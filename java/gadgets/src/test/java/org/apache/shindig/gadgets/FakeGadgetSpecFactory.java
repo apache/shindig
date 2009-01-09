@@ -53,6 +53,14 @@ public class FakeGadgetSpecFactory implements GadgetSpecFactory {
       String bodySpec = baseSpec.replace("uri-query", "post-body");
       bodySpec = bodySpec.replace("'GET'", "'POST'");
       return new GadgetSpec(uri, bodySpec);
+    } else if (gadget.contains("badoauthurl")) {
+      String spec = baseSpec.replace("/request?param=foo", "/echo?mary_had_a_little_lamb");
+      spec = spec.replace("/access", "/echo?add_oauth_token=with_fleece_as_white_as_snow");
+      spec = spec.replace("uri-query", "auth-header");
+      return new GadgetSpec(uri, spec);
+    } else if (gadget.contains("approvalparams")) {
+      String spec = baseSpec.replace("/authorize", "/authorize?oauth_callback=foo");
+      return new GadgetSpec(uri, spec);
     } else {
       return new GadgetSpec(uri, baseSpec);
     }

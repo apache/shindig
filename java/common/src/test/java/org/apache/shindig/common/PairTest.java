@@ -15,14 +15,18 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.oauth;
+package org.apache.shindig.common;
 
-/**
- * Exception thrown when a lookup found no data in the OAuth store.
- */
-public class OAuthNoDataException extends OAuthStoreException {
+import static org.junit.Assert.assertEquals;
 
-  public OAuthNoDataException(String message) {
-    super(message);
+import org.junit.Test;
+
+public class PairTest {
+
+  @Test
+  public void testPair() {
+    Pair<String, Integer> p = Pairs.newPair("one", new Integer(1));
+    assertEquals("one", p.one);
+    assertEquals(new Integer(1), p.two);
   }
 }

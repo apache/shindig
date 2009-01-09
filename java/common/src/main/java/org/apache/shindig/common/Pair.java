@@ -15,25 +15,17 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.oauth;
-
-import org.apache.shindig.gadgets.GadgetException;
+package org.apache.shindig.common;
 
 /**
- * Base class of exception that can be thrown when interacting with the
- * OAuthStore.
+ * A pair of any two objects.
  */
-public class OAuthStoreException extends GadgetException {
-
-  public OAuthStoreException(String message) {
-    super(GadgetException.Code.OAUTH_STORAGE_ERROR, message);
-  }
-
-  public OAuthStoreException(String message, Throwable cause) {
-    super(GadgetException.Code.OAUTH_STORAGE_ERROR, message, cause);
-  }
-
-  public OAuthStoreException(Throwable cause) {
-    super(GadgetException.Code.OAUTH_STORAGE_ERROR, cause);
+public class Pair<T1, T2> {
+  public final T1 one;
+  public final T2 two;
+  
+  public Pair(T1 one, T2 two) {
+    this.one = one;
+    this.two = two;
   }
 }

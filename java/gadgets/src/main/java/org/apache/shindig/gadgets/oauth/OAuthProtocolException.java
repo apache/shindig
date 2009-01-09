@@ -21,10 +21,7 @@ import com.google.common.collect.ImmutableSet;
 
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -32,7 +29,7 @@ import java.util.Set;
  * <a href="http://wiki.oauth.net/ProblemReporting">
  * OAuth problem reporting extension</a>
  * 
- * We divide problems into two categories:
+ * We divide problems into three categories:
  * - problems that cause us to abort the protocol.  For example, if we don't
  *   have a consumer key that the service provider accepts, we give up.
  *   
@@ -40,11 +37,11 @@ import java.util.Set;
  *   example, if the service provider reports that an access token has been
  *   revoked, we throw away the token and start over.
  *   
+ * - problems that require us to refresh our access token per the OAuth
+ *   session extension protocol
+ *   
  * By default we assume most service provider errors fall into the second
  * category: we should ask for the user's permission again.
- *   
- * TODO: add a third category to cope with reauthorization per the ScalableOAuth
- * extension.
  */
 class OAuthProtocolException extends Exception {
 
@@ -58,45 +55,34 @@ class OAuthProtocolException extends Exception {
                       "consumer_key_unknown",
                       "consumer_key_rejected",
                       "timestamp_refused");
-  
+
   /**
    * Problems that should force us to abort the protocol right away,
    * but we can still try to use the access token again later.
    */
   private static Set<String> temporaryProblems = 
       ImmutableSet.of("consumer_key_refused");
-  
+
   /**
    * Problems that should have us try to refresh the access token.
    */
   private static Set<String> extensionProblems =
       ImmutableSet.of("access_token_expired");
-  
-  private final String problemCode;
-  private final String problemText;
-  
+
   private final boolean canRetry;
 
   private final boolean startFromScratch;
-  
+
   private final boolean canExtend;
-  
-  OAuthProtocolException(boolean canRetry) {
-    this.problemCode = null;
-    this.problemText = null;
-    this.canRetry = canRetry;
-    this.startFromScratch = false;
-    this.canExtend = false;
-  }
-  
+
+  private final String problemCode;
+
   public OAuthProtocolException(OAuthMessage reply) {
     String problem = OAuthUtil.getParameter(reply, OAuthProblemException.OAUTH_PROBLEM);
     if (problem == null) {
-      throw new IllegalArgumentException(
-          "No problem reported for OAuthProtocolException");
+      throw new IllegalArgumentException("No problem reported for OAuthProtocolException");
     }
     this.problemCode = problem;
-    this.problemText = OAuthUtil.getParameter(reply, "oauth_problem_advice");
     if (fatalProblems.contains(problem)) {
       startFromScratch = true;
       canRetry = false;
@@ -122,8 +108,6 @@ class OAuthProtocolException extends Exception {
    * @param status HTTP status code, assumed to be between 400 and 499 inclusive
    */
   public OAuthProtocolException(int status) {
-    problemCode = Integer.toString(status);
-    problemText = null;
     if (status == 401) {
       startFromScratch = true;
       canRetry = true;
@@ -132,6 +116,7 @@ class OAuthProtocolException extends Exception {
       canRetry = false;
     }
     canExtend = false;
+    problemCode = null;
   }
 
   /**
@@ -141,7 +126,7 @@ class OAuthProtocolException extends Exception {
   public boolean startFromScratch() {
     return startFromScratch;
   }
-  
+
   /**
    * @return true if we think we can make progress by attempting the protocol
    * flow again (which may require starting from scratch).
@@ -149,7 +134,7 @@ class OAuthProtocolException extends Exception {
   public boolean canRetry() {
     return canRetry;
   }
-  
+
   /**
    * @return true if we think we can make progress by attempting to extend the lifetime of the
    * access token.
@@ -157,14 +142,11 @@ class OAuthProtocolException extends Exception {
   public boolean canExtend() {
     return canExtend;
   }
-  
-  public HttpResponse getResponseForGadget() {
-    return new HttpResponseBuilder()
-        .setHttpStatusCode(0)
-        // Inch towards opensocial-0.8: this is very much an experiment, don't
-        // hesitate to change it if you've got something better.
-        .setMetadata("oauthError", problemCode)
-        .setMetadata("oauthErrorText", problemText)
-        .create();
+
+  /**
+   * @return the OAuth problem code (from the problem reporting extension).
+   */
+  public String getProblemCode() {
+    return problemCode;
   }
 }

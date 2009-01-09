@@ -63,7 +63,7 @@ public class HttpResponseBuilder {
     responseBytes = CharsetUtil.getUtf8Bytes(body);
     return this;
   }
-  
+
   /**   
    * @param responseBytes The response body. Copied when set.
    */
@@ -197,7 +197,7 @@ public class HttpResponseBuilder {
     return responseBytes;
   }
 
-  int getHttpStatusCode() {
+  public int getHttpStatusCode() {
     return httpStatusCode;
   }
 }

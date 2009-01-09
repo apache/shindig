@@ -44,9 +44,7 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -66,12 +64,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public final static String APPROVAL_URL = SP_HOST + "/authorize";
   public final static String RESOURCE_URL = SP_HOST + "/data";
   public final static String NOT_FOUND_URL = SP_HOST + "/404";
+  public final static String ECHO_URL = SP_HOST + "/echo";
+
 
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
-  
+
   public final static int TOKEN_EXPIRATION_SECONDS = 60;
-  
+
   public static final String PRIVATE_KEY_TEXT =
     "MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V" +
     "A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d" +
@@ -100,14 +100,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     "4TvuXJbNQc8f4AMWL/tO9w0Fk80rWKp9ea8/df4qMq5qlFWlx6yOLQxumNOmECKb\n" +
     "WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J\n" +
     "-----END CERTIFICATE-----";
-  
+
   enum State {
     PENDING,
     APPROVED_UNCLAIMED,
     APPROVED,
     REVOKED,
   }
-  
+
   private class TokenState {
     String tokenSecret;
     OAuthConsumer consumer;
@@ -128,13 +128,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       state = State.APPROVED_UNCLAIMED;
       issued = clock.currentTimeMillis();
     }
-    
+
     public void claimToken() {
       // consumer taking the token
       state = State.APPROVED;
       sessionHandle = Crypto.getRandomString(8);
     }
-    
+
     public void renewToken() {
       issued = clock.currentTimeMillis();
     }
@@ -184,16 +184,22 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private Set<OAuthParamLocation> validParamLocations;
 
+  private boolean returnNull;
+
+  private GadgetException gadgetException;
+
+  private RuntimeException runtimeException;
+
   public FakeOAuthServiceProvider(TimeSource clock) {
     this.clock = clock;
     OAuthServiceProvider provider = new OAuthServiceProvider(
         REQUEST_TOKEN_URL, APPROVAL_URL, ACCESS_TOKEN_URL);
-    
+
     signedFetchConsumer = new OAuthConsumer(null, null, null, null);
     signedFetchConsumer.setProperty(RSA_SHA1.X509_CERTIFICATE, CERTIFICATE_TEXT);
 
     oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
-    
+
     tokenState = Maps.newHashMap();
     validator = new FakeTimeOAuthValidator();
     validParamLocations = Sets.newHashSet();
@@ -203,7 +209,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public void setVagueErrors(boolean vagueErrors) {
     this.vagueErrors = vagueErrors;
   }
-  
+
   public void setSessionExtension(boolean sessionExtension) {
     this.sessionExtension = sessionExtension;
   }
@@ -211,33 +217,38 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public void setReportExpirationTimes(boolean reportExpirationTimes) {
     this.reportExpirationTimes = reportExpirationTimes;
   }
-  
+
   public void setRejectExtraParams(boolean rejectExtraParams) {
     this.rejectExtraParams = rejectExtraParams;
   }
-  
+
   public void setReturnAccessTokenData(boolean returnAccessTokenData) {
     this.returnAccessTokenData = returnAccessTokenData;
   }
-  
+
   public void addParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.add(paramLocation);
   }
-  
+
   public void removeParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.remove(paramLocation);
   }
-  
+
   public void setParamLocation(OAuthParamLocation paramLocation) {
     validParamLocations.clear();
     validParamLocations.add(paramLocation);
   }
 
   public HttpResponse fetch(HttpRequest request) throws GadgetException {
-    return realFetch(request);
-  }
-
-  private HttpResponse realFetch(HttpRequest request) {
+    if (returnNull) {
+      return null;
+    }
+    if (gadgetException != null) {
+      throw gadgetException;
+    }
+    if (runtimeException != null) {
+      throw runtimeException;
+    }
     if (request.getFollowRedirects()) {
       throw new RuntimeException("Not supposed to follow OAuth redirects");
     }
@@ -254,6 +265,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         return handleResourceUrl(request);
       } else if (url.startsWith(NOT_FOUND_URL)) {
         return handleNotFoundUrl(request);
+      } else if (url.startsWith(ECHO_URL)) {
+        return handleEchoUrl(request);
       }
     } catch (Exception e) {
       throw new RuntimeException("Problem with request for URL " + url, e);
@@ -330,10 +343,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     MessageInfo info = new MessageInfo();
     String method = request.getMethod();
     ParsedUrl parsed = new ParsedUrl(request.getUri().toString());
-    
+
     List<OAuth.Parameter> params = Lists.newArrayList();
     params.addAll(parsed.getParsedQuery());
-    
+
     if (!validParamLocations.contains(OAuthParamLocation.URI_QUERY)) {
       // Make sure nothing OAuth related ended up in the query string
       for (OAuth.Parameter p : params) {
@@ -342,7 +355,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         }
       }
     }
-        
+
     // Parse authorization header
     if (validParamLocations.contains(OAuthParamLocation.AUTH_HEADER)) {
       String aznHeader = request.getHeader("Authorization");
@@ -355,7 +368,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         }
       }
     }
-    
+
     // Parse body
     if (request.getMethod().equals("POST")) {
       String type = request.getHeader("Content-Type");
@@ -385,12 +398,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         }
       }
     }
-    
+
     // Return the lot
     info.message = new OAuthMessage(method, parsed.getLocation(), params);
     return info;
   }
-  
+
   /**
    * Bundles information about a received OAuthMessage.
    */
@@ -498,7 +511,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       state.revokeToken();
     }
   }
-  
+
   /**
    * Changes session handles to prevent renewal from working.
    */
@@ -525,12 +538,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         return makeOAuthProblemReport("parameter_rejected", extra);
       }
     }
-    
+
     OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
     accessor.requestToken = requestToken;
     accessor.tokenSecret = state.tokenSecret;
     message.validateMessage(accessor, validator);
-        
+
     if (state.getState() == State.APPROVED_UNCLAIMED) {
       state.claimToken();
     } else if (state.getState() == State.APPROVED) {
@@ -603,7 +616,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       accessor.accessToken = accessToken;
       accessor.tokenSecret = state.getSecret();
       info.message.validateMessage(accessor, validator);
-      
+
       if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
             "token_revoked", "User revoked permissions");
@@ -618,12 +631,12 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     } else {
       // Check the signature
       info.message.validateMessage(accessor, validator);
-      
+
       // For signed fetch, just echo back the query parameters in the body
       responseBody = request.getUri().getQuery();
     }
-    
-    
+
+
     // Send back a response
     HttpResponseBuilder resp = new HttpResponseBuilder()
         .setHttpStatusCode(HttpResponse.SC_OK)
@@ -639,7 +652,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
     return resp.create();
   }
-  
+
   private HttpResponse handleNotFoundUrl(HttpRequest request) throws Exception {
     return new HttpResponseBuilder()
         .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
@@ -647,8 +660,23 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         .create();
   }
 
+  private HttpResponse handleEchoUrl(HttpRequest request) throws Exception {
+    String query = request.getUri().getQuery();
+    if (query.contains("add_oauth_token")) {
+      query = query + "&oauth_token=abc";
+    }
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_OK)
+        .setResponseString(query)
+        .create();
+  }
+
   public void setConsumersThrottled(boolean throttled) {
     this.throttled = throttled;
+  }
+
+  public void setReturnNull(boolean returnNull) {
+    this.returnNull = returnNull;
   }
 
   /**
@@ -671,7 +699,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public int getResourceAccessCount() {
     return resourceAccessCount;
   }
-  
+
   /**
    * Validate oauth messages using a fake time source.
    */
@@ -680,5 +708,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     protected long currentTimeMsec() {
       return clock.currentTimeMillis();
     }
+  }
+
+  public void setThrow(GadgetException gadgetException) {
+    this.gadgetException = gadgetException;
+  }
+
+  public void setThrow(RuntimeException runtimeException) {
+    this.runtimeException = runtimeException;
   }
 }
