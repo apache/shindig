@@ -27,6 +27,7 @@ import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyT
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
@@ -60,6 +61,7 @@ public class OAuthModule extends AbstractModule {
     bind(OAuthRequest.class).toProvider(OAuthRequestProvider.class);
   }
 
+  @Singleton
   public static class OAuthCrypterProvider implements Provider<BlobCrypter> {
 
     private final BlobCrypter crypter;
@@ -96,6 +98,7 @@ public class OAuthModule extends AbstractModule {
     }
   }
 
+  @Singleton
   public static class OAuthStoreProvider implements Provider<OAuthStore> {
 
     private final BasicOAuthStore store;

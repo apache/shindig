@@ -26,11 +26,11 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
+import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider;
 import org.junit.Before;
@@ -39,7 +39,7 @@ import org.junit.Test;
 public class GadgetTokenStoreTest {
 
   private static final String GADGET_URL = "http://www.example.com/gadget.xml";
-  
+
   public static final String GADGET_SPEC =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
       "  <Module>\n" +
@@ -77,6 +77,7 @@ public class GadgetTokenStoreTest {
   private FakeGadgetToken privateToken;
   private BlobCrypter stateCrypter;
   private OAuthClientState clientState;
+  private OAuthResponseParams responseParams;
 
   @Before
   public void setUp() throws Exception {
@@ -84,26 +85,27 @@ public class GadgetTokenStoreTest {
     backingStore.setDefaultKey(
         new BasicOAuthStoreConsumerKeyAndSecret("key", "secret", KeyType.RSA_PRIVATE, "keyname"));
     store = new GadgetOAuthTokenStore(backingStore, new FakeGadgetSpecFactory());
-    
+
     socialToken = new FakeGadgetToken();
     socialToken.setOwnerId("owner");
     socialToken.setViewerId("viewer");
     socialToken.setAppUrl(GADGET_URL);
-    
+
     privateToken = new FakeGadgetToken();
     privateToken.setOwnerId("owner");
     privateToken.setViewerId("owner");
     privateToken.setAppUrl(GADGET_URL);
-    
+
     stateCrypter = new BasicBlobCrypter("abcdefghijklmnop".getBytes());
     clientState = new OAuthClientState(stateCrypter);
+    responseParams = new OAuthResponseParams(socialToken, null, stateCrypter);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_signedFetch() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals("keyname", info.getConsumer().getKeyName());
     assertEquals("key", info.getConsumer().getConsumer().consumerKey);
@@ -112,19 +114,19 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_useToken_noOAuthInSpec() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.IF_AVAILABLE);
     try {
-      store.getOAuthAccessor(socialToken, arguments, clientState);
+      store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
       fail();
-    } catch (GadgetException e) {
-      // good
+    } catch (OAuthRequestException e) {
+      assertEquals("BAD_OAUTH_CONFIGURATION", responseParams.getError());
     }
   }
-  
+
   @Test
   public void testGetOAuthAccessor_signedFetch_hmacKey() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -136,7 +138,7 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
     arguments.setServiceName("hmac");
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -157,11 +159,11 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
     arguments.setServiceName("hmac");
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals("keyname", info.getConsumer().getKeyName());
     assertEquals("key", info.getConsumer().getConsumer().consumerKey);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_signedFetch_defaultHmac() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -172,7 +174,7 @@ public class GadgetTokenStoreTest {
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -181,7 +183,7 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_socialOAuth_socialPage() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -193,7 +195,7 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.IF_AVAILABLE);
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -202,7 +204,7 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_socialOAuth_privatePage() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -214,7 +216,8 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.IF_AVAILABLE);
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -223,7 +226,7 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_socialOAuth_withToken() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -232,15 +235,16 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerKeyAndSecret cks =
         new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
-    
+
     backingStore.setTokenInfo(privateToken, null, "testservice", "",
         new TokenInfo("token", "secret", null, 0));
-    
+
     // Owner views their own page
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.IF_AVAILABLE);
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -248,9 +252,9 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().requestToken);
     assertEquals("token", info.getAccessor().accessToken);
     assertEquals("secret", info.getAccessor().tokenSecret);
-    
+
     // Friend views page
-    info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -259,7 +263,7 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_fullOAuth_socialPage() throws Exception {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
@@ -271,7 +275,7 @@ public class GadgetTokenStoreTest {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
-    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
     assertEquals(null, info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
@@ -280,27 +284,28 @@ public class GadgetTokenStoreTest {
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testGetOAuthAccessor_serviceNotFound() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("no such service");
     arguments.setUseToken(UseToken.ALWAYS);
     try {
-      store.getOAuthAccessor(socialToken, arguments, clientState);
+      store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
       fail();
-    } catch (GadgetException e) {
-      // good.
+    } catch (OAuthRequestException e) {
+      assertEquals("BAD_OAUTH_CONFIGURATION", responseParams.getError());
     }
   }
-  
+
   @Test
   public void testGetOAuthAccessor_oauthParamsInBody() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     privateToken.setAppUrl("http://www.example.com/body.xml");
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertEquals(
         FakeOAuthServiceProvider.REQUEST_TOKEN_URL,
         info.getConsumer().getConsumer().serviceProvider.requestTokenURL);
@@ -313,14 +318,15 @@ public class GadgetTokenStoreTest {
     assertEquals(HttpMethod.POST, info.getHttpMethod());
     assertEquals(OAuthParamLocation.POST_BODY, info.getParamLocation());
   }
-  
+
   @Test
   public void testGetOAuthAccessor_oauthParamsInHeader() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     privateToken.setAppUrl("http://www.example.com/header.xml");
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertEquals(
         FakeOAuthServiceProvider.REQUEST_TOKEN_URL,
         info.getConsumer().getConsumer().serviceProvider.requestTokenURL);
@@ -333,61 +339,64 @@ public class GadgetTokenStoreTest {
     assertEquals(HttpMethod.GET, info.getHttpMethod());
     assertEquals(OAuthParamLocation.AUTH_HEADER, info.getParamLocation());
   }
-  
+
   @Test
   public void testAccessTokenFromServerDatabase() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     store.storeTokenKeyAndSecret(privateToken, null, arguments,
-        new TokenInfo("access", "secret", "sessionhandle", 12345L));
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+        new TokenInfo("access", "secret", "sessionhandle", 12345L), responseParams);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertNull(info.getAccessor().requestToken);
     assertEquals("access", info.getAccessor().accessToken);
     assertEquals("secret", info.getAccessor().tokenSecret);
     assertEquals("sessionhandle", info.getSessionHandle());
     assertEquals(12345L, info.getTokenExpireMillis());
   }
-  
+
   @Test
   public void testAccessTokenFromClient() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     store.storeTokenKeyAndSecret(privateToken, null, arguments,
-        new TokenInfo("access", "secret", null, 0));
-    
+        new TokenInfo("access", "secret", null, 0), responseParams);
+
     clientState.setAccessToken("clienttoken");
     clientState.setAccessTokenSecret("clienttokensecret");
     clientState.setSessionHandle("clienthandle");
     clientState.setTokenExpireMillis(56789L);
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertNull(info.getAccessor().requestToken);
     assertEquals("clienttoken", info.getAccessor().accessToken);
     assertEquals("clienttokensecret", info.getAccessor().tokenSecret);
     assertEquals("clienthandle", info.getSessionHandle());
     assertEquals(56789L, info.getTokenExpireMillis());
   }
-  
+
   @Test
   public void testRequestTokenFromClientState() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     store.storeTokenKeyAndSecret(privateToken, null, arguments,
-        new TokenInfo("access", "secret", null, 0));
-    
+        new TokenInfo("access", "secret", null, 0), responseParams);
+
     clientState.setRequestToken("request");
     clientState.setRequestTokenSecret("requestsecret");
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertEquals("request", info.getAccessor().requestToken);
     assertEquals("requestsecret", info.getAccessor().tokenSecret);
     assertNull(info.getAccessor().accessToken);
   }
-  
+
   @Test
   public void testRequestTokenFromClient_preferTokenInStorage() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
@@ -396,14 +405,15 @@ public class GadgetTokenStoreTest {
     arguments.setRequestToken("preapproved");
     arguments.setRequestTokenSecret("preapprovedsecret");
     store.storeTokenKeyAndSecret(privateToken, null, arguments,
-        new TokenInfo("access", "secret", null, 0));
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+        new TokenInfo("access", "secret", null, 0), responseParams);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertNull(info.getAccessor().requestToken);
     assertEquals("access", info.getAccessor().accessToken);
     assertEquals("secret", info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testRequestTokenFromClient_noTokenInStorage() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
@@ -411,29 +421,31 @@ public class GadgetTokenStoreTest {
     arguments.setUseToken(UseToken.ALWAYS);
     arguments.setRequestToken("preapproved");
     arguments.setRequestTokenSecret("preapprovedsecret");
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertNull(info.getAccessor().accessToken);
     assertEquals("preapproved", info.getAccessor().requestToken);
     assertEquals("preapprovedsecret", info.getAccessor().tokenSecret);
   }
-  
+
   @Test
   public void testRemoveToken() throws Exception {
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
     arguments.setUseToken(UseToken.ALWAYS);
     store.storeTokenKeyAndSecret(privateToken, null, arguments,
-        new TokenInfo("access", "secret", null, 0));
-    
-    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState);
+        new TokenInfo("access", "secret", null, 0), responseParams);
+
+    AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
+        responseParams);
     assertNull(info.getAccessor().requestToken);
     assertEquals("access", info.getAccessor().accessToken);
     assertEquals("secret", info.getAccessor().tokenSecret);
-    
-    store.removeToken(privateToken, null, arguments);
-    
-    info = store.getOAuthAccessor(privateToken, arguments, clientState);
+
+    store.removeToken(privateToken, null, arguments, responseParams);
+
+    info = store.getOAuthAccessor(privateToken, arguments, clientState, responseParams);
     assertNull(info.getAccessor().requestToken);
     assertNull(info.getAccessor().accessToken);
     assertNull(info.getAccessor().tokenSecret);

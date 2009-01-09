@@ -21,9 +21,9 @@ package org.apache.shindig.gadgets.oauth;
 
 import net.oauth.OAuthAccessor;
 
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
+import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
 
 /**
@@ -42,17 +42,17 @@ public class AccessorInfoBuilder {
 
   public AccessorInfoBuilder() {
   }
-  
-  public AccessorInfo create() throws GadgetException {
+
+  public AccessorInfo create(OAuthResponseParams responseParams) throws OAuthRequestException {
     if (location == null) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, "no location");
+      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM, "no location");
     }
     if (consumer == null) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, "no consumer");
+      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM, "no consumer");
     }
-    
+
     OAuthAccessor accessor = new OAuthAccessor(consumer.getConsumer());
-        
+
     // request token/access token/token secret can all be null, for signed fetch, or if the OAuth
     // dance is just beginning
     accessor.requestToken = requestToken;
@@ -68,7 +68,7 @@ public class AccessorInfoBuilder {
   public void setRequestToken(String requestToken) {
     this.requestToken = requestToken;
   }
-  
+
   public void setAccessToken(String accessToken) {
     this.accessToken = accessToken;
   }

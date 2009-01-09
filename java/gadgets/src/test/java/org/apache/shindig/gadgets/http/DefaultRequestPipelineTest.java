@@ -189,12 +189,9 @@ public class DefaultRequestPipelineTest {
 
     private final OAuthRequest oauthRequest = new OAuthRequest(null, null) {
       @Override
-      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+      public HttpResponse fetch(HttpRequest request) {
         fetchCount++;
         httpRequest = request;
-        if (httpResponse == null) {
-          throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT);
-        }
         return httpResponse;
       }
     };

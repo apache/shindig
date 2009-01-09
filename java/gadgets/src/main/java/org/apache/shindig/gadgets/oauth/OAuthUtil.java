@@ -23,7 +23,6 @@ import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
 import net.oauth.OAuth.Parameter;
 
 import java.io.IOException;
@@ -53,16 +52,7 @@ public class OAuthUtil {
       throw new RuntimeException(e);
     }
   }
-  
-  public static void requireParameters(OAuthMessage message, String... names)
-      throws OAuthProblemException {
-    try {
-      message.requireParameters(names);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
+
   public static String formEncode(Iterable<? extends Entry<String, String>> parameters) {
     try {
       return OAuth.formEncode(parameters);
@@ -70,7 +60,7 @@ public class OAuthUtil {
       throw new RuntimeException(e);
     }
   }
-  
+
   public static String addParameters(String url, List<Entry<String, String>> parameters) {
     try {
       return OAuth.addParameters(url, parameters);
@@ -78,7 +68,7 @@ public class OAuthUtil {
       throw new RuntimeException(e);
     }
   }
-  
+
   public static OAuthMessage newRequestMessage(OAuthAccessor accessor, String method, String url,
       List<Parameter> parameters) throws OAuthException {
     try {

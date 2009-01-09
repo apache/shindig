@@ -15,35 +15,13 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
-package org.apache.shindig.gadgets.oauth;
-
-import org.apache.shindig.gadgets.GadgetException;
+package org.apache.shindig.common;
 
 /**
- * Exceptions whose message text should be shown to gadget developers.
+ * Utility class for creating Pair objects.
  */
-public class UserVisibleOAuthException extends GadgetException {
-
-  private OAuthError oauthErrorCode;
-
-  public UserVisibleOAuthException(String msg) {
-    super(Code.INVALID_PARAMETER, msg);
-  }
-  
-  public UserVisibleOAuthException(String msg, Throwable t) {
-    super(Code.INVALID_PARAMETER, msg, t);
-  }
-  
-  public UserVisibleOAuthException(OAuthError oauthErrorCode, String msg) {
-    super(Code.INVALID_PARAMETER, msg);
-    this.oauthErrorCode = oauthErrorCode;
-  }
-  
-  /**
-   * @return the OAuth error code, or null if no code was specified.
-   */
-  public OAuthError getOAuthErrorCode() {
-    return oauthErrorCode;
+public class Pairs {
+  public static <T1, T2> Pair<T1, T2> newPair(T1 one, T2 two) {
+    return new Pair<T1, T2>(one, two);
   }
 }
