@@ -190,6 +190,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private RuntimeException runtimeException;
 
+  private boolean checkTrustedParams;
+
+  private int trustedParamCount;
+
   public FakeOAuthServiceProvider(TimeSource clock) {
     this.clock = clock;
     OAuthServiceProvider provider = new OAuthServiceProvider(
@@ -401,6 +405,21 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
     // Return the lot
     info.message = new OAuthMessage(method, parsed.getLocation(), params);
+    
+    // Check for trusted parameters
+    if (checkTrustedParams) {
+      if (!"foo".equals(OAuthUtil.getParameter(info.message, "oauth_magic"))) {
+        throw new RuntimeException("no oauth_trusted=foo parameter");
+      }
+      if (!"bar".equals(OAuthUtil.getParameter(info.message, "opensocial_magic"))) {
+        throw new RuntimeException("no opensocial_trusted=foo parameter");
+      }
+      if (!"quux".equals(OAuthUtil.getParameter(info.message, "xoauth_magic"))) {
+        throw new RuntimeException("no xoauth_magic=quux parameter");
+      }
+      trustedParamCount += 3;
+    }
+    
     return info;
   }
 
@@ -716,5 +735,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public void setThrow(RuntimeException runtimeException) {
     this.runtimeException = runtimeException;
+  }
+
+  public void setCheckTrustedParams(boolean checkTrustedParams) {
+    this.checkTrustedParams = checkTrustedParams;
+  }
+
+  public int getTrustedParamCount() {
+    return trustedParamCount;
   }
 }
