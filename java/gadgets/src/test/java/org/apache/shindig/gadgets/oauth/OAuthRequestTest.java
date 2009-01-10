@@ -1325,6 +1325,23 @@ public class OAuthRequestTest {
     checkLogContains("RuntimeException");
     checkLogContains("very, very wrong");
   }
+  
+  @Test
+  public void testTrustedParams() throws Exception {
+    serviceProvider.setCheckTrustedParams(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    client.setTrustedParam("oauth_magic", "foo");
+    client.setTrustedParam("opensocial_magic", "bar");
+    client.setTrustedParam("xoauth_magic", "quux");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    assertEquals(9, serviceProvider.getTrustedParamCount());
+  }
 
   // Checks whether the given parameter list contains the specified
   // key/value pair

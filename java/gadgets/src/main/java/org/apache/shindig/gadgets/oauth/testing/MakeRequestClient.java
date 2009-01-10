@@ -19,6 +19,9 @@
 
 package org.apache.shindig.gadgets.oauth.testing;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -28,6 +31,12 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherConfig;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
+
+import net.oauth.OAuth.Parameter;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Test utility to emulate the requests sent via gadgets.io.makeRequest.  The simulation starts
@@ -44,6 +53,7 @@ public class MakeRequestClient {
   private String oauthState;
   private String approvalUrl;
   private boolean ignoreCache;
+  private Map<String, String> trustedParams = Maps.newHashMap();
 
   /**
    * Create a make request client with the given security token, sending requests through an
@@ -78,6 +88,21 @@ public class MakeRequestClient {
   public void setIgnoreCache(boolean ignoreCache) {
     this.ignoreCache = ignoreCache;
   }
+  
+  public void setTrustedParam(String name, String value) {
+    trustedParams.put(name, value);
+  }
+  
+  private OAuthRequest createRequest() {
+    if (trustedParams != null) {
+      List<Parameter> trusted = Lists.newArrayList();
+      for (Entry<String, String> e : trustedParams.entrySet()) {
+        trusted.add(new Parameter(e.getKey(), e.getValue()));
+      }
+      return new OAuthRequest(fetcherConfig, serviceProvider, trusted);
+    }
+    return new OAuthRequest(fetcherConfig, serviceProvider);
+  }
 
   /**
    * Send an OAuth GET request to the given URL.
@@ -85,7 +110,7 @@ public class MakeRequestClient {
   public HttpResponse sendGet(String target) throws Exception {
     HttpRequest request = new HttpRequest(Uri.parse(target));
     request.setOAuthArguments(recallState());
-    OAuthRequest dest = new OAuthRequest(fetcherConfig, serviceProvider);
+    OAuthRequest dest = createRequest();
     request.setIgnoreCache(ignoreCache);
     request.setSecurityToken(securityToken);
     HttpResponse response = dest.fetch(request);
@@ -99,7 +124,7 @@ public class MakeRequestClient {
   public HttpResponse sendFormPost(String target, String body) throws Exception {
     HttpRequest request = new HttpRequest(Uri.parse(target));
     request.setOAuthArguments(recallState());
-    OAuthRequest dest = new OAuthRequest(fetcherConfig, serviceProvider);
+    OAuthRequest dest = createRequest();
     request.setMethod("POST");
     request.setPostBody(CharsetUtil.getUtf8Bytes(body));
     request.setHeader("content-type", "application/x-www-form-urlencoded");
@@ -115,7 +140,7 @@ public class MakeRequestClient {
   public HttpResponse sendRawPost(String target, String type, byte[] body) throws Exception {
     HttpRequest request = new HttpRequest(Uri.parse(target));
     request.setOAuthArguments(recallState());
-    OAuthRequest dest = new OAuthRequest(fetcherConfig, serviceProvider);
+    OAuthRequest dest = createRequest();
     request.setMethod("POST");
     if (type != null) {
       request.setHeader("Content-Type", type);

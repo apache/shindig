@@ -103,6 +103,11 @@ public class OAuthRequest {
   private final HttpFetcher fetcher;
 
   /**
+   * Additional trusted parameters to be included in the OAuth request.
+   */
+  private final List<Parameter> trustedParams;
+  
+  /**
    * State information from client
    */
   protected OAuthClientState clientState;
@@ -134,8 +139,20 @@ public class OAuthRequest {
    * @param fetcher fetcher to use for actually making requests
    */
   public OAuthRequest(OAuthFetcherConfig fetcherConfig, HttpFetcher fetcher) {
+    this(fetcherConfig, fetcher, null);
+  }
+  
+  /**
+   * @param fetcherConfig configuration options for the fetcher
+   * @param fetcher fetcher to use for actually making requests
+   * @param trustedParams additional parameters to include in all outgoing OAuth requests, useful
+   *     for client data that can't be pulled from the security token but is still trustworthy.
+   */
+  public OAuthRequest(OAuthFetcherConfig fetcherConfig, HttpFetcher fetcher,
+      List<Parameter> trustedParams) {
     this.fetcherConfig = fetcherConfig;
     this.fetcher = fetcher;
+    this.trustedParams = trustedParams;
   }
 
   /**
@@ -374,6 +391,10 @@ public class OAuthRequest {
     String appUrl = realRequest.getSecurityToken().getAppUrl();
     if (appUrl != null) {
       params.add(new Parameter(OPENSOCIAL_APPURL, appUrl));
+    }
+
+    if (trustedParams != null) {
+      params.addAll(trustedParams);
     }
   }
 
