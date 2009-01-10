@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.easymock.IAnswer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +38,10 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Tests for MakeRequestHandler.
@@ -224,6 +229,18 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  private void expectParameters(HttpServletRequest request, String... params) {
+    final Vector<String> v = new Vector<String>();
+    for (String p : params) {
+      v.add(p);
+    }
+    expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration<String>>() {
+      public Enumeration<String> answer() throws Throwable{
+        return v.elements();
+      }      
+    });
+  }
+  
   public void testSignedGetRequest() throws Exception {
 
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
@@ -234,6 +251,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .setAuthType(AuthType.SIGNED);
     expect(pipeline.execute(expected))
         .andReturn(new HttpResponse(RESPONSE_BODY));
+    expectParameters(request, MakeRequestHandler.AUTHZ_PARAM);
     replay();
 
     handler.fetch(request, recorder);
@@ -251,6 +269,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(DUMMY_TOKEN).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
         .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
+    expectParameters(request, MakeRequestHandler.METHOD_PARAM, MakeRequestHandler.POST_DATA_PARAM,
+        MakeRequestHandler.AUTHZ_PARAM);
     replay();
 
     handler.fetch(request, recorder);
@@ -271,6 +291,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(authToken).atLeastOnce();
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
         .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
+    expectParameters(request, MakeRequestHandler.AUTHZ_PARAM);
     replay();
 
     handler.fetch(request, recorder);
@@ -292,6 +313,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(AuthType.OAUTH.toString()).atLeastOnce();
     // This isn't terribly accurate, but is close enough for this test.
     expect(request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
+    expectParameters(request);
     replay();
 
     handler.fetch(request, recorder);

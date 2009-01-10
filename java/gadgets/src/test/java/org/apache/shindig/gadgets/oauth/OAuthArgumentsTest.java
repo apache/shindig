@@ -47,6 +47,7 @@ public class OAuthArgumentsTest {
     		"OAUTH_REQuest_token='requesttoken' " +
     		"oauth_request_token_secret='tokensecret' " +
     		"OAUTH_USE_TOKEN='never' " +
+    		"random='stuff'" +
     		"/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml), Uri.parse(""));
@@ -58,6 +59,7 @@ public class OAuthArgumentsTest {
     assertEquals(UseToken.NEVER, params.getUseToken());
     assertNull(params.getOrigClientState());
     assertFalse(params.getBypassSpecCache());
+    assertEquals("stuff", params.getRequestOption("random"));
   }
 
   private FakeHttpServletRequest makeDummyRequest() throws Exception {
@@ -71,6 +73,7 @@ public class OAuthArgumentsTest {
     req.setParameter("bypassSpecCache", true, "1");
     req.setParameter("signOwner", true, "false");
     req.setParameter("signViewer", true, "false");
+    req.setParameter("random", true, "stuff");
     return req;
   }
 
@@ -88,6 +91,7 @@ public class OAuthArgumentsTest {
     assertEquals(true, args.getBypassSpecCache());
     assertEquals(false, args.getSignOwner());
     assertEquals(false, args.getSignViewer());
+    assertEquals("stuff", args.getRequestOption("random"));
   }
 
   @Test
@@ -103,6 +107,7 @@ public class OAuthArgumentsTest {
     assertEquals(false, args.getBypassSpecCache());
     assertEquals(true, args.getSignOwner());
     assertEquals(true, args.getSignViewer());
+    assertNull(args.getRequestOption("random"));
   }
 
   @Test
@@ -152,6 +157,11 @@ public class OAuthArgumentsTest {
 
     args.setUseToken(UseToken.IF_AVAILABLE);
     assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());
+    
+    args.setRequestOption("foo", "bar");
+    assertEquals("bar", args.getRequestOption("foo"));
+    args.removeRequestOption("foo");
+    assertNull(args.getRequestOption("foo"));
   }
 
   @Test
@@ -168,6 +178,18 @@ public class OAuthArgumentsTest {
     assertEquals(true, args.getBypassSpecCache());
     assertEquals(false, args.getSignOwner());
     assertEquals(false, args.getSignViewer());
+  }
+  
+  @Test
+  public void testCopyConstructor_options() throws Exception {
+    HttpServletRequest req = makeDummyRequest();
+    OAuthArguments args = new OAuthArguments(AuthType.OAUTH, req);
+    args = new OAuthArguments(args);
+    
+    args.setRequestOption("foo", "bar");
+    args.setRequestOption("quux", "baz");
+    assertEquals("bar", args.getRequestOption("foo"));
+    assertEquals("baz", args.getRequestOption("quux"));
   }
 
   @Test

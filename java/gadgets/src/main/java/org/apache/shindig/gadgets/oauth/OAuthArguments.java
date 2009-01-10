@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 
 import com.google.common.collect.Maps;
 
+import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,6 +81,9 @@ public class OAuthArguments {
 
   /** Include information about the viewer? */
   private boolean signViewer = false;
+  
+  /** Arbitrary name/value pairs associated with the request */
+  private final Map<String, String> requestOptions;
 
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
@@ -98,8 +102,22 @@ public class OAuthArguments {
     bypassSpecCache = "1".equals(getRequestParam(request, BYPASS_SPEC_CACHE_PARAM, null));
     signOwner = Boolean.parseBoolean(getRequestParam(request, SIGN_OWNER_PARAM, "true"));
     signViewer = Boolean.parseBoolean(getRequestParam(request, SIGN_VIEWER_PARAM, "true"));
+    requestOptions = Maps.newHashMap();
+    Enumeration<String> params = getParameterNames(request);
+    while (params.hasMoreElements()) {
+      String name = params.nextElement();
+      requestOptions.put(name, request.getParameter(name));
+    }
   }
 
+  @SuppressWarnings("unchecked")
+  private Enumeration<String> getParameterNames(HttpServletRequest request) {
+    return request.getParameterNames();
+  }
+
+  /**
+   * Parse OAuthArguments from parameters to Preload, proxied content rendering, and OSML tags.
+   */
   public OAuthArguments(RequestAuthenticationInfo info) throws GadgetException {
     Map<String, String> attrs = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     attrs.putAll(info.getAttributes());
@@ -112,6 +130,7 @@ public class OAuthArguments {
     bypassSpecCache = false;
     signOwner = info.isSignOwner();
     signViewer = info.isSignViewer();
+    requestOptions = Maps.newHashMap(info.getAttributes());
   }
 
   /**
@@ -173,6 +192,7 @@ public class OAuthArguments {
    * method in real code, consider writing a new constructor instead.
    */
   public OAuthArguments() {
+    requestOptions = Maps.newHashMap();
   }
 
 
@@ -189,6 +209,7 @@ public class OAuthArguments {
     bypassSpecCache = orig.bypassSpecCache;
     signOwner = orig.signOwner;
     signViewer = orig.signViewer;
+    requestOptions = Maps.newHashMap(orig.requestOptions);
   }
 
   public boolean mustUseToken() {
@@ -269,5 +290,17 @@ public class OAuthArguments {
 
   public void setSignViewer(boolean signViewer) {
     this.signViewer = signViewer;
+  }
+  
+  public void setRequestOption(String name, String value) {
+    requestOptions.put(name, value);
+  }
+  
+  public void removeRequestOption(String name) {
+    requestOptions.remove(name);
+  }
+  
+  public String getRequestOption(String name) {
+    return requestOptions.get(name);
   }
 }
