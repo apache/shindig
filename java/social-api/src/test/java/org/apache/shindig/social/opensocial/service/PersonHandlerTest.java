@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -34,15 +35,13 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
-public class PersonHandlerTest extends TestCase {
+public class PersonHandlerTest extends EasyMockTestCase {
   private PersonService personService;
   private PersonHandler handler;
   private FakeGadgetToken token;
@@ -75,11 +74,13 @@ public class PersonHandlerTest extends TestCase {
     handler = new PersonHandler(personService);
   }
 
-  private void replay() {
+  @Override
+  protected void replay() {
     EasyMock.replay(personService);
   }
 
-  private void verify() {
+  @Override
+  protected void verify() {
     EasyMock.verify(personService);
   }
 
