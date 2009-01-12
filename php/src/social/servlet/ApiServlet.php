@@ -79,7 +79,6 @@ abstract class ApiServlet extends HttpServlet {
     $appUrl = $request->get_parameter('oauth_consumer_key');
     $userId = $request->get_parameter('xoauth_requestor_id'); // from Consumer Request extension (2-legged OAuth)
     $signature = $request->get_parameter('oauth_signature');
-    
     if ($appUrl && $signature) {
       //if ($appUrl && $signature && $userId) {
       // look up the user and perms for this oauth request
@@ -103,7 +102,6 @@ abstract class ApiServlet extends HttpServlet {
         // accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
         // create token with 0 values, no gadget url, no domain and 0 duration
         
-
         //FIXME change this to a new AnonymousToken when reworking auth token
         $gadgetSigner = Config::get('security_token');
         return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0);
