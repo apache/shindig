@@ -73,10 +73,10 @@ abstract class DataRequestHandler {
     return $decoded;
   }
 
-  /* 
-	*  To support people/@supportedFields and activity/@supportedFields 
-	*  @param parameters url parameters to get request type(people/activity)
-	*/
+  /**
+   *  To support people/@supportedFields and activity/@supportedFields 
+   *  @param parameters url parameters to get request type(people/activity)
+   */
   public function getSupportedFields($parameters) {
     $context = new GadgetContext('GADGET');
     $container = $context->getContainer();
@@ -92,10 +92,10 @@ abstract class DataRequestHandler {
     return new ResponseItem(null, null, $ret);
   }
 
-  /* 
-	*  To get OpenSocial version fro getting supportedFields 
-	*  @param config configuration values from container's js files
-	*/
+  /**
+   *  To get OpenSocial version for getting supportedFields 
+   *  @param config configuration values from container's js files
+   */
   private function getOpenSocialVersion($config) {
     $str = "opensocial-";
     $version = array();

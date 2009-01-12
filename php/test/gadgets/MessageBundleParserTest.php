@@ -53,7 +53,6 @@ class MessageBundleParserTest extends PHPUnit_Framework_TestCase {
    * Tests MessageBundleParser->parse()
    */
   public function testParse() {
-    
     $xml = '<?xml version="1.0" encoding="UTF-8" ?>
 <doc>
 	<msg name="name1">Message 1</msg>
@@ -69,6 +68,19 @@ class MessageBundleParserTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('Message 3', $this->MessageBundle['name3']);
     $this->assertEquals('Message 4', $this->MessageBundle['name4']);
   }
-
+  
+  /**
+   * Tests MessageBundleParser->parse() on error xml string.
+   */
+  public function testParseOnError() {
+    $xml = '<?xml version="1.0" encoding="UTF-8" ?>
+<doc>
+  <msg name="name1">Message 1</msg>
+  <msg name="name2">Message 2</msg>
+  <msg name="name3">Message 3</msg>
+  <msg name="name4">Message 4</msg>';
+    $this->setExpectedException('Exception');
+    $this->MessageBundle = $this->MessageBundleParser->parse($xml);  	
+  }
 }
 
