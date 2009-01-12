@@ -149,7 +149,7 @@ public class BeanJsonConverter implements BeanConverter {
 
     availableGetters = GETTER_METHODS.get(pojo.getClass());
     if (availableGetters == null) {
-      availableGetters = getMatchingMethods(pojo, GETTER_PREFIX);
+      availableGetters = getMatchingMethods(pojo, GETTER_PREFIX, false);
       GETTER_METHODS.putIfAbsent(pojo.getClass(), availableGetters);
     }
 
@@ -189,7 +189,7 @@ public class BeanJsonConverter implements BeanConverter {
   }
 
 
-  private List<MethodPair> getMatchingMethods(Object pojo, String prefix) {
+  private List<MethodPair> getMatchingMethods(Object pojo, String prefix, boolean allowHaveArgs) {
 
     List<MethodPair> availableGetters = Lists.newArrayList();
     Method[] methods = pojo.getClass().getMethods();
@@ -205,6 +205,11 @@ public class BeanJsonConverter implements BeanConverter {
       
       if (EXCLUDED_FIELDS.contains(fieldName.toLowerCase())) {
         continue;
+      }
+      if (!allowHaveArgs) {
+        if (method.getParameterTypes().length != 0) {
+          continue;
+        }
       }
       availableGetters.add(new MethodPair(method, fieldName));
     }
@@ -260,7 +265,7 @@ public class BeanJsonConverter implements BeanConverter {
       List<MethodPair> methods;
       methods = SETTER_METHODS.get(pojo.getClass());
       if (methods == null) {
-        methods = getMatchingMethods(pojo, SETTER_PREFIX);
+        methods = getMatchingMethods(pojo, SETTER_PREFIX, true);
         SETTER_METHODS.putIfAbsent(pojo.getClass(), methods);
       }
 
