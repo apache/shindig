@@ -378,7 +378,7 @@ public class ModulePrefs {
    */
   public boolean getBoolAttribute(String name) {
     String value = getAttribute(name);
-    return !(value == null || "false".equals(value));
+    return Boolean.parseBoolean(value);
   }
 
   /**
