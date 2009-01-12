@@ -19,18 +19,15 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.core.util.BeanAtomConverter;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.BeanXmlConverter;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import com.google.inject.Provider;
 
-import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  */
-public class JsonRpcServletTest extends TestCase {
+public class JsonRpcServletTest extends EasyMockTestCase {
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
