@@ -61,6 +61,7 @@ public class EndToEndTest {
   private WebClient webClient;
   private CollectingAlertHandler alertHandler;
   private SecurityToken token;
+  private String language;
 
   @Test
   public void checkResources() throws Exception {
@@ -79,6 +80,19 @@ public class EndToEndTest {
   @Test
   public void fetchPeople() throws Exception {
     executeAllPageTests("fetchPeopleTest");
+  }
+
+  @Test
+  public void messageBundles() throws Exception {
+    executeAllPageTests("messageBundle");
+  }
+
+  @Test
+  public void messageBundlesRtl() throws Exception {
+    // Repeeat the messageBundle tests, but with the language set to "ar"
+    language = "ar";
+    
+    executeAllPageTests("messageBundle");
   }
 
   @Test
@@ -125,6 +139,7 @@ public class EndToEndTest {
     alertHandler = new CollectingAlertHandler();
     webClient.setAlertHandler(alertHandler);
     token = createToken("canonical", "john.doe");
+    language = null;
   }
 
   @After
@@ -168,6 +183,10 @@ public class EndToEndTest {
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
     url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
     url += "&nocache=1";
+    if (language != null) {
+      url += "&lang=" + language;
+    }
+    
     Page page = webClient.getPage(url);
     if (!(page instanceof HtmlPage)) {
       fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
