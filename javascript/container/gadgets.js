@@ -304,7 +304,7 @@ gadgets.StaticLayoutManager.inherits(gadgets.LayoutManager);
 
 /**
  * Sets chrome ids, whose indexes are gadget instance ids (starting from 0).
- * @param {Array} gadgetIdToChromeIdMap Gadget id to chrome id map
+ * @param {Array} gadgetChromeIds Gadget id to chrome id map
  */
 gadgets.StaticLayoutManager.prototype.setGadgetChromeIds =
     function(gadgetChromeIds) {
@@ -339,7 +339,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
   if (layoutRoot) {
     var chrome = document.createElement('div');
     chrome.className = 'gadgets-gadget-chrome';
-    chrome.style.cssFloat = 'left'
+    chrome.style.cssFloat = 'left';
     layoutRoot.appendChild(chrome);
     return chrome;
   } else {
@@ -423,7 +423,7 @@ gadgets.Gadget.prototype.getContent = function(continuation) {
 
 /**
  * Gets title bar content asynchronously or synchronously.
- * @param {Function} continutation Function that handles title bar content as
+ * @param {Function} continuation Function that handles title bar content as
  *     the one and only argument
  */
 gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
@@ -432,7 +432,7 @@ gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
 
 /**
  * Gets user preferences dialog content asynchronously or synchronously.
- * @param {Function} continutation Function that handles user preferences
+ * @param {Function} continuation Function that handles user preferences
  *     content as the one and only argument
  */
 gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
@@ -441,7 +441,7 @@ gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
 
 /**
  * Gets gadget content asynchronously or synchronously.
- * @param {Function} continutation Function that handles gadget content as
+ * @param {Function} continuation Function that handles gadget content as
  *     the one and only argument
  */
 gadgets.Gadget.prototype.getMainContent = function(continuation) {
