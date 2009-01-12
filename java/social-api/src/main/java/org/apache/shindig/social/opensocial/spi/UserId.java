@@ -99,4 +99,20 @@ public class UserId {
     int userHashCode = this.userId == null ? 0 : this.userId.hashCode();
     return this.type.hashCode() + userHashCode;
   }
+
+  @Override
+  public String toString() {
+      switch(type) {
+          case owner:
+            return "OWNER";
+          case viewer:
+          case me:
+            return "VIEWER";
+          case userId:
+            return "USER(" + userId + ")";
+          default:
+              return "UNKNOWN";
+        }
+
+  }
 }
