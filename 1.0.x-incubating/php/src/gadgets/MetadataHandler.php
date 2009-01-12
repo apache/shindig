@@ -65,6 +65,16 @@ class MetadataHandler {
     foreach ($gadget->getIcons() as $icon) {
       $icons[] = $icon;
     }
+    $oauth = array();
+    $oauthspec = $gadget->getOAuthSpec();
+    if (! empty($oauthspec)) {
+      foreach ($oauthspec->getServices() as $oauthservice) {
+        $oauth[$oauthservice->getName()] = array(
+            "request" => $oauthservice->getRequestUrl(), 
+            "access" => $oauthservice->getAccessUrl(), 
+            "authorization" => $oauthservice->getAuthorizationUrl());
+      }
+    }
     $response['author'] = $gadget->getAuthor();
     $response['authorEmail'] = $gadget->getAuthorEmail();
     $response['description'] = $gadget->getDescription();
@@ -95,6 +105,7 @@ class MetadataHandler {
     $response['url'] = $gadgetUrl;
     $response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
     $response['userPrefs'] = $prefs;
+    $response['oauth'] = $oauth;
     return $response;
   }
 }
