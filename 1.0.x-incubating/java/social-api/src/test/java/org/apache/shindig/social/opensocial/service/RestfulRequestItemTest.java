@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
@@ -29,13 +30,11 @@ import com.google.inject.Guice;
 
 import org.easymock.classextension.EasyMock;
 
-import junit.framework.TestCase;
-
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class RestfulRequestItemTest extends TestCase {
+public class RestfulRequestItemTest extends EasyMockTestCase {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
 
@@ -126,26 +125,26 @@ public class RestfulRequestItemTest extends TestCase {
     assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun"));
     assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun/yes"));
   }
-  
+
   public static class InputData {
     String name;
     int id;
-    
+
     public void setName(String name) {
       this.name = name;
     }
-    
+
     public void setId(int id) {
       this.id = id;
     }
   }
-  
+
   public void testGetTypedParameter() throws Exception {
     InputData input = request.getTypedParameter("anykey", InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);
   }
-  
+
   public void testGetTypedParameters() throws Exception {
     InputData input = request.getTypedParameters(InputData.class);
     assertEquals("Bob", input.name);

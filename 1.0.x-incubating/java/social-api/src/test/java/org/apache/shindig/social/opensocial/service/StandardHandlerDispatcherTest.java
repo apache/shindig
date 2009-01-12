@@ -20,15 +20,14 @@ package org.apache.shindig.social.opensocial.service;
 
 import com.google.inject.Provider;
 
-import junit.framework.TestCase;
-
+import org.apache.shindig.social.EasyMockTestCase;
 import org.easymock.classextension.IMocksControl;
 import org.easymock.classextension.EasyMock;
 
 /**
  * Tests StandardHandlerDispatcher.
  */
-public class StandardHandlerDispatcherTest extends TestCase {
+public class StandardHandlerDispatcherTest extends EasyMockTestCase {
 
   private Provider<PersonHandler> personHandlerProvider;
   private Provider<AppDataHandler> appDataHandlerProvider;
