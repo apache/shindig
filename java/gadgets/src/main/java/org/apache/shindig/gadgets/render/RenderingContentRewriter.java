@@ -160,7 +160,7 @@ public class RenderingContentRewriter implements ContentRewriter {
 
   private void injectBaseTag(Gadget gadget, Node headTag) {
     GadgetContext context = gadget.getContext();
-    if ("true".equals(containerConfig.get(context.getContainer(), INSERT_BASE_ELEMENT_KEY))) {
+    if (Boolean.parseBoolean(containerConfig.get(context.getContainer(), INSERT_BASE_ELEMENT_KEY))) {
       Uri base = gadget.getSpec().getUrl();
       View view = gadget.getCurrentView();
       if (view != null && view.getHref() != null) {
