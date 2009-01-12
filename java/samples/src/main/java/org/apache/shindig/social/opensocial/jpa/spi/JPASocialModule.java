@@ -23,8 +23,7 @@ import com.google.inject.Scopes;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 
-import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.social.opensocial.jpa.PersonDb;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.social.opensocial.jpa.eclipselink.EclipseEntityManagerProvider;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
@@ -38,7 +37,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 
 /**
- * 
+ *
  */
 public class JPASocialModule extends AbstractModule {
 
@@ -46,7 +45,7 @@ public class JPASocialModule extends AbstractModule {
   private Properties properties;
 
   /**
-   * 
+   *
    */
   public JPASocialModule() {
     InputStream is = null;
@@ -62,19 +61,13 @@ public class JPASocialModule extends AbstractModule {
       throw new CreationException(Arrays.asList(new Message(
           "Unable to load properties: " + DEFAULT_PROPERTIES)));
     } finally {
-      try {
-        if (is != null) {
-          is.close();
-        }
-      } catch (IOException e) {
-        // dont care about this.
-      }
+      IOUtils.closeQuietly( is );
     }
   }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.google.inject.AbstractModule#configure()
    */
   @Override

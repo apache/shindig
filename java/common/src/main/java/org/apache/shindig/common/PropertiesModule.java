@@ -24,6 +24,7 @@ import com.google.inject.CreationException;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.util.ResourceLoader;
 
 import java.io.IOException;
@@ -38,9 +39,9 @@ import java.util.Properties;
 public class PropertiesModule extends AbstractModule {
 
   private final static String DEFAULT_PROPERTIES = "shindig.properties";
-  
+
   private final Properties properties;
-  
+
   public PropertiesModule() {
     this.properties = readPropertyFile(getDefaultPropertiesPath());
   }
@@ -48,7 +49,7 @@ public class PropertiesModule extends AbstractModule {
   public PropertiesModule(String propertyFile) {
     this.properties = readPropertyFile(propertyFile);
   }
-  
+
   public PropertiesModule(Properties properties) {
     this.properties = properties;
   }
@@ -76,15 +77,9 @@ public class PropertiesModule extends AbstractModule {
       throw new CreationException(Arrays.asList(
           new Message("Unable to load properties: " + propertyFile)));
     } finally {
-      try {
-        if (is != null) {
-          is.close();
-        }
-      } catch (IOException e) {
-        // weird
-      }
+      IOUtils.closeQuietly( is );
     }
-    
+
     return properties;
   }
 
