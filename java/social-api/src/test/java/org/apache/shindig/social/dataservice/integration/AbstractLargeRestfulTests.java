@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
@@ -55,7 +56,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public abstract class AbstractLargeRestfulTests extends TestCase {
+public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
     + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
