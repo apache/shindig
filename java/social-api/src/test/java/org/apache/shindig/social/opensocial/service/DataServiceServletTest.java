@@ -20,24 +20,20 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
-import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
-import junit.framework.TestCase;
 import org.easymock.classextension.EasyMock;
 
 import java.io.IOException;
@@ -48,7 +44,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DataServiceServletTest extends TestCase {
+public class DataServiceServletTest extends EasyMockTestCase {
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");

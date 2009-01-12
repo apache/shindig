@@ -20,10 +20,9 @@ package org.apache.shindig.social.opensocial.service;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
@@ -37,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class AppDataHandlerTest extends TestCase {
+public class AppDataHandlerTest extends EasyMockTestCase {
 
   private BeanJsonConverter converter;
 
@@ -63,12 +62,14 @@ public class AppDataHandlerTest extends TestCase {
     handler = new AppDataHandler(appDataService);
   }
 
-  private void replay() {
+  @Override
+  protected void replay() {
     EasyMock.replay(converter);
     EasyMock.replay(appDataService);
   }
 
-  private void verify() {
+  @Override
+  protected void verify() {
     EasyMock.verify(converter);
     EasyMock.verify(appDataService);
   }
@@ -227,7 +228,7 @@ public class AppDataHandlerTest extends TestCase {
     verify();
   }
 
-  
+
   public void testHandleDelete() throws Exception {
     Map<String, String> params = Maps.newHashMap();
     params.put("fields", "pandas");
