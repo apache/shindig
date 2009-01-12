@@ -70,6 +70,27 @@ public abstract class AbstractLargeRestfulTests extends TestCase {
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
 
+  protected HttpServletRequest getRequest() {
+    return req;
+  }
+  protected void setRequest(HttpServletRequest req) {
+    this.req = req;
+  }
+
+  protected HttpServletResponse getResponse() {
+    return res;
+  }
+  protected void setResponse(HttpServletResponse res) {
+    this.res = res;
+  }
+
+  protected DataServiceServlet getServlet() {
+    return servlet;
+  }
+  protected void setServlet(DataServiceServlet servlet) {
+    this.servlet = servlet;
+  }
+
   @Override
   protected void setUp() throws Exception {
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
