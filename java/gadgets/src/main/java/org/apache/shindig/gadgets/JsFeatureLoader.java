@@ -33,11 +33,9 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -88,7 +86,7 @@ public class JsFeatureLoader {
             List<String> resources = Lists.newArrayList();
             for(String resource : StringUtils.split(ResourceLoader.getContent(location), "[\r\n]+")) {
               // Skip blank/commented lines
-	      if (StringUtils.trim(resource).length() > 0 && resource.charAt(0) != '#') {
+              if (StringUtils.trim(resource).length() > 0 && resource.charAt(0) != '#') {
                 resources.add(StringUtils.trim(resource));
               }
             }
@@ -140,11 +138,17 @@ public class JsFeatureLoader {
     for (File file : files) {
       if (file.isDirectory()) {
         loadFiles(file.listFiles(), features);
-      } else if (file.getName().endsWith(".xml")) {
+      } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
+        if (!file.exists()) {
+            throw new GadgetException(GadgetException.Code.INVALID_PATH,
+                                      "The file '" + file.getAbsolutePath() + "' doesn't exist.");
+        }
         ParsedFeature feature = processFile(file);
         if (feature != null) {
           features.add(feature);
         }
+      } else {
+          logger.finest(file.getAbsolutePath() + " doesn't seem to be an XML file.");
       }
     }
   }

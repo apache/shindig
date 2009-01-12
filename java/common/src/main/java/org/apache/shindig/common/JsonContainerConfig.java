@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -135,9 +136,14 @@ public class JsonContainerConfig implements ContainerConfig {
         LOG.info("Reading container config: " + file.getName());
         if (file.isDirectory()) {
           loadFiles(file.listFiles());
-        } else if (file.getName().endsWith(".js") ||
-                   file.getName().endsWith(".json")) {
+        } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".js") ||
+                   file.getName().toLowerCase(Locale.ENGLISH).endsWith(".json")) {
+            if (!file.exists()) {
+                throw new ContainerConfigException("The file '" + file.getAbsolutePath() + "' doesn't exist.");
+            }
           loadFromString(ResourceLoader.getContent(file));
+        } else {
+            LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
       }
     } catch (IOException e) {
