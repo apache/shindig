@@ -164,5 +164,21 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
 
     JsLibrary lib2 = getJsLib(map.get(ALT_FEATURE_NAME));
     assertEquals(ALT_JS_CONTENT, lib2.getContent());
+
+    // Test with comma in the path
+    file1 = makeFeatureFile("test,test", DEF_JS_CONTENT);
+    file2 = makeFeatureFile("test2,test2", ALT_JS_CONTENT);
+
+    try {
+        loader.loadFeatures(file1.getAbsolutePath() +
+                            JsFeatureLoader.FILE_SEPARATOR +
+                            file2.getAbsolutePath(), registry);
+    } catch (GadgetException e ) {
+        if (!e.getCode().equals(GadgetException.Code.INVALID_PATH)) {
+            throw e;
+        }
+
+        assertTrue("Invalid path catched", true);
+    }
   }
 }
