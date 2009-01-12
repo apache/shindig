@@ -399,6 +399,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     if (! $totalResults) {
       throw new SocialSpiException("Activity not found", ResponseError::$NOT_FOUND);
     }
+    $activities = array_slice($activities, $startIndex, $count);
     $ret = new RestfulCollection($activities, $startIndex, $totalResults);
     $ret->setItemsPerPage($count);
     return $ret;
