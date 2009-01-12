@@ -92,6 +92,7 @@ public class JsFeatureLoaderTest extends GadgetTestFixture {
 
   public void testFileReferences() throws Exception {
     File temp = File.createTempFile(getName(), ".js-noopt");
+    temp.deleteOnExit();
     BufferedWriter out = new BufferedWriter(new FileWriter(temp));
     out.write(DEF_JS_CONTENT);
     out.close();
