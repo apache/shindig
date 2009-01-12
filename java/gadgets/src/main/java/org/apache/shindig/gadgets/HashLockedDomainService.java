@@ -73,7 +73,7 @@ public class HashLockedDomainService implements LockedDomainService {
         }
 
         String require = config.get(container, LOCKED_DOMAIN_REQUIRED_KEY);
-        required.put(container, "true".equals(require));
+        required.put(container, Boolean.parseBoolean(require));
       }
     }
   }
