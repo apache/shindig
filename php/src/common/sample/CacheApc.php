@@ -87,6 +87,6 @@ class CacheApc extends Cache {
   }
 
   public function delete($key) {
-    @apc_delete($this->connection, $key);
+    @apc_delete($key);
   }
 }
