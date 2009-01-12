@@ -180,7 +180,7 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
 }
 
 class OAuthRequest {
-  private $parameters;
+  public $parameters;
   private $http_method;
   private $http_url;
   // for debug purposes

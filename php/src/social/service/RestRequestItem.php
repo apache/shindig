@@ -22,8 +22,6 @@
  * Represents the request items that come from the restful request.
  */
 class RestRequestItem extends RequestItem {
-  
-  protected static $X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
   private $url;
   private $params;
   private $inputConverter;
