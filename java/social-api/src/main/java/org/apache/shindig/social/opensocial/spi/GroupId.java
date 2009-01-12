@@ -87,4 +87,21 @@ public class GroupId {
     }
     return this.type.hashCode() + groupHashCode;
   }
+
+  @Override public String toString() {
+      switch (type) {
+          case all:
+              return "ALL";
+          case deleted:
+              return "DELETE";
+          case friends:
+              return "FRIENDS";
+          case self:
+              return "SELF";
+          case groupId:
+              return "GROUPID(" + groupId + ")";
+          default:
+              return "UNKNOWN";
+      }
+  }
 }
