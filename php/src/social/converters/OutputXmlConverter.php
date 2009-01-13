@@ -28,8 +28,8 @@ class OutputXmlConverter extends OutputConverter {
   private static $formatOutput = true;
   
   // this maps the REST url to the xml tags
-  private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 
-      'activities' => 'activity', 'messages' => 'messages');
+  private static $entryTypes = array('people' => 'entry', 'appdata' => 'entry', 
+      'activities' => 'entry', 'messages' => 'entry');
   private $doc;
 
   function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem) {
