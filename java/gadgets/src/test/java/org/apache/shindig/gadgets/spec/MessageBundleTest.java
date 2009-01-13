@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.json.JSONException;
@@ -72,6 +73,17 @@ public class MessageBundleTest {
     assertEquals(MESSAGES, bundle.getMessages());
   }
 
+  @Test
+  public void duplicateKeyIgnored() throws Exception {
+    String duplicateKeyXml =
+      "<messagebundle>" +
+      "  <msg name='key'>value</msg>" +
+      "  <msg name='key'>value</msg>" +
+      "</messagebundle>";
+    MessageBundle bundle = new MessageBundle(locale, duplicateKeyXml);
+    assertEquals(ImmutableMap.of("key", "value"), bundle.getMessages());
+  }
+  
   @Test(expected = SpecParserException.class)
   public void missingNameThrows() throws SpecParserException {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";

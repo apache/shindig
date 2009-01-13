@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.json.JSONObject;
@@ -127,7 +126,7 @@ public class MessageBundle {
       throws SpecParserException {
     NodeList nodes = element.getElementsByTagName("msg");
 
-    ImmutableMap.Builder<String, String> messages = ImmutableMap.builder();
+    Map<String, String> messages = Maps.newHashMap();
 
     for (int i = 0, j = nodes.getLength(); i < j; ++i) {
       Element msg = (Element)nodes.item(i);
@@ -138,7 +137,8 @@ public class MessageBundle {
       }
       messages.put(name, msg.getTextContent().trim());
     }
-    return messages.build();
+    
+    return Collections.unmodifiableMap(messages);
   }
 
   @Override
