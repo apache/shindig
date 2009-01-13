@@ -18,7 +18,8 @@
  */
 package org.apache.shindig.common.crypto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.Crypto;
@@ -36,43 +37,43 @@ public class CryptoTest {
   }
 
   private BasicBlobCrypter crypter;
-  
+
   public CryptoTest() {
     crypter = new BasicBlobCrypter("0123456789abcdef".getBytes());
     crypter.timeSource = new FakeTimeSource();
   }
-  
+
   @Test
-  public void testHmacSha1() throws Exception { 
+  public void testHmacSha1() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
     byte[] expected = new byte[] {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
-        -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,     
+        -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
     byte[] hmac = Crypto.hmacSha1(key.getBytes(), val.getBytes());
     assertArrayEquals(expected, hmac);
   }
-  
+
   @Test
-  public void testHmacSha1Verify() throws Exception { 
+  public void testHmacSha1Verify() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
     byte[] expected = new byte[] {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
-        -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,     
+        -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
     Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
   }
-  
-  
+
+
   @Test
-  public void testHmacSha1VerifyTampered() throws Exception { 
+  public void testHmacSha1VerifyTampered() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
     byte[] expected = new byte[] {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
-        -51, 115, -122, -91, 39, 0, -18, 122, 30, 90,     
+        -51, 115, -122, -91, 39, 0, -18, 122, 30, 90,
     };
     try {
       Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
@@ -81,9 +82,9 @@ public class CryptoTest {
       // OK
     }
   }
-  
+
   @Test
-  public void testAes128Cbc() throws Exception { 
+  public void testAes128Cbc() throws Exception {
     byte[] key = Crypto.getRandomBytes(Crypto.CIPHER_KEY_LEN);
     for (byte i=0; i < 50; i++) {
       byte[] orig = new byte[i];

@@ -27,14 +27,12 @@ import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.xstream.GuiceBeanProvider;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -42,8 +40,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -52,8 +48,6 @@ import junit.framework.TestCase;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,7 +66,7 @@ public class BeanXStreamConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
-    
+
     johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
     johnDoe.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl(
         "home", "+33H000000000"), new ListFieldImpl("mobile", "+33M000000000"),
@@ -88,11 +82,11 @@ public class BeanXStreamConverterTest extends TestCase {
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
-    
+
 
     beanXmlConverter = new BeanXStreamConverter(new XStream081Configuration(injector));
   }
-  
+
 
   public static class SimplePerson {
     private String id;
@@ -144,7 +138,7 @@ public class BeanXStreamConverterTest extends TestCase {
 
   public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
-    Map<String, Map<String, String>> map = new TreeMap<String, Map<String, String>>();
+    Map<String, Map<String, String>> map = Maps.newTreeMap();
 
     Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");

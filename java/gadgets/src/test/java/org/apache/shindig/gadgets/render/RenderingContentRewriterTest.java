@@ -18,6 +18,48 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_CSS;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
+import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
+import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.PropertiesModule;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
+import org.apache.shindig.gadgets.GadgetFeatureRegistry;
+import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.preload.NullPreloads;
+import org.apache.shindig.gadgets.preload.PreloadException;
+import org.apache.shindig.gadgets.preload.PreloadedData;
+import org.apache.shindig.gadgets.preload.Preloads;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.LocaleSpec;
+import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.spec.View;
+import org.easymock.classextension.EasyMock;
+import org.easymock.classextension.IMocksControl;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.caja.util.Join;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
@@ -25,35 +67,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.PropertiesModule;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.*;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.preload.NullPreloads;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.Preloads;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.*;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.LocaleSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
-import org.apache.shindig.gadgets.spec.View;
-import static org.easymock.EasyMock.expect;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
-import org.json.JSONException;
-import org.json.JSONObject;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Tests for RenderingContentRewriter.
@@ -709,6 +722,9 @@ public class RenderingContentRewriterTest {
    * Simple message bundle factory -- only honors inline bundles.
    */
   private static class FakeMessageBundleFactory implements MessageBundleFactory {
+    protected FakeMessageBundleFactory() {
+    }
+
     public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache) {
       LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
       if (localeSpec == null) {
@@ -719,6 +735,9 @@ public class RenderingContentRewriterTest {
   }
 
   private static class FakeUrlGenerator implements UrlGenerator {
+    protected FakeUrlGenerator() {
+    }
+
     public String getBundledJsParam(Collection<String> features, GadgetContext context) {
       throw new UnsupportedOperationException();
     }

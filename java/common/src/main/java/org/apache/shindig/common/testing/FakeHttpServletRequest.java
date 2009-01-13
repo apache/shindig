@@ -34,13 +34,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,11 +54,11 @@ import javax.servlet.http.HttpSession;
 /**
  * This class fakes a HttpServletRequest for unit test purposes. Currently, it
  * supports servlet API 2.4.
- * 
+ *
  * <p>
  * To use this class, you specify the request info (URL, parameters) in the
  * constructors.
- * 
+ *
  * <p>
  * Lots of stuff are still not implemented here. Feel free to implement them.
  */
@@ -201,10 +198,10 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   /*
    * Set a header on this request. Note that if the header implies other
    * attributes of the request I will set them accordingly. Specifically:
-   * 
+   *
    * If the header is "Cookie:" then I will automatically call setCookie on all
    * of the name-value pairs found therein.
-   * 
+   *
    * This makes the object easier to use because you can just feed it headers
    * and the object will remain consistent with the behavior you'd expect from a
    * request.
@@ -238,7 +235,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Associates a set of cookies with this fake request.
-   * 
+   *
    * @param cookies the cookies associated with this request.
    */
   public FakeHttpServletRequest setCookies(Cookie... cookies) {
@@ -252,7 +249,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   /**
    * Sets a single cookie associated with this fake request. Cookies are
    * cumulative, but ones with the same name will overwrite one another.
-   * 
+   *
    * @param c the cookie to associate with this request.
    */
   public FakeHttpServletRequest setCookie(Cookie c) {
@@ -287,7 +284,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Sets the a parameter in this fake request.
-   * 
+   *
    * @param name the string key
    * @param values the string array value
    * @param isPost if the paramenter comes in the post body.
@@ -305,7 +302,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Sets the a parameter in this fake request.
-   * 
+   *
    * @param name the string key
    * @param values the string array value
    */
@@ -323,7 +320,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Specify the mock POST data.
-   * 
+   *
    * @param postString the mock post data
    * @param encoding format with which to encode mock post data
    */
@@ -336,9 +333,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Specify the mock POST data in raw binary format.
-   * 
+   *
    * This implicitly sets character encoding to not specified.
-   * 
+   *
    * @param data the mock post data; this is owned by the caller, so
    *        modifications made after this call will show up when the post data
    *        is read
@@ -353,7 +350,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
   /**
    * Set a new value for the query string. The query string will be parsed and
    * all parameters reset.
-   * 
+   *
    * @param queryString representing the new value. i.e.: "bug=1&id=23"
    */
   public FakeHttpServletRequest setQueryString(String queryString) {
@@ -365,7 +362,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Sets the session for this request.
-   * 
+   *
    * @param session the new session
    */
   public FakeHttpServletRequest setSession(HttpSession session) {
@@ -375,7 +372,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Sets the content type.
-   * 
+   *
    * @param contentType of the request.
    */
   public FakeHttpServletRequest setContentType(String contentType) {
@@ -607,7 +604,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * Get the body of the request (i.e. the POST data) as a binary stream. As per
    * Java docs, this OR getReader() may be called, but not both (attempting that
    * will result in an IllegalStateException)
-   * 
+   *
    */
   public ServletInputStream getInputStream() {
     if (getReaderCalled) {
@@ -687,7 +684,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * Sets the remote IP address for this {@code FakeHttpServletRequest}.
-   * 
+   *
    * @param ip the IP to set
    * @return this {@code FakeHttpServletRequest} object
    */
@@ -703,9 +700,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * New Servlet 2.4 method
-   * 
+   *
    * @see javax.servlet.ServletRequest#getLocalPort()
    */
   public int getLocalPort() {
@@ -714,9 +711,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * New Servlet 2.4 method
-   * 
+   *
    * @see javax.servlet.ServletRequest#getLocalAddr()
    */
   public String getLocalAddr() {
@@ -725,9 +722,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * New Servlet 2.4 method
-   * 
+   *
    * @see javax.servlet.ServletRequest#getLocalName()
    */
   public String getLocalName() {
@@ -736,9 +733,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * New Servlet 2.4 method
-   * 
+   *
    * @see javax.servlet.ServletRequest#getRemotePort()
    */
   public int getRemotePort() {
@@ -776,9 +773,9 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   /**
    * @inheritDoc
-   * 
+   *
    * For POST requests, this affects interpretation of POST body.
-   * 
+   *
    * For non-POST requests (original author's comment): Do nothing - all request
    * components were created as unicode Strings, so this can't affect how
    * they're interpreted anyway.
@@ -795,7 +792,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
    * This method serves as the central constructor of this class. The reason it
    * is not an actual constructor is that Java doesn't allow calling another
    * constructor at the end of a constructor. e.g.
-   * 
+   *
    * <pre>
    * public FakeHttpServletRequest(String foo) {
    *   // Do something here
@@ -866,7 +863,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       parameters.put(name, paramValues);
     }
   }
-  
+
   private static String[] splitAndTrim(String str, String delims) {
     StringTokenizer tokenizer = new StringTokenizer(str, delims);
     int n = tokenizer.countTokens();

@@ -17,25 +17,37 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
-import org.apache.xerces.xni.*;
-import org.apache.xerces.xni.parser.XMLDocumentSource;
-import org.apache.xerces.xni.parser.XMLInputSource;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.HTMLEntities;
-import org.cyberneko.html.HTMLScanner;
-import org.cyberneko.html.HTMLTagBalancer;
-import org.w3c.dom.*;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Set;
 import java.util.Stack;
+
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.NamespaceContext;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLDocumentHandler;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLDocumentSource;
+import org.apache.xerces.xni.parser.XMLInputSource;
+import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.HTMLEntities;
+import org.cyberneko.html.HTMLScanner;
+import org.cyberneko.html.HTMLTagBalancer;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Neko based DOM parser that concatentates elements which we dont care about into

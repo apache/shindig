@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 
@@ -27,7 +30,6 @@ import com.google.caja.lexer.Token;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.*;
 
 /** Rewrite a linking attribute of an HTML tag to an arbitrary scheme */
 public class LinkingTagRewriter implements HtmlTagTransformer {
@@ -44,7 +46,7 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
 
   public static Map<String, Set<String>> getDefaultTargets() {
       Map<String, Set<String>> targets  = new ImmutableMap.Builder<String,Set<String>>()
-	  .put("img", ImmutableSet.of("src"))
+      .put("img", ImmutableSet.of("src"))
           .put("embed", ImmutableSet.of("src"))
           .put("link", ImmutableSet.of("href")).build();
     return targets;

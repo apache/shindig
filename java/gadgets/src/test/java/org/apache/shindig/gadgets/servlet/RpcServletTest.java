@@ -18,18 +18,22 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.easymock.classextension.EasyMock.*;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import junit.framework.TestCase;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import junit.framework.TestCase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Tests for RpcServlet.
@@ -37,7 +41,7 @@ import java.io.PrintWriter;
 public class RpcServletTest extends TestCase {
   private RpcServlet servlet;
   private JsonRpcHandler handler;
-  
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
@@ -80,7 +84,7 @@ public class RpcServletTest extends TestCase {
     servlet.doGet(request, response);
     verify(response);
   }
-  
+
   public void testDoGetWithMissingReqParam() throws Exception {
     HttpServletRequest request = createGetRequest(null, "function");
     HttpServletResponse response = createHttpResponse(null, HttpServletResponse.SC_BAD_REQUEST);

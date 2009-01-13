@@ -61,12 +61,12 @@ public class OAuthSpecTest {
         " <Access url='http://two.example.com'/>" +
         " <Authorization url='http://two.example.com/authorize'/>" +
         "</Service>" +
-    	"<Service name='three'>" +
+        "<Service name='three'>" +
         " <Request url='http://three.example.com' param_location='uri-query' method='POST'/>" +
         " <Access url='http://three.example.com/acc' param_location='uri-query' method='POST'/>" +
         " <Authorization url='http://three.example.com/authorize'/>" +
         "</Service>" +
-    	"</OAuth>";
+        "</OAuth>";
     OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);
     assertEquals("http://req.example.com",
         oauth.getServices().get("one").getRequestUrl().url.toString());

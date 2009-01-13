@@ -65,6 +65,7 @@ public class StackWriterWrapper extends WriterWrapper {
    * @see com.thoughtworks.xstream.io.WriterWrapper#addAttribute(java.lang.String,
    *      java.lang.String)
    */
+  @Override
   public void addAttribute(String name, String value) {
     if (!"class".equals(name)) {
       super.addAttribute(name, value);

@@ -23,7 +23,6 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,7 +58,7 @@ public class ProxyServletRequest extends HttpServletRequestWrapper {
                                 Utf8UrlCoder.decode(paramMatcher.group(2)));
       }
 
-      extractedParameters.put(ProxyHandler.URL_PARAM, chainedMatcher.group(2));
+      extractedParameters.put(ProxyBase.URL_PARAM, chainedMatcher.group(2));
     } else {
       extractedParameters = Collections.emptyMap();
     }

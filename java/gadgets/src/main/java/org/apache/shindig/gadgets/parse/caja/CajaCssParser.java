@@ -22,7 +22,14 @@ import org.apache.shindig.gadgets.parse.GadgetCssParser;
 import org.apache.shindig.gadgets.parse.ParsedCssDeclaration;
 import org.apache.shindig.gadgets.parse.ParsedCssRule;
 
-import com.google.caja.lexer.*;
+import com.google.caja.lexer.CharProducer;
+import com.google.caja.lexer.CssLexer;
+import com.google.caja.lexer.CssTokenType;
+import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.ParseException;
+import com.google.caja.lexer.Token;
+import com.google.caja.lexer.TokenConsumer;
+import com.google.caja.lexer.TokenQueue;
 import com.google.caja.parser.css.CssParser;
 import com.google.caja.parser.css.CssTree;
 import com.google.caja.reporting.MessageContext;
@@ -45,24 +52,24 @@ public class CajaCssParser implements GadgetCssParser {
     if (css.matches("\\s*")) {
       return Lists.newArrayList();
     }
-    
+
     CssParser parser = getParser(css);
     CssTree.StyleSheet stylesheet = null;
-    
+
     try {
       stylesheet = parser.parseStyleSheet();
     } catch (ParseException e) {
       throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, e);
     }
-    
-    ArrayList<ParsedCssRule> rules = 
+
+    ArrayList<ParsedCssRule> rules =
         Lists.newArrayListWithExpectedSize(stylesheet.children().size());
     for (CssTree node : stylesheet.children()) {
       if (node instanceof CssTree.RuleSet) {
         rules.add(new CajaParsedCssRule((CssTree.RuleSet)node));
       }
     }
-    
+
     return rules;
   }
 
@@ -71,16 +78,16 @@ public class CajaCssParser implements GadgetCssParser {
     if (style.matches("\\s*")) {
       return Lists.newArrayList();
     }
-    
+
     CssParser parser = getParser(style);
     CssTree.DeclarationGroup declGroup = null;
-    
+
     try {
       declGroup = parser.parseDeclarationGroup();
     } catch (ParseException e) {
       throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, e);
     }
-    
+
     List<ParsedCssDeclaration> attributes =
         Lists.newArrayListWithExpectedSize(declGroup.children().size());
     for (CssTree node : declGroup.children()) {
@@ -91,10 +98,10 @@ public class CajaCssParser implements GadgetCssParser {
         }
       }
     }
-    
+
     return attributes;
   }
-  
+
   private CssParser getParser(String content) {
     InputSource source = null;
     try {
@@ -109,29 +116,29 @@ public class CajaCssParser implements GadgetCssParser {
     return new CssParser(new TokenQueue<CssTokenType>(
         lexer,
         source,
-        new Criterion<Token<CssTokenType>>() {  
+        new Criterion<Token<CssTokenType>>() {
           public boolean accept(Token<CssTokenType> tok) {
             return tok.type != CssTokenType.COMMENT
                 && tok.type != CssTokenType.SPACE;
           }
         }));
   }
-  
-  private static final String renderCssTreeElement(CssTree elem) {
+
+  private static String renderCssTreeElement(CssTree elem) {
     StringBuffer selBuffer = new StringBuffer();
     TokenConsumer tc = elem.makeRenderer(selBuffer, null);
     elem.render(new RenderContext(new MessageContext(), tc));
     return selBuffer.toString();
   }
-  
+
   private static class CajaParsedCssRule implements ParsedCssRule {
     private final List<ParsedCssDeclaration> attributes;
     private final List<String> selectors;
-    
+
     private CajaParsedCssRule(CssTree.RuleSet ruleSet) {
       attributes = Lists.newArrayList();
       selectors = Lists.newArrayList();
-      
+
       for (CssTree child : ruleSet.children()) {
         if (child instanceof CssTree.Selector) {
           selectors.add(renderCssTreeElement(child));
@@ -152,16 +159,16 @@ public class CajaCssParser implements GadgetCssParser {
       return selectors;
     }
   }
-  
+
   private static class CajaParsedCssDeclaration implements ParsedCssDeclaration {
     private final String key;
     private final String value;
-    
+
     private CajaParsedCssDeclaration(CssTree.Declaration declaration) {
       key = declaration.getProperty().getPropertyName().getCanonicalForm();
       value = renderCssTreeElement(declaration.getExpr());
     }
-    
+
     public String getName() {
       return key;
     }

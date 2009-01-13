@@ -46,8 +46,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -152,14 +150,13 @@ public class DefaultContentRewriter implements ContentRewriter {
 
       if (getProxyUrl() != null) {
         LinkRewriter linkRewriter = createLinkRewriter(spec, rewriterFeature);
-        LinkingTagRewriter rewriter = new LinkingTagRewriter(
-            linkRewriter,
-            source);
-        Set<String> toProcess = Sets.newHashSet(rewriter.getSupportedTags());
-        toProcess.retainAll(rewriterFeature.getIncludedTags());
+        LinkingTagRewriter rewriter = new LinkingTagRewriter(linkRewriter, source);
+        Set<String> toProcess = Sets.intersection(rewriter.getSupportedTags(), rewriterFeature.getIncludedTags());
+
         for (String tag : toProcess) {
           transformerMap.put(tag, rewriter);
         }
+
         if (rewriterFeature.getIncludedTags().contains("style")) {
           transformerMap.put("style", new StyleTagRewriter(source, linkRewriter));
         }

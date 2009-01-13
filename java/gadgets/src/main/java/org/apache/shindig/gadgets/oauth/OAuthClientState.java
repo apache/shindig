@@ -62,7 +62,7 @@ public class OAuthClientState {
   /**
    * Initialize client state based on an encrypted blob passed by the
    * client.
-   * 
+   *
    * @param crypter
    * @param stateBlob
    */

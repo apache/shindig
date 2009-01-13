@@ -19,7 +19,6 @@ package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.social.core.model.PersonImpl;
 
-import com.google.common.collect.EnumHashBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.base.Functions;
@@ -203,7 +202,7 @@ public interface Person {
     /**
      * a Map to convert json string to Field representations.
      */
-  
+
     private static final Map<String,Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), Functions.TO_STRING);
 
     /**
@@ -220,7 +219,7 @@ public interface Person {
      * The set of default fields returned fields.
      */
     public static final Set<String> DEFAULT_FIELDS = ImmutableSet.of(
-        ID.toString(), 
+        ID.toString(),
         NAME.toString(),
         THUMBNAIL_URL.toString());
 
@@ -342,7 +341,7 @@ public interface Person {
    * @param birthday the person's data of birth
    */
   void setBirthday(Date birthday);
-  
+
   /**
    * Get the person's body characteristics, specified as an BodyType. Container support for this
    * field is OPTIONAL.

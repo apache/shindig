@@ -88,6 +88,7 @@ public class BeanXmlConverter implements BeanConverter {
     return toReturn;
   }
 
+  @SuppressWarnings("unchecked")
   public <T> T convertToObject(String xml, Class<T> className) {
     String errorMessage = "Could not convert " + xml + " to " + className;
 

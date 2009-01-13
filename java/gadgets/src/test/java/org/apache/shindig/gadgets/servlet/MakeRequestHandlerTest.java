@@ -89,7 +89,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   @Override
   public void setUp() {
     expect(request.getMethod()).andReturn("POST").anyTimes();
-    expect(request.getParameter(MakeRequestHandler.URL_PARAM))
+    expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 

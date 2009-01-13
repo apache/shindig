@@ -88,7 +88,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     List<Activity> activityList = ImmutableList.of();
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(activityList);
-    EasyMock.expect(activityService.getActivities(JOHN_DOE,
+    org.easymock.EasyMock.expect(activityService.getActivities(JOHN_DOE,
        new GroupId(group, null), null, Sets.<String>newHashSet(), new CollectionOptions(request), token)).andReturn(
         ImmediateFuture.newInstance(data));
 
@@ -116,7 +116,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(activities);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
-    EasyMock.expect(activityService.getActivities(userIdSet,
+    org.easymock.EasyMock.expect(activityService.getActivities(userIdSet,
         new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(), new CollectionOptions(request), token)).andReturn(
           ImmediateFuture.newInstance(data));
 
@@ -129,7 +129,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     setPath("/people/john.doe/@friends/@app/1");
 
     Activity activity = new ActivityImpl();
-    EasyMock.expect(activityService.getActivity(JOHN_DOE.iterator().next(),
+    org.easymock.EasyMock.expect(activityService.getActivity(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.friends, null),
         "appId", Sets.<String>newHashSet(), "1", token)).andReturn(
         ImmediateFuture.newInstance(activity));
@@ -145,9 +145,9 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     setPathAndPostData("/people/john.doe/@self/@app", jsonActivity);
 
     Activity activity = new ActivityImpl();
-    EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
+    org.easymock.EasyMock.expect(converter.convertToObject(jsonActivity, Activity.class)).andReturn(activity);
 
-    EasyMock.expect(activityService.createActivity(JOHN_DOE.iterator().next(),
+    org.easymock.EasyMock.expect(activityService.createActivity(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.self, null), "appId", Sets.<String>newHashSet(),
         activity, token)).andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
@@ -168,7 +168,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
   public void testHandleDelete() throws Exception {
     setPath("/people/john.doe/@self/@app/1");
 
-    EasyMock.expect(activityService.deleteActivities(JOHN_DOE.iterator().next(),
+    org.easymock.EasyMock.expect(activityService.deleteActivities(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.self, null), "appId", Sets.newHashSet("1"), token)).andReturn(
         ImmediateFuture.newInstance((Void) null));
 

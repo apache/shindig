@@ -33,7 +33,7 @@ import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -112,7 +112,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     options.setMax(20);
 
     RestfulCollection<Person> responseItem = db.getPeople(
-        ImmutableSortedSet.of(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
+        ImmutableSet.of(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
        options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
     assertEquals(responseItem.getTotalResults(), 4);

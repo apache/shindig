@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 /**

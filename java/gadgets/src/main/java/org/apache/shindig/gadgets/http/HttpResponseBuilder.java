@@ -17,12 +17,16 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import com.google.common.collect.*;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.DateUtil;
 
-import java.util.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 
 /**
  * Constructs HttpResponse objects.
@@ -116,7 +120,7 @@ public class HttpResponseBuilder {
    */
   public HttpResponseBuilder addHeaders(Map<String, String> headers) {
     for (Map.Entry<String, String> entry : headers.entrySet()) {
-      addHeader(entry.getKey(), entry.getValue());      
+      addHeader(entry.getKey(), entry.getValue());
     }
     return this;
   }

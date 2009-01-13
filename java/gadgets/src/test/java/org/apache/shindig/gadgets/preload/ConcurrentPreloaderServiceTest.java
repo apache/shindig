@@ -23,7 +23,10 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -142,7 +145,10 @@ public class ConcurrentPreloaderServiceTest {
   }
 
   private static class TestPreloader implements Preloader {
-    private final Collection<Callable<PreloadedData>> tasks = Lists.newArrayList();
+    protected final Collection<Callable<PreloadedData>> tasks = Lists.newArrayList();
+
+    protected TestPreloader() {
+    }
 
     public Collection<Callable<PreloadedData>> createPreloadTasks(
         GadgetContext context, GadgetSpec spec, PreloaderService.PreloadPhase phase) {

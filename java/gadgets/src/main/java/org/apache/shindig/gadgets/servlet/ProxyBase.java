@@ -100,6 +100,7 @@ public abstract class ProxyBase {
   /**
    * Sets cache control headers for the response.
    */
+  @SuppressWarnings("boxing")
   protected void setResponseHeaders(HttpServletRequest request,
       HttpServletResponse response, HttpResponse results) {
     int refreshInterval = 0;

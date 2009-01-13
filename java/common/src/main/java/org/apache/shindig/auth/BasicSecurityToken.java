@@ -24,7 +24,6 @@ import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -77,7 +76,7 @@ public class BasicSecurityToken implements SecurityToken {
     putNullSafe(MODULE_KEY, moduleId);
     token = crypter.wrap(tokenData);
   }
-  
+
   private void putNullSafe(String key, String value) {
     if (value != null) {
       tokenData.put(key, value);

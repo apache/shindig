@@ -18,15 +18,20 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableMap;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Tests for ConcurrentPreloads.
@@ -107,7 +112,7 @@ public class ConcurrentPreloadsTest {
     private boolean throwsInterrupted;
     private boolean throwsExecution;
     private boolean throwsExecutionWrapped;
-    private final String key;
+    protected final String key;
 
     private TestFuture(String key) {
       this.key = key;

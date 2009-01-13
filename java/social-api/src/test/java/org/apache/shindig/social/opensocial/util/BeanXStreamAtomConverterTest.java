@@ -46,8 +46,6 @@ import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -135,7 +133,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 
   public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
-    Map<String, Map<String, String>> map = new TreeMap<String, Map<String, String>>();
+    Map<String, Map<String, String>> map = Maps.newTreeMap();
 
     Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");

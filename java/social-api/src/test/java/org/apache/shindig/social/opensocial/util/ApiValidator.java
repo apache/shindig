@@ -20,8 +20,6 @@ package org.apache.shindig.social.opensocial.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -67,7 +66,7 @@ public class ApiValidator {
    * @throws IOException
    *                 if feature.xml or the javascript that represents the
    *                 feature is missing
-   * 
+   *
    */
   private ApiValidator(String feature) throws IOException,
       ParserConfigurationException, SAXException {
@@ -193,7 +192,7 @@ public class ApiValidator {
 
   /**
    * Validate an JSON Object extracted
-   * 
+   *
    * @param object
    * @param string
    * @param optional
@@ -221,7 +220,7 @@ public class ApiValidator {
       for (String fieldName : fieldNames) {
         Object o = parsedJSONObject.get(fieldName,
             parsedJSONObject);
-        if (o == ScriptableObject.NOT_FOUND) {
+        if (o == Scriptable.NOT_FOUND) {
           if (optional.containsKey(fieldName)) {
             log.warn("Missing Optional Field " + fieldName);
           } else if (!nullf.containsKey(fieldName)) {
@@ -258,7 +257,7 @@ public class ApiValidator {
 
   /**
    * get an object from the json context and scope.
-   * 
+   *
    * @param object
    *                the name of the object specified as a path from the base
    *                object
@@ -280,7 +279,7 @@ public class ApiValidator {
   /**
    * List a scriptable object at log debug level, constructors will not be
    * expanded as this loads to recursion.
-   * 
+   *
    * @param id
    *                The name of the object
    * @param scriptableObject
@@ -302,7 +301,7 @@ public class ApiValidator {
 
   /**
    * Load a feature based on the spec
-   * 
+   *
    * @param spec
    *                The name of the location of the spec in the classpath, must
    *                not start with a '/' and must should contain a feature.xml
@@ -346,7 +345,7 @@ public class ApiValidator {
   /**
    * Add some javascript to the context, and execute it. If extra custom
    * javascript is wanted in the context or scope then this method will load it.
-   * 
+   *
    * @param javascript
    */
   public void addScript(String javascript) {
@@ -357,7 +356,7 @@ public class ApiValidator {
 
   /**
    * Get an ordered list of javascript resources from a feature sets.
-   * 
+   *
    * @param spec
    *                The spec location
    * @return An ordered list of javascript resources, these are relative to

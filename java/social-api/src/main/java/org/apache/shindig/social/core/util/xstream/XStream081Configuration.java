@@ -56,7 +56,6 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,11 +89,11 @@ public class XStream081Configuration implements XStreamConfiguration {
   private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
   private static final String OS_NS = "http://ns.opensocial.org/2008/opensocial";
   private static final String OSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1";
-  
+
   static {
     // configure the name space mapping. This does not need to be all the elments in the
     // namespace, just the point of translation from one namespace to another.
-    // It would have been good to use a standard parser/serializer approach, but 
+    // It would have been good to use a standard parser/serializer approach, but
     // the xstream namespace implementation does not work exactly how we need it to.
     NamespaceSet atom = new NamespaceSet();
     atom.addNamespace("xmlns", ATOM_NS);

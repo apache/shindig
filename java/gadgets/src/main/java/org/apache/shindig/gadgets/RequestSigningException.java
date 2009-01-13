@@ -22,15 +22,15 @@ package org.apache.shindig.gadgets;
  */
 public class RequestSigningException extends GadgetException {
 
-	public RequestSigningException(Throwable cause) {
-		super(GadgetException.Code.REQUEST_SIGNING_FAILURE, cause);
-	}
-	
-	public RequestSigningException(String msg, Throwable cause) {
-		super(GadgetException.Code.REQUEST_SIGNING_FAILURE, msg, cause);
-	}
-	
-	public RequestSigningException(String msg) {
-		super(GadgetException.Code.REQUEST_SIGNING_FAILURE, msg);
-	}
+    public RequestSigningException(Throwable cause) {
+        super(GadgetException.Code.REQUEST_SIGNING_FAILURE, cause);
+    }
+
+    public RequestSigningException(String msg, Throwable cause) {
+        super(GadgetException.Code.REQUEST_SIGNING_FAILURE, msg, cause);
+    }
+
+    public RequestSigningException(String msg) {
+        super(GadgetException.Code.REQUEST_SIGNING_FAILURE, msg);
+    }
 }

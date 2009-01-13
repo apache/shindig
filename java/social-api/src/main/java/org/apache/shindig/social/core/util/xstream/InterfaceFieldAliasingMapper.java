@@ -20,17 +20,14 @@ package org.apache.shindig.social.core.util.xstream;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import com.thoughtworks.xstream.mapper.FieldAliasingMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  */
 public class InterfaceFieldAliasingMapper extends MapperWrapper {
 
@@ -64,10 +61,11 @@ public class InterfaceFieldAliasingMapper extends MapperWrapper {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.mapper.MapperWrapper#realMember(java.lang.Class,
    *      java.lang.String)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public String realMember(Class type, String serialized) {
     // get the possible member spec, using the serialized elment as the key.
@@ -86,10 +84,11 @@ public class InterfaceFieldAliasingMapper extends MapperWrapper {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.mapper.MapperWrapper#serializedMember(java.lang.Class,
    *      java.lang.String)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public String serializedMember(Class type, String memberName) {
     // get the possible serialized spec, using the memberName elment as the key.

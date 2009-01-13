@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * Captures output from an HttpServletResponse.
  */
 public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
-  private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  protected final ByteArrayOutputStream baos = new ByteArrayOutputStream();
   private PrintWriter writer;
   private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = 200;

@@ -67,7 +67,7 @@ public class OAuthRequestTest {
   private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
   private BasicOAuthStore base;
-  private final List<LogRecord> logRecords = Lists.newArrayList();
+  protected final List<LogRecord> logRecords = Lists.newArrayList();
   private final FakeTimeSource clock = new FakeTimeSource();
 
   public static final String GADGET_URL = "http://www.example.com/gadget.xml";

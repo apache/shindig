@@ -60,7 +60,7 @@ class ConcurrentPreloads implements Preloads {
   /**
    * Gets the preloaded data, handling any exceptions from Future processing.
    */
-  private PreloadedData getPreloadedData(Future<PreloadedData> preloadedDataFuture) {
+  protected PreloadedData getPreloadedData(Future<PreloadedData> preloadedDataFuture) {
     try {
      return preloadedDataFuture.get();
     } catch (ExecutionException ee) {

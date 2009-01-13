@@ -220,7 +220,10 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   }
 
   private static class FakeContainerConfig implements ContainerConfig {
-    private final Map<String, String> properties = Maps.newHashMap();
+    protected final Map<String, String> properties = Maps.newHashMap();
+
+    protected FakeContainerConfig() {
+    }
 
     public String get(String container, String property) {
       return properties.get(property);

@@ -19,18 +19,13 @@ package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Maps;
 
-import com.google.inject.ImplementedBy;
-
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
-
-import org.apache.shindig.social.opensocial.model.Person;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,9 +79,9 @@ public class InterfaceClassMapper extends MapperWrapper {
    * as it is shared over multiple threads.
    */
   private WriterStack writerStack;
-  
+
   /**
-   * A list of explicit mapping specifications. 
+   * A list of explicit mapping specifications.
    */
   private List<ImplicitCollectionFieldMapping> itemFieldMappings;
 
@@ -282,11 +277,12 @@ public class InterfaceClassMapper extends MapperWrapper {
   }
 
 
-  
+
   /**
    * {@inheritDoc}
    * @see com.thoughtworks.xstream.mapper.MapperWrapper#getImplicitCollectionDefForFieldName(java.lang.Class, java.lang.String)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(
       Class itemType, String fieldName) {
@@ -299,5 +295,5 @@ public class InterfaceClassMapper extends MapperWrapper {
   }
 
 
-  
+
 }

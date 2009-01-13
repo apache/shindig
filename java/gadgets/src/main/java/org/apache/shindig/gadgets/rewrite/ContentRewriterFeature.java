@@ -26,7 +26,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**

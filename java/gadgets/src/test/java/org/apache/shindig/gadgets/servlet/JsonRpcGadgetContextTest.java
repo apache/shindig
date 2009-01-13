@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 

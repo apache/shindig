@@ -35,18 +35,22 @@ public class DataRequestHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     drh = new DataRequestHandler() {
+      @Override
       protected Future<?> handleDelete(RequestItem request) {
         return ImmediateFuture.newInstance("DELETE");
       }
 
+      @Override
       protected Future<?> handlePut(RequestItem request) {
         return ImmediateFuture.newInstance("PUT");
       }
 
+      @Override
       protected Future<?> handlePost(RequestItem request) {
         return ImmediateFuture.newInstance("POST");
       }
 
+      @Override
       protected Future<?> handleGet(RequestItem request) {
         return ImmediateFuture.newInstance("GET");
       }

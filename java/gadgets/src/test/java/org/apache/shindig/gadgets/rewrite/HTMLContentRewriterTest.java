@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.http.HttpRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.w3c.dom.Document;
 
 /**

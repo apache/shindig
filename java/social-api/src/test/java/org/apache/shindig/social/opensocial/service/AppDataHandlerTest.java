@@ -95,7 +95,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     setPath("/activities/john.doe/@" + group.toString() + "/appId");
 
     DataCollection data = new DataCollection(null);
-    EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
+    org.easymock.EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
         new GroupId(group, null),
         "appId", Sets.<String>newHashSet(), token)).andReturn(ImmediateFuture.newInstance(data));
 
@@ -122,7 +122,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     DataCollection data = new DataCollection(null);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
-    EasyMock.expect(appDataService.getPersonData(userIdSet,
+    org.easymock.EasyMock.expect(appDataService.getPersonData(userIdSet,
         new GroupId(GroupId.Type.self, null),
         "appId", Sets.<String>newHashSet(), token)).andReturn(ImmediateFuture.newInstance(data));
 
@@ -137,7 +137,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     setPathAndParams("/appData/john.doe/@friends/appId", params);
 
     DataCollection data = new DataCollection(null);
-    EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
+    org.easymock.EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
         new GroupId(GroupId.Type.friends, null),
         "appId", Sets.newHashSet("pandas"), token)).andReturn(ImmediateFuture.newInstance(data));
 
@@ -154,9 +154,9 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
 
     HashMap<String, String> values = Maps.newHashMap();
-    EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
-    EasyMock.expect(appDataService.updatePersonData(JOHN_DOE.iterator().next(),
+    org.easymock.EasyMock.expect(appDataService.updatePersonData(JOHN_DOE.iterator().next(),
         new GroupId(GroupId.Type.self, null),
         "appId", Sets.newHashSet("pandas"), values, token))
         .andReturn(ImmediateFuture.newInstance((Void) null));
@@ -190,7 +190,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("", "an empty value");
-    EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
     replay();
     try {
@@ -216,7 +216,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("a bad key", "a good value");
-    EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
 
     replay();
     try {

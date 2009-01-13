@@ -33,7 +33,6 @@ import net.sf.json.JsonConfig;
 import net.sf.json.util.EnumMorpher;
 import net.sf.json.util.JSONUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

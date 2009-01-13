@@ -31,7 +31,6 @@ import org.apache.shindig.common.util.FakeTimeSource;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,11 +70,11 @@ public class BlobCrypterSecurityTokenDecoderTest {
     decoder = new DecoderWithLoadStubbedOut(config);
   }
 
-  private String getContainerKey(String container) {
+  protected String getContainerKey(String container) {
     return "KEY FOR CONTAINER " + container;
   }
 
-  private BlobCrypter getBlobCrypter(String fileName) {
+  protected BlobCrypter getBlobCrypter(String fileName) {
     BasicBlobCrypter c = new BasicBlobCrypter(CharsetUtil.getUtf8Bytes(fileName));
     c.timeSource = timeSource;
     return c;

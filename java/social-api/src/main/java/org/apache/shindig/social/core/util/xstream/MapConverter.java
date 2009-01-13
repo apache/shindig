@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.collections.AbstractCollectionConvert
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +71,7 @@ public class MapConverter extends AbstractCollectionConverter {
    *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
    *      com.thoughtworks.xstream.converters.MarshallingContext)
    */
+  @Override
   public void marshal(Object source, HierarchicalStreamWriter writer,
       MarshallingContext context) {
     Map<?, ?> map = (Map<?, ?>) source;
@@ -106,9 +108,10 @@ public class MapConverter extends AbstractCollectionConverter {
    *      .xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
+  @Override
   public Object unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext context) {
-    Map<String, Object> m = new ConcurrentHashMap<String, Object>();
+    Map<String, Object> m = Maps.newConcurrentHashMap();
     reader.moveDown();
     while (reader.hasMoreChildren()) {
       String key = reader.getNodeName();
@@ -162,6 +165,7 @@ public class MapConverter extends AbstractCollectionConverter {
    * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang
    *      .Class)
    */
+  @Override
   @SuppressWarnings("unchecked")
   // API is not generic
   public boolean canConvert(Class clazz) {

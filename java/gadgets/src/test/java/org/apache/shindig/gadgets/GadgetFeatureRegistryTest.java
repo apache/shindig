@@ -32,12 +32,9 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +94,6 @@ public class GadgetFeatureRegistryTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void getFeaturesUsesCache() throws GadgetException {
     registry.register(makeFeature(DEP_NAME, DEP_CONTENT, null));
     registry.register(makeFeature("feat0", CONTENT, DEP_NAME));

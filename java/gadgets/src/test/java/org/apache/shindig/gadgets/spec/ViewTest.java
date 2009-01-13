@@ -19,14 +19,17 @@
 
 package org.apache.shindig.gadgets.spec;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class ViewTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");

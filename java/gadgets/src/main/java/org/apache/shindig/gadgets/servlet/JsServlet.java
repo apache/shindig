@@ -29,9 +29,7 @@ import org.apache.shindig.gadgets.RenderingContext;
 import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;

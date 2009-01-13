@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class UserPrefs {

@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 
 import java.util.Collections;
 

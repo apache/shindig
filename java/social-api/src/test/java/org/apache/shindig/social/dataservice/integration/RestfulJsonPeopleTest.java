@@ -48,6 +48,8 @@ import java.util.Map;
 public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
 
+  @SuppressWarnings({ "unchecked", "boxing" })
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     NameImpl name = new NameImpl("Sir Shin H. Digg Social Butterfly");
@@ -200,6 +202,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    *
    * @throws Exception if test encounters an error
    */
+  @SuppressWarnings("boxing")
   @Test
   public void testGetPersonJson() throws Exception {
     // TODO(doll): Test all of the date fields
@@ -406,6 +409,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertEquals(list.get(0), actual.getString(0));
   }
 
+  @SuppressWarnings("unchecked")
   private void assertEnumField(JSONObject result, Enum expected,
       Person.Field field) throws JSONException {
     JSONObject actual = result.getJSONObject(field.toString());

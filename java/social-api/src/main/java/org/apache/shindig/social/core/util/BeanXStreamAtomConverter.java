@@ -46,6 +46,7 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
    *
    * @see org.apache.shindig.social.core.util.BeanXStreamConverter#getContentType()
    */
+  @Override
   public String getContentType() {
     return "application/atom+xml";
   }
@@ -63,7 +64,7 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
         .get(XStreamConfiguration.ConverterSet.DEFAULT);
     cc.mapper.setBaseObject(af); // thread safe method
     String result = cc.xstream.toXML(af);
-    
+
     return result;
   }
 

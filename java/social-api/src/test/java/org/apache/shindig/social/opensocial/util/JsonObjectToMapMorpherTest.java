@@ -17,19 +17,23 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.apache.shindig.social.core.util.JsonObjectToMapMorpher;
+import java.util.List;
+import java.util.Map;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.ObjectMorpher;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
+import org.apache.shindig.social.core.util.JsonObjectToMapMorpher;
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tests the JsonObjectMapMorpher

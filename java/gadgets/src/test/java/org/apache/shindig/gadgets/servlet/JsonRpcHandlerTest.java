@@ -228,8 +228,8 @@ public class JsonRpcHandlerTest {
   }
 
   private static class FakeProcessor extends Processor {
-    private final Map<URI, ProcessingException> exceptions = Maps.newHashMap();
-    private final Map<URI, String> gadgets = Maps.newHashMap();
+    protected final Map<URI, ProcessingException> exceptions = Maps.newHashMap();
+    protected final Map<URI, String> gadgets = Maps.newHashMap();
 
     public FakeProcessor() {
       super(null, null, null, null);
@@ -256,8 +256,11 @@ public class JsonRpcHandlerTest {
   }
 
   private static class FakeUrlGenerator implements UrlGenerator {
-    private boolean throwRandomFault = false;
-    private String iframeUrl = "http://example.org/gadgets/foo-does-not-matter";
+    protected boolean throwRandomFault = false;
+    protected String iframeUrl = "http://example.org/gadgets/foo-does-not-matter";
+
+    protected FakeUrlGenerator() {
+    }
 
     public String getBundledJsParam(Collection<String> features, GadgetContext context) {
       throw new UnsupportedOperationException();

@@ -30,7 +30,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.Set;
 
 /**

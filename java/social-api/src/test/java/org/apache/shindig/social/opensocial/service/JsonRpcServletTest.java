@@ -111,9 +111,9 @@ public class JsonRpcServletTest extends EasyMockTestCase {
         "{id:id,error:{message:'notImplemented: The service junk is not implemented',code:501}}");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(EasyMock.eq(err.toString()));
-    EasyMock.expectLastCall();
+    org.easymock.EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(org.easymock.EasyMock.eq(err.toString()));
+    org.easymock.EasyMock.expectLastCall();
 
     EasyMock.replay(req, res, jsonConverter, writerMock);
     servlet.service(req, res);
@@ -128,17 +128,17 @@ public class JsonRpcServletTest extends EasyMockTestCase {
    */
   public void testFailedRequest() throws Exception {
     setupRequest("{id:id,method:appdata.get}");
-    EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RpcRequestItem.class)));
-    EasyMock.expectLastCall().andReturn(
+    org.easymock.EasyMock.expect(appDataHandler.handleItem(org.easymock.EasyMock.isA(RpcRequestItem.class)));
+    org.easymock.EasyMock.expectLastCall().andReturn(
         ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
 
     JSONObject err = new JSONObject(
         "{id:id,error:{message:'internalError: FAILED',code:500}}");
 
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(EasyMock.eq(err.toString()));
-    EasyMock.expectLastCall();
+    org.easymock.EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(org.easymock.EasyMock.eq(err.toString()));
+    org.easymock.EasyMock.expectLastCall();
 
     EasyMock.replay(req, res, appDataHandler, jsonConverter, writerMock);
     servlet.service(req, res);
@@ -152,19 +152,19 @@ public class JsonRpcServletTest extends EasyMockTestCase {
 
     String resultObject = "my lovely json";
 
-    EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(resultObject));
+    org.easymock.EasyMock.expect(handler.handleItem(org.easymock.EasyMock.isA(RequestItem.class)));
+    org.easymock.EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(resultObject));
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+    org.easymock.EasyMock.expect(jsonConverter.convertToJson(resultObject))
         .andReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONObject result = new JSONObject();
     result.put("id", "id");
     result.put("data", ImmutableMap.of("foo", "bar"));
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(EasyMock.eq(result.toString()));
-    EasyMock.expectLastCall();
+    org.easymock.EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(org.easymock.EasyMock.eq(result.toString()));
+    org.easymock.EasyMock.expectLastCall();
 
     EasyMock.replay(req, res, handler, jsonConverter, writerMock);
     servlet.service(req, res);
@@ -179,19 +179,19 @@ public class JsonRpcServletTest extends EasyMockTestCase {
 
     String resultObject = "my lovely json";
     Future<?> responseItemFuture = ImmediateFuture.newInstance(resultObject);
-    EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(responseItemFuture);
-    EasyMock.expect(activityHandler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(responseItemFuture);
+    org.easymock.EasyMock.expect(peopleHandler.handleItem(org.easymock.EasyMock.isA(RequestItem.class)));
+    org.easymock.EasyMock.expectLastCall().andReturn(responseItemFuture);
+    org.easymock.EasyMock.expect(activityHandler.handleItem(org.easymock.EasyMock.isA(RequestItem.class)));
+    org.easymock.EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+    org.easymock.EasyMock.expect(jsonConverter.convertToJson(resultObject))
         .andStubReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONArray result = new JSONArray("[{id:'1',data:{foo:'bar'}}," + "{id:'2',data:{foo:'bar'}}]");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(EasyMock.eq(result.toString()));
-    EasyMock.expectLastCall();
+    org.easymock.EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(org.easymock.EasyMock.eq(result.toString()));
+    org.easymock.EasyMock.expectLastCall();
 
     EasyMock.replay(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
     servlet.service(req, res);
@@ -200,27 +200,27 @@ public class JsonRpcServletTest extends EasyMockTestCase {
   }
 
   public void testGetExecution() throws Exception {
-    EasyMock.expect(req.getParameterMap()).andStubReturn(
+    org.easymock.EasyMock.expect(req.getParameterMap()).andStubReturn(
         ImmutableMap.of("method", new String[]{"people.get"}, "id", new String[]{"1"}));
-    EasyMock.expect(req.getMethod()).andStubReturn("GET");
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    org.easymock.EasyMock.expect(req.getMethod()).andStubReturn("GET");
+    org.easymock.EasyMock.expect(req.getAttribute(org.easymock.EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    org.easymock.EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
 
     String resultObject = "my lovely json";
 
     Future<?> responseItemFuture = ImmediateFuture.newInstance(resultObject);
-    EasyMock.expect(peopleHandler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(responseItemFuture);
+    org.easymock.EasyMock.expect(peopleHandler.handleItem(org.easymock.EasyMock.isA(RequestItem.class)));
+    org.easymock.EasyMock.expectLastCall().andReturn(responseItemFuture);
 
-    EasyMock.expect(jsonConverter.convertToJson(resultObject))
+    org.easymock.EasyMock.expect(jsonConverter.convertToJson(resultObject))
         .andReturn(new JSONObject(ImmutableMap.of("foo", "bar")));
 
     JSONObject result = new JSONObject("{id:'1',data:{foo:'bar'}}");
     PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(EasyMock.eq(result.toString()));
-    EasyMock.expectLastCall();
+    org.easymock.EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(org.easymock.EasyMock.eq(result.toString()));
+    org.easymock.EasyMock.expectLastCall();
 
     EasyMock.replay(req, res, peopleHandler, activityHandler, jsonConverter, writerMock);
     servlet.service(req, res);
@@ -237,10 +237,10 @@ public class JsonRpcServletTest extends EasyMockTestCase {
       }
     };
 
-    EasyMock.expect(req.getInputStream()).andStubReturn(stream);
-    EasyMock.expect(req.getMethod()).andStubReturn("POST");
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    org.easymock.EasyMock.expect(req.getInputStream()).andStubReturn(stream);
+    org.easymock.EasyMock.expect(req.getMethod()).andStubReturn("POST");
+    org.easymock.EasyMock.expect(req.getAttribute(org.easymock.EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    org.easymock.EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
     res.setContentType("application/json");
   }

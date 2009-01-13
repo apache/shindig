@@ -51,9 +51,9 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
   private static final String PRELOAD_HREF = "http://www.example.org/file";
   private static final String PRELOAD_HREF2 = "http://www.example.org/file-two";
   private static final String PRELOAD_CONTENT = "Preloaded data";
-  private static final Map<String, String> PRELOAD_METADATA = ImmutableMap.of("foo", "bar");
-  private final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
-  private final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
+  protected static final Map<String, String> PRELOAD_METADATA = ImmutableMap.of("foo", "bar");
+  protected final RecordingHttpFetcher plainFetcher = new RecordingHttpFetcher();
+  protected final RecordingHttpFetcher oauthFetcher = new RecordingHttpFetcher();
 
   private final RequestPipeline requestPipeline = new RequestPipeline() {
     public HttpResponse execute(HttpRequest request) {
@@ -215,7 +215,10 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {
-    private final List<HttpRequest> requests = Lists.newArrayList();
+    protected final List<HttpRequest> requests = Lists.newArrayList();
+
+    protected RecordingHttpFetcher() {
+    }
 
     public HttpResponse fetch(HttpRequest request) {
       requests.add(request);

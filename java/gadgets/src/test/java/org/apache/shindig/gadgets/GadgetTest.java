@@ -60,6 +60,9 @@ public class GadgetTest {
     public String view = super.getView();
     public String container = super.getContainer();
 
+    protected DummyContext() {
+    }
+
     @Override
     public String getView() {
       return view;

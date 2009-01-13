@@ -81,6 +81,6 @@ public class RenderingResults {
   }
 
   public enum Status {
-    OK, MUST_REDIRECT, ERROR;
+    OK, MUST_REDIRECT, ERROR
   }
 }

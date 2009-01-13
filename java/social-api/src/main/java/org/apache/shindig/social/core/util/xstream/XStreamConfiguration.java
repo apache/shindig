@@ -33,8 +33,8 @@ import java.util.Map;
 @ImplementedBy(XStream081Configuration.class)
 public interface XStreamConfiguration {
   public static enum ConverterSet {
-    MAP(), COLLECTION(), DEFAULT();
-  };
+    MAP(), COLLECTION(), DEFAULT()
+  }
 
   public class ConverterConfig {
     public InterfaceClassMapper mapper;

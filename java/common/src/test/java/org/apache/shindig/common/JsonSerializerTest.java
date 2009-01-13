@@ -230,6 +230,7 @@ public class JsonSerializerTest {
     return jsonEquals(new JSONObject(reference), new JSONObject(comparison));
   }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     int iterations = args.length > 0 ? Integer.parseInt(args[0]) : 1000;
     System.out.println("Running tests with " + iterations + " iterations.");

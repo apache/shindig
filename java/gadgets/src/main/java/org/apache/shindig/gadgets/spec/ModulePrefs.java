@@ -30,10 +30,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -544,6 +542,9 @@ public class ModulePrefs {
    */
   private class PreloadVisitor implements ElementVisitor {
     private final List<Preload> preloaded = Lists.newLinkedList();
+
+    protected PreloadVisitor() {
+    }
 
     public void visit(Element element) throws SpecParserException {
       Preload preload = new Preload(element, base);

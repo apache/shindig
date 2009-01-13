@@ -24,7 +24,12 @@ import org.apache.shindig.gadgets.GadgetException;
 import com.google.inject.Inject;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -47,7 +52,8 @@ public class ConcatProxyServlet extends InjectedServlet {
     this.proxyHandler = proxyHandler;
   }
 
-  @Override
+  @SuppressWarnings("boxing")
+@Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     if (request.getHeader("If-Modified-Since") != null) {
@@ -127,14 +133,14 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     private final String url;
 
-    private RequestWrapper(HttpServletRequest httpServletRequest, String url) {
+    protected RequestWrapper(HttpServletRequest httpServletRequest, String url) {
       super(httpServletRequest);
       this.url = url;
     }
 
     @Override
     public String getParameter(String paramName) {
-      if (ProxyHandler.URL_PARAM.equals(paramName)) {
+      if (ProxyBase.URL_PARAM.equals(paramName)) {
         return url;
       }
       return super.getParameter(paramName);
@@ -152,7 +158,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     private int errorCode = SC_OK;
     private String errorMessage;
 
-    private ResponseWrapper(HttpServletResponse httpServletResponse) {
+    protected ResponseWrapper(HttpServletResponse httpServletResponse) {
       super(httpServletResponse);
     }
 
@@ -265,6 +271,11 @@ public class ConcatProxyServlet extends InjectedServlet {
    * there's no output.
    */
   private static class NullServletOutputStream extends ServletOutputStream {
+
+    protected NullServletOutputStream() {
+    }
+
+    @Override
     public void write(int b) throws IOException {
     }
 

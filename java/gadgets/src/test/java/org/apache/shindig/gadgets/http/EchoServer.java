@@ -34,7 +34,7 @@ import java.io.OutputStream;
  * A server that echoes back whatever you send to it.
  */
 public class EchoServer extends FakeHttpServer {
-  
+
   public static final String STATUS_PARAM = "status";
   public static final String BODY_PARAM = "body";
   public static final String HEADER_PARAM = "header";
@@ -44,16 +44,18 @@ public class EchoServer extends FakeHttpServer {
     ServletHolder servletHolder = new ServletHolder(new EchoServlet());
     context.addServlet(servletHolder, "/*");
   }
-  
+
   private static class EchoServlet extends HttpServlet {
 
-    @SuppressWarnings("unused")
+    protected EchoServlet() {
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
         throws ServletException, IOException {
       handleEcho(req, resp);
     }
-    
+
     private void handleEcho(HttpServletRequest req, HttpServletResponse resp)
         throws IOException {
       int code = HttpServletResponse.SC_OK;
@@ -61,7 +63,7 @@ public class EchoServer extends FakeHttpServer {
         code = Integer.parseInt(req.getParameter(STATUS_PARAM));
       }
       resp.setStatus(code);
-      
+
       String[] headers = req.getParameterValues(HEADER_PARAM);
       if (headers != null) {
         for (String header : headers) {
@@ -69,15 +71,15 @@ public class EchoServer extends FakeHttpServer {
           resp.setHeader(nameAndValue[0], nameAndValue[1]);
         }
       }
-      
+
       resp.setHeader("X-Method", req.getMethod());
-      
+
       String body = req.getParameter(BODY_PARAM);
       if (body != null) {
         resp.getWriter().print(body);
       } else {
         resp.setHeader("Content-Type", "application/octet-stream");
-        
+
         // Read the input stream into memory
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         InputStream is = req.getInputStream();
@@ -86,7 +88,7 @@ public class EchoServer extends FakeHttpServer {
         while ((len = is.read(buf)) > 0) {
           baos.write(buf, 0, len);
         }
-        
+
         // Echo the bytes back to the output stream
         OutputStream os = resp.getOutputStream();
         ByteArrayInputStream bais = new ByteArrayInputStream(
@@ -95,7 +97,7 @@ public class EchoServer extends FakeHttpServer {
           os.write(buf, 0, len);
         }
       }
-    } 
+    }
   }
 
 }

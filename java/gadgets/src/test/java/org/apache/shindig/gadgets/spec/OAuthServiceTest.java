@@ -119,10 +119,10 @@ public class OAuthServiceTest {
   public void testParseService() throws Exception {
     String xml = "" +
         "<Service name='thename'>" +
-    	"   <Request url='http://request.example.com/foo'/>" +
-    	"   <Access url='http://access.example.com/bar'/>" +
-    	"   <Authorization url='http://azn.example.com/quux'/>" +
-    	"</Service>";
+        "   <Request url='http://request.example.com/foo'/>" +
+        "   <Access url='http://access.example.com/bar'/>" +
+        "   <Authorization url='http://azn.example.com/quux'/>" +
+        "</Service>";
     OAuthService s = new OAuthService(XmlUtil.parse(xml), SPEC_URL);
     assertEquals("thename", s.getName());
     assertEquals(OAuthService.Location.HEADER, s.getAccessUrl().location);

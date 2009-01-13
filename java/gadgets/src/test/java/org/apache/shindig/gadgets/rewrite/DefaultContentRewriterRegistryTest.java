@@ -26,7 +26,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Lists;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +37,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private List<ContentRewriter> contentRewriters;
   private ContentRewriterRegistry registry;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
@@ -88,7 +89,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     assertTrue("First rewriter invoked.", rewriters.get(0).viewWasRewritten());
     assertTrue("Second rewriter invoked.", rewriters.get(1).viewWasRewritten());
 
-    assertEquals(body, rewritten); 
+    assertEquals(body, rewritten);
   }
 
   /**

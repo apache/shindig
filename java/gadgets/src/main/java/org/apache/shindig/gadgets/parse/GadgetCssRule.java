@@ -21,8 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +33,7 @@ import java.util.Set;
 public class GadgetCssRule {
   private final List<String> selectors;
   private final Map<String, String> declarations;
-  
+
   /**
    * Create a new {@code GadgetCssRule} from a {@code ParsedCssRule}
    * @param source Parsed CSS rule
@@ -45,13 +43,13 @@ public class GadgetCssRule {
     for (String selector : source.getSelectors()) {
       addSelector(selector, null);
     }
-    
+
     // Last decl with a given key "wins" - duplicates are therefore ignored.
     for (ParsedCssDeclaration decl : source.getDeclarations()) {
       setDeclaration(decl.getName(), decl.getValue());
     }
   }
-  
+
   /**
    * Create a new, blank rule. At least one selector must be added
    * for the rule to be valid (and serializable).
@@ -60,7 +58,7 @@ public class GadgetCssRule {
     selectors = Lists.newLinkedList();
     declarations = Maps.newHashMap();
   }
-  
+
   /**
    * Adds a new selector after the provided entry. Selector order in a given
    * rule is significant in CSS.
@@ -85,7 +83,7 @@ public class GadgetCssRule {
     }
     return true;
   }
-  
+
   /**
    * @param selector Selector to remove
    * @return Whether or not the selector was present and removed
@@ -101,14 +99,14 @@ public class GadgetCssRule {
   public boolean hasSelector(String selector) {
     return selectors.contains(selector);
   }
-  
+
   /**
    * @return Unmodifiable list of selectors
    */
   public List<String> getSelectors() {
     return Collections.unmodifiableList(selectors);
   }
-  
+
   /**
    * Add a declaration by key/value. Key is trimmed.
    * @param key Declaration key, either new or replaced
@@ -127,7 +125,7 @@ public class GadgetCssRule {
     key = key.trim();
     return declarations.remove(key) != null;
   }
-  
+
   /**
    * Get a given declaration's value by key.
    * @param key Key for the declaration
@@ -137,7 +135,7 @@ public class GadgetCssRule {
     key = key.trim();
     return declarations.get(key);
   }
-  
+
   /**
    * @return Unmodifiable set of existing declaration keys.
    */

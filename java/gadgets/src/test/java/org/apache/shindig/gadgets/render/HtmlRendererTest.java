@@ -224,6 +224,9 @@ public class HtmlRendererTest {
   private static class FakeHttpCache extends AbstractHttpCache {
     private final Map<String, HttpResponse> map = Maps.newHashMap();
 
+    protected FakeHttpCache() {
+    }
+
     @Override
     protected void addResponseImpl(String key, HttpResponse response) {
       map.put(key, response);
@@ -241,10 +244,13 @@ public class HtmlRendererTest {
   }
 
   private static class FakeRequestPipeline implements RequestPipeline {
-    private final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
-    private final Map<Uri, HttpResponse> signedResponses = Maps.newHashMap();
-    private final Map<Uri, HttpResponse> oauthResponses = Maps.newHashMap();
+    protected final Map<Uri, HttpResponse> plainResponses = Maps.newHashMap();
+    protected final Map<Uri, HttpResponse> signedResponses = Maps.newHashMap();
+    protected final Map<Uri, HttpResponse> oauthResponses = Maps.newHashMap();
     private HttpRequest lastHttpRequest;
+
+    protected FakeRequestPipeline() {
+    }
 
     public HttpResponse execute(HttpRequest request) throws GadgetException {
       lastHttpRequest = request;
@@ -297,8 +303,11 @@ public class HtmlRendererTest {
   }
 
   private static class FakePreloaderService implements PreloaderService {
-    private boolean wasPreloaded;
-    Preloads preloads;
+    protected boolean wasPreloaded;
+    protected Preloads preloads;
+
+    protected FakePreloaderService() {
+    }
 
     public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
       wasPreloaded = true;
@@ -323,7 +332,10 @@ public class HtmlRendererTest {
   }
 
   private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
-    private boolean wasRewritten = false;
+    protected boolean wasRewritten = false;
+
+    protected FakeContentRewriterRegistry() {
+    }
 
     public String rewriteGadget(Gadget gadget, View currentView) {
       throw new UnsupportedOperationException();

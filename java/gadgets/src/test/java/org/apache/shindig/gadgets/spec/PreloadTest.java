@@ -31,8 +31,6 @@ import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -88,7 +86,7 @@ public class PreloadTest {
   @Test
   public void multipleViews() throws Exception {
     String xml = "<Preload href='" + HREF + '\'' +
-    		     " views='" + StringUtils.join(VIEWS, ',') + "'/>";
+                 " views='" + StringUtils.join(VIEWS, ',') + "'/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml), SPEC_URL);
 
@@ -135,10 +133,10 @@ public class PreloadTest {
   @Test
   public void toStringIsSane() throws Exception {
     String xml = "<Preload" +
-    		     " href='" + HREF + '\'' +
-    		     " authz='signed'" +
-    		     " views='" + StringUtils.join(VIEWS, ',') + "'" +
-    		     " some_attribute='yes' />";
+                 " href='" + HREF + '\'' +
+                 " authz='signed'" +
+                 " views='" + StringUtils.join(VIEWS, ',') + "'" +
+                 " some_attribute='yes' />";
 
     Preload preload = new Preload(XmlUtil.parse(xml), SPEC_URL);
     Preload preload2 = new Preload(XmlUtil.parse(preload.toString()), SPEC_URL);

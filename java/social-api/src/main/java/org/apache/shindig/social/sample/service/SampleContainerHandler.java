@@ -49,6 +49,7 @@ public class SampleContainerHandler extends DataRequestHandler {
   /**
    * We don't support any delete methods right now.
    */
+  @Override
   protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
     throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, null);
   }
@@ -56,6 +57,7 @@ public class SampleContainerHandler extends DataRequestHandler {
   /**
    * We don't distinguish between put and post for these urls.
    */
+  @Override
   protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
     return handlePost(request);
   }
@@ -64,6 +66,7 @@ public class SampleContainerHandler extends DataRequestHandler {
    * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}. TODO(doll): These
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
+  @Override
   protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(POST_PATH);
     String type = request.getParameter("type");
@@ -86,6 +89,7 @@ public class SampleContainerHandler extends DataRequestHandler {
   /**
    * Handles /samplecontainer/dumpstate
    */
+  @Override
   protected Future<?> handleGet(RequestItem request) {
     return ImmediateFuture.newInstance(service.getDb());
   }

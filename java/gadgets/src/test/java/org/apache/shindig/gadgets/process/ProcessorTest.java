@@ -44,7 +44,7 @@ public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
-  private static final String GADGET =
+  protected static final String GADGET =
       "<Module>" +
       " <ModulePrefs title='foo'/>" +
       " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
@@ -147,8 +147,11 @@ public class ProcessorTest {
   }
 
   private static class FakeBlacklist implements GadgetBlacklist {
-    private boolean wasChecked;
-    private boolean isBlacklisted;
+    protected boolean wasChecked;
+    protected boolean isBlacklisted;
+
+    protected FakeBlacklist() {
+    }
 
     public boolean isBlacklisted(URI gadgetUri) {
       wasChecked = true;
@@ -157,7 +160,7 @@ public class ProcessorTest {
   }
 
   private static class FakeContainerConfig extends JsonContainerConfig {
-    private final JSONObject json = new JSONObject();
+    protected final JSONObject json = new JSONObject();
 
     public FakeContainerConfig() throws ContainerConfigException {
       super(null);
@@ -170,7 +173,11 @@ public class ProcessorTest {
   }
 
   private static class FakeGadgetSpecFactory implements GadgetSpecFactory {
-    private GadgetException exception;
+    protected GadgetException exception;
+
+    protected FakeGadgetSpecFactory() {
+    }
+
     public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
       if (exception != null) {
         throw exception;
@@ -184,9 +191,9 @@ public class ProcessorTest {
   }
 
   private static class FakeVariableSubstituter extends VariableSubstituter {
-    private boolean wasSubstituted;
+    protected boolean wasSubstituted;
 
-    public FakeVariableSubstituter() {
+    protected FakeVariableSubstituter() {
       super(null);
     }
 

@@ -19,7 +19,6 @@ package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Maps;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
