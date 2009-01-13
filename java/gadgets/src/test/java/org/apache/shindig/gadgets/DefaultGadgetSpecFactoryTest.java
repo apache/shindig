@@ -42,7 +42,7 @@ import java.net.URI;
  * Tests for DefaultGadgetSpecFactory
  */
 public class DefaultGadgetSpecFactoryTest {
-  private final static Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
+  protected final static Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private final static Uri REMOTE_URL = Uri.parse("http://example.org/remote.html");
   private final static String LOCAL_CONTENT = "Hello, local content!";
   private final static String ALT_LOCAL_CONTENT = "Hello, local content!";
@@ -284,7 +284,7 @@ public class DefaultGadgetSpecFactoryTest {
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
   }
 
-  private static class CapturingFetcher implements HttpFetcher {
+  protected static class CapturingFetcher implements HttpFetcher {
     HttpRequest request;
 
     public HttpResponse fetch(HttpRequest request) {

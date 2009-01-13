@@ -33,6 +33,7 @@ import org.apache.shindig.social.opensocial.model.Person;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
@@ -120,15 +121,11 @@ public class BeanXmlConverterTest extends TestCase {
 
   public void xxxtestMapsToXml() throws Exception {
     // This is the structure our app data currently takes
-    Map<String, Map<String, String>> map =
-        new TreeMap<String, Map<String, String>>();
-
-    Map<String, String> item1Map = Maps.newHashMap();
-    item1Map.put("value", "1");
+    Map<String, Map<String, String>> map = Maps.newTreeMap();
+    Map<String, String> item1Map = ImmutableMap.of("value","1");
     map.put("item1", item1Map);
 
-    Map<String, String> item2Map = Maps.newHashMap();
-    item2Map.put("value", "2");
+    Map<String, String> item2Map = ImmutableMap.of("value", "2");
     map.put("item2", item2Map);
 
     String xml = beanXmlConverter.convertToXml(map);

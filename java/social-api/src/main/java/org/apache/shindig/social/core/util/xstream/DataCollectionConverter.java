@@ -28,13 +28,12 @@ import com.thoughtworks.xstream.mapper.Mapper;
 
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
  * This converter changes the way in which a collection is serialized
- * 
+ *
  */
 public class DataCollectionConverter extends AbstractCollectionConverter {
 
@@ -47,7 +46,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#canConvert(java.lang.Class)
    */
   @Override
@@ -58,7 +57,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#marshal(java.lang.Object,
    *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
    *      com.thoughtworks.xstream.converters.MarshallingContext)
@@ -108,7 +107,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#unmarshal(com.thoughtworks.xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
@@ -171,7 +170,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
           fm.put(e.getKey(), (Map<String, String>) e.getValue());
         } else {
           // not certain that this makes sense, but can't see how else.
-	  Map<String, String> mv = Maps.newHashMap();
+          Map<String, String> mv = Maps.newHashMap();
           mv.put(e.getKey(), (String) e.getValue());
           fm.put(e.getKey(), mv);
         }

@@ -65,6 +65,7 @@ public class AtomLinkConverter implements Converter {
    *
    * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
    */
+  @SuppressWarnings("unchecked")
   public boolean canConvert(Class clazz) {
     return AtomLink.class.equals(clazz);
   }

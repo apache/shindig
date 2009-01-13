@@ -215,6 +215,9 @@ public class DefaultMessageBundleFactoryTest {
   private static class CapturingFetcher implements HttpFetcher {
     HttpRequest request;
 
+    protected CapturingFetcher() {
+    }
+
     public HttpResponse fetch(HttpRequest request) {
       this.request = request;
       return new HttpResponse(BASIC_BUNDLE);

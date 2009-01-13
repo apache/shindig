@@ -34,7 +34,6 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class BasicOAuthStore implements OAuthStore {
   private static final String CONSUMER_SECRET_KEY = "consumer_secret";
   private static final String CONSUMER_KEY_KEY = "consumer_key";
   private static final String KEY_TYPE_KEY = "key_type";
-  
+
   /**
    * HashMap of provider and consumer information. Maps BasicOAuthStoreConsumerIndexs (i.e.
    * nickname of a service provider and the gadget that uses that nickname) to
@@ -64,21 +63,21 @@ public class BasicOAuthStore implements OAuthStore {
    * secrets).
    */
   private final Map<BasicOAuthStoreTokenIndex, TokenInfo> tokens;
-  
+
   /**
    * Key to use when no other key is found.
    */
   private BasicOAuthStoreConsumerKeyAndSecret defaultKey;
-  
+
   /** Number of times we looked up a consumer key */
   private int consumerKeyLookupCount = 0;
-  
+
   /** Number of times we looked up an access token */
   private int accessTokenLookupCount = 0;
-  
+
   /** Number of times we added an access token */
   private int accessTokenAddCount = 0;
-  
+
   /** Number of times we removed an access token */
   private int accessTokenRemoveCount = 0;
 
@@ -86,7 +85,7 @@ public class BasicOAuthStore implements OAuthStore {
     consumerInfos = Maps.newHashMap();
     tokens = Maps.newHashMap();
   }
-  
+
   public void initFromConfigString(String oauthConfigStr) throws GadgetException {
     try {
       JSONObject oauthConfigs = new JSONObject(oauthConfigStr);
@@ -116,7 +115,7 @@ public class BasicOAuthStore implements OAuthStore {
       throws JSONException, GadgetException {
     realStoreConsumerInfo(gadgetUri, serviceName, consumerInfo);
   }
-  
+
   private void realStoreConsumerInfo(URI gadgetUri, String serviceName, JSONObject consumerInfo)
       throws JSONException {
     String consumerSecret = consumerInfo.getString(CONSUMER_SECRET_KEY);
@@ -137,12 +136,12 @@ public class BasicOAuthStore implements OAuthStore {
     index.setServiceName(serviceName);
     setConsumerKeyAndSecret(index, kas);
   }
-  
+
   // Support standard openssl keys by stripping out the headers and blank lines
   public static String convertFromOpenSsl(String privateKey) {
     return privateKey.replaceAll("-----[A-Z ]*-----", "").replace("\n", "");
   }
-    
+
   public void setDefaultKey(BasicOAuthStoreConsumerKeyAndSecret defaultKey) {
     this.defaultKey = defaultKey;
   }
@@ -181,7 +180,7 @@ public class BasicOAuthStore implements OAuthStore {
     }
     return new ConsumerInfo(consumer, cks.getKeyName());
   }
-  
+
   private BasicOAuthStoreTokenIndex makeBasicOAuthStoreTokenIndex(
       SecurityToken securityToken, String serviceName, String tokenName) {
     BasicOAuthStoreTokenIndex tokenKey = new BasicOAuthStoreTokenIndex();
@@ -214,7 +213,7 @@ public class BasicOAuthStore implements OAuthStore {
     ++accessTokenRemoveCount;
     BasicOAuthStoreTokenIndex tokenKey =
         makeBasicOAuthStoreTokenIndex(securityToken, serviceName, tokenName);
-    tokens.remove(tokenKey);    
+    tokens.remove(tokenKey);
   }
 
   public int getConsumerKeyLookupCount() {

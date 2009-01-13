@@ -41,11 +41,12 @@ public class JsonConversionUtil {
 
   private static final Set<String> RESERVED_PARAMS = ImmutableSet.of("method", "id", "st");
 
+  @SuppressWarnings("unchecked")
   public static JSONObject fromRequest(HttpServletRequest request) throws JSONException {
     //String methodName = request.getPathInfo().replaceAll("/", "");
 
     JSONObject root = new JSONObject();
-    Map<String, String[]> params = (Map<String, String[]>) request.getParameterMap();
+    Map<String, String[]> params = request.getParameterMap();
     root.put("method", params.get("method")[0]);
     if (params.containsKey("id")) {
       root.put("id", params.get("id")[0]);
@@ -79,7 +80,7 @@ public class JsonConversionUtil {
 
     if (current instanceof JSONObject) {
       JSONObject json = (JSONObject) current;
-      Iterator keys = json.keys();
+      Iterator<?> keys = json.keys();
       while (keys.hasNext()) {
         String key = (String) keys.next();
         if (json.isNull(key)) {

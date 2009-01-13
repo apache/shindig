@@ -22,8 +22,18 @@ import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xml.serialize.HTMLSerializer;
 import org.apache.xml.serialize.OutputFormat;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import com.google.caja.lexer.*;
+import com.google.caja.lexer.CharProducer;
+import com.google.caja.lexer.HtmlLexer;
+import com.google.caja.lexer.HtmlTokenType;
+import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.ParseException;
+import com.google.caja.lexer.TokenQueue;
 import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.DomTree;
 import com.google.caja.reporting.MessageQueue;
@@ -31,7 +41,7 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.util.Name;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.w3c.dom.*;
+
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -42,6 +52,7 @@ import java.net.URISyntaxException;
 /**
  * Caja-based implementation of a {@code GadgetHtmlParser}.
  */
+@SuppressWarnings("deprecation")
 @Singleton
 public class CajaHtmlParser extends GadgetHtmlParser {
 
@@ -82,7 +93,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     } catch (URISyntaxException e) {
       // Never happens. Dummy URI needed to satisfy API.
       // We may want to pass in the gadget URI for auditing
-      // purposes at some point.                                      
+      // purposes at some point.
     }
     CharProducer producer = CharProducer.Factory.create(
         new StringReader(content), source);
@@ -140,6 +151,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       outputFormat.setPreserveEmptyAttributes(false);
     }
 
+    @Override
     public String serializeImpl(Document doc) {
       StringWriter sw = createWriter(doc);
       HTMLSerializer serializer = new HTMLSerializer(sw, outputFormat);

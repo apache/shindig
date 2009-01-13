@@ -18,12 +18,21 @@
  */
 package org.apache.shindig.gadgets.rewrite.lexer;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Map;
+
 import org.apache.shindig.common.uri.Uri;
 
-import com.google.caja.lexer.*;
-
-import java.io.*;
-import java.util.Map;
+import com.google.caja.lexer.CharProducer;
+import com.google.caja.lexer.HtmlLexer;
+import com.google.caja.lexer.HtmlTokenType;
+import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.ParseException;
+import com.google.caja.lexer.Token;
 
 /**
  * Rewrites an HTML content block

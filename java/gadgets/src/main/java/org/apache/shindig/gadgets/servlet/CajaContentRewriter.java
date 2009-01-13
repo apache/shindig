@@ -18,6 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.logging.Logger;
+
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -29,18 +36,15 @@ import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FilePosition;
 import com.google.caja.lexer.InputSource;
-import com.google.caja.opensocial.*;
+import com.google.caja.opensocial.DefaultGadgetRewriter;
+import com.google.caja.opensocial.GadgetRewriteException;
+import com.google.caja.opensocial.UriCallback;
+import com.google.caja.opensocial.UriCallbackException;
+import com.google.caja.opensocial.UriCallbackOption;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.logging.Logger;
 
 public class CajaContentRewriter implements ContentRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
@@ -98,7 +102,7 @@ public class CajaContentRewriter implements ContentRewriter {
       } catch (IOException e) {
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
-      }      
+      }
       content.setContent(tameCajaClientApi() + output.toString());
     }
     return null;
@@ -109,7 +113,7 @@ public class CajaContentRewriter implements ContentRewriter {
       "opensocial.Container.get().enableCaja();" +
       "</script>";
   }
-  
+
   private void throwCajolingException(Exception cause, MessageQueue mq) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();

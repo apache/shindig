@@ -17,15 +17,24 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.common.uri.Uri;
-
-import com.google.caja.lexer.*;
-import com.google.common.collect.Lists;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.shindig.common.uri.Uri;
+
+import com.google.caja.lexer.CharProducer;
+import com.google.caja.lexer.CssLexer;
+import com.google.caja.lexer.CssTokenType;
+import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.ParseException;
+import com.google.caja.lexer.Token;
+import com.google.common.collect.Lists;
 
 /**
  * Support rewriting links in CSS

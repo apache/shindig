@@ -63,10 +63,10 @@ public class EndToEndServer {
   private final Server server;
 
   /** Fake error code for data service servlet request */
-  private int errorCode;
+  protected int errorCode;
 
   /** Fake error message for data service servlet request */
-  private String errorMessage;
+  protected String errorMessage;
 
   public EndToEndServer() throws Exception {
     server = createServer(JETTY_PORT);

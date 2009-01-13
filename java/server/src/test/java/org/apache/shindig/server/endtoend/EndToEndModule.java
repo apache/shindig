@@ -24,8 +24,6 @@ import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.BeanXmlConverter;
-import org.apache.shindig.social.core.util.BeanAtomConverter;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 

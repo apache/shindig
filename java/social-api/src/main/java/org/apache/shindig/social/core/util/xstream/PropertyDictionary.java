@@ -26,7 +26,6 @@ import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PropertyDictionary {
 
-  private final Map<String, Map<String, BeanProperty>> keyedByPropertyNameCache = new ConcurrentHashMap<String, Map<String, BeanProperty>>();
+  private final Map<String, Map<String, BeanProperty>> keyedByPropertyNameCache = Maps.newConcurrentHashMap();
 
   public Iterator<BeanProperty> serializablePropertiesFor(Class<?> cls) {
     return buildMap(cls).values().iterator();
@@ -49,15 +48,14 @@ public class PropertyDictionary {
 
   /**
    * Locates a serializable property
-   * 
+   *
    * @param cls
    * @param name
-   * @param definedIn
    * @return
    */
   public BeanProperty property(Class<?> cls, String name) {
     Map<String, BeanProperty> properties = buildMap(cls);
-    BeanProperty property = (BeanProperty) properties.get(name);
+    BeanProperty property = properties.get(name);
     if (property == null) {
       throw new ObjectAccessException("No such property " + cls.getName() + "."
           + name);
@@ -68,9 +66,8 @@ public class PropertyDictionary {
 
   /**
    * Builds the map of all serializable properties for the the provided bean
-   * 
+   *
    * @param cls
-   * @param tupleKeyed
    * @return
    */
   private Map<String, BeanProperty> buildMap(Class<?> cls) {
@@ -85,15 +82,15 @@ public class PropertyDictionary {
           final Map<PropertyKey, BeanProperty> propertyMap = Maps.newHashMap();
           Method[] methods = cls.getMethods();
 
-          for (int i = 0; i < methods.length; i++) {
-            if (!Modifier.isPublic(methods[i].getModifiers())
-                || Modifier.isStatic(methods[i].getModifiers())) {
+          for (Method method : methods) {
+            if (!Modifier.isPublic(method.getModifiers())
+                || Modifier.isStatic(method.getModifiers())) {
               continue;
             }
 
-            String methodName = methods[i].getName();
-            Class<?>[] parameters = methods[i].getParameterTypes();
-            Class<?> returnType = methods[i].getReturnType();
+            String methodName = method.getName();
+            Class<?>[] parameters = method.getParameterTypes();
+            Class<?> returnType = method.getReturnType();
             String propertyName = null;
             if ((methodName.startsWith("get") || methodName.startsWith("is"))
                 && parameters.length == 0 && returnType != null) {
@@ -105,13 +102,13 @@ public class PropertyDictionary {
                     .substring(2));
               BeanProperty property = getBeanProperty(propertyMap, cls,
                   propertyName, returnType);
-              property.setGetterMethod(methods[i]);
+              property.setGetterMethod(method);
             } else if (methodName.startsWith("set") && parameters.length == 1
                 && returnType.equals(void.class)) {
               propertyName = Introspector.decapitalize(methodName.substring(3));
               BeanProperty property = getBeanProperty(propertyMap, cls,
                   propertyName, parameters[0]);
-              property.setSetterMethod(methods[i]);
+              property.setSetterMethod(method);
             }
           }
 
@@ -127,7 +124,7 @@ public class PropertyDictionary {
               .sort(serializableProperties, new BeanPropertyComparator());
 
           // build the maps and return
-          final Map<String, BeanProperty> keyedByFieldName = new OrderRetainingMap();
+          final Map<String, BeanProperty> keyedByFieldName = new OrderRetainingMap<String, BeanProperty>();
           for (BeanProperty property : serializableProperties) {
             keyedByFieldName.put(property.getName(), property);
           }
@@ -136,14 +133,14 @@ public class PropertyDictionary {
         }
       }
     }
-    return (Map<String, BeanProperty>) keyedByPropertyNameCache.get(clsName);
+    return keyedByPropertyNameCache.get(clsName);
   }
 
   private BeanProperty getBeanProperty(
       Map<PropertyKey, BeanProperty> propertyMap, Class<?> cls,
       String propertyName, Class<?> type) {
     PropertyKey key = new PropertyKey(propertyName, type);
-    BeanProperty property = (BeanProperty) propertyMap.get(key);
+    BeanProperty property = propertyMap.get(key);
     if (property == null) {
       property = new BeanProperty(cls, propertyName, type);
       propertyMap.put(key, property);
@@ -165,6 +162,7 @@ public class PropertyDictionary {
       this.propertyType = propertyType;
     }
 
+    @Override
     public boolean equals(Object o) {
       if (this == o)
         return true;
@@ -183,6 +181,7 @@ public class PropertyDictionary {
       return true;
     }
 
+    @Override
     public int hashCode() {
       int result;
       result = (propertyName != null ? propertyName.hashCode() : 0);
@@ -191,6 +190,7 @@ public class PropertyDictionary {
       return result;
     }
 
+    @Override
     public String toString() {
       return "PropertyKey{propertyName='" + propertyName + "'"
           + ", propertyType=" + propertyType + "}";
@@ -204,6 +204,10 @@ public class PropertyDictionary {
   private static class BeanPropertyComparator implements
       Comparator<BeanProperty> {
 
+    protected BeanPropertyComparator()
+    {
+    }
+
     public int compare(BeanProperty o1, BeanProperty o2) {
       return o1.getName().compareTo(o2.getName());
     }
@@ -214,11 +218,17 @@ public class PropertyDictionary {
     private static final long serialVersionUID = 1565370254073638221L;
     private List<V> valueOrder = Lists.newArrayList();
 
+    protected OrderRetainingMap()
+    {
+    }
+
+    @Override
     public V put(K key, V value) {
       valueOrder.add(value);
       return super.put(key, value);
     }
 
+    @Override
     public Collection<V> values() {
       return Collections.unmodifiableList(valueOrder);
     }

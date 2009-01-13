@@ -47,6 +47,8 @@ import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
 import org.apache.shindig.social.opensocial.model.Enum.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 
+import com.google.common.collect.Maps;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,7 +202,7 @@ public class SpiDatabaseBootstrap {
     ApplicationDataMapDb applicationDataMap = new ApplicationDataMapDb();
     applicationDataMap.setApplication(application);
     applicationDataMap.setPersonId(personId);    
-    Map<String, String> values = new ConcurrentHashMap<String, String>();
+    Map<String, String> values = Maps.newConcurrentHashMap();
     if (null != count) {
       values.put("count", count);
     }
@@ -236,7 +238,7 @@ public class SpiDatabaseBootstrap {
       mediaItems.add(mediaItem2);
       activity.setMediaItems(mediaItems);
       activity.setPostedTime(1111111111L);
-      Map<String, String> templateParams = new ConcurrentHashMap<String, String>();
+      Map<String, String> templateParams = Maps.newConcurrentHashMap();
       templateParams.put("small", "true");
       templateParams.put("otherContent", "and got wet");
       activity.setTemplateParams(templateParams);
@@ -252,7 +254,7 @@ public class SpiDatabaseBootstrap {
       List<MediaItem> mediaItems = new ArrayList<MediaItem>();
       activity.setMediaItems(mediaItems);
       activity.setPostedTime(1111111112L);
-      Map<String, String> templateParams = new ConcurrentHashMap<String, String>();
+      Map<String, String> templateParams = Maps.newConcurrentHashMap();
       templateParams.put("small", "true");
       templateParams.put("otherContent", "and went fast");
       activity.setTemplateParams(templateParams);
@@ -285,7 +287,7 @@ public class SpiDatabaseBootstrap {
     activity.setStreamSourceUrl("");
     activity.setStreamTitle("");
     activity.setStreamUrl("");
-    Map<String, String> templateParams = new ConcurrentHashMap<String, String>();
+    Map<String, String> templateParams = Maps.newConcurrentHashMap();
     activity.setTemplateParams(templateParams);
     activity.setTitle("");
     activity.setTitleId("");

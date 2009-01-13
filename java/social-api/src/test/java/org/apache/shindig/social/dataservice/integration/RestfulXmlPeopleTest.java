@@ -55,6 +55,8 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
   private XPathFactory xpathFactory;
 
+  @SuppressWarnings({ "boxing", "unchecked" })
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     xpathFactory = XPathFactory.newInstance();
@@ -214,6 +216,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
    * @throws Exception
    *           if test encounters an error
    */
+  @SuppressWarnings("boxing")
   @Test
   public void testGetPersonJson() throws Exception {
     // TODO(doll): Test all of the date fields
@@ -228,9 +231,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams,
         "xml", "application/xml");
-    
+
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
-    
+
     XPath xp = xpathFactory.newXPath();
     NodeList resultNodeList = (NodeList) xp.evaluate("/response/person",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
@@ -430,6 +433,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
         .get(0)));
   }
 
+  @SuppressWarnings("boxing")
   private void assertFloatField(Map<String, List<String>> result,
       Float expected, Object field) {
     assertEquals(expected.floatValue(), Float.valueOf(result.get(
@@ -447,7 +451,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
       t = "";
     } else {
       t = v.get(0);
-    } 
+    }
     assertEquals(expected, t);
   }
 
@@ -459,7 +463,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     }
   }
 
-  private void assertEnumField(Map<String, List<Node>> result, Enum expected,
+  private void assertEnumField(Map<String, List<Node>> result, Enum<?> expected,
       Person.Field field) {
     Map<String, List<String>> actual = childNodesToMap(result.get(
         field.toString()).get(0));
@@ -503,9 +507,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     // Currently, for Shindig @all == @friends
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
-    
+
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
-   
+
     XPath xp = xpathFactory.newXPath();
     NodeList resultNodeList = (NodeList) xp.evaluate("/response",
         new InputSource(new StringReader(resp)), XPathConstants.NODESET);
@@ -520,10 +524,10 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
 
     // The users should be in alphabetical order
     Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
-    
+
     assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
-    
+
     Map<String, List<Node>> entryTwo = childNodesToNodeMap(resultNodes.get("entry").get(1));
     assertPerson(childNodesToNodeMap(entryTwo.get("person").get(0)),
         "jane.doe", "Jane Doe");
@@ -557,7 +561,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     assertEquals("0", result.get("startIndex").get(0));
 
     Map<String, List<Node>> entryOne = childNodesToNodeMap(resultNodes.get("entry").get(0));
-    
+
     assertPerson(childNodesToNodeMap(entryOne.get("person").get(0)),
         "george.doe", "George Doe");
 
@@ -565,7 +569,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("startIndex", "1");
     resp = getResponse("/people/john.doe/@friends", "GET", extraParams, "xml",
         "application/xml");
-    
+
     XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
 
     xp = xpathFactory.newXPath();

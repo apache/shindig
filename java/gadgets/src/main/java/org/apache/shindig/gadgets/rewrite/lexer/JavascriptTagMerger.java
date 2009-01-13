@@ -31,7 +31,6 @@ import com.google.caja.lexer.Token;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,7 +72,6 @@ public class JavascriptTagMerger implements HtmlTagTransformer {
     this.relativeUrlBase = relativeUrlBase;
   }
 
-  @SuppressWarnings("unchecked")
   public void accept(Token<HtmlTokenType> token,
       Token<HtmlTokenType> lastToken) {
     try {

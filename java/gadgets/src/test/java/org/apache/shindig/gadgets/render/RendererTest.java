@@ -46,10 +46,10 @@ import java.util.Arrays;
  * Tests for Renderer.
  */
 public class RendererTest {
-  private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
+  protected static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
   private static final String BASIC_HTML_CONTENT = "Hello, World!";
-  private static final String GADGET =
+  protected static final String GADGET =
       "<Module>" +
       " <ModulePrefs title='foo'/>" +
       " <Content view='html' type='html'>" + BASIC_HTML_CONTENT + "</Content>" +
@@ -171,7 +171,7 @@ public class RendererTest {
   }
 
   private static class FakeContainerConfig extends JsonContainerConfig {
-    private final JSONObject json = new JSONObject();
+    protected final JSONObject json = new JSONObject();
 
     public FakeContainerConfig() throws ContainerConfigException {
       super(null);
@@ -184,8 +184,8 @@ public class RendererTest {
   }
 
   private static class FakeHtmlRenderer extends HtmlRenderer {
-    private RenderingException exception;
-    private RuntimeException runtimeException;
+    protected RenderingException exception;
+    protected RuntimeException runtimeException;
 
     public FakeHtmlRenderer() {
       super(null, null, null, null);
@@ -204,7 +204,7 @@ public class RendererTest {
   }
 
   private static class FakeProcessor extends Processor {
-    private ProcessingException exception;
+    protected ProcessingException exception;
 
     public FakeProcessor() {
       super(null, null, null, null);
@@ -229,8 +229,12 @@ public class RendererTest {
   }
 
   private static class FakeLockedDomainService implements LockedDomainService {
-    private boolean wasChecked = false;
-    private boolean canRender = true;
+    protected boolean wasChecked = false;
+    protected boolean canRender = true;
+
+    protected FakeLockedDomainService() {
+    }
+
     public boolean gadgetCanRender(String host, GadgetSpec gadget, String container) {
       wasChecked = true;
       return canRender;

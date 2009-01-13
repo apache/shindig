@@ -27,7 +27,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,7 +50,7 @@ public class OAuthService {
     NodeList children = serviceElement.getChildNodes();
     for (int i=0; i < children.getLength(); ++i) {
       Node child = children.item(i);
-      if (child.getNodeType() != Element.ELEMENT_NODE) {
+      if (child.getNodeType() != Node.ELEMENT_NODE) {
         continue;
       }
       String childName = child.getNodeName();
@@ -209,7 +208,7 @@ public class OAuthService {
 
     public String toString(String element) {
       return '<' + element + " url='" + url.toString() + "' " +
-      		"method='" + method + "' param_location='" + location + "'/>";
+              "method='" + method + "' param_location='" + location + "'/>";
     }
   }
 

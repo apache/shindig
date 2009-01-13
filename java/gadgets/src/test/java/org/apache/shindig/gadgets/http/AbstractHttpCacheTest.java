@@ -39,7 +39,7 @@ import org.junit.Test;
 import java.util.Map;
 
 public class AbstractHttpCacheTest {
-  private static final Uri DEFAULT_URI = Uri.parse("http://example.org/file.txt");
+  protected static final Uri DEFAULT_URI = Uri.parse("http://example.org/file.txt");
   private static final Uri APP_URI = Uri.parse("http://example.org/gadget.xml");
   private static final String MODULE_ID = "100";
   private static final String SERVICE_NAME = "service";
@@ -402,7 +402,7 @@ public class AbstractHttpCacheTest {
   }
 
   private static class TestHttpCache extends AbstractHttpCache {
-    private final Map<String, HttpResponse> map;
+    protected final Map<String, HttpResponse> map;
 
     public TestHttpCache() {
       map = Maps.newHashMap();

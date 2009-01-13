@@ -26,7 +26,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,7 +43,7 @@ public class OAuthSpec {
     NodeList services = element.getElementsByTagName("Service");
     for (int i=0; i < services.getLength(); ++i) {
       Node node = services.item(i);
-      if (node.getNodeType() == Element.ELEMENT_NODE) {
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
         parseService((Element)node, base);
       }
     }

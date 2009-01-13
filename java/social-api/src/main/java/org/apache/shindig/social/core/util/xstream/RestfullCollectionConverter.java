@@ -28,7 +28,7 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 /**
  * This converter changes the way in which a collection is serialized
- * 
+ *
  */
 public class RestfullCollectionConverter extends AbstractCollectionConverter {
 
@@ -41,9 +41,10 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#canConvert(java.lang.Class)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public boolean canConvert(Class clazz) {
     boolean convert = (RestfulCollection.class.isAssignableFrom(clazz));
@@ -52,7 +53,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#marshal(java.lang.Object,
    *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
    *      com.thoughtworks.xstream.converters.MarshallingContext)
@@ -87,7 +88,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#unmarshal(com.thoughtworks.xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */

@@ -18,7 +18,6 @@
 package org.apache.shindig.common.util;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;

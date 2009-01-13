@@ -102,7 +102,7 @@ public class SoftExpiringCache<K, V> {
     public final V obj;
     public final boolean isExpired;
 
-    private CachedObject(V obj, boolean isExpired) {
+    protected CachedObject(V obj, boolean isExpired) {
       this.obj = obj;
       this.isExpired = isExpired;
     }

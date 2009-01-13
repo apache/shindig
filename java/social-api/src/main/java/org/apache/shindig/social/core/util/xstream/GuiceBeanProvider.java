@@ -18,11 +18,12 @@
 package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableMap;
 
 import com.google.inject.Injector;
 
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
-import com.thoughtworks.xstream.core.util.OrderRetainingMap;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -30,16 +31,14 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.WeakHashMap;
 
 /**
- * 
+ *
  */
 public class GuiceBeanProvider {
 
@@ -63,15 +62,13 @@ public class GuiceBeanProvider {
   }
 
   public void visitSerializableProperties(Object object, Visitor visitor) {
-    PropertyDescriptor[] propertyDescriptors = getSerializableProperties(object);
-    for (int i = 0; i < propertyDescriptors.length; i++) {
-      PropertyDescriptor property = propertyDescriptors[i];
+    for (PropertyDescriptor property : getSerializableProperties(object)) {
       try {
         Method readMethod = property.getReadMethod();
         String name = property.getName();
         Class<?> definedIn = readMethod.getDeclaringClass();
         if (visitor.shouldVisit(name, definedIn)) {
-          Object value = readMethod.invoke(object, new Object[0]);
+          Object value = readMethod.invoke(object);
           visitor.visit(name, property.getPropertyType(), definedIn, value);
         }
       } catch (IllegalArgumentException e) {
@@ -90,7 +87,7 @@ public class GuiceBeanProvider {
   public void writeProperty(Object object, String propertyName, Object value) {
     PropertyDescriptor property = getProperty(propertyName, object.getClass());
     try {
-      property.getWriteMethod().invoke(object, new Object[] { value });
+      property.getWriteMethod().invoke(object, value);
     } catch (IllegalArgumentException e) {
       throw new ObjectAccessException("Could not set property "
           + object.getClass() + "." + property.getName(), e);
@@ -111,22 +108,21 @@ public class GuiceBeanProvider {
     return getProperty(name, type) != null;
   }
 
-  private PropertyDescriptor[] getSerializableProperties(Object object) {
+  private List<PropertyDescriptor> getSerializableProperties(Object object) {
     Map<String, PropertyDescriptor> nameMap = getNameMap(object.getClass());
+
+    Set<String> names = (propertyNameComparator == null) ? nameMap.keySet() :
+      ImmutableSortedSet.orderedBy(propertyNameComparator).copyOf(nameMap.keySet());
+
     List<PropertyDescriptor> result = Lists.newArrayListWithExpectedSize(nameMap.size());
-    Set<String> names = nameMap.keySet();
-    if (propertyNameComparator != null) {
-      Set<String> sortedSet = new TreeSet<String>(propertyNameComparator);
-      sortedSet.addAll(names);
-      names = sortedSet;
-    }
+
     for (final String name : names) {
       final PropertyDescriptor descriptor = nameMap.get(name);
       if (canStreamProperty(descriptor)) {
         result.add(descriptor);
       }
     }
-    return result.toArray(new PropertyDescriptor[result.size()]);
+    return result;
   }
 
   protected boolean canStreamProperty(PropertyDescriptor descriptor) {
@@ -140,28 +136,31 @@ public class GuiceBeanProvider {
   }
 
   private PropertyDescriptor getProperty(String name, Class<?> type) {
-    return (PropertyDescriptor) getNameMap(type).get(name);
+    return getNameMap(type).get(name);
   }
 
   private Map<String, PropertyDescriptor> getNameMap(Class<?> type) {
     Map<String, PropertyDescriptor> nameMap = propertyNameCache.get(type);
-    if (nameMap == null) {
-      BeanInfo beanInfo;
-      try {
-        beanInfo = Introspector.getBeanInfo(type, Object.class);
-      } catch (IntrospectionException e) {
-        throw new ObjectAccessException("Cannot get BeanInfo of type "
-            + type.getName(), e);
-      }
-      nameMap = new OrderRetainingMap();
-      propertyNameCache.put(type, nameMap);
-      PropertyDescriptor[] propertyDescriptors = beanInfo
-          .getPropertyDescriptors();
-      for (int i = 0; i < propertyDescriptors.length; i++) {
-        PropertyDescriptor descriptor = propertyDescriptors[i];
-        nameMap.put(descriptor.getName(), descriptor);
-      }
+
+    if (nameMap != null) {
+      return nameMap;
     }
+
+    ImmutableMap.Builder<String,PropertyDescriptor> nameMapBuilder = ImmutableMap.builder();
+
+    BeanInfo beanInfo;
+    try {
+      beanInfo = Introspector.getBeanInfo(type, Object.class);
+    } catch (IntrospectionException e) {
+      throw new ObjectAccessException("Cannot get BeanInfo of type "
+          + type.getName(), e);
+    }
+
+    for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+        nameMapBuilder.put(descriptor.getName(), descriptor);
+    }
+    nameMap = nameMapBuilder.build();
+    propertyNameCache.put(type, nameMap);
     return nameMap;
   }
 

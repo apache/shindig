@@ -85,6 +85,7 @@ public class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will be pulled from the
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(APP_DATA_PATH);

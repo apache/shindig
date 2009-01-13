@@ -30,7 +30,6 @@ import org.apache.shindig.gadgets.UserPrefs;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -230,7 +229,8 @@ public class HttpGadgetContext extends GadgetContext {
    * @param req
    * @return module id, if specified
    */
-  private static Integer getModuleId(HttpServletRequest req) {
+  @SuppressWarnings("boxing")
+private static Integer getModuleId(HttpServletRequest req) {
     String mid = req.getParameter("mid");
     if (mid == null) {
       return null;

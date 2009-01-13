@@ -26,7 +26,6 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.tools.jmx.Manager;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContext;

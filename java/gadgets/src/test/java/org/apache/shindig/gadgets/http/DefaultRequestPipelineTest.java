@@ -147,9 +147,12 @@ public class DefaultRequestPipelineTest {
   }
 
   private static class FakeHttpFetcher implements HttpFetcher {
-    private HttpRequest request;
-    private HttpResponse response;
-    private int fetchCount = 0;
+    protected HttpRequest request;
+    protected HttpResponse response;
+    protected int fetchCount = 0;
+
+    protected FakeHttpFetcher() {
+    }
 
     public HttpResponse fetch(HttpRequest request) throws GadgetException {
       fetchCount++;
@@ -162,9 +165,12 @@ public class DefaultRequestPipelineTest {
   }
 
   private static class FakeHttpCache implements HttpCache {
-    private final Map<Uri, HttpResponse> data = Maps.newHashMap();
-    private int writeCount = 0;
-    private int readCount = 0;
+    protected final Map<Uri, HttpResponse> data = Maps.newHashMap();
+    protected int writeCount = 0;
+    protected int readCount = 0;
+
+    protected FakeHttpCache() {
+    }
 
     public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
       writeCount++;
@@ -183,9 +189,13 @@ public class DefaultRequestPipelineTest {
   }
 
   private static class FakeOAuthRequestProvider implements Provider<OAuthRequest> {
-    private int fetchCount = 0;
-    private HttpRequest httpRequest;
-    private HttpResponse httpResponse;
+    protected int fetchCount = 0;
+    protected HttpRequest httpRequest;
+    protected HttpResponse httpResponse;
+
+    protected FakeOAuthRequestProvider() {
+    }
+
 
     private final OAuthRequest oauthRequest = new OAuthRequest(null, null) {
       @Override

@@ -28,16 +28,16 @@ public abstract class FakeHttpServer {
   protected Server server = null;
   protected Context context = null;
 
-	public void start(int port) throws Exception {
-	  server = new Server(port);
-	  context = new Context(server, "/", Context.SESSIONS);
-	  addServlets();
-	  server.start();
-	}
+  public void start(int port) throws Exception {
+    server = new Server(port);
+    context = new Context(server, "/", Context.SESSIONS);
+    addServlets();
+    server.start();
+  }
 
-	/** Override to add your servlets */
+  /** Override to add your servlets */
   protected abstract void addServlets() throws Exception;
-  
+
   public void stop() throws Exception {
     server.stop();
   }

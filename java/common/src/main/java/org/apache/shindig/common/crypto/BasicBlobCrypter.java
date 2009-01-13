@@ -35,7 +35,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,30 +45,30 @@ public class BasicBlobCrypter implements BlobCrypter {
   // Labels for key derivation
   private static final byte CIPHER_KEY_LABEL = 0;
   private static final byte HMAC_KEY_LABEL = 1;
-  
+
   /** Key used for time stamp (in seconds) of data */
   public static final String TIMESTAMP_KEY = "t";
-  
+
   /** minimum length of master key */
   public static final int MASTER_KEY_MIN_LEN = 16;
-  
+
   /** allow three minutes for clock skew */
   private static final long CLOCK_SKEW_ALLOWANCE = 180;
-  
+
   private static final String UTF8 = "UTF-8";
-  
-  public TimeSource timeSource = new TimeSource();  
+
+  public TimeSource timeSource = new TimeSource();
   private byte[] cipherKey;
   private byte[] hmacKey;
-  
+
   /**
    * Creates a crypter based on a key in a file.  The key is the first line
    * in the file, whitespace trimmed from either end, as UTF-8 bytes.
-   * 
+   *
    * The following *nix command line will create an excellent key:
-   * 
+   *
    * dd if=/dev/random bs=32 count=1  | openssl base64 > /tmp/key.txt
-   * 
+   *
    * @throws IOException if the file can't be read.
    */
   public BasicBlobCrypter(File keyfile) throws IOException {
@@ -92,16 +91,16 @@ public class BasicBlobCrypter implements BlobCrypter {
       }
     }
   }
-  
+
   /**
    * Builds a BlobCrypter from the specified master key
-   * 
+   *
    * @param masterKey
    */
   public BasicBlobCrypter(byte[] masterKey) {
     init(masterKey);
   }
-  
+
   private void init(byte[] masterKey) {
     if (masterKey.length < MASTER_KEY_MIN_LEN) {
       throw new IllegalArgumentException("Master key needs at least " +
@@ -113,12 +112,12 @@ public class BasicBlobCrypter implements BlobCrypter {
 
   /**
    * Generates unique keys from a master key.
-   * 
+   *
    * @param label type of key to derive
    * @param masterKey master key
-   * @param len length of key needed, less than 20 bytes.  20 bytes are 
-   * returned if len is 0.  
-   * 
+   * @param len length of key needed, less than 20 bytes.  20 bytes are
+   * returned if len is 0.
+   *
    * @return a derived key of the specified length
    */
   private byte[] deriveKey(byte label, byte[] masterKey, int len) {
@@ -131,7 +130,7 @@ public class BasicBlobCrypter implements BlobCrypter {
     System.arraycopy(hash, 0, out, 0, out.length);
     return out;
   }
-  
+
   /* (non-Javadoc)
    * @see org.apache.shindig.util.BlobCrypter#wrap(java.util.Map)
    */
@@ -214,7 +213,7 @@ public class BasicBlobCrypter implements BlobCrypter {
     }
     return map;
   }
-  
+
   /**
    * We allow a few minutes on either side of the validity window to account
    * for clock skew.
@@ -227,7 +226,7 @@ public class BasicBlobCrypter implements BlobCrypter {
     long now = timeSource.currentTimeMillis()/1000;
     if (!(minTime < now && now < maxTime)) {
       throw new BlobExpiredException(minTime, now, maxTime);
-    }    
+    }
   }
 
 }

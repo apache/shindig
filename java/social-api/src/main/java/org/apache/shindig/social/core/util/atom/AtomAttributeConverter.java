@@ -44,6 +44,7 @@ public class AtomAttributeConverter implements SingleValueConverter {
    * {@inheritDoc}
    * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
    */
+  @SuppressWarnings("unchecked")
   public boolean canConvert(Class clazz) {
     return AtomAttribute.class.equals(clazz);
   }

@@ -119,9 +119,9 @@ public class GadgetSpec {
       this.views = ImmutableMap.copyOf(tmpViews);
     }
     if (userPrefs.isEmpty()) {
-	this.userPrefs = Collections.emptyList();
+      this.userPrefs = Collections.emptyList();
     } else {
-        this.userPrefs = ImmutableList.copyOf(userPrefs);
+      this.userPrefs = ImmutableList.copyOf(userPrefs);
     }
   }
 
@@ -191,7 +191,7 @@ public class GadgetSpec {
    * Used by handler classes to use specs to carry context.
    * Not defined by the specification
    */
-  private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+  private final Map<String, Object> attributes = Maps.newConcurrentHashMap();
   public Object getAttribute(String key) {
     return attributes.get(key);
   }

@@ -30,12 +30,12 @@ import org.apache.shindig.common.util.FakeTimeSource;
 
 import junit.framework.JUnit4TestAdapter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class BlobCrypterTest {
@@ -72,7 +72,7 @@ public class BlobCrypterTest {
     Map<String, String> out = crypter.unwrap(blob, 0);
     assertEquals(string, out.get("a"));
   }
-  
+
   @Test
   public void testDecryptGarbage() throws Exception {
     StringBuilder sb = new StringBuilder();
@@ -81,7 +81,7 @@ public class BlobCrypterTest {
       sb.append("a");
     }
   }
-  
+
   private void assertThrowsBlobCrypterException(String in) {
     try {
       crypter.unwrap(in, 1000);

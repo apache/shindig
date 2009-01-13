@@ -22,7 +22,6 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.io.PrintWriter;

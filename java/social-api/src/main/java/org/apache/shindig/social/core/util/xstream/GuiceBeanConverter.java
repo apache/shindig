@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * 
+ *
  */
 public class GuiceBeanConverter implements Converter {
   private Mapper mapper;
@@ -88,8 +88,7 @@ public class GuiceBeanConverter implements Converter {
               if (mapping != null) {
                 if (mapping.getItemFieldName() != null) {
                   Collection<?> list = (Collection<?>) newObj;
-                  for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
-                    Object obj = iter.next();
+                  for (Object obj : list) {
                     writeField(propertyName, mapping.getItemFieldName(),
                         mapping.getItemType(), definedIn, obj);
                   }
@@ -165,6 +164,7 @@ public class GuiceBeanConverter implements Converter {
   /**
    * @deprecated since 1.3
    */
+  @Deprecated
   public static class DuplicateFieldException extends ConversionException {
     public DuplicateFieldException(String msg) {
       super(msg);

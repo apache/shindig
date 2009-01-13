@@ -164,6 +164,7 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
   }
 
+  @SuppressWarnings("unchecked")
   public void testListsToJson() throws Exception {
     Map<String, String> item1Map = Maps.newHashMap();
     item1Map.put("value", "1");
@@ -206,6 +207,7 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals("video", actualItem.getType().toString());
   }
 
+  @SuppressWarnings("unchecked")
   public void testJsonToMap() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
     Map<String, String> data = Maps.newHashMap();

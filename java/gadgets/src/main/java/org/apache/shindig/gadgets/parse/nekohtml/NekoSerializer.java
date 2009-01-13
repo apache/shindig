@@ -22,7 +22,13 @@ import org.apache.shindig.gadgets.parse.HtmlSerializer;
 
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -36,6 +42,7 @@ public class NekoSerializer extends HtmlSerializer
   public NekoSerializer() {
   }
 
+  @Override
   public String serializeImpl(Document doc) {
     try {
       StringWriter sw = createWriter(doc);
@@ -49,7 +56,7 @@ public class NekoSerializer extends HtmlSerializer
       return null;
     }
   }
-  
+
   public static void serialize(Node n, Appendable output) throws IOException {
     switch (n.getNodeType()) {
       case Node.CDATA_SECTION_NODE: {

@@ -34,7 +34,7 @@ import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
 import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

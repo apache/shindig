@@ -52,7 +52,7 @@ public class StandardHandlerDispatcherTest extends EasyMockTestCase {
 
   public void testGetHandler() {
     PersonHandler handler = mockControl.createMock(PersonHandler.class);
-    EasyMock.expect(personHandlerProvider.get()).andReturn(handler);
+    org.easymock.EasyMock.expect(personHandlerProvider.get()).andReturn(handler);
 
     mockControl.replay();
 
@@ -75,7 +75,7 @@ public class StandardHandlerDispatcherTest extends EasyMockTestCase {
     Provider<DataRequestHandler> mockProvider = mockControl.createMock(Provider.class);
     dispatcher.addHandler("mock", mockProvider);
 
-    EasyMock.expect(mockProvider.get()).andReturn(mockHandler);
+    org.easymock.EasyMock.expect(mockProvider.get()).andReturn(mockHandler);
 
     mockControl.replay();
 

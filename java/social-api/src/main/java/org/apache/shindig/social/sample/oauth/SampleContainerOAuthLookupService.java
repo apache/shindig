@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.oauth.OAuthLookupService;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;

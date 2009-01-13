@@ -41,12 +41,10 @@ public class Base32 implements BinaryDecoder, BinaryEncoder {
     return ENCODER.decode(new String(arg0));
   }
 
-  @SuppressWarnings("unused")
   public byte[] decode(byte[] arg0) throws DecoderException {
     return decodeBase32(arg0);
   }
 
-  @SuppressWarnings("unused")
   public byte[] encode(byte[] arg0) throws EncoderException {
     return encodeBase32(arg0);
   }

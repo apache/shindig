@@ -23,11 +23,10 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test link rewriting 
+ * Test link rewriting
  */
 public class LinkingTagRewriterTest extends BaseRewriterTestCase {
 

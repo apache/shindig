@@ -20,7 +20,6 @@
 package org.apache.shindig.gadgets.variables;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.UserPrefs;
@@ -29,7 +28,6 @@ import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
 import junit.framework.TestCase;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class UserPrefSubstituterTest extends TestCase {

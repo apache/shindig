@@ -43,7 +43,7 @@ public final class JsonLibConverterUtils {
    * @param indent
    *                the indent to be used per object nesting.
    */
-  public static final void dumpJsonObject(JSONObject jsonObject, String indent) {
+  public static void dumpJsonObject(JSONObject jsonObject, String indent) {
     for (Object o : jsonObject.entrySet()) {
       Entry<?, ?> entry = (Entry<?, ?>) o;
       Object key = entry.getKey();

@@ -24,7 +24,6 @@ import org.apache.shindig.social.opensocial.service.BeanConverter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -44,8 +43,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Converts pojos to json objects.
@@ -182,7 +179,7 @@ public class BeanJsonConverter implements BeanConverter {
     public Method method;
     public String fieldName;
 
-    private MethodPair(final Method method, final String fieldName) {
+    protected MethodPair(final Method method, final String fieldName) {
       this.method = method;
       this.fieldName = fieldName;
     }
@@ -202,7 +199,7 @@ public class BeanJsonConverter implements BeanConverter {
 
       String fieldName = name.substring(prefixlen, prefixlen+1).toLowerCase() +
           name.substring(prefixlen + 1);
-      
+
       if (EXCLUDED_FIELDS.contains(fieldName.toLowerCase())) {
         continue;
       }
@@ -228,16 +225,15 @@ public class BeanJsonConverter implements BeanConverter {
       throw new RuntimeException(errorMessage, e);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(errorMessage, e);
-    } catch (InstantiationException e) {
-      throw new RuntimeException(errorMessage, e);
     } catch (NoSuchFieldException e) {
       throw new RuntimeException(errorMessage, e);
     }
   }
 
+  @SuppressWarnings("unchecked")
   private <T> T convertToObject(String json, T pojo)
       throws JSONException, InvocationTargetException, IllegalAccessException,
-      InstantiationException, NoSuchFieldException {
+      NoSuchFieldException {
 
     if (pojo instanceof String) {
       pojo = (T) json; // This is a weird cast...
@@ -278,6 +274,7 @@ public class BeanJsonConverter implements BeanConverter {
     return pojo;
   }
 
+  @SuppressWarnings("boxing")
   private <T> void callSetterWithValue(T pojo, Method method,
       JSONObject jsonObject, String fieldName)
       throws IllegalAccessException, InvocationTargetException, NoSuchFieldException,
@@ -326,7 +323,7 @@ public class BeanJsonConverter implements BeanConverter {
       Map<String, Object> map = Maps.newHashMap();
       JSONObject jsonMap = jsonObject.getJSONObject(fieldName);
 
-      Iterator keys = jsonMap.keys();
+      Iterator<?> keys = jsonMap.keys();
       while (keys.hasNext()) {
         String keyName = (String) keys.next();
         map.put(keyName, convertToObject(jsonMap.getString(keyName),
