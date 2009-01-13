@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.auth;
 
-import com.google.inject.Inject;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
+import com.google.inject.Inject;
 
 /**
  * Produces security tokens by extracting the "st" parameter from the request url or post body.
@@ -34,13 +34,14 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   private static final String TOKEN_PARAM = "st";
 
-  private static final Logger logger = Logger.getLogger(
-      UrlParameterAuthenticationHandler.class.getName());
+  private static final Logger logger = Logger
+      .getLogger(UrlParameterAuthenticationHandler.class.getName());
 
   private final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
-  public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder) {
+  public UrlParameterAuthenticationHandler(
+      SecurityTokenDecoder securityTokenDecoder) {
     this.securityTokenDecoder = securityTokenDecoder;
   }
 
@@ -50,14 +51,26 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
     try {
-      String token = request.getParameter(TOKEN_PARAM);
-      if (token == null) return null;
-      Map<String, String> parameters
-          = Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
+      Map<String, String> parameters = getMappedParameters(request);
+      if (parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME) == null) {
+        return null;
+      }
       return securityTokenDecoder.createToken(parameters);
     } catch (SecurityTokenException e) {
       logger.log(Level.INFO, "Valid security token not found.", e);
       return null;
     }
   }
+
+  protected SecurityTokenDecoder getSecurityTokenDecoder() {
+    return this.securityTokenDecoder;
+  }
+
+  protected Map<String, String> getMappedParameters(
+      final HttpServletRequest request) {
+    String token = request.getParameter(TOKEN_PARAM);
+    return Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME,
+        token);
+  }
+
 }
