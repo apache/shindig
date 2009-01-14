@@ -71,7 +71,12 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
     }
   }
 
-  private String getParameter(OAuthMessage requestMessage, String key) {
+    @Override
+    public String getWWWAuthenticateHeader(String realm) {
+       return String.format("OAuth realm=\"%s\"", realm);
+    }
+
+    private String getParameter(OAuthMessage requestMessage, String key) {
     try {
       return requestMessage.getParameter(key);
     } catch (IOException e) {
