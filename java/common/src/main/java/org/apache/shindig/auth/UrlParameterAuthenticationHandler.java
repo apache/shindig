@@ -62,7 +62,6 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     }
   }
 
-  @Override
   public String getWWWAuthenticateHeader(String realm) {
     return null;
   }
