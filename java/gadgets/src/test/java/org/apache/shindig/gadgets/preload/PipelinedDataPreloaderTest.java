@@ -47,18 +47,25 @@ import java.util.concurrent.Callable;
 public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   private ContainerConfig containerConfig;
 
-  private static final String XML = "<Module xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
-      + "<ModulePrefs title=\"Title\"/>"
+  private static final String XML = "<Module xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE
+      + "\">" + "<ModulePrefs title=\"Title\"/>"
       + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
       + "  <os:PeopleRequest key=\"p\" userIds=\"you\"/>"
-      + "  <os:PersonAppDataRequest key=\"a\" userId=\"she\"/>"
-      + "</Content></Module>";
+      + "  <os:PersonAppDataRequest key=\"a\" userId=\"she\"/>" + "</Content></Module>";
+
+  private static final String MAKE_REQUEST_URL =  "http://example.org/preload.html";
+  private static final String XML_WITH_MAKE_REQUEST = "<Module xmlns:os=\""
+      + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
+      + "<ModulePrefs title=\"Title\"/>"
+      + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
+      + "  <os:MakeRequest key=\"p\" href=\"" + MAKE_REQUEST_URL + "\" "
+      + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
   @Before
   public void createContainerConfig() {
     containerConfig = EasyMock.createMock(ContainerConfig.class);
-    EasyMock.expect(containerConfig.get(CONTAINER, "gadgets.osDataUri"))
-        .andStubReturn("http://%host%/social/rpc");
+    EasyMock.expect(containerConfig.get(CONTAINER, "gadgets.osDataUri")).andStubReturn(
+        "http://%host%/social/rpc");
     EasyMock.replay(containerConfig);
   }
 
@@ -72,8 +79,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "profile";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks =
-        preloader.createPreloadTasks(context, spec, PreloaderService.PreloadPhase.PROXY_FETCH);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
     // Nothing fetched yet
     assertEquals(0, pipeline.requests.size());
@@ -90,10 +97,40 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(1, pipeline.requests.size());
     HttpRequest request = pipeline.requests.get(0);
 
-    assertEquals("http://" + context.getHost() + "/social/rpc?st=token",
-        request.getUri().toString());
+    assertEquals("http://" + context.getHost() + "/social/rpc?st=token", request.getUri()
+        .toString());
     assertEquals("POST", request.getMethod());
     assertTrue(request.getContentType().startsWith("application/json"));
+  }
+
+  @Test
+  public void testHttpPreload() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_MAKE_REQUEST);
+
+    String httpResult = "{foo: 'bar'}";
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    view = "profile";
+
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
+    assertEquals(1, tasks.size());
+    // Nothing fetched yet
+    assertEquals(0, pipeline.requests.size());
+
+    Map<String, Object> result = tasks.iterator().next().call().toJson();
+    assertEquals(1, result.size());
+
+    String expectedResult = "{data: {foo: 'bar'}, id: 'p'}";
+    assertEquals(new JSONObject(expectedResult).toString(), result.get("p").toString());
+
+    // Should have only fetched one request
+    assertEquals(1, pipeline.requests.size());
+    HttpRequest request = pipeline.requests.get(0);
+
+    assertEquals(MAKE_REQUEST_URL, request.getUri().toString());
+    assertEquals("POST", request.getMethod());
+    assertEquals(60, request.getCacheTtl());
   }
 
   @Test
@@ -106,8 +143,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "canvas";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks =
-        preloader.createPreloadTasks(context, spec, PreloaderService.PreloadPhase.PROXY_FETCH);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
     assertTrue(tasks.isEmpty());
   }
 
@@ -121,8 +158,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "profile";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks =
-        preloader.createPreloadTasks(context, spec, PreloaderService.PreloadPhase.HTML_RENDER);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.HTML_RENDER);
     assertTrue(tasks.isEmpty());
   }
 
@@ -138,9 +175,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     public HttpResponse execute(HttpRequest request) {
       requests.add(request);
-      return new HttpResponseBuilder()
-          .setResponseString(content)
-          .create();
+      return new HttpResponseBuilder().setResponseString(content).create();
     }
   }
 }

@@ -23,13 +23,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetContext;
+
+import java.util.Map;
+
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class PipelinedDataTest {
   //TODO: test os:MakeRequest
 
+  private GadgetContext context;
+
+  @Before
+  public void setUp() {
+    context = new GadgetContext();
+  }
+  
   @Test
   public void testPeopleRequest() throws Exception {
     String xml = "<Content><PeopleRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
@@ -53,8 +67,35 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads().size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads().get("key").toString());
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+  }
+  
+  @Test
+  public void testPeopleRequestWithExpressions() throws Exception {
+    String xml = "<Content><PeopleRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " groupId=\"group\""
+        + " userId=\"first,second\""
+        + " startIndex=\"20\""
+        + " count=\"10\""
+        + " fields=\"name,id\""
+        + "/></Content>";
+
+    PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
+    assertFalse(socialData.needsOwner());
+    assertFalse(socialData.needsViewer());
+
+    JSONObject expected = new JSONObject("{method: 'people.get', id: 'key', params:"
+        + "{groupId: 'group',"
+        + "userId: ['first','second'],"
+        + "startIndex: 20,"
+        + "count: 10,"
+        + "fields: ['name','id']"
+        + "}}");
+
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
   }
 
   @Test
@@ -73,8 +114,8 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads().size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads().get("key").toString());
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
   }
 
   @Test
@@ -93,8 +134,8 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads().size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads().get("key").toString());
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
   }
 
   @Test
@@ -114,8 +155,8 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads().size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads().get("key").toString());
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
   }
 
   @Test
@@ -135,8 +176,8 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads().size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads().get("key").toString());
+    assertEquals(1, socialData.getSocialPreloads(context).size());
+    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
   }
 
   @Test
@@ -150,7 +191,7 @@ public class PipelinedDataTest {
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertFalse(socialData.needsOwner());
 
-    assertTrue(socialData.getSocialPreloads().isEmpty());
+    assertTrue(socialData.getSocialPreloads(context).isEmpty());
   }
 
   @Test(expected = SpecParserException.class)
@@ -159,5 +200,44 @@ public class PipelinedDataTest {
         + "/></Content>";
 
     new PipelinedData(XmlUtil.parse(xml), null);
+  }
+  
+  @Test
+  public void makeRequestDefaults() throws Exception {
+    String xml = "<Content><MakeRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " href=\"/example.html\""
+        + "/></Content>";
+
+    PipelinedData pipelinedData = new PipelinedData(
+        XmlUtil.parse(xml), Uri.parse("http://example.org/"));
+    Map<String, RequestAuthenticationInfo> httpPreloads = 
+        pipelinedData.getHttpPreloads(context);
+    
+    assertEquals(1, httpPreloads.size());
+    RequestAuthenticationInfo preload = httpPreloads.get("key");
+    assertEquals(AuthType.NONE, preload.getAuthType());
+    assertEquals(Uri.parse("http://example.org/example.html"), preload.getHref());    
+  }
+
+  @Test
+  public void makeRequestDefaultsSigned() throws Exception {
+    String xml = "<Content><MakeRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " href=\"/example.html\""
+        + " authz=\"signed\""
+        + " sign_owner=\"false\""
+        + "/></Content>";
+
+    PipelinedData pipelinedData = new PipelinedData(
+        XmlUtil.parse(xml), Uri.parse("http://example.org/"));
+    Map<String, RequestAuthenticationInfo> httpPreloads = 
+        pipelinedData.getHttpPreloads(context);
+    
+    assertEquals(1, httpPreloads.size());
+    RequestAuthenticationInfo preload = httpPreloads.get("key");
+    assertEquals(AuthType.SIGNED, preload.getAuthType());
+    assertTrue(preload.isSignViewer());
+    assertFalse(preload.isSignOwner());
   }
 }
