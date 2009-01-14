@@ -85,7 +85,7 @@ public class GadgetFeatureRegistry {
       throw new IllegalStateException("register should never be " +
           "invoked after calling getLibraries");
     }
-    logger.info("Registering feature: " + feature.getName());
+    logger.fine("Registering feature: " + feature.getName());
     if (isCore(feature)) {
       core.put(feature.getName(), feature);
       for (GadgetFeature feat : features.values()) {
