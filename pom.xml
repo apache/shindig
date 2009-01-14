@@ -400,7 +400,7 @@
               <tempDirectory>${basedir}/java/server/target/work</tempDirectory>
               <webApp>${basedir}/java/server/target/shindig-server-${pom.version}.war</webApp>
               <contextPath>/</contextPath>
-              <overrideWebXml>${basedir}/java/server/target/shindig-server-${pom.version}/WEB-INF/web.${runType}.xml</overrideWebXml>
+              <webXml>${basedir}/java/server/target/shindig-server-${pom.version}/WEB-INF/web.${runType}.xml</webXml>
             </configuration>
           </plugin>
         </plugins>
