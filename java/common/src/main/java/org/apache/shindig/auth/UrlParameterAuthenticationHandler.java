@@ -62,6 +62,11 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     }
   }
 
+  @Override
+  public String getWWWAuthenticateHeader(String realm) {
+    return null;
+  }
+
   protected SecurityTokenDecoder getSecurityTokenDecoder() {
     return this.securityTokenDecoder;
   }

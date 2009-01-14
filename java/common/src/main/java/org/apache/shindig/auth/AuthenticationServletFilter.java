@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Filter that attempts to authenticate an incoming HTTP request. It uses the guice injected
@@ -40,6 +41,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class AuthenticationServletFilter extends InjectedFilter {
   public static final String AUTH_TYPE_OAUTH = "OAuth";
+
+  // At some point change this to a container specific realm
+  private static final String realm = "shindig";
 
   private List<AuthenticationHandler> handlers;
 
@@ -53,21 +57,25 @@ public class AuthenticationServletFilter extends InjectedFilter {
   public void doFilter(ServletRequest request, ServletResponse response,
       FilterChain chain) throws IOException, ServletException {
 
-    if (!(request instanceof HttpServletRequest)) {
+    if (!(request instanceof HttpServletRequest && response instanceof HttpServletResponse)) {
       throw new ServletException("Auth filter can only handle HTTP");
     }
 
     HttpServletRequest req = (HttpServletRequest) request;
-
+    HttpServletResponse resp = (HttpServletResponse) response;
     for (AuthenticationHandler handler : handlers) {
       SecurityToken token = handler.getSecurityTokenFromRequest(req);
       if (token != null) {
         new AuthInfo(req).setAuthType(handler.getName()).setSecurityToken(token);
         chain.doFilter(req, response);
         return;
+      } else {
+          String authHeader = handler.getWWWAuthenticateHeader(realm);
+          if (authHeader != null) {
+              resp.addHeader("WWW-Authenticate", authHeader);
+          }
       }
     }
-
     // We did not find a security token so we will just pass null
     chain.doFilter(req, response);
   }

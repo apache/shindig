@@ -43,4 +43,9 @@ public class AnonymousAuthenticationHandler implements AuthenticationHandler {
     }
     return null;
   }
+
+  @Override
+  public String getWWWAuthenticateHeader(String realm) {
+    return null;
+  }
 }

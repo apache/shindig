@@ -37,4 +37,16 @@ public interface AuthenticationHandler {
    * @return A valid security token for the request, or null if it wasn't possible to authenticate.
    */
   SecurityToken getSecurityTokenFromRequest(HttpServletRequest request);
+
+    /**
+     * Return a String to be used for a WWW-Authenticate header. This will be called if the
+     * call to getSecurityTokenFromRequest returns null.
+     *
+     * If non-null/non-blank it will be added to the Response.
+     * See Section 6.1.3 of the Portable Contacts Specification
+     *
+     * @param realm the name of the realm to use for the authenticate header
+     * @return Header value for a WWW-Authenticate Header
+     */
+  String getWWWAuthenticateHeader(String realm);
 }
