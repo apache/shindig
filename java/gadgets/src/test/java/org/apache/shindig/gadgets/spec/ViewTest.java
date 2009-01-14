@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 import org.junit.Test;
@@ -207,9 +208,10 @@ public class ViewTest {
         + " key=\"key\""
         + " fields=\"name,id\""
         + "/></Content>";
+    GadgetContext context = new GadgetContext();
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
-    assertEquals(1, view.getPipelinedData().getSocialPreloads().size());
-    assertTrue(view.getPipelinedData().getSocialPreloads().containsKey("key"));
+    assertEquals(1, view.getPipelinedData().getSocialPreloads(context).size());
+    assertTrue(view.getPipelinedData().getSocialPreloads(context).containsKey("key"));
   }
 
   @Test(expected = SpecParserException.class)

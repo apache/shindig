@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
+import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.collect.ImmutableMap;
@@ -69,7 +70,7 @@ public class PipelinedDataPreloader implements Preloader {
         && phase == PreloaderService.PreloadPhase.PROXY_FETCH) {
 
       List<Callable<PreloadedData>> preloadList = Lists.newArrayList();
-      Map<String, Object> socialPreloads = view.getPipelinedData().getSocialPreloads();
+      Map<String, Object> socialPreloads = view.getPipelinedData().getSocialPreloads(context);
 
       // Load any social preloads into a JSONArray for delivery to
       // JsonRpcServlet
@@ -83,9 +84,11 @@ public class PipelinedDataPreloader implements Preloader {
         preloadList.add(preloader);
       }
 
-      Map<String, Preload> httpPreloads = view.getPipelinedData().getHttpPreloads();
+      Map<String, RequestAuthenticationInfo> httpPreloads =
+          view.getPipelinedData().getHttpPreloads(context);
       if (!httpPreloads.isEmpty()) {
-        for (Map.Entry<String, Preload> httpPreloadEntry : httpPreloads.entrySet()) {
+        for (Map.Entry<String, RequestAuthenticationInfo> httpPreloadEntry
+            : httpPreloads.entrySet()) {
           preloadList.add(new HttpPreloadTask(context,  httpPreloadEntry.getValue(),
               httpPreloadEntry.getKey()));
         }
@@ -147,10 +150,10 @@ public class PipelinedDataPreloader implements Preloader {
   // A task for preloading os:MakeRequest
   class HttpPreloadTask implements Callable<PreloadedData> {
     private final GadgetContext context;
-    private final Preload preload;
+    private final RequestAuthenticationInfo preload;
     private final String key;
 
-    public HttpPreloadTask(GadgetContext context, Preload preload, String key) {
+    public HttpPreloadTask(GadgetContext context, RequestAuthenticationInfo preload, String key) {
       this.context = context;
       this.preload = preload;
       this.key = key;
@@ -158,6 +161,23 @@ public class PipelinedDataPreloader implements Preloader {
 
     public PreloadedData call() throws Exception {
       HttpRequest request = HttpPreloader.newHttpRequest(context, preload);
+      String refreshIntervalStr = preload.getAttributes().get("refreshInterval");
+      if (refreshIntervalStr != null) {
+        try {
+          int refreshInterval = Integer.parseInt(refreshIntervalStr);
+          request.setCacheTtl(refreshInterval);
+        } catch (NumberFormatException nfe) {
+          // Ignore, and use the HTTP response interval
+        }
+      }
+      
+      // TODO: support non GET/POST methods
+      String method = preload.getAttributes().get("method");
+      if (method != null) {
+        request.setMethod(method);
+      }
+      
+      // TODO: support params
       return new Data(requestPipeline.execute(request));
     }
 
