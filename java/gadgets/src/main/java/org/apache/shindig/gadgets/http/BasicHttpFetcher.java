@@ -161,10 +161,10 @@ public class BasicHttpFetcher implements HttpFetcher {
       if (!"GET".equals(request.getMethod())) {
         fetcher.setUseCaches(false);
       }
+      fetcher.setRequestProperty("Content-Length",
+          String.valueOf(request.getPostBodyLength()));
       if (request.getPostBodyLength() > 0) {
         fetcher.setDoOutput(true);
-        fetcher.setRequestProperty("Content-Length",
-            String.valueOf(request.getPostBodyLength()));
         IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
       return makeResponse(fetcher);
