@@ -554,9 +554,9 @@ opensocial.Container.prototype.enableCaja = function() {
   ___.getNewModuleHandler().setImports(imports);
 
   
-  attachDocumentStub('-g___', uriCallback, imports);
   var gadgetRoot = document.createElement('div');
   gadgetRoot.className = 'g___';
+  attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
   imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
   document.body.appendChild(gadgetRoot);
 
