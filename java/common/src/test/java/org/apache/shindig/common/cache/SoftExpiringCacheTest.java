@@ -28,6 +28,7 @@ public class SoftExpiringCacheTest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     timeSource = new FakeTimeSource(0);
     cache = new LruCache<String, String>(5);
   }

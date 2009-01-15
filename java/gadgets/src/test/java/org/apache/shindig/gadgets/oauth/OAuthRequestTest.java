@@ -49,6 +49,7 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Assert;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -343,7 +344,7 @@ public class OAuthRequestTest {
 
     String aznHeader = response.getHeader(FakeOAuthServiceProvider.AUTHZ_ECHO_HEADER);
     assertNotNull(aznHeader);
-    assertTrue("azn header: " + aznHeader, aznHeader.indexOf("OAuth") != -1);
+    Assert.assertNotSame("azn header: " + aznHeader, aznHeader.indexOf("OAuth"), -1);
   }
 
   @Test
@@ -359,7 +360,7 @@ public class OAuthRequestTest {
 
     String echoedBody = response.getHeader(FakeOAuthServiceProvider.BODY_ECHO_HEADER);
     assertNotNull(echoedBody);
-    assertTrue("body: " + echoedBody, echoedBody.indexOf("oauth_consumer_key=") != -1);
+    Assert.assertNotSame("body: " + echoedBody, echoedBody.indexOf("oauth_consumer_key="), -1);
   }
 
   @Test
@@ -375,8 +376,8 @@ public class OAuthRequestTest {
 
     String echoedBody = response.getHeader(FakeOAuthServiceProvider.BODY_ECHO_HEADER);
     assertNotNull(echoedBody);
-    assertTrue("body: " + echoedBody, echoedBody.indexOf("oauth_consumer_key=") != -1);
-    assertTrue("body: " + echoedBody, echoedBody.indexOf("foo=bar&foo=baz") != -1);
+    Assert.assertNotSame("body: " + echoedBody, echoedBody.indexOf("oauth_consumer_key="), -1);
+    Assert.assertNotSame("body: " + echoedBody, echoedBody.indexOf("foo=bar&foo=baz"), -1);
   }
 
   @Test
@@ -394,7 +395,7 @@ public class OAuthRequestTest {
 
     String aznHeader = response.getHeader(FakeOAuthServiceProvider.AUTHZ_ECHO_HEADER);
     assertNotNull(aznHeader);
-    assertTrue("azn header: " + aznHeader, aznHeader.indexOf("OAuth") != -1);
+    Assert.assertNotSame("azn header: " + aznHeader, aznHeader.indexOf("OAuth"), -1);
   }
 
   @Test
@@ -539,8 +540,8 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     String approvalUrl = response.getMetadata().get("oauthApprovalUrl");
-    assertTrue(approvalUrl, approvalUrl.indexOf(
-        "http://www.example.com/authorize?oauth_callback=foo&oauth_token=") == 0);
+    Assert.assertSame(approvalUrl, 0, approvalUrl.indexOf(
+        "http://www.example.com/authorize?oauth_callback=foo&oauth_token="));
     client.approveToken("user_data=hello-oauth");
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -862,7 +863,7 @@ public class OAuthRequestTest {
   public void testTrickyParametersInQuery() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     String tricky = "%6fpensocial_owner_id=gotcha";
-    HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?" + tricky);
+    HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + '?' + tricky);
     assertEquals(OAuthError.INVALID_REQUEST.toString(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
@@ -913,7 +914,7 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     String weird = "~!@$*()-_[]:,./";
     HttpResponse resp = client.sendGet(
-        FakeOAuthServiceProvider.RESOURCE_URL + "?" + weird + "=foo");
+        FakeOAuthServiceProvider.RESOURCE_URL + '?' + weird + "=foo");
     List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
     assertTrue(contains(queryParams, weird, "foo"));
   }
@@ -1325,7 +1326,7 @@ public class OAuthRequestTest {
     checkLogContains("RuntimeException");
     checkLogContains("very, very wrong");
   }
-  
+
   @Test
   public void testTrustedParams() throws Exception {
     serviceProvider.setCheckTrustedParams(true);
@@ -1382,7 +1383,7 @@ public class OAuthRequestTest {
 
   private void checkStringContains(String message, String text, String expected) {
     if (!text.contains(expected)) {
-      fail(message + ", expected [" + expected + "], got + [" + text + "]");
+      fail(message + ", expected [" + expected + "], got + [" + text + ']');
     }
   }
 }

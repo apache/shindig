@@ -64,7 +64,7 @@ public class Substitutions {
      *        The placeholder prefix for substituted strings.
      */
     Type(String prefix) {
-      this.prefix = "__" + prefix +  "_";
+      this.prefix = "__" + prefix + '_';
     }
   }
 

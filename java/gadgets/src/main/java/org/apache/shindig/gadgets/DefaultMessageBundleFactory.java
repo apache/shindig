@@ -141,7 +141,6 @@ public class DefaultMessageBundleFactory implements MessageBundleFactory {
           response.getHttpStatusCode());
     }
 
-    MessageBundle bundle  = new MessageBundle(locale, response.getResponseAsString());
-    return bundle;
+    return new MessageBundle(locale, response.getResponseAsString());
   }
 }

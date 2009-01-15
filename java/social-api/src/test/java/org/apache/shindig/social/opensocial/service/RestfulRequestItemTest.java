@@ -57,7 +57,7 @@ public class RestfulRequestItemTest extends EasyMockTestCase {
     request = new RestfulRequestItem(DEFAULT_PATH, "GET", null, null, null);
 
     assertEquals("people", request.getService());
-    assertEquals(null, request.getParameters().get("fields"));
+    assertNull(request.getParameters().get("fields"));
   }
 
   public void testGetHttpMethodFromParameter() throws Exception {

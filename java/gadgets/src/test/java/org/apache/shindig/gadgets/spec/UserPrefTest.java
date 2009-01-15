@@ -36,7 +36,7 @@ public class UserPrefTest extends TestCase {
     assertEquals("name", userPref.getName());
     assertEquals("display_name", userPref.getDisplayName());
     assertEquals("default_value", userPref.getDefaultValue());
-    assertEquals(true, userPref.getRequired());
+    assertTrue(userPref.getRequired());
     assertEquals(UserPref.DataType.HIDDEN, userPref.getDataType());
   }
 

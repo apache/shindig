@@ -18,7 +18,7 @@
 package org.apache.shindig.social.core.util.xstream;
 
 /**
- * 
+ *
  */
 public class InterfaceFieldAliasMapping {
 
@@ -90,16 +90,16 @@ public class InterfaceFieldAliasMapping {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     if (parent == null) {
-      return type + ".get" + fieldName + "() <-> <" + alias + ">";
+      return type + ".get" + fieldName + "() <-> <" + alias + '>';
     } else {
       return type + ".get" + fieldName + "() <-> <" + alias
-          + "> inside parent <" + parent + ">";
+          + "> inside parent <" + parent + '>';
     }
   }
 }

@@ -152,7 +152,7 @@ public class RenderingContentRewriterTest {
         .append(docType)
         .append("<html><head>")
         .append(head)
-        .append("</head><body").append(bodyAttr).append(">")
+        .append("</head><body").append(bodyAttr).append('>')
         .append(body)
         .append("</body></html>")
         .toString();

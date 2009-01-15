@@ -35,34 +35,34 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BasicOAuthStoreTest {
-  
+
   private static final String SAMPLE_FILE =
-    "{" +
+      '{' +
     "'http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml' : {" +
-    "'' : {" + 
-    "'consumer_key' : 'gadgetConsumer'," + 
-    "'consumer_secret' : 'gadgetSecret'," + 
+    "'' : {" +
+    "'consumer_key' : 'gadgetConsumer'," +
+    "'consumer_secret' : 'gadgetSecret'," +
     "'key_type' : 'HMAC_SYMMETRIC'" +
-    "}" +
+          '}' +
     "}," +
     "'http://rsagadget/test.xml' : {" +
-    "'' : {" + 
-    "'consumer_key' : 'rsaconsumer'," + 
-    "'consumer_secret' : 'rsaprivate'," + 
+    "'' : {" +
+    "'consumer_key' : 'rsaconsumer'," +
+    "'consumer_secret' : 'rsaprivate'," +
     "'key_type' : 'RSA_PRIVATE'" +
-    "}" +
-    "}" +
+          '}' +
+          '}' +
 
-    "}";
+          '}';
 
   private BasicOAuthStore store;
-  
+
   @Before
   public void setUp() throws Exception {
     store = new BasicOAuthStore();
     store.initFromConfigString(SAMPLE_FILE);
   }
-  
+
   @Test
   public void testInit() throws Exception {
     FakeGadgetToken t = new FakeGadgetToken();
@@ -86,7 +86,7 @@ public class BasicOAuthStoreTest {
     assertEquals("rsaprivate", consumer.getProperty(RSA_SHA1.PRIVATE_KEY));
     assertNull(consumerInfo.getKeyName());
   }
-  
+
   @Test
   public void testGetAndSetAndRemoveToken() {
     FakeGadgetToken t = new FakeGadgetToken();
@@ -94,23 +94,23 @@ public class BasicOAuthStoreTest {
     t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
     t.setViewerId("viewer-one");
     assertNull(store.getTokenInfo(t, consumer, "", ""));
-    
+
     TokenInfo info = new TokenInfo("token", "secret", null, 0);
     store.setTokenInfo(t, consumer, "service", "token", info);
-    
+
     info = store.getTokenInfo(t, consumer, "service", "token");
     assertEquals("token", info.getAccessToken());
     assertEquals("secret", info.getTokenSecret());
-    
+
     FakeGadgetToken t2 = new FakeGadgetToken();
     t2.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
     t2.setViewerId("viewer-two");
     assertNull(store.getTokenInfo(t2, consumer, "service", "token"));
-    
+
     store.removeToken(t, consumer, "service", "token");
     assertNull(store.getTokenInfo(t, consumer, "service", "token"));
   }
-  
+
   @Test
   public void testDefaultKey() throws Exception {
     FakeGadgetToken t = new FakeGadgetToken();
@@ -123,11 +123,11 @@ public class BasicOAuthStoreTest {
     } catch (GadgetException e) {
       // good
     }
-    
+
     BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret(
         "somekey", "default", KeyType.RSA_PRIVATE, "keyname");
     store.setDefaultKey(cks);
-    
+
     ConsumerInfo consumer = store.getConsumerKeyAndSecret(t, "", provider);
     assertEquals("somekey", consumer.getConsumer().consumerKey);
     assertNull(consumer.getConsumer().consumerSecret);

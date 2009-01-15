@@ -18,14 +18,15 @@
 package org.apache.shindig.common.uri;
 
 import com.google.common.collect.Maps;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.junit.Assert;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static junitx.framework.Assert.assertNotEquals;
 
 /**
  * Tests for UriBuilder
@@ -268,15 +269,15 @@ public class UriBuilderTest {
     Map<String, List<String>> params = UriBuilder.splitParameters("blah=blah");
     UriBuilder uri2 = new UriBuilder(Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo"));
 
-    assertTrue(uri.equals(uri2));
-    assertTrue(uri2.equals(uri));
+    assertEquals(uri, uri2);
+    assertEquals(uri2, uri);
 
-    assertTrue(uri.equals(uri));
+    assertEquals(uri, uri);
 
-    assertFalse(uri.equals(null));
-    assertFalse(uri.equals("http://example.org/foo/bar/baz?blah=blah#boo"));
-    assertFalse(uri.equals(Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo")));
+    assertNotNull(uri);
+    assertNotEquals(uri, "http://example.org/foo/bar/baz?blah=blah#boo");
+    assertNotEquals(uri, Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo"));
 
-    assertTrue(uri.hashCode() == uri2.hashCode());
+    assertEquals(uri.hashCode(), uri2.hashCode());
   }
 }

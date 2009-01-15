@@ -55,6 +55,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     token = new FakeGadgetToken();
     token.setAppId("appId");
     converter = EasyMock.createMock(BeanJsonConverter.class);

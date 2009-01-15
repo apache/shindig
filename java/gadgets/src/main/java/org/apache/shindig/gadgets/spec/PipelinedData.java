@@ -97,7 +97,7 @@ public class PipelinedData {
         } else {
           // TODO: This is wrong - the spec should parse, but should preload
           // notImplemented
-          throw new SpecParserException("Unknown element <os:" + elementName + ">");
+          throw new SpecParserException("Unknown element <os:" + elementName + '>');
         }
       } catch (ElException ele) {
         throw new SpecParserException(new XmlException(ele));
@@ -122,7 +122,7 @@ public class PipelinedData {
     this.socialPreloads = Collections.unmodifiableMap(socialPreloads);
     this.httpPreloads = Collections.unmodifiableMap(httpPreloads);
 
-  } 
+  }
 
   /**
    * Allows the creation of a view from an existing view so that localization
@@ -217,7 +217,7 @@ public class PipelinedData {
   /** Handle the os:PersonAppDataRequest element */
   private SocialData createPersonAppDataRequest(Element child) throws ElException {
     SocialData expression = new SocialData(child.getAttribute("key"), "appdata.get");
-    
+
     copyAttribute("groupId", child, expression, String.class);
     copyAttribute("userId", child, expression, JSONArray.class);
     updateUserArrayState("userId", child);
@@ -230,7 +230,7 @@ public class PipelinedData {
   /** Handle the os:ActivitiesRequest element */
   private SocialData createActivityRequest(Element child) throws ElException {
     SocialData expression = new SocialData(child.getAttribute("key"), "activities.get");
-    
+
     copyAttribute("groupId", child, expression, String.class);
     copyAttribute("userId", child, expression, JSONArray.class);
     updateUserArrayState("userId", child);
@@ -298,7 +298,7 @@ public class PipelinedData {
     private final Expression<Boolean> signOwner;
     private final Expression<Boolean> signViewer;
     private final Map<String, Expression<String>> attributes;
-    
+
     private static final Set<String> KNOWN_ATTRIBUTES =
           ImmutableSet.of("authz", "href", "sign_owner", "sign_viewer");
 
@@ -307,18 +307,18 @@ public class PipelinedData {
      */
     public HttpData(Element element, Uri base) throws ElException {
       this.base = base;
-      
+
       // TODO: Spec question;  should authz be EL enabled?
       String authz = element.hasAttribute("authz") ? element.getAttribute("authz") : "none";
       this.authz = Expressions.parse(authz, String.class);
-      
+
       // TODO: Spec question;  should EL values be URL escaped?
       this.href = element.getAttribute("href");
-      
+
       // TODO: Spec question;  should sign_* be EL enabled?
       this.signOwner = booleanExpression(element, "sign_owner");
       this.signViewer = booleanExpression(element, "sign_viewer");
-      
+
       Map<String, Expression<String>> attributes = Maps.newHashMap();
       for (int i = 0; i < element.getAttributes().getLength(); i++) {
         Node attr = element.getAttributes().item(i);
@@ -326,10 +326,10 @@ public class PipelinedData {
           attributes.put(attr.getNodeName(), Expressions.parse(attr.getNodeValue(), String.class));
         }
       }
-      
+
       this.attributes = ImmutableMap.copyOf(attributes);
     }
-    
+
     private HttpData(HttpData data, Substitutions substituter) {
       this.base = data.base;
       this.authz = data.authz;
@@ -338,12 +338,12 @@ public class PipelinedData {
       this.signViewer = data.signViewer;
       this.attributes = data.attributes;
     }
-    
+
     /** Run substitutions over an HttpData */
     public HttpData substitute(Substitutions substituter) {
       return new HttpData(this, substituter);
     }
-    
+
     /**
      * Evaluate expressions and return a RequestAuthenticationInfo.
      * @throws ElException if expression evaluation fails.
@@ -361,7 +361,7 @@ public class PipelinedData {
       for (Map.Entry<String, Expression<String>> attr : attributes.entrySet()) {
         evaluatedAttributes.put(attr.getKey(), attr.getValue().evaluate(context));
       }
-      
+
       return new RequestAuthenticationInfo() {
         public Map<String, String> getAttributes() {
           return evaluatedAttributes;
@@ -384,7 +384,7 @@ public class PipelinedData {
         }
       };
     }
-    
+
     /** Evaluate a boolean expression, choosing a default value if needed */
     private boolean evaluateBooleanExpression(ExpressionContext context,
         Expression<Boolean> expression, boolean defaultValue) throws ElException {
@@ -396,7 +396,7 @@ public class PipelinedData {
       if (value == null) {
         return defaultValue;
       }
-      
+
       return value;
     }
 
@@ -406,11 +406,11 @@ public class PipelinedData {
       if (!element.hasAttribute(attrName)) {
         return null;
       }
-      
+
       return Expressions.parse(element.getAttribute(attrName), Boolean.class);
     }
   }
-  
+
   /**
    * A single social data request.
    */
@@ -465,7 +465,7 @@ public class PipelinedData {
             object.put(name, value);
           }
         } catch (JSONException e) {
-          throw new ElException("Error parsing property \"" + name + "\"", e);
+          throw new ElException("Error parsing property \"" + name + '\"', e);
         }
       }
     }

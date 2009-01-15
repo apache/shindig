@@ -17,13 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +27,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.shindig.social.core.util.JsonObjectToMapMorpher;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Tests the JsonObjectMapMorpher
@@ -47,7 +41,7 @@ public class JsonObjectToMapMorpherTest {
   @Test
   public void testMorphsTo() {
     Morpher m = new JsonObjectToMapMorpher();
-    assertEquals(Map.class, m.morphsTo());
+    assertSame(Map.class, m.morphsTo());
   }
 
   /**

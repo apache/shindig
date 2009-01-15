@@ -131,8 +131,8 @@ public class GadgetOAuthTokenStore {
     if (service == null) {
       throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           "Failed to retrieve OAuth URLs, spec for gadget does not contain OAuth service " +
-          arguments.getServiceName() + ".  Known services: " + 
-          StringUtils.join(oauthSpec.getServices().keySet(), ',') + ".");
+          arguments.getServiceName() + ".  Known services: " +
+          StringUtils.join(oauthSpec.getServices().keySet(), ',') + '.');
     }
     // In theory some one could specify different parameter locations for request token and
     // access token requests, but that's probably not useful.  We just use the request token

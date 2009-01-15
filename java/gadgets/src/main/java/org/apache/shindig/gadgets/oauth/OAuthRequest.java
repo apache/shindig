@@ -314,7 +314,7 @@ public class OAuthRequest {
     if (stateOwner != null && !stateOwner.equals(pageOwner)) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Client state belongs to a different person " +
-          "(state owner=" + stateOwner + ", pageOwner=" + pageOwner + ")");
+          "(state owner=" + stateOwner + ", pageOwner=" + pageOwner + ')');
     }
   }
 

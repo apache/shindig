@@ -96,12 +96,12 @@ public class ModulePrefsTest {
     assertEquals(SPEC_URL.resolve(Uri.parse("author_link")), prefs.getAuthorLink());
     assertEquals("author_aboutme", prefs.getAuthorAboutme());
     assertEquals("author_quote", prefs.getAuthorQuote());
-    assertEquals(true, prefs.getShowStats());
-    assertEquals(true, prefs.getShowInDirectory());
-    assertEquals(true, prefs.getSingleton());
+    assertTrue(prefs.getShowStats());
+    assertTrue(prefs.getShowInDirectory());
+    assertTrue(prefs.getSingleton());
 
-    assertEquals(true, prefs.getFeatures().get("require").getRequired());
-    assertEquals(false, prefs.getFeatures().get("optional").getRequired());
+    assertTrue(prefs.getFeatures().get("require").getRequired());
+    assertFalse(prefs.getFeatures().get("optional").getRequired());
 
     assertEquals("http://example.org",
         prefs.getPreloads().get(0).getHref().toString());

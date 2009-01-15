@@ -142,8 +142,7 @@ public class BeanJsonLibConverter implements BeanConverter {
       Class<?> pojoClass = pojo.getClass();
       if (JSONUtils.isArray(pojoClass)) {
         JSONArray jsonArray = JSONArray.fromObject(pojo);
-        String result = jsonArray.toString();
-        return result;
+        return jsonArray.toString();
       }
       throw jse;
     }

@@ -20,15 +20,20 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.social.ResponseError;
 
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNotNull;
 
 import junit.framework.Assert;
+import static junit.framework.Assert.assertFalse;
+import static junitx.framework.Assert.assertNotEquals;
 
 
 /**
  * Tests Response Item equality methods.
  */
 public class ResponseItemTest {
-  
+
   @Test
   public void testEquals() {
     ResponseItem responseItem = new ResponseItem(ResponseError.BAD_REQUEST, "message1");
@@ -37,19 +42,19 @@ public class ResponseItemTest {
     ResponseItem simpleResponse = new ResponseItem("simple");
     ResponseItem simpleResponseSame = new ResponseItem("simple");
     ResponseItem simpleResponseDifferent = new ResponseItem("simpleDiffernt");
-    Assert.assertTrue(responseItem.hashCode() == responseItemSame.hashCode());
-    Assert.assertTrue(responseItem.equals(responseItem));
-    Assert.assertTrue(responseItem.equals(responseItemSame));
-    Assert.assertFalse(responseItem.hashCode() == responseItemDifferent.hashCode());
-    Assert.assertFalse(responseItem.equals(responseItemDifferent));
-    Assert.assertFalse(responseItem.equals(null));
-    Assert.assertFalse(responseItem.equals("A String"));
-    Assert.assertTrue(simpleResponse.hashCode() == simpleResponseSame.hashCode());
-    Assert.assertTrue(simpleResponse.equals(simpleResponse));
-    Assert.assertTrue(simpleResponse.equals(simpleResponseSame));
-    Assert.assertFalse(simpleResponse.hashCode() == simpleResponseDifferent.hashCode());
-    Assert.assertFalse(simpleResponse.equals(simpleResponseDifferent));
-    Assert.assertFalse(simpleResponse.equals(null));
-    Assert.assertFalse(simpleResponse.equals("A String"));
+    assertEquals(responseItem.hashCode(), responseItemSame.hashCode());
+    assertEquals(responseItem, responseItem);
+    assertEquals(responseItem, responseItemSame);
+    assertNotEquals(responseItem.hashCode(), responseItemDifferent.hashCode());
+    assertFalse(responseItem.equals(responseItemDifferent));
+    assertNotNull(responseItem);
+    assertNotEquals(responseItem, "A String");
+    assertEquals(simpleResponse.hashCode(), simpleResponseSame.hashCode());
+    assertEquals(simpleResponse, simpleResponse);
+    assertEquals(simpleResponse, simpleResponseSame);
+    assertNotSame(simpleResponse.hashCode(), simpleResponseDifferent.hashCode());
+    assertFalse(simpleResponse.equals(simpleResponseDifferent));
+    assertNotNull(simpleResponse);
+    assertNotEquals(simpleResponse, "A String");
   }
 }

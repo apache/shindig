@@ -27,34 +27,34 @@ import java.util.Map;
 
 /**
  * Authentication based on a provided BlobCrypter.
- * 
+ *
  * Wire format is "<container>:<encrypted-and-signed-token>"
- * 
+ *
  * Container is included so different containers can use different security tokens if necessary.
  */
 public class BlobCrypterSecurityToken implements SecurityToken {
-  
+
   private static final int MAX_TOKEN_LIFETIME_SECS = 3600;
-  
+
   private static final String OWNER_KEY = "o";
   private static final String VIEWER_KEY = "v";
   private static final String GADGET_KEY = "g";
   private static final String GADGET_INSTANCE_KEY = "i";
   private static final String TRUSTED_JSON_KEY = "j";
-  
+
   private final BlobCrypter crypter;
   private final String container;
   private final String domain;
-  
+
   private String ownerId;
   private String viewerId;
   private String appUrl;
   private long moduleId;
   private String trustedJson;
-  
+
   /**
    * Create a new security token.
-   * 
+   *
    * @param crypter used for encryption and signing
    * @param container container that is issuing the token
    * @param domain domain to use for signed fetch with default signed fetch key.
@@ -64,17 +64,17 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     this.container = container;
     this.domain = domain;
   }
-  
+
   /**
    * Decrypt and verify a token.  Note this is not public, use BlobCrypterSecurityTokenDecoder
    * instead.
-   * 
+   *
    * @param crypter crypter to use for decryption
    * @param container container that minted the token
    * @param domain oauth_consumer_key to use for signed fetch with default key
    * @param token the encrypted token (just the portion after the first ":")
    * @return the decrypted, verified token.
-   * 
+   *
    * @throws BlobCrypterException
    */
   static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
@@ -91,7 +91,7 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     t.setTrustedJson(values.get(TRUSTED_JSON_KEY));
     return t;
   }
-  
+
   /**
    * Encrypt and sign the token.  The returned value is *not* web safe, it should be URL
    * encoded before being used as a form parameter.
@@ -113,64 +113,64 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     if (trustedJson != null) {
       values.put(TRUSTED_JSON_KEY, trustedJson);
     }
-    return container + ":" + crypter.wrap(values);
+    return container + ':' + crypter.wrap(values);
   }
-  
+
   // Legacy value for signed fetch, opensocial 0.8 prefers opensocial_app_url
   public String getAppId() {
     return appUrl;
   }
-  
+
   public String getAppUrl() {
     return appUrl;
   }
-  
+
   public void setAppUrl(String appUrl) {
     this.appUrl = appUrl;
   }
-  
+
   // Used for oauth_consumer_key for signed fetch with default key.  This is a weird spot for this.
   public String getDomain() {
     return domain;
   }
-  
+
   public long getModuleId() {
     return moduleId;
   }
-  
+
   public void setModuleId(long moduleId) {
     this.moduleId = moduleId;
   }
-  
+
   public String getOwnerId() {
     return ownerId;
   }
-  
+
   public void setOwnerId(String ownerId) {
     this.ownerId = ownerId;
   }
-  
+
   public String getTrustedJson() {
     return trustedJson;
   }
-  
+
   public void setTrustedJson(String trustedJson) {
     this.trustedJson = trustedJson;
   }
-   
+
   // Our tokens are static, we could change this to periodically update the token.
   public String getUpdatedToken() {
     return null;
   }
-  
+
   public String getViewerId() {
     return viewerId;
   }
-  
+
   public void setViewerId(String viewerId) {
     this.viewerId = viewerId;
   }
-  
+
   public boolean isAnonymous() {
     return false;
   }

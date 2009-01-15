@@ -94,6 +94,8 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
+    super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
 
     servlet = new DataServiceServlet();

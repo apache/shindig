@@ -58,7 +58,7 @@ public final class JsonLibConverterUtils {
         if (value == null) {
           LOG.info(indent + key + ":null:na");
         } else {
-          LOG.info(indent + key + ":" + value + ":" + value.getClass());
+          LOG.info(indent + key + ':' + value + ':' + value.getClass());
         }
       }
     }
@@ -78,7 +78,7 @@ public final class JsonLibConverterUtils {
         LOG.info(indent + ":JSONArray " + ((JSONArray) value).size());
         dumpJsonArray((JSONArray) value, indent + "  ");
       } else {
-        LOG.info(indent + ":" + value + ":" + (value == null ? "na" : value.getClass()));
+        LOG.info(indent + ':' + value + ':' + (value == null ? "na" : value.getClass()));
       }
     }
   }

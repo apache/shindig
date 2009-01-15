@@ -28,7 +28,8 @@ public class SubstitutionsTest extends TestCase {
   private Substitutions subst;
 
   @Override
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     subst = new Substitutions();
   }
 

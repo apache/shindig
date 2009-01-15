@@ -38,7 +38,7 @@ public class PersonTest extends TestCase {
 
   public void testGetProfileUrl() throws Exception {
     Person person = new PersonImpl();
-    assertEquals(null, person.getProfileUrl());
+    assertNull(person.getProfileUrl());
 
     String address = "hi";
     person.setProfileUrl(address);
@@ -46,7 +46,7 @@ public class PersonTest extends TestCase {
 
     assertEquals(address, person.getUrls().get(0).getValue());
     assertEquals(Person.PROFILE_URL_TYPE, person.getUrls().get(0).getType());
-    assertEquals(null, person.getUrls().get(0).getLinkText());
+    assertNull(person.getUrls().get(0).getLinkText());
 
     address = "something new";
     person.setProfileUrl(address);
@@ -58,7 +58,7 @@ public class PersonTest extends TestCase {
 
   public void testGetThumbnailUrl() throws Exception {
     Person person = new PersonImpl();
-    assertEquals(null, person.getThumbnailUrl());
+    assertNull(person.getThumbnailUrl());
 
     String url = "hi";
     person.setThumbnailUrl(url);

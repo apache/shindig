@@ -76,7 +76,7 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeMixedObjects() throws Exception {
-    Map<String, ? extends Object> map = ImmutableMap.of(
+    Map<String, ?> map = ImmutableMap.of(
         "integer", Integer.valueOf(100),
         "double", Double.valueOf(233333333333.7d),
         "boolean", Boolean.TRUE,

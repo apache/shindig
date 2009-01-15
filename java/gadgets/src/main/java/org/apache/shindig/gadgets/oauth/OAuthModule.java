@@ -132,7 +132,7 @@ public class OAuthModule extends AbstractModule {
             "  openssl req -newkey rsa:1024 -days 365 -nodes -x509 -keyout testkey.pem \\\n" +
             "     -out testkey.pem -subj '/CN=mytestkey'\n" +
             "  openssl pkcs8 -in testkey.pem -out oauthkey.pem -topk8 -nocrypt -outform PEM\n" +
-            "\n" +
+            '\n' +
             "Then edit gadgets.properties and add these lines:\n" +
             OAUTH_SIGNING_KEY_FILE + "=<path-to-oauthkey.pem>\n" +
             OAUTH_SIGNING_KEY_NAME + "=mykey\n");

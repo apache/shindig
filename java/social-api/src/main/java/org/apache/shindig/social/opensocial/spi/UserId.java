@@ -34,7 +34,7 @@ public class UserId {
 
     static {
       for (Type type : Type.values()) {
-        jsonTypeMap.put("@" + type.name(), type);
+        jsonTypeMap.put('@' + type.name(), type);
       }
     }
     /** Return the Type enum value given a specific jsonType **/
@@ -109,7 +109,7 @@ public class UserId {
           case me:
             return "VIEWER";
           case userId:
-            return "USER(" + userId + ")";
+            return "USER(" + userId + ')';
           default:
               return "UNKNOWN";
         }

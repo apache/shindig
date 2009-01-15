@@ -30,14 +30,14 @@ public class FeatureTest extends TestCase {
     String xml = "<Require feature=\"foo\"/>";
     Feature feature = new Feature(XmlUtil.parse(xml));
     assertEquals("foo", feature.getName());
-    assertEquals(true, feature.getRequired());
+    assertTrue(feature.getRequired());
   }
 
   public void testOptional() throws Exception {
     String xml = "<Optional feature=\"foo\"/>";
     Feature feature = new Feature(XmlUtil.parse(xml));
     assertEquals("foo", feature.getName());
-    assertEquals(false, feature.getRequired());
+    assertFalse(feature.getRequired());
   }
 
   public void testParams() throws Exception {

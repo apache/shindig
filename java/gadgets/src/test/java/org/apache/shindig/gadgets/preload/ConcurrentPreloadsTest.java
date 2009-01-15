@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.preload;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
@@ -67,7 +68,7 @@ public class ConcurrentPreloadsTest {
       withError.toJson();
       fail();
     } catch (PreloadException pe) {
-      assertEquals(pe.getCause().getClass(), RuntimeException.class);
+      assertSame(pe.getCause().getClass(), RuntimeException.class);
     }
 
     // And iteration should continue

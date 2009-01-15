@@ -60,6 +60,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
     db = injector.getInstance(JsonDbOpensocialService.class);
   }
@@ -95,10 +96,10 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
         options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
-    assertEquals(responseItem.getTotalResults(), 4);
+    assertEquals(4, responseItem.getTotalResults());
     // Test a couple of users
-    assertEquals(responseItem.getEntry().get(0).getId(), "john.doe");
-    assertEquals(responseItem.getEntry().get(1).getId(), "jane.doe");
+    assertEquals("john.doe", responseItem.getEntry().get(0).getId());
+    assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
   }
 
   public void testGetExpectedUsersForPlural() throws Exception {
@@ -115,24 +116,24 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         ImmutableSet.of(JOHN_DOE, JANE_DOE), new GroupId(GroupId.Type.friends, null),
        options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
-    assertEquals(responseItem.getTotalResults(), 4);
+    assertEquals(4, responseItem.getTotalResults());
     // Test a couple of users
-    assertEquals(responseItem.getEntry().get(0).getId(), "john.doe");
-    assertEquals(responseItem.getEntry().get(1).getId(), "jane.doe");
+    assertEquals("john.doe", responseItem.getEntry().get(0).getId());
+    assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
   }
 
   public void testGetExpectedActivities() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
         Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
-    assertTrue(responseItem.getTotalResults() == 2);
+    assertSame(2, responseItem.getTotalResults());
   }
 
   public void testGetExpectedActivitiesForPlural() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
         Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
-    assertTrue(responseItem.getTotalResults() == 3);
+    assertSame(3, responseItem.getTotalResults());
   }
 
   public void testGetExpectedActivity() throws Exception {
@@ -167,7 +168,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
 
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).size() == 2);
+    assertSame(2, responseItem.getEntry().get(CANONICAL_USER_ID).size());
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("size"));
   }
@@ -179,12 +180,12 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
 
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).size() == 2);
+    assertSame(2, responseItem.getEntry().get(CANONICAL_USER_ID).size());
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("size"));
 
     assertFalse(responseItem.getEntry().get(JOHN_DOE.getUserId()).isEmpty());
-    assertTrue(responseItem.getEntry().get(JOHN_DOE.getUserId()).size() == 1);
+    assertSame(1, responseItem.getEntry().get(JOHN_DOE.getUserId()).size());
     assertTrue(responseItem.getEntry().get(JOHN_DOE.getUserId()).containsKey("count"));
   }
 
@@ -200,7 +201,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
 
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).size() == 1);
+    assertSame(1, responseItem.getEntry().get(CANONICAL_USER_ID).size());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("size"));
   }
@@ -218,10 +219,10 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
 
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).size() == 3);
+    assertSame(3, responseItem.getEntry().get(CANONICAL_USER_ID).size());
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("count"));
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).get("count").equals("10"));
+    assertEquals("10", responseItem.getEntry().get(CANONICAL_USER_ID).get("count"));
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("newvalue"));
-    assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue").equals("20"));
+    assertEquals("20", responseItem.getEntry().get(CANONICAL_USER_ID).get("newvalue"));
   }
 }

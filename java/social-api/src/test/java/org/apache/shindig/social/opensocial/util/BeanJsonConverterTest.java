@@ -232,8 +232,8 @@ public class BeanJsonConverterTest extends TestCase {
     Person result = beanJsonConverter.convertToObject(jsonPerson, Person.class);
 
     assertEquals(10, result.getAge().intValue());
-    assertEquals(true, result.getHasApp().booleanValue());
-    assertEquals(true, result.getIsViewer());
+    assertTrue(result.getHasApp().booleanValue());
+    assertTrue(result.getIsViewer());
   }
 
 }

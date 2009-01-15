@@ -19,6 +19,7 @@
 package org.apache.shindig.common.cache;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -47,6 +48,6 @@ public class LruCacheTest {
     assertEquals(TEST_CAPACITY, cache.size());
     assertEquals(TEST_CAPACITY, cache.getSize());
     assertEquals(TEST_CAPACITY, cache.getCapacity());
-    assertEquals(null, cache.getElement("0"));
+    assertNull(cache.getElement("0"));
   }
 }

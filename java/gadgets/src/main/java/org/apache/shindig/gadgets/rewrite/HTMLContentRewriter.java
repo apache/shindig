@@ -201,7 +201,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
   protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType) {
     return concatBaseNoGadget +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +
-           "=" + mimeType +
+        '=' + mimeType +
            ((gadgetUri == null) ? "" : "&gadget=" + Utf8UrlCoder.encode(gadgetUri.toString())) +
            "&fp=" + feature.getFingerprint() +'&';
   }
@@ -322,9 +322,9 @@ public class HTMLContentRewriter  implements ContentRewriter {
         if (paramIndex == 1) {
           builder = new StringBuilder(concatBase);
         } else {
-          builder.append("&");
+          builder.append('&');
         }
-        builder.append(paramIndex).append("=")
+        builder.append(paramIndex).append('=')
             .append(URLEncoder.encode(uri.toString(), "UTF-8"));
         if (builder.length() > maxUriLen ||
             uriIx == lastUriIx) {

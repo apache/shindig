@@ -142,7 +142,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Map<String, Object> special = apiValidator.validate(result, new String[] { "newfield" },
         optional, nullfields);
     assertNotNull(special.get("newfield"));
-    assertEquals(String.class, special.get("newfield").getClass());
+    assertSame(String.class, special.get("newfield").getClass());
     assertEquals("nonsense", special.get("newfield"));
 
     // convert back into an object Tree
@@ -175,7 +175,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Map<String, Object> standard = apiValidator.validate(result, PERSON_FIELDS, optional,
         nullfields);
     assertNotNull(standard.get("id"));
-    assertEquals(String.class, standard.get("id").getClass());
+    assertSame(String.class, standard.get("id").getClass());
     assertEquals(id, standard.get("id"));
 
     assertNotNull(standard.get("name"));
@@ -184,7 +184,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     ApiValidator.dump(nameJSON);
 
     assertNotNull(nameJSON.get("unstructured"));
-    assertEquals(String.class, nameJSON.get("unstructured").getClass());
+    assertSame(String.class, nameJSON.get("unstructured").getClass());
     assertEquals(name, nameJSON.get("unstructured"));
 
     // additional name
@@ -195,7 +195,7 @@ public class BeanJsonLibConverterTest extends TestCase {
   public void testPersonToJson() throws Exception {
     String result = beanJsonConverter.convertToString(johnDoe);
     if (outputInfo) {
-      log.info("JSON (" + result + ")");
+      log.info("JSON (" + result + ')');
     }
     Person parsedPerson = beanJsonConverter.convertToObject(result, Person.class);
 
@@ -240,7 +240,7 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     String result = beanJsonConverter.convertToString(activity);
     if (outputInfo) {
-      log.info("JSON (" + result + ")");
+      log.info("JSON (" + result + ')');
     }
     Activity parsedActivity = beanJsonConverter.convertToObject(result, Activity.class);
     assertEquals(activity.getUserId(), parsedActivity.getUserId());
@@ -272,7 +272,7 @@ public class BeanJsonLibConverterTest extends TestCase {
 
     String result = beanJsonConverter.convertToString(map);
     if (outputInfo) {
-      log.info("JSON (" + result + ")");
+      log.info("JSON (" + result + ')');
     }
     // there is introspection that can tell jsonobject -> bean converter what a
     // map should contain, so we have to tell it
@@ -281,7 +281,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Map<?, ?> parsedMap = beanJsonConverter.convertToObject(result, Map.class);
 
     if (outputInfo) {
-      log.info("Dumping Map (" + parsedMap + ")");
+      log.info("Dumping Map (" + parsedMap + ')');
     }
     ApiValidator.dump(parsedMap);
 
@@ -305,7 +305,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     list.add(item2Map);
     String result = beanJsonConverter.convertToString(list);
     if (outputInfo) {
-      log.info("JSON (" + result + ")");
+      log.info("JSON (" + result + ')');
     }
     Map<?, ?>[] parsedList = beanJsonConverter.convertToObject(result, Map[].class);
 
@@ -317,7 +317,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     String[] colors = { "blue", "green", "aquamarine" };
     String result = beanJsonConverter.convertToString(colors);
     if (outputInfo) {
-      log.info("JSON (" + result + ")");
+      log.info("JSON (" + result + ')');
     }
     String[] parsedColors = beanJsonConverter.convertToObject(result, String[].class);
     assertEquals(colors.length, parsedColors.length);

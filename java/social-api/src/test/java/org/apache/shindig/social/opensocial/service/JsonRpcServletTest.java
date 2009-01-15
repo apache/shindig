@@ -61,6 +61,7 @@ public class JsonRpcServletTest extends EasyMockTestCase {
   private BeanXStreamConverter xmlConverter;
 
   @Override protected void setUp() throws Exception {
+    super.setUp();
     servlet = new JsonRpcServlet();
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);

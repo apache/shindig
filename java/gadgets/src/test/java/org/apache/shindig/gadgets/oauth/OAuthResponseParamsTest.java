@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * 
+ *
  */
 public class OAuthResponseParamsTest {
 
@@ -192,10 +192,10 @@ public class OAuthResponseParamsTest {
         .setHeader("Date", "Date: Fri, 09 Jan 2009 00:35:08 GMT")
         .setResponseString(body);
     String out = OAuthResponseParams.filterSecrets(resp.create().toString());
-    if (out.indexOf("oauth_token_secret") != -1) {
+    if (out.contains("oauth_token_secret")) {
       checkStringContains("should remove secret", out, "oauth_token_secret=REMOVED");
     }
-    if (out.indexOf("oauth_session_handle") != -1) {
+    if (out.contains("oauth_session_handle")) {
       checkStringContains("should remove handle", out, "oauth_session_handle=REMOVED");
     }
     return out;
@@ -228,13 +228,13 @@ public class OAuthResponseParamsTest {
 
   private void checkStringContains(String text, String expected) {
     if (!text.contains(expected)) {
-      fail("expected [" + expected + "], got + [" + text + "]");
+      fail("expected [" + expected + "], got + [" + text + ']');
     }
   }
 
   private void checkStringContains(String message, String text, String expected) {
     if (!text.contains(expected)) {
-      fail(message + ", expected [" + expected + "], got + [" + text + "]");
+      fail(message + ", expected [" + expected + "], got + [" + text + ']');
     }
   }
 }

@@ -54,7 +54,8 @@ public class MakeRequestServletTest extends ServletTestFixture {
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 
   @Override
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     servlet.setMakeRequestHandler(handler);
     expect(request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM))

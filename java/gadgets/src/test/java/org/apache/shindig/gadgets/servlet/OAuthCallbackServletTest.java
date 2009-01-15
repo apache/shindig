@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.junit.Test;
+import org.junit.Assert;
 
 /**
  * Tests for OAuth callback servlet.
@@ -35,6 +36,6 @@ public class OAuthCallbackServletTest extends ServletTestFixture {
     verify();
     assertEquals("text/html; charset=UTF-8", fixture.recorder.getContentType());
     String body = fixture.recorder.getResponseAsString();
-    assertTrue("body is " + body, body.indexOf("window.close()") != -1);
+    Assert.assertNotSame("body is " + body, body.indexOf("window.close()"), -1);
   }
 }

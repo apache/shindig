@@ -224,7 +224,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = Maps.newHashMap();
     String allFieldsParam = "";
     for (String allField : Person.Field.ALL_FIELDS) {
-      allFieldsParam += allField + ",";
+      allFieldsParam += allField + ',';
     }
     extraParams.put("fields", allFieldsParam);
 

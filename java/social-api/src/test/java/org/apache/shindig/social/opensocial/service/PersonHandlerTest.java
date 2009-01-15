@@ -68,6 +68,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     token = new FakeGadgetToken();
     personService = EasyMock.createMock(PersonService.class);
 
