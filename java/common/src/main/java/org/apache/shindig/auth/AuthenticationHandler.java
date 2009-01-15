@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.auth;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -49,4 +51,43 @@ public interface AuthenticationHandler {
      * @return Header value for a WWW-Authenticate Header
      */
   String getWWWAuthenticateHeader(String realm);
+ 
+  /**
+   * An exception thrown by an AuthenticationHandler in the situation where
+   * a malformed credential or token is passed. A handler which throws this exception
+   * is required to include the appropriate error state in the servlet response
+   */
+  public static final class InvalidAuthenticationException extends RuntimeException {
+ 
+     private Map<String,String> additionalHeaders;
+     private String redirect;
+ 
+     /**
+      * @param message Message to output in error response
+      * @param cause Underlying exception
+      */
+     public InvalidAuthenticationException(String message, Throwable cause) {
+       this(message, cause, null, null);
+     }
+ 
+     /**
+      * @param message Message to output in error response
+      * @param additionalHeaders Headers to add to error response
+      * @param cause Underlying exception
+      */
+     public InvalidAuthenticationException(String message, Throwable cause,
+         Map<String,String> additionalHeaders, String redirect) {
+       super(message, cause);
+       this.additionalHeaders = additionalHeaders;
+       this.redirect = redirect;
+     }
+ 
+     public Map<String, String> getAdditionalHeaders() {
+       return additionalHeaders;
+     }
+ 
+     public String getRedirect() {
+       return redirect;
+     }
+   }
 }

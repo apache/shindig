@@ -23,12 +23,16 @@ import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -47,6 +51,9 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
   private List<AuthenticationHandler> handlers;
 
+  private static final Logger logger = Logger.getLogger(
+      AuthenticationServletFilter.class.getName());
+
   @Inject
   public void setAuthenticationHandlers(List<AuthenticationHandler> handlers) {
     this.handlers = handlers;
@@ -63,20 +70,36 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
-    for (AuthenticationHandler handler : handlers) {
-      SecurityToken token = handler.getSecurityTokenFromRequest(req);
-      if (token != null) {
-        new AuthInfo(req).setAuthType(handler.getName()).setSecurityToken(token);
-        chain.doFilter(req, response);
-        return;
-      } else {
+
+    try {
+      for (AuthenticationHandler handler : handlers) {
+        SecurityToken token = handler.getSecurityTokenFromRequest(req);
+        if (token != null) {
+          new AuthInfo(req).setAuthType(handler.getName()).setSecurityToken(token);
+          chain.doFilter(req, response);
+          return;
+        } else {
           String authHeader = handler.getWWWAuthenticateHeader(realm);
           if (authHeader != null) {
               resp.addHeader("WWW-Authenticate", authHeader);
           }
+        }
+      }
+
+      // We did not find a security token so we will just pass null
+      chain.doFilter(req, response);
+    } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
+      logger.log(Level.INFO, iae.getMessage(), iae.getCause());
+      if (iae.getAdditionalHeaders() != null) {
+        for (Map.Entry<String,String> entry : iae.getAdditionalHeaders().entrySet()) {
+          resp.addHeader(entry.getKey(), entry.getValue());
+        }
+      }
+      if (iae.getRedirect() != null) {
+        resp.sendRedirect(iae.getRedirect());
+      } else {
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, iae.getMessage());
       }
     }
-    // We did not find a security token so we will just pass null
-    chain.doFilter(req, response);
   }
 }
