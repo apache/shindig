@@ -71,7 +71,6 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
     }
   }
 
-    @Override
     public String getWWWAuthenticateHeader(String realm) {
        return String.format("OAuth realm=\"%s\"", realm);
     }
