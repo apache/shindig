@@ -65,7 +65,7 @@ public class GuiceServletContextListener implements ServletContextListener {
     context.setAttribute(INJECTOR_ATTRIBUTE, injector);
 
     try {
-      if (jmxInitialized == false) {
+      if (!jmxInitialized) {
         Manager.manage("ShindigGuiceContext", injector);
         jmxInitialized = true;
       }

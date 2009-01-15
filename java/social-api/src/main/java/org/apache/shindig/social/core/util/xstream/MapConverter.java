@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * converts a map to and from the form &lt;container&gt;
@@ -104,13 +103,11 @@ public class MapConverter extends AbstractCollectionConverter {
    * @param context
    *          the unmarshalling context.
    * @return the object representing the stream.
-   * @see com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks
-   *      .xstream.io.HierarchicalStreamReader,
+   * @see com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks.xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
   @Override
-  public Object unmarshal(HierarchicalStreamReader reader,
-      UnmarshallingContext context) {
+  public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
     Map<String, Object> m = Maps.newConcurrentHashMap();
     reader.moveDown();
     while (reader.hasMoreChildren()) {
@@ -162,15 +159,13 @@ public class MapConverter extends AbstractCollectionConverter {
    * @param clazz
    *          the type being converted.
    * @return true if the type supplied is a form of Map.
-   * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang
-   *      .Class)
+   * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
    */
   @Override
   @SuppressWarnings("unchecked")
   // API is not generic
   public boolean canConvert(Class clazz) {
-    boolean convert = (Map.class.isAssignableFrom(clazz));
-    return convert;
+    return (Map.class.isAssignableFrom(clazz));
   }
 
 }

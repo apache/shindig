@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.util.atom;
 
 import com.thoughtworks.xstream.converters.SingleValueConverter;
+import com.google.common.base.Preconditions;
 
 /**
  * Serializes attributes correctly.
@@ -29,7 +30,7 @@ public class AtomAttributeConverter implements SingleValueConverter {
    * @see com.thoughtworks.xstream.converters.SingleValueConverter#fromString(java.lang.String)
    */
   public Object fromString(String value) {
-    return new AtomAttribute(value);
+    return new AtomAttribute(Preconditions.checkNotNull(value));
   }
 
   /**

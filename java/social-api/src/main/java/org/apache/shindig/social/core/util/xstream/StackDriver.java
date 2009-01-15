@@ -46,15 +46,14 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link StackDriver}, wrapping a {@link HierarchicalStreamDriver}
    * and updating a {@link WriterStack}.
-   * 
+   *
    * @param parent
    *          the driver to be wrapped
    * @param writerStack
    *          the thread safe writer stack that records where the writer is.
    * @param map
    */
-  public StackDriver(HierarchicalStreamDriver parent, WriterStack writerStack,
-      Map<String, NamespaceSet> map) {
+  public StackDriver(HierarchicalStreamDriver parent, WriterStack writerStack, Map<String, NamespaceSet> map) {
     this.parent = parent;
     this.writerStack = writerStack;
     this.namespaces = map;
@@ -63,12 +62,11 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamReader}, using the wrapped
    * {@link HierarchicalStreamDriver}.
-   * 
+   *
    * @param reader
    *          the Reader that will be used to read from the underlying stream
    * @return the reader
-   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createReader(java.
-   *      io.Reader)
+   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createReader(java.io.Reader)
    */
   public HierarchicalStreamReader createReader(Reader reader) {
     return parent.createReader(reader);
@@ -77,13 +75,12 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamReader}, using the wrapped
    * {@link HierarchicalStreamDriver}.
-   * 
+   *
    * @param inputStream
    *          the input stream that will be used to read from the underlying
    *          stream
    * @return the reader
-   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createReader(java.
-   *      io.InputStream)
+   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createReader(java.io.InputStream)
    */
   public HierarchicalStreamReader createReader(InputStream inputStream) {
     return parent.createReader(inputStream);
@@ -92,12 +89,11 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamWriter} that tracks the path to the
    * current element based on a {@link Writer}.
-   * 
+   *
    * @param writer
    *          the underlying writer that will perform the writes.
    * @return the writer
-   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createWriter(java.
-   *      io.Writer)
+   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createWriter(java.io.Writer)
    */
   public HierarchicalStreamWriter createWriter(Writer writer) {
     HierarchicalStreamWriter parentWriter = parent.createWriter(writer);
@@ -107,12 +103,11 @@ public class StackDriver implements HierarchicalStreamDriver {
   /**
    * Create a {@link HierarchicalStreamWriter} that tracks the path to the
    * current element based on a {@link OutputStream}.
-   * 
+   *
    * @param outputStream
    *          the underlying output stream that will perform the writes.
    * @return the writer
-   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createWriter(java.
-   *      io.Writer)
+   * @see com.thoughtworks.xstream.io.HierarchicalStreamDriver#createWriter(java.io.Writer)
    */
   public HierarchicalStreamWriter createWriter(OutputStream outputStream) {
     HierarchicalStreamWriter parentWriter = parent.createWriter(outputStream);

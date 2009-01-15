@@ -47,8 +47,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
   @SuppressWarnings("unchecked")
   @Override
   public boolean canConvert(Class clazz) {
-    boolean convert = (RestfulCollection.class.isAssignableFrom(clazz));
-    return convert;
+    return (RestfulCollection.class.isAssignableFrom(clazz));
   }
 
   /**
@@ -59,8 +58,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
    *      com.thoughtworks.xstream.converters.MarshallingContext)
    */
   @Override
-  public void marshal(Object source, HierarchicalStreamWriter writer,
-      MarshallingContext context) {
+  public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 
     RestfulCollection<?> collection = (RestfulCollection<?>) source;
     writer.startNode("startIndex");
@@ -93,8 +91,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
   @Override
-  public Object unmarshal(HierarchicalStreamReader arg0,
-      UnmarshallingContext arg1) {
+  public Object unmarshal(HierarchicalStreamReader arg0, UnmarshallingContext arg1) {
     // TODO Auto-generated method stub
     return null;
   }

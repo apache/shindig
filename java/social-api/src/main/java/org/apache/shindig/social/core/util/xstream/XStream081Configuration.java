@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
 import com.thoughtworks.xstream.converters.extended.ISO8601GregorianCalendarConverter;
 import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
@@ -55,9 +55,7 @@ import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -69,257 +67,190 @@ public class XStream081Configuration implements XStreamConfiguration {
    * Defines the type of the list container when at the top level where there
    * are no methods to specify the name of the list.
    */
-  private static final Map<ConverterSet, List<ClassFieldMapping>> listElementMappingList = Maps.newHashMap();
+  private static final Map<ConverterSet, List<ClassFieldMapping>> listElementMappingList =
+      DefaultedEnumMap.init(ConverterSet.class,  ConverterSet.DEFAULT);
+
   /**
    * Specifies a priority sorted list of Class to Element Name mappings.
    */
-  private static final Map<ConverterSet, List<ClassFieldMapping>> elementMappingList = Maps.newHashMap();
+  private static final Map<ConverterSet, List<ClassFieldMapping>> elementMappingList =
+      DefaultedEnumMap.init(ConverterSet.class, ConverterSet.DEFAULT);
+
   /**
    * A list of omits, the potential field is the key, and if the class which the
    * field is in, is also in the list, the field is supressed.
    */
-  private static final Map<ConverterSet, Map<String, Class<?>[]>> omitMap = Maps.newHashMap();
+  private static final Map<ConverterSet, ImmutableMultimap<String, Class<?>>> omitMap = ImmutableMap.of(ConverterSet.DEFAULT,
+      ImmutableMultimap.<String,Class<?>>builder()
+          .put("isOwner", Person.class)
+          .put("isViewer", Person.class).build());
+
   /**
    * Maps elements names to classes.
    */
-  private static final Map<ConverterSet, Map<String, Class<?>>> elementClassMap = Maps.newHashMap();
-  private static final Map<ConverterSet, List<ImplicitCollectionFieldMapping>> itemFieldMappings = Maps.newHashMap();
-  private static final Map<ConverterSet, List<InterfaceFieldAliasMapping>> fieldAliasMappingList = Maps.newHashMap();
-  private static final Map<String, NamespaceSet> namepaces = Maps.newHashMap();
+  private static final Map<ConverterSet, Map<String, Class<?>>> elementClassMap = DefaultedEnumMap.init(ConverterSet.class,  ConverterSet.DEFAULT);
+  private static final Map<ConverterSet, List<ImplicitCollectionFieldMapping>> itemFieldMappings = DefaultedEnumMap.init(ConverterSet.class, ConverterSet.DEFAULT);
+  private static final Map<ConverterSet, List<InterfaceFieldAliasMapping>> fieldAliasMappingList = DefaultedEnumMap.init(ConverterSet.class, ConverterSet.DEFAULT);
+
   private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
   private static final String OS_NS = "http://ns.opensocial.org/2008/opensocial";
   private static final String OSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1";
 
-  static {
+
+  private static final Map<String, NamespaceSet> NAMESPACES = initNameSpace();
+
+  private static Map<String, NamespaceSet> initNameSpace() {
     // configure the name space mapping. This does not need to be all the elments in the
     // namespace, just the point of translation from one namespace to another.
     // It would have been good to use a standard parser/serializer approach, but
     // the xstream namespace implementation does not work exactly how we need it to.
     NamespaceSet atom = new NamespaceSet();
     atom.addNamespace("xmlns", ATOM_NS);
-    atom.addNamespace("xmlns:osearch",OSEARCH_NS);
-    atom.addPrefixedElement("totalResults","osearch:totalResults");
-    atom.addPrefixedElement("startIndex","osearch:startIndex");
-    atom.addPrefixedElement("itemsPerPage","osearch:itemsPerPage");
-    namepaces.put("feed", atom);
+    atom.addNamespace("xmlns:osearch", OSEARCH_NS);
+    atom.addPrefixedElement("totalResults", "osearch:totalResults");
+    atom.addPrefixedElement("startIndex", "osearch:startIndex");
+    atom.addPrefixedElement("itemsPerPage", "osearch:itemsPerPage");
+
     NamespaceSet os = new NamespaceSet();
     atom.addNamespace("xmlns", OS_NS);
-    namepaces.put("person", os);
-    namepaces.put("activity", os);
-    namepaces.put("account", os);
-    namepaces.put("address", os);
-    namepaces.put("bodyType", os);
-    namepaces.put("message", os);
-    namepaces.put("mediaItem", os);
-    namepaces.put("name", os);
-    namepaces.put("url", os);
-    namepaces.put("reponse", os);
-    namepaces.put("appdata", os);
 
-    List<ClassFieldMapping> defaultElementMappingList = Lists.newArrayList();
-    // this is order specific, so put the more specified interfaces at the top.
-    defaultElementMappingList.add(new ClassFieldMapping("feed",
-        AtomFeed.class));
-    defaultElementMappingList.add(new ClassFieldMapping("content",
-        AtomContent.class));
+    return ImmutableMap.<String, NamespaceSet>builder().
+        put("feed", atom)
+        .put("person", os)
+        .put("activity", os)
+        .put("account", os)
+        .put("address", os)
+        .put("bodyType", os)
+        .put("message", os)
+        .put("mediaItem", os)
+        .put("name", os)
+        .put("url", os)
+        .put("reponse", os)
+        .put("appdata", os).
+            build();
+  }
 
-    defaultElementMappingList.add(new ClassFieldMapping("activity",
-        Activity.class));
-    defaultElementMappingList.add(new ClassFieldMapping("account",
-        Account.class));
-    defaultElementMappingList.add(new ClassFieldMapping("address",
-        Address.class));
-    defaultElementMappingList.add(new ClassFieldMapping("bodyType",
-        BodyType.class));
-    defaultElementMappingList.add(new ClassFieldMapping("message",
-        Message.class));
-    defaultElementMappingList.add(new ClassFieldMapping("mediaItem",
-        MediaItem.class));
-    defaultElementMappingList.add(new ClassFieldMapping("name", Name.class));
-    defaultElementMappingList.add(new ClassFieldMapping("organization",
-        Organization.class));
-    defaultElementMappingList
-        .add(new ClassFieldMapping("person", Person.class));
-    defaultElementMappingList.add(new ClassFieldMapping("url", Url.class));
-    // this is an example of a class field mapping with context. If
-    // ListField is mapped inside an element named emails, replace the element
-    // name
-    // that would have been defiend as fqcn ListField with email
+  static {
+    elementMappingList.put(ConverterSet.DEFAULT, ImmutableList.of(
+        // this is order specific, so put the more specified interfaces at the top.
+        new ClassFieldMapping("feed", AtomFeed.class),
+        new ClassFieldMapping("content", AtomContent.class),
 
-    defaultElementMappingList.add(new ClassFieldMapping("ListField",
-        ListField.class));
+        new ClassFieldMapping("activity", Activity.class),
+        new ClassFieldMapping("account", Account.class),
+        new ClassFieldMapping("address", Address.class),
+        new ClassFieldMapping("bodyType", BodyType.class),
+        new ClassFieldMapping("message", Message.class),
+        new ClassFieldMapping("mediaItem", MediaItem.class),
+        new ClassFieldMapping("name", Name.class),
+        new ClassFieldMapping("organization", Organization.class),
+        new ClassFieldMapping("person", Person.class),
+        new ClassFieldMapping("url", Url.class),
+        // this is an example of a class field mapping with context. If
+        // ListField is mapped inside an element named emails, replace the element
+        // name
+        // that would have been defiend as fqcn ListField with email
 
-    // some standard mappings not needed for runtime, but used in test, at the
-    // bottom so as not
-    // to conflict with other mappings.
+        new ClassFieldMapping("ListField", ListField.class),
 
-    defaultElementMappingList.add(new ClassFieldMapping("response",
-        RestfulCollection.class));
-    defaultElementMappingList.add(new ClassFieldMapping("appdata",
-        DataCollection.class));
-    defaultElementMappingList.add(new ClassFieldMapping("list", List.class));
-    defaultElementMappingList.add(new ClassFieldMapping("map", Map.class));
+        // some standard mappings not needed for runtime, but used in test, at the
+        // bottom so as not
+        // to conflict with other mappings.
 
-    elementMappingList.put(ConverterSet.DEFAULT, defaultElementMappingList);
+        new ClassFieldMapping("response", RestfulCollection.class),
+        new ClassFieldMapping("appdata", DataCollection.class),
+        new ClassFieldMapping("list", List.class),
+        new ClassFieldMapping("map", Map.class))
+    );
 
     // element setup for RestfullCollection Responses
 
-    List<ClassFieldMapping> collectionElementMappingList = Lists.newArrayList();
+    elementMappingList.put(ConverterSet.COLLECTION, ImmutableList.of(
+        new ClassFieldMapping("feed", AtomFeed.class),
+        new ClassFieldMapping("content", AtomContent.class),
 
-    collectionElementMappingList.add(new ClassFieldMapping("feed",
-        AtomFeed.class));
-    collectionElementMappingList.add(new ClassFieldMapping("content",
-        AtomContent.class));
+        new ClassFieldMapping("activity", Activity.class),
+        new ClassFieldMapping("account", Account.class),
+        new ClassFieldMapping("address", Address.class),
+        new ClassFieldMapping("bodyType", BodyType.class),
+        new ClassFieldMapping("message", Message.class),
+        new ClassFieldMapping("mediaItem", MediaItem.class),
+        new ClassFieldMapping("name", Name.class),
+        new ClassFieldMapping("organization", Organization.class),
+        new ClassFieldMapping("person", Person.class),
+        new ClassFieldMapping("url", Url.class),
+        // this is an example of a class field mapping with context. If
+        // ListField is mapped inside an element named emails, replace the element
+        // name that would have been defiend as fqcn ListField with email
 
-    collectionElementMappingList.add(new ClassFieldMapping("activity",
-        Activity.class));
-    collectionElementMappingList.add(new ClassFieldMapping("account",
-        Account.class));
-    collectionElementMappingList.add(new ClassFieldMapping("address",
-        Address.class));
-    collectionElementMappingList.add(new ClassFieldMapping("bodyType",
-        BodyType.class));
-    collectionElementMappingList.add(new ClassFieldMapping("message",
-        Message.class));
-    collectionElementMappingList.add(new ClassFieldMapping("mediaItem",
-        MediaItem.class));
-    collectionElementMappingList.add(new ClassFieldMapping("name", Name.class));
-    collectionElementMappingList.add(new ClassFieldMapping("organization",
-        Organization.class));
-    collectionElementMappingList.add(new ClassFieldMapping("person",
-        Person.class));
-    collectionElementMappingList.add(new ClassFieldMapping("url", Url.class));
-    // this is an example of a class field mapping with context. If
-    // ListField is mapped inside an element named emails, replace the element
-    // name
-    // that would have been defiend as fqcn ListField with email
+        //     new ClassFieldMapping("emails", "email", ListField.class),
+        //     new ClassFieldMapping("phoneNumbers","phone", ListField.class),
+        new ClassFieldMapping("ListField", ListField.class),
 
-    // collectionElementMappingList.add(new ClassFieldMapping("emails", "email",
-    // ListField.class));
-    // collectionElementMappingList.add(new ClassFieldMapping("phoneNumbers",
-    // "phone", ListField.class));
-    collectionElementMappingList.add(new ClassFieldMapping("ListField",
-        ListField.class));
+        // some standard mappings not needed for runtime, but used in test, at the
+        // bottom so as not to conflict with other mappings.
 
-    // some standard mappings not needed for runtime, but used in test, at the
-    // bottom so as not
-    // to conflict with other mappings.
+        new ClassFieldMapping("response", RestfulCollection.class),
+        new ClassFieldMapping("list", List.class),
+        new ClassFieldMapping("map", Map.class))
+    );
 
-    collectionElementMappingList.add(new ClassFieldMapping("response",
-        RestfulCollection.class));
-    collectionElementMappingList.add(new ClassFieldMapping("list", List.class));
-    collectionElementMappingList.add(new ClassFieldMapping("map", Map.class));
-
-    elementMappingList.put(ConverterSet.COLLECTION,
-        collectionElementMappingList);
-
-    // ignore these fields in the specified classes.
-    // Entries here might indicate a hole in the spec.
-    // This not in the XSD for 81, but is in the wording of the spec.
-    // omitMap.put("addresses", new Class[] { Person.class });
-    Map<String, Class<?>[]> defaultOmitMap = Maps.newHashMap();
-    defaultOmitMap.put("isOwner", new Class[] { Person.class });
-    defaultOmitMap.put("isViewer", new Class[] { Person.class });
-    omitMap.put(ConverterSet.DEFAULT, defaultOmitMap);
-
-    Map<String, Class<?>> defaultElementClassMap = Maps.newHashMap();
-    defaultElementClassMap.put("feed", AtomFeed.class);
-    defaultElementClassMap.put("content", AtomContent.class);
-    defaultElementClassMap.put("person", Person.class);
-    defaultElementClassMap.put("email", ListField.class);
-    defaultElementClassMap.put("phone", ListField.class);
-    defaultElementClassMap.put("list", ArrayList.class);
-    defaultElementClassMap.put("map", ConcurrentHashMap.class);
-    defaultElementClassMap.put("appdata", DataCollection.class);
-    defaultElementClassMap.put("activity", Activity.class);
-    defaultElementClassMap.put("account", Account.class);
-    defaultElementClassMap.put("address", Address.class);
-    defaultElementClassMap.put("bodyType", BodyType.class);
-    defaultElementClassMap.put("message", Message.class);
-    defaultElementClassMap.put("mediaItem", MediaItem.class);
-    defaultElementClassMap.put("name", Name.class);
-    defaultElementClassMap.put("organization", Organization.class);
-    defaultElementClassMap.put("person", Person.class);
-    defaultElementClassMap.put("url", Url.class);
-    defaultElementClassMap.put("listField", ListField.class);
-    elementClassMap.put(ConverterSet.DEFAULT, defaultElementClassMap);
-
-    List<ImplicitCollectionFieldMapping> defaultItemFieldMappings = Lists.newArrayList();
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        AtomFeed.class, "entry", AtomEntry.class, "entry"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        AtomContent.class, "entry", AtomKeyValue.class, "entry"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "books", String.class, "books"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "cars", String.class, "cars"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "heroes", String.class, "heroes"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "food", String.class, "food"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "interests", String.class, "interests"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "languagesSpoken", String.class, "languagesSpoken"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "movies", String.class, "movies"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "music", String.class, "music"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "quotes", String.class, "quotes"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "sports", String.class, "sports"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "tags", String.class, "tags"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "turnOns", String.class, "turnOns"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "turnOffs", String.class, "turnOffs"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "tvShows", String.class, "tvShows"));
-
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "emails", ListField.class, "emails"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "phoneNumbers", ListField.class, "phoneNumbers"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "ims", ListField.class, "ims"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "photos", ListField.class, "photos"));
-
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "activities", Activity.class, "activities"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "addresses", Address.class, "addresses"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "organizations", Organization.class, "organizations"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "urls", Url.class, "urls"));
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Person.class, "lookingFor", EnumImpl.class, "lookingFor"));
-
-    defaultItemFieldMappings.add(new ImplicitCollectionFieldMapping(
-        Activity.class, "mediaItems", MediaItem.class, "mediaItems"));
-
-    itemFieldMappings.put(ConverterSet.DEFAULT, defaultItemFieldMappings);
-
-    List<ClassFieldMapping> defaultListElementMappingList = Lists.newArrayList();
-    listElementMappingList.put(ConverterSet.DEFAULT,
-        defaultListElementMappingList);
-
-    List<InterfaceFieldAliasMapping> defaultFieldAliasMappingList = Lists.newArrayList();
-    // defaultFieldAliasMappingList.add(new
-    // InterfaceFieldAliasMapping("address",ListField.class,"value","urls"));
-    // defaultFieldAliasMappingList.add(new
-    // InterfaceFieldAliasMapping("address",
-    // ListField.class,"value","profileSong"));
-    // defaultFieldAliasMappingList.add(new
-    // InterfaceFieldAliasMapping("address",
-    // ListField.class,"value","profileVideo"));
+    elementClassMap.put(ConverterSet.DEFAULT, new ImmutableMap.Builder<String, Class<?>>()
+        .put("feed", AtomFeed.class)
+        .put("content", AtomContent.class)
+        .put("email", ListField.class)
+        .put("phone", ListField.class)
+        .put("list", ArrayList.class)
+        .put("map", ConcurrentHashMap.class)
+        .put("appdata", DataCollection.class)
+        .put("activity", Activity.class)
+        .put("account", Account.class)
+        .put("address", Address.class)
+        .put("bodyType", BodyType.class)
+        .put("message", Message.class)
+        .put("mediaItem", MediaItem.class)
+        .put("name", Name.class)
+        .put("organization", Organization.class)
+        .put("person", Person.class)
+        .put("url", Url.class)
+        .put("listField", ListField.class).build()
+    );
 
 
-    fieldAliasMappingList.put(ConverterSet.DEFAULT,
-        defaultFieldAliasMappingList);
+    itemFieldMappings.put(ConverterSet.DEFAULT, ImmutableList.of(
+        new ImplicitCollectionFieldMapping(AtomFeed.class, "entry", AtomEntry.class, "entry"),
+        new ImplicitCollectionFieldMapping(AtomContent.class, "entry", AtomKeyValue.class, "entry"),
+        new ImplicitCollectionFieldMapping(Person.class, "books", String.class, "books"),
+        new ImplicitCollectionFieldMapping(Person.class, "cars", String.class, "cars"),
+        new ImplicitCollectionFieldMapping(Person.class, "heroes", String.class, "heroes"),
+        new ImplicitCollectionFieldMapping(Person.class, "food", String.class, "food"),
+        new ImplicitCollectionFieldMapping(Person.class, "interests", String.class, "interests"),
+        new ImplicitCollectionFieldMapping(Person.class, "languagesSpoken", String.class, "languagesSpoken"),
+        new ImplicitCollectionFieldMapping(Person.class, "movies", String.class, "movies"),
+        new ImplicitCollectionFieldMapping(Person.class, "music", String.class, "music"),
+        new ImplicitCollectionFieldMapping(Person.class, "quotes", String.class, "quotes"),
+        new ImplicitCollectionFieldMapping(Person.class, "sports", String.class, "sports"),
+        new ImplicitCollectionFieldMapping(Person.class, "tags", String.class, "tags"),
+        new ImplicitCollectionFieldMapping(Person.class, "turnOns", String.class, "turnOns"),
+        new ImplicitCollectionFieldMapping(Person.class, "turnOffs", String.class, "turnOffs"),
+        new ImplicitCollectionFieldMapping(Person.class, "tvShows", String.class, "tvShows"),
+
+        new ImplicitCollectionFieldMapping(Person.class, "emails", ListField.class, "emails"),
+        new ImplicitCollectionFieldMapping(Person.class, "phoneNumbers", ListField.class, "phoneNumbers"),
+        new ImplicitCollectionFieldMapping(Person.class, "ims", ListField.class, "ims"),
+        new ImplicitCollectionFieldMapping(Person.class, "photos", ListField.class, "photos"),
+
+        new ImplicitCollectionFieldMapping(Person.class, "activities", Activity.class, "activities"),
+        new ImplicitCollectionFieldMapping(Person.class, "addresses", Address.class, "addresses"),
+        new ImplicitCollectionFieldMapping(Person.class, "organizations", Organization.class, "organizations"),
+        new ImplicitCollectionFieldMapping(Person.class, "urls", Url.class, "urls"),
+        new ImplicitCollectionFieldMapping(Person.class, "lookingFor", EnumImpl.class, "lookingFor"),
+
+        new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
+    );
+
+    listElementMappingList.put(ConverterSet.DEFAULT, ImmutableList.<ClassFieldMapping>of());
+    fieldAliasMappingList.put(ConverterSet.DEFAULT, ImmutableList.<InterfaceFieldAliasMapping>of());
   }
 
   /**
@@ -328,103 +259,46 @@ public class XStream081Configuration implements XStreamConfiguration {
   private Injector injector;
 
   /**
-   *
+   * @param injector the injector to initialize with
    */
   @Inject
   public XStream081Configuration(Injector injector) {
     this.injector = injector;
   }
 
-  private Map<String, Class<?>> getElementClassMap(ConverterSet c) {
-    Map<String, Class<?>> ecm = elementClassMap.get(c);
-    if (ecm == null) {
-      ecm = elementClassMap.get(ConverterSet.DEFAULT);
-    }
-    return ecm;
+  private Multimap<String, Class<?>> getOmitMap(ConverterSet c) {
+    return Objects.firstNonNull(omitMap.get(c), omitMap.get(ConverterSet.DEFAULT));
   }
 
-  private List<ClassFieldMapping> getElementMappingList(ConverterSet c) {
-    List<ClassFieldMapping> eml = elementMappingList.get(c);
-    if (eml == null) {
-      eml = elementMappingList.get(ConverterSet.DEFAULT);
-    }
-    return eml;
-  }
-
-  private List<ClassFieldMapping> getListElementMappingList(ConverterSet c) {
-    List<ClassFieldMapping> leml = listElementMappingList.get(c);
-    if (leml == null) {
-      leml = listElementMappingList.get(ConverterSet.DEFAULT);
-    }
-    return leml;
-  }
-
-  private Map<String, Class<?>[]> getOmitMap(ConverterSet c) {
-    Map<String, Class<?>[]> om = omitMap.get(c);
-    if (om == null) {
-      om = omitMap.get(ConverterSet.DEFAULT);
-    }
-    return om;
-  }
-
-  private Converter[] getConverters(Mapper mapper, ConverterSet c) {
-    return new Converter[] { new MapConverter(mapper),
-        new RestfullCollectionConverter(mapper),
-        new DataCollectionConverter(mapper),
-        new AtomLinkConverter()};
-  }
-
-  /**
-   * @param c
-   * @return
-   */
-  private List<ImplicitCollectionFieldMapping> getItemFieldMappings(
-      ConverterSet c) {
-    List<ImplicitCollectionFieldMapping> om = itemFieldMappings.get(c);
-    if (om == null) {
-      om = itemFieldMappings.get(ConverterSet.DEFAULT);
-    }
-    return om;
-  }
-
-  /**
-   * @param c
-   * @return
-   */
-  private List<InterfaceFieldAliasMapping> getFieldAliasMappingList(
-      ConverterSet c) {
-    List<InterfaceFieldAliasMapping> om = fieldAliasMappingList.get(c);
-    if (om == null) {
-      om = fieldAliasMappingList.get(ConverterSet.DEFAULT);
-    }
-    return om;
-  }
 
   /**
    * {@inheritDoc}
    *
    * @param writerStack
-   *
-   * @see org.apache.shindig.social.core.util.xstream.XStreamConfiguration#getXStream(org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterSet,
-   *      com.thoughtworks.xstream.converters.reflection.ReflectionProvider,
-   *      com.thoughtworks.xstream.mapper.Mapper,
-   *      com.thoughtworks.xstream.io.HierarchicalStreamDriver)
+   * @see XStreamConfiguration#getConverterConfig(org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterSet, com.thoughtworks.xstream.converters.reflection.ReflectionProvider, com.thoughtworks.xstream.mapper.Mapper, com.thoughtworks.xstream.io.HierarchicalStreamDriver, WriterStack)
    */
   public ConverterConfig getConverterConfig(ConverterSet c, ReflectionProvider rp,
-      Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack) {
+                                            Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack) {
 
-    InterfaceFieldAliasingMapper emapper = new InterfaceFieldAliasingMapper(
-        dmapper, writerStack, getFieldAliasMappingList(c));
-    InterfaceClassMapper fmapper = new InterfaceClassMapper(writerStack, emapper,
-        getElementMappingList(c), getListElementMappingList(c),
-        getItemFieldMappings(c), getOmitMap(c), getElementClassMap(c));
+    InterfaceFieldAliasingMapper emapper = new InterfaceFieldAliasingMapper(dmapper, writerStack, fieldAliasMappingList.get(c));
+
+    InterfaceClassMapper fmapper = new InterfaceClassMapper(writerStack,
+        emapper,
+        elementMappingList.get(c),
+        listElementMappingList.get(c),
+        itemFieldMappings.get(c),
+        getOmitMap(c),
+        elementClassMap.get(c));
+
     AttributeMapper amapper = new AttributeMapper(fmapper);
 
     XStream xstream = new XStream(rp, amapper, driver);
-    amapper.addAttributeFor(AtomAttribute.class);
-    for (Converter converter : getConverters(fmapper, c)) {
-      xstream.registerConverter(converter);
-    }
+
+    xstream.registerConverter(new MapConverter(fmapper));
+    xstream.registerConverter(new RestfullCollectionConverter(fmapper));
+    xstream.registerConverter(new DataCollectionConverter(fmapper));
+    xstream.registerConverter(new AtomLinkConverter());
+
     xstream.registerConverter(new ISO8601DateConverter());
     xstream.registerConverter(new ISO8601GregorianCalendarConverter());
     xstream.registerConverter(new ISO8601SqlTimestampConverter());
@@ -432,16 +306,53 @@ public class XStream081Configuration implements XStreamConfiguration {
     xstream.registerConverter(new AtomAttributeConverter());
     xstream.setMode(XStream.NO_REFERENCES);
 
-    return new ConverterConfig(fmapper,xstream);
+    amapper.addAttributeFor(AtomAttribute.class);
 
+    // prevent NPE on xstream 1.3.x
+    amapper.setConverterLookup(xstream.getConverterLookup());
+    return new ConverterConfig(fmapper, xstream);
   }
 
 
   /**
    * {@inheritDoc}
+   *
    * @see org.apache.shindig.social.core.util.xstream.XStreamConfiguration#getNameSpaces()
    */
   public Map<String, NamespaceSet> getNameSpaces() {
-    return namepaces;
+    return NAMESPACES;
+  }
+
+  /**
+   * Delegate for an EnumMap that returns the value of the defaultkey if the
+   * designated key is not present.
+   * @param <K>
+   * @param <V>
+   */
+
+  private static final class DefaultedEnumMap<K extends Enum<K>,V> extends ForwardingMap<K,V> {
+    private final EnumMap<K,V> backing;
+    final K defaultval;
+
+    public DefaultedEnumMap(Class<K> clz, K defaultkey) {
+      this.backing = new EnumMap<K,V>(Preconditions.checkNotNull(clz));
+      this.defaultval = Preconditions.checkNotNull(defaultkey);
+    }
+
+    public static <K extends Enum<K>,V> DefaultedEnumMap<K,V> init(Class<K> clz, K defaultkey) {
+      return new DefaultedEnumMap<K,V>(clz, defaultkey);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public V get(Object o) {
+      K key = (K)o;
+      return Objects.firstNonNull(backing.get(key), backing.get(defaultval));
+    }
+
+    @Override
+    protected Map<K,V> delegate() {
+      return backing;
+    }
   }
 }

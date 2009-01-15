@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
@@ -61,7 +62,7 @@ public class InterfaceClassMapper extends MapperWrapper {
    * A map of classed to ommit, the key is the field name, and the value is an
    * array of classes where that field is ommitted from the output.
    */
-  private Map<String, Class<?>[]> omitMap;
+  private Multimap<String, Class<?>> omitMMap;
   /**
    * A map of elements, where the ClassMapping object defines how the classes
    * are mapped to elements.
@@ -101,21 +102,23 @@ public class InterfaceClassMapper extends MapperWrapper {
    * @param listElementMappingList
    *          A list of element names to use as the base element where there is
    *          a collection of the same type objects being serialized.
-   * @param omitMap
-   *          A map of fields in classes to omit from serialization.
+   * @param omitMMap
+   *          A Multimap of fields in classes to omit from serialization.
    * @param elementClassMap
    *          a map of element names to class types.
    */
-  public InterfaceClassMapper(WriterStack writerStack, Mapper wrapped,
+  public InterfaceClassMapper(WriterStack writerStack,
+      Mapper wrapped,
       List<ClassFieldMapping> elementMappingList,
       List<ClassFieldMapping> listElementMappingList,
       List<ImplicitCollectionFieldMapping> itemFieldMappings,
-      Map<String, Class<?>[]> omitMap, Map<String, Class<?>> elementClassMap) {
+      Multimap<String, Class<?>> omitMMap,
+      Map<String, Class<?>> elementClassMap) {
     super(wrapped);
     this.elementClassMap = elementClassMap;
     this.elementMappingList = elementMappingList;
     this.listElementMappingList = listElementMappingList;
-    this.omitMap = omitMap;
+    this.omitMMap = omitMMap;
     this.writerStack = writerStack;
     this.itemFieldMappings = itemFieldMappings;
   }
@@ -229,7 +232,7 @@ public class InterfaceClassMapper extends MapperWrapper {
 
   /**
    * Checks to see if the field in a class should be serialized. This is
-   * controlled buy the omitMap Map which is keyed by the field name. Each entry
+   * controlled buy the omitMMap Multimap which is keyed by the field name. Each entry
    * in the map contains a list of classes where the field name should be
    * excluded from the output.
    *
@@ -247,12 +250,9 @@ public class InterfaceClassMapper extends MapperWrapper {
   // API is not generic
   @Override
   public boolean shouldSerializeMember(Class definedIn, String fieldName) {
-    Class<?>[] omitList = omitMap.get(fieldName);
-    if (omitList != null) {
-      for (Class<?> omit : omitList) {
-        if (omit.isAssignableFrom(definedIn)) {
-          return false;
-        }
+    for (Class<?> omit : omitMMap.get(fieldName)) {
+      if (omit.isAssignableFrom(definedIn)) {
+        return false;
       }
     }
     return super.shouldSerializeMember(definedIn, fieldName);
@@ -284,8 +284,7 @@ public class InterfaceClassMapper extends MapperWrapper {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(
-      Class itemType, String fieldName) {
+  public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(Class itemType, String fieldName) {
     for ( ImplicitCollectionFieldMapping ifm : itemFieldMappings) {
       if ( ifm.matches(itemType, fieldName) ) {
         return ifm;
@@ -293,7 +292,4 @@ public class InterfaceClassMapper extends MapperWrapper {
     }
     return super.getImplicitCollectionDefForFieldName(itemType, fieldName);
   }
-
-
-
 }

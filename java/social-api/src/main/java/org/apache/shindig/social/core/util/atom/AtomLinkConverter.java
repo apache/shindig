@@ -22,6 +22,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.google.common.base.Preconditions;
 
 /**
  * Serializes links for atom, taking account of attributes.
@@ -35,8 +36,7 @@ public class AtomLinkConverter implements Converter {
    *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
    *      com.thoughtworks.xstream.converters.MarshallingContext)
    */
-  public void marshal(Object object, HierarchicalStreamWriter writer,
-      MarshallingContext context) {
+  public void marshal(Object object, HierarchicalStreamWriter writer, MarshallingContext context) {
     AtomLink link = (AtomLink) object;
     if (link.getRel() != null) {
       writer.addAttribute("rel", link.getRel());
@@ -52,8 +52,9 @@ public class AtomLinkConverter implements Converter {
    * @see com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks.xstream.io.HierarchicalStreamReader,
    *      com.thoughtworks.xstream.converters.UnmarshallingContext)
    */
-  public Object unmarshal(HierarchicalStreamReader reader,
-      UnmarshallingContext context) {
+  public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    Preconditions.checkNotNull(reader);
+
     reader.moveDown();
     AtomLink al = new AtomLink(reader.getAttribute("rel"), reader.getValue());
     reader.moveUp();
@@ -65,7 +66,6 @@ public class AtomLinkConverter implements Converter {
    *
    * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
    */
-  @SuppressWarnings("unchecked")
   public boolean canConvert(Class clazz) {
     return AtomLink.class.equals(clazz);
   }

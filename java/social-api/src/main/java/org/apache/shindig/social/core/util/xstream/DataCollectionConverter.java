@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -51,8 +52,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
    */
   @Override
   public boolean canConvert(Class clazz) {
-    boolean convert = (DataCollection.class.isAssignableFrom(clazz));
-    return convert;
+    return (DataCollection.class.isAssignableFrom(clazz));
   }
 
   /**
@@ -63,45 +63,30 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
    *      com.thoughtworks.xstream.converters.MarshallingContext)
    */
   @Override
-  public void marshal(Object source, HierarchicalStreamWriter writer,
-      MarshallingContext context) {
+  public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 
     DataCollection collection = (DataCollection) source;
     Map<String, Map<String, String>> internalMap = collection.getEntry();
 
-    if (false) {
-      Map<String, String> m = internalMap.values().iterator().next();
-      for (Entry<String, String> e : m.entrySet()) {
+    for (Entry<String, Map<String, String>> eo : internalMap.entrySet()) {
+      writer.startNode("entry");
+      writer.startNode("key");
+      writer.setValue(eo.getKey());
+      writer.endNode();
+      writer.startNode("value");
+      for (Entry<String, String> ei : eo.getValue().entrySet()) {
         writer.startNode("entry");
         writer.startNode("key");
-        writer.setValue(e.getKey());
+        writer.setValue(ei.getKey());
         writer.endNode();
         writer.startNode("value");
-        writer.setValue(e.getValue());
+        writer.setValue(ei.getValue());
         writer.endNode();
         writer.endNode();
       }
-    } else {
-      for (Entry<String, Map<String, String>> eo : internalMap.entrySet()) {
-        writer.startNode("entry");
-        writer.startNode("key");
-        writer.setValue(eo.getKey());
-        writer.endNode();
-        writer.startNode("value");
-        for (Entry<String, String> ei : eo.getValue().entrySet()) {
-          writer.startNode("entry");
-          writer.startNode("key");
-          writer.setValue(ei.getKey());
-          writer.endNode();
-          writer.startNode("value");
-          writer.setValue(ei.getValue());
-          writer.endNode();
-          writer.endNode();
-        }
 
-        writer.endNode();
-        writer.endNode();
-      }
+      writer.endNode();
+      writer.endNode();
     }
   }
 
@@ -115,6 +100,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
   @Override
   public Object unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext context) {
+    Preconditions.checkNotNull(reader);
     reader.moveDown();
     Map<String, Object> m = Maps.newHashMap();
     while (reader.hasMoreChildren()) {

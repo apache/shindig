@@ -48,7 +48,6 @@ import org.w3c.dom.Node;
 
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class BeanXStreamAtomConverterTest extends TestCase {
   private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
@@ -80,6 +79,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
+    activity.setUrl("http://foo.com");
 
     beanXmlConverter = new BeanXStreamAtomConverter(
         new XStream081Configuration(injector));
@@ -230,6 +230,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
         + "    </mediaItems>"
+        + "    <url>http://foo.com</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
         + "  <activity>"
@@ -239,6 +240,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
         + "    </mediaItems>"
+        + "    <url>http://foo.com</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
         + "  <activity>"
@@ -248,6 +250,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
         + "    </mediaItems>"
+        + "    <url>http://foo.com</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
         + "</content></entry>"
