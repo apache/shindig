@@ -122,7 +122,7 @@ public abstract class AbstractHttpCache implements HttpCache {
    * Except for the first two, all of these may be "0" depending on authentication rules. See
    * individual methods for details.
    */
-  protected String createKey(HttpRequest request) {
+  public String createKey(HttpRequest request) {
     String uri = request.getUri().toString();
     StringBuilder key = new StringBuilder(uri.length() * 2);
     key.append(request.getUri());
