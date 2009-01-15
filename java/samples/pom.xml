@@ -68,6 +68,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-common</artifactId>
+      <version>1.1-SNAPSHOT</version>
+      <classifier>tests</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-gadgets</artifactId>
     </dependency>
     <dependency>
