@@ -66,7 +66,7 @@ public class EndToEndTest {
   @Test
   public void checkResources() throws Exception {
     for ( String resource : EXPECTED_RESOURCES ) {
-      String url = EndToEndServer.SERVER_URL + "/" + resource;
+      String url = EndToEndServer.SERVER_URL + '/' + resource;
       Page p = webClient.getPage(url);
       assertEquals("Failed to load test resource "+url,200,p.getWebResponse().getStatusCode());
     }
@@ -91,7 +91,7 @@ public class EndToEndTest {
   public void messageBundlesRtl() throws Exception {
     // Repeeat the messageBundle tests, but with the language set to "ar"
     language = "ar";
-    
+
     executeAllPageTests("messageBundle");
   }
 
@@ -177,7 +177,7 @@ public class EndToEndTest {
    */
   private HtmlPage executePageTest(String testName, String testMethod)
       throws IOException {
-    String gadgetUrl = EndToEndServer.SERVER_URL + "/" + testName + ".xml";
+    String gadgetUrl = EndToEndServer.SERVER_URL + '/' + testName + ".xml";
     String url = EndToEndServer.GADGET_BASEURL + "?url=" + URLEncoder.encode(gadgetUrl, "UTF-8");
     BasicSecurityTokenDecoder decoder = new BasicSecurityTokenDecoder();
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
@@ -186,7 +186,7 @@ public class EndToEndTest {
     if (language != null) {
       url += "&lang=" + language;
     }
-    
+
     Page page = webClient.getPage(url);
     if (!(page instanceof HtmlPage)) {
       fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());

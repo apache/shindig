@@ -50,8 +50,7 @@ public class NekoSerializer extends HtmlSerializer
         outputDocType(doc.getDoctype(), sw);
       }
       serialize(doc, sw);
-      String s = sw.toString();
-      return s;
+      return sw.toString();
     } catch (IOException ioe) {
       return null;
     }

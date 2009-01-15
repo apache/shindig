@@ -19,6 +19,7 @@
 package org.apache.shindig.common.uri;
 
 import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -208,7 +209,6 @@ public final class Uri {
   public boolean equals(Object obj) {
     if (obj == this) {return true;}
     if (!(obj instanceof Uri)) {return false;}
-
-    return text.equals(((Uri)obj).text);
+    return Objects.equal(text, ((Uri)obj).text);
   }
 }

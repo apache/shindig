@@ -419,7 +419,7 @@ public class HttpRequest {
   public String toString() {
     StringBuilder buf = new StringBuilder(method);
     buf.append(' ').append(uri.getPath())
-       .append(uri.getQuery() == null ? "" : "?" + uri.getQuery()).append("\n\n");
+       .append(uri.getQuery() == null ? "" : '?' + uri.getQuery()).append("\n\n");
     buf.append("Host: ").append(uri.getAuthority()).append('\n');
     buf.append("X-Shindig-AuthType: ").append(authType).append('\n');
     for (Map.Entry<String, List<String>> entry : headers.entrySet()) {

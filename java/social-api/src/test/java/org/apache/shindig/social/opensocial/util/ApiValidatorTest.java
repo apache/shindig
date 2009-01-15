@@ -62,8 +62,8 @@ public class ApiValidatorTest {
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.get("json"));
     Assert.assertNotNull(result.get("xyz"));
-    Assert.assertEquals(String.class, result.get("json").getClass());
-    Assert.assertEquals(Integer.class, result.get("xyz").getClass());
+    Assert.assertSame(String.class, result.get("json").getClass());
+    Assert.assertSame(Integer.class, result.get("xyz").getClass());
     Assert.assertEquals("A Test JSON", result.get("json"));
     Assert.assertEquals(123, ((Integer) result.get("xyz")).intValue());
   }
@@ -110,13 +110,13 @@ public class ApiValidatorTest {
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.get("json"));
     Assert.assertNotNull(result.get("xyz"));
-    Assert.assertEquals(String.class, result.get("json").getClass());
-    Assert.assertEquals(Integer.class, result.get("xyz").getClass());
+    Assert.assertSame(String.class, result.get("json").getClass());
+    Assert.assertSame(Integer.class, result.get("xyz").getClass());
     Assert.assertEquals("A Test JSON", result.get("json"));
     Assert.assertEquals(123, ((Integer) result.get("xyz")).intValue());
 
   }
-  
+
   /**
    * Test for a failing validation
    * @throws ApiValidatorExpcetion

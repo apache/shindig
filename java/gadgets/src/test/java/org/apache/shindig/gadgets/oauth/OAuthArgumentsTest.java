@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 import org.apache.shindig.gadgets.spec.Preload;
 
 import org.junit.Test;
+import org.junit.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -88,9 +89,9 @@ public class OAuthArgumentsTest {
     assertEquals("reqtoken", args.getRequestToken());
     assertEquals("secret", args.getRequestTokenSecret());
     assertEquals("state", args.getOrigClientState());
-    assertEquals(true, args.getBypassSpecCache());
-    assertEquals(false, args.getSignOwner());
-    assertEquals(false, args.getSignViewer());
+    Assert.assertTrue(args.getBypassSpecCache());
+    Assert.assertFalse(args.getSignOwner());
+    Assert.assertFalse(args.getSignViewer());
     assertEquals("stuff", args.getRequestOption("random"));
   }
 
@@ -101,12 +102,12 @@ public class OAuthArgumentsTest {
     assertEquals(UseToken.NEVER, args.getUseToken());
     assertEquals("", args.getServiceName());
     assertEquals("", args.getTokenName());
-    assertEquals(null, args.getRequestToken());
-    assertEquals(null, args.getRequestTokenSecret());
-    assertEquals(null, args.getOrigClientState());
-    assertEquals(false, args.getBypassSpecCache());
-    assertEquals(true, args.getSignOwner());
-    assertEquals(true, args.getSignViewer());
+    Assert.assertNull(args.getRequestToken());
+    Assert.assertNull(args.getRequestTokenSecret());
+    Assert.assertNull(args.getOrigClientState());
+    Assert.assertFalse(args.getBypassSpecCache());
+    Assert.assertTrue(args.getSignOwner());
+    Assert.assertTrue(args.getSignViewer());
     assertNull(args.getRequestOption("random"));
   }
 
@@ -123,19 +124,19 @@ public class OAuthArgumentsTest {
     assertEquals(UseToken.ALWAYS, args.getUseToken());
     assertEquals("", args.getServiceName());
     assertEquals("", args.getTokenName());
-    assertEquals(null, args.getRequestToken());
-    assertEquals(null, args.getRequestTokenSecret());
-    assertEquals(null, args.getOrigClientState());
-    assertEquals(false, args.getBypassSpecCache());
-    assertEquals(false, args.getSignOwner());
-    assertEquals(false, args.getSignViewer());
+    Assert.assertNull(args.getRequestToken());
+    Assert.assertNull(args.getRequestTokenSecret());
+    Assert.assertNull(args.getOrigClientState());
+    Assert.assertFalse(args.getBypassSpecCache());
+    Assert.assertFalse(args.getSignOwner());
+    Assert.assertFalse(args.getSignViewer());
   }
 
   @Test
   public void testGetAndSet() throws Exception {
     OAuthArguments args = new OAuthArguments();
     args.setBypassSpecCache(true);
-    assertEquals(true, args.getBypassSpecCache());
+    Assert.assertTrue(args.getBypassSpecCache());
 
     args.setOrigClientState("thestate");
     assertEquals("thestate", args.getOrigClientState());
@@ -150,14 +151,14 @@ public class OAuthArgumentsTest {
     assertEquals("s", args.getServiceName());
 
     args.setSignOwner(true);
-    assertEquals(true, args.getSignOwner());
+    Assert.assertTrue(args.getSignOwner());
 
     args.setSignViewer(true);
-    assertEquals(true, args.getSignViewer());
+    Assert.assertTrue(args.getSignViewer());
 
     args.setUseToken(UseToken.IF_AVAILABLE);
     assertEquals(UseToken.IF_AVAILABLE, args.getUseToken());
-    
+
     args.setRequestOption("foo", "bar");
     assertEquals("bar", args.getRequestOption("foo"));
     args.removeRequestOption("foo");
@@ -175,17 +176,17 @@ public class OAuthArgumentsTest {
     assertEquals("reqtoken", args.getRequestToken());
     assertEquals("secret", args.getRequestTokenSecret());
     assertEquals("state", args.getOrigClientState());
-    assertEquals(true, args.getBypassSpecCache());
-    assertEquals(false, args.getSignOwner());
-    assertEquals(false, args.getSignViewer());
+    Assert.assertTrue(args.getBypassSpecCache());
+    Assert.assertFalse(args.getSignOwner());
+    Assert.assertFalse(args.getSignViewer());
   }
-  
+
   @Test
   public void testCopyConstructor_options() throws Exception {
     HttpServletRequest req = makeDummyRequest();
     OAuthArguments args = new OAuthArguments(AuthType.OAUTH, req);
     args = new OAuthArguments(args);
-    
+
     args.setRequestOption("foo", "bar");
     args.setRequestOption("quux", "baz");
     assertEquals("bar", args.getRequestOption("foo"));

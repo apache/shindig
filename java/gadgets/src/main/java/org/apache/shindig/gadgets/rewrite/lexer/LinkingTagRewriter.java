@@ -45,11 +45,10 @@ public class LinkingTagRewriter implements HtmlTagTransformer {
   private Set<String> currentTagAttrs;
 
   public static Map<String, Set<String>> getDefaultTargets() {
-      Map<String, Set<String>> targets  = new ImmutableMap.Builder<String,Set<String>>()
+      return new ImmutableMap.Builder<String,Set<String>>()
       .put("img", ImmutableSet.of("src"))
           .put("embed", ImmutableSet.of("src"))
           .put("link", ImmutableSet.of("href")).build();
-    return targets;
   }
 
   public LinkingTagRewriter(LinkRewriter linkRewriter, Uri relativeBase) {

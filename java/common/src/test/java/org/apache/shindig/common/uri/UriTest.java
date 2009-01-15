@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.Assert;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -239,6 +240,6 @@ public class UriTest {
     assertEquals(uri, uri2);
     assertEquals(uri2, uri);
 
-    assertTrue(uri.hashCode() == uri2.hashCode());
+    assertEquals(uri.hashCode(), uri2.hashCode());
   }
 }

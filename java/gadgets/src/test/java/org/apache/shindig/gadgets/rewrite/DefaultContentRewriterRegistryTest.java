@@ -110,7 +110,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     replay();
     HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse);
     // Assert that response is untouched
-    assertTrue(rewritten == fakeResponse);
+    assertSame(rewritten, fakeResponse);
     verify();
   }
 }

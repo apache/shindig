@@ -291,8 +291,7 @@ public class XmlUtil {
     try {
       DocumentBuilder builder = getBuilder();
       InputSource is = new InputSource(new StringReader(xml.trim()));
-      Element element = builder.parse(is).getDocumentElement();
-      return element;
+      return builder.parse(is).getDocumentElement();
     } catch (SAXParseException e) {
       throw new XmlException(
           e.getMessage() + " At: (" + e.getLineNumber() + ',' + e.getColumnNumber() + ')', e);

@@ -84,9 +84,9 @@ public class JsonConversionUtil {
       while (keys.hasNext()) {
         String key = (String) keys.next();
         if (json.isNull(key)) {
-          result.put(prefix + "." + key, "null");
+          result.put(prefix + '.' + key, "null");
         } else {
-          collect(json.get(key), prefix + "." + key, result);
+          collect(json.get(key), prefix + '.' + key, result);
         }
       }
     } else if (current instanceof JSONArray) {
@@ -97,15 +97,15 @@ public class JsonConversionUtil {
         //Strip [ & ]
         jsonArrayString = jsonArrayString.substring(1, jsonArrayString.length() - 1);
         if (jsonArr.length() == 1) {
-          jsonArrayString = "(" + jsonArrayString + ")";
+          jsonArrayString = '(' + jsonArrayString + ')';
         }
         result.put(prefix, jsonArrayString);
       } else {
         for (int i = 0; i < jsonArr.length(); i++) {
           if (jsonArr.isNull(i)) {
-            result.put(prefix + "(" + i + ")", "null");
+            result.put(prefix + '(' + i + ')', "null");
           } else {
-            collect(jsonArr.get(i), prefix + "(" + i + ")", result);
+            collect(jsonArr.get(i), prefix + '(' + i + ')', result);
           }
         }
       }
@@ -182,12 +182,12 @@ public class JsonConversionUtil {
       return null;
     } else if (value.startsWith("(") && value.endsWith(")")) {
       // explicit form of literal array
-      return new JSONArray("[" + value.substring(1, value.length() - 1) + "]");
+      return new JSONArray('[' + value.substring(1, value.length() - 1) + ']');
     } else {
       try {
         // inferred parsing of literal array
         // Attempt to parse as an array of literals
-        JSONArray parsedArray = new JSONArray("[" + value + "]");
+        JSONArray parsedArray = new JSONArray('[' + value + ']');
         if (parsedArray.length() == 1) {
           // Not an array
           return parsedArray.get(0);

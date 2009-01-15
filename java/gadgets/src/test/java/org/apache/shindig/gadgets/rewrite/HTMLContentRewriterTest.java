@@ -48,13 +48,13 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     XPathWrapper wrapper = new XPathWrapper(doc);
 
     // Head should contain 1 script tag
-    assertEquals(wrapper.getValue("/html/head/script"), "headScript1");
-    assertEquals(wrapper.getNodeList("/html/head/script").getLength(), 1);
+    assertEquals("headScript1", wrapper.getValue("/html/head/script"));
+    assertEquals(1, wrapper.getNodeList("/html/head/script").getLength());
 
     // Body should contain 8 script tags after rewrite
-    assertEquals(wrapper.getNodeList("/html/body/script").getLength(), 8);
+    assertEquals(8, wrapper.getNodeList("/html/body/script").getLength());
 
-    assertEquals(wrapper.getValue("/html/body/script[1]"), "bodyScript1");
+    assertEquals("bodyScript1", wrapper.getValue("/html/body/script[1]"));
 
     // Second script should contain two concatenated urls
     assertEquals(wrapper.getValue("/html/body/script[2]/@src"),
@@ -64,7 +64,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F2.js");
 
-    assertEquals(wrapper.getValue("/html/body/script[3]"), "bodyScript2");
+    assertEquals("bodyScript2", wrapper.getValue("/html/body/script[3]"));
 
     // Fourth script should contain one concatenated url
     assertEquals(wrapper.getValue("/html/body/script[4]/@src"),
@@ -75,8 +75,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&1=http%3A%2F%2Fwww.example.org%2F3.js");
 
     // Fifth script should contain a retained comment
-    assertEquals(wrapper.getValue("/html/body/script[5]"),
-        "<!-- retain-comment -->");
+    assertEquals("<!-- retain-comment -->",
+        wrapper.getValue("/html/body/script[5]"));
 
     // An excluded URL between contiguous tags prevents them being concatentated
     assertEquals(wrapper.getValue("/html/body/script[6]/@src"),
@@ -86,8 +86,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&1=http%3A%2F%2Fwww.example.org%2F4.js");
 
     // Excluded URL is untouched
-    assertEquals(wrapper.getValue("/html/body/script[7]/@src"),
-        "http://www.example.org/excluded/5.js");
+    assertEquals("http://www.example.org/excluded/5.js",
+        wrapper.getValue("/html/body/script[7]/@src"));
 
     assertEquals(wrapper.getValue("/html/body/script[8]/@src"),
         "http://www.test.com/dir/concat?" +
@@ -111,7 +111,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
 
     // Excluded image is untouched
-    assertEquals(wrapper.getValue("//img[2]/@src"), "http://www.example.org/excluded/img.gif");
+    assertEquals("http://www.example.org/excluded/img.gif", wrapper.getValue("//img[2]/@src"));
 
     // Embed target is rewritten to proxy
     assertEquals(wrapper.getValue("//embed[1]/@src"),
@@ -120,7 +120,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
 
     // Excluded embed is untouched
-    assertEquals(wrapper.getValue("//embed[2]/@src"), "http://www.example.org/excluded/some.swf");
+    assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
   }
 
   public void testStyleBasic() throws Exception {
@@ -142,19 +142,19 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&5=http%3A%2F%2Fwww.example.org%2Fimportedstyle4.css");
 
     // Untouched link target
-    assertEquals(wrapper.getValue("//link[2]/@href"),
-        "http://www.example.org/excluded/linkedstyle2.css");
+    assertEquals("http://www.example.org/excluded/linkedstyle2.css",
+        wrapper.getValue("//link[2]/@href"));
 
     // Untouched @import taget converted to a link
-    assertEquals(wrapper.getValue("//link[3]/@href"),
-        "/excluded/importedstyle2.css");
+    assertEquals("/excluded/importedstyle2.css",
+        wrapper.getValue("//link[3]/@href"));
 
     // Body should contain 1 style element
-    assertEquals(wrapper.getNodeList("//style").getLength(), 1);
+    assertEquals(1, wrapper.getNodeList("//style").getLength());
 
     // All @imports are stripped
-    assertEquals(wrapper.getValue("//style[1]"),
-        "div { color : black; }");
+    assertEquals("div { color : black; }",
+        wrapper.getValue("//style[1]"));
   }
 
   public void testNoRewriteUnknownMimeType() {

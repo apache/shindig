@@ -31,7 +31,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     expect(request.getParameter("nocache")).andReturn(Integer.toString(Integer.MAX_VALUE));
     replay();
     GadgetContext context = new HttpGadgetContext(request);
-    assertEquals(true, context.getIgnoreCache());
+    assertTrue(context.getIgnoreCache());
   }
 
   public void testLocale() {
@@ -46,7 +46,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     expect(request.getParameter("debug")).andReturn("1");
     replay();
     GadgetContext context = new HttpGadgetContext(request);
-    assertEquals(true, context.getDebug());
+    assertTrue(context.getDebug());
   }
 
   public void testGetParameter() {

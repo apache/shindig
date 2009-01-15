@@ -35,6 +35,7 @@ import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Assert;
 
 public class GadgetTokenStoreTest {
 
@@ -47,17 +48,17 @@ public class GadgetTokenStoreTest {
       "   \n" +
       "    <OAuth>\n" +
       "      <Service name='testservice'>" +
-      "        <Access " + 
+      "        <Access " +
       "          url='" + FakeOAuthServiceProvider.ACCESS_TOKEN_URL + '\'' +
       "          param_location='uri-query' " +
       "          method='GET'" +
       "        />" +
-      "        <Request " + 
+      "        <Request " +
       "          url='" + FakeOAuthServiceProvider.REQUEST_TOKEN_URL + '\'' +
       "          param_location='uri-query' " +
       "          method='GET'" +
       "        />" +
-      "        <Authorization " + 
+      "        <Authorization " +
       "          url='" + FakeOAuthServiceProvider.APPROVAL_URL + '\'' +
       "        />" +
       "      </Service>" +
@@ -140,7 +141,7 @@ public class GadgetTokenStoreTest {
     arguments.setServiceName("hmac");
     AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -176,7 +177,7 @@ public class GadgetTokenStoreTest {
     arguments.setUseToken(UseToken.NEVER);
     AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -197,7 +198,7 @@ public class GadgetTokenStoreTest {
     arguments.setUseToken(UseToken.IF_AVAILABLE);
     AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -219,7 +220,7 @@ public class GadgetTokenStoreTest {
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
         responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -246,7 +247,7 @@ public class GadgetTokenStoreTest {
     AccessorInfo info = store.getOAuthAccessor(privateToken, arguments, clientState,
         responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -256,7 +257,7 @@ public class GadgetTokenStoreTest {
     // Friend views page
     info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);
@@ -277,7 +278,7 @@ public class GadgetTokenStoreTest {
     arguments.setUseToken(UseToken.ALWAYS);
     AccessorInfo info = store.getOAuthAccessor(socialToken, arguments, clientState, responseParams);
     assertEquals(OAuthParamLocation.URI_QUERY, info.getParamLocation());
-    assertEquals(null, info.getConsumer().getKeyName());
+    Assert.assertNull(info.getConsumer().getKeyName());
     assertEquals("hmac", info.getConsumer().getConsumer().consumerKey);
     assertEquals("hmacsecret", info.getConsumer().getConsumer().consumerSecret);
     assertNull(info.getAccessor().requestToken);

@@ -69,6 +69,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
     Map<String, String> prefMap = Maps.newHashMap();

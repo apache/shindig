@@ -78,7 +78,7 @@ public class BlobCrypterTest {
     StringBuilder sb = new StringBuilder();
     for (int i=0; i < 100; ++i) {
       assertThrowsBlobCrypterException(sb.toString());
-      sb.append("a");
+      sb.append('a');
     }
   }
 

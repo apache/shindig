@@ -117,10 +117,10 @@ public class ApiValidator {
     log.debug("Loading " + json);
     json = json.trim();
     if (!json.endsWith("}")) {
-      json = json + "}";
+      json = json + '}';
     }
     if (!json.startsWith("{")) {
-      json = "{" + json;
+      json = '{' + json;
     }
     json = "( testingObject = " + json + " )";
 
@@ -170,10 +170,10 @@ public class ApiValidator {
     log.debug("Loading " + json);
     json = json.trim();
     if (!json.endsWith("}")) {
-      json = json + "}";
+      json = json + '}';
     }
     if (!json.startsWith("{")) {
-      json = "{" + json;
+      json = '{' + json;
     }
     json = "( testingObject = " + json + " )";
 
@@ -241,7 +241,7 @@ public class ApiValidator {
           } else {
 
             log.debug("Got JSON Field  Field,"  + fieldName + " as "
-                + o + " " + o.getClass());
+                + o + ' ' + o.getClass());
           }
           resultFields.put(String.valueOf(fieldName), o);
         }
@@ -290,10 +290,10 @@ public class ApiValidator {
     if (!id.endsWith("constructor")) {
       Object[] allIDs = scriptableObject.getAllIds();
       for (Object oid : allIDs) {
-        log.debug(id + "." + oid);
+        log.debug(id + '.' + oid);
         Object o = scriptableObject.get(String.valueOf(oid), scriptableObject);
         if (o instanceof ScriptableObject) {
-          listScriptable(id + "." + String.valueOf(oid), (ScriptableObject) o);
+          listScriptable(id + '.' + String.valueOf(oid), (ScriptableObject) o);
         }
       }
     }
@@ -320,7 +320,7 @@ public class ApiValidator {
 
     List<Script> compiled = Lists.newArrayList();
     for (String script : scripts) {
-      String scriptPath = spec + "/" + script;
+      String scriptPath = spec + '/' + script;
       InputStream in = this.getClass().getClassLoader().getResourceAsStream(
           scriptPath);
       if (in == null) {
@@ -407,7 +407,7 @@ public class ApiValidator {
       for (Entry<?, ?> entry : nameJSON.entrySet()) {
         Object k = entry.getKey();
         Object o = entry.getValue();
-        log.info("Key [" + k + "] value:[" + (o == null ? "null" : o + ":" + o.getClass()) + "]");
+        log.info("Key [" + k + "] value:[" + (o == null ? "null" : o + ":" + o.getClass()) + ']');
       }
     }
   }

@@ -23,14 +23,14 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Class to get authorization information on a servlet request.
- * 
+ *
  * Information is set by adding an AuthentiationServletFilter, and there
  * is no way to set in a public API. This can be added in the future for testing
  * purposes.
  */
 public class AuthInfo {
   private HttpServletRequest req;
-  
+
   /**
    * Create AuthInfo from a given HttpServletRequest
    * @param req
@@ -42,7 +42,7 @@ public class AuthInfo {
 
   /**
    * Constants for request attribute keys
-   * 
+   *
    * This is only public for testing.
    */
   public enum Attribute {
@@ -52,7 +52,7 @@ public class AuthInfo {
     AUTH_TYPE;
 
     public String getId() {
-      return Attribute.class.getName() + "." + this.name();
+      return Attribute.class.getName() + '.' + this.name();
     }
   }
 

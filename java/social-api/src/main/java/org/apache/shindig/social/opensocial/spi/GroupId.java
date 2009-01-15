@@ -32,7 +32,7 @@ public class GroupId {
 
     static {
       for (Type type : Type.values()) {
-        jsonTypeMap.put("@" + type.name(), type);
+        jsonTypeMap.put('@' + type.name(), type);
       }
     }
     /** Return the Type enum value given a specific jsonType **/
@@ -99,7 +99,7 @@ public class GroupId {
           case self:
               return "SELF";
           case groupId:
-              return "GROUPID(" + groupId + ")";
+              return "GROUPID(" + groupId + ')';
           default:
               return "UNKNOWN";
       }

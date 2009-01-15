@@ -73,13 +73,13 @@ public class GuiceBeanProvider {
         }
       } catch (IllegalArgumentException e) {
         throw new ObjectAccessException("Could not get property "
-            + object.getClass() + "." + property.getName(), e);
+            + object.getClass() + '.' + property.getName(), e);
       } catch (IllegalAccessException e) {
         throw new ObjectAccessException("Could not get property "
-            + object.getClass() + "." + property.getName(), e);
+            + object.getClass() + '.' + property.getName(), e);
       } catch (InvocationTargetException e) {
         throw new ObjectAccessException("Could not get property "
-            + object.getClass() + "." + property.getName(), e);
+            + object.getClass() + '.' + property.getName(), e);
       }
     }
   }
@@ -90,13 +90,13 @@ public class GuiceBeanProvider {
       property.getWriteMethod().invoke(object, value);
     } catch (IllegalArgumentException e) {
       throw new ObjectAccessException("Could not set property "
-          + object.getClass() + "." + property.getName(), e);
+          + object.getClass() + '.' + property.getName(), e);
     } catch (IllegalAccessException e) {
       throw new ObjectAccessException("Could not set property "
-          + object.getClass() + "." + property.getName(), e);
+          + object.getClass() + '.' + property.getName(), e);
     } catch (InvocationTargetException e) {
       throw new ObjectAccessException("Could not set property "
-          + object.getClass() + "." + property.getName(), e);
+          + object.getClass() + '.' + property.getName(), e);
     }
   }
 

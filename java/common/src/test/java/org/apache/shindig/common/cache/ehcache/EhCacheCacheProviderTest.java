@@ -37,7 +37,7 @@ public class EhCacheCacheProviderTest {
     Assert.assertNotNull(cache);
     Assert.assertNull(cache.getElement("test"));
     cache.addElement("test", "value1");
-    Assert.assertEquals(cache.getElement("test"), "value1");
+    Assert.assertEquals("value1", cache.getElement("test"));
     cache.removeElement("test");
     Assert.assertNull(cache.getElement("test"));
 
@@ -53,7 +53,7 @@ public class EhCacheCacheProviderTest {
     Assert.assertEquals(cache, cache2);
     Assert.assertNull(cache.getElement("test"));
     cache.addElement("test", "value1");
-    Assert.assertEquals(cache.getElement("test"), "value1");
+    Assert.assertEquals("value1", cache.getElement("test"));
     cache.removeElement("test");
     Assert.assertNull(cache.getElement("test"));
     Assert.assertEquals(cache.getCapacity(), cache2.getCapacity());

@@ -64,6 +64,7 @@ public class DataServiceServletTest extends EasyMockTestCase {
   };
 
   @Override protected void setUp() throws Exception {
+    super.setUp();
     servlet = new DataServiceServlet();
     req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);

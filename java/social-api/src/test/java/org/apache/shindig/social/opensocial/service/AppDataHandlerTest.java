@@ -55,6 +55,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     token = new FakeGadgetToken();
     converter = EasyMock.createMock(BeanJsonConverter.class);
     appDataService = EasyMock.createMock(AppDataService.class);

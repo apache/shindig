@@ -77,7 +77,7 @@ public class RpcServlet extends InjectedServlet {
 
     Result result = process(request, response, reqValue.getBytes());
     response.getWriter().write(result.isSuccess()
-        ? callbackValue + "(" + result.getOutput() + ")"
+        ? callbackValue + '(' + result.getOutput() + ')'
         : result.getOutput());
   }
 
@@ -108,7 +108,7 @@ public class RpcServlet extends InjectedServlet {
     Result result = process(request, response, body);
     response.getWriter().write(result.getOutput());
   }
-  
+
   private String validateParameterValue(HttpServletRequest request, String parameter)
       throws IllegalArgumentException {
     String result = request.getParameter(parameter);
@@ -117,7 +117,7 @@ public class RpcServlet extends InjectedServlet {
     }
     return result;
   }
-  
+
   private Result process(HttpServletRequest request, HttpServletResponse response, byte[] body) {
     try {
       String encoding = getRequestCharacterEncoding(request);
@@ -140,7 +140,7 @@ public class RpcServlet extends InjectedServlet {
       return new Result(e.getMessage(), false);
     }
   }
-  
+
   private String getRequestCharacterEncoding(HttpServletRequest request) {
     String encoding = request.getCharacterEncoding();
     if (encoding == null) {

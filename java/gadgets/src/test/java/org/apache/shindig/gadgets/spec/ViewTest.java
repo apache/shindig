@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 import org.junit.Test;
+import org.junit.Assert;
 
 public class ViewTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
@@ -50,7 +51,7 @@ public class ViewTest {
     View view = new View(viewName, Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
 
     assertEquals(viewName, view.getName());
-    assertEquals(false, view.getQuirks());
+    Assert.assertFalse(view.getQuirks());
     assertEquals(View.ContentType.HTML, view.getType());
     assertEquals("html", view.getRawType());
     assertEquals(content, view.getContent());
@@ -108,7 +109,7 @@ public class ViewTest {
     String content2 = "<Content type=\"html\" quirks=\"false\"/>";
     View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
                                                XmlUtil.parse(content2)), SPEC_URL);
-    assertEquals(false, view.getQuirks());
+    Assert.assertFalse(view.getQuirks());
   }
 
   @Test
@@ -117,7 +118,7 @@ public class ViewTest {
     String content2 = "<Content type=\"html\" quirks=\"true\"/>";
     View view = new View("test", Arrays.asList(XmlUtil.parse(content1),
                                                XmlUtil.parse(content2)), SPEC_URL);
-    assertEquals(true, view.getQuirks());
+    Assert.assertTrue(view.getQuirks());
   }
 
   @Test

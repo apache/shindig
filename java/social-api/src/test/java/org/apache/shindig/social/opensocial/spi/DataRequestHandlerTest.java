@@ -34,6 +34,7 @@ public class DataRequestHandlerTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     drh = new DataRequestHandler() {
       @Override
       protected Future<?> handleDelete(RequestItem request) {

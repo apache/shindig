@@ -50,7 +50,8 @@ public class ProxyServletTest extends ServletTestFixture {
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 
   @Override
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     servlet.setProxyHandler(proxyHandler);
     expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();

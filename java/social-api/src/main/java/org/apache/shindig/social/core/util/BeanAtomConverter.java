@@ -91,9 +91,10 @@ public class BeanAtomConverter implements BeanConverter {
     return toReturn;
   }
 
+  public static final String ERROR_MESSAGE_FMT = "Could not convert %s to %s";
+
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String xml, Class<T> className) {
-    String errorMessage = "Could not convert " + xml + " to " + className;
     xml=xml.substring(xml.indexOf("?>") + 2);
     BeanReader reader = new BeanReader();
     try {
@@ -101,11 +102,11 @@ public class BeanAtomConverter implements BeanConverter {
       StringReader rd = new StringReader(xml);
       return (T) reader.parse(rd);
     } catch (IntrospectionException e) {
-      throw new RuntimeException(errorMessage, e);
+      throw new RuntimeException(String.format(ERROR_MESSAGE_FMT, xml, className), e);
     } catch (IOException e) {
-      throw new RuntimeException(errorMessage, e);
+      throw new RuntimeException(String.format(ERROR_MESSAGE_FMT, xml, className), e);
     } catch (SAXException e) {
-      throw new RuntimeException(errorMessage, e);
+      throw new RuntimeException(String.format(ERROR_MESSAGE_FMT, xml, className), e);
     }
   }
 }

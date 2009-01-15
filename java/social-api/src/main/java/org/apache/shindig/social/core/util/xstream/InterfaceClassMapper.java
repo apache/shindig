@@ -208,7 +208,7 @@ public class InterfaceClassMapper extends MapperWrapper {
       // but after we have been asked once, then clear
       firstChild.set(null);
       if (log.isDebugEnabled()) {
-        log.debug("serializedClass(" + type + ")");
+        log.debug("serializedClass(" + type + ')');
       }
       for (ClassFieldMapping cfm : elementMappingList) {
         if (cfm.matches(parentElementName, type)) {

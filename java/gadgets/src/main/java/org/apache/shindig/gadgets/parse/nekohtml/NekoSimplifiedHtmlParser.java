@@ -141,15 +141,15 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       // Dont really do anything with this
       builder.append("<?xml");
       if (version != null) {
-        builder.append(" version=\"").append(version).append("\"");
+        builder.append(" version=\"").append(version).append('\"');
       }
       if (encoding != null) {
-        builder.append(" encoding=\"").append(encoding).append("\"");
+        builder.append(" encoding=\"").append(encoding).append('\"');
       }
       if (standalone != null) {
-        builder.append(" standalone=\"").append(standalone).append("\"");
+        builder.append(" standalone=\"").append(standalone).append('\"');
       }
-      builder.append(">");
+      builder.append('>');
     }
 
     public void doctypeDecl(String rootElement, String publicId, String systemId,
@@ -184,13 +184,13 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         elementStack.peek().appendChild(element);
         elementStack.push(element);
       } else {
-        builder.append("<").append(qName.rawname);
+        builder.append('<').append(qName.rawname);
         for (int i = 0; i < xmlAttributes.getLength(); i++) {
-          builder.append(" ").append(xmlAttributes.getLocalName(i)).append("=\"");
+          builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
           appendAttributeValue(xmlAttributes.getValue(i));
-          builder.append("\"");
+          builder.append('\"');
         }
-        builder.append(">");
+        builder.append('>');
       }
     }
 
@@ -207,13 +207,13 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         }
         elementStack.peek().appendChild(element);
       } else {
-        builder.append("<").append(qName.rawname);
+        builder.append('<').append(qName.rawname);
         for (int i = 0; i < xmlAttributes.getLength(); i++) {
-          builder.append(" ").append(xmlAttributes.getLocalName(i)).append("=\"");
+          builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
           appendAttributeValue(xmlAttributes.getValue(i));
-          builder.append("\"");
+          builder.append('\"');
         }
-        builder.append(">");
+        builder.append('>');
       }
     }
 
@@ -282,7 +282,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         }
         elementStack.pop();
       } else {
-        builder.append("</").append(qName.rawname).append(">");
+        builder.append("</").append(qName.rawname).append('>');
       }
     }
 

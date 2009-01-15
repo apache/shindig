@@ -111,14 +111,14 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request.
    */
   public void logDetailedWarning(String note) {
-    logger.log(Level.WARNING, note + "\n" + getDetails());
+    logger.log(Level.WARNING, note + '\n' + getDetails());
   }
 
   /**
    * Log a warning message that includes the details of the request and the thrown exception.
    */
   public void logDetailedWarning(String note, Throwable cause) {
-    logger.log(Level.WARNING, note + "\n" + getDetails(), cause);
+    logger.log(Level.WARNING, note + '\n' + getDetails(), cause);
   }
 
   /**
@@ -198,7 +198,7 @@ public class OAuthResponseParams {
         verboseError.append(errorText);
       }
       if (sendTraceToClient) {
-        verboseError.append("\n");
+        verboseError.append('\n');
         verboseError.append(getRequestTrace());
       }
       response.setMetadata(ERROR_TEXT, verboseError.toString());
@@ -239,7 +239,7 @@ public class OAuthResponseParams {
     return oauthRequestException(error.toString(), errorText);
   }
 
-  public OAuthRequestException oauthRequestException(OAuthError error, String errorText, 
+  public OAuthRequestException oauthRequestException(OAuthError error, String errorText,
       Throwable cause) {
     return oauthRequestException(error.toString(), errorText, cause);
   }
@@ -252,7 +252,7 @@ public class OAuthResponseParams {
     Check.notNull(errorText);
     this.error = error;
     this.errorText = errorText;
-    return new OAuthRequestException("[" + error + "," + errorText + "]");
+    return new OAuthRequestException('[' + error + ',' + errorText + ']');
   }
 
   /**
@@ -264,12 +264,12 @@ public class OAuthResponseParams {
     Check.notNull(errorText);
     this.error = error;
     this.errorText = errorText;
-    return new OAuthRequestException("[" + error + "," + errorText + "]", cause);
+    return new OAuthRequestException('[' + error + ',' + errorText + ']', cause);
   }
 
   /**
    * Superclass for all exceptions thrown from OAuthRequest and friends.
-   * 
+   *
    * The constructors are private, use OAuthResponseParams.oauthRequestException to create this
    * exception.  This makes sure that any exception thrown is also exposed to the calling gadget
    * in a useful way.

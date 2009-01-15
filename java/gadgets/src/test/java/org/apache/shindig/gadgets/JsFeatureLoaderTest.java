@@ -51,6 +51,7 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
 
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     registry = new GadgetFeatureRegistry(null, fetcher);
   }
 

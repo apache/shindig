@@ -58,7 +58,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
             + "&fp="
             + rewriterFeature.getFingerprint();
         if (rewriterFeature.getExpires() != null) {
-          result += "&" + ProxyBase.REFRESH_PARAM  + "=" + rewriterFeature.getExpires().toString();
+          result += '&' + ProxyBase.REFRESH_PARAM  + '=' + rewriterFeature.getExpires().toString();
         }
         return result;
       } else {

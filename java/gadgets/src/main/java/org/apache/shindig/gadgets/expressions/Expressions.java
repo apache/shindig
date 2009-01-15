@@ -42,12 +42,12 @@ public class Expressions {
 
   /**
    * Parse a string into an Expression object.
-   * @param <T> type of the expression 
+   * @param <T> type of the expression
    * @param text the text in the expression
    * @param type type of object the expression will return
    * @throws ElException if errors are found in the expression while parsing.
    *     Unterminated expressions, empty expressions, and constant values that
-   *     cannot be properly coerced will result in exceptions. 
+   *     cannot be properly coerced will result in exceptions.
    */
   public static <T> Expression<T> parse(String text, Class<T> type) throws ElException {
     Preconditions.checkNotNull(text);
@@ -92,7 +92,7 @@ public class Expressions {
 
   /**
    * Parses an EL expression within a string.
-   * @throws ElException 
+   * @throws ElException
    */
   private static <T> Expression<T> parseEL(final String text, int from, int to,
       final Class<T> type) throws ElException {
@@ -110,7 +110,7 @@ public class Expressions {
         for (int i = 1; i < segments.length; i++) {
           if (value == null) {
             throw new ElException("Could not find property \"" + segments[i - 1] + "\" in \""
-                + text + "\"");
+                + text + '\"');
           }
           value = getProperty(value, segments[i]);
         }
@@ -139,8 +139,8 @@ public class Expressions {
    *   Integer.parseInt() for all other types.
    * - Booleans are false if they are numeric and equal to 0, if they are
    *   Boolean.FALSE, or if they are case-insensitive equal to "false".
-   * - Arrays are parsed with comma separators. 
-   *      
+   * - Arrays are parsed with comma separators.
+   *
    */
   static <T> T coerce(Object value, Class<T> type) throws ElException {
     if (value == null) {
@@ -192,7 +192,7 @@ public class Expressions {
         // TODO: especially this case...
         boolValue = !"false".equalsIgnoreCase(value.toString());
       }
-      
+
       @SuppressWarnings("unchecked")
       T t = (T) Boolean.valueOf(boolValue);
       return t;

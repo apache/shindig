@@ -52,7 +52,7 @@ public class XSDValidator {
 
   /**
    * Validate a xml string against a supplied schema.
-   * 
+   *
    * @param xml
    *          the xml presented as a string
    * @param schema
@@ -69,7 +69,7 @@ public class XSDValidator {
 
   /**
    * Validate a xml input stream against a supplied schema.
-   * 
+   *
    * @param xml
    *          a stream containing the xml
    * @param schema
@@ -92,8 +92,8 @@ public class XSDValidator {
 
         public LSInput resolveResource(String arg0, String arg1, String arg2,
             String arg3, String arg4) {
-          log.info("resolveResource(" + arg0 + "," + arg1 + "," + arg2 + ","
-              + arg3 + "," + arg4 + ")");
+          log.info("resolveResource(" + arg0 + ',' + arg1 + ',' + arg2 + ','
+              + arg3 + ',' + arg4 + ')');
           return lsr.resolveResource(arg0, arg1, arg2, arg3, arg4);
         }
 
@@ -102,7 +102,7 @@ public class XSDValidator {
       validator.validate(new StreamSource(xml));
     } catch (IOException e) {
     } catch (SAXException e) {
-      errors.append(e.getMessage()).append("\n");
+      errors.append(e.getMessage()).append('\n');
     }
 
     return errors.toString();
@@ -111,7 +111,7 @@ public class XSDValidator {
   /**
    * Process the response string to strip the container element and insert the
    * opensocial schema.
-   * 
+   *
    * @param xml
    * @return
    */
@@ -133,7 +133,7 @@ public class XSDValidator {
 
     int start = 0;
     if ( xml.startsWith("<?") ) {
-      start = xml.indexOf(">")+1;
+      start = xml.indexOf('>')+1;
       int gt = xml.indexOf('>',start);
       if (gt > 0) {
         return xml.substring(0, gt) + schemaStatement
@@ -164,7 +164,7 @@ public class XSDValidator {
       log.error("Failed to validate " + xml);
     }
     if (!"".equals(errors)) {
-      throw new Error("XML document does not validate \n" + errors + "\n" + xml);
+      throw new Error("XML document does not validate \n" + errors + '\n' + xml);
     }
     return xml;
   }

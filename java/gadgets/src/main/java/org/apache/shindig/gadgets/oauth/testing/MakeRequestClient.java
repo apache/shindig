@@ -88,11 +88,11 @@ public class MakeRequestClient {
   public void setIgnoreCache(boolean ignoreCache) {
     this.ignoreCache = ignoreCache;
   }
-  
+
   public void setTrustedParam(String name, String value) {
     trustedParams.put(name, value);
   }
-  
+
   private OAuthRequest createRequest() {
     if (trustedParams != null) {
       List<Parameter> trusted = Lists.newArrayList();
@@ -202,6 +202,6 @@ public class MakeRequestClient {
    */
   public void approveToken(String params) throws Exception {
     // This will throw if approvalUrl looks wrong.
-    serviceProvider.browserVisit(approvalUrl + "&" + params);
+    serviceProvider.browserVisit(approvalUrl + '&' + params);
   }
 }

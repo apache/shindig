@@ -135,7 +135,7 @@ public class PreloadTest {
     String xml = "<Preload" +
                  " href='" + HREF + '\'' +
                  " authz='signed'" +
-                 " views='" + StringUtils.join(VIEWS, ',') + "'" +
+                 " views='" + StringUtils.join(VIEWS, ',') + '\'' +
                  " some_attribute='yes' />";
 
     Preload preload = new Preload(XmlUtil.parse(xml), SPEC_URL);

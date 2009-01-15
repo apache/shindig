@@ -118,7 +118,7 @@ public class RpcRequestItemTest extends TestCase {
 
   public void testFilterBy() throws Exception {
     request.setParameter("filterBy", null);
-    assertEquals(null, request.getFilterBy());
+    assertNull(request.getFilterBy());
 
     request.setParameter("filterBy", "hasApp");
     assertEquals("hasApp", request.getFilterBy());
@@ -147,36 +147,36 @@ public class RpcRequestItemTest extends TestCase {
     request.setListParameter("fields", Lists.newArrayList("happy", "sad", "grumpy"));
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
-  
+
   public static class InputData {
     String name;
     int id;
-    
+
     public void setName(String name) {
       this.name = name;
     }
-    
+
     public void setId(int id) {
       this.id = id;
     }
   }
-  
+
   public void testGetTypedParameter() throws Exception {
     JSONObject obj = new JSONObject();
     obj.put("name", "Bob");
     obj.put("id", "1234");
-    
+
     request.setJsonParameter("tp", obj);
-    
+
     InputData input = request.getTypedParameter("tp", InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);
   }
-  
+
   public void testGetTypedParameters() throws Exception {
     request.setParameter("name", "Bob");
     request.setParameter("id", "1234");
-    
+
     InputData input = request.getTypedParameters(InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);

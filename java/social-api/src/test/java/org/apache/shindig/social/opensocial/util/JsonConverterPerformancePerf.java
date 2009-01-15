@@ -140,7 +140,7 @@ public class JsonConverterPerformancePerf extends TestCase {
                 TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
             + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
             + output[0].length());
-    log.info("Output Was [" + output[0] + "]");
+    log.info("Output Was [" + output[0] + ']');
   }
 
   public void testToJsonLibOnInheritedClassInput() throws Exception {
@@ -210,7 +210,7 @@ public class JsonConverterPerformancePerf extends TestCase {
                 TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
             + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
             + output[0].length());
-    log.info("Output Was [" + output[0] + "]");
+    log.info("Output Was [" + output[0] + ']');
   }
 
   /**
