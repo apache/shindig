@@ -19,8 +19,6 @@ package org.apache.shindig.auth;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,17 +29,12 @@ import com.google.inject.Inject;
  */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
   public static final String AUTH_URL_PARAMETER = "SecurityTokenUrlParameter";
-
   private static final String TOKEN_PARAM = "st";
-
-  private static final Logger logger = Logger
-      .getLogger(UrlParameterAuthenticationHandler.class.getName());
 
   private final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
-  public UrlParameterAuthenticationHandler(
-      SecurityTokenDecoder securityTokenDecoder) {
+  public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder) {
     this.securityTokenDecoder = securityTokenDecoder;
   }
 
@@ -50,15 +43,14 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   }
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
+    Map<String, String> parameters = getMappedParameters(request);
     try {
-      Map<String, String> parameters = getMappedParameters(request);
       if (parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME) == null) {
         return null;
       }
       return securityTokenDecoder.createToken(parameters);
     } catch (SecurityTokenException e) {
-      logger.log(Level.INFO, "Valid security token not found.", e);
-      return null;
+      throw new InvalidAuthenticationException("Malformed security token " + parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME), e);
     }
   }
 
