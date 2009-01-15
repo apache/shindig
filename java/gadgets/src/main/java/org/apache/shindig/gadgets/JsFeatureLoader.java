@@ -164,7 +164,7 @@ public class JsFeatureLoader {
       throws GadgetException {
     try {
       for (String file : paths) {
-        logger.info("Processing resource: " + file);
+        if (logger.isLoggable(Level.FINE)) logger.fine("Processing resource: " + file);
         String content = ResourceLoader.getContent(file);
         String parent = file.substring(0, file.lastIndexOf('/') + 1);
         ParsedFeature feature = parse(content, parent, true);
