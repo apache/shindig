@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.ContainerConfigException;
@@ -162,12 +161,10 @@ public class RendererTest {
   }
 
   @Test
-  public void wrongDomainRedirects() throws Exception {
+  public void wrongDomainFails() throws Exception {
     lockedDomainService.canRender = false;
     RenderingResults results = renderer.render(makeContext("html"));
-    assertEquals(RenderingResults.Status.MUST_REDIRECT, results.getStatus());
-    // TODO: Verify the real url for redirection.
-    assertNull(results.getRedirect());
+    assertEquals(RenderingResults.Status.ERROR, results.getStatus());
   }
 
   private static class FakeContainerConfig extends JsonContainerConfig {

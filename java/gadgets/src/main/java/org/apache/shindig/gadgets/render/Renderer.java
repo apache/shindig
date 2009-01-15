@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -82,12 +81,12 @@ public class Renderer {
       }
 
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
-        return RenderingResults.mustRedirect(getRedirect(gadget));
+        return RenderingResults.mustRedirect(gadget.getCurrentView().getHref());
       }
 
       GadgetSpec spec = gadget.getSpec();
       if (!lockedDomainService.gadgetCanRender(context.getHost(), spec, context.getContainer())) {
-        return RenderingResults.mustRedirect(getRedirect(gadget));
+        return RenderingResults.error("Invalid domain");
       }
 
       return RenderingResults.ok(renderer.render(gadget));
@@ -138,16 +137,5 @@ public class Renderer {
       LOG.log(Level.WARNING, "Configuration error", e);
     }
     return false;
-  }
-
-  private Uri getRedirect(Gadget gadget) {
-    // TODO: This should probably just call UrlGenerator.getIframeUrl(), but really it should
-    // never happen.
-    View view = gadget.getCurrentView();
-    if (view.getType() == View.ContentType.URL) {
-      return gadget.getCurrentView().getHref();
-    }
-    // TODO
-    return null;
   }
 }
