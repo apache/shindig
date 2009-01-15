@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Maintains a registry of all {@code GadgetFeature} types supported by
@@ -85,7 +86,7 @@ public class GadgetFeatureRegistry {
       throw new IllegalStateException("register should never be " +
           "invoked after calling getLibraries");
     }
-    logger.fine("Registering feature: " + feature.getName());
+    if (logger.isLoggable(Level.FINE)) logger.fine("Registering feature: " + feature.getName());
     if (isCore(feature)) {
       core.put(feature.getName(), feature);
       for (GadgetFeature feat : features.values()) {

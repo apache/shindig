@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,8 +43,7 @@ public class DataServiceServlet extends ApiServlet {
 
   public static final String CONTENT_TYPE = "CONTENT_TYPE";
 
-  private static final Logger logger = Logger.getLogger(
-      "org.apache.shindig.social.opensocial.spi");
+  private static final Logger logger = Logger.getLogger("org.apache.shindig.social.opensocial.spi");
 
   @Override
   protected void doGet(HttpServletRequest servletRequest,
@@ -70,7 +70,7 @@ public class DataServiceServlet extends ApiServlet {
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    logger.finest("Handling restful request for " + servletRequest.getPathInfo());
+    if (logger.isLoggable(Level.FINEST)) logger.finest("Handling restful request for " + servletRequest.getPathInfo());
 
     setCharacterEncodings(servletRequest, servletResponse);
 
@@ -126,13 +126,13 @@ public class DataServiceServlet extends ApiServlet {
       formatString = servletRequest.getParameter(FORMAT_PARAM);
     } catch (Throwable t) {
       // this happens while testing
-      logger.fine("Unexpected error : format param is null " + t.toString());
+      if (logger.isLoggable(Level.FINE)) logger.fine("Unexpected error : format param is null " + t.toString());
     }
     try {
       contentType = servletRequest.getHeader(CONTENT_TYPE);
     } catch (Throwable t) {
       //this happens while testing
-      logger.fine("Unexpected error : content type is null " + t.toString());
+      if (logger.isLoggable(Level.FINE)) logger.fine("Unexpected error : content type is null " + t.toString());
     }
 
     if (contentType != null) {
