@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.render;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Check;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Contains the results of a rendering operation.
  */
@@ -46,6 +48,7 @@ public class RenderingResults {
   }
 
   public static RenderingResults mustRedirect(Uri redirect) {
+    Preconditions.checkNotNull(redirect);
     return new RenderingResults(Status.MUST_REDIRECT, null, null, redirect);
   }
 
