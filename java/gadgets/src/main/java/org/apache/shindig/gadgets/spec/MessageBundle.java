@@ -21,12 +21,12 @@ import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -36,7 +36,7 @@ public class MessageBundle {
 
   public static final MessageBundle EMPTY = new MessageBundle();
 
-  private final Map<String, String> messages;
+  private final ImmutableMap<String, String> messages;
   private final String languageDirection;
   private final String jsonString;
 
@@ -60,8 +60,22 @@ public class MessageBundle {
     languageDirection = locale.getLanguageDirection();
   }
 
+   /**
+   * Constructs a message bundle from a prebuilt map.
+   *
+   * @param locale The LocaleSpec element that this bundle was constructed from.
+   * @param map The content of the message map.
+   */
+  public MessageBundle(LocaleSpec locale, Map<String, String> map) {
+     messages = ImmutableMap.copyOf(map);
+     languageDirection = locale.getLanguageDirection();
+     jsonString = new JSONObject(messages).toString();
+   }
+
   /**
    * Constructs a message bundle from a /ModulePrefs/Locale with nested messages.
+   * @param element XML Dom element to parse
+   * @throws SpecParserException when badly formed xml is provided
    */
   public MessageBundle(Element element) throws SpecParserException {
     messages = parseMessages(element);
@@ -78,6 +92,7 @@ public class MessageBundle {
   public MessageBundle(MessageBundle parent, MessageBundle child) {
     Map<String, String> merged = Maps.newHashMap();
     String dir = null;
+
     if (parent != null) {
       merged.putAll(parent.messages);
       dir = parent.languageDirection;
@@ -86,13 +101,13 @@ public class MessageBundle {
       merged.putAll(child.messages);
       dir = child.languageDirection;
     }
-    messages = Collections.unmodifiableMap(merged);
+    messages = ImmutableMap.copyOf(merged);
     jsonString = new JSONObject(messages).toString();
     languageDirection = dir;
   }
 
   private MessageBundle() {
-    this.messages = Collections.emptyMap();
+    this.messages = ImmutableMap.of();
     jsonString = "{}";
     languageDirection = "ltr";
   }
@@ -113,7 +128,9 @@ public class MessageBundle {
   }
 
   /**
-   * Return the contents as a JSON encoded string
+   * Return the message bundle contents as a JSON encoded string.
+   *
+   * @return json representation of the message bundler
    */
   public String toJSONString() {
     return jsonString;
@@ -121,12 +138,15 @@ public class MessageBundle {
 
   /**
    * Extracts messages from an element.
+   * @param element Xml dom containing mesage bundle nodes
+   * @return Immutable map of message keys to values
+   * @throws SpecParserException when invalid xml is parsed
    */
-  private Map<String, String> parseMessages(Element element)
+  private ImmutableMap<String, String> parseMessages(Element element)
       throws SpecParserException {
     NodeList nodes = element.getElementsByTagName("msg");
 
-    Map<String, String> messages = Maps.newHashMap();
+    Map<String, String> messages = Maps.newHashMapWithExpectedSize(nodes.getLength());
 
     for (int i = 0, j = nodes.getLength(); i < j; ++i) {
       Element msg = (Element)nodes.item(i);
@@ -137,8 +157,8 @@ public class MessageBundle {
       }
       messages.put(name, msg.getTextContent().trim());
     }
-    
-    return Collections.unmodifiableMap(messages);
+
+    return ImmutableMap.copyOf(messages);
   }
 
   @Override
