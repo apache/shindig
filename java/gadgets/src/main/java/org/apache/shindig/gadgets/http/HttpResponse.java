@@ -502,16 +502,23 @@ public final class HttpResponse implements Externalizable {
    */
   @SuppressWarnings("unchecked")
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    httpStatusCode = in.readInt();
-    Map<String, List<String>> headerCopy = (Map<String, List<String>>)in.readObject();
-    int bodyLength = in.readInt();
-    responseBytes = new byte[bodyLength];
-    in.read(responseBytes, 0, bodyLength);
+    httpStatusCode = in.readInt(); 
+    Map<String, List<String>> headerCopy = (Map<String, List<String>>)in.readObject(); 
+    int bodyLength = in.readInt(); 
+    responseBytes = new byte[bodyLength]; 
+    int cnt, offset = 0; 
+    while ((cnt = in.read(responseBytes, offset, bodyLength)) > 0) { 
+   	 offset += cnt; 
+   	 bodyLength -= cnt; 
+    } 
+    if (offset != responseBytes.length) { 
+    	throw new IOException("Invalid body! Expected length = " + responseBytes.length + ", bytes readed = " + offset + "."); 
+    } 
 
-    date = getAndUpdateDate(headerCopy);
-    encoding = getAndUpdateEncoding(headerCopy, responseBytes);
-    headers = Collections.unmodifiableMap(headerCopy);
-    metadata = Collections.emptyMap();
+    date = getAndUpdateDate(headerCopy); 
+    encoding = getAndUpdateEncoding(headerCopy, responseBytes); 
+    headers = Collections.unmodifiableMap(headerCopy); 
+    metadata = Collections.emptyMap(); 
   }
 
   public void writeExternal(ObjectOutput out) throws IOException {
