@@ -18,6 +18,7 @@
 package org.apache.shindig.social.core.util.xstream;
 
 import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
 
 import java.util.Map;
 import java.util.Set;
@@ -60,8 +61,7 @@ public class NamespaceSet {
    * @param namespacedElementName
    *          the final name of the element with prefix.
    */
-  public void addPrefixedElement(String elementName,
-      String namespacedElementName) {
+  public void addPrefixedElement(String elementName, String namespacedElementName) {
     elementNames.put(elementName, namespacedElementName);
   }
 
@@ -73,11 +73,7 @@ public class NamespaceSet {
    * @return the converted name, left as is if no conversion was required.
    */
   public String getElementName(String name) {
-    String namespacedName = elementNames.get(name);
-    if (namespacedName != null) {
-      return namespacedName;
-    }
-    return name;
+    return Objects.firstNonNull(elementNames.get(name), name);
   }
 
   /**

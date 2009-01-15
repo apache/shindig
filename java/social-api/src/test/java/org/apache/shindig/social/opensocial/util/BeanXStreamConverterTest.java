@@ -79,6 +79,7 @@ public class BeanXStreamConverterTest extends TestCase {
         "john.doe@work.bar"), new ListFieldImpl("home", "john.doe@home.bar")));
 
     activity = new ActivityImpl("activityId", johnDoe.getId());
+    activity.setUrl("http://foo.com/");
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(new MediaItemImpl(
         "image/jpg", MediaItem.Type.IMAGE, "http://foo.bar")));
@@ -203,20 +204,40 @@ public class BeanXStreamConverterTest extends TestCase {
     String xml = XSDValidator.validate(beanXmlConverter
         .convertToString(activities), XMLSCHEMA, XSDRESOURCE, true);
     XmlUtil.parse(xml);
-    String expectedXml = "<response>" + "<list.container>" + "  <activity>"
-        + "    <id>activityId</id>" + "    <mediaItems>"
+    String expectedXml = "<response>"
+        + "<list.container>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
-        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "  <activity>" + "    <id>activityId</id>"
-        + "    <mediaItems>" + "        <mimeType>image/jpg</mimeType>"
-        + "        <type>IMAGE</type>" + "        <url>http://foo.bar</url>"
-        + "    </mediaItems>" + "    <userId>johnDoeId</userId>"
-        + "  </activity>" + "</list.container>" + "</response>";
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <url>http://foo.com/</url>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
+        + "        <mimeType>image/jpg</mimeType>"
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <url>http://foo.com/</url>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "  <activity>"
+        + "    <id>activityId</id>"
+        + "    <mediaItems>"
+        + "        <mimeType>image/jpg</mimeType>"
+        + "        <type>IMAGE</type>"
+        + "        <url>http://foo.bar</url>"
+        + "    </mediaItems>"
+        + "    <url>http://foo.com/</url>"
+        + "    <userId>johnDoeId</userId>"
+        + "  </activity>"
+        + "</list.container>"
+        + "</response>";
     expectedXml = XSDValidator.insertSchema(expectedXml, XMLSCHEMA, true);
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
@@ -242,8 +263,8 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   /**
-   * @param string
-   * @return
+   * @param resource
+   * @return a string
    * @throws IOException
    */
   private String loadXML(String resource) throws IOException {

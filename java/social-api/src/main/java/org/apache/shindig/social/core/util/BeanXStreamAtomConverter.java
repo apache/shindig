@@ -60,12 +60,10 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
   public String convertToString(Object obj) {
     writerStack.reset();
     AtomFeed af = new AtomFeed(obj);
-    ConverterConfig cc = converterMap
-        .get(XStreamConfiguration.ConverterSet.DEFAULT);
+    ConverterConfig cc = converterMap.get(XStreamConfiguration.ConverterSet.DEFAULT);
     cc.mapper.setBaseObject(af); // thread safe method
-    String result = cc.xstream.toXML(af);
 
-    return result;
+    return cc.xstream.toXML(af);
   }
 
 }

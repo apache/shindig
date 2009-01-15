@@ -21,7 +21,7 @@ package org.apache.shindig.social.core.util.xstream;
  * This represents the mapping between a class and a field, potentially with a
  * parent element. It is used to define the element names that are used to
  * serialize the contents of a class.
- * 
+ *
  * eg
  * <pre>
  * &lt;outerobject&gt;
@@ -47,8 +47,8 @@ package org.apache.shindig.social.core.util.xstream;
  * &lt;/person&gt;
  * </pre>
  * For a more compact mapping {@link ItemFieldMapping}.
- * 
- * 
+ *
+ *
  */
 /**
  *
@@ -71,7 +71,7 @@ public class ClassFieldMapping {
 
   /**
    * Create a simple element class mapping, applicable to all parent elements.
-   * 
+   *
    * @param elementName
    *          the name of the element
    * @param mappedClazz
@@ -86,7 +86,7 @@ public class ClassFieldMapping {
   /**
    * Create a element class mapping, that only applies to one parent element
    * name.
-   * 
+   *
    * @param parentName
    *          the name of the parent element that this mapping applies to
    * @param elementName
@@ -94,8 +94,7 @@ public class ClassFieldMapping {
    * @param mappedClazz
    *          the class to map to the name of the element
    */
-  public ClassFieldMapping(String parentName, String elementName,
-      Class<?> mappedClazz) {
+  public ClassFieldMapping(String parentName, String elementName, Class<?> mappedClazz) {
     this.elementName = elementName;
     this.mappedClazz = mappedClazz;
     this.fieldParentName = parentName;
@@ -117,7 +116,7 @@ public class ClassFieldMapping {
 
   /**
    * Does this ClassFieldMapping match the supplied parent and type.
-   * 
+   *
    * @param parent
    *          the parent element, which may be null
    * @param type
@@ -127,11 +126,9 @@ public class ClassFieldMapping {
   public boolean matches(String parent, Class<?> type) {
     if (fieldParentName == null) {
       return mappedClazz.isAssignableFrom(type);
-    } else {
-      boolean result = fieldParentName.equals(parent)
-          && mappedClazz.isAssignableFrom(type);
-      return result;
     }
+    return fieldParentName.equals(parent)
+        && mappedClazz.isAssignableFrom(type);
   }
 
 }

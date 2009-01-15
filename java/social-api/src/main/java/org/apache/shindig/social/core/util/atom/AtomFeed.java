@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+
 /**
  * represents an atom:feed entry
  */
@@ -49,6 +52,7 @@ public class AtomFeed {
    */
   @SuppressWarnings("unchecked")
   public AtomFeed(Object obj) {
+    Preconditions.checkNotNull(obj);
     if (obj instanceof Map) {
       Map<?, ?> m = (Map<?, ?>) obj;
       entry = new ArrayList();
@@ -80,8 +84,7 @@ public class AtomFeed {
       totalResults = entry.size();
       itemsPerPage = entry.size();
     } else {
-      entry = new ArrayList();
-      entry.add(new AtomEntry(obj));
+      entry = ImmutableList.of(new AtomEntry(obj));
       startIndex = 0;
       totalResults = 1;
       itemsPerPage = 1;

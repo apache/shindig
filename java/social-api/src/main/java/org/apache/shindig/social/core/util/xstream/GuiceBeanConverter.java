@@ -31,7 +31,6 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import org.apache.shindig.social.opensocial.model.Exportablebean;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  *

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
+import com.google.common.base.Preconditions;
+
 /**
  * represents an atom:link element.
  */
@@ -24,6 +26,8 @@ public class AtomLink {
 
   private String href;
   private String rel;
+  private String type;
+  private String title;
 
   /**
    * @param string
@@ -48,4 +52,11 @@ public class AtomLink {
     return rel;
   }
 
+  public String getType() {
+    return type;
+  }
+
+  public String getTitle() {
+    return title;
+  }
 }

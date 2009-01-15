@@ -106,7 +106,7 @@ public class OAuthRequest {
    * Additional trusted parameters to be included in the OAuth request.
    */
   private final List<Parameter> trustedParams;
-  
+
   /**
    * State information from client
    */
@@ -141,7 +141,7 @@ public class OAuthRequest {
   public OAuthRequest(OAuthFetcherConfig fetcherConfig, HttpFetcher fetcher) {
     this(fetcherConfig, fetcher, null);
   }
-  
+
   /**
    * @param fetcherConfig configuration options for the fetcher
    * @param fetcher fetcher to use for actually making requests
@@ -180,12 +180,12 @@ public class OAuthRequest {
    * unchecked exception occurs, well, then the client is out of luck.
    */
   private HttpResponse fetchNoThrow() {
-    HttpResponseBuilder response = null;    
+    HttpResponseBuilder response = null;
     try {
       accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(
           realRequest.getSecurityToken(), realRequest.getOAuthArguments(), clientState,
           responseParams);
-      response = fetchWithRetry();     
+      response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
       responseParams.logDetailedWarning("OAuth fetch fatal error", e);
@@ -313,7 +313,7 @@ public class OAuthRequest {
     }
     if (stateOwner != null && !stateOwner.equals(pageOwner)) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
-          "Client state belongs to a different person " + 
+          "Client state belongs to a different person " +
           "(state owner=" + stateOwner + ", pageOwner=" + pageOwner + ")");
     }
   }
@@ -347,7 +347,7 @@ public class OAuthRequest {
       } else {
         throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
             "invalid parameter name " + name +
-            ", applications may not override opensocial or oauth parameters");           
+            ", applications may not override opensocial or oauth parameters");
       }
     }
     return list;
@@ -501,7 +501,7 @@ public class OAuthRequest {
         if (!OAuth.isFormEncoded(contentType)) {
           throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
               "OAuth param location can only be post_body if post body if of " +
-              "type x-www-form-urlencoded");              
+              "type x-www-form-urlencoded");
         }
         String oauthData = OAuthUtil.formEncode(oauthParams);
         if (result.getPostBodyLength() == 0) {
@@ -536,7 +536,7 @@ public class OAuthRequest {
     }
     if (OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET) == null) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
-          "No oauth_token_secret returned from service provider");  
+          "No oauth_token_secret returned from service provider");
     }
     return reply;
   }
@@ -600,10 +600,7 @@ public class OAuthRequest {
         && accessorInfo.getAccessor().accessToken == null) {
       return true;
     }
-    if (realRequest.getOAuthArguments().mayUseToken() && accessTokenExpired()) {
-      return true;
-    }
-    return false;
+    return realRequest.getOAuthArguments().mayUseToken() && accessTokenExpired();
   }
 
   private boolean accessTokenExpired() {

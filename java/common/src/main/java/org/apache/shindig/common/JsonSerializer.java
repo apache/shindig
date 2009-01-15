@@ -63,7 +63,7 @@ public final class JsonSerializer {
   /**
    * Serializes a Map as a JSON object. Does not guard against cyclical references.
    */
-  public static String serialize(Map<String, ? extends Object> map) {
+  public static String serialize(Map<String, ?> map) {
     StringBuilder buf = new StringBuilder(map.size() * BASE_MULTIPLIER);
     try {
       appendMap(buf, map);
@@ -77,7 +77,7 @@ public final class JsonSerializer {
   /**
    * Serializes a Collection as a JSON array. Does not guard against cyclical references.
    */
-  public static String serialize(Collection<? extends Object> collection) {
+  public static String serialize(Collection<?> collection) {
     StringBuilder buf = new StringBuilder(collection.size() * BASE_MULTIPLIER);
     try {
       appendCollection(buf, collection);
@@ -186,7 +186,7 @@ public final class JsonSerializer {
    *
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
-  public static void appendCollection(Appendable buf, Collection<? extends Object> collection)
+  public static void appendCollection(Appendable buf, Collection<?> collection)
       throws IOException {
     buf.append('[');
     boolean firstDone = false;
@@ -206,11 +206,11 @@ public final class JsonSerializer {
    *
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
-  public static void appendMap(Appendable buf, Map<String, ? extends Object> map)
+  public static void appendMap(Appendable buf, Map<String, ?> map)
       throws IOException {
     buf.append('{');
     boolean firstDone = false;
-    for (Map.Entry<String, ? extends Object> entry : map.entrySet()) {
+    for (Map.Entry<String, ?> entry : map.entrySet()) {
       if (firstDone) {
         buf.append(',');
       } else {

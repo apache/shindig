@@ -97,11 +97,8 @@ public abstract class AbstractHttpCache implements HttpCache {
     if (request.getIgnoreCache()) {
       return false;
     }
-    if (!"GET".equals(request.getMethod()) &&
-        !"GET".equals(request.getHeader("X-Method-Override"))) {
-      return false;
-    }
-    return true;
+    return !(!"GET".equals(request.getMethod()) &&
+        !"GET".equals(request.getHeader("X-Method-Override")));
   }
 
   /**
