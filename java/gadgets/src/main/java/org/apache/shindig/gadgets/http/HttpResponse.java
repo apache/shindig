@@ -333,7 +333,7 @@ public final class HttpResponse implements Externalizable {
    */
   public boolean isStrictNoCache() {
     if (isError() && !NEGATIVE_CACHING_EXEMPT_STATUS.contains(httpStatusCode)) {
-      return true;
+      return false;
     }
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {

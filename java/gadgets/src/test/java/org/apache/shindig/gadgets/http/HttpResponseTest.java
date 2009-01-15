@@ -190,6 +190,26 @@ public class HttpResponseTest extends TestCase {
     assertEquals(expected, expires);
     assertTrue(response.getCacheTtl() <= HttpResponse.DEFAULT_TTL && response.getCacheTtl() > 0);
   }
+  
+  public void testCachingHeadersIgnoredOnError() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "no-cache")
+        .setHttpStatusCode(404)
+        .create();
+    assertFalse(response.isStrictNoCache());
+
+    response = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "no-cache")
+        .setHttpStatusCode(403)
+        .create();
+    assertTrue(response.isStrictNoCache());
+
+    response = new HttpResponseBuilder()
+        .addHeader("Cache-Control", "no-cache")
+        .setHttpStatusCode(401)
+        .create();
+    assertTrue(response.isStrictNoCache());
+  }
 
   /**
    * Verifies that the cache TTL is within acceptable ranges.
