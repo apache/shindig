@@ -66,9 +66,9 @@
           <compilerArguments>
             <!-- A common distribution of hamcrest library includes .java files that are newer than the corresponding
              .class files.  Because sourcepath defaults to classpath, if we do not set this, then we end up with some
-              of hamcrest's classes in our jar.  This is silly and not what we want, so we explicitly set sourcepath 
-              to something that is not a directory.  If you have a directory on your machine that is called 
-              /not_a_directory and contains .java files that are newer than .class files with a similar name that are 
+              of hamcrest's classes in our jar.  This is silly and not what we want, so we explicitly set sourcepath
+              to something that is not a directory.  If you have a directory on your machine that is called
+              /not_a_directory and contains .java files that are newer than .class files with a similar name that are
               imported by our code, then you will probably experience trouble. -->
             <sourcepath>/not_a_directory</sourcepath>
           </compilerArguments>
@@ -102,6 +102,12 @@
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-common</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <!--
       external dependencies
@@ -116,17 +122,14 @@
     <dependency>
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>caja</groupId>
       <artifactId>json_simple</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.oauth</groupId>
       <artifactId>core</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.collections</groupId>
@@ -139,12 +142,6 @@
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>rome</groupId>
@@ -153,7 +150,6 @@
     <dependency>
       <groupId>com.ibm.icu</groupId>
       <artifactId>icu4j</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.nekohtml</groupId>
@@ -166,6 +162,13 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
+    </dependency>
+
+    <!-- test -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
