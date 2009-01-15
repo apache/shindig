@@ -69,7 +69,7 @@ public class BeanXmlConverter implements BeanConverter {
     try {
       writer.write("response", obj);
       toReturn = outputWriter.toString();
-      logger.finest("XML is: " + toReturn + "\n **** \n\n");
+      if (logger.isLoggable(Level.FINEST)) logger.finest("XML is: " + toReturn + "\n **** \n\n");
 
     } catch (SAXException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
@@ -81,7 +81,7 @@ public class BeanXmlConverter implements BeanConverter {
       try {
         writer.close();
       } catch (IOException e) {
-        logger.log(Level.FINEST, e.getMessage(), e);
+        if (logger.isLoggable(Level.FINEST)) logger.log(Level.FINEST, e.getMessage(), e);
       }
     }
 

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Provides a mechanism for loading a group of js features from a directory.
@@ -148,7 +149,7 @@ public class JsFeatureLoader {
           features.add(feature);
         }
       } else {
-          logger.finest(file.getAbsolutePath() + " doesn't seem to be an XML file.");
+          if (logger.isLoggable(Level.FINEST)) logger.finest(file.getAbsolutePath() + " doesn't seem to be an XML file.");
       }
     }
   }

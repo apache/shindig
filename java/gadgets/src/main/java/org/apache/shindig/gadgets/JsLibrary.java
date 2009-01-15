@@ -154,7 +154,7 @@ public final class JsLibrary {
    * @return The contents of the file or resource named by @code name.
    */
   private static String loadData(String name, Type type) {
-    logger.fine("Loading js from: " + name + " type: " + type.toString());
+    if (logger.isLoggable(Level.FINE)) logger.fine("Loading js from: " + name + " type: " + type.toString());
     if (type == Type.FILE) {
       return loadFile(name);
     } else if (type == Type.RESOURCE) {

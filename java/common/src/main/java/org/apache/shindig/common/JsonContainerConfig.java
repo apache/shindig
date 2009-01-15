@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Represents a container configuration using JSON notation.
@@ -143,7 +144,7 @@ public class JsonContainerConfig implements ContainerConfig {
             }
           loadFromString(ResourceLoader.getContent(file));
         } else {
-            LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
+            if (LOG.isLoggable(Level.FINEST)) LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
       }
     } catch (IOException e) {
