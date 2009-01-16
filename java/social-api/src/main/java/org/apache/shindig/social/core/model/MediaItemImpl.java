@@ -21,7 +21,8 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Activity.MediaItem.Field.html
+ * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.MediaItem">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.MediaItem</a>
  *
  */
 public class MediaItemImpl implements MediaItem {
