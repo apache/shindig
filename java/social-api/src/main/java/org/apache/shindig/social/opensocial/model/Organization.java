@@ -27,7 +27,8 @@ import java.util.Date;
  * support only a single Company Name and Job Title field should represent them with a single
  * organization element with name and title properties, respectively.
  *
- * see http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Organization.Field.html
+ * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Organization">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Organization</a>
  *
  */
 

@@ -20,14 +20,13 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.MediaItem
- *
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.MediaItem
  */
 class MediaItem {
   public $mimeType;
   public $type;
   public $url;
-  
+
   public $types = array('AUDIO' => 'audio', 'VIDEO' => 'video', 'IMAGE' => 'image');
 
   public function __construct($mimeType, $type, $url) {

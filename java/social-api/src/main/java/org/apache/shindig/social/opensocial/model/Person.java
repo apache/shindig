@@ -32,8 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * see http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person.Field for all
- * field meanings. All fields are represented in the js api at this time except for lastUpdated.
+ * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field</a>
+ * for all field meanings. All fields are represented in the js api at this time except for lastUpdated.
  * This field is currently only in the RESTful spec.
  *
  */
@@ -764,7 +765,7 @@ public interface Person {
 
   /**
    * Get the person's current network status. Specified as an {@link Enum} with the enum's key
-   * referencing {@link Enum.Presence}. Container support for this field is OPTIONAL.
+   * referencing {@link Enum.NetworkPresence}. Container support for this field is OPTIONAL.
    *
    * @return the person's current network status
    */
@@ -772,7 +773,7 @@ public interface Person {
 
   /**
    * Set the person's current network status. Specified as an {@link Enum} with the enum's key
-   * referencing {@link Enum.Presence}. Container support for this field is OPTIONAL.
+   * referencing {@link Enum.NetworkPresence}. Container support for this field is OPTIONAL.
    *
    * @param networkPresence the person's current network status
    */
@@ -846,7 +847,8 @@ public interface Person {
 
   /**
    * Set a list of Photos for the person.
-   * @see Person.getPhotos()
+   * @see Person#getPhotos()
+   *
    * @param photos a list of photos.
    */
   void setPhotos(List<ListField> photos);
