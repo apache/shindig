@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * see http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Activity.Field for all
+ * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Activity.Field">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Activity.Field</a> for all
  * field meanings. All fields are represented in the js api at this time except for lastUpdated.
  * This field is currently only in the RESTful spec.
  *

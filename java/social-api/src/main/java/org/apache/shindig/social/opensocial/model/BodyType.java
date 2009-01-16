@@ -23,7 +23,8 @@ import com.google.inject.ImplementedBy;
 
 /**
  * Base interface for all body type objects. see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.BodyType.Field_field_detail
+ * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field.BODY_TYPE">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field.BODY_TYPE</a>
  *
  */
 @ImplementedBy(BodyTypeImpl.class)

@@ -21,7 +21,8 @@ import org.apache.shindig.social.opensocial.model.Url;
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Url.Field.html
+ * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Url">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Url</a>
  */
 public class UrlImpl extends ListFieldImpl implements Url {
   private String linkText;

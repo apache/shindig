@@ -19,12 +19,11 @@
  */
 
 /**
- * 
- * Base interface for all message objects.
- * 
- * see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Message
  *
+ * Base interface for all message objects.
+ *
+ * see
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Message
  */
 class Message {
   public $body;
