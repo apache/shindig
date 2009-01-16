@@ -16,13 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.expressions;
+package org.apache.shindig.expressions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
+import org.apache.shindig.expressions.ElException;
+import org.apache.shindig.expressions.Expression;
+import org.apache.shindig.expressions.ExpressionContext;
+import org.apache.shindig.expressions.Expressions;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;

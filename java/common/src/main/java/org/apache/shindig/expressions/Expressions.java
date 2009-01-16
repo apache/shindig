@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.expressions;
+package org.apache.shindig.expressions;
 
 import java.util.List;
 import java.util.Map;

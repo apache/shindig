@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.expressions;
+package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.expressions.ExpressionContext;
 
 import java.util.logging.Logger;
 
