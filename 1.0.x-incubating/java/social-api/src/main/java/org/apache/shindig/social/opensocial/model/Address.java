@@ -23,7 +23,8 @@ import com.google.inject.ImplementedBy;
 
 /**
  * Base interface for all address objects
- * see http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Address.Field.html.
+ * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Address">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Address</a>.
  *
  */
 @ImplementedBy(AddressImpl.class)

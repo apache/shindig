@@ -24,8 +24,9 @@ import com.google.inject.ImplementedBy;
 /**
  * Base interface for all name objects.
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.Name.Field.html
- *
+ * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Name">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Name</a>
+ * 
  */
 
 @ImplementedBy(NameImpl.class)

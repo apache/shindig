@@ -20,7 +20,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Enum
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Enum
  *
  * Base class for all Enum objects. This class allows containers to use constants
  * for fields that have a common set of values.
@@ -68,8 +68,8 @@ abstract class Enum implements ComplexField {
  * public Enum for opensocial.Enum.Drinker
  */
 class EnumDrinker extends Enum {
-  public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Occasionally", 
-      'QUIT' => "Quit", 'QUITTING' => "Quitting", 'REGULARLY' => "Regularly", 
+  public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Occasionally",
+      'QUIT' => "Quit", 'QUITTING' => "Quitting", 'REGULARLY' => "Regularly",
       'SOCIALLY' => "Socially", 'YES' => "Yes");
 }
 
@@ -84,8 +84,8 @@ class EnumGender extends Enum {
  * public Enum for opensocial.Enum.LookingFor
  */
 class EnumLookingFor extends Enum {
-  public $values = array('ACTIVITY_PARTNERS' => 'Activity Partners', 'DATING' => 'Dating', 
-      'FRIENDS' => 'Friends', 'NETWORKING' => 'Networking', 'RANDOM' => 'Random', 
+  public $values = array('ACTIVITY_PARTNERS' => 'Activity Partners', 'DATING' => 'Dating',
+      'FRIENDS' => 'Friends', 'NETWORKING' => 'Networking', 'RANDOM' => 'Random',
       'RELATIONSHIP' => 'Relationship');
 }
 
@@ -93,8 +93,8 @@ class EnumLookingFor extends Enum {
  * public Enum for opensocial.Enum.Smoker
  */
 class EnumSmoker extends Enum {
-  public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Ocasionally", 'QUIT' => "Quit", 
-      'QUITTING' => "Quitting", 'REGULARLY' => "Regularly", 'SOCIALLY' => "Socially", 
+  public $values = array('HEAVILY' => "Heavily", 'NO' => "No", 'OCCASIONALLY' => "Ocasionally", 'QUIT' => "Quit",
+      'QUITTING' => "Quitting", 'REGULARLY' => "Regularly", 'SOCIALLY' => "Socially",
       'YES' => "Yes");
 }
 
@@ -102,6 +102,6 @@ class EnumSmoker extends Enum {
  * public Enum for opensocial.Enum.Presence
  */
 class EnumPresence extends Enum {
-  public $values = array('AWAY' => "Away", 'CHAT' => "Chat", 'DND' => "Do Not Disturb", 'OFFLINE' => "Offline", 
+  public $values = array('AWAY' => "Away", 'CHAT' => "Chat", 'DND' => "Do Not Disturb", 'OFFLINE' => "Offline",
       'ONLINE' => "Online", 'XA' => "Extended Away");
 }

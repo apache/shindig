@@ -24,7 +24,7 @@ if (! class_exists('Enum')) {
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Person
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person
  *
  */
 class Person {
@@ -86,7 +86,7 @@ class Person {
   public $turnOns;
   public $tvShows;
   public $urls;
-  
+
   // Note: Not in the opensocial js person object directly
   public $isOwner = false;
   public $isViewer = false;
@@ -104,7 +104,7 @@ class Person {
     $this->$fieldName = $value;
   }
 
-  /** 
+  /**
    * Returns the field value for the given fieldName, if present.
    * @param $fieldName name of the contact field, e.g. "displayName"
    */
