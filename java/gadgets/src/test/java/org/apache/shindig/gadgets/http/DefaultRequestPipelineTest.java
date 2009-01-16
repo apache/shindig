@@ -172,10 +172,10 @@ public class DefaultRequestPipelineTest {
     protected FakeHttpCache() {
     }
 
-    public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
+    public boolean addResponse(HttpRequest request, HttpResponse response) {
       writeCount++;
       data.put(request.getUri(), response);
-      return response;
+      return true;
     }
 
     public HttpResponse getResponse(HttpRequest request) {
@@ -185,6 +185,10 @@ public class DefaultRequestPipelineTest {
 
     public HttpResponse removeResponse(HttpRequest key) {
       throw new UnsupportedOperationException();
+    }
+
+    public String createKey(HttpRequest request) {
+      return request.getUri().getQuery();
     }
   }
 
