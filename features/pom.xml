@@ -42,55 +42,25 @@
   </scm>
 
   <build>
-
     <pluginManagement>
       <!-- set versions of common plugins for reproducibility, ordered alphabetically by owner -->
       <plugins>
-	      <plugin>
-	        <groupId>net.sf.alchim</groupId>
-	        <artifactId>yuicompressor-maven-plugin</artifactId>
-	        <version>0.7.1</version>
-        </plugin>
+        <!-- Misc -->
         <plugin>
           <groupId>de.berlios.jsunit</groupId>
           <artifactId>jsunit-maven2-plugin</artifactId>
-	        <version>1.3</version>
+          <version>1.3</version>
+        </plugin>
+        <plugin>
+          <groupId>net.sf.alchim</groupId>
+          <artifactId>yuicompressor-maven-plugin</artifactId>
+          <version>0.7.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
-    
+
+    <!-- ordered alphabetically by owner -->
     <plugins>
-      <plugin>
-        <!-- TODO: Replace this with the more generic javascript plugin that
-             allows the use of arbitrary compressor / compilers.
-             The maven-javascript-plugin does not seem to work.
-        -->
-        <!-- <groupId>net.sf.hammerfest</groupId> -->
-        <!-- <artifactId>maven-javascript-plugin</artifactId> -->
-        <groupId>net.sf.alchim</groupId>
-        <artifactId>yuicompressor-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compress</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <suffix>.opt</suffix>
-          <excludes>
-            <exclude>target/**</exclude>
-            <!-- don't bother with other file types. -->
-            <exclude>**/*.xml</exclude>
-            <exclude>**/*.html</exclude>
-            <exclude>**/*.gif</exclude>
-            <exclude>**/*.jpeg</exclude>
-            <exclude>**/*.png</exclude>
-            <!-- Caja is already minified -->
-            <exclude>**/caja/*.js</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>de.berlios.jsunit</groupId>
         <artifactId>jsunit-maven2-plugin</artifactId>
@@ -161,15 +131,66 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <!-- TODO: Replace this with the more generic javascript plugin that
+          allows the use of arbitrary compressor / compilers.
+          The maven-javascript-plugin does not seem to work.
+        -->
+        <!-- <groupId>net.sf.hammerfest</groupId> -->
+        <!-- <artifactId>maven-javascript-plugin</artifactId> -->
+        <groupId>net.sf.alchim</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compress</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <suffix>.opt</suffix>
+          <excludes>
+            <exclude>target/**</exclude>
+            <!-- don't bother with other file types. -->
+            <exclude>**/*.xml</exclude>
+            <exclude>**/*.html</exclude>
+            <exclude>**/*.gif</exclude>
+            <exclude>**/*.jpeg</exclude>
+            <exclude>**/*.png</exclude>
+            <!-- Caja is already minified -->
+            <exclude>**/caja/*.js</exclude>
+          </excludes>
+          <jswarn>false</jswarn>
+          <statistics>false</statistics>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
         <targetPath>features</targetPath>
         <directory>${basedir}</directory>
-        <filtering>false</filtering>
         <excludes>
           <exclude>pom.xml</exclude>
+          <!-- SVN ignore -->
           <exclude>target/**</exclude>
+          <exclude>work</exclude>
+          <exclude>dojo</exclude>
+          <exclude>*.iws</exclude>
+          <exclude>*.ipr</exclude>
+          <exclude>*.iml</exclude>
+          <exclude>derby.log</exclude>
+          <exclude>maven.log</exclude>
+          <exclude>build.xml</exclude>
+          <exclude>build-dependency.xml</exclude>
+          <exclude>velocity.log*</exclude>
+          <exclude>junit*.properties</exclude>
+          <exclude>surefire*.properties</exclude>
+          <exclude>.project</exclude>
+          <exclude>.classpath</exclude>
+          <exclude>.settings/**</exclude>
+          <exclude>.deployables</exclude>
+          <exclude>.wtpmodules</exclude>
+          <exclude>.externalToolBuilders/**</exclude>
         </excludes>
       </resource>
     </resources>
