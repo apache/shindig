@@ -20,7 +20,7 @@
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.8/reference/#opensocial.Phone
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Phone
  *
  */
 class Phone extends ListField {

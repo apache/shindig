@@ -21,7 +21,8 @@ import org.apache.shindig.social.opensocial.model.BodyType;
 
 /**
  * see
- * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.BodyType.Field.html
+ * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType">
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType</a>
  *
  */
 public class BodyTypeImpl implements BodyType {
