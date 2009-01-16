@@ -62,7 +62,7 @@ public abstract class AbstractHttpCache implements HttpCache {
     return null;
   }
 
-  public HttpResponse addResponse(HttpRequest request, HttpResponse response) {
+  public boolean addResponse(HttpRequest request, HttpResponse response) {
     if (isCacheable(request) && isCacheable(response)) {
       // Both are cacheable. Check for forced cache TTL overrides.
       HttpResponseBuilder responseBuilder = new HttpResponseBuilder(response);
@@ -74,9 +74,10 @@ public abstract class AbstractHttpCache implements HttpCache {
       response = responseBuilder.create();
       String keyString = createKey(request);
       addResponseImpl(keyString, response);
+      return true;
     }
 
-    return response;
+    return false;
   }
 
   public HttpResponse removeResponse(HttpRequest request) {

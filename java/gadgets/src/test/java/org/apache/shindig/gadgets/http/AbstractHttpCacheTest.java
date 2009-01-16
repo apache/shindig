@@ -20,7 +20,9 @@ package org.apache.shindig.gadgets.http;
 import static org.apache.shindig.gadgets.http.AbstractHttpCache.DEFAULT_KEY_VALUE;
 import static org.apache.shindig.gadgets.http.AbstractHttpCache.KEY_SEPARATOR;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
@@ -310,7 +312,7 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponse("normal");
     String key = cache.createKey(request);
 
-    cache.addResponse(request, response);
+    assertTrue("response should have been cached", cache.addResponse(request, response));
 
     assertEquals(response, cache.map.get(key));
   }
@@ -321,7 +323,7 @@ public class AbstractHttpCacheTest {
         .setIgnoreCache(true);
     HttpResponse response = new HttpResponse("does not matter");
 
-    cache.addResponse(request, response);
+    assertFalse("response should not have been cached", cache.addResponse(request, response));
 
     assertEquals(0, cache.map.size());
   }
@@ -330,7 +332,7 @@ public class AbstractHttpCacheTest {
   public void addResponseNotCacheable() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
-    cache.addResponse(request, response);
+    assertFalse(cache.addResponse(request, response));
 
     assertEquals(0, cache.map.size());
   }
@@ -340,7 +342,7 @@ public class AbstractHttpCacheTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setMethod("POST");
     HttpResponse response = new HttpResponse("does not matter");
-    cache.addResponse(request, response);
+    assertFalse(cache.addResponse(request, response));
 
     assertEquals(0, cache.map.size());
   }
@@ -353,7 +355,7 @@ public class AbstractHttpCacheTest {
     HttpResponse response = new HttpResponse("normal");
     String key = cache.createKey(request);
 
-    cache.addResponse(request, response);
+    assertTrue(cache.addResponse(request, response));
 
     assertEquals(response, cache.map.get(key));
   }
@@ -366,7 +368,7 @@ public class AbstractHttpCacheTest {
     String key = cache.createKey(request);
     HttpResponse response = new HttpResponse("result");
 
-    cache.addResponse(request, response);
+    assertTrue(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
   }
