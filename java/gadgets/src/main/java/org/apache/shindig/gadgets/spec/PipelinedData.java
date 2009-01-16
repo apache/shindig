@@ -19,13 +19,13 @@ package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.expressions.ElException;
+import org.apache.shindig.expressions.Expression;
+import org.apache.shindig.expressions.ExpressionContext;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.expressions.ElException;
-import org.apache.shindig.gadgets.expressions.Expression;
-import org.apache.shindig.gadgets.expressions.ExpressionContext;
-import org.apache.shindig.gadgets.expressions.Expressions;
-import org.apache.shindig.gadgets.expressions.GadgetExpressionContext;
+import org.apache.shindig.gadgets.GadgetExpressionContext;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import java.util.Collections;

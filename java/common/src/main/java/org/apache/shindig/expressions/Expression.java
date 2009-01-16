@@ -16,21 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.expressions;
+package org.apache.shindig.expressions;
 
 /**
- * Exceptions thrown while evaluating expressions.
+ * A single expression.
+ * 
+ * @param <T> return type of the expression.
  */
-public class ElException extends Exception {
-  public ElException(String message) {
-    super(message);
-  }
-
-  public ElException(Throwable cause) {
-    super(cause);
-  }
-
-  public ElException(String message, Throwable cause) {
-    super(message, cause);
-  }
+public interface Expression<T> {
+  /**
+   * Evaluates the expression.
+   * @param context the context providing top-level variables.
+   * @return the result of expression evaluation.
+   * @throws ElException if evaluation fails.
+   */
+  T evaluate(ExpressionContext context) throws ElException;
 }
