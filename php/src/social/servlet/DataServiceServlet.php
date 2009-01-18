@@ -71,7 +71,8 @@ class DataServiceServlet extends ApiServlet {
   public function sendError(ResponseItem $responseItem) {
     $unauthorized = false;
     $errorMessage = $responseItem->getErrorMessage();
-    switch ($responseItem->getError()) {
+    $errorCode = $responseItem->getError();
+    switch ($errorCode) {
       case ResponseError::$BAD_REQUEST:
         $code = '400 Bad Request';
         break;
@@ -82,7 +83,7 @@ class DataServiceServlet extends ApiServlet {
       case ResponseError::$FORBIDDEN:
         $code = '403 Forbidden';
         break;
-      case ResponseError::$FORBIDDEN:
+      case ResponseError::$NOT_FOUND:
         $code = '404 Not Found';
         break;
       case ResponseError::$NOT_IMPLEMENTED:
