@@ -81,7 +81,7 @@ class GadgetServer {
         // relative path's in the locale spec uri
         $gadgetUrl = $context->getUrl();
         $gadgetUrl = substr($gadgetUrl, 0, strrpos($gadgetUrl, '/') + 1);
-        $uri = $gadgetUrl.$uri;
+        $uri = $gadgetUrl . $uri;
       }
       $requestArray[] = new RemoteContentRequest($uri);
       $contextArray[] = $context;
@@ -137,6 +137,16 @@ class GadgetServer {
     $substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
     $substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
     $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
+    foreach ($gadget->userPrefs as $pref) {
+      if (!empty($pref->displayName)) {
+        $pref->displayName = $gadget->getSubstitutions()->substitute($pref->displayName);
+      }
+      if (is_array($pref->enumValues) && count($pref->enumValues)) {
+        foreach ($pref->enumValues as &$enum) {
+          $enum = $gadget->getSubstitutions()->substitute($enum);
+        }
+      }
+    }
     // userPref's
     $upValues = $gadget->getUserPrefValues();
     foreach ($gadget->getUserPrefs() as $pref) {
