@@ -35,23 +35,29 @@ class OAuthService {
   public function __construct($service) {
     $attrs = $service->attributes();
     $this->name = (string)$attrs['name'];
-    $this->requestUrl = $this->parseEndPoint($service->Request->attributes());
-    $this->authorizationUrl = $this->parseEndPoint($service->Authorization->attributes());
-    $this->accessUrl = $this->parseEndPoint($service->Access->attributes());
+    if (isset($service->Request)) {
+      $this->requestUrl = $this->parseEndPoint($service->Request->attributes());
+    }
+    if (isset($service->Authorization)) {
+      $this->authorizationUrl = $this->parseEndPoint($service->Authorization->attributes());
+    }
+    if (isset($service->Access)) {
+      $this->accessUrl = $this->parseEndPoint($service->Access->attributes());
+    }
   }
 
   private function parseEndPoint($element) {
-    $url = (string)$element[OAuthService::$URL_ATTR];
+    $url = trim((string)$element[OAuthService::$URL_ATTR]);
     if (empty($url)) {
       throw new SpecParserException("Not an HTTP url");
     }
     $location = Location::$header;
-    $locationString = (string)$element[OAuthService::$PARAM_LOCATION_ATTR];
+    $locationString = trim((string)$element[OAuthService::$PARAM_LOCATION_ATTR]);
     if (! empty($locationString)) {
       $location = $locationString;
     }
     $method = Method::$GET;
-    $methodString = (string)$element[OAuthService::$METHOD_ATTR];
+    $methodString = trim((string)$element[OAuthService::$METHOD_ATTR]);
     if (! empty($methodString)) {
       $method = $methodString;
     }
@@ -88,9 +94,9 @@ class Method {
  * access token, or resource URL.  (Lowercase to match gadget spec schema)
  */
 class Location {
-  public static $header = "header";
-  public static $url = "url";
-  public static $body = "body";
+  public static $header = "auth-header";
+  public static $url = "url-query";
+  public static $body = "post-body";
 }
 
 /**
