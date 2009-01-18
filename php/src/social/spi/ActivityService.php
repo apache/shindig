@@ -23,7 +23,7 @@ interface ActivityService {
   /**
    * Returns a list of activities that correspond to the passed in person ids.
    */
-  public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $filterOp, $filterValue, $startIndex, $count, $fields, $token);
+  public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $filterOp, $filterValue, $startIndex, $count, $fields, $activityIds, $token);
 
   public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token);
 

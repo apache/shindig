@@ -21,7 +21,7 @@
 class ActivityHandler extends DataRequestHandler {
   private $service;
   
-  private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/appId/{activityId}";
+  private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
 
   public function __construct() {
     $service = Config::get('activity_service');
@@ -65,7 +65,7 @@ class ActivityHandler extends DataRequestHandler {
         return $this->service->getActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $optionalActivityIds, $requestItem->getToken());
       }
     }
-    return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $requestItem->getToken());
+    return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), null, $requestItem->getToken());
   }
 
   /**
