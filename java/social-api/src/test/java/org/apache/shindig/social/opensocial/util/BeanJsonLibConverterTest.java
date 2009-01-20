@@ -61,7 +61,7 @@ public class BeanJsonLibConverterTest extends TestCase {
 
   // taken from opensocial-reference/name.js
   private static final String[] NAME_FIELDS = { "familyName", "givenName", "additionalName",
-      "honorificPrefix", "honorificSuffix", "unstructured" };
+      "honorificPrefix", "honorificSuffix", "formatted" };
 
   private Person johnDoe;
   private Activity activity;
@@ -156,7 +156,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Name name = parseCassie.getName();
     Name cassieName = cassie.getName();
     assertNotNull(name);
-    assertEquals(cassieName.getUnstructured(), name.getUnstructured());
+    assertEquals(cassieName.getFormatted(), name.getFormatted());
     assertEquals(cassieName.getAdditionalName(), name.getAdditionalName());
     assertEquals(cassieName.getFamilyName(), name.getFamilyName());
     assertEquals(cassieName.getGivenName(), name.getGivenName());
@@ -183,9 +183,9 @@ public class BeanJsonLibConverterTest extends TestCase {
         optional, nullfields);
     ApiValidator.dump(nameJSON);
 
-    assertNotNull(nameJSON.get("unstructured"));
-    assertSame(String.class, nameJSON.get("unstructured").getClass());
-    assertEquals(name, nameJSON.get("unstructured"));
+    assertNotNull(nameJSON.get("formatted"));
+    assertEquals(String.class, nameJSON.get("formatted").getClass());
+    assertEquals(name, nameJSON.get("formatted"));
 
     // additional name
     assertNull(nameJSON.get("additionalName"));
@@ -200,7 +200,7 @@ public class BeanJsonLibConverterTest extends TestCase {
     Person parsedPerson = beanJsonConverter.convertToObject(result, Person.class);
 
     assertEquals(johnDoe.getId(), parsedPerson.getId());
-    assertEquals(johnDoe.getName().getUnstructured(), parsedPerson.getName().getUnstructured());
+    assertEquals(johnDoe.getName().getFormatted(), parsedPerson.getName().getFormatted());
 
     List<Address> addresses = parsedPerson.getAddresses();
     if (outputInfo) {

@@ -184,12 +184,12 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
    *
    * { 'entry' : {
    *     'id' : 'john.doe',
-   *     'name' : {'unstructured' : 'John Doe'},
+   *     'name' : {'formatted' : 'John Doe'},
    *     'phoneNumbers' : [
    *       { 'number' : '+33H000000000', 'type' : 'home'},
    *     ],
    *     'addresses' : [
-   *       {'formattedAddress' : 'My home address'}
+   *       {'formatted' : 'My home address'}
    *     ],
    *     'emails' : [
    *       { 'value' : 'john.doe@work.bar', 'type' : 'work'},
@@ -294,9 +294,9 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     assertStringListField(result, canonical.getMovies(), Person.Field.MOVIES);
     assertStringListField(result, canonical.getMusic(), Person.Field.MUSIC);
 
-    assertEquals(canonical.getName().getUnstructured(),
+    assertEquals(canonical.getName().getFormatted(),
         result.getJSONObject(Person.Field.NAME.toString()).getString(
-            Name.Field.UNSTRUCTURED.toString()));
+            Name.Field.FORMATTED.toString()));
 
     assertEnumField(result, canonical.getNetworkPresence(),
         Person.Field.NETWORKPRESENCE);
@@ -502,7 +502,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   private void assertPerson(JSONObject person, String expectedId, String expectedName)
       throws Exception {
     assertEquals(expectedId, person.getString("id"));
-    assertEquals(expectedName, person.getJSONObject("name").getString("unstructured"));
+    assertEquals(expectedName, person.getJSONObject("name").getString("formatted"));
   }
 
   // TODO: Add tests for fields parameter

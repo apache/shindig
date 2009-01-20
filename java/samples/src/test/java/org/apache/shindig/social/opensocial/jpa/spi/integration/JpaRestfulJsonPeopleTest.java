@@ -116,7 +116,7 @@ public class JpaRestfulJsonPeopleTest extends RestfulJsonPeopleTest {
   private void assertPerson(JSONObject person, String expectedId, String expectedName)
       throws Exception {
     assertEquals(expectedId, person.getString("id"));
-    assertEquals(expectedName, person.getJSONObject("name").getString("unstructured"));
+    assertEquals(expectedName, person.getJSONObject("name").getString("formatted"));
   }
   
 }

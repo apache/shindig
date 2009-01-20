@@ -157,7 +157,7 @@ public class JpaRestfulXmlPeopleTest extends RestfulXmlPeopleTest {
       String expectedName) throws Exception {
     assertEquals(expectedId, person.get("id").get(0).getTextContent());
     assertEquals(expectedName, childNodesToMap(person.get("name").get(0)).get(
-        "unstructured").get(0));
+        "formatted").get(0));
   }
 
 }

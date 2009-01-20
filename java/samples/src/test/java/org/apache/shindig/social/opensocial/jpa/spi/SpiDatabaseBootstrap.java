@@ -323,7 +323,7 @@ public class SpiDatabaseBootstrap {
   }
 
   private Person buildPerson(String id, String displayName, Person.Gender gender, boolean hasApp,
-      String familyName, String givenName, String unstructured) throws Exception {
+      String familyName, String givenName, String formatted) throws Exception {
     Person person = buildPersonTemplate(id);
     person.setDisplayName(displayName);
     person.setGender(gender);
@@ -332,7 +332,7 @@ public class SpiDatabaseBootstrap {
     NameDb name = new NameDb();
     name.setFamilyName(familyName);
     name.setGivenName(givenName);
-    name.setUnstructured(unstructured);
+    name.setFormatted(formatted);
     person.setName(name);
     
     return person;
@@ -453,7 +453,7 @@ public class SpiDatabaseBootstrap {
     name.setGivenName("Shin");
     name.setHonorificPrefix("Sir");
     name.setHonorificSuffix("Social Butterfly");
-    name.setUnstructured("Sir Shin H. Digg Social Butterfly");
+    name.setFormatted("Sir Shin H. Digg Social Butterfly");
     person.setName(name);
     
     person.setNetworkPresence(new EnumDb<NetworkPresence>(NetworkPresence.ONLINE));
@@ -611,7 +611,7 @@ public class SpiDatabaseBootstrap {
     name.setGivenName("");
     name.setHonorificPrefix("");
     name.setHonorificSuffix("");
-    name.setUnstructured("");
+    name.setFormatted("");
     person.setName(name);
     
     person.setNetworkPresence(new EnumDb<NetworkPresence>(NetworkPresence.ONLINE));
