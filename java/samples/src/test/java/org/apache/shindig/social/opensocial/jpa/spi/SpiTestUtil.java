@@ -210,13 +210,13 @@ public class SpiTestUtil {
   }
   
   /*
-   * Asserts actual person instance has the expected person id and (unstructured) name.
+   * Asserts actual person instance has the expected person id and (formatted) name.
    * 
    */
   public static void assertPersonEquals(Person actual, String expectedId, String expectedName) {
     assertEquals(actual.getId(), expectedId);
     assertTrue(actual.getName() != null);
-    assertEquals(actual.getName().getUnstructured(), expectedName);
+    assertEquals(actual.getName().getFormatted(), expectedName);
   }
 
   /*
@@ -311,7 +311,7 @@ public class SpiTestUtil {
     assertEquals(actual.getGivenName(), expected.getGivenName());
     assertEquals(actual.getHonorificPrefix(), expected.getHonorificPrefix());
     assertEquals(actual.getHonorificSuffix(), expected.getHonorificSuffix());
-    assertEquals(actual.getUnstructured(), expected.getUnstructured());    
+    assertEquals(actual.getFormatted(), expected.getFormatted());    
   }
 
   private static void assertOrganizationEquals(Organization actual, Organization expected) {
