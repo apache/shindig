@@ -134,5 +134,9 @@
       <artifactId>hsqldb</artifactId>
       <version>1.8.0.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+    </dependency>
   </dependencies>
 </project>

@@ -17,7 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
@@ -28,16 +30,13 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.inject.Inject;
-
-import javax.persistence.EntityManager;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.persistence.EntityManager;
 
 /**
  * 

@@ -18,6 +18,8 @@
 
 package org.apache.shindig.social.opensocial.jpa.test;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
 import org.apache.shindig.social.opensocial.jpa.BodyTypeDb;
@@ -43,18 +45,18 @@ import org.apache.shindig.social.opensocial.model.Enum.Drinker;
 import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
 import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 import org.apache.shindig.social.opensocial.model.Person.Gender;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 public class PersonPopulate {
 
