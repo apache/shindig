@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -29,6 +30,9 @@ import org.w3c.dom.Document;
  * Test behavior of neko based parser and serializers
  */
 public class NekoParserAndSerializeTest extends TestCase {
+
+  /** The vm line separator */
+  private static final String EOL = System.getProperty( "line.separator" );
 
   private NekoSimplifiedHtmlParser simple = new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
@@ -77,6 +81,7 @@ public class NekoParserAndSerializeTest extends TestCase {
   private void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
       throws Exception {
     Document document = parser.parseDom(content);
+    expected = StringUtils.replace(expected, EOL, "\n");
     assertEquals(expected, HtmlSerializer.serialize(document));
   }
 }
