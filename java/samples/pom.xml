@@ -147,10 +147,5 @@
       <artifactId>hibernate-tools</artifactId>
       <version>3.2.0.ga</version>
     </dependency>
-    <dependency>
-      <groupId>hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>1.8.0.1</version>
-    </dependency>
   </dependencies>
 </project>
