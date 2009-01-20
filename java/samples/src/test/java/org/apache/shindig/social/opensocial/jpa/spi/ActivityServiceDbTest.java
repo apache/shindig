@@ -31,6 +31,9 @@ import org.apache.shindig.social.opensocial.spi.UserId.Type;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import javax.persistence.EntityManager;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,13 +51,23 @@ public class ActivityServiceDbTest {
 
   private ActivityServiceDb activityServiceDb;
   
+  /** The bootstrap. */
+  private SpiDatabaseBootstrap bootstrap;
+  
   @Before
   public void setup() throws Exception {
+    EntityManager entityManager = SpiEntityManagerFactory.getEntityManager();
+    this.activityServiceDb = new ActivityServiceDb(entityManager);
+    
     // Bootstrap hibernate and associated test db, and setup db with test data
-    SpiDatabaseBootstrap bootstrap = new SpiDatabaseBootstrap();
-    activityServiceDb = new ActivityServiceDb(bootstrap.getEntityManager());
-    bootstrap.init();    
+    this.bootstrap = new SpiDatabaseBootstrap(entityManager);
+    this.bootstrap.init();
   }
+  
+  @After
+  public void tearDown() throws Exception {
+    bootstrap.tearDown();
+  }  
   
   @Test
   public void getJohnDoeActivityWithAppId1() throws Exception {

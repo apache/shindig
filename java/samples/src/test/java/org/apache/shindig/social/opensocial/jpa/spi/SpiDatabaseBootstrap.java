@@ -47,20 +47,17 @@ import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
 import org.apache.shindig.social.opensocial.model.Enum.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 
-import com.google.common.collect.Maps;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 /**
  * 
@@ -71,23 +68,14 @@ import javax.persistence.Persistence;
 public class SpiDatabaseBootstrap {
 
   private final static SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-  private static final String DEFAULT_UNIT_NAME = "hibernate";
   
   private EntityManager entityManager;
   
-  public SpiDatabaseBootstrap() {
-    this(DEFAULT_UNIT_NAME);
+  @Inject
+  public SpiDatabaseBootstrap(EntityManager entityManager) {
+    this.entityManager = entityManager;
   }
   
-  public SpiDatabaseBootstrap(String unitName) {
-    EntityManagerFactory emFactory = Persistence.createEntityManagerFactory(unitName, new HashMap<String, String>());
-    this.entityManager = emFactory.createEntityManager();
-  }
-  
-  public EntityManager getEntityManager() {
-    return entityManager;
-  }
-
   /*
    * Init database bootstrap
    */
@@ -100,7 +88,9 @@ public class SpiDatabaseBootstrap {
    */
   protected void bootstrapDatabase() throws Exception {
     // Start transaction
-    entityManager.getTransaction().begin();
+    if (!entityManager.getTransaction().isActive()) {
+      entityManager.getTransaction().begin();
+    }
   
     // Build person with dummy data
     Person canonical = buildCanonicalPerson();    
@@ -194,6 +184,58 @@ public class SpiDatabaseBootstrap {
     entityManager.getTransaction().commit();
   }
   
+  /**
+   * Delete all previous data
+   * 
+   * @throws Exception
+   */
+  public void tearDown() throws Exception {
+    // Start transaction
+    if (!entityManager.getTransaction().isActive()) {
+      entityManager.getTransaction().begin();
+    }
+    
+    // Delete all data
+    entityManager.createNativeQuery("delete from FriendDb where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from activity_media where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from url where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from template_params where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from photo where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from phone where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_properties where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_organization where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_group where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_application where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_address where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person_account where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from person where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from organizational_address where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from organization where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from name where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from message where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from membership where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from media_item where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from im where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from group_property where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from friend_property where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from email where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from body_type where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from application_property where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from application_datavalue where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from application_datamap where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from application where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from address where 1 > 0").executeUpdate();    
+    entityManager.createNativeQuery("delete from activity where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from account where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from list_field where 1 > 0").executeUpdate();    
+    
+    // Commit transaction
+    entityManager.getTransaction().commit();
+    
+    // Clear entity manager
+    entityManager.clear();
+  }
+  
   //
   // Build methods that create dummy test data 
   //
@@ -269,30 +311,7 @@ public class SpiDatabaseBootstrap {
   private ActivityDb buildActivityTemplate(String userId, String id) {
     ActivityDb activity = new ActivityDb();
     activity.setUserId(userId);
-    activity.setAppId(id);    
-    activity.setBody("");
-    activity.setBodyId("");
-    activity.setExternalId("");
-    activity.setId(id);
-    List<MediaItem> mediaItems = new ArrayList<MediaItem>();
-    MediaItemDb mediaItem = new MediaItemDb();
-    mediaItem.setMimeType("");
-    mediaItem.setType(MediaItem.Type.VIDEO);
-    mediaItem.setUrl("");
-    mediaItems.add(mediaItem);
-    activity.setMediaItems(mediaItems);
-    activity.setPostedTime(new Date().getTime());
-    activity.setPriority(0F);
-    activity.setStreamFaviconUrl("");
-    activity.setStreamSourceUrl("");
-    activity.setStreamTitle("");
-    activity.setStreamUrl("");
-    Map<String, String> templateParams = Maps.newConcurrentHashMap();
-    activity.setTemplateParams(templateParams);
-    activity.setTitle("");
-    activity.setTitleId("");
-    activity.setUpdated(new Date());
-    activity.setUrl("");
+    activity.setId(id);    
     return activity;
   }
   

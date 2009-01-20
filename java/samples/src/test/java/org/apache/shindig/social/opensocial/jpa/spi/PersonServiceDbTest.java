@@ -31,6 +31,9 @@ import org.apache.shindig.social.opensocial.spi.UserId.Type;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import javax.persistence.EntityManager;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,14 +46,24 @@ public class PersonServiceDbTest {
 
   private final Person canonical = SpiTestUtil.buildCanonicalPerson();
   
-  private PersonServiceDb personServiceDb;  
+  private PersonServiceDb personServiceDb;
+  
+  /** The bootstrap. */
+  private SpiDatabaseBootstrap bootstrap;
   
   @Before
   public void setup() throws Exception {
+    EntityManager entityManager = SpiEntityManagerFactory.getEntityManager();
+    this.personServiceDb = new PersonServiceDb(entityManager);
+    
     // Bootstrap hibernate and associated test db, and setup db with test data
-    SpiDatabaseBootstrap bootstrap = new SpiDatabaseBootstrap();
-    personServiceDb = new PersonServiceDb(bootstrap.getEntityManager());
-    bootstrap.init();    
+    this.bootstrap = new SpiDatabaseBootstrap(entityManager);
+    this.bootstrap.init();
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    bootstrap.tearDown();
   }
   
   @Test

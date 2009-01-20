@@ -17,6 +17,9 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.social.core.model.ActivityImpl;
@@ -40,9 +43,6 @@ import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,7 +51,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 
 /**
