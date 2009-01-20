@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -68,6 +69,7 @@ public class OAuthRequestTest {
   private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
   private BasicOAuthStore base;
+  private Logger logger;
   protected final List<LogRecord> logRecords = Lists.newArrayList();
   private final FakeTimeSource clock = new FakeTimeSource();
 
@@ -88,7 +90,7 @@ public class OAuthRequestTest {
         getOAuthStore(base),
         clock);
 
-    Logger logger = Logger.getLogger(OAuthResponseParams.class.getName());
+    logger = Logger.getLogger(OAuthResponseParams.class.getName());
     logger.addHandler(new Handler() {
       @Override
       public void close() throws SecurityException {
@@ -1371,6 +1373,9 @@ public class OAuthRequestTest {
   }
 
   private void checkLogContains(String text) {
+    if ((logger.getLevel()!=null)&&(logger.getLevel().equals(Level.OFF))) {
+        return;
+    }
     String logText = getLogText();
     if (!logText.contains(text)) {
       fail("Should have logged '" + text + "', instead got " + logText);

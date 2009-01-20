@@ -55,9 +55,7 @@
               </includes>
             </resource>
           </webResources>
-         </configuration>
-         <executions>
-        </executions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

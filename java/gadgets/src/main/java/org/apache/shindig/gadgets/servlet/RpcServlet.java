@@ -71,7 +71,13 @@ public class RpcServlet extends InjectedServlet {
 
     } catch (IllegalArgumentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      logger.log(Level.INFO, e.getMessage(), e);
+      if (!logger.isLoggable(Level.OFF)) {
+        if (logger.isLoggable(Level.INFO)) {
+          logger.log(Level.INFO, e.getMessage());
+        } else {
+          logger.log(Level.INFO, e.getMessage(), e);
+        }
+      }
       return;
     }
 
@@ -129,14 +135,26 @@ public class RpcServlet extends InjectedServlet {
       return new Result(resp.toString(), true);
     } catch (UnsupportedEncodingException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      logger.log(Level.INFO, e.getMessage(), e);
+      if (!logger.isLoggable(Level.OFF)) {
+        if (logger.isLoggable(Level.INFO)) {
+          logger.log(Level.INFO, e.getMessage());
+        } else {
+          logger.log(Level.INFO, e.getMessage(), e);
+        }
+      }
       return new Result("Unsupported input character set", false);
     } catch (JSONException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new Result("Malformed JSON request.", false);
     } catch (RpcException e) {
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      logger.log(Level.INFO, e.getMessage(), e);
+      if (!logger.isLoggable(Level.OFF)) {
+        if (logger.isLoggable(Level.INFO)) {
+          logger.log(Level.INFO, e.getMessage());
+        } else {
+          logger.log(Level.INFO, e.getMessage(), e);
+        }
+      }
       return new Result(e.getMessage(), false);
     }
   }
