@@ -58,9 +58,9 @@ public interface Name {
      */
     HONORIFIC_SUFFIX("honorificSuffix"),
     /**
-     * The unstructured name.
+     * The formatted name.
      */
-    UNSTRUCTURED("unstructured");
+    FORMATTED("formatted");
 
     /**
      * the json key for this field.
@@ -86,15 +86,15 @@ public interface Name {
   }
 
   /**
-   * @return the name, unstructured.
+   * @return the name, formatted.
    */
-  String getUnstructured();
+  String getFormatted();
 
   /**
-   * set the name unstructured.
-   * @param unstructured the name, unstructured.
+   * set the name formatted.
+   * @param formatted the name, formatted.
    */
-  void setUnstructured(String unstructured);
+  void setFormatted(String formatted);
 
   /**
    * @return get the additional name.

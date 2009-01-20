@@ -202,9 +202,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
    *
    * { 'entry' :
    * { 'id' : 'john.doe',
-   * 'name' : {'unstructured' : 'John Doe'},
+   * 'name' : {'formatted' : 'John Doe'},
    * 'phoneNumbers' : [ { 'number' : '+33H000000000', 'type' : 'home'}, ],
-   * 'addresses' : [ {'formattedAddress' : 'My home address'} ],
+   * 'addresses' : [ {'formatted' : 'My home address'} ],
    * 'emails' : [
    *    { 'value' : 'john.doe@work.bar', 'type' : 'work'}, ]
    *
@@ -327,9 +327,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     assertStringListField(result, canonical.getMovies(), Person.Field.MOVIES);
     assertStringListField(result, canonical.getMusic(), Person.Field.MUSIC);
 
-    assertEquals(canonical.getName().getUnstructured(), childNodesToMap(
+    assertEquals(canonical.getName().getFormatted(), childNodesToMap(
         childNodeMap.get(Person.Field.NAME.toString()).get(0)).get(
-        Name.Field.UNSTRUCTURED.toString()).get(0));
+        Name.Field.FORMATTED.toString()).get(0));
 
     assertEnumField(childNodeMap, canonical.getNetworkPresence(),
         Person.Field.NETWORKPRESENCE);
@@ -588,7 +588,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
       String expectedName) throws Exception {
     assertEquals(expectedId, person.get("id").get(0).getTextContent());
     assertEquals(expectedName, childNodesToMap(person.get("name").get(0)).get(
-        "unstructured").get(0));
+        "formatted").get(0));
   }
 
   // TODO: Add tests for fields parameter
