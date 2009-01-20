@@ -4,6 +4,6 @@
   <gender>female</gender>
   <id></id>
   <name>
-    <unstructured>Jane Doe</unstructured>
+    <formatted>Jane Doe</formatted>
   </name>
 </person>
