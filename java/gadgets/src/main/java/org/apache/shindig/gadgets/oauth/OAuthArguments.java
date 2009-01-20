@@ -83,7 +83,7 @@ public class OAuthArguments {
   private boolean signViewer = false;
   
   /** Arbitrary name/value pairs associated with the request */
-  private final Map<String, String> requestOptions;
+  private final Map<String, String> requestOptions = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
@@ -102,7 +102,6 @@ public class OAuthArguments {
     bypassSpecCache = "1".equals(getRequestParam(request, BYPASS_SPEC_CACHE_PARAM, null));
     signOwner = Boolean.parseBoolean(getRequestParam(request, SIGN_OWNER_PARAM, "true"));
     signViewer = Boolean.parseBoolean(getRequestParam(request, SIGN_VIEWER_PARAM, "true"));
-    requestOptions = Maps.newHashMap();
     Enumeration<String> params = getParameterNames(request);
     while (params.hasMoreElements()) {
       String name = params.nextElement();
@@ -130,7 +129,7 @@ public class OAuthArguments {
     bypassSpecCache = false;
     signOwner = info.isSignOwner();
     signViewer = info.isSignViewer();
-    requestOptions = Maps.newHashMap(info.getAttributes());
+    requestOptions.putAll(info.getAttributes());
   }
 
   /**
@@ -192,7 +191,6 @@ public class OAuthArguments {
    * method in real code, consider writing a new constructor instead.
    */
   public OAuthArguments() {
-    requestOptions = Maps.newHashMap();
   }
 
 
@@ -209,7 +207,7 @@ public class OAuthArguments {
     bypassSpecCache = orig.bypassSpecCache;
     signOwner = orig.signOwner;
     signViewer = orig.signViewer;
-    requestOptions = Maps.newHashMap(orig.requestOptions);
+    requestOptions.putAll(orig.requestOptions);
   }
 
   public boolean mustUseToken() {
