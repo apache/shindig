@@ -26,13 +26,15 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-import com.google.common.collect.Maps;
+import javax.persistence.EntityManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -43,14 +45,24 @@ public class AppDataServiceDbTest {
   
   private static final String DEFAULT_APPLICATION_ID = "app";
 
-    private AppDataServiceDb appDataServiceDb;
+  private AppDataServiceDb appDataServiceDb;
+  
+  /** The bootstrap. */
+  private SpiDatabaseBootstrap bootstrap;
   
   @Before
   public void setup() throws Exception {
+    EntityManager entityManager = SpiEntityManagerFactory.getEntityManager();
+    this.appDataServiceDb = new AppDataServiceDb(entityManager);
+    
     // Bootstrap hibernate and associated test db, and setup db with test data
-    SpiDatabaseBootstrap bootstrap = new SpiDatabaseBootstrap();
-    appDataServiceDb = new AppDataServiceDb(bootstrap.getEntityManager());
-    bootstrap.init();
+    this.bootstrap = new SpiDatabaseBootstrap(entityManager);
+    this.bootstrap.init();
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    bootstrap.tearDown();
   }
   
   @Test
