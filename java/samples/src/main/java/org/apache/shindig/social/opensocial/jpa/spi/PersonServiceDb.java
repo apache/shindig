@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
@@ -31,15 +34,12 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.inject.Inject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  * Implements the PersonService from the SPI binding to the JPA model and providing queries to
