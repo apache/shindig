@@ -11,11 +11,11 @@
      <properties>
 		<property name="hibernate.hbm2ddl.auto" value="create"/>
 		<property name="hibernate.show_sql" value="true"/>
-		<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
+		<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver"/>
 		<property name="hibernate.connection.password" value=""/>
-		<property name="hibernate.connection.url" value="jdbc:hsqldb:."/>
+		<property name="hibernate.connection.url" value="jdbc:derby:target/hibernatedb;create=true"/>
 		<property name="hibernate.connection.username" value="sa"/>
-		<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+		<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
      </properties>
   </persistence-unit>
   
@@ -25,11 +25,11 @@
      <properties>
 		<property name="hibernate.hbm2ddl.auto" value="create"/>
 		<property name="hibernate.show_sql" value="true"/>
-		<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
+		<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver"/>
 		<property name="hibernate.connection.password" value=""/>
-		<property name="hibernate.connection.url" value="jdbc:hsqldb:."/>
+		<property name="hibernate.connection.url" value="jdbc:derby:target/hibernatedb;create=true"/>
 		<property name="hibernate.connection.username" value="sa"/>
-		<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+		<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect"/>
      </properties>
   </persistence-unit>
   
@@ -43,7 +43,7 @@
   <!--  properties are set in Bootstrap no here  -->
   <properties>
      <property name="eclipselink.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-     <property name="eclipselink.jdbc.url" value="jdbc:derby:testdb;create=true"/>
+     <property name="eclipselink.jdbc.url" value="jdbc:derby:target/eclipselinkdb;create=true"/>
      <property name="eclipselink.jdbc.user" value="sa"/>
      <property name="eclipselink.jdbc.password" value=" "/>
      <property name="eclipselink.target-server" value="None"/>
