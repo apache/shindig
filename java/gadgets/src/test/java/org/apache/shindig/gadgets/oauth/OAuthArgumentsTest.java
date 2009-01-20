@@ -93,6 +93,7 @@ public class OAuthArgumentsTest {
     Assert.assertFalse(args.getSignOwner());
     Assert.assertFalse(args.getSignViewer());
     assertEquals("stuff", args.getRequestOption("random"));
+    assertEquals("stuff", args.getRequestOption("rAnDoM"));
   }
 
   @Test
