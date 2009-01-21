@@ -49,7 +49,7 @@ gadgets.flash.getMajorVersion = function() {
     // Flash detection for IE
     // This is done by trying to create an ActiveX object with the name
     // "ShockwaveFlash.ShockwaveFlash.{majorVersion}".
-    for (var version = 9; version > 0; version--) {
+    for (var version = 10; version > 0; version--) {
       try {
         new ActiveXObject("ShockwaveFlash.ShockwaveFlash." + version);
         return version;
