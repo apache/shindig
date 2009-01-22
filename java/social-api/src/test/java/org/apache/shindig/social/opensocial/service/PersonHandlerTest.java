@@ -22,6 +22,8 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.util.ContainerConf;
+import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -70,8 +72,8 @@ public class PersonHandlerTest extends EasyMockTestCase {
   protected void setUp() throws Exception {
     token = new FakeGadgetToken();
     personService = EasyMock.createMock(PersonService.class);
-
-    handler = new PersonHandler(personService);
+    ContainerConf containerConf = new JsonContainerConf();
+    handler = new PersonHandler(personService, containerConf);
   }
 
   @Override

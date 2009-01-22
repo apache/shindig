@@ -22,6 +22,8 @@ import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXmlConverter;
+import org.apache.shindig.social.core.util.ContainerConf;
+import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 
@@ -45,6 +47,8 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
+    bind(ContainerConf.class).to(JsonContainerConf.class);
+    
 
   }
 }
