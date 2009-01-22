@@ -69,7 +69,7 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
       if (service.thirdPartyHasAccessToUser(requestMessage, containerKey, userId)) {
         return service.getSecurityToken(containerKey, userId);
       } else {
-        return null;
+        throw new InvalidAuthenticationException("Access for app not allowed",null);
       }
     } catch (OAuthException oae) {
       throw new InvalidAuthenticationException(oae.getMessage(), oae);

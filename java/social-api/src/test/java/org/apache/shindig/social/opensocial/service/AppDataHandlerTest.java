@@ -24,6 +24,8 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.social.core.util.ContainerConf;
+import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -59,8 +61,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     token = new FakeGadgetToken();
     converter = EasyMock.createMock(BeanJsonConverter.class);
     appDataService = EasyMock.createMock(AppDataService.class);
-
-    handler = new AppDataHandler(appDataService);
+    ContainerConf containerConf = new JsonContainerConf();
+    handler = new AppDataHandler(appDataService, containerConf);
   }
 
   @Override

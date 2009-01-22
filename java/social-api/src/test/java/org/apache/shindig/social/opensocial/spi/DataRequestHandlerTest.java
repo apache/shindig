@@ -21,6 +21,8 @@ import junit.framework.TestCase;
 
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.social.core.util.ContainerConf;
+import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.opensocial.service.RestfulRequestItem;
@@ -35,7 +37,8 @@ public class DataRequestHandlerTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    drh = new DataRequestHandler() {
+    ContainerConf containerConf = new JsonContainerConf();
+    drh = new DataRequestHandler(containerConf) {
       @Override
       protected Future<?> handleDelete(RequestItem request) {
         return ImmediateFuture.newInstance("DELETE");
