@@ -18,6 +18,8 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
+import org.apache.shindig.social.core.util.ContainerConf;
+import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.jpa.AccountDb;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
@@ -43,6 +45,7 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
@@ -50,7 +53,10 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import javax.persistence.EntityManager;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Scopes;
+import com.google.inject.TypeLiteral;
 
 /**
  * Provides component injection for tests
@@ -60,6 +66,7 @@ import com.google.inject.Scopes;
  */
 public class JpaTestGuiceModule extends AbstractModule {
   
+
   private EntityManager entityManager;
   
   JpaTestGuiceModule(EntityManager entityManager) {
@@ -91,5 +98,7 @@ public class JpaTestGuiceModule extends AbstractModule {
     this.bind(Organization.class).to(OrganizationDb.class);
     this.bind(Person.class).to(PersonDb.class);
     this.bind(Url.class).to(UrlDb.class);
+    this.bind(ContainerConf.class).to(JsonContainerConf.class);
+    
   }
 }
