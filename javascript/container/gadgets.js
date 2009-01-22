@@ -214,9 +214,9 @@ gadgets.IfrGadgetService.prototype.setTitle = function(title) {
  */
 gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
     value) {
-  var id = this.getGadgetIdFromModuleId(this.f);
+  var id = gadgets.container.gadgetService.getGadgetIdFromModuleId(this.f);
   var gadget = gadgets.container.getGadget(id);
-  var prefs = gadget.getUserPrefs();
+  var prefs = gadget.getUserPrefs() || {};
   for (var i = 1, j = arguments.length; i < j; i += 2) {
     prefs[arguments[i]] = arguments[i + 1];
   }
@@ -229,8 +229,8 @@ gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
  */
 gadgets.IfrGadgetService.prototype.requestNavigateTo = function(view,
     opt_params) {
-  var id = this.getGadgetIdFromModuleId(this.f);
-  var url = this.getUrlForView(view);
+  var id = gadgets.container.gadgetService.getGadgetIdFromModuleId(this.f);
+  var url = gadgets.container.gadgetService.getUrlForView(view);
 
   if (opt_params) {
     var paramStr = gadgets.json.stringify(opt_params);
