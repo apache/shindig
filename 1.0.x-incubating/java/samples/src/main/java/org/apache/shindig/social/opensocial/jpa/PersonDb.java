@@ -21,6 +21,8 @@ import com.google.common.collect.Maps;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.jpa.api.FilterSpecification;

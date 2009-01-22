@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
+import com.google.common.collect.Lists;
+
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.GenerationType.IDENTITY;
 
