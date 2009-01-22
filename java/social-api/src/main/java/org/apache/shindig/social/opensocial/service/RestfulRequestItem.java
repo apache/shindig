@@ -244,4 +244,8 @@ public class RestfulRequestItem extends RequestItem {
     }
     return stringList;
   }
+  
+  public String getUrl() {
+    return this.url;
+  }
 }
