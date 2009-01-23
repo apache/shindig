@@ -489,7 +489,7 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {
   opt_params = opt_params || {};
 
-  var fields = opensocial.DataRequest.PeopleRequestFields; // THIS LINE IS MISSING 
+  var fields = opensocial.DataRequest.PeopleRequestFields;
 
   this.addDefaultParam(opt_params, fields.FIRST, 0);
   this.addDefaultParam(opt_params, fields.MAX, 20);
