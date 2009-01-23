@@ -229,7 +229,7 @@ gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
   }
 
   if (tabName == this.defaultTabName_ || (!this.defaultTabName_
-      && tabIndex == 0)) {
+      && tabIndex === 0)) {
     this.selectTab_(tab);
   }
 
@@ -263,7 +263,7 @@ gadgets.TabSet.prototype.removeTab = function(tabIndex) {
     this.mainContainer_.removeChild(tab.contentContainer_);
     this.tabs_.splice(tabIndex, 1);
     this.adjustNavigation_();
-    if (this.tabs_.length == 0) {
+    if (this.tabs_.length === 0) {
       this.displayTabs(false);
       this.selectedTab_ = null;
     }

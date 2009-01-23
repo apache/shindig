@@ -67,7 +67,7 @@ body {
     var tabAnchorPrefix = "#tab-";
 
     function changeActiveTab(activeTab, updateAnchor) {
-      if (activeTab == undefined)
+      if (activeTab === undefined)
         return false;
       if (updateAnchor)
         location.href = tabAnchorPrefix + activeTab.id;
@@ -89,7 +89,7 @@ body {
       var tabAnchor = tabAnchorRE.exec(location.href);
       if (tabAnchor && tabAnchor.length == 2) {
         var tabAnchorObj = document.getElementById(tabAnchor[1]);
-        if (tabAnchorObj != undefined) {
+        if (tabAnchorObj !== undefined) {
           changeActiveTab(tabAnchorObj, false);
           return;
         }
@@ -114,7 +114,7 @@ body {
           if (! divMatch || divMatch.length != 2)
             return; // failed
           var tabAnchorObj = document.getElementById(divMatch[1]);
-          if (tabAnchorObj == undefined)
+          if (tabAnchorObj === undefined)
             return; // failed
           changeActiveTab(tabAnchorObj, false); //SUCCESS!
           // need to set location again as browser can't navigate
