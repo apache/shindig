@@ -19,6 +19,7 @@
 package org.apache.shindig.common.crypto;
 
 import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
@@ -102,10 +103,9 @@ public class BasicBlobCrypter implements BlobCrypter {
   }
 
   private void init(byte[] masterKey) {
-    if (masterKey.length < MASTER_KEY_MIN_LEN) {
-      throw new IllegalArgumentException("Master key needs at least " +
-          MASTER_KEY_MIN_LEN + " bytes");
-    }
+    Preconditions.checkArgument(masterKey.length >= MASTER_KEY_MIN_LEN,
+        "Master key needs at least %s bytes", MASTER_KEY_MIN_LEN);
+
     cipherKey = deriveKey(CIPHER_KEY_LABEL, masterKey, Crypto.CIPHER_KEY_LEN);
     hmacKey = deriveKey(HMAC_KEY_LABEL, masterKey, 0);
   }
@@ -136,9 +136,9 @@ public class BasicBlobCrypter implements BlobCrypter {
    */
   public String wrap(Map<String, String> in)
   throws BlobCrypterException {
-    if (in.containsKey(TIMESTAMP_KEY)) {
-      throw new IllegalArgumentException("No '" + TIMESTAMP_KEY + "' key allowed for BlobCrypter");
-    }
+    Preconditions.checkArgument(!in.containsKey(TIMESTAMP_KEY),
+        "No '%s' key allowed for BlobCrypter", TIMESTAMP_KEY);
+
     try {
       byte[] encoded = serializeAndTimestamp(in);
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);

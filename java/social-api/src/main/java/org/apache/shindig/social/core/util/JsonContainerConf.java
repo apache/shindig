@@ -42,7 +42,6 @@ public class JsonContainerConf implements ContainerConf {
   private JSONObject containerJsonObject;
   private ContainerConfig config;
   private List<String> activityFieldsList;
-  private JSONArray personFieldsJsonArray;
 
   @Inject
   public JsonContainerConf() {
@@ -129,6 +128,7 @@ public class JsonContainerConf implements ContainerConf {
     }
     JSONObject osJsonObjectValue = null;
 
+    JSONArray personFieldsJsonArray;
     try {
       osJsonObjectValue = gfJsonObject.getJSONObject(osKey);
       JSONObject personFieldsJsonObject = osJsonObjectValue
