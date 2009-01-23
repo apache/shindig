@@ -107,7 +107,7 @@ body {
           var parent = anchor;
           do {
             parent = parent.parentNode;
-          } while (parent && ! /.*Div$/.test(parent.id))
+          } while (parent && ! /.*Div$/.test(parent.id));
           if (! parent)
             return; // failed
           var divMatch = /^(.*)Div$/g.exec(parent.id);
@@ -192,7 +192,7 @@ body {
         <li><a href="#eclipseProject">Setting up an Eclipse project</a></li>
         <li><a href="#caja">Running with Caja</a></li>
       </ul>
-      
+
       <h2>PHP</h2>
  	  <ul>
 	    <li><a href="#php">Building and running Shindig (PHP)</a></li>
@@ -201,7 +201,7 @@ body {
 	    <li><a href="#phpbuildTheCode">Running Shindig</a></li>
 	    <li><a href="#phpAdditonal_reading">Additonal reading</a></li>
 	  </ul>
- 
+
 	  <h3><a name="java">Building and running Shindig (Java)</a></h3>
       <h4><a name="preReqs">Prequisites before building Shindig</a></h4>
       <p>In order to build Shindig, you must have the following:</p>
@@ -372,58 +372,58 @@ body {
       instructions on how to start up any of the java shindig servers.
       <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/javascript/README">javascript/README</a>
       for instructions for using the Shindig Gadget Container JavaScript to enable your page to render Gadgets.</p>
-         
+
 	  <h3><a name="php">Building and running Shindig PHP server</a></h3>
-		
+
 	  <h4><a name="phppreReqs">Prequisites before building Shindig for PHP</a></h4>
 	  <p> In order to build and run Shindig for PHP, you must have the following: </p>
 	  <ul>
 	    <li>A Subversion client installed in order to checkout the code.</li>
 	     <ul><li>Instructions for downloading and installing Subversion can be found here: <a href="http://subversion.tigris.org/"></a>http://subversion.tigris.org/</li></ul>
-	
+
 	    <li>Apache with mod_rewrite enabled.</li>
 	    <li>PHP 5.2.x with the <a href="http://www.php.net/json">json</a>, <a href="http://www.php.net/simplexml">simplexml</a>, <a href="http://www.php.net/mcrypt">mcrypt</a> and <a href="http://www.php.net/curl">curl</a> extentions enabled.</li>
 	  </ul>
-	
+
 	  <h4><a name="phpgetTheCode">Getting the code</a></h4>
-	  <p> Create a subdirectory in your web document root, e.g. /var/www/html  
+	  <p> Create a subdirectory in your web document root, e.g. /var/www/html
 	  and checkout the Shindig code from its Subversion repository</p>
-	
+
 	  <ol>
 	    <li> <code>mkdir /var/www/html/shindig</code> </li>
 	    <li> <code>cd /var/www/html/shindig</code></li>
 	    <li> <code>svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .</code> </li>
 	  </ol>
-	
+
 	  <h4><a name="phpbuildTheCode">Running Shindig</a></h4>
 	  <p>With PHP There is no need to build anything - the source code is already built.</p>
-	
+
 	  <p>To run the code, you have several options:</p>
-	  
+
 	  <h5>a. Create a new virtual host</h5>
-	  
+
 	  <p>Point your apache to the php dir with a virtual host like:</p>
-	
+
 	  <pre>
 		&lt;VirtualHost your_ip:your_port&gt;
-	
+
 		       ServerName your.host
 		       DocumentRoot /var/www/html/shindig/php
 		       ... other normal settings in vhosts...
 		&lt;/VirtualHost&gt;
 	  </pre>
-	
-	  <p>Restart apache, and point your browser to:</p> 
+
+	  <p>Restart apache, and point your browser to:</p>
 	  <p>http://your.host/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml</p>
-	
-	  <p>you should see something like 
+
+	  <p>you should see something like
 	  <a href='http://shindig.chabotc.com/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml'>this</a>.
 	  </p>
-	
+
 	  <h5>b. Run with an existing host</h5>
-	
+
 	  <p>If you cannot/don't want to create a virtual host, you can edit the file php/config.php and change the web_prefix setting to '/shindig/php'.
-	
+
 	  <p>Then you can run the gadget by pointing your browser to:
 	  <p>http://your.host/shindig/php/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml</p>
 

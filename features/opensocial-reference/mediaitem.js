@@ -65,7 +65,7 @@ opensocial.MediaItem.Type = {
   VIDEO : 'video',
   /** @member opensocial.MediaItem.Type */
   AUDIO : 'audio'
-}
+};
 
 
 /**

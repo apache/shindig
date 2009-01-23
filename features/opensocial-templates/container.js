@@ -83,7 +83,7 @@ os.Container.registerDomLoadListener_ = function() {
     window.onload = function() {
       oldOnLoad();
       os.Container.onDomLoad_();
-    }
+    };
   }
 };
 

@@ -159,7 +159,7 @@ gadgets.config = function() {
             return true;
           }
         }
-      }
+      };
     },
 
     /**
@@ -168,7 +168,7 @@ gadgets.config = function() {
     RegExValidator: function(re) {
       return function(data) {
         return re.test(data);
-      }
+      };
     },
 
     /**
@@ -182,7 +182,7 @@ gadgets.config = function() {
      * Validates that a value is a non-empty string.
      */
     NonEmptyStringValidator: function(data) {
-      return typeof data === "string" && data.length > 0
+      return typeof data === "string" && data.length > 0;
     },
 
     /**

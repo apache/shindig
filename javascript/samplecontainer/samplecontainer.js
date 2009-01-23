@@ -37,7 +37,7 @@ shindig.samplecontainer = {};
   */
 
   var parentUrl = document.location.href;
-  var baseUrl = parentUrl.substring(0, parentUrl.indexOf('samplecontainer.html'))
+  var baseUrl = parentUrl.substring(0, parentUrl.indexOf('samplecontainer.html'));
 
   // TODO: This is gross, it needs to use the config just like the gadget js does
   var socialDataPath = document.location.protocol + "//" + document.location.host
@@ -96,7 +96,7 @@ shindig.samplecontainer = {};
   SampleContainerGadget.inherits(gadgets.IfrGadget);
 
   SampleContainerGadget.prototype.getAdditionalParams = function() {
-    var params = ''
+    var params = '';
 
     if (useCaja) {
       params += "&caja=1";
@@ -145,7 +145,7 @@ shindig.samplecontainer = {};
 
   function generateGadgets(metadata) {
     // TODO: The gadget.js file should really have a clearGadgets method
-    gadgets.container.view_ = current_view; 
+    gadgets.container.view_ = current_view;
     gadgets.container.gadgets_ = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
       gadget = gadgets.container.createGadget(
@@ -203,8 +203,8 @@ shindig.samplecontainer = {};
      if (cacheUrlMatches && cacheUrlMatches[1] == "0") {
        document.getElementById("useCacheCheckbox").checked = false;
      }
-  }
-  
+  };
+
   shindig.samplecontainer.initGadget = function() {
     // Fetch cookies
     var cookieGadgetUrl = decodeURIComponent(shindig.cookies.get(gadgetUrlCookie));
@@ -228,14 +228,14 @@ shindig.samplecontainer = {};
     document.getElementById("ownerId").value = ownerId;
 
     requestGadgetMetaData(generateGadgets);
-  }
+  };
 
   shindig.samplecontainer.unpackFormState = function() {
     useCaja = document.getElementById("useCajaCheckbox").checked;
     useCache = document.getElementById("useCacheCheckbox").checked;
     usePermissive = document.getElementById("usePermissiveCheckbox").checked;
     doEvil = document.getElementById("doEvilCheckbox").checked;
-  }
+  };
 
   shindig.samplecontainer.changeGadgetUrl = function() {
     shindig.samplecontainer.unpackFormState();

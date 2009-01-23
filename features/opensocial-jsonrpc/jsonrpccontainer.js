@@ -72,7 +72,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
         recipientIds,
         body);
   };
-  
+
 
   /**
    * Receives the returned results from the parent container.
@@ -85,10 +85,10 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
    */
   JsonRpcContainer.requestShareAppCallback_ = function(callbackId,
       success, opt_errorCode, recipientIds) {
-    callback = callbackIdStore[callbackId]
+    callback = callbackIdStore[callbackId];
     if (callback) {
       callbackIdStore[callbackId] = null;
-      
+
       var data = null;
       if (recipientIds) {
         data = {'recipientIds': recipientIds};
@@ -201,7 +201,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
 
   JsonRpcContainer.prototype.sendRequest = function(relativeUrl, callback, params, contentType) {
     gadgets.io.makeNonProxiedRequest(relativeUrl, callback, params, contentType);
-  }
+  };
 
   JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
       callback) {
@@ -441,5 +441,5 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
       : null;
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), errorCode, errorMessage);
-  }
+  };
 };

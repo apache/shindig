@@ -18,11 +18,11 @@
  */
 /**
  * @fileoverview Prototype for OpenSocial Templates implementation.
- * 
+ *
  * Simple usage of templates:
  *   var template = os.compileTemplate("<span>Hello, ${name}</span>");
  *   template.renderInto(document.getElementById("output"), { name: "Bob" });
- * 
+ *
  * More complex usecase:
  *   var data = { ... };
  *   var template = os.compileTemplate(document.getElementById("template"));
@@ -30,7 +30,7 @@
  *   var output = template.render(data, context);
  *   // ... attach the output node ...
  *   os.fireCallbacks(context);
- * 
+ *
  * TODO(levik): Optimization:
  *   - Define all regexps as globals once, not once per function call.
  *   - Use queue-based DOM walker instead of recursion.
@@ -78,7 +78,7 @@ os.ATT_customtag = "customtag";
 
 os.VAR_my = "$my";
 os.VAR_cur = "$cur";
-os.VAR_node = "$node"; 
+os.VAR_node = "$node";
 os.VAR_msg = "Msg";
 os.VAR_parentnode = "$parentnode";
 os.VAR_uniqueId = "$uniqueId";
@@ -98,7 +98,7 @@ os.regExps_ = {
  * Preprocess the template.
  * @param {Element|string} node DOM node containing the template data, or the
  * string source.
- * @param {string} opt_id An optional ID for the new template. 
+ * @param {string} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object
  */
 os.compileTemplate = function(node, opt_id) {
@@ -106,7 +106,7 @@ os.compileTemplate = function(node, opt_id) {
   if (typeof(node) == "string") {
     return os.compileTemplateString(node, opt_id);
   }
-  
+
   opt_id = opt_id || node.id;
   var src = node.value || node.innerHTML;
   src = os.trim(src);
@@ -135,7 +135,7 @@ os.renderTemplateNode_ = function(compiledNode, context) {
     template.removeAttribute(STRING_id);
   }
   jstProcess(context, template);
-  return template;  
+  return template;
 };
 
 /**
@@ -158,11 +158,11 @@ os.createTemplateCustomTag = function(template) {
     os.markNodeToSkip(ret);
 
     return ret;
-  }
+  };
 };
 
 /**
- * Creates a functor which returns a value from the specified node given a 
+ * Creates a functor which returns a value from the specified node given a
  * name.
  * @param {Node} node Node to get the value from.
  * @return {Function} The functor which takes a type {string}.
@@ -171,12 +171,12 @@ os.createTemplateCustomTag = function(template) {
 os.createNodeAccessor_ = function(node) {
   return function(name) {
     return os.getValueFromNode_(node, name);
-  }         
+  };
 };
 
 /**
  * A singleton instance of the current gadget Prefs - only instantiated if
- * we are in a gadget container. 
+ * we are in a gadget container.
  * @type gadgets.Prefs
  */
 os.gadgetPrefs_ = null;
@@ -208,7 +208,7 @@ os.globalDisallowedAttributes_ = {
 
 /**
  * A map of custom attributes keyed by attribute name.
- * Maps {string} types onto Function({Element|string|Object|JSEvalContext}). 
+ * Maps {string} types onto Function({Element|string|Object|JSEvalContext}).
  * @type {Object}
  * @private
  */
@@ -216,9 +216,9 @@ os.customAttributes_ = {};
 
 /**
  * Registers a custom attribute functor. When this attribute is encountered in
- * a DOM node, the specified functor will be called. 
+ * a DOM node, the specified functor will be called.
  * @param {string} attrName The name of the custom attribute.
- * @param {Function} functor A function with signature 
+ * @param {Function} functor A function with signature
  *     function({Element}, {string}, {Object}, {JSEvalContext})
  */
 os.registerAttribute = function(attrName, functor) {
@@ -250,7 +250,7 @@ os.doTag = function(node, ns, tag, data, context) {
     os.warn("Custom tag <" + ns + ":" + tag + "> not defined.");
     return;
   }
-  
+
   // Process tag's inner content before processing the tag.
   for (var child = node.firstChild; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
@@ -258,7 +258,7 @@ os.doTag = function(node, ns, tag, data, context) {
       os.markNodeToSkip(child);
     }
   }
-  
+
   var result = tagFunction.call(null, node, data, context);
 
   if (!result && typeof(result) != "string") {
@@ -266,12 +266,12 @@ os.doTag = function(node, ns, tag, data, context) {
   }
 
   if (typeof(result) == "string") {
-    node.innerHTML = result ? result : "";    
+    node.innerHTML = result ? result : "";
   } else if (isArray(result) && result.nodeType != DOM_TEXT_NODE) {
     os.removeChildren(node);
     for (var i = 0; i < result.length; i++) {
-      if (result[i].nodeType && 
-          (result[i].nodeType == DOM_ELEMENT_NODE || 
+      if (result[i].nodeType &&
+          (result[i].nodeType == DOM_ELEMENT_NODE ||
            result[i].nodeType == DOM_TEXT_NODE)) {
         node.appendChild(result[i]);
         if (result[i].nodeType == DOM_ELEMENT_NODE) {
@@ -288,16 +288,16 @@ os.doTag = function(node, ns, tag, data, context) {
         result.root.nodeType == DOM_ELEMENT_NODE) {
       resultNode = result.root;
     }
-    
+
     // Only attach the result DOM if it's not the same as the container node,
     // or not already attached. In IE, detached nodes can be parented in
     // DocumentFragments, so we check for that as well.
     if (resultNode && resultNode != node && (
-        !resultNode.parentNode || 
+        !resultNode.parentNode ||
         result.parentNode.nodeType == DOM_DOCUMENT_FRAGMENT_NODE)) {
-      os.removeChildren(node); 
+      os.removeChildren(node);
       node.appendChild(resultNode);
-      os.markNodeToSkip(resultNode);      
+      os.markNodeToSkip(resultNode);
     }
     if (result.onAttach) {
       callbacks.push(result);
@@ -307,8 +307,8 @@ os.doTag = function(node, ns, tag, data, context) {
 
 
 /**
- * Checks the current context, and if it's an element node, sets it to be used 
- * for future <os:renderAll/> operations. 
+ * Checks the current context, and if it's an element node, sets it to be used
+ * for future <os:renderAll/> operations.
  */
 os.setContextNode_ = function(data, context) {
   if (data.nodeType == DOM_ELEMENT_NODE) {
@@ -318,7 +318,7 @@ os.setContextNode_ = function(data, context) {
 
 /**
  * Mark the node to not be re-processed by continued template processing.
- * Useful if the node contains a template that needs to be processed with a 
+ * Useful if the node contains a template that needs to be processed with a
  * different context.
  */
 os.markNodeToSkip = function(node) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-opensocial.Activity.MediaItem = opensocial.MediaItem
+opensocial.Activity.MediaItem = opensocial.MediaItem;
 opensocial.newActivityMediaItem = opensocial.newMediaItem;
 
 opensocial.DataRequest.PersonId = opensocial.IdSpec.PersonId;
@@ -32,7 +32,7 @@ opensocial.DataRequest.prototype.newFetchPeopleRequest_v08
 opensocial.DataRequest.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {
   return this.newFetchPeopleRequest_v08(translateIdSpec(idSpec), opt_params);
-}
+};
 
 opensocial.DataRequest.prototype.newFetchPersonAppDataRequest_v08
     = opensocial.DataRequest.prototype.newFetchPersonAppDataRequest;
@@ -40,7 +40,7 @@ opensocial.DataRequest.prototype.newFetchPersonAppDataRequest = function(idSpec,
     keys, opt_params) {
   return this.newFetchPersonAppDataRequest_v08(translateIdSpec(idSpec), keys,
       opt_params);
-}
+};
 
 opensocial.DataRequest.prototype.newFetchActivitiesRequest_v08
     = opensocial.DataRequest.prototype.newFetchActivitiesRequest;
@@ -50,7 +50,7 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
       = this.newFetchActivitiesRequest_v08(translateIdSpec(idSpec), opt_params);
   request.isActivityRequest = true;
   return request;
-}
+};
 
 // TODO: handle making the last param valid json from any given string
 // (is it already valid??)

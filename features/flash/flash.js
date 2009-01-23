@@ -58,7 +58,7 @@ gadgets.flash.getMajorVersion = function() {
     }
   }
   return flashMajorVersion;
-}
+};
 
 gadgets.flash.swfContainerId_ = 0;
 

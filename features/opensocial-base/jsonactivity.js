@@ -43,19 +43,19 @@ JsonActivity.prototype.toJsonObject = function() {
   jsonObject['mediaItems'] = newMediaItems;
 
   return jsonObject;
-}
+};
 
 
 // TODO: Split into separate class
 var JsonMediaItem = function(opt_params) {
   opensocial.MediaItem.call(this, opt_params['mimeType'],
       opt_params['url'], opt_params);
-}
+};
 JsonMediaItem.inherits(opensocial.MediaItem);
 
 JsonMediaItem.prototype.toJsonObject = function() {
   return JsonActivity.copyFields(this.fields_);
-}
+};
 
 
 // TODO: Pull this method into a common class, it is from jsonperson.js
@@ -66,7 +66,7 @@ JsonActivity.constructArrayObject = function(map, fieldName, className) {
       fieldValue[i] = new className(fieldValue[i]);
     }
   }
-}
+};
 
 // TODO: Pull into common class as well
 JsonActivity.copyFields = function(oldObject) {
@@ -75,4 +75,4 @@ JsonActivity.copyFields = function(oldObject) {
     newObject[field] = oldObject[field];
   }
   return newObject;
-}
+};
