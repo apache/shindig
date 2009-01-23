@@ -25,7 +25,7 @@ import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
@@ -288,7 +288,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   }
 
   /**
-   * @param personNode
+   * @param n
    * @return
    */
   protected Map<String, List<Node>> childNodesToNodeMap(Node n) {

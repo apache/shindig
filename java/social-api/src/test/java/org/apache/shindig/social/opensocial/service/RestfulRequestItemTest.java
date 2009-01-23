@@ -18,7 +18,7 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;

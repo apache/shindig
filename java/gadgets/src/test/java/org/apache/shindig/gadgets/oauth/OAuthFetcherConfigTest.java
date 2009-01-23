@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.gadgets.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.gadgets.http.HttpCache;
 
 import org.junit.Test;

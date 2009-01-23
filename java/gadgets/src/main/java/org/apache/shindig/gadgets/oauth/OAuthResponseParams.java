@@ -20,13 +20,13 @@
 package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.Pairs;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.common.util.Check;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -248,10 +248,8 @@ public class OAuthResponseParams {
    * Create an exception and record information about the exception to be returned to the gadget.
    */
   public OAuthRequestException oauthRequestException(String error, String errorText) {
-    Check.notNull(error);
-    Check.notNull(errorText);
-    this.error = error;
-    this.errorText = errorText;
+    this.error = Preconditions.checkNotNull(error);
+    this.errorText = Preconditions.checkNotNull(errorText);
     return new OAuthRequestException('[' + error + ',' + errorText + ']');
   }
 
@@ -260,10 +258,8 @@ public class OAuthResponseParams {
    */
   public OAuthRequestException oauthRequestException(String error, String errorText,
       Throwable cause) {
-    Check.notNull(error);
-    Check.notNull(errorText);
-    this.error = error;
-    this.errorText = errorText;
+    this.error = Preconditions.checkNotNull(error);
+    this.errorText = Preconditions.checkNotNull(errorText);
     return new OAuthRequestException('[' + error + ',' + errorText + ']', cause);
   }
 

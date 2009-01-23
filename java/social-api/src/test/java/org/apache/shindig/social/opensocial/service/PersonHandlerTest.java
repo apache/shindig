@@ -19,7 +19,7 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.ContainerConf;

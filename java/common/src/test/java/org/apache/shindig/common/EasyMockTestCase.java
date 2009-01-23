@@ -15,16 +15,17 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.social;
+package org.apache.shindig.common;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 import junit.framework.TestCase;
 
 import org.easymock.classextension.EasyMock;
 
-import com.google.common.collect.Lists;
+import java.lang.reflect.Method;
+import java.util.List;
+
 
 public abstract class EasyMockTestCase extends TestCase {
   /** Tracks all EasyMock objects created for a test. */
@@ -50,31 +51,6 @@ public abstract class EasyMockTestCase extends TestCase {
   }
 
   /**
-   * Creates a nice mock object for the given class, adds it to the internal
-   * list of all mocks, and returns it.
-   *
-   * @param clazz Class to be mocked.
-   * @return A mock instance of the given type.
-   **/
-  protected <T> T mock(Class<T> clazz, Method[] methods) {
-    return mock(clazz, methods, false);
-  }
-
-  /**
-   * Creates a strict mock object for the given class, adds it to the internal
-   * list of all mocks, and returns it.
-   *
-   * @param clazz Class to be mocked.
-   * @return A mock instance of the given type.
-   **/
-  protected <T> T mock(Class<T> clazz, Method[] methods, boolean strict) {
-    T m = strict ? EasyMock.createMock(clazz, methods)
-        : EasyMock.createNiceMock(clazz, methods);
-    mocks.add(m);
-    return m;
-  }
-
-  /**
    * Creates a strict or nice mock object for the given class, adds it to the internal
    * list of all mocks, and returns it.
    *
@@ -89,11 +65,46 @@ public abstract class EasyMockTestCase extends TestCase {
   }
 
   /**
+   * Creates a nice mock object for the given class, adds it to the internal
+   * list of all mocks, and returns it.
+   *
+   * @param clazz Class to be mocked.
+   * @return A mock instance of the given type.
+   **/
+
+
+  protected <T> T mock(Class<T> clazz, Method[] methods) {
+    return mock(clazz, methods, false);
+  }
+
+
+  /**
+   * Creates a strict mock object for the given class, adds it to the internal
+   * list of all mocks, and returns it.
+   *
+   * @param clazz Class to be mocked.
+   * @return A mock instance of the given type.
+   **/
+
+  protected <T> T mock(Class<T> clazz, Method[] methods, boolean strict) {
+    T m = strict ? EasyMock.createMock(clazz, methods)
+         : EasyMock.createNiceMock(clazz, methods);
+    mocks.add(m);
+
+    return m;
+  }
+
+  /**
+  /**
    * Sets each mock to replay mode in the order they were created. Call this after setting
    * all of the mock expectations for a test.
    */
   protected void replay() {
     EasyMock.replay(mocks.toArray());
+  }
+
+  protected void replay(Object mock) {
+    EasyMock.replay(mock);
   }
 
   /**
@@ -102,5 +113,16 @@ public abstract class EasyMockTestCase extends TestCase {
    */
   protected void verify() {
     EasyMock.verify(mocks.toArray());
+  }
+
+  /**
+   * Resets all of the mocks.
+   */
+  protected void reset() {
+    EasyMock.reset(mocks.toArray());
+  }
+
+  protected void reset(Object mock) {
+    EasyMock.reset(mock);
   }
 }

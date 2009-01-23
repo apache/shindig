@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.gadgets.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 
 import javax.servlet.http.HttpServletRequest;
 

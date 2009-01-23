@@ -19,8 +19,8 @@ package org.apache.shindig.social.opensocial.spi;
 
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.social.opensocial.service.RequestItem;
+import com.google.common.base.Objects;
 
 public class CollectionOptions {
   private String sortBy;
@@ -107,7 +107,7 @@ public class CollectionOptions {
    * filter. The exception is the isFriendsWith filter where this contains the value of the id who
    * the all the results need to be friends with.
    *
-   * @return
+   * @return the filter value
    */
   public String getFilterValue() {
     return filterValue;
@@ -119,7 +119,7 @@ public class CollectionOptions {
 
   /**
    * When paginating, the index of the first item to fetch.
-   * @return
+   * @return the value of first
    */
   public int getFirst() {
     return first;
@@ -129,12 +129,12 @@ public class CollectionOptions {
     this.first = first;
   }
 
-  
+
   /**
    * The maximum number of items to fetch; defaults to 20. If set to a larger
    * number, a container may honor the request, or may limit the number to a
    * container-specified limit of at least 20.
-   * @return
+   * @return the value of max
    */
   public int getMax() {
     return max;
@@ -161,23 +161,18 @@ public class CollectionOptions {
     }
 
     CollectionOptions actual = (CollectionOptions) o;
-    return StringUtils.equals(this.sortBy, actual.sortBy)
+    return Objects.equal(this.sortBy, actual.sortBy)
         && this.sortOrder == actual.sortOrder
-        && StringUtils.equals(this.filter, actual.filter)
+        && Objects.equal(this.filter, actual.filter)
         && this.filterOperation == actual.filterOperation
-        && StringUtils.equals(this.filterValue, actual.filterValue)
+        && Objects.equal(this.filterValue, actual.filterValue)
         && this.first == actual.first
         && this.max == actual.max;
   }
 
   @Override
   public int hashCode() {
-    return getHashCode(this.sortBy) + getHashCode(this.sortOrder) + getHashCode(this.filter)
-        + getHashCode(this.filterOperation) + getHashCode(this.filterValue)
-        + getHashCode(this.first) + getHashCode(this.max);
-  }
-
-  private int getHashCode(Object o) {
-    return o == null ? 0 : o.hashCode();
+    return Objects.hashCode(this.sortBy, this.sortOrder, this.filter,
+        this.filterOperation, this.filterValue, this.first, this.max);
   }
 }

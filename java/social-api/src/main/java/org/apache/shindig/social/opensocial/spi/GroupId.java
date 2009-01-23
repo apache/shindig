@@ -17,9 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Objects;
 
 import java.util.Map;
 
@@ -28,14 +27,21 @@ public class GroupId {
     all, friends, self, deleted, groupId;
 
     /** A map of JSON strings to Type objects */
-    private static final Map<String, Type> jsonTypeMap = Maps.newHashMap();
+    private static final Map<String, Type> jsonTypeMap;
 
     static {
+      ImmutableMap.Builder<String,Type> builder = ImmutableMap.builder();
       for (Type type : Type.values()) {
-        jsonTypeMap.put('@' + type.name(), type);
+        builder.put('@' + type.name(), type);
       }
+      jsonTypeMap = builder.build();
     }
-    /** Return the Type enum value given a specific jsonType **/
+    /**
+     * Return the Type enum value given a specific jsonType such as @all, @friends, etc.
+     *
+     * @param jsonType the type string to convert
+     * @return A Type Enum value or null if no value exists
+     **/
     public static Type jsonValueOf(String jsonType) {
        return jsonTypeMap.get(jsonType);
     }
@@ -75,20 +81,16 @@ public class GroupId {
     }
 
     GroupId actual = (GroupId) o;
-    return this.type == actual.type
-        && StringUtils.equals(this.groupId, actual.groupId);
+    return this.type == actual.type && Objects.equal(this.groupId, actual.groupId);
   }
 
   @Override
   public int hashCode() {
-    int groupHashCode = 0;
-    if (this.groupId != null) {
-      groupHashCode = this.groupId.hashCode();
-    }
-    return this.type.hashCode() + groupHashCode;
+    return Objects.hashCode(this.groupId, this.type);
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
       switch (type) {
           case all:
               return "ALL";
