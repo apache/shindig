@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
@@ -175,6 +176,18 @@ public class ActivityServiceDb implements ActivityService {
       throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
 
     }
+    
+    // Get total results, that is count the total number of rows for this query
+    Long totalResults = JPQLUtils.getTotalResults(entityManager, sb.toString(), paramList);
+    
+    // Execute paginated query
+    if (totalResults > 0) {
+      plist = JPQLUtils.getListQuery(entityManager, sb.toString(), paramList, options);
+    }
+
+    if (plist == null) {
+      plist = Lists.newArrayList();
+    }
 
     plist = JPQLUtils.getListQuery(entityManager, sb.toString(), paramList, null);
 
@@ -184,7 +197,7 @@ public class ActivityServiceDb implements ActivityService {
 
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.
-    return ImmediateFuture.newInstance(new RestfulCollection<Activity>(plist));
+    return ImmediateFuture.newInstance(new RestfulCollection<Activity>(plist, options.getFirst(), totalResults.intValue()));
   }
   
   /* (non-Javadoc)

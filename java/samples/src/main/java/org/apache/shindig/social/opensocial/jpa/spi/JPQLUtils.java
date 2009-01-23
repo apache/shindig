@@ -17,7 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
+import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import java.util.List;
 
@@ -62,17 +64,60 @@ public class JPQLUtils {
   @SuppressWarnings("unchecked")
   public static <T> List<T> getListQuery(EntityManager entityManager, String query,
       List<?> parametersValues, CollectionOptions collectionOptions) {
+    Query q = createQuery(entityManager, query, parametersValues);
+    if (collectionOptions != null) {
+      q.setFirstResult(collectionOptions.getFirst());
+      q.setMaxResults(collectionOptions.getMax());
+    }
+    return (List<T>) q.getResultList();
+  }
+  
+  
+  /**
+   * Performs a 'select count(*)' on the given query
+   * 
+   * @param entityManager
+   * @param query
+   * @param parametersValues
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  public static Long getTotalResults(EntityManager entityManager, String query,
+      List<?> parametersValues) {
+    int fromIndex = 0;
+    String queryInUpperCase = query.toUpperCase();
+    // If JPA query starts with FROM then fromIndex as 0 is correct,
+    // otherwise find where FROM keyword starts in the query string and set the fromIndex.
+    if (!queryInUpperCase.startsWith("FROM ")) {
+      fromIndex = queryInUpperCase.indexOf(" FROM ");
+      if (fromIndex == -1) {
+        // Couldn't find the FROM keyword in the query
+        throw new SocialSpiException(ResponseError.INTERNAL_ERROR, "Invalid query [" + query + "]");
+      }
+    }
+    query = "select count(*) " + query.substring(fromIndex, query.length());
+    System.out.println("Count query [" + query + "]");
+    Query q = createQuery(entityManager, query, parametersValues);
+    return (Long) q.getSingleResult();
+  }
+
+  /**
+   * Create JPA Query
+   * 
+   * @param entityManager
+   * @param query
+   * @param parametersValues
+   * @return
+   */
+  private static Query createQuery(EntityManager entityManager, String query,
+      List<?> parametersValues) {
     Query q = entityManager.createQuery(query);
     int i = 1;
     for (Object p : parametersValues) {
       q.setParameter(i, p);
       i++;
     }
-    if (collectionOptions != null) {
-      q.setFirstResult(collectionOptions.getFirst());
-      q.setMaxResults(collectionOptions.getMax());
-    }
-    return (List<T>) q.getResultList();
+    return q;
   }
 
 }

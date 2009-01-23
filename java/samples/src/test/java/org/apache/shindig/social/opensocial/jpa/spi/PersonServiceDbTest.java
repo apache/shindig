@@ -105,7 +105,7 @@ public class PersonServiceDbTest {
     // Get first friend of john.doe
     Future<RestfulCollection<Person>> result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);    
     RestfulCollection<Person> peopleCollection = result.get();
-    assertEquals(1, peopleCollection.getTotalResults());
+    assertEquals(3, peopleCollection.getTotalResults());
     assertEquals(0, peopleCollection.getStartIndex());    
     List<Person> people = peopleCollection.getEntry();    
     SpiTestUtil.assertPersonEquals(people.get(0), "george.doe", "George Doe");
@@ -114,7 +114,7 @@ public class PersonServiceDbTest {
     collectionOptions.setFirst(1);
     result = this.personServiceDb.getPeople(SpiTestUtil.buildUserIds("john.doe"), new GroupId(GroupId.Type.friends, "@friends"), collectionOptions, Person.Field.ALL_FIELDS, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     peopleCollection = result.get();
-    assertEquals(1, peopleCollection.getTotalResults());
+    assertEquals(3, peopleCollection.getTotalResults());
     assertEquals(1, peopleCollection.getStartIndex());    
     people = peopleCollection.getEntry();    
     SpiTestUtil.assertPersonEquals(people.get(0), "jane.doe", "Jane Doe");    
