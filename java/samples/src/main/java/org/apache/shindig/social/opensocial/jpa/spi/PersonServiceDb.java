@@ -122,9 +122,15 @@ public class PersonServiceDb implements PersonService {
     if (filterPos > 0) {
       paramList.add(collectionOptions.getFilterValue());
     }
-    addOrderClause(sb, collectionOptions);
-
-    plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
+    
+    // Get total results, that is count the total number of rows for this query
+    Long totalResults = JPQLUtils.getTotalResults(entiyManager, sb.toString(), paramList);
+    
+    // Execute ordered and paginated query
+    if (totalResults > 0) {
+      addOrderClause(sb, collectionOptions);
+      plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
+    }
 
     if (plist == null) {
       plist = Lists.newArrayList();
@@ -132,7 +138,7 @@ public class PersonServiceDb implements PersonService {
 
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.
-    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist, collectionOptions.getFirst(), plist.size()));
+    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist, collectionOptions.getFirst(), totalResults.intValue()));
 
   }
 

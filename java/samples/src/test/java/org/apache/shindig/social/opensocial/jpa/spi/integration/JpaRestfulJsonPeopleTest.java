@@ -21,13 +21,6 @@ package org.apache.shindig.social.opensocial.jpa.spi.integration;
 import org.apache.shindig.social.dataservice.integration.RestfulJsonPeopleTest;
 import org.apache.shindig.social.opensocial.jpa.spi.SpiDatabaseBootstrap;
 
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
-
-import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 
 /**
@@ -66,57 +59,6 @@ public class JpaRestfulJsonPeopleTest extends RestfulJsonPeopleTest {
   protected void tearDown() throws Exception {
     super.tearDown();
     this.bootstrap.tearDown();
-  }
-	
-  /**
-   * TODO Overriding this test because of an existing jira issue
-   * (https://issues.apache.org/jira/browse/SHINDIG-778)
-   * where totalResults should be the same as specified in the count parameter.
-   * Remove once issue 778 has been fixed.
-   */
-	@Test
-  public void testGetPeoplePagination() throws Exception {
-    Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("sortBy", "name");
-    extraParams.put("sortOrder", null);
-    extraParams.put("filterBy", null);
-    extraParams.put("startIndex", "0");
-    extraParams.put("count", "1");
-    extraParams.put("fields", null);
-
-    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
-    JSONObject result = getJson(resp);
-
-    assertEquals(1, result.getInt("totalResults"));
-    assertEquals(0, result.getInt("startIndex"));
-
-    JSONArray people = result.getJSONArray("entry");
-    assertPerson(people.getJSONObject(0), "george.doe", "George Doe");
-
-    // Get the second page
-    extraParams.put("startIndex", "1");
-    resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
-    result = getJson(resp);
-
-    assertEquals(1, result.getInt("totalResults"));
-    assertEquals(1, result.getInt("startIndex"));
-
-    people = result.getJSONArray("entry");
-    assertPerson(people.getJSONObject(0), "jane.doe", "Jane Doe");
-  }
-
-	/**
-	 * Convenience assert method
-	 * 
-	 * @param person
-	 * @param expectedId
-	 * @param expectedName
-	 * @throws Exception
-	 */
-  private void assertPerson(JSONObject person, String expectedId, String expectedName)
-      throws Exception {
-    assertEquals(expectedId, person.getString("id"));
-    assertEquals(expectedName, person.getJSONObject("name").getString("formatted"));
-  }
+  }	
   
 }
