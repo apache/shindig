@@ -38,7 +38,7 @@ IoTest.prototype.setUp = function() {
 
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
-      "jsonProxyUrl" : "http://example.com/json" }}); 
+      "jsonProxyUrl" : "http://example.com/json" }});
   gadgets.io.preloaded_ = {};
 };
 
@@ -90,7 +90,7 @@ IoTest.prototype.setArg = function(req, inBody, name, value) {
   } else {
     req.setQueryArg(name, value);
   }
-}
+};
 
 IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "refresh", "3600");
@@ -509,9 +509,9 @@ IoTest.prototype.testOAuth = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
-          'oauthState' : 'newState' 
+          'oauthState' : 'newState'
          }
       }));
 
@@ -568,9 +568,9 @@ IoTest.prototype.testSignedEquivalentToOAuth = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
-          'oauthState' : 'newState' 
+          'oauthState' : 'newState'
          }
       }));
 
@@ -602,10 +602,10 @@ IoTest.prototype.testOAuth_error = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'oauthError' : 'SOME_ERROR_CODE',
           'oauthErrorText' : 'Some helpful error message',
-          'oauthState' : 'newState' 
+          'oauthState' : 'newState'
          }
       }));
 
@@ -639,9 +639,9 @@ IoTest.prototype.testOAuth_serviceAndToken = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'oauthApprovalUrl' : 'http://sp.example.com/authz?oauth_token=foo',
-          'oauthState' : 'newState' 
+          'oauthState' : 'newState'
          }
       }));
 
@@ -731,7 +731,7 @@ IoTest.prototype.testJson = function() {
   req.setQueryArg("contentType", "JSON");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'body' : '{ "somejsonparam" : 3 }',
          }
       }));
@@ -756,7 +756,7 @@ IoTest.prototype.testJson_malformed = function() {
   req.setQueryArg("contentType", "JSON");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'body' : '{ bogus : 3 }',
          }
       }));
@@ -802,7 +802,7 @@ IoTest.prototype.testPreload = function() {
   req.setQueryArg("url", "http://target.example.com/somepage");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'body' : 'not preloaded',
          }
       }));
@@ -892,7 +892,7 @@ IoTest.prototype.testPreload_error404 = function() {
   req.setQueryArg("url", "http://target.example.com/somepage");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'body' : 'not preloaded',
          }
       }));
@@ -934,7 +934,7 @@ IoTest.prototype.testPreload_oauthApproval = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
-      { 'http://target.example.com/somepage' : { 
+      { 'http://target.example.com/somepage' : {
           'body' : 'not preloaded',
          }
       }

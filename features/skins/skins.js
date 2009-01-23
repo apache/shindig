@@ -63,7 +63,7 @@ gadgets.skins = function() {
     getProperty : function(propertyKey) {
       return skinProperties[propertyKey] || "";
     }
-  }
+  };
 }();
 /**
  * @static

@@ -26,29 +26,29 @@
  * Map of namespace collections.
  *
  * Each namespace collection is either a map of tag handlers, or an object
- * that has a getTag(tagName) method that will return a tag handler based on 
+ * that has a getTag(tagName) method that will return a tag handler based on
  * name.
- * 
+ *
  * A tag handler function should be have the following signature:
  * function({Element} node, {Object} data, {JSEvalContext} context)
- * where context is the JSEvalContext used to wrap data. 
+ * where context is the JSEvalContext used to wrap data.
  *
  * For simpler implementations,
  * function({Element} node, {Object} data)
  * can be used, omitting the third param.
- * 
- * Handler functions can return a string, a DOM Element or an Object with 
+ *
+ * Handler functions can return a string, a DOM Element or an Object with
  * {Element} root and, optionally, {Function} onAttach properties.
  *
  * @type {Object}
- * @private  
+ * @private
  */
 os.nsmap_ = {};
 
 /**
  * Map of namespace prefixes to full urls.
  * @type {Object}
- * @private  
+ * @private
  */
 os.nsurls_ = {};
 
@@ -122,11 +122,11 @@ os.getRequiredNamespaces = function(templateSrc) {
  * Define 'os:renderAll' and 'os:Html' tags and the @onAttach attribute
  */
 os.defineBuiltinTags = function() {
-  var osn = os.getNamespace("os") || 
+  var osn = os.getNamespace("os") ||
       os.createNamespace("os", "http://opensocial.com/#template");
-      
+
   /**
-   * <os:Render> custom tag renders the specified child nodes of the current 
+   * <os:Render> custom tag renders the specified child nodes of the current
    * context.
    */
   osn.Render = function(node, data, context) {
@@ -134,7 +134,7 @@ os.defineBuiltinTags = function() {
     var exp = node.getAttribute("content") || "*";
     var result = os.getValueFromNode_(parent, exp);
     if (!result) {
-       return ""; 
+       return "";
     } else if (typeof(result) == "string") {
       var textNode = document.createTextNode(result);
       result = [];
@@ -153,10 +153,10 @@ os.defineBuiltinTags = function() {
       for (var i = 0; i < result[0].childNodes.length; i++) {
         resultArray.push(result[0].childNodes[i]);
       }
-      result = resultArray;      
+      result = resultArray;
     }
 
-    // Trim away leading and trailing spaces on IE, which interprets them 
+    // Trim away leading and trailing spaces on IE, which interprets them
     // literally.
     if (os.isIe) {
       for (var i = 0; i < result.length; i++) {
@@ -170,29 +170,29 @@ os.defineBuiltinTags = function() {
         }
       }
     }
-    
+
     return result;
-  }
+  };
   osn.render = osn.RenderAll = osn.renderAll = osn.Render;
-  
+
   /**
    * <os:Html> custom tag renders HTML content (as opposed to HTML code), so
-   * <os:Html code="<b>Hello</b>"/> would result in the bold string "Hello", 
-   * rather than the text of the markup. 
+   * <os:Html code="<b>Hello</b>"/> would result in the bold string "Hello",
+   * rather than the text of the markup.
    */
   osn.Html = function(node) {
     var html = node.code ? "" + node.code : node.getAttribute("code") || "";
     // TODO(levik): Sanitize the HTML here to avoid script injection issues.
     // Perhaps use the gadgets sanitizer if available.
     return html;
-  }
-  
+  };
+
   function createClosure(object, method) {
     return function() {
       method.apply(object);
-    }
+    };
   }
-  
+
   function processOnAttach(node, code, data, context) {
     var callbacks = context.getVariable(os.VAR_callbacks);
     var func = new Function(code);

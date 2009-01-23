@@ -66,14 +66,14 @@ opensocial.Person.prototype.getField = function(fieldname) {
   } else {
     return this.getField_v07(fieldname);
   }
-}
+};
 
 opensocial.Person.prototype.getDisplayName_v07
     = opensocial.Person.getDisplayName;
 opensocial.Person.prototype.getDisplayName = function() {
   return this.getField_v07(opensocial.Person.Field.NAME)
       .getField(opensocial.Name.Field.UNSTRUCTURED);
-}
+};
 
 opensocial.newActivity_v07 = opensocial.newActivity;
 opensocial.newActivity = function(title, opt_params) {
@@ -114,7 +114,7 @@ opensocial.DataRequest.prototype.newUpdateInstanceAppDataRequest = function(key,
 // same.
 gadgets.views.View.prototype.isPrimaryContent = function() {
   return this.isOnlyVisibleGadget();
-}
+};
 
 // Note: The names of views may have changed in a container between 0.6 and 0.7
 // but that is container specific

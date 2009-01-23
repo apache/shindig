@@ -494,7 +494,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
   this.tabsContainer_ = wrapper;
 
   return table;
-}
+};
 
 /**
  * Helper method that shows or hides the navigation elements.
@@ -602,7 +602,7 @@ gadgets.TabSet.prototype.createTab_ = function(tabName, params) {
  * @return {Function} Callback function to select the tab.
  */
 gadgets.TabSet.prototype.setSelectedTabGenerator_ = function(tab) {
-  return function() { tab.handle_.selectTab_(tab); }
+  return function() { tab.handle_.selectTab_(tab); };
 };
 
 /**

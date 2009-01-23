@@ -41,7 +41,7 @@ JsonActivityTest.prototype.testConstructArrayObject = function() {
   var map = {'fakeClass' : [{'field1' : 'value1'}, {'field2' : 'value2'}]};
   FakeClass = function(opt_params) {
     this.fields = opt_params;
-  }
+  };
 
   JsonActivity.constructArrayObject(map, 'fakeClass', FakeClass);
 

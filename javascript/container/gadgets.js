@@ -260,7 +260,7 @@ gadgets.IfrGadgetService.prototype.getUrlForView = function(
   } else {
     return null;
   }
-}
+};
 
 gadgets.IfrGadgetService.prototype.getGadgetIdFromModuleId = function(
     moduleId) {
@@ -454,7 +454,7 @@ gadgets.Gadget.prototype.getMainContent = function(continuation) {
  */
 gadgets.Gadget.prototype.getAdditionalParams = function() {
   return '';
-}
+};
 
 
 // ---------
@@ -462,7 +462,7 @@ gadgets.Gadget.prototype.getAdditionalParams = function() {
 
 gadgets.IfrGadget = function(opt_params) {
   gadgets.Gadget.call(this, opt_params);
-  this.serverBase_ = '../../' // default gadget server
+  this.serverBase_ = '../../'; // default gadget server
 };
 
 gadgets.IfrGadget.inherits(gadgets.Gadget);
@@ -563,7 +563,7 @@ gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
     }
   }
   return params;
-}
+};
 
 gadgets.IfrGadget.prototype.handleToggle = function() {
   var gadgetIframe = document.getElementById(this.getIframeId());
@@ -607,7 +607,7 @@ gadgets.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
   userPrefsDialog.style.display = (opt_show || opt_show == undefined)
       ? '' : 'none';
-}
+};
 
 gadgets.IfrGadget.prototype.hideUserPrefsDialog = function() {
   this.showUserPrefsDialog(false);

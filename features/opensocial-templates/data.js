@@ -125,7 +125,7 @@ os.data.RequestDescriptor.prototype.getSendRequestClosure = function() {
   var self = this;
   return function() {
     self.sendRequest();
-  }
+  };
 };
 
 /**
@@ -205,7 +205,7 @@ os.data.DataContext.registerListener = function(keys, callback) {
   // Check to see if this one should fire immediately.
   if (os.data.DataContext.isDataReady(listener.keys)) {
     window.setTimeout(function() {
-      listener.callback()
+      listener.callback();
     }, 1);
   }
 };
@@ -404,7 +404,7 @@ os.data.createSharedRequestCallback_ = function() {
   var callbacks = os.data.currentAPIRequestCallbacks_;
   return function(data) {
     os.data.onAPIResponse(data, keys, callbacks);
-  }
+  };
 };
 
 /**
@@ -488,7 +488,7 @@ os.data.loadRequests = function(xml) {
   var node = xml;
   xml = node.value || node.innerHTML;
   os.data.loadRequestsFromMarkup_(xml);
-}
+};
 
 /**
  * Parses XML data and constructs the pending request list.

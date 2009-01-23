@@ -200,7 +200,7 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
 RestfulContainer.prototype.getNetworkDistance = function(idSpec) {
   var networkDistance = idSpec.getField('networkDistance') || '';
   return "networkDistance=" + networkDistance;
-}
+};
 
 RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var peopleRequest = this.newFetchPeopleRequest(
@@ -343,5 +343,5 @@ var RestfulRequestItem = function(url, method, opt_postData, opt_processData) {
 
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), error, errorMessage);
-  }
+  };
 };

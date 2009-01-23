@@ -89,19 +89,19 @@ FieldTranslations.translateServerPersonToJsPerson = function(serverJson) {
     serverJson.name.unstructured = serverJson.name.formatted;
   }
 
-}
+};
 
 FieldTranslations.translateEnumJson = function(enumJson) {
   if (enumJson) {
     enumJson.key = enumJson.value;
   }
-}
+};
 
 FieldTranslations.translateUrlJson = function(urlJson) {
   if (urlJson) {
     urlJson.address = urlJson.value;
   }
-}
+};
 
 
 FieldTranslations.translateJsPersonFieldsToServerFields = function(fields) {
@@ -116,5 +116,5 @@ FieldTranslations.translateJsPersonFieldsToServerFields = function(fields) {
   // displayName and id always need to be requested
   fields.push("id");
   fields.push("displayName");
-}
+};
 

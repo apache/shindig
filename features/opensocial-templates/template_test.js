@@ -399,9 +399,9 @@ function testTag_blink() {
     }
     root.onAttach = function() {
       blink();
-    }
+    };
     return root;
-  }
+  };
 
   Clock.reset();
   var outputNode = compileAndRender_("_T_Tag_blink");
@@ -442,7 +442,7 @@ function testParameter() {
       '<div>Hello world!</div>',
       null,
       ['<Template tag="os:HelloWorldWithParam">' + content + '</Template>']);
-  }
+  };
 
   tryTemplateContent('${$my.text}');
   tryTemplateContent('${My.text}');
@@ -462,7 +462,7 @@ function testContent() {
       '<div>Hello world!</div>',
       null,
       ['<Template tag="os:HelloWorldWithContent">' + content + '</Template>']);
-  }
+  };
 
   tryTemplateContent('<os:renderAll/>');
   tryTemplateContent('<os:RenderAll/>');
@@ -482,7 +482,7 @@ function testNamedContent() {
       '<div>Hello <b>world!</b></div>',
       null,
       ['<Template tag="os:HelloWorldWithNamedContent">' + content + '</Template>']);
-  }
+  };
   tryTemplateContent('<os:renderAll content="os:Content"/>');
   tryTemplateContent('<os:renderAll content="Content"/>');
 
@@ -636,7 +636,7 @@ function testRepeatedNode() {
         Words: ['Hello', 'world!'],
         WordObjects: [{value: 'Hello'}, {value: 'world!'}]
       });
-  }
+  };
 
   tryTemplateContent('<div><span repeat="WordObjects">${$cur.value}</span></div>');
   tryTemplateContent('<div><span repeat="WordObjects">${value}</span></div>');
@@ -746,7 +746,7 @@ function testSpacesAmongTags() {
   var tryTemplateContent = function(templateText) {
     var output = os.compileTemplateString(templateText).render();
     assertEquals('Hello world!', domutil.getVisibleTextTrim(output));
-  }
+  };
 
   os.Loader.loadContent('<Templates xmlns:os="uri:unused">' +
     '<Template tag="os:msg">${My.text}</Template></Templates>');

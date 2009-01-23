@@ -36,16 +36,16 @@ gadgets.rpc = function() {
   // Consts for FrameElement.
   var FE_G2C_CHANNEL = '__g2c_rpc';
   var FE_C2G_CHANNEL = '__c2g_rpc';
- 
+
   // Consts for NIX. VBScript doesn't
   // allow items to start with _ for some reason,
-  // so we need to make these names quite unique, as 
+  // so we need to make these names quite unique, as
   // they will go into the global namespace.
   var NIX_WRAPPER = 'GRPC____NIXVBS_wrapper';
   var NIX_GET_WRAPPER = 'GRPC____NIXVBS_get_wrapper';
   var NIX_HANDLE_MESSAGE = 'GRPC____NIXVBS_handle_message';
   var NIX_CREATE_CHANNEL = 'GRPC____NIXVBS_create_channel';
- 
+
   // JavaScript reference to the NIX VBScript wrappers.
   // Gadgets will have but a single channel under
   // nix_channels['..'] while containers will have a channel
@@ -78,7 +78,7 @@ gadgets.rpc = function() {
    * + For those browsers that support native messaging (various implementations
    *   of the HTML5 postMessage method), use that. Officially defined at
    *   http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
-   *   
+   *
    *   postMessage is a native implementation of XDC. A page registers that
    *   it would like to receive messages by listening the the "message" event
    *   on the window (document in DPM) object. In turn, another page can
@@ -88,7 +88,7 @@ gadgets.rpc = function() {
    *   the message. The target page will then have its "message" event raised
    *   if the domain matches and can, in turn, check the origin of the message
    *   and process the data contained within.
-   *  
+   *
    *     wpm: postMessage on the window object.
    *        - Internet Explorer 8+
    *        - Safari (latest nightlies as of 26/6/2008)
@@ -101,8 +101,8 @@ gadgets.rpc = function() {
    * + For Internet Explorer before version 8, the security model allows anyone
    *   parent to set the value of the "opener" property on another window,
    *   with only the receiving window able to read it.
-   *   This method is dubbed "Native IE XDC" (NIX). 
-   *   
+   *   This method is dubbed "Native IE XDC" (NIX).
+   *
    *   This method works by placing a handler object in the "opener" property
    *   of a gadget when the container sets up the authentication information
    *   for that gadget (by calling setAuthToken(...)). At that point, a NIX
@@ -126,7 +126,7 @@ gadgets.rpc = function() {
    *   domain C passes object obj to gadget on domain G. Then the gadget can
    *   access C's global context using:
    *   var parentWindow = (new obj.toString.constructor("return window;"))();
-   *   Nulling out all of obj's properties doesn't fix this, since IE helpfully 
+   *   Nulling out all of obj's properties doesn't fix this, since IE helpfully
    *   restores them to their original values if you do something like:
    *   delete obj.toString; delete obj.toString;
    *   Thus, we wrap the necessary functions and information inside a VBScript
@@ -178,7 +178,7 @@ gadgets.rpc = function() {
   function getRelayChannel() {
     return typeof window.postMessage === 'function' ? 'wpm' :
            typeof document.postMessage === 'function' ? 'dpm' :
-           window.ActiveXObject ? 'nix' : 
+           window.ActiveXObject ? 'nix' :
            navigator.product === 'Gecko' ? 'fe' :
            'ifpc';
   }
@@ -220,7 +220,7 @@ gadgets.rpc = function() {
         };
 
         // Inject the VBScript code needed.
-        var vbscript = 
+        var vbscript =
           // We create a class to act as a wrapper for
           // a Javascript call, to prevent a break in of
           // the context.
@@ -246,7 +246,7 @@ gadgets.rpc = function() {
           + 'If isEmpty(m_Intended) Then\n'
           + 'm_Intended = name\n'
           + 'End If\n'
-          + 'End Sub\n' 
+          + 'End Sub\n'
 
           // Method for internally setting the value of the m_Auth property.
           + 'Public Sub SetAuth(auth)\n '
@@ -255,11 +255,11 @@ gadgets.rpc = function() {
           + 'End If\n'
           + 'End Sub\n'
 
-          // A wrapper method which actually causes a 
+          // A wrapper method which actually causes a
           // message to be sent to the other context.
           + 'Public Sub SendMessage(data)\n '
           + NIX_HANDLE_MESSAGE + '(data)\n'
-          + 'End Sub\n' 
+          + 'End Sub\n'
 
           // Returns the auth token to the gadget, so it can
           // confirm a match before initiating the connection
@@ -454,7 +454,7 @@ gadgets.rpc = function() {
         // typeof(window.opener.GetAuthToken) check here
         // because it means accessing that field on the COM object, which,
         // being an internal function reference, is not allowed.
-        // "in" works because it merely checks for the prescence of 
+        // "in" works because it merely checks for the prescence of
         // the key, rather than actually accessing the object's property.
         // This is just a sanity check, not a validity check.
         if (!handler && window.opener && "GetAuthToken" in window.opener) {
@@ -515,7 +515,7 @@ gadgets.rpc = function() {
       if (from != '..') {
         // Call from gadget to the container.
         var fe = window.frameElement;
-      
+
         if (typeof fe[FE_G2C_CHANNEL] === 'function') {
           // Complete the setup of the FE channel if need be.
           if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
@@ -918,7 +918,7 @@ gadgets.rpc = function() {
     receiveSameDomain: function(rpc) {
       // Pass through to local process method but converting to a local Array
       rpc.a = Array.prototype.slice.call(rpc.a);
-      window.setTimeout(function() { process(rpc) }, 0);
+      window.setTimeout(function() { process(rpc); }, 0);
     }
   };
 }();

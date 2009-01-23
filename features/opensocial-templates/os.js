@@ -30,10 +30,10 @@
  *   <li>OpenSocial Field</li>
  *   <li>Data result set</li>
  * </ul>
- * @param {Object} object The object in the scope of which to get a named 
+ * @param {Object} object The object in the scope of which to get a named
  * property.
  * @param {string} name The name of the property to get.
- * @return {Object?} The property requested. 
+ * @return {Object?} The property requested.
  */
 os.resolveOpenSocialIdentifier = function(object, name) {
   // Simple property from object.
@@ -67,7 +67,7 @@ os.resolveOpenSocialIdentifier = function(object, name) {
     }
     return responseItem;
   }
-  
+
   // Return undefined value, to avoid confusing with existing value of "null".
   var und;
   return und;
@@ -89,7 +89,7 @@ os.createOpenSocialGetMethods_ = function(object, fields) {
       var getter = os.getPropertyGetterName(value);
       object.prototype[getter] = function() {
         this.getField(key);
-      }
+      };
     }
   }
 };
