@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.service;
 
 import com.google.inject.Provider;
 
-import org.apache.shindig.social.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.easymock.classextension.IMocksControl;
 import org.easymock.classextension.EasyMock;
 

@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 

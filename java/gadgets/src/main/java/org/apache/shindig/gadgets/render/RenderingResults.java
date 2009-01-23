@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.Check;
 
 import com.google.common.base.Preconditions;
 
@@ -63,7 +62,7 @@ public class RenderingResults {
    * @return The content to render. Only available when status is OK.
    */
   public String getContent() {
-    Check.eq(status, Status.OK, "Only available when status is OK.");
+    Preconditions.checkState(status == Status.OK, "Only available when status is OK.");
     return content;
   }
 
@@ -71,7 +70,7 @@ public class RenderingResults {
    * @return The error message for rendering. Only available when status is ERROR.
    */
   public String getErrorMessage() {
-    Check.eq(status, Status.ERROR, "Only available when status is ERROR.");
+    Preconditions.checkState(status == Status.ERROR, "Only available when status is ERROR.");
     return errorMessage;
   }
 
@@ -79,7 +78,7 @@ public class RenderingResults {
    * @return The error message for rendering. Only available when status is ERROR.
    */
   public Uri getRedirect() {
-    Check.eq(status, Status.MUST_REDIRECT, "Only available when status is MUST_REDIRECT.");
+    Preconditions.checkState(status == Status.MUST_REDIRECT, "Only available when status is MUST_REDIRECT.");
     return redirect;
   }
 

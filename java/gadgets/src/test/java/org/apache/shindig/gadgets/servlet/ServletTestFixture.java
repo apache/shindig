@@ -23,7 +23,7 @@ import static junitx.framework.ComparableAssert.assertLesser;
 
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
-import org.apache.shindig.gadgets.EasyMockTestCase;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;

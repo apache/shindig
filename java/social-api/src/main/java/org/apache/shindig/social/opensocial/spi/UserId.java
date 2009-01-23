@@ -19,9 +19,8 @@ package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Objects;
 
 import java.util.Map;
 
@@ -30,12 +29,14 @@ public class UserId {
     me, viewer, owner, userId;
 
     /** A map of JSON strings to Type objects */
-    private static final Map<String, Type> jsonTypeMap = Maps.newHashMap();
+    private static final Map<String, Type> jsonTypeMap;
 
     static {
+      ImmutableMap.Builder<String,Type> builder = ImmutableMap.builder();
       for (Type type : Type.values()) {
-        jsonTypeMap.put('@' + type.name(), type);
+        builder.put('@' + type.name(), type);
       }
+      jsonTypeMap = builder.build();
     }
     /** Return the Type enum value given a specific jsonType **/
     public static Type jsonValueOf(String jsonType) {
@@ -91,13 +92,12 @@ public class UserId {
 
     UserId actual = (UserId) o;
     return this.type == actual.type
-        && StringUtils.equals(this.userId, actual.userId);
+        && Objects.equal(this.userId, actual.userId);
   }
 
   @Override
   public int hashCode() {
-    int userHashCode = this.userId == null ? 0 : this.userId.hashCode();
-    return this.type.hashCode() + userHashCode;
+    return Objects.hashCode(this.userId,  this.type);
   }
 
   @Override

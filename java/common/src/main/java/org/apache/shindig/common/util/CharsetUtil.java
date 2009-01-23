@@ -28,15 +28,11 @@ import java.nio.charset.Charset;
  * Utilities for dealing with character set encoding.
  */
 public class CharsetUtil {
-  
+
   /**
    * UTF-8 Charset.
    */
-  public static final Charset UTF8;
-  
-  static {
-    UTF8 = Charset.forName("UTF-8");
-  }
+  public static final Charset UTF8 = Charset.forName("UTF-8");
 
   /**
    * @return UTF-8 byte array for the input string.
@@ -47,5 +43,6 @@ public class CharsetUtil {
     }
     ByteBuffer bb = UTF8.encode(s);
     return ArrayUtils.subarray(bb.array(), 0, bb.limit());
+    
   }
 }

@@ -23,7 +23,6 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.Check;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -32,6 +31,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.common.base.Preconditions;
 
 import java.net.URI;
 import java.util.logging.Logger;
@@ -98,7 +98,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
         // Enforce negative caching.
         if (cached != null) {
           spec = cached.obj;
-          Check.notNull(spec);
+          Preconditions.checkNotNull(spec);
         } else {
           // We create this dummy spec to avoid the cost of re-parsing when a remote site is out.
           spec = new GadgetSpec(uri, ERROR_SPEC);

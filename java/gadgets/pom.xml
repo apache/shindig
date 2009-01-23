@@ -60,17 +60,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <compilerArguments>
-            <!-- A common distribution of hamcrest library includes .java files that are newer than the corresponding
-             .class files.  Because sourcepath defaults to classpath, if we do not set this, then we end up with some
-              of hamcrest's classes in our jar.  This is silly and not what we want, so we explicitly set sourcepath
-              to something that is not a directory.  If you have a directory on your machine that is called
-              /not_a_directory and contains .java files that are newer than .class files with a similar name that are
-              imported by our code, then you will probably experience trouble. -->
-            <sourcepath>/not_a_directory</sourcepath>
-          </compilerArguments>
-        </configuration>
       </plugin>
     </plugins>
     <resources>
@@ -166,6 +155,12 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-common</artifactId>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

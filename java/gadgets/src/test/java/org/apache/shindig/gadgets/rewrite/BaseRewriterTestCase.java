@@ -18,8 +18,8 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.PropertiesModule;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.EasyMockTestCase;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;

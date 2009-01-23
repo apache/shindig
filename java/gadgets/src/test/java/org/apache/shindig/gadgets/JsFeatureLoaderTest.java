@@ -21,6 +21,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
