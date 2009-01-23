@@ -22,6 +22,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -59,8 +60,8 @@ public class GadgetFeatureRegistry {
   /**
    * Creates a new feature registry and loads the specified features.
    *
-   * @param httpFetcher
-   * @param featureFiles
+   * @param httpFetcher HttpFetcher for retrieving content
+   * @param featureFiles Injected from shindig.features.default
    * @throws GadgetException
    */
   @Inject
@@ -82,10 +83,8 @@ public class GadgetFeatureRegistry {
    * @param feature Class implementing the feature.
    */
   public void register(GadgetFeature feature) {
-    if (graphComplete) {
-      throw new IllegalStateException("register should never be " +
-          "invoked after calling getLibraries");
-    }
+    Preconditions.checkState(!graphComplete,
+        "register should never be invoked after calling getLibraries");
     if (logger.isLoggable(Level.FINE)) logger.fine("Registering feature: " + feature.getName());
     if (isCore(feature)) {
       core.put(feature.getName(), feature);
@@ -99,6 +98,7 @@ public class GadgetFeatureRegistry {
   }
 
   /**
+   * @param feature the GadgetFeature to test
    * @return True if the entry is "core" (a dependency of all other features)
    */
   private boolean isCore(GadgetFeature feature) {

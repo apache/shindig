@@ -28,6 +28,7 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
 import java.util.List;
@@ -68,8 +69,8 @@ public class ActivityHandler extends DataRequestHandler {
 
     Preconditions.requireNotEmpty(userIds, "No userId specified");
     Preconditions.requireSingular(userIds, "Multiple userIds not supported");
-
-    return service.deleteActivities(userIds.iterator().next(), request.getGroup(),
+    // Throws exceptions if userIds contains more than one element or zero elements
+    return service.deleteActivities(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), activityIds, request.getToken());
   }
 
@@ -100,7 +101,7 @@ public class ActivityHandler extends DataRequestHandler {
     // TODO(lryan) This seems reasonable to allow on PUT but we don't have an update verb.
     Preconditions.requireEmpty(activityIds, "Cannot specify activityId in create");
 
-    return service.createActivity(userIds.iterator().next(), request.getGroup(),
+    return service.createActivity(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), request.getFields(),
         request.getTypedParameter("activity", Activity.class),
         request.getToken());
@@ -116,7 +117,7 @@ public class ActivityHandler extends DataRequestHandler {
   @Override
   protected Future<?> handleGet(RequestItem request)
       throws SocialSpiException {
-  	if (isValidSupportedFieldsRestCall(request)) { 
+  	if (isValidSupportedFieldsRestCall(request)) {
   	  List<String> activityFieldsList = null;
 	  try {
 		activityFieldsList = containerConf.getActivityFieldsList();
@@ -155,7 +156,7 @@ public class ActivityHandler extends DataRequestHandler {
         // getSortBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
         request.getFields(), options, request.getToken());
   }
-  
+
   private boolean isValidSupportedFieldsRestCall(RequestItem request) {
     String url = ((RestfulRequestItem)request).getUrl();
     Matcher supFieldsMatcher = activityPatternSupFields.matcher(url);

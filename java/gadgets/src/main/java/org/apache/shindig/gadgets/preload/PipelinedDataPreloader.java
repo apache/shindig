@@ -34,6 +34,7 @@ import org.apache.shindig.gadgets.spec.View;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import org.json.JSONArray;
@@ -170,13 +171,13 @@ public class PipelinedDataPreloader implements Preloader {
           // Ignore, and use the HTTP response interval
         }
       }
-      
+
       // TODO: support non GET/POST methods
       String method = preload.getAttributes().get("method");
       if (method != null) {
         request.setMethod(method);
       }
-      
+
       // TODO: support params
       return new Data(requestPipeline.execute(request));
     }
@@ -223,9 +224,7 @@ public class PipelinedDataPreloader implements Preloader {
 
   private Uri getSocialUri(GadgetContext context) {
     String jsonUri = config.get(context.getContainer(), "gadgets.osDataUri");
-    if (jsonUri == null) {
-      throw new NullPointerException("No JSON URI available for social preloads");
-    }
+    Preconditions.checkNotNull(jsonUri, "No JSON URI available for social preloads");
 
     UriBuilder builder = UriBuilder.parse(
         jsonUri.replace("%host%", context.getHost()))
