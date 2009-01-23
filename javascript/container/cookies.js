@@ -202,7 +202,7 @@ shindig.cookies.getValues = function() {
  * @return {boolean}
  */
 shindig.cookies.isEmpty = function() {
-  return document.cookie == '';
+  return document.cookie === '';
 };
 
 
@@ -212,7 +212,7 @@ shindig.cookies.isEmpty = function() {
  */
 shindig.cookies.getCount = function() {
   var cookie = String(document.cookie);
-  if (cookie == '') {
+  if (cookie === '') {
     return 0;
   }
   var parts = cookie.split(/\s*;\s*/);

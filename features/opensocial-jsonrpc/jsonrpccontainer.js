@@ -60,7 +60,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     var body = gadgets.util.unescapeString(reason.getField(
         opensocial.Message.Field.BODY));
 
-    if (!body || body.length == 0) {
+    if (!body || body.length === 0) {
       var bodyMsgKey = gadgets.util.unescapeString(reason.getField(
         opensocial.Message.Field.BODY_ID));
       body = gadgets.Prefs.getMsg(bodyMsgKey);
@@ -118,7 +118,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     var requestObjects = dataRequest.getRequestObjects();
     var totalRequests = requestObjects.length;
 
-    if (totalRequests == 0) {
+    if (totalRequests === 0) {
       window.setTimeout(function() {
         callback(new opensocial.DataResponse({}, true));
       }, 0);
@@ -337,7 +337,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
   };
 
   JsonRpcContainer.prototype.hasNoKeys = function(keys) {
-    return !keys || keys.length == 0;
+    return !keys || keys.length === 0;
   };
 
   JsonRpcContainer.prototype.isWildcardKey = function(key) {

@@ -201,7 +201,7 @@ gadgets.io = function() {
       xhr.onreadystatechange = gadgets.util.makeClosure(
           null, processResponseFunction, realUrl, callback, params, xhr);
     }
-    if (paramData != null) {
+    if (paramData !== null) {
       xhr.setRequestHeader('Content-Type', opt_contentType || 'application/x-www-form-urlencoded');
       xhr.send(paramData);
     } else {

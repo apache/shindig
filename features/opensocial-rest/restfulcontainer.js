@@ -65,7 +65,7 @@ RestfulContainer.prototype.requestData = function(dataRequest, callback) {
   var requestObjects = dataRequest.getRequestObjects();
   var totalRequests = requestObjects.length;
 
-  if (totalRequests == 0) {
+  if (totalRequests === 0) {
     window.setTimeout(function () {
       callback(new opensocial.DataResponse({}, true));
     }, 0);
@@ -262,7 +262,7 @@ RestfulContainer.prototype.getFieldsList = function(keys) {
 };
 
 RestfulContainer.prototype.hasNoKeys = function(keys) {
-  return !keys || keys.length == 0;
+  return !keys || keys.length === 0;
 };
 
 RestfulContainer.prototype.isWildcardKey = function(key) {
