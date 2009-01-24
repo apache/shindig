@@ -68,13 +68,14 @@ public class DefaultSecurityTokenDecoderTest {
   public void testBasicDecoder() throws Exception {
     DefaultSecurityTokenDecoder decoder = new DefaultSecurityTokenDecoder(
         new FakeContainerConfig("insecure"));
-    String token = "o:v:app:domain:appurl:12345";
+    String token = "o:v:app:domain:appurl:12345:container";
     Map<String, String> parameters = Collections.singletonMap(
         SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
     SecurityToken st = decoder.createToken(parameters);
     assertEquals("o", st.getOwnerId());
     assertEquals("v", st.getViewerId());
     assertEquals("appurl", st.getAppUrl());
+    assertEquals("container", st.getContainer());
   }
 
   @Test

@@ -37,6 +37,7 @@ public class FakeGadgetToken implements SecurityToken {
   private String viewerId = null;
   private String appId = null;
   private String domain = null;
+  private String container = null;
   private String appUrl = null;
   private int moduleId = 0;
 
@@ -70,6 +71,11 @@ public class FakeGadgetToken implements SecurityToken {
     return this;
   }
 
+  public FakeGadgetToken setContainer(String container) {
+    this.container = container;
+    return this;
+  }
+
   public FakeGadgetToken setAppUrl(String appUrl) {
     this.appUrl = appUrl;
     return this;
@@ -94,6 +100,10 @@ public class FakeGadgetToken implements SecurityToken {
 
   public String getDomain() {
     return domain;
+  }
+
+  public String getContainer() {
+    return container;
   }
 
   public String toSerialForm() {

@@ -129,6 +129,10 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     this.appUrl = appUrl;
   }
 
+  public String getContainer() {
+    return container;
+  }
+
   // Used for oauth_consumer_key for signed fetch with default key.  This is a weird spot for this.
   public String getDomain() {
     return domain;

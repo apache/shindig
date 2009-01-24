@@ -24,12 +24,15 @@ public class OAuthSecurityToken implements SecurityToken {
   private final String appUrl;
   private final String appId;
   private final String domain;
+  private final String container;
 
-  public OAuthSecurityToken(String userId, String appUrl, String appId, String domain) {
+  public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
+      String container) {
     this.userId = userId;
     this.appUrl = appUrl;
     this.appId = appId;
     this.domain = domain;
+    this.container = container;
   }
 
   public String getOwnerId() {
@@ -46,6 +49,10 @@ public class OAuthSecurityToken implements SecurityToken {
 
   public String getDomain() {
     return domain;
+  }
+
+  public String getContainer() {
+    return container;
   }
 
   public String getAppUrl() {

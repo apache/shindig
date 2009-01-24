@@ -51,6 +51,10 @@ public class AnonymousSecurityToken implements SecurityToken {
     return "";
   }
 
+  public String getContainer() {
+    return "";
+  }
+
   public String getAppUrl() {
     return "";
   }

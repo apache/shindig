@@ -18,15 +18,15 @@
  */
 package org.apache.shindig.auth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobExpiredException;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.FakeTimeSource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,16 +37,16 @@ public class BlobCrypterSecurityTokenTest {
 
   private static final String CONTAINER = "container";
   private static final String DOMAIN = "example.com";
-  
+
   private FakeTimeSource timeSource = new FakeTimeSource();
   private BasicBlobCrypter crypter;
-  
+
   @Before
   public void setUp() {
     crypter = new BasicBlobCrypter(Crypto.getRandomBytes(20));
     crypter.timeSource = timeSource;
   }
-  
+
   @Test
   public void testNullValues() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
@@ -63,8 +63,9 @@ public class BlobCrypterSecurityTokenTest {
     assertNull(t2.getViewerId(), t2.getViewerId());
     assertNull(t2.getTrustedJson(), t2.getTrustedJson());
     assertNull(t2.getUpdatedToken(), t2.getUpdatedToken());
+    assertEquals(CONTAINER, t2.getContainer());
   }
-  
+
   @Test
   public void testRealValues() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
@@ -85,8 +86,9 @@ public class BlobCrypterSecurityTokenTest {
     assertEquals("owner", t2.getOwnerId());
     assertEquals("viewer", t2.getViewerId());
     assertEquals("trusted", t2.getTrustedJson());
+    assertEquals(CONTAINER, t2.getContainer());
   }
-  
+
   @Test
   public void testExpired() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);

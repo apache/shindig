@@ -81,7 +81,7 @@ shindig.samplecontainer = {};
     for (var i = 0; i < gadgetUrl.length; i++) {
       appId += gadgetUrl.charCodeAt(i);
     }
-    var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0"];
+    var fields = [ownerId, viewerId, appId, "shindig", gadgetUrl, "0", "default"];
     for (var i = 0; i < fields.length; i++) {
       // escape each field individually, for metachars in URL
       fields[i] = escape(fields[i]);
