@@ -17,10 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.common.ContainerConfigException;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.core.util.ContainerConf;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -32,23 +29,14 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 public class PersonHandler extends DataRequestHandler {
-  private final static Logger logger = Logger.getLogger(PersonHandler.class.getName());
   private final PersonService personService;
 
   private static final String PEOPLE_PATH = "/people/{userId}+/{groupId}/{personId}+";
-  private static final String PEOPLE_SUP_FIELDS_REGEX = "/people/@supportedFields";
-  private static Pattern peoplePatternSupFields = Pattern.compile(PEOPLE_SUP_FIELDS_REGEX);
-  private Object personFields = null;
   
   @Inject
-  public PersonHandler(PersonService personService, ContainerConf containerConf) {
-    super(containerConf);
+  public PersonHandler(PersonService personService) {
     this.personService = personService;
   }
 
@@ -75,20 +63,6 @@ public class PersonHandler extends DataRequestHandler {
   @Override
   protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(PEOPLE_PATH);
-    if (request instanceof RestfulRequestItem) {
-  	  if (isValidSupportedFieldsRestCall(request)) { 
-  	    if (personFields == null) {
-  		  logger.fine("personFieldsList is null");
-  		  try {
-		    personFields = this.containerConf.getPersonFields();
-		  } catch (ContainerConfigException e) {
-            throw new SocialSpiException(ResponseError.INTERNAL_ERROR,
-			  "Error trying to Supported Person Fields from container.js", e);
-		  }
-  		}
-  	    return ImmediateFuture.newInstance(personFields);
-  	  } 
-    }
     GroupId groupId = request.getGroup();
     Set<String> optionalPersonId = Sets.newLinkedHashSet(request.getListParameter("personId"));
     Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);
@@ -127,12 +101,5 @@ public class PersonHandler extends DataRequestHandler {
 
     // Every other case is a collection response.
     return personService.getPeople(userIds, groupId, options, fields, request.getToken());
-  }
-  
-  private boolean isValidSupportedFieldsRestCall(RequestItem request) {
-    String url = ((RestfulRequestItem)request).getUrl();
-	Matcher supFieldsMatcher =peoplePatternSupFields.matcher(url);
-	boolean isValidSupFieldsUrl = supFieldsMatcher.matches();
-	return isValidSupFieldsUrl;
   }
 }

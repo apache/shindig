@@ -25,8 +25,6 @@ import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
-import org.apache.shindig.social.core.util.ContainerConf;
-import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
@@ -35,7 +33,6 @@ import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.easymock.classextension.EasyMock;
-import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
@@ -62,8 +59,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     token.setAppId("appId");
     converter = EasyMock.createMock(BeanJsonConverter.class);
     activityService = EasyMock.createMock(ActivityService.class);
-    ContainerConf containerConf = new JsonContainerConf();
-    handler = new ActivityHandler(activityService, containerConf);
+    handler = new ActivityHandler(activityService);
   }
 
   @Override

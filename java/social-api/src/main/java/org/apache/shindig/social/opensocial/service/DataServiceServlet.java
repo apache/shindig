@@ -18,18 +18,30 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
+import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DataServiceServlet extends ApiServlet {
 
@@ -44,6 +56,13 @@ public class DataServiceServlet extends ApiServlet {
   public static final String CONTENT_TYPE = "CONTENT_TYPE";
 
   private static final Logger logger = Logger.getLogger("org.apache.shindig.social.opensocial.spi");
+
+  /** Map from service name to the property name in the container config */
+  private static final Map<String, String> SERVICE_TO_SUPPORTED_FIELD_MAP =
+    ImmutableMap.of("people", "person", "activities", "activity");
+
+
+  private ContainerConfig config;
 
   @Override
   protected void doGet(HttpServletRequest servletRequest,
@@ -92,6 +111,11 @@ public class DataServiceServlet extends ApiServlet {
         responseItem.getErrorMessage());
   }
 
+  @Inject
+  public void setContainerConfig(ContainerConfig config) {
+    this.config = config;
+  }
+
   /**
    * Handler for non-batch requests.
    */
@@ -99,7 +123,13 @@ public class DataServiceServlet extends ApiServlet {
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
     RestfulRequestItem requestItem = new RestfulRequestItem(servletRequest, token, converter);
-    ResponseItem responseItem = getResponseItem(handleRequestItem(requestItem, servletRequest));
+    ResponseItem responseItem;
+
+    if (requestItem.getUrl().endsWith("/@supportedFields")) {
+      responseItem = getSupportedFields(requestItem);
+    } else {
+      responseItem = getResponseItem(handleRequestItem(requestItem, servletRequest));
+    }
 
     servletResponse.setContentType(converter.getContentType());
     if (responseItem.getError() == null) {
@@ -116,6 +146,66 @@ public class DataServiceServlet extends ApiServlet {
     }
   }
 
+  private ResponseItem getSupportedFields(RequestItem requestItem) {
+    String service = requestItem.getService();
+    String configProperty = SERVICE_TO_SUPPORTED_FIELD_MAP.get(service);
+    if (configProperty == null) {
+      configProperty = service;
+    }
+
+    String container = Objects.firstNonNull(requestItem.getToken().getContainer(), "default");
+    // TODO: hardcoding opensocial-0.8 is brittle
+    JSONArray fields = config.getJsonArray(container,
+        "gadgets.features/opensocial-0.8/supportedFields/" + configProperty);
+
+    if (fields == null) {
+      return new ResponseItem(ResponseError.NOT_IMPLEMENTED,"Supported fields not available for" +
+      		" service \"" + service + "\"");
+    }
+
+    return new ResponseItem(toList(fields));
+  }
+
+  // TODO: delete this when Kevin lands his config changes
+  private Object toList(JSONArray fields) {
+    List<Object> list = Lists.newArrayList();
+    for (int index = 0; index < fields.length(); index++) {
+      try {
+        Object o = fields.get(index);
+        if (o instanceof JSONObject) {
+          list.add(toMap((JSONObject) o));
+        } else {
+          list.add(fields.get(index));
+        }
+      } catch (JSONException e) {
+        // Ignore
+      }
+    }
+
+    return list;
+  }
+
+  // TODO: delete this when Kevin lands his config changes
+  private Object toMap(JSONObject json) {
+    Map<String, Object> map = Maps.newHashMap();
+
+    for (String name : JSONObject.getNames(json)) {
+      try {
+        Object o = json.get(name);
+        if (o instanceof JSONObject) {
+          o = toMap((JSONObject) o);
+        } else if (o instanceof JSONArray) {
+          o = toList((JSONArray) o);
+        }
+
+        map.put(name, o);
+      } catch (JSONException e) {
+        // Ignore
+      }
+    }
+
+    return map;
+  }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = null;
