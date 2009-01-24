@@ -1,7 +1,7 @@
 Installing and running the various java servers
 ============================================
 
-1) Install Maven 2.0 (see http://maven.apache.org)
+1) Install Maven 2.0.8 or higher (see http://maven.apache.org)
 
 2) Make sure the JAVA_HOME environment variable is set to the location of your
    JDK/JRE, and that the maven executable is in your PATH.
