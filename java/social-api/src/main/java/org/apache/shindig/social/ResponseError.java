@@ -18,6 +18,8 @@
 package org.apache.shindig.social;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
 /**
  * An Enumeration for holding all the responses emitted by the social API.
  */
@@ -53,6 +55,21 @@ public enum ResponseError {
     this.jsonValue = jsonValue;
     this.httpErrorCode = httpErrorCode;
   }
+
+  public static ResponseError parse(final String value) {
+
+      if (value == null) {
+          return null;
+      }
+
+      for (ResponseError error : ResponseError.values()) {
+          if (StringUtils.equalsIgnoreCase(error.toString(), StringUtils.trimToEmpty(value))) {
+              return error;
+          }
+      }
+      return null;
+  }
+
 
   /**
    *
