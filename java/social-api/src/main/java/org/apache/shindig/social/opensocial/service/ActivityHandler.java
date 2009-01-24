@@ -17,14 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.social.core.util.ContainerConf;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.common.ContainerConfigException;
-import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
 import com.google.common.collect.Sets;
@@ -34,23 +30,15 @@ import com.google.inject.Inject;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ActivityHandler extends DataRequestHandler {
-  private final static Logger logger = Logger.getLogger(ActivityHandler.class.getName());
   private final ActivityService service;
 
   private static final String ACTIVITY_ID_PATH
       = "/activities/{userId}+/{groupId}/{appId}/{activityId}+";
-  private static final String ACTIVITY_SUP_FIELDS_REGEX = "/activities/@supportedFields";
-  private static Pattern activityPatternSupFields = Pattern.compile(ACTIVITY_SUP_FIELDS_REGEX);
 
   @Inject
-  public ActivityHandler(ActivityService service, ContainerConf containerConf) {
-    super(containerConf);
+  public ActivityHandler(ActivityService service) {
     this.service = service;
   }
 
@@ -117,15 +105,6 @@ public class ActivityHandler extends DataRequestHandler {
   @Override
   protected Future<?> handleGet(RequestItem request)
       throws SocialSpiException {
-  	if (isValidSupportedFieldsRestCall(request)) {
-  	  List<String> activityFieldsList = null;
-	  try {
-		activityFieldsList = containerConf.getActivityFieldsList();
-	  } catch (ContainerConfigException e) {
-		logger.log(Level.SEVERE,"Not able to retrieve ActivityFields from container.js",e);
-	  }
-      return ImmediateFuture.newInstance(new RestfulCollection<String>(activityFieldsList));
-    }
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
@@ -155,12 +134,5 @@ public class ActivityHandler extends DataRequestHandler {
         // TODO: add pagination and sorting support
         // getSortBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
         request.getFields(), options, request.getToken());
-  }
-
-  private boolean isValidSupportedFieldsRestCall(RequestItem request) {
-    String url = ((RestfulRequestItem)request).getUrl();
-    Matcher supFieldsMatcher = activityPatternSupFields.matcher(url);
-    boolean isValidSupFieldsUrl = supFieldsMatcher.matches();
-    return isValidSupFieldsUrl;
   }
 }

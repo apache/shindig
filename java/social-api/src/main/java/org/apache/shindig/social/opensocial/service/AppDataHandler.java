@@ -18,7 +18,6 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.core.util.ContainerConf;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -37,8 +36,7 @@ public class AppDataHandler extends DataRequestHandler {
   private static final String APP_DATA_PATH = "/appdata/{userId}+/{groupId}/{appId}";
 
   @Inject
-  public AppDataHandler(AppDataService service, ContainerConf containerConf) {
-    super(containerConf);
+  public AppDataHandler(AppDataService service) {
     this.service = service;
   }
 

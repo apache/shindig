@@ -20,7 +20,6 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
-import org.apache.shindig.social.core.util.ContainerConf;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -34,14 +33,8 @@ public abstract class DataRequestHandler {
   private static final Set<String> CREATE_SYNONYMS = ImmutableSet.of("post", "create");
   private static final Set<String> UPDATE_SYNONYMS = ImmutableSet.of("put", "update");
   private static final Set<String> DELETE_SYNONYMS = ImmutableSet.of("delete");
-  protected ContainerConf containerConf;
   
-  /**
-   * 
-   */
-  
-  public DataRequestHandler(ContainerConf containerConf) {
-    this.containerConf = containerConf;
+  public DataRequestHandler() {
   }
   
   public Future<?> handleItem(RequestItem request) {

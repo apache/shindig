@@ -25,7 +25,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.core.util.ContainerConf;
 import org.apache.shindig.social.opensocial.service.DataRequestHandler;
 import org.apache.shindig.social.opensocial.service.RequestItem;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
@@ -43,8 +42,7 @@ public class SampleContainerHandler extends DataRequestHandler {
   private static final String POST_PATH = "/samplecontainer/{type}/{doevil}";
 
   @Inject
-  public SampleContainerHandler(JsonDbOpensocialService dbService, ContainerConf containerConf) {
-    super(containerConf);
+  public SampleContainerHandler(JsonDbOpensocialService dbService) {
     this.service = dbService;
   }
 
