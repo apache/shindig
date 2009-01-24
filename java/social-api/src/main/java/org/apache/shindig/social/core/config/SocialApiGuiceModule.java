@@ -25,8 +25,6 @@ import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
-import org.apache.shindig.social.core.util.ContainerConf;
-import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.StandardHandlerDispatcher;
@@ -73,7 +71,6 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
-    bind(ContainerConf.class).to(JsonContainerConf.class);
   }
 
   /**
