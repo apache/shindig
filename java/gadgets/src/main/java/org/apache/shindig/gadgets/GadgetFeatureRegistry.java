@@ -52,7 +52,7 @@ public class GadgetFeatureRegistry {
   // Caches the transitive dependencies to enable faster lookups.
   final Map<Set<String>, Collection<GadgetFeature>> cache = Maps.newConcurrentHashMap();
 
-  private boolean graphComplete = false;
+  private boolean locked = false;
 
   private final static Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -78,14 +78,31 @@ public class GadgetFeatureRegistry {
   }
 
   /**
+   * Lock the registry, no longer allow the registration of new entries.
+   * A locked registry can never be unlocked.
+   */
+  private void lock() {
+    locked = true;
+  }
+
+  /**
+   * Returns the locking state of the registry.
+   * @return true if the registry is locked.
+   */
+  public boolean isLocked() {
+    return locked;
+  }
+
+  /**
    * Register a {@code GadgetFeature}.
    *
    * @param feature Class implementing the feature.
    */
   public void register(GadgetFeature feature) {
-    Preconditions.checkState(!graphComplete,
-        "register should never be invoked after calling getLibraries");
+    Preconditions.checkState(!isLocked(), "registry is locked and can no longer be changed!");
+
     if (logger.isLoggable(Level.FINE)) logger.fine("Registering feature: " + feature.getName());
+
     if (isCore(feature)) {
       core.put(feature.getName(), feature);
       for (GadgetFeature feat : features.values()) {
@@ -128,7 +145,7 @@ public class GadgetFeatureRegistry {
    */
   public Collection<GadgetFeature> getFeatures(Collection<String> needed,
                                                Collection<String> unsupported) {
-    graphComplete = true;
+    lock();
 
     Set<String> neededSet;
     if (needed.isEmpty()) {
