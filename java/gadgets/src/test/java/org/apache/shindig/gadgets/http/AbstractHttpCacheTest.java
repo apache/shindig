@@ -46,6 +46,8 @@ public class AbstractHttpCacheTest {
   private static final String MODULE_ID = "100";
   private static final String SERVICE_NAME = "service";
   private static final String TOKEN_NAME = "token";
+  private static final String CONTAINER_NAME = "container";
+
   private final TestHttpCache cache = new TestHttpCache();
 
   @Test
@@ -104,7 +106,7 @@ public class AbstractHttpCacheTest {
 
     String ownerId = "owner eye dee";
     SecurityToken securityToken
-        = new BasicSecurityToken(ownerId, "", "", "", APP_URI.toString(), MODULE_ID);
+        = new BasicSecurityToken(ownerId, "", "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
@@ -162,7 +164,7 @@ public class AbstractHttpCacheTest {
 
     String viewerId = "viewer eye dee";
     SecurityToken securityToken
-        = new BasicSecurityToken("", viewerId, "", "", APP_URI.toString(), MODULE_ID);
+        = new BasicSecurityToken("", viewerId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
@@ -221,7 +223,7 @@ public class AbstractHttpCacheTest {
 
     String userId = "user id";
     SecurityToken securityToken
-        = new BasicSecurityToken(userId, userId, "", "", APP_URI.toString(), MODULE_ID);
+        = new BasicSecurityToken(userId, userId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)

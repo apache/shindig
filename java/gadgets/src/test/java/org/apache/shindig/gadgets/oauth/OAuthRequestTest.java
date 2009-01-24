@@ -232,7 +232,7 @@ public class OAuthRequestTest {
 
   public static SecurityToken getSecurityToken(String owner, String viewer, String gadget)
       throws Exception {
-    return new BasicSecurityToken(owner, viewer, "app", "container.com", gadget, "0");
+    return new BasicSecurityToken(owner, viewer, "app", "container.com", gadget, "0", "default");
   }
 
   @After

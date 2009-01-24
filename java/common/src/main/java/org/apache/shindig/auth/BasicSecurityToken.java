@@ -48,6 +48,7 @@ public class BasicSecurityToken implements SecurityToken {
   private static final String DOMAIN_KEY = "d";
   private static final String APPURL_KEY = "u";
   private static final String MODULE_KEY = "m";
+  private static final String CONTAINER_KEY = "c";
 
   public String toSerialForm() {
     return token;
@@ -57,7 +58,7 @@ public class BasicSecurityToken implements SecurityToken {
    * Generates a token from an input string
    * @param token String form of token
    * @param maxAge max age of the token (in seconds)
-   * @throws BlobCrypterException
+   * @throws BlobCrypterException never
    */
   public BasicSecurityToken(String token, int maxAge)
   throws BlobCrypterException {
@@ -66,14 +67,15 @@ public class BasicSecurityToken implements SecurityToken {
   }
 
   public BasicSecurityToken(String owner, String viewer, String app,
-      String domain, String appUrl, String moduleId) throws BlobCrypterException {
-    tokenData = Maps.newHashMapWithExpectedSize(5);
+      String domain, String appUrl, String moduleId, String container) throws BlobCrypterException {
+    tokenData = Maps.newHashMapWithExpectedSize(6);
     putNullSafe(OWNER_KEY, owner);
     putNullSafe(VIEWER_KEY, viewer);
     putNullSafe(APP_KEY, app);
     putNullSafe(DOMAIN_KEY, domain);
     putNullSafe(APPURL_KEY, appUrl);
     putNullSafe(MODULE_KEY, moduleId);
+    putNullSafe(CONTAINER_KEY, container);
     token = crypter.wrap(tokenData);
   }
 
@@ -95,6 +97,13 @@ public class BasicSecurityToken implements SecurityToken {
    */
   public String getDomain() {
     return tokenData.get(DOMAIN_KEY);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getContainer() {
+    return tokenData.get(CONTAINER_KEY);
   }
 
   /**

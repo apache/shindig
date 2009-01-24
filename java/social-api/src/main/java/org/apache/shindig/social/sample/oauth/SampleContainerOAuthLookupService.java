@@ -101,7 +101,9 @@ public class SampleContainerOAuthLookupService implements OAuthLookupService {
   }
 
   public SecurityToken getSecurityToken(String appUrl, String userId) {
-    return new OAuthSecurityToken(userId, appUrl, getAppId(appUrl), "samplecontainer");
+    String domain = "samplecontainer.com";
+    String container = "default";
+    return new OAuthSecurityToken(userId, appUrl, getAppId(appUrl), domain, container);
   }
 
   private String getAppId(String appUrl) {

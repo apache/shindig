@@ -19,12 +19,12 @@
 package org.apache.shindig.auth;
 
 import org.apache.shindig.common.crypto.BlobCrypterException;
+import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.commons.lang.StringUtils;
 
+import com.google.common.base.Join;
 import com.google.inject.Singleton;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -37,27 +37,26 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
   private static final int OWNER_INDEX = 0;
   private static final int VIEWER_INDEX = 1;
   private static final int APP_ID_INDEX = 2;
-  private static final int CONTAINER_INDEX = 3;
+  private static final int DOMAIN_INDEX = 3;
   private static final int APP_URL_INDEX = 4;
   private static final int MODULE_ID_INDEX = 5;
-  private static final int TOKEN_COUNT = MODULE_ID_INDEX + 1;
+  private static final int CONTAINER_ID_INDEX = 6;
+  private static final int TOKEN_COUNT = CONTAINER_ID_INDEX + 1;
 
   /**
    * Encodes a token using the a plaintext dummy format.
+   * @param token token to encode
+   * @return token with values separated by colons
    */
   public String encodeToken(SecurityToken token) {
-    try {
-    StringBuilder out = new StringBuilder();
-      out.append(URLEncoder.encode(token.getOwnerId(), "UTF-8")).append(':')
-          .append(URLEncoder.encode(token.getViewerId(), "UTF-8")).append(':')
-          .append(URLEncoder.encode(token.getAppId(), "UTF-8")).append(':')
-          .append(URLEncoder.encode(token.getDomain(), "UTF-8")).append(':')
-          .append(URLEncoder.encode(token.getAppUrl(), "UTF-8")).append(':')
-          .append(Long.toString(token.getModuleId()));
-      return out.toString();
-    } catch (UnsupportedEncodingException uee) {
-      throw new IllegalStateException(uee);
-    }
+    return Join.join(":",
+        Utf8UrlCoder.encode(token.getOwnerId()),
+        Utf8UrlCoder.encode(token.getViewerId()),
+        Utf8UrlCoder.encode(token.getAppId()),
+        Utf8UrlCoder.encode(token.getDomain()),
+        Utf8UrlCoder.encode(token.getAppUrl()),
+        Long.toString(token.getModuleId()),
+        Utf8UrlCoder.encode(token.getContainer()));
   }
 
 
@@ -76,21 +75,20 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
     }
 
     try {
-      String[] tokens = token.split(":");
+      String[] tokens = StringUtils.split(token, ':');
       if (tokens.length != TOKEN_COUNT) {
         throw new SecurityTokenException("Malformed security token");
       }
 
       return new BasicSecurityToken(
-          URLDecoder.decode(tokens[OWNER_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[VIEWER_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[APP_ID_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[CONTAINER_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[APP_URL_INDEX], "UTF-8"),
-          URLDecoder.decode(tokens[MODULE_ID_INDEX], "UTF-8"));
+          Utf8UrlCoder.decode(tokens[OWNER_INDEX]),
+          Utf8UrlCoder.decode(tokens[VIEWER_INDEX]),
+          Utf8UrlCoder.decode(tokens[APP_ID_INDEX]),
+          Utf8UrlCoder.decode(tokens[DOMAIN_INDEX]),
+          Utf8UrlCoder.decode(tokens[APP_URL_INDEX]),
+          Utf8UrlCoder.decode(tokens[MODULE_ID_INDEX]),
+          Utf8UrlCoder.decode(tokens[CONTAINER_ID_INDEX]));
     } catch (BlobCrypterException e) {
-      throw new SecurityTokenException(e);
-    } catch (UnsupportedEncodingException e) {
       throw new SecurityTokenException(e);
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new SecurityTokenException(e);

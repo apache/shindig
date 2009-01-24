@@ -23,7 +23,7 @@ package org.apache.shindig.auth;
  * Use in conjunction with @code SecurityTokenDecoder.
  */
 public interface SecurityToken {
-  
+
   /**
    * @return the owner from the token, or null if there is none.
    */
@@ -43,6 +43,11 @@ public interface SecurityToken {
    * @return the domain from the token, or null if there is none.
    */
   public String getDomain();
+
+  /**
+   * @return The container.
+   */
+  public String getContainer();
 
   /**
    * @return the URL of the application
