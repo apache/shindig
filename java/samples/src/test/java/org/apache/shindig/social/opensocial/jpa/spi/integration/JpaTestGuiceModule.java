@@ -18,8 +18,6 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
-import org.apache.shindig.social.core.util.ContainerConf;
-import org.apache.shindig.social.core.util.JsonContainerConf;
 import org.apache.shindig.social.opensocial.jpa.AccountDb;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
@@ -98,7 +96,5 @@ public class JpaTestGuiceModule extends AbstractModule {
     this.bind(Organization.class).to(OrganizationDb.class);
     this.bind(Person.class).to(PersonDb.class);
     this.bind(Url.class).to(UrlDb.class);
-    this.bind(ContainerConf.class).to(JsonContainerConf.class);
-    
   }
 }
