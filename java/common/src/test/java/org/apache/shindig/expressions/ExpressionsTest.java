@@ -21,18 +21,14 @@ package org.apache.shindig.expressions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
-import org.apache.shindig.expressions.ElException;
-import org.apache.shindig.expressions.Expression;
-import org.apache.shindig.expressions.ExpressionContext;
-import org.apache.shindig.expressions.Expressions;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 
 /**
@@ -45,7 +41,7 @@ public class ExpressionsTest {
   public void setUp() {
     context = new FakeContext();
   }
-  
+
   @Test
   public void constantExpressions() throws Exception {
     assertEquals("foo", Expressions.parse("foo", String.class).evaluate(context));
@@ -56,10 +52,10 @@ public class ExpressionsTest {
   public void simpleExpressions() throws Exception {
     context.variables.put("var", "value");
     context.variables.put("int", 1);
-    
+
     Expression<String> var = Expressions.parse("${var}", String.class);
     assertEquals("value", var.evaluate(context));
-    
+
     Expression<Integer> intExpression = Expressions.parse("${int}", Integer.class);
     assertEquals(1, intExpression.evaluate(context).intValue());
   }
@@ -73,24 +69,57 @@ public class ExpressionsTest {
   @Test
   public void propertyEvaluationForMaps() throws Exception {
     context.variables.put("var", ImmutableMap.of("one", 1, "two", 2));
-    
+
     Expression<Integer> var = Expressions.parse("${var.one}${var.two}", Integer.class);
     // 1 and 2 concatenated make 12, not 3
-    assertEquals(12, var.evaluate(context).intValue());    
+    assertEquals(12, var.evaluate(context).intValue());
   }
 
   @Test
   public void propertyEvaluationForJson() throws Exception {
     context.variables.put("var", new JSONObject("{top: {middle: {inner: 'value'}}}"));
-    
+
     Expression<String> var = Expressions.parse("${var.top.middle.inner}", String.class);
-    assertEquals("value", var.evaluate(context));    
+    assertEquals("value", var.evaluate(context));
+  }
+
+  @Test
+  public void propertyEvaluationForExpressionContext() throws Exception {
+    context.variables.put("var", new ExpressionContext() {
+      public Object getVariable(String name) {
+        return name.equals("top") ? "value" : null;
+      }
+    });
+
+    Expression<String> var = Expressions.parse("${var.top}", String.class);
+    assertEquals("value", var.evaluate(context));
+  }
+
+  @Test
+  public void propertyEvaluationWithEscapedDot() throws Exception {
+    context.variables.put("foo.bar", "baz");
+    Expression<String> var = Expressions.parse("${foo\\.bar}", String.class);
+    assertEquals("baz", var.evaluate(context));
+  }
+
+  @Test(expected = ElException.class)
+  public void propertyEvaluationWithLeadingDot() throws Exception {
+    context.variables.put("foo", "bar");
+    Expression<String> var = Expressions.parse("${.foo}", String.class);
+    var.evaluate(context);
+  }
+
+  @Test(expected = ElException.class)
+  public void propertyEvaluationWithTrailingDot() throws Exception {
+    context.variables.put("foo", "bar");
+    Expression<String> var = Expressions.parse("${foo.}", String.class);
+    var.evaluate(context);
   }
 
   @Test(expected = ElException.class)
   public void exceptionWhenCoercionFails() throws Exception {
     context.variables.put("var", "value");
-    
+
     Expression<Integer> var = Expressions.parse("${var}", Integer.class);
     var.evaluate(context);
   }
@@ -109,14 +138,14 @@ public class ExpressionsTest {
   @Test
   public void concatExpressions() throws Exception {
     context.variables.put("var", "value");
-    
+
     Expression<String> concat = Expressions.parse("foo${var}bar", String.class);
     assertEquals("foovaluebar", concat.evaluate(context));
   }
 
   static public class FakeContext implements ExpressionContext {
     public final Map<String, Object> variables = Maps.newHashMap();
-    
+
     public Object getVariable(String name) {
       return variables.get(name);
     }

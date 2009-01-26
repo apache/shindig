@@ -18,14 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.TimeSource;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -110,19 +109,16 @@ public class HttpUtil {
    * @param context The request context.
    * @param features A set of all features needed.
    */
-  public static JSONObject getJsConfig(ContainerConfig config, GadgetContext context,
+  public static Map<String, Object> getJsConfig(ContainerConfig config, GadgetContext context,
       Collection<String> features) {
-    JSONObject containerFeatures = config.getJsonObject(context.getContainer(),
-                                                        "gadgets.features");
-    if (containerFeatures != null) {
-      String[] featArray = features.toArray(new String[features.size()]);
-      try {
-        return new JSONObject(containerFeatures, featArray);
-      } catch (JSONException e) {
-        // Can't happen.
-        throw new RuntimeException(e);
-      }
+    Map<String, Object> containerFeatures
+        = config.getMap(context.getContainer(), "gadgets.features");
+
+    Map<String, Object> out = new HashMap<String, Object>(features.size(), 1);
+    for (String requested : features) {
+      out.put(requested, containerFeatures.get(requested));
     }
-    return new JSONObject();
+
+    return out;
   }
 }

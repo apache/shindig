@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.auth;
 
+import org.apache.shindig.config.ContainerConfig;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.apache.shindig.common.ContainerConfig;
 
 import java.util.Map;
 
@@ -29,27 +29,27 @@ import java.util.Map;
  * Default implementation of security tokens.  Decides based on default container configuration
  * whether to use real crypto for security tokens or to use a simple insecure implementation that
  * is useful for testing.
- * 
+ *
  * Example configuration in container.js for insecure security tokens:
  *    gadgets.securityTokenType = insecure
- *    
+ *
  * Example configuration in container.js for blob crypter based security tokens:
  *    gadgets.securityTokenType = secure
- * 
+ *
  * The insecure implementation is BasicSecurityTokenDecoder.
- * 
+ *
  * The secure implementation is BlobCrypterSecurityTokenDecoder.
  */
 @Singleton
 public class DefaultSecurityTokenDecoder implements SecurityTokenDecoder {
 
   private static final String SECURITY_TOKEN_TYPE = "gadgets.securityTokenType";
-  
+
   private final SecurityTokenDecoder decoder;
-  
+
   @Inject
   public DefaultSecurityTokenDecoder(ContainerConfig config) {
-    String tokenType = config.get(ContainerConfig.DEFAULT_CONTAINER, SECURITY_TOKEN_TYPE);
+    String tokenType = config.getString(ContainerConfig.DEFAULT_CONTAINER, SECURITY_TOKEN_TYPE);
     if ("insecure".equals(tokenType)) {
       decoder = new BasicSecurityTokenDecoder();
     } else if ("secure".equals(tokenType)) {
@@ -60,10 +60,10 @@ public class DefaultSecurityTokenDecoder implements SecurityTokenDecoder {
           SECURITY_TOKEN_TYPE + ": " + tokenType);
     }
   }
-  
+
   public SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException {
     return decoder.createToken(tokenParameters);
   }
-  
+
 }

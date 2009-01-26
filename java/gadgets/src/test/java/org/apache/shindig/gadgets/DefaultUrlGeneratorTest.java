@@ -22,20 +22,18 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import junitx.framework.StringAssert;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import junitx.framework.StringAssert;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -221,30 +219,17 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());
   }
 
-  private static class FakeContainerConfig implements ContainerConfig {
+  private static class FakeContainerConfig extends AbstractContainerConfig {
     protected final Map<String, String> properties = Maps.newHashMap();
 
-    protected FakeContainerConfig() {
-    }
-
-    public String get(String container, String property) {
+    @Override
+    public Object getProperty(String container, String property) {
       return properties.get(property);
     }
 
+    @Override
     public Collection<String> getContainers() {
       return Arrays.asList(CONTAINER);
-    }
-
-    public Object getJson(String container, String parameter) {
-      return null;
-    }
-
-    public JSONArray getJsonArray(String container, String parameter) {
-      return null;
-    }
-
-    public JSONObject getJsonObject(String container, String parameter) {
-      return null;
     }
   }
 }

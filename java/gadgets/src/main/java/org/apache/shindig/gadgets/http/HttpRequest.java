@@ -19,8 +19,8 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 

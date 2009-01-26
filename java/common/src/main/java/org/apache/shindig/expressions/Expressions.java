@@ -18,15 +18,16 @@
  */
 package org.apache.shindig.expressions;
 
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Implementation of the small subset of JSP EL that OpenSocial supports:
@@ -102,17 +103,17 @@ public class Expressions {
 
     // TODO: the spec only describes support for "a.b", not "a.b.c.d".  Update
     // the spec, or limit this function?
-    final String[] segments = text.substring(from, to).split("\\.");
+    final List<String> segments = splitSegments(text.substring(from, to));
     return new Expression<T>() {
 
       public T evaluate(ExpressionContext context) throws ElException {
-        Object value = context.getVariable(segments[0]);
-        for (int i = 1; i < segments.length; i++) {
+        Object value = context.getVariable(segments.get(0));
+        for (int i = 1; i < segments.size(); i++) {
           if (value == null) {
-            throw new ElException("Could not find property \"" + segments[i - 1] + "\" in \""
+            throw new ElException("Could not find property \"" + segments.get(i - 1) + "\" in \""
                 + text + '\"');
           }
-          value = getProperty(value, segments[i]);
+          value = getProperty(value, segments.get(i));
         }
 
         return coerce(value, type);
@@ -121,12 +122,37 @@ public class Expressions {
     };
   }
 
+  private static List<String> splitSegments(String input) {
+    List<String> segments = new ArrayList<String>();
+    StringBuilder buf = new StringBuilder(16);
+    for (int i = 0, j = input.length(); i < j; ++i) {
+      char ch = input.charAt(i);
+      if (ch == '\\' && i < j && input.charAt(i + 1) == '.') {
+        // Escaped dot.
+        buf.append('.');
+        ++i;
+      } else if (ch == '.') {
+        // end of identifier
+        segments.add(buf.toString());
+        buf.setLength(0);
+      } else {
+        buf.append(input.charAt(i));
+      }
+    }
+
+    segments.add(buf.toString());
+
+    return segments;
+  }
+
   private static Object getProperty(Object value, String propertyName) throws ElException {
     if (value instanceof Map) {
       Map<?, ?> map = (Map<?, ?>) value;
       return map.get(propertyName);
     } else if (value instanceof JSONObject) {
       return ((JSONObject) value).opt(propertyName);
+    } else if (value instanceof ExpressionContext) {
+      return ((ExpressionContext) value).getVariable(propertyName);
     }
 
     throw new ElException("Unsupported property parent type " + value.getClass());
@@ -221,7 +247,7 @@ public class Expressions {
   }
 
   /** Expression class for constant values */
-  private static class ConstantExpression<T> implements Expression<T> {
+  public static class ConstantExpression<T> implements Expression<T> {
     private final T value;
 
     public ConstantExpression(T value) {
@@ -234,7 +260,7 @@ public class Expressions {
   }
 
   /** Expression class for string concatenation */
-  private static class ConcatExpression<T> implements Expression<T> {
+  public static class ConcatExpression<T> implements Expression<T> {
 
     private final List<Expression<String>> expressions;
     private final Class<T> type;

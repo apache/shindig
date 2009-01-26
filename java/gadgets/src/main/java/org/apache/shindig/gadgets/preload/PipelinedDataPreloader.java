@@ -18,16 +18,15 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -223,7 +222,7 @@ public class PipelinedDataPreloader implements Preloader {
   }
 
   private Uri getSocialUri(GadgetContext context) {
-    String jsonUri = config.get(context.getContainer(), "gadgets.osDataUri");
+    String jsonUri = config.getString(context.getContainer(), "gadgets.osDataUri");
     Preconditions.checkNotNull(jsonUri, "No JSON URI available for social preloads");
 
     UriBuilder builder = UriBuilder.parse(

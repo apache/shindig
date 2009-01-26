@@ -22,12 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.shindig.common.ContainerConfig;
-import org.apache.shindig.common.JsonContainerConfig;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -50,9 +50,9 @@ public class BlobCrypterSecurityTokenDecoderTest {
 
   @Before
   public void setUp() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(null) {
+    ContainerConfig config = new AbstractContainerConfig() {
       @Override
-      public String get(String container, String name) {
+      public Object getProperty(String container, String name) {
         if (BlobCrypterSecurityTokenDecoder.SECURITY_TOKEN_KEY_FILE.equals(name)) {
           return getContainerKey(container);
         }
@@ -207,9 +207,9 @@ public class BlobCrypterSecurityTokenDecoderTest {
 
   @Test
   public void testLoadFailure() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(null) {
+    ContainerConfig config = new AbstractContainerConfig() {
       @Override
-      public String get(String container, String name) {
+      public Object getProperty(String container, String name) {
         if (BlobCrypterSecurityTokenDecoder.SECURITY_TOKEN_KEY_FILE.equals(name)) {
           return getContainerKey(container);
         }

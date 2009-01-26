@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.process;
 
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -29,8 +29,6 @@ import org.apache.shindig.gadgets.variables.VariableSubstituter;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.json.JSONArray;
 
 import java.net.URI;
 import java.util.logging.Logger;
@@ -99,23 +97,18 @@ public class Processor {
     String viewName = context.getView();
     View view = spec.getView(viewName);
     if (view == null) {
-      JSONArray aliases = containerConfig.getJsonArray(context.getContainer(),
-          "gadgets.features/views/" + viewName + "/aliases");
-      if (aliases != null) {
-        for (int i = 0, j = aliases.length(); i < j; ++i) {
-          viewName = aliases.optString(i);
-          if (viewName != null) {
-            view = spec.getView(viewName);
-            if (view != null) {
-              break;
-            }
-          }
+      String container = context.getContainer();
+      String property = "${gadgets\\.features.views." + viewName + ".aliases}";
+      for (Object alias : containerConfig.getList(container, property)) {
+        viewName = alias.toString();
+        view = spec.getView(viewName);
+        if (view != null) {
+          return view;
         }
       }
-
-      if (view == null) {
-        view = spec.getView(GadgetSpec.DEFAULT_VIEW);
-      }
+    }
+    if (view == null) {
+      view = spec.getView(GadgetSpec.DEFAULT_VIEW);
     }
     return view;
   }

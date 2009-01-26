@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.common;
+package org.apache.shindig.config;
 
 /**
  * Thrown for problems encountered with the container configuration.

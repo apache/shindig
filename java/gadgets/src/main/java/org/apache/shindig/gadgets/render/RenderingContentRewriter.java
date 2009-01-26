@@ -18,20 +18,11 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -57,18 +48,27 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
@@ -185,7 +185,7 @@ public class RenderingContentRewriter implements ContentRewriter {
 
   private void injectBaseTag(Gadget gadget, Node headTag) {
     GadgetContext context = gadget.getContext();
-    if (Boolean.parseBoolean(containerConfig.get(context.getContainer(), INSERT_BASE_ELEMENT_KEY))) {
+    if (containerConfig.getBool(context.getContainer(), INSERT_BASE_ELEMENT_KEY)) {
       Uri base = gadget.getSpec().getUrl();
       View view = gadget.getCurrentView();
       if (view != null && view.getHref() != null) {
@@ -348,16 +348,16 @@ public class RenderingContentRewriter implements ContentRewriter {
       throws GadgetException {
     GadgetContext context = gadget.getContext();
 
-    JSONObject features = containerConfig.getJsonObject(context.getContainer(), FEATURES_KEY);
+    Map<String, Object> features = containerConfig.getMap(context.getContainer(), FEATURES_KEY);
 
     Map<String, Object> config
-        = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.length() + 2);
+        = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
 
     if (features != null) {
       // Discard what we don't care about.
       for (GadgetFeature feature : reqs) {
         String name = feature.getName();
-        Object conf = features.opt(name);
+        Object conf = features.get(name);
         if (conf != null) {
           config.put(name, conf);
         }

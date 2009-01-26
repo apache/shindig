@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -30,11 +30,8 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.net.URI;
-import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -122,20 +119,19 @@ public class Renderer {
       return true;
     }
 
-    try {
-      JSONArray parents = containerConfig.getJsonArray(container, "gadgets.parent");
-      if (parents == null) {
+    List<Object> parents = containerConfig.getList(container, "gadgets.parent");
+    if (parents.size() == 0) {
+      // Allow all.
+      return true;
+    }
+
+    // We need to check each possible parent parameter against this regex.
+    for (Object pattern : parents) {
+      if (Pattern.matches(pattern.toString(), parent)) {
         return true;
       }
-      // We need to check each possible parent parameter against this regex.
-      for (int i = 0, j = parents.length(); i < j; ++i) {
-        if (Pattern.matches(parents.getString(i), parent)) {
-          return true;
-        }
-      }
-    } catch (JSONException e) {
-      LOG.log(Level.WARNING, "Configuration error", e);
     }
+
     return false;
   }
 }

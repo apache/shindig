@@ -18,7 +18,7 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.net.URI;

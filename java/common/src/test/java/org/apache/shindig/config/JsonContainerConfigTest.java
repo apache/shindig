@@ -17,20 +17,27 @@
  * under the License.
  */
 
-package org.apache.shindig.common;
+package org.apache.shindig.config;
 
-import static org.apache.shindig.common.ContainerConfig.DEFAULT_CONTAINER;
-import static org.apache.shindig.common.JsonContainerConfig.CONTAINER_KEY;
-import static org.apache.shindig.common.JsonContainerConfig.PARENT_KEY;
+import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;
+import static org.apache.shindig.config.JsonContainerConfig.CONTAINER_KEY;
+import static org.apache.shindig.config.JsonContainerConfig.PARENT_KEY;
 import static org.junit.Assert.assertEquals;
 
-import org.json.JSONArray;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.ContainerConfigException;
+import org.apache.shindig.config.JsonContainerConfig;
+
 import org.json.JSONObject;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class JsonContainerConfigTest {
 
@@ -84,13 +91,11 @@ public class JsonContainerConfigTest {
       assertEquals(DEFAULT_CONTAINER, container);
     }
 
-    String value = config.get(DEFAULT_CONTAINER, TOP_LEVEL_NAME);
+    String value = config.getString(DEFAULT_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
 
-    JSONObject nested = config.getJsonObject(DEFAULT_CONTAINER, NESTED_KEY);
-
-    String nestedValue = nested.getString(NESTED_NAME);
-
+    Map<String, Object> nested = config.getMap(DEFAULT_CONTAINER, NESTED_KEY);
+    String nestedValue = nested.get(NESTED_NAME).toString();
     assertEquals(NESTED_VALUE, nestedValue);
   }
 
@@ -106,8 +111,8 @@ public class JsonContainerConfigTest {
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
         JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
 
-    assertEquals(NESTED_VALUE, config.get(CONTAINER_A, NESTED_KEY));
-    assertEquals(NESTED_VALUE, config.get(CONTAINER_B, NESTED_KEY));
+    assertEquals(NESTED_VALUE, config.getString(CONTAINER_A, NESTED_KEY));
+    assertEquals(NESTED_VALUE, config.getString(CONTAINER_B, NESTED_KEY));
   }
 
   @Test
@@ -128,22 +133,26 @@ public class JsonContainerConfigTest {
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
         JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
 
-    String value = config.get(CHILD_CONTAINER, TOP_LEVEL_NAME);
+    String value = config.getString(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
 
-    JSONObject nestedObj = config.getJsonObject(CHILD_CONTAINER, NESTED_KEY);
-    String nestedValue = nestedObj.getString(NESTED_NAME);
+    Map<String, Object> nestedObj = config.getMap(CHILD_CONTAINER, NESTED_KEY);
+    String nestedValue = nestedObj.get(NESTED_NAME).toString();
     assertEquals(NESTED_ALT_VALUE, nestedValue);
 
-    String arrayValue = config.get(CHILD_CONTAINER, ARRAY_NAME);
+    String arrayValue = config.getString(CHILD_CONTAINER, ARRAY_NAME);
     assertEquals(ARRAY_ALT_VALUE, arrayValue);
 
     // Verify that the parent value wasn't overwritten as well.
 
-    JSONArray defaultArrayTest = config.getJsonArray(DEFAULT_CONTAINER,
-                                                     ARRAY_NAME);
-    JSONArray defaultArray = new JSONArray(ARRAY_VALUE);
-    assertEquals(defaultArrayTest.toString(), defaultArray.toString());
+    List<String> actual = new ArrayList<String>();
+    for (Object val : config.getList(DEFAULT_CONTAINER, ARRAY_NAME)) {
+      actual.add(val.toString());
+    }
+
+    List<String> expected = Arrays.asList(ARRAY_VALUE);
+
+    assertEquals(expected, actual);
   }
 
   @Test(expected = ContainerConfigException.class)
@@ -159,8 +168,21 @@ public class JsonContainerConfigTest {
   @Test
   public void pathQuery() throws Exception {
     ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
-    String path = NESTED_KEY + '/' + NESTED_NAME;
-    String data = config.get(DEFAULT_CONTAINER, path);
+    String path = "${" + NESTED_KEY + '.' + NESTED_NAME + '}';
+    String data = config.getString(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
+  }
+
+  @Test
+  public void expressionEvaluation() throws Exception {
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put("expression", "Hello, ${world}!");
+    json.put("world", "Earth");
+
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath());
+
+    assertEquals("Hello, Earth!", config.getString(DEFAULT_CONTAINER, "expression"));
   }
 }

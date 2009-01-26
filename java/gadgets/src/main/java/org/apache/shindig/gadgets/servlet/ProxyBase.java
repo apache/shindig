@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 

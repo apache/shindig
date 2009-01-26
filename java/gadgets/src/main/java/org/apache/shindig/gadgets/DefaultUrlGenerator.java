@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
@@ -53,14 +53,14 @@ public class DefaultUrlGenerator implements UrlGenerator {
   private final LockedDomainService lockedDomainService;
 
   @Inject
-  public DefaultUrlGenerator(ContainerConfig containerConfig,
+  public DefaultUrlGenerator(ContainerConfig config,
                              LockedDomainService lockedDomainService,
                              GadgetFeatureRegistry registry) {
     iframeBaseUris = Maps.newHashMap();
     jsUriTemplates = Maps.newHashMap();
-    for (String container : containerConfig.getContainers()) {
-      iframeBaseUris.put(container, Uri.parse(containerConfig.get(container, IFRAME_URI_PARAM)));
-      jsUriTemplates.put(container, containerConfig.get(container, JS_URI_PARAM));
+    for (String container : config.getContainers()) {
+      iframeBaseUris.put(container, Uri.parse(config.getString(container, IFRAME_URI_PARAM)));
+      jsUriTemplates.put(container, config.getString(container, JS_URI_PARAM));
     }
 
     this.lockedDomainService = lockedDomainService;
@@ -107,10 +107,6 @@ public class DefaultUrlGenerator implements UrlGenerator {
     return buf.toString();
   }
 
-  /**
-   * TODO: This is in need of a rewrite most likely. It doesn't even take locked domain into
-   * consideration!
-   */
   public String getIframeUrl(Gadget gadget) {
     GadgetContext context = gadget.getContext();
     GadgetSpec spec = gadget.getSpec();
@@ -130,7 +126,6 @@ public class DefaultUrlGenerator implements UrlGenerator {
         break;
       case HTML:
       default:
-        // TODO: Locked domain support.
         Uri iframeBaseUri = iframeBaseUris.get(context.getContainer());
         if (iframeBaseUri != null) {
           uri = new UriBuilder(iframeBaseUri);

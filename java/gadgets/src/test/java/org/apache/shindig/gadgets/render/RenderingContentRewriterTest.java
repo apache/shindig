@@ -21,19 +21,14 @@ package org.apache.shindig.gadgets.render;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_CSS;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
 import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -53,14 +48,9 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.View;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
 
 import com.google.caja.util.Join;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -68,15 +58,29 @@ import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Tests for RenderingContentRewriter.
  */
 public class RenderingContentRewriterTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final String BODY_CONTENT = "Some body content";
-  private final IMocksControl control = EasyMock.createNiceControl();
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
-  private final ContainerConfig config = control.createMock(ContainerConfig.class);
+  private final FakeContainerConfig config = new FakeContainerConfig();
   private final UrlGenerator urlGenerator = new FakeUrlGenerator();
 
   private FakeGadgetFeatureRegistry featureRegistry;
@@ -124,8 +128,6 @@ public class RenderingContentRewriterTest {
   public void defaultOutput() throws Exception {
     Gadget gadget = makeDefaultGadget();
 
-    control.replay();
-
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
@@ -171,7 +173,6 @@ public class RenderingContentRewriterTest {
         .setContext(context);
 
     featureRegistry.addInline("foo", "does-not-matter");
-    control.replay();
 
     String rewritten = rewrite(gadget, doc);
 
@@ -204,8 +205,6 @@ public class RenderingContentRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -248,7 +247,6 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "does-not-matter");
     featureRegistry.addInline("bar", "does-not-matter");
     featureRegistry.addInline("baz", "does-not-matter");
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -269,7 +267,6 @@ public class RenderingContentRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "foo_content();");
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -301,7 +298,6 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "foo_content();");
     featureRegistry.addInline("bar", "does-not-matter");
     featureRegistry.addInline("baz", "does-not-matter");
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -314,7 +310,6 @@ public class RenderingContentRewriterTest {
   @Test
   public void featuresInjectedBeforeExistingScript() throws Exception {
     Gadget gadget = makeDefaultGadget();
-    control.replay();
 
     String rewritten = rewrite(gadget,
         "<html><head><script src=\"foo.js\"></script></head><body>hello</body></html>");
@@ -345,7 +340,6 @@ public class RenderingContentRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "gadgets.Prefs.setMessages_ = function(){};");
-    control.replay();
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
@@ -388,7 +382,6 @@ public class RenderingContentRewriterTest {
     featureRegistry.addInline("foo", "foo_content();");
     featureRegistry.addExternal("bar", "http://example.org/external.js");
     featureRegistry.addInline("baz", "does-not-matter");
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -421,11 +414,7 @@ public class RenderingContentRewriterTest {
 
     featureRegistry.addInline("foo", "");
 
-    JSONObject conf = new JSONObject();
-    conf.put("foo", "blah");
-    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
-        .andReturn(conf);
-    control.replay();
+    config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
 
@@ -456,12 +445,11 @@ public class RenderingContentRewriterTest {
 
     featureRegistry.addInline("foo", "");
     featureRegistry.addInline("bar", "");
-    JSONObject conf = new JSONObject();
-    conf.put("foo", "blah")
-        .put("bar", "baz");
-    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
-        .andReturn(conf);
-    control.replay();
+
+    config.data.put(FEATURES_KEY, ImmutableMap.of(
+        "foo", "blah",
+        "bar", "baz"
+    ));
 
     String rewritten = rewrite(gadget, "");
 
@@ -484,11 +472,7 @@ public class RenderingContentRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "");
-    JSONObject conf = new JSONObject();
-    conf.put("foo", "blah");
-    expect(config.getJsonObject(ContainerConfig.DEFAULT_CONTAINER, FEATURES_KEY))
-        .andReturn(conf);
-    control.replay();
+    config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
 
@@ -517,8 +501,6 @@ public class RenderingContentRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -551,8 +533,6 @@ public class RenderingContentRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
-    control.replay();
-
     rewrite(gadget, "");
   }
 
@@ -566,8 +546,6 @@ public class RenderingContentRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    control.replay();
 
     rewrite(gadget, "");
     // rewrite will throw if the optional unsupported feature doesn't work.
@@ -584,8 +562,6 @@ public class RenderingContentRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    control.replay();
 
     rewrite(gadget, "");
     // rewrite will throw if the optional unsupported feature doesn't work.
@@ -625,7 +601,6 @@ public class RenderingContentRewriterTest {
     };
 
     Gadget gadget = makeDefaultGadget().setPreloads(preloads);
-    control.replay();
 
     String rewritten = rewrite(gadget, "");
 
@@ -650,8 +625,6 @@ public class RenderingContentRewriterTest {
     };
 
     Gadget gadget = makeDefaultGadget().setPreloads(preloads);
-    control.replay();
-
     String rewritten = rewrite(gadget, "");
 
     JSONObject json = getPreloadedJson(rewritten);
@@ -674,10 +647,7 @@ public class RenderingContentRewriterTest {
   public void baseElementInsertedWhenContentIsInline() throws Exception {
     Gadget gadget = makeDefaultGadget();
 
-    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
-        .andReturn("true");
-
-    control.replay();
+    config.data.put(INSERT_BASE_ELEMENT_KEY, true);
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
     String base = getBaseElement(rewritten);
@@ -694,10 +664,7 @@ public class RenderingContentRewriterTest {
     View fakeView = new View("foo", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     gadget.setCurrentView(fakeView);
 
-    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
-        .andReturn("true");
-
-    control.replay();
+    config.data.put(INSERT_BASE_ELEMENT_KEY, true);
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
     String base = getBaseElement(rewritten);
@@ -709,13 +676,20 @@ public class RenderingContentRewriterTest {
   public void baseElementNotInsertedWhenConfigDoesNotAllowIt() throws Exception {
     Gadget gadget = makeDefaultGadget();
 
-    expect(config.get(ContainerConfig.DEFAULT_CONTAINER, INSERT_BASE_ELEMENT_KEY))
-        .andReturn("false");
-
-    control.replay();
+    config.data.put(INSERT_BASE_ELEMENT_KEY, false);
 
     String rewritten = rewrite(gadget, BODY_CONTENT);
     assertFalse("Base element injected incorrectly.", rewritten.contains("<base"));
+  }
+
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    protected final Map<String, Object> data = Maps.newHashMap();
+
+    @Override
+    public Object getProperty(String container, String name) {
+      return data.get(name);
+    }
+
   }
 
   /**

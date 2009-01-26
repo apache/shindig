@@ -17,14 +17,13 @@
  * under the License.
  */
 
-package org.apache.shindig.common;
+package org.apache.shindig.config;
 
 import com.google.inject.ImplementedBy;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a container configuration.
@@ -35,6 +34,8 @@ import java.util.Collection;
  *
  * The default container configuration implementation is intended to be shared with the code found
  * in the PHP implementation of Shindig. It uses a simple JSON format inteded for easy readability.
+ *
+ * get* can take either a simple property name (foo), or an EL expression (${foo.bar}).
  */
 @ImplementedBy(JsonContainerConfig.class)
 public interface ContainerConfig {
@@ -46,36 +47,43 @@ public interface ContainerConfig {
   Collection<String> getContainers();
 
   /**
-   * Fetches a configuration parameter as a JSON object, array, string, or
-   * number, ensuring that it can be safely passed to javascript without any
-   * additional filtering.
-   *
-   * @param parameter The value to fetch. May be specified as an x-path like
-   *     object reference such as "gadgets/features/views".
-   * @return A configuration parameter as a JSON object or null if not set or
-   *     can't be interpreted as JSON.
-   *
-   * TODO: Convert to a more generalized object.
+   * Fetch all properties for the given container configuration.
    */
-  Object getJson(String container, String parameter);
+  Map<String, Object> getProperties(String container);
 
   /**
-   * Attempts to fetch a parameter for the given container, or the default
-   * container if the specified container is not supported.
-   *
-   * @return A configuration parameter as a string, or null if not set.
+   * @return The configuration property stored under the given name for the given container.
    */
-  String get(String container, String parameter);
+  Object getProperty(String container, String name);
 
   /**
-   * @return A configuration parameter as a JSON object or null if not set or
-   *     can't be interpreted as JSON.
+   * @return The configuration property stored under the given name for the given container, or null
+   * if it is not defined or not a string.
    */
-  JSONObject getJsonObject(String container, String parameter);
+  String getString(String container, String name);
 
   /**
-   * @return A configuration parameter as a JSON object or null if not set or
-   *     can't be interpreted as JSON.
+   * @return The configuration property stored under the given name for the given container, or 0
+   * if it is not defined or not a number.
    */
-  JSONArray getJsonArray(String container, String parameter);
+  int getInt(String container, String name);
+
+
+  /**
+   * @return The configuration property stored under the given name for the given container, or
+   * false if it is not defined or not a boolean.
+   */
+  boolean getBool(String container, String name);
+
+  /**
+   * @return The configuration property stored under the given name for the given container, or an
+   * empty list if it is not defined or not a list.
+   */
+  List<Object> getList(String container, String name);
+
+  /**
+   * @return The configuration property stored under the given name for the given container, or an
+   * empty map if it is not defined or not a map.
+   */
+  Map<String, Object> getMap(String container, String name);
 }

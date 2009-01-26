@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.shindig.common.ContainerConfigException;
-import org.apache.shindig.common.JsonContainerConfig;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfigException;
 
 import com.google.common.collect.Lists;
 
@@ -38,16 +38,15 @@ import java.util.Map;
  */
 public class DefaultSecurityTokenDecoderTest {
 
-  private static class FakeContainerConfig extends JsonContainerConfig {
+  private static class FakeContainerConfig extends AbstractContainerConfig {
     private final String tokenType;
 
     public FakeContainerConfig(String tokenType) throws ContainerConfigException {
-      super(null);
       this.tokenType = tokenType;
     }
 
     @Override
-    public String get(String container, String parameter) {
+    public Object getProperty(String container, String parameter) {
       if ("gadgets.securityTokenType".equals(parameter)) {
         if ("default".equals(container)) {
           return tokenType;

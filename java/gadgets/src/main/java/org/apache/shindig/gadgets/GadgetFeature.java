@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

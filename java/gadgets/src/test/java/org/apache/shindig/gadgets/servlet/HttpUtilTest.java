@@ -20,22 +20,22 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.common.collect.Maps;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 public class HttpUtilTest extends ServletTestFixture {
   private final static String CONTAINER = "container";
   private final static String FEATURE_0 = "featureZero";
   private final static String FEATURE_1 = "feature-One";
-  private final ContainerConfig containerConfig = mock(ContainerConfig.class);
+  private final FakeContainerConfig containerConfig = new FakeContainerConfig();
 
   private final GadgetContext context = mock(GadgetContext.class);
 
@@ -83,45 +83,40 @@ public class HttpUtilTest extends ServletTestFixture {
     checkCacheControlHeaders(0, true);
   }
 
-  private void assertJsonEquals(JSONObject lhs, JSONObject rhs) throws JSONException {
-    for (String key : JSONObject.getNames(lhs)) {
-      Object obj = lhs.get(key);
-      if (obj instanceof String) {
-        assertEquals(obj, rhs.get(key));
-      } else if (obj instanceof JSONObject) {
-        assertJsonEquals((JSONObject)obj, rhs.getJSONObject(key));
-      } else {
-        fail("Unsupported type: " + obj.getClass());
-      }
-    }
-  }
-
-  public void testGetJsConfig() throws JSONException {
-    JSONObject features = new JSONObject()
-        .put(FEATURE_0, "config")
-        .put(FEATURE_1, "other config");
+  public void testGetJsConfig() {
+    Map<String, String> features = ImmutableMap.of(
+        FEATURE_0, "config",
+        FEATURE_1, "other config"
+    );
 
     Set<String> needed = ImmutableSet.of(FEATURE_0, FEATURE_1);
 
     expect(context.getContainer()).andReturn(CONTAINER);
-    expect(containerConfig.getJsonObject(CONTAINER, "gadgets.features"))
-        .andReturn(features);
 
+    containerConfig.data.put("gadgets.features", features);
     replay();
 
-    assertJsonEquals(features, HttpUtil.getJsConfig(containerConfig, context, needed));
+    assertEquals(features,  HttpUtil.getJsConfig(containerConfig, context, needed));
   }
 
   public void testGetJsConfigNoFeatures() {
     expect(context.getContainer()).andReturn(CONTAINER);
-    expect(containerConfig.getJsonObject(CONTAINER, "gadgets.features"))
-        .andReturn(null);
 
     replay();
 
-    JSONObject results = HttpUtil.getJsConfig(containerConfig, context,
+    Map<String, Object> results = HttpUtil.getJsConfig(containerConfig, context,
         Collections.<String>emptySet());
 
-    assertEquals("Results should be empty when there are no features", 0, results.length());
+    assertEquals("Results should be empty when there are no features", 0, results.size());
+  }
+
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    protected final Map<String, Object> data = Maps.newHashMap();
+
+    @Override
+    public Object getProperty(String container, String name) {
+      return data.get(name);
+    }
+
   }
 }
