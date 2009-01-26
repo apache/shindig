@@ -23,6 +23,7 @@ import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.ResponseError;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,7 +98,7 @@ public class RpcRequestItem extends RequestItem {
           return returnVal;
         } else {
           // Allow up-conversion of non-array to array params.
-          return Lists.newArrayList(data.getString(paramName));
+          return ImmutableList.of(data.getString(paramName));
         }
       } else {
         return Collections.emptyList();
@@ -115,7 +116,7 @@ public class RpcRequestItem extends RequestItem {
       throw new SocialSpiException(ResponseError.BAD_REQUEST, je.getMessage(), je);
     }
   }
-  
+
   @Override
   public<T> T getTypedParameters(Class<T> dataTypeClass) {
     return converter.convertToObject(data.toString(), dataTypeClass);

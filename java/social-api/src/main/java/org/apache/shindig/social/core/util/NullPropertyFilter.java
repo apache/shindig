@@ -41,7 +41,7 @@ public class NullPropertyFilter implements PropertyFilter {
     }
     if (value instanceof JSONArray) {
       JSONArray array = (JSONArray) value;
-      if (array.size() == 0) {
+      if (array.isEmpty()) {
         return true;
       }
     }
@@ -53,7 +53,7 @@ public class NullPropertyFilter implements PropertyFilter {
     }
     if (value instanceof Collection) {
       Collection<?> collection = (Collection<?>) value;
-      if (collection.size() == 0) {
+      if (collection.isEmpty()) {
         return true;
       }
     }

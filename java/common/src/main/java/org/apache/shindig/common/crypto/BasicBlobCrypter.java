@@ -160,8 +160,7 @@ public class BasicBlobCrypter implements BlobCrypter {
   throws UnsupportedEncodingException {
     StringBuilder sb = new StringBuilder();
 
-    for (Map.Entry<String, String> stringStringEntry : in.entrySet()) {
-      Map.Entry<String, String> val = stringStringEntry;
+    for (Map.Entry<String, String> val : in.entrySet()) {
       sb.append(URLEncoder.encode(val.getKey(), UTF8));
       sb.append('=');
       sb.append(URLEncoder.encode(val.getValue(), UTF8));

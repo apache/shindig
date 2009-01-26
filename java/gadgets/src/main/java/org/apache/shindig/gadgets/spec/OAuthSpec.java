@@ -69,8 +69,7 @@ public class OAuthSpec {
       OAuthService service = serviceMap.get(name);
       sb.append(service.getRequestUrl().toString("Request"));
       sb.append(service.getAccessUrl().toString("Access"));
-      sb.append("<Authorization url='" +
-          service.getAuthorizationUrl().toString() + "'/>");
+      sb.append("<Authorization url='").append(service.getAuthorizationUrl().toString()).append("'/>");
       sb.append("</Service>");
     }
     sb.append("</OAuth>");

@@ -21,6 +21,7 @@ import org.apache.shindig.auth.SecurityToken;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -185,7 +186,7 @@ public class RestfulRequestItem extends RequestItem {
     // and so we simply ignore the parameter name
     return getTypedParameters(dataTypeClass);
   }
-  
+
   @Override
   public <T> T getTypedParameters(Class<T> dataTypeClass) {
     return converter.convertToObject(postData, dataTypeClass);
@@ -222,11 +223,7 @@ public class RestfulRequestItem extends RequestItem {
 
   @Override
   public String getParameter(String paramName, String defaultValue) {
-    String result = getParameter(paramName);
-    if (result == null) {
-      return defaultValue;
-    }
-    return result;
+    return Objects.firstNonNull(getParameter(paramName), defaultValue);
   }
 
   /**
@@ -244,7 +241,7 @@ public class RestfulRequestItem extends RequestItem {
     }
     return stringList;
   }
-  
+
   public String getUrl() {
     return this.url;
   }

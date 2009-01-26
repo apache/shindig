@@ -103,7 +103,7 @@ public class CajaContentRewriter implements ContentRewriter {
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
       }
-      content.setContent(tameCajaClientApi() + output.toString());
+      content.setContent(tameCajaClientApi() + output);
     }
     return null;
   }
@@ -126,7 +126,7 @@ public class CajaContentRewriter implements ContentRewriter {
       errbuilder.append(m.format(mc)).append('\n');
     }
 
-    logger.info("Unable to cajole gadget: " + errbuilder.toString());
+    logger.info("Unable to cajole gadget: " + errbuilder);
 
     // throw new GadgetException(
     //    GadgetException.Code.MALFORMED_FOR_SAFE_INLINING, errbuilder.toString());

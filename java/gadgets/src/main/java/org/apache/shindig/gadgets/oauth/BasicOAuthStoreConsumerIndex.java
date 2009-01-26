@@ -19,8 +19,10 @@
 
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.base.Objects;
+
 /**
- * Index into the token store by  
+ * Index into the token store by
  */
 public class BasicOAuthStoreConsumerIndex {
   private String gadgetUri;
@@ -41,13 +43,7 @@ public class BasicOAuthStoreConsumerIndex {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result =
-        prime * result + ((gadgetUri == null) ? 0 : gadgetUri.hashCode());
-    result =
-        prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
-    return result;
+    return Objects.hashCode(gadgetUri, serviceName);
   }
 
   @Override

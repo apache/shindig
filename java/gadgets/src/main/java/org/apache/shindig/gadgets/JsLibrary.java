@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.base.Objects;
+
 /**
  * Represents a javascript library, either as an external resource (url)
  * or as an inline script.
@@ -239,7 +241,7 @@ public final class JsLibrary {
 
   @Override
   public int hashCode() {
-    return content.hashCode() + type.hashCode();
+    return Objects.hashCode(content, type);
   }
 
   @Override

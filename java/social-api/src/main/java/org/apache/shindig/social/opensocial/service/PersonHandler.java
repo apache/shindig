@@ -26,6 +26,7 @@ import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -34,7 +35,7 @@ public class PersonHandler extends DataRequestHandler {
   private final PersonService personService;
 
   private static final String PEOPLE_PATH = "/people/{userId}+/{groupId}/{personId}+";
-  
+
   @Inject
   public PersonHandler(PersonService personService) {
     this.personService = personService;
@@ -64,7 +65,7 @@ public class PersonHandler extends DataRequestHandler {
   protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
     request.applyUrlTemplate(PEOPLE_PATH);
     GroupId groupId = request.getGroup();
-    Set<String> optionalPersonId = Sets.newLinkedHashSet(request.getListParameter("personId"));
+    Set<String> optionalPersonId = ImmutableSet.copyOf(request.getListParameter("personId"));
     Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);
     Set<UserId> userIds = request.getUsers();
 

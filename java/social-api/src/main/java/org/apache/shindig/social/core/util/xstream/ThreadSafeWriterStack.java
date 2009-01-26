@@ -65,7 +65,7 @@ public class ThreadSafeWriterStack implements WriterStack {
    */
   public String pop() {
     List<Object[]> stack = stackHolder.get();
-    if (stack.size() == 0) {
+    if (stack.isEmpty()) {
       return null;
     } else {
       Object[] o =  stack.remove(stack.size() - 1);
@@ -98,7 +98,7 @@ public class ThreadSafeWriterStack implements WriterStack {
    */
   public Object peek(int i) {
     List<Object[]> stack = stackHolder.get();
-    if (stack.size() == 0) {
+    if (stack.isEmpty()) {
       return null;
     } else {
       Object[] o = stack.get(stack.size() - 1);

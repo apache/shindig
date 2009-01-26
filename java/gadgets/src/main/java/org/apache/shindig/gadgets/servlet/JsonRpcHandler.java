@@ -75,6 +75,7 @@ public class JsonRpcHandler {
     // Process all JSON first so that we don't wind up with hanging threads if
     // a JSONException is thrown.
     gadgets = Lists.newArrayListWithExpectedSize(requestedGadgets.length());
+    
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
       GadgetContext context = new JsonRpcGadgetContext(
           requestContext, requestedGadgets.getJSONObject(i));

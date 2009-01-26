@@ -772,7 +772,7 @@ public class RenderingContentRewriterTest {
 
     @Override
     public Collection<GadgetFeature> getFeatures(Collection<String> needed) {
-      return getFeatures(needed, new HashSet<String>());
+      return getFeatures(needed, Sets.<String>newHashSet());
     }
 
     @Override

@@ -160,7 +160,7 @@ public class DataServiceServlet extends ApiServlet {
 
     if (fields == null) {
       return new ResponseItem(ResponseError.NOT_IMPLEMENTED,"Supported fields not available for" +
-      		" service \"" + service + "\"");
+      		" service \"" + service + '\"');
     }
 
     return new ResponseItem(toList(fields));
