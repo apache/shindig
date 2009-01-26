@@ -140,11 +140,10 @@ public class GadgetOAuthTokenStore {
     accessorBuilder.setParameterLocation(
         getStoreLocation(service.getRequestUrl().location, responseParams));
     accessorBuilder.setMethod(getStoreMethod(service.getRequestUrl().method, responseParams));
-    OAuthServiceProvider provider = new OAuthServiceProvider(
+    return new OAuthServiceProvider(
         service.getRequestUrl().url.toJavaUri().toASCIIString(),
         service.getAuthorizationUrl().toJavaUri().toASCIIString(),
         service.getAccessUrl().url.toJavaUri().toASCIIString());
-    return provider;
   }
 
   /**

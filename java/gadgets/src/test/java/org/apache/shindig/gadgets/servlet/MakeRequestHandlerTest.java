@@ -37,11 +37,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import com.google.common.collect.Lists;
 
 /**
  * Tests for MakeRequestHandler.
@@ -230,17 +230,15 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   private void expectParameters(HttpServletRequest request, String... params) {
-    final Vector<String> v = new Vector<String>();
-    for (String p : params) {
-      v.add(p);
-    }
+    final List<String> v = Lists.newArrayList(params);
+
     expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration<String>>() {
       public Enumeration<String> answer() throws Throwable{
-        return v.elements();
-      }      
+        return Collections.enumeration(v);
+      }
     });
   }
-  
+
   public void testSignedGetRequest() throws Exception {
 
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))

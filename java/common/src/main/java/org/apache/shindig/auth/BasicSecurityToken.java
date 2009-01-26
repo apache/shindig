@@ -68,7 +68,7 @@ public class BasicSecurityToken implements SecurityToken {
 
   public BasicSecurityToken(String owner, String viewer, String app,
       String domain, String appUrl, String moduleId, String container) throws BlobCrypterException {
-    tokenData = Maps.newHashMapWithExpectedSize(6);
+    tokenData = Maps.newHashMapWithExpectedSize(7);
     putNullSafe(OWNER_KEY, owner);
     putNullSafe(VIEWER_KEY, viewer);
     putNullSafe(APP_KEY, app);

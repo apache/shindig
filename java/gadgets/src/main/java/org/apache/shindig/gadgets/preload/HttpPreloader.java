@@ -76,13 +76,12 @@ public class HttpPreloader implements Preloader {
   // TODO: move somewhere more sensible
   public static HttpRequest newHttpRequest(GadgetContext context,
       RequestAuthenticationInfo authenticationInfo) throws GadgetException {
-    HttpRequest request = new HttpRequest(authenticationInfo.getHref())
+    return new HttpRequest(authenticationInfo.getHref())
         .setSecurityToken(context.getToken())
         .setOAuthArguments(new OAuthArguments(authenticationInfo))
         .setAuthType(authenticationInfo.getAuthType())
         .setContainer(context.getContainer())
         .setGadget(Uri.fromJavaUri(context.getUrl()));
-    return request;
   }
 
   class PreloadTask implements Callable<PreloadedData> {

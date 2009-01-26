@@ -444,7 +444,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
       String expected, Object field) {
     List<String> v = result.get(field.toString());
     String t = null;
-    if ( v == null || v.size() == 0 ) {
+    if ( v == null || v.isEmpty()) {
       if (expected == null ) {
         return;
       }

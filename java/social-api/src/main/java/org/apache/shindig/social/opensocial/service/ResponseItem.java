@@ -102,9 +102,6 @@ public final class ResponseItem {
 
   @Override
   public int hashCode() {
-    int result = (error != null ? error.hashCode() : 0);
-    result = 31 * result + (errorMessage != null ? errorMessage.hashCode() : 0);
-    result = 31 * result + (response != null ? response.hashCode() : 0);
-    return result;
+    return Objects.hashCode(error, errorMessage, response);
   }
 }

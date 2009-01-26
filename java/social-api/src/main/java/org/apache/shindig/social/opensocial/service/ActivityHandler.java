@@ -25,6 +25,7 @@ import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class ActivityHandler extends DataRequestHandler {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
-    Set<String> activityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
+    Set<String> activityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
     Preconditions.requireNotEmpty(userIds, "No userId specified");
     Preconditions.requireSingular(userIds, "Multiple userIds not supported");
@@ -108,7 +109,7 @@ public class ActivityHandler extends DataRequestHandler {
     request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
-    Set<String> optionalActivityIds = Sets.newLinkedHashSet(request.getListParameter("activityId"));
+    Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
     CollectionOptions options = new CollectionOptions(request);
 

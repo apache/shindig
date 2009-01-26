@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * represents an atom:feed entry
@@ -55,7 +56,7 @@ public class AtomFeed {
     Preconditions.checkNotNull(obj);
     if (obj instanceof Map) {
       Map<?, ?> m = (Map<?, ?>) obj;
-      entry = new ArrayList();
+      entry = Lists.newArrayList();
       for ( Entry<?, ?> o : m.entrySet()) {
         entry.add(new AtomEntry(o));
       }
@@ -64,7 +65,7 @@ public class AtomFeed {
       itemsPerPage = entry.size();
     } else if (obj instanceof RestfulCollection<?>) {
       RestfulCollection<?> r = (RestfulCollection<?>) obj;
-      entry = new ArrayList();
+      entry = Lists.newArrayList();
       List<?> entryList = r.getEntry();
       for (Object o : entryList) {
         entry.add(new AtomEntry(o));
@@ -76,7 +77,7 @@ public class AtomFeed {
       link = new AtomLink("rel", "???");
     } else if ( obj instanceof DataCollection ) {
       DataCollection dc = (DataCollection) obj;
-      entry = new ArrayList();
+      entry = Lists.newArrayList();
       for ( Entry<String, Map<String,String>> o : dc.getEntry().entrySet()) {
         entry.add(new AtomEntry(o));
       }

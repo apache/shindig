@@ -44,10 +44,7 @@ public class GadgetCssRuleTest extends TestCase {
   private ParsedCssRule makeParsedRule(String[] selectors, String[][] decls) {
     ParsedCssRule parsedMock = EasyMock.createNiceMock(ParsedCssRule.class);
 
-    List<String> selectorList = Lists.newLinkedList();
-    for (String sel : selectors) {
-      selectorList.add(sel);
-    }
+    List<String> selectorList = Lists.newLinkedList(selectors);
     expect(parsedMock.getSelectors()).andReturn(selectorList).anyTimes();
 
     List<ParsedCssDeclaration> declList = Lists.newLinkedList();
