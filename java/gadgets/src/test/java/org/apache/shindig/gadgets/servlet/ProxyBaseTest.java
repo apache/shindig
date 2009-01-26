@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;

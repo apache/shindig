@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.preload;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -64,7 +64,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   @Before
   public void createContainerConfig() {
     containerConfig = EasyMock.createMock(ContainerConfig.class);
-    EasyMock.expect(containerConfig.get(CONTAINER, "gadgets.osDataUri")).andStubReturn(
+    EasyMock.expect(containerConfig.getString(CONTAINER, "gadgets.osDataUri")).andStubReturn(
         "http://%host%/social/rpc");
     EasyMock.replay(containerConfig);
   }

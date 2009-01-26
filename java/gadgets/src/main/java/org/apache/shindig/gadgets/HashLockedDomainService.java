@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.Base32;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
@@ -65,15 +65,14 @@ public class HashLockedDomainService implements LockedDomainService {
     Collection<String> containers = config.getContainers();
     if (enabled) {
       for (String container : containers) {
-        String suffix = config.get(container, LOCKED_DOMAIN_SUFFIX_KEY);
+        String suffix = config.getString(container, LOCKED_DOMAIN_SUFFIX_KEY);
         if (suffix == null) {
           LOG.warning("No locked domain configuration for " + container);
         } else {
           lockedSuffixes.put(container, suffix);
         }
 
-        String require = config.get(container, LOCKED_DOMAIN_REQUIRED_KEY);
-        required.put(container, Boolean.parseBoolean(require));
+        required.put(container, config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY));
       }
     }
   }

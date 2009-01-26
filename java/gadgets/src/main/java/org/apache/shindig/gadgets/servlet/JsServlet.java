@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;

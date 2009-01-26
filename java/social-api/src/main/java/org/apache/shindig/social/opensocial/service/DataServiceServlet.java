@@ -18,30 +18,25 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.ContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class DataServiceServlet extends ApiServlet {
 
@@ -155,56 +150,15 @@ public class DataServiceServlet extends ApiServlet {
 
     String container = Objects.firstNonNull(requestItem.getToken().getContainer(), "default");
     // TODO: hardcoding opensocial-0.8 is brittle
-    JSONArray fields = config.getJsonArray(container,
-        "gadgets.features/opensocial-0.8/supportedFields/" + configProperty);
+    List<Object> fields = config.getList(container,
+        "${gadgets\\.features.opensocial-0\\.8.supportedFields." + configProperty + '}');
 
-    if (fields == null) {
+    if (fields.size() == 0) {
       return new ResponseItem(ResponseError.NOT_IMPLEMENTED,"Supported fields not available for" +
       		" service \"" + service + '\"');
     }
 
-    return new ResponseItem(toList(fields));
-  }
-
-  // TODO: delete this when Kevin lands his config changes
-  private Object toList(JSONArray fields) {
-    List<Object> list = Lists.newArrayList();
-    for (int index = 0; index < fields.length(); index++) {
-      try {
-        Object o = fields.get(index);
-        if (o instanceof JSONObject) {
-          list.add(toMap((JSONObject) o));
-        } else {
-          list.add(fields.get(index));
-        }
-      } catch (JSONException e) {
-        // Ignore
-      }
-    }
-
-    return list;
-  }
-
-  // TODO: delete this when Kevin lands his config changes
-  private Object toMap(JSONObject json) {
-    Map<String, Object> map = Maps.newHashMap();
-
-    for (String name : JSONObject.getNames(json)) {
-      try {
-        Object o = json.get(name);
-        if (o instanceof JSONObject) {
-          o = toMap((JSONObject) o);
-        } else if (o instanceof JSONArray) {
-          o = toList((JSONArray) o);
-        }
-
-        map.put(name, o);
-      } catch (JSONException e) {
-        // Ignore
-      }
-    }
-
-    return map;
+    return new ResponseItem(fields);
   }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {

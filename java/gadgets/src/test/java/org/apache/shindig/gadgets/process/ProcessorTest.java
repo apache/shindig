@@ -21,9 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfigException;
-import org.apache.shindig.common.JsonContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -32,13 +31,16 @@ import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
@@ -100,8 +102,8 @@ public class ProcessorTest {
 
   @Test
   public void doViewAliasing() throws Exception {
-    JSONArray aliases = new JSONArray(Arrays.asList("some-alias", "alias"));
-    containerConfig.json.put("gadgets.features/views/aliased/aliases", aliases);
+    List<Object> aliases = Arrays.<Object>asList("some-alias", "alias");
+    containerConfig.data.put("${gadgets\\.features.views.aliased.aliases}", aliases);
     Gadget gadget = processor.process(makeContext("aliased"));
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
@@ -159,16 +161,22 @@ public class ProcessorTest {
     }
   }
 
-  private static class FakeContainerConfig extends JsonContainerConfig {
-    protected final JSONObject json = new JSONObject();
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    protected final Map<String, Object> data = Maps.newHashMap();
 
-    public FakeContainerConfig() throws ContainerConfigException {
-      super(null);
+    @Override
+    public Object getProperty(String container, String parameter) {
+      return data.get(parameter);
     }
 
     @Override
-    public Object getJson(String container, String parameter) {
-      return json.opt(parameter);
+    public Collection<String> getContainers() {
+      return null;
+    }
+
+    @Override
+    public Map<String, Object> getProperties(String container) {
+      return null;
     }
   }
 

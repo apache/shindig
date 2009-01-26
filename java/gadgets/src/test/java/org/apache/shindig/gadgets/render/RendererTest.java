@@ -22,9 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.ContainerConfigException;
-import org.apache.shindig.common.JsonContainerConfig;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -34,12 +33,13 @@ import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Tests for Renderer.
@@ -131,8 +131,8 @@ public class RendererTest {
 
   @Test
   public void validateParent() throws Exception {
-    containerConfig.json.put("gadgets.parent",
-        new JSONArray(Arrays.asList("http:\\/\\/example\\.org\\/[a-z]+", "localhost")));
+    containerConfig.data.put("gadgets.parent",
+        Arrays.asList("http:\\/\\/example\\.org\\/[a-z]+", "localhost"));
 
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.OK, results.getStatus());
@@ -140,8 +140,8 @@ public class RendererTest {
 
   @Test
   public void validateBadParent() throws Exception {
-    containerConfig.json.put("gadgets.parent",
-        new JSONArray(Arrays.asList("http:\\/\\/example\\.com\\/[a-z]+", "localhost")));
+    containerConfig.data.put("gadgets.parent",
+        Arrays.asList("http:\\/\\/example\\.com\\/[a-z]+", "localhost"));
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertNotNull("No error message provided for bad parent.", results.getErrorMessage());
@@ -167,16 +167,12 @@ public class RendererTest {
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
   }
 
-  private static class FakeContainerConfig extends JsonContainerConfig {
-    protected final JSONObject json = new JSONObject();
-
-    public FakeContainerConfig() throws ContainerConfigException {
-      super(null);
-    }
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    protected final Map<String, Object> data = Maps.newHashMap();
 
     @Override
-    public Object getJson(String container, String parameter) {
-      return json.opt(parameter);
+    public Object getProperty(String container, String name) {
+      return data.get(name);
     }
   }
 

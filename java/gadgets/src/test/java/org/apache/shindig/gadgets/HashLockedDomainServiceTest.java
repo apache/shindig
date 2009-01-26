@@ -24,9 +24,9 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.Arrays;
@@ -59,14 +59,14 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    expect(requiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+    expect(requiredConfig.getString(ContainerConfig.DEFAULT_CONTAINER,
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
-    expect(requiredConfig.get(ContainerConfig.DEFAULT_CONTAINER,
-        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn("true").anyTimes();
+    expect(requiredConfig.getBool(ContainerConfig.DEFAULT_CONTAINER,
+        LOCKED_DOMAIN_REQUIRED_KEY)).andReturn(true).anyTimes();
     expect(requiredConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
 
-    expect(enabledConfig.get(ContainerConfig.DEFAULT_CONTAINER,
+    expect(enabledConfig.getString(ContainerConfig.DEFAULT_CONTAINER,
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
     expect(enabledConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
@@ -163,9 +163,9 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     ContainerConfig inheritsConfig  = mock(ContainerConfig.class);
     expect(inheritsConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER, "other"));
-    expect(inheritsConfig.get(isA(String.class), eq(LOCKED_DOMAIN_REQUIRED_KEY)))
-        .andReturn("true").anyTimes();
-    expect(inheritsConfig.get(isA(String.class), eq(LOCKED_DOMAIN_SUFFIX_KEY)))
+    expect(inheritsConfig.getBool(isA(String.class), eq(LOCKED_DOMAIN_REQUIRED_KEY)))
+        .andReturn(true).anyTimes();
+    expect(inheritsConfig.getString(isA(String.class), eq(LOCKED_DOMAIN_SUFFIX_KEY)))
         .andReturn("-a.example.com:8080").anyTimes();
     replay();
 

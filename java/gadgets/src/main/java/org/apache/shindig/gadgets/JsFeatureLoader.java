@@ -21,10 +21,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.shindig.common.ContainerConfig;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 
 import org.apache.commons.lang.StringUtils;

@@ -17,12 +17,15 @@
  * under the License.
  */
 
-package org.apache.shindig.common;
+package org.apache.shindig.config;
 
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.expressions.ElException;
+import org.apache.shindig.expressions.Expression;
+import org.apache.shindig.expressions.ExpressionContext;
+import org.apache.shindig.expressions.Expressions;
 
 import com.google.common.collect.Maps;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -34,13 +37,14 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Represents a container configuration using JSON notation.
@@ -49,16 +53,19 @@ import java.util.logging.Level;
  *
  * We use a cascading model, so you only have to specify attributes in
  * your config that you actually want to change.
+ *
+ * String values may use expressions. The variable context defaults to the 'current' container,
+ * but parent values may be accessed through the special "parent" property.
  */
 @Singleton
-public class JsonContainerConfig implements ContainerConfig {
+public class JsonContainerConfig extends AbstractContainerConfig {
   private static final Logger LOG = Logger.getLogger(JsonContainerConfig.class.getName());
   public static final char FILE_SEPARATOR = ',';
   public static final String PARENT_KEY = "parent";
   // TODO: Rename this to simply "container", gadgets.container is unnecessary.
   public static final String CONTAINER_KEY = "gadgets.container";
 
-  private final Map<String, JSONObject> config;
+  private final Map<String, Map<String, Object>> config;
 
   /**
    * Creates a new, empty configuration.
@@ -68,59 +75,80 @@ public class JsonContainerConfig implements ContainerConfig {
   @Inject
   public JsonContainerConfig(@Named("shindig.containers.default") String containers)
       throws ContainerConfigException {
-    config = Maps.newHashMap();
-    if (containers != null) {
-      loadContainers(containers);
-    }
+    config = createContainers(loadContainers(containers));
   }
 
+  @Override
   public Collection<String> getContainers() {
     return Collections.unmodifiableSet(config.keySet());
   }
 
-  public Object getJson(String container, String parameter) {
-    JSONObject data = config.get(container);
-    if (data == null) {
-      return null;
-    }
-    if (parameter == null) {
-      return data;
-    }
+  @Override
+  public Map<String, Object> getProperties(String container) {
+    return config.get(container);
+  }
 
-    try {
-      for (String param : parameter.split("/")) {
-        Object next = data.get(param);
-        if (next instanceof JSONObject) {
-          data = (JSONObject)next;
-        } else {
-          return next;
-        }
+  @Override
+  public Object getProperty(String container, String property) {
+    if (property.startsWith("${")) {
+      // An expression!
+      try {
+        Expression<String> expression = Expressions.parse(property, String.class);
+        return expression.evaluate(createExpressionContext(container));
+      } catch (ElException e) {
+        return null;
       }
-      return data;
-    } catch (JSONException e) {
-      return null;
     }
+    return config.get(container).get(property);
   }
 
-  public String get(String container, String parameter) {
-    Object data = getJson(container, parameter);
-    return data == null ? null : data.toString();
+  /**
+   * Initialize each container's configuration.
+   */
+  private Map<String, Map<String, Object>> createContainers(JSONObject json) {
+    Map<String, Map<String, Object>> map = Maps.newHashMap();
+    for (String container : JSONObject.getNames(json)) {
+      ExpressionContext context = createExpressionContext(container);
+      map.put(container, jsonToMap(json.optJSONObject(container), context));
+    }
+
+    return map;
   }
 
-  public JSONObject getJsonObject(String container, String parameter) {
-    Object data = getJson(container, parameter);
-    if (data instanceof JSONObject) {
-      return (JSONObject)data;
-    }
-    return null;
+  /**
+   * Protected to allow overriding.
+   */
+  protected ExpressionContext createExpressionContext(String container) {
+    return new ContainerConfigExpressionContext(container, this);
   }
 
-  public JSONArray getJsonArray(String container, String parameter) {
-    Object data = getJson(container, parameter);
-    if (data instanceof JSONArray) {
-      return (JSONArray)data;
+  /**
+   * Convert a JSON value to a configuration value.
+   */
+  private static Object jsonToConfig(Object json, ExpressionContext context) {
+    if (json instanceof CharSequence) {
+      return new DynamicConfigProperty(json.toString(), context);
+    } else if (json instanceof JSONArray) {
+      JSONArray jsonArray = (JSONArray) json;
+      List<Object> values = new ArrayList<Object>(jsonArray.length());
+      for (int i = 0, j = jsonArray.length(); i < j; ++i) {
+        values.add(jsonToConfig(jsonArray.opt(i), context));
+      }
+      return Collections.unmodifiableList(values);
+    } else if (json instanceof JSONObject) {
+      return jsonToMap((JSONObject) json, context);
     }
-    return null;
+
+    // A (boxed) primitive.
+    return json;
+  }
+
+  private static Map<String, Object> jsonToMap(JSONObject json, ExpressionContext context) {
+    Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
+    for (String key : JSONObject.getNames(json)) {
+      values.put(key, jsonToConfig(json.opt(key), context));
+    }
+    return Collections.unmodifiableMap(values);
   }
 
   /**
@@ -131,20 +159,21 @@ public class JsonContainerConfig implements ContainerConfig {
    * @param files The files to examine.
    * @throws ContainerConfigException
    */
-  private void loadFiles(File[] files) throws ContainerConfigException {
+  private void loadFiles(File[] files, JSONObject all) throws ContainerConfigException {
     try {
       for (File file : files) {
         LOG.info("Reading container config: " + file.getName());
         if (file.isDirectory()) {
-          loadFiles(file.listFiles());
+          loadFiles(file.listFiles(), all);
         } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".js") ||
                    file.getName().toLowerCase(Locale.ENGLISH).endsWith(".json")) {
-            if (!file.exists()) {
-                throw new ContainerConfigException("The file '" + file.getAbsolutePath() + "' doesn't exist.");
-            }
-          loadFromString(ResourceLoader.getContent(file));
+          if (!file.exists()) {
+            throw new ContainerConfigException(
+                "The file '" + file.getAbsolutePath() + "' doesn't exist.");
+          }
+          loadFromString(ResourceLoader.getContent(file), all);
         } else {
-            if (LOG.isLoggable(Level.FINEST)) LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
+          LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
       }
     } catch (IOException e) {
@@ -157,12 +186,12 @@ public class JsonContainerConfig implements ContainerConfig {
    * @param files The base paths to look for container.xml
    * @throws ContainerConfigException
    */
-  private void loadResources(String[] files)  throws ContainerConfigException {
+  private void loadResources(String[] files, JSONObject all)  throws ContainerConfigException {
     try {
       for (String entry : files) {
         LOG.info("Reading container config: " + entry);
         String content = ResourceLoader.getContent(entry);
-        loadFromString(content);
+        loadFromString(content, all);
       }
     } catch (IOException e) {
       throw new ContainerConfigException(e);
@@ -215,20 +244,20 @@ public class JsonContainerConfig implements ContainerConfig {
    * @throws ContainerConfigException If there is an invalid parent parameter
    *    in the prototype chain.
    */
-  private JSONObject mergeParents(String container)
+  private JSONObject mergeParents(String container, JSONObject all)
       throws ContainerConfigException, JSONException {
-    JSONObject base = config.get(container);
+    JSONObject base = all.getJSONObject(container);
     if (DEFAULT_CONTAINER.equals(container)) {
       return base;
     }
 
     String parent = base.optString(PARENT_KEY, DEFAULT_CONTAINER);
-    if (!config.containsKey(parent)) {
+    if (!all.has(parent)) {
       throw new ContainerConfigException(
           "Unable to locate parent '" + parent + "' required by "
           + base.getString(CONTAINER_KEY));
     }
-    return mergeObjects(mergeParents(parent), base);
+    return mergeObjects(mergeParents(parent, all), base);
   }
 
   /**
@@ -237,7 +266,7 @@ public class JsonContainerConfig implements ContainerConfig {
    * @param json
    * @throws ContainerConfigException
    */
-  protected void loadFromString(String json) throws ContainerConfigException {
+  protected void loadFromString(String json, JSONObject all) throws ContainerConfigException {
     try {
       JSONObject contents = new JSONObject(json);
       JSONArray containers = contents.getJSONArray(CONTAINER_KEY);
@@ -245,7 +274,7 @@ public class JsonContainerConfig implements ContainerConfig {
       for (int i = 0, j = containers.length(); i < j; ++i) {
         // Copy the default object and produce a new one.
         String container = containers.getString(i);
-        config.put(container, contents);
+        all.put(container, contents);
       }
     } catch (JSONException e) {
       throw new ContainerConfigException(e);
@@ -259,32 +288,32 @@ public class JsonContainerConfig implements ContainerConfig {
    * @param path
    * @throws ContainerConfigException
    */
-  private void loadContainers(String path) throws ContainerConfigException {
+  private JSONObject loadContainers(String path) throws ContainerConfigException {
+    JSONObject all = new JSONObject();
     try {
       for (String location : StringUtils.split(path, FILE_SEPARATOR)) {
         if (location.startsWith("res://")) {
           location = location.substring(6);
           LOG.info("Loading resources from: " + location);
           if (path.endsWith(".txt")) {
-            loadResources(ResourceLoader.getContent(location).split("[\r\n]+"));
+            loadResources(ResourceLoader.getContent(location).split("[\r\n]+"), all);
           } else {
-            loadResources(new String[]{location});
+            loadResources(new String[]{location}, all);
           }
         } else {
           LOG.info("Loading files from: " + location);
           File file = new File(location);
-          loadFiles(new File[]{file});
+          loadFiles(new File[]{file}, all);
         }
       }
 
       // Now that all containers are loaded, we go back through them and merge
       // recursively. This is done at startup to simplify lookups.
-      Map<String, JSONObject> merged = Maps.newHashMapWithExpectedSize(config.size());
-
-      for (String container : config.keySet()) {
-        merged.put(container, mergeParents(container));
+      for (String container : JSONObject.getNames(all)) {
+        all.put(container, mergeParents(container, all));
       }
-      config.putAll(merged);
+
+      return all;
     } catch (IOException e) {
       throw new ContainerConfigException(e);
     } catch (JSONException e) {
