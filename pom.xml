@@ -1222,8 +1222,8 @@
       </dependency>
       <dependency>
         <groupId>net.oauth</groupId>
-        <artifactId>core</artifactId>
-        <version>20080621</version>
+        <artifactId>oauth-core</artifactId>
+        <version>20090121</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
