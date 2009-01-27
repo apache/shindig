@@ -30,10 +30,10 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
@@ -86,12 +86,12 @@ public class DefaultMessageBundleFactoryTest {
 
   private static final int MAX_AGE = 10000;
 
-  private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
+  private final RequestPipeline pipeline = EasyMock.createNiceMock(RequestPipeline.class);
   private final CacheProvider cacheProvider = new LruCacheProvider(10);
   private final Cache<String, MessageBundle> cache
       = cacheProvider.createCache(DefaultMessageBundleFactory.CACHE_NAME);
   private final DefaultMessageBundleFactory bundleFactory
-      = new DefaultMessageBundleFactory(fetcher, cacheProvider, MAX_AGE);
+      = new DefaultMessageBundleFactory(pipeline, cacheProvider, MAX_AGE);
   private final GadgetSpec gadgetSpec;
 
   public DefaultMessageBundleFactoryTest() {
@@ -106,8 +106,8 @@ public class DefaultMessageBundleFactoryTest {
   @Test
   public void getBundle() throws Exception {
     HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(response);
-    replay(fetcher);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response);
+    replay(pipeline);
 
     MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, true);
 
@@ -119,8 +119,8 @@ public class DefaultMessageBundleFactoryTest {
   @Test
   public void getBundleFromCache() throws Exception {
     HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(fetcher.fetch(isA(HttpRequest.class))).andReturn(response).once();
-    replay(fetcher);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).once();
+    replay(pipeline);
 
     MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
     MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
@@ -157,11 +157,11 @@ public class DefaultMessageBundleFactoryTest {
         .create();
     HttpResponse badResponse = HttpResponse.error();
 
-    expect(fetcher.fetch(isA(HttpRequest.class)))
+    expect(pipeline.execute(isA(HttpRequest.class)))
         .andReturn(expiredResponse).once();
-    expect(fetcher.fetch(isA(HttpRequest.class)))
+    expect(pipeline.execute(isA(HttpRequest.class)))
         .andReturn(badResponse).once();
-    replay(fetcher);
+    replay(pipeline);
 
     final AtomicLong time = new AtomicLong();
 
@@ -180,7 +180,7 @@ public class DefaultMessageBundleFactoryTest {
 
     MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
 
-    verify(fetcher);
+    verify(pipeline);
 
     assertSame("Did not respond from cache when refresh failed.", bundle0, bundle1);
   }
@@ -189,13 +189,13 @@ public class DefaultMessageBundleFactoryTest {
   public void badResponseIsEmptyWhenNotInCache() throws Exception {
     HttpResponse badResponse = HttpResponse.error();
 
-    expect(fetcher.fetch(isA(HttpRequest.class)))
+    expect(pipeline.execute(isA(HttpRequest.class)))
         .andReturn(badResponse).once();
-    replay(fetcher);
+    replay(pipeline);
 
     MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
 
-    verify(fetcher);
+    verify(pipeline);
 
     assertEquals(0, bundle.getMessages().size());
   }
@@ -212,13 +212,13 @@ public class DefaultMessageBundleFactoryTest {
     assertEquals(MAX_AGE / 1000, capturingFetcher.request.getCacheTtl());
   }
 
-  private static class CapturingFetcher implements HttpFetcher {
+  private static class CapturingFetcher implements RequestPipeline {
     HttpRequest request;
 
     protected CapturingFetcher() {
     }
 
-    public HttpResponse fetch(HttpRequest request) {
+    public HttpResponse execute(HttpRequest request) {
       this.request = request;
       return new HttpResponse(BASIC_BUNDLE);
     }

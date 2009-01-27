@@ -23,15 +23,15 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.common.base.Preconditions;
 
 import java.net.URI;
 import java.util.logging.Logger;
@@ -48,15 +48,15 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
   static final String ERROR_KEY = "parse.exception";
   static final Logger LOG = Logger.getLogger(DefaultGadgetSpecFactory.class.getName());
 
-  private final HttpFetcher fetcher;
+  private final RequestPipeline pipeline;
   private final SoftExpiringCache<Uri, GadgetSpec> cache;
   private final long refresh;
 
   @Inject
-  public DefaultGadgetSpecFactory(HttpFetcher fetcher,
+  public DefaultGadgetSpecFactory(RequestPipeline pipeline,
                                   CacheProvider cacheProvider,
                                   @Named("shindig.cache.xml.refreshInterval") long refresh) {
-    this.fetcher = fetcher;
+    this.pipeline = pipeline;
     Cache<Uri, GadgetSpec> baseCache = cacheProvider.createCache(CACHE_NAME);
     this.cache = new SoftExpiringCache<Uri, GadgetSpec>(baseCache);
     this.refresh = refresh;
@@ -133,7 +133,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
     // globally. This ensures propagation to shared caches when this is set.
     request.setCacheTtl((int) (refresh / 1000));
 
-    HttpResponse response = fetcher.fetch(request);
+    HttpResponse response = pipeline.execute(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                                 "Unable to retrieve gadget xml. HTTP error " +

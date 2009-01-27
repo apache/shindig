@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.EasyMockTestCase;
+import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -26,10 +26,12 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -65,7 +67,8 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
         SPEC_URL,
         defaultRewriterFeature,
         DEFAULT_PROXY_BASE);
-    injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
+    injector = Guice.createInjector(new ParseModule(), new PropertiesModule(),
+        new TestRequestPipelineModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
@@ -152,6 +155,16 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     @Override
     public ContentRewriterFeature get(HttpRequest request) {
       return feature;
+    }
+  }
+
+  private static class TestRequestPipelineModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+      bind(RequestPipeline.class).toInstance(new RequestPipeline() {
+        public HttpResponse execute(HttpRequest request) { return null; }
+      });
     }
   }
 }

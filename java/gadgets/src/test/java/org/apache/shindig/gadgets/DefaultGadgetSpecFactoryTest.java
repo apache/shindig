@@ -27,10 +27,10 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import org.easymock.EasyMock;
@@ -102,12 +102,12 @@ public class DefaultGadgetSpecFactoryTest {
 
   private static final int MAX_AGE = 10000;
 
-  private final HttpFetcher fetcher = EasyMock.createNiceMock(HttpFetcher.class);
+  private final RequestPipeline pipeline = EasyMock.createNiceMock(RequestPipeline.class);
 
   private final CacheProvider cacheProvider = new LruCacheProvider(5);
 
   private final DefaultGadgetSpecFactory specFactory
-      = new DefaultGadgetSpecFactory(fetcher, cacheProvider, MAX_AGE);
+      = new DefaultGadgetSpecFactory(pipeline, cacheProvider, MAX_AGE);
 
   private static HttpRequest createIgnoreCacheRequest() {
     return new HttpRequest(SPEC_URL)
@@ -126,8 +126,8 @@ public class DefaultGadgetSpecFactoryTest {
   public void specFetched() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
     HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
-    expect(fetcher.fetch(request)).andReturn(response);
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
 
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
 
@@ -139,8 +139,8 @@ public class DefaultGadgetSpecFactoryTest {
     HttpRequest request = createIgnoreCacheRequest();
 
     HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
-    expect(fetcher.fetch(request)).andReturn(response);
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
 
     GadgetSpec spec = specFactory.getGadgetSpec(NO_CACHE_CONTEXT);
 
@@ -150,11 +150,11 @@ public class DefaultGadgetSpecFactoryTest {
   @Test
   public void specFetchedFromParam() throws Exception {
     // Set up request as if it's a regular spec request, and ensure that
-    // the return value comes from rawxml, not the fetcher.
+    // the return value comes from rawxml, not the pipeline.
     HttpRequest request = createIgnoreCacheRequest();
     HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
-    expect(fetcher.fetch(request)).andReturn(response);
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
 
     GadgetSpec spec = specFactory.getGadgetSpec(RAWXML_GADGET_CONTEXT);
 
@@ -172,9 +172,9 @@ public class DefaultGadgetSpecFactoryTest {
         .setResponse(LOCAL_SPEC_XML.getBytes("UTF-8"))
         .create();
     HttpResponse updatedResponse = new HttpResponse(ALT_LOCAL_SPEC_XML);
-    expect(fetcher.fetch(request)).andReturn(expiredResponse).once();
-    expect(fetcher.fetch(retriedRequest)).andReturn(updatedResponse).once();
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(expiredResponse).once();
+    expect(pipeline.execute(retriedRequest)).andReturn(updatedResponse).once();
+    replay(pipeline);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
@@ -191,9 +191,9 @@ public class DefaultGadgetSpecFactoryTest {
         .setResponse(LOCAL_SPEC_XML.getBytes("UTF-8"))
         .addHeader("Pragma", "no-cache")
         .create();
-    expect(fetcher.fetch(request)).andReturn(expiredResponse);
-    expect(fetcher.fetch(retriedRequest)).andReturn(HttpResponse.notFound()).once();
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(expiredResponse);
+    expect(pipeline.execute(retriedRequest)).andReturn(HttpResponse.notFound()).once();
+    replay(pipeline);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
@@ -202,23 +202,23 @@ public class DefaultGadgetSpecFactoryTest {
   }
 
   @Test
-  public void ttlPropagatesToFetcher() throws Exception {
-    CapturingFetcher capturingFetcher = new CapturingFetcher();
+  public void ttlPropagatesToPipeline() throws Exception {
+    CapturingPipeline capturingpipeline = new CapturingPipeline();
 
     DefaultGadgetSpecFactory forcedCacheFactory
-        = new DefaultGadgetSpecFactory(capturingFetcher, cacheProvider, 10000);
+        = new DefaultGadgetSpecFactory(capturingpipeline, cacheProvider, 10000);
 
     forcedCacheFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
 
-    assertEquals(10, capturingFetcher.request.getCacheTtl());
+    assertEquals(10, capturingpipeline.request.getCacheTtl());
   }
 
   @Test
   public void typeUrlNotFetchedRemote() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
     HttpResponse response = new HttpResponse(URL_SPEC_XML);
-    expect(fetcher.fetch(request)).andReturn(response);
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
 
     GadgetSpec spec = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
 
@@ -229,8 +229,8 @@ public class DefaultGadgetSpecFactoryTest {
   @Test(expected = GadgetException.class)
   public void badFetchThrows() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
-    expect(fetcher.fetch(request)).andReturn(HttpResponse.error());
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(HttpResponse.error());
+    replay(pipeline);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
   }
@@ -238,10 +238,10 @@ public class DefaultGadgetSpecFactoryTest {
   @Test(expected = GadgetException.class)
   public void badFetchServesCached() throws Exception {
     HttpRequest firstRequest = createCacheableRequest();
-    expect(fetcher.fetch(firstRequest)).andReturn(new HttpResponse(LOCAL_SPEC_XML)).once();
+    expect(pipeline.execute(firstRequest)).andReturn(new HttpResponse(LOCAL_SPEC_XML)).once();
     HttpRequest secondRequest = createIgnoreCacheRequest();
-    expect(fetcher.fetch(secondRequest)).andReturn(HttpResponse.error()).once();
-    replay(fetcher);
+    expect(pipeline.execute(secondRequest)).andReturn(HttpResponse.error()).once();
+    replay(pipeline);
 
     GadgetSpec original = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
     GadgetSpec cached = specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
@@ -253,8 +253,8 @@ public class DefaultGadgetSpecFactoryTest {
   @Test(expected = GadgetException.class)
   public void malformedGadgetSpecThrows() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
-    expect(fetcher.fetch(request)).andReturn(new HttpResponse("malformed junk"));
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(new HttpResponse("malformed junk"));
+    replay(pipeline);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
   }
@@ -262,8 +262,8 @@ public class DefaultGadgetSpecFactoryTest {
   @Test(expected = GadgetException.class)
   public void malformedGadgetSpecIsCachedAndThrows() throws Exception {
     HttpRequest request = createCacheableRequest();
-    expect(fetcher.fetch(request)).andReturn(new HttpResponse("malformed junk")).once();
-    replay(fetcher);
+    expect(pipeline.execute(request)).andReturn(new HttpResponse("malformed junk")).once();
+    replay(pipeline);
 
     try {
       specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), false);
@@ -275,19 +275,19 @@ public class DefaultGadgetSpecFactoryTest {
   }
 
   @Test(expected = GadgetException.class)
-  public void throwingFetcherRethrows() throws Exception {
+  public void throwingpipelineRethrows() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
-    expect(fetcher.fetch(request)).andThrow(
+    expect(pipeline.execute(request)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT));
-    replay(fetcher);
+    replay(pipeline);
 
     specFactory.getGadgetSpec(SPEC_URL.toJavaUri(), true);
   }
 
-  protected static class CapturingFetcher implements HttpFetcher {
+  protected static class CapturingPipeline implements RequestPipeline {
     HttpRequest request;
 
-    public HttpResponse fetch(HttpRequest request) {
+    public HttpResponse execute(HttpRequest request) {
       this.request = request;
       return new HttpResponse(LOCAL_SPEC_XML);
     }
