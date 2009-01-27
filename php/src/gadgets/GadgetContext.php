@@ -46,7 +46,7 @@ class GadgetContext {
   public function __construct($renderingContext) {
     // Rendering context is set by the calling event handler (either GADGET or CONTAINER)
     $this->setRenderingContext($renderingContext);
-    
+
     // Request variables
     $this->setIgnoreCache($this->getIgnoreCacheParam());
     $this->setForcedJsLibs($this->getFocedJsLibsParam());
@@ -133,17 +133,14 @@ class GadgetContext {
     return new $remoteContent();
   }
 
-  private function instanceCache() {
-    $dataCache = Config::get('data_cache');
-    return new $dataCache();
-  }
-
   private function instanceRegistry() {
     // Profiling showed 40% of the processing time was spend in the feature registry
     // So by caching this and making it a one time initialization, we almost double the performance
-    if (! ($registry = $this->getCache()->get(md5(Config::get('features_path'))))) {
+    $featureCache = Config::get('feature_cache');
+    $featureCache = new $featureCache();
+    if (! ($registry = $featureCache->get(md5(Config::get('features_path'))))) {
       $registry = new GadgetFeatureRegistry(Config::get('features_path'));
-      $this->getCache()->set(md5(Config::get('features_path')), $registry);
+      $featureCache->set(md5(Config::get('features_path')), $registry);
     }
     return $registry;
   }
@@ -168,13 +165,6 @@ class GadgetContext {
       $this->containerConfig = $this->instanceContainerConfig();
     }
     return $this->containerConfig;
-  }
-
-  public function getCache() {
-    if ($this->cache == null) {
-      $this->setCache($this->instanceCache());
-    }
-    return $this->cache;
   }
 
   public function getGadgetId() {

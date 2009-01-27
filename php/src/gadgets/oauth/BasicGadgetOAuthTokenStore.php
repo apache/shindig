@@ -19,7 +19,7 @@
  */
 
 class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
-  
+
   /** default location for consumer keys and secrets */
   private $OAUTH_CONFIG = "../config/oauth.json";
   private $CONSUMER_SECRET_KEY = "consumer_secret";
@@ -96,5 +96,4 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     $kas = new ConsumerKeyAndSecret($consumerKey, $consumerSecret, $keyType);
     $this->storeConsumerKeyAndSecret($gadgetUri, $serviceName, $kas);
   }
-
 }

@@ -38,11 +38,11 @@ class JsLibrary {
   public function getContent() {
     if (! $this->loaded && $this->type == 'FILE') {
       if (Config::get('compress_javascript')) {
-        $dataCache = Config::get('data_cache');
-        $dataCache = new $dataCache();
-        if (! ($content = $dataCache->get(md5($this->content)))) {
+        $featureCache = Config::get('feature_cache');
+        $featureCache = new $featureCache();
+        if (! ($content = $featureCache->get(md5($this->content)))) {
           $content = JsMin::minify(JsLibrary::loadData($this->content, $this->type));
-          $dataCache->set(md5($this->content), $content);
+          $featureCache->set(md5($this->content), $content);
           $this->content = $content;
         } else {
           $this->content = $content;
