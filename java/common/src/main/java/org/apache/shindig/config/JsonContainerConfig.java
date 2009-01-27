@@ -19,6 +19,7 @@
 
 package org.apache.shindig.config;
 
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.expressions.ElException;
 import org.apache.shindig.expressions.Expression;
@@ -319,5 +320,10 @@ public class JsonContainerConfig extends AbstractContainerConfig {
     } catch (JSONException e) {
       throw new ContainerConfigException(e);
     }
+  }
+
+  @Override
+  public String toString() {
+    return JsonSerializer.serialize(config);
   }
 }
