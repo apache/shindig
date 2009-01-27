@@ -23,9 +23,9 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.cache.SoftExpiringCache.CachedObject;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -48,15 +48,15 @@ public class DefaultMessageBundleFactory implements MessageBundleFactory {
   private static final Locale ALL_ALL = new Locale("all", "ALL");
   public static final String CACHE_NAME = "messageBundles";
   static final Logger LOG = Logger.getLogger(DefaultMessageBundleFactory.class.getName());
-  private final HttpFetcher fetcher;
+  private final RequestPipeline pipeline;
   final SoftExpiringCache<String, MessageBundle> cache;
   private final long refresh;
 
   @Inject
-  public DefaultMessageBundleFactory(HttpFetcher fetcher,
+  public DefaultMessageBundleFactory(RequestPipeline pipeline,
                                      CacheProvider cacheProvider,
                                      @Named("shindig.cache.xml.refreshInterval") long refresh) {
-    this.fetcher = fetcher;
+    this.pipeline = pipeline;
     Cache<String, MessageBundle> baseCache = cacheProvider.createCache(CACHE_NAME);
     this.cache = new SoftExpiringCache<String, MessageBundle>(baseCache);
     this.refresh = refresh;
@@ -134,7 +134,7 @@ public class DefaultMessageBundleFactory implements MessageBundleFactory {
     // globally. This ensures propagation to shared caches when this is set.
     request.setCacheTtl((int) (refresh / 1000));
 
-    HttpResponse response = fetcher.fetch(request);
+    HttpResponse response = pipeline.execute(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
           "Unable to retrieve message bundle xml. HTTP error " +
