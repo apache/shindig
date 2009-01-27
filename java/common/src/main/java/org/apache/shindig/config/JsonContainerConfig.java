@@ -100,7 +100,12 @@ public class JsonContainerConfig extends AbstractContainerConfig {
         return null;
       }
     }
-    return config.get(container).get(property);
+
+    Map<String, Object> containerData = config.get(container);
+    if (containerData == null) {
+      return null;
+    }
+    return containerData.get(property);
   }
 
   /**

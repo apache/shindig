@@ -23,10 +23,7 @@ import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;
 import static org.apache.shindig.config.JsonContainerConfig.CONTAINER_KEY;
 import static org.apache.shindig.config.JsonContainerConfig.PARENT_KEY;
 import static org.junit.Assert.assertEquals;
-
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.config.ContainerConfigException;
-import org.apache.shindig.config.JsonContainerConfig;
+import static org.junit.Assert.assertNull;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -153,6 +150,12 @@ public class JsonContainerConfigTest {
     List<String> expected = Arrays.asList(ARRAY_VALUE);
 
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void invalidContainerReturnsNull() throws Exception {
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
+    assertNull("Did not return null for invalid container.", config.getString("fake", PARENT_KEY));
   }
 
   @Test(expected = ContainerConfigException.class)
