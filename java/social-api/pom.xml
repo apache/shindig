@@ -101,7 +101,7 @@
     </dependency>
     <dependency>
       <groupId>net.oauth</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>oauth-core</artifactId>
     </dependency>
     <!-- may only be needed for JDK < 1.6 -->
     <dependency>

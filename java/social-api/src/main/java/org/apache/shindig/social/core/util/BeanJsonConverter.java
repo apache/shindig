@@ -155,7 +155,12 @@ public class BeanJsonConverter implements BeanConverter {
       try {
         Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
         if (val != null) {
-          toReturn.put(getter.fieldName, translateObjectToJson(val));
+          String attribute = getter.fieldName;
+          Object value = translateObjectToJson(val);
+
+          if (!(attribute.equals("isOwner") || attribute.equals("isViewer") && value.equals(Boolean.FALSE))) {
+            toReturn.put(attribute, value);
+          }
         }
       } catch (JSONException e) {
         throw new RuntimeException(errorMessage(pojo, getter), e);
