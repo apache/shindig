@@ -65,6 +65,9 @@ os.createNamespace = function(ns, url) {
     tags = {};
     os.nsmap_[ns] = tags;
     os.nsurls_[ns] = url;
+  } else if (os.nsurls_[ns] == null ) {
+    // Lazily register an auto-created namespace.
+    os.nsurls_[ns] = url;
   } else if (os.nsurls_[ns] != url) {
     throw("Namespace " + ns + " already defined with url " + os.nsurls_[ns]);
   }
@@ -78,9 +81,15 @@ os.getNamespace = function(prefix) {
   return os.nsmap_[prefix];
 };
 
-os.addNamespace = function(ns, url, nsObj) {
+os.addNamespace = function(ns, url, nsObj) {  
   if (os.nsmap_[ns]) {
-    throw ("Namespace '" + ns + "' already exists!");
+    if (os.nsurls_[ns] == null) {
+      // Lazily register an auto-created namespace.
+      os.nsurls_[ns] = url;
+      return;
+    } else {
+      throw ("Namespace '" + ns + "' already exists!");
+    }
   }
   os.nsmap_[ns] = nsObj;
   os.nsurls_[ns] = url;

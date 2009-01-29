@@ -612,7 +612,7 @@ os.data.transformSpecialValue = function(value) {
  * Pre-populate a Data Set based on application's URL parameters.
  */
 (os.data.populateParams_ = function() {
-  if (gadgets.util.hasFeature("views")) {
+  if (window["gadgets"] && gadgets.util.hasFeature("views")) {
     os.data.DataContext.putDataSet("ViewParams", gadgets.views.getParams());
   }
 })();

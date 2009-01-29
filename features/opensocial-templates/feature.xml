@@ -31,6 +31,7 @@ This should not be used in a production setting.
 -->
 <feature>
   <name>opensocial-templates</name>
+  <dependency>opensocial-0.8</dependency>
   <gadget>
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/util.js"></script>
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>

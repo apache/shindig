@@ -360,10 +360,10 @@ os.Container.registerTagElement_ = function(element, name) {
   if (template) {
     var tagParts = name.split(':');
     var nsObj = os.getNamespace(tagParts[0]);
-    if (nsObj) {
-      nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
-    } else {
-      os.warn('Namespace ' + tagParts[0] + ' is not registered.');
+    if (!nsObj) {
+      // Auto Create a namespace for lazy registration.
+      nsObj = os.createNamespace(tagParts[0], null);
     }
+    nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
   }
 };
