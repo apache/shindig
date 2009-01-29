@@ -83,14 +83,14 @@ public class Substitutions {
    * @param value
    */
   public void addSubstitution(Type type, String key, String value) {
-    substitutions.put(type.prefix + key + "__", value);
+    substitutions.put(type.prefix + key, value);
   }
 
   /**
    * @return The value stored for the given type and key, or null.
    */
   public String getSubstitution(Type type, String key) {
-    return substitutions.get(type.prefix + key + "__");
+    return substitutions.get(type.prefix + key);
   }
 
   /**
@@ -115,14 +115,14 @@ public class Substitutions {
       }
 
       output.append(input.substring(lastPosition, i));
-      lastPosition = next + 2;
 
-      String pattern = input.substring(i, lastPosition);
+      String pattern = input.substring(i, next);
 
       boolean isMessage = pattern.startsWith(Type.MESSAGE.prefix);
       String replacement;
+
       if (isMessage && isNested) {
-        replacement = pattern;
+        replacement = pattern + "__";
       } else {
         replacement = substitutions.get(pattern);
       }
@@ -130,11 +130,15 @@ public class Substitutions {
       if (replacement == null) {
         // Keep it.
         output.append(pattern);
-      } else  if (isMessage && !isNested) {
-        // Messages can get recursive
-        performSubstitutions(replacement, output, true);
+        lastPosition = next;
       } else {
-        output.append(replacement);
+        lastPosition = next + 2;
+        if (isMessage && !isNested) {
+          // Messages can be recursive
+          performSubstitutions(replacement, output, true);
+        } else {
+          output.append(replacement);
+        }
       }
     }
 

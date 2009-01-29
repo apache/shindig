@@ -20,9 +20,9 @@ package org.apache.shindig.gadgets.variables;
 
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.lang.StringUtils;
+
+import junit.framework.TestCase;
 
 public class SubstitutionsTest extends TestCase {
   private Substitutions subst;
@@ -73,6 +73,22 @@ public class SubstitutionsTest extends TestCase {
     subst.addSubstitution(Type.USER_PREF, "bar", "BAR!!!");
     assertEquals("Greetings __MSG_foo____UP_bar__, planet __MSG_earth__???",
         subst.substituteString(msg));
+  }
+
+  public void testDanglingUnderScoresAreIgnored() throws Exception {
+    String msg = "__MSG_hello__, var_msg + '__' + 'world __MSG_world__";
+    subst.addSubstitution(Type.MESSAGE, "hello", "Hello");
+    subst.addSubstitution(Type.MESSAGE, "world", "World");
+
+    assertEquals("Hello, var_msg + '__' + 'world World", subst.substituteString(msg));
+  }
+
+  public void testComplexUnderscores() throws Exception {
+    String msg = "__MSG_hello____________ten____________MSG_world______";
+    subst.addSubstitution(Type.MESSAGE, "hello", "Hello");
+    subst.addSubstitution(Type.MESSAGE, "world", "World");
+
+    assertEquals("Hello__________ten__________World____", subst.substituteString(msg));
   }
 
   public void loadTest() throws Exception {
