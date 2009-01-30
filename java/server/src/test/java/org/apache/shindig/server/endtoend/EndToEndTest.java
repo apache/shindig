@@ -114,6 +114,11 @@ public class EndToEndTest {
   }
 
   @Test
+  public void testData() throws Exception {
+    executeAllPageTests("opensocial-data/data_test");
+  }
+
+  @Test
   public void testTemplates() throws Exception {
     executeAllPageTests("opensocial-templates/ost_test");
   }
