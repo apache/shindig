@@ -21,10 +21,12 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -57,6 +59,8 @@ public class BasicHttpFetcher implements HttpFetcher {
 
   private Provider<Proxy> proxyProvider;
 
+  private ImageRewriter rewriter;
+
   /**
    * Creates a new fetcher for fetching HTTP objects.  Not really suitable
    * for production use.  Someone should probably go and implement maxObjSize,
@@ -83,6 +87,11 @@ public class BasicHttpFetcher implements HttpFetcher {
   // @Inject(optional=true)
   public void setProxyProvider(Provider<Proxy> proxyProvider) {
     this.proxyProvider = proxyProvider;
+  }
+
+  @Inject(optional = true)
+  public void setImageRewriter(@Named("org.apache.shindig.image-rewriter")ImageRewriter rewriter) {
+    this.rewriter = rewriter;
   }
 
   /**
@@ -167,7 +176,12 @@ public class BasicHttpFetcher implements HttpFetcher {
         fetcher.setDoOutput(true);
         IOUtils.copy(request.getPostBody(), fetcher.getOutputStream());
       }
-      return makeResponse(fetcher);
+      HttpResponse response = makeResponse(fetcher);
+      if (rewriter != null && !request.getIgnoreCache() &&
+          request.getCacheTtl() != 0) {
+        response = rewriter.rewrite(request.getUri(), response);
+      }
+      return response;
     } catch (IOException e) {
       if (e instanceof java.net.SocketTimeoutException ||
           e instanceof java.net.SocketException) {
