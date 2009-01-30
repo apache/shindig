@@ -17,6 +17,16 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Nullable;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.common.xml.DomUtil;
@@ -25,18 +35,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.base.Nullable;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -58,6 +56,8 @@ import java.util.Set;
  */
 public class HTMLContentRewriter  implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
+  
+  private final static String JS_MIME_TYPE = "text/javascript";
 
   public final static Set<String> TAGS = ImmutableSet.of("img", "embed", "link", "script", "style");
 
@@ -217,11 +217,15 @@ public class HTMLContentRewriter  implements ContentRewriter {
     List<Element> scriptTags = Lists.newArrayList(Iterables.filter(elementList,
         new Predicate<Element>() {
       public boolean apply(@Nullable Element node) {
-        return node.getNodeName().equalsIgnoreCase("script");
+        if (node.getNodeName().equalsIgnoreCase("script")) {
+          String type = node.getAttribute("type");
+          return type == null || type.length() == 0 || type.equalsIgnoreCase(JS_MIME_TYPE);
+        }
+        return false;
       }
     }));
 
-    String concatBase = getConcatBase(gadgetUri, feature, "text/javascript");
+    String concatBase = getConcatBase(gadgetUri, feature, JS_MIME_TYPE);
     List<Element> concatenateable = Lists.newArrayList();
     for (int i = 0; i < scriptTags.size(); i++) {
       Element scriptTag = scriptTags.get(i);
