@@ -24,13 +24,12 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -39,9 +38,6 @@ public class MutableContentTest {
 
   @Before
   public void setUp() throws Exception {
-    // Note dependency on CajaHtmlParser - this isn't particularly ideal but is
-    // sufficient given that this test doesn't exercise the parser extensively at all,
-    // instead focusing on the additional utility provided by MutableHtmlContent
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     mhc = new MutableContent(injector.getInstance(GadgetHtmlParser.class), "DEFAULT VIEW");
   }
