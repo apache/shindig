@@ -23,14 +23,16 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.HttpPreloader;
 import org.apache.shindig.gadgets.preload.PipelinedDataPreloader;
 import org.apache.shindig.gadgets.preload.Preloader;
 import org.apache.shindig.gadgets.render.RenderingContentRewriter;
+import org.apache.shindig.gadgets.rewrite.CSSContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.lexer.DefaultContentRewriter;
+import org.apache.shindig.gadgets.rewrite.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import java.util.List;
@@ -64,11 +66,13 @@ public class DefaultGuiceModule extends AbstractModule {
     private final List<ContentRewriter> rewriters;
 
     @Inject
-    public ContentRewritersProvider(DefaultContentRewriter optimizingRewriter,
+    public ContentRewritersProvider(HTMLContentRewriter optimizingRewriter,
+                                    CSSContentRewriter cssRewriter,
                                     CajaContentRewriter cajaRewriter,
                                     RenderingContentRewriter renderingRewriter) {
       rewriters = Lists.newArrayList();
       rewriters.add(optimizingRewriter);
+      rewriters.add(cssRewriter);
       rewriters.add(cajaRewriter);
       rewriters.add(renderingRewriter);
     }
