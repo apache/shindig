@@ -19,13 +19,21 @@
 package org.apache.shindig.social;
 
 import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
 
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
+
+import java.util.List;
 
 /**
  * Provides social api component injection for all large tests
@@ -44,7 +52,14 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
-    
 
+    bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(Lists.immutableList(ActivityHandler.class, AppDataHandler.class,
+            PersonHandler.class));
+
+    bind(String.class).annotatedWith(
+        Names.named("shindig.containers.default"))
+        .toInstance("res://containers/default/container.js");
+    bind(ContainerConfig.class).to(JsonContainerConfig.class);
   }
 }

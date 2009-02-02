@@ -18,20 +18,21 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.inject.ImplementedBy;
+import org.apache.shindig.auth.SecurityToken;
+
+import java.io.Reader;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
- * Dispatcher for DataRequestHandler requests.  The default implementation
- * registers the three standard Shindig handlers.
- * <p>
- * Add a custom binding of this interface to customize request handling.
+ * Interface exposed by a REST handler
  */
-@ImplementedBy(StandardHandlerDispatcher.class)
-public interface HandlerDispatcher {
+public interface RestHandler {
 
   /**
-   * @param service a service name
-   * @return the handler, or null if no handler is registered for that service
+   * Handle the request and return a Future from which the response object
+   * can be retrieved
    */
-  DataRequestHandler getHandler(String service);
+  Future<?> execute(String path, Map<String, String[]> parameters, Reader body,
+                    SecurityToken token, BeanConverter converter);
 }

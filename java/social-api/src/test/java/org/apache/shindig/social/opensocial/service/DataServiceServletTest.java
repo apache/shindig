@@ -17,34 +17,32 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
-import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
-
+import junit.framework.TestCase;
+import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutionException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-public class DataServiceServletTest extends EasyMockTestCase {
+public class DataServiceServletTest extends TestCase {
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
@@ -52,10 +50,9 @@ public class DataServiceServletTest extends EasyMockTestCase {
   private HttpServletRequest req;
   private HttpServletResponse res;
   private DataServiceServlet servlet;
-  private PersonHandler peopleHandler;
-  private ActivityHandler activityHandler;
-  private AppDataHandler appDataHandler;
   private BeanJsonConverter jsonConverter;
+
+  private IMocksControl mockControl = EasyMock.createNiceControl();
 
   private final ServletInputStream dummyPostData = new ServletInputStream() {
     @Override public int read()  {
@@ -64,142 +61,100 @@ public class DataServiceServletTest extends EasyMockTestCase {
   };
 
   @Override protected void setUp() throws Exception {
-    super.setUp();
     servlet = new DataServiceServlet();
-    req = EasyMock.createMock(HttpServletRequest.class);
-    res = EasyMock.createMock(HttpServletResponse.class);
-    jsonConverter = EasyMock.createMock(BeanJsonConverter.class);
-    BeanXStreamConverter xmlConverter = EasyMock.createMock(BeanXStreamConverter.class);
-    BeanXStreamAtomConverter atomConverter = EasyMock.createMock(BeanXStreamAtomConverter.class);
-    peopleHandler = EasyMock.createMock(PersonHandler.class);
-    activityHandler = EasyMock.createMock(ActivityHandler.class);
-    appDataHandler = EasyMock.createMock(AppDataHandler.class);
+    req = mockControl.createMock(HttpServletRequest.class);
+    res = mockControl.createMock(HttpServletResponse.class);
+    jsonConverter = mockControl.createMock(BeanJsonConverter.class);
+    BeanXStreamConverter xmlConverter = mockControl.createMock(BeanXStreamConverter.class);
+    BeanXStreamAtomConverter atomConverter = mockControl.createMock(BeanXStreamAtomConverter.class);
 
-    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json");
-    EasyMock.expect(xmlConverter.getContentType()).andReturn("application/xml");
-    EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml");
+    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json").anyTimes();
+    EasyMock.expect(xmlConverter.getContentType()).andReturn("application/xml").anyTimes();
+    EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml").anyTimes();
 
-    HandlerDispatcher dispatcher = new StandardHandlerDispatcher(constant(peopleHandler),
-        constant(activityHandler), constant(appDataHandler));
-    servlet.setHandlerDispatcher(dispatcher);
+    HandlerRegistry registry = new DefaultHandlerRegistry(null,
+        Lists.newArrayList(new TestHandler()));
+
+    servlet.setHandlerRegistry(registry);
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
-  // TODO: replace with Providers.of() when Guice version is upgraded
-  private static <T> Provider<T> constant(final T value) {
-    return new Provider<T>() {
-      public T get() {
-        return value;
-      }
-    };
+  public void testUriRecognition() throws Exception {
+    verifyHandlerWasFoundForPathInfo("/test/5/@self");
   }
 
-  public void testPeopleUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo('/'
-        + DataServiceServlet.PEOPLE_ROUTE + "/5/@self", peopleHandler);
+  private void verifyHandlerWasFoundForPathInfo(String peoplePathInfo)
+      throws Exception {
+    String post = "POST";
+    verifyHandlerWasFoundForPathInfo(peoplePathInfo, post, post);
   }
 
-  public void testActivitiesUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo('/'
-        + DataServiceServlet.ACTIVITY_ROUTE + "/5/@self", activityHandler);
+  private void verifyHandlerWasFoundForPathInfo(String pathInfo,
+    String actualMethod, String overrideMethod) throws Exception {
+    setupRequest(pathInfo, actualMethod, overrideMethod);
+
+    String method = StringUtils.isEmpty(overrideMethod) ? actualMethod : overrideMethod;
+
+    EasyMock.expect(jsonConverter.convertToString(
+        ImmutableMap.of("entry", TestHandler.REST_RESULTS.get(method))))
+        .andReturn("{ 'entry' : " + TestHandler.REST_RESULTS.get(method) + " }");
+
+    PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
+    EasyMock.expect(res.getWriter()).andReturn(writerMock);
+    writerMock.write(TestHandler.GET_RESPONSE);
+    EasyMock.expectLastCall();
+    res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+    mockControl.reset();
   }
 
-  public void testAppDataUriRecognition() throws Exception {
-    verifyHandlerWasFoundForPathInfo('/'
-        + DataServiceServlet.APPDATA_ROUTE + "/5/@self", appDataHandler);
+  public void testOverridePostWithGet() throws Exception {
+    String route = "/test";
+    verifyHandlerWasFoundForPathInfo(route, "POST", "GET");
   }
 
-  public void testMethodOverride() throws Exception {
-    String route = '/' + DataServiceServlet.APPDATA_ROUTE;
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", "GET", "GET");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", "", "POST");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", null, "POST");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "POST", "POST", "POST");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "GET", null, "GET");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "DELETE", null, "DELETE");
-    verifyHandlerWasFoundForPathInfo(route, appDataHandler, "PUT", null, "PUT");
+  public void testOverrideGetWithPost() throws Exception {
+    String route = "/test";
+    verifyHandlerWasFoundForPathInfo(route, "GET", "POST");
   }
 
   /**
    * Tests a data handler that returns a failed Future
    */
   public void testFailedRequest() throws Exception {
-    String route = '/' + DataServiceServlet.APPDATA_ROUTE;
-    setupRequest(route, "GET", null);
+    String route = "/test";
+    setupRequest(route, "DELETE", null);
 
-    EasyMock.expect(appDataHandler.handleItem(EasyMock.isA(RestfulRequestItem.class)));
-    EasyMock.expectLastCall().andReturn(
-        ImmediateFuture.errorInstance(new RuntimeException("FAILED")));
-
-    res.sendError(500, "FAILED");
+    // Shouldnt these be expectations
+    res.sendError(ResponseError.BAD_REQUEST.getHttpErrorCode(), TestHandler.FAILURE_MESSAGE);
     res.setCharacterEncoding("UTF-8");
     res.setContentType("application/json");
 
-    EasyMock.replay(req, res, appDataHandler, jsonConverter);
+    mockControl.replay();
     servlet.service(req, res);
-    EasyMock.verify(req, res, appDataHandler, jsonConverter);
-    EasyMock.reset(req, res, appDataHandler, jsonConverter);
+    mockControl.verify();
+    mockControl.reset();
   }
 
-  private void verifyHandlerWasFoundForPathInfo(String peoplePathInfo, DataRequestHandler handler)
-      throws Exception {
-    String post = "POST";
-    verifyHandlerWasFoundForPathInfo(peoplePathInfo, handler, post, post, post);
-  }
 
-  private void verifyHandlerWasFoundForPathInfo(String pathInfo, DataRequestHandler handler,
-      String actualMethod, String overrideMethod, String expectedMethod) throws Exception {
-    setupRequest(pathInfo, actualMethod, overrideMethod);
-
-    String jsonObject = "my lovely json";
-
-    EasyMock.expect(handler.handleItem(EasyMock.isA(RequestItem.class)));
-    EasyMock.expectLastCall().andReturn(ImmediateFuture.newInstance(jsonObject));
-
-    EasyMock.expect(jsonConverter.convertToString(ImmutableMap.of("entry", jsonObject)))
-        .andReturn("{ 'entry' : " + jsonObject + " }");
-
-    PrintWriter writerMock = EasyMock.createMock(PrintWriter.class);
-    EasyMock.expect(res.getWriter()).andReturn(writerMock);
-    writerMock.write(jsonObject);
-    res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
-
-    EasyMock.replay(req, res, handler, jsonConverter);
-    servlet.service(req, res);
-    EasyMock.verify(req, res, handler, jsonConverter);
-    EasyMock.reset(req, res, handler, jsonConverter);
-    // ick, this resets for the next call...
-    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json");
-  }
 
   private void setupRequest(String pathInfo, String actualMethod, String overrideMethod)
       throws IOException {
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
-    if (!("GET").equals(overrideMethod) && !("HEAD").equals(overrideMethod)) {
-      EasyMock.expect(req.getInputStream()).andStubReturn(dummyPostData);
+    FakeHttpServletRequest fakeReq = new FakeHttpServletRequest("/social/rest", pathInfo, "");
+    fakeReq.setPathInfo(pathInfo);
+    fakeReq.setParameter(DataServiceServlet.X_HTTP_METHOD_OVERRIDE, overrideMethod);
+    fakeReq.setCharacterEncoding("UTF-8");
+    if (!("GET").equals(actualMethod) && !("HEAD").equals(actualMethod)) {
+      fakeReq.setPostData("", "UTF-8");
     }
-    EasyMock.expect(req.getPathInfo()).andStubReturn(pathInfo);
-    EasyMock.expect(req.getMethod()).andStubReturn(actualMethod);
-    EasyMock.expect(req.getParameterNames()).andStubReturn(new StringTokenizer(""));
-    EasyMock.expect(req.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE)).andReturn(
-        overrideMethod).times(2);
-    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM)).andReturn(null);
-
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-  }
-
-  public void testInvalidRoute() throws Exception {
-    RestfulRequestItem requestItem = new RestfulRequestItem("/ahhh!", "GET", null,
-        FAKE_GADGET_TOKEN, jsonConverter);
-    try {
-      servlet.handleRequestItem(requestItem, new FakeHttpServletRequest()).get();
-      fail();
-    } catch (ExecutionException ee) {
-      assertTrue(ee.getCause() instanceof SocialSpiException);
-      assertEquals(ResponseError.NOT_IMPLEMENTED, ((SocialSpiException) ee.getCause()).getError());
-    }
+    fakeReq.setMethod(actualMethod);
+    fakeReq.setAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
+    req = fakeReq;
   }
 
   public void testGetConverterForRequest() throws Exception {

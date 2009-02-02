@@ -18,25 +18,20 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DataServiceServlet extends ApiServlet {
 
@@ -44,20 +39,11 @@ public class DataServiceServlet extends ApiServlet {
   protected static final String ATOM_FORMAT = "atom";
   protected static final String XML_FORMAT = "xml";
 
-  public static final String PEOPLE_ROUTE = "people";
-  public static final String ACTIVITY_ROUTE = "activities";
-  public static final String APPDATA_ROUTE = "appdata";
-
   public static final String CONTENT_TYPE = "CONTENT_TYPE";
 
   private static final Logger logger = Logger.getLogger("org.apache.shindig.social.opensocial.spi");
 
-  /** Map from service name to the property name in the container config */
-  private static final Map<String, String> SERVICE_TO_SUPPORTED_FIELD_MAP =
-    ImmutableMap.of("people", "person", "activities", "activity");
-
-
-  private ContainerConfig config;
+  protected static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
 
   @Override
   protected void doGet(HttpServletRequest servletRequest,
@@ -106,25 +92,36 @@ public class DataServiceServlet extends ApiServlet {
         responseItem.getErrorMessage());
   }
 
-  @Inject
-  public void setContainerConfig(ContainerConfig config) {
-    this.config = config;
-  }
-
   /**
    * Handler for non-batch requests.
    */
   private void handleSingleRequest(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
-    RestfulRequestItem requestItem = new RestfulRequestItem(servletRequest, token, converter);
-    ResponseItem responseItem;
 
-    if (requestItem.getUrl().endsWith("/@supportedFields")) {
-      responseItem = getSupportedFields(requestItem);
-    } else {
-      responseItem = getResponseItem(handleRequestItem(requestItem, servletRequest));
+    // TODO Rework to allow sub-services
+    String path = servletRequest.getPathInfo();
+
+    // TODO - This shouldnt be on BaseRequestItem
+    String method = servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE);
+    if (method == null) {
+      method = servletRequest.getMethod();
     }
+
+    // Always returns a non-null handler.
+    RestHandler handler = dispatcher.getRestHandler(path, method.toUpperCase());
+
+    Reader bodyReader = null;
+    if (!servletRequest.getMethod().equals("GET") &&
+        !servletRequest.getMethod().equals("HEAD")) {
+      bodyReader = servletRequest.getReader();
+    }
+
+    // Execute the request
+    Future future = handler.execute(path, servletRequest.getParameterMap(),
+        bodyReader, token, converter);
+
+    ResponseItem responseItem = getResponseItem(future);
 
     servletResponse.setContentType(converter.getContentType());
     if (responseItem.getError() == null) {
@@ -141,25 +138,6 @@ public class DataServiceServlet extends ApiServlet {
     }
   }
 
-  private ResponseItem getSupportedFields(RequestItem requestItem) {
-    String service = requestItem.getService();
-    String configProperty = SERVICE_TO_SUPPORTED_FIELD_MAP.get(service);
-    if (configProperty == null) {
-      configProperty = service;
-    }
-
-    String container = Objects.firstNonNull(requestItem.getToken().getContainer(), "default");
-    // TODO: hardcoding opensocial-0.8 is brittle
-    List<Object> fields = config.getList(container,
-        "${gadgets\\.features.opensocial-0\\.8.supportedFields." + configProperty + '}');
-
-    if (fields.size() == 0) {
-      return new ResponseItem(ResponseError.NOT_IMPLEMENTED,"Supported fields not available for" +
-      		" service \"" + service + '\"');
-    }
-
-    return new ResponseItem(fields);
-  }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = null;

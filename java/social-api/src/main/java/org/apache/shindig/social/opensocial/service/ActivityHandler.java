@@ -17,30 +17,35 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 
-import com.google.common.collect.Sets;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
-public class ActivityHandler extends DataRequestHandler {
+@Service(name = "activities", path="/{userId}+/{groupId}/{appId}/{activityId}+")
+public class ActivityHandler  {
+
+  private static final Logger logger = Logger.getLogger(ActivityHandler.class.getName());
+
   private final ActivityService service;
-
-  private static final String ACTIVITY_ID_PATH
-      = "/activities/{userId}+/{groupId}/{appId}/{activityId}+";
+  private final ContainerConfig config;
 
   @Inject
-  public ActivityHandler(ActivityService service) {
+  public ActivityHandler(ActivityService service, ContainerConfig config) {
     this.service = service;
+    this.config = config;
   }
 
   /**
@@ -48,16 +53,15 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self/1
    */
-  @Override
-  protected Future<?> handleDelete(RequestItem request)
+  @Operation(httpMethods="DELETE")
+  public Future<?> delete(RequestItem request)
       throws SocialSpiException {
-    request.applyUrlTemplate(ACTIVITY_ID_PATH);
 
     Set<UserId> userIds = request.getUsers();
     Set<String> activityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
-    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
     // Throws exceptions if userIds contains more than one element or zero elements
     return service.deleteActivities(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), activityIds, request.getToken());
@@ -68,9 +72,9 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
-  @Override
-  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
-    return handlePost(request);
+  @Operation(httpMethods="PUT", bodyParam = "activity")
+  public Future<?> update(RequestItem request) throws SocialSpiException {
+    return create(request);
   }
 
   /**
@@ -78,17 +82,16 @@ public class ActivityHandler extends DataRequestHandler {
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
-  @Override
-  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
-    request.applyUrlTemplate(ACTIVITY_ID_PATH);
+  @Operation(httpMethods="POST", bodyParam = "activity")
+  public Future<?> create(RequestItem request) throws SocialSpiException {
 
     Set<UserId> userIds = request.getUsers();
     List<String> activityIds = request.getListParameter("activityId");
 
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
-    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
     // TODO(lryan) This seems reasonable to allow on PUT but we don't have an update verb.
-    Preconditions.requireEmpty(activityIds, "Cannot specify activityId in create");
+    HandlerPreconditions.requireEmpty(activityIds, "Cannot specify activityId in create");
 
     return service.createActivity(Iterables.getOnlyElement(userIds), request.getGroup(),
         request.getAppId(), request.getFields(),
@@ -103,18 +106,16 @@ public class ActivityHandler extends DataRequestHandler {
    * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
    * /activities/john.doe,jane.doe/@friends
    */
-  @Override
-  protected Future<?> handleGet(RequestItem request)
+  @Operation(httpMethods="GET")
+  public Future<?> get(RequestItem request)
       throws SocialSpiException {
-    request.applyUrlTemplate(ACTIVITY_ID_PATH);
-
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 
     CollectionOptions options = new CollectionOptions(request);
 
     // Preconditions
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     if (userIds.size() > 1 && !optionalActivityIds.isEmpty()) {
       throw new IllegalArgumentException("Cannot fetch same activityIds for multiple userIds");
     }
@@ -135,5 +136,14 @@ public class ActivityHandler extends DataRequestHandler {
         // TODO: add pagination and sorting support
         // getSortBy(params), getFilterBy(params), getStartIndex(params), getCount(params),
         request.getFields(), options, request.getToken());
+  }
+
+  @Operation(httpMethods = "GET", path="/@supportedFields")
+  public List supportedFields(RequestItem request) {
+    // TODO: Would be nice if name in config matched name of service.
+    String container = Objects.firstNonNull(request.getToken().getContainer(),
+        ContainerConfig.DEFAULT_CONTAINER);
+    return config.getList(container,
+        "${gadgets\\.features.opensocial-0\\.8.supportedFields.activity}");
   }
 }
