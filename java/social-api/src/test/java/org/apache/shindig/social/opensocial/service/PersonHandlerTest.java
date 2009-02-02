@@ -17,25 +17,27 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.common.EasyMockTestCase;
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.social.core.model.PersonImpl;
+import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import org.easymock.classextension.EasyMock;
+import static org.easymock.classextension.EasyMock.eq;
+import static org.easymock.classextension.EasyMock.expect;
 
 import java.util.List;
 import java.util.Map;
@@ -45,7 +47,8 @@ public class PersonHandlerTest extends EasyMockTestCase {
   private PersonService personService;
   private PersonHandler handler;
   private FakeGadgetToken token;
-  private RestfulRequestItem request;
+  protected HandlerRegistry registry;
+  private BeanJsonConverter converter;
 
   private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
       Person.Field.NAME.toString(),
@@ -55,6 +58,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
       .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
 
   private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
+  protected ContainerConfig containerConfig;
 
   static {
     DEFAULT_OPTIONS.setSortBy(PersonService.TOP_FRIENDS_SORT);
@@ -68,78 +72,59 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
   @Override
   protected void setUp() throws Exception {
-    super.setUp();
     token = new FakeGadgetToken();
-    personService = EasyMock.createMock(PersonService.class);
-    handler = new PersonHandler(personService);
-  }
-
-  @Override
-  protected void replay() {
-    EasyMock.replay(personService);
-  }
-
-  @Override
-  protected void verify() {
-    EasyMock.verify(personService);
-  }
-
-  private void setPath(String path) {
-    Map<String, String> params = Maps.newHashMap();
-    params.put("sortBy", null);
-    params.put("sortOrder", null);
-    params.put("filterBy", null);
-    params.put("startIndex", null);
-    params.put("count", null);
-    params.put("fields", null);
-    this.setPathAndParams(path, params);
-  }
-
-  private void setPathAndParams(String path, Map<String, String> params) {
-    request = new RestfulRequestItem(path, "GET", null, token, null);
-    for (Map.Entry<String, String> entry : params.entrySet()) {
-      request.setParameter(entry.getKey(), entry.getValue());
-    }
+    converter = mock(BeanJsonConverter.class);
+    personService = mock(PersonService.class);
+    containerConfig = mock(ContainerConfig.class);
+    handler = new PersonHandler(personService, containerConfig);
+    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
   }
 
   public void testHandleGetAllNoParams() throws Exception {
-    setPath("/people/john.doe/@all");
+    String path = "/people/john.doe/@all";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     List<Person> personList = ImmutableList.of();
     RestfulCollection<Person> data = new RestfulCollection<Person>(personList);
 
-    EasyMock.expect(personService.getPeople(
-        JOHN_DOE,
-        new GroupId(GroupId.Type.all, null),
-        DEFAULT_OPTIONS,
-        DEFAULT_FIELDS,
-        token))
+    expect(personService.getPeople(
+        eq(JOHN_DOE),
+        eq(new GroupId(GroupId.Type.all, null)),
+        eq(DEFAULT_OPTIONS),
+        eq(DEFAULT_FIELDS),
+        eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(), null,
+        token, converter).get());
     verify();
   }
 
   public void testHandleGetFriendsNoParams() throws Exception {
-    setPath("/people/john.doe/@friends");
+    String path = "/people/john.doe/@friends";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     List<Person> personList = ImmutableList.of();
     RestfulCollection<Person> data = new RestfulCollection<Person>(personList);
-    EasyMock.expect(personService.getPeople(
-        JOHN_DOE,
-        new GroupId(GroupId.Type.friends, null),
-        DEFAULT_OPTIONS,
-        DEFAULT_FIELDS,
-        token))
+    expect(personService.getPeople(
+        eq(JOHN_DOE),
+        eq(new GroupId(GroupId.Type.friends, null)),
+        eq(DEFAULT_OPTIONS),
+        eq(DEFAULT_FIELDS),
+        eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
   public void testHandleGetFriendsWithParams() throws Exception {
+    String path = "/people/john.doe/@friends";
+    RestHandler operation = registry.getRestHandler(path, "GET");
+
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(Person.Field.NAME.toString());
     options.setSortOrder(PersonService.SortOrder.descending);
@@ -149,109 +134,90 @@ public class PersonHandlerTest extends EasyMockTestCase {
     options.setFirst(5);
     options.setMax(10);
 
-    Map<String, String> params = Maps.newHashMap();
-    params.put("sortBy", options.getSortBy());
-    params.put("sortOrder", options.getSortOrder().toString());
-    params.put("filterBy", options.getFilter());
-    params.put("filterOp", options.getFilterOperation().toString());
-    params.put("filterValue", options.getFilterValue());
-    params.put("startIndex", "5");
-    params.put("count", "10");
-    params.put("fields", "money,fame,fortune");
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("sortBy", new String[]{options.getSortBy()});
+    params.put("sortOrder", new String[]{options.getSortOrder().toString()});
+    params.put("filterBy", new String[]{options.getFilter()});
+    params.put("filterOp", new String[]{options.getFilterOperation().toString()});
+    params.put("filterValue", new String[]{options.getFilterValue()});
+    params.put("startIndex", new String[]{"5"});
+    params.put("count", new String[]{"10"});
+    params.put("fields", new String[]{"money,fame,fortune"});
 
-    setPathAndParams("/people/john.doe/@friends", params);
 
     List<Person> people = ImmutableList.of();
     RestfulCollection<Person> data = new RestfulCollection<Person>(people);
-    EasyMock.expect(personService.getPeople(
-        JOHN_DOE,
-        new GroupId(GroupId.Type.friends, null), options,
-        ImmutableSortedSet.of("money", "fame", "fortune"), token))
+    expect(personService.getPeople(
+        eq(JOHN_DOE),
+        eq(new GroupId(GroupId.Type.friends, null)), eq(options),
+        eq(ImmutableSortedSet.of("money", "fame", "fortune")), eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, params, null, token, converter).get());
     verify();
   }
 
   public void testHandleGetFriendById() throws Exception {
-    setPath("/people/john.doe/@friends/jane.doe");
+    String path = "/people/john.doe/@friends/jane.doe";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     Person data = new PersonImpl();
     // TODO: We aren't passing john.doe to the service yet.
-    EasyMock.expect(personService.getPerson(new UserId(UserId.Type.userId, "jane.doe"),
-        DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
+    expect(personService.getPerson(eq(new UserId(UserId.Type.userId, "jane.doe")),
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
   public void testHandleGetSelf() throws Exception {
-    setPath("/people/john.doe/@self");
+    String path = "/people/john.doe/@self";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     Person data = new PersonImpl();
-    EasyMock.expect(personService.getPerson(JOHN_DOE.iterator().next(),
-        DEFAULT_FIELDS, token)).andReturn(ImmediateFuture.newInstance(data));
+    expect(personService.getPerson(eq(JOHN_DOE.iterator().next()),
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
   public void testHandleGetPlural() throws Exception {
-    setPath("/people/john.doe,jane.doe/@self");
+    String path = "/people/john.doe,jane.doe/@self";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     List<Person> people = ImmutableList.of();
     RestfulCollection<Person> data = new RestfulCollection<Person>(people);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
-    EasyMock.expect(personService.getPeople(userIdSet,
-        new GroupId(GroupId.Type.self, null),
-        DEFAULT_OPTIONS,
-        DEFAULT_FIELDS,
-        token)).andReturn(ImmediateFuture.newInstance(data));
+    expect(personService.getPeople(eq(userIdSet),
+        eq(new GroupId(GroupId.Type.self, null)),
+        eq(DEFAULT_OPTIONS),
+        eq(DEFAULT_FIELDS),
+        eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
-  public void testHandleDelete() throws Exception {
+  public void testHandleGetSuportedFields() throws Exception {
+    String path = "/people/@supportedFields";
+    RestHandler operation = registry.getRestHandler(path, "GET");
+
+    List<Object> list = ImmutableList.<Object>of("id", ImmutableMap.of("name", "familyName"));
+    expect(containerConfig.getList(eq("default"),
+        eq("${gadgets\\.features.opensocial-0\\.8.supportedFields.person}"))).andReturn(list);
+
     replay();
-    try {
-      handler.handleDelete(request);
-      fail();
-    } catch (SocialSpiException spe) {
-      assertEquals(ResponseError.BAD_REQUEST, spe.getError());
-    }
-
-    verify();
-  }
-
-  public void testHandlePut() throws Exception {
-    replay();
-
-    try {
-      handler.handlePut(request).get();
-      fail();
-    } catch (SocialSpiException spe) {
-      assertEquals(ResponseError.NOT_IMPLEMENTED, spe.getError());
-    }
-
-    verify();
-  }
-
-  public void testHandlePost() throws Exception {
-    replay();
-
-    try {
-      handler.handlePost(request).get();
-      fail();
-    } catch (SocialSpiException spe) {
-      assertEquals(ResponseError.NOT_IMPLEMENTED, spe.getError());
-    }
-
+    assertEquals(list, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 }

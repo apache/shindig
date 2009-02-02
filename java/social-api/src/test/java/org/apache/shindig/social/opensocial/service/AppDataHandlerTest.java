@@ -17,24 +17,30 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
+import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.common.EasyMockTestCase;
+import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.easymock.classextension.EasyMock;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.easymock.classextension.EasyMock;
+import static org.easymock.classextension.EasyMock.eq;
+
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class AppDataHandlerTest extends EasyMockTestCase {
 
@@ -42,11 +48,9 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
   private AppDataService appDataService;
 
-  private AppDataHandler handler;
-
   private FakeGadgetToken token;
 
-  private RestfulRequestItem request;
+  protected HandlerRegistry registry;
 
 
   private static final Set<UserId> JOHN_DOE = Collections.unmodifiableSet(Sets
@@ -57,50 +61,25 @@ public class AppDataHandlerTest extends EasyMockTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     token = new FakeGadgetToken();
-    converter = EasyMock.createMock(BeanJsonConverter.class);
-    appDataService = EasyMock.createMock(AppDataService.class);
-    handler = new AppDataHandler(appDataService);
-  }
-
-  @Override
-  protected void replay() {
-    EasyMock.replay(converter);
-    EasyMock.replay(appDataService);
-  }
-
-  @Override
-  protected void verify() {
-    EasyMock.verify(converter);
-    EasyMock.verify(appDataService);
-  }
-
-  private void setPath(String path) {
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", null);
-    this.setPathAndParams(path, params);
-  }
-
-  private void setPathAndParams(String path, Map<String, String> params) {
-    setPathAndParams(path, params, null);
-  }
-
-  private void setPathAndParams(String path, Map<String, String> params, String postData) {
-    request = new RestfulRequestItem(path, "GET", postData, token, converter);
-    for (Map.Entry<String, String> entry : params.entrySet()) {
-      request.setParameter(entry.getKey(), entry.getValue());
-    }
+    converter = mock(BeanJsonConverter.class);
+    appDataService = mock(AppDataService.class);
+    AppDataHandler handler = new AppDataHandler(appDataService);
+    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
-    setPath("/activities/john.doe/@" + group.toString() + "/appId");
+    String path = "/appdata/john.doe/@" + group.toString() + "/appId";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     DataCollection data = new DataCollection(null);
-    org.easymock.EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
-        new GroupId(group, null),
-        "appId", Sets.<String>newHashSet(), token)).andReturn(ImmediateFuture.newInstance(data));
+    org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
+        eq(new GroupId(group, null)),
+        eq("appId"), eq(Sets.<String>newHashSet()), eq(token)))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
@@ -117,61 +96,69 @@ public class AppDataHandlerTest extends EasyMockTestCase {
   }
 
   public void testHandleGetPlural() throws Exception {
-    setPath("/activities/john.doe,jane.doe/@self/appId");
+    String path = "/appdata/john.doe,jane.doe/@self/appId";
+    RestHandler operation = registry.getRestHandler(path, "GET");
 
     DataCollection data = new DataCollection(null);
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
-    org.easymock.EasyMock.expect(appDataService.getPersonData(userIdSet,
-        new GroupId(GroupId.Type.self, null),
-        "appId", Sets.<String>newHashSet(), token)).andReturn(ImmediateFuture.newInstance(data));
+    org.easymock.EasyMock.expect(appDataService.getPersonData(eq(userIdSet),
+        eq(new GroupId(GroupId.Type.self, null)),
+        eq("appId"), eq(Sets.<String>newHashSet()), eq(token)))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+        null, token, converter).get());
     verify();
   }
 
   public void testHandleGetWithoutFields() throws Exception {
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", "pandas");
-    setPathAndParams("/appData/john.doe/@friends/appId", params);
+    String path = "/appdata/john.doe/@friends/appId";
+    RestHandler operation = registry.getRestHandler(path, "GET");
+
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("fields", new String[]{"pandas"});
 
     DataCollection data = new DataCollection(null);
-    org.easymock.EasyMock.expect(appDataService.getPersonData(JOHN_DOE,
-        new GroupId(GroupId.Type.friends, null),
-        "appId", Sets.newHashSet("pandas"), token)).andReturn(ImmediateFuture.newInstance(data));
+    org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
+        eq(new GroupId(GroupId.Type.friends, null)),
+        eq("appId"), eq(Sets.newHashSet("pandas")), eq(token)))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, handler.handleGet(request).get());
+    assertEquals(data, operation.execute(path, params, null, token, converter).get());
     verify();
   }
 
-  private void setupPostData() throws SocialSpiException {
+  private Future setupPostData(String method) throws SocialSpiException {
+    String path = "/appdata/john.doe/@self/appId";
+    RestHandler operation = registry.getRestHandler(path, method);
+
     String jsonAppData = "{pandas: 'are fuzzy'}";
 
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", "pandas");
-    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("fields", new String[]{"pandas"});
 
     HashMap<String, String> values = Maps.newHashMap();
-    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+        .andReturn(values);
 
-    org.easymock.EasyMock.expect(appDataService.updatePersonData(JOHN_DOE.iterator().next(),
-        new GroupId(GroupId.Type.self, null),
-        "appId", Sets.newHashSet("pandas"), values, token))
+    org.easymock.EasyMock.expect(appDataService.updatePersonData(eq(JOHN_DOE.iterator().next()),
+        eq(new GroupId(GroupId.Type.self, null)),
+        eq("appId"), eq(Sets.newHashSet("pandas")), eq(values), eq(token)))
         .andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
+    return operation.execute(path, params, new StringReader(jsonAppData), token, converter);
   }
 
   public void testHandlePost() throws Exception {
-    setupPostData();
-    assertNull(handler.handlePost(request).get());
+    assertNull(setupPostData("POST").get());
     verify();
   }
 
   public void testHandlePut() throws Exception {
-    setupPostData();
-    assertNull(handler.handlePut(request).get());
+    assertNull(setupPostData("PUT").get());
     verify();
   }
 
@@ -180,23 +167,26 @@ public class AppDataHandlerTest extends EasyMockTestCase {
    * @throws Exception if the test fails
    */
   public void testHandleNullPostDataKeys() throws Exception {
+    String path = "/appdata/john.doe/@self/appId";
+    RestHandler operation = registry.getRestHandler(path, "POST");
     String jsonAppData = "{pandas: 'are fuzzy'}";
 
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", "pandas");
-    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("fields", new String[]{"pandas"});
 
     HashMap<String, String> values = Maps.newHashMap();
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("", "an empty value");
-    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+        .andReturn(values);
 
     replay();
     try {
-      handler.handlePost(request).get();
+      operation.execute(path, params, new StringReader(jsonAppData), token, converter).get();
       fail();
-    } catch (SocialSpiException spi) {
+    } catch (ExecutionException ee) {
+      assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
       // was expecting an Exception
     }
     verify();
@@ -206,41 +196,44 @@ public class AppDataHandlerTest extends EasyMockTestCase {
    * @throws Exception if the test fails
    */
   public void testHandleInvalidPostDataKeys() throws Exception {
+    String path = "/appdata/john.doe/@self/appId";
+    RestHandler operation = registry.getRestHandler(path, "POST");
     String jsonAppData = "{pandas: 'are fuzzy'}";
 
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", "pandas");
-    setPathAndParams("/appData/john.doe/@self/appId", params, jsonAppData);
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("fields", new String[]{"pandas"});
 
     HashMap<String, String> values = Maps.newHashMap();
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("a bad key", "a good value");
-    org.easymock.EasyMock.expect(converter.convertToObject(jsonAppData, HashMap.class)).andReturn(values);
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+        .andReturn(values);
 
     replay();
     try {
-      handler.handlePost(request).get();
+      operation.execute(path, params, new StringReader(jsonAppData), token, converter).get();
       fail();
-    } catch (SocialSpiException spi) {
-      // was expecting an Exception
+    } catch (ExecutionException ee) {
+      assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
     }
     verify();
   }
 
 
   public void testHandleDelete() throws Exception {
-    Map<String, String> params = Maps.newHashMap();
-    params.put("fields", "pandas");
-    setPathAndParams("/appData/john.doe/@self/appId", params);
+    Map<String, String[]> params = Maps.newHashMap();
+    params.put("fields", new String[]{"pandas"});
+    String path = "/appdata/john.doe/@self/appId";
+    RestHandler operation = registry.getRestHandler(path, "DELETE");
 
-    EasyMock.expect(appDataService.deletePersonData(JOHN_DOE.iterator().next(),
-        new GroupId(GroupId.Type.self, null),
-        "appId", Sets.newHashSet("pandas"), token))
+    EasyMock.expect(appDataService.deletePersonData(eq(JOHN_DOE.iterator().next()),
+        eq(new GroupId(GroupId.Type.self, null)),
+        eq("appId"), eq(Sets.newHashSet("pandas")), eq(token)))
         .andReturn(ImmediateFuture.newInstance((Void) null));
 
     replay();
-    assertNull(handler.handleDelete(request).get());
+    assertNull(operation.execute(path, params, null, token, converter).get());
     verify();
   }
 }

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -25,35 +25,26 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Sets;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
-public class PersonHandler extends DataRequestHandler {
+@Service(name = "people", path = "/{userId}+/{groupId}/{personId}+")
+public class PersonHandler {
+  private final static Logger logger = Logger.getLogger(PersonHandler.class.getName());
   private final PersonService personService;
-
-  private static final String PEOPLE_PATH = "/people/{userId}+/{groupId}/{personId}+";
+  private final ContainerConfig config;
 
   @Inject
-  public PersonHandler(PersonService personService) {
+  public PersonHandler(PersonService personService, ContainerConfig config) {
     this.personService = personService;
-  }
-
-  @Override
-  protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.BAD_REQUEST, "You can't delete people.");
-  }
-
-  @Override
-  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't update right now.");
-  }
-
-  @Override
-  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "You can't add people right now.");
+    this.config = config;
   }
 
   /**
@@ -61,16 +52,15 @@ public class PersonHandler extends DataRequestHandler {
    *
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
-  @Override
-  protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
-    request.applyUrlTemplate(PEOPLE_PATH);
+  @Operation(httpMethods = "GET")
+  public Future<?> get(RequestItem request) throws SocialSpiException {
     GroupId groupId = request.getGroup();
     Set<String> optionalPersonId = ImmutableSet.copyOf(request.getListParameter("personId"));
     Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);
     Set<UserId> userIds = request.getUsers();
 
     // Preconditions
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     if (userIds.size() > 1 && !optionalPersonId.isEmpty()) {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
@@ -102,5 +92,13 @@ public class PersonHandler extends DataRequestHandler {
 
     // Every other case is a collection response.
     return personService.getPeople(userIds, groupId, options, fields, request.getToken());
+  }
+
+  @Operation(httpMethods = "GET", path="/@supportedFields")
+  public List supportedFields(RequestItem request) {
+    // TODO: Would be nice if name in config matched name of service.
+    String container = Objects.firstNonNull(request.getToken().getContainer(), "default");
+    return config.getList(container,
+        "${gadgets\\.features.opensocial-0\\.8.supportedFields.person}");
   }
 }

@@ -25,15 +25,17 @@ import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.service.StandardHandlerDispatcher;
-import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
+import org.apache.shindig.social.opensocial.service.DefaultHandlerRegistry;
+import org.apache.shindig.social.opensocial.service.HandlerRegistry;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
@@ -50,7 +52,7 @@ public class SocialApiGuiceModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-	bind(HandlerDispatcher.class).toProvider(HandlerDispatcherProvider.class);
+    bind(HandlerRegistry.class).to(DefaultHandlerRegistry.class);
 
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
@@ -71,24 +73,9 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
-  }
-
-  /**
-   * Provider for the HandlerDispatcher.  Adds the sample container handler
-   * at "samplecontainer".
-   */
-  static class HandlerDispatcherProvider implements Provider<HandlerDispatcher> {
-    private final HandlerDispatcher dispatcher;
-
-    @Inject
-    public HandlerDispatcherProvider(StandardHandlerDispatcher dispatcher,
-        Provider<SampleContainerHandler> sampleHandler) {
-      dispatcher.addHandler("samplecontainer", sampleHandler);
-      this.dispatcher = dispatcher;
-    }
-
-    public HandlerDispatcher get() {
-      return dispatcher;
-    }
+  
+    bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(Lists.immutableList(ActivityHandler.class, AppDataHandler.class,
+            PersonHandler.class, SampleContainerHandler.class));
   }
 }

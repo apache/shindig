@@ -18,57 +18,44 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
+import junit.framework.TestCase;
+import org.json.JSONObject;
 
-import org.easymock.EasyMock;
-
-import java.util.Collections;
-
-import javax.servlet.http.HttpServletRequest;
-
-public class RestfulRequestItemTest extends EasyMockTestCase {
+/**
+ * Test BaseRequestItem
+ */
+public class BaseRequestItemTest extends TestCase {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
 
   private static final String DEFAULT_PATH = "/people/john.doe/@self";
-
-  private RestfulRequestItem request;
+  protected BaseRequestItem request;
+  protected BeanJsonConverter converter;
 
   @Override protected void setUp() throws Exception {
-    super.setUp();
-    request = new RestfulRequestItem(
-        DEFAULT_PATH + "?fields=huey,dewey,louie", "GET",
-        "{name: 'Bob', id: '1234'}", FAKE_TOKEN, new BeanJsonConverter(Guice.createInjector()));
+    FAKE_TOKEN.setAppId("12345");
+    FAKE_TOKEN.setOwnerId("someowner");
+    FAKE_TOKEN.setViewerId("someowner");
+    converter = new BeanJsonConverter(Guice.createInjector());
+    request = new BaseRequestItem(
+        Maps.<String,String[]>newHashMap(),
+        FAKE_TOKEN, converter);
   }
 
-  public void testParseUrl() throws Exception {
-    assertEquals("people", request.getService());
+
+  public void testParseCommaSeparatedList() throws Exception {
+    request.setParameter("fields", "huey,dewey,louie");
     assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
-
-    // Try it without any params
-    request = new RestfulRequestItem(DEFAULT_PATH, "GET", null, null, null);
-
-    assertEquals("people", request.getService());
-    assertNull(request.getParameters().get("fields"));
   }
-
-  public void testGetHttpMethodFromParameter() throws Exception {
-    HttpServletRequest overridden = EasyMock.createMock(HttpServletRequest.class);
-    EasyMock.expect(overridden.getParameter(RestfulRequestItem.X_HTTP_METHOD_OVERRIDE))
-        .andReturn("DELETE");
-    EasyMock.replay(overridden);
-    assertEquals("DELETE", RestfulRequestItem.getMethod(overridden));
-    EasyMock.verify(overridden);
-  }
-
 
   public void testGetAppId() throws Exception {
     request.setParameter("appId", "100");
@@ -90,7 +77,7 @@ public class RestfulRequestItemTest extends EasyMockTestCase {
 
   public void testStartIndex() throws Exception {
     request.setParameter("startIndex", null);
-    assertEquals(0, request.getStartIndex());
+    assertEquals(RequestItem.DEFAULT_START_INDEX, request.getStartIndex());
 
     request.setParameter("startIndex", "5");
     assertEquals(5, request.getStartIndex());
@@ -98,7 +85,7 @@ public class RestfulRequestItemTest extends EasyMockTestCase {
 
   public void testCount() throws Exception {
     request.setParameter("count", null);
-    assertEquals(20, request.getCount());
+    assertEquals(RequestItem.DEFAULT_COUNT, request.getCount());
 
     request.setParameter("count", "5");
     assertEquals(5, request.getCount());
@@ -113,17 +100,27 @@ public class RestfulRequestItemTest extends EasyMockTestCase {
   }
 
   public void testFields() throws Exception {
-    request.setListParameter("fields", Collections.<String>emptyList());
+    request.setParameter("fields", "");
     assertEquals(Sets.<String>newHashSet(), request.getFields());
 
     request.setParameter("fields", "happy,sad,grumpy");
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
 
-  public void testRouteFromParameter() throws Exception {
-    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path"));
-    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun"));
-    assertEquals("path", RestfulRequestItem.getServiceFromPath("/path/fun/yes"));
+  public void testGetTypedParameter() throws Exception {
+    request.setParameter("anykey", "{name: 'Bob', id: '1234'}");
+    InputData input = request.getTypedParameter("anykey", InputData.class);
+    assertEquals("Bob", input.name);
+    assertEquals(1234, input.id);
+  }
+
+  public void testJSONConstructor() throws Exception {
+    request = new BaseRequestItem(new JSONObject("{" +
+            "userId:john.doe," +
+            "groupId:@self," +
+            "fields:[huey,dewey,louie]" +
+            "}"), FAKE_TOKEN, converter);
+    assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
   }
 
   public static class InputData {
@@ -138,16 +135,5 @@ public class RestfulRequestItemTest extends EasyMockTestCase {
       this.id = id;
     }
   }
-
-  public void testGetTypedParameter() throws Exception {
-    InputData input = request.getTypedParameter("anykey", InputData.class);
-    assertEquals("Bob", input.name);
-    assertEquals(1234, input.id);
-  }
-
-  public void testGetTypedParameters() throws Exception {
-    InputData input = request.getTypedParameters(InputData.class);
-    assertEquals("Bob", input.name);
-    assertEquals(1234, input.id);
-  }
 }
+

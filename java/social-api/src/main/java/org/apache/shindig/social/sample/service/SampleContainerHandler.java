@@ -18,28 +18,28 @@
 
 package org.apache.shindig.social.sample.service;
 
-import com.google.inject.Inject;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.service.DataRequestHandler;
+import org.apache.shindig.social.opensocial.service.Operation;
 import org.apache.shindig.social.opensocial.service.RequestItem;
+import org.apache.shindig.social.opensocial.service.Service;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
+
+import com.google.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
 
-public class SampleContainerHandler extends DataRequestHandler {
+@Service(name = "samplecontainer", path = "/samplecontainer/{type}/{doevil}")
+public class SampleContainerHandler {
 
   private final JsonDbOpensocialService service;
-
-  private static final String POST_PATH = "/samplecontainer/{type}/{doevil}";
 
   @Inject
   public SampleContainerHandler(JsonDbOpensocialService dbService) {
@@ -47,28 +47,19 @@ public class SampleContainerHandler extends DataRequestHandler {
   }
 
   /**
-   * We don't support any delete methods right now.
-   */
-  @Override
-  protected Future<?> handleDelete(RequestItem request) throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, null);
-  }
-
-  /**
    * We don't distinguish between put and post for these urls.
    */
-  @Override
-  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
-    return handlePost(request);
+  @Operation(httpMethods = "PUT")
+  public Future<?> update(RequestItem request) throws SocialSpiException {
+    return create(request);
   }
 
   /**
    * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}. TODO(doll): These
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
-  @Override
-  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
-    request.applyUrlTemplate(POST_PATH);
+  @Operation(httpMethods = "POST")
+  public Future<?> create(RequestItem request) throws SocialSpiException {
     String type = request.getParameter("type");
     if (type.equals("setstate")) {
       try {
@@ -89,8 +80,8 @@ public class SampleContainerHandler extends DataRequestHandler {
   /**
    * Handles /samplecontainer/dumpstate
    */
-  @Override
-  protected Future<?> handleGet(RequestItem request) {
+  @Operation(httpMethods = "GET")
+  public Future<?> get(RequestItem request) {
     return ImmediateFuture.newInstance(service.getDb());
   }
 

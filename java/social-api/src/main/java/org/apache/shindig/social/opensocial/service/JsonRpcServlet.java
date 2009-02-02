@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.social.ResponseError;
@@ -24,18 +26,16 @@ import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Future;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * JSON-RPC handler servlet.
@@ -101,8 +101,7 @@ public class JsonRpcServlet extends ApiServlet {
     // into single requests.
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
-      RpcRequestItem requestItem = new RpcRequestItem(batchObj, token, jsonConverter);
-      responses.add(handleRequestItem(requestItem, servletRequest));
+      responses.add(dispatcher.getRpcHandler(batchObj).execute(batchObj, token, jsonConverter));
     }
 
     // Resolve each Future into a response.
@@ -125,11 +124,13 @@ public class JsonRpcServlet extends ApiServlet {
     if (request.has("id")) {
       key = request.getString("id");
     }
-    RpcRequestItem requestItem = new RpcRequestItem(request, token, jsonConverter);
+
+    // getRpcHandler never returns null
+    Future future = dispatcher.getRpcHandler(request).execute(request, token, jsonConverter);
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
-    ResponseItem response = getResponseItem(handleRequestItem(requestItem, servletRequest));
+    ResponseItem response = getResponseItem(future);
     JSONObject result = getJSONResponse(key, response);
     servletResponse.getWriter().write(result.toString());
   }
@@ -143,15 +144,15 @@ public class JsonRpcServlet extends ApiServlet {
       result.put("error", getErrorJson(responseItem));
     } else {
       Object response = responseItem.getResponse();
-      JSONObject converted = (JSONObject) jsonConverter.convertToJson(response);
+      Object converted = jsonConverter.convertToJson(response);
 
       if (response instanceof RestfulCollection) {
         // FIXME this is a little hacky because of the field names in the RestfulCollection
-        converted.put("list", converted.remove("entry"));
+        ((JSONObject)converted).put("list", ((JSONObject)converted).remove("entry"));
         result.put("data", converted);
       } else if (response instanceof DataCollection) {
-        if (converted.has("entry")) {
-          result.put("data", converted.get("entry"));
+        if (((JSONObject)converted).has("entry")) {
+          result.put("data", ((JSONObject)converted).get("entry"));
         }
       } else {
         result.put("data", converted);

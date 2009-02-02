@@ -20,7 +20,6 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.social.ResponseError;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
@@ -28,12 +27,12 @@ import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Common base class for API servlets.
@@ -41,13 +40,13 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class ApiServlet extends InjectedServlet {
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
-  private HandlerDispatcher dispatcher;
+  protected HandlerRegistry dispatcher;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
 
   @Inject
-  public void setHandlerDispatcher(HandlerDispatcher dispatcher) {
+  public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
   }
 
@@ -73,21 +72,6 @@ public abstract class ApiServlet extends InjectedServlet {
     sendError(servletResponse, new ResponseItem(ResponseError.UNAUTHORIZED,
         "The request did not have a proper security token nor oauth message and unauthenticated "
             + "requests are not allowed"));
-  }
-
-  /**
-   * Delivers a request item to the appropriate DataRequestHandler.
-   */
-  protected Future<?> handleRequestItem(RequestItem requestItem,
-      HttpServletRequest servletRequest) {
-    DataRequestHandler handler = dispatcher.getHandler(requestItem.getService());
-
-    if (handler == null) {
-      return ImmediateFuture.errorInstance(new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
-          "The service " + requestItem.getService() + " is not implemented"));
-    }
-
-    return handler.handleItem(requestItem);
   }
 
   protected ResponseItem getResponseItem(Future<?> future) {

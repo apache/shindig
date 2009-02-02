@@ -29,11 +29,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class AppDataHandler extends DataRequestHandler {
+@Service(name = "appdata", path = "/{userId}+/{groupId}/{appId}")
+public class AppDataHandler {
 
   private final AppDataService service;
-
-  private static final String APP_DATA_PATH = "/appdata/{userId}+/{groupId}/{appId}";
 
   @Inject
   public AppDataHandler(AppDataService service) {
@@ -49,15 +48,14 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
-  @Override
-  protected Future<?> handleDelete(RequestItem request)
+  @Operation(httpMethods = "DELETE")
+  public Future<?> delete(RequestItem request)
       throws SocialSpiException {
-    request.applyUrlTemplate(APP_DATA_PATH);
 
     Set<UserId> userIds = request.getUsers();
 
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
-    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
     return service.deletePersonData(userIds.iterator().next(), request.getGroup(),
         request.getAppId(), request.getFields(), request.getToken());
@@ -72,9 +70,9 @@ public class AppDataHandler extends DataRequestHandler {
    * values and set on the person object. If there are no fields vars then all of the data will be
    * overridden.
    */
-  @Override
-  protected Future<?> handlePut(RequestItem request) throws SocialSpiException {
-    return handlePost(request);
+  @Operation(httpMethods = "PUT", bodyParam = "data")
+  public Future<?> update(RequestItem request) throws SocialSpiException {
+    return create(request);
   }
 
   /**
@@ -85,15 +83,12 @@ public class AppDataHandler extends DataRequestHandler {
    * The post data should be a regular json object. All of the fields vars will be pulled from the
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
-  @SuppressWarnings("unchecked")
-  @Override
-  protected Future<?> handlePost(RequestItem request) throws SocialSpiException {
-    request.applyUrlTemplate(APP_DATA_PATH);
-
+  @Operation(httpMethods = "POST", bodyParam = "data")
+  public Future<?> create(RequestItem request) throws SocialSpiException {
     Set<UserId> userIds = request.getUsers();
 
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
-    Preconditions.requireSingular(userIds, "Multiple userIds not supported");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
     Map<String, String> values = request.getTypedParameter("data", HashMap.class);
     for (String key : values.keySet()) {
@@ -112,14 +107,12 @@ public class AppDataHandler extends DataRequestHandler {
    *
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
-  @Override
-  protected Future<?> handleGet(RequestItem request) throws SocialSpiException {
-    request.applyUrlTemplate(APP_DATA_PATH);
-
+  @Operation(httpMethods = "GET")
+  public Future<?> get(RequestItem request) throws SocialSpiException {
     Set<UserId> userIds = request.getUsers();
 
     // Preconditions
-    Preconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
 
     return service.getPersonData(userIds, request.getGroup(),
         request.getAppId(), request.getFields(), request.getToken());

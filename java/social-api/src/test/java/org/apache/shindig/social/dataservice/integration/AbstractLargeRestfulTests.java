@@ -17,44 +17,37 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import junit.framework.TestCase;
-
-import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.common.EasyMockTestCase;
+import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
+import org.apache.shindig.social.opensocial.service.HandlerRegistry;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
@@ -62,21 +55,12 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
   protected static final String XSDRESOURCE = "opensocial.xsd";
 
-  private HttpServletRequest req;
-
   private HttpServletResponse res;
 
   private DataServiceServlet servlet;
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
-
-  protected HttpServletRequest getRequest() {
-    return req;
-  }
-  protected void setRequest(HttpServletRequest req) {
-    this.req = req;
-  }
 
   protected HttpServletResponse getResponse() {
     return res;
@@ -100,12 +84,11 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
 
     servlet = new DataServiceServlet();
 
-    servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
+    servlet.setHandlerRegistry(injector.getInstance(HandlerRegistry.class));
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
 
-    req = EasyMock.createMock(HttpServletRequest.class);
     res = EasyMock.createMock(HttpServletResponse.class);
   }
 
@@ -130,43 +113,23 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected String getResponse(String path, String method,
       Map<String, String> extraParams, String postData, String format,
       String contentType) throws Exception {
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
-    EasyMock.expect(req.getPathInfo()).andStubReturn(path);
-    EasyMock.expect(req.getMethod()).andStubReturn(method);
-    EasyMock.expect(req.getParameter("format")).andStubReturn(format);
-    EasyMock.expect(req.getParameter("X-HTTP-Method-Override")).andStubReturn(
-        method);
-
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(
-        FAKE_GADGET_TOKEN);
-
-    Vector<String> vector = new Vector<String>(extraParams.keySet());
-    EasyMock.expect(req.getParameterNames()).andStubReturn(vector.elements());
-
-    for (Map.Entry<String, String> entry : extraParams.entrySet()) {
-      if (entry.getValue() != null) {
-        EasyMock.expect(req.getParameterValues(entry.getKey())).andStubReturn(
-            new String[] { entry.getValue() });
-      } else {
-        EasyMock.expect(req.getParameterValues(entry.getKey())).andStubReturn(
-            new String[] {});
-      }
-    }
-
-    if (postData == null) {
-      postData = "";
+    FakeHttpServletRequest req = new FakeHttpServletRequest();
+    req.setCharacterEncoding("UTF-8");
+    req.setPathInfo(path);
+    req.setParameter("format",format);
+    req.setParameter("X-HTTP-Method-Override", method);
+    req.setAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
+    for (Map.Entry<String,String> entry : extraParams.entrySet()) {
+      req.setParameter(entry.getKey(), entry.getValue());
     }
 
     if (!("GET").equals(method) && !("HEAD").equals(method)) {
-      final InputStream stream = new ByteArrayInputStream(postData.getBytes());
-      ServletInputStream servletStream = new ServletInputStream() {
-        @Override
-        public int read() throws IOException {
-          return stream.read();
-        }
-      };
-      EasyMock.expect(req.getInputStream()).andReturn(servletStream);
+      if (postData == null) {
+        postData = "";
+      }
+      req.setPostData(postData.getBytes());
     }
+    req.setMethod(method);
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     PrintWriter writer = new PrintWriter(outputStream);
@@ -174,10 +137,10 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     res.setCharacterEncoding("UTF-8");
     res.setContentType(contentType);
 
-    EasyMock.replay(req, res);
+    EasyMock.replay(res);
     servlet.service(req, res);
-    EasyMock.verify(req, res);
-    EasyMock.reset(req, res);
+    EasyMock.verify(res);
+    EasyMock.reset(res);
 
     writer.flush();
     return outputStream.toString();
