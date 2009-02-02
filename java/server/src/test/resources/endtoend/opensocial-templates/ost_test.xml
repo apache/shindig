@@ -27,7 +27,6 @@
     <script type="text/javascript" src="/opensocial-templates/testadapter.js"></script>
     <!-- the JsUnit tests -->
     <script type="text/javascript" src="/opensocial-templates/compiler_test.js"></script>
-    <script type="text/javascript" src="/opensocial-templates/data_test.js"></script>
     <script type="text/javascript" src="/opensocial-templates/container_test.js"></script>
     <script type="text/javascript" src="/opensocial-templates/loader_test.js"></script>
     <script type="text/javascript" src="/opensocial-templates/os_test.js"></script>

@@ -81,30 +81,6 @@ os.compileXMLDoc = function(doc, opt_id) {
 };
 
 /**
- * Parses an XML string into an XML Document.
- * @param {string} str A string of well-formed XML.
- * @return {Document} XML document.
- */
-os.parseXML_ = function(str) {
-  if (typeof(DOMParser) != "undefined") {
-    os.parser_ = os.parser_ || new DOMParser();
-    var doc = os.parser_.parseFromString(str, "text/xml");
-    if (doc.firstChild && doc.firstChild.tagName == 'parsererror') {
-      throw doc.firstChild.firstChild.nodeValue;
-    }
-    return doc;
-  } else {
-    var doc = new ActiveXObject("MSXML2.DomDocument");
-    doc.validateOnParse = false;
-    doc.loadXML(str);
-    if (doc.parseError && doc.parseError.errorCode) {
-      throw doc.parseError.reason;
-    }
-    return doc;
-  }
-};
-
-/**
  * Map of special operators to be transformed.
  */
 os.operatorMap = {
@@ -495,18 +471,6 @@ os.compileNode_ = function(node) {
  * TODO(levik): A better way to do this.
  */
 os.ENTITIES = "<!ENTITY nbsp \"&#160;\">";
-
-/**
- * Prepares an XML string to be compiled as a template. Injects a DOCTYPE
- * with entities and a top-level <root> element to encapsulate the template.
- * @param {string} templateSrc XML string to be prepared.
- * @return {string} XML string prepared for template compilation.
- */
-os.prepareTemplateXML_ = function(templateSrc) {
-  var namespaces = os.getRequiredNamespaces(templateSrc);
-  return "<!DOCTYPE root [" + os.ENTITIES + "]><root xml:space=\"preserve\"" +
-      namespaces + ">" + templateSrc + "</root>";;
-};
 
 /**
  * Creates an HTML node that's a shallow copy of an XML node

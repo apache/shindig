@@ -121,8 +121,8 @@ os.compileTemplate = function(node, opt_id) {
  * @return {os.Template} A compiled Template object.
  */
 os.compileTemplateString = function(src, opt_id) {
-  src = os.prepareTemplateXML_(src);
-  var doc = os.parseXML_(src);
+  src = opensocial.xmlutil.prepareXML(src);
+  var doc = opensocial.xmlutil.parseXML(src);
   return os.compileXMLDoc(doc, opt_id);
 };
 

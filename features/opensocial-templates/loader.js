@@ -143,7 +143,7 @@ os.Loader.loadUrls = function(urls, callback) {
  * Processes the XML markup of a Template Library.
  */
 os.Loader.loadContent = function(xmlString) {
-  var doc = os.parseXML_(xmlString);
+  var doc = opensocial.xmlutil.parseXML(xmlString);
   var templatesNode = doc.firstChild;
   os.Loader.processTemplatesNode(templatesNode);
 };

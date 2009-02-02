@@ -23,6 +23,8 @@ limitations under the License.
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/jstemplate.js"></script>
     <script src="jstemplate_debug.js"></script>
+    <script src="../xmlutil/xmlutil.js"></script>
+    <script src="../opensocial-data/data.js"></script>
     <script src="base.js"></script>
     <script src="namespaces.js"></script>
     <script src="util.js"></script>
@@ -31,11 +33,9 @@ limitations under the License.
     <script src="loader.js"></script>
     <script src="container.js"></script>
     <script src="os.js"></script>
-    <script src="data.js"></script>
     <!-- the JsUnit tests -->
     <script src="domutil.js"></script>
     <script type="text/javascript" src="compiler_test.js"></script>
-    <script type="text/javascript" src="data_test.js"></script>
     <script type="text/javascript" src="container_test.js"></script>
     <script type="text/javascript" src="loader_test.js"></script>
     <script type="text/javascript" src="os_test.js"></script>
@@ -53,7 +53,7 @@ limitations under the License.
         }
         return testFunctionNames;
       }
- 
+
       os.createNamespace("test", "http://www.google.com/#test");
     </script>
   </head>
@@ -126,7 +126,7 @@ limitations under the License.
           <body>world</body>
         </item>
       </custom:list>
-    </xmp>  
+    </xmp>
 
     <xmp id="_T_Tag_blink" style="display: none">
       <custom:blink>blink text</custom:blink>
