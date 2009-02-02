@@ -159,7 +159,7 @@ function assertTemplateOutput(templateText, output, context,
     for (var i = 0; i < namedTemplates.length; i++) {
       var text = '<Templates xmlns:os="uri:unused">' + namedTemplates[i] +
           '</Templates>';
-      var dom = os.parseXML_(text);
+      var dom = opensocial.xmlutil.parseXML(text);
       os.Loader.processTemplatesNode(dom);
     }
   }

@@ -71,9 +71,9 @@ os.Container.registerDomLoadListener_ = function() {
   if (gadgets && gadgets.util) {
     gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_);
   } else if (navigator.product == 'Gecko') {
-    window.addEventListener("DOMContentLoaded", os.Container.onDomLoad_, false);
+    window.addEventListener('DOMContentLoaded', os.Container.onDomLoad_, false);
   } if (window.addEventListener) {
-    window.addEventListener("load", os.Container.onDomLoad_, false);
+    window.addEventListener('load', os.Container.onDomLoad_, false);
   } else {
     if (!document.body) {
       setTimeout(arguments.callee, 0);
@@ -170,6 +170,19 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
   }
 };
 
+os.Container.defaultContext = null;
+
+os.Container.getDefaultContext = function() {
+  if (!os.Container.defaultContext) {
+    if (window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) {
+      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.dataSets_);
+    } else {
+      os.Container.defaultContext = os.createContext({});
+    }
+  }
+  return os.Container.defaultContext;
+};
+
 /**
  * Renders any registered inline templates.
  * @param {Object} opt_data Optional JSON data.
@@ -178,7 +191,7 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
 os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
   var doc = opt_doc || document;
   var context = opt_data ?
-      os.createContext(opt_data) : os.data.getDataContext().getContext();
+      os.createContext(opt_data) : os.Container.getDefaultContext();
   var inlined = os.Container.inlineTemplates_;
   for (var i = 0; i < inlined.length; ++i) {
     var template = inlined[i].template;
@@ -191,23 +204,29 @@ os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
       node.parentNode.insertBefore(el, node);
     }
 
-    var beforeData = node.getAttribute('before') ||
-        node.getAttribute('beforeData');
-    if (beforeData) {
-      // Automatically hide this template when specified data is available.
-      var keys = beforeData.split(/[\, ]+/);
-      os.data.DataContext.registerListener(keys,
-          os.Container.createHideElementClosure(el));
-    }
+    // Only honor @before and @require attributes if the opensocial-data
+    // feature is present.
+    if (window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) {
+      var beforeData = node.getAttribute('before') ||
+          node.getAttribute('beforeData');
+      if (beforeData) {
+        // Automatically hide this template when specified data is available.
+        var keys = beforeData.split(/[\, ]+/);
+        opensocial.data.DataContext.registerListener(keys,
+            os.Container.createHideElementClosure(el));
+      }
 
-    var requiredData = node.getAttribute('require') ||
-        node.getAttribute('requireData');
-    if (requiredData) {
-      // This template will render when the specified data is available.
-      var keys = requiredData.split(/[\, ]+/);
-      os.data.DataContext.registerListener(keys,
-          os.Container.createRenderClosure(template, el, null,
-              os.data.DataContext.getContext()));
+      var requiredData = node.getAttribute('require') ||
+          node.getAttribute('requireData');
+      if (requiredData) {
+        // This template will render when the specified data is available.
+        var keys = requiredData.split(/[\, ]+/);
+        opensocial.data.DataContext.registerListener(keys,
+            os.Container.createRenderClosure(template, el, null,
+                os.Container.getDefaultContext()));
+      } else {
+        template.renderInto(el, null, context);
+      }
     } else {
       template.renderInto(el, null, context);
     }

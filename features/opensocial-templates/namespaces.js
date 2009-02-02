@@ -45,13 +45,6 @@
  */
 os.nsmap_ = {};
 
-/**
- * Map of namespace prefixes to full urls.
- * @type {Object}
- * @private
- */
-os.nsurls_ = {};
-
 /***
  * Registers the given namespace with a specified URL. Throws an error if it
  * already exists as a different URL.
@@ -64,12 +57,13 @@ os.createNamespace = function(ns, url) {
   if (!tags) {
     tags = {};
     os.nsmap_[ns] = tags;
-    os.nsurls_[ns] = url;
-  } else if (os.nsurls_[ns] == null ) {
+    opensocial.xmlutil.NSMAP[ns] = url;
+  } else if (opensocial.xmlutil.NSMAP[ns] == null ) {
     // Lazily register an auto-created namespace.
-    os.nsurls_[ns] = url;
-  } else if (os.nsurls_[ns] != url) {
-    throw("Namespace " + ns + " already defined with url " + os.nsurls_[ns]);
+    opensocial.xmlutil.NSMAP[ns] = url;
+  } else if (opensocial.xmlutil.NSMAP[ns] != url) {
+    throw("Namespace " + ns + " already defined with url " +
+        opensocial.xmlutil.NSMAP[ns]);
   }
   return tags;
 };
@@ -81,18 +75,18 @@ os.getNamespace = function(prefix) {
   return os.nsmap_[prefix];
 };
 
-os.addNamespace = function(ns, url, nsObj) {  
+os.addNamespace = function(ns, url, nsObj) {
   if (os.nsmap_[ns]) {
-    if (os.nsurls_[ns] == null) {
+    if (opensocial.xmlutil.NSMAP[ns] == null) {
       // Lazily register an auto-created namespace.
-      os.nsurls_[ns] = url;
+      opensocial.xmlutil.NSMAP[ns] = url;
       return;
     } else {
       throw ("Namespace '" + ns + "' already exists!");
     }
   }
   os.nsmap_[ns] = nsObj;
-  os.nsurls_[ns] = url;
+  opensocial.xmlutil.NSMAP[ns] = url;
 };
 
 os.getCustomTag = function(ns, tag) {
@@ -105,26 +99,6 @@ os.getCustomTag = function(ns, tag) {
   } else {
     return nsObj[tag];
   }
-};
-
-/**
- * Returns the XML namespace declarations that need to be injected into a
- * particular template to make it valid XML. Uses the defined namespaces to
- * see which are available, and checks that they are used in the supplied code.
- * An empty string is returned if no injection is needed.
- *
- * @param {string} templateSrc Template source code.
- * @return {string} A string of xmlns delcarations required for this tempalte.
- */
-os.getRequiredNamespaces = function(templateSrc) {
-  var codeToInject = "";
-  for (var ns in os.nsurls_) {
-    if (templateSrc.indexOf("<" + ns + ":") >= 0 &&
-        templateSrc.indexOf("xmlns:" + ns + ":") < 0) {
-      codeToInject += " xmlns:" + ns + "=\"" + os.nsurls_[ns] + "\"";
-    }
-  }
-  return codeToInject;
 };
 
 /**
