@@ -26,6 +26,8 @@
  */
 class CacheMemcache extends Cache {
   private $connection = false;
+  private $host;
+  private $port;
 
   public function __construct() {
     if (! function_exists('memcache_connect')) {
@@ -108,7 +110,7 @@ class CacheMemcache extends Cache {
   public function set($key, $value) {
     $this->check();
     // we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
-    if (@memcache_set($this->connection, $key, array('time' => time(), 
+    if (@memcache_set($this->connection, $key, array('time' => time(),
         'data' => $value), false, Config::Get('cache_time')) == false) {
       throw new CacheException("Couldn't store data in cache");
     }
