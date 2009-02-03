@@ -24,7 +24,7 @@ import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.jpa.spi.SpiEntityManagerFactory;
 import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.HandlerDispatcher;
+import org.apache.shindig.social.opensocial.service.HandlerRegistry;
 
 import javax.persistence.EntityManager;
 
@@ -57,7 +57,7 @@ public class JpaRestfulTestConfigHelper {
   protected static DataServiceServlet getDataServiceServlet(Injector injector) {
  // Set data service servlet again to use JPA guice dependencies
     DataServiceServlet servlet = new DataServiceServlet();
-    servlet.setHandlerDispatcher(injector.getInstance(HandlerDispatcher.class));
+    servlet.setHandlerRegistry(injector.getInstance(HandlerRegistry.class));
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));

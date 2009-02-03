@@ -18,6 +18,12 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
+import javax.persistence.EntityManager;
+
+import org.apache.shindig.common.PropertiesModule;
+import org.apache.shindig.gadgets.DefaultGuiceModule;
+import org.apache.shindig.gadgets.oauth.OAuthModule;
+import org.apache.shindig.social.core.config.SocialApiGuiceModule;
 import org.apache.shindig.social.opensocial.jpa.AccountDb;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
@@ -43,18 +49,12 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 
-import javax.persistence.EntityManager;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Scopes;
-import com.google.inject.TypeLiteral;
 
 /**
  * Provides component injection for tests
@@ -76,6 +76,11 @@ public class JpaTestGuiceModule extends AbstractModule {
    */
   @Override
   protected void configure() {
+    install(new PropertiesModule());
+    install(new DefaultGuiceModule());
+    install(new SocialApiGuiceModule());
+    install(new OAuthModule());
+    
     // Entity manager
     this.bind(EntityManager.class).toInstance(this.entityManager);
     
