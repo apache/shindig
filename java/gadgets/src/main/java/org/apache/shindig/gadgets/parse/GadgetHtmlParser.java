@@ -57,7 +57,7 @@ public abstract class GadgetHtmlParser {
 
   public final Document parseDom(String source) throws GadgetException {
     Document document = null;
-    String key = null;  
+    String key = null;
     // Avoid checksum overhead if we arent caching
     boolean shouldCache = shouldCache();
     if (shouldCache) {

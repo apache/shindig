@@ -65,7 +65,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -79,14 +78,6 @@ import java.util.regex.Pattern;
 public class RenderingContentRewriterTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final String BODY_CONTENT = "Some body content";
-  private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
-  private final FakeContainerConfig config = new FakeContainerConfig();
-  private final UrlGenerator urlGenerator = new FakeUrlGenerator();
-
-  private FakeGadgetFeatureRegistry featureRegistry;
-  private RenderingContentRewriter rewriter;
-  private GadgetHtmlParser parser;
-
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
       "(.*)<head>(.*?)<\\/head>(?:.*)<body(.*?)>(.*?)<\\/body>(?:.*)", Pattern.DOTALL |
       Pattern.CASE_INSENSITIVE);
@@ -95,6 +86,15 @@ public class RenderingContentRewriterTest {
   static final int HEAD_GROUP = 2;
   static final int BODY_ATTRIBUTES_GROUP = 3;
   static final int BODY_GROUP = 4;
+
+  private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
+  private final FakeContainerConfig config = new FakeContainerConfig();
+  private final UrlGenerator urlGenerator = new FakeUrlGenerator();
+  private final MapGadgetContext context = new MapGadgetContext();
+
+  private FakeGadgetFeatureRegistry featureRegistry;
+  private RenderingContentRewriter rewriter;
+  private GadgetHtmlParser parser;
 
   @Before
   public void setUp() throws Exception {
@@ -108,7 +108,7 @@ public class RenderingContentRewriterTest {
   private Gadget makeGadgetWithSpec(String gadgetXml) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
     return new Gadget()
-        .setContext(new GadgetContext())
+        .setContext(context)
         .setPreloads(new NullPreloads())
         .setSpec(spec);
   }
@@ -682,6 +682,34 @@ public class RenderingContentRewriterTest {
     assertFalse("Base element injected incorrectly.", rewritten.contains("<base"));
   }
 
+  @Test
+  public void doesNotRewriteWhenSanitizeEquals1() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+
+    context.params.put("sanitize", "1");
+
+    assertEquals(BODY_CONTENT, rewrite(gadget, BODY_CONTENT));
+  }
+
+  @Test
+  public void doesRewriteWhenSanitizeEquals0() throws Exception {
+    Gadget gadget = makeDefaultGadget();
+
+    context.params.put("sanitize", "0");
+
+    assertFalse("Didn't rewrite when sanitize was '0'.",
+        BODY_CONTENT.equals(rewrite(gadget, BODY_CONTENT)));
+  }
+
+  private static class MapGadgetContext extends GadgetContext {
+    protected final Map<String, String> params = Maps.newHashMap();
+
+    @Override
+    public String getParameter(String name) {
+      return params.get(name);
+    }
+  }
+
   private static class FakeContainerConfig extends AbstractContainerConfig {
     protected final Map<String, Object> data = Maps.newHashMap();
 
@@ -689,7 +717,6 @@ public class RenderingContentRewriterTest {
     public Object getProperty(String container, String name) {
       return data.get(name);
     }
-
   }
 
   /**
