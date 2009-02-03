@@ -122,6 +122,11 @@ public class RenderingContentRewriter implements ContentRewriter {
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
+    // Don't touch sanitized gadgets.
+    if ("1".equals(gadget.getContext().getParameter("sanitize"))) {
+      return RewriterResults.notCacheable();
+    }
+
     try {
       Document document = mutableContent.getDocument();
 
