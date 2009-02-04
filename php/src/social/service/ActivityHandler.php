@@ -21,7 +21,7 @@
 class ActivityHandler extends DataRequestHandler {
   private $service;
 
-  private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/{activityId}";
+  private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/appId/{activityId}";
 
   public function __construct() {
     $service = Config::get('activity_service');
