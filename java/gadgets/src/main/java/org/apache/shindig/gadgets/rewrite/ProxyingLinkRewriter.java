@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.servlet.ProxyBase;
 public class ProxyingLinkRewriter implements LinkRewriter {
 
   private final String prefix;
+  private final Uri parsedPrefix;
 
   private final ContentRewriterFeature rewriterFeature;
 
@@ -37,6 +38,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
   public ProxyingLinkRewriter(Uri gadgetUri, ContentRewriterFeature rewriterFeature,
       String prefix) {
     this.prefix = prefix;
+    parsedPrefix = Uri.parse(prefix);
     this.rewriterFeature = rewriterFeature;
     this.gadgetUri = gadgetUri;
   }
@@ -49,7 +51,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
     }
 
     try {
-      Uri linkUri = Uri.parse(link);
+      Uri linkUri = processLink(Uri.parse(link));
       Uri uri = context.resolve(linkUri);
       if (rewriterFeature.shouldRewriteURL(uri.toString())) {
         String result = prefix
@@ -68,5 +70,16 @@ public class ProxyingLinkRewriter implements LinkRewriter {
       // Unrecoverable. Just return link
       return link;
     }
+  }
+
+  /**
+   * Preprocess link to avoid double-proxying
+   */
+  private Uri processLink(Uri original) {
+    if (parsedPrefix.getPath().equals(original.getPath())) {
+      // Link is already rewritten to the proxy so extract the url param
+      return Uri.parse(original.getQueryParameter("url"));
+    }
+    return original;
   }
 }
