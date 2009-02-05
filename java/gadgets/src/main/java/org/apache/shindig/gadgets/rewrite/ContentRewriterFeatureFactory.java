@@ -24,12 +24,12 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Sets;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -96,5 +96,14 @@ public class ContentRewriterFeatureFactory {
         = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires, includeTags);
     spec.setAttribute("content-rewriter", rewriterFeature);
     return rewriterFeature;
+  }
+
+  /**
+   * Create a rewriter feature that allows all URIs to be rewritten.
+   */
+  public ContentRewriterFeature createRewriteAllFeature(int ttl) {
+    return new ContentRewriterFeature(null,
+        ".*", "", (ttl == -1) ? "HTTP" : Integer.toString(ttl),
+        Collections.<String>emptySet());
   }
 }

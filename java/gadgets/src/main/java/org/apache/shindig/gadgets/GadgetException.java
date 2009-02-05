@@ -62,6 +62,7 @@ public class GadgetException extends Exception {
     // Parsing errors
     CSS_PARSE_ERROR,
     HTML_PARSE_ERROR,
+    IMAGE_PARSE_ERROR,
     JS_PARSE_ERROR,
 
     // View errors

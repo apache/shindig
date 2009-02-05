@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -29,8 +30,6 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -93,6 +92,8 @@ public class ProxyHandler extends ProxyBase {
     req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
 
     req.setIgnoreCache(getIgnoreCache(request));
+
+    req.setSanitizationRequested("1".equals(request.getParameter(SANITIZE_CONTENT_PARAM)));
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it
