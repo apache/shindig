@@ -44,6 +44,7 @@ public abstract class ProxyBase {
 
   // Public because of rewriter. Rewriter should be cleaned up.
   public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
+  public static final String SANITIZE_CONTENT_PARAM = "sanitize";
 
   /**
    * Validates the given url.

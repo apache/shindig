@@ -18,9 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static junitx.framework.StringAssert.assertStartsWith;
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -30,18 +27,23 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.easymock.IAnswer;
 
+import com.google.common.collect.Lists;
+
+import static org.easymock.EasyMock.expect;
+import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.google.common.collect.Lists;
+import static junitx.framework.StringAssert.assertStartsWith;
 
 /**
  * Tests for MakeRequestHandler.
@@ -232,8 +234,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private void expectParameters(HttpServletRequest request, String... params) {
     final List<String> v = Lists.newArrayList(params);
 
-    expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration<String>>() {
-      public Enumeration<String> answer() throws Throwable{
+    expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration>() {
+      public Enumeration<String> answer() throws Throwable {
         return Collections.enumeration(v);
       }
     });

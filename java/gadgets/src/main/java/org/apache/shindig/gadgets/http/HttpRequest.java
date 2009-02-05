@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
@@ -26,9 +28,6 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,6 +58,9 @@ public class HttpRequest {
   // Cache control.
   private boolean ignoreCache;
   private int cacheTtl = -1;
+
+  // Sanitization
+  private boolean sanitizationRequested;
 
   // Whether to follow redirects
   private boolean followRedirects = true;
@@ -197,6 +199,18 @@ public class HttpRequest {
       headers.put("Pragma", Lists.newArrayList("no-cache"));
     }
     return this;
+  }
+
+  /**
+   * Should content fetched in response to this request
+   * be sanitized based on the specified mime-type
+   */
+  public boolean isSanitizationRequested() {
+    return sanitizationRequested;
+  }
+
+  public void setSanitizationRequested(boolean sanitizationRequested) {
+    this.sanitizationRequested = sanitizationRequested;
   }
 
   /**

@@ -35,9 +35,17 @@
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
 
-  <!-- By default do not cache any parsed documents. This is experimental -->
+  <!-- Used to cache parsed HTML DOMs based on their content -->
   <cache name="parsedDocuments"
-    maxElementsInMemory="0"
+    maxElementsInMemory="1000"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache parsed CSS DOMs based on their content -->
+  <cache name="parsedCss"
+    maxElementsInMemory="1000"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"
