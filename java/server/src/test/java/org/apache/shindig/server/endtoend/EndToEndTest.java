@@ -20,19 +20,15 @@ package org.apache.shindig.server.endtoend;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.BasicSecurityTokenDecoder;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-
-import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -41,8 +37,16 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+
+import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.google.common.collect.Maps;
 
 /**
  * Base class for end-to-end tests.
@@ -123,6 +127,27 @@ public class EndToEndTest {
     executeAllPageTests("opensocial-templates/ost_test");
   }
 
+  @Test
+  public void testPipelining() throws Exception {
+    HtmlPage page = executePageTest("pipeliningTest", null);
+    JSONArray array = new JSONArray(page.asText());
+    assertEquals(2, array.length());
+    Map<String, JSONObject> jsonObjects = Maps.newHashMap();
+    for (int i = 0; i < array.length(); i++) {
+      JSONObject jsonObj = array.getJSONObject(i);
+      assertTrue(jsonObj.has("id"));
+      
+      jsonObjects.put(jsonObj.getString("id"), jsonObj);
+    }
+    
+    JSONObject me = jsonObjects.get("me").getJSONObject("data");
+    assertEquals("Digg", me.getJSONObject("name").getString("familyName"));
+    
+    JSONObject json = jsonObjects.get("json").getJSONObject("data");
+    JSONObject expected = new JSONObject("{key: 'value'}");
+    assertEquals(expected.toString(), json.toString());
+  }
+  
   @BeforeClass
   public static void setUpOnce() throws Exception {
     server = new EndToEndServer();
@@ -186,7 +211,10 @@ public class EndToEndTest {
     String url = EndToEndServer.GADGET_BASEURL + "?url=" + URLEncoder.encode(gadgetUrl, "UTF-8");
     BasicSecurityTokenDecoder decoder = new BasicSecurityTokenDecoder();
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
-    url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
+    if (testMethod != null) {
+      url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
+    }
+    
     url += "&nocache=1";
     if (language != null) {
       url += "&lang=" + language;
