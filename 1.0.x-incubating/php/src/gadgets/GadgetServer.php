@@ -23,6 +23,7 @@ class GadgetServer {
   public function processGadget($context) {
     $gadget = $this->specLoad($context);
     $this->featuresLoad($gadget, $context);
+    $this->substitute($gadget, $context);
     return $gadget;
   }
 
@@ -45,8 +46,7 @@ class GadgetServer {
     $localeSpec = $this->localeSpec($gadget, $locale); // en-US
     $language_allSpec = $this->localeSpec($gadget, new Locale($locale->getLanguage(), "all")); // en-all
     $all_allSpec = $this->localeSpec($gadget, new Locale("all", "all")); // all-all
-    $messagesArray = $this->getMessagesArrayForSpecs($context, array($localeSpec, $language_allSpec, 
-        $all_allSpec));
+    $messagesArray = $this->getMessagesArrayForSpecs($context, array($localeSpec, $language_allSpec, $all_allSpec));
     if (count($messagesArray) == 0) {
       return null;
     }
@@ -81,7 +81,7 @@ class GadgetServer {
         // relative path's in the locale spec uri
         $gadgetUrl = $context->getUrl();
         $gadgetUrl = substr($gadgetUrl, 0, strrpos($gadgetUrl, '/') + 1);
-        $uri = $gadgetUrl.$uri;
+        $uri = $gadgetUrl . $uri;
       }
       $requestArray[] = new RemoteContentRequest($uri);
       $contextArray[] = $context;
@@ -113,7 +113,7 @@ class GadgetServer {
     return null;
   }
 
-  private function featuresLoad(Gadget $gadget, $context) {
+  private function substitute(Gadget $gadget, $context) {
     //NOTE i've been a bit liberal here with folding code into this function, while it did get a bit long, the many include()'s are slowing us down
     // get the message bundle for this gadget
     $bundle = $this->getBundle($context, $gadget);
@@ -137,6 +137,16 @@ class GadgetServer {
     $substitutor->addSubstitution('BIDI', "END_EDGE", $rtl ? "left" : "right");
     $substitutor->addSubstitution('BIDI', "DIR", $rtl ? "rtl" : "ltr");
     $substitutor->addSubstitution('BIDI', "REVERSE_DIR", $rtl ? "ltr" : "rtl");
+    foreach ($gadget->userPrefs as $pref) {
+      if (! empty($pref->displayName)) {
+        $pref->displayName = $gadget->getSubstitutions()->substitute($pref->displayName);
+      }
+      if (is_array($pref->enumValues) && count($pref->enumValues)) {
+        foreach ($pref->enumValues as &$enum) {
+          $enum = $gadget->getSubstitutions()->substitute($enum);
+        }
+      }
+    }
     // userPref's
     $upValues = $gadget->getUserPrefValues();
     foreach ($gadget->getUserPrefs() as $pref) {
@@ -151,6 +161,9 @@ class GadgetServer {
       $substitutor->addSubstitution('UP', $name, $value);
     }
     $this->substitutePreloads($gadget, $substitutor);
+  }
+
+  function featuresLoad(Gadget $gadget, $context) {
     // Process required / desired features
     $requires = $gadget->getRequires();
     $needed = array();

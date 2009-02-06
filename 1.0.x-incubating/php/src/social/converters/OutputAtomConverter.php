@@ -28,10 +28,8 @@ class OutputAtomConverter extends OutputConverter {
   private static $xmlVersion = '1.0';
   private static $charSet = 'UTF-8';
   private static $formatOutput = true;
-  //FIXME osearch fields break the validator ... remove option once i know if they should be included or not
-  private static $includeOsearch = false;
   // this maps the REST url to the atom content type
-  private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata', 
+  private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata',
       'activities' => 'activity', 'messages' => 'messages');
   private $doc;
 
@@ -44,17 +42,17 @@ class OutputAtomConverter extends OutputConverter {
     $guid = 'urn:guid:' . $userId;
     $authorName = $_SERVER['HTTP_HOST'] . ':' . $userId;
     $updatedAtom = date(DATE_ATOM);
-    
-    // Check to see if this is a single entry, or a collection, and construct either an atom 
-    // feed (collection) or an entry (single)		
+
+    // Check to see if this is a single entry, or a collection, and construct either an atom
+    // feed (collection) or an entry (single)
     if ($responseItem->getResponse() instanceof RestfulCollection) {
       $totalResults = $responseItem->getResponse()->getTotalResults();
       $itemsPerPage = $requestItem->getCount();
       $startIndex = $requestItem->getStartIndex();
-      
+
       // The root Feed element
       $entry = $this->addNode($doc, 'feed', '', false, self::$nameSpace);
-      
+
       // Required Atom fields
       $endPos = ($startIndex + $itemsPerPage) > $totalResults ? $totalResults : ($startIndex + $itemsPerPage);
       $this->addNode($entry, 'title', $requestType . ' feed for id ' . $authorName . ' (' . $startIndex . ' - ' . ($endPos - 1) . ' of ' . $totalResults . ')');
@@ -63,7 +61,7 @@ class OutputAtomConverter extends OutputConverter {
       $this->addNode($author, 'name', $authorName);
       $this->addNode($entry, 'updated', $updatedAtom);
       $this->addNode($entry, 'id', $guid);
-      $this->addNode($entry, 'link', '', array('rel' => 'self', 
+      $this->addNode($entry, 'link', '', array('rel' => 'self',
           'href' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
       // Add osearch & next link to the entry
       $this->addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults);
@@ -99,12 +97,12 @@ class OutputAtomConverter extends OutputConverter {
           $this->addNode($feedEntry, 'title', $requestType . ' feed entry for id ' . $idField);
           $this->addNode($feedEntry, 'updated', $updatedAtom);
         }
-        
+
         // recursively add responseItem data to the xml structure
         $this->addData($content, $requestType, $response, self::$osNameSpace);
       }
     } else {
-      // Single entry = Atom:Entry	
+      // Single entry = Atom:Entry
       $entry = $doc->appendChild($doc->createElementNS(self::$nameSpace, "entry"));
       // Atom fields
       $this->addNode($entry, 'title', $requestType . ' entry for ' . $authorName);
@@ -199,7 +197,7 @@ class OutputAtomConverter extends OutputConverter {
   }
 
   /**
-   * Recursive function that maps an data array or object to it's xml represantation 
+   * Recursive function that maps an data array or object to it's xml represantation
    *
    * @param DOMElement $element the element to append the new node(s) to
    * @param string $name the name of the to be created node
