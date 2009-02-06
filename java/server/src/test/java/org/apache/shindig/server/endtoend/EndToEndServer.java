@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.server.endtoend;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.AuthenticationServletFilter;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
@@ -45,6 +46,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -132,6 +135,10 @@ public class EndToEndServer {
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
     context.addServlet(concatHolder, CONCAT_BASE);
 
+    // Attach an EchoServlet, used to test proxied rendering
+    ServletHolder echoHolder = new ServletHolder(new EchoServlet());
+    context.addServlet(echoHolder, "/echo");
+    
     return newServer;
   }
 
@@ -167,5 +174,17 @@ public class EndToEndServer {
     public void destroy() {
       proxiedServlet.destroy();
     }
+  }
+
+  static private class EchoServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+      req.setCharacterEncoding("UTF-8");
+      resp.setContentType(req.getContentType());
+      
+      IOUtils.copy(req.getReader(), resp.getWriter());
+    }
+    
   }
 }
