@@ -25,6 +25,7 @@ import static org.apache.shindig.config.JsonContainerConfig.PARENT_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import org.apache.shindig.expressions.Expressions;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -53,7 +54,7 @@ public class JsonContainerConfigTest {
   private static final String ARRAY_NAME = "array value";
   private static final String[] ARRAY_VALUE = new String[]{"Hello", "World"};
   private static final String ARRAY_ALT_VALUE = "Not an array";
-
+  
   private File createContainer(JSONObject json) throws Exception {
     File file = File.createTempFile(getClass().getName(), ".json");
     file.deleteOnExit();
@@ -81,7 +82,8 @@ public class JsonContainerConfigTest {
 
   @Test
   public void parseBasicConfig() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(),
+        new Expressions());
 
     assertEquals(1, config.getContainers().size());
     for (String container : config.getContainers()) {
@@ -106,7 +108,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
 
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
 
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_A, NESTED_KEY));
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_B, NESTED_KEY));
@@ -128,7 +130,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath());
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
 
     String value = config.getString(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
@@ -154,7 +156,8 @@ public class JsonContainerConfigTest {
 
   @Test
   public void invalidContainerReturnsNull() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(),
+        new Expressions());
     assertNull("Did not return null for invalid container.", config.getString("fake", PARENT_KEY));
   }
 
@@ -165,13 +168,13 @@ public class JsonContainerConfigTest {
     json.put(PARENT_KEY, "bad bad bad parent!");
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
-    new JsonContainerConfig(createContainer(json).getAbsolutePath());
+    new JsonContainerConfig(createContainer(json).getAbsolutePath(), new Expressions());
   }
 
   @Test
   public void pathQuery() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath());
-    String path = "${" + NESTED_KEY + '.' + NESTED_NAME + '}';
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(), new Expressions());
+    String path = "${" + NESTED_KEY + "['" + NESTED_NAME + "']}";
     String data = config.getString(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
   }
@@ -184,8 +187,24 @@ public class JsonContainerConfigTest {
     json.put("expression", "Hello, ${world}!");
     json.put("world", "Earth");
 
-    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath());
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(), new Expressions());
 
     assertEquals("Hello, Earth!", config.getString(DEFAULT_CONTAINER, "expression"));
+  }
+
+  @Test
+  public void expressionEvaluationUsingParent() throws Exception {
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{CHILD_CONTAINER});
+    json.put(PARENT_KEY, DEFAULT_CONTAINER);
+    json.put("parentExpression", "${parent['" + TOP_LEVEL_NAME + "']}");
+
+    File childFile = createContainer(json);
+    File parentFile = createDefaultContainer();
+    ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
+
+    assertEquals(TOP_LEVEL_VALUE, config.getString(CHILD_CONTAINER, "parentExpression"));
   }
 }

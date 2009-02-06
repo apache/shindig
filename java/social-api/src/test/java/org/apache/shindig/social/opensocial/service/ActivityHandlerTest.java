@@ -17,10 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.isNull;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
@@ -30,19 +35,17 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.eq;
-import static org.easymock.classextension.EasyMock.isNull;
+import org.json.JSONObject;
 
 import java.io.StringReader;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class ActivityHandlerTest extends EasyMockTestCase {
 
@@ -68,7 +71,13 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     converter = mock(BeanJsonConverter.class);
     activityService = mock(ActivityService.class);
-    containerConfig = mock(ContainerConfig.class);
+
+    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+            "{'gadgets.features':{'opensocial-0.8':" +
+               "{supportedFields: {activity: ['id', 'title']}}" +
+             "}}}");
+
+    containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new ActivityHandler(activityService, containerConfig);
     registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
   }
@@ -140,7 +149,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
-  private Future setupBodyRequest(String method) throws SocialSpiException {
+  private Future<?> setupBodyRequest(String method) throws SocialSpiException {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
     String path = "/activities/john.doe/@self/@app";
@@ -160,14 +169,14 @@ public class ActivityHandlerTest extends EasyMockTestCase {
   }
 
   public void testHandlePost() throws Exception {
-    Future future = setupBodyRequest("POST");
+    Future<?> future = setupBodyRequest("POST");
     assertNull(future.get());
     verify();
     reset();
   }
 
   public void testHandlePut() throws Exception {
-    Future future = setupBodyRequest("PUT");
+    Future<?> future = setupBodyRequest("PUT");
     assertNull(future.get());
     verify();
     reset();
@@ -193,13 +202,14 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     String path = "/activities/@supportedFields";
     RestHandler operation = registry.getRestHandler(path, "GET");
 
-    List<Object> list = ImmutableList.<Object>of("id", "title");
-    expect(containerConfig.getList(eq("default"),
-        eq("${gadgets\\.features.opensocial-0\\.8.supportedFields.activity}"))).andReturn(list);
-
     replay();
-    assertEquals(list, operation.execute(path, Maps.<String, String[]>newHashMap(), null,
-        token, converter).get());
+    @SuppressWarnings("unchecked")
+    List<Object> received = (List<Object>) operation.execute(path, Maps.<String, String[]>newHashMap(), null,
+            token, converter).get();
+    assertEquals(2, received.size());
+    assertEquals("id", received.get(0).toString());
+    assertEquals("title", received.get(1).toString());
+
     verify();
   }
 }

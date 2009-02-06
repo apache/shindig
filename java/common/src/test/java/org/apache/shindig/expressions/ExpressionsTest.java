@@ -19,136 +19,84 @@
 package org.apache.shindig.expressions;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
+import javax.el.ELContext;
+import javax.el.ValueExpression;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
-/**
- * Tests of the Expressions class.
- */
 public class ExpressionsTest {
-  private FakeContext context;
-
+  private Expressions expressions;
+  private ELContext context;
+  
   @Before
   public void setUp() {
-    context = new FakeContext();
+    expressions = new Expressions();
+    context = expressions.newELContext(new RootELResolver());
+  }
+    
+  @Test
+  public void arraySupport() {
+    addVariable("array", new String[]{"foo", "bar"});
+    String result = evaluate("${array[0]}${array[1]}", String.class);
+    assertEquals("foobar", result);
+  }
+  
+  @Test
+  public void listSupport() {
+    addVariable("list", ImmutableList.of("foo", "bar"));
+    String result = evaluate("${list[0]}${list[1]}", String.class);
+    assertEquals("foobar", result);
+  }
+  
+  @Test
+  public void mapSupport() {
+    addVariable("map", ImmutableMap.of("foo", "bar"));
+    String result = evaluate("${map.foo}${map['foo']}", String.class);
+    assertEquals("barbar", result);
   }
 
   @Test
-  public void constantExpressions() throws Exception {
-    assertEquals("foo", Expressions.parse("foo", String.class).evaluate(context));
-    assertEquals(1, Expressions.parse("1", Integer.class).evaluate(context).intValue());
+  public void jsonObjectSupport() throws Exception {
+    addVariable("object", new JSONObject("{foo: 125}"));
+    int result = evaluate("${object.foo}", Integer.class);
+    assertEquals(125, result);
   }
 
   @Test
-  public void simpleExpressions() throws Exception {
-    context.variables.put("var", "value");
-    context.variables.put("int", 1);
-
-    Expression<String> var = Expressions.parse("${var}", String.class);
-    assertEquals("value", var.evaluate(context));
-
-    Expression<Integer> intExpression = Expressions.parse("${int}", Integer.class);
-    assertEquals(1, intExpression.evaluate(context).intValue());
+  public void jsonArraySupport() throws Exception {
+    addVariable("array", new JSONArray("[1, 2]"));
+    int result = evaluate("${array[0] + array[1]}", Integer.class);
+    assertEquals(3, result);
   }
 
   @Test
-  public void variableNotFoundIsNull() throws Exception {
-    Expression<String> var = Expressions.parse("${var}", String.class);
-    assertNull(var.evaluate(context));
+  public void jsonArrayCoercionOfStatic() throws Exception {
+    JSONArray result = evaluate("first,second", JSONArray.class);
+    JSONArray expected = new JSONArray("['first', 'second']");
+    assertEquals(expected.toString(), result.toString());
   }
-
+  
   @Test
-  public void propertyEvaluationForMaps() throws Exception {
-    context.variables.put("var", ImmutableMap.of("one", 1, "two", 2));
-
-    Expression<Integer> var = Expressions.parse("${var.one}${var.two}", Integer.class);
-    // 1 and 2 concatenated make 12, not 3
-    assertEquals(12, var.evaluate(context).intValue());
+  public void jsonArrayCoercion() throws Exception {
+    addVariable("foo", "first,second");
+    JSONArray result = evaluate("${foo}", JSONArray.class);
+    JSONArray expected = new JSONArray("['first', 'second']");
+    assertEquals(expected.toString(), result.toString());
+  }
+  
+  private <T> T evaluate(String expression, Class<T> type) {
+    ValueExpression expr = expressions.parse(expression, type);
+    return type.cast(expr.getValue(context));
   }
 
-  @Test
-  public void propertyEvaluationForJson() throws Exception {
-    context.variables.put("var", new JSONObject("{top: {middle: {inner: 'value'}}}"));
-
-    Expression<String> var = Expressions.parse("${var.top.middle.inner}", String.class);
-    assertEquals("value", var.evaluate(context));
+  private void addVariable(String key, Object value) {
+    context.getELResolver().setValue(context, null, key, value);
   }
-
-  @Test
-  public void propertyEvaluationForExpressionContext() throws Exception {
-    context.variables.put("var", new ExpressionContext() {
-      public Object getVariable(String name) {
-        return name.equals("top") ? "value" : null;
-      }
-    });
-
-    Expression<String> var = Expressions.parse("${var.top}", String.class);
-    assertEquals("value", var.evaluate(context));
-  }
-
-  @Test
-  public void propertyEvaluationWithEscapedDot() throws Exception {
-    context.variables.put("foo.bar", "baz");
-    Expression<String> var = Expressions.parse("${foo\\.bar}", String.class);
-    assertEquals("baz", var.evaluate(context));
-  }
-
-  @Test(expected = ElException.class)
-  public void propertyEvaluationWithLeadingDot() throws Exception {
-    context.variables.put("foo", "bar");
-    Expression<String> var = Expressions.parse("${.foo}", String.class);
-    var.evaluate(context);
-  }
-
-  @Test(expected = ElException.class)
-  public void propertyEvaluationWithTrailingDot() throws Exception {
-    context.variables.put("foo", "bar");
-    Expression<String> var = Expressions.parse("${foo.}", String.class);
-    var.evaluate(context);
-  }
-
-  @Test(expected = ElException.class)
-  public void exceptionWhenCoercionFails() throws Exception {
-    context.variables.put("var", "value");
-
-    Expression<Integer> var = Expressions.parse("${var}", Integer.class);
-    var.evaluate(context);
-  }
-
-  @Test(expected = ElException.class)
-  public void exceptionIfExpressionNotClosed() throws Exception {
-    Expressions.parse("${var${foo", Integer.class);
-  }
-
-  @Test(expected = ElException.class)
-  public void exceptionWhenPropertyEvaluationFails() throws Exception {
-    Expression<String> var = Expressions.parse("${var.property}", String.class);
-    var.evaluate(context);
-  }
-
-  @Test
-  public void concatExpressions() throws Exception {
-    context.variables.put("var", "value");
-
-    Expression<String> concat = Expressions.parse("foo${var}bar", String.class);
-    assertEquals("foovaluebar", concat.evaluate(context));
-  }
-
-  static public class FakeContext implements ExpressionContext {
-    public final Map<String, Object> variables = Maps.newHashMap();
-
-    public Object getVariable(String name) {
-      return variables.get(name);
-    }
-  }
-
 }
