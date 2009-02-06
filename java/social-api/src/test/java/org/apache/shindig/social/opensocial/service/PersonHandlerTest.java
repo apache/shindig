@@ -17,10 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -29,19 +34,17 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import static org.easymock.classextension.EasyMock.eq;
-import static org.easymock.classextension.EasyMock.expect;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class PersonHandlerTest extends EasyMockTestCase {
   private PersonService personService;
@@ -75,7 +78,12 @@ public class PersonHandlerTest extends EasyMockTestCase {
     token = new FakeGadgetToken();
     converter = mock(BeanJsonConverter.class);
     personService = mock(PersonService.class);
-    containerConfig = mock(ContainerConfig.class);
+    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+            "{'gadgets.features':{'opensocial-0.8':" +
+               "{supportedFields: {person: ['id', {name: 'familyName'}]}}" +
+             "}}}");
+
+    containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
     registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
   }
@@ -207,17 +215,20 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
-  public void testHandleGetSuportedFields() throws Exception {
+  public void testHandleGetSupportedFields() throws Exception {
     String path = "/people/@supportedFields";
     RestHandler operation = registry.getRestHandler(path, "GET");
 
-    List<Object> list = ImmutableList.<Object>of("id", ImmutableMap.of("name", "familyName"));
-    expect(containerConfig.getList(eq("default"),
-        eq("${gadgets\\.features.opensocial-0\\.8.supportedFields.person}"))).andReturn(list);
-
     replay();
-    assertEquals(list, operation.execute(path, Maps.<String, String[]>newHashMap(),
-        null, token, converter).get());
+    @SuppressWarnings("unchecked")
+    List<Object> received = (List<Object>) operation.execute(path, Maps.<String, String[]>newHashMap(), null,
+            token, converter).get();
+    assertEquals(2, received.size());
+    assertEquals("id", received.get(0).toString());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> map = (Map<String, Object>) received.get(1);
+    assertEquals("familyName", map.get("name").toString());
+
     verify();
   }
 }

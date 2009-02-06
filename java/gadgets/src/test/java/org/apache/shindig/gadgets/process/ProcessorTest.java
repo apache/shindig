@@ -22,7 +22,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -30,17 +32,11 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
-
-import com.google.common.collect.Maps;
-
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
@@ -58,12 +54,17 @@ public class ProcessorTest {
   private final FakeVariableSubstituter substituter = new FakeVariableSubstituter();
   private final FakeBlacklist blacklist = new FakeBlacklist();
 
-  private FakeContainerConfig containerConfig;
+  private ContainerConfig containerConfig;
   private Processor processor;
 
   @Before
   public void setUp() throws Exception {
-    containerConfig = new FakeContainerConfig();
+    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+        "{'gadgets.features':{views:" +
+           "{aliased: {aliases: ['some-alias', 'alias']}}" +
+         "}}}");
+    
+    containerConfig = new JsonContainerConfig(config, new Expressions());
     processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist);
   }
 
@@ -102,8 +103,6 @@ public class ProcessorTest {
 
   @Test
   public void doViewAliasing() throws Exception {
-    List<Object> aliases = Arrays.<Object>asList("some-alias", "alias");
-    containerConfig.data.put("${gadgets\\.features.views.aliased.aliases}", aliases);
     Gadget gadget = processor.process(makeContext("aliased"));
     assertEquals(BASIC_HTML_CONTENT, gadget.getCurrentView().getContent());
   }
@@ -158,25 +157,6 @@ public class ProcessorTest {
     public boolean isBlacklisted(URI gadgetUri) {
       wasChecked = true;
       return isBlacklisted;
-    }
-  }
-
-  private static class FakeContainerConfig extends AbstractContainerConfig {
-    protected final Map<String, Object> data = Maps.newHashMap();
-
-    @Override
-    public Object getProperty(String container, String parameter) {
-      return data.get(parameter);
-    }
-
-    @Override
-    public Collection<String> getContainers() {
-      return null;
-    }
-
-    @Override
-    public Map<String, Object> getProperties(String container) {
-      return null;
     }
   }
 

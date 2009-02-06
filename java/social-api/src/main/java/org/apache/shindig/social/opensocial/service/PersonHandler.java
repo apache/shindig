@@ -25,19 +25,17 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.logging.Logger;
-
 @Service(name = "people", path = "/{userId}+/{groupId}/{personId}+")
 public class PersonHandler {
-  private final static Logger logger = Logger.getLogger(PersonHandler.class.getName());
   private final PersonService personService;
   private final ContainerConfig config;
 
@@ -95,10 +93,10 @@ public class PersonHandler {
   }
 
   @Operation(httpMethods = "GET", path="/@supportedFields")
-  public List supportedFields(RequestItem request) {
+  public List<Object> supportedFields(RequestItem request) {
     // TODO: Would be nice if name in config matched name of service.
     String container = Objects.firstNonNull(request.getToken().getContainer(), "default");
     return config.getList(container,
-        "${gadgets\\.features.opensocial-0\\.8.supportedFields.person}");
+        "${Cur['gadgets.features']['opensocial-0.8'].supportedFields.person}");
   }
 }

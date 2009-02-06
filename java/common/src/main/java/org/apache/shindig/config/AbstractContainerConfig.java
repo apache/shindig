@@ -55,7 +55,9 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
   public List<Object> getList(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof List) {
-      return (List<Object>) value;
+      @SuppressWarnings("unchecked")
+      List<Object> listValue = (List<Object>) value;
+      return listValue;
     }
     return Collections.emptyList();
   }
@@ -63,7 +65,9 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
   public Map<String, Object> getMap(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof Map) {
-      return (Map<String, Object>) value;
+      @SuppressWarnings("unchecked")
+      Map<String, Object> mapValue = (Map<String, Object>) value;
+      return mapValue;
     }
     return Collections.emptyMap();
   }

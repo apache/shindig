@@ -98,7 +98,7 @@ public class Processor {
     View view = spec.getView(viewName);
     if (view == null) {
       String container = context.getContainer();
-      String property = "${gadgets\\.features.views." + viewName + ".aliases}";
+      String property = "${Cur['gadgets.features'].views['" + viewName + "'].aliases}";
       for (Object alias : containerConfig.getList(container, property)) {
         viewName = alias.toString();
         view = spec.getView(viewName);

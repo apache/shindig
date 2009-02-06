@@ -17,23 +17,23 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlException;
-import org.apache.shindig.expressions.ElException;
-import org.apache.shindig.expressions.Expression;
-import org.apache.shindig.expressions.ExpressionContext;
-import org.apache.shindig.expressions.Expressions;
-import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetExpressionContext;
-import org.apache.shindig.gadgets.variables.Substitutions;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ValueExpression;
+
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetELResolver;
+import org.apache.shindig.gadgets.variables.Substitutions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,7 +99,7 @@ public class PipelinedData {
           // notImplemented
           throw new SpecParserException("Unknown element <os:" + elementName + '>');
         }
-      } catch (ElException ele) {
+      } catch (ELException ele) {
         throw new SpecParserException(new XmlException(ele));
       }
     }
@@ -135,11 +135,12 @@ public class PipelinedData {
   public Map<String, Object> getSocialPreloads(GadgetContext context) {
     Map<String, Object> evaluatedPreloads = Maps.newHashMapWithExpectedSize(
         socialPreloads.size());
-    ExpressionContext expressionContext = new GadgetExpressionContext(context);
+    Expressions expressions = Expressions.sharedInstance();
+    ELContext elContext = expressions.newELContext(new GadgetELResolver(context));
     for (Map.Entry<String, SocialData> preload : socialPreloads.entrySet()) {
       try {
-        evaluatedPreloads.put(preload.getKey(), preload.getValue().toJson(expressionContext));
-      } catch (ElException e) {
+        evaluatedPreloads.put(preload.getKey(), preload.getValue().toJson(elContext));
+      } catch (ELException e) {
         // TODO: Handle!?!
         throw new RuntimeException(e);
       }
@@ -151,11 +152,12 @@ public class PipelinedData {
   public Map<String, RequestAuthenticationInfo> getHttpPreloads(GadgetContext context) {
     Map<String, RequestAuthenticationInfo> evaluatedPreloads = Maps.newHashMapWithExpectedSize(
         httpPreloads.size());
-    ExpressionContext expressionContext = new GadgetExpressionContext(context);
+    Expressions expressions = Expressions.sharedInstance();
+    ELContext elContext = expressions.newELContext(new GadgetELResolver(context));
     for (Map.Entry<String, HttpData> preload : httpPreloads.entrySet()) {
       try {
-        evaluatedPreloads.put(preload.getKey(), preload.getValue().evaluate(expressionContext));
-      } catch (ElException e) {
+        evaluatedPreloads.put(preload.getKey(), preload.getValue().evaluate(elContext));
+      } catch (ELException e) {
         // TODO: Handle!?!
         throw new RuntimeException(e);
       }
@@ -173,7 +175,7 @@ public class PipelinedData {
   }
 
   /** Handle the os:PeopleRequest element */
-  private SocialData createPeopleRequest(Element child) throws ElException {
+  private SocialData createPeopleRequest(Element child) throws ELException {
     SocialData expression = new SocialData(child.getAttribute("key"), "people.get");
 
     copyAttribute("groupId", child, expression, String.class);
@@ -195,16 +197,16 @@ public class PipelinedData {
   }
 
   /** Handle the os:ViewerRequest element */
-  private SocialData createViewerRequest(Element child) throws ElException {
+  private SocialData createViewerRequest(Element child) throws ELException {
     return createPersonRequest(child, "@viewer");
   }
 
   /** Handle the os:OwnerRequest element */
-  private SocialData createOwnerRequest(Element child) throws ElException {
+  private SocialData createOwnerRequest(Element child) throws ELException {
     return createPersonRequest(child, "@owner");
   }
 
-  private SocialData createPersonRequest(Element child, String userId) throws ElException {
+  private SocialData createPersonRequest(Element child, String userId) throws ELException {
     SocialData expression = new SocialData(child.getAttribute("key"), "people.get");
 
     expression.addProperty("userId", userId, JSONArray.class);
@@ -215,7 +217,7 @@ public class PipelinedData {
   }
 
   /** Handle the os:PersonAppDataRequest element */
-  private SocialData createPersonAppDataRequest(Element child) throws ElException {
+  private SocialData createPersonAppDataRequest(Element child) throws ELException {
     SocialData expression = new SocialData(child.getAttribute("key"), "appdata.get");
 
     copyAttribute("groupId", child, expression, String.class);
@@ -228,7 +230,7 @@ public class PipelinedData {
   }
 
   /** Handle the os:ActivitiesRequest element */
-  private SocialData createActivityRequest(Element child) throws ElException {
+  private SocialData createActivityRequest(Element child) throws ELException {
     SocialData expression = new SocialData(child.getAttribute("key"), "activities.get");
 
     copyAttribute("groupId", child, expression, String.class);
@@ -243,7 +245,7 @@ public class PipelinedData {
   }
 
   /** Handle an os:MakeRequest element */
-  private HttpData createMakeRequest(Element child, Uri base) throws ElException {
+  private HttpData createMakeRequest(Element child, Uri base) throws ELException {
     HttpData data = new HttpData(child, base);
 
     /* TODO: check auth type, and sign-by-owner/viewer, once spec agrees
@@ -262,7 +264,7 @@ public class PipelinedData {
   }
 
   private void copyAttribute(String name, Element element, SocialData expression, Class<?> type)
-    throws ElException {
+    throws ELException {
     if (element.hasAttribute(name)) {
       expression.addProperty(name, element.getAttribute(name), type);
     }
@@ -292,12 +294,12 @@ public class PipelinedData {
    * A single pipelined HTTP makerequest.
    */
   private static class HttpData {
-    private final Expression<String> authz;
+    private final String authz;
     private final Uri base;
     private final String href;
-    private final Expression<Boolean> signOwner;
-    private final Expression<Boolean> signViewer;
-    private final Map<String, Expression<String>> attributes;
+    private final boolean signOwner;
+    private final boolean signViewer;
+    private final Map<String, ValueExpression> attributes;
 
     private static final Set<String> KNOWN_ATTRIBUTES =
           ImmutableSet.of("authz", "href", "sign_owner", "sign_viewer");
@@ -305,25 +307,27 @@ public class PipelinedData {
     /**
      * Create an HttpData off an <os:makeRequest> element.
      */
-    public HttpData(Element element, Uri base) throws ElException {
+    public HttpData(Element element, Uri base) throws ELException {
       this.base = base;
 
-      // TODO: Spec question;  should authz be EL enabled?
-      String authz = element.hasAttribute("authz") ? element.getAttribute("authz") : "none";
-      this.authz = Expressions.parse(authz, String.class);
+      this.authz = element.hasAttribute("authz") ? element.getAttribute("authz") : "none";
 
       // TODO: Spec question;  should EL values be URL escaped?
       this.href = element.getAttribute("href");
 
-      // TODO: Spec question;  should sign_* be EL enabled?
-      this.signOwner = booleanExpression(element, "sign_owner");
-      this.signViewer = booleanExpression(element, "sign_viewer");
+      // TODO: Spec question;  should sign_* default to true?
+      this.signOwner = booleanValue(element, "sign_owner", true);
+      this.signViewer = booleanValue(element, "sign_viewer", true);
 
-      Map<String, Expression<String>> attributes = Maps.newHashMap();
+      Expressions expressions = Expressions.sharedInstance();
+      
+      // TODO: many of these attributes should not be EL enabled
+      Map<String, ValueExpression> attributes = Maps.newHashMap();
       for (int i = 0; i < element.getAttributes().getLength(); i++) {
         Node attr = element.getAttributes().item(i);
         if (!KNOWN_ATTRIBUTES.contains(attr.getNodeName())) {
-          attributes.put(attr.getNodeName(), Expressions.parse(attr.getNodeValue(), String.class));
+          attributes.put(attr.getNodeName(),
+              expressions.parse(attr.getNodeValue(), String.class));
         }
       }
 
@@ -346,20 +350,19 @@ public class PipelinedData {
 
     /**
      * Evaluate expressions and return a RequestAuthenticationInfo.
-     * @throws ElException if expression evaluation fails.
+     * @throws ELException if expression evaluation fails.
      */
-    public RequestAuthenticationInfo evaluate(ExpressionContext context) throws ElException {
-      final AuthType authType = AuthType.parse(authz.evaluate(context));
-      Expression<String> hrefExpression = Expressions.parse(href, String.class);
-      final Uri evaluatedHref = base.resolve(Uri.parse(hrefExpression.evaluate(context)));
+    public RequestAuthenticationInfo evaluate(ELContext context) throws ELException {
+      final AuthType authType = AuthType.parse(authz);
+      
+      Expressions expressions = Expressions.sharedInstance();
+      String hrefString = String.valueOf(expressions.parse(href, String.class)
+          .getValue(context));
+      final Uri evaluatedHref = base.resolve(Uri.parse(hrefString));
 
-      final boolean evaluatedSignOwner = evaluateBooleanExpression(context,
-          this.signOwner, true);
-      final boolean evaluatedSignViewer = evaluateBooleanExpression(context,
-          this.signViewer, true);
       final Map<String, String> evaluatedAttributes = Maps.newHashMap();
-      for (Map.Entry<String, Expression<String>> attr : attributes.entrySet()) {
-        evaluatedAttributes.put(attr.getKey(), attr.getValue().evaluate(context));
+      for (Map.Entry<String, ValueExpression> attr : attributes.entrySet()) {
+        evaluatedAttributes.put(attr.getKey(), (String) attr.getValue().getValue(context));
       }
 
       return new RequestAuthenticationInfo() {
@@ -376,38 +379,23 @@ public class PipelinedData {
         }
 
         public boolean isSignOwner() {
-          return evaluatedSignOwner;
+          return signOwner;
         }
 
         public boolean isSignViewer() {
-          return evaluatedSignViewer;
+          return signViewer;
         }
       };
     }
 
-    /** Evaluate a boolean expression, choosing a default value if needed */
-    private boolean evaluateBooleanExpression(ExpressionContext context,
-        Expression<Boolean> expression, boolean defaultValue) throws ElException {
-      if (expression == null) {
-        return defaultValue;
-      }
-
-      Boolean value = expression.evaluate(context);
-      if (value == null) {
-        return defaultValue;
-      }
-
-      return value;
-    }
-
     /** Parse a boolean expression off an XML attribute. */
-    private Expression<Boolean> booleanExpression(Element element, String attrName)
-        throws ElException {
+    private boolean booleanValue(Element element, String attrName,
+        boolean defaultValue) {
       if (!element.hasAttribute(attrName)) {
-        return null;
+        return defaultValue;
       }
 
-      return Expressions.parse(element.getAttribute(attrName), Boolean.class);
+      return "true".equalsIgnoreCase(element.getAttribute(attrName));
     }
   }
 
@@ -424,13 +412,13 @@ public class PipelinedData {
       this.method = method;
     }
 
-    public void addProperty(String name, String value, Class<?> type) throws ElException {
-      Expression<?> expression = Expressions.parse(value, type);
+    public void addProperty(String name, String value, Class<?> type) throws ELException {
+      ValueExpression expression = Expressions.sharedInstance().parse(value, type);
       properties.add(new Property(name, expression));
     }
 
     /** Create the JSON request form for the social data */
-    public JSONObject toJson(ExpressionContext context) throws ElException {
+    public JSONObject toJson(ELContext elContext) throws ELException {
       JSONObject object = new JSONObject();
       try {
         object.put("method", method);
@@ -438,11 +426,11 @@ public class PipelinedData {
 
         JSONObject params = new JSONObject();
         for (Property property : properties) {
-          property.set(context, params);
+          property.set(elContext, params);
         }
         object.put("params", params);
       } catch (JSONException je) {
-        throw new ElException(je);
+        throw new ELException(je);
       }
 
       return object;
@@ -450,22 +438,22 @@ public class PipelinedData {
 
     /** Single property for an expression */
     private static class Property {
-      private final Expression<?> expression;
+      private final ValueExpression expression;
       private final String name;
 
-      public Property(String name, Expression<?> expression) {
+      public Property(String name, ValueExpression expression) {
         this.name = name;
         this.expression = expression;
       }
 
-      public void set(ExpressionContext context, JSONObject object) throws ElException {
-        Object value = expression.evaluate(context);
+      public void set(ELContext elContext, JSONObject object) throws ELException {
+        Object value = expression.getValue(elContext);
         try {
           if (value != null) {
             object.put(name, value);
           }
         } catch (JSONException e) {
-          throw new ElException("Error parsing property \"" + name + '\"', e);
+          throw new ELException("Error parsing property \"" + name + '\"', e);
         }
       }
     }

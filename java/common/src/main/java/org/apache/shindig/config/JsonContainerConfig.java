@@ -19,19 +19,10 @@
 
 package org.apache.shindig.config;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.expressions.ElException;
-import org.apache.shindig.expressions.Expression;
-import org.apache.shindig.expressions.ExpressionContext;
 import org.apache.shindig.expressions.Expressions;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +37,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ValueExpression;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Represents a container configuration using JSON notation.
@@ -67,16 +67,25 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   public static final String CONTAINER_KEY = "gadgets.container";
 
   private final Map<String, Map<String, Object>> config;
+  private final Expressions expressions;
 
   /**
-   * Creates a new, empty configuration.
-   * @param containers
+   * Creates a new configuration from files.
    * @throws ContainerConfigException
    */
   @Inject
-  public JsonContainerConfig(@Named("shindig.containers.default") String containers)
+  public JsonContainerConfig(@Named("shindig.containers.default") String containers, Expressions expressions)
       throws ContainerConfigException {
+    this.expressions = expressions;
     config = createContainers(loadContainers(containers));
+  }
+
+  /**
+   * Creates a new configuration from a JSON Object,Êfor use in testing.
+   */
+  public JsonContainerConfig(JSONObject json, Expressions expressions) {
+    this.expressions = expressions;
+    config = createContainers(json);
   }
 
   @Override
@@ -94,9 +103,9 @@ public class JsonContainerConfig extends AbstractContainerConfig {
     if (property.startsWith("${")) {
       // An expression!
       try {
-        Expression<String> expression = Expressions.parse(property, String.class);
-        return expression.evaluate(createExpressionContext(container));
-      } catch (ElException e) {
+        ValueExpression expression = expressions.parse(property, Object.class);
+        return expression.getValue(createExpressionContext(container));
+      } catch (ELException e) {
         return null;
       }
     }
@@ -114,8 +123,8 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   private Map<String, Map<String, Object>> createContainers(JSONObject json) {
     Map<String, Map<String, Object>> map = Maps.newHashMap();
     for (String container : JSONObject.getNames(json)) {
-      ExpressionContext context = createExpressionContext(container);
-      map.put(container, jsonToMap(json.optJSONObject(container), context));
+      ELContext context = createExpressionContext(container);
+      map.put(container, jsonToMap(json.optJSONObject(container), expressions, context));
     }
 
     return map;
@@ -124,35 +133,35 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   /**
    * Protected to allow overriding.
    */
-  protected ExpressionContext createExpressionContext(String container) {
-    return new ContainerConfigExpressionContext(container, this);
+  protected ELContext createExpressionContext(String container) {
+    return expressions.newELContext(new ContainerConfigELResolver(this, container));
   }
 
   /**
    * Convert a JSON value to a configuration value.
    */
-  private static Object jsonToConfig(Object json, ExpressionContext context) {
+  private static Object jsonToConfig(Object json, Expressions expressions, ELContext context) {
     if (json instanceof CharSequence) {
-      return new DynamicConfigProperty(json.toString(), context);
+      return new DynamicConfigProperty(json.toString(), expressions, context);
     } else if (json instanceof JSONArray) {
       JSONArray jsonArray = (JSONArray) json;
       List<Object> values = new ArrayList<Object>(jsonArray.length());
       for (int i = 0, j = jsonArray.length(); i < j; ++i) {
-        values.add(jsonToConfig(jsonArray.opt(i), context));
+        values.add(jsonToConfig(jsonArray.opt(i), expressions, context));
       }
       return Collections.unmodifiableList(values);
     } else if (json instanceof JSONObject) {
-      return jsonToMap((JSONObject) json, context);
+      return jsonToMap((JSONObject) json, expressions, context);
     }
 
     // A (boxed) primitive.
     return json;
   }
 
-  private static Map<String, Object> jsonToMap(JSONObject json, ExpressionContext context) {
+  private static Map<String, Object> jsonToMap(JSONObject json, Expressions expressions, ELContext context) {
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
     for (String key : JSONObject.getNames(json)) {
-      values.put(key, jsonToConfig(json.opt(key), context));
+      values.put(key, jsonToConfig(json.opt(key), expressions, context));
     }
     return Collections.unmodifiableMap(values);
   }

@@ -24,20 +24,17 @@ import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.logging.Logger;
-
 @Service(name = "activities", path="/{userId}+/{groupId}/{appId}/{activityId}+")
 public class ActivityHandler  {
-
-  private static final Logger logger = Logger.getLogger(ActivityHandler.class.getName());
 
   private final ActivityService service;
   private final ContainerConfig config;
@@ -139,11 +136,11 @@ public class ActivityHandler  {
   }
 
   @Operation(httpMethods = "GET", path="/@supportedFields")
-  public List supportedFields(RequestItem request) {
+  public List<Object> supportedFields(RequestItem request) {
     // TODO: Would be nice if name in config matched name of service.
     String container = Objects.firstNonNull(request.getToken().getContainer(),
         ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
-        "${gadgets\\.features.opensocial-0\\.8.supportedFields.activity}");
+        "${Cur['gadgets.features']['opensocial-0.8'].supportedFields.activity}");
   }
 }
