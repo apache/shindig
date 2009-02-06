@@ -232,6 +232,15 @@
       </roles>
     </developer>
     <developer>
+      <id>vsiveton</id>
+      <name>Vincent Siveton</name>
+      <email>vsiveton@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>zhen</id>
       <name>Zhen Wang</name>
       <email>zhen@apache.org</email>
