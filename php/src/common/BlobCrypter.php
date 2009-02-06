@@ -19,34 +19,33 @@
  */
 
 
-class BlobCrypterException extends Exception {
-}
+class BlobCrypterException extends Exception { }
 
 /**
  * Utility interface for managing signed, encrypted, and time stamped blobs.
  * Blobs are made up of name/value pairs.  Time stamps are automatically
  * included and checked.
- * 
+ *
  */
 abstract class BlobCrypter {
 
   /**
    * Time stamps, encrypts, and signs a blob.
-   * 
+   *
    * @param in name/value pairs to encrypt
    * @return a base64 encoded blob
-   * 
+   *
    * @throws BlobCrypterException
    */
   abstract public function wrap(Array $in);
 
   /**
    * Unwraps a blob.
-   * 
+   *
    * @param in blob
    * @param maxAgeSec maximum age for the blob
    * @return the name/value pairs, including the origin timestamp.
-   * 
+   *
    * @throws BlobExpiredException if the blob is too old to be accepted.
    * @throws BlobCrypterException if the blob can't be decoded.
    */

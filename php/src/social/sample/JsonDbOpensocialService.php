@@ -345,7 +345,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token) {
-    $activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, $token);
+    $activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, array($activityId), $token);
     if ($activities instanceof RestfulCollection) {
       $activities = $activities->getEntry();
       foreach ($activities as $activity) {
@@ -357,7 +357,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     throw new SocialSpiException("Activity not found", ResponseError::$NOT_FOUND);
   }
 
-  public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $filterOp, $filterValue, $startIndex, $count, $fields, $token) {
+  public function getActivities($userIds, $groupId, $appId, $sortBy, $filterBy, $filterOp, $filterValue, $startIndex, $count, $fields, $activityIds, $token) {
     $db = $this->getDb();
     $friendsTable = $db[self::$FRIEND_LINK_TABLE];
     $ids = array();

@@ -166,7 +166,7 @@ class GadgetRenderingServlet extends HttpServlet {
       $content .= sprintf($externFmt, Config::get('default_js_prefix') . $this->getJsUrl($libs, $gadget) . "&container=" . $context->getContainer()) . "\n";
     }
     $content .= "<script>\n";
-    
+
     if (! empty($forcedLibs)) {
       // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.7:settitle.js">
       // type url), then we don't want to include dependencies twice, so find the complete features chain, so we can skip over those
@@ -301,7 +301,8 @@ class GadgetRenderingServlet extends HttpServlet {
         $buf .= $lib;
       }
     }
-    $cache = $this->context->getCache();
+    $cache = Config::get('feature_cache');
+    $cache = new $cache();
     if (($md5 = $cache->get(md5('getJsUrlMD5'))) === false) {
       $registry = $this->context->getRegistry();
       $features = $registry->getAllFeatures();
@@ -339,7 +340,7 @@ class GadgetRenderingServlet extends HttpServlet {
         }
       }
     }
-    
+
     // Add gadgets.util support. This is calculated dynamically based on request inputs.
     // See java/org/apache/shindig/gadgets/render/RenderingContentRewriter.java for reference.
     $requires = array();
@@ -347,7 +348,7 @@ class GadgetRenderingServlet extends HttpServlet {
       $requires[$feature->name] = new EmptyClass();
     }
     $gadgetConfig['core.util'] = $requires;
-    
+
     return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
   }
 
@@ -417,7 +418,7 @@ class GadgetRenderingServlet extends HttpServlet {
         $responses = $brc->multiFetch($unsignedRequests, $unsignedContexts);
         foreach ($responses as $response) {
           $resp[$response->getUrl()] = array(
-              'body' => $response->getResponseContent(), 
+              'body' => $response->getResponseContent(),
               'rc' => $response->getHttpCode());
         }
       } catch (Exception $e) {
@@ -430,7 +431,7 @@ class GadgetRenderingServlet extends HttpServlet {
         $responses = $fetcher->multiFetchRequest($signedRequests);
         foreach ($responses as $response) {
           $resp[$response->getNotSignedUrl()] = array(
-              'body' => $response->getResponseContent(), 
+              'body' => $response->getResponseContent(),
               'rc' => $response->getHttpCode());
         }
       } catch (Exception $e) {
