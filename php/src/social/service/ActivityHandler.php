@@ -20,7 +20,7 @@
 
 class ActivityHandler extends DataRequestHandler {
   private $service;
-  
+
   private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/appId/{activityId}";
 
   public function __construct() {
@@ -65,7 +65,7 @@ class ActivityHandler extends DataRequestHandler {
         return $this->service->getActivities($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $optionalActivityIds, $requestItem->getToken());
       }
     }
-    return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), $requestItem->getToken());
+    return $this->service->getActivities($userIds, $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getSortBy(), $requestItem->getFilterBy(), $requestItem->getFilterOperation(), $requestItem->getFilterValue(), $requestItem->getStartIndex(), $requestItem->getCount(), $requestItem->getFields(), null, $requestItem->getToken());
   }
 
   /**
@@ -89,6 +89,12 @@ class ActivityHandler extends DataRequestHandler {
     if (! empty($activityIds)) {
       throw new InvalidArgumentException("Cannot specify activityId in create");
     }
+    /*
+     * Note, on just about all types of social networks you would only allow activities to be created when the owner == viewer, and the userId == viewer as well, in code this would mean:
+     *  if ($token->getOwnerId() != $token->getViewerId() || $token->getViewerId() != $userId->getUserId($token)) {
+     *    throw new SocialSpiException("Create activity permission denied.", ResponseError::$UNAUTHORIZED);
+     *  }
+     */
     return $this->service->createActivity($userIds[0], $requestItem->getGroup(), $requestItem->getAppId(), $requestItem->getFields(), $requestItem->getParameter("activity"), $requestItem->getToken());
   }
 

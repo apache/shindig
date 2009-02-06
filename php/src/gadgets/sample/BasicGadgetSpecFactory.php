@@ -22,8 +22,9 @@
  * Basic implementation of a gadget spec factory.
  */
 class BasicGadgetSpecFactory implements GadgetSpecFactory {
-  
+
   private $fetcher;
+  private $cache;
 
   public function __construct($fetcher) {
     $this->fetcher = $fetcher;
@@ -37,10 +38,7 @@ class BasicGadgetSpecFactory implements GadgetSpecFactory {
    * Retrieves a gadget specification from the cache or from the Internet.
    */
   public function getGadgetSpecUri($url, $ignoreCache) {
-    if ($ignoreCache) {
-      return $this->fetchFromWeb($url, true);
-    }
-    return $this->fetchFromWeb($url, false);
+    return $this->fetchFromWeb($url, $ignoreCache);
   }
 
   /**

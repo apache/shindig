@@ -54,8 +54,35 @@ class GadgetSpecParser {
     foreach ($doc->UserPref as $pref) {
       $this->processUserPref($gadget, $pref);
     }
+    // Assume gadget v1
+    $explicit_profile = false;
     foreach ($doc->Content as $content) {
-      $this->processContent($gadget, $content);
+      $attributes = $content->attributes();
+      if (empty($attributes['type'])) {
+        throw new SpecParserException("No content type specified!");
+      }
+      $view = isset($attributes['view']) ? trim($attributes['view']) : '';
+      // Note if we find a profile explicity defined
+      if (strpos($view, "profile") !== false) {
+        $explicit_profile = true;
+      }
+    }
+    foreach ($doc->Content as $content) {
+      $attributes = $content->attributes();
+      if (empty($attributes['type'])) {
+        throw new SpecParserException("No content type specified!");
+      }
+      $view = isset($attributes['view']) ? trim($attributes['view']) : '';
+      // If view isnt defined and we didnt find a profile explicity defined
+      if ($view == '') {
+        if (! $explicit_profile) {
+          $this->processContent($gadget, $content, array(0 => DEFAULT_VIEW));
+        }
+        // If view isnt defined and a profile was found, this will catch it
+      } else {
+        $views = explode(',', $view);
+        $this->processContent($gadget, $content, $views);
+      }
     }
     foreach ($doc->ModulePrefs->Preload as $feature) {
       $gadget->preloads[] = new Preload($feature);
@@ -166,18 +193,9 @@ class GadgetSpecParser {
     $gadget->userPrefs[] = $preference;
   }
 
-  private function processContent(&$gadget, $content) {
-    $attributes = $content->attributes();
-    if (empty($attributes['type'])) {
-      throw new SpecParserException("No content type specified!");
-    }
-    $view = isset($attributes['view']) ? trim($attributes['view']) : '';
-    $views = explode(',', $view);
+  private function processContent(&$gadget, $content, $views) {
     $html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
     foreach ($views as $view) {
-      if (empty($view)) {
-        $view = DEFAULT_VIEW;
-      }
       $viewSpec = new ViewSpec($view, $content);
       if (! isset($gadget->views[$view])) {
         $viewSpec->content = $html;
