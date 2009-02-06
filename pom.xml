@@ -240,6 +240,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>awiner</id>
+      <name>Adam Winer</name>
+      <email>awiner@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
     <!-- Mentors -->
     <developer>
       <id>fitz</id>
