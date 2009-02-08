@@ -107,20 +107,10 @@
               <testSourceDirectory>${basedir}</testSourceDirectory>
               <testSuites>
                 <testSuite>
-                  <name>GadgetsJSAPITests</name>
+                  <name>FeatureTests</name>
                   <type>TESTCASES</type>
                   <includes>
-                    <include>core/*test.js</include>
-                    <include>core.io/*test.js</include>
-                    <include>views/*test.js</include>
-                  </includes>
-                </testSuite>
-                <testSuite>
-                  <name>OpenSocialJsTests</name>
-                  <type>TESTCASES</type>
-                  <includes>
-                    <include>opensocial-reference/*test.js</include>
-                    <include>opensocial-base/*test.js</include>
+                    <include>*/*test.js</include>
                   </includes>
                 </testSuite>
               </testSuites>

@@ -59,7 +59,7 @@
 var gadgets = gadgets || {};
 
 gadgets.config = function() {
-  var components = {};
+  var components = [];
 
   return {
     /**
@@ -82,13 +82,16 @@ gadgets.config = function() {
      * @throws {Error} If the component has already been registered.
      */
     register: function(component, opt_validators, opt_callback) {
-      if (components[component]) {
-        throw new Error('Component "' + component + '" is already registered.');
+      var registered = components[component];
+      if (!registered) {
+        registered = [];
+        components[component] = registered;
       }
-      components[component] = {
+
+      registered.push({
         validators: opt_validators || {},
         callback: opt_callback
-      };
+      });
     },
 
     /**
@@ -101,9 +104,6 @@ gadgets.config = function() {
      */
     get: function(opt_component) {
       if (opt_component) {
-        if (!components[opt_component]) {
-          throw new Error('Component "' + opt_component + '" not registered.');
-        }
         return configuration[opt_component] || {};
       }
       return configuration;
@@ -119,20 +119,25 @@ gadgets.config = function() {
     init: function(config, opt_noValidation) {
       configuration = config;
       for (var name in components) if (components.hasOwnProperty(name)) {
-        var component = components[name],
-            conf = config[name],
-            validators = component.validators;
-        if (!opt_noValidation) {
-          for (var v in validators) if (validators.hasOwnProperty(v)) {
-            if (!validators[v](conf[v])) {
-              throw new Error('Invalid config value "' + conf[v] +
-                  '" for parameter "' + v + '" in component "' +
-                  name + '"');
+        var componentList = components[name],
+            conf = config[name];
+
+        for (var i = 0, j = componentList.length; i < j; ++i) {
+          var component = componentList[i];
+          if (conf && !opt_noValidation) {
+            var validators = component.validators;
+            for (var v in validators) if (validators.hasOwnProperty(v)) {
+              if (!validators[v](conf[v])) {
+                throw new Error('Invalid config value "' + conf[v] +
+                    '" for parameter "' + v + '" in component "' +
+                    name + '"');
+              }
             }
           }
-        }
-        if (component.callback) {
-          component.callback(config);
+
+          if (component.callback) {
+            component.callback(config);
+          }
         }
       }
     },
