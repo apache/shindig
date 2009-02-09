@@ -43,9 +43,13 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** A CSS DOM parser using Caja. */
 public class CajaCssParser {
+
+  private static final Logger log = Logger.getLogger(CajaCssParser.class.getName());
 
   /**
    * Dummy URI that is never read from. Needed to construct Caja parser
@@ -77,23 +81,7 @@ public class CajaCssParser {
     }
     if (parsedCss == null) {
       try {
-        InputSource inputSource = new InputSource(FAKE_SOURCE);
-        CharProducer producer = CharProducer.Factory.create(new StringReader(content),
-            inputSource);
-        TokenStream<CssTokenType> lexer = new CssLexer(producer);
-        TokenQueue<CssTokenType> queue = new TokenQueue<CssTokenType>(lexer, inputSource,
-            new Criterion<Token<CssTokenType>>() {
-              public boolean accept(Token<CssTokenType> t) {
-                return CssTokenType.SPACE != t.type
-                    && CssTokenType.COMMENT != t.type;
-              }
-            });
-        if (queue.isEmpty()) {
-          // Return empty stylesheet
-          return new CssTree.StyleSheet(null, Collections.<CssTree.CssStatement>emptyList());
-        }
-        CssParser parser = new CssParser(queue);
-        parsedCss =  parser.parseStyleSheet();
+        parsedCss = parseImpl(content);
         if (shouldCache) {
           parsedCssCache.addElement(key, parsedCss);
         }
@@ -102,9 +90,40 @@ public class CajaCssParser {
       }
     }
     if (shouldCache) {
-      return (CssTree.StyleSheet)parsedCss.clone();
+      try {
+        return (CssTree.StyleSheet)parsedCss.clone();
+      } catch (RuntimeException re) {
+        // TODO - FIXME ASAP!
+        log.log(Level.INFO, "Workaround for Caja bug http://code.google.com/p/google-caja/issues/detail?id=985&start=200",
+            re);
+        try {
+          return parseImpl(content);
+        } catch (ParseException pe) {
+          throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe); 
+        }
+      }
     }
     return parsedCss;
+  }
+
+  private CssTree.StyleSheet parseImpl(String css) throws ParseException {
+    InputSource inputSource = new InputSource(FAKE_SOURCE);
+    CharProducer producer = CharProducer.Factory.create(new StringReader(css),
+        inputSource);
+    TokenStream<CssTokenType> lexer = new CssLexer(producer);
+    TokenQueue<CssTokenType> queue = new TokenQueue<CssTokenType>(lexer, inputSource,
+        new Criterion<Token<CssTokenType>>() {
+          public boolean accept(Token<CssTokenType> t) {
+            return CssTokenType.SPACE != t.type
+                && CssTokenType.COMMENT != t.type;
+          }
+        });
+    if (queue.isEmpty()) {
+      // Return empty stylesheet
+      return new CssTree.StyleSheet(null, Collections.<CssTree.CssStatement>emptyList());
+    }
+    CssParser parser = new CssParser(queue);
+    return parser.parseStyleSheet();
   }
 
   /** Serialize a stylesheet to a String */
