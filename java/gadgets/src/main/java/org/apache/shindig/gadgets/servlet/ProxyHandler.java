@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -30,6 +29,8 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ProxyHandler extends ProxyBase {
 
   private static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
-      "vary", "expires", "date", "pragma", "cache-control"
+      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding"
   );
 
   private final RequestPipeline requestPipeline;
