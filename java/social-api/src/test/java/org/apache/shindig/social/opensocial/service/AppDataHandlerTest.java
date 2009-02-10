@@ -20,10 +20,13 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.RestHandler;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -64,7 +67,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
-    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
+    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler), converter);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.NameImpl;
 
 import com.google.inject.ImplementedBy;

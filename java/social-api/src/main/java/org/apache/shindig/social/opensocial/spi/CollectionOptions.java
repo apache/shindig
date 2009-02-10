@@ -17,16 +17,19 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
-import java.util.Date;
+import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.model.FilterOperation;
+import org.apache.shindig.protocol.model.SortOrder;
 
-import org.apache.shindig.social.opensocial.service.RequestItem;
 import com.google.common.base.Objects;
+
+import java.util.Date;
 
 public class CollectionOptions {
   private String sortBy;
-  private PersonService.SortOrder sortOrder;
+  private SortOrder sortOrder;
   private String filter;
-  private PersonService.FilterOperation filterOperation;
+  private FilterOperation filterOperation;
   private String filterValue;
   private int first;
   private int max;
@@ -56,11 +59,11 @@ public class CollectionOptions {
     this.sortBy = sortBy;
   }
 
-  public PersonService.SortOrder getSortOrder() {
+  public SortOrder getSortOrder() {
     return sortOrder;
   }
 
-  public void setSortOrder(PersonService.SortOrder sortOrder) {
+  public void setSortOrder(SortOrder sortOrder) {
     this.sortOrder = sortOrder;
   }
 
@@ -94,11 +97,11 @@ public class CollectionOptions {
     this.filter = filter;
   }
 
-  public PersonService.FilterOperation getFilterOperation() {
+  public FilterOperation getFilterOperation() {
     return filterOperation;
   }
 
-  public void setFilterOperation(PersonService.FilterOperation filterOperation) {
+  public void setFilterOperation(FilterOperation filterOperation) {
     this.filterOperation = filterOperation;
   }
 

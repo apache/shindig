@@ -17,16 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.ResponseItem;
 
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNotNull;
-
-import junit.framework.Assert;
 import static junit.framework.Assert.assertFalse;
 import static junitx.framework.Assert.assertNotEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import org.junit.Test;
 
 
 /**

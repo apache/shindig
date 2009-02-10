@@ -17,8 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
@@ -26,7 +28,6 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -38,19 +39,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import org.apache.commons.lang.StringUtils;
+import junit.framework.TestCase;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import junit.framework.TestCase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class BeanXStreamConverterTest extends TestCase {
   private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"

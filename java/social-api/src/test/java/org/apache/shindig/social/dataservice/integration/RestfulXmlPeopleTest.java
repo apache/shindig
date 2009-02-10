@@ -17,9 +17,10 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
 import org.apache.shindig.social.core.model.BodyTypeImpl;
-import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.OrganizationImpl;
@@ -27,11 +28,14 @@ import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.util.XSDValidator;
 
@@ -42,14 +46,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 
 public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
@@ -104,7 +107,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     canonical.setCurrentLocation(location);
 
     canonical.setBirthday(new Date());
-    canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
+    canonical.setDrinker(new EnumImpl<Drinker>(Drinker.SOCIALLY));
     ListField email = new ListFieldImpl("work",
         "shindig-dev@incubator.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
@@ -153,16 +156,16 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     canonical.setLanguagesSpoken(Lists.newArrayList("English", "Dutch",
         "Esperanto"));
     canonical.setLivingArrangement("in a house");
-    Enum<Enum.LookingFor> lookingForRandom = new EnumImpl<Enum.LookingFor>(
-        Enum.LookingFor.RANDOM, "Random");
-    Enum<Enum.LookingFor> lookingForNetworking = new EnumImpl<Enum.LookingFor>(
-        Enum.LookingFor.NETWORKING, "Networking");
+    org.apache.shindig.protocol.model.Enum<LookingFor> lookingForRandom = new EnumImpl<LookingFor>(
+        LookingFor.RANDOM, "Random");
+    Enum<LookingFor> lookingForNetworking = new EnumImpl<LookingFor>(
+        LookingFor.NETWORKING, "Networking");
     canonical.setLookingFor(Lists.newArrayList(lookingForRandom,
         lookingForNetworking));
     canonical.setMovies(Lists.newArrayList("Iron Man", "Nosferatu"));
     canonical.setMusic(Lists.newArrayList("Chieftains", "Beck"));
-    canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(
-        Enum.NetworkPresence.ONLINE));
+    canonical.setNetworkPresence(new EnumImpl<NetworkPresence>(
+        NetworkPresence.ONLINE));
     canonical.setNickname("diggy");
     canonical.setPets("dog,cat");
     canonical.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl(
@@ -181,7 +184,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     canonical.setRomance("twice a year");
     canonical.setScaredOf("COBOL");
     canonical.setSexualOrientation("north");
-    canonical.setSmoker(new EnumImpl<Enum.Smoker>(Enum.Smoker.NO));
+    canonical.setSmoker(new EnumImpl<Smoker>(Smoker.NO));
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));

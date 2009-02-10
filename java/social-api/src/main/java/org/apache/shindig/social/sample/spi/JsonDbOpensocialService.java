@@ -18,20 +18,22 @@
 
 package org.apache.shindig.social.sample.spi;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.social.opensocial.service.BeanConverter;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -42,8 +44,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
-import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -17,19 +17,20 @@
  */
 package org.apache.shindig.social.core.util;
 
-import com.google.common.collect.Maps;
-
+import org.apache.shindig.protocol.conversion.jsonlib.BaseJsonLibConfig;
+import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import net.sf.ezmorph.MorpherRegistry;
-import net.sf.json.JsonConfig;
 import net.sf.json.util.EnumMorpher;
 import net.sf.json.util.JSONUtils;
 
@@ -38,25 +39,7 @@ import java.util.Map;
 /**
  * A Json Config class suitable for serializing Shindig json and pojos.
  */
-
-public class BeanJsonLibConfig extends JsonConfig {
-
-  /*
-   * Register the Enum Morphers so that JSON -> Bean works correctly for enums.
-   */
-  static {
-    MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-    morpherRegistry.registerMorpher(new EnumMorpher(Address.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Type.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Drinker.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Field.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.NetworkPresence.class));
-    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Smoker.class));
-    morpherRegistry.registerMorpher(new JsonObjectToMapMorpher());
-  }
+public class BeanJsonLibConfig extends BaseJsonLibConfig {
 
   /**
    * Construct the config with a Guice injector.
@@ -64,34 +47,27 @@ public class BeanJsonLibConfig extends JsonConfig {
    */
   @Inject
   public BeanJsonLibConfig(Injector injector) {
-    /*
-     * This hook deals with the creation of new beans in the JSON -> Java Bean
-     * conversion
-     */
-    setNewBeanInstanceStrategy(new InjectorBeanInstanceStrategy(injector));
+    super(injector);
+  }
 
-    /*
-     * We are expecting null for nulls
-     */
-    registerDefaultValueProcessor(String.class, new NullDefaultValueProcessor());
+  @Override
+  protected void registerMorphers() {
+    super.registerMorphers();
+    MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+    morpherRegistry.registerMorpher(new EnumMorpher(Address.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(ListField.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(MediaItem.Type.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(Drinker.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(Enum.Field.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(NetworkPresence.class));
+    morpherRegistry.registerMorpher(new EnumMorpher(Smoker.class));
+  }
 
-    setJsonPropertyFilter(new NullPropertyFilter());
-    setJavaPropertyFilter(new NullPropertyFilter());
-    // the classMap deals with the basic json string to bean conversion
-
-    Map<String, Class<?>> classMap = Maps.newHashMap();
-
-    /*
-     * mappings are required where there is a List of objects in the interface
-     * with no indication of what type the list should contain. At the moment,
-     * we are using 1 map for all json trees, as there is no conflict, but if
-     * there is a map could be selected on the basis of the root object. It
-     * would be better to do this with generics, but this is good enough and
-     * compact enough for the moment.
-     *
-     */
-    //
-    // activity
+  @Override
+  protected Map<String, Class<?>> createClassMap() {
+    Map<String, Class<?>> classMap = super.createClassMap();
     classMap.put("mediaItems", MediaItem.class);
     // this may not be necessary
     classMap.put("templateParams", Map.class);
@@ -113,8 +89,6 @@ public class BeanJsonLibConfig extends JsonConfig {
     classMap.put("jobs", Organization.class);
     classMap.put("schools", Organization.class);
     classMap.put("urls", Url.class);
-    setClassMap(classMap);
-
+    return classMap;
   }
-
 }

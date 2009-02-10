@@ -21,16 +21,18 @@ package org.apache.shindig.social.core.config;
 import org.apache.shindig.auth.AnonymousAuthenticationHandler;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
+import org.apache.shindig.protocol.DataServiceServletFetcher;
+import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.BeanConverter;
-import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
-import org.apache.shindig.social.opensocial.service.DefaultHandlerRegistry;
-import org.apache.shindig.social.opensocial.service.HandlerRegistry;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
@@ -63,7 +65,7 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
         .toInstance(Boolean.TRUE);
-
+    bind(XStreamConfiguration.class).to(XStream081Configuration.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(
         BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(

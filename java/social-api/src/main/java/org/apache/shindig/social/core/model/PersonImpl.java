@@ -17,14 +17,18 @@
  */
 package org.apache.shindig.social.core.model;
 
+import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Lists;
@@ -48,7 +52,7 @@ public class PersonImpl implements Person {
   private String children;
   private Address currentLocation;
   private String displayName;
-  private Enum<Enum.Drinker> drinker;
+  private Enum<Drinker> drinker;
   private List<ListField> emails;
   private String ethnicity;
   private String fashion;
@@ -64,11 +68,11 @@ public class PersonImpl implements Person {
   private String jobInterests;
   private List<String> languagesSpoken;
   private String livingArrangement;
-  private List<Enum<Enum.LookingFor>> lookingFor;
+  private List<Enum<LookingFor>> lookingFor;
   private List<String> movies;
   private List<String> music;
   private Name name;
-  private Enum<Enum.NetworkPresence> networkPresence;
+  private Enum<NetworkPresence> networkPresence;
   private String nickname;
   private List<Organization> organizations;
   private String pets;
@@ -83,7 +87,7 @@ public class PersonImpl implements Person {
   private String romance;
   private String scaredOf;
   private String sexualOrientation;
-  private Enum<Enum.Smoker> smoker;
+  private Enum<Smoker> smoker;
   private List<String> sports;
   private String status;
   private List<String> tags;
@@ -216,11 +220,11 @@ public class PersonImpl implements Person {
     this.displayName = displayName;
   }
 
-  public Enum<Enum.Drinker> getDrinker() {
+  public org.apache.shindig.protocol.model.Enum<Drinker> getDrinker() {
     return this.drinker;
   }
 
-  public void setDrinker(Enum<Enum.Drinker> newDrinker) {
+  public void setDrinker(Enum<Drinker> newDrinker) {
     this.drinker = newDrinker;
   }
 
@@ -359,11 +363,11 @@ public class PersonImpl implements Person {
     this.livingArrangement = livingArrangement;
   }
 
-  public List<Enum<Enum.LookingFor>> getLookingFor() {
+  public List<Enum<LookingFor>> getLookingFor() {
     return lookingFor;
   }
 
-  public void setLookingFor(List<Enum<Enum.LookingFor>> lookingFor) {
+  public void setLookingFor(List<Enum<LookingFor>> lookingFor) {
     this.lookingFor = lookingFor;
   }
 
@@ -391,11 +395,11 @@ public class PersonImpl implements Person {
     this.name = name;
   }
 
-  public Enum<Enum.NetworkPresence> getNetworkPresence() {
+  public Enum<NetworkPresence> getNetworkPresence() {
     return networkPresence;
   }
 
-  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
+  public void setNetworkPresence(Enum<NetworkPresence> networkPresence) {
     this.networkPresence = networkPresence;
   }
 
@@ -511,11 +515,11 @@ public class PersonImpl implements Person {
     this.sexualOrientation = sexualOrientation;
   }
 
-  public Enum<Enum.Smoker> getSmoker() {
+  public Enum<Smoker> getSmoker() {
     return this.smoker;
   }
 
-  public void setSmoker(Enum<Enum.Smoker> newSmoker) {
+  public void setSmoker(Enum<Smoker> newSmoker) {
     this.smoker = newSmoker;
   }
 

@@ -47,7 +47,7 @@
   <servlet>
     <servlet-name>restapiServlet</servlet-name>
     <servlet-class>
-      org.apache.shindig.social.opensocial.service.DataServiceServlet
+      org.apache.shindig.protocol.DataServiceServlet
     </servlet-class>
   </servlet>
 
@@ -55,7 +55,7 @@
   <servlet>
     <servlet-name>jsonRpcServlet</servlet-name>
     <servlet-class>
-      org.apache.shindig.social.opensocial.service.JsonRpcServlet
+      org.apache.shindig.protocol.JsonRpcServlet
     </servlet-class>
   </servlet>
 

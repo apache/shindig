@@ -17,14 +17,12 @@
  */
 package org.apache.shindig.common.util;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap;
-
+import com.google.common.collect.Lists;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import junit.framework.TestCase;
 
 import java.util.Iterator;
 
@@ -102,7 +100,7 @@ public class JsonConversionUtilTest extends TestCase {
         .fromJson(new JSONObject("{a:{b:[{c:\"hello\"},{c:\"hello\"}]}}"));
   }
 
-  private void assertJsonEquals(Object expected, Object actual)
+  public static void assertJsonEquals(Object expected, Object actual)
       throws JSONException {
     if (expected == null) {
       assertNull(actual);

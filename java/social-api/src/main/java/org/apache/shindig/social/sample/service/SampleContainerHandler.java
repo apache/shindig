@@ -22,10 +22,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseError;
-import org.apache.shindig.social.opensocial.service.Operation;
-import org.apache.shindig.social.opensocial.service.RequestItem;
-import org.apache.shindig.social.opensocial.service.Service;
+import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
@@ -36,7 +36,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
-@Service(name = "samplecontainer", path = "/samplecontainer/{type}/{doevil}")
+@Service(name = "samplecontainer", path = "/{type}/{doevil}")
 public class SampleContainerHandler {
 
   private final JsonDbOpensocialService service;

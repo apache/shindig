@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.PersonImpl;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.base.Functions;
-
 import com.google.inject.ImplementedBy;
 
 import java.util.Date;
@@ -426,19 +427,19 @@ public interface Person {
 
   /**
    * Get the person's drinking status, specified as an {@link Enum} with the enum's key referencing
-   * {@link Enum.Drinker}. Container support for this field is OPTIONAL.
+   * {@link Drinker}. Container support for this field is OPTIONAL.
    *
    * @return the persons drinking status
    */
-  Enum<Enum.Drinker> getDrinker();
+  Enum<Drinker> getDrinker();
 
   /**
    * Get the person's drinking status, specified as an {@link Enum} with the enum's key referencing
-   * {@link Enum.Drinker}. Container support for this field is OPTIONAL.
+   * {@link Drinker}. Container support for this field is OPTIONAL.
    *
    * @param newDrinker the persons drinking status
    */
-  void setDrinker(Enum<Enum.Drinker> newDrinker);
+  void setDrinker(Enum<Drinker> newDrinker);
 
   /**
    * Get the person's Emails associated with the person.
@@ -701,21 +702,21 @@ public interface Person {
 
   /**
    * Get a person's statement about who or what they are looking for, or what they are interested in
-   * meeting people for. Specified as an List of {@link Enum} with the enum's key referencing
-   * {@link Enum.LookingFor} Container support for this field is OPTIONAL.
+   * meeting people for. Specified as an List of {@link org.apache.shindig.protocol.model.Enum} with the enum's key referencing
+   * {@link LookingFor} Container support for this field is OPTIONAL.
    *
    * @return person's statement about who or what they are looking for
    */
-  List<Enum<Enum.LookingFor>> getLookingFor();
+  List<Enum<LookingFor>> getLookingFor();
 
   /**
    * Get a person's statement about who or what they are looking for, or what they are interested in
    * meeting people for. Specified as an List of {@link Enum} with the enum's key referencing
-   * {@link Enum.LookingFor} Container support for this field is OPTIONAL.
+   * {@link LookingFor} Container support for this field is OPTIONAL.
    *
    * @param lookingFor person's statement about who or what they are looking for
    */
-  void setLookingFor(List<Enum<Enum.LookingFor>> lookingFor);
+  void setLookingFor(List<Enum<LookingFor>> lookingFor);
 
   /**
    * Get the Person's favorite movies, specified as an List of strings. Container support for this
@@ -765,19 +766,19 @@ public interface Person {
 
   /**
    * Get the person's current network status. Specified as an {@link Enum} with the enum's key
-   * referencing {@link Enum.NetworkPresence}. Container support for this field is OPTIONAL.
+   * referencing {@link NetworkPresence}. Container support for this field is OPTIONAL.
    *
    * @return the person's current network status
    */
-  Enum<Enum.NetworkPresence> getNetworkPresence();
+  Enum<NetworkPresence> getNetworkPresence();
 
   /**
-   * Set the person's current network status. Specified as an {@link Enum} with the enum's key
-   * referencing {@link Enum.NetworkPresence}. Container support for this field is OPTIONAL.
+   * Set the person's current network status. Specified as an {@link org.apache.shindig.protocol.model.Enum} with the enum's key
+   * referencing {@link NetworkPresence}. Container support for this field is OPTIONAL.
    *
    * @param networkPresence the person's current network status
    */
-  void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence);
+  void setNetworkPresence(org.apache.shindig.protocol.model.Enum<NetworkPresence> networkPresence);
 
   /**
    * Get the person's nickname. Container support for this field is REQUIRED.
@@ -988,14 +989,14 @@ public interface Person {
    *
    * @return the person's smoking status
    */
-  Enum<Enum.Smoker> getSmoker();
+  Enum<Smoker> getSmoker();
 
   /**
    * Set the person's smoking status. Container support for this field is OPTIONAL.
    *
    * @param newSmoker the person's smoking status
    */
-  void setSmoker(Enum<Enum.Smoker> newSmoker);
+  void setSmoker(Enum<Smoker> newSmoker);
 
   /**
    * Get the person's favorite sports. Container support for this field is OPTIONAL.

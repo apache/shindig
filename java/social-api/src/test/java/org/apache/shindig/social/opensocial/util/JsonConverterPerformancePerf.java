@@ -17,7 +17,11 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.shindig.social.JsonLibTestsGuiceModule;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonLibConverter;
+import org.apache.shindig.protocol.conversion.jsonlib.JsonLibTestsGuiceModule;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
@@ -25,8 +29,6 @@ import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.MediaItemImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
-import org.apache.shindig.social.core.util.BeanJsonLibConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
@@ -37,8 +39,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 public class JsonConverterPerformancePerf extends TestCase {

@@ -17,34 +17,38 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.RestHandler;
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.model.FilterOperation;
+import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.core.model.PersonImpl;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.json.JSONObject;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import org.json.JSONObject;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PersonHandlerTest extends EasyMockTestCase {
   private PersonService personService;
@@ -65,9 +69,9 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
   static {
     DEFAULT_OPTIONS.setSortBy(PersonService.TOP_FRIENDS_SORT);
-    DEFAULT_OPTIONS.setSortOrder(PersonService.SortOrder.ascending);
+    DEFAULT_OPTIONS.setSortOrder(SortOrder.ascending);
     DEFAULT_OPTIONS.setFilter(null);
-    DEFAULT_OPTIONS.setFilterOperation(PersonService.FilterOperation.contains);
+    DEFAULT_OPTIONS.setFilterOperation(FilterOperation.contains);
     DEFAULT_OPTIONS.setFilterValue("");
     DEFAULT_OPTIONS.setFirst(0);
     DEFAULT_OPTIONS.setMax(20);
@@ -85,7 +89,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
+    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler), converter);
   }
 
   public void testHandleGetAllNoParams() throws Exception {
@@ -135,9 +139,9 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(Person.Field.NAME.toString());
-    options.setSortOrder(PersonService.SortOrder.descending);
+    options.setSortOrder(SortOrder.descending);
     options.setFilter(PersonService.TOP_FRIENDS_FILTER);
-    options.setFilterOperation(PersonService.FilterOperation.present);
+    options.setFilterOperation(FilterOperation.present);
     options.setFilterValue("cassie");
     options.setFirst(5);
     options.setMax(10);

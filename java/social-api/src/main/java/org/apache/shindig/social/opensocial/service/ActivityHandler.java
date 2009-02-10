@@ -18,20 +18,24 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.protocol.HandlerPreconditions;
+import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 @Service(name = "activities", path="/{userId}+/{groupId}/{appId}/{activityId}+")
 public class ActivityHandler  {
@@ -51,7 +55,7 @@ public class ActivityHandler  {
    * examples: /activities/john.doe/@self/1
    */
   @Operation(httpMethods="DELETE")
-  public Future<?> delete(RequestItem request)
+  public Future<?> delete(SocialRequestItem request)
       throws SocialSpiException {
 
     Set<UserId> userIds = request.getUsers();
@@ -70,7 +74,7 @@ public class ActivityHandler  {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   @Operation(httpMethods="PUT", bodyParam = "activity")
-  public Future<?> update(RequestItem request) throws SocialSpiException {
+  public Future<?> update(SocialRequestItem request) throws SocialSpiException {
     return create(request);
   }
 
@@ -80,7 +84,7 @@ public class ActivityHandler  {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   @Operation(httpMethods="POST", bodyParam = "activity")
-  public Future<?> create(RequestItem request) throws SocialSpiException {
+  public Future<?> create(SocialRequestItem request) throws SocialSpiException {
 
     Set<UserId> userIds = request.getUsers();
     List<String> activityIds = request.getListParameter("activityId");
@@ -104,7 +108,7 @@ public class ActivityHandler  {
    * /activities/john.doe,jane.doe/@friends
    */
   @Operation(httpMethods="GET")
-  public Future<?> get(RequestItem request)
+  public Future<?> get(SocialRequestItem request)
       throws SocialSpiException {
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));

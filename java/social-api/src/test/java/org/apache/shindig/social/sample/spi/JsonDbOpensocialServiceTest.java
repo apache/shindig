@@ -20,15 +20,17 @@ package org.apache.shindig.social.sample.spi;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.model.FilterOperation;
+import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -37,7 +39,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -85,9 +86,9 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedFriends() throws Exception {
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(PersonService.TOP_FRIENDS_SORT);
-    options.setSortOrder(PersonService.SortOrder.ascending);
+    options.setSortOrder(SortOrder.ascending);
     options.setFilter(null);
-    options.setFilterOperation(PersonService.FilterOperation.contains);
+    options.setFilterOperation(FilterOperation.contains);
     options.setFilterValue("");
     options.setFirst(0);
     options.setMax(20);
@@ -105,9 +106,9 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedUsersForPlural() throws Exception {
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(PersonService.TOP_FRIENDS_SORT);
-    options.setSortOrder(PersonService.SortOrder.ascending);
+    options.setSortOrder(SortOrder.ascending);
     options.setFilter(null);
-    options.setFilterOperation(PersonService.FilterOperation.contains);
+    options.setFilterOperation(FilterOperation.contains);
     options.setFilterValue("");
     options.setFirst(0);
     options.setMax(20);

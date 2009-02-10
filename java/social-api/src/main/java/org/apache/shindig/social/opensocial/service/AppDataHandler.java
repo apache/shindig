@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.HandlerPreconditions;
+import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -49,7 +52,7 @@ public class AppDataHandler {
    * overridden.
    */
   @Operation(httpMethods = "DELETE")
-  public Future<?> delete(RequestItem request)
+  public Future<?> delete(SocialRequestItem request)
       throws SocialSpiException {
 
     Set<UserId> userIds = request.getUsers();
@@ -71,7 +74,7 @@ public class AppDataHandler {
    * overridden.
    */
   @Operation(httpMethods = "PUT", bodyParam = "data")
-  public Future<?> update(RequestItem request) throws SocialSpiException {
+  public Future<?> update(SocialRequestItem request) throws SocialSpiException {
     return create(request);
   }
 
@@ -84,7 +87,7 @@ public class AppDataHandler {
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
   @Operation(httpMethods = "POST", bodyParam = "data")
-  public Future<?> create(RequestItem request) throws SocialSpiException {
+  public Future<?> create(SocialRequestItem request) throws SocialSpiException {
     Set<UserId> userIds = request.getUsers();
 
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
@@ -108,7 +111,7 @@ public class AppDataHandler {
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
   @Operation(httpMethods = "GET")
-  public Future<?> get(RequestItem request) throws SocialSpiException {
+  public Future<?> get(SocialRequestItem request) throws SocialSpiException {
     Set<UserId> userIds = request.getUsers();
 
     // Preconditions
