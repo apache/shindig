@@ -20,7 +20,8 @@
 package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
@@ -28,6 +29,7 @@ import junit.framework.TestCase;
 
 public class GadgetSpecTest extends TestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
+
   public void testBasic() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\"/>" +
@@ -39,6 +41,21 @@ public class GadgetSpecTest extends TestCase {
     assertEquals(UserPref.DataType.STRING,
         spec.getUserPrefs().get(0).getDataType());
     assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+
+  public void testAlternativeConstructor() throws Exception {
+    String xml = "<Module>" +
+                 "<ModulePrefs title=\"title\"/>" +
+                 "<UserPref name=\"foo\" datatype=\"string\"/>" +
+                 "<Content type=\"html\">Hello!</Content>" +
+                 "</Module>";
+    GadgetSpec spec = new GadgetSpec(SPEC_URL, XmlUtil.parse(xml), xml);
+    assertEquals("title", spec.getModulePrefs().getTitle());
+    assertEquals(UserPref.DataType.STRING,
+        spec.getUserPrefs().get(0).getDataType());
+    assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+
+    assertEquals(HashUtil.checksum(xml.getBytes()), spec.getChecksum());
   }
 
   public void testMultipleContentSections() throws Exception {
@@ -77,18 +94,6 @@ public class GadgetSpecTest extends TestCase {
       fail("No exception thrown when more than 1 ModulePrefs is specified.");
     } catch (SpecParserException e) {
       // OK
-    }
-  }
-
-  public void testMalformedXml() throws Exception {
-    String xml = "<Module><ModulePrefs/>";
-    try {
-      new GadgetSpec(SPEC_URL, xml);
-      fail("No exception thrown on malformed XML.");
-    } catch (SpecParserException e) {
-      // OK
-      assertEquals(GadgetException.Code.MALFORMED_XML_DOCUMENT, e.getCode());
-      assertTrue(e.getMessage().contains(SPEC_URL.toString()));
     }
   }
 

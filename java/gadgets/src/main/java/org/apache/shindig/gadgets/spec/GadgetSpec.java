@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
@@ -36,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a gadget specification root element (Module).
@@ -49,20 +47,17 @@ public class GadgetSpec {
   /**
    * Creates a new Module from the given xml input.
    *
-   * @throws SpecParserException If xml can not be parsed as a valid gadget spec.
+   * @param url The original url of the gadget.
+   * @param doc The pre-parsed xml document.
+   * @param original Unparsed input XML. Used to generate checksums.
+   *
+   * @throws SpecParserException If xml can not be processed as a valid gadget spec.
    */
-  public GadgetSpec(Uri url, String xml) throws SpecParserException {
-    Element doc;
-    try {
-      doc = XmlUtil.parse(xml);
-    } catch (XmlException e) {
-      throw new SpecParserException("Malformed XML in file " + url.toString(), e);
-    }
+  public GadgetSpec(Uri url, Element doc, String original) throws SpecParserException {
     this.url = url;
 
-    // This might not be good enough; should we take message bundle changes
-    // into account?
-    this.checksum = HashUtil.checksum(xml.getBytes());
+    // This might not be good enough; should we take message bundle changes into account?
+    this.checksum = HashUtil.checksum(original.getBytes());
 
     NodeList children = doc.getChildNodes();
 
@@ -80,8 +75,7 @@ public class GadgetSpec {
         if (modulePrefs == null) {
           modulePrefs = new ModulePrefs(element, url);
         } else {
-          throw new SpecParserException(
-              "Only 1 ModulePrefs is allowed.");
+          throw new SpecParserException("Only 1 ModulePrefs is allowed.");
         }
       }
       if ("UserPref".equals(name)) {
@@ -123,6 +117,13 @@ public class GadgetSpec {
     } else {
       this.userPrefs = ImmutableList.copyOf(userPrefs);
     }
+  }
+
+  /**
+   * Use for testing.
+   */
+  public GadgetSpec(Uri url, String xml) throws SpecParserException {
+    this(url, XmlUtil.parseSilent(xml), xml);
   }
 
   /**

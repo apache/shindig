@@ -18,6 +18,7 @@
 package org.apache.shindig.common.xml;
 
 import org.apache.shindig.common.uri.Uri;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -26,14 +27,15 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Utility class for simplifying parsing of xml documents. Documents are not validated, and
@@ -301,6 +303,17 @@ public class XmlUtil {
       throw new XmlException(e);
     } catch (IOException e) {
       throw new XmlException(e);
+    }
+  }
+
+  /**
+   * Same as {@link #parse(String)}, but throws a RuntimeException instead of XmlException.
+   */
+  public static Element parseSilent(String xml) {
+    try {
+      return parse(xml);
+    } catch (XmlException e) {
+      throw new RuntimeException(e);
     }
   }
 }

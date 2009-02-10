@@ -37,8 +37,9 @@ public class ApplicationManifest {
 
   private final Map<String, String> versions;
   private final Map<String, Uri> gadgets;
+  private final Uri uri;
 
-  public ApplicationManifest(Uri base, Element xml) throws SpecParserException {
+  public ApplicationManifest(Uri uri, Element xml) throws SpecParserException {
     ImmutableMap.Builder<String, String> versions = ImmutableMap.builder();
     ImmutableMap.Builder<String, Uri> gadgets = ImmutableMap.builder();
 
@@ -46,18 +47,19 @@ public class ApplicationManifest {
     for (int i = 0, j = nodes.getLength(); i < j; ++i) {
       Element gadget = (Element) nodes.item(i);
       String version = getVersionString(gadget);
-      Uri spec = getSpecUri(base, gadget);
+      Uri spec = getSpecUri(uri, gadget);
       gadgets.put(version, spec);
       for (String label : getLabels(gadget)) {
         versions.put(label, version);
       }
     }
 
+    this.uri = uri;
     this.versions = versions.build();
     this.gadgets = gadgets.build();
   }
 
-  private static Uri getSpecUri(Uri base, Element gadget) throws SpecParserException {
+  private static Uri getSpecUri(Uri baseUri, Element gadget) throws SpecParserException {
     NodeList specs = gadget.getElementsByTagName("spec");
 
     if (specs.getLength() > 1) {
@@ -68,7 +70,11 @@ public class ApplicationManifest {
 
     try {
       String relative = specs.item(0).getTextContent();
-      return base.resolve(Uri.parse(relative));
+      Uri specUri = baseUri.resolve(Uri.parse(relative));
+      if (specUri.equals(baseUri)) {
+        throw new SpecParserException("Manifest is self-referencing.");
+      }
+      return specUri;
     } catch (IllegalArgumentException e) {
       throw new SpecParserException("Invalid spec URI.");
     }
@@ -95,6 +101,13 @@ public class ApplicationManifest {
     }
 
     return list;
+  }
+
+  /**
+   * @return The URI of this manifest.
+   */
+  public Uri getUri() {
+    return uri;
   }
 
   /**

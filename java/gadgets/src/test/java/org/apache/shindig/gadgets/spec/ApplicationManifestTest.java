@@ -41,6 +41,7 @@ public class ApplicationManifestTest {
     ApplicationManifest manifest = new ApplicationManifest(BASE_URI, XmlUtil.parse(xml));
 
     assertEquals(BASE_URI.resolve(Uri.parse("app.xml")), manifest.getGadget("1.0"));
+    assertEquals(BASE_URI, manifest.getUri());
   }
 
   @Test(expected = SpecParserException.class)
@@ -145,6 +146,20 @@ public class ApplicationManifestTest {
         "  <version>1.0</version>" +
         "  <spec>whoever</spec>" +
         "  <spec>whatever</spec>" +
+        "</gadget></app>";
+
+    new ApplicationManifest(BASE_URI, XmlUtil.parse(xml));
+  }
+
+  @Test(expected = SpecParserException.class)
+  public void selfReferencingManifest() throws Exception {
+    String xml =
+        "<app xmlns='" + ApplicationManifest.NAMESPACE + "'>" +
+        "<gadget>" +
+        "  <label>production</label>" +
+        "  <version>1.0</version>" +
+        "  <spec>whoever</spec>" +
+        "  <spec>" + BASE_URI + "</spec>" +
         "</gadget></app>";
 
     new ApplicationManifest(BASE_URI, XmlUtil.parse(xml));

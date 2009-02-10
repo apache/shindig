@@ -24,17 +24,21 @@ import com.google.inject.ImplementedBy;
 
 import java.net.URI;
 
-/** Factory of gadget specs */
-
+/**
+ * Factory of gadget specs.
+ */
 @ImplementedBy(DefaultGadgetSpecFactory.class)
-
 public interface GadgetSpecFactory {
 
   /** Return a gadget spec for a context */
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
 
-  /** Return a gadget spec for a URI */
-  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache)
-      throws GadgetException;
+  /**
+   * Return a gadget spec for a URI.
+   *
+   * @deprecated Use {@link #getGadgetSpec(GadgetContext)} instead.
+   */
+  @Deprecated
+  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException;
 
 }
