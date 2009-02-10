@@ -17,24 +17,27 @@
  */
 package org.apache.shindig.server;
 
-import com.google.common.base.Join;
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.auth.AuthenticationServletFilter;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
-import org.apache.shindig.gadgets.servlet.AuthenticationModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
+import org.apache.shindig.gadgets.servlet.JsServlet;
 import org.apache.shindig.gadgets.servlet.ProxyServlet;
+import org.apache.shindig.gadgets.servlet.RpcServlet;
+import org.apache.shindig.protocol.DataServiceServlet;
+import org.apache.shindig.protocol.JsonRpcServlet;
 import org.apache.shindig.server.endtoend.EndToEndModule;
-import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.JsonRpcServlet;
+
+import com.google.common.base.Join;
+import com.google.common.collect.Maps;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.resource.Resource;
 
 import java.io.IOException;
 import java.util.Map;
@@ -49,21 +52,24 @@ public class JettyLauncher {
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
+  private static final String GADGETS_FILES = "/gadgets/files/*";
+  private static final String JS_BASE = "/gadgets/js/*";
+  private static final String METADATA_BASE = "/gadgets/metadata/*";
 
   private Server server;
 
-  private JettyLauncher(int port) throws IOException {
+  private JettyLauncher(int port, final String trunk) throws IOException {
 
     server = new Server(port);
 
     Context context = new Context(server, "/", Context.SESSIONS);
+    context.setResourceBase(trunk + "/javascript");
     context.addEventListener(new GuiceServletContextListener());
 
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Join
         .join(":", EndToEndModule.class.getName(), DefaultGuiceModule.class.getName(),
-            PropertiesModule.class.getName(), OAuthModule.class.getName(),
-            AuthenticationModule.class.getName());
+            PropertiesModule.class.getName(), OAuthModule.class.getName());
 
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);
     context.setInitParams(initParams);
@@ -71,6 +77,14 @@ public class JettyLauncher {
     // Attach the ConcatProxyServlet - needed for rewriting
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
     context.addServlet(concatHolder, CONCAT_BASE);
+
+    // Attach the JS
+    ServletHolder jsHolder = new ServletHolder(new JsServlet());
+    context.addServlet(jsHolder, JS_BASE);
+
+    // Attach the metatdata handler
+    ServletHolder metadataHolder = new ServletHolder(new RpcServlet());
+    context.addServlet(metadataHolder, METADATA_BASE);
 
     // Attach the Proxy
     ServletHolder proxyHolder = new ServletHolder(new ProxyServlet());
@@ -89,6 +103,23 @@ public class JettyLauncher {
     ServletHolder rpcServletHolder = new ServletHolder(new JsonRpcServlet());
     context.addServlet(rpcServletHolder, JSON_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
+
+    DefaultServlet defaultServlet = new DefaultServlet() {
+      public Resource getResource(String s) {
+        // Skip Gzip
+        if (s.endsWith(".gz")) return null;
+        
+        String stripped = s.substring("/gadgets/files/".length());
+        try {
+          return Resource.newResource(trunk + "/javascript/" + stripped);
+        } catch (IOException ioe) {
+          ioe.printStackTrace();
+          return null;
+        }
+      }
+    };
+    ServletHolder defaultHolder = new ServletHolder(defaultServlet);
+    context.addServlet(defaultHolder, GADGETS_FILES);
   }
 
   public void start() throws Exception {
@@ -96,8 +127,13 @@ public class JettyLauncher {
     server.join();
   }
 
+  /**
+   * Takes a single path which is the trunk root directory. Uses
+   * current root otherwise
+   */
   public static void main(String[] argv) throws Exception {
-    JettyLauncher server = new JettyLauncher(8080);
+    String trunk = argv.length == 0 ? System.getProperty("user.dir") : argv[0];
+    JettyLauncher server = new JettyLauncher(8080, trunk);
     server.start();
   }
 }
