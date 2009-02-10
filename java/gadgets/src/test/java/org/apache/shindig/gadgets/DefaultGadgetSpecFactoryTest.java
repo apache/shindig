@@ -188,7 +188,7 @@ public class DefaultGadgetSpecFactoryTest {
         = new ApplicationManifest(MANIFEST_URI, XmlUtil.parse(MANIFEST_XML));
     specFactory.cache.addElement(MANIFEST_URI, manifest, 1000);
 
-    GadgetSpec cachedSpec = new GadgetSpec(SPEC_URL, XmlUtil.parse(LOCAL_SPEC_XML));
+    GadgetSpec cachedSpec = new GadgetSpec(SPEC_URL, LOCAL_SPEC_XML);
     specFactory.cache.addElement(SPEC_URL, cachedSpec, 1000);
 
     GadgetSpec spec = specFactory.getGadgetSpec(createContext(MANIFEST_URI, false));
@@ -202,7 +202,7 @@ public class DefaultGadgetSpecFactoryTest {
         = new ApplicationManifest(MANIFEST_URI, XmlUtil.parse(MANIFEST_XML));
     specFactory.cache.addElement(MANIFEST_URI, manifest, 1000);
 
-    GadgetSpec cachedSpec = new GadgetSpec(ALT_SPEC_URL, XmlUtil.parse(ALT_LOCAL_SPEC_XML));
+    GadgetSpec cachedSpec = new GadgetSpec(ALT_SPEC_URL, ALT_LOCAL_SPEC_XML);
     specFactory.cache.addElement(ALT_SPEC_URL, cachedSpec, 1000);
 
     GadgetSpec spec = specFactory.getGadgetSpec(new GadgetContext() {
@@ -231,7 +231,7 @@ public class DefaultGadgetSpecFactoryTest {
     replay(pipeline);
 
     specFactory.cache.addElement(
-        SPEC_URL, new GadgetSpec(SPEC_URL, XmlUtil.parse(LOCAL_SPEC_XML)), -1);
+        SPEC_URL, new GadgetSpec(SPEC_URL, LOCAL_SPEC_XML), -1);
 
     GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
