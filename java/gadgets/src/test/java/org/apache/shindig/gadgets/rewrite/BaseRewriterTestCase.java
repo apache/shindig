@@ -23,6 +23,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -67,8 +68,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
         SPEC_URL,
         defaultRewriterFeature,
         DEFAULT_PROXY_BASE);
-    injector = Guice.createInjector(new ParseModule(), new PropertiesModule(),
-        new TestRequestPipelineModule());
+    injector = Guice.createInjector(new ParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
@@ -158,12 +158,26 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     }
   }
 
-  private static class TestRequestPipelineModule extends AbstractModule {
+  private static class TestModule extends AbstractModule {
 
     @Override
     protected void configure() {
       bind(RequestPipeline.class).toInstance(new RequestPipeline() {
         public HttpResponse execute(HttpRequest request) { return null; }
+      });
+
+      bind(GadgetSpecFactory.class).toInstance(new GadgetSpecFactory() {
+
+        public GadgetSpec getGadgetSpec(GadgetContext context) {
+          // TODO Auto-generated method stub
+          return null;
+        }
+
+        public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) {
+          // TODO Auto-generated method stub
+          return null;
+        }
+
       });
     }
   }
