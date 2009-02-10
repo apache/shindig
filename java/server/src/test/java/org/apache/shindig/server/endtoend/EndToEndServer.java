@@ -25,21 +25,16 @@ import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
-import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.JsonRpcServlet;
+import org.apache.shindig.protocol.DataServiceServlet;
+import org.apache.shindig.protocol.JsonRpcServlet;
 
 import com.google.common.base.Join;
 import com.google.common.collect.Maps;
-
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -49,6 +44,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
 
 /**
  * Suite for running the end-to-end tests. The suite is responsible for starting up and shutting

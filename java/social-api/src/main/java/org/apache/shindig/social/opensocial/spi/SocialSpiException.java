@@ -18,26 +18,19 @@
  */
 package org.apache.shindig.social.opensocial.spi;
 
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.ProtocolException;
+import org.apache.shindig.protocol.ResponseError;
 
 /**
- * Unchecked exception class for exceptions thrown by the OpenSocial
- * SPI interfaces.
+ * Convenience subclass of ProtocolException to ease transition
  */
-public class SocialSpiException extends RuntimeException {
-  private final ResponseError error;
+public class SocialSpiException extends ProtocolException {
 
   public SocialSpiException(ResponseError error, String errorMessage, Throwable cause) {
-    super(errorMessage, cause);
-    this.error = error;
+    super(error, errorMessage, cause);
   }
 
   public SocialSpiException(ResponseError error, String errorMessage) {
-    super(errorMessage);
-    this.error = error;
-  }
-
-  public ResponseError getError() {
-    return error;
+    super(error, errorMessage);
   }
 }

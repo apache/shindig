@@ -17,17 +17,17 @@
  */
 package org.apache.shindig.social.core.util;
 
-import com.google.inject.Inject;
-
-import org.apache.shindig.social.core.util.atom.AtomFeed;
-import org.apache.shindig.social.core.util.xstream.XStreamConfiguration;
-import org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterConfig;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.util.atom.AtomFeed;
+
+import com.google.inject.Inject;
 
 /**
  * Converts output to atom.
+ * TODO: Move to common once atom binding can be decoupled form social code
  */
 public class BeanXStreamAtomConverter extends BeanXStreamConverter {
 
@@ -44,7 +44,7 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
   /**
    * {@inheritDoc}
    *
-   * @see org.apache.shindig.social.core.util.BeanXStreamConverter#getContentType()
+   * @see org.apache.shindig.protocol.conversion.BeanXStreamConverter#getContentType()
    */
   @Override
   public String getContentType() {
@@ -54,13 +54,13 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
   /**
    * {@inheritDoc}
    *
-   * @see org.apache.shindig.social.core.util.BeanXStreamConverter#convertToString(java.lang.Object)
+   * @see org.apache.shindig.protocol.conversion.BeanXStreamConverter#convertToString(java.lang.Object)
    */
   @Override
   public String convertToString(Object obj) {
     writerStack.reset();
     AtomFeed af = new AtomFeed(obj);
-    ConverterConfig cc = converterMap.get(XStreamConfiguration.ConverterSet.DEFAULT);
+    XStreamConfiguration.ConverterConfig cc = converterMap.get(XStreamConfiguration.ConverterSet.DEFAULT);
     cc.mapper.setBaseObject(af); // thread safe method
 
     return cc.xstream.toXML(af);

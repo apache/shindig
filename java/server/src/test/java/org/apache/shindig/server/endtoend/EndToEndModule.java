@@ -22,22 +22,25 @@ import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.protocol.DataServiceServletFetcher;
+import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.BeanConverter;
-import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
-
-import java.util.List;
+import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+
+import java.util.List;
 
 /**
  * Guice module for the end-to-end tests.
@@ -55,6 +58,7 @@ public class EndToEndModule extends AbstractModule {
         .to(BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json"))
         .to(BeanJsonConverter.class);
+    bind(XStreamConfiguration.class).to(XStream081Configuration.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.atom"))
         .to(BeanXStreamAtomConverter.class);
 
@@ -67,7 +71,7 @@ public class EndToEndModule extends AbstractModule {
 
     bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
         .toInstance(ImmutableList.of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class));
+            PersonHandler.class, SampleContainerHandler.class));
 
     bind(ContainerConfig.class).to(JsonContainerConfig.class);    
   }

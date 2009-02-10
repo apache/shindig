@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.ImplementedBy;

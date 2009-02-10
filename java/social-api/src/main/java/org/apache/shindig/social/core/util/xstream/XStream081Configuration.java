@@ -17,23 +17,21 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
-import com.google.common.collect.*;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
-import com.thoughtworks.xstream.converters.extended.ISO8601GregorianCalendarConverter;
-import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
-import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
-import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
-import com.thoughtworks.xstream.mapper.AttributeMapper;
-import com.thoughtworks.xstream.mapper.Mapper;
-
-import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.conversion.xstream.ClassFieldMapping;
+import org.apache.shindig.protocol.conversion.xstream.DataCollectionConverter;
+import org.apache.shindig.protocol.conversion.xstream.GuiceBeanConverter;
+import org.apache.shindig.protocol.conversion.xstream.ImplicitCollectionFieldMapping;
+import org.apache.shindig.protocol.conversion.xstream.InterfaceClassMapper;
+import org.apache.shindig.protocol.conversion.xstream.InterfaceFieldAliasMapping;
+import org.apache.shindig.protocol.conversion.xstream.InterfaceFieldAliasingMapper;
+import org.apache.shindig.protocol.conversion.xstream.MapConverter;
+import org.apache.shindig.protocol.conversion.xstream.NamespaceSet;
+import org.apache.shindig.protocol.conversion.xstream.RestfullCollectionConverter;
+import org.apache.shindig.protocol.conversion.xstream.WriterStack;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.core.util.atom.AtomAttribute;
 import org.apache.shindig.social.core.util.atom.AtomAttributeConverter;
 import org.apache.shindig.social.core.util.atom.AtomContent;
@@ -52,14 +50,33 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import java.util.*;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ForwardingMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.extended.ISO8601DateConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601GregorianCalendarConverter;
+import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter;
+import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
+import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
+import com.thoughtworks.xstream.mapper.AttributeMapper;
+import com.thoughtworks.xstream.mapper.Mapper;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * Opensocial 0.81 compliant Xstream binding
  */
 public class XStream081Configuration implements XStreamConfiguration {
 
@@ -275,7 +292,7 @@ public class XStream081Configuration implements XStreamConfiguration {
    * {@inheritDoc}
    *
    * @param writerStack
-   * @see XStreamConfiguration#getConverterConfig(org.apache.shindig.social.core.util.xstream.XStreamConfiguration.ConverterSet, com.thoughtworks.xstream.converters.reflection.ReflectionProvider, com.thoughtworks.xstream.mapper.Mapper, com.thoughtworks.xstream.io.HierarchicalStreamDriver, WriterStack)
+   * @see XStreamConfiguration#getConverterConfig(org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration.ConverterSet, com.thoughtworks.xstream.converters.reflection.ReflectionProvider, com.thoughtworks.xstream.mapper.Mapper, com.thoughtworks.xstream.io.HierarchicalStreamDriver, org.apache.shindig.protocol.conversion.xstream.WriterStack)
    */
   public ConverterConfig getConverterConfig(ConverterSet c, ReflectionProvider rp,
                                             Mapper dmapper, HierarchicalStreamDriver driver, WriterStack writerStack) {
@@ -317,7 +334,7 @@ public class XStream081Configuration implements XStreamConfiguration {
   /**
    * {@inheritDoc}
    *
-   * @see org.apache.shindig.social.core.util.xstream.XStreamConfiguration#getNameSpaces()
+   * @see org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration#getNameSpaces()
    */
   public Map<String, NamespaceSet> getNameSpaces() {
     return NAMESPACES;

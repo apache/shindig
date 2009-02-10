@@ -17,9 +17,10 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
 import org.apache.shindig.social.core.model.BodyTypeImpl;
-import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.OrganizationImpl;
@@ -27,11 +28,14 @@ import org.apache.shindig.social.core.model.PersonImpl;
 import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 
 import com.google.common.collect.Lists;
@@ -93,7 +97,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setCurrentLocation(location);
 
     canonical.setBirthday(new Date());
-    canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
+    canonical.setDrinker(new EnumImpl<Drinker>(Drinker.SOCIALLY));
     ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
 
@@ -139,14 +143,14 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setUpdated(new Date());
     canonical.setLanguagesSpoken(Lists.newArrayList("English", "Dutch", "Esperanto"));
     canonical.setLivingArrangement("in a house");
-    Enum<Enum.LookingFor> lookingForRandom =
-        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.RANDOM, "Random");
-    Enum<Enum.LookingFor> lookingForNetworking =
-        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.NETWORKING, "Networking");
+    Enum<LookingFor> lookingForRandom =
+        new EnumImpl<LookingFor>(LookingFor.RANDOM, "Random");
+    Enum<LookingFor> lookingForNetworking =
+        new EnumImpl<LookingFor>(LookingFor.NETWORKING, "Networking");
     canonical.setLookingFor(Lists.newArrayList(lookingForRandom, lookingForNetworking));
     canonical.setMovies(Lists.newArrayList("Iron Man", "Nosferatu"));
     canonical.setMusic(Lists.newArrayList("Chieftains", "Beck"));
-    canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(Enum.NetworkPresence.ONLINE));
+    canonical.setNetworkPresence(new EnumImpl<NetworkPresence>(NetworkPresence.ONLINE));
     canonical.setNickname("diggy");
     canonical.setPets("dog,cat");
     canonical.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl("work",
@@ -164,7 +168,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     canonical.setRomance("twice a year");
     canonical.setScaredOf("COBOL");
     canonical.setSexualOrientation("north");
-    canonical.setSmoker(new EnumImpl<Enum.Smoker>(Enum.Smoker.NO));
+    canonical.setSmoker(new EnumImpl<Smoker>(Smoker.NO));
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));
@@ -410,7 +414,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   }
 
   @SuppressWarnings("unchecked")
-  private void assertEnumField(JSONObject result, Enum expected,
+  private void assertEnumField(JSONObject result, org.apache.shindig.protocol.model.Enum expected,
       Person.Field field) throws JSONException {
     JSONObject actual = result.getJSONObject(field.toString());
     assertEquals(expected.getDisplayValue(), actual.getString("displayValue"));

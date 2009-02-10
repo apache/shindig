@@ -17,18 +17,18 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
-import org.apache.shindig.social.opensocial.spi.DataCollection;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.RestfulCollection;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * represents an atom:feed entry

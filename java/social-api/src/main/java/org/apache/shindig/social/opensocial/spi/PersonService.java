@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
@@ -55,14 +56,6 @@ public interface PersonService {
    * filter value will be set to the userId of the target friend.
    */
   public static String IS_WITH_FRIENDS_FILTER = "isFriendsWith";
-
-  public enum SortOrder {
-    ascending, descending
-  }
-
-  public enum FilterOperation {
-    contains, equals, startsWith, present
-  }
 
   /**
    * Returns a list of people that correspond to the passed in person ids.

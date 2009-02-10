@@ -18,6 +18,10 @@
 package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.protocol.HandlerPreconditions;
+import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
@@ -25,14 +29,14 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 @Service(name = "people", path = "/{userId}+/{groupId}/{personId}+")
 public class PersonHandler {
@@ -51,7 +55,7 @@ public class PersonHandler {
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
   @Operation(httpMethods = "GET")
-  public Future<?> get(RequestItem request) throws SocialSpiException {
+  public Future<?> get(SocialRequestItem request) throws SocialSpiException {
     GroupId groupId = request.getGroup();
     Set<String> optionalPersonId = ImmutableSet.copyOf(request.getListParameter("personId"));
     Set<String> fields = request.getFields(Person.Field.DEFAULT_FIELDS);

@@ -1,0 +1,271 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.apache.shindig.protocol;
+
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.model.FilterOperation;
+import org.apache.shindig.protocol.model.SortOrder;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Default implementation of RequestItem
+ */
+public class BaseRequestItem implements RequestItem {
+
+  protected final SecurityToken token;
+  final BeanConverter converter;
+  final Map<String,Object> parameters;
+  final BeanJsonConverter jsonConverter;
+
+  public BaseRequestItem(Map<String, String[]> parameters,
+      SecurityToken token,
+      BeanConverter converter,
+      BeanJsonConverter jsonConverter) {
+    this.token = token;
+    this.converter = converter;
+    this.parameters = Maps.newHashMap();
+    for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
+      if  (entry.getValue() == null) {
+        setParameter(entry.getKey(), null);
+      } else if (entry.getValue().length == 1) {
+        setParameter(entry.getKey(), entry.getValue()[0]);
+      } else {
+        setParameter(entry.getKey(), Lists.newArrayList(entry.getValue()));
+      }
+    }
+    this.jsonConverter = jsonConverter;
+  }
+
+  public BaseRequestItem(JSONObject parameters,
+      SecurityToken token,
+      BeanConverter converter,
+      BeanJsonConverter jsonConverter) {
+    try {
+      this.parameters = Maps.newHashMap();
+      Iterator keys = parameters.keys();
+      while (keys.hasNext()) {
+        String key = (String)keys.next();
+        this.parameters.put(key, parameters.get(key));
+      }
+      this.token = token;
+      this.converter = converter;
+    } catch (JSONException je) {
+      throw new ProtocolException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+    }
+    this.jsonConverter = jsonConverter;
+  }
+
+  public String getAppId() {
+    String appId = getParameter(APP_ID);
+    if (appId != null && appId.equals(APP_SUBSTITUTION_TOKEN)) {
+      return token.getAppId();
+    } else {
+      return appId;
+    }
+  }
+
+  public Date getUpdatedSince() {
+    String updatedSince = getParameter("updatedSince");
+    if (updatedSince == null)
+      return null;
+
+    DateTime date = new DateTime(updatedSince);
+
+    return date.toDate();
+  }
+
+  public String getSortBy() {
+    return getParameter(SORT_BY);
+  }
+
+  public SortOrder getSortOrder() {
+    String sortOrder = getParameter(SORT_ORDER);
+    try {
+      return sortOrder == null
+            ? SortOrder.ascending
+            : SortOrder.valueOf(sortOrder);
+    } catch (IllegalArgumentException iae) {
+      throw new ProtocolException(ResponseError.BAD_REQUEST,
+           "Parameter " + SORT_ORDER + " (" + sortOrder + ") is not valid.");
+    }
+  }
+
+  public String getFilterBy() {
+    return getParameter(FILTER_BY);
+  }
+
+  public int getStartIndex() {
+    String startIndex = getParameter(START_INDEX);
+    try {
+      return startIndex == null ? DEFAULT_START_INDEX
+          : Integer.valueOf(startIndex);
+    } catch (NumberFormatException nfe) {
+      throw new ProtocolException(ResponseError.BAD_REQUEST,
+          "Parameter " + START_INDEX + " (" + startIndex + ") is not a number.");
+    }
+  }
+
+  public int getCount() {
+    String count = getParameter(COUNT);
+    try {
+      return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
+    } catch (NumberFormatException nfe) {
+      throw new ProtocolException(ResponseError.BAD_REQUEST,
+           "Parameter " + COUNT + " (" + count + ") is not a number.");
+    }
+  }
+
+  public FilterOperation getFilterOperation() {
+    String filterOp = getParameter(FILTER_OPERATION);
+    try {
+      return filterOp == null
+          ? FilterOperation.contains
+          : FilterOperation.valueOf(filterOp);
+    } catch (IllegalArgumentException iae) {
+      throw new ProtocolException(ResponseError.BAD_REQUEST,
+           "Parameter " + FILTER_OPERATION + " (" + filterOp + ") is not valid.");
+    }
+  }
+
+  public String getFilterValue() {
+    String filterValue = getParameter(FILTER_VALUE);
+    return filterValue == null ? "" : filterValue;
+  }
+
+  public Set<String> getFields() {
+    return getFields(Collections.<String>emptySet());
+  }
+
+  public Set<String> getFields(Set<String> defaultValue) {
+    Set<String> result = ImmutableSet.copyOf(getListParameter(FIELDS));
+    if (result.isEmpty()) {
+      return defaultValue;
+    }
+    return result;
+  }
+
+
+  public SecurityToken getToken() {
+    return token;
+  }
+
+  public <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass) {
+    return converter.convertToObject(getParameter(parameterName), dataTypeClass);
+  }
+
+  /**
+   * Assume that all the parameters in the request belong to single aggregate
+   * type and convert to it.
+   * @param dataTypeClass
+   * @return Typed request object
+   */
+  public <T> T getTypedRequest(Class<T> dataTypeClass) {
+    return jsonConverter.convertToObject(new JSONObject(this.parameters).toString(),
+        dataTypeClass);
+  }
+
+  public String getParameter(String paramName) {
+    Object param = this.parameters.get(paramName);
+    if (param instanceof List) {
+      if (((List)param).isEmpty()) {
+        return null;
+      } else {
+        param = ((List)param).get(0);
+      }
+    }
+    if (param == null) {
+      return null;
+    }
+    return param.toString();
+  }
+
+  public String getParameter(String paramName, String defaultValue) {
+    String param = getParameter(paramName);
+    if (param == null) {
+      return defaultValue;
+    }
+    return param;
+  }
+
+  public List<String> getListParameter(String paramName) {
+    Object param = this.parameters.get(paramName);
+    if (param == null) {
+      return Collections.emptyList();
+    }
+    if (param instanceof String && ((String)param).indexOf(',') != -1) {
+      List<String> listParam = Arrays.asList(((String)param).split(","));
+      this.parameters.put(paramName, listParam);
+      return listParam;
+    }
+    else if (param instanceof List) {
+      List<String> listParam = (List<String>)param;
+      return listParam;
+    } else if (param instanceof JSONArray) {
+      try {
+        JSONArray jsonArray = (JSONArray)param;
+        List<String> returnVal = Lists.newArrayListWithExpectedSize(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+          returnVal.add(jsonArray.getString(i));
+        }
+        return returnVal;
+      } catch (JSONException je) {
+        throw new ProtocolException(ResponseError.BAD_REQUEST, je.getMessage(), je);
+      }
+    } else {
+      // Allow up-conversion of non-array to array params.
+      return Lists.newArrayList(param.toString());
+    }
+  }
+
+
+  // Exposed for testing only
+  public void setParameter(String paramName, Object paramValue) {
+    if (paramValue instanceof String[]) {
+      String[] arr = (String[])paramValue;
+      if (arr.length == 1) {
+        this.parameters.put(paramName, arr[0]);
+      } else {
+        this.parameters.put(paramName, Lists.newArrayList(arr));
+      }
+    } else if (paramValue instanceof String) {
+      String stringValue = (String)paramValue;
+      if (stringValue.length() > 0) {
+        this.parameters.put(paramName, stringValue);
+      }
+    } else {
+      this.parameters.put(paramName, paramValue);
+    }
+  }
+}

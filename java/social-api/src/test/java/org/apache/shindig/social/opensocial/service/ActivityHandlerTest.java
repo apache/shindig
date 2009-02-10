@@ -17,35 +17,37 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.isNull;
-
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.RestHandler;
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.core.model.ActivityImpl;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.isNull;
 import org.json.JSONObject;
 
 import java.io.StringReader;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class ActivityHandlerTest extends EasyMockTestCase {
 
@@ -79,7 +81,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new ActivityHandler(activityService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler));
+    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler), converter);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

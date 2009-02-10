@@ -21,12 +21,14 @@ package org.apache.shindig.social;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
-import org.apache.shindig.social.core.util.BeanJsonConverter;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
+import org.apache.shindig.protocol.DataServiceServletFetcher;
+import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.BeanConverter;
-import org.apache.shindig.social.opensocial.service.DataServiceServletFetcher;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.Lists;
@@ -48,6 +50,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
 
+    bind(XStreamConfiguration.class).to(XStream081Configuration.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(
         BeanXStreamConverter.class);
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
