@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa.api;
 
-import org.apache.shindig.social.opensocial.spi.PersonService;
+import org.apache.shindig.protocol.model.FilterOperation;
 
 /**
  * Specifies the ability to filter an object
@@ -33,5 +33,5 @@ public interface FilterCapability {
    * @return the final property that is being filtered or null is the filter operation specified is
    *         not applicable
    */
-  String findFilterableProperty(String fieldName, PersonService.FilterOperation filterOperation);
+  String findFilterableProperty(String fieldName, FilterOperation filterOperation);
 }

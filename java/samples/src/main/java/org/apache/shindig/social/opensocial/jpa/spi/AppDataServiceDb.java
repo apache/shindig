@@ -23,9 +23,9 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
-import org.apache.shindig.social.opensocial.spi.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;

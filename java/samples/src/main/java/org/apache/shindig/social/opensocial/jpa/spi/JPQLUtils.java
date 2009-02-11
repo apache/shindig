@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 

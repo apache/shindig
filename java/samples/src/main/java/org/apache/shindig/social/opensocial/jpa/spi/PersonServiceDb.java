@@ -22,7 +22,8 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.social.ResponseError;
+import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
 import org.apache.shindig.social.opensocial.jpa.api.FilterSpecification;
@@ -30,7 +31,6 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
@@ -172,7 +172,7 @@ public class PersonServiceDb implements PersonService {
    */
   private int addFilterClause(StringBuilder sb, FilterCapability filterable,
       CollectionOptions collectionOptions, int lastPos) {
-    // this makes the filter value safe
+    // this makes the filter value saf
     String filter = filterable.findFilterableProperty(collectionOptions.getFilter(),
         collectionOptions.getFilterOperation());
     String filterValue = collectionOptions.getFilterValue();

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.protocol.model.Enum;
 
 /**
  * This a utility holder class for Enums to assist in database storage. It does not have any

@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.social.opensocial.jpa.api;
 
-import org.apache.shindig.social.opensocial.spi.PersonService.FilterOperation;
+import org.apache.shindig.protocol.model.FilterOperation;
 
 /**
  * A FilterSpecifiation encapsulates the Filter operation for a specific field. Name of the target

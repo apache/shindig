@@ -20,11 +20,12 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.protocol.RestfulCollection;
+import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
 
@@ -77,7 +78,7 @@ public class PersonServiceDbTest {
     // Set collection options
     CollectionOptions collectionOptions = new CollectionOptions();
     collectionOptions.setSortBy("name");
-    collectionOptions.setSortOrder(PersonService.SortOrder.ascending);
+    collectionOptions.setSortOrder(SortOrder.ascending);
     collectionOptions.setMax(20);
     
     // Get all friends of john.doe
@@ -98,7 +99,7 @@ public class PersonServiceDbTest {
     // Set collection options
     CollectionOptions collectionOptions = new CollectionOptions();
     collectionOptions.setSortBy("name");
-    collectionOptions.setSortOrder(PersonService.SortOrder.ascending);
+    collectionOptions.setSortOrder(SortOrder.ascending);
     collectionOptions.setFirst(0);
     collectionOptions.setMax(1);
     

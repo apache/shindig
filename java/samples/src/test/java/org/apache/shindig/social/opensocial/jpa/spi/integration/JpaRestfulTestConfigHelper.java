@@ -18,13 +18,13 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
-import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.protocol.DataServiceServlet;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
-import org.apache.shindig.social.core.util.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.jpa.spi.SpiEntityManagerFactory;
-import org.apache.shindig.social.opensocial.service.DataServiceServlet;
-import org.apache.shindig.social.opensocial.service.HandlerRegistry;
 
 import javax.persistence.EntityManager;
 
