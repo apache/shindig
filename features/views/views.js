@@ -45,6 +45,43 @@ gadgets.views = function() {
   var params = {};
 
   /**
+   * Forces navigation via requestNavigateTo.
+   */
+  function forceNavigate(href) {
+    return function(e) {
+      if (!e) {
+        e = window.event;
+      }
+
+      gadgets.views.requestNavigateTo(currentView, href);
+
+      e.cancelBubble = true;
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      return false;
+    };
+  }
+
+  function attachLinkHandlers() {
+    var anchors = document.getElementsByTagName("a");
+    for (var i = 0, j = anchors.length; i < j; ++i) {
+      var anchor = anchors[i];
+      var href = anchor.href;
+      if (href && !(href[0] === "#" || href.indexOf("://") !== -1)) {
+        if (anchor.attachEvent) {
+          anchor.attachEvent("onclick", forceNavigate(href));
+        } else {
+          anchor.addEventListener("click", forceNavigate(href), false);
+        }
+      }
+    }
+  }
+
+  /**
    * Initializes views. Assumes that the current view is the "view"
    * url parameter (or default if "view" isn't supported), and that
    * all view parameters are in the form view-<name>
@@ -52,17 +89,19 @@ gadgets.views = function() {
    *
    */
   function init(config) {
-    var supported = config["views"];
-
-    for (var s in supported) if (supported.hasOwnProperty(s)) {
-      var obj = supported[s];
-      if (!obj) {
-        continue;
-      }
-      supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
-      var aliases = obj.aliases || [];
-      for (var i = 0, alias; alias = aliases[i]; ++i) {
-        supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+    var conf = config.views || {};
+    for (var s in conf) if (conf.hasOwnProperty(s)) {
+      // TODO: Fix this by moving view names / config into a sub property.
+      if (s != "rewriteLinks") {
+        var obj = conf[s];
+        if (!obj) {
+          continue;
+        }
+        supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
+        var aliases = obj.aliases || [];
+        for (var i = 0, alias; alias = aliases[i]; ++i) {
+          supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+        }
       }
     }
 
@@ -72,6 +111,10 @@ gadgets.views = function() {
       params = gadgets.json.parse(urlParams["view-params"]) || params;
     }
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
+
+    if (conf.rewriteLinks) {
+      attachLinkHandlers();
+    }
   }
 
   gadgets.config.register("views", null, init);
@@ -204,15 +247,17 @@ gadgets.views = function() {
      * supports parameters will pass the optional parameters along to the gadget
      * in the new view.
      *
-     * @param {gadgets.views.View} view The view to navigate to
+     * @param {string | gadgets.views.View} view The view to navigate to
      * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
      *     gadget after it has been navigated to on the surface
      * @param {string} opt_ownerId The ID of the owner of the page to navigate to;
      *                 defaults to the current owner.
      */
     requestNavigateTo : function(view, opt_params, opt_ownerId) {
-      gadgets.rpc.call(
-          null, "requestNavigateTo", null, view.getName(), opt_params, opt_ownerId);
+      if (typeof view !== "string") {
+        view = view.getName();
+      }
+      gadgets.rpc.call(null, "requestNavigateTo", null, view, opt_params, opt_ownerId);
     },
 
     /**
