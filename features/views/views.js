@@ -47,38 +47,40 @@ gadgets.views = function() {
   /**
    * Forces navigation via requestNavigateTo.
    */
-  function forceNavigate(href) {
-    return function(e) {
-      if (!e) {
-        e = window.event;
-      }
+  function forceNavigate(e) {
+    if (!e) {
+      e = window.event;
+    }
 
-      gadgets.views.requestNavigateTo(currentView, href);
+    var target;
+    if (e.target) {
+      target = e.target;
+    } else if (e.srcElement) {
+      target = e.srcElement;
+    }
 
-      e.cancelBubble = true;
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
-      return false;
-    };
-  }
+    if (target.nodeType === 3) {
+      target = target.parentNode;
+    }
 
-  function attachLinkHandlers() {
-    var anchors = document.getElementsByTagName("a");
-    for (var i = 0, j = anchors.length; i < j; ++i) {
-      var anchor = anchors[i];
-      var href = anchor.href;
-      if (href && !(href[0] === "#" || href.indexOf("://") !== -1)) {
-        if (anchor.attachEvent) {
-          anchor.attachEvent("onclick", forceNavigate(href));
-        } else {
-          anchor.addEventListener("click", forceNavigate(href), false);
+    if (target.nodeName.toLowerCase() === "a") {
+      // We use getAttribute() instead of .href to avoid automatic relative path resolution.
+      var href = target.getAttribute("href");
+      if (href && href[0] !== "#" && href.indexOf("://") === -1) {
+        gadgets.views.requestNavigateTo(currentView, href);
+        if (e.stopPropagation) {
+          e.stopPropagation();
         }
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        e.returnValue = false;
+        e.cancelBubble = true;
+        return false;
       }
     }
+
+    return false;
   }
 
   /**
@@ -113,7 +115,11 @@ gadgets.views = function() {
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
 
     if (conf.rewriteLinks) {
-      attachLinkHandlers();
+      if (document.attachEvent) {
+        document.attachEvent("onclick", forceNavigate);
+      } else {
+        document.addEventListener("click", forceNavigate, false);
+      }
     }
   }
 

@@ -55,59 +55,44 @@ ViewsInitTest.prototype.testStringParams = function() {
   this.assertEquals(path, gadgets.views.getParams());
 };
 
-function createAnchors(input) {
-  var anchors = [];
-  for (var i = 0, j = input.length; i < j; ++i) {
-    anchors[i] = {
-      href: input[i],
-      eventName: null,
-      addEventListener: function(name, func) {
-        this.invokedAddEventListener = true;
-        this.eventName = name;
-      }
-    };
-  }
-  return anchors;
-}
 
-ViewsInitTest.prototype.testRewriteLinks = function() {
-  var input = [
-    "http://example.org/absolute",
-    "/relative/path?arg=foo",
-    "#fragment",
-    "/relative/path?arg=foo",
-    null
-  ];
-
-  var anchors = createAnchors(input);
-
-  // Make the last one pretend to be IE.
-  anchors[3].attachEvent = function(name, func) {
-    this.invokedAttachEvent = true;
-    this.eventName = name;
-  };
-
+ViewsInitTest.prototype.testRewriteLinksStandards = function() {
+  var name, func, bubble;
   document = {
-    getElementsByTagName: function(tag) {
-      if (tag === "a") {
-        return anchors;
-      }
-      return [];
+    addEventListener: function() {
+      name = arguments[0];
+      func = arguments[1];
+      bubble = arguments[2];
     }
   };
 
   gadgets.config.init({views:{rewriteLinks: true}});
 
-  this.assertEquals(null, anchors[0].eventName);
-  this.assertEquals("click", anchors[1].eventName);
-  this.assertEquals(null, anchors[2].eventName);
-  this.assertEquals("onclick", anchors[3].eventName);
-  this.assertEquals(null, anchors[4].eventName);
-
-  this.assertTrue(anchors[1].invokedAddEventListener);
-  this.assertTrue(anchors[3].invokedAttachEvent);
-
+  this.assertEquals("click", name);
+  this.assertTrue(typeof func === "function");
+  this.assertFalse(bubble);
   this.assertTrue(typeof gadgets.views.getSupportedViews().rewriteLinks === "undefined");
 };
+
+ViewsInitTest.prototype.testRewriteLinksIe = function() {
+  var name, func, self = this;
+  document = {
+    attachEvent: function() {
+      name = arguments[0];
+      func = arguments[1];
+    },
+    addEventListener: function() {
+      self.fail("Tried to call addEventListener in IE.");
+    }
+  };
+
+  gadgets.config.init({views:{rewriteLinks: true}});
+
+  this.assertEquals("onclick", name);
+  this.assertTrue(typeof func === "function");
+  this.assertTrue(typeof gadgets.views.getSupportedViews().rewriteLinks === "undefined");
+};
+
+// TODO: Verify behavior of onclick.
 
 })();
