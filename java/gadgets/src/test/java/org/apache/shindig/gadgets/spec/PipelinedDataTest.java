@@ -21,27 +21,35 @@ package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.GadgetContext;
 
 import java.util.Map;
+
+import javax.el.ELResolver;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PipelinedDataTest {
-  //TODO: test os:MakeRequest
+import com.google.common.collect.Maps;
 
-  private GadgetContext context;
+public class PipelinedDataTest {
+
+  private static final Uri GADGET_URI = Uri.parse("http://example.org/");
+  private ELResolver elResolver;
+  private Map<String, Object> elValues;
 
   @Before
   public void setUp() {
-    context = new GadgetContext();
+    elValues = Maps.newHashMap();
+    elResolver = new RootELResolver(elValues);
+    
   }
   
   @Test
@@ -67,8 +75,11 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
+    assertNull(batch.getNextBatch(elResolver));
   }
   
   @Test
@@ -78,10 +89,13 @@ public class PipelinedDataTest {
         + " groupId=\"group\""
         + " userId=\"first,second\""
         + " startIndex=\"20\""
-        + " count=\"10\""
-        + " fields=\"name,id\""
+        + " count=\"${count}\""
+        + " fields=\"${fields}\""
         + "/></Content>";
 
+    elValues.put("count", 10);
+    // TODO: try List, JSONArray
+    elValues.put("fields", "name,id");
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertFalse(socialData.needsOwner());
     assertFalse(socialData.needsViewer());
@@ -94,8 +108,10 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
   }
 
   @Test
@@ -114,8 +130,10 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
   }
 
   @Test
@@ -134,8 +152,10 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
   }
 
   @Test
@@ -155,8 +175,10 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
   }
 
   @Test
@@ -176,8 +198,10 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    assertEquals(1, socialData.getSocialPreloads(context).size());
-    assertEquals(expected.toString(), socialData.getSocialPreloads(context).get("key").toString());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
   }
 
   @Test
@@ -191,7 +215,8 @@ public class PipelinedDataTest {
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertFalse(socialData.needsOwner());
 
-    assertTrue(socialData.getSocialPreloads(context).isEmpty());
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertNull(batch);
   }
 
   @Test(expected = SpecParserException.class)
@@ -203,21 +228,47 @@ public class PipelinedDataTest {
   }
   
   @Test
+  public void testBatching() throws Exception {
+    String xml = "<Content xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
+    		+ "<PeopleRequest key=\"key\" userId=\"${userId}\"/>"
+            + "<MakeRequest key=\"key2\" href=\"${key}\"/>"
+        + "</Content>";
+
+    PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
+    
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getSocialPreloads().isEmpty());
+    assertTrue(batch.getHttpPreloads().isEmpty());
+
+    // Now have "userId", the next batch should resolve the people request
+    elValues.put("userId", "foo");
+    batch = batch.getNextBatch(elResolver);
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertTrue(batch.getHttpPreloads().isEmpty());
+
+    elValues.put("key", "somedata");
+    batch = batch.getNextBatch(elResolver);
+    assertTrue(batch.getSocialPreloads().isEmpty());
+    assertEquals(1, batch.getHttpPreloads().size());
+    assertNull(batch.getNextBatch(elResolver));
+  }
+
+
+ @Test
   public void makeRequestDefaults() throws Exception {
     String xml = "<Content><MakeRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
         + " key=\"key\""
         + " href=\"/example.html\""
         + "/></Content>";
 
-    PipelinedData pipelinedData = new PipelinedData(
-        XmlUtil.parse(xml), Uri.parse("http://example.org/"));
-    Map<String, RequestAuthenticationInfo> httpPreloads = 
-        pipelinedData.getHttpPreloads(context);
+    PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
+    PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
     
-    assertEquals(1, httpPreloads.size());
-    RequestAuthenticationInfo preload = httpPreloads.get("key");
+    assertEquals(1, batch.getHttpPreloads().size());
+    RequestAuthenticationInfo preload = batch.getHttpPreloads().get("key");
     assertEquals(AuthType.NONE, preload.getAuthType());
     assertEquals(Uri.parse("http://example.org/example.html"), preload.getHref());    
+    assertTrue(batch.getSocialPreloads().isEmpty());
   }
 
   @Test
@@ -229,15 +280,14 @@ public class PipelinedDataTest {
         + " sign_owner=\"false\""
         + "/></Content>";
 
-    PipelinedData pipelinedData = new PipelinedData(
-        XmlUtil.parse(xml), Uri.parse("http://example.org/"));
-    Map<String, RequestAuthenticationInfo> httpPreloads = 
-        pipelinedData.getHttpPreloads(context);
+    PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
+    PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
     
-    assertEquals(1, httpPreloads.size());
-    RequestAuthenticationInfo preload = httpPreloads.get("key");
+    assertEquals(1, batch.getHttpPreloads().size());
+    RequestAuthenticationInfo preload = batch.getHttpPreloads().get("key");
     assertEquals(AuthType.SIGNED, preload.getAuthType());
     assertTrue(preload.isSignViewer());
     assertFalse(preload.isSignOwner());
+    assertTrue(batch.getSocialPreloads().isEmpty());
   }
 }

@@ -57,6 +57,10 @@ public class ConcurrentPreloaderService implements PreloaderService {
       tasks.addAll(taskCollection);
     }
 
+    return preload(tasks);
+  }
+
+  public Preloads preload(Collection<Callable<PreloadedData>> tasks) {
     ConcurrentPreloads preloads = new ConcurrentPreloads();
     int processed = tasks.size();
     for (Callable<PreloadedData> task : tasks) {

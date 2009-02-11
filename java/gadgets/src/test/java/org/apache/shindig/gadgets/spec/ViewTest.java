@@ -23,15 +23,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
-import org.junit.Test;
+
+import java.util.Arrays;
+
 import org.junit.Assert;
+import org.junit.Test;
 
 public class ViewTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
@@ -209,10 +210,11 @@ public class ViewTest {
         + " key=\"key\""
         + " fields=\"name,id\""
         + "/></Content>";
-    GadgetContext context = new GadgetContext();
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
-    assertEquals(1, view.getPipelinedData().getSocialPreloads(context).size());
-    assertTrue(view.getPipelinedData().getSocialPreloads(context).containsKey("key"));
+    PipelinedData.Batch batch = view.getPipelinedData().getBatch(new RootELResolver());
+    
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertTrue(batch.getSocialPreloads().containsKey("key"));
   }
 
   @Test(expected = SpecParserException.class)

@@ -21,6 +21,9 @@ import com.google.inject.ImplementedBy;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
 /**
  * Handles preloading operations, such as HTTP fetches, social data retrieval, or anything else that
  * would benefit from preloading on the server instead of incurring a network request for users.
@@ -51,4 +54,9 @@ public interface PreloaderService {
    * @return The preloads for the gadget.
    */
   Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase);
+
+  /**
+   * Execute preloads with a specific set of preload tasks.
+   */
+  Preloads preload(Collection<Callable<PreloadedData>> tasks);
 }
