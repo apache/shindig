@@ -132,7 +132,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return RewriterResults.cacheableIndefinitely();
   }
 
-  boolean rewriteStyleTags(Element head, List<Element> elementList,
+  protected boolean rewriteStyleTags(Element head, List<Element> elementList,
       ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
     if (!feature.getIncludedTags().contains("style")) {
       return false;
@@ -186,11 +186,11 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return mutated;
   }
 
-  LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
+  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
     return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
   }
 
-  String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType) {
+  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType) {
     return concatBaseNoGadget +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +
         '=' + mimeType +
@@ -198,7 +198,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
            "&fp=" + feature.getFingerprint() +'&';
   }
 
-  boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature feature,
+  protected boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature feature,
       Uri gadgetUri, Uri contentBase) {
     if (!feature.getIncludedTags().contains("script")) {
       return false;
@@ -244,7 +244,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
     return mutated;
   }
 
-  boolean rewriteContentReferences(List<Element> elementList,
+  protected boolean rewriteContentReferences(List<Element> elementList,
       ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
     boolean mutated = false;
     LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
