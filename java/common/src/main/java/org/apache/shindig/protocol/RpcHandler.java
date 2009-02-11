@@ -21,8 +21,6 @@ package org.apache.shindig.protocol;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 
-import org.json.JSONObject;
-
 import java.util.concurrent.Future;
 
 /**
@@ -34,5 +32,5 @@ public interface RpcHandler {
    * Handle the request and return a Future from which the response object
    * can be retrieved
    */
-  Future<?> execute(JSONObject rpc, SecurityToken st, BeanConverter converter);
+  Future<?> execute(SecurityToken st, BeanConverter converter);
 }

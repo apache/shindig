@@ -22,10 +22,15 @@ package org.apache.shindig.protocol;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import org.json.JSONObject;
 
+import org.json.JSONObject;
+import static org.junit.Assert.assertArrayEquals;
+
+import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -56,6 +61,10 @@ public class DefaultHandlerRegistryTest extends TestCase {
     assertNotNull(registry.getRpcHandler(new JSONObject("{method : test.overidden}")));
   }
 
+  public void testOverrideHandlerRPCName() throws Exception {
+    assertNotNull(registry.getRpcHandler(new JSONObject("{method : test.override.rpcname}")));
+  }
+
   public void testOverrideHandlerRest() throws Exception {
     assertNotNull(registry.getRestHandler("/test/overidden/method/", "GET"));
   }
@@ -68,7 +77,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     JSONObject rpc = new JSONObject("{method : makebelieve.get}");
     RpcHandler rpcHandler = registry.getRpcHandler(rpc);
     try {
-      Future future = rpcHandler.execute(rpc, null, null);
+      Future future = rpcHandler.execute(null, null);
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
@@ -82,8 +91,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testRestHandler_serviceDoesntExist() {
     RestHandler restHandler = registry.getRestHandler("/makebelieve", "GET");
     try {
-      Future future = restHandler.execute("/makebelieve", Maps.<String, String[]>newHashMap(),
-          null, null, null);
+      Future future = restHandler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
@@ -97,14 +105,14 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testNonFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "GET");
-    Future future = handler.execute("/test", Maps.<String, String[]>newHashMap(), null, null, null);
+    Future future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
     assertEquals(future.get(), TestHandler.GET_RESPONSE);
   }
 
   public void testFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "POST");
-    Future future = handler.execute("/test", Maps.<String, String[]>newHashMap(), null, null, null);
+    Future future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
     assertEquals(future.get(), TestHandler.CREATE_RESPONSE);
   }
 
@@ -112,7 +120,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.exception }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future future = handler.execute(rpc, null, null);
+    Future future = handler.execute(null, null);
     try {
       future.get();
       fail("Service method did not produce NullPointerException from Future");
@@ -125,7 +133,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.futureException }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future future = handler.execute(rpc, null, null);
+    Future future = handler.execute(null, null);
     try {
       future.get();
       fail("Service method did not produce ExecutionException from Future");
@@ -137,12 +145,15 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testSupportedRpcServices() throws Exception {
     assertEquals(registry.getSupportedRpcServices(),
         Sets.newHashSet("test.create", "test.get", "test.overridden", "test.exception",
-            "test.futureException"));
+            "test.futureException", "test.override.rpcname"));
   }
 
   public void testSupportedRestServices() throws Exception {
     assertEquals(registry.getSupportedRestServices(),
-        Sets.newHashSet("GET /test", "PUT /test", "DELETE /test", "POST /test",
+        Sets.newHashSet("GET /test/{someParam}/{someOtherParam}",
+            "PUT /test/{someParam}/{someOtherParam}",
+            "DELETE /test/{someParam}/{someOtherParam}",
+            "POST /test/{someParam}/{someOtherParam}",
             "GET /test/overridden/method"));
   }
 
@@ -153,5 +164,36 @@ public class DefaultHandlerRegistryTest extends TestCase {
     } catch (IllegalStateException ise) {
 
     }
+  }
+
+  public void testRestPath() {
+    DefaultHandlerRegistry.RestPath restPath =
+        new DefaultHandlerRegistry.RestPath("/service/const1/{p1}/{p2}+/const2/{p3}", null);
+    DefaultHandlerRegistry.RestInvocationWrapper wrapper =
+        restPath.accept("service/const1/a/b,c/const2/d".split("/"));
+    assertArrayEquals(wrapper.pathParams.get("p1"), new String[]{"a"});
+    assertArrayEquals(wrapper.pathParams.get("p2"), new String[]{"b","c"});
+    assertArrayEquals(wrapper.pathParams.get("p3"), new String[]{"d"});
+    wrapper = restPath.accept("service/const1/a/b/const2".split("/"));
+    assertArrayEquals(wrapper.pathParams.get("p1"), new String[]{"a"});
+    assertArrayEquals(wrapper.pathParams.get("p2"), new String[]{"b"});
+    assertNull(wrapper.pathParams.get("p3"));
+    assertNull(restPath.accept("service/const1/{p1}/{p2}+".split("/")));
+    assertNull(restPath.accept("service/constmiss/{p1}/{p2}+/const2".split("/")));
+  }
+
+  public void testRestPathOrdering() {
+    DefaultHandlerRegistry.RestPath restPath1 =
+        new DefaultHandlerRegistry.RestPath("/service/const1/{p1}/{p2}+/const2/{p3}", null);
+    DefaultHandlerRegistry.RestPath restPath2 =
+        new DefaultHandlerRegistry.RestPath("/service/{p1}/{p2}+/const2/{p3}", null);
+    DefaultHandlerRegistry.RestPath restPath3 =
+        new DefaultHandlerRegistry.RestPath("/service/const1/const2/{p1}/{p2}+/{p3}", null);
+    TreeSet<DefaultHandlerRegistry.RestPath> sortedSet =
+        Sets.newTreeSet(restPath1, restPath2, restPath3);
+    Iterator<DefaultHandlerRegistry.RestPath> itr = sortedSet.iterator();
+    assertEquals(itr.next(), restPath3);
+    assertEquals(itr.next(), restPath1);
+    assertEquals(itr.next(), restPath2);
   }
 }

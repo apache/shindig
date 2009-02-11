@@ -21,6 +21,7 @@ package org.apache.shindig.protocol;
 import org.apache.shindig.common.util.ImmediateFuture;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.junit.Ignore;
 
 import java.util.Map;
@@ -60,6 +61,14 @@ public class TestHandler {
 
   @Operation(httpMethods = "GET", path = "/overridden/method")
   public String overridden(RequestItem req) {
+    if (mock != null) {
+      return mock.get(req);
+    }
+    return GET_RESPONSE;
+  }
+
+  @Operation(name="override.rpcname", httpMethods = "")
+  public String overriddenRpc(RequestItem req) {
     if (mock != null) {
       return mock.get(req);
     }

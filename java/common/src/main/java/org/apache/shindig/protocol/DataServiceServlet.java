@@ -22,15 +22,16 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 
 import com.google.common.collect.ImmutableMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class DataServiceServlet extends ApiServlet {
 
@@ -119,8 +120,7 @@ public class DataServiceServlet extends ApiServlet {
     }
 
     // Execute the request
-    Future future = handler.execute(path, servletRequest.getParameterMap(),
-        bodyReader, token, converter);
+    Future future = handler.execute(servletRequest.getParameterMap(), bodyReader, token, converter);
 
     ResponseItem responseItem = getResponseItem(future);
 

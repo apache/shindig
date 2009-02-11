@@ -34,6 +34,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import org.easymock.classextension.EasyMock;
 import static org.easymock.classextension.EasyMock.eq;
 
@@ -81,7 +82,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -111,7 +112,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -130,7 +131,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, params, null, token, converter).get());
+    assertEquals(data, operation.execute(params, null, token, converter).get());
     verify();
   }
 
@@ -152,7 +153,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
         eq("appId"), eq(Sets.newHashSet("pandas")), eq(values), eq(token)))
         .andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
-    return operation.execute(path, params, new StringReader(jsonAppData), token, converter);
+    return operation.execute(params, new StringReader(jsonAppData), token, converter);
   }
 
   public void testHandlePost() throws Exception {
@@ -186,7 +187,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
     replay();
     try {
-      operation.execute(path, params, new StringReader(jsonAppData), token, converter).get();
+      operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
       assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
@@ -215,7 +216,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
     replay();
     try {
-      operation.execute(path, params, new StringReader(jsonAppData), token, converter).get();
+      operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
       assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
@@ -236,7 +237,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance((Void) null));
 
     replay();
-    assertNull(operation.execute(path, params, null, token, converter).get());
+    assertNull(operation.execute(params, null, token, converter).get());
     verify();
   }
 }

@@ -34,6 +34,6 @@ public interface RestHandler {
    * Handle the request and return a Future from which the response object
    * can be retrieved
    */
-  Future<?> execute(String path, Map<String, String[]> parameters, Reader body,
+  Future<?> execute(Map<String, String[]> parameters, Reader body,
                     SecurityToken token, BeanConverter converter);
 }
