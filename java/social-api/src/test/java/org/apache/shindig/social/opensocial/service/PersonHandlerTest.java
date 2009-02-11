@@ -39,7 +39,6 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -90,7 +89,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler), converter);
+    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter);
   }
 
   public void testHandleGetAllNoParams() throws Exception {

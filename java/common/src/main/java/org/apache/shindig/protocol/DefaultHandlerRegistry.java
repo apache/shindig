@@ -71,7 +71,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    */
   @Inject
   public DefaultHandlerRegistry(Injector injector,
-                                @Named("org.apache.shindig.handlers")List handlers,
+                                @Named("org.apache.shindig.handlers")Set handlers,
                                 BeanJsonConverter beanJsonConverter) {
     this.injector = injector;
     this.beanJsonConverter = beanJsonConverter;

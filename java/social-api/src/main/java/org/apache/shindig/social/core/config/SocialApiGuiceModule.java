@@ -36,12 +36,13 @@ import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides social api component injection. Implementor may want to replace this module if they need
@@ -76,8 +77,8 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
   
-    bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
-        .toInstance(Lists.immutableList(ActivityHandler.class, AppDataHandler.class,
+    bind(Set.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, SampleContainerHandler.class));
   }
 }

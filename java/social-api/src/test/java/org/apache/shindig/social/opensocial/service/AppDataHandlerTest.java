@@ -31,7 +31,6 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -68,7 +67,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
-    registry = new DefaultHandlerRegistry(null, Lists.newArrayList(handler), converter);
+    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter);
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

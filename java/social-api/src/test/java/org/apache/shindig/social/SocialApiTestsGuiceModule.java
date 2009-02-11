@@ -31,11 +31,11 @@ import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Provides social api component injection for all large tests
@@ -56,8 +56,8 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
 
-    bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
-        .toInstance(Lists.immutableList(ActivityHandler.class, AppDataHandler.class,
+    bind(Set.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class));
 
     bind(String.class).annotatedWith(

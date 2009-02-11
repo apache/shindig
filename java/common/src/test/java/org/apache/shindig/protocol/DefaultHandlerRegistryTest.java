@@ -19,7 +19,6 @@
 package org.apache.shindig.protocol;
 
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -46,7 +45,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     registry = new DefaultHandlerRegistry(null,
-        Lists.newArrayList(new TestHandler()), null);
+        Sets.newHashSet(new TestHandler()), null);
   }
 
   public void testGetHandlerRPC() throws Exception {
