@@ -82,7 +82,7 @@ public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
         XMLInputSource scriptSource = new XMLInputSource(null, null, null);
         scriptSource.setCharacterStream(new StringReader(scriptContent.toString()));
         scriptContent.setLength(0);
-        inScript = true;
+        inScript = false;
         
         // Evaluate the content of the script block immediately
         scanner.evaluateInputSource(scriptSource);
