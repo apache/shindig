@@ -23,6 +23,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.expressions.Expressions;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,11 +47,6 @@ import java.util.logging.Logger;
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ValueExpression;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 /**
  * Represents a container configuration using JSON notation.
@@ -131,10 +132,17 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   }
 
   /**
+   * Make Expressions available to subclasses so they can create ELContexts
+   */
+  protected Expressions getExpressions() {
+    return expressions;
+  }
+
+  /**
    * Protected to allow overriding.
    */
   protected ELContext createExpressionContext(String container) {
-    return expressions.newELContext(new ContainerConfigELResolver(this, container));
+    return getExpressions().newELContext(new ContainerConfigELResolver(this, container));
   }
 
   /**
