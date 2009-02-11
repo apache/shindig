@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -119,6 +120,7 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (val != null && val.getClass().isEnum()) {
       return val.toString();
     } else if (val instanceof String
+        || val instanceof CharSequence
         || val instanceof Boolean
         || val instanceof Integer
         || val instanceof Date
