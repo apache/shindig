@@ -22,20 +22,23 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import junit.framework.TestCase;
+
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -65,7 +68,7 @@ public class JsonRpcServletTest extends TestCase {
     atomConverter = mockControl.createMock(BeanConverter.class);
 
     HandlerRegistry registry = new DefaultHandlerRegistry(null,
-        Lists.newArrayList(new TestHandler()), jsonConverter);
+        Sets.newHashSet(new TestHandler()), jsonConverter);
 
     servlet.setHandlerRegistry(registry);
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);

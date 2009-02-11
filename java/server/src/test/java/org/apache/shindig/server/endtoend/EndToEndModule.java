@@ -35,12 +35,13 @@ import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Guice module for the end-to-end tests.
@@ -69,8 +70,8 @@ public class EndToEndModule extends AbstractModule {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
 
-    bind(List.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
-        .toInstance(ImmutableList.of(ActivityHandler.class, AppDataHandler.class,
+    bind(Set.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, SampleContainerHandler.class));
 
     bind(ContainerConfig.class).to(JsonContainerConfig.class);    
