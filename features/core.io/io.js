@@ -255,7 +255,7 @@ gadgets.io = function() {
    * @private
    */
   function init (configuration) {
-    config = configuration["core.io"];
+    config = configuration["core.io"] || {};
   }
 
   var requiredConfig = {
