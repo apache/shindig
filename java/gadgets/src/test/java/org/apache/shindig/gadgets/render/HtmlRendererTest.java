@@ -114,6 +114,53 @@ public class HtmlRendererTest {
   }
 
   @Test
+  public void renderProxiedRelative() throws Exception {
+    Uri base = EXPECTED_PROXIED_HTML_HREF;
+    final Uri relative = Uri.parse("/some/path?foo=bar");
+    Uri resolved = new UriBuilder(base.resolve(relative))
+      .addQueryParameter("lang", GadgetSpec.DEFAULT_LOCALE.getLanguage())
+      .addQueryParameter("country", GadgetSpec.DEFAULT_LOCALE.getCountry())
+      .toUri();
+
+    HttpRequest request = new HttpRequest(resolved);
+    HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
+
+    pipeline.plainResponses.put(resolved, response);
+
+    Gadget gadget = makeHrefGadget("none");
+    gadget.setContext(new GadgetContext(gadget.getContext()) {
+      @Override
+      public String getParameter(String name) {
+        return name.equals(HtmlRenderer.PATH_PARAM) ? relative.toString() : null;
+      }
+    });
+
+    String content = renderer.render(gadget);
+    assertEquals(PROXIED_HTML_CONTENT, content);
+    assertEquals(response, cache.getResponse(request));
+  }
+
+  @Test
+  public void renderProxiedRelativeBadPath() throws Exception {
+    HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
+    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
+
+    Gadget gadget = makeHrefGadget("none");
+    gadget.setContext(new GadgetContext(gadget.getContext()) {
+      @Override
+      public String getParameter(String name) {
+        return name.equals(HtmlRenderer.PATH_PARAM) ? "$(^)$" : null;
+      }
+    });
+
+    String content = renderer.render(gadget);
+
+    assertEquals(PROXIED_HTML_CONTENT, content);
+    assertEquals(response, cache.getResponse(request));
+  }
+
+  @Test
   public void renderProxiedFromCache() throws Exception {
     HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);

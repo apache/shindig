@@ -31,96 +31,105 @@ import java.util.Locale;
  * actually serving as abstraction over different request types.
  */
 public class GadgetContext {
+  private final GadgetContext delegate;
+
+  public GadgetContext() {
+    this(null);
+  }
+
+  public GadgetContext(GadgetContext delegate) {
+    this.delegate = delegate;
+  }
 
   /**
    * @param name The parameter to get data for.
    * @return The parameter set under the given name, or null.
    */
   public String getParameter(String name) {
-    return null;
+    return delegate == null ? null : delegate.getParameter(name);
   }
 
   /**
    * @return The url for this gadget.
    */
   public URI getUrl() {
-    return null;
+    return delegate == null ? null : delegate.getUrl();
   }
 
   /**
    * @return The module id for this request.
    */
   public int getModuleId() {
-    return 0;
+    return delegate == null ? 0 : delegate.getModuleId();
   }
 
   /**
    * @return The locale for this request.
    */
   public Locale getLocale() {
-    return GadgetSpec.DEFAULT_LOCALE;
+    return delegate == null ? GadgetSpec.DEFAULT_LOCALE : delegate.getLocale();
   }
 
   /**
    * @return The rendering context for this request.
    */
   public RenderingContext getRenderingContext() {
-    return RenderingContext.GADGET;
+    return delegate == null ? RenderingContext.GADGET : delegate.getRenderingContext();
   }
 
   /**
    * @return Whether or not to bypass caching behavior for the current request.
    */
   public boolean getIgnoreCache() {
-    return false;
+    return delegate == null ? false : delegate.getIgnoreCache();
   }
 
   /**
    * @return The container of the current request.
    */
   public String getContainer() {
-    return ContainerConfig.DEFAULT_CONTAINER;
+    return delegate == null ? ContainerConfig.DEFAULT_CONTAINER : delegate.getContainer();
   }
 
   /**
    * @return The host for which the current request is being made.
    */
   public String getHost() {
-    return null;
+    return delegate == null ? null : delegate.getHost();
   }
 
   /**
    * @return The IP Address for the current user.
    */
   public String getUserIp() {
-    return null;
+    return delegate == null ? null : delegate.getUserIp();
   }
 
   /**
    * @return Whether or not to show debug output.
    */
   public boolean getDebug() {
-    return false;
+    return delegate == null ? false : delegate.getDebug();
   }
 
   /**
    * @return Name of view to show
    */
   public String getView() {
-    return GadgetSpec.DEFAULT_VIEW;
+    return delegate == null ? GadgetSpec.DEFAULT_VIEW : delegate.getView();
   }
 
   /**
    * @return The user prefs for the current request.
    */
   public UserPrefs getUserPrefs() {
-    return UserPrefs.EMPTY;
+    return delegate == null ? UserPrefs.EMPTY : delegate.getUserPrefs();
   }
 
   /**
    * @return The token associated with this request
    */
   public SecurityToken getToken() {
-    return null;
+    return delegate == null ? null : delegate.getToken();
   }
 }

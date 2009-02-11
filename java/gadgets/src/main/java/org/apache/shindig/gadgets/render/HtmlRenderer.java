@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -49,13 +50,14 @@ import java.util.logging.Logger;
  * Handles producing output markup for a gadget based on the provided context.
  */
 public class HtmlRenderer {
+  public static final String PATH_PARAM = "path";
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+  private static final Logger logger = Logger.getLogger(HtmlRenderer.class.getName());
+
   private final RequestPipeline requestPipeline;
   private final HttpCache httpCache;
   private final PreloaderService preloader;
   private final ContentRewriterRegistry rewriter;
-
-  private static final Charset UTF8 = Charset.forName("UTF-8");
-  private static final Logger logger = Logger.getLogger(HtmlRenderer.class.getName());
 
   /**
    * @param requestPipeline Used for performing the proxy request. Always ignores caching because
@@ -103,7 +105,21 @@ public class HtmlRenderer {
       if (view.getHref() == null) {
         content = view.getContent();
       } else {
-        UriBuilder uri = new UriBuilder(view.getHref());
+        Uri href = view.getHref();
+        String path = context.getParameter(PATH_PARAM);
+        if (path != null) {
+          try {
+            Uri relative = Uri.parse(path);
+            if (!relative.isAbsolute()) {
+              href = href.resolve(relative);
+            }
+          } catch (IllegalArgumentException e) {
+            // TODO: Spec does not say what to do for an invalid relative path.
+            // Just ignoring for now.
+          }
+        }
+
+        UriBuilder uri = new UriBuilder(href);
         uri.addQueryParameter("lang", context.getLocale().getLanguage());
         uri.addQueryParameter("country", context.getLocale().getCountry());
 
