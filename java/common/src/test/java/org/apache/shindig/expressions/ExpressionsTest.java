@@ -19,6 +19,9 @@
 package org.apache.shindig.expressions;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,19 +29,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.el.ELContext;
+import javax.el.PropertyNotFoundException;
 import javax.el.ValueExpression;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 public class ExpressionsTest {
   private Expressions expressions;
   private ELContext context;
+  private Map<String, Object> variables;
   
   @Before
   public void setUp() {
     expressions = new Expressions();
-    context = expressions.newELContext(new RootELResolver());
+    variables = Maps.newHashMap();
+    context = expressions.newELContext(new RootELResolver(variables));
   }
     
   @Test
@@ -91,12 +98,32 @@ public class ExpressionsTest {
     assertEquals(expected.toString(), result.toString());
   }
   
+  @Test
+  public void missingJsonSubproperty() throws Exception {
+    addVariable("object", new JSONObject("{foo: 125}"));
+    assertNull(evaluate("${object.bar.baz}", Object.class));
+  }
+
+  @Test
+  public void missingMapSubproperty() throws Exception {
+    addVariable("map", ImmutableMap.of("key", "value"));
+    assertNull(evaluate("${map.bar.baz}", Object.class));
+  }
+
+  @Test(expected = PropertyNotFoundException.class)
+  public void missingTopLevelVariable() throws Exception {
+    // Top-level properties must throw a PropertyNotFoundException when
+    // failing;  other properties must not.  Pipeline data batching
+    // relies on this
+    assertNull(evaluate("${map.bar.baz}", Object.class));
+  }
+
   private <T> T evaluate(String expression, Class<T> type) {
     ValueExpression expr = expressions.parse(expression, type);
     return type.cast(expr.getValue(context));
   }
 
   private void addVariable(String key, Object value) {
-    context.getELResolver().setValue(context, null, key, value);
+    variables.put(key, value);
   }
 }

@@ -17,6 +17,13 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetELResolver;
+import org.apache.shindig.gadgets.variables.Substitutions;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +32,10 @@ import java.util.StringTokenizer;
 
 import javax.el.ELContext;
 import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.PropertyNotFoundException;
 import javax.el.ValueExpression;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlException;
-import org.apache.shindig.expressions.Expressions;
-import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetELResolver;
-import org.apache.shindig.gadgets.variables.Substitutions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,39 +133,122 @@ public class PipelinedData {
   public PipelinedData substitute(Substitutions substituter) {
     return new PipelinedData(this, substituter);
   }
-
-  public Map<String, Object> getSocialPreloads(GadgetContext context) {
-    Map<String, Object> evaluatedPreloads = Maps.newHashMapWithExpectedSize(
-        socialPreloads.size());
-    Expressions expressions = Expressions.sharedInstance();
-    ELContext elContext = expressions.newELContext(new GadgetELResolver(context));
-    for (Map.Entry<String, SocialData> preload : socialPreloads.entrySet()) {
-      try {
-        evaluatedPreloads.put(preload.getKey(), preload.getValue().toJson(elContext));
-      } catch (ELException e) {
-        // TODO: Handle!?!
-        throw new RuntimeException(e);
-      }
-    }
-
-    return evaluatedPreloads;
+  
+  public interface Batch {
+    Map<String, Object> getSocialPreloads();
+    Map<String, RequestAuthenticationInfo> getHttpPreloads();
+    Batch getNextBatch(ELResolver rootObjects);
   }
 
-  public Map<String, RequestAuthenticationInfo> getHttpPreloads(GadgetContext context) {
-    Map<String, RequestAuthenticationInfo> evaluatedPreloads = Maps.newHashMapWithExpectedSize(
-        httpPreloads.size());
+  /**
+   * Gets the first batch of preload requests.  Preloads that require root
+   * objects not yet available will not be executed in this batch, but may
+   * become available in subsequent batches.
+   * 
+   * @param rootObjects an ELResolver that can evaluate currently available
+   *     root objects.
+   * @see GadgetELResolver
+   * @return a batch, or null if no batch could be created
+   */
+  public Batch getBatch(ELResolver rootObjects) {
+    return getBatch(rootObjects, socialPreloads, httpPreloads);
+  }
+  
+  /**
+   * Create a Batch of preload requests
+   * @param rootObjects an ELResolver that can evaluate currently available
+   *     root objects.
+   * @param currentSocialPreloads the remaining social preloads
+   * @param currentHttpPreloads the remaining http preloads
+   */
+  private Batch getBatch(ELResolver rootObjects, Map<String, SocialData> currentSocialPreloads,
+      Map<String, HttpData> currentHttpPreloads) {
     Expressions expressions = Expressions.sharedInstance();
-    ELContext elContext = expressions.newELContext(new GadgetELResolver(context));
-    for (Map.Entry<String, HttpData> preload : httpPreloads.entrySet()) {
-      try {
-        evaluatedPreloads.put(preload.getKey(), preload.getValue().evaluate(elContext));
-      } catch (ELException e) {
-        // TODO: Handle!?!
-        throw new RuntimeException(e);
+    ELContext elContext = expressions.newELContext(rootObjects);
+ 
+    // Evaluate all existing social preloads
+    Map<String, Object> evaluatedSocialPreloads = Maps.newHashMap();
+    Map<String, SocialData> pendingSocialPreloads = null;
+    
+    if (currentSocialPreloads != null) {
+      for (Map.Entry<String, SocialData> preload : currentSocialPreloads.entrySet()) {
+        try {
+          Object value = preload.getValue().toJson(elContext);
+          evaluatedSocialPreloads.put(preload.getKey(), value);
+        } catch (PropertyNotFoundException pnfe) {
+          // Missing top-level property: put it in the pending set
+          if (pendingSocialPreloads == null) {
+            pendingSocialPreloads = Maps.newHashMap();
+          }
+          pendingSocialPreloads.put(preload.getKey(), preload.getValue());
+        } catch (ELException e) {
+          // TODO: Handle!?!
+          throw new RuntimeException(e);
+        }
+      }
+    }    
+    // And evaluate all existing HTTP preloads
+    Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads = Maps.newHashMap();
+    Map<String, HttpData> pendingHttpPreloads = null;
+    
+    if (currentHttpPreloads != null) {
+      for (Map.Entry<String, HttpData> preload : currentHttpPreloads.entrySet()) {
+        try {
+          RequestAuthenticationInfo value = preload.getValue().evaluate(elContext);
+          evaluatedHttpPreloads.put(preload.getKey(), value);
+        } catch (PropertyNotFoundException pnfe) {
+          if (pendingHttpPreloads == null) {
+            pendingHttpPreloads = Maps.newHashMap();
+          }
+          pendingHttpPreloads.put(preload.getKey(), preload.getValue());
+        } catch (ELException e) {
+          // TODO: Handle!?!
+          throw new RuntimeException(e);
+        }
       }
     }
+    
+    // Nothing evaluated or pending;  return null for the batch.  Note that
+    // there may be multiple PipelinedData objects (e.g., from multiple 
+    // <script type="text/os-data"> elements), so even if all evaluations
+    // fail here, evaluations might succeed elsewhere and free up pending preloads
+    if (evaluatedSocialPreloads.isEmpty() && evaluatedHttpPreloads.isEmpty() &&
+        pendingHttpPreloads == null && pendingSocialPreloads == null) {
+      return null;
+    }
+    
+    return new BatchImpl(evaluatedSocialPreloads, evaluatedHttpPreloads,
+        pendingSocialPreloads, pendingHttpPreloads);
+  }
+  
+  /** Batch implementation */
+  class BatchImpl implements Batch {
 
-    return evaluatedPreloads;
+    private final Map<String, Object> evaluatedSocialPreloads;
+    private final Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads;
+    private final Map<String, SocialData> pendingSocialPreloads;
+    private final Map<String, HttpData> pendingHttpPreloads;
+
+    public BatchImpl(Map<String, Object> evaluatedSocialPreloads,
+        Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads,
+        Map<String, SocialData> pendingSocialPreloads, Map<String, HttpData> pendingHttpPreloads) {
+      this.evaluatedSocialPreloads = evaluatedSocialPreloads;
+      this.evaluatedHttpPreloads = evaluatedHttpPreloads;
+      this.pendingSocialPreloads = pendingSocialPreloads;
+      this.pendingHttpPreloads = pendingHttpPreloads;
+    }
+
+    public Map<String, Object> getSocialPreloads() {
+      return evaluatedSocialPreloads;
+    }
+    
+    public Map<String, RequestAuthenticationInfo> getHttpPreloads() {
+      return evaluatedHttpPreloads;
+    }
+
+    public Batch getNextBatch(ELResolver rootObjects) {
+      return getBatch(rootObjects, pendingSocialPreloads, pendingHttpPreloads);
+    }
   }
 
   public boolean needsViewer() {

@@ -39,6 +39,7 @@ import org.cyberneko.html.HTMLConfiguration;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
+import org.cyberneko.html.filters.NamespaceBinder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -67,26 +68,32 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   public NekoSimplifiedHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
   }
-
+  
   @Override
   protected Document parseDomImpl(String source) {
+
+    HTMLConfiguration config = newConfiguration();
+
     HTMLScanner htmlScanner = new HTMLScanner();
     HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
-    DocumentHandler handler = new DocumentHandler(source);
-    tagBalancer.setDocumentHandler(handler);
+    DocumentHandler handler = newDocumentHandler(source, htmlScanner);
+
+    if (config.getFeature("http://xml.org/sax/features/namespaces")) {
+      NamespaceBinder namespaceBinder = new NamespaceBinder();
+      namespaceBinder.setDocumentHandler(handler);
+      namespaceBinder.setDocumentSource(tagBalancer);
+      namespaceBinder.reset(config);
+      tagBalancer.setDocumentHandler(namespaceBinder);
+    } else {
+      tagBalancer.setDocumentHandler(handler);
+    }
+    
+    tagBalancer.setDocumentSource(htmlScanner);    
     htmlScanner.setDocumentHandler(tagBalancer);
 
-    HTMLConfiguration config = new HTMLConfiguration();
-    // Maintain original case for elements and attributes
-    config.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
-    config.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
-    // Parse as fragment.
-    config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
-    // Get notified of entity and character references
-    config.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
-    config.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
     tagBalancer.reset(config);
     htmlScanner.reset(config);
+    
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
     inputSource.setEncoding("UTF-8");
     inputSource.setCharacterStream(new StringReader(source));
@@ -103,10 +110,34 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
   }
 
+  protected HTMLConfiguration newConfiguration() {
+    HTMLConfiguration config = new HTMLConfiguration();
+    // Maintain original case for elements and attributes
+    config.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
+    config.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+    // Parse as fragment.
+    config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+    // Get notified of entity and character references
+    config.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
+    config.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
+    return config;
+  }
+
+  protected DocumentHandler newDocumentHandler(String source, HTMLScanner scanner) {
+    return new DocumentHandler(source);
+  }
+
+  /**
+   * Is the given element important enough to preserve in the DOM?
+   */
+  protected boolean isElementImportant(QName qName) {
+    return elements.contains(qName.rawname.toLowerCase());
+  }
+  
   /**
    * Handler for XNI events from Neko
    */
-  private class DocumentHandler implements XMLDocumentHandler {
+  protected class DocumentHandler implements XMLDocumentHandler {
     private final Stack<Node> elementStack = new Stack<Node>();
     private final StringBuilder builder;
     private boolean inEntity = false;
@@ -172,49 +203,60 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public void startElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      if (elements.contains(qName.rawname.toLowerCase())) {
-        if (builder.length() > 0) {
-          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
-          builder.setLength(0);
-        }
-        Element element = document.createElement(qName.rawname);
-        for (int i = 0; i < xmlAttributes.getLength(); i++) {
-          element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
-        }
-        elementStack.peek().appendChild(element);
+      if (isElementImportant(qName)) {
+        Element element = startImportantElement(qName, xmlAttributes);
+        // Not an empty element, so push on the stack
         elementStack.push(element);
       } else {
-        builder.append('<').append(qName.rawname);
-        for (int i = 0; i < xmlAttributes.getLength(); i++) {
-          builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
-          appendAttributeValue(xmlAttributes.getValue(i));
-          builder.append('\"');
-        }
-        builder.append('>');
+        startUnimportantElement(qName, xmlAttributes);
       }
     }
 
     public void emptyElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      if (elements.contains(qName.rawname.toLowerCase())) {
-        if (builder.length() > 0) {
-          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
-          builder.setLength(0);
-        }
-        Element element = document.createElement(qName.rawname);
-        for (int i = 0; i < xmlAttributes.getLength(); i++) {
+      if (isElementImportant(qName)) {
+        startImportantElement(qName, xmlAttributes);
+      } else {
+        startUnimportantElement(qName, xmlAttributes);
+      }
+    }
+
+    /** Write an unimportant element into content as raw text */
+    private void startUnimportantElement(QName qName, XMLAttributes xmlAttributes) {
+      builder.append('<').append(qName.rawname);
+      for (int i = 0; i < xmlAttributes.getLength(); i++) {
+        builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
+        appendAttributeValue(xmlAttributes.getValue(i));
+        builder.append('\"');
+      }
+      builder.append('>');
+    }
+
+    /** Create an Element in the DOM for an important element */
+    private Element startImportantElement(QName qName, XMLAttributes xmlAttributes) {
+      if (builder.length() > 0) {
+        elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+        builder.setLength(0);
+      }
+      
+      Element element;
+      // Preserve XML namespace if present
+      if (qName.uri != null) {
+        element = document.createElementNS(qName.uri, qName.rawname);
+      } else {
+        element = document.createElement(qName.rawname);
+      }
+      
+      for (int i = 0; i < xmlAttributes.getLength(); i++) {
+        if (xmlAttributes.getURI(i) != null) {
+          element.setAttributeNS(xmlAttributes.getURI(i), xmlAttributes.getQName(i),
+              xmlAttributes.getValue(i));
+        } else {
           element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
         }
-        elementStack.peek().appendChild(element);
-      } else {
-        builder.append('<').append(qName.rawname);
-        for (int i = 0; i < xmlAttributes.getLength(); i++) {
-          builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
-          appendAttributeValue(xmlAttributes.getValue(i));
-          builder.append('\"');
-        }
-        builder.append('>');
       }
+      elementStack.peek().appendChild(element);
+      return element;
     }
 
     private void appendAttributeValue(String text) {
@@ -275,7 +317,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void endElement(QName qName, Augmentations augs) throws XNIException {
-      if (elements.contains(qName.rawname.toLowerCase())) {
+      if (isElementImportant(qName)) {
         if (builder.length() > 0) {
           elementStack.peek().appendChild(document.createTextNode(builder.toString()));
           builder.setLength(0);

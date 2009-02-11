@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Tests for HtmlRenderer
@@ -357,6 +358,11 @@ public class HtmlRendererTest {
     }
 
     public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+      wasPreloaded = true;
+      return preloads;
+    }
+
+    public Preloads preload(Collection<Callable<PreloadedData>> tasks) {
       wasPreloaded = true;
       return preloads;
     }

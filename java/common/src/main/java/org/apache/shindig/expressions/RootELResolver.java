@@ -26,7 +26,6 @@ import javax.el.ELContext;
 import javax.el.ELResolver;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 /**
  * ELResolver implementation that adds a map of top-level variables.
@@ -38,15 +37,14 @@ import com.google.common.collect.Maps;
  * @see Expressions#newELContext(ELResolver...)
  */
 public class RootELResolver extends ELResolver {
-  private final Map<String, Object> map;
+  private final Map<String, ? extends Object> map;
 
   public RootELResolver() {
     this(ImmutableMap.<String, Object>of());
   }
   
   public RootELResolver(Map<String, ? extends Object> base) {
-    // TODO: if read-only is OK, then a copy is unnecessary
-    map = Maps.newHashMap(base);
+    this.map = base;
   }
   
   @Override
@@ -66,7 +64,7 @@ public class RootELResolver extends ELResolver {
 
   @Override
   public Class<?> getType(ELContext context, Object base, Object property) {
-    if (base == null) {
+    if (base == null && map.containsKey(property)) {
       context.setPropertyResolved(true);
       Object value = map.get(property);
       return value == null ? null : value.getClass();
@@ -77,7 +75,7 @@ public class RootELResolver extends ELResolver {
 
   @Override
   public Object getValue(ELContext context, Object base, Object property) {
-    if (base == null) {
+    if (base == null && map.containsKey(property)) {
       context.setPropertyResolved(true);
       return map.get(property);
     }
@@ -87,8 +85,9 @@ public class RootELResolver extends ELResolver {
 
   @Override
   public boolean isReadOnly(ELContext context, Object base, Object property) {
-    if (base == null) {
+    if (base == null && map.containsKey(property)) {
       context.setPropertyResolved(true);
+      return true;
     }
     
     return false;
@@ -96,9 +95,5 @@ public class RootELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context, Object base, Object property, Object value) {
-    if (base == null) {
-      context.setPropertyResolved(true);
-      map.put(property.toString(), value);
-    }
   }
 }

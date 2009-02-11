@@ -23,10 +23,12 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.el.ELResolver;
+
 /**
  * Preloader for loading Data Pipelining Preload data.
  */
@@ -62,6 +66,7 @@ public class PipelinedDataPreloader implements Preloader {
     this.config = config;
   }
 
+  /** Create preloads from a gadget view */
   public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
       GadgetSpec gadget, PreloaderService.PreloadPhase phase) {
     View view = gadget.getView(context.getView());
@@ -69,36 +74,43 @@ public class PipelinedDataPreloader implements Preloader {
         && view.getPipelinedData() != null
         && phase == PreloaderService.PreloadPhase.PROXY_FETCH) {
 
-      List<Callable<PreloadedData>> preloadList = Lists.newArrayList();
-      Map<String, Object> socialPreloads = view.getPipelinedData().getSocialPreloads(context);
-
-      // Load any social preloads into a JSONArray for delivery to
-      // JsonRpcServlet
-      if (!socialPreloads.isEmpty()) {
-        JSONArray array = new JSONArray();
-        for (Object socialRequest : socialPreloads.values()) {
-          array.put(socialRequest);
-        }
-
-        Callable<PreloadedData> preloader = new SocialPreloadTask(context, array);
-        preloadList.add(preloader);
+      ELResolver resolver = new GadgetELResolver(context);
+      PipelinedData.Batch batch = view.getPipelinedData().getBatch(resolver);
+      if (batch != null) {
+        return createPreloadTasks(context, batch);
       }
-
-      Map<String, RequestAuthenticationInfo> httpPreloads =
-          view.getPipelinedData().getHttpPreloads(context);
-      if (!httpPreloads.isEmpty()) {
-        for (Map.Entry<String, RequestAuthenticationInfo> httpPreloadEntry
-            : httpPreloads.entrySet()) {
-          preloadList.add(new HttpPreloadTask(context,  httpPreloadEntry.getValue(),
-              httpPreloadEntry.getKey()));
-        }
-
-      }
-
-      return preloadList;
     }
 
     return Collections.emptyList();
+  }
+
+  /** Create preload tasks from an explicit list of social and http preloads */
+  public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
+      PipelinedData.Batch batch) {
+    List<Callable<PreloadedData>> preloadList = Lists.newArrayList();
+
+    // Load any social preloads into a JSONArray for delivery to
+    // JsonRpcServlet
+    if (!batch.getSocialPreloads().isEmpty()) {
+      JSONArray array = new JSONArray();
+      for (Object socialRequest : batch.getSocialPreloads().values()) {
+        array.put(socialRequest);
+      }
+
+      Callable<PreloadedData> preloader = new SocialPreloadTask(context, array);
+      preloadList.add(preloader);
+    }
+
+    if (!batch.getHttpPreloads().isEmpty()) {
+      for (Map.Entry<String, RequestAuthenticationInfo> httpPreloadEntry
+          : batch.getHttpPreloads().entrySet()) {
+        preloadList.add(new HttpPreloadTask(context,  httpPreloadEntry.getValue(),
+            httpPreloadEntry.getKey()));
+      }
+
+    }
+
+    return preloadList;
   }
 
   /**
@@ -130,6 +142,8 @@ public class PipelinedDataPreloader implements Preloader {
 
       // Unpack the response into a map of PreloadedData responses
       final Map<String, Object> data = Maps.newHashMap();
+      // TODO: if the entire request fails, the result is an object,
+      // not an array
       JSONArray array = new JSONArray(response.getResponseAsString());
       for (int i = 0; i < array.length(); i++) {
         JSONObject arrayElement = array.getJSONObject(i);
