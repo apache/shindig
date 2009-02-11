@@ -20,11 +20,11 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.EnumUtil;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.RestfulCollection;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
 

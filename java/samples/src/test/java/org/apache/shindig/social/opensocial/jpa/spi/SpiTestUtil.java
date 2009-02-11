@@ -22,10 +22,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
 import org.apache.shindig.social.core.model.BodyTypeImpl;
-import org.apache.shindig.social.core.model.EnumImpl;
 import org.apache.shindig.social.core.model.ListFieldImpl;
 import org.apache.shindig.social.core.model.NameImpl;
 import org.apache.shindig.social.core.model.OrganizationImpl;
@@ -34,11 +35,14 @@ import org.apache.shindig.social.core.model.UrlImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
@@ -48,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -109,7 +114,7 @@ public class SpiTestUtil {
     canonical.setCurrentLocation(location);
 
     canonical.setBirthday(buildDate("1975-01-01"));
-    canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
+    canonical.setDrinker(new EnumImpl<Drinker>(Drinker.SOCIALLY));
     ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
 
@@ -155,14 +160,15 @@ public class SpiTestUtil {
     canonical.setUpdated(new Date());
     canonical.setLanguagesSpoken(Lists.newArrayList("English", "Dutch", "Esperanto"));
     canonical.setLivingArrangement("in a house");
-    Enum<Enum.LookingFor> lookingForRandom =
-        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.RANDOM, "Random");
-    Enum<Enum.LookingFor> lookingForNetworking =
-        new EnumImpl<Enum.LookingFor>(Enum.LookingFor.NETWORKING, "Networking");
-    canonical.setLookingFor(Lists.newArrayList(lookingForRandom, lookingForNetworking));
+    List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
+    Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
+    Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
+    lookingFor.add(lookingForOne);
+    lookingFor.add(lookingForTwo);
+    canonical.setLookingFor(lookingFor);
     canonical.setMovies(Lists.newArrayList("Iron Man", "Nosferatu"));
     canonical.setMusic(Lists.newArrayList("Chieftains", "Beck"));
-    canonical.setNetworkPresence(new EnumImpl<Enum.NetworkPresence>(Enum.NetworkPresence.ONLINE));
+    canonical.setNetworkPresence(new EnumImpl<NetworkPresence>(NetworkPresence.ONLINE));
     canonical.setNickname("diggy");
     canonical.setPets("dog,cat");
     canonical.setPhoneNumbers(Lists.<ListField> newArrayList(new ListFieldImpl("work",
@@ -180,7 +186,7 @@ public class SpiTestUtil {
     canonical.setRomance("twice a year");
     canonical.setScaredOf("COBOL");
     canonical.setSexualOrientation("north");
-    canonical.setSmoker(new EnumImpl<Enum.Smoker>(Enum.Smoker.NO));
+    canonical.setSmoker(new EnumImpl<Smoker>(Smoker.NO));
     canonical.setSports(Lists.newArrayList("frisbee", "rugby"));
     canonical.setStatus("happy");
     canonical.setTags(Lists.newArrayList("C#", "JSON", "template"));

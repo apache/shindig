@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.jpa.spi;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.shindig.social.opensocial.spi.DataCollection;
+import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;

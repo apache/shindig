@@ -18,6 +18,8 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi;
 
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
 import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
@@ -36,16 +38,15 @@ import org.apache.shindig.social.opensocial.jpa.PhoneDb;
 import org.apache.shindig.social.opensocial.jpa.PhotoDb;
 import org.apache.shindig.social.opensocial.jpa.UrlDb;
 import org.apache.shindig.social.opensocial.model.Address;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.model.Enum.Drinker;
-import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
-import org.apache.shindig.social.opensocial.model.Enum.NetworkPresence;
-import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -437,12 +439,12 @@ public class SpiDatabaseBootstrap {
     person.setUpdated(new Date());
     person.setLivingArrangement("in a house");
         
-    List<Enum<LookingFor>> lookingForList = new ArrayList<Enum<LookingFor>>();
-    EnumDb<LookingFor> lookingFor1 = new EnumDb<LookingFor>(LookingFor.RANDOM);
-    EnumDb<LookingFor> lookingFor2 = new EnumDb<LookingFor>(LookingFor.NETWORKING);
-    lookingForList.add(lookingFor1);
-    lookingForList.add(lookingFor2);
-    person.setLookingFor(lookingForList);
+    List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
+    Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
+    Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
+    lookingFor.add(lookingForOne);
+    lookingFor.add(lookingForTwo);
+    person.setLookingFor(lookingFor);
     
     person.setMovies(asList("Iron Man", "Nosferatu"));
     person.setMusic(asList("Chieftains","Beck"));
@@ -595,12 +597,12 @@ public class SpiDatabaseBootstrap {
     person.setUpdated(new Date());
     person.setLivingArrangement("");
         
-    List<Enum<LookingFor>> lookingForList = new ArrayList<Enum<LookingFor>>();
-    EnumDb<LookingFor> lookingFor1 = new EnumDb<LookingFor>(LookingFor.RANDOM);
-    EnumDb<LookingFor> lookingFor2 = new EnumDb<LookingFor>(LookingFor.NETWORKING);
-    lookingForList.add(lookingFor1);
-    lookingForList.add(lookingFor2);
-    person.setLookingFor(lookingForList);
+    List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
+    Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
+    Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
+    lookingFor.add(lookingForOne);
+    lookingFor.add(lookingForTwo);
+    person.setLookingFor(lookingFor);
     
     person.setMovies(asList(""));
     person.setMusic(asList(""));

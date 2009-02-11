@@ -20,7 +20,8 @@ package org.apache.shindig.social.opensocial.jpa.test;
 
 import com.google.common.collect.Lists;
 
-import org.apache.shindig.social.core.model.EnumImpl;
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.opensocial.jpa.AddressDb;
 import org.apache.shindig.social.opensocial.jpa.BodyTypeDb;
 import org.apache.shindig.social.opensocial.jpa.EmailDb;
@@ -35,15 +36,14 @@ import org.apache.shindig.social.opensocial.jpa.PhotoDb;
 import org.apache.shindig.social.opensocial.jpa.UrlDb;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.model.Enum.Drinker;
-import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
-import org.apache.shindig.social.opensocial.model.Enum.Smoker;
 import org.apache.shindig.social.opensocial.model.Person.Gender;
 
 import org.apache.commons.logging.Log;
@@ -120,8 +120,10 @@ public class PersonPopulate {
     person.setLanguagesSpoken(getList("LanguagesSpoken"));
     person.setLivingArrangement("living Arrangement");
     List<Enum<LookingFor>> lookingFor = Lists.newArrayList();
-    lookingFor.add(new EnumImpl<LookingFor>(LookingFor.RANDOM));
-    lookingFor.add(new EnumImpl<LookingFor>(LookingFor.NETWORKING));
+    Enum<LookingFor> lookingForOne = new EnumImpl<LookingFor>(LookingFor.RANDOM);
+    Enum<LookingFor> lookingForTwo = new EnumImpl<LookingFor>(LookingFor.NETWORKING);
+    lookingFor.add(lookingForOne);
+    lookingFor.add(lookingForTwo);
     person.setLookingFor(lookingFor);
     person.setMovies(getList("Movies"));
     person.setMusic(getList("music"));

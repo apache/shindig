@@ -20,7 +20,7 @@ package org.apache.shindig.social.opensocial.jpa.test;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import org.apache.shindig.social.core.util.BeanJsonConverter;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.jpa.hibernate.Bootstrap;
 import org.apache.shindig.social.opensocial.jpa.spi.JPASocialModule;
 import org.apache.shindig.social.opensocial.model.Person;

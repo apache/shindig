@@ -26,23 +26,23 @@ import static javax.persistence.GenerationType.IDENTITY;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
 import org.apache.shindig.social.opensocial.jpa.api.FilterSpecification;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
-import org.apache.shindig.social.opensocial.model.Enum;
+import org.apache.shindig.social.opensocial.model.Drinker;
 import org.apache.shindig.social.opensocial.model.ListField;
+import org.apache.shindig.social.opensocial.model.LookingFor;
 import org.apache.shindig.social.opensocial.model.Name;
+import org.apache.shindig.social.opensocial.model.NetworkPresence;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
-import org.apache.shindig.social.opensocial.model.Enum.Drinker;
-import org.apache.shindig.social.opensocial.model.Enum.LookingFor;
-import org.apache.shindig.social.opensocial.model.Enum.NetworkPresence;
-import org.apache.shindig.social.opensocial.model.Enum.Smoker;
-import org.apache.shindig.social.opensocial.spi.PersonService.FilterOperation;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -267,7 +267,7 @@ public class PersonDb implements Person, DbObject {
   protected String drinkerDb;
 
   @Transient
-  protected Enum<Enum.Drinker> drinker;
+  protected Enum<Drinker> drinker;
 
   @Basic
   @Column(name = "display_name", length = 255)
@@ -387,7 +387,7 @@ public class PersonDb implements Person, DbObject {
    */
   @Transient
   // stored as a property, processed on get,set
-  protected List<Enum<Enum.LookingFor>> lookingFor;
+  protected List<Enum<LookingFor>> lookingFor;
 
   /**
    *
@@ -416,7 +416,7 @@ public class PersonDb implements Person, DbObject {
   protected String networkPresenceDb;
 
   @Transient
-  protected Enum<Enum.NetworkPresence> networkPresence = new EnumDb<NetworkPresence>(
+  protected Enum<NetworkPresence> networkPresence = new EnumDb<NetworkPresence>(
       NetworkPresence.XA);
 
   /**
@@ -516,7 +516,7 @@ public class PersonDb implements Person, DbObject {
   protected String smokerDb;
 
   @Transient
-  protected Enum<Enum.Smoker> smoker;
+  protected Enum<Smoker> smoker;
 
   /**
    *
@@ -691,11 +691,11 @@ public class PersonDb implements Person, DbObject {
     }
   }
 
-  public Enum<Enum.Drinker> getDrinker() {
+  public Enum<Drinker> getDrinker() {
     return this.drinker;
   }
 
-  public void setDrinker(Enum<Enum.Drinker> newDrinker) {
+  public void setDrinker(Enum<Drinker> newDrinker) {
     this.drinker = newDrinker;
   }
 
@@ -834,11 +834,11 @@ public class PersonDb implements Person, DbObject {
     this.livingArrangement = livingArrangement;
   }
 
-  public List<Enum<Enum.LookingFor>> getLookingFor() {
+  public List<Enum<LookingFor>> getLookingFor() {
     return lookingFor;
   }
 
-  public void setLookingFor(List<Enum<Enum.LookingFor>> lookingFor) {
+  public void setLookingFor(List<Enum<LookingFor>> lookingFor) {
     this.lookingFor = lookingFor;
   }
 
@@ -866,11 +866,11 @@ public class PersonDb implements Person, DbObject {
     this.name = name;
   }
 
-  public Enum<Enum.NetworkPresence> getNetworkPresence() {
+  public Enum<NetworkPresence> getNetworkPresence() {
     return networkPresence;
   }
 
-  public void setNetworkPresence(Enum<Enum.NetworkPresence> networkPresence) {
+  public void setNetworkPresence(Enum<NetworkPresence> networkPresence) {
     this.networkPresence = networkPresence;
   }
 
@@ -986,11 +986,11 @@ public class PersonDb implements Person, DbObject {
     this.sexualOrientation = sexualOrientation;
   }
 
-  public Enum<Enum.Smoker> getSmoker() {
+  public Enum<Smoker> getSmoker() {
     return this.smoker;
   }
 
-  public void setSmoker(Enum<Enum.Smoker> newSmoker) {
+  public void setSmoker(Enum<Smoker> newSmoker) {
     this.smoker = newSmoker;
   }
 
@@ -1139,7 +1139,7 @@ public class PersonDb implements Person, DbObject {
     smokerDb = smoker.toString();
 
     List<String> lookingFor = Lists.newArrayList();
-    for (Enum<Enum.LookingFor> np : this.lookingFor) {
+    for (Enum<LookingFor> np : this.lookingFor) {
       lookingFor.add(np.toString());
     }
     Map<String, List<String>> toSave = new HashMap<String, List<String>>();
