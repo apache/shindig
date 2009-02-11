@@ -32,7 +32,7 @@ import javax.el.PropertyNotWritableException;
  *   - implicit reference to top-level properties in the current container config
  *     or inside any parents
  */
-class ContainerConfigELResolver extends ELResolver {
+public class ContainerConfigELResolver extends ELResolver {
   /** Key for the current container. */
   public static final String CURRENT_CONFIG_KEY = "Cur";
   
