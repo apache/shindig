@@ -42,6 +42,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import org.json.JSONObject;
@@ -108,7 +109,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(), null,
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(), null,
         token, converter).get());
     verify();
   }
@@ -128,7 +129,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -166,7 +167,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, params, null, token, converter).get());
+    assertEquals(data, operation.execute(params, null, token, converter).get());
     verify();
   }
 
@@ -180,7 +181,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -194,7 +195,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -214,7 +215,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
         eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -225,8 +226,8 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     replay();
     @SuppressWarnings("unchecked")
-    List<Object> received = (List<Object>) operation.execute(path, Maps.<String, String[]>newHashMap(), null,
-            token, converter).get();
+    List<Object> received = (List<Object>) operation.execute(Maps.<String, String[]>newHashMap(),
+        null, token, converter).get();
     assertEquals(2, received.size());
     assertEquals("id", received.get(0).toString());
     @SuppressWarnings("unchecked")

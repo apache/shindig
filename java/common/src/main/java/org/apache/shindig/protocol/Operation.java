@@ -48,4 +48,10 @@ public @interface Operation {
    * operation rather than the HTTP method in REST
    */
   String path() default "";
+
+  /**
+   * The name to match for the RPC operation to override the default behvaior 
+   * which is to use the name of the annotated method
+   */
+  String name() default "";
 }

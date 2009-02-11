@@ -40,6 +40,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.isNull;
 import org.json.JSONObject;
@@ -96,7 +97,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
     reset();
@@ -128,7 +129,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
           ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
     reset();
@@ -145,7 +146,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         ImmediateFuture.newInstance(activity));
 
     replay();
-    assertEquals(activity, operation.execute(path, Maps.<String, String[]>newHashMap(),
+    assertEquals(activity, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
     reset();
@@ -166,7 +167,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         eq(activity), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
 
-    return operation.execute(path, Maps.<String, String[]>newHashMap(),
+    return operation.execute(Maps.<String, String[]>newHashMap(),
         new StringReader(jsonActivity), token, converter);
   }
 
@@ -194,7 +195,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
 
     replay();
-    assertNull(operation.execute(path, Maps.<String, String[]>newHashMap(), null,
+    assertNull(operation.execute(Maps.<String, String[]>newHashMap(), null,
         token, converter).get());
     verify();
     reset();
@@ -206,8 +207,8 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     replay();
     @SuppressWarnings("unchecked")
-    List<Object> received = (List<Object>) operation.execute(path, Maps.<String, String[]>newHashMap(), null,
-            token, converter).get();
+    List<Object> received = (List<Object>) operation.execute(Maps.<String, String[]>newHashMap(),
+        null, token, converter).get();
     assertEquals(2, received.size());
     assertEquals("id", received.get(0).toString());
     assertEquals("title", received.get(1).toString());

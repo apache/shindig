@@ -23,16 +23,18 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 
 import com.google.common.collect.Lists;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * JSON-RPC handler servlet.
@@ -98,7 +100,7 @@ public class JsonRpcServlet extends ApiServlet {
     // into single requests.
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
-      responses.add(dispatcher.getRpcHandler(batchObj).execute(batchObj, token, jsonConverter));
+      responses.add(dispatcher.getRpcHandler(batchObj).execute(token, jsonConverter));
     }
 
     // Resolve each Future into a response.
@@ -123,7 +125,7 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     // getRpcHandler never returns null
-    Future future = dispatcher.getRpcHandler(request).execute(request, token, jsonConverter);
+    Future future = dispatcher.getRpcHandler(request).execute(token, jsonConverter);
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
