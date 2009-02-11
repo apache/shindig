@@ -20,6 +20,7 @@ package org.apache.shindig.expressions;
 
 import org.json.JSONArray;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -29,11 +30,14 @@ import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
+import javax.el.FunctionMapper;
 import javax.el.ListELResolver;
 import javax.el.MapELResolver;
 import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
+import javax.el.VariableMapper;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -64,7 +68,7 @@ public class Expressions {
   public Expressions() {
     factory = newExpressionFactory();
     // Stub context with no FunctionMapper, used only to parse expressions
-    parseContext = new SimpleContext();
+    parseContext = new Context(null);
     defaultELResolver = createDefaultELResolver();
   }
 
@@ -79,7 +83,7 @@ public class Expressions {
     }
 
     composite.add(defaultELResolver);
-    return new SimpleContext(composite);
+    return new Context(composite);
   }
 
   /**
@@ -96,6 +100,10 @@ public class Expressions {
           type);
     }
     return factory.createValueExpression(parseContext, expression, type);
+  }
+  
+  public ValueExpression constant(Object value, Class<?> type) {
+    return factory.createValueExpression(value, type);
   }
   
   private ExpressionFactory newExpressionFactory() {
@@ -122,6 +130,54 @@ public class Expressions {
     return resolver;
   }
 
+  /**
+   * ELContext implementation.  SimpleContext from JUEL would be
+   * sufficient if not for:
+   * https://sourceforge.net/tracker2/?func=detail&aid=2590830&group_id=165179&atid=834616
+   */
+  static private class Context extends ELContext {
+    private final ELResolver resolver;
+    private VariableMapper variables;
+
+    public Context(ELResolver resolver) {
+      this.resolver = resolver;
+    }
+    
+    @Override
+    public ELResolver getELResolver() {
+      return resolver;
+    }
+
+    @Override
+    public FunctionMapper getFunctionMapper() {
+      return null;
+    }
+
+    @Override
+    public VariableMapper getVariableMapper() {
+      if (variables == null) {
+        variables = new Variables();
+      }
+      
+      return variables;
+    }
+    
+  }
+  
+  static private class Variables extends VariableMapper {
+    private final Map<String, ValueExpression> variables = Maps.newHashMap();
+    @Override
+    public ValueExpression resolveVariable(String var) {
+      return variables.get(var);
+    }
+
+    @Override
+    public ValueExpression setVariable(String var, ValueExpression expression) {
+      return variables.put(var, expression);
+    }
+    
+  }
+  
   /** 
    * Class providing custom type coercion for getValue() where needed.
    * This will be obsolete with JUEL 2.1.1.
