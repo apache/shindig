@@ -62,6 +62,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
   private final Injector injector;
   private final BeanJsonConverter beanJsonConverter;
+  private final HandlerExecutionListener executionListener;
 
   /**
    * Creates a dispatcher with the specified handler classes
@@ -72,9 +73,11 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
   @Inject
   public DefaultHandlerRegistry(Injector injector,
                                 @Named("org.apache.shindig.handlers")Set handlers,
-                                BeanJsonConverter beanJsonConverter) {
+                                BeanJsonConverter beanJsonConverter,
+                                HandlerExecutionListener executionListener) {
     this.injector = injector;
     this.beanJsonConverter = beanJsonConverter;
+    this.executionListener = executionListener;
     addHandlers(handlers.toArray());
   }
 
@@ -175,8 +178,13 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         Constructor reqItemConstructor =
             requestItemType.getConstructor(Map.class, SecurityToken.class, BeanConverter.class,
                 BeanJsonConverter.class);
+        String opName = m.getName();
+        if (!StringUtils.isEmpty(op.name())) {
+          opName = op.name();
+        }
         RestInvocationHandler restHandler = new RestInvocationHandler(service, op, m, handler,
-            beanJsonConverter, reqItemConstructor);
+            beanJsonConverter, reqItemConstructor,
+            new ExecutionListenerWrapper(service.name(), opName, executionListener));
         String serviceName = service.name();
 
         Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(serviceName);
@@ -221,17 +229,38 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
             requestItemType.getConstructor(JSONObject.class, SecurityToken.class,
                 BeanConverter.class,
                 BeanJsonConverter.class);
-        RpcInvocationHandler rpcHandler =
-            new RpcInvocationHandler(m, handler, beanJsonConverter, reqItemConstructor);
-        String defaultName = service.name() + "." + m.getName();
+        String opName = m.getName();
         // Use the override if its defined
         if (op.name().length() > 0) {
-          defaultName = service.name() + "." + op.name();
+          opName = op.name();
         }
-        rpcOperations.put(defaultName, rpcHandler);
+        RpcInvocationHandler rpcHandler =
+            new RpcInvocationHandler(m, handler, beanJsonConverter, reqItemConstructor,
+                new ExecutionListenerWrapper(service.name(), opName, executionListener));
+        rpcOperations.put(service.name() + "." + opName, rpcHandler);
       }
     } catch (NoSuchMethodException nme) {
       logger.log(Level.INFO, "No RPC binding for " + service.name() + "." + m.getName());
+    }
+  }
+
+  /**
+   * Utility wrapper for the HandlerExecutionListener
+   */
+  private static class ExecutionListenerWrapper {
+    final String service;
+    final String operation;
+    final HandlerExecutionListener listener;
+
+    ExecutionListenerWrapper(String service, String operation,
+        HandlerExecutionListener listener) {
+      this.service = service;
+      this.operation = operation;
+      this.listener = listener;
+    }
+
+    private void executing(RequestItem req) {
+      listener.executing(service, operation, req);
     }
   }
 
@@ -244,14 +273,17 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     Object handlerInstance;
     BeanJsonConverter beanJsonConverter;
     Constructor requestItemConstructor;
+    ExecutionListenerWrapper listener;
 
     private RpcInvocationHandler(Method receiver, Object handlerInstance,
                                  BeanJsonConverter beanJsonConverter,
-                                 Constructor reqItemConstructor) {
+                                 Constructor reqItemConstructor,
+                                 ExecutionListenerWrapper listener) {
       this.receiver = receiver;
       this.handlerInstance = handlerInstance;
       this.beanJsonConverter = beanJsonConverter;
       this.requestItemConstructor = reqItemConstructor;
+      this.listener = listener;
     }
 
     public Future execute(JSONObject rpc, SecurityToken token, BeanConverter converter) {
@@ -264,6 +296,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
           item = (RequestItem) requestItemConstructor.newInstance(new JSONObject(), token,
               converter, beanJsonConverter);
         }
+        listener.executing(item);
         Object result = receiver.invoke(handlerInstance, item);
         if (result instanceof Future) {
           return (Future) result;
@@ -308,11 +341,13 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     final String[] expectedUrl;
     BeanJsonConverter beanJsonConverter;
     Constructor requestItemConstructor;
+    ExecutionListenerWrapper listener;
 
     private RestInvocationHandler(Service service, Operation operation,
                                   Method receiver, Object handlerInstance,
                                   BeanJsonConverter beanJsonConverter,
-                                  Constructor requestItemConstructor) {
+                                  Constructor requestItemConstructor,
+                                  ExecutionListenerWrapper listener) {
       this.service = service;
       this.operation = operation;
       this.receiver = receiver;
@@ -320,6 +355,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       expectedUrl = service.path().split("/");
       this.beanJsonConverter = beanJsonConverter;
       this.requestItemConstructor = requestItemConstructor;
+      this.listener = listener;
     }
 
     public Future<?> execute(Map<String, String[]> parameters, Reader body,
@@ -331,6 +367,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         }
         RequestItem item = (RequestItem) requestItemConstructor.newInstance(parameters, token,
             converter, beanJsonConverter);
+        listener.executing(item);
         Object result = receiver.invoke(handlerInstance, item);
         if (result instanceof Future) {
           return (Future) result;
@@ -488,6 +525,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       }
       return new RestInvocationWrapper(parsedParams, handler);
     }
+
 
     /**
      * Rank based on the number of consant parts they accept, where the constant parts occur

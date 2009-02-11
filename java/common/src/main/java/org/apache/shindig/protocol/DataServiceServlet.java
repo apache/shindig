@@ -99,17 +99,8 @@ public class DataServiceServlet extends ApiServlet {
       HttpServletResponse servletResponse, SecurityToken token,
       BeanConverter converter) throws IOException {
 
-    // TODO Rework to allow sub-services
-    String path = servletRequest.getPathInfo();
-
-    // TODO - This shouldnt be on BaseRequestItem
-    String method = servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE);
-    if (method == null) {
-      method = servletRequest.getMethod();
-    }
-
     // Always returns a non-null handler.
-    RestHandler handler = dispatcher.getRestHandler(path, method.toUpperCase());
+    RestHandler handler = getRestHandler(servletRequest);
 
     Reader bodyReader = null;
     if (!servletRequest.getMethod().equals("GET") && !servletRequest.getMethod().equals("HEAD")) {
@@ -139,6 +130,19 @@ public class DataServiceServlet extends ApiServlet {
     }
   }
 
+  protected RestHandler getRestHandler(HttpServletRequest servletRequest) {
+    // TODO Rework to allow sub-services
+    String path = servletRequest.getPathInfo();
+
+    // TODO - This shouldnt be on BaseRequestItem
+    String method = servletRequest.getParameter(X_HTTP_METHOD_OVERRIDE);
+    if (method == null) {
+      method = servletRequest.getMethod();
+    }
+
+    // Always returns a non-null handler.
+    return dispatcher.getRestHandler(path, method.toUpperCase());
+  }
 
   BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = null;

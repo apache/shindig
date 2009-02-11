@@ -73,7 +73,8 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml").anyTimes();
 
     HandlerRegistry registry = new DefaultHandlerRegistry(null,
-        Sets.newHashSet(new TestHandler()), jsonConverter);
+        Sets.newHashSet(new TestHandler()), jsonConverter,
+        new HandlerExecutionListener.NoOpHandlerExecutionListener());
 
     servlet.setHandlerRegistry(registry);
 

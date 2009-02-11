@@ -24,6 +24,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.RestfulCollection;
@@ -81,7 +82,8 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new ActivityHandler(activityService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter);
+    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter,
+        new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
