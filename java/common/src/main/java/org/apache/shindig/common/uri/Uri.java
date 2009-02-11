@@ -18,8 +18,8 @@
  */
 package org.apache.shindig.common.uri;
 
-import com.google.common.collect.Maps;
 import com.google.common.base.Objects;
+import com.google.common.collect.Maps;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -132,7 +132,7 @@ public final class Uri {
    * @return True if the Uri is absolute.
    */
   public boolean isAbsolute() {
-    return scheme != null;
+    return scheme != null && authority != null;
   }
 
   /**
