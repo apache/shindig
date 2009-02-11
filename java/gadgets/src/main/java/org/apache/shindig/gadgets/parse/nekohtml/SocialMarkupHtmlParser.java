@@ -69,7 +69,7 @@ public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
 
     @Override
     public void characters(XMLString text, Augmentations augs) throws XNIException {
-      if (scriptContent != null) {
+      if (inScript) {
         scriptContent.append(text.ch, text.offset, text.length);
       } else {
         super.characters(text, augs);
@@ -78,7 +78,7 @@ public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
 
     @Override
     public void endElement(QName name, Augmentations augs) throws XNIException {
-      if (scriptContent != null) {
+      if (inScript) {
         XMLInputSource scriptSource = new XMLInputSource(null, null, null);
         scriptSource.setCharacterStream(new StringReader(scriptContent.toString()));
         scriptContent.setLength(0);
