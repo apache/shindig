@@ -100,7 +100,7 @@ public class JsonRpcServlet extends ApiServlet {
     // into single requests.
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
-      responses.add(dispatcher.getRpcHandler(batchObj).execute(token, jsonConverter));
+      responses.add(getHandler(batchObj, servletRequest).execute(token, jsonConverter));
     }
 
     // Resolve each Future into a response.
@@ -125,13 +125,21 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     // getRpcHandler never returns null
-    Future future = dispatcher.getRpcHandler(request).execute(token, jsonConverter);
+    Future future = getHandler(request, servletRequest).execute(token, jsonConverter);
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
     ResponseItem response = getResponseItem(future);
     JSONObject result = getJSONResponse(key, response);
     servletResponse.getWriter().write(result.toString());
+  }
+
+  /**
+   * Wrap call to dispatcher to allow for implementation specific overrides
+   * and servlet-request contextual handling
+   */
+  protected RpcHandler getHandler(JSONObject rpc, HttpServletRequest request) {
+    return dispatcher.getRpcHandler(rpc);
   }
 
   private JSONObject getJSONResponse(String key, ResponseItem responseItem) throws JSONException {

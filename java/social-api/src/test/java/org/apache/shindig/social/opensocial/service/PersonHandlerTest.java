@@ -24,6 +24,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.RestfulCollection;
@@ -89,7 +90,8 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter);
+    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter,
+        new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
   public void testHandleGetAllNoParams() throws Exception {

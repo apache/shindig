@@ -22,6 +22,7 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.RestHandler;
@@ -67,7 +68,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
-    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter);
+    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter,
+        new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
