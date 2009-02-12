@@ -60,7 +60,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
   	$startIndex = 1;
   	$count = 1;
   	
-    $ret = $this->service->getActivities($userIds, $groupId, 1, null, null, null, null, $startIndex, $count, null, $token);
+    $ret = $this->service->getActivities($userIds, $groupId, 1, null, null, null, null, $startIndex, $count, null, 1, $token);
     $this->assertEquals($startIndex, $ret->startIndex);
     $this->assertEquals($count, count($ret->entry));
     $this->assertEquals(2, $ret->totalResults);
