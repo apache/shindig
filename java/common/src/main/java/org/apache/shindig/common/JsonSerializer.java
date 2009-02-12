@@ -18,13 +18,21 @@
  */
 package org.apache.shindig.common;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Serializes a JSONObject.
@@ -44,7 +52,22 @@ public final class JsonSerializer {
     '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
   };
 
+  private static final Set<String> EXCLUDE_METHODS
+      = ImmutableSet.of("getClass", "getDeclaringClass");
+
+  private static final Map<Class<?>, Map<String, Method>> getters = Maps.newConcurrentHashMap();
+
   private JsonSerializer() {}
+
+  public static String serialize(Object object) {
+    StringBuilder buf = new StringBuilder(1024);
+    try {
+      append(buf, object);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return buf.toString();
+  }
 
   /**
    * Serialize a JSONObject. Does not guard against cyclical references.
@@ -125,23 +148,63 @@ public final class JsonSerializer {
   public static void append(Appendable buf, Object value) throws IOException {
     if (value == null) {
       buf.append("null");
-    } else if (value instanceof JSONObject) {
-      appendJsonObject(buf, (JSONObject)value);
-    } else if (value instanceof String) {
-      appendString(buf, (String)value);
-    } else if (value instanceof Number || value instanceof Boolean) {
+    } else if (value instanceof Number ||
+               value instanceof Boolean) {
+      // Primitives
       buf.append(value.toString());
+    } else if (value instanceof CharSequence ||
+               value instanceof DateTime ||
+               value instanceof Date ||
+               value.getClass().isEnum()) {
+      // String-like Primitives
+      appendString(buf, value.toString());
+    } else if (value instanceof JSONObject) {
+      appendJsonObject(buf, (JSONObject) value);
     } else if (value instanceof JSONArray) {
       buf.append(value.toString());
     } else if (value instanceof Map) {
-      appendMap(buf, (Map<String, Object>)value);
+      appendMap(buf, (Map<String, Object>) value);
     } else if (value instanceof Collection) {
-      appendCollection(buf, (Collection<Object>)value);
+      appendCollection(buf, (Collection<Object>) value);
     } else if (value.getClass().isArray()) {
-      appendArray(buf, (Object[])value);
+      appendArray(buf, (Object[]) value);
     } else {
-      appendString(buf, value.toString());
+      // Try getter conversion
+      appendPojo(buf, value);
     }
+  }
+
+  /**
+   * Appends a java object using getters
+   *
+   * @throws IOException If {@link Appendable#append(char)} throws an exception.
+   */
+  public static void appendPojo(Appendable buf, Object pojo) throws IOException {
+    Map<String, Method> methods = getGetters(pojo);
+    buf.append('{');
+    boolean firstDone = false;
+    for (Map.Entry<String, Method> entry : methods.entrySet()) {
+      if (firstDone) {
+        buf.append(',');
+      } else {
+        firstDone = true;
+      }
+      appendString(buf, entry.getKey());
+      buf.append(':');
+      try {
+        append(buf, entry.getValue().invoke(pojo));
+      } catch (IllegalArgumentException e) {
+        // Shouldn't be possible.
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        // Bad class.
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        // Bad class.
+        throw new RuntimeException(e);
+      }
+    }
+    buf.append('}');
   }
 
   /**
@@ -336,5 +399,39 @@ public final class JsonSerializer {
       }
     }
     buf.append('"');
+  }
+
+  private static Map<String, Method> getGetters(Object pojo) {
+    Class<?> clazz = pojo.getClass();
+
+    Map<String, Method> methods = getters.get(clazz);
+    if (methods != null) {
+      return methods;
+    }
+    // Ensure consistent method ordering by using a linked hash map.
+    methods = Maps.newHashMap();
+
+    for (Method method : clazz.getMethods()) {
+      String name = getPropertyName(method);
+      if (name != null) {
+        methods.put(name, method);
+      }
+    }
+
+    getters.put(clazz, methods);
+    return methods;
+  }
+
+  private static String getPropertyName(Method method) {
+    JsonProperty property = method.getAnnotation(JsonProperty.class);
+    if (property == null) {
+      String name = method.getName();
+      if (name.startsWith("get") && (!EXCLUDE_METHODS.contains(name))) {
+        return name.substring(3, 4).toLowerCase() + name.substring(4);
+      }
+      return null;
+    } else {
+      return property.value();
+    }
   }
 }
