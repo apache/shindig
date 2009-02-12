@@ -68,7 +68,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
-    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 

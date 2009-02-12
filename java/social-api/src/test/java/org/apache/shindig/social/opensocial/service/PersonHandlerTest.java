@@ -90,7 +90,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Sets.newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
