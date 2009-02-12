@@ -33,10 +33,13 @@ import java.util.Map;
 
 import javax.el.ELResolver;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class PipelinedDataTest {
@@ -52,6 +55,38 @@ public class PipelinedDataTest {
     
   }
   
+  @Test
+  public void testDataRequest() throws Exception {
+    String xml = "<Content><DataRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " method=\"people.get\""
+        + " groupId=\"${params.groupId}\""
+        + " userId=\"${userIds}\""
+        + " startIndex=\"${startIndex}\""
+        + " fields=\"${fields}\""
+        + "/></Content>";
+
+    elValues.put("startIndex", 10);
+    // Test a param that evaluates to null
+    elValues.put("params", ImmutableMap.of());
+    elValues.put("userIds", Lists.newArrayList("first", "second"));    
+    elValues.put("fields", new JSONArray("['name','id']"));
+    PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
+    assertFalse(socialData.needsOwner());
+    assertFalse(socialData.needsViewer());
+
+    JSONObject expected = new JSONObject("{method: 'people.get', id: 'key', params:"
+        + "{userId: ['first','second'],"
+        + "startIndex: 10,"
+        + "fields: ['name','id']"
+        + "}}");
+
+    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    assertTrue(batch.getHttpPreloads().isEmpty());
+    assertEquals(1, batch.getSocialPreloads().size());
+    assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
+  }
+
   @Test
   public void testPeopleRequest() throws Exception {
     String xml = "<Content><PeopleRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
@@ -231,7 +266,7 @@ public class PipelinedDataTest {
   public void testBatching() throws Exception {
     String xml = "<Content xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
     		+ "<PeopleRequest key=\"key\" userId=\"${userId}\"/>"
-            + "<MakeRequest key=\"key2\" href=\"${key}\"/>"
+            + "<HttpRequest key=\"key2\" href=\"${key}\"/>"
         + "</Content>";
 
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
@@ -255,14 +290,16 @@ public class PipelinedDataTest {
 
 
  @Test
-  public void makeRequestDefaults() throws Exception {
-    String xml = "<Content><MakeRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+  public void httpRequestDefaults() throws Exception {
+    String xml = "<Content><HttpRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
         + " key=\"key\""
         + " href=\"/example.html\""
         + "/></Content>";
 
     PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
     PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
+    assertFalse(pipelinedData.needsViewer());
+    assertFalse(pipelinedData.needsOwner());
     
     assertEquals(1, batch.getHttpPreloads().size());
     RequestAuthenticationInfo preload = batch.getHttpPreloads().get("key");
@@ -272,8 +309,8 @@ public class PipelinedDataTest {
   }
 
   @Test
-  public void makeRequestDefaultsSigned() throws Exception {
-    String xml = "<Content><MakeRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+  public void httpRequestDefaultsSigned() throws Exception {
+    String xml = "<Content><HttpRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
         + " key=\"key\""
         + " href=\"/example.html\""
         + " authz=\"signed\""
@@ -282,6 +319,8 @@ public class PipelinedDataTest {
 
     PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
     PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
+    assertTrue(pipelinedData.needsViewer());
+    assertFalse(pipelinedData.needsOwner());
     
     assertEquals(1, batch.getHttpPreloads().size());
     RequestAuthenticationInfo preload = batch.getHttpPreloads().get("key");
