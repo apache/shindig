@@ -67,7 +67,6 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
     <name>shindig:1</name>
   </author>
   <id>urn:guid:1</id>
-
   <updated>2008-12-11T19:58:31+01:00</updated>
   <content type="application/xml">
     <person xmlns="http://ns.opensocial.org/2008/opensocial">
@@ -75,7 +74,6 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
       <isViewer></isViewer>
       <displayName>1 1</displayName>
       <id>1</id>
-
     </person>
   </content>
 </entry>
@@ -83,6 +81,9 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
     $outputXml = simplexml_load_string($output);
     $expectedXml = simplexml_load_string($expected);
     $expectedXml->updated = $outputXml->updated;
+    // Prefix may be 'shindig' or something else.
+    $expectedXml->title = $outputXml->title; 
+    $expectedXml->author->name = $outputXml->author->name;
     $this->assertEquals($expectedXml, $outputXml);
   }
 
