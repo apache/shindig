@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  */
 @Singleton
 public class DefaultUrlGenerator implements UrlGenerator {
-  protected static final Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z\\.\\-]+");
+  protected static final Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z_\\.\\-]+");
   protected static final String IFRAME_URI_PARAM = "gadgets.iframeBaseUri";
   protected static final String JS_URI_PARAM = "gadgets.jsUriTemplate";
   private final String jsChecksum;

@@ -22,18 +22,11 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
-import junitx.framework.StringAssert;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -41,6 +34,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import junitx.framework.StringAssert;
+
+import com.google.caja.util.Join;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Tests for DefaultUrlGenerator.
@@ -92,15 +92,20 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     reset(registry);
   }
 
-  public void testGetBundledJsParam() throws Exception {
-    List<String> features = ImmutableList.of("foo", "bar");
+  public void testGetBundledJsParamWithGoodFeatureName() throws Exception {
+    List<String> features = ImmutableList.of(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "abcdefghijklmnopqrstuvwxyz",
+        "0123456789",
+        "_.-");
+
     expect(context.getDebug()).andReturn(true);
     replay();
 
     String jsParam = urlGenerator.getBundledJsParam(features, context);
 
-    assertTrue(
-        jsParam.matches("foo:bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
+    assertTrue(jsParam.matches(Join.join(":", features) + "\\.js\\?v=[0-9a-zA-Z]*&container=" +
+        CONTAINER + "&debug=1"));
   }
 
   public void testGetBundledJsParamWithBadFeatureName() throws Exception {
