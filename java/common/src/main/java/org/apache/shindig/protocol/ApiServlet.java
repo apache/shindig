@@ -26,12 +26,13 @@ import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Common base class for API servlets.

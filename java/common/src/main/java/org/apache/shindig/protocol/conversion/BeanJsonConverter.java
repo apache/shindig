@@ -17,10 +17,11 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import org.apache.shindig.common.JsonProperty;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -35,13 +36,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Converts pojos to json objects.
@@ -49,16 +48,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BeanJsonConverter implements BeanConverter {
 
-  private static final Object[] EMPTY_OBJECT = {};
-  private static final Set<String> EXCLUDED_FIELDS = ImmutableSet.of("class", "declaringclass");
-  private static final String GETTER_PREFIX  = "get";
-  private static final String SETTER_PREFIX = "set";
+  // Only compute the filtered setters once per-class
+  private static final Map<Class<?>, Map<String, Method>> setters = Maps.newConcurrentHashMap();
 
-  // Only compute the filtered getters/setters once per-class
-  private static final ConcurrentHashMap<Class,List<MethodPair>> GETTER_METHODS = Maps.newConcurrentHashMap();
-  private static final ConcurrentHashMap<Class,List<MethodPair>> SETTER_METHODS = Maps.newConcurrentHashMap();
-
-  private Injector injector;
+  private final Injector injector;
 
   @Inject
   public BeanJsonConverter(Injector injector) {
@@ -76,141 +69,41 @@ public class BeanJsonConverter implements BeanConverter {
    * @return An object whos toString method will return json
    */
   public String convertToString(final Object pojo) {
-    return convertToJson(pojo).toString();
+    return JsonSerializer.serialize(pojo);
   }
 
-  /**
-   * Convert the passed in object to a json object.
-   *
-   * @param pojo The object to convert
-   * @return An object whos toString method will return json
-   */
-  public Object convertToJson(final Object pojo) {
-    try {
-      return translateObjectToJson(pojo);
-    } catch (JSONException e) {
-      throw new RuntimeException("Could not translate " + pojo + " to json", e);
+  private static Map<String, Method> getSetters(Object pojo) {
+    Class<?> clazz = pojo.getClass();
+
+    Map<String, Method> methods = setters.get(clazz);
+    if (methods != null) {
+      return methods;
     }
-  }
+    // Ensure consistent method ordering by using a linked hash map.
+    methods = Maps.newHashMap();
 
-  private Object translateObjectToJson(final Object val) throws JSONException {
-    if (val instanceof Object[]) {
-      JSONArray array = new JSONArray();
-      for (Object asd : (Object[]) val) {
-        array.put(translateObjectToJson(asd));
-      }
-      return array;
-
-    } else if (val instanceof List) {
-      JSONArray list = new JSONArray();
-      for (Object item : (List<?>) val) {
-        list.put(translateObjectToJson(item));
-      }
-      return list;
-
-    } else if (val instanceof Map) {
-      JSONObject map = new JSONObject();
-      Map<?, ?> originalMap = (Map<?, ?>) val;
-
-      for (Entry<?, ?> item : originalMap.entrySet()) {
-        map.put(item.getKey().toString(), translateObjectToJson(item.getValue()));
-      }
-      return map;
-
-    } else if (val != null && val.getClass().isEnum()) {
-      return val.toString();
-    } else if (val instanceof String
-        || val instanceof CharSequence
-        || val instanceof Boolean
-        || val instanceof Integer
-        || val instanceof Date
-        || val instanceof Long
-        || val instanceof Float
-        || val instanceof JSONObject
-        || val instanceof JSONArray
-        || val == null) {
-      return val;
-    }
-
-    return convertMethodsToJson(val);
-  }
-
-  /**
-   * Convert the object to {@link JSONObject} reading Pojo properties
-   *
-   * @param pojo The object to convert
-   * @return A JSONObject representing this pojo
-   */
-  private JSONObject convertMethodsToJson(final Object pojo) {
-    List<MethodPair> availableGetters;
-
-    availableGetters = GETTER_METHODS.get(pojo.getClass());
-    if (availableGetters == null) {
-      availableGetters = getMatchingMethods(pojo, GETTER_PREFIX, false);
-      GETTER_METHODS.putIfAbsent(pojo.getClass(), availableGetters);
-    }
-
-    JSONObject toReturn = new JSONObject();
-    for (MethodPair getter : availableGetters) {
-      try {
-        Object val = getter.method.invoke(pojo, EMPTY_OBJECT);
-        if (val != null) {
-          toReturn.put(getter.fieldName, translateObjectToJson(val));
-        }
-      } catch (JSONException e) {
-        throw new RuntimeException(errorMessage(pojo, getter), e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(errorMessage(pojo, getter), e);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(errorMessage(pojo, getter), e);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(errorMessage(pojo, getter), e);
+    for (Method method : clazz.getMethods()) {
+      String name = getPropertyName(method);
+      if (name != null) {
+        methods.put(name, method);
       }
     }
-    return toReturn;
+
+    setters.put(clazz, methods);
+    return methods;
   }
 
-  private static String errorMessage(Object pojo, MethodPair getter) {
-    return "Could not encode the " + getter.method + " method on "
-        + pojo.getClass().getName();
-  }
-
-  private static final class MethodPair {
-    public Method method;
-    public String fieldName;
-
-    protected MethodPair(final Method method, final String fieldName) {
-      this.method = method;
-      this.fieldName = fieldName;
-    }
-  }
-
-
-  private List<MethodPair> getMatchingMethods(Object pojo, String prefix, boolean allowHaveArgs) {
-
-    List<MethodPair> availableGetters = Lists.newArrayList();
-    Method[] methods = pojo.getClass().getMethods();
-    for (Method method : methods) {
+  private static String getPropertyName(Method method) {
+    JsonProperty property = method.getAnnotation(JsonProperty.class);
+    if (property == null) {
       String name = method.getName();
-      if (!method.getName().startsWith(prefix)) {
-        continue;
+      if (name.startsWith("set")) {
+        return name.substring(3, 4).toLowerCase() + name.substring(4);
       }
-      int prefixlen = prefix.length();
-
-      String fieldName = name.substring(prefixlen, prefixlen+1).toLowerCase() +
-          name.substring(prefixlen + 1);
-
-      if (EXCLUDED_FIELDS.contains(fieldName.toLowerCase())) {
-        continue;
-      }
-      if (!allowHaveArgs) {
-        if (method.getParameterTypes().length != 0) {
-          continue;
-        }
-      }
-      availableGetters.add(new MethodPair(method, fieldName));
+      return null;
+    } else {
+      return property.value();
     }
-    return availableGetters;
   }
 
   public <T> T convertToObject(String json, Class<T> className) {
@@ -251,23 +144,16 @@ public class BeanJsonConverter implements BeanConverter {
         ((Map<String, Object>) pojo).put(key, value);
       }
 
-    } else if (pojo instanceof List) {
+    } else if (pojo instanceof Collection) {
       JSONArray array = new JSONArray(json);
       for (int i = 0; i < array.length(); i++) {
-        ((List<Object>) pojo).add(array.get(i));
+        ((Collection<Object>) pojo).add(array.get(i));
       }
     } else {
       JSONObject jsonObject = new JSONObject(json);
-      List<MethodPair> methods;
-      methods = SETTER_METHODS.get(pojo.getClass());
-      if (methods == null) {
-        methods = getMatchingMethods(pojo, SETTER_PREFIX, true);
-        SETTER_METHODS.putIfAbsent(pojo.getClass(), methods);
-      }
-
-      for (MethodPair setter : methods) {
-        if (jsonObject.has(setter.fieldName)) {
-          callSetterWithValue(pojo, setter.method, jsonObject, setter.fieldName);
+      for (Map.Entry<String, Method> setter : getSetters(pojo).entrySet()) {
+        if (jsonObject.has(setter.getKey())) {
+          callSetterWithValue(pojo, setter.getValue(), jsonObject, setter.getKey());
         }
       }
     }
@@ -365,8 +251,9 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (expectedType.equals(Boolean.class) || expectedType.equals(Boolean.TYPE)) {
       value = jsonObject.getBoolean(fieldName);
     } else if (expectedType.equals(Float.class) || expectedType.equals(Float.TYPE)) {
-      String stringFloat = jsonObject.getString(fieldName);
-      value = new Float(stringFloat);
+      value = ((Double) jsonObject.getDouble(fieldName)).floatValue();
+    } else if (expectedType.equals(Double.class) || expectedType.equals(Double.TYPE)) {
+      value = jsonObject.getDouble(fieldName);
     } else {
       // Assume its an injected type
       value = convertToObject(jsonObject.getJSONObject(fieldName).toString(), expectedType);

@@ -17,22 +17,26 @@
  */
 package org.apache.shindig.protocol;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.JsonConversionUtil;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,9 +46,8 @@ import javax.servlet.http.HttpServletResponse;
 public class JsonRpcServlet extends ApiServlet {
 
   @Override
-  protected void doGet(HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse)
-      throws ServletException, IOException {
+  protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+      throws IOException {
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
       sendSecurityError(servletResponse);
@@ -61,9 +64,8 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   @Override
-  protected void doPost(HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse)
-      throws ServletException, IOException {
+  protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+      throws IOException {
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
       sendSecurityError(servletResponse);
@@ -105,16 +107,17 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
-    JSONArray result = new JSONArray();
+    List<Object> result = new ArrayList<Object>(batch.length());
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
       String key = null;
       if (batchObj.has("id")) {
         key = batchObj.getString("id");
       }
-      result.put(getJSONResponse(key, getResponseItem(responses.get(i))));
+      result.add(getJSONResponse(key, getResponseItem(responses.get(i))));
     }
-    servletResponse.getWriter().write(result.toString());
+
+    JsonSerializer.append(servletResponse.getWriter(), result);
   }
 
   protected void dispatch(JSONObject request, HttpServletRequest servletRequest,
@@ -125,13 +128,14 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     // getRpcHandler never returns null
-    Future future = getHandler(request, servletRequest).execute(token, jsonConverter);
+    Future<?> future = getHandler(request, servletRequest).execute(token, jsonConverter);
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request
     ResponseItem response = getResponseItem(future);
-    JSONObject result = getJSONResponse(key, response);
-    servletResponse.getWriter().write(result.toString());
+    Object result = getJSONResponse(key, response);
+
+    JsonSerializer.append(servletResponse.getWriter(), result);
   }
 
   /**
@@ -142,8 +146,8 @@ public class JsonRpcServlet extends ApiServlet {
     return dispatcher.getRpcHandler(rpc);
   }
 
-  private JSONObject getJSONResponse(String key, ResponseItem responseItem) throws JSONException {
-    JSONObject result = new JSONObject();
+  private Object getJSONResponse(String key, ResponseItem responseItem) {
+    Map<String, Object> result = Maps.newHashMap();
     if (key != null) {
       result.put("id", key);
     }
@@ -151,18 +155,18 @@ public class JsonRpcServlet extends ApiServlet {
       result.put("error", getErrorJson(responseItem));
     } else {
       Object response = responseItem.getResponse();
-      Object converted = jsonConverter.convertToJson(response);
 
-      if (response instanceof RestfulCollection) {
-        // FIXME this is a little hacky because of the field names in the RestfulCollection
-        ((JSONObject)converted).put("list", ((JSONObject)converted).remove("entry"));
-        result.put("data", converted);
-      } else if (response instanceof DataCollection) {
-        if (((JSONObject)converted).has("entry")) {
-          result.put("data", ((JSONObject)converted).get("entry"));
-        }
+      if (response instanceof DataCollection) {
+        result.put("data", ((DataCollection) response).getEntry());
+      } else if (response instanceof RestfulCollection) {
+        Map<String, Object> map = Maps.newHashMap();
+        RestfulCollection<?> collection = (RestfulCollection<?>) response;
+        map.put("startIndex", collection.getStartIndex());
+        map.put("totalResults", collection.getTotalResults());
+        map.put("list", collection.getEntry());
+        result.put("data", map);
       } else {
-        result.put("data", converted);
+        result.put("data", response);
       }
     }
     return result;
@@ -171,8 +175,8 @@ public class JsonRpcServlet extends ApiServlet {
   // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
   // Then we can use the general converter to output the response to the client and we won't
   // be harcoded to json.
-  private JSONObject getErrorJson(ResponseItem responseItem) throws JSONException {
-    JSONObject error = new JSONObject();
+  private Object getErrorJson(ResponseItem responseItem) {
+    Map<String, Object> error = new HashMap<String, Object>(2, 1);
     error.put("code", responseItem.getError().getHttpErrorCode());
 
     String message = responseItem.getError().toString();
@@ -186,14 +190,7 @@ public class JsonRpcServlet extends ApiServlet {
   @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
-    try {
-      JSONObject error = getErrorJson(responseItem);
-      servletResponse.getWriter().write(error.toString());
-    } catch (JSONException je) {
-      // This really shouldn't ever happen
-      servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Error generating error response " + je.getMessage());
-    }
+    JsonSerializer.append(servletResponse.getWriter(), getErrorJson(responseItem));
   }
 
   private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
