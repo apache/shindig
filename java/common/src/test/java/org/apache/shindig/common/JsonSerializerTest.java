@@ -18,17 +18,18 @@
  */
 package org.apache.shindig.common;
 
+import static org.apache.shindig.common.JsonAssert.assertJsonEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,58 +45,100 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeSimpleJsonObject() throws Exception {
-    JSONObject json = new JSONObject("{\"foo\":\"bar\"}");
-    assertTrue("Did not produce results matching reference implementation.",
-               jsonEquals(json.toString(), JsonSerializer.serialize(json)));
+    String json = "{foo:'bar'}";
+    assertJsonEquals(json, JsonSerializer.serialize(new JSONObject(json)));
   }
 
   @Test
   public void serializeSimpleMap() throws Exception {
     Map<String, String> map = ImmutableMap.of("hello", "world", "foo", "bar");
-    assertTrue("Did not produce results matching reference implementation.",
-        jsonEquals(new JSONObject(map).toString(), JsonSerializer.serialize(map)));
+    assertJsonEquals("{hello:'world',foo:'bar'}", JsonSerializer.serialize(map));
   }
 
   @Test
   public void serializeSimpleCollection() throws Exception {
     Collection<String> collection = Arrays.asList("foo", "bar", "baz");
-    assertEquals("[\"foo\",\"bar\",\"baz\"]", JsonSerializer.serialize(collection));
+    assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(collection));
   }
 
   @Test
   public void serializeArray() throws Exception {
     String[] array = new String[] {"foo", "bar", "baz"};
-    assertEquals("[\"foo\",\"bar\",\"baz\"]", JsonSerializer.serialize(array));
+    assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
   }
 
   @Test
   public void serializeJsonArray() throws Exception {
     JSONArray array = new JSONArray(new String[] {"foo", "bar", "baz"});
-    assertEquals("[\"foo\",\"bar\",\"baz\"]", JsonSerializer.serialize(array));
+    assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
+  }
+
+  @Test
+  public void serializePrimitives() throws Exception {
+    assertEquals("\"hello\"", JsonSerializer.serialize("hello"));
+    assertEquals("100", JsonSerializer.serialize(100));
+    assertEquals("125.0", JsonSerializer.serialize(125.0f));
+    assertEquals("126.0", JsonSerializer.serialize(126.0));
+    assertEquals("1", JsonSerializer.serialize(1L));
+    assertEquals("\"RUNTIME\"", JsonSerializer.serialize(RetentionPolicy.RUNTIME));
+    assertEquals("\"string buf\"",
+        JsonSerializer.serialize(new StringBuilder().append("string").append(' ').append("buf")));
+  }
+
+  public static class JsonPojo {
+    public String getString() {
+      return "string-value";
+    }
+
+    @SuppressWarnings("unused")
+    private String getPrivateString() {
+      throw new UnsupportedOperationException();
+    }
+
+    public int getInteger() {
+      return 100;
+    }
+
+    @JsonProperty("simple!")
+    public int getSimpleName() {
+      return 3;
+    }
+
+  }
+
+  @Test
+  public void serializePojo() throws Exception {
+    JsonPojo pojo = new JsonPojo();
+
+    assertJsonEquals("{string:'string-value',integer:100,'simple!':3}",
+        JsonSerializer.serialize(pojo));
   }
 
   @Test
   public void serializeMixedObjects() throws Exception {
     Map<String, ?> map = ImmutableMap.of(
-        "integer", Integer.valueOf(100),
-        "double", Double.valueOf(233333333333.7d),
-        "boolean", Boolean.TRUE,
+        "int", Integer.valueOf(3),
+        "double", Double.valueOf(2.7d),
+        "bool", Boolean.TRUE,
         "map", ImmutableMap.of("hello", "world", "foo", "bar"),
         "string", "hello!");
-    assertTrue("Did not produce results matching reference implementation.",
-        jsonEquals(new JSONObject(map).toString(), JsonSerializer.serialize(map)));
+    assertJsonEquals(
+        "{int:3,double:2.7,bool:true,map:{hello:'world',foo:'bar'},string:'hello!'}",
+        JsonSerializer.serialize(map));
   }
 
   @Test
   public void serializeMixedArray() throws Exception {
     Collection<Object> data = Arrays.asList(
-        "integer", Integer.valueOf(100),
-        "double", Double.valueOf(233333333333.7d),
-        "boolean", Boolean.TRUE,
+        Integer.valueOf(3),
+        Double.valueOf(2.7d),
+        Boolean.TRUE,
         Arrays.asList("one", "two", "three"),
         new JSONArray(new String[] {"foo", "bar"}),
-        "string", "hello!");
-    assertEquals(new JSONArray(data).toString(), JsonSerializer.serialize(data));
+        "hello!");
+    assertJsonEquals(
+        "[3,2.7,true,['one','two','three'],['foo','bar'],'hello!']",
+        JsonSerializer.serialize(data));
   }
 
   @Test
@@ -199,37 +242,6 @@ public class JsonSerializerTest {
     return data;
   }
 
-  private static boolean jsonEquals(JSONObject left, JSONObject right) {
-    if (left.length() != right.length()) {
-      return false;
-    }
-    for (String name : JSONObject.getNames(left)) {
-      Object leftValue = left.opt(name);
-      Object rightValue = right.opt(name);
-      if (leftValue instanceof JSONObject) {
-        if (!jsonEquals((JSONObject)leftValue, (JSONObject)rightValue)) {
-          return false;
-        }
-      } else if (leftValue instanceof JSONArray) {
-        JSONArray leftArray = (JSONArray)leftValue;
-        JSONArray rightArray = (JSONArray)rightValue;
-        for (int i = 0; i < leftArray.length(); ++i) {
-          if (!(leftArray.opt(i).equals(rightArray.opt(i)))) {
-            return false;
-          }
-        }
-      } else if (!leftValue.equals(rightValue)) {
-        System.out.println("Not a match: " + leftValue + " != " + rightValue);
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private static boolean jsonEquals(String reference, String comparison) throws Exception {
-    return jsonEquals(new JSONObject(reference), new JSONObject(comparison));
-  }
-
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     int iterations = args.length > 0 ? Integer.parseInt(args[0]) : 1000;
@@ -240,13 +252,8 @@ public class JsonSerializerTest {
         Map<String, Object> data = (Map<String, Object>)method.invoke(null);
         System.out.println("Running: " + method.getName());
 
-        String jsonOrg = runJsonOrgTest(data, iterations);
-        String serializer = runSerializerTest(data, iterations);
-        // String netSfJson = runNetSfJsonTest(data, iterations);
-
-        if (!jsonEquals(jsonOrg, serializer)) {
-          System.out.println("Serializer did not produce results matching the reference impl.");
-        }
+        runJsonOrgTest(data, iterations);
+        runSerializerTest(data, iterations);
 
         // if (!jsonEquals(jsonOrg, netSfJson)) {
         //   System.out.println("net.sf.json did not produce results matching the reference impl.");
