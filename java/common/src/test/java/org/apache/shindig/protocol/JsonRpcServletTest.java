@@ -68,7 +68,7 @@ public class JsonRpcServletTest extends TestCase {
     atomConverter = mockControl.createMock(BeanConverter.class);
 
     HandlerRegistry registry = new DefaultHandlerRegistry(null,
-        Sets.newHashSet(new TestHandler()), jsonConverter,
+        Sets.<Object>newHashSet(new TestHandler()), jsonConverter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
 
     servlet.setHandlerRegistry(registry);

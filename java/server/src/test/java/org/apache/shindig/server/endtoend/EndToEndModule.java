@@ -70,8 +70,8 @@ public class EndToEndModule extends AbstractModule {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
 
-    bind(Set.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
-        .toInstance(ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
+    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, SampleContainerHandler.class));
 
     bind(ContainerConfig.class).to(JsonContainerConfig.class);    

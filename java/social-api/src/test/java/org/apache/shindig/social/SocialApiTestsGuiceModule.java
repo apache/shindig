@@ -33,6 +33,7 @@ import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import java.util.Set;
@@ -56,8 +57,8 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(
         BeanJsonConverter.class);
 
-    bind(Set.class).annotatedWith(Names.named("org.apache.shindig.handlers"))
-        .toInstance(ImmutableSet.of(ActivityHandler.class, AppDataHandler.class,
+    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
+        .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class));
 
     bind(String.class).annotatedWith(

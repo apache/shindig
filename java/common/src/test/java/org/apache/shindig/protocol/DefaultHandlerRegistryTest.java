@@ -45,7 +45,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     registry = new DefaultHandlerRegistry(null,
-        Sets.newHashSet(new TestHandler()), null,
+        Sets.<Object>newHashSet(new TestHandler()), null,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
