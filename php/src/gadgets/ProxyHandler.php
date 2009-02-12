@@ -23,9 +23,9 @@ define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
 
 /**
  * The ProxyHandler class does the actual proxy'ing work. it deals both with
- * GET and POST based input, and peforms a request based on the input, headers and 
+ * GET and POST based input, and peforms a request based on the input, headers and
  * httpmethod params. It also deals with request signing and verification thru the
- * authz and st (security token) params. 
+ * authz and st (security token) params.
  *
  */
 class ProxyHandler {
@@ -292,11 +292,11 @@ class ProxyHandler {
       }
       if (!$isShockwaveFlash) {
         header('Content-Disposition: attachment;filename=p.txt');
-      }      
+      }
       $etag = md5($result->getResponseContent());
       $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
       $notModified = false;
-      // If HTTP_PRAGMA | HTTP_CACHE_CONTROL == no-cache, the browser wants to do a 'forced reload' 
+      // If HTTP_PRAGMA | HTTP_CACHE_CONTROL == no-cache, the browser wants to do a 'forced reload'
       if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
         if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
           // if e-tag's match, set not modified, and no need to check the if-modified-since headers
@@ -338,19 +338,19 @@ class ProxyHandler {
    */
   private function fetchContent($url, $method) {
     //TODO get actual character encoding from the request
-    
-    // Check the protocol requested - curl doesn't really support file:// 
+
+    // Check the protocol requested - curl doesn't really support file://
     // requests but the 'error' should be handled properly
     $protocolSplit = explode('://', $url, 2);
     if (count($protocolSplit) < 2) {
-      throw new Exception("Invalid protocol specified for url: $url");
+      throw new Exception("Invalid protocol specified");
     } else {
       $protocol = strtoupper($protocolSplit[0]);
       if ($protocol != "HTTP" && $protocol != "HTTPS" && $protocol != "FTP") {
         throw new Exception("Invalid protocol specified in url ($protocol)");
       }
     }
-    
+
     // Extract the request headers from the $_SERVER super-global (this -does- unfortunatly mean that any header that php doesn't understand won't be proxied thru though)
     // if this turns out to be a problem we could add support for HTTP_RAW_HEADERS, but this depends on a php.ini setting, so i'd rather prevent that from being required
     $headers = '';
@@ -421,7 +421,7 @@ class ProxyHandler {
 
   /**
    * Sets the caching headers (overwriting anything the remote host set) to force
-   * the browser not to cache this. 
+   * the browser not to cache this.
    *
    */
   private function setCachingHeaders($etag = false, $maxAge = false, $lastModified = false) {
