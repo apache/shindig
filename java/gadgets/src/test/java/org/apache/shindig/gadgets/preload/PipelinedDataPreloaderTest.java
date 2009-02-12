@@ -58,7 +58,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
       + "<ModulePrefs title=\"Title\"/>"
       + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
-      + "  <os:MakeRequest key=\"p\" href=\"" + MAKE_REQUEST_URL + "\" "
+      + "  <os:HttpRequest key=\"p\" href=\"" + MAKE_REQUEST_URL + "\" "
       + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
   @Before

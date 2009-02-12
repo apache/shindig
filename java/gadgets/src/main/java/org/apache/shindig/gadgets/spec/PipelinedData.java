@@ -40,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.google.common.collect.ImmutableMap;
@@ -94,8 +95,10 @@ public class PipelinedData {
           socialPreloads.put(key, createPersonAppDataRequest(child));
         } else if ("ActivitiesRequest".equals(elementName)) {
           socialPreloads.put(key, createActivityRequest(child));
-        } else if ("MakeRequest".equals(elementName)) {
-          httpPreloads.put(key, createMakeRequest(child, base));
+        } else if ("DataRequest".equals(elementName)) {
+          socialPreloads.put(key, createDataRequest(child));
+        } else if ("HttpRequest".equals(elementName)) {
+          httpPreloads.put(key, createHttpRequest(child, base));
         } else {
           // TODO: This is wrong - the spec should parse, but should preload
           // notImplemented
@@ -329,21 +332,56 @@ public class PipelinedData {
     return expression;
   }
 
-  /** Handle an os:MakeRequest element */
-  private HttpData createMakeRequest(Element child, Uri base) throws ELException {
-    HttpData data = new HttpData(child, base);
+  /** Handle the os:DataRequest element */
+  private SocialData createDataRequest(Element child) throws ELException, SpecParserException {
+    String method = child.getAttribute("method");
+    if (method == null) {
+      throw new SpecParserException("Missing @method attribute on os:DataRequest");
+    }
+    
+    // TODO: should we support anything that doesn't end in .get?
+    // i.e, should this be a whitelist not a blacklist? 
+    if (method.endsWith(".update")
+        || method.endsWith(".create")
+        || method.endsWith(".delete")) {
+      throw new SpecParserException("Unsupported @method attribute \"" + method + "\" on os:DataRequest");
+    }
+    
+    SocialData expression = new SocialData(child.getAttribute("key"), method);
+    NamedNodeMap nodeMap = child.getAttributes();
+    for (int i = 0; i < nodeMap.getLength(); i++) {
+      Node attrNode = nodeMap.item(i);
+      // Skip namespaced attributes
+      if (attrNode.getNamespaceURI() != null) {
+        continue;
+      }
+      
+      String name = attrNode.getLocalName();
+      // Skip the built-in names
+      if ("method".equals(name) || "key".equals(name)) {
+        continue;
+      }
+      
+      String value = attrNode.getNodeValue();
+      expression.addProperty(name, value, Object.class);
+    }
 
-    /* TODO: check auth type, and sign-by-owner/viewer, once spec agrees
-     * to remove support for EL on @authz and @sign_*.
-    if (preload.getAuthType() != AuthType.NONE) {
-      if (preload.isSignOwner()) {
+    return expression;
+  }
+
+  /** Handle an os:HttpRequest element */
+  private HttpData createHttpRequest(Element child, Uri base) throws ELException {
+    HttpData data = new HttpData(child, base);
+    // Update needsOwner and needsViewer
+    if (data.authz != AuthType.NONE) {
+      if (data.signOwner) {
         needsOwner = true;
       }
-
-      if (preload.isSignViewer()) {
+      
+      if (data.signViewer) {
         needsViewer = true;
       }
-    }*/
+    }
 
     return data;
   }
@@ -379,7 +417,7 @@ public class PipelinedData {
    * A single pipelined HTTP makerequest.
    */
   private static class HttpData {
-    private final String authz;
+    private final AuthType authz;
     private final Uri base;
     private final String href;
     private final boolean signOwner;
@@ -395,7 +433,8 @@ public class PipelinedData {
     public HttpData(Element element, Uri base) throws ELException {
       this.base = base;
 
-      this.authz = element.hasAttribute("authz") ? element.getAttribute("authz") : "none";
+      this.authz = element.hasAttribute("authz") ?
+          AuthType.parse(element.getAttribute("authz")) : AuthType.NONE;
 
       // TODO: Spec question;  should EL values be URL escaped?
       this.href = element.getAttribute("href");
@@ -438,8 +477,6 @@ public class PipelinedData {
      * @throws ELException if expression evaluation fails.
      */
     public RequestAuthenticationInfo evaluate(ELContext context) throws ELException {
-      final AuthType authType = AuthType.parse(authz);
-      
       Expressions expressions = Expressions.sharedInstance();
       String hrefString = String.valueOf(expressions.parse(href, String.class)
           .getValue(context));
@@ -456,7 +493,7 @@ public class PipelinedData {
         }
 
         public AuthType getAuthType() {
-          return authType;
+          return authz;
         }
 
         public Uri getHref() {

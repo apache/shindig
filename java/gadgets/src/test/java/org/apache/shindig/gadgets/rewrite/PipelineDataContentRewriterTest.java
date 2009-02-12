@@ -75,14 +75,14 @@ public class PipelineDataContentRewriterTest {
   private static final String CONTENT =
     "<script xmlns:os='http://ns.opensocial.org/2008/markup' type='text/os-data'>"
       + "  <os:PeopleRequest key='me' userId='canonical'/>"
-      + "  <os:MakeRequest key='json' href='test.json'/>"
+      + "  <os:HttpRequest key='json' href='test.json'/>"
       + "</script>";
 
   // Two requests, one depends on the other
   private static final String TWO_BATCH_CONTENT =
     "<script xmlns:os='http://ns.opensocial.org/2008/markup' type='text/os-data'>"
     + "  <os:PeopleRequest key='me' userId='${json.user}'/>"
-    + "  <os:MakeRequest key='json' href='${ViewParams.file}'/>"
+    + "  <os:HttpRequest key='json' href='${ViewParams.file}'/>"
     + "</script>";
 
   // One request, but it requires data that isn't present

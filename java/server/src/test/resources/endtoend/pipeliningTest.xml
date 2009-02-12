@@ -28,6 +28,6 @@
     <!--  Load the canonical user -->
     <os:PeopleRequest key="me" userId="canonical"/>
     <!--  Load a JSON file -->
-    <os:MakeRequest key="json" href="test.json"/>
+    <os:HttpRequest key="json" href="test.json"/>
   </Content>
 </Module>
