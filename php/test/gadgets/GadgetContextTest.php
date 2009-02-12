@@ -69,14 +69,6 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Tests GadgetContext->getCache()
-   */
-  public function testGetCache() {
-    $this->assertTrue(is_object($this->GadgetContext->getCache()));
-  
-  }
-
-  /**
    * Tests GadgetContext->getContainer()
    */
   public function testGetContainer() {
