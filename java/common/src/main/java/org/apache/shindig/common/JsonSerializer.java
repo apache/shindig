@@ -43,6 +43,8 @@ import java.util.Set;
  *
  * The append*() methods can be used to serialize directly into an Appendable, such as an output
  * stream. This avoids unnecessary copies to intermediate objects.
+ *
+ * To reduce output size, null values in json arrays and objects will always be removed.
  */
 public final class JsonSerializer {
   // Multiplier to use for allocating the buffer.
@@ -184,15 +186,19 @@ public final class JsonSerializer {
     buf.append('{');
     boolean firstDone = false;
     for (Map.Entry<String, Method> entry : methods.entrySet()) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
-      }
-      appendString(buf, entry.getKey());
-      buf.append(':');
       try {
-        append(buf, entry.getValue().invoke(pojo));
+        Object value = entry.getValue().invoke(pojo);
+        if (value != null) {
+          // Drop null values.
+          if (firstDone) {
+            buf.append(',');
+          } else {
+            firstDone = true;
+          }
+          appendString(buf, entry.getKey());
+          buf.append(':');
+          append(buf, value);
+        }
       } catch (IllegalArgumentException e) {
         // Shouldn't be possible.
         throw new RuntimeException(e);
@@ -216,12 +222,14 @@ public final class JsonSerializer {
     buf.append('[');
     boolean firstDone = false;
     for (Object o : array) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
+      if (o != null) {
+        if (firstDone) {
+          buf.append(',');
+        } else {
+          firstDone = true;
+        }
+        append(buf, o);
       }
-      append(buf, o);
     }
     buf.append(']');
   }
@@ -234,12 +242,15 @@ public final class JsonSerializer {
     buf.append('[');
     boolean firstDone = false;
     for (int i = 0, j = array.length(); i < j; ++i) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
+      Object value = array.opt(i);
+      if (value != null) {
+        if (firstDone) {
+          buf.append(',');
+        } else {
+          firstDone = true;
+        }
+        append(buf, value);
       }
-      append(buf, array.opt(i));
     }
     buf.append(']');
   }
@@ -254,12 +265,14 @@ public final class JsonSerializer {
     buf.append('[');
     boolean firstDone = false;
     for (Object o : collection) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
+      if (o != null) {
+        if (firstDone) {
+          buf.append(',');
+        } else {
+          firstDone = true;
+        }
+        append(buf, o);
       }
-      append(buf, o);
     }
     buf.append(']');
   }
@@ -269,19 +282,21 @@ public final class JsonSerializer {
    *
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
-  public static void appendMap(Appendable buf, Map<String, ?> map)
-      throws IOException {
+  public static void appendMap(Appendable buf, Map<String, ?> map) throws IOException {
     buf.append('{');
     boolean firstDone = false;
     for (Map.Entry<String, ?> entry : map.entrySet()) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
+      Object value = entry.getValue();
+      if (value != null) {
+        if (firstDone) {
+          buf.append(',');
+        } else {
+          firstDone = true;
+        }
+        appendString(buf, entry.getKey());
+        buf.append(':');
+        append(buf, value);
       }
-      appendString(buf, entry.getKey());
-      buf.append(':');
-      append(buf, entry.getValue());
     }
     buf.append('}');
   }
@@ -297,15 +312,18 @@ public final class JsonSerializer {
     Iterator<String> keys = object.keys();
     boolean firstDone = false;
     while (keys.hasNext()) {
-      if (firstDone) {
-        buf.append(',');
-      } else {
-        firstDone = true;
-      }
       String key = keys.next();
-      appendString(buf, key);
-      buf.append(':');
-      append(buf, object.opt(key));
+      Object value = object.opt(key);
+      if (value != null) {
+        if (firstDone) {
+          buf.append(',');
+        } else {
+          firstDone = true;
+        }
+        appendString(buf, key);
+        buf.append(':');
+        append(buf, value);
+      }
     }
     buf.append('}');
   }
