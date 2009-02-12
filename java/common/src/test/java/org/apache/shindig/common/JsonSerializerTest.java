@@ -33,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,30 +52,34 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeSimpleMap() throws Exception {
-    Map<String, String> map = ImmutableMap.of("hello", "world", "foo", "bar");
+    Map<String, String> map = new HashMap<String, String>(3, 1);
+    map.put("hello", "world");
+    map.put("foo", "bar");
+    map.put("remove", null);
     assertJsonEquals("{hello:'world',foo:'bar'}", JsonSerializer.serialize(map));
   }
 
   @Test
   public void serializeSimpleCollection() throws Exception {
-    Collection<String> collection = Arrays.asList("foo", "bar", "baz");
+    Collection<String> collection = Arrays.asList("foo", null, "bar", "baz", null);
     assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(collection));
   }
 
   @Test
   public void serializeArray() throws Exception {
-    String[] array = new String[] {"foo", "bar", "baz"};
+    String[] array = new String[] {"foo", null, "bar", "baz"};
     assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
   }
 
   @Test
   public void serializeJsonArray() throws Exception {
-    JSONArray array = new JSONArray(new String[] {"foo", "bar", "baz"});
+    JSONArray array = new JSONArray(new String[] {"foo", null, "bar", "baz"});
     assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
   }
 
   @Test
   public void serializePrimitives() throws Exception {
+    assertEquals("null", JsonSerializer.serialize((Object) null));
     assertEquals("\"hello\"", JsonSerializer.serialize("hello"));
     assertEquals("100", JsonSerializer.serialize(100));
     assertEquals("125.0", JsonSerializer.serialize(125.0f));
@@ -104,6 +109,9 @@ public class JsonSerializerTest {
       return 3;
     }
 
+    public Object getNullValue() {
+      return null;
+    }
   }
 
   @Test
