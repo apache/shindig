@@ -52,7 +52,7 @@ public class TestHandler {
   }
 
   @Operation(httpMethods = "GET")
-  public String get(RequestItem req) {
+  public Object get(RequestItem req) {
     if (mock != null) {
       return mock.get(req);
     }
@@ -60,7 +60,7 @@ public class TestHandler {
   }
 
   @Operation(httpMethods = "GET", path = "/overridden/method")
-  public String overridden(RequestItem req) {
+  public Object overridden(RequestItem req) {
     if (mock != null) {
       return mock.get(req);
     }
@@ -68,7 +68,7 @@ public class TestHandler {
   }
 
   @Operation(name="override.rpcname", httpMethods = "")
-  public String overriddenRpc(RequestItem req) {
+  public Object overriddenRpc(RequestItem req) {
     if (mock != null) {
       return mock.get(req);
     }

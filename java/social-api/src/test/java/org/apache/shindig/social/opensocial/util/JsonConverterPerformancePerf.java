@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonLibConverter;
 import org.apache.shindig.protocol.conversion.jsonlib.JsonLibTestsGuiceModule;
@@ -38,8 +36,11 @@ import org.apache.shindig.social.opensocial.model.Person;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.TestCase;
-import org.json.JSONObject;
 
 public class JsonConverterPerformancePerf extends TestCase {
 
@@ -176,42 +177,42 @@ public class JsonConverterPerformancePerf extends TestCase {
         + average(personStart, personEnd, TEST_SIZE));
   }
 
-  public void testToJsonOnInheritedClassOutput() throws Exception {
-    SpecialPerson[] spa = new SpecialPerson[TEST_SIZE];
-    for (int i = 0; i < TEST_SIZE; i++) {
-      spa[i] = new SpecialPerson(String.valueOf(i), "robot", "nonsense");
-    }
-    Runtime r = Runtime.getRuntime();
-    String[] output = new String[TEST_SIZE];
-    r.gc();
-    long memstart = r.totalMemory() - r.freeMemory();
-    long startOutput = System.currentTimeMillis();
-    for (int i = 0; i < TEST_SIZE; i++) {
-      output[i] = ((JSONObject) beanJsonConverter.convertToJson(spa[i])).toString();
-    }
-    long endOutput = System.currentTimeMillis();
-    long memend = r.totalMemory() - r.freeMemory();
-    String[] serializeOutput = new String[TEST_SIZE];
-    char[] source = output[0].toCharArray();
-    r.gc();
-
-    long stringsizeStart = r.totalMemory() - r.freeMemory();
-
-    for (int i = 0; i < TEST_SIZE; i++) {
-      serializeOutput[i] = new String(source);
-    }
-    long stringsizeEnd = r.totalMemory() - r.freeMemory();
-
-    log
-        .info("ORG JSON Lib Output "
-            + average(startOutput, endOutput, TEST_SIZE)
-            + " ms/conversion, "
-            + (average(memstart, memend, TEST_SIZE) - average(stringsizeStart, stringsizeEnd,
-                TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
-            + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
-            + output[0].length());
-    log.info("Output Was [" + output[0] + ']');
-  }
+//  public void testToJsonOnInheritedClassOutput() throws Exception {
+//    SpecialPerson[] spa = new SpecialPerson[TEST_SIZE];
+//    for (int i = 0; i < TEST_SIZE; i++) {
+//      spa[i] = new SpecialPerson(String.valueOf(i), "robot", "nonsense");
+//    }
+//    Runtime r = Runtime.getRuntime();
+//    String[] output = new String[TEST_SIZE];
+//    r.gc();
+//    long memstart = r.totalMemory() - r.freeMemory();
+//    long startOutput = System.currentTimeMillis();
+//    for (int i = 0; i < TEST_SIZE; i++) {
+//      output[i] = ((JSONObject) beanJsonConverter.convertToJson(spa[i])).toString();
+//    }
+//    long endOutput = System.currentTimeMillis();
+//    long memend = r.totalMemory() - r.freeMemory();
+//    String[] serializeOutput = new String[TEST_SIZE];
+//    char[] source = output[0].toCharArray();
+//    r.gc();
+//
+//    long stringsizeStart = r.totalMemory() - r.freeMemory();
+//
+//    for (int i = 0; i < TEST_SIZE; i++) {
+//      serializeOutput[i] = new String(source);
+//    }
+//    long stringsizeEnd = r.totalMemory() - r.freeMemory();
+//
+//    log
+//        .info("ORG JSON Lib Output "
+//            + average(startOutput, endOutput, TEST_SIZE)
+//            + " ms/conversion, "
+//            + (average(memstart, memend, TEST_SIZE) - average(stringsizeStart, stringsizeEnd,
+//                TEST_SIZE)) + " heap bytes/conversion, output packet consumed on average "
+//            + average(stringsizeStart, stringsizeEnd, TEST_SIZE) + " for a string length of "
+//            + output[0].length());
+//    log.info("Output Was [" + output[0] + ']');
+//  }
 
   /**
    * @param endOutput

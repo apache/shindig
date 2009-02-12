@@ -17,44 +17,27 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import org.apache.shindig.common.util.JsonConversionUtilTest;
 import org.apache.shindig.protocol.model.TestModel;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+
 import junit.framework.TestCase;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class BeanJsonConverterTest extends TestCase {
-  private TestModel.Car car;
   private BeanJsonConverter beanJsonConverter;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    car = new TestModel.Car();
     beanJsonConverter = new BeanJsonConverter(Guice.createInjector());
   }
-
-  public void testToJsonOnInheritedClass() throws Exception {
-    TestModel.ExpensiveCar roller = new TestModel.ExpensiveCar();
-    JSONObject result = (JSONObject) beanJsonConverter.convertToJson(roller);
-    assertEquals(roller.getCost(), result.getInt("cost"));
-    assertEquals(roller.getParkingTickets().size(), result.getJSONObject("parkingTickets").length());
-  }
-
-  public void testCarToJson() throws Exception {
-    JSONObject result = (JSONObject) beanJsonConverter.convertToJson(car);
-    JsonConversionUtilTest.assertJsonEquals(new JSONObject(TestModel.Car.DEFAULT_JSON), result);
-  }
-
 
   public void testJsonToCar() throws Exception {
     String carJson = "{engine:[{value:DIESEL},{value:TURBO}],parkingTickets:{SF:$137,NY:'$301'}," +
@@ -74,49 +57,6 @@ public class BeanJsonConverterTest extends TestCase {
     TestModel.Passenger dad = car.getPassengers().get(1);
     assertEquals(dad.getGender(), TestModel.Gender.male);
     assertEquals(dad.getName(), "Dad");
-  }
-
-  public void testMapsToJson() throws Exception {
-    Map<String, Map<String, String>> map = Maps.newHashMap();
-
-    Map<String, String> item1Map = Maps.newHashMap();
-    item1Map.put("value", "1");
-
-    // Null values shouldn't cause exceptions
-    item1Map.put("value2", null);
-    map.put("item1", item1Map);
-
-    Map<String, String> item2Map = Maps.newHashMap();
-    item2Map.put("value", "2");
-    map.put("item2", item2Map);
-
-    JSONObject jsonMap = (JSONObject) beanJsonConverter.convertToJson(map);
-
-    assertEquals("1", jsonMap.getJSONObject("item1").getString("value"));
-    assertEquals("2", jsonMap.getJSONObject("item2").getString("value"));
-  }
-
-  @SuppressWarnings("unchecked")
-  public void testListsToJson() throws Exception {
-    Map<String, String> item1Map = Maps.newHashMap();
-    item1Map.put("value", "1");
-
-    Map<String, String> item2Map = Maps.newHashMap();
-    item2Map.put("value", "2");
-
-    JSONArray jsonArray = (JSONArray) beanJsonConverter.convertToJson(
-        Lists.newArrayList(item1Map, item2Map));
-
-    assertEquals("1", ((JSONObject) jsonArray.get(0)).getString("value"));
-    assertEquals("2", ((JSONObject) jsonArray.get(1)).getString("value"));
-  }
-
-  public void testArrayToJson() throws Exception {
-    String[] colors = {"blue", "green", "aquamarine"};
-    JSONArray jsonArray = (JSONArray) beanJsonConverter.convertToJson(colors);
-
-    assertEquals(colors.length, jsonArray.length());
-    assertEquals(colors[0], jsonArray.get(0));
   }
 
   @SuppressWarnings("unchecked")

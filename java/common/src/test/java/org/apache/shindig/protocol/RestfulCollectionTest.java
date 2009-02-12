@@ -18,6 +18,7 @@
 package org.apache.shindig.protocol;
 
 import com.google.common.collect.Lists;
+
 import junit.framework.TestCase;
 
 import java.util.List;
