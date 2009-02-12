@@ -10,21 +10,50 @@
 		show_in_directory="true" width="200" height="100" category="example category"
 		category2="example category2" singleton="true" render_inline="true"
 		scaling="true" scrolling="true">
+		
+		<Icon>http://example.org/favicon.ico</Icon>
+		
 		<Require feature="opensocial-0.7" />
 		<Require feature="dynamic-height" />
 		<Require feature="views" />
 		<Require feature="tabs" />
 		<Require feature="flash" />
 		<Require feature="setprefs" />
+		<Optional feature="missing-feature" />
+				
+		<Locale messages="http://www.labpixies.com/campaigns/todo/i19/all_all.xml"/>
+		<Locale lang="nl" messages="http://www.labpixies.com/campaigns/todo/i19/nl_all.xml"/>
+		<Locale lang="nl" country="BE" messages="http://www.labpixies.com/campaigns/todo/i19/nl_be.xml"/>
+		<Locale lang="en" county="US">
+			<messagebundle>
+				<msg name="foo">foo</msg>
+				<msg name="bar">bar</msg>
+			</messagebundle>
+		</Locale>
+		
+		<Preload href='http://test.chabotc.com/ok.html'/>
+		
 	</ModulePrefs>
-	<UserPref name='testpref' display_name='testpref' datatype='enum'
-		default_value='test'>
-		<EnumValue value='bar' display_value='foo' />
-		<EnumValue value='test' display_value='test' />
+	
+	<UserPref name='testEnum' display_name='testEnum' datatype='enum' default_value='foo'>
+		<EnumValue value='foo' display_value='foo' />
+		<EnumValue value='bar' display_value='bar' />
 	</UserPref>
-	<Content type="html" view="profile" prefered_height="400"
-		prefered_width="300" quirks="true">content</Content>
-	<Content type="html" view="canvas" prefered_height="400"
-		prefered_width="300" quirks="true">content</Content>
+	<UserPref name='testString' display_name='testString' datatype='string' default_value='testString' required='true' />
+	<UserPref name='testBool' display_name='testBool' datatype='bool' default_value='false' />
+	<UserPref name='testHidden' display_name='testHidden' datatype='hidden' default_value='testHidden' />
+	<UserPref name="__MSG_title__" display_name="__MSG_title__" datatype="string" default_value="__MSG_title__" />
+	
+	<link rel="event" href="http://www.example.com/pingme" method="POST" />
+	<link rel="event.addapp" href="http://www.example.com/add" />
+	<link rel="event.removeapp" href="http://www.example.com/remove" />
+	
+	<Content type="html" view="profile" prefered_height="400" prefered_width="300" quirks="true">content</Content>
+	
+	<Content type="html" view="profile,canvas" prefered_height="400" prefered_width="300" quirks="true">content</Content>
+	
+	<Content view="home" href="http://www.example.com/myapp/home/index.html"></Content>
+	
 	<Content type="url" view="external" href="http://example.com/foo.html"></Content>
+	
 </Module>
