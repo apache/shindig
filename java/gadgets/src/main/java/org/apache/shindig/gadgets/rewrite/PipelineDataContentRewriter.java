@@ -194,7 +194,7 @@ public class PipelineDataContentRewriter implements ContentRewriter {
       String key = entry.getKey();
 
       // TODO: escape key
-      // TODO: push to MutableContent
+      content.addPipelinedData(key, entry.getValue());
       script.append("osd.DataContext.putDataSet(\"")
           .append(key)
           .append("\",")
