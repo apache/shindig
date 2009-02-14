@@ -58,7 +58,8 @@ public class ProxyServletRequest extends HttpServletRequestWrapper {
                                 Utf8UrlCoder.decode(paramMatcher.group(2)));
       }
 
-      extractedParameters.put(ProxyBase.URL_PARAM, chainedMatcher.group(2));
+      extractedParameters.put(ProxyBase.URL_PARAM,
+                              Utf8UrlCoder.decode(chainedMatcher.group(2)));
     } else {
       extractedParameters = Collections.emptyMap();
     }
