@@ -50,6 +50,6 @@ public class PersonDbToJsonTest {
   public void convertPersonToJson() {
     Person person = new PersonPopulate(entityManager).createPerson(1, System
         .currentTimeMillis(), new Random());
-    jsonConverter.convertToJson(person);
+    jsonConverter.convertToString(person);
   }
 }
