@@ -37,14 +37,25 @@ class MetadataHandler {
     return $response;
   }
 
+  private function getIframeURL(Gadget $gadget, GadgetContext $context) {
+    $v = $gadget->getChecksum();
+    $view = $gadget->getView($context->getView());
+    $up = '';
+    foreach ($gadget->gadgetSpec->userPrefs as $pref) {
+      $up .= '&up_' . urlencode($pref['name']) . '=' . urlencode($pref['value']);
+    }
+    $locale = $context->getLocale();
+    //Note: putting the URL last, else some browsers seem to get confused (reported by hi5)
+    return Config::get('default_iframe_prefix') . 'container=' . $context->getContainer() . ($context->getIgnoreCache() ? '&nocache=1' : '&v=' . $v) . ($context->getModuleId() != 0 ? '&mid=' . $context->getModuleId() : '') . '&lang=' . $locale['lang'] . '&country=' . $locale['country'] . '&view=' . $view['view'] . $up . '&url=' . urlencode($context->getUrl());
+  }
+
+
   private function makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context) {
     $response = array();
-
     $prefs = array();
     foreach ($gadget->gadgetSpec->userPrefs as $pref) {
       $prefs[$pref['name']] = $pref;
     }
-
     $views = array();
     foreach ($gadget->gadgetSpec->views as $name => $view) {
       // we want to include all information, except for the content
@@ -53,8 +64,6 @@ class MetadataHandler {
     }
 
     $oauth = array();
-
-    //FIXME missing from the spec parsing still
     /*
     $oauthspec = $gadget->getOAuthSpec();
     if (! empty($oauthspec)) {
@@ -64,14 +73,11 @@ class MetadataHandler {
     }
     */
 
-    //FIXME UrlGenerator needs fixin' still
-    //$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
-
+    $response['iframeUrl'] = $this->getIframeURL($gadget, $context);
     $response['features'] = $gadget->features;
     $response['links'] = $gadget->gadgetSpec->links;
     $response['icons'] = $gadget->gadgetSpec->icon;
     $response['views'] = $views;
-
     $response['author'] = $gadget->getAuthor();
     $response['authorEmail'] = $gadget->getAuthorEmail();
     $response['description'] = $gadget->getDescription();
@@ -94,10 +100,8 @@ class MetadataHandler {
     $response['singleton'] = $gadget->getSingleton();
     $response['scaling'] = $gadget->getScaling();
     $response['scrolling'] = $gadget->getScrolling();
-
     $response['moduleId'] = $gadgetModuleId;
     $response['url'] = $gadgetUrl;
-
     $response['userPrefs'] = $prefs;
     $response['oauth'] = $oauth;
     return $response;
