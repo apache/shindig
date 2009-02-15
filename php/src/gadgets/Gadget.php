@@ -18,275 +18,489 @@
  * under the License.
  */
 
-/**
- * The main gadget class, this gets filled in by the GadgetSpecParser, etc
- * and contains all the gadget information.
- *
- */
+class GadgetException extends Exception {}
+
 class Gadget {
-  private $jsLibraries;
-  private $substitutions;
-  private $userPrefValues;
-  private $oAuthSpec;
-  private $messageBundle = array();
-  private $checksum;
-  public $contentTypes = array('HTML', 'URL');
-  public $id;
-  public $author;
-  public $authorEmail;
-  public $description;
-  public $directoryTitle;
-  public $contentData = array();
-  public $localeSpecs = array();
-  public $preloads = array();
-  public $requires = array();
-  public $screenshot;
-  public $thumbnail;
-  public $title;
-  public $titleUrl = null;
-  public $userPrefs = array();
-  public $authorAffiliation;
-  public $authorLocation;
-  public $authorPhoto;
-  public $authorAboutMe;
-  public $authorQuote;
-  public $authorLink;
-  public $showStats;
-  public $showInDirectory;
-  public $string;
-  public $width;
-  public $height;
-  public $category;
-  public $category2;
-  public $singleton;
-  public $renderInline;
-  public $scaling;
-  public $scrolling;
-  public $views = array();
-  public $links = array();
-  public $icons = array();
+  const DEFAULT_VIEW = 'profile';
+  public $gadgetSpec;
+  public $features;
+  public $substitutions;
+  public $rightToLeft;
+  public $gadgetContext;
 
-  public function __construct($id = false, $context) {
-    if ($id) {
-      $this->id = $id;
-    }
-    if ($context->getUserPrefs()) {
-      $this->setPrefs($context->getUserPrefs());
-    }
-    $this->substitutions = new Substitutions();
-    $this->jsLibraries = array();
-  }
-
-  public function setId($id) {
-    $this->id = $id;
-  }
-
-  public function setPrefs($prefs) {
-    $this->userPrefValues = $prefs;
-  }
-
-  public function getAuthor() {
-    return $this->substitutions->substitute($this->author);
-  }
-
-  public function getAuthorEmail() {
-    return $this->substitutions->substitute($this->authorEmail);
-  }
-
-  public function getMessageBundle() {
-    return $this->messageBundle;
-  }
-
-  public function getDescription() {
-    return $this->substitutions->substitute($this->description);
-  }
-
-  public function getDirectoryTitle() {
-    return $this->substitutions->substitute($this->directoryTitle);
-  }
-
-  public function getId() {
-    return $this->id;
-  }
-
-  public function getJsLibraries() {
-    return $this->jsLibraries;
-  }
-
-  public function addJsLibrary($library) {
-    $this->jsLibraries[] = $library;
-  }
-
-  public function getLocaleSpecs() {
-    return $this->localeSpecs;
-  }
-
-  public function getFeatureParams($gadget, $feature) {
-    //FIXME not working atm
-    $spec = $gadget->getRequires();
-    $spec = isset($spec[$feature->getName()]) ? $spec[$feature->getName()] : null;
-    if ($spec == null) {
-      return array();
-    } else {
-      return $spec->getParams();
-    }
-  }
-
-  public function getPreloads() {
-    return $this->preloads;
-  }
-
-  public function getRequires() {
-    return $this->requires;
-  }
-
-  public function getScreenshot() {
-    return $this->substitutions->substitute($this->screenshot);
-  }
-
-  public function getSubstitutions() {
-    return $this->substitutions;
-  }
-
-  public function getThumbnail() {
-    return $this->substitutions->substitute($this->thumbnail);
-  }
-
-  public function getTitle() {
-    return $this->substitutions->substitute($this->title);
-  }
-
-  public function getTitleUrl() {
-    $ret = null;
-    if (! empty($this->titleUrl)) {
-      $ret = $this->substitutions->substitute($this->titleUrl);
-    }
-    return $ret;
-  }
-
-  public function getAuthorAffiliation() {
-    return $this->substitutions->substitute($this->authorAffiliation);
-  }
-
-  public function getAuthorLocation() {
-    return $this->substitutions->substitute($this->authorLocation);
-  }
-
-  public function getAuthorPhoto() {
-    return $this->substitutions->substitute($this->authorPhoto);
-  }
-
-  public function getAuthorAboutme() {
-    return $this->substitutions->substitute($this->authorAboutMe);
-  }
-
-  public function getAuthorQuote() {
-    return $this->substitutions->substitute($this->authorQuote);
-  }
-
-  public function getAuthorLink() {
-    return $this->substitutions->substitute($this->authorLink);
-  }
-
-  public function getShowStats() {
-    return $this->showStats;
-  }
-
-  public function getShowInDirectory() {
-    return $this->showInDirectory;
-  }
-
-  public function getString() {
-    return $this->substitutions->substitute($this->string);
-  }
-
-  public function getWidth() {
-    return $this->width;
-  }
-
-  public function getHeight() {
-    return $this->height;
-  }
-
-  public function getCategory() {
-    return $this->substitutions->substitute($this->category);
-  }
-
-  public function getCategory2() {
-    return $this->substitutions->substitute($this->category2);
-  }
-
-  public function getSingleton() {
-    return $this->singleton;
-  }
-
-  public function getRenderInline() {
-    return $this->renderInline;
-  }
-
-  public function getScaling() {
-    return $this->scaling;
-  }
-
-  public function getScrolling() {
-    return $this->scrolling;
-  }
-
-  public function getUserPrefs() {
-    return $this->userPrefs;
-  }
-
-  public function getUserPrefValues() {
-    return $this->userPrefValues;
-  }
-
-  public function setMessageBundle($messageBundle) {
-    $this->messageBundle = $messageBundle;
-  }
-
-  public function getLinks() {
-    return $this->links;
-  }
-
-  public function getLink($rel) {
-    foreach ($this->links as $link) {
-      if ($link->getRel() == $rel) {
-        return $link;
-      }
-    }
-    return false;
-  }
-
-  public function getIcons() {
-    return $this->icons;
-  }
-
-  public function getViews() {
-    return $this->views;
+  public function __construct(GadgetSpec $gadgetSpec, GadgetContext $gadgetContext) {
+    $this->gadgetSpec = $gadgetSpec;
+    $this->gadgetContext = $gadgetContext;
   }
 
   public function getView($viewName) {
-    if (isset($this->views[$viewName])) {
-      return $this->views[$viewName];
-    } elseif (isset($this->views[DEFAULT_VIEW])) {
-      return $this->views[DEFAULT_VIEW];
+    if (isset($this->gadgetSpec->views[$viewName])) {
+      return $this->gadgetSpec->views[$viewName];
+    } elseif (isset($this->gadgetSpec->views[self::DEFAULT_VIEW])) {
+      return $this->gadgetSpec->views[self::DEFAULT_VIEW];
     }
     throw new GadgetException("Invalid view specified for this gadget");
   }
 
-  public function getOAuthSpec() {
-    return $this->oAuthSpec;
+  /**
+   * @return unknown
+   */
+  public function getAuthor() {
+    return $this->substitutions->substitute($this->gadgetSpec->author);
   }
 
-  public function setOAuthSpec($oAuthSpec) {
-    $this->oAuthSpec = $oAuthSpec;
+  /**
+   * @return unknown
+   */
+  public function getAuthorAboutme() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorAboutme);
   }
 
-  public function setChecksum($xml) {
-    $this->checksum = md5($xml);
+  /**
+   * @return unknown
+   */
+  public function getAuthorAffiliation() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorAffiliation);
   }
 
+  /**
+   * @return unknown
+   */
+  public function getAuthorEmail() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorEmail);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getAuthorLink() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorLink);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getAuthorLocation() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorLocation);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getAuthorPhoto() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorPhoto);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getAuthorQuote() {
+    return $this->substitutions->substitute($this->gadgetSpec->authorQuote);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getCategory() {
+    return $this->substitutions->substitute($this->gadgetSpec->category);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getCategory2() {
+    return $this->substitutions->substitute($this->gadgetSpec->category2);
+  }
+
+  /**
+   * @return unknown
+   */
   public function getChecksum() {
-    return $this->checksum;
+    return $this->gadgetSpec->checksum;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getDescription() {
+    return $this->substitutions->substitute($this->gadgetSpec->description);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getDirectoryTitle() {
+    return $this->substitutions->substitute($this->gadgetSpec->directoryTitle);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getHeight() {
+    return $this->substitutions->substitute($this->gadgetSpec->height);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getIcon() {
+    return $this->substitutions->substitute($this->gadgetSpec->icon);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getLinks() {
+    return $this->gadgetSpec->links;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getLocales() {
+    return $this->gadgetSpec->locales;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getOptionalFeatures() {
+    return $this->gadgetSpec->optionalFeatures;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getPreloads() {
+    return $this->gadgetSpec->preloads;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getRenderInline() {
+    return $this->substitutions->substitute($this->gadgetSpec->renderInline);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getRequiredFeatures() {
+    return $this->substitutions->substitute($this->gadgetSpec->requiredFeatures);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getScaling() {
+    return $this->substitutions->substitute($this->gadgetSpec->scaling);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getScreenshot() {
+    return $this->substitutions->substitute($this->gadgetSpec->screenshot);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getScrolling() {
+    return $this->substitutions->substitute($this->gadgetSpec->scrolling);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getShowInDirectory() {
+    return $this->substitutions->substitute($this->gadgetSpec->showInDirectory);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getShowStats() {
+    return $this->substitutions->substitute($this->gadgetSpec->showStats);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getSingleton() {
+    return $this->substitutions->substitute($this->gadgetSpec->singleton);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getString() {
+    return $this->substitutions->substitute($this->gadgetSpec->string);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getThumbnail() {
+    return $this->substitutions->substitute($this->gadgetSpec->thumbnail);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getTitle() {
+    return $this->substitutions->substitute($this->gadgetSpec->title);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getTitleUrl() {
+    return $this->substitutions->substitute($this->gadgetSpec->titleUrl);
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getUserPrefs() {
+    return $this->gadgetSpec->userPrefs;
+  }
+
+  /**
+   * @return unknown
+   */
+  public function getWidth() {
+    return $this->substitutions->substitute($this->gadgetSpec->width);
+  }
+
+  /**
+   * @param unknown_type $author
+   */
+  public function setAuthor($author) {
+    $this->gadgetSpec->author = $author;
+  }
+
+  /**
+   * @param unknown_type $authorAboutme
+   */
+  public function setAuthorAboutme($authorAboutme) {
+    $this->gadgetSpec->authorAboutme = $authorAboutme;
+  }
+
+  /**
+   * @param unknown_type $authorAffiliation
+   */
+  public function setAuthorAffiliation($authorAffiliation) {
+    $this->gadgetSpec->authorAffiliation = $authorAffiliation;
+  }
+
+  /**
+   * @param unknown_type $authorEmail
+   */
+  public function setAuthorEmail($authorEmail) {
+    $this->gadgetSpec->authorEmail = $authorEmail;
+  }
+
+  /**
+   * @param unknown_type $authorLink
+   */
+  public function setAuthorLink($authorLink) {
+    $this->gadgetSpec->authorLink = $authorLink;
+  }
+
+  /**
+   * @param unknown_type $authorLocation
+   */
+  public function setAuthorLocation($authorLocation) {
+    $this->gadgetSpec->authorLocation = $authorLocation;
+  }
+
+  /**
+   * @param unknown_type $authorPhoto
+   */
+  public function setAuthorPhoto($authorPhoto) {
+    $this->gadgetSpec->authorPhoto = $authorPhoto;
+  }
+
+  /**
+   * @param unknown_type $authorQuote
+   */
+  public function setAuthorQuote($authorQuote) {
+    $this->gadgetSpec->authorQuote = $authorQuote;
+  }
+
+  /**
+   * @param unknown_type $category
+   */
+  public function setCategory($category) {
+    $this->gadgetSpec->category = $category;
+  }
+
+  /**
+   * @param unknown_type $category2
+   */
+  public function setCategory2($category2) {
+    $this->gadgetSpec->category2 = $category2;
+  }
+
+  /**
+   * @param unknown_type $checksum
+   */
+  public function setChecksum($checksum) {
+    $this->gadgetSpec->checksum = $checksum;
+  }
+
+  /**
+   * @param unknown_type $description
+   */
+  public function setDescription($description) {
+    $this->gadgetSpec->description = $description;
+  }
+
+  /**
+   * @param unknown_type $directoryTitle
+   */
+  public function setDirectoryTitle($directoryTitle) {
+    $this->gadgetSpec->directoryTitle = $directoryTitle;
+  }
+
+  /**
+   * @param unknown_type $height
+   */
+  public function setHeight($height) {
+    $this->gadgetSpec->height = $height;
+  }
+
+  /**
+   * @param unknown_type $icon
+   */
+  public function setIcon($icon) {
+    $this->gadgetSpec->icon = $icon;
+  }
+
+  /**
+   * @param unknown_type $links
+   */
+  public function setLinks($links) {
+    $this->gadgetSpec->links = $links;
+  }
+
+  /**
+   * @param unknown_type $locales
+   */
+  public function setLocales($locales) {
+    $this->gadgetSpec->locales = $locales;
+  }
+
+  /**
+   * @param unknown_type $optionalFeatures
+   */
+  public function setOptionalFeatures($optionalFeatures) {
+    $this->gadgetSpec->optionalFeatures = $optionalFeatures;
+  }
+
+  /**
+   * @param unknown_type $preloads
+   */
+  public function setPreloads($preloads) {
+    $this->gadgetSpec->preloads = $preloads;
+  }
+
+  /**
+   * @param unknown_type $renderInline
+   */
+  public function setRenderInline($renderInline) {
+    $this->gadgetSpec->renderInline = $renderInline;
+  }
+
+  /**
+   * @param unknown_type $requiredFeatures
+   */
+  public function setRequiredFeatures($requiredFeatures) {
+    $this->gadgetSpec->requiredFeatures = $requiredFeatures;
+  }
+
+  /**
+   * @param unknown_type $scaling
+   */
+  public function setScaling($scaling) {
+    $this->gadgetSpec->scaling = $scaling;
+  }
+
+  /**
+   * @param unknown_type $screenshot
+   */
+  public function setScreenshot($screenshot) {
+    $this->gadgetSpec->screenshot = $screenshot;
+  }
+
+  /**
+   * @param unknown_type $scrolling
+   */
+  public function setScrolling($scrolling) {
+    $this->gadgetSpec->scrolling = $scrolling;
+  }
+
+  /**
+   * @param unknown_type $showInDirectory
+   */
+  public function setShowInDirectory($showInDirectory) {
+    $this->gadgetSpec->showInDirectory = $showInDirectory;
+  }
+
+  /**
+   * @param unknown_type $showStats
+   */
+  public function setShowStats($showStats) {
+    $this->gadgetSpec->showStats = $showStats;
+  }
+
+  /**
+   * @param unknown_type $singleton
+   */
+  public function setSingleton($singleton) {
+    $this->gadgetSpec->singleton = $singleton;
+  }
+
+  /**
+   * @param unknown_type $string
+   */
+  public function setString($string) {
+    $this->gadgetSpec->string = $string;
+  }
+
+  /**
+   * @param unknown_type $thumbnail
+   */
+  public function setThumbnail($thumbnail) {
+    $this->gadgetSpec->thumbnail = $thumbnail;
+  }
+
+  /**
+   * @param unknown_type $title
+   */
+  public function setTitle($title) {
+    $this->gadgetSpec->title = $title;
+  }
+
+  /**
+   * @param unknown_type $titleUrl
+   */
+  public function setTitleUrl($titleUrl) {
+    $this->gadgetSpec->titleUrl = $titleUrl;
+  }
+
+  /**
+   * @param unknown_type $userPrefs
+   */
+  public function setUserPrefs($userPrefs) {
+    $this->gadgetSpec->userPrefs = $userPrefs;
+  }
+
+  /**
+   * @param unknown_type $width
+   */
+  public function setWidth($width) {
+    $this->gadgetSpec->width = $width;
   }
 }

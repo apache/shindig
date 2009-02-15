@@ -50,8 +50,16 @@ $shindigConfig = array(
 
   // Allow plain text security tokens, this is only here to allow the sample files to work. Disable on a production site
   'allow_plaintext_token' => true,
+
+  // Is a valid security token required to render a gadget? The token is required for doing signed preloads, but disallowing this
+  // can also help prevent external parties using your rendering server (only for the paranoid :)
+  'render_token_required' => false,
+
   // Compress the inlined javascript, saves upto 50% of the document size
   'compress_javascript' => true,
+
+  // Default refresh interval for proxy/makeRequest's if none is specified in the query
+  'default_refresh_interval' => 1209587,
 
   // The URL Prefix under which shindig lives ie if you have http://myhost.com/shindig/php set web_prefix to /shindig/php
   'web_prefix' => '',

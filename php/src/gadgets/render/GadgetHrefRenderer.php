@@ -18,25 +18,8 @@
  * under the License.
  */
 
-class LocaleSpec {
-  public $url;
-  public $locale;
-  public $rightToLeft;
-  public $localeMessageBundles = array();
-
-  public function getLocaleMessageBundles() {
-    return $this->localeMessageBundles;
-  }
-
-  public function getURI() {
-    return $this->url;
-  }
-
-  public function getLocale() {
-    return $this->locale;
-  }
-
-  public function isRightToLeft() {
-    return $this->rightToLeft;
+class GadgetHrefRenderer extends GadgetRenderer {
+  public function renderGadget(Gadget $gadget, $view) {
+    echo "render href";
   }
 }

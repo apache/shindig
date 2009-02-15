@@ -50,10 +50,8 @@
 	
 	<Content type="html" view="profile" prefered_height="400" prefered_width="300" quirks="true">content</Content>
 	
-	<Content type="html" view="profile,canvas" prefered_height="400" prefered_width="300" quirks="true">content</Content>
+	<Content type="url" view="canvas" href="http://example.com/foo.html" prefered_height="400" prefered_width="300" quirks="true"></Content>
 	
 	<Content view="home" href="http://www.example.com/myapp/home/index.html"></Content>
-	
-	<Content type="url" view="external" href="http://example.com/foo.html"></Content>
 	
 </Module>

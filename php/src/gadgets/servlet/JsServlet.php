@@ -19,12 +19,8 @@
  */
 
 require 'src/common/HttpServlet.php';
+require 'src/gadgets/GadgetContext.php';
 require 'src/gadgets/GadgetFeatureRegistry.php';
-require 'src/gadgets/JsFeatureLoader.php';
-require 'src/gadgets/JsLibrary.php';
-require 'src/gadgets/GadgetFeatureFactory.php';
-require 'src/gadgets/GadgetFeature.php';
-require 'src/gadgets/JsLibraryFeatureFactory.php';
 
 /**
  * This event handler deals with the /js/core:caja:etc.js request which content type=url gadgets can use
@@ -58,29 +54,14 @@ class JsServlet extends HttpServlet {
     }
     $found = array();
     $missing = array();
+    $context = new GadgetContext('GADGET');
     $registry = new GadgetFeatureRegistry(Config::get('features_path'));
-    if ($registry->getIncludedFeatures($needed, $found, $missing)) {
-      $containerParam = isset($_GET["c"]) ? $_GET["c"] : '';
-      $context = $containerParam == '1' ? 'CONTAINER' : 'GADGET';
+    if ($registry->resolveFeatures($needed, $found, $missing)) {
+      $isGadgetContext = !isset($_GET["c"]) || $_GET['c'] == 0 ? true : false;
       $jsData = '';
-      $done = array();
-      do {
-        foreach ($found as $entry) {
-          if (! in_array($entry, $done)) {
-            $feat = $registry->getEntry($entry);
-            $feature = $feat->getFeature();
-            if ($feature instanceof JsLibraryFeatureFactory) {
-              $jsLib = $feature;
-              foreach ($jsLib->getLibraries($context) as $lib) {
-                if ($lib->getType() != 'URL') {
-                  $jsData .= $lib->getContent() . "\n";
-                }
-              }
-            }
-            $done[] = $entry;
-          }
-        }
-      } while (count($done) != count($found));
+      foreach ($found as $feature) {
+        $jsData .= $registry->getFeatureContent($feature, $context, $isGadgetContext);
+      }
       if (! strlen($jsData)) {
         header("HTTP/1.0 404 Not Found", true);
         die();
@@ -95,6 +76,7 @@ class JsServlet extends HttpServlet {
   }
 
   private function setCachingHeaders() {
+    // Expires far into the future
     header("Expires: Tue, 01 Jan 2030 00:00:01 GMT");
     // IE seems to need this (10 years should be enough).
     header("Cache-Control: public,max-age=315360000");

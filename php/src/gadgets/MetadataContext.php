@@ -24,7 +24,7 @@ class MetadataGadgetContext extends GadgetContext {
     parent::__construct('GADGET');
     $this->url = $url;
     $this->view = $jsonContext->view;
-    $this->locale = new Locale($jsonContext->language, $jsonContext->country);
+    $this->locale = array('lang' => $jsonContext->language, 'country' => $jsonContext->country);
     $this->container = $jsonContext->container;
   }
 

@@ -53,7 +53,6 @@ class HttpServlet {
     if (! $this->noHeaders) {
       header("Content-Type: $this->contentType" . (! empty($this->charset) ? "; charset={$this->charset}" : ''));
       header('Accept-Ranges: bytes');
-      $content = ob_get_contents();
       if ($this->noCache) {
         header("Cache-Control: no-cache, must-revalidate", true);
         header("Expires: Mon, 26 Jul 1997 05:00:00 GMT", true);
@@ -64,21 +63,6 @@ class HttpServlet {
         header("Expires: " . gmdate("D, d M Y H:i:s", time() + $this->cacheTime) . " GMT", true);
         // Obey browsers (or proxy's) request to send a fresh copy if we recieve a no-cache pragma or cache-control request
         if (! isset($_SERVER['HTTP_PRAGMA']) || ! strstr(strtolower($_SERVER['HTTP_PRAGMA']), 'no-cache') && (! isset($_SERVER['HTTP_CACHE_CONTROL']) || ! strstr(strtolower($_SERVER['HTTP_CACHE_CONTROL']), 'no-cache'))) {
-          // If the browser send us a E-TAG check if it matches (md5 sum of content), if so send a not modified header instead of content
-          $etag = '"' . md5($content) . '"';
-          if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
-            header("ETag: \"$etag\"");
-            if ($this->lastModified) {
-              header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->lastModified) . ' GMT', true);
-            }
-            header("HTTP/1.1 304 Not Modified", true);
-            header('Content-Length: 0', true);
-            ob_end_clean();
-            die();
-          }
-          header("ETag: $etag");
-          // If no etag is present, then check if maybe this browser supports if_modified_since tags,
-          // check it against our lastModified (if it's set)
           if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
             $if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
             if ($this->lastModified <= $if_modified_since) {
@@ -104,8 +88,8 @@ class HttpServlet {
   }
 
   /**
-   * Sets the time in seconds that the browser's cache should be 
-   * considered out of date (through the Expires header) 
+   * Sets the time in seconds that the browser's cache should be
+   * considered out of date (through the Expires header)
    *
    * @param int $time time in seconds
    */
@@ -123,7 +107,7 @@ class HttpServlet {
   }
 
   /**
-   * Sets the content type of this request (forinstance: text/html or text/javascript, etc) 
+   * Sets the content type of this request (forinstance: text/html or text/javascript, etc)
    *
    * @param string $type content type header to use
    */
@@ -132,7 +116,7 @@ class HttpServlet {
   }
 
   /**
-   * Returns the current content type 
+   * Returns the current content type
    *
    * @return string content type string
    */

@@ -27,12 +27,11 @@ class MetadataHandler {
         $gadgetUrl = $gadget->url;
         $gadgetModuleId = $gadget->moduleId;
         $context = new MetadataGadgetContext($requests->context, $gadgetUrl);
-        $gadgetServer = new GadgetServer();
-        $gadget = $gadgetServer->processGadget($context);
+        $gadgetServer = new GadgetFactory($context, null);
+        $gadget = $gadgetServer->createGadget($gadgetUrl);
         $response[] = $this->makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context);
       } catch (Exception $e) {
-        $response[] = array('errors' => array($e->getMessage()), 
-            'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
+        $response[] = array('errors' => array($e->getMessage()), 'moduleId' => $gadgetModuleId, 'url' => $gadgetUrl);
       }
     }
     return $response;
@@ -40,46 +39,43 @@ class MetadataHandler {
 
   private function makeResponse($gadget, $gadgetModuleId, $gadgetUrl, $context) {
     $response = array();
+
     $prefs = array();
-    foreach ($gadget->getUserPrefs() as $pref) {
-      $prefs[$pref->getName()] = array('displayName' => $pref->getDisplayName(), 
-          'type' => $pref->getDataType(), 'default' => $pref->getDefaultValue(), 
-          'enumValues' => $pref->getEnumValues(), 
-          'required' => $pref->isRequired());
+    foreach ($gadget->gadgetSpec->userPrefs as $pref) {
+      $prefs[$pref['name']] = $pref;
     }
-    $features = array();
-    foreach ($gadget->getRequires() as $feature) {
-      $features[] = $feature->getName();
-    }
+
     $views = array();
-    foreach ($gadget->getViews() as $view) {
+    foreach ($gadget->gadgetSpec->views as $name => $view) {
       // we want to include all information, except for the content
-      unset($view->content);
-      $views[$view->getName()] = $view;
+      unset($view['content']);
+      $views[$name] = $view;
     }
-    $links = array();
-    foreach ($gadget->links as $link) {
-      $links[] = $link;
-    }
-    $icons = array();
-    foreach ($gadget->getIcons() as $icon) {
-      $icons[] = $icon;
-    }
+
     $oauth = array();
+
+    //FIXME missing from the spec parsing still
+    /*
     $oauthspec = $gadget->getOAuthSpec();
     if (! empty($oauthspec)) {
       foreach ($oauthspec->getServices() as $oauthservice) {
-        $oauth[$oauthservice->getName()] = array(
-            "request" => $oauthservice->getRequestUrl(), 
-            "access" => $oauthservice->getAccessUrl(), 
-            "authorization" => $oauthservice->getAuthorizationUrl());
+        $oauth[$oauthservice->getName()] = array("request" => $oauthservice->getRequestUrl(), "access" => $oauthservice->getAccessUrl(), "authorization" => $oauthservice->getAuthorizationUrl());
       }
     }
+    */
+
+    //FIXME UrlGenerator needs fixin' still
+    //$response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
+
+    $response['features'] = $gadget->features;
+    $response['links'] = $gadget->gadgetSpec->links;
+    $response['icons'] = $gadget->gadgetSpec->icon;
+    $response['views'] = $views;
+
     $response['author'] = $gadget->getAuthor();
     $response['authorEmail'] = $gadget->getAuthorEmail();
     $response['description'] = $gadget->getDescription();
     $response['directoryTitle'] = $gadget->getDirectoryTitle();
-    $response['features'] = $features;
     $response['screenshot'] = $gadget->getScreenShot();
     $response['thumbnail'] = $gadget->getThumbnail();
     $response['title'] = $gadget->getTitle();
@@ -98,12 +94,10 @@ class MetadataHandler {
     $response['singleton'] = $gadget->getSingleton();
     $response['scaling'] = $gadget->getScaling();
     $response['scrolling'] = $gadget->getScrolling();
-    $response['links'] = $links;
-    $response['views'] = $views;
-    $response['icons'] = $icons;
+
     $response['moduleId'] = $gadgetModuleId;
     $response['url'] = $gadgetUrl;
-    $response['iframeUrl'] = UrlGenerator::getIframeURL($gadget, $context);
+
     $response['userPrefs'] = $prefs;
     $response['oauth'] = $oauth;
     return $response;
