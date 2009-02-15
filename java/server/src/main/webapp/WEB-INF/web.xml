@@ -129,6 +129,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- Serve sample OAuth apis -->
+  <servlet>
+    <servlet-name>sampleOAuth</servlet-name>
+    <servlet-class>
+      org.apache.shindig.social.sample.oauth.SampleOAuthServlet
+    </servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>js</servlet-name>
     <url-pattern>/gadgets/js/*</url-pattern>
@@ -172,5 +180,10 @@
   <servlet-mapping>
     <servlet-name>jsonRpcServlet</servlet-name>
     <url-pattern>/social/rpc/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>sampleOAuth</servlet-name>
+    <url-pattern>/oauth/*</url-pattern>
   </servlet-mapping>
 </web-app>

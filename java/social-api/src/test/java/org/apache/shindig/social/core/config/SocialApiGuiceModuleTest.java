@@ -45,11 +45,11 @@ public class SocialApiGuiceModuleTest extends TestCase {
 
     AuthenticationHandlerProvider provider =
         injector.getInstance(AuthenticationHandlerProvider.class);
-    assertEquals(3, provider.get().size());
+    assertEquals(4, provider.get().size());
 
     List<AuthenticationHandler> handlers = injector.getInstance(
         Key.get(new TypeLiteral<List<AuthenticationHandler>>(){}));
 
-    assertEquals(3, handlers.size());
+    assertEquals(4, handlers.size());
   }
 }
