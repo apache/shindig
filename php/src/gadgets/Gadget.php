@@ -38,6 +38,13 @@ class Gadget {
       return $this->gadgetSpec->views[$viewName];
     } elseif (isset($this->gadgetSpec->views[self::DEFAULT_VIEW])) {
       return $this->gadgetSpec->views[self::DEFAULT_VIEW];
+    } else {
+      // see if there's any empty entries, we'll use that as default then (old iGoogle style)
+      foreach ($this->gadgetSpec->views as $view) {
+        if (empty($view['view'])) {
+          return $view;
+        }
+      }
     }
     throw new GadgetException("Invalid view specified for this gadget");
   }
