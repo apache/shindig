@@ -163,7 +163,7 @@ abstract class RequestItem {
       $cleanResult = array();
       foreach ($result as $field) {
         if (! in_array($field, $cleanResult)) {
-          $cleanResult[] = urldecode($field);
+          $cleanResult[urldecode($field)] = urldecode($field);
         }
       }
       $result = $cleanResult;
