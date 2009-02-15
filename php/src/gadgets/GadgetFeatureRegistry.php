@@ -37,6 +37,7 @@ class GadgetFeatureRegistry {
     if (!isset($this->features[$feature])) {
       throw new GadgetException("Invalid feature: ".htmlentities($feature));
     }
+    $featureName = $feature;
     $feature = $this->features[$feature];
     $filesContext = $isGadgetContext ? 'gadgetJs' : 'containerJs';
     if (!isset($feature[$filesContext])) {
@@ -44,6 +45,13 @@ class GadgetFeatureRegistry {
       return '';
     }
     $ret = '';
+    if (Config::get('compress_javascript')) {
+      $featureCache = Config::get('feature_cache');
+      $featureCache = new $featureCache();
+      if (($featureContent = $featureCache->get(md5('features:'.$featureName.$isGadgetContext)))) {
+        return $featureContent;
+      }
+    }
     foreach ($feature[$filesContext] as $entry) {
       switch ($entry['type']) {
         case 'URL':
@@ -55,13 +63,16 @@ class GadgetFeatureRegistry {
           break;
         case 'FILE':
           $file = $feature['basePath'] . '/' . $entry['content'];
-          // add jsmin compression here
           $ret .= file_get_contents($file). "\n";
           break;
         case 'INLINE':
           $ret .= $entry['content'] . "\n";
           break;
       }
+    }
+    if (Config::get('compress_javascript')) {
+      $ret = JsMin::minify($ret);
+      $featureCache->set(md5('features:'.$featureName.$isGadgetContext), $ret);
     }
     return $ret;
   }
