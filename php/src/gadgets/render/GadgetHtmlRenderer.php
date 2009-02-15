@@ -29,7 +29,6 @@ class EmptyClass {
 class GadgetHtmlRenderer extends GadgetRenderer {
 
   public function renderGadget(Gadget $gadget, $view) {
-
     // Was a privacy policy header configured? if so set it
     if (Config::get('P3P') != '') {
       header("P3P: " . Config::get('P3P'));
