@@ -39,54 +39,48 @@ class ProxyHandler extends ProxyBase {
     $url = $this->validateUrl($url);
     $result = $this->fetchContent($url, 'GET');
     $status = (int)$result->getHttpCode();
-    if ($status == 200) {
-      $headers = explode("\n", $result->getResponseHeaders());
-      $isShockwaveFlash = false;
-      foreach ($headers as $header) {
-        if (strpos($header, ':')) {
-          $key = trim(substr($header, 0, strpos($header, ':')));
-          $key = str_replace(' ', '-', ucwords(str_replace('-', ' ', $key))); // force the header name to have the proper Header-Name casing
-          $val = trim(substr($header, strpos($header, ':') + 1));
-          // filter out headers that would otherwise mess up our output
-          if (! in_array($key, $this->disallowedHeaders)) {
-            header("$key: $val", true);
-          } else {
-          }
-          if ($key == 'Content-Type' && strtolower($val) == 'application/x-shockwave-flash') {
-            // We're skipping the content disposition header for flash due to an issue with Flash player 10
-            // This does make some sites a higher value phishing target, but this can be mitigated by
-            // additional referer checks.
-            $isShockwaveFlash = true;
-          }
+    header("HTTP/1.0 $status", true);
+    $headers = explode("\n", $result->getResponseHeaders());
+    $isShockwaveFlash = false;
+    foreach ($headers as $header) {
+      if (strpos($header, ':')) {
+        $key = trim(substr($header, 0, strpos($header, ':')));
+        $key = str_replace(' ', '-', ucwords(str_replace('-', ' ', $key))); // force the header name to have the proper Header-Name casing
+        $val = trim(substr($header, strpos($header, ':') + 1));
+        // filter out headers that would otherwise mess up our output
+        if (! in_array($key, $this->disallowedHeaders)) {
+          header("$key: $val", true);
+        } else {
+        }
+        if ($key == 'Content-Type' && strtolower($val) == 'application/x-shockwave-flash') {
+          // We're skipping the content disposition header for flash due to an issue with Flash player 10
+          // This does make some sites a higher value phishing target, but this can be mitigated by
+          // additional referer checks.
+          $isShockwaveFlash = true;
         }
       }
-      if (! $isShockwaveFlash) {
-        header('Content-Disposition: attachment;filename=p.txt');
+    }
+    if (! $isShockwaveFlash) {
+      header('Content-Disposition: attachment;filename=p.txt');
+    }
+    $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
+    $notModified = false;
+    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+      $if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+      // Use the request's Last-Modified, otherwise fall back on our internal time keeping (the time the request was created)
+      $lastModified = strtotime($lastModified);
+      if ($lastModified <= $if_modified_since) {
+        $notModified = true;
       }
-      $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
-      $notModified = false;
-      if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lastModified && ! isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
-        $if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-        // Use the request's Last-Modified, otherwise fall back on our internal time keeping (the time the request was created)
-        $lastModified = strtotime($lastModified);
-        if ($lastModified <= $if_modified_since) {
-          $notModified = true;
-        }
-      }
-      $this->setCachingHeaders($lastModified);
-      // If the cached file time is within the refreshInterval params value, return not-modified
-      if ($notModified) {
-        header('HTTP/1.0 304 Not Modified', true);
-        header('Content-Length: 0', true);
-      } else {
-        // then echo the content
-        echo $result->getResponseContent();
-      }
+    }
+    $this->setCachingHeaders($lastModified);
+    // If the cached file time is within the refreshInterval params value, return not-modified
+    if ($notModified) {
+      header('HTTP/1.0 304 Not Modified', true);
+      header('Content-Length: 0', true);
     } else {
-      @ob_end_clean();
-      header("HTTP/1.0 404 Not Found", true);
-      echo "<html><body><h1>404 - Not Found ($status)</h1>";
-      echo "</body></html>";
+      // then echo the content
+      echo $result->getResponseContent();
     }
   }
 }
