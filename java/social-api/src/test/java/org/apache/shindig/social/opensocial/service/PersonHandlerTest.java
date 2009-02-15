@@ -40,6 +40,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -176,13 +177,18 @@ public class PersonHandlerTest extends EasyMockTestCase {
     String path = "/people/john.doe/@friends/jane.doe";
     RestHandler operation = registry.getRestHandler(path, "GET");
 
-    Person data = new PersonImpl();
+    Person person = new PersonImpl();
+    List<Person> people = Lists.newArrayList(person);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(people);
     // TODO: We aren't passing john.doe to the service yet.
-    expect(personService.getPerson(eq(new UserId(UserId.Type.userId, "jane.doe")),
-        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
+    expect(personService.getPeople(
+        eq(Sets.newHashSet(new UserId(UserId.Type.userId, "jane.doe"))),
+        eq(new GroupId(GroupId.Type.self, null)), eq(DEFAULT_OPTIONS),
+        eq(DEFAULT_FIELDS), eq(token)))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
+    assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }
@@ -191,12 +197,17 @@ public class PersonHandlerTest extends EasyMockTestCase {
     String path = "/people/john.doe/@self";
     RestHandler operation = registry.getRestHandler(path, "GET");
 
-    Person data = new PersonImpl();
-    expect(personService.getPerson(eq(JOHN_DOE.iterator().next()),
-        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
+    Person person = new PersonImpl();
+    List<Person> people = Lists.newArrayList(person);
+    RestfulCollection<Person> data = new RestfulCollection<Person>(people);
+    expect(personService.getPeople(
+        eq(JOHN_DOE),
+        eq(new GroupId(GroupId.Type.self, null)), eq(DEFAULT_OPTIONS),
+        eq(DEFAULT_FIELDS), eq(token)))
+        .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
+    assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }

@@ -78,6 +78,7 @@ public class PersonServiceDb implements PersonService {
     // either lazy or at no extra costs, the consumer will either access the properties or not
     List<Person> plist = null;
     int lastPos = 1;
+    Long totalResults = null;
 
     StringBuilder sb = new StringBuilder();
     // sanitize the list to get the uid's and remove duplicates
@@ -117,23 +118,31 @@ public class PersonServiceDb implements PersonService {
 
     }
 
-    int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
-        lastPos);
-    if (filterPos > 0) {
-      paramList.add(collectionOptions.getFilterValue());
-    }
-    
-    // Get total results, that is count the total number of rows for this query
-    Long totalResults = JPQLUtils.getTotalResults(entiyManager, sb.toString(), paramList);
-    
-    // Execute ordered and paginated query
-    if (totalResults > 0) {
-      addOrderClause(sb, collectionOptions);
+    if (GroupId.Type.self.equals(groupId.getType())) {
       plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
-    }
+      totalResults = Long.valueOf(1);
+      if (0 == plist.size()) {
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+      }
+    } else {
+      int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
+          lastPos);
+      if (filterPos > 0) {
+        paramList.add(collectionOptions.getFilterValue());
+      }
 
-    if (plist == null) {
-      plist = Lists.newArrayList();
+      // Get total results, that is count the total number of rows for this query
+      totalResults = JPQLUtils.getTotalResults(entiyManager, sb.toString(), paramList);
+
+      // Execute ordered and paginated query
+      if (totalResults > 0) {
+        addOrderClause(sb, collectionOptions);
+        plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
+      }
+
+      if (plist == null) {
+        plist = Lists.newArrayList();
+      }
     }
 
     // all of the above could equally have been placed into a thread to overlay the
