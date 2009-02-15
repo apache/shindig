@@ -17,10 +17,12 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import org.apache.shindig.common.util.FutureUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
@@ -72,15 +74,21 @@ public class PersonHandler {
     if (userIds.size() == 1) {
       if (optionalPersonId.isEmpty()) {
         if (groupId.getType() == GroupId.Type.self) {
-          return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
+          Future<RestfulCollection<Person>> people = personService.getPeople(
+              userIds, groupId, options, fields, request.getToken());
+          return FutureUtil.getFirstFromCollection(people);
         } else {
           return personService.getPeople(userIds, groupId, options, fields, request.getToken());
         }
       } else if (optionalPersonId.size() == 1) {
         // TODO: Add some crazy concept to handle the userId?
-        return personService.getPerson(new UserId(UserId.Type.userId,
-            optionalPersonId.iterator().next()),
-            fields, request.getToken());
+        Set<UserId> optionalUserIds = Sets.newHashSet(
+            new UserId(UserId.Type.userId, optionalPersonId.iterator().next()));
+
+        Future<RestfulCollection<Person>> people = personService.getPeople(
+            optionalUserIds, new GroupId(GroupId.Type.self, null),
+            options, fields, request.getToken());
+        return FutureUtil.getFirstFromCollection(people);
       } else {
         Set<UserId> personIds = Sets.newLinkedHashSet();
         for (String pid : optionalPersonId) {

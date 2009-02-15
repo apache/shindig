@@ -252,6 +252,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         result.add(filterFields(person, fields, Person.class));
       }
 
+      if (GroupId.Type.self.equals(groupId.getType()) && 0 == result.size()) {
+        throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+      }
+
       // We can pretend that by default the people are in top friends order
       if (options.getSortBy().equals(Person.Field.NAME.toString())) {
         Collections.sort(result, NAME_COMPARATOR);
