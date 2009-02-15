@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -56,12 +55,13 @@ class GadgetHtmlRenderer extends GadgetRenderer {
     }
     $content .= "<script>\n";
     foreach ($gadget->features as $feature) {
-      if (! count($forcedJsLibs) || ! in_array($feature, $forcedJsLibs)) {
+      if (! is_array($forcedJsLibs) || (is_array($forcedJsLibs) && ! in_array($feature, $forcedJsLibs))) {
         $content .= $this->context->getRegistry()->getFeatureContent($feature, $this->context, true);
       }
     }
 
     // Add the JavaScript initialization strings for the configuration, localization and preloads
+    $content .= "\n";
     $content .= $this->appendJsConfig($gadget, count($forcedJsLibs));
     $content .= $this->appendMessages($gadget);
     $content .= $this->appendPreloads($gadget);
