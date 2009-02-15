@@ -351,5 +351,13 @@
 "jane.doe" : ["9158", "9703"],
 "george.doe" : ["9143"],
 "maija.m" : []
+},
+//
+// Consumer Secrets for OAuth REST validations
+// In this case the consumerKey is the App URL.
+//
+"consumerSecrets" : {
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml": "secret",
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : "secret"
 }
 }
