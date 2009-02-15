@@ -18,248 +18,223 @@
  * under the License.
  */
 
-class SpecParserException extends Exception {
+class GadgetSpecException extends Exception {
 }
 
+/**
+ * Parses the XML content into a GadgetSpec object
+ */
 class GadgetSpecParser {
-
-  public function parse($xml, $context) {
-    if (empty($xml)) {
-      throw new SpecParserException("Empty XML document");
-    }
-    // make sure we can generate a detailed error report
+  /**
+   * Parses the $xmlContent into a Gadget class
+   *
+   * @param string $xmlContent
+   */
+  public function parse($xmlContent) {
     libxml_use_internal_errors(true);
-    if (($doc = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)) == false) {
-      $errors = @libxml_get_errors();
-      $xmlErrors = '';
+    $doc = new DOMDocument();
+    if (! $doc->loadXML($xmlContent, LIBXML_NOCDATA)) {
+      $errors = libxml_get_errors();
+      $errorStr = '';
       foreach ($errors as $error) {
-        $xmlErrors .= $this->displayXmlError($error);
+        $errorStr .= $error . " \n";
       }
-      @libxml_clear_errors();
-      throw new SpecParserException("<b>Invalid XML Document</b><br/>\n" . $xmlErrors);
+      libxml_clear_errors();
+      throw new GadgetSpecException("Error parsing gadget xml:\n$errorStr");
     }
-    if (count($doc->ModulePrefs) != 1) {
-      throw new SpecParserException("Missing or duplicated <ModulePrefs>");
-    }
-    $gadget = new Gadget($context->getGadgetId(), $context);
-    // record Checksum to trace xml version
-    $gadget->setChecksum($xml);
-    // process ModulePref attributes
-    $this->processModulePrefs($gadget, $doc->ModulePrefs);
-    if (isset($doc->ModulePrefs->OAuth)) {
-      // process OAuthPref attributes
-      $this->processOAuthSpec($gadget, $doc->ModulePrefs->OAuth, $context);
-    }
-    // process UserPrefs, if any
-    foreach ($doc->UserPref as $pref) {
-      $this->processUserPref($gadget, $pref);
-    }
-    // Assume gadget v1
-    $explicit_profile = false;
-    foreach ($doc->Content as $content) {
-      $attributes = $content->attributes();
-      if (empty($attributes['type'])) {
-        throw new SpecParserException("No content type specified!");
-      }
-      $view = isset($attributes['view']) ? trim($attributes['view']) : '';
-      // Note if we find a profile explicity defined
-      if (strpos($view, "profile") !== false) {
-        $explicit_profile = true;
-      }
-    }
-    foreach ($doc->Content as $content) {
-      $attributes = $content->attributes();
-      if (empty($attributes['type'])) {
-        throw new SpecParserException("No content type specified!");
-      }
-      $view = isset($attributes['view']) ? trim($attributes['view']) : '';
-      // If view isnt defined and we didnt find a profile explicity defined
-      if ($view == '') {
-        if (! $explicit_profile) {
-          $this->processContent($gadget, $content, array(0 => DEFAULT_VIEW));
-        }
-        // If view isnt defined and a profile was found, this will catch it
-      } else {
-        $views = explode(',', $view);
-        $this->processContent($gadget, $content, $views);
-      }
-    }
-    foreach ($doc->ModulePrefs->Preload as $feature) {
-      $gadget->preloads[] = new Preload($feature);
-    }
-    foreach ($doc->ModulePrefs->Require as $feature) {
-      $this->processFeature($gadget, $feature, true);
-    }
-    foreach ($doc->ModulePrefs->Optional as $feature) {
-      $this->processFeature($gadget, $feature, false);
-    }
-    foreach ($doc->ModulePrefs->Icon as $icon) {
-      $this->processIcon($gadget, $icon);
-    }
+    //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have bugs, so it's not really practical yet (and slow)
+    // $doc->schemaValidate('gadget.xsd');
+    $gadget = new GadgetSpec();
+    $gadget->checksum = md5($xmlContent);
+    $this->parseModulePrefs($doc, $gadget);
+    $this->parseLinks($doc, $gadget);
+    $this->parseUserPrefs($doc, $gadget);
+    $this->parseViews($doc, $gadget);
+    //TODO
+    // OAuthService / OAuthSpec
+    // PipelinedData
     return $gadget;
   }
 
-  private function processModulePrefs(&$gadget, $ModulePrefs) {
-    $attributes = $ModulePrefs->attributes();
-    if (empty($attributes['title'])) {
-      throw new SpecParserException("Missing or empty \"title\" attribute.");
+  /**
+   * Parse the gadget views
+   *
+   * @param DOMDocument $doc
+   * @param GadgetSpec $gadget
+   */
+  private function parseViews(DOMDocument &$doc, GadgetSpec &$gadget) {
+    $views = $doc->getElementsByTagName('Content');
+    if (! $views || $views->length < 1) {
+      throw new GadgetSpecException("A gadget needs to have at least one view");
     }
-    // Get ModulePrefs base and extended attributes
-    // See http://code.google.com/apis/gadgets/docs/gadgets-extended-xsd.html
-    // (trim is used here since it not only cleans up the text, but also auto-casts the SimpleXMLElement to a string)
-    $gadget->title = trim($attributes['title']);
-    $gadget->author = isset($attributes['author']) ? trim($attributes['author']) : '';
-    $gadget->authorEmail = isset($attributes['author_email']) ? trim($attributes['author_email']) : '';
-    $gadget->description = isset($attributes['description']) ? trim($attributes['description']) : '';
-    $gadget->directoryTitle = isset($attributes['directory_title']) ? trim($attributes['directory_title']) : '';
-    $gadget->screenshot = isset($attributes['screenshot']) ? trim($attributes['screenshot']) : '';
-    $gadget->thumbnail = isset($attributes['thumbnail']) ? trim($attributes['thumbnail']) : '';
-    $gadget->titleUrl = isset($attributes['title_url']) ? trim($attributes['title_url']) : '';
-    // Extended spec fields
-    $gadget->authorAffiliation = isset($attributes['author_affiliation']) ? trim($attributes['author_affiliation']) : '';
-    $gadget->authorLocation = isset($attributes['author_location']) ? trim($attributes['author_location']) : '';
-    $gadget->authorPhoto = isset($attributes['author_photo']) ? trim($attributes['author_photo']) : '';
-    $gadget->authorAboutMe = isset($attributes['author_aboutme']) ? trim($attributes['author_aboutme']) : '';
-    $gadget->authorQuote = isset($attributes['author_quote']) ? trim($attributes['author_quote']) : '';
-    $gadget->authorLink = isset($attributes['author_link']) ? trim($attributes['author_link']) : '';
-    $gadget->showStats = isset($attributes['show_stats']) ? trim($attributes['show_stats']) : '';
-    $gadget->showInDirectory = isset($attributes['show_in_directory']) ? trim($attributes['show_in_directory']) : '';
-    $gadget->string = isset($attributes['string']) ? trim($attributes['string']) : '';
-    $gadget->width = isset($attributes['width']) ? trim($attributes['width']) : '';
-    $gadget->height = isset($attributes['height']) ? trim($attributes['height']) : '';
-    $gadget->category = isset($attributes['category']) ? trim($attributes['category']) : '';
-    $gadget->category2 = isset($attributes['category2']) ? trim($attributes['category2']) : '';
-    $gadget->singleton = isset($attributes['singleton']) ? trim($attributes['singleton']) : '';
-    $gadget->renderInline = isset($attributes['render_inline']) ? trim($attributes['render_inline']) : '';
-    $gadget->scaling = isset($attributes['scaling']) ? trim($attributes['scaling']) : '';
-    $gadget->scrolling = isset($attributes['scrolling']) ? trim($attributes['scrolling']) : '';
-    foreach ($ModulePrefs->Link as $link) {
-      $gadget->links[] = $this->processLink($link);
-    }
-    foreach ($ModulePrefs->Locale as $locale) {
-      $gadget->localeSpecs[] = $this->processLocale($locale);
-    }
-  }
-
-  private function processLink($link) {
-    $attributes = $link->attributes();
-    $rel = isset($attributes['rel']) ? trim($attributes['rel']) : '';
-    $href = isset($attributes['href']) ? trim($attributes['href']) : '';
-    $method = isset($attributes['method']) ? trim($attributes['method']) : 'GET';
-    $link = new LinkSpec($rel, $href, $method);
-    return $link;
-  }
-
-  private function processLocale($locale) {
-    $attributes = $locale->attributes();
-    $messageAttr = isset($attributes['messages']) ? trim($attributes['messages']) : '';
-    $languageAttr = isset($attributes['lang']) ? trim($attributes['lang']) : 'all';
-    $countryAttr = isset($attributes['country']) ? trim($attributes['country']) : 'all';
-    $rtlAttr = isset($attributes['language_direction']) ? trim($attributes['language_direction']) : '';
-    $rightToLeft = $rtlAttr == 'rtl';
-    $localeMessageBundles = array();
-    if ($messageAttr == '') {
-      $parser = new MessageBundleParser();
-      $localeMessageBundles = $parser->getMessages($locale);
-    }
-    $locale = new LocaleSpec();
-    $locale->rightToLeft = $rightToLeft;
-    $locale->url = $messageAttr;
-    $locale->localeMessageBundles = $localeMessageBundles;
-    $locale->locale = new Locale($languageAttr, $countryAttr);
-    return $locale;
-  }
-
-  private function processUserPref(&$gadget, $pref) {
-    $attributes = $pref->attributes();
-    $preference = new UserPref();
-    if (empty($attributes['name'])) {
-      throw new SpecParserException("All UserPrefs must have name attributes.");
-    }
-    $preference->name = trim($attributes['name']);
-    $preference->displayName = isset($attributes['display_name']) ? $gadget->getSubstitutions()->substitute(trim($attributes['display_name'])) : '';
-    // if its set -and- in our valid 'enum' of types, use it, otherwise assume STRING, to try and emulate java's enum behavior
-    $preference->required = isset($attributes['required']) ? $gadget->getSubstitutions()->substitute(trim($attributes['required'])) : 'false';
-    $preference->dataType = isset($attributes['datatype']) && in_array(strtoupper($attributes['datatype']), $preference->DataTypes) ? strtoupper($attributes['datatype']) : 'STRING';
-    $preference->defaultValue = isset($attributes['default_value']) ? $gadget->getSubstitutions()->substitute(trim($attributes['default_value'])) : '';
-    if (isset($pref->EnumValue)) {
-      foreach ($pref->EnumValue as $enum) {
-        $attr = $enum->attributes();
-        $valueText = trim($attr['value']);
-        $displayText = ! empty($attr['display_value']) ? $gadget->getSubstitutions()->substitute(trim($attr['display_value'])) : $valueText;
-        $preference->enumValues[$valueText] = $displayText;
+    $gadget->views = array();
+    foreach ($views as $viewNode) {
+      if ($viewNode->getAttribute('type' == 'url') && $viewNode->getAttribute('href') == null) {
+        throw new GadgetSpecException("Malformed <Content> href value");
       }
-    }
-    $gadget->userPrefs[] = $preference;
-  }
-
-  private function processContent(&$gadget, $content, $views) {
-    $html = (string)$content; // no trim here since empty lines can have structural meaning, so typecast to string instead
-    foreach ($views as $view) {
-      $viewSpec = new ViewSpec($view, $content);
-      if (! isset($gadget->views[$view])) {
-        $viewSpec->content = $html;
-        $gadget->views[$view] = $viewSpec;
-      } else {
-        if ($gadget->views[$view]->getName() == $viewSpec->getName() && $viewSpec->getType() != $gadget->views[$view]->getType()) {
-          throw new SpecParserException("You may not mix content " . " types in the same view.");
+      foreach (explode(',', $viewNode->getAttribute('view')) as $view) {
+        $view = trim($view);
+        if (isset($gadget->views[$view])) {
+          $gadget->views[$view]['content'] .= $viewNode->nodeValue;
+        } else {
+          $gadget->views[$view] = array('view' => $view, 'type' => strtoupper($viewNode->getAttribute('type')), 'href' => $viewNode->getAttribute('href'), 'preferedHeight' => $viewNode->getAttribute('prefered_height'),
+              'preferedWidth' => $viewNode->getAttribute('prefered_width'), 'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue);
         }
-        $gadget->views[$view]->addContent($html);
       }
     }
   }
 
-  private function processFeature(&$gadget, $feature, $required) {
-    $featureSpec = new FeatureSpec();
-    $attributes = $feature->attributes();
-    if (empty($attributes['feature'])) {
-      throw new SpecParserException("Feature not specified in <" . ($required ? "Required" : "Optional") . "> tag");
-    }
-    $featureSpec->name = trim($attributes['feature']);
-    $featureSpec->optional = ! $required;
-    foreach ($feature->Param as $param) {
-      $attr = $param->attributes();
-      if (empty($attr['name'])) {
-        throw new SpecParserException("Missing name attribute in <Param>.");
+  /**
+   * Parses the UserPref entries
+   *
+   * @param DOMDocument $doc
+   * @param GadgetSpec $gadget
+   */
+  private function parseUserPrefs(DOMDocument &$doc, GadgetSpec &$gadget) {
+    $gadget->userPrefs = array();
+    if (($userPrefs = $doc->getElementsByTagName('UserPref')) != null) {
+      foreach ($userPrefs as $prefNode) {
+        $pref = array('name' => $prefNode->getAttribute('name'), 'displayName' => $prefNode->getAttribute('display_name'), 'datatype' => strtoupper($prefNode->getAttribute('datatype')), 'defaultValue' => $prefNode->getAttribute('default_value'),
+            'required' => $prefNode->getAttribute('required'));
+        if ($pref['datatype'] == 'ENUM') {
+          if (($enumValues = $prefNode->getElementsByTagName('EnumValue')) != null) {
+            $enumVals = array();
+            foreach ($enumValues as $enumNode) {
+              $enumVals[] = array('value' => $enumNode->getAttribute('value'), 'displayValue' => $enumNode->getAttribute('display_value'));
+            }
+          }
+          $pref['enumValues'] = $enumVals;
+        }
+        $gadget->userPrefs[] = $pref;
       }
-      $name = trim($attr['name']);
-      $value = trim($param);
-      $featureSpec->params[$name] = $value;
     }
-    $gadget->requires[$featureSpec->name] = $featureSpec;
   }
 
-  private function processIcon(Gadget &$gadget, $icon) {
-    $attributes = $icon->attributes();
-    $iconSpec = new Icon();
-    $iconSpec->content = (string)(trim($icon));
-    $iconSpec->mode = isset($attributes['mode']) ? trim($attributes['mode']) : '';
-    $iconSpec->type = isset($attributes['type']) ? trim($attributes['type']) : '';
-    $gadget->icons[] = $iconSpec;
+  /**
+   * Parses the link spec elements
+   *
+   * @param DOMDocument $doc
+   * @param GadgetSpec $gadget
+   */
+  private function parseLinks(DOMDocument &$doc, GadgetSpec &$gadget) {
+    $gadget->links = array();
+    if (($links = $doc->getElementsByTagName('link')) != null) {
+      foreach ($links as $linkNode) {
+        $gadget->links[] = array('rel' => $linkNode->getAttribute('rel'), 'href' => $linkNode->getAttribute('href'), 'method' => strtoupper($linkNode->getAttribute('method')));
+      }
+    }
   }
 
-  private function processOAuthSpec(Gadget &$gadget, $OAuthSpec) {
-    $oauthSpec = new OAuthSpec($OAuthSpec->Service);
-    $gadget->setOAuthSpec($oauthSpec);
+  /**
+   * Parses the ModulePrefs section of the xml structure. The ModulePrefs
+   * section is required, so if it's missing or if there's 2 an GadgetSpecException will be thrown.
+   *
+   * This function also parses the ModulePref's child elements (Icon, Features, Preload and Locale)
+   *
+   * @param DOMDocument $doc
+   */
+  private function parseModulePrefs(DOMDocument &$doc, GadgetSpec &$gadget) {
+    $modulePrefs = $doc->getElementsByTagName("ModulePrefs");
+    if ($modulePrefs->length < 1) {
+      throw new GadgetSpecException("Missing ModulePrefs block");
+    } elseif ($modulePrefs->length > 1) {
+      throw new GadgetSpecException("More then one ModulePrefs block found");
+    }
+    $modulePrefs = $modulePrefs->item(0);
+    // parse the ModulePrefs attributes
+    $knownAttributes = array('title', 'author', 'authorEmail', 'description', 'directoryTitle', 'screenshot', 'thumbnail', 'titleUrl', 'authorAffiliation', 'authorLocation', 'authorPhoto', 'authorAboutme', 'authorQuote', 'authorLink', 'showStats',
+        'showInDirectory', 'string', 'width', 'height', 'category', 'category2', 'singleton', 'renderInline', 'scaling', 'scrolling');
+    foreach ($modulePrefs->attributes as $key => $attribute) {
+      $attrValue = trim($attribute->value);
+      // var format conversion from directory_title => directoryTitle
+      $attrKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+      $attrKey[0] = strtolower($attrKey[0]);
+      if (in_array($attrKey, $knownAttributes)) {
+        $gadget->$attrKey = $attrValue;
+      }
+    }
+    // And parse the child nodes
+    $this->parseIcon($modulePrefs, $gadget);
+    $this->parseFeatures($modulePrefs, $gadget);
+    $this->parsePreloads($modulePrefs, $gadget);
+    $this->parseLocales($modulePrefs, $gadget);
   }
 
-  private function displayXmlError($error) {
-    $return = '';
-    switch ($error->level) {
-      case LIBXML_ERR_WARNING:
-        $return .= "Warning [{$error->code}]: ";
-        break;
-      case LIBXML_ERR_ERROR:
-        $return .= "Error [{$error->code}]: ";
-        break;
-      case LIBXML_ERR_FATAL:
-        $return .= "Fatal Error [{$error->code}]: ";
-        break;
+  /**
+   * Parses the (optional) Icon element, returns a Icon class or null
+   *
+   * @param DOMElement $modulePrefs
+   * @param Gadget $gadget
+   */
+  private function parseIcon(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+    if (($iconNodes = $modulePrefs->getElementsByTagName('Icon')) != null) {
+      if ($iconNodes->length > 1) {
+        throw new GadgetSpecException("A gadget can only have one Icon element");
+      } elseif ($iconNodes->length == 1) {
+        $icon = $iconNodes->item(0);
+        $gadget->icon = $icon->nodeValue;
+      }
     }
-    $return .= trim($error->message) . ", Line: {$error->line}" . " Column: {$error->column}";
-    if ($error->file) {
-      $return .= "File: {$error->file}";
+  }
+
+  /**
+   * Parses the Required and Optional feature entries in the ModulePrefs
+   *
+   * @param DOMElement $modulePrefs
+   * @param Gadget $gadget
+   */
+  private function parseFeatures(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+    $gadget->requiredFeatures = $gadget->optionalFeatures = array();
+    if (($requiredNodes = $modulePrefs->getElementsByTagName('Require')) != null) {
+      foreach ($requiredNodes as $requiredFeature) {
+        $gadget->requiredFeatures[] = $requiredFeature->getAttribute('feature');
+      }
     }
-    return "$return\n";
+    if (($optionalNodes = $modulePrefs->getElementsByTagName('Optional')) != null) {
+      foreach ($optionalNodes as $optionalFeature) {
+        $gadget->optionalFeatures[] = $optionalFeature->getAttribute('feature');
+      }
+    }
+  }
+
+  /**
+   * Parses the preload elements
+   *
+   * @param DOMElement $modulePrefs
+   * @param Gadget $gadget
+   */
+  private function parsePreloads(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+    $gadget->preloads = array();
+    if (($preloadNodes = $modulePrefs->getElementsByTagName('Preload')) != null) {
+      foreach ($preloadNodes as $node) {
+        $gadget->preloads[] = array('href' => $node->getAttribute('href'), 'authz' => strtoupper($node->getAttribute('authz')), 'signViewer' => $node->getAttribute('sign_viewer'), 'signOwner' => $node->getAttribute('sign_owner'));
+      }
+    }
+  }
+
+  /**
+   * Parses the Locale (message bundle) entries
+   *
+   * @param DOMElement $modulePrefs
+   * @param Gadget $gadget
+   */
+  private function parseLocales(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+    $gadget->locales = array();
+    if (($localeNodes = $modulePrefs->getElementsByTagName('Locale')) != null) {
+      foreach ($localeNodes as $node) {
+        $messageBundle = array();
+        if (($messageBundleNode = $node->getElementsByTagName('messagebundle')) != null && $messageBundleNode->length > 0) {
+          // parse inlined messages
+          $messageBundleNode = $messageBundleNode->item(0);
+          $messages = $messageBundleNode->getElementsByTagName('msg');
+          foreach ($messages as $msg) {
+            $messageBundle[$msg->getAttribute('name')] = trim($msg->nodeValue);
+          }
+        }
+        $lang = $node->getAttribute('lang') == '' ? 'all' : strtolower($node->getAttribute('lang'));
+        $country = $node->getAttribute('country') == '' ? 'all' : strtoupper($node->getAttribute('country'));
+        $gadget->locales[] = array('lang' => $lang, 'country' => $country, 'messages' => $node->getAttribute('messages'), 'languageDirection' => $node->getAttribute('language_direction'), 'messageBundle' => $messageBundle);
+      }
+    }
   }
 }

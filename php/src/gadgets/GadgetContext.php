@@ -18,7 +18,7 @@
  * under the License.
  */
 
-define('DEFAULT_VIEW', 'profile');
+
 
 /*
  * GadgetContext contains all contextual variables and classes that are relevant for this request,
@@ -26,11 +26,11 @@ define('DEFAULT_VIEW', 'profile');
  * Server wide variables are stored in config.php
  */
 class GadgetContext {
+  const DEFAULT_VIEW = 'profile';
   protected $httpFetcher = null;
   protected $locale = null;
   protected $renderingContext = null;
   protected $registry = null;
-  protected $userPrefs = null;
   protected $gadgetId = null;
   protected $view = null;
   protected $moduleId = null;
@@ -59,7 +59,7 @@ class GadgetContext {
   }
 
   private function getRefreshIntervalParam() {
-    return isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('cache_time');
+    return isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('default_refresh_interval');
   }
 
   private function getContainerParam() {
@@ -100,7 +100,7 @@ class GadgetContext {
   }
 
   private function getViewParam() {
-    return ! empty($_GET['view']) ? $_GET['view'] : DEFAULT_VIEW;
+    return ! empty($_GET['view']) ? $_GET['view'] : self::DEFAULT_VIEW;
   }
 
   private function instanceBlacklist() {
@@ -110,18 +110,6 @@ class GadgetContext {
     } else {
       return null;
     }
-  }
-
-  private function instanceUserPrefs() {
-    $prefs = array();
-    $userPrefParamPrefix = Config::get('userpref_param_prefix');
-    foreach ($_GET as $key => $val) {
-      if (substr($key, 0, strlen($userPrefParamPrefix)) == $userPrefParamPrefix) {
-        $name = substr($key, strlen($userPrefParamPrefix));
-        $prefs[$name] = $val;
-      }
-    }
-    return new UserPrefs($prefs);
   }
 
   private function instanceGadgetId($url, $moduleId) {
@@ -134,8 +122,7 @@ class GadgetContext {
   }
 
   private function instanceRegistry() {
-    // Profiling showed 40% of the processing time was spend in the feature registry
-    // So by caching this and making it a one time initialization, we almost double the performance
+    // feature parsing is very resource intensive so by caching the result this saves upto 30% of the processing time
     $featureCache = Config::get('feature_cache');
     $featureCache = new $featureCache();
     if (! ($registry = $featureCache->get(md5(Config::get('features_path'))))) {
@@ -149,7 +136,7 @@ class GadgetContext {
     // Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default
     $language = ! empty($_GET['lang']) ? $_GET['lang'] : (! empty($_POST['lang']) ? $_POST['lang'] : 'all');
     $country = ! empty($_GET['country']) ? $_GET['country'] : (! empty($_POST['country']) ? $_POST['country'] : 'all');
-    return new Locale($language, $country);
+    return array('lang' => strtolower($language), 'country' => strtoupper($country));
   }
 
   private function instanceContainerConfig() {
@@ -187,13 +174,6 @@ class GadgetContext {
 
   public function getUrl() {
     return $this->url;
-  }
-
-  public function getUserPrefs() {
-    if ($this->userPrefs == null) {
-      $this->setUserPrefs($this->instanceUserPrefs());
-    }
-    return $this->userPrefs;
   }
 
   public function getView() {
@@ -248,10 +228,6 @@ class GadgetContext {
     $this->url = $url;
   }
 
-  public function setUserPrefs($userPrefs) {
-    $this->userPrefs = $userPrefs;
-  }
-
   public function setView($view) {
     $this->view = $view;
   }
@@ -301,10 +277,6 @@ class GadgetContext {
     return $this->locale;
   }
 
-  public function getFeatureRegistry() {
-    return $this->registry;
-  }
-
   /**
    * Extracts the 'st' token from the GET or POST params and calls the
    * signer to validate the token
@@ -322,6 +294,9 @@ class GadgetContext {
     }
     if (count(explode(':', $token)) != 6) {
       $token = urldecode(base64_decode($token));
+    }
+    if (empty($token)) {
+      throw new Exception("Missing or invalid security token");
     }
     return $signer->createToken($token);
   }

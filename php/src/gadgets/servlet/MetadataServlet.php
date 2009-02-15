@@ -18,38 +18,26 @@
  * under the License.
  */
 
-require 'src/common/HttpServlet.php';
-require 'src/gadgets/MetadataHandler.php';
-require 'src/gadgets/GadgetContext.php';
-require 'src/gadgets/MetadataContext.php';
-require 'src/common/Locale.php';
-require 'src/gadgets/GadgetServer.php';
-require 'src/common/RemoteContentRequest.php';
-require 'src/common/RemoteContent.php';
-require 'src/common/Cache.php';
-require 'src/common/RemoteContentFetcher.php';
-require 'src/gadgets/GadgetSpecParser.php';
-require 'src/gadgets/Gadget.php';
-require 'src/gadgets/GadgetId.php';
-require 'src/gadgets/UserPrefs.php';
-require 'src/gadgets/Substitutions.php';
-require 'src/gadgets/ViewSpec.php';
-require 'src/gadgets/GadgetFeatureRegistry.php';
-require 'src/gadgets/GadgetFeatureFactory.php';
-require 'src/gadgets/GadgetFeature.php';
-require 'src/gadgets/JsLibraryFeatureFactory.php';
-require 'src/gadgets/JsLibrary.php';
-require 'src/common/UrlGenerator.php';
-require 'src/gadgets/HttpUtil.php';
-require 'src/gadgets/LocaleSpec.php';
-require 'src/gadgets/LocaleMessageBundle.php';
-require 'src/gadgets/UserPref.php';
-require 'src/gadgets/FeatureSpec.php';
-require 'src/gadgets/MessageBundleParser.php';
-require 'src/gadgets/MessageBundle.php';
-require 'src/gadgets/GadgetException.php';
-require 'src/gadgets/rewrite/ContentRewriter.php';
-require 'src/gadgets/rewrite/ContentRewriteFeature.php';
+require_once 'src/common/HttpServlet.php';
+require_once 'src/common/JsMin.php';
+require_once 'src/common/SecurityTokenDecoder.php';
+require_once 'src/common/SecurityToken.php';
+require_once 'src/common/BlobCrypter.php';
+require_once 'src/common/RemoteContentRequest.php';
+require_once 'src/common/RemoteContent.php';
+require_once 'src/common/Cache.php';
+require_once 'src/common/RemoteContentFetcher.php';
+require_once 'src/common/sample/BasicRemoteContent.php';
+require_once 'src/common/sample/BasicRemoteContentFetcher.php';
+require_once 'src/gadgets/GadgetSpecParser.php';
+require_once 'src/gadgets/GadgetBlacklist.php';
+require_once 'src/gadgets/sample/BasicGadgetBlacklist.php';
+require_once 'src/gadgets/GadgetContext.php';
+require_once 'src/gadgets/GadgetSpec.php';
+require_once 'src/gadgets/Gadget.php';
+require_once 'src/gadgets/GadgetFactory.php';
+require_once 'src/gadgets/MetadataContext.php';
+require_once 'src/gadgets/MetadataHandler.php';
 
 class MetadataServlet extends HttpServlet {
 

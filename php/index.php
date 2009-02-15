@@ -50,15 +50,15 @@ function __autoload($className) {
     'src/common',
     'src/common/sample',
     'src/gadgets',
-    'src/gadgets/servlet', 
+    'src/gadgets/servlet',
     'src/gadgets/oauth',
     'src/gadgets/sample',
     'src/social',
-    'src/social/servlet', 
+    'src/social/servlet',
     'src/social/service',
     'src/social/opensocial',
     'src/social/model',
-    'src/social/spi', 
+    'src/social/spi',
     'src/social/converters',
     'src/social/oauth',
     'src/social/sample'
@@ -78,15 +78,15 @@ function __autoload($className) {
 }
 
 $servletMap = array(
-    Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet', 
-    Config::get('web_prefix') . '/gadgets/js' => 'JsServlet', 
-    Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
-    Config::get('web_prefix') . '/gadgets/makeRequest' => 'ProxyServlet', 
-    Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
-    Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet', 
-    Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet', 
-    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet', 
-    Config::get('web_prefix') . '/public.crt' => 'CertServlet', 
+    Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet',
+    Config::get('web_prefix') . '/gadgets/js' => 'JsServlet',
+    Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet',
+    Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet',
+    Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet',
+    Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet',
+    Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet',
+    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet',
+    Config::get('web_prefix') . '/public.crt' => 'CertServlet',
     Config::get('web_prefix') . '/public.cer' => 'CertServlet'
 );
 
@@ -109,7 +109,7 @@ foreach ($servletMap as $url => $class) {
 if ($servlet) {
   $class = new $class();
   $method = $_SERVER['REQUEST_METHOD'];
-  // Not all clients support the PUT, HEAD & DELETE http methods, they depend on the X-HTTP-Method-Override instead 
+  // Not all clients support the PUT, HEAD & DELETE http methods, they depend on the X-HTTP-Method-Override instead
   if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
     $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
   }

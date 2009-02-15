@@ -21,27 +21,34 @@
 require 'src/common/HttpServlet.php';
 require 'src/gadgets/GadgetContext.php';
 require 'src/gadgets/ProxyBase.php';
-require 'src/gadgets/ProxyHandler.php';
+require 'src/gadgets/MakeRequestHandler.php';
 require 'src/common/RemoteContentRequest.php';
 require 'src/common/RemoteContent.php';
 require 'src/common/Cache.php';
 require 'src/common/RemoteContentFetcher.php';
+require 'src/gadgets/oauth/OAuth.php';
+require 'src/gadgets/oauth/OAuthStore.php';
 
-class ProxyServlet extends HttpServlet {
+class MakeRequestServlet extends HttpServlet {
 
   public function doGet() {
     try {
-      // Make sure the HttpServlet doesn't overwrite our headers
       $this->noHeaders = true;
       $context = new GadgetContext('GADGET');
-      $url = (isset($_GET['url']) ? $_GET['url'] : (isset($_POST['url']) ? $_POST['url'] : false));
-      $url = urldecode($url);
-      if (! $url) {
+      $url = urldecode(isset($_GET['url']) ? $_GET['url'] : (isset($_POST['url']) ? $_POST['url'] : false));
+      if (! $url || empty($url)) {
         header("HTTP/1.0 400 Bad Request", true);
         echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
       }
-      $proxyHandler = new ProxyHandler($context);
-      $proxyHandler->fetch($url);
+      $method = (isset($_GET['httpMethod']) ? $_GET['httpMethod'] : (isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET'));
+      $signingFetcherFactory = $gadgetSigner = false;
+      if (! empty($_GET['authz']) || ! empty($_POST['authz'])) {
+        $gadgetSigner = Config::get('security_token_signer');
+        $gadgetSigner = new $gadgetSigner();
+        $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+      }
+      $makeRequestHandler = new MakeRequestHandler($context, $signingFetcherFactory);
+      $makeRequestHandler->fetchJson($url, $gadgetSigner, $method);
     } catch (Exception $e) {
       // catch all exceptions and give a 500 server error
       header("HTTP/1.0 500 Internal Server Error");
