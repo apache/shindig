@@ -57,10 +57,9 @@ public class FutureUtil {
         return collection.isDone();
       }
 
-      @SuppressWarnings("unchecked")
-      private T getFirstFromCollection(RestfulCollection<?> collection) {
+      private T getFirstFromCollection(RestfulCollection<T> collection) {
         if (collection.getTotalResults() > 0) {
-          return (T) collection.getEntry().get(0);
+          return collection.getEntry().get(0);
         }
 
         return null;
