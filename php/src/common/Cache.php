@@ -24,9 +24,9 @@ class CacheException extends Exception {
 
 abstract class Cache {
 
-  abstract function get($key, $expiration = false);
+  abstract function get($key);
 
-  abstract function set($key, $value);
+  abstract function set($key, $value, $ttl = false);
 
   abstract function delete($key);
 }

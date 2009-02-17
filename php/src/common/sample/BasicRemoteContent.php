@@ -18,60 +18,78 @@
  * under the License.
  */
 
-
 class BasicRemoteContent extends RemoteContent {
 
-  public function fetch($request, $context) {
+  public function fetch(RemoteContentRequest $request, $context) {
     $cache = Config::get('data_cache');
     $cache = new $cache();
     $remoteContentFetcher = new BasicRemoteContentFetcher();
-    if (! ($request instanceof RemoteContentRequest)) {
-      throw new RemoteContentException("Invalid request type in remoteContent");
-    }
-    // determine which requests we can load from cache, and which we have to actually fetch
-    if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash(), $context->getRefreshInterval())) !== false) {
-      $ret = $cachedRequest;
+    if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+      $request = $cachedRequest;
     } else {
-      $ret = $remoteContentFetcher->fetchRequest($request);
-      // only cache requests that returned a 200 OK and is not a POST
-      if ($request->getHttpCode() == '200' && ! $request->isPost()) {
-        $cache->set($request->toHash(), $request);
-      }
+      $request = $remoteContentFetcher->fetchRequest($request);
+      $this->setRequestCache($request, $cache, $context);
     }
-    return $ret;
+    return $request;
   }
 
   public function multiFetch(Array $requests, Array $contexts) {
     $cache = Config::get('data_cache');
     $cache = new $cache();
     $remoteContentFetcher = new BasicRemoteContentFetcher();
-    
     $rets = array();
     $requestsToProc = array();
-    
     foreach ($requests as $request) {
       list(, $context) = each($contexts);
       if (! ($request instanceof RemoteContentRequest)) {
         throw new RemoteContentException("Invalid request type in remoteContent");
       }
       // determine which requests we can load from cache, and which we have to actually fetch
-      if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash(), $context->getRefreshInterval())) !== false) {
+      if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
         $rets[] = $cachedRequest;
       } else {
         $requestsToProc[] = $request;
       }
     }
-    
     $newRets = $remoteContentFetcher->multiFetchRequest($requestsToProc);
-    
     foreach ($newRets as $request) {
-      // only cache requests that returned a 200 OK and is not a POST
-      if ($request->getHttpCode() == '200' && ! $request->isPost()) {
-        $cache->set($request->toHash(), $request);
-      }
+      $this->setRequestCache($request, $cache, $context);
       $rets[] = $request;
     }
-    
     return $rets;
+  }
+
+  private function setRequestCache(RemoteContentRequest $request, Cache $cache, GadgetContext $context) {
+    if (! $request->isPost() && ! $context->getIgnoreCache()) {
+      $ttl = Config::get('cache_time');
+      if ($request->getHttpCode() == '200') {
+        // Got a 200 OK response, calculate the TTL to use for caching it
+        if (($expires = $request->getResponseHeader('Expires')) != null) {
+          // prefer to use the servers notion of the time since there could be a clock-skew, but otherwise use our own
+          $date = $request->getResponseHeader('Date') != null ? $request->getResponseHeader('Date') : gmdate('D, d M Y H:i:s', $_SERVER['REQUEST_TIME']) . ' GMT';
+          // convert both dates to unix epoch seconds, and calculate the TTL
+          $date = strtotime($date);
+          $expires = strtotime($expires);
+          $ttl = $expires - $date;
+          // Don't fall for the old expiration-date-in-the-past trick, we *really* want to cache stuff since a large SNS's traffic would devastate a gadget developer's server
+          if ($expires - $date > 1) {
+            $ttl = $expires - $date;
+          }
+        }
+        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html : The Cache-Control: max-age=<seconds> overrides the expires header, sp if both are present this one will overwrite the $ttl
+        if (($cacheControl = $request->getResponseHeader('Cache-Control')) != null) {
+          $bits = explode('=', $cacheControl);
+          foreach ($bits as $key => $val) {
+            if ($val == 'max-age' && isset($bits[$key + 1])) {
+              $ttl = $bits[$key + 1];
+              break;
+            }
+          }
+        }
+      } else {
+        $ttl = 5 * 60; // cache errors for 5 minutes, takes the denial of service attack type behaviour out of having an error :)
+      }
+      $cache->set($request->toHash(), $request, $ttl);
+    }
   }
 }

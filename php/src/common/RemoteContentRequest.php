@@ -67,7 +67,7 @@ class RemoteContentRequest {
       }
       // Bypass caching in proxies as well.
       if (! $setPragmaHeader && $options->ignoreCache) {
-        $tmpHeaders .= "Pragma:no-cache\n";
+        $tmpHeaders .= "Pragma: no-cache\n";
       }
       $this->headers = $tmpHeaders;
     }
@@ -85,97 +85,12 @@ class RemoteContentRequest {
   }
 
   /**
-   * Creates a new request to a different URL using all request data from
-   * an existing request.
-   *
-   * @param uri
-   * @param base The base request to copy data from.
-   */
-  public static function createRemoteContentRequestWithUriBase($uri, $base) {
-    $this->uri = $uri;
-    $this->method = $base->method;
-    $this->options = $base->options;
-    $this->headers = $base->headers;
-    $this->contentType = $base->contentType;
-    $this->postBody = $base->postBody;
-  }
-
-  /**
    * Basic GET request.
    *
    * @param uri
    */
   public function createRemoteContentRequestWithUri($uri) {
     $this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::getDefaultOptions());
-  }
-
-  /**
-   * GET with options
-   *
-   * @param uri
-   * @param options
-   */
-  public function createRemoteContentRequestWithUriOptions($uri, $options) {
-    $this->createRemoteContentRequest("GET", $uri, null, null, $options);
-  }
-
-  /**
-   * GET request with custom headers and default options
-   * @param uri
-   * @param headers
-   */
-  public function RemoteContentRequestWithUriHeaders($uri, $headers) {
-    $this->createRemoteContentRequest("GET", $uri, $headers, null, RemoteContentRequest::getDefaultOptions());
-  }
-
-  /**
-   * GET request with custom headers + options
-   * @param uri
-   * @param headers
-   * @param options
-   */
-  public function createRemoteContentRequestWithUriHeadersOptions($uri, $headers, $options) {
-    $this->createRemoteContentRequest("GET", $uri, $headers, null, $options);
-  }
-
-  /**
-   * Basic POST request
-   * @param uri
-   * @param postBody
-   */
-  public function RemoteContentRequestWithUriPostBody($uri, $postBody) {
-    $this->createRemoteContentRequest("POST", $uri, null, $postBody, RemoteContentRequest::getDefaultOptions());
-  }
-
-  /**
-   * POST request with options
-   * @param uri
-   * @param postBody
-   * @param options
-   */
-  public function createRemoteContentRequestWithUriPostBodyOptions($uri, $postBody, $options) {
-    $this->createRemoteContentRequest("POST", $uri, null, $postBody, $options);
-  }
-
-  /**
-   * POST request with headers
-   * @param uri
-   * @param headers
-   * @param postBody
-   */
-  public function createRemoteContentRequestWithUriHeadersPostBody($uri, $headers, $postBody) {
-    $this->createRemoteContentRequest("POST", $uri, $headers, $postBody, RemoteContentRequest::getDefaultOptions());
-  }
-
-  /**
-   * POST request with options + headers
-   * @param uri
-   * @param headers
-   * @param postBody
-   * @param options
-   */
-  public function createRemoteContentRequestWithUriHeadersPostBodyOptions($uri, $headers, $postBody, $options) {
-    $this->createRemoteContentRequest("POST", $uri, $headers, $postBody, $options);
   }
 
   /**
@@ -188,23 +103,6 @@ class RemoteContentRequest {
     $options = new Options();
     $options->ignoreCache = $ignoreCache;
     return $this->createRemoteContentRequestWithUriOptions($uri, $options);
-  }
-
-  /**
-   * Simple constructor for setting a basic response from a string. Mostly used
-   * for testing.
-   *
-   * @param body
-   */
-  public function getHttpFalseResponseBody($body) {
-    return $this->createFalseResponse(RemoteContentRequest::$SC_OK, $body, null);
-  }
-
-  private function createFalseResponse($httpCode, $body, $headers) {
-    $this->httpCode = $httpCode;
-    $this->responseContent = $body;
-    $this->headers = $headers;
-    return $this;
   }
 
   // returns a hash code which identifies this request, used for caching
@@ -307,17 +205,8 @@ class RemoteContentRequest {
     return null;
   }
 
-  //FIXME: Find a better way to do this
-  // The headers can be an array of elements.
   public function getResponseHeader($headerName) {
-    $headers = explode("\n", $this->responseHeaders);
-    foreach ($headers as $header) {
-      $key = explode(":", $header, 2);
-      if ($key[0] == $headerName) {
-        return trim($key[1]);
-      }
-    }
-    return null;
+    return isset($this->responseHeaders[$headerName]) ? $this->responseHeaders[$headerName] : null;
   }
 
   public function getCreated() {

@@ -28,25 +28,25 @@
  * but instances may be created by multiple threads.
  */
 class SigningFetcher extends RemoteContentFetcher {
-  
+
   protected static $OPENSOCIAL_OWNERID = "opensocial_owner_id";
   protected static $OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
   protected static $OPENSOCIAL_APPID = "opensocial_app_id";
   protected static $XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
   protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
-  
+
   /**
    * Authentication token for the user and gadget making the request.
    */
   protected $authToken;
-  
+
   /**
    * Private key we pass to the OAuth RSA_SHA1 algorithm.This can be a
    * PrivateKey object, or a PEM formatted private key, or a DER encoded byte
    * array for the private key.(No, really, they accept any of them.)
    */
   protected $privateKeyObject;
-  
+
   /**
    * The name of the key, included in the fetch to help with key rotation.
    */
@@ -92,7 +92,7 @@ class SigningFetcher extends RemoteContentFetcher {
     $this->privateKeyObject = $privateKeyObject;
   }
 
-  public function fetchRequest($request) {
+  public function fetchRequest(RemoteContentRequest $request) {
     return $this->getNextFetcher()->fetchRequest($request);
   }
 

@@ -50,40 +50,38 @@ class CacheApc extends Cache {
   }
 
   private function waitForLock($key) {
-    // 20 x 250 = 5 seconds
-    $tries = 20;
+    // 10 x 100ms = 1 second
+    $tries = 10;
     $cnt = 0;
     do {
-      // 250 ms is a long time to sleep, but it does stop the server from burning all resources on polling locks..
-      usleep(250);
+      usleep(100);
       $cnt ++;
     } while ($cnt <= $tries && $this->isLocked());
     if ($this->isLocked()) {
-      // 5 seconds passed, assume the owning process died off and remove it
       $this->removeLock($key);
     }
   }
 
-  public function get($key, $expiration = false) {
-    if (! $expiration) {
-      // default to global cache time
-      $expiration = Config::Get('cache_time');
-    }
+  public function get($key) {
     if (($ret = @apc_fetch($key)) === false) {
       return false;
     }
-    if (time() - $ret['time'] > $expiration) {
-      $this->delete($key);
-      return false;
-    }
-    return unserialize($ret['data']);
+    return $ret;
   }
 
-  public function set($key, $value) {
-    // we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
-    if (@apc_store($key, array('time' => time(), 'data' => serialize($value)), Config::Get('cache_time')) == false) {
+  public function set($key, $value, $ttl = false) {
+    if (! $ttl) {
+      $ttl = Config::Get('cache_time');
+    }
+    if ($this->isLocked($key)) {
+      $this->waitForLock($key);
+    }
+    $this->createLock($key);
+    if (@apc_store($key, $value, $ttl) == false) {
+      $this->removeLock($key);
       throw new CacheException("Couldn't store data in cache");
     }
+    $this->removeLock($key);
   }
 
   public function delete($key) {
