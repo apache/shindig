@@ -38,26 +38,17 @@ class ProxyHandler extends ProxyBase {
   public function fetch($url) {
     $url = $this->validateUrl($url);
     $result = $this->fetchContent($url, 'GET');
-    $status = (int)$result->getHttpCode();
-    header("HTTP/1.0 $status", true);
-    $headers = explode("\n", $result->getResponseHeaders());
+    $httpCode = (int)$result->getHttpCode();
     $isShockwaveFlash = false;
-    foreach ($headers as $header) {
-      if (strpos($header, ':')) {
-        $key = trim(substr($header, 0, strpos($header, ':')));
-        $key = str_replace(' ', '-', ucwords(str_replace('-', ' ', $key))); // force the header name to have the proper Header-Name casing
-        $val = trim(substr($header, strpos($header, ':') + 1));
-        // filter out headers that would otherwise mess up our output
-        if (! in_array($key, $this->disallowedHeaders)) {
-          header("$key: $val", true);
-        } else {
-        }
-        if ($key == 'Content-Type' && strtolower($val) == 'application/x-shockwave-flash') {
-          // We're skipping the content disposition header for flash due to an issue with Flash player 10
-          // This does make some sites a higher value phishing target, but this can be mitigated by
-          // additional referer checks.
-          $isShockwaveFlash = true;
-        }
+    foreach ($result->getResponseHeaders() as $key => $val) {
+      if (! in_array($key, $this->disallowedHeaders)) {
+        header("$key: $val", true);
+      }
+      if ($key == 'Content-Type' && strtolower($val) == 'application/x-shockwave-flash') {
+        // We're skipping the content disposition header for flash due to an issue with Flash player 10
+        // This does make some sites a higher value phishing target, but this can be mitigated by
+        // additional referer checks.
+        $isShockwaveFlash = true;
       }
     }
     if (! $isShockwaveFlash) {
@@ -73,7 +64,10 @@ class ProxyHandler extends ProxyBase {
         $notModified = true;
       }
     }
-    $this->setCachingHeaders($lastModified);
+    if ($httpCode == 200) {
+      // only set caching headers if the result was 'OK'
+      $this->setCachingHeaders($lastModified);
+    }
     // If the cached file time is within the refreshInterval params value, return not-modified
     if ($notModified) {
       header('HTTP/1.0 304 Not Modified', true);

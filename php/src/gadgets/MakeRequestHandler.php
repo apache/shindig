@@ -56,7 +56,6 @@ class MakeRequestHandler extends ProxyBase {
       die();
     }
     $status = (int)$result->getHttpCode();
-    header("HTTP/1.1 $status", true);
     header("Content-Type: application/json; charset=utf-8", true);
     $output = '';
     if (isset($_REQUEST['contentType']) && $_REQUEST['contentType'] == 'FEED' && $status == 200) {
@@ -67,7 +66,10 @@ class MakeRequestHandler extends ProxyBase {
     $json = array($url => array('body' => $resp, 'rc' => $status));
     $json = json_encode($json);
     $output = UNPARSEABLE_CRUFT . $json;
-    $this->setCachingHeaders();
+    if ($status == 200) {
+      // only set caching headers if the result was 'OK'
+      $this->setCachingHeaders();
+    }
     echo $output;
   }
 
