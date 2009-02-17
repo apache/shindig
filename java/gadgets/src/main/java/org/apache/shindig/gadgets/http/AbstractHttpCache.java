@@ -121,6 +121,11 @@ public abstract class AbstractHttpCache implements HttpCache {
    * individual methods for details.
    */
   public String createKey(HttpRequest request) {
+    if ((request.getAuthType() != AuthType.NONE) &&
+        (request.getSecurityToken() == null)) {
+      throw new IllegalArgumentException("Cannot sign request without security token: [" + request + "]");
+    }
+    
     String uri = request.getUri().toString();
     StringBuilder key = new StringBuilder(uri.length() * 2);
     key.append(request.getUri());

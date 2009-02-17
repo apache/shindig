@@ -253,6 +253,39 @@ public class AbstractHttpCacheTest {
     assertEquals(key.toString(), actual);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void createKeyWithoutSecurityToken() throws Exception {
+    OAuthArguments args = new OAuthArguments(new RequestAuthenticationInfo() {
+
+      public Map<String, String> getAttributes() {
+        return ImmutableMap.of();
+      }
+
+      public AuthType getAuthType() {
+        return AuthType.SIGNED;
+      }
+
+      public Uri getHref() {
+        return DEFAULT_URI;
+      }
+
+      public boolean isSignOwner() {
+        return true;
+      }
+
+      public boolean isSignViewer() {
+        return false;
+      }
+    });
+
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.SIGNED)
+        .setOAuthArguments(args);
+
+    cache.createKey(request);
+  }
+
+
   @Test
   public void getResponse() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
