@@ -87,17 +87,9 @@ class CacheMemcache extends Cache {
     }
   }
 
-  public function get($key, $expiration = false) {
+  public function get($key) {
     $this->check();
-    if (! $expiration) {
-      // default to global cache time
-      $expiration = Config::Get('cache_time');
-    }
     if (($ret = @memcache_get(self::$connection, $key)) === false) {
-      return false;
-    }
-    if (time() - $ret['time'] > $expiration) {
-      $this->delete($key);
       return false;
     }
     return $ret['data'];
