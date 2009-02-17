@@ -185,13 +185,26 @@ public class PipelinedDataPreloader implements Preloader {
         }
       }
 
-      // TODO: support non GET/POST methods
       String method = preload.getAttributes().get("method");
       if (method != null) {
         request.setMethod(method);
       }
+      
+      // TODO: params EL implementation is not yet properly escaped per spec
+      String params = preload.getAttributes().get("params");
+      if ((params != null) && !"".equals(params)) { 
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+          request.setPostBody(params.getBytes("UTF-8"));
+          request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        } else {
+          UriBuilder uriBuilder = new UriBuilder(request.getUri());
+          String query = uriBuilder.getQuery();
+          query = query == null ? params : query + "&" + params;
+          uriBuilder.setQuery(query);
+          request.setUri(uriBuilder.toUri());
+        }
+      }
 
-      // TODO: support params
       return new Data(requestPipeline.execute(request));
     }
 

@@ -53,14 +53,32 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       + "  <os:PeopleRequest key=\"p\" userIds=\"you\"/>"
       + "  <os:PersonAppDataRequest key=\"a\" userId=\"she\"/>" + "</Content></Module>";
 
-  private static final String MAKE_REQUEST_URL =  "http://example.org/preload.html";
-  private static final String XML_WITH_MAKE_REQUEST = "<Module xmlns:os=\""
+  private static final String HTTP_REQUEST_URL =  "http://example.org/preload.html";
+  private static final String PARAMS = "a=b&c=d";
+  private static final String XML_PARAMS = "a=b&amp;c=d";
+  
+  private static final String XML_WITH_HTTP_REQUEST = "<Module xmlns:os=\""
       + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
       + "<ModulePrefs title=\"Title\"/>"
       + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
-      + "  <os:HttpRequest key=\"p\" href=\"" + MAKE_REQUEST_URL + "\" "
+      + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
       + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
+  private static final String XML_WITH_HTTP_REQUEST_AND_PARAMS = "<Module xmlns:os=\""
+    + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
+    + "<ModulePrefs title=\"Title\"/>"
+    + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
+    + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
+    + "                  method=\"POST\" params=\"" + XML_PARAMS + "\"/>"
+    + "</Content></Module>";
+
+  private static final String XML_WITH_HTTP_REQUEST_AND_GET_PARAMS = "<Module xmlns:os=\""
+    + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
+    + "<ModulePrefs title=\"Title\"/>"
+    + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
+    + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
+    + "                  method=\"GET\" params=\"" + XML_PARAMS + "\"/>"
+    + "</Content></Module>";
   @Before
   public void createContainerConfig() {
     containerConfig = EasyMock.createMock(ContainerConfig.class);
@@ -105,7 +123,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
   @Test
   public void testHttpPreload() throws Exception {
-    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_MAKE_REQUEST);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_HTTP_REQUEST);
 
     String httpResult = "{foo: 'bar'}";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
@@ -128,10 +146,54 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(1, pipeline.requests.size());
     HttpRequest request = pipeline.requests.get(0);
 
-    assertEquals(MAKE_REQUEST_URL, request.getUri().toString());
+    assertEquals(HTTP_REQUEST_URL, request.getUri().toString());
     assertEquals("POST", request.getMethod());
     assertEquals(60, request.getCacheTtl());
   }
+
+  @Test
+  public void testHttpPreloadWithPostParams() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_HTTP_REQUEST_AND_PARAMS);
+
+    String httpResult = "{foo: 'bar'}";
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    view = "profile";
+
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
+    tasks.iterator().next().call();
+
+    // Should have only fetched one request
+    assertEquals(1, pipeline.requests.size());
+    HttpRequest request = pipeline.requests.get(0);
+
+    assertEquals(HTTP_REQUEST_URL, request.getUri().toString());
+    assertEquals("POST", request.getMethod());
+    assertEquals(PARAMS, request.getPostBodyAsString());
+  }
+
+  @Test
+  public void testHttpPreloadWithGetParams() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_HTTP_REQUEST_AND_GET_PARAMS);
+
+    String httpResult = "{foo: 'bar'}";
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    view = "profile";
+
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
+    tasks.iterator().next().call();
+
+    // Should have only fetched one request
+    assertEquals(1, pipeline.requests.size());
+    HttpRequest request = pipeline.requests.get(0);
+
+    assertEquals(HTTP_REQUEST_URL + "?" + PARAMS, request.getUri().toString());
+    assertEquals("GET", request.getMethod());
+  }
+
 
   @Test
   public void testSocialPreloadForOtherView() throws Exception {
