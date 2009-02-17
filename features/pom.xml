@@ -70,6 +70,7 @@
               <sourceDirectory>${basedir}</sourceDirectory>
               <sources>
                 <source>mocks/env.js</source>
+                <source>mocks/window.js</source>
                 <source>mocks/xhr.js</source>
                 <source>core/config.js</source>
                 <source>core/json.js</source>
@@ -103,6 +104,7 @@
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-rest/restfulcontainer.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
+                <source>oauthpopup/oauthpopup.js</source>
               </sources>
               <testSourceDirectory>${basedir}</testSourceDirectory>
               <testSuites>

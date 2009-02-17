@@ -8,6 +8,7 @@
         <Authorization url="http://localhost:9090/oauth-provider/authorize?oauth_callback=http://localhost:8080/gadgets/oauthcallback" />
       </Service>
     </OAuth>
+    <Require feature="oauthpopup" />
     <Preload authz="oauth" href="http://localhost:9090/oauth-provider/echo" />
   </ModulePrefs>
   <Content type="html">
@@ -34,8 +35,6 @@
       <a href="#" id="approvaldone">I've approved access</a>
       once you've approved access to your data.
     </div>
-
-    <script src="http://localhost:8080/gadgets/files/samplecontainer/examples/popup.js"></script>
 
     <script type="text/javascript">
       function $(x) {
@@ -66,14 +65,15 @@
           gadgets.io.MethodType.GET;
 
         gadgets.io.makeRequest(url, function (response) {
-          var popup = null;
           if (response.oauthApprovalUrl) {
-            popup = shindig.oauth.popup({
-              destination: response.oauthApprovalUrl,
-              windowOptions: null,
-              onOpen: function() { showOneSection('waiting'); },
-              onClose: function() { fetchData(); }
-            });
+            var onOpen = function() {
+              showOneSection('waiting');
+            };
+            var onClose = function() {
+              fetchData();
+            };
+            var popup = new gadgets.oauth.Popup(response.oauthApprovalUrl,
+                null, onOpen, onClose);
             $('personalize').onclick = popup.createOpenerOnClick();
             $('approvaldone').onclick = popup.createApprovedOnClick();
             showOneSection('approval');
