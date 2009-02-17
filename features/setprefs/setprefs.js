@@ -48,6 +48,7 @@ gadgets.Prefs.prototype.set = function(key, value) {
     null, // no callback
     gadgets.util.getUrlParameters().ifpctok || 0 // Legacy IFPC "security".
   ].concat(Array.prototype.slice.call(arguments));
+
   gadgets.rpc.call.apply(gadgets.rpc, args);
 };
 
@@ -61,8 +62,10 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
   // We must escape pipe (|) characters to ensure that decoding in
   // getArray actually works properly.
   for (var i = 0, j = val.length; i < j; ++i) {
-    val[i] = val[i].replace(/\|/g, "%7C");
+    if (typeof val[i] !== "number") {
+      val[i] = val[i].replace(/\|/g, "%7C");
+    }
   }
-  gadgets.Prefs.setInternal_(key, val.join('|'));
+  this.set(key, val.join('|'));
 };
 
