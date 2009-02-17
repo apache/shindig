@@ -25,7 +25,7 @@
  * (in a single server setup file based caching is actually faster)
  */
 class CacheMemcache extends Cache {
-  private $connection = false;
+  private static $connection = false;
   private $host;
   private $port;
 
@@ -42,7 +42,7 @@ class CacheMemcache extends Cache {
 
   private function isLocked($key) {
     $this->check();
-    if ((@memcache_get($this->connection, $key . '.lock')) === false) {
+    if ((@memcache_get(self::$connection, $key . '.lock')) === false) {
       return false;
     }
     return true;
@@ -52,13 +52,13 @@ class CacheMemcache extends Cache {
     $this->check();
     // the interesting thing is that this could fail if the lock was created in the meantime..
     // but we'll ignore that out of convenience
-    @memcache_add($this->connection, $key . '.lock', '', 0, 2);
+    @memcache_add(self::$connection, $key . '.lock', '', 0, 2);
   }
 
   private function removeLock($key) {
     $this->check();
     // suppress all warnings, if some other process removed it that's ok too
-    @memcache_delete($this->connection, $key . '.lock');
+    @memcache_delete(self::$connection, $key . '.lock');
   }
 
   private function waitForLock($key) {
@@ -76,13 +76,13 @@ class CacheMemcache extends Cache {
 
   // Prefer lazy initalization since the cache isn't used every request
   private function connect() {
-    if (! $this->connection = @memcache_pconnect($this->host, $this->port)) {
+    if (! self::$connection = @memcache_pconnect($this->host, $this->port)) {
       throw new CacheException("Couldn't connect to memcache server");
     }
   }
 
   private function check() {
-    if (! $this->connection) {
+    if (! self::$connection) {
       $this->connect();
     }
   }
@@ -93,7 +93,7 @@ class CacheMemcache extends Cache {
       // default to global cache time
       $expiration = Config::Get('cache_time');
     }
-    if (($ret = @memcache_get($this->connection, $key)) === false) {
+    if (($ret = @memcache_get(self::$connection, $key)) === false) {
       return false;
     }
     if (time() - $ret['time'] > $expiration) {
@@ -112,7 +112,7 @@ class CacheMemcache extends Cache {
       $this->waitForLock($key);
     }
     $this->createLock($key);
-    if (@memcache_set($this->connection, $key, $value, false, $ttl) == false) {
+    if (@memcache_set(self::$connection, $key, $value, false, $ttl) == false) {
       $this->removeLock($key);
       throw new CacheException("Couldn't store data in cache");
     }
@@ -121,6 +121,6 @@ class CacheMemcache extends Cache {
 
   public function delete($key) {
     $this->check();
-    @memcache_delete($this->connection, $key);
+    @memcache_delete(self::$connection, $key);
   }
 }
