@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +40,9 @@ import javax.servlet.http.HttpServletResponse;
  * Common base class for API servlets.
  */
 public abstract class ApiServlet extends InjectedServlet {
+  
+  private static final Logger logger = Logger.getLogger(ApiServlet.class.getName());
+  
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
   protected HandlerRegistry dispatcher;
@@ -94,9 +99,11 @@ public abstract class ApiServlet extends InjectedServlet {
   protected ResponseItem responseItemFromException(Throwable t) {
     if (t instanceof ProtocolException) {
       ProtocolException spe = (ProtocolException) t;
+      logger.log(Level.INFO, "Returning a response error as result of a protocol exception", spe);
       return new ResponseItem(spe.getError(), spe.getMessage());
     }
-
+    
+    logger.log(Level.WARNING, "Returning a response error as result of an exception", t);
     return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
   }
 
