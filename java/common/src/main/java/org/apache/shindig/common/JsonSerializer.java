@@ -189,15 +189,20 @@ public final class JsonSerializer {
       try {
         Object value = entry.getValue().invoke(pojo);
         if (value != null) {
-          // Drop null values.
-          if (firstDone) {
-            buf.append(',');
-          } else {
-            firstDone = true;
+          String attribute = entry.getKey();
+
+          // Common use case isOwner/isViewer should not be set unless true
+          if (!((attribute.equals("isOwner") || attribute.equals("isViewer")) && value.equals(Boolean.FALSE))) {
+            // Drop null values.
+            if (firstDone) {
+              buf.append(',');
+            } else {
+              firstDone = true;
+            }
+            appendString(buf, attribute);
+            buf.append(':');
+            append(buf, value);
           }
-          appendString(buf, entry.getKey());
-          buf.append(':');
-          append(buf, value);
         }
       } catch (IllegalArgumentException e) {
         // Shouldn't be possible.
