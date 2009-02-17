@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,13 +19,12 @@
  * under the License.
  */
 
-
 /*
  * This class impliments a basic on disk caching. That will work fine on a single host
  * but on a multi server setup this could lead to some problems due to inconsistencies
  * between the various cached versions on the different servers. Other methods like
  * memcached should be used instead really.
- * 
+ *
  * When using this file based backend, its adviced to make a cron job that scans thru the
  * cache dir, and removes all files that are older then 24 hours (or whatever your
  * config's CACHE_TIME is set too).
@@ -55,14 +55,13 @@ class CacheFile extends Cache {
   }
 
   private function waitForLock($cacheFile) {
-    // 20 x 250 = 5 seconds
-    $tries = 20;
+    // 10 x 100 = 1 second
+    $tries = 10;
     $cnt = 0;
     do {
       // make sure PHP picks up on file changes. This is an expensive action but really can't be avoided
       clearstatcache();
-      // 250 ms is a long time to sleep, but it does stop the server from burning all resources on polling locks..
-      usleep(250);
+      usleep(100);
       $cnt ++;
     } while ($cnt <= $tries && $this->isLocked($cacheFile));
     if ($this->isLocked($cacheFile)) {
@@ -82,11 +81,7 @@ class CacheFile extends Cache {
     return $this->getCacheDir($hash) . '/' . $hash;
   }
 
-  public function get($key, $expiration = false) {
-    if (! $expiration) {
-      // if no expiration time was given, fall back on the global config
-      $expiration = Config::get('cache_time');
-    }
+  public function get($key) {
     $cacheFile = $this->getCacheFile($key);
     // See if this cache file is locked, if so we wait upto 5 seconds for the lock owning process to
     // complete it's work. If the lock is not released within that time frame, it's cleaned up.
@@ -95,18 +90,20 @@ class CacheFile extends Cache {
       $this->waitForLock($cacheFile);
     }
     if (File::exists($cacheFile) && File::readable($cacheFile)) {
-      $now = time();
-      if (($mtime = @filemtime($cacheFile)) !== false && ($now - $mtime) < $expiration) {
-        if (($data = @file_get_contents($cacheFile)) !== false) {
-          $data = unserialize($data);
-          return $data;
+      if (($data = @file_get_contents($cacheFile)) !== false) {
+        $data = unserialize($data);
+        if (($_SERVER['REQUEST_TIME'] - $data['time']) < $data['ttl']) {
+          return $data['data'];
         }
       }
     }
     return false;
   }
 
-  public function set($key, $value) {
+  public function set($key, $value, $ttl = false) {
+    if (! $ttl) {
+      $ttl = Config::Get('cache_time');
+    }
     $cacheDir = $this->getCacheDir($key);
     $cacheFile = $this->getCacheFile($key);
     if ($this->isLocked($cacheFile)) {
@@ -118,9 +115,7 @@ class CacheFile extends Cache {
         throw new CacheException("Could not create cache directory");
       }
     }
-    // we serialize the whole request object, since we don't only want the
-    // responseContent but also the postBody used, headers, size, etc
-    $data = serialize($value);
+    $data = serialize(array('data' => $value, 'time' => $_SERVER['REQUEST_TIME'], 'ttl' => $ttl));
     $this->createLock($cacheFile);
     if (! @file_put_contents($cacheFile, $data)) {
       $this->removeLock($cacheFile);

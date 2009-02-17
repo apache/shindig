@@ -52,7 +52,7 @@ class CacheMemcache extends Cache {
     $this->check();
     // the interesting thing is that this could fail if the lock was created in the meantime..
     // but we'll ignore that out of convenience
-    @memcache_add($this->connection, $key . '.lock', '', 0, 5);
+    @memcache_add($this->connection, $key . '.lock', '', 0, 2);
   }
 
   private function removeLock($key) {
@@ -63,22 +63,18 @@ class CacheMemcache extends Cache {
 
   private function waitForLock($key) {
     $this->check();
-    // 20 x 250 = 5 seconds
-    $tries = 20;
+    $tries = 10;
     $cnt = 0;
     do {
-      // 250 ms is a long time to sleep, but it does stop the server from burning all resources on polling locks..
-      usleep(250);
+      usleep(100);
       $cnt ++;
     } while ($cnt <= $tries && $this->isLocked());
     if ($this->isLocked()) {
-      // 5 seconds passed, assume the owning process died off and remove it
       $this->removeLock($key);
     }
   }
 
-  // I prefer lazy initalization since the cache isn't used every request
-  // so this potentially saves a lot of overhead
+  // Prefer lazy initalization since the cache isn't used every request
   private function connect() {
     if (! $this->connection = @memcache_pconnect($this->host, $this->port)) {
       throw new CacheException("Couldn't connect to memcache server");
@@ -107,13 +103,20 @@ class CacheMemcache extends Cache {
     return $ret['data'];
   }
 
-  public function set($key, $value) {
+  public function set($key, $value, $ttl = false) {
     $this->check();
-    // we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
-    if (@memcache_set($this->connection, $key, array('time' => time(),
-        'data' => $value), false, Config::Get('cache_time')) == false) {
+    if (! $ttl) {
+      $ttl = Config::Get('cache_time');
+    }
+    if ($this->isLocked($key)) {
+      $this->waitForLock($key);
+    }
+    $this->createLock($key);
+    if (@memcache_set($this->connection, $key, $value, false, $ttl) == false) {
+      $this->removeLock($key);
       throw new CacheException("Couldn't store data in cache");
     }
+    $this->removeLock($key);
   }
 
   public function delete($key) {
