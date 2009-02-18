@@ -35,6 +35,14 @@
     </param-value>
   </context-param>
 
+  <login-config>
+     <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/sample_login.jsp</form-login-page>
+      <form-error-page>/sample_fail.jsp</form-error-page>
+    </form-login-config>
+  </login-config>
+  
   <filter>
     <filter-name>authFilter</filter-name>
     <filter-class>org.apache.shindig.auth.AuthenticationServletFilter</filter-class>

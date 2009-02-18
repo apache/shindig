@@ -20,6 +20,7 @@ package org.apache.shindig.social.sample.oauth;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.core.oauth.OAuthSecurityToken;
@@ -29,33 +30,43 @@ import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 import org.json.JSONException;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.oauth.OAuthConsumer;
+import net.oauth.OAuthServiceProvider;
 
 // Sample implementation for OAuth data store
 public class SampleOAuthDataStore implements OAuthDataStore {
   // used to get samplecontainer data from canonicaldb.json
-  private JsonDbOpensocialService service;
+  private final JsonDbOpensocialService service;
+  private final OAuthServiceProvider SERVICE_PROVIDER;
 
   @Inject
-  public SampleOAuthDataStore(JsonDbOpensocialService dbService) {
+  public SampleOAuthDataStore(JsonDbOpensocialService dbService, @Named("shindig.oauth.base-url") String baseUrl) {
     this.service = dbService;
+    this.SERVICE_PROVIDER = new OAuthServiceProvider(baseUrl + "requestToken", baseUrl + "authorize", baseUrl + "accessToken");
   }
 
   // All valid OAuth tokens
-  private static ConcurrentHashMap<String,OAuthEntry> oauthTokens = Maps.newConcurrentHashMap();
+  private static ConcurrentHashMap<String,OAuthEntry> oauthEntries = Maps.newConcurrentHashMap();
 
   // Get the OAuthEntry that corresponds to the oauthToken
   public OAuthEntry getEntry(String oauthToken) {
     Preconditions.checkNotNull(oauthToken);
-    return oauthTokens.get(oauthToken);
+    return oauthEntries.get(oauthToken);
   }
 
-  // If the passed in consumerKey is valid, pass back the consumerSecret
-  public String getConsumerSecret(String consumerKey) {
+  public OAuthConsumer getConsumer(String consumerKey) {
     try {
-       return service.getDb().getJSONObject("consumerSecrets").getString(Preconditions.checkNotNull(consumerKey));
+      String consumerSecret = service.getDb().getJSONObject("consumerSecrets").getString(Preconditions.checkNotNull(consumerKey));
+      if (consumerSecret == null)
+          return null;
+      // null below is for the callbackUrl, which we don't have in the db
+      OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, SERVICE_PROVIDER);
+      consumer.setProperty("samplecontainer-attribute", "value");
+      return consumer;
+
     } catch (JSONException e) {
        return null;
     }
@@ -66,7 +77,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     OAuthEntry entry = new OAuthEntry();
     entry.appId = consumerKey;
     entry.consumerKey = consumerKey;
-    entry.consumerSecret = getConsumerSecret(consumerKey);
+    entry.consumerSecret = getConsumer(consumerKey).consumerSecret;
     entry.domain = "samplecontainer.com";
     entry.container = "default";
 
@@ -76,7 +87,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     entry.type = OAuthEntry.Type.REQUEST;
     entry.issueTime = new Date();
 
-    oauthTokens.put(entry.token, entry);
+    oauthEntries.put(entry.token, entry);
     return entry;
   }
 
@@ -93,7 +104,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     accessEntry.type = OAuthEntry.Type.ACCESS;
     accessEntry.issueTime = new Date();
 
-    oauthTokens.put(entry.token, entry);
+    oauthEntries.put(entry.token, entry);
 
     return entry;
   }

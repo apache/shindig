@@ -81,10 +81,7 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
 
   private boolean isValidOAuthRequest(OAuthMessage requestMessage) {
     String consumerKey = getParameter(requestMessage, OAuth.OAUTH_CONSUMER_KEY);
-    String consumerSecret = store.getConsumerSecret(consumerKey);
-
-    OAuthServiceProvider provider = new OAuthServiceProvider(baseUrl + "reqeustToken", baseUrl + "authorize", baseUrl + "accessToken");
-    OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, provider);
+    OAuthConsumer consumer = store.getConsumer(consumerKey);
     OAuthAccessor accessor = new OAuthAccessor(consumer);
 
     SimpleOAuthValidator validator = new SimpleOAuthValidator();
