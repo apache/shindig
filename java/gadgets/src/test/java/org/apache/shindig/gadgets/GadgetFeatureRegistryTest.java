@@ -19,21 +19,17 @@
 
 package org.apache.shindig.gadgets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
-import java.util.Collections;
-
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -133,4 +129,23 @@ public class GadgetFeatureRegistryTest {
       assertTrue(feature + " not returned.", found.contains(feature));
     }
   }
+
+  @Test
+  public void duplicateFeaturesRejected() throws Exception {
+    int expectedFeaturesInRegistry = 2;
+    registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
+    try {
+      registry.register(makeFeature(FEATURE_NAME, CONTENT, DEP_NAME));
+      fail("Should have thrown IllegalArgumentException for duplicate name registration");
+    } catch (IllegalArgumentException e) {      
+    }
+    Collection<GadgetFeature> features
+        = registry.getFeatures(Arrays.asList(FEATURE_NAME));
+    assertEquals(expectedFeaturesInRegistry, features.size());
+    // Order must be preserved.
+    Iterator<GadgetFeature> i = features.iterator();
+    assertEquals(CORE_NAME, i.next().getName());
+    assertEquals(FEATURE_NAME, i.next().getName());
+  }
+
 }
