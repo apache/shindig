@@ -94,8 +94,8 @@ public class CajaCssParser {
         return (CssTree.StyleSheet)parsedCss.clone();
       } catch (RuntimeException re) {
         // TODO - FIXME ASAP!
-        log.log(Level.INFO, "Workaround for Caja bug http://code.google.com/p/google-caja/issues/detail?id=985&start=200",
-            re);
+        log.log(Level.INFO,
+            "Workaround for Caja bug http://code.google.com/p/google-caja/issues/detail?id=985&start=200\n" + re.getMessage());
         try {
           return parseImpl(content);
         } catch (ParseException pe) {
