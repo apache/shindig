@@ -26,6 +26,8 @@ import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
 import java.util.UUID;
 import java.util.Date;
 
+import net.oauth.OAuthConsumer;
+
 @ImplementedBy(SampleOAuthDataStore.class)
 
 /**
@@ -57,12 +59,18 @@ public interface OAuthDataStore {
   SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId);
 
   /**
-   * If the passed in consumerKey is valid, pass back the consumerSecret.
+   * Lookup consumers.  Generally this corresponds to an opensocial Application
+   * but could be abstracted in other ways.  If you have multiple containers you
+   * may want to include the container as part of the identifier.
    *
-   * @param consumerKey A consumer key to test.
-   * @return the consumer secret for the specific consumer key.
+   * Your consumer object should have the key and secret, a link to your provider
+   * plus you should consider setting properties that correspond to the metadata
+   * in the opensocial app like icon, description, etc.
+   *
+   * @param consumerKey A valid, non-null ConsumerKey
+   * @return the consumer object corresponding to the specified key.
    */
-  String getConsumerSecret(String consumerKey);
+  OAuthConsumer getConsumer(String consumerKey);
 
   /**
    * Generate a valid requestToken for the given consumerKey.
