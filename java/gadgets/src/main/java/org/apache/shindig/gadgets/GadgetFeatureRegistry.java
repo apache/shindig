@@ -101,10 +101,6 @@ public class GadgetFeatureRegistry {
   public void register(GadgetFeature feature) {
     Preconditions.checkState(!isLocked(), "registry is locked and can no longer be changed!");
 
-    if (features.containsKey(feature.getName())) {
-      throw new IllegalArgumentException("Trying to enter the same feature twice: "+feature.getName());
-    }
-    
     if (logger.isLoggable(Level.FINE)) logger.fine("Registering feature: " + feature.getName());
 
     if (isCore(feature)) {
