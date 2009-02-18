@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 
+import com.google.caja.lexer.ParseException;
 import com.google.caja.parser.AbstractParseTreeNode;
 import com.google.caja.parser.AncestorChain;
 import com.google.caja.parser.Visitor;
@@ -41,12 +42,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Rewrite links to referenced content in a stylesheet
  */
 public class CSSContentRewriter implements ContentRewriter {
+
+  private static final Logger logger = Logger.getLogger(CSSContentRewriter.class.getName());
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
   private final String proxyBaseNoGadget;
@@ -94,15 +100,25 @@ public class CSSContentRewriter implements ContentRewriter {
   public List<String> rewrite(Reader content, Uri source,
       LinkRewriter rewriter, Writer writer, boolean extractImports) {
     try {
-      CssTree.StyleSheet stylesheet = cssParser.parseDom(IOUtils.toString(content));
-      List<String> stringList = rewrite(stylesheet, source, rewriter, extractImports);
-      // Serialize the stylesheet
-      cssParser.serialize(stylesheet, writer);
-      return stringList;
+      String original = IOUtils.toString(content);
+      try {
+        CssTree.StyleSheet stylesheet = cssParser.parseDom(original);
+        List<String> stringList = rewrite(stylesheet, source, rewriter, extractImports);
+        // Serialize the stylesheet
+        cssParser.serialize(stylesheet, writer);
+        return stringList;
+      } catch (GadgetException ge) {
+        if (ge.getCause() instanceof ParseException) {
+          logger.log(Level.WARNING,
+              "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
+          writer.write(original);
+          return Collections.emptyList();
+        } else {
+          throw new RuntimeException(ge);
+        }
+      }
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
-    } catch (GadgetException ge) {
-      throw new RuntimeException(ge);
     }
   }
 
@@ -130,7 +146,13 @@ public class CSSContentRewriter implements ContentRewriter {
       }
       return imports;
     } catch (GadgetException ge) {
-      throw new RuntimeException(ge);
+      if (ge.getCause() instanceof ParseException) {
+        logger.log(Level.WARNING,
+              "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
+        return Collections.emptyList();
+      } else {
+        throw new RuntimeException(ge);
+      }
     }
   }
 

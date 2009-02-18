@@ -136,4 +136,49 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(stringList, Lists.newArrayList("www.example.org/some.css",
         "www.example.org/someother.css", "www.example.org/another.css"));
   }
+
+  /**
+   * These tests will fail when Caja successfully parses funky CSS.
+   * They can be converted into a test of success once that happens
+   */
+  public void testCajaParseFailureColonInRValue() {
+    String original = " A {\n"
+        + " -moz-opacity: 0.80;\n"
+        + " filter: alpha(opacity=40);\n"
+        + " filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);\n"
+        + "}";
+    StringWriter sw = new StringWriter();
+    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(original, sw.toString());
+  }
+
+  public void testCajaParseFailureNoLValue() {
+    String original = "body, input, td {\n"
+        + "  Arial, sans-serif;\n"
+        + "}";
+    StringWriter sw = new StringWriter();
+    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(original, sw.toString());
+  }
+
+  public void testCajaParseFailureCommentInContent() {
+    String original = "body { font : bold; } \n//A comment\n A { font : bold; }"; 
+    StringWriter sw = new StringWriter();
+    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(original, sw.toString());
+  }
+
+  public void testCajaParseFailureDotInIdent() {
+    String original = "li{list-style:none;.padding-bottom:4px;}";
+    StringWriter sw = new StringWriter();
+    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(original, sw.toString());
+  }
+
+  public void testCajaParseFailureDotInFunction() {
+    String original = ".iepngfix {behavior: expression(IEPNGFIX.fix(this)); }";
+    StringWriter sw = new StringWriter();
+    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
+    assertEquals(original, sw.toString());
+  }
 }
