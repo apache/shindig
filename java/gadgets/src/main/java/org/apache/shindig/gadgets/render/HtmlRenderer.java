@@ -32,19 +32,17 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
-import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.inject.Inject;
-
 import org.json.JSONArray;
 
 import java.nio.charset.Charset;
-import java.util.Map;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.inject.Inject;
 
 /**
  * Handles producing output markup for a gadget based on the provided context.
@@ -96,7 +94,7 @@ public class HtmlRenderer {
       GadgetSpec spec = gadget.getSpec();
 
       // We always execute these preloads, they have nothing to do with the cache output.
-      Preloads preloads = preloader.preload(context, spec,
+      Collection<PreloadedData> preloads = preloader.preload(context, spec,
           PreloaderService.PreloadPhase.HTML_RENDER);
       gadget.setPreloads(preloads);
 
@@ -162,21 +160,18 @@ public class HtmlRenderer {
     request.setIgnoreCache(true);
     GadgetSpec spec = gadget.getSpec();
     GadgetContext context = gadget.getContext();
-    Preloads proxyPreloads = preloader.preload(context, spec,
+    Collection<PreloadedData> proxyPreloads = preloader.preload(context, spec,
           PreloaderService.PreloadPhase.PROXY_FETCH);
     // TODO: Add current url to GadgetContext to support transitive proxying.
 
     // POST any preloaded content
-    if ((proxyPreloads != null) && !proxyPreloads.getData().isEmpty()) {
+    if ((proxyPreloads != null) && !proxyPreloads.isEmpty()) {
       JSONArray array = new JSONArray();
 
-      for (PreloadedData preload : proxyPreloads.getData()) {
+      for (PreloadedData preload : proxyPreloads) {
         try {
-          Map<String, Object> dataMap = preload.toJson();
-          for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-            // TODO: the existing, supported content is JSONObjects that contain the
-            // key already.  Discarding the key is odd.
-            array.put(entry.getValue());
+          for (Object entry : preload.toJson()) {
+            array.put(entry);
           }
         } catch (PreloadException pe) {
           // TODO: Determine whether this is a terminal path for the request. The spec is not

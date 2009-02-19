@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -45,9 +46,9 @@ public class ConcurrentPreloaderService implements PreloaderService {
     this.preloaders = preloaders;
   }
 
-  public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+  public Collection<PreloadedData> preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
     if (preloaders.isEmpty()) {
-      return new NullPreloads();
+      return ImmutableList.<PreloadedData>of();
     }
 
     List<Callable<PreloadedData>> tasks = Lists.newArrayList();
@@ -60,7 +61,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
     return preload(tasks);
   }
 
-  public Preloads preload(Collection<Callable<PreloadedData>> tasks) {
+  public Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks) {
     ConcurrentPreloads preloads = new ConcurrentPreloads();
     int processed = tasks.size();
     for (Callable<PreloadedData> task : tasks) {

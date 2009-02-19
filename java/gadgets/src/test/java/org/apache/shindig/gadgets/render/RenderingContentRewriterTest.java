@@ -39,25 +39,14 @@ import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.preload.NullPreloads;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.caja.util.Join;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -71,6 +60,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.caja.util.Join;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Tests for RenderingContentRewriter.
@@ -109,7 +108,7 @@ public class RenderingContentRewriterTest {
     GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
     return new Gadget()
         .setContext(context)
-        .setPreloads(new NullPreloads())
+        .setPreloads(ImmutableList.<PreloadedData>of())
         .setSpec(spec);
   }
 
@@ -567,67 +566,49 @@ public class RenderingContentRewriterTest {
     // rewrite will throw if the optional unsupported feature doesn't work.
   }
 
-  private JSONObject getPreloadedJson(String content) throws JSONException {
+  private JSONArray getPreloadedJson(String content) throws JSONException {
     Pattern preloadPattern
-        = Pattern.compile("(?:.*)gadgets\\.io\\.preloaded_=\\{(.*?)\\};(?:.*)", Pattern.DOTALL);
+        = Pattern.compile("(?:.*)gadgets\\.io\\.preloaded_=\\[(.*?)\\];(?:.*)", Pattern.DOTALL);
     Matcher matcher = preloadPattern.matcher(content);
     assertTrue("gadgets.io.preloaded not set.", matcher.matches());
-    return new JSONObject('{' + matcher.group(1) + '}');
+    return new JSONArray('[' + matcher.group(1) + ']');
   }
 
   @Test
   public void preloadsInjected() throws Exception {
-    final Map<String, Object> preloadData = Maps.newHashMap();
-
-    // We want a variety of data.
-    preloadData.put("string", "string");
-    preloadData.put("integer", 99);
-    preloadData.put("double", 4343434.345345d);
+    final Collection<Object> someData = ImmutableList.of("string", (Object) 99, 4343434.345345d);
 
     // Other types are supported (anything valid for org.json.JSONObject), but equality comparisons
     // are more complicated because JSON doesn't implement interfaces like Collection or Map, or
     // implementing equals.
-
-    Preloads preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
-            return preloadData;
-          }
-        };
-
-        return Lists.newArrayList(preloadedData);
+    PreloadedData preloadedData = new PreloadedData() {
+      public Collection<Object> toJson() throws PreloadException {
+        return someData;
       }
     };
-
-    Gadget gadget = makeDefaultGadget().setPreloads(preloads);
+    Gadget gadget = makeDefaultGadget().setPreloads(ImmutableList.of(preloadedData));
 
     String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getPreloadedJson(rewritten);
-    for (Map.Entry<String, Object> entry : preloadData.entrySet()) {
-      assertEquals(entry.getValue(), json.get(entry.getKey()));
+    JSONArray json = getPreloadedJson(rewritten);
+    int i = 0;
+    for (Object entry : someData) {
+      assertEquals(entry, json.get(i++));
     }
   }
 
   @Test
   public void failedPreloadHandledGracefully() throws Exception {
-    Preloads preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
-            throw new PreloadException("test");
-          }
-        };
-
-        return Lists.newArrayList(preloadedData);
+    PreloadedData preloadedData = new PreloadedData() {
+      public Collection<Object> toJson() throws PreloadException {
+        throw new PreloadException("test");
       }
     };
 
-    Gadget gadget = makeDefaultGadget().setPreloads(preloads);
+    Gadget gadget = makeDefaultGadget().setPreloads(ImmutableList.of(preloadedData));
     String rewritten = rewrite(gadget, "");
 
-    JSONObject json = getPreloadedJson(rewritten);
+    JSONArray json = getPreloadedJson(rewritten);
 
     assertEquals(0, json.length());
   }

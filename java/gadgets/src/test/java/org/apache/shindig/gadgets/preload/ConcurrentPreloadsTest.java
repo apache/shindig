@@ -24,14 +24,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
+import org.junit.Test;
+
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -45,8 +46,8 @@ public class ConcurrentPreloadsTest {
     preloads.add(TestFuture.returnsNormal("foo"));
     preloads.add(TestFuture.returnsNormal("bar"));
 
-    assertEquals(2, preloads.getData().size());
-    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    assertEquals(2, preloads.size());
+    Iterator<PreloadedData> iterator = preloads.iterator();
     assertEquals(TestFuture.expectedResult("foo"), iterator.next().toJson());
     assertEquals(TestFuture.expectedResult("bar"), iterator.next().toJson());
     assertFalse(iterator.hasNext());
@@ -58,8 +59,8 @@ public class ConcurrentPreloadsTest {
     preloads.add(TestFuture.throwsExecution());
     preloads.add(TestFuture.returnsNormal("foo"));
 
-    assertEquals(2, preloads.getData().size());
-    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    assertEquals(2, preloads.size());
+    Iterator<PreloadedData> iterator = preloads.iterator();
 
     // First item should throw an exception, a PreloadException around
     // a RuntimeException
@@ -81,8 +82,8 @@ public class ConcurrentPreloadsTest {
     preloads.add(TestFuture.throwsExecutionWrapped());
     preloads.add(TestFuture.returnsNormal("foo"));
 
-    assertEquals(2, preloads.getData().size());
-    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    assertEquals(2, preloads.size());
+    Iterator<PreloadedData> iterator = preloads.iterator();
 
     // First item should throw an exception, a straight PreloadException
     PreloadedData withError = iterator.next();
@@ -103,8 +104,8 @@ public class ConcurrentPreloadsTest {
     preloads.add(TestFuture.throwsInterrupted());
     preloads.add(TestFuture.returnsNormal("foo"));
 
-    assertEquals(2, preloads.getData().size());
-    Iterator<PreloadedData> iterator = preloads.getData().iterator();
+    assertEquals(2, preloads.size());
+    Iterator<PreloadedData> iterator = preloads.iterator();
     // InterruptedException should immediately terminate
     iterator.next();
   }
@@ -141,8 +142,8 @@ public class ConcurrentPreloadsTest {
       return future;
     }
 
-    public static Map<String, Object> expectedResult(String key) {
-      return ImmutableMap.of(key, (Object) "Preloaded");
+    public static Collection<Object> expectedResult(String key) {
+      return ImmutableList.of((Object) ImmutableMap.of(key, "Preloaded"));
     }
 
     public PreloadedData get() throws InterruptedException, ExecutionException {
@@ -159,7 +160,7 @@ public class ConcurrentPreloadsTest {
       }
 
       return new PreloadedData() {
-        public Map<String, Object> toJson() {
+        public Collection<Object> toJson() {
           return expectedResult(key);
         }
       };

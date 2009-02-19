@@ -29,11 +29,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -43,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for HttpPreloader.
@@ -97,7 +95,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     PreloadedData data = preloaded.iterator().next().call();
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson().iterator().next());
   }
 
   @Test
@@ -119,7 +117,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     checkRequest(request);
     assertTrue(request.getOAuthArguments().getSignOwner());
     assertFalse(request.getOAuthArguments().getSignViewer());
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson().iterator().next());;
   }
 
   @Test
@@ -140,7 +138,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
 
     HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
-    checkResults((JSONObject) data.toJson().get(PRELOAD_HREF));
+    checkResults((JSONObject) data.toJson().iterator().next());
   }
 
   @Test
@@ -157,23 +155,24 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertEquals(2, preloaded.size());
-    Map<String, Object> map = getAll(preloaded);
+    List<Object> list = getAll(preloaded);
+    assertEquals(2, list.size());
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) map.get(PRELOAD_HREF));
+    checkResults((JSONObject) list.get(0));
 
     checkRequest(plainFetcher.requests.get(1));
-    checkResults((JSONObject) map.get(PRELOAD_HREF2));
+    checkResults((JSONObject) list.get(1));
   }
 
-  private Map<String, Object> getAll(
+  private List<Object> getAll(
       Collection<Callable<PreloadedData>> preloaded) throws Exception {
-    Map<String, Object> map = Maps.newHashMap();
+    List<Object> list = Lists.newArrayList();
     for (Callable<PreloadedData> preloadCallable : preloaded) {
-      map.putAll(preloadCallable.call().toJson());
+      list.addAll(preloadCallable.call().toJson());
     }
 
-    return map;
+    return list;
   }
 
   @Test
@@ -191,12 +190,10 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     Collection<Callable<PreloadedData>> preloaded
         = preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
-    Map<String, Object> map = getAll(preloaded);
-
+    List<Object> list = getAll(preloaded);
+    assertEquals(1, list.size());
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) map.get(PRELOAD_HREF));
-
-    assertFalse("Preloaded an item that should not have been.", map.containsKey(PRELOAD_HREF2));
+    checkResults((JSONObject) list.get(0));
   }
 
   @Test

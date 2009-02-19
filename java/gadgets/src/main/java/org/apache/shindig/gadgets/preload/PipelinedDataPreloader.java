@@ -31,13 +31,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +43,11 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.el.ELResolver;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 /**
  * Preloader for loading Data Pipelining Preload data.
@@ -140,21 +138,17 @@ public class PipelinedDataPreloader implements Preloader {
 
       HttpResponse response = requestPipeline.execute(request);
 
-      // Unpack the response into a map of PreloadedData responses
-      final Map<String, Object> data = Maps.newHashMap();
+      // Unpack the response into a list of PreloadedData responses
+      final List<Object> data = Lists.newArrayList();
       // TODO: if the entire request fails, the result is an object,
       // not an array
       JSONArray array = new JSONArray(response.getResponseAsString());
       for (int i = 0; i < array.length(); i++) {
-        JSONObject arrayElement = array.getJSONObject(i);
-
-        // The posted form is just the returned data.
-        String id = arrayElement.getString("id");
-        data.put(id, arrayElement);
+        data.add(array.getJSONObject(i));
       }
 
       return new PreloadedData() {
-        public Map<String, Object> toJson() {
+        public Collection<Object> toJson() {
           return data;
         }
       };
@@ -242,8 +236,8 @@ public class PipelinedDataPreloader implements Preloader {
         this.data = data;
       }
 
-      public Map<String, Object> toJson() {
-        return ImmutableMap.of(key, (Object) data);
+      public Collection<Object> toJson() {
+        return ImmutableList.<Object>of(data);
       }
     }
   }

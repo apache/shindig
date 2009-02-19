@@ -29,19 +29,17 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 /**
  * Handles HTTP Preloading (/ModulePrefs/Preload elements).
@@ -107,21 +105,19 @@ public class HttpPreloader implements Preloader {
    */
   private static class HttpPreloadData implements PreloadedData {
     private final JSONObject data;
-    private final String key;
 
     public HttpPreloadData(HttpResponse response, String key) {
       JSONObject data = null;
       try {
-        data = FetchResponseUtils.getResponseAsJson(response, response.getResponseAsString());
+        data = FetchResponseUtils.getResponseAsJson(response, key, response.getResponseAsString());
       } catch (JSONException e) {
         data = new JSONObject();
       }
       this.data = data;
-      this.key = key;
     }
 
-    public Map<String, Object> toJson() {
-      return ImmutableMap.of(key, (Object) data);
+    public Collection<Object> toJson() {
+      return ImmutableList.of((Object) data);
     }
   }
 }

@@ -51,12 +51,11 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Test of PipelineDataContentRewriter.
@@ -290,10 +289,11 @@ public class PipelineDataContentRewriterTest {
   /** Create a mock Callable for a single preload task */
   private Callable<PreloadedData> createPreloadTask(final String key, String jsonResult)
       throws JSONException {
-    final Object value = new JSONObject(jsonResult);
+    final JSONObject value = new JSONObject(jsonResult);
+    value.put("id", key);
     final PreloadedData preloadResult = new PreloadedData() {
-      public Map<String, Object> toJson() throws PreloadException {
-        return ImmutableMap.of(key, value);
+      public Collection<Object> toJson() throws PreloadException {
+        return ImmutableList.<Object>of(value);
       }
     };
 

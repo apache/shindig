@@ -223,28 +223,32 @@ gadgets.io = function() {
    *         false otherwise
    */
   function respondWithPreload(postData, params, callback) {
-    if (gadgets.io.preloaded_ && gadgets.io.preloaded_[postData.url]) {
-      var preload = gadgets.io.preloaded_[postData.url];
-      if (postData.httpMethod == "GET") {
-        delete gadgets.io.preloaded_[postData.url];
-        if (preload.rc !== 200) {
-          callback({errors : ["Error " + preload.rc]});
-        } else {
-          if (preload.oauthState) {
-            oauthState = preload.oauthState;
+    if (gadgets.io.preloaded_ && postData.httpMethod === "GET") {
+      for (var i = 0; i < gadgets.io.preloaded_.length; i++) {
+        var preload = gadgets.io.preloaded_[i];
+        if (preload && (preload.id === postData.url)) {
+          // Only satisfy once
+          delete gadgets.io.preloaded_[i];
+
+          if (preload.rc !== 200) {
+            callback({errors : ["Error " + preload.rc]});
+          } else {
+            if (preload.oauthState) {
+              oauthState = preload.oauthState;
+            }
+            var resp = {
+              body: preload.body,
+              rc: preload.rc,
+              headers: preload.headers,
+              oauthApprovalUrl: preload.oauthApprovalUrl,
+              oauthError: preload.oauthError,
+              oauthErrorText: preload.oauthErrorText,
+              errors: []
+            };
+            callback(transformResponseData(params, resp));
           }
-          var resp = {
-            body: preload.body,
-            rc: preload.rc,
-            headers: preload.headers,
-            oauthApprovalUrl: preload.oauthApprovalUrl,
-            oauthError: preload.oauthError,
-            oauthErrorText: preload.oauthErrorText,
-            errors: []
-          };
-          callback(transformResponseData(params, resp));
+          return true;
         }
-        return true;
       }
     }
     return false;
