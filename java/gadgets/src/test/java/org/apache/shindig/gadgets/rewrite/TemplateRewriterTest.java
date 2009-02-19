@@ -150,7 +150,9 @@ public class TemplateRewriterTest {
   
   private static String getGadgetXml(String content, boolean requireFeature) {
     String feature = requireFeature ?
-        "<Require feature='opensocial-templates'/>" : "";
+        "<Require feature='opensocial-templates'>" +
+        "  <Param name='" + TemplateRewriter.SERVER_TEMPLATING_PARAM + "'>true</Param>" +
+        "</Require>" : "";
     return "<Module>" + "<ModulePrefs title='Title'>"
         + feature + "</ModulePrefs>"
         + "<Content>"

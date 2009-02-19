@@ -52,6 +52,9 @@ import com.google.inject.Provider;
 public class TemplateRewriter implements ContentRewriter {
 
   public final static Set<String> TAGS = ImmutableSet.of("script");
+
+  /** A temporary parameter while server-side templating is in development */
+  static final String SERVER_TEMPLATING_PARAM = "process-on-server";
   
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
@@ -72,12 +75,20 @@ public class TemplateRewriter implements ContentRewriter {
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
-    if (f != null) {
+    if (f != null && isServerTemplatingEnabled(f)) {
       return rewriteImpl(gadget, content);   
     }
     return null;
   }
-  
+
+  /**
+   * For now, only enable server-side templating when the feature contains:
+   *   <Param name="process-on-server">true</Param>
+   */
+  private boolean isServerTemplatingEnabled(Feature f) {
+    return ("true".equalsIgnoreCase(f.getParams().get(SERVER_TEMPLATING_PARAM)));
+  }
+
   private RewriterResults rewriteImpl(Gadget gadget, MutableContent content) {
     List<Element> tagList =
       DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS);
