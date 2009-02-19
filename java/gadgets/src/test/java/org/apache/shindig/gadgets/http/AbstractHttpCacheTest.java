@@ -429,7 +429,7 @@ public class AbstractHttpCacheTest {
         .create();
     cache.map.put(key, response);
 
-    TimeSource fakeClock = new FakeTimeSource(expiration - 60L);
+    TimeSource fakeClock = new FakeTimeSource(expiration + 60L);
 
     cache.setClock(fakeClock);
 
