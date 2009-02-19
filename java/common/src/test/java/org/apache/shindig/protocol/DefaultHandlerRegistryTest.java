@@ -77,7 +77,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     JSONObject rpc = new JSONObject("{method : makebelieve.get}");
     RpcHandler rpcHandler = registry.getRpcHandler(rpc);
     try {
-      Future future = rpcHandler.execute(null, null);
+      Future<?> future = rpcHandler.execute(null, null);
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
@@ -91,7 +91,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testRestHandler_serviceDoesntExist() {
     RestHandler restHandler = registry.getRestHandler("/makebelieve", "GET");
     try {
-      Future future = restHandler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
+      Future<?> future = restHandler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
@@ -105,14 +105,14 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testNonFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "GET");
-    Future future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
+    Future<?> future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
     assertEquals(future.get(), TestHandler.GET_RESPONSE);
   }
 
   public void testFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "POST");
-    Future future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
+    Future<?> future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
     assertEquals(future.get(), TestHandler.CREATE_RESPONSE);
   }
 
@@ -120,7 +120,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.exception }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future future = handler.execute(null, null);
+    Future<?> future = handler.execute(null, null);
     try {
       future.get();
       fail("Service method did not produce NullPointerException from Future");
@@ -133,7 +133,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.futureException }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future future = handler.execute(null, null);
+    Future<?> future = handler.execute(null, null);
     try {
       future.get();
       fail("Service method did not produce ExecutionException from Future");
