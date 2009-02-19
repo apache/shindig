@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
-
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.w3c.dom.Attr;
@@ -57,6 +56,11 @@ public class NekoSerializer extends HtmlSerializer
   }
 
   public static void serialize(Node n, Appendable output) throws IOException {
+    serialize(n, output, false);
+  }
+    
+  private static void serialize(Node n, Appendable output, boolean xmlMode)
+      throws IOException {
     switch (n.getNodeType()) {
       case Node.CDATA_SECTION_NODE: {
         break;
@@ -66,17 +70,23 @@ public class NekoSerializer extends HtmlSerializer
         break;
       }
       case Node.DOCUMENT_NODE: {
-        serialize(((Document)n).getDocumentElement(), output);
+        serialize(((Document)n).getDocumentElement(), output, xmlMode);
         break;
       }
       case Node.ELEMENT_NODE: {
         Element elem = (Element)n;
         HTMLElements.Element htmlElement =
             HTMLElements.getElement(elem.getNodeName());
+        
         NodeList children = elem.getChildNodes();
-        printStartElement(elem, output);
+        printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
+        
+        // Special HTML elements - <script> in particular - will typically
+        // only have CDATA.  If they do have elements, that'd be data pipelining
+        // or templating kicking in, and we should use XML-format output.
+        boolean childXmlMode = xmlMode || htmlElement.isSpecial();
         for (int i = 0; i < children.getLength(); i++) {
-          serialize(children.item(i), output);
+          serialize(children.item(i), output, childXmlMode);
         }
         if (!htmlElement.isEmpty()) {
           output.append("</").append(elem.getNodeName()).append('>');
@@ -109,7 +119,19 @@ public class NekoSerializer extends HtmlSerializer
     output.append(">\n");
   }
 
+  /**
+   * Print the start of an HTML element. 
+   */
   public static void printStartElement(Element elem, Appendable output) throws IOException {
+    printStartElement(elem, output, false);
+  }
+  
+  /**
+   * Print the start of an HTML element.  If withXmlClose==true, this is an
+   * empty element that should have its content 
+   */
+  private static void printStartElement(Element elem, Appendable output, boolean withXmlClose)
+      throws IOException {
     output.append("<").append(elem.getTagName());
     NamedNodeMap attributes = elem.getAttributes();
     for (int i = 0; i < attributes.getLength(); i++) {
@@ -122,7 +144,7 @@ public class NekoSerializer extends HtmlSerializer
         output.append('"');
       }
     }
-    output.append(">");
+    output.append(withXmlClose ? "/>" : ">");
   }
 
   public static void printAttributeValue(String text, Appendable output) throws IOException {
