@@ -112,10 +112,12 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(pathParts[0]);
     if (methods != null) {
       SortedSet<RestPath> paths = methods.get(method);
-      for (RestPath restPath : paths) {
-        RestHandler handler = restPath.accept(pathParts);
-        if (handler != null) {
-          return handler;
+      if (paths != null) {
+        for (RestPath restPath : paths) {
+          RestHandler handler = restPath.accept(pathParts);
+          if (handler != null) {
+            return handler;
+          }
         }
       }
     }
