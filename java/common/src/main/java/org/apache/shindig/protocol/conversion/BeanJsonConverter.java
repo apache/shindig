@@ -32,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -70,6 +71,10 @@ public class BeanJsonConverter implements BeanConverter {
    */
   public String convertToString(final Object pojo) {
     return JsonSerializer.serialize(pojo);
+  }
+
+  public void append(Appendable buf, Object pojo) throws IOException {
+    JsonSerializer.append(buf, pojo);
   }
 
   private static Map<String, Method> getSetters(Object pojo) {

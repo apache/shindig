@@ -30,6 +30,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.JSONUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.List;
 
@@ -159,6 +160,10 @@ public class BeanJsonLibConverter implements BeanConverter {
   @SuppressWarnings("unchecked")
   public void addMapping(String key, Class<?> class1) {
     jsonConfig.getClassMap().put(key, class1);
+  }
+  
+  public void append(Appendable buf, Object pojo) throws IOException {
+    buf.append(convertToString(pojo));
   }
 
 }

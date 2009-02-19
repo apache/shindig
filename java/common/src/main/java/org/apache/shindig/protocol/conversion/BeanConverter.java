@@ -17,10 +17,20 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import java.io.IOException;
+
 public interface BeanConverter {
   <T> T convertToObject(String string, Class<T> className);
 
   String convertToString(Object pojo);
 
   String getContentType();
+
+  /**
+   * Serialize object to a buffer. Useful for high performance output.
+   * @param buf Buffer to append to
+   * @param pojo Object to serialize
+   * @throws IOException If {@link Appendable#append(char)} throws an exception.
+   */
+  public void append(Appendable buf, Object pojo) throws IOException;
 }

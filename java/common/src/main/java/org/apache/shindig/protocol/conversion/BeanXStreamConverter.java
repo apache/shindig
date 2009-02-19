@@ -35,6 +35,7 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.DefaultMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class BeanXStreamConverter implements BeanConverter {
@@ -90,7 +91,7 @@ public class BeanXStreamConverter implements BeanConverter {
    * a thread at any one time. This only matters if this class is extended.
    *
    * @param obj
-   * @return
+   * @return The XML as a string
    */
   private String convertToXml(Object obj) {
 
@@ -136,4 +137,7 @@ public class BeanXStreamConverter implements BeanConverter {
     return (T) cc.xstream.fromXML(xml);
   }
 
+  public void append(Appendable buf, Object pojo) throws IOException {
+    buf.append(convertToString(pojo));
+  }
 }

@@ -23,6 +23,7 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
 
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
@@ -66,7 +67,7 @@ public class JsonRpcServletTest extends TestCase {
     servlet = new JsonRpcServlet();
     req = mockControl.createMock(HttpServletRequest.class);
     res = mockControl.createMock(HttpServletResponse.class);
-    jsonConverter = mockControl.createMock(BeanJsonConverter.class);
+    jsonConverter = new BeanJsonConverter(Guice.createInjector());
     xmlConverter = mockControl.createMock(BeanConverter.class);
     atomConverter = mockControl.createMock(BeanConverter.class);
 
