@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -78,6 +79,13 @@ public class SocialMarkupHtmlParserTest {
     assertEquals(1, boldElements.getLength());
     Element boldElement = (Element) boldElements.item(0);
     assertEquals("Some ${viewer} content", boldElement.getTextContent());
+  }
+
+  @Test
+  public void testSocialTemplateSerialization() {
+    String content = NekoSerializer.serialize(document);
+    assertTrue("Empty elements not preserved as XML inside template",
+        content.indexOf("<img/>") >= 0);
   }
 
   @Test
