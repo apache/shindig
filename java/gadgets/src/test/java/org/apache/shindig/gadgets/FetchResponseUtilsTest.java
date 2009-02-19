@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -35,8 +36,9 @@ public class FetchResponseUtilsTest {
     HttpResponse response = new HttpResponseBuilder()
         .setHttpStatusCode(999)
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "body");
+    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
     assertEquals(999, obj.getInt("rc"));
+    assertEquals("key", obj.getString("id"));
     assertEquals("body", obj.getString("body"));
     assertEquals(0, obj.getJSONObject("headers").length());
   }
@@ -48,8 +50,9 @@ public class FetchResponseUtilsTest {
         .setMetadata("metaname", "metavalue")
         .setMetadata("more meta", "more value")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "body");
+    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, null, "body");
     assertEquals(999, obj.getInt("rc"));
+    assertFalse(obj.has("id"));
     assertEquals("body", obj.getString("body"));
     assertEquals("metavalue", obj.getString("metaname"));
     assertEquals("more value", obj.getString("more meta"));
@@ -62,8 +65,9 @@ public class FetchResponseUtilsTest {
         .setHeader("Set-Cookie", "cookie")
         .setHeader("location", "somewhere")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "body");
+    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
     assertEquals(999, obj.getInt("rc"));
+    assertEquals("key", obj.getString("id"));
     assertEquals("body", obj.getString("body"));
     assertEquals(1, obj.getJSONObject("headers").getJSONArray("set-cookie").length());
     assertEquals("cookie", obj.getJSONObject("headers").getJSONArray("set-cookie").get(0));
@@ -79,8 +83,9 @@ public class FetchResponseUtilsTest {
         .addHeader("Set-Cookie", "cookie2")
         .addHeader("Set-Cookie", "cookie3")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "body");
+    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
     assertEquals(999, obj.getInt("rc"));
+    assertEquals("key", obj.getString("id"));
     assertEquals("body", obj.getString("body"));
     assertEquals(3, obj.getJSONObject("headers").getJSONArray("set-cookie").length());
     assertEquals("cookie", obj.getJSONObject("headers").getJSONArray("set-cookie").get(0));

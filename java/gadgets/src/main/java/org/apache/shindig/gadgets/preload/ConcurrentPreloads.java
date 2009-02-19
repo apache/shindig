@@ -18,22 +18,23 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingCollection;
+import com.google.common.collect.Lists;
 
 /**
  * Preloads data by evaluating Futures for PreloadedData.
  * This class is not, however, thread-safe - tasks must be
  * added and read from a single thread..
  */
-class ConcurrentPreloads implements Preloads {
+class ConcurrentPreloads extends ForwardingCollection<PreloadedData> {
   private final List<Future<PreloadedData>> tasks;
+  private Collection<PreloadedData> loaded;
 
   ConcurrentPreloads() {
     tasks = Lists.newArrayList();
@@ -49,7 +50,16 @@ class ConcurrentPreloads implements Preloads {
     return this;
   }
 
-  public Collection<PreloadedData> getData() {
+  @Override
+  protected Collection<PreloadedData> delegate() {
+    if (loaded == null) {
+      loaded = getData();
+    }
+
+    return loaded;
+  }
+
+  private Collection<PreloadedData> getData() {
     return Lists.transform(tasks, new Function<Future<PreloadedData>, PreloadedData>() {
       public PreloadedData apply(Future<PreloadedData> preloadedDataFuture) {
         return getPreloadedData(preloadedDataFuture);
@@ -79,7 +89,7 @@ class ConcurrentPreloads implements Preloads {
       this.t = t;
     }
 
-    public Map<String, Object> toJson() throws PreloadException {
+    public Collection<Object> toJson() throws PreloadException {
       if (t instanceof PreloadException) {
         throw (PreloadException) t;
       }

@@ -39,7 +39,7 @@ IoTest.prototype.setUp = function() {
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
       "jsonProxyUrl" : "http://example.com/json" }});
-  gadgets.io.preloaded_ = {};
+  gadgets.io.preloaded_ = [];
 };
 
 IoTest.prototype.tearDown = function() {
@@ -775,8 +775,9 @@ IoTest.prototype.testJson_malformed = function() {
 };
 
 IoTest.prototype.testPreload = function() {
-  gadgets.io.preloaded_ = {
-    "http://target.example.com/somepage" : {
+  gadgets.io.preloaded_ = [
+    {
+      "id": "http://target.example.com/somepage",
       "rc" : 200,
       "body" : "preloadedbody",
       "headers": {
@@ -784,7 +785,7 @@ IoTest.prototype.testPreload = function() {
         "location": ["somewhere"],
       }
     }
-  };
+  ];
 
   var resp = null;
   gadgets.io.makeRequest("http://target.example.com/somepage",
@@ -818,12 +819,13 @@ IoTest.prototype.testPreload = function() {
 };
 
 IoTest.prototype.testPreloadMiss_postRequest = function() {
-  gadgets.io.preloaded_ = {
-    "http://target.example.com/somepage" : {
+  gadgets.io.preloaded_ = [
+    {
+      "id": "http://target.example.com/somepage",
       "rc" : 200,
       "body" : "preloadedbody",
     }
-  };
+  ];
 
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
@@ -853,12 +855,13 @@ IoTest.prototype.testPreloadMiss_postRequest = function() {
 };
 
 IoTest.prototype.testPreloadMiss_wrongUrl = function() {
-  gadgets.io.preloaded_ = {
-    "http://target.example.com/somepage2" : {
+  gadgets.io.preloaded_ = [
+    {
+      "id": "http://target.example.com/somepage2",
       "rc" : 200,
       "body" : "preloadedbody",
     }
-  };
+  ];
 
   var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
@@ -881,11 +884,12 @@ IoTest.prototype.testPreloadMiss_wrongUrl = function() {
 };
 
 IoTest.prototype.testPreload_error404 = function() {
-  gadgets.io.preloaded_ = {
-    "http://target.example.com/somepage" : {
+  gadgets.io.preloaded_ = [
+    {
+      "id": "http://target.example.com/somepage",
       "rc" : 404,
     }
-  };
+  ];
 
   var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
@@ -916,13 +920,14 @@ IoTest.prototype.testPreload_error404 = function() {
 
 IoTest.prototype.testPreload_oauthApproval = function() {
   gadgets.io.clearOAuthState();
-  gadgets.io.preloaded_ = {
-    "http://target.example.com/somepage" : {
+  gadgets.io.preloaded_ = [
+    {
+      "id": "http://target.example.com/somepage",
       "rc" : 200,
       "oauthState" : "stateinfo",
       "oauthApprovalUrl" : "http://example.com/approve",
     }
-  };
+  ];
 
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);

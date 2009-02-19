@@ -17,10 +17,12 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.preload.Preloads;
+import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
+
+import java.util.Collection;
 
 /**
  * Intermediary representation of all state associated with processing
@@ -29,7 +31,7 @@ import org.apache.shindig.gadgets.spec.View;
 public class Gadget {
   private GadgetContext context;
   private GadgetSpec spec;
-  private Preloads preloads;
+  private Collection<PreloadedData> preloads;
   private View currentView;
   /**
    * @param context The request that the gadget is being processed for.
@@ -58,12 +60,12 @@ public class Gadget {
   /**
    * @param preloads The preloads for the gadget that is being processed.
    */
-  public Gadget setPreloads(Preloads preloads) {
+  public Gadget setPreloads(Collection<PreloadedData> preloads) {
     this.preloads = preloads;
     return this;
   }
 
-  public Preloads getPreloads() {
+  public Collection<PreloadedData> getPreloads() {
     return preloads;
   }
 

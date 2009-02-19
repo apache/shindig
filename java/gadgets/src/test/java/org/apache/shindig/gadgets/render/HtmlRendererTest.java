@@ -36,25 +36,21 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
-import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * Tests for HtmlRenderer
@@ -210,10 +206,14 @@ public class HtmlRendererTest {
 
   @Test
   public void renderProxiedWithPreload() throws Exception {
-    JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
+    final JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
 
-    preloaderService.preloads = new FakePreloads(
-        ImmutableMap.of("key", (Object) prefetchedJson));
+    preloaderService.preloads = ImmutableList.of((PreloadedData)
+        new PreloadedData() {
+          public Collection<Object> toJson() throws PreloadException {
+            return ImmutableList.<Object>of(prefetchedJson);
+          }
+        });
 
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("none"));
@@ -233,16 +233,12 @@ public class HtmlRendererTest {
   public void renderProxiedWithFailedPreload() throws Exception {
     new JSONObject("{id: 'foo', data: 'bar'}");
 
-    preloaderService.preloads = new Preloads() {
-      public Collection<PreloadedData> getData() {
-        PreloadedData preloadedData = new PreloadedData() {
-          public Map<String, Object> toJson() throws PreloadException {
+    preloaderService.preloads = ImmutableList.of((PreloadedData)
+        new PreloadedData() {
+          public Collection<Object> toJson() throws PreloadException {
             throw new PreloadException("test");
           }
-        };
-        return Lists.newArrayList(preloadedData);
-      }
-    };
+        });
 
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
     String content = renderer.render(makeHrefGadget("none"));
@@ -352,35 +348,19 @@ public class HtmlRendererTest {
 
   private static class FakePreloaderService implements PreloaderService {
     protected boolean wasPreloaded;
-    protected Preloads preloads;
+    protected Collection<PreloadedData> preloads;
 
     protected FakePreloaderService() {
     }
 
-    public Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+    public Collection<PreloadedData> preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
       wasPreloaded = true;
       return preloads;
     }
 
-    public Preloads preload(Collection<Callable<PreloadedData>> tasks) {
+    public Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks) {
       wasPreloaded = true;
       return preloads;
-    }
-  }
-
-  private static class FakePreloads implements Preloads {
-    private final PreloadedData preloadedData;
-
-    public Collection<PreloadedData> getData() {
-      return Collections.singletonList(preloadedData);
-    }
-
-    public FakePreloads(final Map<String, Object> preloadData) {
-      this.preloadedData = new PreloadedData() {
-        public Map<String, Object> toJson() {
-          return preloadData;
-        }
-      };
     }
   }
 

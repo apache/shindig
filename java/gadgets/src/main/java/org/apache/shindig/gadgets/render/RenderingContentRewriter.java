@@ -37,7 +37,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
@@ -48,13 +47,6 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,6 +61,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
@@ -433,14 +431,10 @@ public class RenderingContentRewriter implements ContentRewriter {
    * If preloading fails for any reason, we just output an empty object.
    */
   private void injectPreloads(Gadget gadget, Node scriptTag) {
-    Preloads preloads = gadget.getPreloads();
-    Map<String, Object> preload = Maps.newHashMap();
-
-    for (PreloadedData preloaded : preloads.getData()) {
+    List<Object> preload = Lists.newArrayList();
+    for (PreloadedData preloaded : gadget.getPreloads()) {
       try {
-        for (Map.Entry<String, Object> entry : preloaded.toJson().entrySet()) {
-          preload.put(entry.getKey(), entry.getValue());
-        }
+        preload.addAll(preloaded.toJson());
       } catch (PreloadException pe) {
         // This will be thrown in the event of some unexpected exception. We can move on.
         LOG.log(Level.WARNING, "Unexpected error when preloading", pe);

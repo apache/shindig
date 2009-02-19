@@ -181,7 +181,7 @@ public class MakeRequestHandler extends ProxyBase {
       if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
         body = processFeed(originalUrl, request, body);
       }
-      JSONObject resp = FetchResponseUtils.getResponseAsJson(results, body);
+      JSONObject resp = FetchResponseUtils.getResponseAsJson(results, null, body);
 
       if (authToken != null) {
         String updatedAuthToken = authToken.getUpdatedToken();

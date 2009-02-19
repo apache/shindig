@@ -53,10 +53,10 @@ public interface PreloaderService {
    * @param phase the preloading phase
    * @return The preloads for the gadget.
    */
-  Preloads preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase);
+  Collection<PreloadedData> preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase);
 
   /**
    * Execute preloads with a specific set of preload tasks.
    */
-  Preloads preload(Collection<Callable<PreloadedData>> tasks);
+  Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks);
 }

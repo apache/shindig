@@ -28,18 +28,17 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
-
-import com.google.common.collect.Lists;
-
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
+
+import com.google.common.collect.Lists;
 
 /**
  * Test for PipelinedDataPreloader.
@@ -103,13 +102,14 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     // Nothing fetched yet
     assertEquals(0, pipeline.requests.size());
 
-    Map<String, Object> result = tasks.iterator().next().call().toJson();
+    Collection<Object> result = tasks.iterator().next().call().toJson();
     assertEquals(2, result.size());
 
     JSONObject resultWithKeyP = new JSONObject("{id: 'p', data: 1}");
     JSONObject resultWithKeyA = new JSONObject("{id: 'a', data: 2}");
-    assertEquals(resultWithKeyP.toString(), result.get("p").toString());
-    assertEquals(resultWithKeyA.toString(), result.get("a").toString());
+    Iterator<Object> iter = result.iterator();
+    assertEquals(resultWithKeyP.toString(), iter.next().toString());
+    assertEquals(resultWithKeyA.toString(), iter.next().toString());
 
     // Should have only fetched one request
     assertEquals(1, pipeline.requests.size());
@@ -136,11 +136,11 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     // Nothing fetched yet
     assertEquals(0, pipeline.requests.size());
 
-    Map<String, Object> result = tasks.iterator().next().call().toJson();
+    Collection<Object> result = tasks.iterator().next().call().toJson();
     assertEquals(1, result.size());
 
     String expectedResult = "{data: {foo: 'bar'}, id: 'p'}";
-    assertEquals(new JSONObject(expectedResult).toString(), result.get("p").toString());
+    assertEquals(new JSONObject(expectedResult).toString(), result.iterator().next().toString());
 
     // Should have only fetched one request
     assertEquals(1, pipeline.requests.size());

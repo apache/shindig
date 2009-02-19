@@ -35,17 +35,22 @@ public class FetchResponseUtils {
    * Convert a response to a JSON object.
    * 
    * The returned JSON object contains the following values:
+   * id: the id of the response
    * rc: integer response code
    * body: string response body
    * headers: object, keys are header names, values are lists of header values
    * 
    * @param response the response body
+   * @param id the response id, or null if not needed
    * @param body string to use as the body of the response.
    * @return a JSONObject representation of the response body.
    */
-  public static JSONObject getResponseAsJson(HttpResponse response, String body)
+  public static JSONObject getResponseAsJson(HttpResponse response, String id, String body)
       throws JSONException {
     JSONObject resp = new JSONObject();
+    if (id != null) {
+      resp.put("id", id);
+    }
     resp.put("rc", response.getHttpStatusCode());
     resp.put("body", body);
     JSONObject headers = new JSONObject();

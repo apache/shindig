@@ -29,7 +29,6 @@ import org.apache.shindig.gadgets.preload.PipelinedDataPreloader;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
-import org.apache.shindig.gadgets.preload.Preloads;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.json.JSONException;
@@ -41,6 +40,7 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -150,13 +150,13 @@ public class PipelineDataContentRewriter implements ContentRewriter {
       }
       
     // And run the pipeline
-      Preloads preloads = preloaderService.preload(tasks);
-      for (PreloadedData preloaded : preloads.getData()) {
+      Collection<PreloadedData> preloads = preloaderService.preload(tasks);
+      for (PreloadedData preloaded : preloads) {
         try {
-          for (Map.Entry<String, Object> entry : preloaded.toJson().entrySet()) {
-            JSONObject obj = (JSONObject) entry.getValue();
+          for (Object entry : preloaded.toJson()) {
+            JSONObject obj = (JSONObject) entry;
             if (obj.has("data")) {
-              results.put(entry.getKey(), obj.getJSONObject("data"));
+              results.put(obj.getString("id"), obj.getJSONObject("data"));
             }
             // TODO: handle errors?
           }

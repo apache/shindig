@@ -17,23 +17,26 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.shindig.common.testing.TestExecutorService;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+
+import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for FuturePreloaderService.
@@ -58,20 +61,22 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
         Arrays.<Preloader>asList(preloader));
 
-    Preloads preloads = service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    Collection<PreloadedData> preloads = service.preload(
+        null, null, PreloaderService.PreloadPhase.HTML_RENDER);
 
-    Map<String, Object> preloaded = getAll(preloads);
-    assertEquals(ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE), preloaded);
+    Collection<Object> preloaded = getAll(preloads);
+    assertEquals(ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE),
+        preloaded.iterator().next());
   }
 
-  /** Load all the data out of a Preloads object */
-  private Map<String, Object> getAll(Preloads preloads) throws PreloadException {
-    Map<String, Object> map = Maps.newHashMap();
-    for (PreloadedData preloadCallable : preloads.getData()) {
-      map.putAll(preloadCallable.toJson());
+  /** Load all the data out of a preloads object */
+  private Collection<Object> getAll(Collection<PreloadedData> preloads) throws PreloadException {
+    List<Object> list = Lists.newArrayList();
+    for (PreloadedData preloadCallable : preloads) {
+      list.addAll(preloadCallable.toJson());
     }
 
-    return map;
+    return list;
   }
 
   @Test
@@ -88,13 +93,14 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
         Arrays.<Preloader>asList(preloader, preloader2));
 
-    Preloads preloads = service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    Collection<PreloadedData> preloads =
+      service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
 
-    Map<String, Object> preloaded = getAll(preloads);
-    assertEquals(ImmutableMap.of(
-        PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE,
-        PRELOAD_NUMERIC_KEY, PRELOAD_NUMERIC_VALUE,
-        PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE), preloaded);
+    Collection<Object> preloaded = getAll(preloads);
+    assertEquals(ImmutableList.<Object>of(
+        ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE),
+        ImmutableMap.of(PRELOAD_NUMERIC_KEY, PRELOAD_NUMERIC_VALUE),
+        ImmutableMap.of(PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE)), preloaded);
   }
 
   @Test
@@ -184,8 +190,8 @@ public class ConcurrentPreloaderServiceTest {
       this.data = data;
     }
 
-    public Map<String, Object> toJson() {
-      return ImmutableMap.of(key, data);
+    public Collection<Object> toJson() {
+      return ImmutableList.of((Object) ImmutableMap.of(key, data));
     }
   }
 }
