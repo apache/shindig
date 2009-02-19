@@ -78,9 +78,12 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   private boolean isValidOAuthRequest(OAuthMessage message, OAuthEntry entry) {
-    if (entry == null || entry.type != OAuthEntry.Type.ACCESS || entry.isExpired()) {
-      throw new InvalidAuthenticationException("access token is invalid.", null);
-    }
+    if (entry == null) 
+      throw new InvalidAuthenticationException("access token not found.", null);
+    if (entry.type != OAuthEntry.Type.ACCESS)
+      throw new InvalidAuthenticationException("token is not an access token.", null);
+    if (entry.isExpired())
+      throw new InvalidAuthenticationException("access token has expired.", null);
 
     OAuthServiceProvider provider = new OAuthServiceProvider(null, null, null);
     OAuthAccessor accessor = new OAuthAccessor(new OAuthConsumer(null, entry.consumerKey,

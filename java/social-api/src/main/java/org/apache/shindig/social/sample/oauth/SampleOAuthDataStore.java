@@ -105,9 +105,11 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     accessEntry.type = OAuthEntry.Type.ACCESS;
     accessEntry.issueTime = new Date();
 
-    oauthEntries.put(entry.token, entry);
+    
+    oauthEntries.remove(entry.token);
+    oauthEntries.put(accessEntry.token, accessEntry);
 
-    return entry;
+    return accessEntry;
   }
 
   // Authorize the request token for the given user id
