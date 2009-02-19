@@ -17,9 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.ImageReadException;
@@ -29,6 +26,9 @@ import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 import java.awt.color.ICC_Profile;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class BasicImageRewriter implements ImageRewriter {
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
 
       // Dont handle animations
-      if (imageInfo.getNumberOfImages() != 1) {
+      if (imageInfo.getNumberOfImages() > 1) {
         return response;
       }
 
