@@ -52,8 +52,8 @@ public interface OAuthDataStore {
    * for the given consumerKey. App specific checks like making sure the requested user has the
    * app installed should take place in this method.
    *
-   * @param consumerKey
-   * @param userId
+   * @param consumerKey A consumer key
+   * @param userId The userId to validate.
    * @return A valid Security Token
    */
   SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId);
@@ -85,7 +85,8 @@ public interface OAuthDataStore {
    * Called when converting a request token to an access token.  This is called
    * in the final phase of 3-legged OAuth after the user authorizes the app.
    *
-   * @param entry
+   * @param entry The Entry to convert
+   * @return a new entry wiht type Type.ACCESS
    */
   OAuthEntry convertToAccessToken(OAuthEntry entry);
 
