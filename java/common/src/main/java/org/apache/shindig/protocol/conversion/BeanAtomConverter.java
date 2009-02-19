@@ -108,4 +108,8 @@ public class BeanAtomConverter implements BeanConverter {
       throw new RuntimeException(String.format(ERROR_MESSAGE_FMT, xml, className), e);
     }
   }
+  
+  public void append(Appendable buf, Object pojo) throws IOException {
+    buf.append(convertToString(pojo));
+  }
 }

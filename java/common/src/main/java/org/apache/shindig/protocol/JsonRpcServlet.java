@@ -18,7 +18,6 @@
 package org.apache.shindig.protocol;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.JsonConversionUtil;
 
 import com.google.common.collect.Lists;
@@ -116,8 +115,8 @@ public class JsonRpcServlet extends ApiServlet {
       }
       result.add(getJSONResponse(key, getResponseItem(responses.get(i))));
     }
-
-    JsonSerializer.append(servletResponse.getWriter(), result);
+    
+    jsonConverter.append(servletResponse.getWriter(), result);
   }
 
   protected void dispatch(JSONObject request, HttpServletRequest servletRequest,
@@ -135,7 +134,7 @@ public class JsonRpcServlet extends ApiServlet {
     ResponseItem response = getResponseItem(future);
     Object result = getJSONResponse(key, response);
 
-    JsonSerializer.append(servletResponse.getWriter(), result);
+    jsonConverter.append(servletResponse.getWriter(), result);
   }
 
   /**
@@ -190,7 +189,7 @@ public class JsonRpcServlet extends ApiServlet {
   @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
-    JsonSerializer.append(servletResponse.getWriter(), getErrorJson(responseItem));
+    jsonConverter.append(servletResponse.getWriter(), getErrorJson(responseItem));
   }
 
   private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {

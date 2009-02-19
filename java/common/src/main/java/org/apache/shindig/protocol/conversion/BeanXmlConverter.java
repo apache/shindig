@@ -104,4 +104,8 @@ public class BeanXmlConverter implements BeanConverter {
       throw new RuntimeException(errorMessage, e);
     }
   }
+  
+  public void append(Appendable buf, Object pojo) throws IOException {
+    buf.append(convertToString(pojo));
+  }
 }
