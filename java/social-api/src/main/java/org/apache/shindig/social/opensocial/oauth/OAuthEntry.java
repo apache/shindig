@@ -31,7 +31,7 @@ public class OAuthEntry implements Serializable {
   private static final long FIVE_MINUTES = 5 * 60 * 1000L;
 
   // Change this when incompatible changes occur..
-  static final long serialVersionUID = 1;
+  static final long serialVersionUID = 2;
 
   public static enum Type {
     REQUEST, ACCESS
@@ -46,7 +46,6 @@ public class OAuthEntry implements Serializable {
   public boolean authorized;
 
   public String consumerKey;
-  public String consumerSecret;
 
   public Type type;
   public Date issueTime;
@@ -68,7 +67,6 @@ public class OAuthEntry implements Serializable {
     this.tokenSecret= old.tokenSecret;
     this.authorized = old.authorized;
     this.consumerKey = old.consumerKey;
-    this.consumerSecret = old.consumerSecret;
     this.type = old.type;
     this.issueTime = old.issueTime;
     this.domain = old.domain;
@@ -76,6 +74,11 @@ public class OAuthEntry implements Serializable {
   }
 
   public boolean isExpired() {
+    Date currentDate = new Date();
+    return currentDate.compareTo(this.expiresAt()) > 0;
+  }
+
+  public Date expiresAt() {
     long expirationTime = issueTime.getTime();
     switch (type) {
       case REQUEST:
@@ -86,7 +89,6 @@ public class OAuthEntry implements Serializable {
         break;
     }
 
-    Date currentDate = new Date();
-    return currentDate.getTime() > expirationTime;
+    return new Date(expirationTime);
   }
 }

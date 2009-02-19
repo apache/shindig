@@ -84,7 +84,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
 
     OAuthServiceProvider provider = new OAuthServiceProvider(null, null, null);
     OAuthAccessor accessor = new OAuthAccessor(new OAuthConsumer(null, entry.consumerKey,
-        entry.consumerSecret, provider));
+        store.getConsumer(entry.consumerKey).consumerSecret, provider));
 
     accessor.tokenSecret = entry.tokenSecret;
     accessor.accessToken = entry.token;

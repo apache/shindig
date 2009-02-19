@@ -64,7 +64,9 @@ public class SampleOAuthDataStore implements OAuthDataStore {
           return null;
       // null below is for the callbackUrl, which we don't have in the db
       OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, SERVICE_PROVIDER);
-      consumer.setProperty("samplecontainer-attribute", "value");
+      if (consumer != null)
+        consumer.setProperty("samplecontainer-attribute", "value");
+
       return consumer;
 
     } catch (JSONException e) {
@@ -77,7 +79,6 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     OAuthEntry entry = new OAuthEntry();
     entry.appId = consumerKey;
     entry.consumerKey = consumerKey;
-    entry.consumerSecret = getConsumer(consumerKey).consumerSecret;
     entry.domain = "samplecontainer.com";
     entry.container = "default";
 
