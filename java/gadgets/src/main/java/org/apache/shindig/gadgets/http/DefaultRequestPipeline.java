@@ -17,12 +17,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.oauth.OAuthRequest;
 
 /**
  * A standard implementation of a request pipeline. Performs request caching and
@@ -33,14 +34,17 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final HttpFetcher httpFetcher;
   private final HttpCache httpCache;
   private final Provider<OAuthRequest> oauthRequestProvider;
+  private final ImageRewriter imageRewriter;
 
   @Inject
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
-                                Provider<OAuthRequest> oauthRequestProvider) {
+                                Provider<OAuthRequest> oauthRequestProvider,
+                                ImageRewriter imageRewriter) {
     this.httpFetcher = httpFetcher;
     this.httpCache = httpCache;
     this.oauthRequestProvider = oauthRequestProvider;
+    this.imageRewriter = imageRewriter;
   }
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
@@ -64,6 +68,10 @@ public class DefaultRequestPipeline implements RequestPipeline {
         break;
       default:
         return HttpResponse.error();
+    }
+
+    if (!response.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
+      response = imageRewriter.rewrite(request.getUri(), response);
     }
 
     if (!request.getIgnoreCache()) {

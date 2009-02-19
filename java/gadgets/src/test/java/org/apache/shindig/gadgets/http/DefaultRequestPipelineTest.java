@@ -17,15 +17,16 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import static org.junit.Assert.assertEquals;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Provider;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
+import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Provider;
+
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.Map;
@@ -37,7 +38,8 @@ public class DefaultRequestPipelineTest {
   private final FakeHttpCache cache = new FakeHttpCache();
   private final FakeOAuthRequestProvider oauth = new FakeOAuthRequestProvider();
 
-  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth);
+  private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+      new NoOpImageRewriter());
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
