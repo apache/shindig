@@ -35,7 +35,7 @@ class MakeRequestServlet extends HttpServlet {
     try {
       $this->noHeaders = true;
       $context = new GadgetContext('GADGET');
-      $url = urldecode(isset($_GET['url']) ? $_GET['url'] : (isset($_POST['url']) ? $_POST['url'] : false));
+      $url = isset($_GET['url']) ? $_GET['url'] : (isset($_POST['url']) ? $_POST['url'] : false);
       if (! $url || empty($url)) {
         header("HTTP/1.0 400 Bad Request", true);
         echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
