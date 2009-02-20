@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -75,9 +76,16 @@ public class ContentRewriterFeatureFactory {
     Uri gadgetUri = request.getGadget();
     GadgetSpec spec;
     if (gadgetUri != null) {
-      URI gadgetJavaUri = gadgetUri.toJavaUri();
+      final URI gadgetJavaUri = gadgetUri.toJavaUri();
       try {
-        spec = specFactory.getGadgetSpec(gadgetJavaUri, false);
+        GadgetContext context = new GadgetContext() {
+          @Override
+          public URI getUrl() {
+            return gadgetJavaUri;
+          }
+        };
+        
+        spec = specFactory.getGadgetSpec(context);
         if (spec != null) {
           return get(spec);
         }
