@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,6 +26,7 @@ class GadgetSpecException extends Exception {
  * Parses the XML content into a GadgetSpec object
  */
 class GadgetSpecParser {
+
   /**
    * Parses the $xmlContent into a Gadget class
    *
@@ -51,7 +53,6 @@ class GadgetSpecParser {
     $this->parseUserPrefs($doc, $gadget);
     $this->parseViews($doc, $gadget);
     //TODO
-    // OAuthService / OAuthSpec
     // PipelinedData
     return $gadget;
   }
@@ -158,6 +159,7 @@ class GadgetSpecParser {
     $this->parseFeatures($modulePrefs, $gadget);
     $this->parsePreloads($modulePrefs, $gadget);
     $this->parseLocales($modulePrefs, $gadget);
+    $this->parseOAuth($modulePrefs, $gadget);
   }
 
   /**
@@ -193,8 +195,111 @@ class GadgetSpecParser {
     if (($optionalNodes = $modulePrefs->getElementsByTagName('Optional')) != null) {
       foreach ($optionalNodes as $optionalFeature) {
         $gadget->optionalFeatures[] = $optionalFeature->getAttribute('feature');
+        // Content-rewrite is a special case since it has Params as child nodes
+        if ($optionalFeature->getAttribute('feature') == 'content-rewrite') {
+          $this->parseContentRewrite($optionalFeature, $gadget);
+        }
       }
     }
+  }
+
+  /**
+   * Parses the gadget's OAuth entries, the OAuth entry would look something like:
+   * <OAuth>
+   *   <Service name="google">
+   *     <Access url="https://www.google.com/accounts/OAuthGetAccessToken" method="GET" />
+   *     <Request url="https://www.google.com/accounts/OAuthGetRequestToken?scope=http://www.google.com/m8/feeds/" method="GET" />
+   *     <Authorization url="https://www.google.com/accounts/OAuthAuthorizeToken?oauth_callback=http://oauth.gmodules.com/gadgets/oauthcallback" />
+   *   </Service>
+   * </OAuth>
+   *
+   * And the resulting $gadgetSpec->oauth structure:
+   *
+   * Array (
+   *     [access] => Array (
+   *             [url] => https://www.google.com/accounts/OAuthGetAccessToken
+   *             [method] => GET
+   *         )
+   *     [request] => Array (
+   *             [url] => https://www.google.com/accounts/OAuthGetRequestToken?scope=http://www.google.com/m8/feeds/
+   *             [method] => GET
+   *         )
+   *     [authorization] => Array (
+   *             [url] => https://www.google.com/accounts/OAuthAuthorizeToken?oauth_callback=http://oauth.gmodules.com/gadgets/oauthcallback
+   *             [method] => GET
+   *         )
+   * )
+   *
+   * @param DOMElement $modulePrefs
+   * @param GadgetSpec $gadget
+   */
+  private function parseOAuth(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
+    if (($oauthNodes = $modulePrefs->getElementsByTagName('OAuth')) != null) {
+      if ($oauthNodes->length > 1) {
+        throw new GadgetSpecException("A gadget can only have one OAuth element (though multiple service entries are allowed in that one OAuth element)");
+      }
+      $oauth = array();
+      $oauthNode = $oauthNodes->item(0);
+      if (($serviceNodes = $oauthNode->getElementsByTagName('Service')) != null) {
+        foreach ($serviceNodes as $service) {
+          if (($entryNodes = $service->getElementsByTagName('*')) != null) {
+            foreach ($entryNodes as $entry) {
+              $type = strtolower($entry->tagName);
+              $url = $entry->getAttribute('url');
+              $method = $entry->getAttribute('method') != null ? strtoupper($entry->getAttribute('method')) : 'GET';
+              $oauth[$type] = array('url' => $url, 'method' => $method);
+            }
+          }
+        }
+      }
+      $gadget->oauth = $oauth;
+    }
+  }
+
+  /**
+   * Parses the content-rewrite feature's params, possible params entries are:
+   *   <Param name="expires">86400</Param>
+   *   <Param name="include-url">*</Param>
+   *   <Param name="exclude-url">.png</Param>
+   *   <Param name="exclude-url">.tmp</Param>
+   *   <Param name="minify-css">true</Param>
+   *   <Param name="minify-js">true</Param>
+   *   <Param name="minify-html">true</Param>
+   *
+   * This sets the $gadgetSpec->rewrite to a structure like:
+   * Array (
+   *   [expires] => 86400
+   *   [include-url] => Array (
+   *     [0] => *
+   *   )
+   *   [exclude-url] => Array (
+   *     [0] => .png
+   *     [1] => .tmp
+   *   )
+   *   [minify-css] => true
+   *   [minify-js] => true
+   *   [minify-html] => true
+   * )
+   * @param DOMElement $feature
+   * @param GadgetSpec $gadget
+   */
+  private function parseContentRewrite(DOMElement $feature, GadgetSpec &$gadget) {
+    $contentRewrite = array();
+    if (($paramNodes = $feature->getElementsByTagName('Param')) != null) {
+      foreach ($paramNodes as $param) {
+        $paramName = $param->getAttribute('name');
+        $paramValue = $param->nodeValue;
+        if ($paramName == 'include-url' || $paramName == 'exclude-url') {
+          if (! isset($contentRewrite[$paramName]) || ! is_array($contentRewrite[$paramName])) {
+            $contentRewrite[$paramName] = array();
+          }
+          $contentRewrite[$paramName][] = $paramValue;
+        } else {
+          $contentRewrite[$paramName] = $paramValue;
+        }
+      }
+    }
+    $gadget->rewrite = $contentRewrite;
   }
 
   /**
