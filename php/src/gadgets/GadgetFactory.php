@@ -201,11 +201,11 @@ class GadgetFactory {
     foreach ($gadget->getPreloads() as $preload) {
       if (!empty($preload['href'])) {
         if (!empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
-          $signedRequests[] = $preload['href'];
-        } else {
           if ($this->token == '') {
             throw new GadgetException("Signed preloading requested, but no valid security token set");
           }
+          $signedRequests[] = $preload['href'];
+        } else {
           $unsignedRequests[] = $preload['href'];
         }
       }
