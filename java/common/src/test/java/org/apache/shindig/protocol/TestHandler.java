@@ -38,6 +38,8 @@ public class TestHandler {
   public static final String GET_RESPONSE = "GET_RESPONSE";
   public static final String CREATE_RESPONSE = "CREATE_RESPONSE";
   public static final String FAILURE_MESSAGE = "FAILURE_MESSAGE";
+  public static final String ECHO_PREFIX = "ECHO: ";
+  public static final String NO_ARG_RESPONSE = "No arguments from me!";
 
   public static Map<String,String> REST_RESULTS = ImmutableMap.of(
       "POST", CREATE_RESPONSE, "GET", GET_RESPONSE, "DELETE", FAILURE_MESSAGE);
@@ -99,5 +101,21 @@ public class TestHandler {
     } else {
       throw new NullPointerException(FAILURE_MESSAGE);
     }
+  }
+  
+  @Operation(httpMethods = "GET", path = "/echo")
+  public String echo(Input input) {
+    return ECHO_PREFIX + input.value;
+  }
+
+  @Ignore
+  public static class Input {
+    public String value;
+    public void setValue(String value) { this.value = value; }
+  }
+  
+  @Operation(httpMethods = "")
+  public String noArg() {
+    return NO_ARG_RESPONSE;
   }
 }

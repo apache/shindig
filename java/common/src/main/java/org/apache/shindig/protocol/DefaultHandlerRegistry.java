@@ -31,6 +31,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.json.JSONException;
@@ -53,6 +54,7 @@ import java.util.logging.Logger;
  * Default implementation of HandlerRegistry. Bind to appropriately
  * annotated handlers.
  */
+@Singleton
 public class DefaultHandlerRegistry implements HandlerRegistry {
 
   private static final Logger logger = Logger.getLogger(DefaultHandlerRegistry.class.getName());
@@ -163,7 +165,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         throw new IllegalStateException("Attempt to bind unannotated service implementation " +
             handlerType.getName());
       }
-      Service service = (Service) handlerType.getAnnotation(Service.class);
+      Service service = handlerType.getAnnotation(Service.class);
 
       for (Method m : handlerType.getMethods()) {
         if (m.isAnnotationPresent(Operation.class)) {
@@ -177,46 +179,37 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
   private void createRestHandler(Provider<?> handlerProvider,
       Service service, Operation op, Method m) {
-    // Check for request item subclass constructor
-    Class<?> requestItemType = m.getParameterTypes()[0];
     try {
-      if (RequestItem.class.isAssignableFrom(requestItemType)) {
-        if (requestItemType == RequestItem.class) {
-          requestItemType = BaseRequestItem.class;
-        }
-        Constructor<?> reqItemConstructor =
-            requestItemType.getConstructor(Map.class, SecurityToken.class, BeanConverter.class,
-                BeanJsonConverter.class);
-        String opName = m.getName();
-        if (!StringUtils.isEmpty(op.name())) {
-          opName = op.name();
-        }
-        RestInvocationHandler restHandler = new RestInvocationHandler(service, op, m,
-            handlerProvider, beanJsonConverter, reqItemConstructor,
-            new ExecutionListenerWrapper(service.name(), opName, executionListener));
-        String serviceName = service.name();
+      MethodCaller methodCaller = new MethodCaller(m, true);
+      String opName = m.getName();
+      if (!StringUtils.isEmpty(op.name())) {
+        opName = op.name();
+      }
+      RestInvocationHandler restHandler = new RestInvocationHandler(op, methodCaller,
+          handlerProvider, beanJsonConverter,
+          new ExecutionListenerWrapper(service.name(), opName, executionListener));
+      String serviceName = service.name();
 
-        Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(serviceName);
-        if (methods == null) {
-          methods = Maps.newHashMap();
-          serviceMethodPathMap.put(serviceName, methods);
-        }
+      Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(serviceName);
+      if (methods == null) {
+        methods = Maps.newHashMap();
+        serviceMethodPathMap.put(serviceName, methods);
+      }
 
-        for (String httpMethod : op.httpMethods()) {
-          if (!StringUtils.isEmpty(httpMethod)) {
-            httpMethod = httpMethod.toUpperCase();
-            SortedSet<RestPath> sortedSet = methods.get(httpMethod);
-            if (sortedSet == null) {
-              sortedSet = Sets.newTreeSet();
-              methods.put(httpMethod, sortedSet);
-            }
+      for (String httpMethod : op.httpMethods()) {
+        if (!StringUtils.isEmpty(httpMethod)) {
+          httpMethod = httpMethod.toUpperCase();
+          SortedSet<RestPath> sortedSet = methods.get(httpMethod);
+          if (sortedSet == null) {
+            sortedSet = Sets.newTreeSet();
+            methods.put(httpMethod, sortedSet);
+          }
 
-            if (StringUtils.isEmpty(op.path())) {
-              sortedSet.add(new RestPath("/" + serviceName +  service.path(), restHandler));
-            } else {
-              // Use the standard service name and constant prefix as the key
-              sortedSet.add(new RestPath("/" + serviceName + op.path(), restHandler));
-            }
+          if (StringUtils.isEmpty(op.path())) {
+            sortedSet.add(new RestPath("/" + serviceName +  service.path(), restHandler));
+          } else {
+            // Use the standard service name and constant prefix as the key
+            sortedSet.add(new RestPath("/" + serviceName + op.path(), restHandler));
           }
         }
       }
@@ -226,29 +219,20 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
   }
 
-  private void createRpcHandler(Provider<?> handlerProvider,
-      Service service, Operation op, Method m) {
-    // Check for request item subclass constructor
-    Class<?> requestItemType = m.getParameterTypes()[0];
+  private void createRpcHandler(Provider<?> handlerProvider, Service service,
+      Operation op, Method m) {
     try {
-      if (RequestItem.class.isAssignableFrom(requestItemType)) {
-        if (requestItemType == RequestItem.class) {
-          requestItemType = BaseRequestItem.class;
-        }
-        Constructor<?> reqItemConstructor =
-            requestItemType.getConstructor(JSONObject.class, SecurityToken.class,
-                BeanConverter.class,
-                BeanJsonConverter.class);
-        String opName = m.getName();
-        // Use the override if its defined
-        if (op.name().length() > 0) {
-          opName = op.name();
-        }
-        RpcInvocationHandler rpcHandler =
-            new RpcInvocationHandler(m, handlerProvider, beanJsonConverter, reqItemConstructor,
-                new ExecutionListenerWrapper(service.name(), opName, executionListener));
-        rpcOperations.put(service.name() + "." + opName, rpcHandler);
+      MethodCaller methodCaller = new MethodCaller(m, false);
+      
+      String opName = m.getName();
+      // Use the override if its defined
+      if (op.name().length() > 0) {
+        opName = op.name();
       }
+      RpcInvocationHandler rpcHandler =
+          new RpcInvocationHandler(methodCaller, handlerProvider, beanJsonConverter,
+              new ExecutionListenerWrapper(service.name(), opName, executionListener));
+      rpcOperations.put(service.name() + "." + opName, rpcHandler);
     } catch (NoSuchMethodException nme) {
       logger.log(Level.INFO, "No RPC binding for " + service.name() + "." + m.getName());
     }
@@ -274,48 +258,35 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     }
   }
 
+
   /**
    * Proxy binding for an RPC operation. We allow binding to methods that
    * return non-Future types by wrapping them in ImmediateFuture.
    */
   static final class RpcInvocationHandler  {
-    private Method receiver;
-    Provider<?> handlerProvider;
-    BeanJsonConverter beanJsonConverter;
-    Constructor<?> requestItemConstructor;
-    ExecutionListenerWrapper listener;
 
-    private RpcInvocationHandler(Method receiver,
+    private Provider<?> handlerProvider;
+    private BeanJsonConverter beanJsonConverter;
+    private ExecutionListenerWrapper listener;
+    private MethodCaller methodCaller;
+
+    private RpcInvocationHandler(MethodCaller methodCaller,
                                  Provider<?> handlerProvider,
                                  BeanJsonConverter beanJsonConverter,
-                                 Constructor<?> reqItemConstructor,
                                  ExecutionListenerWrapper listener) {
-      this.receiver = receiver;
       this.handlerProvider = handlerProvider;
       this.beanJsonConverter = beanJsonConverter;
-      this.requestItemConstructor = reqItemConstructor;
       this.listener = listener;
+      this.methodCaller = methodCaller;
     }
 
     public Future<?> execute(JSONObject rpc, SecurityToken token, BeanConverter converter) {
       try {
-        RequestItem item;
-        if (rpc.has("params")) {
-          item = (RequestItem) requestItemConstructor.newInstance(
-              (JSONObject) rpc.get("params"), token, converter, beanJsonConverter);
-        } else {
-          item = (RequestItem) requestItemConstructor.newInstance(new JSONObject(), token,
-              converter, beanJsonConverter);
-        }
+        JSONObject params = rpc.has("params") ? (JSONObject)rpc.get("params") : new JSONObject();
+        RequestItem item = methodCaller.getRpcRequestItem(params, token, beanJsonConverter);
+
         listener.executing(item);
-        Object result = receiver.invoke(handlerProvider.get(), item);
-        if (result instanceof Future) {
-          return (Future<?>) result;
-        }
-        return ImmediateFuture.newInstance(result);
-      } catch (InvocationTargetException ite) {
-        // Unwrap these
-        return ImmediateFuture.errorInstance(ite.getTargetException());
+        return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
         return ImmediateFuture.errorInstance(e);
       }
@@ -345,30 +316,22 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    * return non-Future types by wrapping them in ImmediateFuture.
    */
   static final class RestInvocationHandler  {
-    final Method receiver;
     final Provider<?> handlerProvider;
-    final Service service;
     final Operation operation;
-    final String[] expectedUrl;
     final BeanJsonConverter beanJsonConverter;
-    final Constructor<?> requestItemConstructor;
     final ExecutionListenerWrapper listener;
+    final MethodCaller methodCaller;
 
-    private RestInvocationHandler(Service service,
-        Operation operation,
-        Method receiver,
+    private RestInvocationHandler(Operation operation,
+        MethodCaller methodCaller,
         Provider<?> handlerProvider,
         BeanJsonConverter beanJsonConverter,
-        Constructor<?> requestItemConstructor,
         ExecutionListenerWrapper listener) {
-      this.service = service;
       this.operation = operation;
-      this.receiver = receiver;
       this.handlerProvider = handlerProvider;
-      expectedUrl = service.path().split("/");
       this.beanJsonConverter = beanJsonConverter;
-      this.requestItemConstructor = requestItemConstructor;
       this.listener = listener;
+      this.methodCaller = methodCaller;
     }
 
     public Future<?> execute(Map<String, String[]> parameters, Reader body,
@@ -378,17 +341,11 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         if (body != null) {
           parameters.put(operation.bodyParam(), new String[]{IOUtils.toString(body)});
         }
-        RequestItem item = (RequestItem) requestItemConstructor.newInstance(parameters, token,
-            converter, beanJsonConverter);
+        RequestItem item = methodCaller.getRestRequestItem(parameters, token, converter,
+            beanJsonConverter);
         listener.executing(item);
-        Object result = receiver.invoke(handlerProvider.get(), item);
-        if (result instanceof Future) {
-          return (Future<?>) result;
-        }
-        return ImmediateFuture.newInstance(result);
-      } catch (InvocationTargetException ite) {
-        // Unwrap these
-        return ImmediateFuture.errorInstance(ite.getTargetException());
+
+        return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
         return ImmediateFuture.errorInstance(e);
       }
@@ -414,7 +371,95 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       return handler.execute(pathParams, body, token, converter);
     }
   }
+  
+  /**
+   * Calls methods annotated with {@link Operation} and appropriately translates
+   * RequestItem to the actual input class of the method.
+   */
+  private static class MethodCaller {
+    /** Type of object to create for this method, or null if takes no args */
+    private Class<?> inputClass;
+    
+    /** Constructors for request item class that will be used */
+    private final Constructor<?> restRequestItemConstructor;
+    private final Constructor<?> rpcRequestItemConstructor;
+    
+    /** The method */
+    private final Method method;
+    
+    /**
+     * Create information needed to call a method
+     * @param method The method
+     * @param isRest True if REST method (affects which RequestItem constructor to return)
+     * @throws NoSuchMethodException
+     */
+    public MethodCaller(Method method, boolean isRest) throws NoSuchMethodException {
+      this.method = method;
 
+      inputClass = method.getParameterTypes().length > 0 ? method.getParameterTypes()[0] : null;
+      
+      // Methods that need RequestItem interface should automatically get a BaseRequestItem
+      if (RequestItem.class.equals(inputClass)) {
+        inputClass = BaseRequestItem.class;
+      }
+      boolean inputIsRequestItem = (inputClass != null) &&
+          RequestItem.class.isAssignableFrom(inputClass);
+      
+      Class<?> requestItemType = inputIsRequestItem ? inputClass : BaseRequestItem.class;
+    
+      Class<?> requestItemFirstParamClass = isRest ? Map.class : JSONObject.class;
+      restRequestItemConstructor = requestItemType.getConstructor(Map.class,
+          SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
+      rpcRequestItemConstructor = requestItemType.getConstructor(JSONObject.class,
+          SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
+    }
+
+    public RequestItem getRestRequestItem(Map<String, String[]> params, SecurityToken token,
+        BeanConverter converter, BeanJsonConverter jsonConverter) {
+      return getRequestItem(params, token, converter, jsonConverter, restRequestItemConstructor);
+    }
+    
+    public RequestItem getRpcRequestItem(JSONObject params, SecurityToken token, BeanJsonConverter converter) {
+      return getRequestItem(params, token, converter, converter, rpcRequestItemConstructor);
+    }
+    
+    private RequestItem getRequestItem(Object params, SecurityToken token, BeanConverter converter,
+        BeanJsonConverter jsonConverter, Constructor<?> constructor) {
+      try {
+        return (RequestItem) constructor.newInstance(params, token,  converter,
+            jsonConverter);
+      } catch (InstantiationException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
+    public Future<?> call(Object handler, RequestItem item) {
+      try {
+        Object result;
+        if (inputClass == null) {
+          result = method.invoke(handler);
+        } else if (RequestItem.class.isAssignableFrom(inputClass)) {
+          result = method.invoke(handler, item);
+        } else {
+          result = method.invoke(handler, item.getTypedRequest(inputClass));
+        }
+
+        if (result instanceof Future) {
+          return (Future<?>) result;
+        }
+        return ImmediateFuture.newInstance(result);
+      } catch (IllegalAccessException e) {
+        return ImmediateFuture.errorInstance(e);
+      } catch (InvocationTargetException e) {
+        // Unwrap the internal exception
+        return ImmediateFuture.errorInstance(e.getTargetException());
+      }
+    }
+  }
 
   /**
    * Standard REST handler to wrap errors

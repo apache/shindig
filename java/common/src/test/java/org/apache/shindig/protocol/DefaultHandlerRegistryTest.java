@@ -19,12 +19,15 @@
 package org.apache.shindig.protocol;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Guice;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.json.JSONObject;
 import static org.junit.Assert.assertArrayEquals;
 
@@ -39,13 +42,15 @@ import java.util.concurrent.Future;
 public class DefaultHandlerRegistryTest extends TestCase {
 
   private DefaultHandlerRegistry registry;
+  private BeanJsonConverter converter;
 
   @Override
   @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
     super.setUp();
+    converter = new BeanJsonConverter(Guice.createInjector());
     registry = new DefaultHandlerRegistry(null,
-        Sets.<Object>newHashSet(new TestHandler()), null,
+        Sets.<Object>newHashSet(new TestHandler()), converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
   }
 
@@ -116,6 +121,27 @@ public class DefaultHandlerRegistryTest extends TestCase {
     assertEquals(future.get(), TestHandler.CREATE_RESPONSE);
   }
 
+  public void testRpcWithInputClassThatIsntRequestItem() throws Exception {
+    JSONObject rpc = new JSONObject("{ method : test.echo, params: {value: 'Bob' }}");
+    RpcHandler handler = registry.getRpcHandler(rpc);
+    Future<?> future = handler.execute(null, converter);
+    assertEquals(future.get(), TestHandler.ECHO_PREFIX + "Bob");
+  }
+  
+  public void testRestWithInputClassThatIsntRequestItem() throws Exception {
+    RestHandler handler = registry.getRestHandler("/test/echo", "GET");
+    String[] value = {"Bob"};
+    Future<?> future = handler.execute(ImmutableMap.of("value", value), null, null, converter);
+    assertEquals(future.get(), TestHandler.ECHO_PREFIX + "Bob");
+  }
+
+  public void testNoArgumentClass() throws Exception {
+    JSONObject rpc = new JSONObject("{ method : test.noArg }");
+    RpcHandler handler = registry.getRpcHandler(rpc);
+    Future<?> future = handler.execute(null, converter);
+    assertEquals(future.get(), TestHandler.NO_ARG_RESPONSE);
+  }
+
   public void testNonFutureException() throws Exception {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.exception }");
@@ -145,7 +171,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testSupportedRpcServices() throws Exception {
     assertEquals(registry.getSupportedRpcServices(),
         Sets.newHashSet("test.create", "test.get", "test.overridden", "test.exception",
-            "test.futureException", "test.override.rpcname"));
+            "test.futureException", "test.override.rpcname", "test.echo", "test.noArg"));
   }
 
   public void testSupportedRestServices() throws Exception {
@@ -154,7 +180,8 @@ public class DefaultHandlerRegistryTest extends TestCase {
             "PUT /test/{someParam}/{someOtherParam}",
             "DELETE /test/{someParam}/{someOtherParam}",
             "POST /test/{someParam}/{someOtherParam}",
-            "GET /test/overridden/method"));
+            "GET /test/overridden/method",
+            "GET /test/echo"));
   }
 
   public void testAddNonService() {
