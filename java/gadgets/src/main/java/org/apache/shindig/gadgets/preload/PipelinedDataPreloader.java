@@ -24,6 +24,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetELResolver;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
@@ -112,6 +113,18 @@ public class PipelinedDataPreloader implements Preloader {
   }
 
   /**
+   * Hook for executing a JSON RPC fetch for social data.  Subclasses can override
+   * to provide special handling (e.g., directly invoking a local API)
+   * 
+   * @param request the social request
+   * @return the response to the request
+   */
+  protected HttpResponse executeSocialRequest(HttpRequest request) throws GadgetException {
+    HttpResponse response = requestPipeline.execute(request);
+    return response;
+  }
+
+  /**
    * Callable for issuing HttpRequests to JsonRpcServlet.
    */
   private class SocialPreloadTask implements Callable<PreloadedData> {
@@ -136,7 +149,7 @@ public class PipelinedDataPreloader implements Preloader {
           .setContainer(context.getContainer())
           .setGadget(Uri.fromJavaUri(context.getUrl()));
 
-      HttpResponse response = requestPipeline.execute(request);
+      HttpResponse response = executeSocialRequest(request);
 
       // Unpack the response into a list of PreloadedData responses
       final List<Object> data = Lists.newArrayList();
