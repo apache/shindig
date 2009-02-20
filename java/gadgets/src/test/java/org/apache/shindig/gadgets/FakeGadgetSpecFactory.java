@@ -31,15 +31,11 @@ public class FakeGadgetSpecFactory implements GadgetSpecFactory {
   public static final String SERVICE_NAME = "testservice";
   public static final String SERVICE_NAME_NO_KEY = "nokey";
 
-  public GadgetSpec getGadgetSpec(GadgetContext context) {
-    // we don't need this one yet
-    return null;
-  }
-
-  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException {
-    Uri uri = Uri.fromJavaUri(gadgetUri);
+  public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException {
+    Uri uri = Uri.fromJavaUri(context.getUrl());
     String gadget = uri.toString();
     String baseSpec = GadgetTokenStoreTest.GADGET_SPEC;
+   
     if (gadget.contains("nokey")) {
       // For testing key lookup failures
       String nokeySpec = baseSpec.replace(SERVICE_NAME, SERVICE_NAME_NO_KEY);

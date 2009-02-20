@@ -22,8 +22,6 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.ImplementedBy;
 
-import java.net.URI;
-
 /**
  * Factory of gadget specs.
  */
@@ -32,13 +30,4 @@ public interface GadgetSpecFactory {
 
   /** Return a gadget spec for a context */
   public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
-
-  /**
-   * Return a gadget spec for a URI.
-   *
-   * @deprecated Use {@link #getGadgetSpec(GadgetContext)} instead.
-   */
-  @Deprecated
-  public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) throws GadgetException;
-
 }

@@ -167,17 +167,9 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
       });
 
       bind(GadgetSpecFactory.class).toInstance(new GadgetSpecFactory() {
-
         public GadgetSpec getGadgetSpec(GadgetContext context) {
-          // TODO Auto-generated method stub
           return null;
         }
-
-        public GadgetSpec getGadgetSpec(URI gadgetUri, boolean ignoreCache) {
-          // TODO Auto-generated method stub
-          return null;
-        }
-
       });
     }
   }

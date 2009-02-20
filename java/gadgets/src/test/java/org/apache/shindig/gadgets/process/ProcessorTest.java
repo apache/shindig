@@ -172,10 +172,6 @@ public class ProcessorTest {
       }
       return new GadgetSpec(Uri.fromJavaUri(context.getUrl()), GADGET);
     }
-
-    public GadgetSpec getGadgetSpec(URI uri, boolean ignoreCache) {
-      throw new UnsupportedOperationException();
-    }
   }
 
   private static class FakeVariableSubstituter extends VariableSubstituter {

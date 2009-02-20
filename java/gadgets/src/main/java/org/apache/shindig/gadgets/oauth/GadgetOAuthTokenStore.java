@@ -18,6 +18,8 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
@@ -31,6 +33,7 @@ import org.apache.shindig.gadgets.spec.OAuthSpec;
 import org.apache.shindig.gadgets.spec.OAuthService.Location;
 import org.apache.shindig.gadgets.spec.OAuthService.Method;
 
+import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
 import net.oauth.OAuthServiceProvider;
@@ -226,12 +229,35 @@ public class GadgetOAuthTokenStore {
     throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST, "Unknown method " + method);
   }
 
-  private GadgetSpec findSpec(SecurityToken securityToken, OAuthArguments arguments,
+  private GadgetSpec findSpec(final SecurityToken securityToken, final OAuthArguments arguments,
       OAuthResponseParams responseParams) throws OAuthRequestException {
     try {
-      return specFactory.getGadgetSpec(
-          new URI(securityToken.getAppUrl()),
-          arguments.getBypassSpecCache());
+      final URI uri = new URI(securityToken.getAppUrl());
+      
+      GadgetContext context = new GadgetContext() {
+        @Override
+        public String getContainer() {
+          return Objects.firstNonNull(securityToken.getContainer(),
+              ContainerConfig.DEFAULT_CONTAINER);
+        }
+
+        @Override
+        public SecurityToken getToken() {
+          return securityToken;
+        }
+
+        @Override
+        public URI getUrl() {
+          return uri;
+        }
+
+        @Override
+        public boolean getIgnoreCache() {
+          return arguments.getBypassSpecCache();
+        }
+      };
+      
+      return specFactory.getGadgetSpec(context);
     } catch (URISyntaxException e) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Could not fetch gadget spec, gadget URI invalid.", e);
