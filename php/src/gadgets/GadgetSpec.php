@@ -62,4 +62,6 @@ class GadgetSpec {
 
   public $links;
   public $userPrefs;
+  public $rewrite = null;
+  public $oauth = null;
 }
