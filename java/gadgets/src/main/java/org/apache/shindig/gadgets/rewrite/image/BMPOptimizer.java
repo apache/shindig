@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
 
 /**
  * Optimize BMP by converting to PNG
@@ -32,10 +33,11 @@ public class BMPOptimizer extends PNGOptimizer {
   public BMPOptimizer(OptimizerConfig config, HttpResponse original)
       throws IOException {
     super(config, original);
+    ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
+    outputter = new ImageIOOutputter(writer, null);
   }
 
   protected void rewriteImpl(BufferedImage image) throws IOException {
-    writer = ImageIO.getImageWritersByFormatName("png").next();
     super.rewriteImpl(image);
   }
 

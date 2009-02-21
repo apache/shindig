@@ -17,14 +17,21 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
+import org.apache.sanselan.ImageFormat;
+import org.apache.sanselan.ImageWriteException;
+import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -37,53 +44,53 @@ import javax.imageio.metadata.IIOMetadata;
  * Base class for image optimizers
  */
 abstract class BaseOptimizer {
+
+  static final Map<String, ImageFormat> formatNameToImageFormat = ImmutableMap.of(
+      "png", ImageFormat.IMAGE_FORMAT_PNG,
+      "gif", ImageFormat.IMAGE_FORMAT_GIF,
+      "jpeg", ImageFormat.IMAGE_FORMAT_JPEG);
+
   final HttpResponse originalResponse;
   final OptimizerConfig config;
 
-  ImageWriter writer;
-
-  private ByteArrayOutputStream baos;
+  protected ImageOutputter outputter;
   protected byte[] minBytes;
   protected int minLength;
   int reductionPct;
 
+
   public BaseOptimizer(OptimizerConfig config, HttpResponse original)
       throws IOException {
     this.config = config;
-    Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(getOriginalFormatName());
-    if (writers.hasNext()) {
-      this.writer = writers.next();
-    }
     this.originalResponse = original;
     this.minLength = original.getContentLength();
+    this.outputter = getOutputter();
   }
 
-  /**
-   * Write the image using its default write parameters
-   */
-  protected void write(BufferedImage image) throws IOException {
-    write(image, null);
+  protected ImageOutputter getOutputter() {
+    Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(getOriginalFormatName());
+    if (writers.hasNext()) {
+      ImageWriter writer = writers.next();
+      ImageWriteParam param = writer.getDefaultWriteParam();
+      if (getOriginalFormatName().equals("jpeg")) {
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(config.getJpegCompression());
+      }
+      return new ImageIOOutputter(writer, param);
+    }
+    return new SanselanOutputter(formatNameToImageFormat.get(getOriginalFormatName()));
   }
 
   /**
    * Write the image using a specified write param
    */
-  protected void write(BufferedImage image, ImageWriteParam writeParam) throws IOException {
+  protected void write(BufferedImage image) throws IOException {
     if (image == null) {
       return;
     }
-    ByteArrayOutputStream stream = getOutputStream();
-    writer.setOutput(ImageIO.createImageOutputStream(stream));
-    if (writeParam == null) {
-      writeParam = writer.getDefaultWriteParam();
-    }
-    // Create a new empty metadata set
-    IIOMetadata metadata = writer.getDefaultImageMetadata(
-        new ImageTypeSpecifier(image.getColorModel(), image.getSampleModel()),
-        writeParam);
-    writer.write(new IIOImage(image, Collections.<BufferedImage>emptyList(), metadata));
-    if (minLength > stream.size()) {
-      minBytes = stream.toByteArray();
+    byte[] bytes = outputter.toBytes(image);
+    if (minLength > bytes.length) {
+      minBytes = bytes;
       minLength = minBytes.length;
       reductionPct = ((originalResponse.getContentLength() - minLength) * 100) /
           originalResponse.getContentLength();
@@ -91,7 +98,7 @@ abstract class BaseOptimizer {
   }
 
   public HttpResponse rewrite(BufferedImage image) throws IOException {
-    if (writer == null) {
+    if (outputter == null) {
       return originalResponse;
     }
 
@@ -114,15 +121,6 @@ abstract class BaseOptimizer {
     return originalResponse;
   }
 
-  // Lazily initialize stream
-  private ByteArrayOutputStream getOutputStream() {
-    if (baos == null) {
-      baos = new ByteArrayOutputStream(originalResponse.getContentLength());
-    }
-    baos.reset();
-    return baos;
-  }
-
   /**
    * Get the rewritten image if available
    * @return
@@ -138,4 +136,70 @@ abstract class BaseOptimizer {
   protected abstract String getOriginalContentType();
 
   protected abstract String getOriginalFormatName();
+
+  /**
+   * Interface to allow for different serialization libraries to be used
+   */
+  public static interface ImageOutputter {
+    byte[] toBytes(BufferedImage image) throws IOException;
+  }
+
+  /**
+   * Standard ImageIO based image outputter
+   */
+  public static class ImageIOOutputter implements ImageOutputter {
+
+    ImageWriter writer;
+    ByteArrayOutputStream baos;
+    ImageWriteParam writeParam;
+    public ImageIOOutputter(ImageWriter writer, ImageWriteParam writeParam) {
+      this.writer = writer;
+      if (writeParam == null) {
+        this.writeParam = writer.getDefaultWriteParam();
+      } else {
+        this.writeParam = writeParam;
+      }
+    }
+
+    public byte[] toBytes(BufferedImage image) throws IOException {
+      if (baos == null) {
+        baos = new ByteArrayOutputStream();
+      } else {
+        baos.reset();
+      }
+      writer.setOutput(ImageIO.createImageOutputStream(baos));
+      // Create a new empty metadata set
+      IIOMetadata metadata = writer.getDefaultImageMetadata(
+          new ImageTypeSpecifier(image.getColorModel(), image.getSampleModel()),
+          writeParam);
+      writer.write(new IIOImage(image, Collections.<BufferedImage>emptyList(), metadata));
+      return baos.toByteArray();
+    }
+  }
+
+  /**
+   * Sanselan based image outputter
+   */
+  public static class SanselanOutputter implements ImageOutputter {
+
+    ImageFormat format;
+    ByteArrayOutputStream baos;
+    public SanselanOutputter(ImageFormat format) {
+      this.format = format;
+    }
+
+    public byte[] toBytes(BufferedImage image) throws IOException {
+      if (baos == null) {
+        baos = new ByteArrayOutputStream();
+      } else {
+        baos.reset();
+      }
+      try {
+        Sanselan.writeImage(image, baos, format, Maps.newHashMap());
+        return baos.toByteArray();
+      } catch (ImageWriteException iwe) {
+        throw new IOException(iwe.getMessage());
+      }
+    }
+  }
 }

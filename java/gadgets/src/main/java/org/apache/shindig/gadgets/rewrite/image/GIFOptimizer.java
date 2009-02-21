@@ -19,8 +19,8 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -38,16 +38,15 @@ public class GIFOptimizer extends PNGOptimizer {
   }
 
   protected void rewriteImpl(BufferedImage image) throws IOException {
-    if (image.getColorModel().getTransparency() != Transparency.OPAQUE) {
+    if (!ImageUtils.isOpaque(image)) {
       // We can rewrite tranparent GIFs to PNG but for IE6 it requires the use of
       // the AlphaImageReader and some pain. Deferring this until that is proven to work
-      // Opacity check is valid as GIF always produces IndexColorModel
 
-      // Re-palettize and write to stip metadata
-      write(ImageUtils.palettize(image, config.getMaxPaletteSize()));
+      // Write to stip any metadata and re-compute the palette
+      write(ImageUtils.palettize(image, ((IndexColorModel)image.getColorModel()).getMapSize()));
     } else {
       usePng = true;
-      writer = ImageIO.getImageWritersByFormatName("png").next();
+      outputter = new ImageIOOutputter(ImageIO.getImageWritersByFormatName("png").next(), null);
       super.rewriteImpl(image);
     }
   }
@@ -55,5 +54,18 @@ public class GIFOptimizer extends PNGOptimizer {
   @Override
   protected String getOriginalContentType() {
     return "image/gif";
+  }
+
+  @Override
+  protected String getOutputContentType() {
+    if (usePng) {
+      return super.getOutputContentType();
+    }
+    return "image/gif";
+  }
+
+  @Override
+  protected String getOriginalFormatName() {
+    return "gif";
   }
 }

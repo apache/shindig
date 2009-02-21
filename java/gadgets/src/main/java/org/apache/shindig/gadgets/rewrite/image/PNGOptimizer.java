@@ -21,11 +21,11 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.IndexColorModel;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 
 /**
  * Optimize a PNG image and possibly convert it to a JPEG.
@@ -65,9 +65,6 @@ class PNGOptimizer extends BaseOptimizer {
       boolean isOpaque;
       if (palettized != null){
         bufferedImage = palettized;
-      }
-      if (bufferedImage.getColorModel() instanceof IndexColorModel) {
-        // Only IndexColorModel faithfully reports transparency
         isOpaque = bufferedImage.getColorModel().getTransparency() == ColorModel.OPAQUE;
       } else {
         isOpaque = ImageUtils.isOpaque(bufferedImage);
@@ -76,11 +73,12 @@ class PNGOptimizer extends BaseOptimizer {
       if (isOpaque) {
         byte[] lastBytes = minBytes;
         int prevReductionPct = reductionPct;
-        writer = ImageIO.getImageWritersByFormatName("jpeg").next();
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
         ImageWriteParam param = writer.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(config.getJpegCompression());
-        write(bufferedImage, param);
+        outputter = new ImageIOOutputter(writer, param);
+        write(bufferedImage);
         // Only use JPEG if it offers a significant reduction over other methods
         if (reductionPct > prevReductionPct + 20) {
           useJpeg = true;

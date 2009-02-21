@@ -23,8 +23,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageWriteParam;
-
 /**
  * Optimize JPEG images by either converting them to PNGs or re-encoding them with a more
  * appropriate compression level.
@@ -57,10 +55,7 @@ public class JPEGOptimizer extends BaseOptimizer {
     }
 
     // Write as standard JPEG using the configured default compression level
-    ImageWriteParam param = writer.getDefaultWriteParam();
-    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-    param.setCompressionQuality(config.getJpegCompression());
-    write(image, param);
+    write(image);
 
     // JPEG did not beat PNG
     if (pngLength == minLength) {

@@ -35,7 +35,12 @@ public class GIFOptimizerTest extends BaseOptimizerTest {
     assertSame(resp, httpResponse);
   }
 
-  public void testRewriteLargeGIFToPNG() throws Exception {
+  /**
+   * This is a GIF image with an palette that contains transparent entries but
+   * that has not pixels that map to them so it is Opaque.
+   * @throws Exception
+   */
+  public void testBadPaletteGIFToPNG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/large.gif", "image/gif");
     HttpResponse httpResponse = rewrite(resp);

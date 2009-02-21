@@ -94,6 +94,8 @@ public class BasicImageRewriter implements ImageRewriter {
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
 
       // Dont handle animations
+      // TODO: This doesnt work as current Sanselan doesnt accurately return image counts
+      // See animated gif detection below
       if (imageInfo.getNumberOfImages() > 1) {
         return response;
       }
@@ -111,8 +113,13 @@ public class BasicImageRewriter implements ImageRewriter {
       int originalBytes = response.getContentLength();
       originalImageBytes.addAndGet(originalBytes);
       if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
-        response = new GIFOptimizer(config, response)
-            .rewrite(Sanselan.getBufferedImage(response.getResponse()));
+        // Detecting the existence of the NETSCAPE2.0 extension by string comparison
+        // is not exactly clean but is good enough to determine if a GIF is animated
+        // Remove once Sanselan returns image count
+        if (!response.getResponseAsString().contains("NETSCAPE2.0")) {
+          response = new GIFOptimizer(config, response).rewrite(
+              Sanselan.getBufferedImage(response.getResponse()));
+        }
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_PNG) {
         response = new PNGOptimizer(config, response)
             .rewrite(Sanselan.getBufferedImage(response.getResponse()));

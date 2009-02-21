@@ -21,12 +21,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import static junit.framework.Assert.*;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 
 /**
  * Tests for ImageRewriter
@@ -96,7 +97,6 @@ public class ImageRewriterTest {
   }
 
   @Test
-  @Ignore("This test is known failing with the current sanselan codebase as of Feb 20, 2009")
   public void testNoRewriteAnimatedGIF() throws Exception {
     byte[] bytes = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
         "org/apache/shindig/gadgets/rewrite/image/animated.gif"));
@@ -108,5 +108,17 @@ public class ImageRewriterTest {
     assertSame(rewriter.rewrite(Uri.parse("animated.gif"), original), original);
   }
 
+  @Test
+  public void testRewriteUnAnimatedGIF() throws Exception {
+    byte[] bytes = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
+        "org/apache/shindig/gadgets/rewrite/image/large.gif"));
+    HttpResponse original = new HttpResponseBuilder()
+        .setHeader("Content-Type", "image/gif")
+        .setHttpStatusCode(HttpResponse.SC_OK)
+        .setResponse(bytes)
+        .create();
+    assertEquals(rewriter.rewrite(Uri.parse("large.gif"), original).getHeader("Content-Type"),
+        "image/png");
+  }
 }
  
