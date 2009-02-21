@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.gadgets.servlet.JsServlet;
+import org.apache.shindig.gadgets.servlet.MakeRequestServlet;
 import org.apache.shindig.gadgets.servlet.ProxyServlet;
 import org.apache.shindig.gadgets.servlet.RpcServlet;
 import org.apache.shindig.protocol.DataServiceServlet;
@@ -49,6 +50,7 @@ public class JettyLauncher {
 
   private static final String GADGET_BASE = "/gadgets/ifr";
   private static final String PROXY_BASE = "/gadgets/proxy";
+  private static final String MAKEREQUEST_BASE = "/gadgets/makeRequest";
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
@@ -93,7 +95,13 @@ public class JettyLauncher {
     // Attach the gadget rendering servlet
     ServletHolder gadgetServletHolder = new ServletHolder(new GadgetRenderingServlet());
     context.addServlet(gadgetServletHolder, GADGET_BASE);
+    context.addFilter(AuthenticationServletFilter.class, GADGET_BASE, 0);
 
+    // Attach the make-request servlet
+    ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());
+    context.addServlet(makeRequestHolder, MAKEREQUEST_BASE);
+    context.addFilter(AuthenticationServletFilter.class, MAKEREQUEST_BASE, 0);
+    
     // Attach DataServiceServlet
     ServletHolder restServletHolder = new ServletHolder(new DataServiceServlet());
     context.addServlet(restServletHolder, REST_BASE);
