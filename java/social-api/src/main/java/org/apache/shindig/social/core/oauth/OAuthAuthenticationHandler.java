@@ -59,26 +59,17 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     OAuthMessage message = OAuthServlet.getMessage(request, null);
     OAuthEntry entry;
 
-
     try {
-      // no token available...
+      // We only return null if this request 
       if (message.getToken() == null) return null;
+      // no token available...
 
       entry = store.getEntry(message.getToken());
     } catch (IOException e) {
       return null;
     }
 
-    if (!isValidOAuthRequest(message, entry)) {
-      return null;
-    }
-
-    return new OAuthSecurityToken(entry.userId, entry.callbackUrl, entry.appId,
-        entry.domain, entry.container);
-  }
-
-  private boolean isValidOAuthRequest(OAuthMessage message, OAuthEntry entry) {
-    if (entry == null) 
+    if (entry == null)
       throw new InvalidAuthenticationException("access token not found.", null);
     if (entry.type != OAuthEntry.Type.ACCESS)
       throw new InvalidAuthenticationException("token is not an access token.", null);
@@ -97,11 +88,12 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     } catch (OAuthException e) {
       throw new InvalidAuthenticationException(e.getMessage(), e);
     } catch (IOException e) {
-      return false;
+      throw new InvalidAuthenticationException(e.getMessage(), e);
     } catch (URISyntaxException e) {
-      return false;
+      throw new InvalidAuthenticationException(e.getMessage(), e);
     }
 
-    return true;
+    return new OAuthSecurityToken(entry.userId, entry.callbackUrl, entry.appId,
+        entry.domain, entry.container);
   }
 }
