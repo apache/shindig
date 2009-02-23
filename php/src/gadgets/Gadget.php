@@ -18,8 +18,6 @@
  * under the License.
  */
 
-class GadgetException extends Exception {}
-
 class Gadget {
   const DEFAULT_VIEW = 'profile';
   public $gadgetSpec;
