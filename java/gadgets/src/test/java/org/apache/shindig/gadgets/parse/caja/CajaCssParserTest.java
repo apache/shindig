@@ -42,6 +42,6 @@ public class CajaCssParserTest extends TestCase {
     List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(styleSheet,
         CssTree.SimpleSelector.class);
     assertEquals(2, selectorList.size());
-    assertEquals(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 }

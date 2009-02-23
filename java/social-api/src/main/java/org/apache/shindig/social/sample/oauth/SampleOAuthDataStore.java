@@ -64,8 +64,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
           return null;
       // null below is for the callbackUrl, which we don't have in the db
       OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, SERVICE_PROVIDER);
-      if (consumer != null)
-        consumer.setProperty("samplecontainer-attribute", "value");
+      consumer.setProperty("samplecontainer-attribute", "value");
 
       return consumer;
 

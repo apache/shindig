@@ -230,8 +230,7 @@ public class BaseRequestItem implements RequestItem {
       return listParam;
     }
     else if (param instanceof List) {
-      List<String> listParam = (List<String>)param;
-      return listParam;
+      return (List<String>)param;
     } else if (param instanceof JSONArray) {
       try {
         JSONArray jsonArray = (JSONArray)param;

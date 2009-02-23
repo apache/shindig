@@ -117,7 +117,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     checkRequest(request);
     assertTrue(request.getOAuthArguments().getSignOwner());
     assertFalse(request.getOAuthArguments().getSignViewer());
-    checkResults((JSONObject) data.toJson().iterator().next());;
+    checkResults((JSONObject) data.toJson().iterator().next());
   }
 
   @Test

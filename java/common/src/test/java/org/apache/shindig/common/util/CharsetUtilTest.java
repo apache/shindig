@@ -53,7 +53,7 @@ public class CharsetUtilTest {
   }
   
 
-  private static final byte[] LATIN1_UTF8_DATA = new byte[] {
+  private static final byte[] LATIN1_UTF8_DATA = {
     'G', 'a', 'm', 'e', 's', ',', ' ', 'H', 'Q', ',', ' ', 'M', 'a', 'n', 'g', (byte)0xC3,
     (byte) 0xA1, ',', ' ', 'A', 'n', 'i', 'm', 'e', ' ', 'e', ' ', 't', 'u', 'd', 'o', ' ',
     'q', 'u', 'e', ' ', 'u', 'm', ' ', 'b', 'o', 'm', ' ', 'n', 'e', 'r', 'd', ' ', 'a', 'm', 'a'

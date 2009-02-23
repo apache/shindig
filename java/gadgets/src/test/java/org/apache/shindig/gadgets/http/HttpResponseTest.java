@@ -30,13 +30,13 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
 public class HttpResponseTest extends TestCase {
-  private static final byte[] UTF8_DATA = new byte[] {
+  private static final byte[] UTF8_DATA = {
     (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
   };
   private static final String UTF8_STRING = "hello";
 
   // A large string is needed for accurate charset detection.
-  private static final byte[] LATIN1_DATA = new byte[] {
+  private static final byte[] LATIN1_DATA = {
     'G', 'a', 'm', 'e', 's', ',', ' ', 'H', 'Q', ',', ' ', 'M', 'a', 'n', 'g', (byte)0xE1, ',', ' ',
     'A', 'n', 'i', 'm', 'e', ' ', 'e', ' ', 't', 'u', 'd', 'o', ' ', 'q', 'u', 'e', ' ', 'u', 'm',
     ' ', 'b', 'o', 'm', ' ', 'n', 'e', 'r', 'd', ' ', 'a', 'm', 'a'
@@ -44,7 +44,7 @@ public class HttpResponseTest extends TestCase {
   private static final String LATIN1_STRING
       = "Games, HQ, Mang\u00E1, Anime e tudo que um bom nerd ama";
 
-  private static final byte[] BIG5_DATA = new byte[] {
+  private static final byte[] BIG5_DATA = {
     (byte)0xa7, (byte)0x41, (byte)0xa6, (byte)0x6e
   };
 
@@ -146,7 +146,7 @@ public class HttpResponseTest extends TestCase {
   }
 
   public void testPreserveBinaryData() throws Exception {
-    byte[] data = new byte[] {
+    byte[] data = {
         (byte)0x00, (byte)0xDE, (byte)0xEA, (byte)0xDB, (byte)0xEE, (byte)0xF0
     };
     HttpResponse response = new HttpResponseBuilder()

@@ -32,7 +32,7 @@ public class EncodingDetectorTest {
 
   @Test
   public void detectedUtf8WithByteOrderMark() {
-    byte[] data = new byte[] {
+    byte[] data = {
         (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
     };
 

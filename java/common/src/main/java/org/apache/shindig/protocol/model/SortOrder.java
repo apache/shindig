@@ -21,5 +21,5 @@ package org.apache.shindig.protocol.model;
  * Common sort order definitions
  */
 public enum SortOrder {
-  ascending, descending;
+  ascending, descending
 }

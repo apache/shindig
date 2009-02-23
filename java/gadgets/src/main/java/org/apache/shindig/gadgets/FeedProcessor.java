@@ -82,7 +82,7 @@ public class FeedProcessor {
         entry.put("Title", e.getTitle());
         entry.put("Link", e.getLink());
         if (getSummaries) {
-          if (e.getContents() != null && e.getContents().size() > 0) {
+          if (e.getContents() != null && !e.getContents().isEmpty()) {
             entry.put("Summary",
                 ((SyndContent)e.getContents().get(0)).getValue());
           } else {

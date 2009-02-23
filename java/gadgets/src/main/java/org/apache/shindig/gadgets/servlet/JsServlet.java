@@ -87,7 +87,7 @@ public class JsServlet extends InjectedServlet {
     StringBuilder jsData = new StringBuilder();
     for (GadgetFeature feature : features) {
       for (JsLibrary lib : feature.getJsLibraries(context, container)) {
-        if (!lib.getType().equals(JsLibrary.Type.URL)) {
+        if (lib.getType() != JsLibrary.Type.URL) {
           if (debug) {
             jsData.append(lib.getDebugContent());
           } else {

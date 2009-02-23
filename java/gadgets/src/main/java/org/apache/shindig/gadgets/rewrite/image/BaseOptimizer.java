@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -154,11 +155,7 @@ abstract class BaseOptimizer {
     ImageWriteParam writeParam;
     public ImageIOOutputter(ImageWriter writer, ImageWriteParam writeParam) {
       this.writer = writer;
-      if (writeParam == null) {
-        this.writeParam = writer.getDefaultWriteParam();
-      } else {
-        this.writeParam = writeParam;
-      }
+      this.writeParam = Objects.firstNonNull(writeParam, writer.getDefaultWriteParam());
     }
 
     public byte[] toBytes(BufferedImage image) throws IOException {

@@ -63,7 +63,7 @@ public class Crypto {
    */
   public final static int CIPHER_KEY_LEN = 16;
   
-  private static int CIPHER_BLOCK_SIZE = 16;
+  private static final int CIPHER_BLOCK_SIZE = 16;
   
   /**
    * Length of HMAC SHA1 output

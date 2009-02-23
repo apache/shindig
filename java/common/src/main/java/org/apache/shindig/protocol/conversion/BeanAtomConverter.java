@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 
 // TODO: This does not produce valid atom sytnax yet
 public class BeanAtomConverter implements BeanConverter {
-  private static Logger logger =
+  private static final Logger logger =
       Logger.getLogger(BeanAtomConverter.class.getName());
 
 

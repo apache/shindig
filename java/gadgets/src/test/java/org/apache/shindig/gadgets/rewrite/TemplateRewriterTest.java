@@ -115,8 +115,8 @@ public class TemplateRewriterTest {
     rewriter.rewrite(gadget, content);
     assertTrue("Template wasn't transformed (" + condition + ")", 
         content.getContent().indexOf("Hello, John") > 0);
-    assertTrue("Template tag wasn't removed (" + condition + ")", 
-        content.getContent().indexOf("text/os-template") < 0);
+    assertTrue("Template tag wasn't removed (" + condition + ")",
+        !content.getContent().contains("text/os-template"));
   }
 
   private void testExpectingNoTransform(String code, String condition) throws Exception {

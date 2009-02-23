@@ -37,7 +37,7 @@ public interface Preloader {
    * @param gadget The gadget that the operations will be performed for.
    * @param phase The preload phase being executed.
    * @return Preloading tasks that will be executed by
-   *  {@link PreloaderService#preload(GadgetContext, GadgetSpec)}.
+   *  {@link PreloaderService#}.
    */
   Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
       GadgetSpec gadget, PreloaderService.PreloadPhase phase);

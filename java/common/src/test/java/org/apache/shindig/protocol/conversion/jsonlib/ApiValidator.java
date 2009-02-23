@@ -287,7 +287,7 @@ public class ApiValidator {
         log.debug(id + '.' + oid);
         Object o = scriptableObject.get(String.valueOf(oid), scriptableObject);
         if (o instanceof ScriptableObject) {
-          listScriptable(id + '.' + String.valueOf(oid), (ScriptableObject) o);
+          listScriptable(id + '.' + oid, (ScriptableObject) o);
         }
       }
     }

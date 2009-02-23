@@ -75,7 +75,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       } else if (path.endsWith("accessToken")) {
         createAccessToken(servletRequest, servletResponse);
       } else {
-        servletResponse.sendError(servletResponse.SC_NOT_FOUND, "unknown Url");
+        servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown Url");
       }
     } catch (OAuthException e) {
       handleException(e, servletRequest, servletResponse, true);
@@ -120,7 +120,8 @@ public class SampleOAuthServlet extends InjectedServlet {
     OAuthEntry entry = dataStore.getEntry(requestMessage.getToken());
 
     if (entry == null) {
-      servletResponse.sendError(servletResponse.SC_NOT_FOUND, "Authentication Token not found");
+      servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "Authentication Token not found");
+      return;
     }
 
     OAuthConsumer consumer = dataStore.getConsumer(entry.consumerKey);

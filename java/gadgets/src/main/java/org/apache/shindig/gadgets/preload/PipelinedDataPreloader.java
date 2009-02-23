@@ -206,7 +206,7 @@ public class PipelinedDataPreloader implements Preloader {
         } else {
           UriBuilder uriBuilder = new UriBuilder(request.getUri());
           String query = uriBuilder.getQuery();
-          query = query == null ? params : query + "&" + params;
+          query = query == null ? params : query + '&' + params;
           uriBuilder.setQuery(query);
           request.setUri(uriBuilder.toUri());
         }

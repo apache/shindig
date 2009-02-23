@@ -28,14 +28,14 @@ import java.util.Locale;
 
 public class DateUtilTest {
 
-  String[] text = new String[] {
+  String[] text = {
     "Tue, 27 May 2008 05:12:50 GMT",
     "Wed, 28 May 2008 04:40:48 GMT",
     "Mon, 30 Jun 3090 03:29:55 GMT",
     "Fri, 06 Jun 1670 01:57:27 GMT",
   };
 
-  Date[] timeStamps = new Date[] {
+  Date[] timeStamps = {
     new Date(1211865170000L),
     new Date(1211949648000L),
     new Date(35359385395000L),

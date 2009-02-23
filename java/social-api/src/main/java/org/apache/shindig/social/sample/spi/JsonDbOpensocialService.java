@@ -252,7 +252,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         result.add(filterFields(person, fields, Person.class));
       }
 
-      if (GroupId.Type.self.equals(groupId.getType()) && 0 == result.size()) {
+      if (GroupId.Type.self == groupId.getType() && result.isEmpty()) {
         throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
       }
 
@@ -261,7 +261,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         Collections.sort(result, NAME_COMPARATOR);
       }
 
-      if (options.getSortOrder().equals(SortOrder.descending)) {
+      if (options.getSortOrder() == SortOrder.descending) {
         Collections.reverse(result);
       }
 

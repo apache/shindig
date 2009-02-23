@@ -130,9 +130,9 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
   public Set<String> getSupportedRestServices() {
     Set<String> result = Sets.newTreeSet();
     for (Map<String, SortedSet<RestPath>> methods : serviceMethodPathMap.values()) {
-      for (String method : methods.keySet()) {
-        for (RestPath path : methods.get(method)) {
-          result.add(method + " " + path.operationPath);
+      for (Map.Entry<String, SortedSet<RestPath>> method : methods.entrySet()) {
+        for (RestPath path : method.getValue()) {
+          result.add(method.getKey() + ' ' + path.operationPath);
         }
       }
     }
@@ -206,15 +206,15 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
           }
 
           if (StringUtils.isEmpty(op.path())) {
-            sortedSet.add(new RestPath("/" + serviceName +  service.path(), restHandler));
+            sortedSet.add(new RestPath('/' + serviceName +  service.path(), restHandler));
           } else {
             // Use the standard service name and constant prefix as the key
-            sortedSet.add(new RestPath("/" + serviceName + op.path(), restHandler));
+            sortedSet.add(new RestPath('/' + serviceName + op.path(), restHandler));
           }
         }
       }
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No REST binding for " + service.name() + "." + m.getName());
+      logger.log(Level.INFO, "No REST binding for " + service.name() + '.' + m.getName());
     }
 
   }
@@ -232,9 +232,9 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       RpcInvocationHandler rpcHandler =
           new RpcInvocationHandler(methodCaller, handlerProvider, beanJsonConverter,
               new ExecutionListenerWrapper(service.name(), opName, executionListener));
-      rpcOperations.put(service.name() + "." + opName, rpcHandler);
+      rpcOperations.put(service.name() + '.' + opName, rpcHandler);
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No RPC binding for " + service.name() + "." + m.getName());
+      logger.log(Level.INFO, "No RPC binding for " + service.name() + '.' + m.getName());
     }
   }
 
@@ -466,7 +466,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    */
   private static final class ErrorRestHandler implements RestHandler {
 
-    private ProtocolException error;
+    private final ProtocolException error;
 
     public ErrorRestHandler(ProtocolException error) {
       this.error = error;
@@ -483,7 +483,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    */
   private static final class ErrorRpcHandler implements RpcHandler {
 
-    private ProtocolException error;
+    private final ProtocolException error;
 
     public ErrorRpcHandler(ProtocolException error) {
       this.error = error;
@@ -503,7 +503,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       CONST, SINGULAR_PARAM, PLURAL_PARAM
     }
 
-    class Part {
+    static class Part {
       String partName;
       PartType type;
       Part(String partName, PartType type) {

@@ -47,7 +47,7 @@ public class JsonObjectToMapMorpher implements Morpher, ObjectMorpher {
   }
 
   /**
-   * @param the bean to be morphed
+   * @param bean the bean to be morphed
    * @return the morphed bean (a map)
    */
   public Object morph(Object bean) {

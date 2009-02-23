@@ -137,10 +137,9 @@ public class PipelineDataContentRewriterTest {
     rewriter.rewrite(gadget, content);
 
     // Verify the data set is injected, and the os-data was deleted
-    assertTrue("Script not inserted", content.getContent().indexOf(
-        "DataContext.putDataSet(\"key\",{\"foo\":\"bar\"})") >= 0);
+    assertTrue("Script not inserted", content.getContent().contains("DataContext.putDataSet(\"key\",{\"foo\":\"bar\"})"));
     assertFalse("os-data wasn't deleted",
-        content.getContent().indexOf("type=\"text/os-data\"") >= 0);
+        content.getContent().contains("type=\"text/os-data\""));
 
     assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
@@ -193,12 +192,10 @@ public class PipelineDataContentRewriterTest {
     control.verify();
 
     // Verify the data set is injected, and the os-data was deleted
-    assertTrue("First batch not inserted", content.getContent().indexOf(
-        "DataContext.putDataSet(\"json\",{\"user\":\"canonical\"})") >= 0);
-    assertTrue("Second batch not inserted", content.getContent().indexOf(
-        "DataContext.putDataSet(\"me\",{\"id\":\"canonical\"})") >= 0);
+    assertTrue("First batch not inserted", content.getContent().contains("DataContext.putDataSet(\"json\",{\"user\":\"canonical\"})"));
+    assertTrue("Second batch not inserted", content.getContent().contains("DataContext.putDataSet(\"me\",{\"id\":\"canonical\"})"));
     assertFalse("os-data wasn't deleted",
-        content.getContent().indexOf("type=\"text/os-data\"") >= 0);
+        content.getContent().contains("type=\"text/os-data\""));
 
     // Check the evaluated HTTP request
     RequestAuthenticationInfo request = firstBatch.getValue().getHttpPreloads().get("json");

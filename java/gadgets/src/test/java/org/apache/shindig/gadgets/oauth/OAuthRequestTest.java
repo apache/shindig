@@ -773,7 +773,7 @@ public class OAuthRequestTest {
 
   @Test
   public void testPostBinaryData() throws Exception {
-    byte[] raw = new byte[] { 0, 1, 2, 3, 4, 5 };
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL, null, raw);
     List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
@@ -786,7 +786,7 @@ public class OAuthRequestTest {
 
   @Test
   public void testPostWeirdContentType() throws Exception {
-    byte[] raw = new byte[] { 0, 1, 2, 3, 4, 5 };
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
         "funky-content", raw);

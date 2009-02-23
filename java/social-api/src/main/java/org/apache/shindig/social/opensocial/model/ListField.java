@@ -96,7 +96,7 @@ public interface ListField {
   String getValue();
 
   /**
-   * @see ListField.getValue()
+   * @see ListField#getValue()
    * @param value the value of the field
    */
   void setValue(String value);
@@ -114,7 +114,7 @@ public interface ListField {
   Boolean getPrimary();
 
   /**
-   * @see ListField.getPrimary()
+   * @see ListField#getPrimary()
    * @param primary set to true if a primary or preferred value
    */
   void setPrimary(Boolean primary);

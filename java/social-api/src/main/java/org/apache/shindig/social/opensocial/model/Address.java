@@ -227,7 +227,7 @@ public interface Address {
   Boolean getPrimary();
 
   /**
-   * @see Address.getPrimary()
+   * @see  org.apache.shindig.social.opensocial.model.Address#getPrimary()
    * @param primary set the Primary status of this Address.
    */
   void setPrimary(Boolean primary);

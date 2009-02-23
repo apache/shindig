@@ -48,7 +48,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
 
   public Collection<PreloadedData> preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
     if (preloaders.isEmpty()) {
-      return ImmutableList.<PreloadedData>of();
+      return ImmutableList.of();
     }
 
     List<Callable<PreloadedData>> tasks = Lists.newArrayList();

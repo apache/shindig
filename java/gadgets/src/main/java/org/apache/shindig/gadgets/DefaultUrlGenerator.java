@@ -113,11 +113,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
     String url = context.getUrl().toString();
     View view = gadget.getCurrentView();
     View.ContentType type;
-    if (view == null) {
-      type = View.ContentType.HTML;
-    } else {
-      type = view.getType();
-    }
+    type = (view == null) ? View.ContentType.HTML : view.getType();
 
     UriBuilder uri;
     switch (type) {
@@ -127,11 +123,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
       case HTML:
       default:
         Uri iframeBaseUri = iframeBaseUris.get(context.getContainer());
-        if (iframeBaseUri != null) {
-          uri = new UriBuilder(iframeBaseUri);
-        } else {
-          uri = new UriBuilder();
-        }
+        uri = iframeBaseUri != null ? new UriBuilder(iframeBaseUri) : new UriBuilder();
         String host = lockedDomainService.getLockedDomainForGadget(spec, context.getContainer());
         if (host != null) {
           uri.setAuthority(host);
@@ -163,7 +155,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
       uri.addQueryParameter("up_" + pref.getName(), value);
     }
     // add url last to work around browser bugs
-    if(!type.equals(View.ContentType.URL)) {
+    if(type != View.ContentType.URL) {
       uri.addQueryParameter("url", url);
     }
 

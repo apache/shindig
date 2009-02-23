@@ -31,7 +31,7 @@ import com.google.inject.Inject;
  */
 public class BeanXStreamAtomConverter extends BeanXStreamConverter {
 
-  private static Log log = LogFactory.getLog(BeanXStreamAtomConverter.class);
+  private static final Log log = LogFactory.getLog(BeanXStreamAtomConverter.class);
 
   /**
    * @param configuration

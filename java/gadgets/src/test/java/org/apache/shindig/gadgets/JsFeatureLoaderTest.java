@@ -176,7 +176,7 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
                             JsFeatureLoader.FILE_SEPARATOR +
                             file2.getAbsolutePath(), registry);
     } catch (GadgetException e ) {
-        if (!e.getCode().equals(GadgetException.Code.INVALID_PATH)) {
+        if (e.getCode() != GadgetException.Code.INVALID_PATH) {
             throw e;
         }
 

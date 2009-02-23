@@ -82,7 +82,7 @@ class ConcurrentPreloads extends ForwardingCollection<PreloadedData> {
   }
 
   /** PreloadData implementation that reports failure */
-  private class FailedPreload implements PreloadedData {
+  private static class FailedPreload implements PreloadedData {
     private final Throwable t;
 
     public FailedPreload(Throwable t) {

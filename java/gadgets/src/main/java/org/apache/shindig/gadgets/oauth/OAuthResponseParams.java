@@ -270,7 +270,7 @@ public class OAuthResponseParams {
    * exception.  This makes sure that any exception thrown is also exposed to the calling gadget
    * in a useful way.
    */
-  public class OAuthRequestException extends Exception {
+  public static class OAuthRequestException extends Exception {
     private OAuthRequestException(String message) {
       super(message);
     }

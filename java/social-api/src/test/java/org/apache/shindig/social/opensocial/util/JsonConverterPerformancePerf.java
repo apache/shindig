@@ -215,8 +215,8 @@ public class JsonConverterPerformancePerf extends TestCase {
 //  }
 
   /**
-   * @param endOutput
-   * @param startOutput
+   * @param end
+   * @param start
    * @param testSize
    * @return
    */

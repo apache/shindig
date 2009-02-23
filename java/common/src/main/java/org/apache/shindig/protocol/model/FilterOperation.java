@@ -21,5 +21,5 @@ package org.apache.shindig.protocol.model;
  * Standard filter operations
  */
 public enum FilterOperation {
-  contains, equals, startsWith, present;
+  contains, equals, startsWith, present
 }

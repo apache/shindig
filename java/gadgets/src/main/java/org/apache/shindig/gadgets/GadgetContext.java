@@ -81,7 +81,7 @@ public class GadgetContext {
    * @return Whether or not to bypass caching behavior for the current request.
    */
   public boolean getIgnoreCache() {
-    return delegate == null ? false : delegate.getIgnoreCache();
+    return delegate != null && delegate.getIgnoreCache();
   }
 
   /**
@@ -109,7 +109,7 @@ public class GadgetContext {
    * @return Whether or not to show debug output.
    */
   public boolean getDebug() {
-    return delegate == null ? false : delegate.getDebug();
+    return delegate != null && delegate.getDebug();
   }
 
   /**

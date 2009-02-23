@@ -46,7 +46,7 @@ public class GadgetFeatureRegistryTest {
   private static final String CONTENT = "var foo = 'bar'";
   private static final String CORE_CONTENT = "var core = 'dependency'";
   private static final String DEP_CONTENT = "var bar ='foo'";
-  private static final String[] FEATURE_LIST = new String[] {
+  private static final String[] FEATURE_LIST = {
     "feature0", "feature1", "feature2", "feature3"
   };
 
