@@ -80,7 +80,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
           throw new SocialSpiException("Could not read json db file: $jsonDb, check if the file exists & has proper permissions", ResponseError::$INTERNAL_ERROR);
         }
         $dbConfig = @file_get_contents($jsonDb);
-        $contents = preg_replace('/[^http:\/\/|^https:\/\/]\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $dbConfig));
+        $contents = preg_replace('/(?<!http:|https:)\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $dbConfig));
         $jsonDecoded = json_decode($contents, true);
         if ($jsonDecoded == $contents) {
           throw new SocialSpiException("Failed to decode the json db", ResponseError::$INTERNAL_ERROR);
