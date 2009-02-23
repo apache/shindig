@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -52,8 +51,7 @@ class GadgetSpecParser {
     $this->parseLinks($doc, $gadget);
     $this->parseUserPrefs($doc, $gadget);
     $this->parseViews($doc, $gadget);
-    //TODO
-    // PipelinedData
+    //TODO: parse pipelined data
     return $gadget;
   }
 
@@ -239,20 +237,22 @@ class GadgetSpecParser {
         throw new GadgetSpecException("A gadget can only have one OAuth element (though multiple service entries are allowed in that one OAuth element)");
       }
       $oauth = array();
-      $oauthNode = $oauthNodes->item(0);
-      if (($serviceNodes = $oauthNode->getElementsByTagName('Service')) != null) {
-        foreach ($serviceNodes as $service) {
-          if (($entryNodes = $service->getElementsByTagName('*')) != null) {
-            foreach ($entryNodes as $entry) {
-              $type = strtolower($entry->tagName);
-              $url = $entry->getAttribute('url');
-              $method = $entry->getAttribute('method') != null ? strtoupper($entry->getAttribute('method')) : 'GET';
-              $oauth[$type] = array('url' => $url, 'method' => $method);
+      if ($oauthNodes->length > 0) {
+        $oauthNode = $oauthNodes->item(0);
+        if (($serviceNodes = $oauthNode->getElementsByTagName('Service')) != null) {
+          foreach ($serviceNodes as $service) {
+            if (($entryNodes = $service->getElementsByTagName('*')) != null) {
+              foreach ($entryNodes as $entry) {
+                $type = strtolower($entry->tagName);
+                $url = $entry->getAttribute('url');
+                $method = $entry->getAttribute('method') != null ? strtoupper($entry->getAttribute('method')) : 'GET';
+                $oauth[$type] = array('url' => $url, 'method' => $method);
+              }
             }
           }
         }
+        $gadget->oauth = $oauth;
       }
-      $gadget->oauth = $oauth;
     }
   }
 
