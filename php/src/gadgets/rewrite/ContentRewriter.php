@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,7 +18,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 
 /**
  * Implements the Content-Rewrite feature which rewrites all image, css and script
@@ -53,7 +53,6 @@ class ContentRewriter extends DomRewriter {
     $gadgetRewriter->addObserver('script', $this, 'rewriteScript');
     $gadgetRewriter->addObserver('link', $this, 'rewriteStyleLink');
   }
-
 
   /**
    * Produces the proxied version of a URL if it falls within the content-rewrite params and
@@ -109,9 +108,37 @@ class ContentRewriter extends DomRewriter {
     }
   }
 
+  /**
+   * Tries to find url(<url tag>) constructs and rewrite them to their
+   * proxied counterparts
+   *
+   * @param DOMElement $node
+   */
   public function rewriteStyle(DOMElement &$node) {
-    // find import('foo') statements
-    // find and rewrite url('foo') statements (background, etc)
+    $content = $node->nodeValue;
+    $newVal = '';
+    // loop through the url elements in the content
+    while (($pos = strpos($content, 'url')) !== false) {
+      // output everything before this url tag
+      $newVal .= substr($content, 0, $pos + 3);
+      $content = substr($content, $pos + 3);
+      // low tech protection against miss-reading tags, if the open ( is to far away, this is probabbly a miss-read
+      if (($beginTag = strpos($content, '(')) < 4) {
+        $content = substr($content, $beginTag + 1);
+        $endTag = strpos($content, ')');
+        $tag = str_replace(array("'", "\""), '', trim(substr($content, 0, $endTag)));
+        // at this point $tag should be the actual url aka: http://example.org/bar/foo.gif
+        if ($this->includedUrl($tag)) {
+          $newVal .= "('" . $this->getProxyUrl($tag) . "')";
+        } else {
+          $newVal .= "('$tag')";
+        }
+        $content = substr($content, $endTag + 1);
+      }
+    }
+    // append what's left
+    $newVal .= $content;
+    $node->nodeValue = $newVal;
   }
 
   public function rewriteScript(DOMElement &$node) {
