@@ -38,11 +38,7 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -197,17 +193,12 @@ public class PersonHandlerTest extends EasyMockTestCase {
     String path = "/people/john.doe/@self";
     RestHandler operation = registry.getRestHandler(path, "GET");
 
-    Person person = new PersonImpl();
-    List<Person> people = Lists.newArrayList(person);
-    RestfulCollection<Person> data = new RestfulCollection<Person>(people);
-    expect(personService.getPeople(
-        eq(JOHN_DOE),
-        eq(new GroupId(GroupId.Type.self, null)), eq(DEFAULT_OPTIONS),
-        eq(DEFAULT_FIELDS), eq(token)))
-        .andReturn(ImmediateFuture.newInstance(data));
+    Person data = new PersonImpl();
+    expect(personService.getPerson(eq(JOHN_DOE.iterator().next()),
+        eq(DEFAULT_FIELDS), eq(token))).andReturn(ImmediateFuture.newInstance(data));
 
     replay();
-    assertEquals(person, operation.execute(Maps.<String, String[]>newHashMap(),
+    assertEquals(data, operation.execute(Maps.<String, String[]>newHashMap(),
         null, token, converter).get());
     verify();
   }

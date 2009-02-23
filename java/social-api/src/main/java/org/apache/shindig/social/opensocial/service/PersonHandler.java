@@ -74,9 +74,14 @@ public class PersonHandler {
     if (userIds.size() == 1) {
       if (optionalPersonId.isEmpty()) {
         if (groupId.getType() == GroupId.Type.self) {
-          Future<RestfulCollection<Person>> people = personService.getPeople(
-              userIds, groupId, options, fields, request.getToken());
-          return FutureUtil.getFirstFromCollection(people);
+            // If a filter is set then we have to call getPeople(), otherwise use the simpler getPerson()
+          if (options != null && options.getFilter() != null) {
+            Future<RestfulCollection<Person>> people = personService.getPeople(
+                userIds, groupId, options, fields, request.getToken());
+            return FutureUtil.getFirstFromCollection(people);
+          } else {
+            return personService.getPerson(userIds.iterator().next(), fields, request.getToken());
+          }
         } else {
           return personService.getPeople(userIds, groupId, options, fields, request.getToken());
         }
