@@ -37,6 +37,8 @@ require_once 'src/gadgets/GadgetFactory.php';
 require_once 'src/gadgets/GadgetSpec.php';
 require_once 'src/gadgets/Gadget.php';
 require_once 'src/gadgets/render/GadgetRenderer.php';
+require_once 'src/gadgets/rewrite/GadgetRewriter.php';
+require_once 'src/gadgets/rewrite/DomRewriter.php';
 
 class GadgetRenderingServlet extends HttpServlet {
   private $context;
