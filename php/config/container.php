@@ -32,13 +32,13 @@
  * 	'token_cipher_key' => 'MySecretKey',
  * 	'token_hmac_key' => 'MyOtherSecret',
  * 	'private_key_phrase' => 'MyCertificatePassword',
- * 	'people_service' => 'MyPeopleService',
+ * 	'person_service' => 'MyPeopleService',
  * 	'activity_service' => 'MyActivitiesService',
  * 	'app_data_service' => 'MyAppDataService',
- * 	'app_data_service' => 'MyAppDataService',
+ * 	'messages_service' => 'MyMessagesService',
  * 	'oauth_lookup_service' => 'MyOAuthLookupService'
  * 	'xrds_location' => 'http://www.mycontainer.com/xrds',
- *  'check_file_exists' => false
+ * 	'check_file_exists' => false
  * );
  *
  */
