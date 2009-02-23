@@ -55,6 +55,14 @@ $shindigConfig = array(
   // can also help prevent external parties using your rendering server (only for the paranoid :)
   'render_token_required' => false,
 
+  // Normally we would only rewrite the gadget's html if it has the <Optional feature="content-rewrite"> set, however with this you can
+  // force the content to always be rewritten
+  'rewrite_by_default' => false,
+
+  // Should we sanitize (remove scripts) from certain views? Right now this is useless, but once service sided templating and OSML is done
+  // this could be useful to force (fast) html only gadgets on the profile and/or home view. Set this to false or to an array of view names like: array('profile', 'home')
+  'sanitize_views' => false,
+
   // Compress the inlined javascript, saves upto 50% of the document size
   'compress_javascript' => true,
 
