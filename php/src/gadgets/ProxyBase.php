@@ -23,7 +23,7 @@
  */
 class ProxyBase {
   public $context;
-  protected $disallowedHeaders = array('Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie', 'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary', 'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
+  protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie', 'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary', 'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
 
   public function __construct($context) {
     $this->context = $context;
@@ -45,15 +45,6 @@ class ProxyBase {
       $protocol = strtoupper($protocolSplit[0]);
       if ($protocol != "HTTP" && $protocol != "HTTPS") {
         throw new Exception("Invalid protocol specified in url: " . htmlentities($protocol));
-      }
-    }
-    $headers = '';
-    $requestHeaders = $this->request_headers();
-    foreach ($requestHeaders as $key => $val) {
-      $key = str_replace(' ', '-', ucwords(str_replace('-', ' ', $key))); // force the header name to have the proper Header-Name casing
-      if (! in_array($key, $this->disallowedHeaders)) {
-        // propper curl header format according to http://www.php.net/manual/en/function.curl-setopt.php#80099
-        $headers .= "$key: $val\n";
       }
     }
     if ($method == 'POST') {
@@ -79,10 +70,10 @@ class ProxyBase {
       }
       // even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
       // so the request to POST is still honored
-      $request = new RemoteContentRequest($url, $headers, $postData);
+      $request = new RemoteContentRequest($url, null, $postData);
       $request = $this->context->getHttpFetcher()->fetch($request, $this->context);
     } else {
-      $request = new RemoteContentRequest($url, $headers);
+      $request = new RemoteContentRequest($url);
       $request = $this->context->getHttpFetcher()->fetch($request, $this->context);
     }
     return $request;
