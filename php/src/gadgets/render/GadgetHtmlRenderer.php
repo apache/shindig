@@ -66,11 +66,17 @@ class GadgetHtmlRenderer extends GadgetRenderer {
     $content .= $this->appendPreloads($gadget);
     $content .= "</script>";
 
-    // Append the content from the view
-    $content .= $gadget->substitutions->substitute($view['content']);
+    // Append the content for the selected view
+    $viewContent = $gadget->substitutions->substitute($view['content']);
+
+    // Rewrite the content, the GadgetRewriter will check for the Content-Rewrtie and Caja feature, if
+    // sanitazation is required, plus look for any template exapanding that needs to be done
+    $rewriter = new GadgetRewriter($this->context);
+    $content .= $rewriter->rewrite($viewContent, $gadget);
 
     // And add our runOnLoadHandlers() call
     $content .= "\n<script>gadgets.util.runOnLoadHandlers();</script></body>\n</html>";
+
     echo $content;
   }
 
