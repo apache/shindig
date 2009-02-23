@@ -148,11 +148,7 @@ public class GadgetFeatureRegistry {
     lock();
 
     Set<String> neededSet;
-    if (needed.isEmpty()) {
-      neededSet = core.keySet();
-    } else {
-      neededSet = ImmutableSet.copyOf(needed);
-    }
+    neededSet = needed.isEmpty() ? core.keySet() : ImmutableSet.copyOf(needed);
 
     // We use the cache only for situations where all needed are available.
     // if any are missing, the result won't be cached.

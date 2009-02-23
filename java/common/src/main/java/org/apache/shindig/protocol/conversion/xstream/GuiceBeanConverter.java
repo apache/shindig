@@ -52,21 +52,23 @@ public class GuiceBeanConverter implements Converter {
    * need stricter checks, subclass JavaBeanConverter
    */
   public boolean canConvert(Class type) {
-    if ( type == null ) {
-      return false;
-    }
-    if (Object.class.equals(type)) {
-      return false;
-    }
-    if ( type.isInterface() ) {
-      return true;
-    }
-    for (Class<?> iff : type.getInterfaces()) {
-      if (iff.isAnnotationPresent(Exportablebean.class)) {
+    while (true) {
+      if (type == null) {
+        return false;
+      }
+      if (Object.class.equals(type)) {
+        return false;
+      }
+      if (type.isInterface()) {
         return true;
       }
+      for (Class<?> iff : type.getInterfaces()) {
+        if (iff.isAnnotationPresent(Exportablebean.class)) {
+          return true;
+        }
+      }
+      type = type.getSuperclass();
     }
-    return canConvert(type.getSuperclass());
   }
 
   public void marshal(final Object source,

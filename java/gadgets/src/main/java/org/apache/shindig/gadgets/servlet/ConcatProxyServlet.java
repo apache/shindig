@@ -98,7 +98,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     response.setStatus(200);
   }
 
-  private String formatHttpError(int status, String errorMessage) {
+  private static String formatHttpError(int status, String errorMessage) {
     StringBuilder err = new StringBuilder();
     err.append("/* ---- Error ");
     err.append(status);
@@ -111,7 +111,7 @@ public class ConcatProxyServlet extends InjectedServlet {
     return err.toString();
   }
 
-  private void outputError(GadgetException excep, String url, HttpServletResponse resp)
+  private static void outputError(GadgetException excep, String url, HttpServletResponse resp)
       throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());

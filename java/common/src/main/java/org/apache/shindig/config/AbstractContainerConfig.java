@@ -44,6 +44,7 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
     return 0;
   }
 
+  @SuppressWarnings("unchecked")
   public boolean getBool(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof Boolean) {
@@ -52,22 +53,20 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   public List<Object> getList(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<Object> listValue = (List<Object>) value;
-      return listValue;
+      return (List<Object>) value;
     }
     return Collections.emptyList();
   }
 
+  @SuppressWarnings("unchecked")
   public Map<String, Object> getMap(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof Map) {
-      @SuppressWarnings("unchecked")
-      Map<String, Object> mapValue = (Map<String, Object>) value;
-      return mapValue;
+      return (Map<String, Object>) value;
     }
     return Collections.emptyMap();
   }

@@ -86,7 +86,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
-      assertEquals(t.getCause().getClass(), ProtocolException.class);
+      assertSame(t.getCause().getClass(), ProtocolException.class);
       Assert.assertEquals(((ProtocolException) t.getCause()).getError(), ResponseError.NOT_IMPLEMENTED);
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
@@ -100,7 +100,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
-      assertEquals(t.getCause().getClass(), ProtocolException.class);
+      assertSame(t.getCause().getClass(), ProtocolException.class);
       Assert.assertEquals(((ProtocolException) t.getCause()).getError(), ResponseError.NOT_IMPLEMENTED);
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
@@ -151,7 +151,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       future.get();
       fail("Service method did not produce NullPointerException from Future");
     } catch (ExecutionException ee) {
-      assertEquals(ee.getCause().getClass(), NullPointerException.class);
+      assertSame(ee.getCause().getClass(), NullPointerException.class);
     }
   }
 
@@ -164,7 +164,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       future.get();
       fail("Service method did not produce ExecutionException from Future");
     } catch (ExecutionException ee) {
-      assertEquals(ee.getCause().getClass(), ProtocolException.class);
+      assertSame(ee.getCause().getClass(), ProtocolException.class);
     }
   }
 

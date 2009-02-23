@@ -35,8 +35,7 @@ import java.util.Map.Entry;
  */
 public class AtomFeed {
 
-  @SuppressWarnings("unchecked")
-  private Collection entry;
+  private Collection<AtomEntry> entry;
   @SuppressWarnings("unused")
   private int startIndex;
   @SuppressWarnings("unused")

@@ -85,7 +85,7 @@ public class SocialMarkupHtmlParserTest {
   public void testSocialTemplateSerialization() {
     String content = NekoSerializer.serialize(document);
     assertTrue("Empty elements not preserved as XML inside template",
-        content.indexOf("<img/>") >= 0);
+        content.contains("<img/>"));
   }
 
   @Test

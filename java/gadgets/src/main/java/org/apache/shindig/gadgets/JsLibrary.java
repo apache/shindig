@@ -234,7 +234,7 @@ public final class JsLibrary {
      try {
        return ResourceLoader.getContent(name);
      } catch (IOException e) {
-       logger.warning("Could not find resource: " + name);
+       logger.warning("Could not find resource: " + name + '-' + e.getMessage());
        return null;
      }
   }
@@ -251,7 +251,7 @@ public final class JsLibrary {
     }
     if (rhs instanceof JsLibrary) {
       JsLibrary lib = (JsLibrary)rhs;
-      return content.equals(lib.content) && type.equals(lib.type);
+      return content.equals(lib.content) && type == lib.type;
     }
     return false;
   }

@@ -158,8 +158,8 @@ public class Preload implements RequestAuthenticationInfo {
     buf.append("<Preload href='").append(href).append('\'')
        .append(" authz='").append(auth.toString().toLowerCase()).append('\'')
        .append(" views='").append(StringUtils.join(views, ',')).append('\'');
-    for (String attr : attributes.keySet()) {
-      buf.append(' ').append(attr).append("='").append(attributes.get(attr))
+    for (Map.Entry<String, String> entry : attributes.entrySet()) {
+      buf.append(' ').append(entry.getKey()).append("='").append(entry.getValue())
          .append('\'');
     }
     buf.append("/>");

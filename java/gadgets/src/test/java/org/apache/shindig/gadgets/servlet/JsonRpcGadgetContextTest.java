@@ -32,8 +32,8 @@ import java.util.Map;
 public class JsonRpcGadgetContextTest extends TestCase {
   final static String SPEC_URL = "http://example.org/gadget.xml";
   final static int SPEC_ID = 1234;
-  final static String[] PREF_KEYS = new String[] {"hello", "foo"};
-  final static String[] PREF_VALUES = new String[] {"world", "bar"};
+  final static String[] PREF_KEYS = {"hello", "foo"};
+  final static String[] PREF_VALUES = {"world", "bar"};
   final static Map<String, String> prefs = Maps.newHashMap();
   static {
     for (int i = 0, j = PREF_KEYS.length; i < j; ++i) {

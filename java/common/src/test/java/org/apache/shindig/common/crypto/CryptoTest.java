@@ -47,7 +47,7 @@ public class CryptoTest {
   public void testHmacSha1() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
-    byte[] expected = new byte[] {
+    byte[] expected = {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
@@ -59,7 +59,7 @@ public class CryptoTest {
   public void testHmacSha1Verify() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
-    byte[] expected = new byte[] {
+    byte[] expected = {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 26, -18, 122, 30, 90,
     };
@@ -71,7 +71,7 @@ public class CryptoTest {
   public void testHmacSha1VerifyTampered() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
-    byte[] expected = new byte[] {
+    byte[] expected = {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 0, -18, 122, 30, 90,
     };

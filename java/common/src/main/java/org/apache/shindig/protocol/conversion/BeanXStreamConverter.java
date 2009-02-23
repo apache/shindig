@@ -40,11 +40,11 @@ import java.util.Map;
 
 public class BeanXStreamConverter implements BeanConverter {
   public static final String XML_DECL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-  private static final XStreamConfiguration.ConverterSet[] MAPPER_SCOPES = new XStreamConfiguration.ConverterSet[] {
+  private static final XStreamConfiguration.ConverterSet[] MAPPER_SCOPES = {
       XStreamConfiguration.ConverterSet.MAP,
       XStreamConfiguration.ConverterSet.COLLECTION,
       XStreamConfiguration.ConverterSet.DEFAULT };
-  private static Log log = LogFactory.getLog(BeanXStreamConverter.class);
+  private static final Log log = LogFactory.getLog(BeanXStreamConverter.class);
   private ReflectionProvider rp;
   private HierarchicalStreamDriver driver;
   protected WriterStack writerStack;

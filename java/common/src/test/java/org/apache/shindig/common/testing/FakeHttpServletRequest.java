@@ -397,7 +397,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       // API promises null return if no cookies
       return null;
     }
-    return cookies.values().toArray(new Cookie[0]);
+    return cookies.values().toArray(new Cookie[cookies.size()]);
   }
 
   public long getDateHeader(String name) {
@@ -465,22 +465,22 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       if (queryString == null && !parameters.isEmpty()) {
         boolean hasPrevious = false;
         StringBuilder queryString = new StringBuilder();
-        for (String key : parameters.keySet()) {
+        for (Map.Entry<String, String[]> stringEntry : parameters.entrySet()) {
           // We're not interested in blank keys
-          if (key == null || key.equals("") || postParameters.contains(key)) {
+          if (stringEntry.getKey() == null || stringEntry.getKey().equals("") || postParameters.contains(stringEntry.getKey())) {
             continue;
           }
           if (hasPrevious) {
             queryString.append('&');
           }
 
-          String[] values = parameters.get(key);
+          String[] values = stringEntry.getValue();
           // Append the parameters to the query string
           if (values.length == 0) {
-            queryString.append(URLEncoder.encode(key, "UTF-8"));
+            queryString.append(URLEncoder.encode(stringEntry.getKey(), "UTF-8"));
           } else {
             for (int i = 0; i < values.length; i++) {
-              queryString.append(URLEncoder.encode(key, "UTF-8")).append('=').append(
+              queryString.append(URLEncoder.encode(stringEntry.getKey(), "UTF-8")).append('=').append(
                       URLEncoder.encode(values[i], "UTF-8"));
               if (i < values.length - 1) {
                 queryString.append('&');

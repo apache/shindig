@@ -455,7 +455,7 @@ public class HttpRequest {
       HttpRequest req = (HttpRequest)obj;
       return method.equals(req.method) &&
              uri.equals(req.uri) &&
-             authType.equals(req.authType) &&
+             authType == req.authType &&
              Arrays.equals(postBody, req.postBody) &&
              headers.equals(req.headers);
              // TODO: Verify that other fields aren't meaningful. Especially important to check for

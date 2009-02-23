@@ -53,7 +53,7 @@ public class BeanJsonLibConverter implements BeanConverter {
   /**
    * in IDE debug flag.
    */
-  private boolean debugMode = false;
+  private final boolean debugMode = false;
 
 
   /**
@@ -121,8 +121,7 @@ public class BeanJsonLibConverter implements BeanConverter {
 
   public JSONObject convertToJson(Object pojo) {
     try {
-      JSONObject jsonObject = JSONObject.fromObject(pojo, jsonConfig);
-      return jsonObject;
+      return JSONObject.fromObject(pojo, jsonConfig);
     } catch (JSONException jse) {
       throw new RuntimeException(jse);
     }

@@ -52,7 +52,7 @@ public class JsonContainerConfigTest {
   private static final String CONTAINER_B = "container-b";
 
   private static final String ARRAY_NAME = "array value";
-  private static final String[] ARRAY_VALUE = new String[]{"Hello", "World"};
+  private static final String[] ARRAY_VALUE = {"Hello", "World"};
   private static final String ARRAY_ALT_VALUE = "Not an array";
   
   private File createContainer(JSONObject json) throws Exception {

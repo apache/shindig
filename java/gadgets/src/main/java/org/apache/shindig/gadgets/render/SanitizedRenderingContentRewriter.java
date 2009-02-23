@@ -330,8 +330,8 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
         return "about:blank";
       }
       String rewritten = super.rewrite(link, context);
-      rewritten += "&" + ProxyBase.SANITIZE_CONTENT_PARAM + "=1";
-      rewritten += "&" + ProxyBase.REWRITE_MIME_TYPE_PARAM + "=" + expectedMime;
+      rewritten += '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1";
+      rewritten += '&' + ProxyBase.REWRITE_MIME_TYPE_PARAM + '=' + expectedMime;
       return rewritten;
     }
   }

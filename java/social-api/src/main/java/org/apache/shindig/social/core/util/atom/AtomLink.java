@@ -30,8 +30,9 @@ public class AtomLink {
   private String title;
 
   /**
-   * @param string
-   * @param string2
+   * Construct a new AtomLink
+   * @param rel a value for the rel attribute
+   * @param href a value for the href attribute
    */
   public AtomLink(String rel, String href) {
     this.rel = rel;

@@ -312,7 +312,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM))
         .andReturn(AuthType.OAUTH.toString()).atLeastOnce();
     // This isn't terribly accurate, but is close enough for this test.
-    expect(request.getParameterMap()).andStubReturn(Collections.EMPTY_MAP);
+    expect(request.getParameterMap()).andStubReturn(Collections.emptyMap());
     expectParameters(request);
     replay();
 

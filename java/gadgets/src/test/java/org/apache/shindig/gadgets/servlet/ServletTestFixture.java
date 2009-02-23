@@ -39,6 +39,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 /**
  * Contains everything needed for making servlet requests, plus a bunch of stuff that shouldn't be
  * here.

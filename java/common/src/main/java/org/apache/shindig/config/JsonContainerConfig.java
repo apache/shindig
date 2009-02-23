@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -82,7 +83,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   }
 
   /**
-   * Creates a new configuration from a JSON Object,Êfor use in testing.
+   * Creates a new configuration from a JSON Object, for use in testing.
    */
   public JsonContainerConfig(JSONObject json, Expressions expressions) {
     this.expressions = expressions;
@@ -196,7 +197,8 @@ public class JsonContainerConfig extends AbstractContainerConfig {
           }
           loadFromString(ResourceLoader.getContent(file), all);
         } else {
-          LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
+          if (LOG.isLoggable(Level.FINEST))
+            LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
       }
     } catch (IOException e) {

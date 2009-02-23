@@ -33,7 +33,7 @@ public class FutureUtilTest extends TestCase {
   String firstWord = "hello";
 
   public void testGetFirstOfMany() throws Exception {
-    List<String> words = Lists.newArrayList(new String[]{firstWord, "goodbye", "blah"});
+    List<String> words = Lists.newArrayList(firstWord, "goodbye", "blah");
     Future<RestfulCollection<String>> collection = ImmediateFuture.newInstance(
         new RestfulCollection<String>(words));
 
@@ -42,7 +42,7 @@ public class FutureUtilTest extends TestCase {
   }
 
   public void testGetFirstOfSingle() throws Exception {
-    List<String> words = Lists.newArrayList(new String[]{firstWord});
+    List<String> words = Lists.newArrayList(firstWord);
     Future<RestfulCollection<String>> collection = ImmediateFuture.newInstance(
         new RestfulCollection<String>(words));
 

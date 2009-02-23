@@ -30,7 +30,7 @@ import java.util.Locale;
  */
 public class DateUtil {
 
-  private static DateTimeFormatter rfc1123DateFormat = DateTimeFormat
+  private static final DateTimeFormatter rfc1123DateFormat = DateTimeFormat
       .forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
       .withLocale(Locale.US)
       .withZone(DateTimeZone.UTC);

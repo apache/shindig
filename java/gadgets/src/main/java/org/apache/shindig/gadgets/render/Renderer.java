@@ -120,7 +120,7 @@ public class Renderer {
     }
 
     List<Object> parents = containerConfig.getList(container, "gadgets.parent");
-    if (parents.size() == 0) {
+    if (parents.isEmpty()) {
       // Allow all.
       return true;
     }

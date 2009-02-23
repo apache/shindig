@@ -67,7 +67,7 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeArray() throws Exception {
-    String[] array = new String[] {"foo", null, "bar", "baz"};
+    String[] array = {"foo", null, "bar", "baz"};
     assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
   }
 
@@ -239,7 +239,7 @@ public class JsonSerializerTest {
 
   public static Map<String, Object> perfComparison100Arrays() {
     Map<String, Object> data = Maps.newHashMap();
-    String[] array = new String[] {
+    String[] array = {
       "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"
     };
 

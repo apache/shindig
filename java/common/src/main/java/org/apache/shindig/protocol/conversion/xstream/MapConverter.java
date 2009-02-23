@@ -44,7 +44,7 @@ public class MapConverter extends AbstractCollectionConverter {
   /**
    * If true will use a short form of xml serialization.
    */
-  private boolean shortform = false;
+  private final boolean shortform = false;
 
   /**
    * Create a MapConverter that use use the supplied mapper.

@@ -37,7 +37,7 @@ public class BasicSecurityToken implements SecurityToken {
   private final Map<String, String> tokenData;
 
   /** tool to use for signing and encrypting the token */
-  private BlobCrypter crypter = new BasicBlobCrypter(INSECURE_KEY);
+  private final BlobCrypter crypter = new BasicBlobCrypter(INSECURE_KEY);
 
   private static final byte[] INSECURE_KEY =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

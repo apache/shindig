@@ -62,11 +62,11 @@ public class OAuthSpec {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("<OAuth>");
-    for (String name : serviceMap.keySet()) {
+    for (Map.Entry<String, OAuthService> entry : serviceMap.entrySet()) {
       sb.append("<Service name='");
-      sb.append(name);
+      sb.append(entry.getKey());
       sb.append("'>");
-      OAuthService service = serviceMap.get(name);
+      OAuthService service = entry.getValue();
       sb.append(service.getRequestUrl().toString("Request"));
       sb.append(service.getAccessUrl().toString("Access"));
       sb.append("<Authorization url='").append(service.getAuthorizationUrl().toString()).append("'/>");

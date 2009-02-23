@@ -38,7 +38,6 @@ public class BasicOAuthStoreTokenIndexTest extends EqualsHashCodeTestCase {
   }
 
 
-  @Test
   public void testHashCode() {
     BasicOAuthStoreTokenIndex eq1 = new BasicOAuthStoreTokenIndex();
     BasicOAuthStoreTokenIndex eq2 = new BasicOAuthStoreTokenIndex();

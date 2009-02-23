@@ -172,6 +172,6 @@ public class TestModel {
 
   public enum Gender {
     male,
-    female;
+    female
   }
 }
