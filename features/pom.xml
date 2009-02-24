@@ -67,11 +67,11 @@
         <executions>
           <execution>
             <configuration>
-              <sourceDirectory>${basedir}</sourceDirectory>
+              <sourceDirectory>${basedir}/src/main/javascript/features</sourceDirectory>
               <sources>
-                <source>mocks/env.js</source>
-                <source>mocks/window.js</source>
-                <source>mocks/xhr.js</source>
+                <source>../../../../src/test/javascript/features/mocks/env.js</source>
+                <source>../../../../src/test/javascript/features/mocks/window.js</source>
+                <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
                 <source>core/config.js</source>
                 <source>core/json.js</source>
                 <source>core/auth.js</source>
@@ -108,12 +108,13 @@
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
                 <source>oauthpopup/oauthpopup.js</source>
               </sources>
-              <testSourceDirectory>${basedir}</testSourceDirectory>
+              <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>
                 <testSuite>
                   <name>FeatureTests</name>
                   <type>TESTCASES</type>
                   <includes>
+		    <include>mocks/*.js</include>
                     <include>*/*test.js</include>
                   </includes>
                 </testSuite>
@@ -144,13 +145,7 @@
         <configuration>
           <suffix>.opt</suffix>
           <excludes>
-            <exclude>target/**</exclude>
-            <!-- don't bother with other file types. -->
             <exclude>**/*.xml</exclude>
-            <exclude>**/*.html</exclude>
-            <exclude>**/*.gif</exclude>
-            <exclude>**/*.jpeg</exclude>
-            <exclude>**/*.png</exclude>
             <!-- Caja is already minified -->
             <exclude>**/caja/*.js</exclude>
           </excludes>
@@ -162,7 +157,7 @@
     <resources>
       <resource>
         <targetPath>features</targetPath>
-        <directory>${basedir}</directory>
+        <directory>${basedir}/src/main/javascript/features</directory>
         <excludes>
           <exclude>pom.xml</exclude>
           <!-- SVN ignore -->
