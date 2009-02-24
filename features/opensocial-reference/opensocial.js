@@ -36,7 +36,7 @@
  * @private
  * @constructor (note: a constructor for JsDoc purposes)
  */
-var opensocial = window['opensocial'] || {};
+var opensocial = opensocial || {};
 
 
 /**

@@ -17,7 +17,6 @@
  */
 
 var gadgets = gadgets || {};
-var opensocial = opensocial || {};
 
 function JsonActivityTest(name) {
   TestCase.call(this, name);

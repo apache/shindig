@@ -18,11 +18,8 @@
   under the License.
 -->
 <feature>
-  <name>opensocial-data</name>
-  <dependency>opensocial-data-context</dependency>
-  <dependency>opensocial-0.8</dependency>
-  <dependency>xmlutil</dependency>
+  <name>opensocial-data-context</name>
   <gadget>    
-    <script src="data.js"></script>
+    <script src="datacontext.js"></script>
   </gadget>
 </feature>

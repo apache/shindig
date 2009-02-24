@@ -206,6 +206,19 @@ public class PipelineDataContentRewriter implements ContentRewriter {
     head.appendChild(pipelineScript);
     MutableContent.notifyEdit(doc);
     
+    boolean allBatchesCompleted = true;
+    for (PipelineState pipeline : pipelines) {
+      if (pipeline.batch != null) {
+        allBatchesCompleted = false;
+        break;
+      }
+    }
+    
+    if (allBatchesCompleted) {
+      gadget.addFeature("opensocial-data-context");
+      gadget.removeFeature("opensocial-data");
+    }
+    
     return RewriterResults.notCacheable();
   }
   

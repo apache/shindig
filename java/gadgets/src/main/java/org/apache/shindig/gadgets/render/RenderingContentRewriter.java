@@ -41,7 +41,6 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
@@ -214,7 +213,6 @@ public class RenderingContentRewriter implements ContentRewriter {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
-    GadgetSpec spec = gadget.getSpec();
     String forcedLibs = context.getParameter("libs");
 
     // List of libraries we need
@@ -248,7 +246,7 @@ public class RenderingContentRewriter implements ContentRewriter {
     // Inline any libs that weren't forced. The ugly context switch between inline and external
     // Js is needed to allow both inline and external scripts declared in feature.xml.
     String container = context.getContainer();
-    Collection<GadgetFeature> features = getFeatures(spec, forced);
+    Collection<GadgetFeature> features = getFeatures(gadget, forced);
 
     // Precalculate the maximum length in order to avoid excessive garbage generation.
     int size = 0;
@@ -304,13 +302,16 @@ public class RenderingContentRewriter implements ContentRewriter {
    * @param forced Forced libraries; added in addition to those found in the spec. Defaults to
    * "core".
    */
-  private Collection<GadgetFeature> getFeatures(GadgetSpec spec, Collection<String> forced)
+  private Collection<GadgetFeature> getFeatures(Gadget gadget, Collection<String> forced)
       throws GadgetException {
-    Map<String, Feature> features = spec.getModulePrefs().getFeatures();
+    Map<String, Feature> features = gadget.getSpec().getModulePrefs().getFeatures();
     Set<String> libs = Sets.newHashSet(features.keySet());
     if (!forced.isEmpty()) {
       libs.addAll(forced);
     }
+    
+    libs.removeAll(gadget.getRemovedFeatures());
+    libs.addAll(gadget.getAddedFeatures());
 
     Set<String> unsupported = Sets.newHashSet();
     Collection<GadgetFeature> feats = featureRegistry.getFeatures(libs, unsupported);
