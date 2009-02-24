@@ -38,12 +38,13 @@ class GadgetSpecParser {
       $errors = libxml_get_errors();
       $errorStr = '';
       foreach ($errors as $error) {
-        $errorStr .= $error . " \n";
+        $errorStr .= $error->message . " \n";
       }
       libxml_clear_errors();
       throw new GadgetSpecException("Error parsing gadget xml:\n$errorStr");
     }
-    //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have bugs, so it's not really practical yet (and slow)
+    //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have some form of schema
+    // violatons, so it's not really practical yet (and slow)
     // $doc->schemaValidate('gadget.xsd');
     $gadget = new GadgetSpec();
     $gadget->checksum = md5($xmlContent);
