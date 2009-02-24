@@ -39,7 +39,18 @@ class SanitizeRewriter extends DomRewriter {
     }
   }
 
-  public function rewriteScript(DOMElement $node) {
-    //TODO: remove it
+  /**
+   * This is a proof of concept / semi dummy content sanitizer
+   * that removes any javascript from the content block
+   *
+   * @param DOMElement $node
+   */
+  public function rewriteScript(DOMElement &$node) {
+    if (!empty($node->nodeValue)) {
+      $node->nodeValue = '';
+    }
+    if ($node->getAttribute('src') != null) {
+      $node->setAttribute('src', '');
+    }
   }
 }
