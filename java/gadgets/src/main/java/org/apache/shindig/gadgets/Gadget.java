@@ -23,6 +23,10 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 /**
  * Intermediary representation of all state associated with processing
@@ -33,6 +37,9 @@ public class Gadget {
   private GadgetSpec spec;
   private Collection<PreloadedData> preloads;
   private View currentView;
+  private Set<String> addedFeatures;
+  private Set<String> removedFeatures;
+
   /**
    * @param context The request that the gadget is being processed for.
    */
@@ -90,5 +97,38 @@ public class Gadget {
    */
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
+  }
+
+  
+  public void addFeature(String name) {
+    if (addedFeatures == null) {
+      addedFeatures = Sets.newHashSet();
+    }
+    
+    addedFeatures.add(name);
+  }
+  
+  public void removeFeature(String name) {
+    if (removedFeatures == null) {
+      removedFeatures = Sets.newHashSet();
+    }
+    
+    removedFeatures.add(name);
+  }
+  
+  public Set<String> getAddedFeatures() {
+    if (addedFeatures == null) {
+      return Collections.<String>emptySet();
+    }
+    
+    return addedFeatures;
+  }
+
+  public Set<String> getRemovedFeatures() {
+    if (removedFeatures == null) {
+      return Collections.<String>emptySet();
+    }
+    
+    return removedFeatures;
   }
 }

@@ -273,6 +273,43 @@ public class RenderingContentRewriterTest {
   }
 
   @Test
+  public void featuresNotInjectedWhenRemoved() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='foo'/>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+    gadget.removeFeature("foo");
+
+    featureRegistry.addInline("foo", "foo_content();");
+
+    String rewritten = rewrite(gadget, "");
+
+    assertFalse("Removed script still inlined.", rewritten.contains("foo_content();"));
+  }
+
+  @Test
+  public void featuresInjectedWhenAdded() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+    gadget.addFeature("foo");
+
+    featureRegistry.addInline("foo", "foo_content();");
+
+    String rewritten = rewrite(gadget, "");
+
+    assertTrue("Added script not inlined.", rewritten.contains("foo_content();"));
+  }
+
+  @Test
   public void mixedExternalAndInline() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +

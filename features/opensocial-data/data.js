@@ -25,15 +25,6 @@
  *   URL parameter support.
  */
 
-var opensocial = window['opensocial'] || function() {};
-
-/**
- * @type {Object} The namespace declaration for this file.
- */
-opensocial.data = opensocial.data || {};
-
-var osd = opensocial.data;
-
 /**
  * @type {string} The key attribute constant.
  */
@@ -213,109 +204,6 @@ osd.RequestDescriptor.prototype.register_ = function() {
 };
 
 
-/**
- * @type {Object} Global DataContext to contain requested data sets.
- */
-osd.DataContext = {};
-
-osd.DataContext.listeners_ = [];
-
-osd.DataContext.dataSets_ = {};
-
-/**
- * Registers a callback listener for a given set of keys.
- * @param {string|Array.<string>} keys Key or set of keys to listen on.
- * @param {Function(string)} callback Function to call when a listener is fired.
- * TODO: Should return a value that can later be used to return
- *     a value.
- */
-osd.DataContext.registerListener = function(keys, callback) {
-  var listener = {};
-  listener.keys = {};
-
-  if (typeof(keys) == 'object') {
-    for (var i in keys) {
-      listener.keys[keys[i]] = true;
-    }
-  } else {
-    listener.keys[keys] = true;
-  }
-
-  listener.callback = callback;
-  opensocial.data.DataContext.listeners_.push(listener);
-
-  // Check to see if this one should fire immediately.
-  if (osd.DataContext.isDataReady(listener.keys)) {
-    window.setTimeout(function() {
-      listener.callback()
-    }, 1);
-  }
-};
-
-
-/**
- * Retrieve a data set for a given key.
- * @param {string} key Key for the requested data set.
- * @return {Object} The data set object.
- */
-osd.DataContext.getDataSet = function(key) {
-  return opensocial.data.DataContext.dataSets_[key];
-};
-
-
-/**
- * Checks if the data for a map of keys is available.
- * @param {Object<string, ?>} An map of keys to check.
- * @return {boolean} Data for all the keys is present.
- */
-osd.DataContext.isDataReady = function(keys) {
-  for (var key in keys) {
-    if (osd.DataContext.getDataSet(key) == null) {
-      return false;
-    }
-  }
-  return true;
-};
-
-
-/**
- * Puts a data set into the global DataContext object. Fires listeners
- * if they are satisfied by the associated key being inserted.
- *
- * Note that if this is passed a ResponseItem object, it will crack it open
- * and extract the JSON payload of the wrapped API Object. This includes
- * iterating over an array of API objects and extracting their JSON into a
- * simple array structure.
- *
- * @param {string} key The key to associate with this object.
- * @param {ResponseItem|Object} obj The data object.
- */
-osd.DataContext.putDataSet = function(key, obj) {
-  var data = obj;
-  if (typeof(data) == "undefined" || data === null) {
-    return;
-  }
-
-  // NOTE: This is ugly, but required since we need to get access
-  // to the JSON/Array payload of API responses.
-  // This will crack the actual API objects and extract their JSON payloads.
-  if (data.getData) {
-   data = data.getData();
-   if (data.array_) {
-     var out = [];
-     for (var i = 0; i < data.array_.length; i++) {
-       out.push(data.array_[i].fields_);
-     }
-     data = out;
-   } else {
-     data = data.fields_ || data;
-   }
-  }
-
-  opensocial.data.DataContext.dataSets_[key] = data;
-  opensocial.data.DataContext.fireCallbacks_(key);
-};
-
 
 /**
  * Evaluates a JS expression against the DataContext.
@@ -325,44 +213,6 @@ osd.DataContext.putDataSet = function(key, obj) {
 osd.DataContext.evalExpression = function(expr) {
   return (new Function("context", "with (context) return " + expr))
       (opensocial.data.DataContext.dataSets_);
-};
-
-
-/**
- * Fires a listener for a key, but only if the data is ready for other
- * keys this listener is bound to.
- * @param {Object} listener The listener object.
- * @param {string} key The key that this listener is being fired for.
- */
-osd.DataContext.maybeFireListener_ = function(listener, key) {
-  if (osd.DataContext.isDataReady(listener.keys)) {
-    listener.callback(key);
-  }
-};
-
-
-/**
- * Scans all active listeners and fires off any callbacks that inserting this
- * key satisfies.
- * @param {string} key The key that was updated.
- * @private
- */
-osd.DataContext.fireCallbacks_ = function(key) {
-  for (var i = 0; i < opensocial.data.DataContext.listeners_.length; ++i) {
-    var listener = opensocial.data.DataContext.listeners_[i];
-    if (listener.keys[key] != null) {
-      opensocial.data.DataContext.maybeFireListener_(listener, key);
-    }
-  }
-};
-
-
-/**
- * Accessor to the static DataContext object. At a later date multiple
- * DataContexts may be used.
- */
-osd.getDataContext = function() {
-  return opensocial.data.DataContext;
 };
 
 
@@ -695,7 +545,7 @@ osd.transformSpecialValue = function(value) {
     opensocial.data.addToCurrentAPIRequest(req, descriptor.key);
   });
 
-  osd.registerRequestHandler("os:DataRequest", function(descriptor) {
+  osd.registerRequestHandler("os:HttpRequest", function(descriptor) {
     var href = descriptor.getAttribute('href');
     var format = descriptor.getAttribute('format') || "json";
     var params = {};

@@ -56,6 +56,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Test of PipelineDataContentRewriter.
@@ -143,6 +144,9 @@ public class PipelineDataContentRewriterTest {
 
     assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
+    
+    assertEquals(ImmutableSet.of("opensocial-data"), gadget.getRemovedFeatures());
+    assertEquals(ImmutableSet.of("opensocial-data-context"), gadget.getAddedFeatures());
 
     control.verify();
   }
@@ -204,6 +208,9 @@ public class PipelineDataContentRewriterTest {
     // Check the evaluated person request
     JSONObject personRequest = (JSONObject) secondBatch.getValue().getSocialPreloads().get("me");
     assertEquals("canonical", personRequest.getJSONObject("params").getJSONArray("userId").get(0));
+
+    assertEquals(ImmutableSet.of("opensocial-data"), gadget.getRemovedFeatures());
+    assertEquals(ImmutableSet.of("opensocial-data-context"), gadget.getAddedFeatures());
   }
 
   @Test
@@ -227,6 +234,9 @@ public class PipelineDataContentRewriterTest {
     // And the os-data elements should be present
     assertTrue("os-data was deleted",
         content.getContent().indexOf("type=\"text/os-data\"") > 0);
+    
+    assertEquals(ImmutableSet.<String>of(), gadget.getRemovedFeatures());
+    assertEquals(ImmutableSet.<String>of(), gadget.getAddedFeatures());
   }
   
   /** Match a batch with the specified count of social and HTTP data items */
