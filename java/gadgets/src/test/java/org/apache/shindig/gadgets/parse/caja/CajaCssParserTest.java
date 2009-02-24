@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
+import org.apache.shindig.gadgets.GadgetException;
+
 import com.google.caja.parser.css.CssTree;
 
 import junit.framework.TestCase;
@@ -43,5 +45,65 @@ public class CajaCssParserTest extends TestCase {
         CssTree.SimpleSelector.class);
     assertEquals(2, selectorList.size());
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
+  }
+
+  /**
+   * These tests will fail when Caja successfully parses funky CSS.
+   * They can be converted into a test of success once that happens
+   */
+  public void testCajaParseFailureColonInRValue() {
+    String original = " A {\n"
+        + " -moz-opacity: 0.80;\n"
+        + " filter: alpha(opacity=40);\n"
+        + " filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);\n"
+        + "}";
+    try {
+      cajaCssParser.parseDom(original);
+      fail();
+    } catch (GadgetException ge) {
+      // Expected
+    }
+  }
+
+  public void testCajaParseFailureNoLValue() {
+    String original = "body, input, td {\n"
+        + "  Arial, sans-serif;\n"
+        + "}";
+    try {
+      cajaCssParser.parseDom(original);
+      fail();
+    } catch (GadgetException ge) {
+      // Expected
+    }
+  }
+
+  public void testCajaParseFailureCommentInContent() {
+    String original = "body { font : bold; } \n//A comment\n A { font : bold; }";
+    try {
+      cajaCssParser.parseDom(original);
+      fail();
+    } catch (GadgetException ge) {
+      // Expected
+    }
+  }
+
+  public void testCajaParseFailureDotInIdent() {
+    String original = "li{list-style:none;.padding-bottom:4px;}";
+    try {
+      cajaCssParser.parseDom(original);
+      fail();
+    } catch (GadgetException ge) {
+      // Expected
+    }
+  }
+
+  public void testCajaParseFailureDotInFunction() {
+    String original = ".iepngfix {behavior: expression(IEPNGFIX.fix(this)); }";
+    try {
+      cajaCssParser.parseDom(original);
+      fail();
+    } catch (GadgetException ge) {
+      // Expected
+    }
   }
 }

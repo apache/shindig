@@ -22,7 +22,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
+import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
 import com.google.common.collect.Lists;
 
@@ -46,7 +46,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    rewriter = new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssParser());
+    rewriter = new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssLexerParser());
     dummyUri = Uri.parse("http://www.w3c.org");
   }
 
@@ -96,20 +96,10 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {\n" +
-            "  list-style-image: url('http\\3A//www.test.com/dir/proxy?url\\3Dhttp%3A%2F%2Fa.b.com%2Fbullet.gif\\26 fp\\3D 1150739864');\n" +
-            "  list-style-position: outside;\n" +
-            "  margin: 5px;\n" +
-            "  padding: 0\n" +
-            "}\n" +
-            ".someid {\n" +
-            "  background-image: url('http\\3A//www.test.com/dir/proxy?url\\3Dhttp%3A%2F%2Fa.b.com%2Fbigimg.png\\26 fp\\3D 1150739864');\n" +
-            "  float: right;\n" +
-            "  width: 165px;\n" +
-            "  height: 23px;\n" +
-            "  margin-top: 4px;\n" +
-            "  margin-left: 5px\n" +
-            "}";
+        "div {list-style-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&fp=1150739864\");\n"
+            + ";list-style-position:outside;margin:5px;padding:0}\n"
+            + ".someid {background-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&fp=1150739864\");\n"
+            + ";float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }
 
@@ -120,65 +110,14 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         " div { color: blue; }\n" +
         " p { color: black; }\n" +
         " span { color: red; }";
-    String expected = "div {\n"
-        + "  color: blue;\n"
-        + "}\n"
-        + "p {\n"
-        + "  color: black;\n"
-        + "}\n"
-        + "span {\n"
-        + "  color: red;\n"
-        + "}";
+    String expected = " div { color: blue; }\n" +
+        " p { color: black; }\n" +
+        " span { color: red; }";
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
     assertEquals(expected, sw.toString());
     assertEquals(stringList, Lists.newArrayList("www.example.org/some.css",
         "www.example.org/someother.css", "www.example.org/another.css"));
-  }
-
-  /**
-   * These tests will fail when Caja successfully parses funky CSS.
-   * They can be converted into a test of success once that happens
-   */
-  public void testCajaParseFailureColonInRValue() {
-    String original = " A {\n"
-        + " -moz-opacity: 0.80;\n"
-        + " filter: alpha(opacity=40);\n"
-        + " filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);\n"
-        + "}";
-    StringWriter sw = new StringWriter();
-    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
-    assertEquals(original, sw.toString());
-  }
-
-  public void testCajaParseFailureNoLValue() {
-    String original = "body, input, td {\n"
-        + "  Arial, sans-serif;\n"
-        + "}";
-    StringWriter sw = new StringWriter();
-    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
-    assertEquals(original, sw.toString());
-  }
-
-  public void testCajaParseFailureCommentInContent() {
-    String original = "body { font : bold; } \n//A comment\n A { font : bold; }"; 
-    StringWriter sw = new StringWriter();
-    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
-    assertEquals(original, sw.toString());
-  }
-
-  public void testCajaParseFailureDotInIdent() {
-    String original = "li{list-style:none;.padding-bottom:4px;}";
-    StringWriter sw = new StringWriter();
-    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
-    assertEquals(original, sw.toString());
-  }
-
-  public void testCajaParseFailureDotInFunction() {
-    String original = ".iepngfix {behavior: expression(IEPNGFIX.fix(this)); }";
-    StringWriter sw = new StringWriter();
-    rewriter.rewrite(new StringReader(original), dummyUri, defaultLinkRewriter, sw, true);
-    assertEquals(original, sw.toString());
   }
 }

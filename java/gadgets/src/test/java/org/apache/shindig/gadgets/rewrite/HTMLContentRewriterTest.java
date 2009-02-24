@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
+import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
 import org.easymock.EasyMock;
 import org.w3c.dom.Document;
@@ -38,7 +38,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
     rewriter = new HTMLContentRewriter(factory, DEFAULT_PROXY_BASE, DEFAULT_CONCAT_BASE,
-        new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssParser()));
+        new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssLexerParser()));
   }
 
   public void testScriptsBasic() throws Exception {
@@ -154,7 +154,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(1, wrapper.getNodeList("//style").getLength());
 
     // All @imports are stripped
-    assertEquals("div {\n  color: black;\n}", wrapper.getValue("//style[1]"));
+    assertEquals("div { color : black; }", wrapper.getValue("//style[1]").trim());
   }
 
   public void testNoRewriteUnknownMimeType() {
