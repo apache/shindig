@@ -17,12 +17,11 @@
  */
 package org.apache.shindig.protocol.model;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Limited model to fully exercise data binding
@@ -61,8 +60,9 @@ public class TestModel {
     private List<Passenger> passengers;
 
     public Car() {
-      ArrayList<Enum<Engine>> engines = Lists.<Enum<Engine>>newArrayList(
-          new EnumImpl<Engine>(Engine.GAS, null), new EnumImpl<Engine>(Engine.HYBRID, null));
+      List<Enum<Engine>> engines = Lists.newArrayList();
+      engines.add(new EnumImpl<Engine>(Engine.GAS, null));
+      engines.add(new EnumImpl<Engine>(Engine.HYBRID, null));
       engine = engines;
       parkingTickets = Maps.newHashMap();
       parkingTickets.put("BERKELEY", "$120");

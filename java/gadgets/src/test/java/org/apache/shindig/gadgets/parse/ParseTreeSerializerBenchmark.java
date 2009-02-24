@@ -21,24 +21,22 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-
 import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.StringWriter;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.StringWriter;
 
 /**
  * Benchmarks for HTML parsing and serialization
  */
 public class ParseTreeSerializerBenchmark {
-  private DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
   private int numRuns;
   private String content;
 

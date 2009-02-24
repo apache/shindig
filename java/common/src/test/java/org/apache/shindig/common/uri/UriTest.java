@@ -23,8 +23,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.junit.Assert;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;

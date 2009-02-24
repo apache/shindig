@@ -136,7 +136,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     verify();
   }
 
-  private Future setupPostData(String method) throws SocialSpiException {
+  private Future<?> setupPostData(String method) throws SocialSpiException {
     String path = "/appdata/john.doe/@self/appId";
     RestHandler operation = registry.getRestHandler(path, method);
 

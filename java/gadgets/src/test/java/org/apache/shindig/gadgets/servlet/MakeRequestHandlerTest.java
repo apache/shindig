@@ -234,7 +234,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   private void expectParameters(HttpServletRequest request, String... params) {
     final List<String> v = Lists.newArrayList(params);
 
-    expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration>() {
+    expect(request.getParameterNames()).andStubAnswer(new IAnswer<Enumeration<String>>() {
       public Enumeration<String> answer() throws Throwable {
         return Collections.enumeration(v);
       }

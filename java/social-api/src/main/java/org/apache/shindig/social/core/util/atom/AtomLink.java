@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.core.util.atom;
 
-import com.google.common.base.Preconditions;
-
 /**
  * represents an atom:link element.
  */

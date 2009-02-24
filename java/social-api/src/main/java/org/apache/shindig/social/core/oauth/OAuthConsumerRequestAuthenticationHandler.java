@@ -17,17 +17,14 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuthServiceProvider;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.server.OAuthServlet;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.auth.SecurityToken;
@@ -35,7 +32,10 @@ import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import javax.servlet.http.HttpServletRequest;
+
+import com.google.inject.Inject;
 
 /**
  * This class only handles "two-legged" OAuth (aka Consumer Request) OAuth requests. The request
@@ -46,13 +46,10 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
   public static final String AUTH_OAUTH_CONSUMER_REQUEST = "OAuth-ConsumerRequest";
   public static final String REQUESTOR_ID_PARAM = "xoauth_requestor_id";
   private OAuthDataStore store;
-  private String baseUrl;
 
   @Inject
-  public OAuthConsumerRequestAuthenticationHandler(OAuthDataStore store,
-                  @Named("shindig.oauth.base-url") String baseUrl) {
+  public OAuthConsumerRequestAuthenticationHandler(OAuthDataStore store) {
     this.store = store;
-    this.baseUrl = baseUrl;
   }
 
   public String getName() {

@@ -42,7 +42,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.odysseus.el.ExpressionFactoryImpl;
-import de.odysseus.el.util.SimpleContext;
 
 /**
  * A facade to the expressions functionality.

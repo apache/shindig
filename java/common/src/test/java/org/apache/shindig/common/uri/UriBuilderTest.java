@@ -19,7 +19,6 @@ package org.apache.shindig.common.uri;
 
 import com.google.common.collect.Maps;
 import org.junit.Test;
-import org.junit.Assert;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -266,7 +265,6 @@ public class UriBuilderTest {
   @Test
   public void equalsAndHashCodeOk() {
     UriBuilder uri = UriBuilder.parse("http://example.org/foo/bar/baz?blah=blah#boo");
-    Map<String, List<String>> params = UriBuilder.splitParameters("blah=blah");
     UriBuilder uri2 = new UriBuilder(Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo"));
 
     assertEquals(uri, uri2);

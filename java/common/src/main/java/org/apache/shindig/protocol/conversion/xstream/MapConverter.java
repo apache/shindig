@@ -17,8 +17,8 @@
  */
 package org.apache.shindig.protocol.conversion.xstream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Maps;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -28,19 +28,12 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 /**
  * converts a map to and from the form &lt;container&gt;
  * &lt;key&gt;value&lt;/key&gt; &lt;key&gt;value&lt;/key&gt; <container>.
  */
 public class MapConverter extends AbstractCollectionConverter {
 
-  /**
-   * The logger.
-   */
-  private static final Log log = LogFactory.getLog(MapConverter.class);
   /**
    * If true will use a short form of xml serialization.
    */

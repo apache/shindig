@@ -50,6 +50,8 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
    * @see com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter#canConvert(java.lang.Class)
    */
   @Override
+  // Base API is inherently unchecked
+  @SuppressWarnings("unchecked")
   public boolean canConvert(Class clazz) {
     return (DataCollection.class.isAssignableFrom(clazz));
   }

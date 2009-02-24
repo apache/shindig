@@ -21,7 +21,6 @@ import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-import java.awt.color.ICC_Profile;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -113,7 +112,8 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
 
   HttpResponse rewrite(HttpResponse original)
       throws IOException, ImageReadException {
-    ICC_Profile icc_profile = Sanselan.getICCProfile(original.getResponse(), null);
+    // Get the profile, throwing exceptions if that fails
+    Sanselan.getICCProfile(original.getResponse(), null);
     return new JPEGOptimizer(new OptimizerConfig(), original).rewrite(
         ImageIO.read(original.getResponse()));
   }

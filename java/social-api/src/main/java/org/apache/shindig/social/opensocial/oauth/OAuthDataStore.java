@@ -18,13 +18,8 @@
 package org.apache.shindig.social.opensocial.oauth;
 
 import com.google.inject.ImplementedBy;
-import com.google.common.base.Preconditions;
-
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
-
-import java.util.UUID;
-import java.util.Date;
 
 import net.oauth.OAuthConsumer;
 

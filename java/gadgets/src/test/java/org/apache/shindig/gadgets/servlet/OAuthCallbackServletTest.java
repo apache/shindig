@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.junit.Test;
 import org.junit.Assert;
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Tests for OAuth callback servlet.

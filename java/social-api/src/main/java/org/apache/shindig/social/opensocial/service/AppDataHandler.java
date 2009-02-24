@@ -93,7 +93,8 @@ public class AppDataHandler {
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
-    Map<String, String> values = (Map<String,String>) request.getTypedParameter("data", HashMap.class);
+    @SuppressWarnings("unchecked")
+    Map<String, String> values = request.getTypedParameter("data", HashMap.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
         throw new SocialSpiException(ResponseError.BAD_REQUEST,
