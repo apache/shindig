@@ -49,9 +49,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
 public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
     + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"

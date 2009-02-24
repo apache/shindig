@@ -21,16 +21,11 @@ import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-
-import java.awt.color.ICC_Profile;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,6 +33,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 /**
  * Rewrite images to more efficiently compress their content. Can rewrite images
@@ -126,8 +124,8 @@ public class BasicImageRewriter implements ImageRewriter {
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
         // We cant use Sanselan to read JPEG but we can use it to read all the metadata which is
         // where we have issues anyway
-        IImageMetadata imageMetadata = Sanselan.getMetadata(response.getResponse(), null);
-        ICC_Profile icc_profile = Sanselan.getICCProfile(response.getResponse(), null);
+        Sanselan.getMetadata(response.getResponse(), null);
+        Sanselan.getICCProfile(response.getResponse(), null);
         response = new JPEGOptimizer(config, response)
             .rewrite(ImageIO.read(response.getResponse()));
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_BMP) {

@@ -74,9 +74,11 @@ public class BaseRequestItem implements RequestItem {
       BeanJsonConverter jsonConverter) {
     try {
       this.parameters = Maps.newHashMap();
-      Iterator keys = parameters.keys();
+      @SuppressWarnings("unchecked")
+      // JSONObject keys are always strings
+      Iterator<String> keys = parameters.keys();
       while (keys.hasNext()) {
-        String key = (String)keys.next();
+        String key = keys.next();
         this.parameters.put(key, parameters.get(key));
       }
       this.token = token;
@@ -199,10 +201,10 @@ public class BaseRequestItem implements RequestItem {
   public String getParameter(String paramName) {
     Object param = this.parameters.get(paramName);
     if (param instanceof List) {
-      if (((List)param).isEmpty()) {
+      if (((List<?>)param).isEmpty()) {
         return null;
       } else {
-        param = ((List)param).get(0);
+        param = ((List<?>)param).get(0);
       }
     }
     if (param == null) {
@@ -230,7 +232,10 @@ public class BaseRequestItem implements RequestItem {
       return listParam;
     }
     else if (param instanceof List) {
-      return (List<String>)param;
+      // Assume it's a list of strings.  This is not type-safe.
+      @SuppressWarnings("unchecked")
+      List<String> listParam = (List<String>) param;
+      return listParam;
     } else if (param instanceof JSONArray) {
       try {
         JSONArray jsonArray = (JSONArray)param;

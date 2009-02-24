@@ -23,21 +23,19 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
-import junit.framework.TestCase;
-
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 public class DataServiceServletTest extends TestCase {
 
@@ -53,12 +51,6 @@ public class DataServiceServletTest extends TestCase {
 
 
   private IMocksControl mockControl = EasyMock.createNiceControl();
-
-  private final ServletInputStream dummyPostData = new ServletInputStream() {
-    @Override public int read()  {
-      return -1;
-    }
-  };
 
   @Override protected void setUp() throws Exception {
     servlet = new DataServiceServlet();

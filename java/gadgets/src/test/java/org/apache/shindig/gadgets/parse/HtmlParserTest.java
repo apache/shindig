@@ -19,10 +19,9 @@ package org.apache.shindig.gadgets.parse;
 
 import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
+import org.w3c.dom.Document;
 
 import junit.framework.TestCase;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 /**
  * Note these tests are of marginal use. Consider removing. More useful tests would exercise
@@ -78,10 +77,4 @@ public class HtmlParserTest extends TestCase {
 
   // TODO: figure out to what extent it makes sense to test "invalid"
   // HTML, semi-structured HTML, and comment parsing
-
-  // Different parsers either return null or empty child lists.
-  // In particular because Caja is a non-w3c compliant parser
-  private void assertNullOrEmpty(NodeList l) {
-    assertTrue(l == null || l.getLength() == 0);
-  }
 }

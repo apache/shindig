@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.oauth;
 
-import com.google.inject.util.Objects;
-
 import java.util.Date;
 import java.io.Serializable;
 

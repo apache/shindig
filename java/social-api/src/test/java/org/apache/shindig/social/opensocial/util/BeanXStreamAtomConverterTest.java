@@ -50,10 +50,6 @@ import java.util.List;
 import java.util.Map;
 
 public class BeanXStreamAtomConverterTest extends TestCase {
-  private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
-      + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-      + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
-  private static final String XSDRESOURCE = "opensocial.xsd";
   private Person johnDoe;
   private Activity activity;
 

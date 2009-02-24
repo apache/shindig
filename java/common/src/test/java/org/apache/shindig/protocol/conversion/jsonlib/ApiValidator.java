@@ -19,29 +19,17 @@ package org.apache.shindig.protocol.conversion.jsonlib;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.google.common.collect.Maps;
 
 /**
  * A class that loads a feature set from features into a Javascript Parser to
@@ -52,27 +40,6 @@ public class ApiValidator {
   private static final Log log = LogFactory.getLog(ApiValidator.class);
   private Context ctx;
   private ScriptableObject scope;
-
-  /**
-   * @param feature
-   *                The name of the feature are eg "opensocial-reference", this
-   *                is a classpath stub (not starting with /) where the location
-   *                contains a feature.xml file.
-   * @throws SAXException
-   *                 if feature.xml is not parsable
-   * @throws ParserConfigurationException
-   *                 if the parsers are invalid
-   * @throws IOException
-   *                 if feature.xml or the javascript that represents the
-   *                 feature is missing
-   *
-   */
-  private ApiValidator(String feature) throws IOException,
-      ParserConfigurationException, SAXException {
-    ctx = Context.enter();
-    scope = ctx.initStandardObjects();
-    load(feature);
-  }
 
   /**
    * Load the ApiValidator with no features, this avoids having features in the classpath
@@ -294,49 +261,6 @@ public class ApiValidator {
   }
 
   /**
-   * Load a feature based on the spec
-   *
-   * @param spec
-   *                The name of the location of the spec in the classpath, must
-   *                not start with a '/' and must should contain a feature.xml
-   *                file in the location
-   * @throws IOException
-   *                 If any of the resources cant be found
-   * @throws ParserConfigurationException
-   *                 If the parser has a problem being constructed
-   * @throws SAXException
-   *                 on a parse error on the features.xml
-   */
-  private void load(String spec) throws IOException, SAXException,
-      ParserConfigurationException {
-
-    List<String> scripts = getScripts(spec);
-
-    List<Script> compiled = Lists.newArrayList();
-    for (String script : scripts) {
-      String scriptPath = spec + '/' + script;
-      InputStream in = this.getClass().getClassLoader().getResourceAsStream(
-          scriptPath);
-      if (in == null) {
-        in = this.getClass().getClassLoader().getResourceAsStream(
-            "features/" + scriptPath);
-        if (in == null) {
-          throw new IOException("Cant load spec " + spec + " or features/"
-              + spec + " from classpath");
-        }
-      }
-      InputStreamReader reader = new InputStreamReader(in);
-      Script compiledScript = ctx.compileReader(reader, spec, 0, null);
-      compiled.add(compiledScript);
-    }
-
-    for (Script compiledScript : compiled) {
-      compiledScript.exec(ctx, scope);
-    }
-
-  }
-
-  /**
    * Add some javascript to the context, and execute it. If extra custom
    * javascript is wanted in the context or scope then this method will load it.
    *
@@ -346,51 +270,6 @@ public class ApiValidator {
     Script compileScript = ctx.compileString(javascript, "AdditionalJS", 0,
         null);
     compileScript.exec(ctx, scope);
-  }
-
-  /**
-   * Get an ordered list of javascript resources from a feature sets.
-   *
-   * @param spec
-   *                The spec location
-   * @return An ordered list of javascript resources, these are relative to
-   *         specification file.
-   * @throws IOException
-   *                 If any of the resources can't be loaded.
-   * @throws SAXException
-   *                 Where the feature.xml file is not parsable
-   * @throws ParserConfigurationException
-   *                 where the parser can't be constructed.
-   * @return An ordered list of script that need to be loaded and executed to
-   *         make the feature available in the context.
-   */
-  private List<String> getScripts(String spec) throws SAXException,
-      IOException, ParserConfigurationException {
-    String features = spec + "/feature.xml";
-    InputStream in = this.getClass().getClassLoader().getResourceAsStream(
-        features);
-    if (in == null) {
-      in = this.getClass().getClassLoader().getResourceAsStream(
-          "features/" + features);
-      if (in == null) {
-        throw new IOException("Cant find " + features + " or features/"
-            + features + " in classpath ");
-      }
-    }
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory
-        .newInstance();
-    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-    Document doc = documentBuilder.parse(in);
-    NodeList nl = doc.getElementsByTagName("script");
-    List<String> scripts = Lists.newArrayList();
-    for (int i = 0; i < nl.getLength(); i++) {
-      Node scriptNode = nl.item(i);
-      NamedNodeMap attributes = scriptNode.getAttributes();
-      Node scriptAttr = attributes.getNamedItem("src");
-      String script = scriptAttr.getNodeValue();
-      scripts.add(script);
-    }
-    return scripts;
   }
 
   /**

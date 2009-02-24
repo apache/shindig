@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,7 +112,9 @@ public class DataServiceServlet extends ApiServlet {
     }
 
     // Execute the request
-    Future future = handler.execute(servletRequest.getParameterMap(), bodyReader, token, converter);
+    @SuppressWarnings("unchecked")
+    Map<String, String[]> parameterMap = servletRequest.getParameterMap();
+    Future<?> future = handler.execute(parameterMap, bodyReader, token, converter);
 
     ResponseItem responseItem = getResponseItem(future);
 

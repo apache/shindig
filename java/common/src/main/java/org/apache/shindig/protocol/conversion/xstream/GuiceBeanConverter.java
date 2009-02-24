@@ -51,6 +51,8 @@ public class GuiceBeanConverter implements Converter {
    * Only checks for the availability of a public default constructor. If you
    * need stricter checks, subclass JavaBeanConverter
    */
+  // Base API is inherently unchecked
+  @SuppressWarnings("unchecked")
   public boolean canConvert(Class type) {
     while (true) {
       if (type == null) {

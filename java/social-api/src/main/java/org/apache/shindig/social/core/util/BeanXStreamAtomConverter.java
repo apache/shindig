@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.core.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.util.atom.AtomFeed;
@@ -30,8 +28,6 @@ import com.google.inject.Inject;
  * TODO: Move to common once atom binding can be decoupled form social code
  */
 public class BeanXStreamAtomConverter extends BeanXStreamConverter {
-
-  private static final Log log = LogFactory.getLog(BeanXStreamAtomConverter.class);
 
   /**
    * @param configuration

@@ -22,8 +22,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.oauth.GadgetTokenStoreTest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.net.URI;
-
 /**
  * Fakes out a gadget spec factory
  */

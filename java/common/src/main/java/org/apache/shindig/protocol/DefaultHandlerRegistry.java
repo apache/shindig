@@ -407,7 +407,6 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       
       Class<?> requestItemType = inputIsRequestItem ? inputClass : BaseRequestItem.class;
     
-      Class<?> requestItemFirstParamClass = isRest ? Map.class : JSONObject.class;
       restRequestItemConstructor = requestItemType.getConstructor(Map.class,
           SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
       rpcRequestItemConstructor = requestItemType.getConstructor(JSONObject.class,

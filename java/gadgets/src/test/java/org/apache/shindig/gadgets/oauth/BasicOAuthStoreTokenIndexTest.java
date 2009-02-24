@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
-import org.junit.Test;
 import junitx.extensions.EqualsHashCodeTestCase;
 import static junitx.framework.Assert.assertNotEquals;
 

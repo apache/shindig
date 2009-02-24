@@ -17,14 +17,16 @@
  */
 package org.apache.shindig.common.util;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
+import java.util.Map;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * Test for conversion of a structured key-value set to a JSON object
@@ -61,7 +63,7 @@ public class JsonConversionUtilTest extends TestCase {
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("a,b,c"),
         new JSONArray(Lists.newArrayList("a", "b", "c")));
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("1,2,3,true,false,null"),
-        new JSONArray(Lists.newArrayList(1, 2, 3, true,
+        new JSONArray(Lists.<Object>newArrayList(1, 2, 3, true,
             false, null)));
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("(1)"),
         new JSONArray(Lists.newArrayList(1)));
@@ -96,8 +98,11 @@ public class JsonConversionUtilTest extends TestCase {
 
   public void testJSONToParameterMapParsing()
       throws Exception {
-    java.util.Map resultMap = JsonConversionUtil
+    Map<String, String> resultMap = JsonConversionUtil
         .fromJson(new JSONObject("{a:{b:[{c:\"hello\"},{c:\"hello\"}]}}"));
+    assertEquals(2, resultMap.size());
+    assertEquals("hello", resultMap.get(".a.b(0).c"));
+    assertEquals("hello", resultMap.get(".a.b(1).c"));
   }
 
   public static void assertJsonEquals(Object expected, Object actual)
@@ -115,11 +120,10 @@ public class JsonConversionUtilTest extends TestCase {
         return;
       }
       assertEquals(expectedObject.names().length(), actualObject.names().length());
-      String key;
-      for (Iterator keys = expectedObject.keys(); keys.hasNext();
-          assertJsonEquals(expectedObject.get(key), actualObject.get(key))) {
-        key = (String) keys.next();
+      
+      for (String key : JSONObject.getNames(expectedObject)) {
         assertTrue(actualObject.has(key));
+        assertJsonEquals(expectedObject.get(key), actualObject.get(key));
       }
     } else if (expected instanceof JSONArray) {
       JSONArray expectedArray = (JSONArray) expected;
