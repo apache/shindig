@@ -56,7 +56,8 @@ public class CajaCssParser {
    */
   private static final URI FAKE_SOURCE = URI.create("http://a.dummy.url");
 
-  private static final String PARSED_CSS = "parsedCss";
+  // Switch to "parsedCss" once CajaCssLexerParser is removed. See ehCacheConfig
+  private static final String PARSED_CSS = "parsedCssDom";
 
   private Cache<String, CssTree.StyleSheet> parsedCssCache;
 

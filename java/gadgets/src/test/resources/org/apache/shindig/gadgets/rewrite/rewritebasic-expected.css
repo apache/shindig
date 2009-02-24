@@ -1,6 +1,11 @@
-@import url('http\3A//www.test.com/dir/proxy?url\3Dhttp%3A%2F%2Fwww.example.org%2Fother1.css\26gadget\3Dhttp%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml\26 fp\3D 1150739864');
-@import url('http\3A//www.test.com/dir/proxy?url\3Dhttp%3A%2F%2Fwww.example.org%2Fpath%2Frelative%2Fother2.css\26gadget\3Dhttp%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml\26 fp\3D 1150739864');
-@import url('http\3A//www.example.org/hostrelative/excluded/other1.css');
+
+/* Rewrite various url forms in input statements, absolute and host/path relative.
+ Test exclusions */
+@import url("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fother1.css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
+@import url("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fpath%2Frelative%2Fother2.css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
+@import url("http://www.example.org/hostrelative/excluded/other1.css");
 DiV {
   font: arial;
 }
+
+/* A comment? */
