@@ -109,13 +109,23 @@ class ContentRewriter extends DomRewriter {
   }
 
   /**
-   * Tries to find url(<url tag>) constructs and rewrite them to their
+   * Uses rewriteCSS to find url(<url tag>) constructs and rewrite them to their
    * proxied counterparts
    *
    * @param DOMElement $node
    */
   public function rewriteStyle(DOMElement &$node) {
-    $content = $node->nodeValue;
+    $node->nodeValue = $this->rewriteCSS($node->nodeValue);
+  }
+
+  /**
+   * Does the actual CSS rewriting, this is a seperate function so it can be called
+   * from the proxy handler too
+   *
+   * @param string $content
+   * @return string
+   */
+  public function rewriteCSS($content) {
     $newVal = '';
     // loop through the url elements in the content
     while (($pos = strpos($content, 'url')) !== false) {
@@ -138,9 +148,14 @@ class ContentRewriter extends DomRewriter {
     }
     // append what's left
     $newVal .= $content;
-    $node->nodeValue = $newVal;
+    return $newVal;
   }
 
+  /**
+   * Rewrites <script src="http://example.org/foo.js" /> tags into their proxied versions
+   *
+   * @param DOMElement $node
+   */
   public function rewriteScript(DOMElement &$node) {
     if (($src = $node->getAttribute('src')) != null && $this->includedUrl($src)) {
       // make sure not to rewrite our forcedJsLibs src tag, else things break
@@ -150,6 +165,11 @@ class ContentRewriter extends DomRewriter {
     }
   }
 
+  /**
+   * Rewrites <link href="http://example.org/foo.css" /> tags into their proxied versions
+   *
+   * @param DOMElement $node
+   */
   public function rewriteStyleLink(DOMElement &$node) {
     if (($src = $node->getAttribute('href')) != null && $this->includedUrl($src)) {
       $node->setAttribute('href', $this->getProxyUrl($src));

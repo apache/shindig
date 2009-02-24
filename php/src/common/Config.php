@@ -35,7 +35,7 @@ class Config {
       include_once 'config/container.php';
       self::$config = $shindigConfig;
       if (file_exists('config/local.php')) {
-        // include local.php if it exists and merge the config arrays. 
+        // include local.php if it exists and merge the config arrays.
         // the second array values overwrites the first one's
         include_once 'config/local.php';
         self::$config = array_merge(self::$config, $shindigConfig);

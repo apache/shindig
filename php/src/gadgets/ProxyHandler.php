@@ -18,9 +18,6 @@
  * under the License.
  */
 
-// according to features/core/io.js, this is high on the list of things to scrap
-define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
-
 /**
  * The ProxyHandler class does the actual proxy'ing work. it deals both with
  * GET and POST based input, and peforms a request based on the input, headers and
@@ -52,7 +49,7 @@ class ProxyHandler extends ProxyBase {
       }
     }
     if (! $isShockwaveFlash) {
-      header('Content-Disposition: attachment;filename=p.txt');
+      //header('Content-Disposition: attachment;filename=p.txt');
     }
     $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';
     $notModified = false;
@@ -67,6 +64,10 @@ class ProxyHandler extends ProxyBase {
     if ($httpCode == 200) {
       // only set caching headers if the result was 'OK'
       $this->setCachingHeaders($lastModified);
+      // was the &gadget=<gadget url> specified in the request? if so parse it and check the rewrite settings
+      if (isset($_GET['gadget'])) {
+        $this->rewriteContent($_GET['gadget'], $result);
+      }
     }
     // If the cached file time is within the refreshInterval params value, return not-modified
     if ($notModified) {
@@ -76,5 +77,56 @@ class ProxyHandler extends ProxyBase {
       // then echo the content
       echo $result->getResponseContent();
     }
+  }
+
+  private function rewriteContent($gadgetUrl, RemoteContentRequest &$result) {
+    try {
+      // At the moment we're only able to rewrite CSS files, so check the content type and/or the file extension before rewriting
+      $headers = $result->getResponseHeaders();
+      $isCss = false;
+      if (isset($headers['Content-Type']) && strtolower($headers['Content-Type'] == 'text/csss')) {
+        $isCss = true;
+      } else {
+        $ext = substr($_GET['url'], strrpos($_GET['url'], '.') + 1);
+        $isCss = strtolower($ext) == 'css';
+      }
+      if ($isCss) {
+        $gadget = $this->createGadget($gadgetUrl);
+        $rewrite = $gadget->gadgetSpec->rewrite;
+        if (is_array($rewrite)) {
+          $contentRewriter = new ContentRewriter($this->context, $gadget);
+          $result->setResponseContent($contentRewriter->rewriteCSS($result->getResponseContent()));
+        }
+      }
+    } catch (Exception $e) {
+      // ignore, not being able to rewrite anything isn't fatal
+    }
+
+  }
+
+  /**
+   * Uses the GadgetFactory to instrance the specified gadget
+   *
+   * @param string $gadgetUrl
+   */
+  private function createGadget($gadgetUrl) {
+    // Only include these files if appropiate, else it would slow down the entire proxy way to much
+    require_once 'src/gadgets/GadgetSpecParser.php';
+    require_once 'src/gadgets/GadgetBlacklist.php';
+    require_once 'src/gadgets/sample/BasicGadgetBlacklist.php';
+    require_once 'src/gadgets/GadgetContext.php';
+    require_once 'src/gadgets/GadgetFactory.php';
+    require_once 'src/gadgets/GadgetSpec.php';
+    require_once 'src/gadgets/Gadget.php';
+    require_once 'src/gadgets/GadgetException.php';
+    require_once 'src/gadgets/rewrite/GadgetRewriter.php';
+    require_once 'src/gadgets/rewrite/DomRewriter.php';
+    require_once 'src/gadgets/rewrite/ContentRewriter.php';
+    // make sure our context returns the gadget url and not the proxied document url
+    $this->context->setUrl($gadgetUrl);
+    // and create & return the gadget
+    $gadgetSpecFactory = new GadgetFactory($this->context, null);
+    $gadget = $gadgetSpecFactory->createGadget();
+    return $gadget;
   }
 }
