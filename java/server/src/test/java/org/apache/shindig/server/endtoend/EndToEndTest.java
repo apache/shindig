@@ -17,36 +17,36 @@
  */
 package org.apache.shindig.server.endtoend;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.BasicSecurityTokenDecoder;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.google.common.collect.Maps;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.w3c.dom.NodeList;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Map;
 
 /**
  * Base class for end-to-end tests.
@@ -57,6 +57,7 @@ public class EndToEndTest {
     "fetchPeopleTest.xml",
     "errorTest.xml",
     "cajaTest.xml",
+    "failCajaTest.xml",
     "testframework.js"
   };
 
@@ -89,6 +90,11 @@ public class EndToEndTest {
   @Test
   public void messageBundles() throws Exception {
     executeAllPageTests("messageBundle");
+  }
+
+  @Test
+  public void caja() throws Exception {
+    executeAllPageTests("cajaTest.xml");
   }
 
   @Test
@@ -128,6 +134,21 @@ public class EndToEndTest {
   }
 
   @Test
+  public void testFailCaja() throws Exception {
+    HtmlPage page = executePageTest("failCajaTest", null);
+    NodeList bodyList = page.getElementsByTagName("body");
+    
+    // Result should contain just one body
+    assertEquals(bodyList.getLength(), 1);
+    DomNode body = (DomNode)bodyList.item(0);
+
+    // Failed output contains only an error block plus a onload script block
+    assertEquals(body.getChildNodes().getLength(), 2);
+    assertEquals(body.getFirstChild().getNodeName(), "pre");
+    assertEquals(body.getLastChild().getNodeName(), "script");
+  }
+
+  @Test
   public void testPipelining() throws Exception {
     HtmlPage page = executePageTest("pipeliningTest", null);
     JSONArray array = new JSONArray(page.asText());
@@ -147,7 +168,7 @@ public class EndToEndTest {
     JSONObject expected = new JSONObject("{key: 'value'}");
     assertEquals(expected.toString(), json.toString());
   }
-  
+
   @BeforeClass
   public static void setUpOnce() throws Exception {
     server = new EndToEndServer();

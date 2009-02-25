@@ -18,13 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.logging.Logger;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -36,6 +30,7 @@ import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FilePosition;
 import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.escaping.Escaping;
 import com.google.caja.opensocial.DefaultGadgetRewriter;
 import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
@@ -43,8 +38,19 @@ import com.google.caja.opensocial.UriCallbackException;
 import com.google.caja.opensocial.UriCallbackOption;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
+import com.google.caja.reporting.MessageLevel;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.SimpleMessageQueue;
+import com.google.caja.reporting.SnippetProducer;
+import com.google.common.collect.Maps;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class CajaContentRewriter implements ContentRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
@@ -89,17 +95,24 @@ public class CajaContentRewriter implements ContentRewriter {
 
       MessageQueue mq = new SimpleMessageQueue();
       DefaultGadgetRewriter rw = new DefaultGadgetRewriter(mq);
+      InputSource is = new InputSource(retrievedUri);
+      String origContent = content.getContent();
       CharProducer input = CharProducer.Factory.create(
-          new StringReader(content.getContent()),
-          FilePosition.instance(new InputSource(retrievedUri), 2, 1, 1));
+          new StringReader(origContent),
+          FilePosition.instance(is, 2, 1, 1));
       StringBuilder output = new StringBuilder();
 
+      // Secure default to remove content in case there 
+      // are problems cajoling a gadget
+      content.setContent("");
       try {
         rw.rewriteContent(retrievedUri, input, cb, output);
       } catch (GadgetRewriteException e) {
+        content.setContent(messagesToHtml(is, origContent, mq));
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
       } catch (IOException e) {
+        content.setContent(messagesToHtml(is, origContent, mq));
         throwCajolingException(e, mq);
         return RewriterResults.notCacheable();
       }
@@ -108,13 +121,46 @@ public class CajaContentRewriter implements ContentRewriter {
     return null;
   }
 
+  private String messagesToHtml(InputSource is, CharSequence orig, MessageQueue mq) {
+    MessageContext mc = new MessageContext();
+    Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
+    originalSrc.put(is, orig);
+
+    mc.inputSources = originalSrc.keySet();
+    SnippetProducer sp = new SnippetProducer(originalSrc, mc);
+
+    StringBuilder messageText = new StringBuilder();
+    messageText.append("<pre>");
+    for (Message msg : mq.getMessages()) {
+      // Ignore LINT messages
+      if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
+        String snippet = sp.getSnippet(msg);
+
+        messageText.append(msg.getMessageLevel().name())
+                   .append(" ")
+                   .append(html(msg.format(mc)));
+        if (!StringUtils.isEmpty(snippet)) {
+          messageText.append("\n").append(snippet);
+        }
+      }
+    }
+    messageText.append("</pre>");
+    return messageText.toString();
+  }
+
+  private static String html(CharSequence s) {
+    StringBuilder sb = new StringBuilder();
+    Escaping.escapeXml(s, false, sb);
+    return sb.toString();
+  }
+
   private String tameCajaClientApi() {
     return "<script>" +
       "opensocial.Container.get().enableCaja();" +
       "</script>";
   }
 
-  private void throwCajolingException(Exception cause, MessageQueue mq) {
+    private void throwCajolingException(Exception cause, MessageQueue mq) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
 
@@ -125,7 +171,7 @@ public class CajaContentRewriter implements ContentRewriter {
     for (Message m : mq.getMessages()) {
       errbuilder.append(m.format(mc)).append('\n');
     }
-
+    
     logger.info("Unable to cajole gadget: " + errbuilder);
 
     // throw new GadgetException(
