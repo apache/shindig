@@ -35,13 +35,11 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetServer;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -59,7 +57,7 @@ public class Bootstrap {
   private static final String DB_PASSWORD = "db.password";
   private static final String DB_MIN_WRITE = "db.write.min";
   private static final String DB_MIN_NUM_READ = "db.read.min";
-  private static final Log LOG = LogFactory.getLog(Boolean.class);
+  private static final Logger LOG = Logger.getLogger(Boolean.class.getName());
   private String minWrite;
   private String minRead;
   private String dbPassword;
@@ -125,7 +123,8 @@ public class Bootstrap {
   }
 
   /**
-   * @param string
+   * @param unitName
+   * 
    * @return
    */
   public EntityManager getEntityManager(String unitName) {

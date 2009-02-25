@@ -46,14 +46,12 @@ import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.model.Person.Gender;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -70,7 +68,7 @@ public class PersonPopulate {
     // TODO Auto-generated constructor stub
   }
 
-  private static final Log log = LogFactory.getLog("shindig-db-test");
+  private static final Logger log = Logger.getLogger("shindig-db-test");
 
   public Person createPerson(int i, long key, Random random) {
 
@@ -182,14 +180,14 @@ public class PersonPopulate {
   }
 
   public String getPersonId(int i, long key) {
-    return "Person" + key + ":" + i;
+    return "Person" + key + ':' + i;
   }
 
   private Url getNewUrl(int i) {
     String targetUrl = "http://sdfsdfsd.sdfdsf/" + String.valueOf(i % 33);
     List<?> l = find(UrlDb.FINDBY_URL,
         new String[] { UrlDb.PARAM_URL }, new Object[] { targetUrl });
-    if (l.size() == 0) {
+    if (l.isEmpty()) {
       Url url = new UrlDb();
       url.setValue(targetUrl);
       url.setLinkText("LinkText");
@@ -300,7 +298,7 @@ public class PersonPopulate {
 
   private <T> T findOne(String query, String[] names, Object[] params) {
     List<T> l = find(query, names, params);
-    if (l.size() > 0) {
+    if (!l.isEmpty()) {
       return (T) l.get(0);
     }
     return null;

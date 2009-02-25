@@ -17,13 +17,11 @@
  */
 package org.apache.shindig.protocol.conversion.jsonlib;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * Some utility functions to simpilfy handling SF json-lib objects.
@@ -33,7 +31,7 @@ public final class JsonLibConverterUtils {
   /**
    * The Logger.
    */
-  protected static final Log LOG = LogFactory.getLog(JsonLibConverterUtils.class);
+  protected static final Logger LOG = Logger.getLogger(JsonLibConverterUtils.class.getName());
 
   /**
    * Dumps a JSON Object out to the log at info level.

@@ -17,34 +17,13 @@
  */
 package org.apache.shindig.social.opensocial.jpa.openjpa;
 
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_READ_CONNECTIONS_MIN;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_WRITE_CONNECTIONS_MIN;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.LOGGING_LEVEL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.LOGGING_SESSION;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.LOGGING_THREAD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.LOGGING_TIMESTAMP;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TARGET_SERVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.eclipse.persistence.config.TargetServer;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 
@@ -57,7 +36,6 @@ public class Bootstrap {
   private static final String DB_PASSWORD = "db.password";
   private static final String DB_MIN_WRITE = "db.write.min";
   private static final String DB_MIN_NUM_READ = "db.read.min";
-  private static final Log LOG = LogFactory.getLog(Boolean.class);
   private String minWrite;
   private String minRead;
   private String dbPassword;
@@ -94,7 +72,7 @@ public class Bootstrap {
   }
 
   /**
-   * @param string
+   * @param unitName
    * @return
    */
   public EntityManager getEntityManager(String unitName) {

@@ -17,9 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion.xstream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.thoughtworks.xstream.mapper.Mapper;
@@ -28,6 +25,8 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * The InterfaceClassMapper provides the central mapping of the XStream bean
@@ -44,7 +43,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   /**
    * A logger.
    */
-  private static final Log log = LogFactory.getLog(InterfaceClassMapper.class);
+  private static final Logger log = Logger.getLogger(InterfaceClassMapper.class.getName());
   /**
    * A map of element names to classes.
    */
@@ -150,8 +149,8 @@ public class InterfaceClassMapper extends MapperWrapper {
         }
       }
       firstChild.set(clazz);
-      if (log.isDebugEnabled()) {
-        log.debug("First Child set to " + clazz);
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("First Child set to " + clazz);
       }
     }
   }
@@ -188,13 +187,13 @@ public class InterfaceClassMapper extends MapperWrapper {
     if (Collection.class.isAssignableFrom(type) && firstChild.get() != null) {
       // empty list, if this is the first one, then we need to look at the
       // first child setup on startup.
-      if (log.isDebugEnabled()) {
-        log.debug("Converting Child to " + firstChild.get());
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("Converting Child to " + firstChild.get());
       }
       type = firstChild.get();
       firstChild.set(null);
-      if (log.isDebugEnabled()) {
-        log.debug("serializedClass(" + type + ") is a collection member "
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("serializedClass(" + type + ") is a collection member "
             + Collection.class.isAssignableFrom(type));
       }
       for (ClassFieldMapping cfm : listElementMappingList) {
@@ -206,13 +205,13 @@ public class InterfaceClassMapper extends MapperWrapper {
     } else {
       // but after we have been asked once, then clear
       firstChild.set(null);
-      if (log.isDebugEnabled()) {
-        log.debug("serializedClass(" + type + ')');
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("serializedClass(" + type + ')');
       }
       for (ClassFieldMapping cfm : elementMappingList) {
         if (cfm.matches(parentElementName, type)) {
-          if (log.isDebugEnabled()) {
-            log.debug("From MAP serializedClass(" + type + ")  =="
+          if (log.isLoggable(Level.FINE)) {
+            log.fine("From MAP serializedClass(" + type + ")  =="
                 + cfm.getElementName());
           }
           return cfm.getElementName();
@@ -222,8 +221,8 @@ public class InterfaceClassMapper extends MapperWrapper {
     }
 
     String fieldName = super.serializedClass(type);
-    if (log.isDebugEnabled()) {
-      log.debug("--- From Super serializedClass(" + type + ")  ==" + fieldName);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("--- From Super serializedClass(" + type + ")  ==" + fieldName);
     }
     return fieldName;
 
