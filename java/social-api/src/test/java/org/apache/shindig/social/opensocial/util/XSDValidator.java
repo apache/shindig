@@ -121,16 +121,6 @@ public class XSDValidator {
       return xml;
     }
 
-    if (removeContainer) {
-      if (xml.startsWith("<response>")) {
-        xml = xml.substring("<response>".length());
-      }
-      if (xml.endsWith("</response>")) {
-        xml = xml.substring(0, xml.length() - "</response>".length());
-      }
-    }
-    xml = xml.trim();
-
     int start = 0;
     if ( xml.startsWith("<?") ) {
       start = xml.indexOf('>')+1;
@@ -156,8 +146,9 @@ public class XSDValidator {
    */
   public static String validate(String xmlFragment, String schemaStatement,
       String schemaResource, boolean removeContainer) {
+
     String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, removeContainer);
-    log.debug("Valiating " + xml);
+    log.debug("Validating " + xml);
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream(schemaResource));
     if (!"".equals(errors)) {
@@ -169,4 +160,21 @@ public class XSDValidator {
     return xml;
   }
 
+  public static String validateOpenSocial(String xmlFragment) {
+    String XMLSCHEMA = " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+    + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
+
+    String xml = XSDValidator.insertSchema(xmlFragment, XMLSCHEMA, true);
+    log.debug("Validating " + xml);
+    String errors = XSDValidator.validate(xml, XSDValidator.class
+        .getResourceAsStream("opensocial.xsd"));
+    if (!"".equals(errors)) {
+      log.error("Failed to validate " + xml);
+    }
+    if (!"".equals(errors)) {
+      throw new Error("XML document does not validate \n" + errors + '\n' + xml);
+    }
+    return xml;
+
+  }
 }

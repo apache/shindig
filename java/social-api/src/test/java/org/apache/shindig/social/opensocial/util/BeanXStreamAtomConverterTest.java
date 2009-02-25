@@ -143,7 +143,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 
     XmlUtil.parse(xml);
 
-    String expectedXml = " <feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\" > "
+    String expectedXml = "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\" > "
         + " <entry><id>item1</id>"
         + "    <content type=\"application/xml\" ><entry><key>value</key><value>1</value></entry></content>"
         + " </entry> "
@@ -163,7 +163,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     m.put("key2", "value2");
     String xml = beanXmlConverter.convertToString(m);
     XmlUtil.parse(xml);
-    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+    String expectedXml = "<feed xmlns=\"http://www.w3.org/2005/Atom\" "
         + " xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\">"
         + "  <entry><id>key1</id><content type=\"application/xml\" >"
         + "    <value>value1</value></content>"
@@ -183,7 +183,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
     XmlUtil.parse(xml);
-    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+    String expectedXml = "<feed xmlns=\"http://www.w3.org/2005/Atom\" "
         + "xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\" >"
         + "<entry><content/></entry>"
         + "<osearch:startIndex>0</osearch:startIndex>"
@@ -199,7 +199,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     emptyLists.add(emptyList);
     xml = beanXmlConverter.convertToString(emptyLists);
     XmlUtil.parse(xml);
-    expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+    expectedXml = "<feed xmlns=\"http://www.w3.org/2005/Atom\" "
         + "xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\" >"
         + "<entry><content><list/><list/><list/></content></entry>"
         + "<osearch:startIndex>0</osearch:startIndex>"
@@ -217,9 +217,9 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     activities.add(activity);
     String xml = beanXmlConverter.convertToString(activities);
     XmlUtil.parse(xml);
-    String expectedXml = "<feed xmlns=\"http://ns.opensocial.org/2008/opensocial\" "
+    String expectedXml = "<feed xmlns=\"http://www.w3.org/2005/Atom\" "
         + "   xmlns:osearch=\"http://a9.com/-/spec/opensearch/1.1\"><entry><content>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
@@ -229,7 +229,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "    <url>http://foo.com</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
@@ -239,7 +239,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "    <url>http://foo.com</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"

@@ -18,12 +18,18 @@
 package org.apache.shindig.social.dataservice.integration;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.shindig.social.opensocial.util.XSDValidator;
 
 import org.junit.Test;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.custommonkey.xmlunit.NamespaceContext;
+import org.custommonkey.xmlunit.SimpleNamespaceContext;
+import org.custommonkey.xmlunit.XpathEngine;
 
 import java.io.StringReader;
 import java.util.List;
@@ -35,13 +41,9 @@ import javax.xml.xpath.XPathFactory;
 
 public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
 
-  private XPathFactory xpathFactory;
-
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    xpathFactory = XPathFactory.newInstance();
-
   }
 
   /**
@@ -60,16 +62,15 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
   @Test
   public void testGetFriendsAppDataJson() throws Exception {
     // app id is mocked out
-    Map<String, String> extraParams = Maps.newHashMap();
-    extraParams.put("fields", "count");
+    Map<String, String> extraParams = ImmutableMap.of("fields", "count");
     String resp = getResponse("/appdata/john.doe/@friends/app", "GET",
         extraParams, "xml", "application/xml");
     
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
-    
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    XSDValidator.validateOpenSocial(resp);
+
+     // /*[local-name()="TestSchema" and namespace-uri()='http://MapTest.TestSchema']/*[local-name()="A"]
+
+    NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
     assertEquals(3, result.getLength());
 
     Map<String, Map<String, List<String>>> v = childNodesToMapofMap(result);
@@ -78,7 +79,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     assertTrue(v.containsKey("jane.doe"));
     assertTrue(v.containsKey("george.doe"));
     assertTrue(v.containsKey("maija.m"));
-    
+
     assertEquals(1, v.get("jane.doe").size());
     assertEquals(1, v.get("george.doe").size());
     assertEquals(0, v.get("maija.m").size());
@@ -104,11 +105,9 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
     
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
 
     Map<String, Map<String, List<String>>> v = childNodesToMapofMap(result);
 
@@ -137,11 +136,9 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
 
     Map<String, Map<String, List<String>>> v = childNodesToMapofMap(result);
 
@@ -170,11 +167,9 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET",
         extraParams, "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
 
     Map<String, Map<String, List<String>>> v = childNodesToMapofMap(result);
 
@@ -194,7 +189,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
     assertCount("0");
 
@@ -203,7 +198,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, "xml",
         "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
     assertCount(null);
   }
@@ -215,11 +210,11 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
     // should be xml ?
-    String postData = XSDValidator.XMLDEC+"<map><entry><key>count</key><value>5</value></entry></map>";
+    String postData = XSDValidator.XMLDEC + "<map><entry><key>count</key><value>5</value></entry></map>";
     String resp = getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData,
         "xml", "application/xml");
     
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
 
     assertCount("5");
@@ -229,12 +224,9 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/appdata/john.doe/@self/app", "GET", "xml",
         "application/xml");
     
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/appdata/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    NodeList result = xp.getMatchingNodes("/:appdata/:entry", XMLUnit.buildTestDocument(resp));
 
     Map<String, Map<String, List<String>>> v = childNodesToMapofMap(result);
 
