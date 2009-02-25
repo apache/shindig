@@ -523,11 +523,11 @@ var uriCallback = {
     if (/^#/.test(uri)) {
       return '#' + encodeURIComponent(decodeURIComponent(uri.substring(1)));
     // and files on the same host
-    } else if (/^\/(?:[^\/][^?#]*)?$/) {
+    } else if (/^\/(?:[^\/][^?#]*)?$/.test(uri)) {
       return encodeURI(decodeURI(uri));
     }
     // This callback can be replaced with one that passes the URL through
-    // a proxy that checks the mimetype.
+    // a proxy that checks the mimetype.    
     return null;
   }
 };
@@ -549,20 +549,20 @@ opensocial.Container.prototype.enableCaja = function() {
 
   var imports = ___.copy(___.sharedImports);
   imports.outers = imports;
-  imports.console = console;
-  imports.$v = ___.asFunc(valijaMaker)(imports);
-  ___.getNewModuleHandler().setImports(imports);
 
-  
   var gadgetRoot = document.createElement('div');
   gadgetRoot.className = 'g___';
   attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
+
+  imports.$v = valijaMaker.CALL___(imports.outers);
   imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
   document.body.appendChild(gadgetRoot);
 
+  ___.getNewModuleHandler().setImports(imports);  
+
   // Add the opensocial APIs and mark them callable and readable.
-  imports.gadgets = gadgets;
-  imports.opensocial = opensocial;
+  imports.outers.gadgets = gadgets;
+  imports.outers.opensocial = opensocial;
   // The below described the opensocial reference APIs.
   // A prefix of "c_" specifies a class, "m_" a method, "f_" a field,
   // and "s_" a static member.
