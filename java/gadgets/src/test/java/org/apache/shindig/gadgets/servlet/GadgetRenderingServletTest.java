@@ -100,4 +100,25 @@ public class GadgetRenderingServletTest {
     assertEquals("text/html", recorder.getContentType());
     assertEquals(NON_ASCII_STRING, recorder.getResponseAsString());
   }
+  
+  @Test
+  public void refreshParameter_specified() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(request.getParameter("refresh")).andReturn("1000");
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok("working"));
+    control.replay();
+    servlet.doGet(request, recorder);
+    assertEquals("private,max-age=1000", recorder.getHeader("Cache-Control"));
+  }
+  
+  @Test
+  public void refreshParameter_default() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok("working"));
+    control.replay();
+    servlet.doGet(request, recorder);
+    assertEquals("private,max-age=300", recorder.getHeader("Cache-Control"));
+  }
 }

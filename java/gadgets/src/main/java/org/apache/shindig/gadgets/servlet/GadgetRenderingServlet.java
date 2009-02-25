@@ -64,9 +64,14 @@ public class GadgetRenderingServlet extends InjectedServlet {
           // Versioned files get cached indefinitely
           HttpUtil.setCachingHeaders(resp, true);
         } else {
-          // Unversioned files get cached for 5 minutes.
-          // TODO: This should be configurable
-          HttpUtil.setCachingHeaders(resp, DEFAULT_CACHE_TTL, true);
+          // Unversioned files get cached for 5 minutes by default, but this can be overridden
+          // with a query parameter.
+          int ttl = DEFAULT_CACHE_TTL;
+          String ttlStr = req.getParameter(ProxyBase.REFRESH_PARAM);
+          if (ttlStr != null) {
+            ttl = Integer.parseInt(ttlStr);
+          }
+          HttpUtil.setCachingHeaders(resp, ttl, true);
         }
         resp.getWriter().print(results.getContent());
         break;
