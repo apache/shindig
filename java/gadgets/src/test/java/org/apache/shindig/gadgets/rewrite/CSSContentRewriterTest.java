@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -25,7 +26,6 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
 import com.google.common.collect.Lists;
-
 import org.easymock.EasyMock;
 
 import java.io.StringReader;
@@ -65,7 +65,8 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     MutableContent mc = new MutableContent(null, content);
     rewriter.rewrite(request, response, mc);
 
-    assertEquals(expected, mc.getContent());
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(mc.getContent()));
   }
 
     public void testNoRewriteUnknownMimeType() {
@@ -84,7 +85,8 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     HttpRequest request = new HttpRequest(base);
     rewriter.rewrite(request,
         new HttpResponseBuilder().setHeader("Content-Type", "text/css").create(), mc);
-    assertEquals(expected, mc.getContent());
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(mc.getContent()));
   }
 
   private void validateRewritten(String content, String expected) {
