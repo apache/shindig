@@ -105,7 +105,7 @@ public class BeanXStreamConverter implements BeanConverter {
         cc.mapper.setBaseObject(s); // thread safe method
         String result = cc.xstream.toXML(s);
         log.debug("Result is " + result);
-        return "<response>" + result + "</response>";
+        return XML_DECL + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">" + result + "</response>";
       }
     } else if (obj instanceof RestfulCollection) {
       XStreamConfiguration.ConverterConfig cc = converterMap
@@ -113,14 +113,14 @@ public class BeanXStreamConverter implements BeanConverter {
       cc.mapper.setBaseObject(obj); // thread safe method
       String result = cc.xstream.toXML(obj);
       log.debug("Result is " + result);
-      return result;
+      return XML_DECL + result;
     } else if (obj instanceof DataCollection) {
       XStreamConfiguration.ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.MAP);
       cc.mapper.setBaseObject(obj); // thread safe method
       String result = cc.xstream.toXML(obj);
       log.debug("Result is " + result);
-      return result;
+      return XML_DECL + result;
     }
     XStreamConfiguration.ConverterConfig cc = converterMap
         .get(XStreamConfiguration.ConverterSet.DEFAULT);
@@ -128,7 +128,7 @@ public class BeanXStreamConverter implements BeanConverter {
     cc.mapper.setBaseObject(obj); // thread safe method
     String result = cc.xstream.toXML(obj);
     log.debug("Result is " + result);
-    return "<response>" + result + "</response>";
+    return XML_DECL + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">" + result + "</response>";
   }
 
   @SuppressWarnings("unchecked")

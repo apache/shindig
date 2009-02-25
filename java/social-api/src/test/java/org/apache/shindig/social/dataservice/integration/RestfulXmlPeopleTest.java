@@ -44,25 +44,19 @@ import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.custommonkey.xmlunit.XMLUnit;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
-  private XPathFactory xpathFactory;
 
   @SuppressWarnings({ "boxing", "unchecked" })
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    xpathFactory = XPathFactory.newInstance();
 
     NameImpl name = new NameImpl("Sir Shin H. Digg Social Butterfly");
     name.setAdditionalName("H");
@@ -225,21 +219,19 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     // TODO(doll): Test all of the date fields
 
     Map<String, String> extraParams = Maps.newHashMap();
-    String allFieldsParam = "";
+    StringBuilder allFieldsParam = new StringBuilder();
     for (String allField : Person.Field.ALL_FIELDS) {
-      allFieldsParam += allField + ',';
+      allFieldsParam.append(allField).append(',');
     }
-    extraParams.put("fields", allFieldsParam);
+    extraParams.put("fields", allFieldsParam.toString());
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams,
         "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response/person",
-        new InputSource(new StringReader(resp)), XPathConstants.NODESET);
+    NodeList resultNodeList = xp.getMatchingNodes("/:response/:person", XMLUnit.buildTestDocument(resp));
     assertEquals(1, resultNodeList.getLength());
 
     Node personNode = resultNodeList.item(0);
@@ -446,7 +438,7 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private void assertStringField(Map<String, List<String>> result,
       String expected, Object field) {
     List<String> v = result.get(field.toString());
-    String t = null;
+    String t;
     if ( v == null || v.isEmpty()) {
       if (expected == null ) {
         return;
@@ -511,11 +503,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response",
-        new InputSource(new StringReader(resp)), XPathConstants.NODESET);
+    NodeList resultNodeList = xp.getMatchingNodes("/:response", XMLUnit.buildTestDocument(resp));
     assertEquals(1, resultNodeList.getLength());
 
     Map<String, List<String>> result = childNodesToMap(resultNodeList.item(0));
@@ -549,11 +539,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/people/john.doe/@friends", "GET", extraParams,
         "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    XPath xp = xpathFactory.newXPath();
-    NodeList resultNodeList = (NodeList) xp.evaluate("/response",
-        new InputSource(new StringReader(resp)), XPathConstants.NODESET);
+    NodeList resultNodeList = xp.getMatchingNodes("/:response", XMLUnit.buildTestDocument(resp));
     assertEquals(1, resultNodeList.getLength());
 
     Map<String, List<String>> result = childNodesToMap(resultNodeList.item(0));
@@ -573,11 +561,9 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
     resp = getResponse("/people/john.doe/@friends", "GET", extraParams, "xml",
         "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
-    xp = xpathFactory.newXPath();
-    resultNodeList = (NodeList) xp.evaluate("/response", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    resultNodeList = xp.getMatchingNodes("/:response", XMLUnit.buildTestDocument(resp));
     assertEquals(1, resultNodeList.getLength());
 
     result = childNodesToMap(resultNodeList.item(0));

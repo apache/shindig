@@ -12,7 +12,6 @@
   
   <xs:element name="response" type="tns:Response" />
   
-  <xs:element name="list.container" type="xs:anyType" />
   
   <xs:complexType name="Response">
     <xs:choice minOccurs="0" maxOccurs="unbounded" >
@@ -28,6 +27,7 @@
       <xs:element minOccurs="0"  maxOccurs="unbounded" name="entry" type="tns:Entry" />
       <!--  this is to allow responses to create to validate -->
       <xs:element minOccurs="0" name="map" type="xs:anyType" />
+      <xs:element minOccurs="0" name="list.container" type="xs:anyType" />
     </xs:choice>
   </xs:complexType>
   

@@ -31,12 +31,17 @@ import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.custommonkey.xmlunit.NamespaceContext;
+import org.custommonkey.xmlunit.SimpleNamespaceContext;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.custommonkey.xmlunit.XpathEngine;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLInputFactory;
@@ -50,11 +55,10 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
-  protected static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
-    + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+  protected static final String XMLSCHEMA = " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
   protected static final String XSDRESOURCE = "opensocial.xsd";
-
+  protected XpathEngine xp;
   private HttpServletResponse res;
 
   private DataServiceServlet servlet;
@@ -65,6 +69,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected HttpServletResponse getResponse() {
     return res;
   }
+
   protected void setResponse(HttpServletResponse res) {
     this.res = res;
   }
@@ -89,6 +94,9 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
 
     res = EasyMock.createMock(HttpServletResponse.class);
+    NamespaceContext ns = new SimpleNamespaceContext(ImmutableMap.of("", "http://ns.opensocial.org/2008/opensocial"));
+    XMLUnit.setXpathNamespaceContext(ns);
+    xp = XMLUnit.newXpathEngine();
   }
 
   protected String getResponse(String path, String method, String format,

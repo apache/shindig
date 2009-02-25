@@ -129,10 +129,10 @@ public class XStream081Configuration implements XStreamConfiguration {
     atom.addPrefixedElement("itemsPerPage", "osearch:itemsPerPage");
 
     NamespaceSet os = new NamespaceSet();
-    atom.addNamespace("xmlns", OS_NS);
+    os.addNamespace("xmlns", OS_NS);
 
-    return ImmutableMap.<String, NamespaceSet>builder().
-        put("feed", atom)
+    return ImmutableMap.<String, NamespaceSet>builder()
+        .put("feed", atom)
         .put("person", os)
         .put("activity", os)
         .put("account", os)
@@ -142,9 +142,9 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("mediaItem", os)
         .put("name", os)
         .put("url", os)
-        .put("reponse", os)
-        .put("appdata", os).
-            build();
+        .put("response", os)
+        .put("appdata", os)
+        .build();
   }
 
   static {
@@ -283,7 +283,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     this.injector = injector;
   }
 
-  private Multimap<String, Class<?>> getOmitMap(ConverterSet c) {
+  private static Multimap<String, Class<?>> getOmitMap(ConverterSet c) {
     return Objects.firstNonNull(omitMap.get(c), omitMap.get(ConverterSet.DEFAULT));
   }
 

@@ -24,23 +24,16 @@ import org.apache.shindig.social.opensocial.util.XSDValidator;
 import org.junit.Test;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.custommonkey.xmlunit.XMLUnit;
 
-import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
-  private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
-    + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+  private static final String XMLSCHEMA = " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
   private static final String XSDRESOURCE = "opensocial.xsd";
   private Activity johnsActivity;
-  private XPathFactory xpathFactory;
 
   @Override
   protected void setUp() throws Exception {
@@ -48,9 +41,6 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     johnsActivity = new ActivityImpl("1", "john.doe");
     johnsActivity.setTitle("yellow");
     johnsActivity.setBody("what a color!");
-
-    xpathFactory = XPathFactory.newInstance();
-
   }
 
   /**
@@ -75,12 +65,10 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/activities/john.doe/@self/@app/1", "GET",
         "xml", "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
     
-    InputSource source = new InputSource(new StringReader(resp));
-    XPath xp = xpathFactory.newXPath();
-    NodeList result = (NodeList) xp.evaluate("/response/activity", source,
-        XPathConstants.NODESET);
+
+    NodeList result = xp.getMatchingNodes("/:response/:activity", XMLUnit.buildTestDocument(resp));
     assertEquals(1, result.getLength());
     Node n = result.item(0);
 
@@ -134,15 +122,13 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   public void testGetActivitiesJson() throws Exception {
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
     
-    XPath xp = xpathFactory.newXPath();
-    assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
-        new StringReader(resp))));
-    assertEquals("1", xp.evaluate("/response/totalResults", new InputSource(
-        new StringReader(resp))));
-    NodeList nl = (NodeList) xp.evaluate("/response/entry/activity",
-        new InputSource(new StringReader(resp)), XPathConstants.NODESET);
+
+    assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
+    assertEquals("1", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
+    NodeList nl = xp.getMatchingNodes("/:response/:entry/:activity", XMLUnit.buildTestDocument(resp));
+
     assertEquals(1, nl.getLength());
 
     assertActivitiesEqual(johnsActivity, childNodesToMap(nl.item(0)));
@@ -196,17 +182,13 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String resp = getResponse("/activities/john.doe/@friends", "GET", "xml",
         "application/xml");
 
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
  
-    XPath xp = xpathFactory.newXPath();
-    assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
-        new StringReader(resp))));
-    assertEquals("2", xp.evaluate("/response/totalResults", new InputSource(
-        new StringReader(resp))));
-    NodeList nl = (NodeList) xp.evaluate("/response/entry", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
-    assertEquals(2, nl.getLength());
+    assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
+    assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
+    NodeList nl = xp.getMatchingNodes("/:response/:entry", XMLUnit.buildTestDocument(resp));
 
+    assertEquals(2, nl.getLength());
   }
 
   private void assertActivitiesEqual(Activity activity,
@@ -223,21 +205,18 @@ public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
     String createResponse = getResponse("/activities/john.doe/@self", "POST",
         postData, "xml", "application/xml");
 
-    XSDValidator.validate(createResponse, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(createResponse);
 
     String resp = getResponse("/activities/john.doe/@self", "GET", "xml",
         "application/xml");
     
-    XSDValidator.validate(resp, XMLSCHEMA, XSDRESOURCE,false);
+    XSDValidator.validateOpenSocial(resp);
 
     
-    XPath xp = xpathFactory.newXPath();
-    assertEquals("0", xp.evaluate("/response/startIndex", new InputSource(
-        new StringReader(resp))));
-    assertEquals("2", xp.evaluate("/response/totalResults", new InputSource(
-        new StringReader(resp))));
-    NodeList nl = (NodeList) xp.evaluate("/response/entry/activity", new InputSource(
-        new StringReader(resp)), XPathConstants.NODESET);
+    assertEquals("0", xp.evaluate("/:response/:startIndex", XMLUnit.buildTestDocument(resp)));
+    assertEquals("2", xp.evaluate("/:response/:totalResults", XMLUnit.buildTestDocument(resp)));
+    NodeList nl = xp.getMatchingNodes("/:response/:entry/:activity", XMLUnit.buildTestDocument(resp));
+
     assertEquals(2, nl.getLength());
 
     Map<String, List<String>> v = childNodesToMap(nl.item(0));

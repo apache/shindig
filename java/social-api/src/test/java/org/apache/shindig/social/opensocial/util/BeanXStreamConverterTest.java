@@ -50,10 +50,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BeanXStreamConverterTest extends TestCase {
-  private static final String XMLSCHEMA = " xmlns=\"http://ns.opensocial.org/2008/opensocial\" \n"
-      + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+  private static final String XMLSCHEMA =
+      " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
       + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
-  private static final String XSDRESOURCE = "opensocial.xsd";
   private Person johnDoe;
   private Activity activity;
 
@@ -118,16 +117,14 @@ public class BeanXStreamConverterTest extends TestCase {
   }
 
   public void testPersonToXml() throws Exception {
-    String xml = XSDValidator.validate(beanXmlConverter.convertToString(johnDoe),
-        XMLSCHEMA, XSDRESOURCE, true);
+    String xml = XSDValidator.validateOpenSocial(beanXmlConverter.convertToString(johnDoe));
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
     assertEquals(johnDoe.getId(), id.getTextContent());
   }
 
   public void testActivityToXml() throws Exception {
-    String xml = XSDValidator.validate(beanXmlConverter.convertToString(activity),
-        XMLSCHEMA, XSDRESOURCE, true);
+    String xml = XSDValidator.validateOpenSocial(beanXmlConverter.convertToString(activity));
 
     Element element = XmlUtil.parse(xml);
     Node id = element.getElementsByTagName("id").item(0);
@@ -150,7 +147,7 @@ public class BeanXStreamConverterTest extends TestCase {
 
     XmlUtil.parse(xml);
 
-    String expectedXml = "<response><map>"
+    String expectedXml = XSDValidator.XMLDEC + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\"><map>"
         + "  <entry><key>item1</key><value><entry><key>value</key><value>1</value></entry></value></entry> "
         + "  <entry><key>item2</key><value><entry><key>value</key><value>2</value></entry></value></entry> "
         + "</map></response>";
@@ -164,7 +161,7 @@ public class BeanXStreamConverterTest extends TestCase {
     m.put("key2", "value2");
     String xml = beanXmlConverter.convertToString(m);
     XmlUtil.parse(xml);
-    String expectedXml = "<response><map>"
+    String expectedXml = XSDValidator.XMLDEC + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\"><map>"
         + "  <entry><key>key1</key><value>value1</value></entry> "
         + "  <entry><key>key2</key><value>value2</value></entry> "
         + "</map></response>";
@@ -176,7 +173,7 @@ public class BeanXStreamConverterTest extends TestCase {
     List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
     XmlUtil.parse(xml);
-    String expectedXml = "<response><list/></response>";
+    String expectedXml = XSDValidator.XMLDEC + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\"><list/></response>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
 
@@ -187,23 +184,25 @@ public class BeanXStreamConverterTest extends TestCase {
     emptyLists.add(emptyList);
     xml = beanXmlConverter.convertToString(emptyLists);
     XmlUtil.parse(xml);
-    expectedXml = "<response><list.container>" + "  <list/>" + "  <list/>"
+    expectedXml = XSDValidator.XMLDEC + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\"><list.container>" + "  <list/>" + "  <list/>"
         + "  <list/>" + "</list.container></response>";
     assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
         .deleteWhitespace(xml));
   }
 
   public void testElementNamesInList() throws XmlException {
+
     List<Activity> activities = Lists.newArrayList();
     activities.add(activity);
     activities.add(activity);
     activities.add(activity);
-    String xml = XSDValidator.validate(beanXmlConverter
-        .convertToString(activities), XMLSCHEMA, XSDRESOURCE, true);
+    String xml = XSDValidator.validateOpenSocial(beanXmlConverter.convertToString(activities));
+
+    // This test is a bit bogus and relies on some odd voodoo in the bundled opensocial.xsd
     XmlUtil.parse(xml);
-    String expectedXml = "<response>"
+    String expectedXml = "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "<list.container>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
@@ -213,7 +212,7 @@ public class BeanXStreamConverterTest extends TestCase {
         + "    <url>http://foo.com/</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
@@ -223,7 +222,7 @@ public class BeanXStreamConverterTest extends TestCase {
         + "    <url>http://foo.com/</url>"
         + "    <userId>johnDoeId</userId>"
         + "  </activity>"
-        + "  <activity>"
+        + "  <activity xmlns=\"http://ns.opensocial.org/2008/opensocial\">"
         + "    <id>activityId</id>"
         + "    <mediaItems>"
         + "        <mimeType>image/jpg</mimeType>"
