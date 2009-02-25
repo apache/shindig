@@ -37,14 +37,13 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import junit.framework.TestCase;
+
+import java.util.logging.Logger;
 
 public class JsonConverterPerformancePerf extends TestCase {
 
-  private static final Log log = LogFactory.getLog(JsonConverterPerformancePerf.class);
+  private static final Logger log = Logger.getLogger(JsonConverterPerformancePerf.class.getName());
   private static final int TEST_SIZE = 10000;
   private Person johnDoe;
   private Activity activity;
@@ -133,8 +132,7 @@ public class JsonConverterPerformancePerf extends TestCase {
      *
      */
 
-    log
-        .info("SF JSON Lib Output "
+    log.info("SF JSON Lib Output "
             + average(startOutput, endOutput, TEST_SIZE)
             + " ms/conversion, "
             + (average(memstart, memend, TEST_SIZE) - average(stringsizeStart, stringsizeEnd,

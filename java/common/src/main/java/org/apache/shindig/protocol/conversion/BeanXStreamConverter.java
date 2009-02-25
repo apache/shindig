@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.xstream.StackDriver;
@@ -37,6 +35,8 @@ import com.thoughtworks.xstream.mapper.Mapper;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class BeanXStreamConverter implements BeanConverter {
   public static final String XML_DECL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -44,7 +44,8 @@ public class BeanXStreamConverter implements BeanConverter {
       XStreamConfiguration.ConverterSet.MAP,
       XStreamConfiguration.ConverterSet.COLLECTION,
       XStreamConfiguration.ConverterSet.DEFAULT };
-  private static final Log log = LogFactory.getLog(BeanXStreamConverter.class);
+  private static final Logger LOG = Logger.getLogger(BeanXStreamConverter.class.getName());
+
   private ReflectionProvider rp;
   private HierarchicalStreamDriver driver;
   protected WriterStack writerStack;
@@ -104,7 +105,10 @@ public class BeanXStreamConverter implements BeanConverter {
         Object s = m.values().iterator().next();
         cc.mapper.setBaseObject(s); // thread safe method
         String result = cc.xstream.toXML(s);
-        log.debug("Result is " + result);
+
+        if (LOG.isLoggable(Level.FINE))
+          LOG.fine("Result is " + result);
+
         return XML_DECL + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">" + result + "</response>";
       }
     } else if (obj instanceof RestfulCollection) {
@@ -112,14 +116,20 @@ public class BeanXStreamConverter implements BeanConverter {
           .get(XStreamConfiguration.ConverterSet.COLLECTION);
       cc.mapper.setBaseObject(obj); // thread safe method
       String result = cc.xstream.toXML(obj);
-      log.debug("Result is " + result);
+
+      if (LOG.isLoggable(Level.FINE))
+        LOG.fine("Result is " + result);
+
       return XML_DECL + result;
     } else if (obj instanceof DataCollection) {
       XStreamConfiguration.ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.MAP);
       cc.mapper.setBaseObject(obj); // thread safe method
       String result = cc.xstream.toXML(obj);
-      log.debug("Result is " + result);
+
+      if (LOG.isLoggable(Level.FINE))
+        LOG.fine("Result is " + result);
+
       return XML_DECL + result;
     }
     XStreamConfiguration.ConverterConfig cc = converterMap
@@ -127,7 +137,9 @@ public class BeanXStreamConverter implements BeanConverter {
 
     cc.mapper.setBaseObject(obj); // thread safe method
     String result = cc.xstream.toXML(obj);
-    log.debug("Result is " + result);
+
+    if (LOG.isLoggable(Level.FINE))
+      LOG.fine("Result is " + result);
     return XML_DECL + "<response xmlns=\"http://ns.opensocial.org/2008/opensocial\">" + result + "</response>";
   }
 

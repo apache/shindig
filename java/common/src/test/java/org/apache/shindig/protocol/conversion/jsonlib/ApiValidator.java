@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion.jsonlib;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Script;
@@ -27,6 +25,8 @@ import org.mozilla.javascript.ScriptableObject;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Maps;
@@ -37,7 +37,7 @@ import com.google.common.collect.Maps;
  */
 public class ApiValidator {
 
-  private static final Log log = LogFactory.getLog(ApiValidator.class);
+  private static final Logger log = Logger.getLogger(ApiValidator.class.getName());
   private Context ctx;
   private ScriptableObject scope;
 
@@ -75,12 +75,14 @@ public class ApiValidator {
     /*
      * Object[] ids = ScriptableObject.getPropertyIds(scope); for (Object id :
      * ids) { Object o = ScriptableObject.getProperty(scope,
-     * String.valueOf(id)); log.debug("ID is " + id + " class " + id.getClass() + "
+     * String.valueOf(id)); log.fine("ID is " + id + " class " + id.getClass() + "
      * is " + o); if (o instanceof ScriptableObject) {
      * listScriptable(String.valueOf(id), (ScriptableObject) o); } }
      */
 
-    log.debug("Loading " + json);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Loading " + json);
+    }
     json = json.trim();
     if (!json.endsWith("}")) {
       json = json + '}';
@@ -94,12 +96,16 @@ public class ApiValidator {
     try {
       so = ctx.evaluateString(scope, json, "test json", 0, null);
     } catch (EvaluatorException ex) {
-      log.error("Non parseable JSON " + json);
+      log.severe("Non parseable JSON " + json);
     }
-    log.debug("Loaded " + so);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Loaded " + so);
+    }
 
     ScriptableObject specification = getScriptableObject(object);
-    log.debug("Looking for  " + object + " found " + specification);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Looking for  " + object + " found " + specification);
+    }
     listScriptable(object, specification);
     Object[] fields = specification.getIds();
     String[] fieldNames = new String[fields.length];
@@ -133,7 +139,9 @@ public class ApiValidator {
       throws ApiValidatorException {
 
 
-    log.debug("Loading " + json);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Loading " + json);
+    }
     json = json.trim();
     if (!json.endsWith("}")) {
       json = json + '}';
@@ -147,9 +155,11 @@ public class ApiValidator {
     try {
       so = ctx.evaluateString(scope, json, "test json", 0, null);
     } catch (EvaluatorException ex) {
-      log.error("Non parseable JSON " + json);
+      log.severe("Non parseable JSON " + json);
     }
-    log.debug("Loaded " + so);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Loaded " + so);
+    }
 
 
     return validateObject(so, fieldNames, optionalFields, nullfields);
@@ -183,26 +193,30 @@ public class ApiValidator {
             parsedJSONObject);
         if (o == Scriptable.NOT_FOUND) {
           if (optional.containsKey(fieldName)) {
-            log.warn("Missing Optional Field " + fieldName);
+            log.warning("Missing Optional Field " + fieldName);
           } else if (!nullf.containsKey(fieldName)) {
-            log.error("Missing Field " + fieldName);
+            log.severe("Missing Field " + fieldName);
             throw new ApiValidatorException("Missing Field " + fieldName);
           }
         } else {
           if (nullf.containsKey(fieldName)) {
-            log.error("Field should have been null and was not");
+            log.severe("Field should have been null and was not");
           }
           if (o == null) {
             if (nullf.containsKey(fieldName)) {
-              log.error("Null Fields has been serialized " + fieldName);
+              log.severe("Null Fields has been serialized " + fieldName);
             }
-            log.debug("Got a Null object for Field " + fieldName
-                + " on json [[" + jsonObject + "]]");
+            if (log.isLoggable(Level.FINE)) {
+              log.fine("Got a Null object for Field " + fieldName
+                  + " on json [[" + jsonObject + "]]");
+            }
 
           } else {
 
-            log.debug("Got JSON Field  Field,"  + fieldName + " as "
-                + o + ' ' + o.getClass());
+            if (log.isLoggable(Level.FINE)) {
+              log.fine("Got JSON Field  Field,"  + fieldName + " as "
+                  + o + ' ' + o.getClass());
+            }
           }
           resultFields.put(String.valueOf(fieldName), o);
         }
@@ -226,13 +240,19 @@ public class ApiValidator {
    */
   private ScriptableObject getScriptableObject(String object) {
     String[] path = object.split("\\.");
-    log.debug("Looking up " + object + " elements " + path.length);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Looking up " + object + " elements " + path.length);
+    }
 
     ScriptableObject s = scope;
     for (String pe : path) {
-      log.debug("Looking up " + pe + " in " + s);
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("Looking up " + pe + " in " + s);
+      }
       s = (ScriptableObject) s.get(pe, s);
-      log.debug("Looking for " + pe + " in found " + s);
+      if (log.isLoggable(Level.FINE)) {
+        log.fine("Looking for " + pe + " in found " + s);
+      }
     }
     return s;
   }
@@ -247,11 +267,15 @@ public class ApiValidator {
    *                the scriptable Object
    */
   private void listScriptable(String id, ScriptableObject scriptableObject) {
-    log.debug("ID is Scriptable " + id);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("ID is Scriptable " + id);
+    }
     if (!id.endsWith("constructor")) {
       Object[] allIDs = scriptableObject.getAllIds();
       for (Object oid : allIDs) {
-        log.debug(id + '.' + oid);
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(id + '.' + oid);
+        }
         Object o = scriptableObject.get(String.valueOf(oid), scriptableObject);
         if (o instanceof ScriptableObject) {
           listScriptable(id + '.' + oid, (ScriptableObject) o);
@@ -276,7 +300,7 @@ public class ApiValidator {
    * @param nameJSON
    */
   public static void dump(Map<?, ?> nameJSON) {
-    if (log.isDebugEnabled()) {
+    if (log.isLoggable(Level.INFO)) {
       for (Entry<?, ?> entry : nameJSON.entrySet()) {
         Object k = entry.getKey();
         Object o = entry.getValue();

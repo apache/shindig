@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.protocol.conversion.jsonlib.JsonLibConverterUtils;
 
 import com.google.inject.Inject;
@@ -38,10 +36,6 @@ import java.util.List;
  * BeanConverter implementation us the net.sf.json-lib json library.
  */
 public class BeanJsonLibConverter implements BeanConverter {
-  /**
-   * The Logger.
-   */
-  protected static final Log LOG = LogFactory.getLog(BeanJsonLibConverter.class);
   /**
    * The Guice injector used to create beans.
    */

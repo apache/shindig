@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -27,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
@@ -48,7 +48,7 @@ public class XSDValidator {
    */
   public static final String XMLDEC = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
-  protected static final Log log = LogFactory.getLog(XSDValidator.class);
+  protected static final Logger log = Logger.getLogger(XSDValidator.class.getName());
 
   /**
    * Validate a xml string against a supplied schema.
@@ -148,11 +148,13 @@ public class XSDValidator {
       String schemaResource, boolean removeContainer) {
 
     String xml = XSDValidator.insertSchema(xmlFragment, schemaStatement, removeContainer);
-    log.debug("Validating " + xml);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Validating " + xml);
+    }
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream(schemaResource));
     if (!"".equals(errors)) {
-      log.error("Failed to validate " + xml);
+      log.severe("Failed to validate " + xml);
     }
     if (!"".equals(errors)) {
       throw new Error("XML document does not validate \n" + errors + '\n' + xml);
@@ -165,11 +167,13 @@ public class XSDValidator {
     + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
 
     String xml = XSDValidator.insertSchema(xmlFragment, XMLSCHEMA, true);
-    log.debug("Validating " + xml);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Validating " + xml);
+    }
     String errors = XSDValidator.validate(xml, XSDValidator.class
         .getResourceAsStream("opensocial.xsd"));
     if (!"".equals(errors)) {
-      log.error("Failed to validate " + xml);
+      log.severe("Failed to validate " + xml);
     }
     if (!"".equals(errors)) {
       throw new Error("XML document does not validate \n" + errors + '\n' + xml);
