@@ -320,6 +320,10 @@ public class OAuthRequest {
 
   private void fetchRequestToken() throws OAuthRequestException, OAuthProtocolException {
     OAuthAccessor accessor = accessorInfo.getAccessor();
+    if (accessor.consumer.serviceProvider.requestTokenURL == null) {
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          "No request token URL specified");
+    }
     HttpRequest request = new HttpRequest(
         Uri.parse(accessor.consumer.serviceProvider.requestTokenURL));
     request.setMethod(accessorInfo.getHttpMethod().toString());
@@ -574,10 +578,13 @@ public class OAuthRequest {
   /**
    * Builds the URL the client needs to visit to approve access.
    */
-  private void buildAznUrl() {
-    // At some point we can be clever and use a callback URL to improve
-    // the user experience, but that's too complex for now.
+  private void buildAznUrl() throws OAuthRequestException {
+    // We add the token, gadget is responsible for the callback URL.
     OAuthAccessor accessor = accessorInfo.getAccessor();
+    if (accessor.consumer.serviceProvider.userAuthorizationURL == null) {
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          "No authorization URL specified");
+    }
     StringBuilder azn = new StringBuilder(
         accessor.consumer.serviceProvider.userAuthorizationURL);
     if (azn.indexOf("?") == -1) {
@@ -619,6 +626,10 @@ public class OAuthRequest {
       accessorInfo.getAccessor().accessToken = null;
     }
     OAuthAccessor accessor = accessorInfo.getAccessor();
+    if (accessor.consumer.serviceProvider.accessTokenURL == null) {
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          "No access token URL specified.");
+    }
     Uri accessTokenUri = Uri.parse(accessor.consumer.serviceProvider.accessTokenURL);
     HttpRequest request = new HttpRequest(accessTokenUri);
     request.setMethod(accessorInfo.getHttpMethod().toString());

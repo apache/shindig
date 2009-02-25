@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -30,6 +31,7 @@ import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.OAuthService;
 import org.apache.shindig.gadgets.spec.OAuthSpec;
+import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.apache.shindig.gadgets.spec.OAuthService.Location;
 import org.apache.shindig.gadgets.spec.OAuthService.Method;
 
@@ -85,10 +87,14 @@ public class GadgetOAuthTokenStore {
 
     AccessorInfoBuilder accessorBuilder = new AccessorInfoBuilder();
 
-    // Does the gadget spec tell us any details about the service provider, like where to put the
-    // OAuth parameters and what methods to use for their URLs?
+    // Pick up any additional information needed about the format of the request, either from
+    // options to makeRequest, or options from the spec, or from sensible defaults.  This is how
+    // we figure out where to put the OAuth parameters and what methods to use for the OAuth
+    // URLs.
     OAuthServiceProvider provider = null;
-    if (arguments.mayUseToken()) {
+    if (arguments.programmaticConfig()) {
+      provider = loadProgrammaticConfig(arguments, accessorBuilder, responseParams);
+    } else if (arguments.mayUseToken()) {
       provider = lookupSpecInfo(securityToken, arguments, accessorBuilder, responseParams);
     } else {
       // This is plain old signed fetch.
@@ -147,6 +153,51 @@ public class GadgetOAuthTokenStore {
         service.getRequestUrl().url.toJavaUri().toASCIIString(),
         service.getAuthorizationUrl().toJavaUri().toASCIIString(),
         service.getAccessUrl().url.toJavaUri().toASCIIString());
+  }
+  
+  private OAuthServiceProvider loadProgrammaticConfig(OAuthArguments arguments,
+      AccessorInfoBuilder accessorBuilder, OAuthResponseParams responseParams)
+      throws OAuthRequestException {
+    try {
+      String paramLocationStr = arguments.getRequestOption(OAuthArguments.PARAM_LOCATION_PARAM, "");
+      Location l = Location.parse(paramLocationStr);
+      accessorBuilder.setParameterLocation(getStoreLocation(l, responseParams));
+
+      String requestMethod = arguments.getRequestOption(OAuthArguments.REQUEST_METHOD_PARAM, "GET");
+      Method m = Method.parse(requestMethod);
+      accessorBuilder.setMethod(getStoreMethod(m, responseParams));
+      
+      String requestTokenUrl = arguments.getRequestOption(OAuthArguments.REQUEST_TOKEN_URL_PARAM);
+      verifyUrl(requestTokenUrl, responseParams);
+      String accessTokenUrl = arguments.getRequestOption(OAuthArguments.ACCESS_TOKEN_URL_PARAM);
+      verifyUrl(accessTokenUrl, responseParams);
+
+      String authorizationUrl = arguments.getRequestOption(OAuthArguments.AUTHORIZATION_URL_PARAM);
+      verifyUrl(authorizationUrl, responseParams);
+      return new OAuthServiceProvider(requestTokenUrl, authorizationUrl, accessTokenUrl);
+    } catch (SpecParserException e) {
+      // these exceptions have decent programmer readable messages
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          e.getMessage());
+    }
+  }
+  
+  private void verifyUrl(String url, OAuthResponseParams responseParams)
+      throws OAuthRequestException {
+    if (url == null) {
+      return;
+    }
+    Uri uri;
+    try {
+      uri = Uri.parse(url);
+    } catch (Throwable t) {
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          "Invalid url: " + url);
+    }
+    if (!uri.isAbsolute()) {
+      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+          "Invalid url: " + url);
+    }
   }
 
   /**

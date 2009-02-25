@@ -42,6 +42,16 @@ public class OAuthArguments {
   private static final String BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
   private static final String SIGN_OWNER_PARAM = "signOwner";
   private static final String SIGN_VIEWER_PARAM = "signViewer";
+  
+  // Experimental support for configuring OAuth without special parameters in the spec XML.
+  public static final String PROGRAMMATIC_CONFIG_PARAM = "OAUTH_PROGRAMMATIC_CONFIG";
+  public static final String REQUEST_METHOD_PARAM = "OAUTH_REQUEST_METHOD";
+  public static final String PARAM_LOCATION_PARAM = "OAUTH_PARAM_LOCATION";
+  public static final String REQUEST_TOKEN_URL_PARAM = "OAUTH_REQUEST_TOKEN_URL";
+  public static final String ACCESS_TOKEN_URL_PARAM = "OAUTH_ACCESS_TOKEN_URL";
+  public static final String AUTHORIZATION_URL_PARAM = "OAUTH_AUTHORIZATION_URL";
+
+  
 
   /**
    * Should the OAuth access token be used?
@@ -300,5 +310,14 @@ public class OAuthArguments {
   
   public String getRequestOption(String name) {
     return requestOptions.get(name);
+  }
+  
+  public String getRequestOption(String name, String def) {
+    String val = requestOptions.get(name);
+    return (val != null ? val : def);
+  }
+  
+  public boolean programmaticConfig() {
+    return Boolean.parseBoolean(requestOptions.get(PROGRAMMATIC_CONFIG_PARAM));
   }
 }
