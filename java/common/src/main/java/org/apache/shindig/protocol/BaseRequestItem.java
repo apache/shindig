@@ -22,6 +22,7 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
+import org.apache.shindig.protocol.multipart.FormDataItem;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -47,6 +48,7 @@ public class BaseRequestItem implements RequestItem {
   protected final SecurityToken token;
   final BeanConverter converter;
   final Map<String,Object> parameters;
+  final Map<String, FormDataItem> formItems;
   final BeanJsonConverter jsonConverter;
 
   public BaseRequestItem(Map<String, String[]> parameters,
@@ -66,9 +68,11 @@ public class BaseRequestItem implements RequestItem {
       }
     }
     this.jsonConverter = jsonConverter;
+    this.formItems = null;
   }
 
   public BaseRequestItem(JSONObject parameters,
+      Map<String, FormDataItem> formItems,
       SecurityToken token,
       BeanConverter converter,
       BeanJsonConverter jsonConverter) {
@@ -83,6 +87,7 @@ public class BaseRequestItem implements RequestItem {
       }
       this.token = token;
       this.converter = converter;
+      this.formItems = formItems;
     } catch (JSONException je) {
       throw new ProtocolException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
@@ -270,6 +275,14 @@ public class BaseRequestItem implements RequestItem {
       }
     } else {
       this.parameters.put(paramName, paramValue);
+    }
+  }
+  
+  public FormDataItem getFormMimePart(String partName) {
+    if (formItems != null) {
+      return formItems.get(partName);
+    } else {
+      return null;
     }
   }
 }

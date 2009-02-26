@@ -20,7 +20,9 @@ package org.apache.shindig.protocol;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
+import org.apache.shindig.protocol.multipart.FormDataItem;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -30,7 +32,7 @@ public interface RpcHandler {
 
   /**
    * Handle the request and return a Future from which the response object
-   * can be retrieved
+   * can be retrieved.
    */
-  Future<?> execute(SecurityToken st, BeanConverter converter);
+  Future<?> execute(Map<String, FormDataItem> formItems, SecurityToken st, BeanConverter converter);
 }

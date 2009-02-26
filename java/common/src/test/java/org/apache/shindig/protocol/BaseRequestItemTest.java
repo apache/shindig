@@ -106,7 +106,7 @@ public class BaseRequestItemTest extends TestCase {
             "userId:john.doe," +
             "groupId:@self," +
             "fields:[huey,dewey,louie]" +
-            "}"), FAKE_TOKEN, converter, converter);
+            "}"), null, FAKE_TOKEN, converter, converter);
     assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
   }
 
