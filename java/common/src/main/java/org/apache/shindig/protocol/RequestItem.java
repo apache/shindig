@@ -20,6 +20,7 @@ package org.apache.shindig.protocol;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
+import org.apache.shindig.protocol.multipart.FormDataItem;
 
 import java.util.Date;
 import java.util.List;
@@ -77,4 +78,6 @@ public interface RequestItem {
   String getParameter(String paramName, String defaultValue);
 
   List<String> getListParameter(String paramName);
+  
+  FormDataItem getFormMimePart(String partName);
 }

@@ -21,25 +21,34 @@ import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.multipart.FormDataItem;
+import org.apache.shindig.protocol.multipart.MultipartFormParser;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.reset;
 
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
-
-import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
 
 /**
  *
@@ -49,10 +58,15 @@ public class JsonRpcServletTest extends TestCase {
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
 
+  private static final String IMAGE_FIELDNAME = "profile-photo";
+  private static final byte[] IMAGE_DATA = "image data".getBytes();
+  private static final String IMAGE_TYPE = "image/jpeg";
+  
   private HttpServletRequest req;
   private HttpServletResponse res;
   private JsonRpcServlet servlet;
-
+  private MultipartFormParser multipartFormParser;
+  
   private BeanJsonConverter jsonConverter;
   private BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
@@ -71,6 +85,10 @@ public class JsonRpcServletTest extends TestCase {
     xmlConverter = mockControl.createMock(BeanConverter.class);
     atomConverter = mockControl.createMock(BeanConverter.class);
 
+    multipartFormParser = mockControl.createMock(MultipartFormParser.class);
+    EasyMock.expect(multipartFormParser.isMultipartContent(req)).andStubReturn(false);
+    servlet.setMultipartFormParser(multipartFormParser);
+    
     HandlerRegistry registry = new DefaultHandlerRegistry(null,
         Collections.<Object>singleton(handler), jsonConverter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
@@ -93,8 +111,8 @@ public class JsonRpcServletTest extends TestCase {
   public void testMethodRecognition() throws Exception {
     setupRequest("{method:test.get,id:id,params:{userId:5,groupId:@self}}");
 
-    EasyMock.expect(res.getWriter()).andReturn(writer);
-    EasyMock.expectLastCall();
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
 
     mockControl.replay();
     servlet.service(req, res);
@@ -103,11 +121,90 @@ public class JsonRpcServletTest extends TestCase {
     JsonAssert.assertJsonEquals("{id: 'id', data: {foo:'bar'}}", getOutput());
   }
 
+  public void testPostMultipartFormData() throws Exception {
+    reset(multipartFormParser);
+    
+    handler.setMock(new TestHandler() {
+      @Override
+      public Object get(RequestItem req) {
+        FormDataItem item = req.getFormMimePart(IMAGE_FIELDNAME);
+        return ImmutableMap.of("image-data", new String(item.get()),
+            "image-type", item.getContentType(),
+            "image-ref", req.getParameter("image-ref"));
+      }
+    });
+    expect(req.getMethod()).andStubReturn("POST");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
+    
+    List<FormDataItem> formItems = new ArrayList<FormDataItem>();
+    String request = "{method:test.get,id:id,params:" +
+        "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
+    formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM, "application/json", 
+        request.getBytes(), true));
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
+    expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
+    expect(multipartFormParser.parse(req)).andReturn(formItems);
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) + 
+        "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
+  }
+  
+  /** 
+   * Tests whether mime part with content type appliction/json is picked up as
+   * request even when its fieldname is not "request".
+   */
+  public void testPostMultipartFormDataWithNoExplicitRequestField() throws Exception {  
+    reset(multipartFormParser);
+
+    handler.setMock(new TestHandler() {
+      @Override
+      public Object get(RequestItem req) {
+        FormDataItem item = req.getFormMimePart(IMAGE_FIELDNAME);
+        return ImmutableMap.of("image-data", new String(item.get()),
+            "image-type", item.getContentType(),
+            "image-ref", req.getParameter("image-ref"));
+      }
+    });
+    expect(req.getMethod()).andStubReturn("POST");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    res.setCharacterEncoding("UTF-8");
+    res.setContentType("application/json");
+    
+    List<FormDataItem> formItems = new ArrayList<FormDataItem>();
+    String request = "{method:test.get,id:id,params:" +
+        "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
+    formItems.add(mockFormDataItem("json", "application/json", 
+        request.getBytes(), true));
+    expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
+    expect(multipartFormParser.parse(req)).andReturn(formItems);
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) + 
+        "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
+  }
+
+  
   public void testInvalidService() throws Exception {
     setupRequest("{method:junk.get,id:id,params:{userId:5,groupId:@self}}");
 
-    EasyMock.expect(res.getWriter()).andReturn(writer);
-    EasyMock.expectLastCall();
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
 
     mockControl.replay();
     servlet.service(req, res);
@@ -126,12 +223,13 @@ public class JsonRpcServletTest extends TestCase {
   public void testFailedRequest() throws Exception {
     setupRequest("{id:id,method:test.futureException}");
 
-    EasyMock.expect(res.getWriter()).andReturn(writer);
-    EasyMock.expectLastCall();
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
 
     mockControl.replay();
     servlet.service(req, res);
-
+    mockControl.verify();
+    
     JsonAssert.assertJsonEquals(
         "{id:id,error:{message:'badRequest: FAILURE_MESSAGE',code:400}}", getOutput());
   }
@@ -139,26 +237,27 @@ public class JsonRpcServletTest extends TestCase {
   public void testBasicBatch() throws Exception {
     setupRequest("[{method:test.get,id:'1'},{method:test.get,id:'2'}]");
 
-    EasyMock.expect(res.getWriter()).andReturn(writer);
-    EasyMock.expectLastCall();
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
 
     mockControl.replay();
     servlet.service(req, res);
+    mockControl.verify();
 
     JsonAssert.assertJsonEquals("[{id:'1',data:{foo:'bar'}},{id:'2',data:{foo:'bar'}}]",
         getOutput());
   }
 
   public void testGetExecution() throws Exception {
-    EasyMock.expect(req.getParameterMap()).andStubReturn(
+    expect(req.getParameterMap()).andStubReturn(
         ImmutableMap.of("method", new String[]{"test.get"}, "id", new String[]{"1"}));
-    EasyMock.expect(req.getMethod()).andStubReturn("GET");
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getMethod()).andStubReturn("GET");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
 
-    EasyMock.expect(res.getWriter()).andReturn(writer);
-    EasyMock.expectLastCall();
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
 
     mockControl.replay();
     servlet.service(req, res);
@@ -176,12 +275,26 @@ public class JsonRpcServletTest extends TestCase {
       }
     };
 
-    EasyMock.expect(req.getInputStream()).andStubReturn(stream);
-    EasyMock.expect(req.getMethod()).andStubReturn("POST");
-    EasyMock.expect(req.getAttribute(EasyMock.isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
-    EasyMock.expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getInputStream()).andStubReturn(stream);
+    expect(req.getMethod()).andStubReturn("POST");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getContentType()).andStubReturn("application/json");
     res.setCharacterEncoding("UTF-8");
     res.setContentType("application/json");
+  }
+
+  private FormDataItem mockFormDataItem(String fieldName, String contentType, byte content[],
+      boolean isFormField) throws IOException {
+    InputStream in = new ByteArrayInputStream(content);
+    FormDataItem formDataItem = mockControl.createMock(FormDataItem.class);
+    expect(formDataItem.getContentType()).andStubReturn(contentType);
+    expect(formDataItem.getSize()).andStubReturn((long) content.length);
+    expect(formDataItem.get()).andStubReturn(content);
+    expect(formDataItem.getFieldName()).andStubReturn(fieldName);
+    expect(formDataItem.isFormField()).andStubReturn(isFormField);
+    expect(formDataItem.getInputStream()).andStubReturn(in);
+    return formDataItem;
   }
 
 }

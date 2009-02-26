@@ -82,7 +82,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     JSONObject rpc = new JSONObject("{method : makebelieve.get}");
     RpcHandler rpcHandler = registry.getRpcHandler(rpc);
     try {
-      Future<?> future = rpcHandler.execute(null, null);
+      Future<?> future = rpcHandler.execute(null, null, null);
       future.get();
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
@@ -124,7 +124,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testRpcWithInputClassThatIsntRequestItem() throws Exception {
     JSONObject rpc = new JSONObject("{ method : test.echo, params: {value: 'Bob' }}");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future<?> future = handler.execute(null, converter);
+    Future<?> future = handler.execute(null, null, converter);
     assertEquals(future.get(), TestHandler.ECHO_PREFIX + "Bob");
   }
   
@@ -138,7 +138,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
   public void testNoArgumentClass() throws Exception {
     JSONObject rpc = new JSONObject("{ method : test.noArg }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future<?> future = handler.execute(null, converter);
+    Future<?> future = handler.execute(null, null, converter);
     assertEquals(future.get(), TestHandler.NO_ARG_RESPONSE);
   }
 
@@ -146,7 +146,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.exception }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future<?> future = handler.execute(null, null);
+    Future<?> future = handler.execute(null, null, null);
     try {
       future.get();
       fail("Service method did not produce NullPointerException from Future");
@@ -159,7 +159,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.futureException }");
     RpcHandler handler = registry.getRpcHandler(rpc);
-    Future<?> future = handler.execute(null, null);
+    Future<?> future = handler.execute(null, null, null);
     try {
       future.get();
       fail("Service method did not produce ExecutionException from Future");

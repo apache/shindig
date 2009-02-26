@@ -19,9 +19,12 @@ package org.apache.shindig.protocol;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
+import org.apache.shindig.protocol.multipart.FormDataItem;
+import org.apache.shindig.protocol.multipart.MultipartFormParser;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +47,20 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JsonRpcServlet extends ApiServlet {
 
+  /**
+   * In a multipart request, the form item with field name "request" will contain the
+   * actual request, per the proposed Opensocial 0.9 specification.
+   */
+  public static final String REQUEST_PARAM = "request";
+  private static final String CONTENT_TYPE_JSON = "application/json";
+  
+  private MultipartFormParser formParser;
+
+  @Inject
+  void setMultipartFormParser(MultipartFormParser formParser) {
+    this.formParser = formParser;
+  }
+  
   @Override
   protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
@@ -56,7 +73,7 @@ public class JsonRpcServlet extends ApiServlet {
     try {
       setCharacterEncodings(servletRequest, servletResponse);
       JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
-      dispatch(request, servletRequest, servletResponse, token);
+      dispatch(request, null, servletRequest, servletResponse, token);
     } catch (JSONException je) {
       // FIXME
     }
@@ -72,26 +89,53 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     setCharacterEncodings(servletRequest, servletResponse);
-    servletResponse.setContentType("application/json");
+    servletResponse.setContentType(CONTENT_TYPE_JSON);
 
     try {
-      String content = IOUtils.toString(servletRequest.getInputStream(),
-          servletRequest.getCharacterEncoding());
+      String content = null;
+      Map<String, FormDataItem> formItems = new HashMap<String, FormDataItem>();
+      
+      if (formParser.isMultipartContent(servletRequest)) {
+        for (FormDataItem item : formParser.parse(servletRequest)) {
+          if (item.isFormField() && content == null) {
+            // As per spec, in case of a multipart/form-data content, there will be one form field
+            // with field name as "request". It will contain the json request. Any further form
+            // field or file item will not be parsed out, but will be exposed via getFormItem
+            // method of RequestItem. Here we are lenient where a mime part which has content type
+            // application/json will be considered as request.
+            if (REQUEST_PARAM.equals(item.getFieldName()) ||
+                CONTENT_TYPE_JSON.equals(item.getContentType())) {
+              content = IOUtils.toString(item.getInputStream());
+            }
+          } else {
+            formItems.put(item.getFieldName(), item);
+          }
+        }
+        
+        if (content == null) {
+          content = "";
+        }
+      } else {
+        content = IOUtils.toString(servletRequest.getInputStream(),
+            servletRequest.getCharacterEncoding());
+      }
+
       if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
         // Is a batch
         JSONArray batch = new JSONArray(content);
-        dispatchBatch(batch, servletRequest, servletResponse, token);
+        dispatchBatch(batch, formItems, servletRequest, servletResponse, token);
       } else {
         JSONObject request = new JSONObject(content);
-        dispatch(request, servletRequest, servletResponse, token);
+        dispatch(request, formItems, servletRequest, servletResponse, token);
       }
     } catch (JSONException je) {
       sendBadRequest(je, servletResponse);
     }
   }
 
-  protected void dispatchBatch(JSONArray batch, HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse, SecurityToken token) throws JSONException, IOException {
+  protected void dispatchBatch(JSONArray batch, Map<String, FormDataItem> formItems ,
+      HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+      SecurityToken token) throws JSONException, IOException {
     // Use linked hash map to preserve order
     List<Future<?>> responses = Lists.newArrayListWithExpectedSize(batch.length());
 
@@ -101,7 +145,7 @@ public class JsonRpcServlet extends ApiServlet {
     // into single requests.
     for (int i = 0; i < batch.length(); i++) {
       JSONObject batchObj = batch.getJSONObject(i);
-      responses.add(getHandler(batchObj, servletRequest).execute(token, jsonConverter));
+      responses.add(getHandler(batchObj, servletRequest).execute(formItems, token, jsonConverter));
     }
 
     // Resolve each Future into a response.
@@ -119,15 +163,16 @@ public class JsonRpcServlet extends ApiServlet {
     jsonConverter.append(servletResponse.getWriter(), result);
   }
 
-  protected void dispatch(JSONObject request, HttpServletRequest servletRequest,
-      HttpServletResponse servletResponse, SecurityToken token) throws JSONException, IOException {
+  protected void dispatch(JSONObject request, Map<String, FormDataItem> formItems,
+      HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+      SecurityToken token) throws JSONException, IOException {
     String key = null;
     if (request.has("id")) {
       key = request.getString("id");
     }
 
     // getRpcHandler never returns null
-    Future<?> future = getHandler(request, servletRequest).execute(token, jsonConverter);
+    Future<?> future = getHandler(request, servletRequest).execute(formItems, token, jsonConverter);
 
     // Resolve each Future into a response.
     // TODO: should use shared deadline across each request

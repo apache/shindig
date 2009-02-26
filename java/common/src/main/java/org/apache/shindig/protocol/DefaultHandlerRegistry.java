@@ -24,6 +24,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+import org.apache.shindig.protocol.multipart.FormDataItem;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -280,10 +281,11 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       this.methodCaller = methodCaller;
     }
 
-    public Future<?> execute(JSONObject rpc, SecurityToken token, BeanConverter converter) {
+    public Future<?> execute(JSONObject rpc, Map<String, FormDataItem> formItems,
+        SecurityToken token, BeanConverter converter) {
       try {
         JSONObject params = rpc.has("params") ? (JSONObject)rpc.get("params") : new JSONObject();
-        RequestItem item = methodCaller.getRpcRequestItem(params, token, beanJsonConverter);
+        RequestItem item = methodCaller.getRpcRequestItem(params, formItems, token, beanJsonConverter);
 
         listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
@@ -306,8 +308,9 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       this.rpc = rpc;
     }
 
-    public Future<?> execute(SecurityToken st, BeanConverter converter) {
-      return handler.execute(rpc, st, converter);
+    public Future<?> execute(Map<String, FormDataItem> formItems, SecurityToken st,
+        BeanConverter converter) {
+      return handler.execute(rpc, formItems, st, converter);
     }
   }
 
@@ -410,7 +413,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       restRequestItemConstructor = requestItemType.getConstructor(Map.class,
           SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
       rpcRequestItemConstructor = requestItemType.getConstructor(JSONObject.class,
-          SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
+          Map.class, SecurityToken.class, BeanConverter.class, BeanJsonConverter.class);
     }
 
     public RequestItem getRestRequestItem(Map<String, String[]> params, SecurityToken token,
@@ -418,15 +421,30 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       return getRequestItem(params, token, converter, jsonConverter, restRequestItemConstructor);
     }
     
-    public RequestItem getRpcRequestItem(JSONObject params, SecurityToken token, BeanJsonConverter converter) {
-      return getRequestItem(params, token, converter, converter, rpcRequestItemConstructor);
+    public RequestItem getRpcRequestItem(JSONObject params, Map<String, FormDataItem> formItems, 
+        SecurityToken token, BeanJsonConverter converter) {
+      return getRequestItem(params, formItems, token, converter, converter, rpcRequestItemConstructor);
+    }
+    
+    private RequestItem getRequestItem(Object params, Map<String, FormDataItem> formItems, 
+        SecurityToken token, BeanConverter converter, BeanJsonConverter jsonConverter,
+        Constructor<?> constructor) {
+      try {
+        return (RequestItem) constructor.newInstance(params, formItems, token,  converter,
+            jsonConverter);
+      } catch (InstantiationException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
     }
     
     private RequestItem getRequestItem(Object params, SecurityToken token, BeanConverter converter,
         BeanJsonConverter jsonConverter, Constructor<?> constructor) {
       try {
-        return (RequestItem) constructor.newInstance(params, token,  converter,
-            jsonConverter);
+        return (RequestItem) constructor.newInstance(params, token,  converter, jsonConverter);
       } catch (InstantiationException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
@@ -488,7 +506,8 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       this.error = error;
     }
 
-    public Future<?> execute(SecurityToken token, BeanConverter converter) {
+    public Future<?> execute(Map<String, FormDataItem> formItems, SecurityToken token,
+        BeanConverter converter) {
       return ImmediateFuture.errorInstance(error);
     }
   }
