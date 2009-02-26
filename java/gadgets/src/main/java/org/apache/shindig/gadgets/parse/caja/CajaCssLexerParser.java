@@ -53,13 +53,13 @@ public class CajaCssLexerParser {
 
   private static final URI DUMMY_SOURCE = URI.create("http://www.example.org");
 
-  private static final String PARSED_CSS = "parsedCss";
+  public static final String CACHE_NAME = "parsedCss";
 
   private Cache<String, List<Object>> parsedCssCache;
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
-    parsedCssCache = cacheProvider.createCache(PARSED_CSS);
+    parsedCssCache = cacheProvider.createCache(CACHE_NAME);
   }
 
   public List<Object> parse(String content) throws GadgetException {
