@@ -72,53 +72,9 @@ public class CajaCssLexerParser {
       parsedCss = parsedCssCache.getElement(key);
     }
     if (parsedCss == null) {
-      parsedCss = Lists.newArrayList();
-      CharProducer producer = CharProducer.Factory.create(new StringReader(content),
-          new InputSource(DUMMY_SOURCE));
-      CssLexer lexer = new CssLexer(producer);
-      try {
-        StringBuilder builder = new StringBuilder();
-        boolean inImport = false;
-        while (lexer.hasNext()) {
-          Token<CssTokenType> token = lexer.next();
-          if (token.type == CssTokenType.SYMBOL && token.text.equalsIgnoreCase("@import")) {
-            parsedCss.add(builder.toString());
-            builder.setLength(0);
-            inImport = true;
-          } else if (inImport) {
-            if (token.type == CssTokenType.URI) {
-              parsedCss.add(builder.toString());
-              builder.setLength(0);
-              Matcher matcher = urlMatcher.matcher(token.text);
-              if (matcher.find()) {
-                parsedCss.add(new ImportDecl(matcher.group(2).trim()));
-              }
-            } else if (token.type != CssTokenType.SPACE && token.type != CssTokenType.PUNCTUATION) {
-              inImport = false;
-              builder.append(token.text);
-            } else {
-              //builder.append(token.text);
-            }
-          } else if (token.type == CssTokenType.URI) {
-            Matcher matcher = urlMatcher.matcher(token.text);
-            if (!matcher.find()) {
-              builder.append(token.text);
-            } else {
-              parsedCss.add(builder.toString());
-              builder.setLength(0);
-              parsedCss.add(new UriDecl(matcher.group(2).trim()));
-            }
-          } else {
-            builder.append(token.text);
-          }
-        }
-        parsedCss.add(builder.toString());
-
-        if (shouldCache) {
-          parsedCssCache.addElement(key, parsedCss);
-        }
-      } catch (ParseException pe) {
-        throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe);
+      parsedCss = parseImpl(content);
+      if (shouldCache) {
+        parsedCssCache.addElement(key, parsedCss);
       }
     }
 
@@ -128,12 +84,60 @@ public class CajaCssLexerParser {
         if (o instanceof ImportDecl) {
           cloned.add(new ImportDecl(((ImportDecl) o).getUri()));
         } else if (o instanceof UriDecl) {
-          cloned.add(new ImportDecl(((UriDecl) o).getUri()));
+          cloned.add(new UriDecl(((UriDecl) o).getUri()));
         } else {
           cloned.add(o);
         }
       }
       return cloned;
+    }
+    return parsedCss;
+  }
+
+  List<Object> parseImpl(String content) throws GadgetException {
+    List<Object> parsedCss = Lists.newArrayList();
+    CharProducer producer = CharProducer.Factory.create(new StringReader(content),
+        new InputSource(DUMMY_SOURCE));
+    CssLexer lexer = new CssLexer(producer);
+    try {
+      StringBuilder builder = new StringBuilder();
+      boolean inImport = false;
+      while (lexer.hasNext()) {
+        Token<CssTokenType> token = lexer.next();
+        if (token.type == CssTokenType.SYMBOL && token.text.equalsIgnoreCase("@import")) {
+          parsedCss.add(builder.toString());
+          builder.setLength(0);
+          inImport = true;
+        } else if (inImport) {
+          if (token.type == CssTokenType.URI) {
+            parsedCss.add(builder.toString());
+            builder.setLength(0);
+            Matcher matcher = urlMatcher.matcher(token.text);
+            if (matcher.find()) {
+              parsedCss.add(new ImportDecl(matcher.group(2).trim()));
+            }
+          } else if (token.type != CssTokenType.SPACE && token.type != CssTokenType.PUNCTUATION) {
+            inImport = false;
+            builder.append(token.text);
+          } else {
+            //builder.append(token.text);
+          }
+        } else if (token.type == CssTokenType.URI) {
+          Matcher matcher = urlMatcher.matcher(token.text);
+          if (!matcher.find()) {
+            builder.append(token.text);
+          } else {
+            parsedCss.add(builder.toString());
+            builder.setLength(0);
+            parsedCss.add(new UriDecl(matcher.group(2).trim()));
+          }
+        } else {
+          builder.append(token.text);
+        }
+      }
+      parsedCss.add(builder.toString());
+    } catch (ParseException pe) {
+      throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe);
     }
     return parsedCss;
   }
@@ -178,7 +182,7 @@ public class CajaCssLexerParser {
     }
 
     public String toString() {
-      return "@import url(\"" + uri + "\");\n";
+      return "@import url('" + uri + "');\n";
     }
   }
 
@@ -199,7 +203,7 @@ public class CajaCssLexerParser {
     }
 
     public String toString() {
-      return "url(\"" + uri + "\");\n";
+      return "url('" + uri + "')";
     }
   }
 }

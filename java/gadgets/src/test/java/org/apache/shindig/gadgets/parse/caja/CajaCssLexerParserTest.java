@@ -30,6 +30,10 @@ public class CajaCssLexerParserTest extends TestCase {
 
   private CajaCssLexerParser cajaCssParser;
 
+  private static final String CSS = "@import url('www.example.org/someother.css');\n" +
+      ".xyz { background-image : url(http://www.example.org/someimage.gif); }\n" +
+      "A { color : #7f7f7f }\n";
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -43,10 +47,22 @@ public class CajaCssLexerParserTest extends TestCase {
   }
 
   public void testClone() throws Exception {
+    // Set the cache so we force cloning
     cajaCssParser.setCacheProvider(new LruCacheProvider(100));
-    String css = "@import url('www.example.org/someother.css'); .xyz { font : bold; } A { color : #7f7f7f }";
-    List<Object> styleSheet = cajaCssParser.parse(css);
-    List<Object> styleSheet2 = cajaCssParser.parse(css);
+
+    // Compare the raw parsed structure to a cloned one
+    List<Object> styleSheet = cajaCssParser.parseImpl(CSS);
+    List<Object> styleSheet2 = cajaCssParser.parse(CSS);
+    assertEquals(cajaCssParser.serialize(styleSheet), cajaCssParser.serialize(styleSheet2));
+  }
+
+  public void testCache() throws Exception {
+    cajaCssParser.setCacheProvider(new LruCacheProvider(100));
+    // Ensure that we return cloned instances and not the original out of the cache. Cloned
+    // instances intentionally do not compare equal but should produce the same output
+    List<Object> styleSheet = cajaCssParser.parse(CSS);
+    List<Object> styleSheet2 = cajaCssParser.parse(CSS);
     assertFalse(styleSheet.equals(styleSheet2));
+    assertEquals(cajaCssParser.serialize(styleSheet), cajaCssParser.serialize(styleSheet2));
   }
 }

@@ -127,7 +127,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testStyleBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
-    Document doc = rewriteContent(rewriter, content).getDocument();
+    MutableContent mc = rewriteContent(rewriter, content);
+    Document doc = mc.getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -155,6 +156,15 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
 
     // All @imports are stripped
     assertEquals("div { color : black; }", wrapper.getValue("//style[1]").trim());
+  }
+
+  public void testStyleBasic2() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2.html"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2-expected.html"));
+    MutableContent mc = rewriteContent(rewriter, content);
+    assertEquals(mc.getContent(), expected);
   }
 
   public void testNoRewriteUnknownMimeType() {
