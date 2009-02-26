@@ -17,27 +17,16 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.ImmutableMap;
-
 import org.apache.shindig.social.opensocial.util.XSDValidator;
-
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.custommonkey.xmlunit.NamespaceContext;
-import org.custommonkey.xmlunit.SimpleNamespaceContext;
-import org.custommonkey.xmlunit.XpathEngine;
 
-import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
 
