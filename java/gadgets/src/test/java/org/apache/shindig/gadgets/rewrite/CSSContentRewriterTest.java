@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
 import com.google.common.collect.Lists;
+
 import org.easymock.EasyMock;
 
 import java.io.StringReader;
@@ -98,10 +99,10 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {list-style-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&fp=1150739864\");\n"
-            + ";list-style-position:outside;margin:5px;padding:0}\n"
-            + ".someid {background-image:url(\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&fp=1150739864\");\n"
-            + ";float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
+        "div {list-style-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&fp=1150739864');\n"
+            + "list-style-position:outside;margin:5px;padding:0}\n"
+            + ".someid {background-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&fp=1150739864');\n"
+            + "float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }
 
