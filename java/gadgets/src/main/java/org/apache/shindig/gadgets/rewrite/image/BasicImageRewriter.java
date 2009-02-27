@@ -26,6 +26,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,9 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 
 /**
  * Rewrite images to more efficiently compress their content. Can rewrite images
@@ -115,22 +116,14 @@ public class BasicImageRewriter implements ImageRewriter {
         // is not exactly clean but is good enough to determine if a GIF is animated
         // Remove once Sanselan returns image count
         if (!response.getResponseAsString().contains("NETSCAPE2.0")) {
-          response = new GIFOptimizer(config, response).rewrite(
-              Sanselan.getBufferedImage(response.getResponse()));
+          response = new GIFOptimizer(config, response).rewrite(readGif(response));
         }
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_PNG) {
-        response = new PNGOptimizer(config, response)
-            .rewrite(Sanselan.getBufferedImage(response.getResponse()));
+        response = new PNGOptimizer(config, response).rewrite(readPng(response));
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
-        // We cant use Sanselan to read JPEG but we can use it to read all the metadata which is
-        // where we have issues anyway
-        Sanselan.getMetadata(response.getResponse(), null);
-        Sanselan.getICCProfile(response.getResponse(), null);
-        response = new JPEGOptimizer(config, response)
-            .rewrite(ImageIO.read(response.getResponse()));
+        response = new JPEGOptimizer(config, response).rewrite(readJpeg(response));
       } else if (imageFormat == ImageFormat.IMAGE_FORMAT_BMP) {
-        response = new BMPOptimizer(config, response)
-            .rewrite(Sanselan.getBufferedImage(response.getResponse()));
+        response = new BMPOptimizer(config, response).rewrite(readBmp(response));
       }
       rewrittenImageBytes.addAndGet(response.getContentLength());
     } catch (IOException ioe) {
@@ -187,5 +180,29 @@ public class BasicImageRewriter implements ImageRewriter {
   /** The total number of images bytes after rewriting */
   public long getRewrittenImageBytes() {
     return rewrittenImageBytes.get();
+  }
+
+  // The following methods are intended to be overridden by implementors if they need to
+  // implement additional security constraints or use their own more efficient
+  // image reading mechanisms
+
+  protected BufferedImage readBmp(HttpResponse response) throws ImageReadException, IOException {
+    return Sanselan.getBufferedImage(response.getResponse());
+  }
+
+  protected BufferedImage readPng(HttpResponse response) throws ImageReadException, IOException {
+    return Sanselan.getBufferedImage(response.getResponse());
+  }
+
+  protected BufferedImage readGif(HttpResponse response) throws ImageReadException, IOException {
+    return Sanselan.getBufferedImage(response.getResponse());
+  }
+
+  protected BufferedImage readJpeg(HttpResponse response) throws ImageReadException, IOException {
+    // We cant use Sanselan to read JPEG but we can use it to read all the metadata which is
+    // where most security issues reside anyway in ImageIO
+    Sanselan.getMetadata(response.getResponse(), null);
+    Sanselan.getICCProfile(response.getResponse(), null);
+    return ImageIO.read(response.getResponse());
   }
 }
