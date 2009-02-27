@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xerces.xni.Augmentations;
@@ -36,6 +37,7 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
@@ -71,11 +73,52 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   
   @Override
   protected Document parseDomImpl(String source) {
+    DocumentHandler handler;
+    
+    try {
+      handler = parseHtmlImpl(source);
+    } catch (IOException ioe) {
+      return null;
+    }
 
+    Document document = handler.getDocument();
+    DocumentFragment fragment = handler.getFragment();
+    normalizeFragment(document, fragment);
+    HtmlSerializer.attach(document, new NekoSerializer(), source);
+    return document;
+  }
+
+  @Override
+  protected DocumentFragment parseFragmentImpl(String source) throws GadgetException {
+    DocumentHandler handler;
+    
+    try {
+      handler = parseHtmlImpl(source);
+    } catch (IOException ioe) {
+      return null;
+    }
+
+    return handler.getFragment();
+  }
+
+  /**
+   * Parse HTML source.
+   * @return a document handler containing the parsed source
+   */
+  private DocumentHandler parseHtmlImpl(String source) throws IOException {
     HTMLConfiguration config = newConfiguration();
 
     HTMLScanner htmlScanner = new HTMLScanner();
-    HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
+    HTMLTagBalancer tagBalancer = new HTMLTagBalancer() {
+      @Override
+      protected HTMLElements.Element getElement(String name) {
+        // Neko's implementation of this method strips off namespace prefixes
+        // before calling HTMLElements.getElement().
+        // This breaks elements like "os:Html", is slower, and has no obvious benefit.
+        return HTMLElements.getElement(name);
+      }
+    };
+    
     DocumentHandler handler = newDocumentHandler(source, htmlScanner);
 
     if (config.getFeature("http://xml.org/sax/features/namespaces")) {
@@ -97,19 +140,11 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
     inputSource.setEncoding("UTF-8");
     inputSource.setCharacterStream(new StringReader(source));
-    try {
-      htmlScanner.setInputSource(inputSource);
-      htmlScanner.scanDocument(true);
-      Document document = handler.getDocument();
-      DocumentFragment fragment = handler.getFragment();
-      normalizeFragment(document, fragment);
-      HtmlSerializer.attach(document, new NekoSerializer(), source);
-      return document;
-    } catch (IOException ioe) {
-      return null;
-    }
+    htmlScanner.setInputSource(inputSource);
+    htmlScanner.scanDocument(true);
+    return handler;
   }
-
+  
   protected HTMLConfiguration newConfiguration() {
     HTMLConfiguration config = new HTMLConfiguration();
     // Maintain original case for elements and attributes

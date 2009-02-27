@@ -28,13 +28,19 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
+import org.apache.shindig.gadgets.templates.TagHandler;
+import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provider;
+
+import java.util.Set;
 
 /** 
  * Tests for TemplateRewriter
@@ -69,7 +75,9 @@ public class TemplateRewriterTest {
     rewriter = new TemplateRewriter(
         new Provider<TemplateProcessor>() {
           public TemplateProcessor get() {
-            return new TemplateProcessor(Expressions.sharedInstance());
+            Set<TagHandler> handlers = ImmutableSet.of();
+            return new DefaultTemplateProcessor(Expressions.sharedInstance(), 
+                new TagRegistry(handlers));
           }
         });
   }

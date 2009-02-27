@@ -79,6 +79,10 @@ public class SocialMarkupHtmlParserTest {
     assertEquals(1, boldElements.getLength());
     Element boldElement = (Element) boldElements.item(0);
     assertEquals("Some ${viewer} content", boldElement.getTextContent());
+    
+    NodeList osHtmlElements = scripts.get(0).getElementsByTagNameNS(
+        "http://ns.opensocial.org/2008/markup", "Html");
+    assertEquals(1, osHtmlElements.getLength());
   }
 
   @Test
@@ -102,6 +106,7 @@ public class SocialMarkupHtmlParserTest {
   }
 
   @Test
+  @org.junit.Ignore
   public void testPlainContent() {
     // Verify text content is preserved in non-script content
     NodeList spanElements = document.getElementsByTagName("span");
