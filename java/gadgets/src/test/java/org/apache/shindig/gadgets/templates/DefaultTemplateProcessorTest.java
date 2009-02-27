@@ -27,14 +27,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
-import org.apache.shindig.gadgets.templates.TemplateContext;
-import org.apache.shindig.gadgets.templates.TemplateProcessor;
-
-import java.io.IOException;
-import java.util.Map;
-
-import javax.el.ELResolver;
-
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,30 +36,43 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import javax.el.ELResolver;
+
 /**
- * Unit tests for TemplateProcessor.
+ * Unit tests for DefaultTemplateProcessor.
  * TODO: Refactor to remove boilerplate.
  * TODO: Add tests for special vars.
  * TODO: Add test for @var in @repeat loops. 
  */
-public class TemplateProcessorTest {
+public class DefaultTemplateProcessorTest {
 
   private Expressions expressions;
 
   private TemplateContext context;
-  private TemplateProcessor processor;
+  private DefaultTemplateProcessor processor;
   private Map<String, JSONObject> variables;
   private ELResolver resolver;
+  private TagRegistry registry;
 
   private SocialMarkupHtmlParser parser;
+  
+  private static final String TEST_NS = "http://example.com";
   
   @Before
   public void setUp() throws Exception {
     expressions = new Expressions();
     variables = Maps.newHashMap();
-    processor = new TemplateProcessor(expressions);
+    Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new TestTagHandler());
+    registry = new TagRegistry(handlers);
+
+    processor = new DefaultTemplateProcessor(expressions, registry);
     resolver = new RootELResolver();
     parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());    
     context = new TemplateContext(variables);
@@ -146,15 +151,26 @@ public class TemplateProcessorTest {
         "</span>");
     assertEquals("<span><span>Not Car</span></span><span><span>Car</span></span>", output);
   }
+  
+  @Test
+  public void testCustomTag() throws Exception {
+    String output = executeTemplate("<test:Foo text='${foo.title}'/>", 
+        "xmlns:test='" + TEST_NS + "'");
+    assertEquals("<b>BAR</b>", output);
+  }
 
   private String executeTemplate(String markup) throws Exception {
-    Element template = prepareTemplate(markup);
+    return executeTemplate(markup, "");
+  }
+  
+  private String executeTemplate(String markup, String extra) throws Exception {
+    Element template = prepareTemplate(markup, extra);
     DocumentFragment result = processor.processTemplate(template, context, resolver);
     return serialize(result);
   }
   
-  private Element prepareTemplate(String markup) throws GadgetException {
-    String content = "<script type=\"text/os-template\">" + markup + "</script>";
+  private Element prepareTemplate(String markup, String extra) throws GadgetException {    
+    String content = "<script type=\"text/os-template\"" + extra + ">" + markup + "</script>";
     Document document = parser.parseDom(content);
     return (Element) document.getElementsByTagName("script").item(0);
   }
@@ -171,5 +187,26 @@ public class TemplateProcessorTest {
   
   private void addVariable(String key, JSONObject value) {
     variables.put(key, value);
+  }
+  
+  /**
+   * A dummy custom tag that looks for the @text attribute, uppercases it and
+   * encloses it in a &lt;b&gt; tag.  <code>&lt;test:Foo text="bar"/&gt;</code>
+   * turns into <code>&lt;b&gt;BAR&lt;/b&gt;</code> 
+   */
+  private static class TestTagHandler extends AbstractTagHandler {
+    
+    public TestTagHandler() {
+      super(TEST_NS, "Foo");
+    }
+    
+    public void process(Node result, Element tag, TemplateProcessor processor) {
+      String text = getValueFromTag(tag, "text", processor, String.class);
+      text = (text == null) ? "" : text.toUpperCase();
+      Document doc = result.getOwnerDocument();
+      Element b = doc.createElement("b");
+      b.appendChild(doc.createTextNode(text));
+      result.appendChild(b);
+    }
   }
 }

@@ -17,19 +17,19 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-
-import com.google.inject.ImplementedBy;
-import com.google.inject.Inject;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Parser for arbitrary HTML content
@@ -38,12 +38,15 @@ import org.w3c.dom.Node;
 public abstract class GadgetHtmlParser {
 
   public static final String PARSED_DOCUMENTS = "parsedDocuments";
+  public static final String PARSED_FRAGMENTS = "parsedFragments";
 
   private Cache<String, Document> documentCache;
+  private Cache<String, DocumentFragment> fragmentCache;
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
     documentCache = cacheProvider.createCache(PARSED_DOCUMENTS);
+    fragmentCache = cacheProvider.createCache(PARSED_FRAGMENTS);
   }
 
   /**
@@ -92,7 +95,42 @@ public abstract class GadgetHtmlParser {
     return document;
   }
 
-  private boolean shouldCache() {
+  /**
+   * Parses a snippet of markup and appends the result as children to the 
+   * provided node.
+   * 
+   * @param source markup to be parsed
+   * @param result Node to append results to
+   * @throws GadgetException
+   */
+  public final void parseFragment(String source, Node result) throws GadgetException {
+    boolean shouldCache = shouldCache();
+    String key = null;    
+    if (shouldCache) {
+      key = HashUtil.rawChecksum(source.getBytes());
+      DocumentFragment cachedFragment = fragmentCache.getElement(key);
+      if (cachedFragment != null) {
+        copyFragment(cachedFragment, result);
+        return;
+      }
+    }
+    DocumentFragment fragment = parseFragmentImpl(source);
+    if (shouldCache) {
+      fragmentCache.addElement(key, fragment);
+    }
+    copyFragment(fragment, result);
+  }
+
+  private void copyFragment(DocumentFragment source, Node dest) {
+    Document destDoc = dest.getOwnerDocument();
+    NodeList nodes = source.getChildNodes();
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node clone = destDoc.importNode(nodes.item(i), true);
+      dest.appendChild(clone);
+    }    
+  }
+  
+  protected boolean shouldCache() {
     return documentCache != null && documentCache.getCapacity() != 0;
   }
 
@@ -103,6 +141,14 @@ public abstract class GadgetHtmlParser {
    */
   protected abstract Document parseDomImpl(String source) throws GadgetException;
 
+  /**
+   * @param source a snippet of HTML markup
+   * @return a DocumentFragment containing the parsed elements
+   * @throws GadgetException
+   */
+  protected abstract DocumentFragment parseFragmentImpl(String source) 
+      throws GadgetException;
+  
   /**
    * Normalize head and body tags in the passed fragment before including it
    * in the document
