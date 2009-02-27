@@ -146,7 +146,7 @@ public class JsonRpcHandler {
         for (View view : spec.getViews().values()) {
           views.put(view.getName(), new JSONObject()
                // .put("content", view.getContent())
-               .put("type", view.getType().toString().toLowerCase())
+               .put("type", view.getType().toString())
                .put("quirks", view.getQuirks())
                .put("preferredHeight", view.getPreferredHeight())
                .put("preferredWidth", view.getPreferredWidth()));
