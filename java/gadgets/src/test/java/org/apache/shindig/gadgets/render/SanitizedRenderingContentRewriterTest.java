@@ -79,9 +79,10 @@ public class SanitizedRenderingContentRewriterTest {
   public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new TestParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
-    gadget = new Gadget().setContext(sanitaryGadgetContext);
+    gadget = new Gadget().setContext(unsanitaryGadgetContext);
     gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
-        "<Module><ModulePrefs title=''/><Content type='html'/></Module>"));
+        "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
+    gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
   }
 
   private String rewrite(Gadget gadget, String content, Set<String> tags, Set<String> attributes) {
@@ -269,10 +270,29 @@ public class SanitizedRenderingContentRewriterTest {
   }
 
   @Test
-  public void doesNothingWhenNotSanitized() {
+  public void doesNothingWhenNotSanitized() throws Exception {
     String markup = "<script src=\"http://evil.org/evil\"></script> <b>hello</b>";
-    gadget.setContext(unsanitaryGadgetContext);
+    Gadget gadget = new Gadget().setContext(unsanitaryGadgetContext);
+    gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+        "<Module><ModulePrefs title=''/><Content type='html'/></Module>"));
+    gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
     assertEquals(markup, rewrite(gadget, markup, set("b"), set()));
+  }
+
+  @Test
+  public void forceSanitizeUnsanitaryGadget() throws Exception {
+    String markup =
+        "<p><style type=\"text/css\">A { font : bold; behavior : bad }</style>text <b>bold text</b></p>" +
+        "<b>Bold text</b><i>Italic text<b>Bold text</b></i>";
+
+    String sanitized = "<html><head></head><body><p><style>A {\n  font: bold\n}</style>text " +
+        "<b>bold text</b></p><b>Bold text</b></body></html>";
+
+    Gadget gadget = new Gadget().setContext(sanitaryGadgetContext);
+    gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+        "<Module><ModulePrefs title=''/><Content type='html'/></Module>"));
+    gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
+    assertEquals(sanitized, rewrite(gadget, markup, set("p", "b", "style"), set()));
   }
 
   private static class TestParseModule extends AbstractModule {

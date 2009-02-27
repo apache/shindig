@@ -121,6 +121,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
         uri = new UriBuilder(view.getHref());
         break;
       case HTML:
+      case X_HTML_SANITIZED:
       default:
         Uri iframeBaseUri = iframeBaseUris.get(context.getContainer());
         uri = iframeBaseUri != null ? new UriBuilder(iframeBaseUri) : new UriBuilder();

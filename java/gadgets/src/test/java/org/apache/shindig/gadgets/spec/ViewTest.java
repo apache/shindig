@@ -19,20 +19,19 @@
 
 package org.apache.shindig.gadgets.spec;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
-import java.util.Arrays;
-
 import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class ViewTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
@@ -80,6 +79,18 @@ public class ViewTest {
     View view = new View("default", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
 
     assertEquals(View.ContentType.HTML, view.getType());
+    assertEquals(contentType, view.getRawType());
+  }
+
+  @Test
+  public void testHtmlSanitizedContentType() throws Exception {
+    String contentType = "x-html-sanitized";
+    String xml = "<Content" +
+                 " type=\"" + contentType + '\"' +
+                 " quirks=\"false\"><![CDATA[blah]]></Content>";
+    View view = new View("default", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
+
+    assertEquals(View.ContentType.X_HTML_SANITIZED, view.getType());
     assertEquals(contentType, view.getRawType());
   }
 

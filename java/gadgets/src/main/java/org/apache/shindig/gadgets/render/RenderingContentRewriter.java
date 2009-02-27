@@ -46,6 +46,13 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -60,12 +67,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
@@ -120,7 +121,7 @@ public class RenderingContentRewriter implements ContentRewriter {
 
   public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
     // Don't touch sanitized gadgets.
-    if ("1".equals(gadget.getContext().getParameter("sanitize"))) {
+    if (gadget.sanitizeOutput()) {
       return RewriterResults.notCacheable();
     }
 
@@ -139,7 +140,6 @@ public class RenderingContentRewriter implements ContentRewriter {
       for (Node n : existingHeadContent) {
         head.removeChild(n);
       }
-
 
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {

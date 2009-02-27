@@ -80,6 +80,15 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
   private static final Map<String, ImmutableSet<String>> PROXY_IMAGE_ATTRIBUTES =
       ImmutableMap.of("img", ImmutableSet.of("src"));
 
+  /**
+   * Is the Gadget to be rendered sanitized
+   * @param gadget
+   * @return
+   */
+  public static boolean isSanitizedRenderingRequest(Gadget gadget) {
+    return ("1".equals(gadget.getContext().getParameter("sanitize")));
+  }
+
   private final Set<String> allowedTags;
   private final Set<String> allowedAttributes;
   private final CajaCssSanitizer cssSanitizer;
@@ -122,7 +131,7 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    if ("1".equals(gadget.getContext().getParameter(ProxyBase.SANITIZE_CONTENT_PARAM))) {
+    if (gadget.sanitizeOutput()) {
       boolean sanitized = false;
       try {
         new NodeSanitizer(gadget).sanitize(content.getDocument().getDocumentElement());

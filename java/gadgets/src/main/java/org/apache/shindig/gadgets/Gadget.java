@@ -18,15 +18,16 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.preload.PreloadedData;
+import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Sets;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 /**
  * Intermediary representation of all state associated with processing
@@ -130,5 +131,14 @@ public class Gadget {
     }
     
     return removedFeatures;
+  }
+
+  /**
+   * Should the gadget content be sanitized on output
+   * @return
+   */
+  public boolean sanitizeOutput() {
+    return (getCurrentView().getType() == View.ContentType.X_HTML_SANITIZED ||
+        "1".equals(getContext().getParameter(ProxyBase.SANITIZE_CONTENT_PARAM)));
   }
 }

@@ -17,12 +17,14 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.variables.Substitutions;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -330,14 +332,31 @@ public class View implements RequestAuthenticationInfo {
    * Possible values for Content/@type
    */
   public enum ContentType {
-    HTML, URL;
+    HTML("html"), URL("url"), X_HTML_SANITIZED("x-html-sanitized");
+
+    private String viewName;
+
+    private ContentType(String viewName) {
+      this.viewName = viewName;
+    }
 
     /**
-     * @param value
+     * @param viewName
      * @return The parsed value (defaults to html)
      */
-    public static ContentType parse(String value) {
-      return "url".equals(value) ? URL : HTML;
+    public static ContentType parse(String viewName) {
+      viewName = viewName.toLowerCase().trim();
+      for (ContentType enumVal : ContentType.values()) {
+        if (enumVal.viewName.equals(viewName)) {
+          return enumVal;
+        }
+      }
+      return HTML;
+    }
+
+    @Override
+    public String toString() {
+      return viewName;
     }
   }
 }
