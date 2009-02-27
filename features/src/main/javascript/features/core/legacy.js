@@ -21,12 +21,21 @@
  // Gadget authors are explicitly discouraged from using any of them.
 
 var JSON = gadgets.json;
-var _IG_Prefs = gadgets.Prefs;
 
-// Yes, these technically modifiy gadget.Prefs as well. Unfortunately,
-// simply setting IG_Prefs.prototype to a new gadgets.Prefs object means
-// that we'd have to duplicate the gadgets.Prefs constructor.
-_IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
+(function() {
+
+var instance = null;
+
+var _IG_Prefs = function() {
+  if (!instance) {
+    instance = new gadgets.Prefs();
+    instance.setDontEscape_();
+  }
+  return instance;
+};
+
+ _IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
+})();
 
 function _IG_Fetch_wrapper(callback, obj) {
   callback(obj.data);

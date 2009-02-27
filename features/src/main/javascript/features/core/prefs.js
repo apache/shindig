@@ -46,6 +46,7 @@ var gadgets = gadgets || {};
 
 var instance = null;
 var prefs = {};
+var esc = gadgets.util.escapeString;
 var messages = {};
 var defaultPrefs = {};
 var language = "en";
@@ -145,7 +146,15 @@ gadgets.Prefs.setDefaultPrefs_ = function(defprefs) {
  * @return {String} The preference; if not set, an empty string
  */
 gadgets.Prefs.prototype.getString = function(key) {
-  return prefs[key] ? gadgets.util.escapeString(prefs[key]) : "";
+  return prefs[key] ? esc(prefs[key]) : "";
+};
+
+/*
+ * Indicates not to escape string values when retrieving them.
+ * This is an internal detail used by _IG_Prefs for backward compatibility.
+ */
+gadgets.Prefs.prototype.setDontEscape_ = function() {
+  esc = function(k) { return k; };
 };
 
 /**
@@ -212,7 +221,6 @@ gadgets.Prefs.prototype.getArray = function(key) {
   if (val) {
     var arr = val.split("|");
     // Decode pipe characters.
-    var esc = gadgets.util.escapeString;
     for (var i = 0, j = arr.length; i < j; ++i) {
       arr[i] = esc(arr[i].replace(/%7C/g, "|"));
     }
