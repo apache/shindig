@@ -128,9 +128,12 @@ public class Substitutions {
       }
 
       if (replacement == null) {
-        // Keep it.
-        output.append(pattern);
-        lastPosition = next;
+        // Just append the first underbar of the __ prefix. The substitution
+        // selection algorithm will move on to the next underbar, which itself
+        // might be a __ prefix suitable for substitution, ensuring proper
+        // accommodation of cases such as ___MODULE_ID__.
+        output.append('_');
+        lastPosition = i + 1;
       } else {
         lastPosition = next + 2;
         if (isMessage && !isNested) {
