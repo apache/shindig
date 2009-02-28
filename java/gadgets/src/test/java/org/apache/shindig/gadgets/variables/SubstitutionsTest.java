@@ -91,6 +91,24 @@ public class SubstitutionsTest extends TestCase {
     assertEquals("Hello__________ten__________World____", subst.substituteString(msg));
   }
 
+  public void testMessageId() throws Exception {
+    String msg = "Hello, __MODULE_ID__!";
+    subst.addSubstitution(Type.MODULE, "ID", "123");
+    assertEquals("Hello, 123!", subst.substituteString(msg));
+  }
+
+  public void testOddNumberOfPrecedingUnderscores() throws Exception {
+    String msg = "<div id='div___MODULE_ID__'/>";
+    subst.addSubstitution(Type.MODULE, "ID", "123");
+    assertEquals("<div id='div_123'/>", subst.substituteString(msg));
+  }
+
+  public void testOddUnderscoresWithInvalidSubstFollowedByValidSubst() throws Exception {
+    String msg = "<div id='div___HI_THERE__MODULE_ID___'/>";
+    subst.addSubstitution(Type.MODULE, "ID", "123");
+    assertEquals("<div id='div___HI_THERE123_'/>", subst.substituteString(msg));
+  }
+
   public void loadTest() throws Exception {
     String msg
         = "Random text and __UP_hello__, amongst other words __MSG_world__ stuff __weeeeee";
