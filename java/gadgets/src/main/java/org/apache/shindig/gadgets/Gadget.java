@@ -138,7 +138,8 @@ public class Gadget {
    * @return
    */
   public boolean sanitizeOutput() {
-    return (getCurrentView().getType() == View.ContentType.X_HTML_SANITIZED ||
-        "1".equals(getContext().getParameter(ProxyBase.SANITIZE_CONTENT_PARAM)));
+    return (getCurrentView() != null &&
+        getCurrentView().getType() == View.ContentType.X_HTML_SANITIZED) ||
+        "1".equals(getContext().getParameter(ProxyBase.SANITIZE_CONTENT_PARAM));
   }
 }
