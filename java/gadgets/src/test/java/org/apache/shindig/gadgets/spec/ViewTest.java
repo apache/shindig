@@ -90,7 +90,7 @@ public class ViewTest {
                  " quirks=\"false\"><![CDATA[blah]]></Content>";
     View view = new View("default", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
 
-    assertEquals(View.ContentType.X_HTML_SANITIZED, view.getType());
+    assertEquals(View.ContentType.HTML_SANITIZED, view.getType());
     assertEquals(contentType, view.getRawType());
   }
 
