@@ -106,7 +106,7 @@ abstract class BaseOptimizer {
     long time = System.currentTimeMillis();
     rewriteImpl(image);
     time = System.currentTimeMillis() - time;
-    if (minBytes != null) {
+    if (minBytes != null && minBytes.length != 0) {
       StringBuilder rewriteMsg = new StringBuilder();
       rewriteMsg.append("c=").append(
           ((minBytes.length * 100) / originalResponse.getContentLength()));
