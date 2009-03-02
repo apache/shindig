@@ -332,7 +332,7 @@ public class View implements RequestAuthenticationInfo {
    * Possible values for Content/@type
    */
   public enum ContentType {
-    HTML("html"), URL("url"), X_HTML_SANITIZED("x-html-sanitized");
+    HTML("html"), URL("url"), HTML_SANITIZED("x-html-sanitized");
 
     private String viewName;
 
