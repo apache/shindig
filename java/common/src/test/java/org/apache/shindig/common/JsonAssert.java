@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.common;
 
-import static org.junit.Assert.assertEquals;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public final class JsonAssert {
   private JsonAssert() {}
@@ -53,10 +53,17 @@ public final class JsonAssert {
       assertEquals("Objects are not of equal size", left.toString(2), right.toString(2));
     }
 
+    // Both are emtpy so skip
+    if (JSONObject.getNames(left) == null && JSONObject.getNames(right) == null) {
+      return;
+    }
     for (String name : JSONObject.getNames(left)) {
       Object leftValue = left.opt(name);
       Object rightValue = right.opt(name);
 
+      if (leftValue != null) {
+        assertNotNull(left.toString() + " != " + right.toString(), rightValue);
+      }
       assertEquals(left.toString() + " != " + right.toString(),
                    leftValue.getClass(), rightValue.getClass());
 
