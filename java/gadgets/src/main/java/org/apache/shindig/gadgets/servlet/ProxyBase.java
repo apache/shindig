@@ -70,7 +70,7 @@ public abstract class ProxyBase {
       return url.toUri();
     } catch (IllegalArgumentException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "url parameter is not a valid url.");
+          "url parameter is not a valid url: " + urlToValidate);
     }
   }
 
