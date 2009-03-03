@@ -65,7 +65,12 @@ public class JettyLauncher {
     server = new Server(port);
 
     Context context = new Context(server, "/", Context.SESSIONS);
-    context.setResourceBase(trunk + "/javascript");
+    //context.setBaseResource(Resource.newClassPathResource("/endtoend"));
+    context.setResourceBase(Resource.newClassPathResource("/endtoend").getFile().getAbsolutePath());
+
+    ServletHolder defaultHolder = new ServletHolder(new DefaultServlet());
+    context.addServlet(defaultHolder, "/");
+
     context.addEventListener(new GuiceServletContextListener());
 
     Map<String, String> initParams = Maps.newHashMap();
@@ -121,13 +126,12 @@ public class JettyLauncher {
         try {
           return Resource.newResource(trunk + "/javascript/" + stripped);
         } catch (IOException ioe) {
-          ioe.printStackTrace();
-          return null;
+          return Resource.newClassPathResource(s);
         }
       }
     };
-    ServletHolder defaultHolder = new ServletHolder(defaultServlet);
-    context.addServlet(defaultHolder, GADGETS_FILES);
+    ServletHolder gadgetFiles = new ServletHolder(defaultServlet);
+    context.addServlet(gadgetFiles, GADGETS_FILES);
   }
 
   public void start() throws Exception {

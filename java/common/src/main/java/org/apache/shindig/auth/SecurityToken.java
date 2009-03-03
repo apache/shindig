@@ -66,6 +66,12 @@ public interface SecurityToken {
   public String getUpdatedToken();
 
   /**
+   * @return the authentication mechanism used to generate this security token
+   * @see AuthenticationMode
+   */
+  public String getAuthenticationMode();
+
+  /**
    * @return a string formatted JSON object from the container, or null if there
    * is no JSON from the container.
    */

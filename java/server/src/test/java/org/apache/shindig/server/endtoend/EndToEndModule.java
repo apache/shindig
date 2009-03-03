@@ -22,7 +22,9 @@ import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.config.JsonContainerConfig;
+import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.protocol.DataServiceServletFetcher;
+import org.apache.shindig.protocol.SystemHandler;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
@@ -72,7 +74,8 @@ public class EndToEndModule extends AbstractModule {
 
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class, SampleContainerHandler.class));
+            PersonHandler.class, SampleContainerHandler.class, SystemHandler.class,
+            InvalidationHandler.class));
 
     bind(ContainerConfig.class).to(JsonContainerConfig.class);    
   }

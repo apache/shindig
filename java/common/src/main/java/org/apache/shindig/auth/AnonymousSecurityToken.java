@@ -74,6 +74,10 @@ public class AnonymousSecurityToken implements SecurityToken {
     return "";
   }
 
+  public String getAuthenticationMode() {
+    return AuthenticationMode.UNAUTHENTICATED.name();
+  }
+
   public String getTrustedJson() {
     return "";
   }

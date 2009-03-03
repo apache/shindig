@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.testing;
 
+import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenDecoder;
 
@@ -39,6 +40,7 @@ public class FakeGadgetToken implements SecurityToken {
   private String domain = null;
   private String container = null;
   private String appUrl = null;
+  private String authMode = AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   private int moduleId = 0;
 
   public FakeGadgetToken setUpdatedToken(String updatedToken) {
@@ -86,6 +88,10 @@ public class FakeGadgetToken implements SecurityToken {
     return this;
   }
 
+  public void setAuthenticationMode(String authMode) {
+    this.authMode = authMode;
+  }
+
   public String getOwnerId() {
     return ownerId;
   }
@@ -120,6 +126,10 @@ public class FakeGadgetToken implements SecurityToken {
 
   public String getUpdatedToken() {
     return updatedToken;
+  }
+
+  public String getAuthenticationMode() {
+    return authMode;
   }
 
   public String getTrustedJson() {

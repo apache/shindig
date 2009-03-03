@@ -18,11 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.InvalidationService;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
@@ -30,16 +32,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.apache.commons.io.IOUtils;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles open proxy requests.
@@ -50,7 +49,8 @@ public class ProxyHandler extends ProxyBase {
 
   private static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
-      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding"
+      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding",
+      InvalidationService.INVALIDATION_HEADER
   );
 
   private final RequestPipeline requestPipeline;

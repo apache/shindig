@@ -17,6 +17,13 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.AuthenticationMode;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
+
+import com.google.inject.Inject;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -25,17 +32,9 @@ import net.oauth.OAuthMessage;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.server.OAuthServlet;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.auth.AuthenticationHandler;
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
-
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.google.inject.Inject;
 
 /**
  * This class only handles "two-legged" OAuth (aka Consumer Request) OAuth requests. The request
@@ -43,7 +42,6 @@ import com.google.inject.Inject;
  * container is requesting information on behalf of.
  */
 public class OAuthConsumerRequestAuthenticationHandler implements AuthenticationHandler {
-  public static final String AUTH_OAUTH_CONSUMER_REQUEST = "OAuth-ConsumerRequest";
   public static final String REQUESTOR_ID_PARAM = "xoauth_requestor_id";
   private OAuthDataStore store;
 
@@ -53,7 +51,7 @@ public class OAuthConsumerRequestAuthenticationHandler implements Authentication
   }
 
   public String getName() {
-    return AUTH_OAUTH_CONSUMER_REQUEST;
+    return AuthenticationMode.OAUTH_CONSUMER_REQUEST.name();
   }
 
   public String getWWWAuthenticateHeader(String realm) {
