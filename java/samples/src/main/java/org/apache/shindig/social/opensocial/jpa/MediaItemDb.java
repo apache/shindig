@@ -86,6 +86,14 @@ public class MediaItemDb implements MediaItem, DbObject {
   private String typeDb;
 
   /**
+   * model field
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "thumbnail_url", length = 255)
+  private String thumbnailUrl;
+
+  /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
@@ -164,6 +172,22 @@ public class MediaItemDb implements MediaItem, DbObject {
    */
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#getThumbnailUrl()
+   */
+  public String getThumbnailUrl() {
+    return thumbnailUrl;
+  }
+
+  /** 
+   * {@inheritDoc}
+   * @see org.apache.shindig.social.opensocial.model.MediaItem#setThumbnailUrl(java.lang.String)
+   */
+  public void setThumbnailUrl(String url) {
+    this.thumbnailUrl = url;
   }
 
   /** 

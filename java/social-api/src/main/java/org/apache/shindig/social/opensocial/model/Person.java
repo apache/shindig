@@ -244,6 +244,10 @@ public interface Person {
       return this.urlString;
     }
 
+    public static Field getField(String jsonString) {
+      return lookup.get(jsonString);
+    }
+
     /**
      * Converts from a url string (usually passed in the fields= parameter) into the
      * corresponding field enum.
@@ -423,7 +427,6 @@ public interface Person {
    * @param currentLocation the persons current location
    */
   void setCurrentLocation(Address currentLocation);
-
 
   /**
    * Get the person's drinking status, specified as an {@link Enum} with the enum's key referencing

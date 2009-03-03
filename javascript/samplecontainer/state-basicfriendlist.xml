@@ -5,9 +5,20 @@
       <friend>jane.doe</friend>
       <friend>george.doe</friend>
       <friend>maija.m</friend>
+      <count type="inbox">10</count>
+      <address type="office">
+        <latitude>37.78940406684465</latitude>
+        <longitude>-122.40046262741089</longitude>
+        <streetAddress>55 2nd Street, Suite 300</streetAddress>
+        <locality>San Francisco</locality>
+        <region>CA</region>
+        <postalCode>94105</postalCode>
+        <country>United States</country>
+      </address>
     </person>
     <person id="jane.doe" name="Jane Doe" phone="867-5309" gender="F">
       <friend>john.doe</friend>
+      <count type="inbox">3</count>
     </person>
     <person id="george.doe" name="George Doe" gender="M">
       <friend>john.doe</friend>

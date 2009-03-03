@@ -316,6 +316,8 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(id,
 opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {};
 
+opensocial.Container.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {};
+opensocial.Container.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {};
 
 /**
  * Creates a new collection with caja support if enabled.

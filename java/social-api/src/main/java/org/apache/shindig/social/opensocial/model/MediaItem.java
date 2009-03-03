@@ -38,7 +38,9 @@ public interface MediaItem {
     /** the field name for type. */
     TYPE("type"),
     /** the field name for url. */
-    URL("url");
+    URL("url"),
+    /** the thumbnail Url */
+    THUMBNAIL_URL("thumbnailUrl");
 
     /**
      * The field name that the instance represents.
@@ -139,4 +141,17 @@ public interface MediaItem {
    */
   void setUrl(String url);
 
+  /**
+   * Get the thumbnail URL for the media item.
+   *
+   * @return the thumbnail url of the media item
+   */
+  String getThumbnailUrl();
+
+  /**
+   * Set a thumbnail URL for the media item.
+   *
+   * @param url the thumbnail URL of the MediaItem
+   */
+  void setThumbnailUrl(String url);
 }

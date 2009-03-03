@@ -30,6 +30,7 @@ public class MediaItemImpl implements MediaItem {
   private String mimeType;
   private Type type;
   private String url;
+  private String thumbnailUrl;
 
   public MediaItemImpl() {
   }
@@ -63,4 +64,6 @@ public class MediaItemImpl implements MediaItem {
   public void setUrl(String url) {
     this.url = url;
   }
+  public String getThumbnailUrl() { return this.thumbnailUrl;}
+  public void setThumbnailUrl(String url) { this.thumbnailUrl = url;}
 }

@@ -35,6 +35,7 @@ import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
+import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 
 import com.google.common.collect.ImmutableSet;
@@ -80,6 +81,6 @@ public class SocialApiGuiceModule extends AbstractModule {
   
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class, SampleContainerHandler.class, SystemHandler.class));
+            PersonHandler.class, MessageHandler.class, SampleContainerHandler.class, SystemHandler.class));
   }
 }

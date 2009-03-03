@@ -24,5 +24,7 @@
     <script src="fieldtranslations.js"></script>
     <script src="jsonactivity.js"></script>
     <script src="jsonperson.js"></script>    
+    <script src="jsonmessagecollection.js"></script>
+    <script src="jsonmessage.js"></script>
   </gadget>
 </feature>
