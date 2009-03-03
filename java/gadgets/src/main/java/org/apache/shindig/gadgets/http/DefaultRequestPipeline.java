@@ -35,48 +35,65 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final HttpCache httpCache;
   private final Provider<OAuthRequest> oauthRequestProvider;
   private final ImageRewriter imageRewriter;
+  private final InvalidationService invalidationService;
 
   @Inject
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
-                                ImageRewriter imageRewriter) {
+                                ImageRewriter imageRewriter,
+                                InvalidationService invalidationService) {
     this.httpFetcher = httpFetcher;
     this.httpCache = httpCache;
     this.oauthRequestProvider = oauthRequestProvider;
     this.imageRewriter = imageRewriter;
+    this.invalidationService = invalidationService;
   }
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
-    HttpResponse response = null;
+    HttpResponse cachedResponse = null;
 
     if (!request.getIgnoreCache()) {
-      response = httpCache.getResponse(request);
-      if (response != null && !response.isStale()) {
-        return response;
+      cachedResponse = httpCache.getResponse(request);
+      // Note that we dont remove invalidated entries from the cache as we want them to be
+      // available in the event of a backend fetch failure
+      if (cachedResponse != null) {
+        if (cachedResponse.isStale()) {
+          cachedResponse = null;
+        } else if(invalidationService.isValid(request, cachedResponse)) {
+          return cachedResponse;
+        }
       }
     }
 
+    HttpResponse fetchedResponse = null;
     switch (request.getAuthType()) {
       case NONE:
-        response = httpFetcher.fetch(request);
+        fetchedResponse = httpFetcher.fetch(request);
         break;
       case SIGNED:
       case OAUTH:
-        // TODO: Why do we have to pass the request twice? This doesn't make sense...
-        response = oauthRequestProvider.get().fetch(request);
+        fetchedResponse = oauthRequestProvider.get().fetch(request);
         break;
       default:
         return HttpResponse.error();
     }
 
-    if (!response.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
-      response = imageRewriter.rewrite(request.getUri(), response);
+    if (fetchedResponse.isError() && cachedResponse != null) {
+      // Use the invalidated cache response if it is not stale. We don't update its
+      // mark so it remains invalidated
+      return cachedResponse;
+    }
+
+    if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
+      fetchedResponse = imageRewriter.rewrite(request.getUri(), fetchedResponse);
     }
 
     if (!request.getIgnoreCache()) {
-      httpCache.addResponse(request, response);
+      // Mark the response with invalidation information prior to caching
+      fetchedResponse = invalidationService.markResponse(request, fetchedResponse);
+      httpCache.addResponse(request, fetchedResponse);
     }
-    return response;
+    return fetchedResponse;
   }
 }

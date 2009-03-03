@@ -17,8 +17,13 @@
  */
 package org.apache.shindig.social.core.oauth;
 
-import com.google.inject.Inject;
+import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.AuthenticationMode;
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
+import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 
+import com.google.inject.Inject;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
@@ -26,20 +31,15 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.server.OAuthServlet;
-import org.apache.shindig.auth.AuthenticationHandler;
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
-import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Normal three legged OAuth handler
  */
 public class OAuthAuthenticationHandler implements AuthenticationHandler {
-  private static String AUTH_OAUTH_REQUEST = "OAuth";
   private OAuthDataStore store;
 
   @Inject
@@ -48,7 +48,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   public String getName() {
-    return AUTH_OAUTH_REQUEST;
+    return AuthenticationMode.OAUTH.name();
   }
 
   public String getWWWAuthenticateHeader(String realm) {

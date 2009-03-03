@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public class AnonymousAuthenticationHandler implements AuthenticationHandler {
   public static final String ALLOW_UNAUTHENTICATED = "shindig.allowUnauthenticated";
-  public static final String AUTH_UNAUTHENTICATED = "Unauthenticated";
   private final boolean allowUnauthenticated;
 
   @Inject
@@ -34,7 +33,7 @@ public class AnonymousAuthenticationHandler implements AuthenticationHandler {
   }
 
   public String getName() {
-    return AUTH_UNAUTHENTICATED;
+    return AuthenticationMode.UNAUTHENTICATED.name();
   }
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {

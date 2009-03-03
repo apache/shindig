@@ -17,9 +17,8 @@
  */
 package org.apache.shindig.auth;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Implements a specific authentication mechanism and produces a SecurityToken when authentication
@@ -28,7 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 public interface AuthenticationHandler {
 
   /**
-   * @return The name of the authentication handler, used for debugging.
+   * @return The name of the authentication handler. This value is bound to the security token
+   * and can be used to determine the authentication mechanism by which the security token was
+   * created. The value is expected to be one of the values in AuthenticationMode but string
+   * is used here to allow containers to have custom authentication modes
    */
   String getName();
 

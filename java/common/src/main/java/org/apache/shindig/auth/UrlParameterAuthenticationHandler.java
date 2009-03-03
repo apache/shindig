@@ -17,18 +17,16 @@
  */
 package org.apache.shindig.auth;
 
-import java.util.Collections;
-import java.util.Map;
+import com.google.inject.Inject;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.google.inject.Inject;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Produces security tokens by extracting the "st" parameter from the request url or post body.
  */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
-  public static final String AUTH_URL_PARAMETER = "SecurityTokenUrlParameter";
   private static final String TOKEN_PARAM = "st";
 
   private final SecurityTokenDecoder securityTokenDecoder;
@@ -39,7 +37,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   }
 
   public String getName() {
-    return AUTH_URL_PARAMETER;
+    return AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   }
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {

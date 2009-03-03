@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.auth;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -165,6 +165,10 @@ public class BlobCrypterSecurityToken implements SecurityToken {
   // Our tokens are static, we could change this to periodically update the token.
   public String getUpdatedToken() {
     return null;
+  }
+
+  public String getAuthenticationMode() {
+    return AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   }
 
   public String getViewerId() {

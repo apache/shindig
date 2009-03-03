@@ -18,11 +18,11 @@
  */
 package org.apache.shindig.auth;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
+
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -139,6 +139,10 @@ public class BasicSecurityToken implements SecurityToken {
    */
   public String getUpdatedToken() {
     return null;
+  }
+
+  public String getAuthenticationMode() {
+    return AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   }
 
   /**

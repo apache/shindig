@@ -25,7 +25,6 @@ import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Provider;
-
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -39,7 +38,7 @@ public class DefaultRequestPipelineTest {
   private final FakeOAuthRequestProvider oauth = new FakeOAuthRequestProvider();
 
   private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
-      new NoOpImageRewriter());
+      new NoOpImageRewriter(), new NoOpInvalidationService());
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
@@ -148,7 +147,7 @@ public class DefaultRequestPipelineTest {
     assertEquals(0, cache.writeCount);
   }
 
-  private static class FakeHttpFetcher implements HttpFetcher {
+  public static class FakeHttpFetcher implements HttpFetcher {
     protected HttpRequest request;
     protected HttpResponse response;
     protected int fetchCount = 0;
@@ -166,7 +165,7 @@ public class DefaultRequestPipelineTest {
     }
   }
 
-  private static class FakeHttpCache implements HttpCache {
+  public static class FakeHttpCache implements HttpCache {
     protected final Map<Uri, HttpResponse> data = Maps.newHashMap();
     protected int writeCount = 0;
     protected int readCount = 0;
@@ -194,7 +193,7 @@ public class DefaultRequestPipelineTest {
     }
   }
 
-  private static class FakeOAuthRequestProvider implements Provider<OAuthRequest> {
+  public static class FakeOAuthRequestProvider implements Provider<OAuthRequest> {
     protected int fetchCount = 0;
     protected HttpRequest httpRequest;
     protected HttpResponse httpResponse;

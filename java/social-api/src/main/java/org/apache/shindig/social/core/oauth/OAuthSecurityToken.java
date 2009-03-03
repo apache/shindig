@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 
 public class OAuthSecurityToken implements SecurityToken {
@@ -25,14 +26,21 @@ public class OAuthSecurityToken implements SecurityToken {
   private final String appId;
   private final String domain;
   private final String container;
+  private final String authMode;
 
   public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
       String container) {
+    this(userId, appUrl, appId, domain, container, AuthenticationMode.OAUTH.name());
+  }
+
+  public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
+      String container, String authMode) {
     this.userId = userId;
     this.appUrl = appUrl;
     this.appId = appId;
     this.domain = domain;
     this.container = container;
+    this.authMode = authMode;
   }
 
   public String getOwnerId() {
@@ -72,6 +80,10 @@ public class OAuthSecurityToken implements SecurityToken {
 
   public String getUpdatedToken() {
     throw new UnsupportedOperationException();
+  }
+
+  public String getAuthenticationMode() {
+    return authMode;
   }
 
   public String getTrustedJson() {
