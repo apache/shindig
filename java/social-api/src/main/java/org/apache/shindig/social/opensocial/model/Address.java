@@ -22,12 +22,17 @@ import org.apache.shindig.social.core.model.AddressImpl;
 
 import com.google.inject.ImplementedBy;
 
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Base interface for all address objects
  * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Address">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Address</a>.
  *
  */
+
 @ImplementedBy(AddressImpl.class)
 @Exportablebean
 public interface Address {
@@ -57,6 +62,14 @@ public interface Address {
     /** the field name for primary. */
     PRIMARY("primary");
 
+    private static final Map<String, Field> lookup = new HashMap<String, Field>();
+
+    static {
+      for (Field field : EnumSet.allOf(Field.class)) {
+        lookup.put(field.toString(), field);
+      }
+    }
+
     /**
      * The json field that the instance represents.
      */
@@ -79,6 +92,10 @@ public interface Address {
     @Override
     public String toString() {
       return this.jsonString;
+    }
+
+    public static Field getField(String jsonString) {
+      return lookup.get(jsonString);
     }
   }
 

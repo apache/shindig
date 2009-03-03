@@ -33,6 +33,7 @@
     <script src="environment.js"/>
     <script src="idspec.js"/>
     <script src="mediaitem.js"/>
+    <script src="messagecollection.js"/>
     <script src="message.js"/>
     <script src="name.js"/>
     <script src="navigationparameters.js"/>

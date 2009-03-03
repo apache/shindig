@@ -3,7 +3,7 @@
 
 <!ELEMENT people (person*)>
 
-<!ELEMENT person (friend*)>
+<!ELEMENT person (friend*, count*, address*)>
 <!ATTLIST person id CDATA #REQUIRED
     name CDATA #IMPLIED
     gender CDATA #IMPLIED
@@ -12,6 +12,24 @@
     profileUrl CDATA #IMPLIED>
 
 <!ELEMENT friend (#PCDATA)>
+
+<!ELEMENT count (#PCDATA)>
+<!ATTLIST count type CDATA #REQUIRED>
+
+<!ELEMENT address (latitude?, longitude?, streetAddress?, locality?, region?,
+    postalCode?, country?, extendedAddress?, poBox?, unstructuredAddress?)>
+<!ATTLIST address type CDATA #REQUIRED>
+
+<!ELEMENT latitude (#PCDATA)>
+<!ELEMENT longitude (#PCDATA)>
+<!ELEMENT streetAddress (#PCDATA)>
+<!ELEMENT locality (#PCDATA)>
+<!ELEMENT region (#PCDATA)>
+<!ELEMENT postalCode (#PCDATA)>
+<!ELEMENT country (#PCDATA)>
+<!ELEMENT extendedAddress (#PCDATA)>
+<!ELEMENT poBox (#PCDATA)>
+<!ELEMENT unstructuredAddress (#PCDATA)>
 
 <!ELEMENT appId (#PCDATA)>
 

@@ -28,11 +28,14 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
+import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
@@ -60,7 +63,8 @@ import java.util.concurrent.Future;
  * Implementation of supported services backed by a JSON DB.
  */
 @Singleton
-public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService {
+public class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService,
+    MessageService {
 
   private static final Comparator<Person> NAME_COMPARATOR = new Comparator<Person>() {
     public int compare(Person person, Person person1) {
@@ -99,6 +103,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    * db["friendLinks"] -> Map<Person.Id, Array<Person.Id>>
    */
   private static final String FRIEND_LINK_TABLE = "friendLinks";
+
+  /**
+   * db["messages"] -> Map<Person.Id, Array<Message>>
+   */
+  private static final String MESSAGE_TABLE = "messages";
 
   @Inject
   public JsonDbOpensocialService(@Named("shindig.canonical.json.db")String jsonLocation,
@@ -381,6 +390,111 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     } catch (JSONException je) {
       throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }
+  }
+
+  /**
+   * Post a message for a set of users.
+   * 
+   * @param userId    The user sending the message.
+   * @param appId     The application sending the message.
+   * @param msgCollId
+   * @param message   The message to post.
+   */
+  public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
+                                    SecurityToken token) throws SocialSpiException {
+    for (String recipient : message.getRecipients()) {
+        try {
+            JSONArray outbox = db.getJSONObject(MESSAGE_TABLE).getJSONArray(recipient);
+            if (outbox == null) {
+              outbox = new JSONArray();
+              db.getJSONObject(MESSAGE_TABLE).put(recipient, outbox);
+            }
+
+        outbox.put(message);
+      } catch (JSONException je) {
+        throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      }
+    }
+
+    return ImmediateFuture.newInstance(null);
+  }
+
+  public Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
+     Set<String> fields, CollectionOptions options, SecurityToken token) throws SocialSpiException
+  {
+    try {
+        List<MessageCollection> result = Lists.newArrayList();
+        JSONObject messageCollections = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token));
+        for (String msgCollId : JSONObject.getNames(messageCollections)) {
+          JSONObject msgColl = messageCollections.getJSONObject(msgCollId);
+          msgColl.put("id", msgCollId);
+          JSONArray messages = msgColl.getJSONArray("messages");
+          int numMessages = (messages == null) ? 0 : messages.length();
+          msgColl.put("total", String.valueOf(numMessages));
+          msgColl.put("unread", String.valueOf(numMessages));
+
+          
+          result.add(filterFields(msgColl, fields, MessageCollection.class));
+        }
+        return ImmediateFuture.newInstance(new RestfulCollection<MessageCollection>(result));
+    } catch (JSONException je) {
+          throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+    }
+  }
+
+
+  public Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
+      SecurityToken token) throws SocialSpiException {
+      throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+ 
+  }
+
+  /**
+   * Gets the messsages in an user's queue.
+   */
+  public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId, Set<String> fields,
+      List<String> msgIds, CollectionOptions options, SecurityToken token) throws SocialSpiException {
+      try {
+          List<Message> result = Lists.newArrayList();
+          JSONArray messages = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token)).getJSONObject(msgCollId).getJSONArray("messages");
+
+          // TODO: special case @all
+
+          if (messages == null) {
+            throw new SocialSpiException(ResponseError.BAD_REQUEST, "message collection" + msgCollId + " not found");
+          }
+          
+          // TODO: filter and sort outbox.
+          for (int i = 0; i < messages.length(); i++) {
+            JSONObject msg = messages.getJSONObject(i);
+            result.add(filterFields(msg, fields, Message.class));
+          }
+          
+          return ImmediateFuture.newInstance(new RestfulCollection<Message>(result));
+          
+      } catch (JSONException je) {
+          throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      }
+  }
+
+  public Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)
+      throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  }
+
+  public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token) 
+      throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  }
+
+  public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) 
+      throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  }
+
+  public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) 
+      throws SocialSpiException {
+    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
   }
 
   /**

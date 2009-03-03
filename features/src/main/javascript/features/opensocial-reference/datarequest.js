@@ -497,3 +497,17 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
   return opensocial.Container.get().newFetchActivitiesRequest(idSpec,
       opt_params);
 };
+
+/**
+ * Creats an item to request messages from the container.
+ *
+ */
+opensocial.DataRequest.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {
+  opt_params = opt_params || {};
+  return opensocial.Container.get().newFetchMessageCollectionsRequest(idSpec, opt_params);
+};
+
+opensocial.DataRequest.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {
+  opt_params = opt_params || {};
+  return opensocial.Container.get().newFetchMessagesRequest(idSpec, msgCollId, opt_params);
+};

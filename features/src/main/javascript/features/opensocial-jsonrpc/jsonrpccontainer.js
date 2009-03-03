@@ -427,6 +427,46 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
   };
 })();
 
+JsonRpcContainer.prototype.newMessage = function(body, opt_params) {
+  return new JsonMessage(body, opt_params);
+};
+
+JsonRpcContainer.prototype.newMessageCollection = function(opt_params) {
+  return new JsonMessageCollection(opt_params);
+};
+
+JsonRpcContainer.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {
+  var rpc = { method : "messages.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+
+  return new JsonRpcRequestItem(rpc,
+      function(rawJson) {
+        rawJson = rawJson['list'];
+        var messagecollections = [];
+        for (var i = 0; i < rawJson.length; i++) {
+          messagecollections.push(new JsonMessageCollection(rawJson[i]));
+        }
+        return new opensocial.Collection(messagecollections);
+      });
+};
+
+JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {
+  var rpc = { method : "messages.get" };
+  rpc.params = this.translateIdSpec(idSpec);
+  rpc.params.msgCollId = msgCollId;
+
+  return new JsonRpcRequestItem(rpc,
+      function(rawJson) {
+        rawJson = rawJson['list'];
+        var messages = [];
+        for (var i = 0; i < rawJson.length; i++) {
+          messages.push(new JsonMessage(rawJson[i]));
+        }
+        return new opensocial.Collection(messages);
+      });
+};
+
+
 var JsonRpcRequestItem = function(rpc, opt_processData) {
   this.rpc = rpc;
   this.processData = opt_processData ||

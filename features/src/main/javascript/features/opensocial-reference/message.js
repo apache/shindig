@@ -46,9 +46,15 @@
  * @private
  * @constructor
  */
-opensocial.Message = function(body, opt_params) {
+opensocial.Message = function(body_or_params, opt_params) {
+
+  if (typeof body_or_params  == 'string') {
+    // We have a string
   this.fields_ = opt_params || {};
-  this.fields_[opensocial.Message.Field.BODY] = body;
+    this.fields_[opensocial.Message.Field.BODY] = body_or_params;
+  } else {
+    this.fields_ = body_or_params || {};
+  }
 };
 
 
@@ -67,17 +73,10 @@ opensocial.Message = function(body, opt_params) {
  */
 opensocial.Message.Field = {
   /**
-   * The title of the message, specified as an opensocial.Message.Type.
+   * The URL of the application that generated this message, if applicable.
    * @member opensocial.Message.Field
    */
-  TYPE : 'type',
-
-  /**
-   * The title of the message. HTML attributes are allowed and are
-   * sanitized by the container.
-   * @member opensocial.Message.Field
-   */
-  TITLE : 'title',
+  APP_URL: 'appUrl',
 
   /**
    * The main text of the message. HTML attributes are allowed and are
@@ -87,6 +86,61 @@ opensocial.Message.Field = {
   BODY : 'body',
 
   /**
+   * The main text of the message as a message template. Specifies the
+   * message ID to use in the gadget xml.
+   * @member opensocial.Message.Field
+   */
+  BODY_ID : 'bodyId',
+
+
+  /**
+   * Collection IDs this Message belongs to
+   * @member opensocial.Message.Field
+   */
+  COLLECTION_IDS : 'collectionIds',
+
+  /**
+   * The Unique ID of this message.
+   * @member opensocial.Message.Field
+   */
+  ID: 'id',
+
+  /**
+   * The Parent ID of this message.  Useful for message threading.
+   * @member opensocial.Message.Field
+   */
+  PARENT_ID: 'parentId',
+
+  /**
+   * The Recipients of this message.
+   * @member opensocial.Message.Field
+   */
+  RECIPIENTS: 'recipients',
+
+  /**
+   * The Person ID that sent this message.
+   * @member opensocial.Message.Field
+   */
+  SENDER_ID: 'senderId',
+
+  /**
+   * The Status of this message.  Specified as an opensocial.Message.Status.
+   */
+  STATUS: 'status',
+
+  /**
+   * The time this message was sent.
+   */
+  TIME_SENT: 'timeSent',
+
+  /**
+   * The title of the message. HTML attributes are allowed and are
+   * sanitized by the container.
+   * @member opensocial.Message.Field
+   */
+  TITLE : 'title',
+
+  /**
    * The title of the message as a message template. Specifies the
    * message ID to use in the gadget xml.
    * @member opensocial.Message.Field
@@ -94,11 +148,22 @@ opensocial.Message.Field = {
   TITLE_ID : 'titleId',
 
   /**
-   * The main text of the message as a message template. Specifies the
-   * message ID to use in the gadget xml.
+   * The title of the message, specified as an opensocial.Message.Type.
    * @member opensocial.Message.Field
    */
-  BODY_ID : 'bodyId'
+  TYPE : 'type',
+
+  /**
+   * The last updated time of this message.
+   * @member opensocial.Message.Field
+   */
+
+  UPDATED: 'updated',
+
+  /**
+   * Urls associated with this message, specified as an array of opensocial.Url
+   */
+  URLS: 'urls'
 };
 
 
@@ -138,6 +203,32 @@ opensocial.Message.Type = {
   PUBLIC_MESSAGE : 'publicMessage'
 };
 
+/**
+ * @static
+ * @class
+ * The different status states of a message.
+ * @name opensocial.Message.Status
+ */
+
+opensocial.Message.Status = {
+  /**
+   * A new, unread message
+   * @member opensocial.Message.Status
+   */
+  NEW: 'new',
+
+  /**
+   * A deleted message
+   * @member opensocial.Message.Status
+   */
+  DELETED: 'deleted',
+
+  /**
+   * A flagged message
+   * @member opensocial.Message.Status
+   */
+  FLAGGED: 'flagged'
+};
 
 /**
  * Gets the message data that's associated with the specified key.

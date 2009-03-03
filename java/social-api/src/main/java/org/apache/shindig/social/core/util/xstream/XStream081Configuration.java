@@ -46,6 +46,7 @@ import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Message;
+import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
@@ -158,6 +159,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
         new ClassFieldMapping("message", Message.class),
+        new ClassFieldMapping("messageCollection", MessageCollection.class),
         new ClassFieldMapping("mediaItem", MediaItem.class),
         new ClassFieldMapping("name", Name.class),
         new ClassFieldMapping("organization", Organization.class),
@@ -191,6 +193,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
         new ClassFieldMapping("message", Message.class),
+        new ClassFieldMapping("messageCollection", MessageCollection.class),
         new ClassFieldMapping("mediaItem", MediaItem.class),
         new ClassFieldMapping("name", Name.class),
         new ClassFieldMapping("organization", Organization.class),
@@ -225,6 +228,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("address", Address.class)
         .put("bodyType", BodyType.class)
         .put("message", Message.class)
+        .put("messageCollection", MessageCollection.class)
         .put("mediaItem", MediaItem.class)
         .put("name", Name.class)
         .put("organization", Organization.class)

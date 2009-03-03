@@ -8,6 +8,7 @@
 //    data : Map<Person.Id, Map<String,String>>
 //    friendLinks : Map<Person.Id, Array<Person.Id>>
 //    userApplications : Map<Person.Id, Array<Application.Id>>
+//    messages : Map<Person.Id, Array<Message>>
 //  }
 //
 //  Notes:
@@ -351,6 +352,56 @@
 "jane.doe" : ["9158", "9703"],
 "george.doe" : ["9143"],
 "maija.m" : []
+},
+//
+//--------------------------- Message Collections. -----------------------------------------
+//
+"messages" : {
+"canonical" : {
+  "notification" : {"title" : "Notifications",
+                         "messages" : [
+                           {"id": "1", "title": "whazzup", "type": "notification", "body": "hey dude."},
+                           {"id": "2", "title": "play checkers", "type": "notification", "body": "hot online checkers action"},
+                           {"id": "3", "title": "you won!", "type": "notification", "body": "<b>yes, you really, really won!</b>"}
+
+                           ]},
+  "publicMessage" : { "title" : "Profile Comments",
+        "messages" : [
+          {"id": "1", "senderId": "john.doe", "title": "Hairdo", "type": "publicMessage", "body": "nice &quot;haircut!&quot;", "replies": ["1a","1b"]},
+          {"id": "1a", "senderId": "canonical", "title": "", "type": "publicMessage", "body": "that's not hair, it's a wig!", "inReplyTo": "1"},
+          {"id": "1b", "senderId": "john.doe", "title": "100% polyester", "type": "publicMessage", "body": "only the finest hyrdrocarbons :)","inReplyTo": "1"},
+          {"id": "2", "senderId": "jane.doe", "title": "hola", "type": "publicMessage", "body": "be my bff?"}
+
+        ]},
+  "privateMessage" : {"title" : "Inbox",
+        "messages" : []}
+  
+  },
+
+"john.doe" : {
+  "notification" : {"title" : "Notifications",
+                          "messages" : [
+                          {"id": "1", "title": "you received a peanut", "type": "notification", "body": "peanuts are healthy"},
+                          {"id": "3", "title": "Group Request", "type": "notification", "body": "Join Cat Lovers Anonymous"}
+                          ]},
+  "privateMessage" : {"title" : "Inbox", "messages" : []},
+  "publicMessage" : {"title" : "Inbox", "messages" : []}
+},
+"jane.doe" : {
+    "notification" : {"title" : "Notifications", "messages" : []},
+    "privateMessage" : {"title" : "Inbox", "messages" : []},
+    "publicMessage" : {"title" : "Inbox", "messages" : []}
+},
+  "george.doe" : {
+        "notification" : {"title" : "Notifications", "messages" : []},
+        "privateMessage" : {"title" : "Inbox", "messages" : []},
+        "publicMessage" : {"title" : "Inbox", "messages" : []}
+  },
+  "maija.m" : { 
+        "notification" : {"title" : "Notifications", "messages" : []},
+        "privateMessage" : {"title" : "Inbox", "messages" : []},
+        "publicMessage" : {"title" : "Inbox", "messages" : []}
+  }
 },
 //
 // Consumer Secrets for OAuth REST validations
