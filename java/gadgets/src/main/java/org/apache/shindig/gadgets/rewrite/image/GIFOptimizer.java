@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -42,8 +41,10 @@ public class GIFOptimizer extends PNGOptimizer {
       // We can rewrite tranparent GIFs to PNG but for IE6 it requires the use of
       // the AlphaImageReader and some pain. Deferring this until that is proven to work
 
-      // Write to stip any metadata and re-compute the palette
-      write(ImageUtils.palettize(image, ((IndexColorModel)image.getColorModel()).getMapSize()));
+      // Write to stip any metadata and re-compute the palette. We allow arbitrary large palettes
+      // here as if the image is already in a direct color model it will already have been
+      // constrained by the max in-mem constraint.
+      write(ImageUtils.palettize(image, Integer.MAX_VALUE));
     } else {
       usePng = true;
       outputter = new ImageIOOutputter(ImageIO.getImageWritersByFormatName("png").next(), null);
