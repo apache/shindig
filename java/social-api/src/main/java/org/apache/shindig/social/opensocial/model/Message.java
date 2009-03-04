@@ -32,7 +32,9 @@ import java.util.Date;
  * see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Message">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Message</a>
- *
+ * <br/>
+ * <a href="http://wiki.opensocial.org/index.php?title=Messaging_API_Changes">
+ * http://wiki.opensocial.org/index.php?title=Messaging_API_Changes</a>
  */
 
 @ImplementedBy(MessageImpl.class)
@@ -109,7 +111,7 @@ public interface Message {
     PRIVATE_MESSAGE("privateMessage"),
     /** A message to a specific user that can be seen by more than that user. */
     PUBLIC_MESSAGE("publicMessage");
-    
+
 
     /**
      * The type of message.
@@ -290,7 +292,7 @@ public interface Message {
    * @param timeSent the time the message was sent
    */
   void setTimeSent(Date timeSent);
-  
+
   /**
    * Gets the title of the message.
    * @return the title of the message
@@ -338,7 +340,7 @@ public interface Message {
   Date getUpdated();
 
   /**
-   * Sets the updated timestamp for the message. 
+   * Sets the updated timestamp for the message.
    */
   void setUpdated(Date updated);
 
