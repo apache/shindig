@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
@@ -164,7 +165,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2-expected.html"));
     MutableContent mc = rewriteContent(rewriter, content);
-    assertEquals(mc.getContent(), expected);
+    assertEquals(StringUtils.deleteWhitespace(mc.getContent()),
+                 StringUtils.deleteWhitespace(expected));
   }
 
   public void testNoRewriteUnknownMimeType() {
