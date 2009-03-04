@@ -19,8 +19,12 @@ package org.apache.shindig.social.opensocial.jpa;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Message;
+import org.apache.shindig.social.opensocial.model.Url;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -40,14 +44,14 @@ import javax.persistence.Version;
 @Table(name="message")
 public class MessageDb implements Message, DbObject {
   /**
-   * The internal object ID used for references to this object. Should be generated 
+   * The internal object ID used for references to this object. Should be generated
    * by the underlying storage mechanism
    */
   @Id
   @GeneratedValue(strategy=IDENTITY)
   @Column(name="oid")
   protected long objectId;
-  
+
   /**
    * An optimistic locking field
    */
@@ -62,7 +66,7 @@ public class MessageDb implements Message, DbObject {
   @Basic
   @Column(name="body", length=255)
   protected String body;
-  
+
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.Message
@@ -70,7 +74,7 @@ public class MessageDb implements Message, DbObject {
   @Basic
   @Column(name="title", length=255)
   protected String title;
-  
+
   /**
    * model field. (database representation of type)
    * @see org.apache.shindig.social.opensocial.model.Message
@@ -78,7 +82,7 @@ public class MessageDb implements Message, DbObject {
   @Basic
   @Column(name="message_type")
   protected String typeDb;
-  
+
   /**
    * model field.
    * @see org.apache.shindig.social.opensocial.model.Message
@@ -169,7 +173,7 @@ public class MessageDb implements Message, DbObject {
   }
 
   /**
-   * 
+   *
    */
   @PrePersist
   public void populateDbFields() {
@@ -177,11 +181,148 @@ public class MessageDb implements Message, DbObject {
   }
 
   /**
-   * 
+   *
    */
   @PostLoad
   public void loadTransientFields() {
     type = Type.valueOf(typeDb);
   }
 
+  /** {@inheritDoc} */
+  public String getAppUrl() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public String getBodyId() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getCollectionIds() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public String getId() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public String getInReplyTo() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getRecipients() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public List<String> getReplies() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public String getSenderId() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public Status getStatus() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public Date getTimeSent() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public String getTitleId() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public Date getUpdated() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public List<Url> getUrls() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public void setAppUrl(String url) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setBodyId(String bodyId) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setCollectionIds(List<String> collectionIds) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setId(String id) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setInReplyTo(String parentId) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setRecipients(List<String> recipients) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setSenderId(String senderId) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setStatus(Status status) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setTimeSent(Date timeSent) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setTitleId(String titleId) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setUpdated(Date updated) {
+    // TODO Auto-generated method stub
+  }
+
+  /** {@inheritDoc} */
+  public void setUrls(List<Url> urls) {
+    // TODO Auto-generated method stub
+  }
 }
