@@ -48,6 +48,19 @@ public class GIFOptimizerTest extends BaseOptimizerTest {
     assertEquals(httpResponse.getHeader("Content-Type"), "image/png");
   }
 
+  /**
+   * This is a GIF image with has a direct color model instead of an indexed one and has
+   * tranparency
+   * @throws Exception
+   */
+  public void testDirectColorModelGif() throws Exception {
+    HttpResponse resp =
+        createResponse("org/apache/shindig/gadgets/rewrite/image/directcolor.gif", "image/gif");
+    HttpResponse httpResponse = rewrite(resp);
+    assertTrue(httpResponse.getContentLength() <= resp.getContentLength());
+    assertEquals(httpResponse.getHeader("Content-Type"), "image/gif");
+  }
+
   protected HttpResponse rewrite(HttpResponse original)
       throws IOException, ImageReadException {
     return new GIFOptimizer(new OptimizerConfig(), original).rewrite(
