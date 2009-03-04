@@ -1378,7 +1378,7 @@
       <dependency>
         <groupId>org.apache.sanselan</groupId>
         <artifactId>sanselan</artifactId>
-        <version>0.94-incubator</version>
+        <version>0.97-incubator</version>
       </dependency>
       <dependency>
         <groupId>de.odysseus.juel</groupId>
