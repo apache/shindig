@@ -29,16 +29,16 @@ import java.io.IOException;
 import com.google.inject.Inject;
 
 /**
- * A TagHandler for the <os:Html code="..."/> tag.
+ * A TagHandler for the &lt;os:Html code="..."/&gt; tag.
  * The value of the @code attribute will be treated as HTML markup.
  */
 public class HtmlTagHandler extends AbstractTagHandler {
- 
+
   static final String TAG_NAME = "Html";
   static final String ATTR_CODE = "code";
-  
+
   private final GadgetHtmlParser parser;
-  
+
   @Inject
   public HtmlTagHandler(GadgetHtmlParser parser) {
     super(TagHandler.OPENSOCIAL_NAMESPACE, TAG_NAME);
@@ -50,12 +50,12 @@ public class HtmlTagHandler extends AbstractTagHandler {
     if ((code == null) || "".equals(code)) {
       return;
     }
-    
+
     try {
       parser.parseFragment(code, result);
     } catch (GadgetException ge) {
       try {
-        StringBuilder sb = new StringBuilder("Error: ");    
+        StringBuilder sb = new StringBuilder("Error: ");
         NekoSerializer.printEscapedText(ge.getMessage(), sb);
         Node comment = result.getOwnerDocument().createComment(sb.toString());
         result.appendChild(comment);

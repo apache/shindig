@@ -49,7 +49,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
- * Parsing code for <os:*> elements.
+ * Parsing code for &lt;os:*&gt; elements.
  */
 public class PipelinedData {
   private final Map<String, SocialData> socialPreloads;

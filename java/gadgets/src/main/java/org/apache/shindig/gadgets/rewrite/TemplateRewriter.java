@@ -45,8 +45,8 @@ import com.google.inject.Provider;
 /**
  * This ContentRewriter uses a TemplateProcessor to replace os-template
  * tag contents of a gadget spec with their rendered equivalents.
- * 
- * Only templates without the @name and @tag attributes are processed 
+ *
+ * Only templates without the @name and @tag attributes are processed
  * automatically.
  */
 public class TemplateRewriter implements ContentRewriter {
@@ -55,18 +55,18 @@ public class TemplateRewriter implements ContentRewriter {
 
   /** A temporary parameter while server-side templating is in development */
   static final String SERVER_TEMPLATING_PARAM = "process-on-server";
-  
+
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
    * processors are not.
    */
   private final Provider<TemplateProcessor> processor;
-  
+
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor) {
     this.processor = processor;
   }
-  
+
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     return null;
@@ -76,14 +76,16 @@ public class TemplateRewriter implements ContentRewriter {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
     if (f != null && isServerTemplatingEnabled(f)) {
-      return rewriteImpl(gadget, content);   
+      return rewriteImpl(gadget, content);
     }
     return null;
   }
 
   /**
    * For now, only enable server-side templating when the feature contains:
-   *   <Param name="process-on-server">true</Param>
+   * <pre>
+   *   &lt;Param name="process-on-server"&gt;true&lt;/Param&gt;
+   * </pre>
    */
   private boolean isServerTemplatingEnabled(Feature f) {
     return ("true".equalsIgnoreCase(f.getParams().get(SERVER_TEMPLATING_PARAM)));
@@ -105,19 +107,19 @@ public class TemplateRewriter implements ContentRewriter {
         // that require data that isn't available on the server can't
         // be processed either
         return "text/os-template".equals(type)
-            && "".equals(name) 
+            && "".equals(name)
             && "".equals(tag)
             && checkRequiredData(require, pipelinedData.keySet());
       }
     }));
-    
+
     if (templates.isEmpty()) {
       return null;
     }
-    
+
     TemplateContext templateContext = new TemplateContext(pipelinedData);
     GadgetELResolver globalGadgetVars = new GadgetELResolver(gadget.getContext());
-    
+
     for (Element template : templates) {
       DocumentFragment result = processor.get().processTemplate(
           template, templateContext, globalGadgetVars);
@@ -127,7 +129,7 @@ public class TemplateRewriter implements ContentRewriter {
       // e.g. paging through friend lists, will still need the template
       template.getParentNode().removeChild(template);
     }
-    
+
     // TODO: Deactivate the "os-templates" feature if all templates have
     // been rendered.
     // Note: This may not always be correct behavior since client may want
@@ -135,7 +137,7 @@ public class TemplateRewriter implements ContentRewriter {
     MutableContent.notifyEdit(content.getDocument());
     return RewriterResults.cacheableIndefinitely();
   }
-  
+
   /**
    * Checks that all the required data is available at rewriting time.
    * @param requiredData A string of comma-separated data set names
