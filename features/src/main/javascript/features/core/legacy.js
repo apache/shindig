@@ -22,7 +22,7 @@
 
 var JSON = gadgets.json;
 
-(function() {
+var _IG_Prefs = (function() {
 
 var instance = null;
 
@@ -35,6 +35,8 @@ var _IG_Prefs = function() {
 };
 
  _IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
+
+return _IG_Prefs;
 })();
 
 function _IG_Fetch_wrapper(callback, obj) {
