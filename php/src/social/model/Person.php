@@ -98,7 +98,7 @@ class Person {
 
   private function setFieldImpl($fieldName, $value) {
     // treat empty singular/plural fields as null so they don't pollute the output
-    if ($value == '' || (is_array($value) && ! count($value))) {
+    if ($value === '' || (is_array($value) && ! count($value))) {
       $value = null;
     }
     $this->$fieldName = $value;
