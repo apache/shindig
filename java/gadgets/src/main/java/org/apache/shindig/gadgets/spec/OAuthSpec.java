@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Wraps an <OAuth> element from the gadget spec.
+ * Wraps an &lt;OAuth&gt; element from the gadget spec.
  *
  * Instances are immutable.
  */

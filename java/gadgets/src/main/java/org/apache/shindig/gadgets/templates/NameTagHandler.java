@@ -26,20 +26,20 @@ import org.w3c.dom.Node;
 import com.google.inject.Inject;
 
 /**
- * TagHandler for the <os:Name person="..."/> tag.
+ * TagHandler for the &lt;os:Name person="..."/&gt; tag.
  */
 public class NameTagHandler extends AbstractTagHandler {
 
   static final String TAG_NAME = "Name";
-  static final String PERSON_ATTR = "person"; 
-  
+  static final String PERSON_ATTR = "person";
+
   @Inject
   public NameTagHandler() {
     super(TagHandler.OPENSOCIAL_NAMESPACE, TAG_NAME);
   }
-  
+
   public void process(Node result, Element tag, TemplateProcessor processor) {
-    
+
     JSONObject person = getValueFromTag(tag, PERSON_ATTR, processor, JSONObject.class);
     if (person == null) {
       return;
@@ -52,7 +52,7 @@ public class NameTagHandler extends AbstractTagHandler {
     if (formatted.length() == 0) {
       formatted = name.optString("givenName") + " " + name.optString("familyName");
     }
-    
+
     Document doc = result.getOwnerDocument();
     Element root = doc.createElement("b");
 
