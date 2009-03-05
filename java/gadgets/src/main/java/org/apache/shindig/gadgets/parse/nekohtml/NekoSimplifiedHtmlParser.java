@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.Set;
 import java.util.Stack;
 
@@ -70,11 +71,11 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   public NekoSimplifiedHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
   }
-  
+
   @Override
   protected Document parseDomImpl(String source) {
     DocumentHandler handler;
-    
+
     try {
       handler = parseHtmlImpl(source);
     } catch (IOException ioe) {
@@ -91,7 +92,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   @Override
   protected DocumentFragment parseFragmentImpl(String source) throws GadgetException {
     DocumentHandler handler;
-    
+
     try {
       handler = parseHtmlImpl(source);
     } catch (IOException ioe) {
@@ -118,7 +119,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         return HTMLElements.getElement(name);
       }
     };
-    
+
     DocumentHandler handler = newDocumentHandler(source, htmlScanner);
 
     if (config.getFeature("http://xml.org/sax/features/namespaces")) {
@@ -130,13 +131,13 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     } else {
       tagBalancer.setDocumentHandler(handler);
     }
-    
-    tagBalancer.setDocumentSource(htmlScanner);    
+
+    tagBalancer.setDocumentSource(htmlScanner);
     htmlScanner.setDocumentHandler(tagBalancer);
 
     tagBalancer.reset(config);
     htmlScanner.reset(config);
-    
+
     XMLInputSource inputSource = new XMLInputSource(null, null, null);
     inputSource.setEncoding("UTF-8");
     inputSource.setCharacterStream(new StringReader(source));
@@ -144,7 +145,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     htmlScanner.scanDocument(true);
     return handler;
   }
-  
+
   protected HTMLConfiguration newConfiguration() {
     HTMLConfiguration config = new HTMLConfiguration();
     // Maintain original case for elements and attributes
@@ -168,7 +169,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   protected boolean isElementImportant(QName qName) {
     return elements.contains(qName.rawname.toLowerCase());
   }
-  
+
   /**
    * Handler for XNI events from Neko
    */
@@ -273,7 +274,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         elementStack.peek().appendChild(document.createTextNode(builder.toString()));
         builder.setLength(0);
       }
-      
+
       Element element;
       // Preserve XML namespace if present
       if (qName.uri != null) {
@@ -281,7 +282,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       } else {
         element = document.createElement(qName.rawname);
       }
-      
+
       for (int i = 0; i < xmlAttributes.getLength(); i++) {
         if (xmlAttributes.getURI(i) != null) {
           element.setAttributeNS(xmlAttributes.getURI(i), xmlAttributes.getQName(i),
@@ -295,10 +296,20 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     private void appendAttributeValue(String text) {
+      boolean isUrl = false;
+      try {
+        new URL(text);
+        isUrl = true;
+      } catch (Exception e) {
+        // nop
+      }
+
       for (int i = 0; i < text.length(); i++) {
         char c = text.charAt(i);
         if (c == '"') {
           builder.append("&quot;");
+        } else if (c == '&' && !isUrl) {
+          builder.append("&amp;");
         } else {
           builder.append(c);
         }
