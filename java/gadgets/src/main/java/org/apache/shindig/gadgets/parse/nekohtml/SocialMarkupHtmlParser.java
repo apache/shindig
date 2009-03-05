@@ -31,7 +31,15 @@ import org.cyberneko.html.HTMLScanner;
 import org.w3c.dom.DOMImplementation;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+/**
+ * Supports parsing of social markup blocks inside gadget content.
+ * &lt;script&gt; elements with types of either "text/os-template"
+ * or "text/os-data" are parsed inline into contained DOM hierarchies
+ * for subsequent processing by the pipeline and template rewriters.
+ */
+@Singleton
 public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
   @Inject
   public SocialMarkupHtmlParser(DOMImplementation documentProvider) {
