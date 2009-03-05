@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Authentication based on a provided BlobCrypter.
  *
- * Wire format is "<container>:<encrypted-and-signed-token>"
+ * Wire format is "&lt;container&gt;:&lt;encrypted-and-signed-token&gt;"
  *
  * Container is included so different containers can use different security tokens if necessary.
  */

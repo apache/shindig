@@ -39,10 +39,10 @@ import java.util.Map;
  * signedFetchDomain: oauth_consumer_key value to use for signed fetch using default key.
  *
  * Creating a key is best done with a command line like this:
- *
+ * <pre>
  *     dd if=/dev/random bs=32 count=1  | openssl base64 > /tmp/key.txt
- *
- * Wire format is "<container>:<encrypted-and-signed-token>"
+ * </pre>
+ * Wire format is "&lt;container&gt;:&lt;encrypted-and-signed-token&gt;"
  */
 @Singleton
 public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {

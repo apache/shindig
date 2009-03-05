@@ -67,8 +67,9 @@ public class BasicBlobCrypter implements BlobCrypter {
    * in the file, whitespace trimmed from either end, as UTF-8 bytes.
    *
    * The following *nix command line will create an excellent key:
-   *
+   * <pre>
    * dd if=/dev/random bs=32 count=1  | openssl base64 > /tmp/key.txt
+   * </pre>
    *
    * @throws IOException if the file can't be read.
    */
