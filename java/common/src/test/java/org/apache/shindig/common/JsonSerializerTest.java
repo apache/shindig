@@ -44,6 +44,8 @@ import java.util.Map;
  */
 public class JsonSerializerTest {
 
+  private static final String JSON_POJO_AS_JSON = "{string:'string-value',integer:100,'simple!':3}";
+
   @Test
   public void serializeSimpleJsonObject() throws Exception {
     String json = "{foo:'bar'}";
@@ -75,6 +77,15 @@ public class JsonSerializerTest {
   public void serializeJsonArray() throws Exception {
     JSONArray array = new JSONArray(new String[] {"foo", null, "bar", "baz"});
     assertJsonEquals("['foo','bar','baz']", JsonSerializer.serialize(array));
+  }
+
+  @Test
+  public void serializeJsonObjectWithComplexArray() throws Exception {
+    JSONArray array = new JSONArray();
+    array.put(new JsonPojo());
+    JSONObject object = new JSONObject();
+    object.put("array", array);
+    assertJsonEquals("{'array': [" + JSON_POJO_AS_JSON + "]}", JsonSerializer.serialize(object));
   }
 
   @Test
@@ -118,7 +129,7 @@ public class JsonSerializerTest {
   public void serializePojo() throws Exception {
     JsonPojo pojo = new JsonPojo();
 
-    assertJsonEquals("{string:'string-value',integer:100,'simple!':3}",
+    assertJsonEquals(JSON_POJO_AS_JSON,
         JsonSerializer.serialize(pojo));
   }
 

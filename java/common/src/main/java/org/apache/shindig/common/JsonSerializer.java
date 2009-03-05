@@ -163,7 +163,7 @@ public final class JsonSerializer {
     } else if (value instanceof JSONObject) {
       appendJsonObject(buf, (JSONObject) value);
     } else if (value instanceof JSONArray) {
-      buf.append(value.toString());
+      appendJsonArray(buf, (JSONArray) value);
     } else if (value instanceof Map) {
       appendMap(buf, (Map<String, Object>) value);
     } else if (value instanceof Collection) {
