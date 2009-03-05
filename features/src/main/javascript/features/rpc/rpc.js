@@ -306,7 +306,9 @@ gadgets.rpc = function() {
 
   // Create the Default RPC handler.
   services[DEFAULT_NAME] = function() {
-    throw new Error('Unknown RPC service: ' + this.s);
+    if (console && console.log) {
+      console.log('Unknown RPC service: ' + this.s);
+    }
   };
 
   // Create a Special RPC handler for callbacks.
