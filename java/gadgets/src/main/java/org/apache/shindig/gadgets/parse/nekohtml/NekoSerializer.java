@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
 
 /**
  * This parser does not try to escape entities in text content as it expects the parser
@@ -58,7 +59,7 @@ public class NekoSerializer extends HtmlSerializer
   public static void serialize(Node n, Appendable output) throws IOException {
     serialize(n, output, false);
   }
-    
+
   private static void serialize(Node n, Appendable output, boolean xmlMode)
       throws IOException {
     switch (n.getNodeType()) {
@@ -77,10 +78,10 @@ public class NekoSerializer extends HtmlSerializer
         Element elem = (Element)n;
         HTMLElements.Element htmlElement =
             HTMLElements.getElement(elem.getNodeName());
-        
+
         NodeList children = elem.getChildNodes();
         printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
-        
+
         // Special HTML elements - <script> in particular - will typically
         // only have CDATA.  If they do have elements, that'd be data pipelining
         // or templating kicking in, and we should use XML-format output.
@@ -120,15 +121,15 @@ public class NekoSerializer extends HtmlSerializer
   }
 
   /**
-   * Print the start of an HTML element. 
+   * Print the start of an HTML element.
    */
   public static void printStartElement(Element elem, Appendable output) throws IOException {
     printStartElement(elem, output, false);
   }
-  
+
   /**
    * Print the start of an HTML element.  If withXmlClose==true, this is an
-   * empty element that should have its content 
+   * empty element that should have its content
    */
   private static void printStartElement(Element elem, Appendable output, boolean withXmlClose)
       throws IOException {
@@ -148,11 +149,21 @@ public class NekoSerializer extends HtmlSerializer
   }
 
   public static void printAttributeValue(String text, Appendable output) throws IOException {
+    boolean isUrl = false;
+    try {
+        new URL(text);
+        isUrl = true;
+    } catch (Exception e) {
+        // nop
+    }
+
     int length = text.length();
     for (int j = 0; j < length; j++) {
       char c = text.charAt(j);
       if (c == '"') {
         output.append("&quot;");
+      } else if (c == '&' && !isUrl) {
+        output.append("&amp;");
       } else {
         output.append(c);
       }

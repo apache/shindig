@@ -79,6 +79,17 @@ public class NekoParsersTest extends TestCase {
     parseAndCompareBalanced(content, expected, simple);
   }
 
+  public void testAmpersand() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands.html"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream(
+        "org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands-expected.html"));
+    parseAndCompareBalanced(content, expected, full);
+    parseAndCompareBalanced(content, expected, simple);
+  }
+
   private void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
       throws Exception {
     Document document = parser.parseDom(content);
