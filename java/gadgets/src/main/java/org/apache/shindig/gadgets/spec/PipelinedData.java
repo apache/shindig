@@ -136,7 +136,7 @@ public class PipelinedData {
   public PipelinedData substitute(Substitutions substituter) {
     return new PipelinedData(this, substituter);
   }
-  
+
   public interface Batch {
     Map<String, Object> getSocialPreloads();
     Map<String, RequestAuthenticationInfo> getHttpPreloads();
@@ -147,7 +147,7 @@ public class PipelinedData {
    * Gets the first batch of preload requests.  Preloads that require root
    * objects not yet available will not be executed in this batch, but may
    * become available in subsequent batches.
-   * 
+   *
    * @param rootObjects an ELResolver that can evaluate currently available
    *     root objects.
    * @see GadgetELResolver
@@ -156,7 +156,7 @@ public class PipelinedData {
   public Batch getBatch(ELResolver rootObjects) {
     return getBatch(rootObjects, socialPreloads, httpPreloads);
   }
-  
+
   /**
    * Create a Batch of preload requests
    * @param rootObjects an ELResolver that can evaluate currently available
@@ -168,11 +168,11 @@ public class PipelinedData {
       Map<String, HttpData> currentHttpPreloads) {
     Expressions expressions = Expressions.sharedInstance();
     ELContext elContext = expressions.newELContext(rootObjects);
- 
+
     // Evaluate all existing social preloads
     Map<String, Object> evaluatedSocialPreloads = Maps.newHashMap();
     Map<String, SocialData> pendingSocialPreloads = null;
-    
+
     if (currentSocialPreloads != null) {
       for (Map.Entry<String, SocialData> preload : currentSocialPreloads.entrySet()) {
         try {
@@ -189,11 +189,11 @@ public class PipelinedData {
           throw new RuntimeException(e);
         }
       }
-    }    
+    }
     // And evaluate all existing HTTP preloads
     Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads = Maps.newHashMap();
     Map<String, HttpData> pendingHttpPreloads = null;
-    
+
     if (currentHttpPreloads != null) {
       for (Map.Entry<String, HttpData> preload : currentHttpPreloads.entrySet()) {
         try {
@@ -210,20 +210,20 @@ public class PipelinedData {
         }
       }
     }
-    
+
     // Nothing evaluated or pending;  return null for the batch.  Note that
-    // there may be multiple PipelinedData objects (e.g., from multiple 
+    // there may be multiple PipelinedData objects (e.g., from multiple
     // <script type="text/os-data"> elements), so even if all evaluations
     // fail here, evaluations might succeed elsewhere and free up pending preloads
     if (evaluatedSocialPreloads.isEmpty() && evaluatedHttpPreloads.isEmpty() &&
         pendingHttpPreloads == null && pendingSocialPreloads == null) {
       return null;
     }
-    
+
     return new BatchImpl(evaluatedSocialPreloads, evaluatedHttpPreloads,
         pendingSocialPreloads, pendingHttpPreloads);
   }
-  
+
   /** Batch implementation */
   class BatchImpl implements Batch {
 
@@ -244,7 +244,7 @@ public class PipelinedData {
     public Map<String, Object> getSocialPreloads() {
       return evaluatedSocialPreloads;
     }
-    
+
     public Map<String, RequestAuthenticationInfo> getHttpPreloads() {
       return evaluatedHttpPreloads;
     }
@@ -325,10 +325,10 @@ public class PipelinedData {
     copyAttribute("userId", child, expression, JSONArray.class);
     updateUserArrayState("userId", child);
     copyAttribute("appId", child, expression, String.class);
-    // TODO: should be activityIds?
+    // TODO: SHINDIG-711 should be activityIds?
     copyAttribute("activityId", child, expression, JSONArray.class);
     copyAttribute("fields", child, expression, JSONArray.class);
-    
+
     // TODO: add activity paging support
 
     return expression;
@@ -340,15 +340,15 @@ public class PipelinedData {
     if (method == null) {
       throw new SpecParserException("Missing @method attribute on os:DataRequest");
     }
-    
+
     // TODO: should we support anything that doesn't end in .get?
-    // i.e, should this be a whitelist not a blacklist? 
+    // i.e, should this be a whitelist not a blacklist?
     if (method.endsWith(".update")
         || method.endsWith(".create")
         || method.endsWith(".delete")) {
       throw new SpecParserException("Unsupported @method attribute \"" + method + "\" on os:DataRequest");
     }
-    
+
     SocialData expression = new SocialData(child.getAttribute("key"), method);
     NamedNodeMap nodeMap = child.getAttributes();
     for (int i = 0; i < nodeMap.getLength(); i++) {
@@ -357,13 +357,13 @@ public class PipelinedData {
       if (attrNode.getNamespaceURI() != null) {
         continue;
       }
-      
+
       String name = attrNode.getLocalName();
       // Skip the built-in names
       if ("method".equals(name) || "key".equals(name)) {
         continue;
       }
-      
+
       String value = attrNode.getNodeValue();
       expression.addProperty(name, value, Object.class);
     }
@@ -379,7 +379,7 @@ public class PipelinedData {
       if (data.signOwner) {
         needsOwner = true;
       }
-      
+
       if (data.signViewer) {
         needsViewer = true;
       }
@@ -446,7 +446,7 @@ public class PipelinedData {
       this.signViewer = booleanValue(element, "sign_viewer", true);
 
       Expressions expressions = Expressions.sharedInstance();
-      
+
       // TODO: many of these attributes should not be EL enabled
       Map<String, ValueExpression> attributes = Maps.newHashMap();
       for (int i = 0; i < element.getAttributes().getLength(); i++) {
