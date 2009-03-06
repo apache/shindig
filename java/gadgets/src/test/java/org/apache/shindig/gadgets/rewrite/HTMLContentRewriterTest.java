@@ -19,11 +19,8 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.config.AbstractContainerConfig;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
-
 import org.easymock.EasyMock;
 import org.w3c.dom.Document;
 
@@ -40,13 +37,6 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    ContainerConfig config = new AbstractContainerConfig() {
-      @Override
-      public Object getProperty(String container, String name) {
-        return null;
-      }      
-    };
-    
     ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
         DEFAULT_CONCAT_BASE);
 
@@ -57,7 +47,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testScriptsBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
-    Document doc = rewriteContent(rewriter, content).getDocument();
+    Document doc = rewriteContent(rewriter, content, null).getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -110,11 +100,20 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
             "&1=http%3A%2F%2Fwww.example.org%2F6.js");
 
   }
-
+  
+  public void testScriptsForContainer() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
+    String text = rewriteContent(rewriter, content, MOCK_CONTAINER).getContent();
+    // Verify that the correct concat base was used
+    assertFalse(text.contains(DEFAULT_CONCAT_BASE));
+    assertTrue(text.contains(MOCK_CONCAT_BASE));
+  }
+  
   public void testLinksBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
-    Document doc = rewriteContent(rewriter, content).getDocument();
+    Document doc = rewriteContent(rewriter, content, null).getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -137,10 +136,19 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
   }
 
+  public void testLinksForContainer() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
+    String text = rewriteContent(rewriter, content, MOCK_CONTAINER).getContent();
+    // Verify that the correct proxy base was used
+    assertFalse(text.contains(DEFAULT_PROXY_BASE));
+    assertTrue(text.contains(MOCK_PROXY_BASE));
+  }
+  
   public void testStyleBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
-    MutableContent mc = rewriteContent(rewriter, content);
+    MutableContent mc = rewriteContent(rewriter, content, null);
     Document doc = mc.getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
@@ -176,11 +184,20 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2.html"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2-expected.html"));
-    MutableContent mc = rewriteContent(rewriter, content);
+    MutableContent mc = rewriteContent(rewriter, content, null);
     assertEquals(StringUtils.deleteWhitespace(mc.getContent()),
                  StringUtils.deleteWhitespace(expected));
   }
 
+  public void testStyleForContainer() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
+    String text = rewriteContent(rewriter, content, MOCK_CONTAINER).getContent();
+    // Verify that the correct concat base was used
+    assertFalse(text.contains(DEFAULT_CONCAT_BASE));
+    assertTrue(text.contains(MOCK_CONCAT_BASE));
+  }
+  
   public void testNoRewriteUnknownMimeType() {
     // Strict mock as we expect no calls
     MutableContent mc = mock(MutableContent.class, true);

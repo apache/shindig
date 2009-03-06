@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -49,6 +51,12 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
   public static final String DEFAULT_PROXY_BASE = "http://www.test.com/dir/proxy?url=";
   public static final String DEFAULT_CONCAT_BASE = "http://www.test.com/dir/concat?";
 
+  public static final String MOCK_CONTAINER = "mock";
+  public static final String MOCK_PROXY_BASE = 
+    replaceDefaultWithMockServer(DEFAULT_PROXY_BASE);
+  public static final String MOCK_CONCAT_BASE = 
+    replaceDefaultWithMockServer(DEFAULT_CONCAT_BASE);
+
   protected Set<String> tags;
   protected ContentRewriterFeature defaultRewriterFeature;
   protected ContentRewriterFeatureFactory rewriterFeatureFactory;
@@ -56,6 +64,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
   protected GadgetHtmlParser parser;
   protected Injector injector;
   protected HttpResponse fakeResponse;
+  protected ContainerConfig config;
 
   @Override
   protected void setUp() throws Exception {
@@ -72,7 +81,23 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
-  }
+
+    config = new AbstractContainerConfig() {
+      @Override
+      public Object getProperty(String container, String name) {
+        if (MOCK_CONTAINER.equals(container)) {
+          if (ContentRewriterUris.PROXY_BASE_CONFIG_PROPERTY.equals(name)) {
+            return MOCK_PROXY_BASE;
+          } else if (ContentRewriterUris.CONCAT_BASE_CONFIG_PROPERTY.equals(name)) {
+            return MOCK_CONCAT_BASE;
+          }
+        }
+        
+        return null;
+      }
+    };
+    
+}
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,
       Set<String> tags) throws GadgetException {
@@ -99,6 +124,10 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     return new GadgetSpec(SPEC_URL, xml);
   }
 
+  public static String replaceDefaultWithMockServer(String originalText) {
+    return originalText.replace("test.com", "mock.com");
+  }
+  
   ContentRewriterFeatureFactory mockContentRewriterFeatureFactory(
       ContentRewriterFeature feature) {
     return new FakeRewriterFeatureFactory(feature);
@@ -106,7 +135,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
 
   String rewriteHelper(ContentRewriter rewriter, String s)
       throws Exception {
-    MutableContent mc = rewriteContent(rewriter, s);
+    MutableContent mc = rewriteContent(rewriter, s, null);
     String rewrittenContent = mc.getContent();
 
     // Strip around the HTML tags for convenience
@@ -118,7 +147,7 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
     return rewrittenContent;
   }
 
-  MutableContent rewriteContent(ContentRewriter rewriter, String s)
+  MutableContent rewriteContent(ContentRewriter rewriter, String s, final String container)
       throws Exception {
     MutableContent mc = new MutableContent(parser, s);
 
@@ -129,6 +158,11 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
       @Override
       public URI getUrl() {
         return SPEC_URL.toJavaUri();
+      }
+      
+      @Override
+      public String getContainer() {
+        return container;
       }
     };
 

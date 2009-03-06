@@ -20,20 +20,17 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
-
-import com.google.common.collect.Lists;
-
 import org.easymock.EasyMock;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 /**
  *
@@ -49,13 +46,6 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    ContainerConfig config = new AbstractContainerConfig() {
-      @Override
-      public Object getProperty(String container, String name) {
-        return null;
-      }      
-    };
-    
     ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE, null);
     rewriter = new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser());
     dummyUri = Uri.parse("http://www.w3c.org");
@@ -80,7 +70,29 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         StringUtils.deleteWhitespace(mc.getContent()));
   }
 
-    public void testNoRewriteUnknownMimeType() {
+  public void testCssWithContainerProxy() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
+    expected = replaceDefaultWithMockServer(expected);
+    
+    HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
+    request.setMethod("GET");
+    request.setGadget(SPEC_URL);
+    request.setContainer(MOCK_CONTAINER);
+
+    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content).create();
+
+    MutableContent mc = new MutableContent(null, content);
+    rewriter.rewrite(request, response, mc);
+
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(mc.getContent()));
+  }
+
+  public void testNoRewriteUnknownMimeType() {
     // Strict mock as we expect no calls
     MutableContent mc = mock(MutableContent.class, true);
     HttpRequest req = mock(HttpRequest.class);
