@@ -23,6 +23,7 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.ResourceLoader;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import net.sf.ehcache.CacheManager;
@@ -40,7 +41,7 @@ import java.util.logging.Logger;
 public class EhCacheCacheProvider implements CacheProvider {
   private final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;
-  private final Map<String, Cache<?, ?>> caches = Maps.newConcurrentHashMap();
+  private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
 
   @Inject
   public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,

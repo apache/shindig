@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter;
@@ -101,7 +102,7 @@ public class MapConverter extends AbstractCollectionConverter {
    */
   @Override
   public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-    Map<String, Object> m = Maps.newConcurrentHashMap();
+    Map<String, Object> m = new MapMaker().makeMap();
     reader.moveDown();
     while (reader.hasMoreChildren()) {
       String key = reader.getNodeName();

@@ -24,6 +24,7 @@ import org.apache.shindig.protocol.model.EnumImpl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -50,7 +51,7 @@ import java.util.Map;
 public class BeanJsonConverter implements BeanConverter {
 
   // Only compute the filtered setters once per-class
-  private static final Map<Class<?>, Map<String, Method>> setters = Maps.newConcurrentHashMap();
+  private static final Map<Class<?>, Map<String, Method>> setters = new MapMaker().makeMap();
 
   private final Injector injector;
 

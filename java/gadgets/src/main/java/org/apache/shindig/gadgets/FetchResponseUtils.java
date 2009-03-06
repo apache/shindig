@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 /**
  * Handles converting HttpResponse objects to the format expected by the makeRequest javascript.
@@ -66,7 +67,7 @@ public class FetchResponseUtils {
   
   private static void addHeaders(JSONObject headers, HttpResponse response, String headerName)
       throws JSONException {
-    List<String> values = response.getHeaders(headerName);
+    Collection<String> values = response.getHeaders(headerName);
     if (!values.isEmpty()) {
       headers.put(headerName.toLowerCase(), new JSONArray(values));
     }

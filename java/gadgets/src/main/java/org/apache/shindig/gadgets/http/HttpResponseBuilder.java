@@ -17,15 +17,17 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.DateUtil;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -33,7 +35,7 @@ import com.google.common.collect.Maps;
  */
 public class HttpResponseBuilder {
   private int httpStatusCode = HttpResponse.SC_OK;
-  private Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+  private Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
   private byte[] responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
   private Map<String, String> metadata = Maps.newHashMap();
 
@@ -48,7 +50,9 @@ public class HttpResponseBuilder {
 
   public HttpResponseBuilder(HttpResponse response) {
     httpStatusCode = response.getHttpStatusCode();
+
     headers.putAll(response.getHeaders());
+
     metadata.putAll(response.getMetadata());
     responseBytes = response.getResponseAsBytes();
   }
@@ -95,12 +99,7 @@ public class HttpResponseBuilder {
    */
   public HttpResponseBuilder addHeader(String name, String value) {
     if (name != null) {
-      List<String> values = headers.get(name);
-      if (values == null) {
-        values = Lists.newLinkedList();
-        headers.put(name, values);
-      }
-      values.add(value);
+      headers.put(name, value);
     }
     return this;
   }
@@ -110,7 +109,7 @@ public class HttpResponseBuilder {
    */
   public HttpResponseBuilder setHeader(String name, String value) {
     if (name != null) {
-      headers.put(name, Lists.newLinkedList(value));
+      headers.replaceValues(name, Lists.newArrayList(value));
     }
     return this;
   }
@@ -119,8 +118,8 @@ public class HttpResponseBuilder {
    * Adds an entire map of headers to the response.
    */
   public HttpResponseBuilder addHeaders(Map<String, String> headers) {
-    for (Map.Entry<String, String> entry : headers.entrySet()) {
-      addHeader(entry.getKey(), entry.getValue());
+    for (Map.Entry<String,String> entry : headers.entrySet()) {
+      this.headers.put(entry.getKey(), entry.getValue());
     }
     return this;
   }
@@ -129,7 +128,9 @@ public class HttpResponseBuilder {
    * Adds all headers in the provided multimap to the response.
    */
   public HttpResponseBuilder addAllHeaders(Map<String, ? extends List<String>> headers) {
-    this.headers.putAll(headers);
+    for (Map.Entry<String,? extends List<String>> entry : headers.entrySet()) {
+      this.headers.putAll(entry.getKey(), entry.getValue());
+    }
     return this;
   }
 
@@ -138,17 +139,17 @@ public class HttpResponseBuilder {
    *
    * @return Any values that were removed from the response.
    */
-  public List<String> removeHeader(String name) {
-    return headers.remove(name);
+  public Collection<String> removeHeader(String name) {
+    return headers.removeAll(name);
   }
 
   /**
    * @param cacheTtl The time to live for this response, in seconds.
    */
   public HttpResponseBuilder setCacheTtl(int cacheTtl) {
-    headers.remove("Pragma");
-    headers.remove("Expires");
-    headers.put("Cache-Control", Lists.newLinkedList("public,max-age=" + cacheTtl));
+    headers.removeAll("Pragma");
+    headers.removeAll("Expires");
+    headers.put("Cache-Control", "public,max-age=" + cacheTtl);
     return this;
   }
 
@@ -157,19 +158,20 @@ public class HttpResponseBuilder {
    * milliseconds since the Unix epoch.
    */
   public HttpResponseBuilder setExpirationTime(long expirationTime) {
-    headers.remove("Cache-Control");
-    headers.remove("Pragma");
-    headers.put("Expires", Lists.newLinkedList(DateUtil.formatDate(expirationTime)));
+    headers.removeAll("Cache-Control");
+    headers.removeAll("Pragma");
+    headers.put("Expires", DateUtil.formatDate(expirationTime));
     return this;
   }
 
   /**
    * Sets cache-control headers indicating the response is not cacheable.
    */
+  private List<String> NO_CACHE_HEADER = ImmutableList.of("no-cache");
   public HttpResponseBuilder setStrictNoCache() {
-    headers.put("Cache-Control", Lists.newLinkedList("no-cache"));
-    headers.put("Pragma", Lists.newLinkedList("no-cache"));
-    headers.remove("Expires");
+    headers.replaceValues("Cache-Control", NO_CACHE_HEADER);
+    headers.replaceValues("Pragma", NO_CACHE_HEADER);
+    headers.removeAll("Expires");
     return this;
   }
 
@@ -189,7 +191,7 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  Map<String, List<String>> getHeaders() {
+  Multimap<String, String> getHeaders() {
     return headers;
   }
 

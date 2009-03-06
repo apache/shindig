@@ -17,9 +17,13 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Join;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -62,8 +66,8 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeaders(headers);
 
-    assertEquals(Arrays.asList("bar"), builder.getHeaders().get("foo"));
-    assertEquals(Arrays.asList("blah"), builder.getHeaders().get("blah"));
+    assertEquals(Arrays.asList("bar"), Lists.newArrayList(builder.getHeaders().get("foo")));
+    assertEquals(Arrays.asList("blah"), Lists.newArrayList(builder.getHeaders().get("blah")));
   }
 
   @Test
@@ -90,7 +94,7 @@ public class HttpResponseBuilderTest {
         .addHeader("Cache-Control", "public,max-age=100")
         .setExpirationTime(100);
 
-    Map<String, List<String>> headers = builder.getHeaders();
+    Multimap<String, String> headers = builder.getHeaders();
     assertTrue("No Expires header added.", headers.containsKey("Expires"));
     assertFalse("Pragma header not removed", headers.containsKey("Pragma"));
     assertFalse("Cache-Control header not removed", headers.containsKey("Cache-Control"));
@@ -103,10 +107,10 @@ public class HttpResponseBuilderTest {
         .addHeader("Expires", "some time stamp normally goes here")
         .setCacheTtl(100);
 
-    Map<String, List<String>> headers = builder.getHeaders();
+    Multimap<String, String> headers = builder.getHeaders();
     assertFalse("Expires header not removed.", headers.containsKey("Expires"));
     assertFalse("Pragma header not removed", headers.containsKey("Pragma"));
-    assertEquals("public,max-age=100", headers.get("Cache-Control").get(0));
+    assertEquals("public,max-age=100", headers.get("Cache-Control").iterator().next());
   }
 
   @Test
@@ -116,10 +120,10 @@ public class HttpResponseBuilderTest {
         .addHeader("Expires", "some time stamp normally goes here")
         .setStrictNoCache();
 
-    Map<String, List<String>> headers = builder.getHeaders();
+    Multimap<String, String> headers = builder.getHeaders();
     assertFalse("Expires header not removed.", headers.containsKey("Expires"));
     assertEquals("no-cache", headers.get("Cache-Control").iterator().next());
-    assertEquals("no-cache", headers.get("Pragma").get(0));
+    assertEquals("no-cache", headers.get("Pragma").iterator().next());
   }
 
 
@@ -129,5 +133,19 @@ public class HttpResponseBuilderTest {
         .setResponseString("foo")
         .create();
     assertEquals("foo", resp.getResponseAsString());
+  }
+
+  @Test
+  public void headerOrdering() {
+    ImmutableList<String> soupList = ImmutableList.of("Tomato", "Potato", "Lentil", "Onion");
+    HttpResponseBuilder b = new HttpResponseBuilder();
+    for (String soup : soupList) {
+      b.addHeader("Soup", soup);
+    }
+    HttpResponse resp = b.create();
+
+    // Insure that headers are stored in the order they are added
+    assertEquals(Join.join(",",resp.getHeaders("Soup")), Join.join(",", soupList));
+
   }
 }

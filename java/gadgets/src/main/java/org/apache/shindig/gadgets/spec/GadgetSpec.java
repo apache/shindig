@@ -17,16 +17,16 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -192,7 +192,7 @@ public class GadgetSpec {
    * Used by handler classes to use specs to carry context.
    * Not defined by the specification
    */
-  private final Map<String, Object> attributes = Maps.newConcurrentHashMap();
+  private final Map<String, Object> attributes = new MapMaker().makeMap();
   public Object getAttribute(String key) {
     return attributes.get(key);
   }

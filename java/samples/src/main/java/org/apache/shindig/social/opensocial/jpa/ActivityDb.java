@@ -21,7 +21,7 @@ import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Activity;
@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -221,7 +220,7 @@ public class ActivityDb implements Activity, DbObject {
    */
   @OneToMany(targetEntity = ActivityTemplateParamsDb.class, mappedBy = "activity", cascade = ALL)
   @MapKey(name = "name")
-  protected Map<String, ActivityTemplateParamsDb> templateParamsDb = Maps.newConcurrentHashMap();
+  protected Map<String, ActivityTemplateParamsDb> templateParamsDb = new MapMaker().makeMap();
 
   /**
    * The transient store for templateParamers loaded by the postLoad hook and
@@ -656,7 +655,7 @@ public class ActivityDb implements Activity, DbObject {
    */
   @PostLoad
   public void loadTransientFields() {
-    templateParams = Maps.newConcurrentHashMap();
+    templateParams = new MapMaker().makeMap();
     for (Entry<String, ActivityTemplateParamsDb> e : templateParamsDb
         .entrySet()) {
       templateParams.put(e.getKey(), e.getValue().value);

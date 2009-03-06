@@ -1232,7 +1232,7 @@
       <dependency>
         <groupId>com.google.collections</groupId>
         <artifactId>google-collections</artifactId>
-        <version>0.8</version>
+        <version>0.9</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>

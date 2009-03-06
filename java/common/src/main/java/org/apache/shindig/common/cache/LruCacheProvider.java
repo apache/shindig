@@ -19,6 +19,7 @@
 package org.apache.shindig.common.cache;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -44,7 +45,7 @@ public class LruCacheProvider implements CacheProvider {
   private static final Logger LOG = Logger.getLogger(LruCacheProvider.class.getName());
   private final int defaultCapacity;
   private final Injector injector;
-  private final Map<String, Cache<?, ?>> caches = Maps.newConcurrentHashMap();
+  private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
 
   @Inject
   public LruCacheProvider(Injector injector,

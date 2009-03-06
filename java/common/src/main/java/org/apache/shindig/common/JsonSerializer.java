@@ -20,6 +20,7 @@ package org.apache.shindig.common;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -57,7 +58,7 @@ public final class JsonSerializer {
   private static final Set<String> EXCLUDE_METHODS
       = ImmutableSet.of("getClass", "getDeclaringClass");
 
-  private static final Map<Class<?>, Map<String, Method>> getters = Maps.newConcurrentHashMap();
+  private static final Map<Class<?>, Map<String, Method>> getters = new MapMaker().makeMap();
 
   private JsonSerializer() {}
 

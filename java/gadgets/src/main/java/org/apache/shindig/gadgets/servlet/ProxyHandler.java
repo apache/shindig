@@ -136,12 +136,10 @@ public class ProxyHandler extends ProxyBase {
 
     setResponseHeaders(request, response, results);
 
-    for (Map.Entry<String, List<String>> entry : results.getHeaders().entrySet()) {
+    for (Map.Entry<String, String> entry : results.getHeaders().entries()) {
       String name = entry.getKey();
       if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
-        for (String value : entry.getValue()) {
-          response.addHeader(name, value);
-        }
+          response.addHeader(name, entry.getValue());
       }
     }
 

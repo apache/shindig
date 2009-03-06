@@ -22,6 +22,7 @@ package org.apache.shindig.protocol;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Guice;
 
 import junit.framework.Assert;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -216,8 +218,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
         new DefaultHandlerRegistry.RestPath("/service/{p1}/{p2}+/const2/{p3}", null);
     DefaultHandlerRegistry.RestPath restPath3 =
         new DefaultHandlerRegistry.RestPath("/service/const1/const2/{p1}/{p2}+/{p3}", null);
-    TreeSet<DefaultHandlerRegistry.RestPath> sortedSet =
-        Sets.newTreeSet(restPath1, restPath2, restPath3);
+    Set<DefaultHandlerRegistry.RestPath> sortedSet = ImmutableSortedSet.of(restPath1, restPath2, restPath3);
     Iterator<DefaultHandlerRegistry.RestPath> itr = sortedSet.iterator();
     assertEquals(itr.next(), restPath3);
     assertEquals(itr.next(), restPath1);
