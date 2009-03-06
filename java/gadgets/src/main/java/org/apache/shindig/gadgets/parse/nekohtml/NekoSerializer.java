@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.xerces.xni.QName;
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.w3c.dom.Attr;
@@ -31,7 +32,9 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URL;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * This parser does not try to escape entities in text content as it expects the parser
@@ -39,6 +42,8 @@ import java.net.URL;
  */
 public class NekoSerializer extends HtmlSerializer
 {
+  private static final Set<String> URL_ATTRIBUTES = ImmutableSet.of("href", "src");
+  
   public NekoSerializer() {
   }
 
@@ -137,26 +142,21 @@ public class NekoSerializer extends HtmlSerializer
     NamedNodeMap attributes = elem.getAttributes();
     for (int i = 0; i < attributes.getLength(); i++) {
       Attr attr = (Attr)attributes.item(i);
-      output.append(' ').append(attr.getNodeName());
+      String attrName = attr.getNodeName();
+      output.append(' ').append(attrName);
       if (attr.getNodeValue() != null &&
           attr.getNodeValue().length() > 0) {
         output.append("=\"");
-        printAttributeValue(attr.getNodeValue(), output);
+        boolean isUrlAttribute =
+          elem.getNamespaceURI() == null && URL_ATTRIBUTES.contains(attrName);
+        printAttributeValue(attr.getNodeValue(), output, isUrlAttribute);
         output.append('"');
       }
     }
     output.append(withXmlClose ? "/>" : ">");
   }
 
-  public static void printAttributeValue(String text, Appendable output) throws IOException {
-    boolean isUrl = false;
-    try {
-        new URL(text);
-        isUrl = true;
-    } catch (Exception e) {
-        // nop
-    }
-
+  public static void printAttributeValue(String text, Appendable output, boolean isUrl) throws IOException {
     int length = text.length();
     for (int j = 0; j < length; j++) {
       char c = text.charAt(j);
@@ -180,5 +180,12 @@ public class NekoSerializer extends HtmlSerializer
         output.append(c);
       }
     }
+  }
+
+  /**
+   * Returns true if the listed attribute is an URL attribute.
+   */
+  public static boolean isUrlAttribute(QName name, String attributeName) {
+    return name.uri == null && URL_ATTRIBUTES.contains(attributeName);
   }
 }

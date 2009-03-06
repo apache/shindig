@@ -17,12 +17,6 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URL;
-import java.util.Set;
-import java.util.Stack;
-
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
@@ -48,6 +42,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Set;
+import java.util.Stack;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -261,8 +260,10 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     private void startUnimportantElement(QName qName, XMLAttributes xmlAttributes) {
       builder.append('<').append(qName.rawname);
       for (int i = 0; i < xmlAttributes.getLength(); i++) {
-        builder.append(' ').append(xmlAttributes.getLocalName(i)).append("=\"");
-        appendAttributeValue(xmlAttributes.getValue(i));
+        String attributeName = xmlAttributes.getLocalName(i);
+        builder.append(' ').append(attributeName).append("=\"");
+        appendAttributeValue(xmlAttributes.getValue(i),
+            NekoSerializer.isUrlAttribute(qName, attributeName));
         builder.append('\"');
       }
       builder.append('>');
@@ -295,15 +296,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       return element;
     }
 
-    private void appendAttributeValue(String text) {
-      boolean isUrl = false;
-      try {
-        new URL(text);
-        isUrl = true;
-      } catch (Exception e) {
-        // nop
-      }
-
+    private void appendAttributeValue(String text, boolean isUrl) {
       for (int i = 0; i < text.length(); i++) {
         char c = text.charAt(i);
         if (c == '"') {
