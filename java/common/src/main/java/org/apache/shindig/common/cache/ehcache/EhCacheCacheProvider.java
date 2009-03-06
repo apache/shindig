@@ -22,7 +22,6 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.ResourceLoader;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

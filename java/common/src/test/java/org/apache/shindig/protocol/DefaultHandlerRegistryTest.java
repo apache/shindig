@@ -33,7 +33,6 @@ import org.json.JSONObject;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

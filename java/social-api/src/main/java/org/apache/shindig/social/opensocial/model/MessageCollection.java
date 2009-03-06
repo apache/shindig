@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
-import org.apache.shindig.social.core.model.MessageImpl;
 import org.apache.shindig.social.core.model.MessageCollectionImpl;
 
 import com.google.inject.ImplementedBy;
