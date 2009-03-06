@@ -1134,6 +1134,15 @@
   <!-- ====================================================================== -->
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>caja</id>
       <url>http://google-caja.googlecode.com/svn/maven</url>
     </repository>
