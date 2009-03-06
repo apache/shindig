@@ -20,7 +20,6 @@ package org.apache.shindig.protocol.conversion.xstream;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;

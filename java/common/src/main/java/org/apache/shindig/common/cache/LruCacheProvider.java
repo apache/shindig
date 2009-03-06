@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.common.cache;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
