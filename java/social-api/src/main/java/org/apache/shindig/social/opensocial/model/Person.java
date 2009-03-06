@@ -205,7 +205,8 @@ public interface Person {
      * a Map to convert json string to Field representations.
      */
 
-    private static final Map<String,Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), Functions.TO_STRING);
+    private static final Map<String,Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+        Functions.toStringFunction());
 
     /**
      * The json field that the instance represents.
