@@ -25,12 +25,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
-
-import com.google.caja.lexer.ParseException;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.w3c.dom.Element;
 
 import java.io.IOException;
@@ -43,6 +37,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.caja.lexer.ParseException;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 /**
  * Rewrite links to referenced content in a stylesheet
  */
@@ -51,15 +49,15 @@ public class CSSContentRewriter implements ContentRewriter {
   private static final Logger logger = Logger.getLogger(CSSContentRewriter.class.getName());
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final String proxyBaseNoGadget;
   private final CajaCssLexerParser cssParser;
+  private final ContentRewriterUris rewriterUris;
 
   @Inject
   public CSSContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
-      @Named("shindig.content-rewrite.proxy-url")String proxyBaseNoGadget,
+      ContentRewriterUris rewriterUris,
       CajaCssLexerParser cssParser) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    this.proxyBaseNoGadget = proxyBaseNoGadget;
+    this.rewriterUris = rewriterUris;
     this.cssParser = cssParser;
   }
 
@@ -77,7 +75,7 @@ public class CSSContentRewriter implements ContentRewriter {
     String css = content.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
-        createLinkRewriter(request.getGadget(), feature), sw, false);
+        createLinkRewriter(request.getGadget(), feature, request.getContainer()), sw, false);
     content.setContent(sw.toString());
 
     return RewriterResults.cacheableIndefinitely();
@@ -184,8 +182,9 @@ public class CSSContentRewriter implements ContentRewriter {
     return imports;
   }
 
-  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
-    return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
+  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature, String container) {
+    String proxyBase = rewriterUris.getProxyBase(container); 
+    return new ProxyingLinkRewriter(gadgetUri, feature, proxyBase);
   }
 }
 

@@ -25,17 +25,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.base.Nullable;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -46,6 +35,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Nullable;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+
 /**
  * Perform rewriting of HTML content including
  * - Concatenating & proxying of referred script content
@@ -53,7 +51,7 @@ import java.util.Set;
  * - Moving all style into head and converting @imports into links
  * - Proxying referred content of images and embeds
  */
-public class HTMLContentRewriter  implements ContentRewriter {
+public class HTMLContentRewriter implements ContentRewriter {
   private final static int MAX_URL_LENGTH = 1500;
   
   private final static String JS_MIME_TYPE = "text/javascript";
@@ -66,18 +64,15 @@ public class HTMLContentRewriter  implements ContentRewriter {
   );
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final String proxyBaseNoGadget;
-  private final String concatBaseNoGadget;
   private final CSSContentRewriter cssRewriter;
+  private final ContentRewriterUris rewriterUris;
 
   @Inject
   public HTMLContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
-      @Named("shindig.content-rewrite.proxy-url")String proxyBaseNoGadget,
-      @Named("shindig.content-rewrite.concat-url")String concatBaseNoGadget,
+      ContentRewriterUris rewriterUris,
       CSSContentRewriter cssRewriter) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    this.concatBaseNoGadget = concatBaseNoGadget;
-    this.proxyBaseNoGadget = proxyBaseNoGadget;
+    this.rewriterUris = rewriterUris;
     this.cssRewriter = cssRewriter;
   }
 
@@ -85,7 +80,8 @@ public class HTMLContentRewriter  implements ContentRewriter {
       MutableContent content) {
     if (RewriterUtils.isHtml(request, original)) {
       ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
-      return rewriteImpl(feature, request.getGadget(), request.getUri(), content);
+      return rewriteImpl(feature, request.getGadget(), request.getUri(), content,
+          request.getContainer());
     }
     return null;
   }
@@ -97,11 +93,12 @@ public class HTMLContentRewriter  implements ContentRewriter {
     if (view != null && view.getHref() != null) {
       contentBase = view.getHref();
     }
-    return rewriteImpl(feature, gadget.getSpec().getUrl(), contentBase, content);
+    return rewriteImpl(feature, gadget.getSpec().getUrl(), contentBase, content,
+        gadget.getContext().getContainer());
   }
 
   RewriterResults rewriteImpl(ContentRewriterFeature feature, Uri gadgetUri,
-                                        Uri contentBase, MutableContent content) {
+                                        Uri contentBase, MutableContent content, String container) {
     if (!feature.isRewriteEnabled() || content.getDocument() == null) {
       return null;
     }
@@ -119,11 +116,11 @@ public class HTMLContentRewriter  implements ContentRewriter {
     // 1st step. Rewrite links in all embedded style tags. Convert @import statements into
     // links and add them to the tag list.
     // Move all style and link tags into head and concat the link tags
-    mutated = rewriteStyleTags(head, tagList, feature, gadgetUri, contentBase);
+    mutated = rewriteStyleTags(head, tagList, feature, gadgetUri, contentBase, container);
     // Concat script links
-    mutated |= rewriteJsTags(tagList, feature, gadgetUri, contentBase);
+    mutated |= rewriteJsTags(tagList, feature, gadgetUri, contentBase, container);
     // Rewrite links in images, embeds etc
-    mutated |= rewriteContentReferences(tagList, feature, gadgetUri, contentBase);
+    mutated |= rewriteContentReferences(tagList, feature, gadgetUri, contentBase, container);
 
     if (mutated) {
       MutableContent.notifyEdit(content.getDocument());
@@ -133,7 +130,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
   protected boolean rewriteStyleTags(Element head, List<Element> elementList,
-      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
+      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase, String container) {
     if (!feature.getIncludedTags().contains("style")) {
       return false;
     }
@@ -147,7 +144,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       }
     }));
 
-    LinkRewriter linkRewriter = createLinkRewriter(gadgetUri, feature);
+    LinkRewriter linkRewriter = createLinkRewriter(gadgetUri, feature, container);
 
     for (Element styleTag : styleTags) {
       mutated |= true;
@@ -179,18 +176,21 @@ public class HTMLContentRewriter  implements ContentRewriter {
           }
         }));
 
-    String concatBase = getConcatBase(gadgetUri, feature, "text/css");
+    String concatBase = getConcatBase(gadgetUri, feature, "text/css", container);
 
     concatenateTags(feature, linkTags, concatBase, contentBase, "href");
 
     return mutated;
   }
 
-  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature) {
-    return new ProxyingLinkRewriter(gadgetUri, feature, proxyBaseNoGadget);
+  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature,
+      String container) {
+    return new ProxyingLinkRewriter(gadgetUri, feature, rewriterUris.getProxyBase(container));
   }
 
-  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType) {
+  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature, String mimeType,
+      String container) {
+    String concatBaseNoGadget = rewriterUris.getConcatBase(container);
     return concatBaseNoGadget +
            ProxyBase.REWRITE_MIME_TYPE_PARAM +
         '=' + mimeType +
@@ -199,7 +199,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
   protected boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature feature,
-      Uri gadgetUri, Uri contentBase) {
+      Uri gadgetUri, Uri contentBase, String container) {
     if (!feature.getIncludedTags().contains("script")) {
       return false;
     }
@@ -217,7 +217,7 @@ public class HTMLContentRewriter  implements ContentRewriter {
       }
     }));
 
-    String concatBase = getConcatBase(gadgetUri, feature, JS_MIME_TYPE);
+    String concatBase = getConcatBase(gadgetUri, feature, JS_MIME_TYPE, container);
     List<Element> concatenateable = Lists.newArrayList();
     for (int i = 0; i < scriptTags.size(); i++) {
       Element scriptTag = scriptTags.get(i);
@@ -245,9 +245,9 @@ public class HTMLContentRewriter  implements ContentRewriter {
   }
 
   protected boolean rewriteContentReferences(List<Element> elementList,
-      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase) {
+      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase, String container) {
     boolean mutated = false;
-    LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature);
+    LinkRewriter rewriter = createLinkRewriter(gadgetUri, feature, container);
 
     final Set<String> tagNames = Sets.intersection(LINKING_TAG_ATTRS.keySet(), feature.getIncludedTags());
 
