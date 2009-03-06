@@ -59,6 +59,7 @@ import javax.persistence.EntityManager;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 
 /**
@@ -246,7 +247,7 @@ public class SpiDatabaseBootstrap {
     ApplicationDataMapDb applicationDataMap = new ApplicationDataMapDb();
     applicationDataMap.setApplication(application);
     applicationDataMap.setPersonId(personId);    
-    Map<String, String> values = Maps.newConcurrentHashMap();
+    Map<String, String> values = new MapMaker().makeMap();
     if (null != count) {
       values.put("count", count);
     }
@@ -282,7 +283,7 @@ public class SpiDatabaseBootstrap {
       mediaItems.add(mediaItem2);
       activity.setMediaItems(mediaItems);
       activity.setPostedTime(1111111111L);
-      Map<String, String> templateParams = Maps.newConcurrentHashMap();
+      Map<String, String> templateParams = new MapMaker().makeMap();
       templateParams.put("small", "true");
       templateParams.put("otherContent", "and got wet");
       activity.setTemplateParams(templateParams);
@@ -298,7 +299,7 @@ public class SpiDatabaseBootstrap {
       List<MediaItem> mediaItems = new ArrayList<MediaItem>();
       activity.setMediaItems(mediaItems);
       activity.setPostedTime(1111111112L);
-      Map<String, String> templateParams = Maps.newConcurrentHashMap();
+      Map<String, String> templateParams = new MapMaker().makeMap();
       templateParams.put("small", "true");
       templateParams.put("otherContent", "and went fast");
       activity.setTemplateParams(templateParams);

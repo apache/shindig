@@ -22,6 +22,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.common.base.Preconditions;
 
 import com.google.inject.Inject;
@@ -50,7 +51,7 @@ public class GadgetFeatureRegistry {
   private final Map<String, GadgetFeature> core;
 
   // Caches the transitive dependencies to enable faster lookups.
-  final Map<Set<String>, Collection<GadgetFeature>> cache = Maps.newConcurrentHashMap();
+  final Map<Set<String>, Collection<GadgetFeature>> cache = new MapMaker().makeMap();
 
   private boolean locked = false;
 

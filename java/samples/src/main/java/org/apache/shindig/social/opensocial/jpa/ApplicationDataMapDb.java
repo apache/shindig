@@ -22,6 +22,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 
@@ -97,7 +98,7 @@ public class ApplicationDataMapDb implements DbObject {
    */
   @OneToMany(targetEntity=ApplicationDataMapValueDb.class, mappedBy="applicationDataMap", cascade = ALL)
   @MapKey(name="name")
-  protected Map<String, ApplicationDataMapValueDb> valuesDb = Maps.newConcurrentHashMap();
+  protected Map<String, ApplicationDataMapValueDb> valuesDb = new MapMaker().makeMap();
 
   /**
    * The transient store for values loaded by the postLoad hook and persisted by the
@@ -145,7 +146,7 @@ public class ApplicationDataMapDb implements DbObject {
    */
   @PostLoad
   public void postLoad() {
-    values = Maps.newConcurrentHashMap();
+    values = new MapMaker().makeMap();
     for (Entry<String, ApplicationDataMapValueDb> e : valuesDb.entrySet()) {
       values.put(e.getKey(), e.getValue().value);
     }

@@ -23,9 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 
 import java.util.Collections;
 
@@ -99,8 +97,8 @@ public class GadgetFeatureRegistryTest {
     registry.register(makeFeature("feat0", CONTENT, DEP_NAME));
     registry.register(makeFeature("feat1", CONTENT, DEP_NAME));
 
-    Set<String> setKeys = ImmutableSortedSet.of("feat0", "feat1");
-    List<String> listKeys = Lists.newLinkedList("feat0", "feat1");
+    Set<String> setKeys = ImmutableSet.of("feat0", "feat1");
+    List<String> listKeys = ImmutableList.of("feat0", "feat1");
     Collection<String> collectKeys
         = Collections.unmodifiableCollection(Lists.newArrayList("feat0", "feat1"));
 

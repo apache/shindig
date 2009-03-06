@@ -17,24 +17,25 @@
  */
 package org.apache.shindig.social.sample.oauth;
 
-import org.apache.shindig.auth.AuthenticationMode;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.MapMaker;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.social.core.oauth.OAuthSecurityToken;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthServiceProvider;
 import org.json.JSONException;
 
 import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import net.oauth.OAuthConsumer;
+import net.oauth.OAuthServiceProvider;
 
 // Sample implementation for OAuth data store
 public class SampleOAuthDataStore implements OAuthDataStore {
@@ -49,7 +50,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   }
 
   // All valid OAuth tokens
-  private static ConcurrentHashMap<String,OAuthEntry> oauthEntries = Maps.newConcurrentHashMap();
+  private static ConcurrentMap<String,OAuthEntry> oauthEntries = new MapMaker().makeMap();
 
   // Get the OAuthEntry that corresponds to the oauthToken
   public OAuthEntry getEntry(String oauthToken) {

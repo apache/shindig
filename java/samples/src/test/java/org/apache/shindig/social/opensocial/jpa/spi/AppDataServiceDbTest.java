@@ -34,7 +34,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 
 /**
  * 
@@ -101,7 +101,7 @@ public class AppDataServiceDbTest {
   @Test
   public void updateJohnDoeApplicationDataSettingCountTo5() throws Exception {
     // Do update
-    Map<String, String> values = Maps.newConcurrentHashMap();
+    Map<String, String> values = new MapMaker().makeMap();
     values.put("count", "5");
     this.appDataServiceDb.updatePersonData(new UserId(Type.userId, "john.doe"), new GroupId(GroupId.Type.self, "@self"), DEFAULT_APPLICATION_ID, SpiTestUtil.asSet("count"), values, SpiTestUtil.DEFAULT_TEST_SECURITY_TOKEN);
     
