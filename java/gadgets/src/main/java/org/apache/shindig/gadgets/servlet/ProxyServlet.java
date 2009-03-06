@@ -55,13 +55,13 @@ public class ProxyServlet extends InjectedServlet {
   }
 
   /**
-   * Outputs an error message for the request if it fails.
-   *
-   * TODO: Eliminate this.
+   * Outputs an error message for the request if it fails and if FINE logging level.
    */
   private static void outputError(GadgetException e, HttpServletResponse resp)
       throws IOException {
-    LOG.log(Level.INFO, "makeRequest failed", e);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.log(Level.FINE, "Make Request failed", e);
+    }
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
   }
 }
