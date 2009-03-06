@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -47,7 +49,15 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    rewriter = new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssLexerParser());
+    ContainerConfig config = new AbstractContainerConfig() {
+      @Override
+      public Object getProperty(String container, String name) {
+        return null;
+      }      
+    };
+    
+    ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE, null);
+    rewriter = new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser());
     dummyUri = Uri.parse("http://www.w3c.org");
   }
 

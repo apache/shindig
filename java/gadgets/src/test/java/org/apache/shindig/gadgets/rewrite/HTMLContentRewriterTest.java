@@ -19,6 +19,8 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 
@@ -38,8 +40,18 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    rewriter = new HTMLContentRewriter(factory, DEFAULT_PROXY_BASE, DEFAULT_CONCAT_BASE,
-        new CSSContentRewriter(factory, DEFAULT_PROXY_BASE, new CajaCssLexerParser()));
+    ContainerConfig config = new AbstractContainerConfig() {
+      @Override
+      public Object getProperty(String container, String name) {
+        return null;
+      }      
+    };
+    
+    ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
+        DEFAULT_CONCAT_BASE);
+
+    rewriter = new HTMLContentRewriter(factory, rewriterUris,
+        new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser()));
   }
 
   public void testScriptsBasic() throws Exception {
