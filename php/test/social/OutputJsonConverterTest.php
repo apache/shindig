@@ -22,7 +22,7 @@
  * OutputJsonConverter test case.
  */
 class OutputJsonConverterTest extends PHPUnit_Framework_TestCase {
-  
+
   /**
    * @var OutputJsonConverter
    */

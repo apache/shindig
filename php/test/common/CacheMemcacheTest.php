@@ -19,23 +19,12 @@
  */
 
 require_once 'src/common/Cache.php';
-
-class MockRequestTime extends RequestTime {
-  private $time = 0;
-  
-  public function getRequestTime() {
-    return $this->time;
-  }
-  
-  public function sleep($second) {
-    $this->time += $second;
-  }
-}
+require_once 'test/common/CacheFileTest.php';
 
 /**
- * CacheFile test case.
+ * CacheMemcache test case.
  */
-class CacheFileTest extends PHPUnit_Framework_TestCase {
+class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
 
   /**
    * @var Cache
@@ -53,7 +42,8 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheFile', 'TestCache', $this->time);
+    $this->cache = Cache::createCache('CacheMemcache', 'TestCache',
+                                      $this->time);
   }
 
   /**
@@ -69,7 +59,6 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
    * Tests cache->delete()
    */
   public function testDelete() {
-    @rmdir("/tmp/shindig/TestCache/te");
     $this->cache->set("test", "testing");
     $this->assertTrue(false != $this->cache->get("test"));
     $this->cache->delete("test");
@@ -94,7 +83,7 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Tests cache->expiredGet()
+   * Tests cache->get()
    */
   public function testExpiredGet() {
     $this->cache->set("test", "testing", 1);
@@ -124,27 +113,9 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Tests cache->set()
-   */
-  public function testSetException() {
-    @rmdir("/tmp/shindig/TestCache/te");
-    $this->assertTrue(touch("/tmp/shindig/TestCache/te"));
-    $this->setExpectedException("CacheException");
-    try {
-      $this->cache->set("test", "testing");
-    } catch (Exception $e) {
-      $this->assertTrue(unlink("/tmp/shindig/TestCache/te"));
-      throw $e;
-    }
-    unlink("/tmp/shindig/TestCache/te");
-  }
-
-  /**
    * Tests cache->invalidate()
    */
   public function testInvalidation() {
-    @unlink("/tmp/shindig/TestCache/te/test");
-    @rmdir("/tmp/shindig/TestCache/te");
     $this->cache->set("test", "testing");
     $this->cache->invalidate("test");
     $this->assertEquals(false, $this->cache->get("test"));
@@ -154,6 +125,5 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
     $expected["time"] = $output["time"];
     $expected["ttl"] = $output["ttl"];
     $this->assertEquals($expected, $output);
-    $this->cache->delete("test");
   }
 }

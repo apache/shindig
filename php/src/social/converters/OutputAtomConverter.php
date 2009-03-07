@@ -113,7 +113,7 @@ class OutputAtomConverter extends OutputConverter {
       $this->addNode($entry, 'updated', $updatedAtom);
       $content = $this->addNode($entry, 'content', '', array('type' => 'application/xml'));
       // addData loops through the responseItem data recursively creating a matching XML structure
-      $this->addData($content, $requestType, $data['entry'], self::$osNameSpace);
+      $this->addData($content, $requestType, $data->entry, self::$osNameSpace);
     }
     $xml = $doc->saveXML();
     if ($responseItem->getResponse() instanceof RestfulCollection) {
