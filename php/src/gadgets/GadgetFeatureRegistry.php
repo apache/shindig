@@ -46,8 +46,7 @@ class GadgetFeatureRegistry {
     }
     $ret = '';
     if (Config::get('compress_javascript')) {
-      $featureCache = Config::get('feature_cache');
-      $featureCache = new $featureCache();
+      $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
       if (($featureContent = $featureCache->get(md5('features:'.$featureName.$isGadgetContext)))) {
         return $featureContent;
       }

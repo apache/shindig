@@ -40,8 +40,7 @@ abstract class GadgetRenderer {
     } else {
       $ret = implode(':', $features);
     }
-    $cache = Config::get('feature_cache');
-    $cache = new $cache();
+    $cache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
     if (($md5 = $cache->get(md5('getJsUrlMD5'))) === false) {
       $registry = $this->context->getRegistry();
       $features = $registry->features;

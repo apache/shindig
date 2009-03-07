@@ -31,7 +31,6 @@ class GadgetContext {
   protected $locale = null;
   protected $renderingContext = null;
   protected $registry = null;
-  protected $gadgetId = null;
   protected $view = null;
   protected $moduleId = null;
   protected $url = null;
@@ -112,10 +111,6 @@ class GadgetContext {
     }
   }
 
-  private function instanceGadgetId($url, $moduleId) {
-    return new GadgetId($url, $moduleId);
-  }
-
   private function instanceHttpFetcher() {
     $remoteContent = Config::get('remote_content');
     return new $remoteContent();
@@ -123,8 +118,7 @@ class GadgetContext {
 
   private function instanceRegistry() {
     // feature parsing is very resource intensive so by caching the result this saves upto 30% of the processing time
-    $featureCache = Config::get('feature_cache');
-    $featureCache = new $featureCache();
+    $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
     if (! ($registry = $featureCache->get(md5(Config::get('features_path'))))) {
       $registry = new GadgetFeatureRegistry(Config::get('features_path'));
       $featureCache->set(md5(Config::get('features_path')), $registry);
@@ -152,13 +146,6 @@ class GadgetContext {
       $this->containerConfig = $this->instanceContainerConfig();
     }
     return $this->containerConfig;
-  }
-
-  public function getGadgetId() {
-    if ($this->gadgetId == null) {
-      $this->setGadgetId($this->instanceGadgetId($this->getUrl(), $this->getModuleId()));
-    }
-    return $this->gadgetId;
   }
 
   public function getModuleId() {
@@ -198,10 +185,6 @@ class GadgetContext {
 
   public function setCache($cache) {
     $this->cache = $cache;
-  }
-
-  public function setGadgetId($gadgetId) {
-    $this->gadgetId = $gadgetId;
   }
 
   public function setHttpFetcher($httpFetcher) {

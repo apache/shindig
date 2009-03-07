@@ -19,24 +19,39 @@
  */
 
 class BasicRemoteContent extends RemoteContent {
+  private $remoteContentFetcher = null;
+
+  public function __construct($fetcher = null) {
+    if (!$fetcher) {
+      $this->remoteContentFetcher = new BasicRemoteContentFetcher();
+    } else {
+      $this->remoteContentFetcher = $fetcher;
+    }
+  }
+
+  public function setRemoteContentFetcher($fetcher) {
+    $this->remoteContentFetcher = $fetcher;
+  }
 
   public function fetch(RemoteContentRequest $request, $context) {
-    $cache = Config::get('data_cache');
-    $cache = new $cache();
-    $remoteContentFetcher = new BasicRemoteContentFetcher();
-    if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
+    if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
       $request = $cachedRequest;
     } else {
-      $request = $remoteContentFetcher->fetchRequest($request);
+      $request = $this->remoteContentFetcher->fetchRequest($request);
+      if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
+        $cachedRequest = $cache->expiredGet($request->toHash());
+        if ($cachedRequest['found'] == true) {
+          return $cachedRequest['data'];
+        }
+      }
       $this->setRequestCache($request, $cache, $context);
     }
     return $request;
   }
 
   public function multiFetch(Array $requests, Array $contexts) {
-    $cache = Config::get('data_cache');
-    $cache = new $cache();
-    $remoteContentFetcher = new BasicRemoteContentFetcher();
+    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
     $rets = array();
     $requestsToProc = array();
     foreach ($requests as $request) {
@@ -45,18 +60,30 @@ class BasicRemoteContent extends RemoteContent {
         throw new RemoteContentException("Invalid request type in remoteContent");
       }
       // determine which requests we can load from cache, and which we have to actually fetch
-      if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+      if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
         $rets[] = $cachedRequest;
       } else {
         $requestsToProc[] = $request;
       }
     }
-    $newRets = $remoteContentFetcher->multiFetchRequest($requestsToProc);
+    $newRets = $this->remoteContentFetcher->multiFetchRequest($requestsToProc);
     foreach ($newRets as $request) {
-      $this->setRequestCache($request, $cache, $context);
-      $rets[] = $request;
+      if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
+        $cachedRequest = $cache->expiredGet($request->toHash());
+        if ($cachedRequest['found'] == true) {
+          $rets[] = $cachedRequest['data'];
+        }
+      } else {
+        $this->setRequestCache($request, $cache, $context);
+        $rets[] = $request;
+      }
     }
     return $rets;
+  }
+
+  public function invalidate(RemoteContentRequest $request) {
+    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
+    $cache->invalidate($request->toHash());
   }
 
   private function setRequestCache(RemoteContentRequest $request, Cache $cache, GadgetContext $context) {

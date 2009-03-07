@@ -35,4 +35,6 @@ abstract class RemoteContent {
   abstract public function fetch(RemoteContentRequest $request, $context);
 
   abstract public function multiFetch(Array $requests, Array $contexts);
+  
+  abstract public function invalidate(RemoteContentRequest $request);
 }

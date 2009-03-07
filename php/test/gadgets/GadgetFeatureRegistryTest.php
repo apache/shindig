@@ -50,40 +50,4 @@ class GadgetFeatureRegistryTest extends PHPUnit_Framework_TestCase {
   public function test__construct() {
     $this->GadgetFeatureRegistry->__construct(Config::get('features_path'));
   }
-
-  /**
-   * Tests GadgetFeatureRegistry->getAllFeatures()
-   */
-  public function testGetAllFeatures() {
-    $this->assertGreaterThan(0, count($this->GadgetFeatureRegistry->getAllFeatures()));
-  }
-
-  /**
-   * Tests GadgetFeatureRegistry->getEntry()
-   */
-  public function testGetEntry() {
-    $entry = $this->GadgetFeatureRegistry->getEntry('core');
-    $this->assertTrue($entry instanceof GadgetFeatureRegistryEntry);
-    $this->assertEquals('core', $entry->getName());
-    $this->assertTrue(is_array($entry->getDependencies()));
-    $this->assertTrue($entry->getFeature() instanceof JsLibraryFeatureFactory);
-  }
-
-  /**
-   * Tests GadgetFeatureRegistry->getIncludedFeatures()
-   */
-  public function testGetIncludedFeatures() {
-    $needed = array('flash', 'opensocial-0.8', 'settitle', 'setprefs', 'foobar');
-    $resultsFound = array();
-    $resultsMissing = array();
-    $this->GadgetFeatureRegistry->getIncludedFeatures($needed, $resultsFound, $resultsMissing);
-    $this->assertTrue(in_array('foobar', $resultsMissing));
-    $this->assertTrue(in_array('settitle', $resultsFound));
-    $this->assertTrue(in_array('setprefs', $resultsFound));
-    $this->assertTrue(in_array('rpc', $resultsFound));
-    $this->assertTrue(in_array('flash', $resultsFound));
-    $this->assertTrue(in_array('core', $resultsFound));
-    $this->assertTrue(in_array('core.io', $resultsFound));
-    $this->assertTrue(in_array('opensocial-0.8', $resultsFound));
-  }
 }

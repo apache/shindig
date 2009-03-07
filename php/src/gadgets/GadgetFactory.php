@@ -297,7 +297,7 @@ class GadgetFactory {
    * @param unknown_type $gadgetUrl
    * @return string gadget's xml content
    */
-  private function fetchGadget($gadgetUrl) {
+  protected function fetchGadget($gadgetUrl) {
     $request = new RemoteContentRequest($gadgetUrl);
     $xml = $this->context->getHttpFetcher()->fetch($request, $this->context);
     if ($xml->getHttpCode() != '200') {

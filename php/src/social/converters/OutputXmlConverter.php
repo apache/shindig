@@ -60,7 +60,7 @@ class OutputXmlConverter extends OutputConverter {
       // Single entry = Xml:Entry	
       $entry = $this->addNode($doc, 'response', '');
       // addData loops through the responseItem data recursively creating a matching XML structure
-      $this->addData($entry, 'entry', $data['entry']);
+      $this->addData($entry, 'entry', $data->entry);
     }
     $xml = $doc->saveXML();
     echo $xml;

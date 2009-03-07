@@ -18,17 +18,28 @@
  * under the License.
  */
 
-class TestContext extends GadgetContext {
+abstract class CacheStorage {
+  abstract public function store($key, $value);
 
-  public function __construct() {
-    // construct a 'fake' context we can use for unit testing
-    $this->setRenderingContext('GADGET');
-    $this->setIgnoreCache(false);
-    $this->setForcedJsLibs('');
-    $this->setUrl('http://www.example.org/foo.xml');
-    $this->setModuleId(1);
-    $this->setView('profile');
-    $this->setContainer('');
-    $this->setRefreshInterval(1);
+  abstract public function fetch($key);
+
+  abstract public function delete($key);
+
+  abstract public function lock($key);
+
+  abstract public function unlock($key);
+
+  abstract public function isLocked($key);
+
+  public function waitForLock($key) {
+    $tries = 10;
+    $cnt = 0;
+    do {
+      usleep(100);
+      $cnt ++;
+    } while ($cnt <= $tries && $this->isLocked());
+    if ($this->isLocked()) {
+      $this->unlock($key);
+    }
   }
 }

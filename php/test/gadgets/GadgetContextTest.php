@@ -85,14 +85,6 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Tests GadgetContext->getGadgetId()
-   */
-  public function testGetGadgetId() {
-    $this->assertNotNull($this->GadgetContext->getGadgetId());
-  
-  }
-
-  /**
    * Tests GadgetContext->getHttpFetcher()
    */
   public function testGetHttpFetcher() {
@@ -137,14 +129,6 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
    */
   public function testGetUrl() {
     $this->assertEquals($this->testData['url'], $this->GadgetContext->getUrl());
-  
-  }
-
-  /**
-   * Tests GadgetContext->getUserPrefs()
-   */
-  public function testGetUserPrefs() {
-    $this->assertNotNull($this->GadgetContext->getUserPrefs());
   
   }
 

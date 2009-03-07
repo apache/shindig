@@ -53,9 +53,9 @@ class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
     $servletRequest = array('url' => '/people/1/@self');
     $requestItem = RestRequestItem::createWithRequest($servletRequest, null, $inputConverter, $outputConverter);
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
-    $response = array(
-        'entry' => array('isOwner' => false, 'isViewer' => false, 'displayName' => '1 1', 
-            'id' => '1'));
+    $entry = array('isOwner' => false, 'isViewer' => false,
+                   'displayName' => '1 1', 'id' => '1');
+    $response = new DataCollection($entry);
     $responseItem = new ResponseItem(null, null, $response);
     ob_start();
     $outputConverter->outputResponse($responseItem, $requestItem);
