@@ -18,8 +18,6 @@
  * under the License.
  */
 
-
-
 /*
  * GadgetContext contains all contextual variables and classes that are relevant for this request,
  * such as url, httpFetcher, feature registry, etc.
@@ -274,6 +272,9 @@ class GadgetContext {
     $token = isset($_GET["st"]) ? $_GET["st"] : '';
     if (! isset($token) || $token == '') {
       $token = isset($_POST['st']) ? $_POST['st'] : '';
+    }
+    if (count(explode(':', $token)) != 6) {
+      $token = urldecode(base64_decode($token));
     }
     if (empty($token)) {
       throw new Exception("Missing or invalid security token");
