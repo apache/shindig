@@ -17,17 +17,24 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
+import java.io.InputStream;
 
 /**
  * Optimize GIF images by converting them to PNGs or even JPEGs depending on content
  */
 public class GIFOptimizer extends PNGOptimizer {
+
+  public static BufferedImage readGif(InputStream is)
+      throws ImageReadException, IOException {
+    return Sanselan.getBufferedImage(is);
+  }
 
   private boolean usePng;
 
