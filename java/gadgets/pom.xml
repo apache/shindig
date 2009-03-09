@@ -127,6 +127,10 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
@@ -153,6 +157,22 @@
     <dependency>
       <groupId>org.apache.sanselan</groupId>
       <artifactId>sanselan</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.odysseus.juel</groupId>
+      <artifactId>juel</artifactId>
     </dependency>
 
     <!-- test -->

@@ -84,6 +84,10 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
     </dependency>
@@ -119,6 +123,22 @@
     <dependency>
       <groupId>xpp3</groupId>
       <artifactId>xpp3_min</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.ezmorph</groupId>
+      <artifactId>ezmorph</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
     </dependency>
 
     <!-- test -->
