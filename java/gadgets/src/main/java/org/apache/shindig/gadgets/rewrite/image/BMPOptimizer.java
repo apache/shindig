@@ -17,18 +17,25 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Optimize BMP by converting to PNG
  */
 public class BMPOptimizer extends PNGOptimizer {
+
+  public static BufferedImage readBmp(InputStream is)
+      throws ImageReadException, IOException {
+    return Sanselan.getBufferedImage(is);
+  }
 
   public BMPOptimizer(OptimizerConfig config, HttpResponse original)
       throws IOException {

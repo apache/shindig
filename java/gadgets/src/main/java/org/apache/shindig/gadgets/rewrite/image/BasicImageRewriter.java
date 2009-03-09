@@ -36,8 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
 /**
  * Rewrite images to more efficiently compress their content. Can rewrite images
  * from one format to another for better efficiency.
@@ -187,22 +185,18 @@ public class BasicImageRewriter implements ImageRewriter {
   // image reading mechanisms
 
   protected BufferedImage readBmp(HttpResponse response) throws ImageReadException, IOException {
-    return Sanselan.getBufferedImage(response.getResponse());
+    return BMPOptimizer.readBmp(response.getResponse());
   }
 
   protected BufferedImage readPng(HttpResponse response) throws ImageReadException, IOException {
-    return Sanselan.getBufferedImage(response.getResponse());
+    return PNGOptimizer.readPng(response.getResponse());
   }
 
   protected BufferedImage readGif(HttpResponse response) throws ImageReadException, IOException {
-    return Sanselan.getBufferedImage(response.getResponse());
+    return GIFOptimizer.readGif(response.getResponse());
   }
 
   protected BufferedImage readJpeg(HttpResponse response) throws ImageReadException, IOException {
-    // We cant use Sanselan to read JPEG but we can use it to read all the metadata which is
-    // where most security issues reside anyway in ImageIO
-    Sanselan.getMetadata(response.getResponse(), null);
-    Sanselan.getICCProfile(response.getResponse(), null);
-    return ImageIO.read(response.getResponse());
+    return JPEGOptimizer.readJpeg(response.getResponse());
   }
 }

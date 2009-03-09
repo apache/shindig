@@ -17,17 +17,39 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
+import javax.imageio.ImageIO;
+import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Optimize JPEG images by either converting them to PNGs or re-encoding them with a more
  * appropriate compression level.
  */
 public class JPEGOptimizer extends BaseOptimizer {
+
+  public static BufferedImage readJpeg(InputStream is)
+      throws ImageReadException, IOException {
+    byte[] bytes = IOUtils.toByteArray(is);
+    // We cant use Sanselan to read JPEG but we can use it to read all the metadata which is
+    // where most security issues reside anyway in ImageIO
+    Sanselan.getMetadata(bytes, null);
+    byte[] iccBytes = Sanselan.getICCProfileBytes(bytes);
+    if (iccBytes != null && iccBytes.length > 0) {
+      ICC_Profile iccProfile = Sanselan.getICCProfile(bytes, null);
+      if (iccProfile == null) {
+        throw new ImageReadException("Image has ICC but it is corrupt and cannot be read");
+      }
+    }
+    return ImageIO.read(new ByteArrayInputStream(bytes));
+  }
 
   private boolean usePng;
 
