@@ -18,22 +18,28 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetELResolver;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
+import org.apache.shindig.gadgets.spec.MessageBundle;
+import org.apache.shindig.gadgets.templates.MessageELResolver;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.json.JSONObject;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.json.JSONObject;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Element;
+import javax.el.CompositeELResolver;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -61,10 +67,15 @@ public class TemplateRewriter implements ContentRewriter {
    * processors are not.
    */
   private final Provider<TemplateProcessor> processor;
+  private final MessageBundleFactory messageBundleFactory;
+  private final Expressions expressions;
 
   @Inject
-  public TemplateRewriter(Provider<TemplateProcessor> processor) {
+  public TemplateRewriter(Provider<TemplateProcessor> processor,
+      MessageBundleFactory messageBundleFactory, Expressions expressions) {
     this.processor = processor;
+    this.messageBundleFactory = messageBundleFactory;
+    this.expressions = expressions;
   }
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
@@ -76,7 +87,13 @@ public class TemplateRewriter implements ContentRewriter {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
     if (f != null && isServerTemplatingEnabled(f)) {
-      return rewriteImpl(gadget, content);
+      try {
+        return rewriteImpl(gadget, content);
+      } catch (GadgetException ge) {
+        // TODO: Rewriter interface needs to be modified to handle GadgetException or
+        // RewriterException or something along those lines.
+        throw new RuntimeException(ge);
+      }
     }
     return null;
   }
@@ -91,7 +108,8 @@ public class TemplateRewriter implements ContentRewriter {
     return ("true".equalsIgnoreCase(f.getParams().get(SERVER_TEMPLATING_PARAM)));
   }
 
-  private RewriterResults rewriteImpl(Gadget gadget, MutableContent content) {
+  private RewriterResults rewriteImpl(Gadget gadget, MutableContent content)
+      throws GadgetException {
     List<Element> tagList =
       DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS);
     final Map<String, JSONObject> pipelinedData = content.getPipelinedData();
@@ -119,10 +137,17 @@ public class TemplateRewriter implements ContentRewriter {
 
     TemplateContext templateContext = new TemplateContext(pipelinedData);
     GadgetELResolver globalGadgetVars = new GadgetELResolver(gadget.getContext());
+    
+    MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
+        gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
+    MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
+    CompositeELResolver resolvers = new CompositeELResolver();
+    resolvers.add(globalGadgetVars);
+    resolvers.add(messageELResolver);
 
     for (Element template : templates) {
       DocumentFragment result = processor.get().processTemplate(
-          template, templateContext, globalGadgetVars);
+          template, templateContext, resolvers);
       // Note: replaceNode errors when replacing Element with DocumentFragment
       template.getParentNode().insertBefore(result, template);
       // TODO: clients that need to update data that is initially available,

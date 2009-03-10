@@ -35,7 +35,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
-import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -43,8 +42,6 @@ import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.LocaleSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.View;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,7 +52,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -734,22 +730,6 @@ public class RenderingContentRewriterTest {
     @Override
     public Object getProperty(String container, String name) {
       return data.get(name);
-    }
-  }
-
-  /**
-   * Simple message bundle factory -- only honors inline bundles.
-   */
-  private static class FakeMessageBundleFactory implements MessageBundleFactory {
-    protected FakeMessageBundleFactory() {
-    }
-
-    public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache) {
-      LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
-      if (localeSpec == null) {
-        return MessageBundle.EMPTY;
-      }
-      return spec.getModulePrefs().getLocale(locale).getMessageBundle();
     }
   }
 
