@@ -44,12 +44,16 @@ public class RewriteModule extends AbstractModule {
     private final List<ContentRewriter> rewriters;
 
     @Inject
-    public ContentRewritersProvider(HTMLContentRewriter optimizingRewriter,
-                                    CSSContentRewriter cssRewriter,
-                                    CajaContentRewriter cajaRewriter,
-                                    SanitizedRenderingContentRewriter sanitizedRewriter,
-                                    RenderingContentRewriter renderingRewriter) {
+    public ContentRewritersProvider(PipelineDataContentRewriter pipelineRewriter,
+        TemplateRewriter templateRewriter,
+        HTMLContentRewriter optimizingRewriter,
+        CSSContentRewriter cssRewriter,
+        CajaContentRewriter cajaRewriter,
+        SanitizedRenderingContentRewriter sanitizedRewriter,
+        RenderingContentRewriter renderingRewriter) {
       rewriters = Lists.newArrayList();
+      rewriters.add(pipelineRewriter);
+      rewriters.add(templateRewriter);
       rewriters.add(optimizingRewriter);
       rewriters.add(cssRewriter);
       rewriters.add(cajaRewriter);
