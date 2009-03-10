@@ -80,6 +80,10 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
       <version>1.0</version>
@@ -104,8 +108,16 @@
       <groupId>commons-collections</groupId>
     </dependency>
     <dependency>
+      <artifactId>commons-io</artifactId>
+      <groupId>commons-io</groupId>
+    </dependency>
+    <dependency>
         <groupId>findbugs</groupId>
         <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
     </dependency>
 
     <!-- Hibernate -->
@@ -128,6 +140,11 @@
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-tools</artifactId>
       <version>3.2.0.ga</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>ejb3-persistence</artifactId>
+      <version>1.0.1.GA</version>
     </dependency>
 
     <!-- test -->
