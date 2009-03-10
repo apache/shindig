@@ -174,8 +174,6 @@ public class PersonPopulate {
     // TODO: person.setActivities(activities);
     // TODO: person.setAddresses(addresses);
 
-    log.info("Created user ++++++ " + personId);
-
     return person;
   }
 
