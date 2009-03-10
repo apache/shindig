@@ -71,11 +71,11 @@ public class JPQLUtils {
     }
     return (List<T>) q.getResultList();
   }
-  
-  
+
+
   /**
    * Performs a 'select count(*)' on the given query
-   * 
+   *
    * @param entityManager
    * @param query
    * @param parametersValues
@@ -103,7 +103,7 @@ public class JPQLUtils {
 
   /**
    * Create JPA Query
-   * 
+   *
    * @param entityManager
    * @param query
    * @param parametersValues
