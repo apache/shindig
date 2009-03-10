@@ -34,6 +34,8 @@ import com.google.common.collect.ImmutableSet;
  * ELResolver used to process OpenSocial templates.  Provides three variables:
  * <ul>
  * <li>"Top": Global values </li>
+ * <li>"Cur": Current template variable</li>
+ * <li>"Context": Miscellaneous contextual information</li>
  */
 public class TemplateELResolver extends ELResolver {
   public static final String PROPERTY_TOP = "Top";

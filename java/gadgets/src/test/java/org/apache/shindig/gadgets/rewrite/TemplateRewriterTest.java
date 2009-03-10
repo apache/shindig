@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
@@ -57,6 +58,9 @@ public class TemplateRewriterTest {
   private static final String CONTENT_PLAIN =
     "<script type='text/os-template'>Hello, ${user.name}</script>";  
 
+  private static final String CONTENT_WITH_MESSAGE =
+    "<script type='text/os-template'>Hello, ${Msg.name}</script>";  
+
   private static final String CONTENT_REQUIRE =
     "<script type='text/os-template' require='user'>Hello, ${user.name}</script>";  
   
@@ -79,7 +83,9 @@ public class TemplateRewriterTest {
             return new DefaultTemplateProcessor(Expressions.sharedInstance(), 
                 new TagRegistry(handlers));
           }
-        });
+        },
+        new FakeMessageBundleFactory(),
+        new Expressions());
   }
   
   @Test
@@ -118,6 +124,12 @@ public class TemplateRewriterTest {
     testExpectingNoTransform(getGadgetXml(CONTENT_WITH_TAG), "with @tag");
   }
    
+  @Test
+  public void templateUsingMessage() throws Exception {
+    // Render a simple template
+    testExpectingTransform(getGadgetXml(CONTENT_WITH_MESSAGE), "simple");
+  }
+  
   private void testExpectingTransform(String code, String condition) throws Exception {
     setupGadget(code);
     rewriter.rewrite(gadget, content);
@@ -162,7 +174,11 @@ public class TemplateRewriterTest {
         "  <Param name='" + TemplateRewriter.SERVER_TEMPLATING_PARAM + "'>true</Param>" +
         "</Require>" : "";
     return "<Module>" + "<ModulePrefs title='Title'>"
-        + feature + "</ModulePrefs>"
+        + feature
+        + "  <Locale>"
+        + "    <msg name='name'>John</msg>"
+        + "  </Locale>"
+        + "</ModulePrefs>"
         + "<Content>"
         + "    <![CDATA[" + content + "]]>"
         + "</Content></Module>";
