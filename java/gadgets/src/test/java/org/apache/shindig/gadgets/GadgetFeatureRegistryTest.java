@@ -60,7 +60,7 @@ public class GadgetFeatureRegistryTest {
       throws GadgetException {
     JsLibrary lib = JsLibrary.create(JsLibrary.Type.INLINE, content, name, null);
     List<String> deps = Lists.newLinkedList();
-    if (deps != null) {
+    if (dep != null) {
       deps.add(dep);
     }
     return new GadgetFeature(name, Arrays.asList(lib), deps);
