@@ -28,12 +28,10 @@ var opensocial = opensocial || {};
  */
 opensocial.data = opensocial.data || {};
 
-var osd = opensocial.data;
-
 /**
  * @type {Object} Global DataContext to contain requested data sets.
  */
-osd.DataContext = function() {
+opensocial.data.DataContext = function() {
   var listeners = [];
   var dataSets = {};
 
@@ -64,34 +62,58 @@ osd.DataContext = function() {
    */
   var maybeFireListener = function(listener, key) {
     if (isDataReady(listener.keys)) {
-      listener.callback(key);
+      if (listener.callback(key) == opensocial.data.DataContext.REMOVE_LISTENER) {
+        removeListener(listener);
+      }
     }
   };
     
+  /**
+   * Removes a listener from the list.
+   * @param {Object} listener The listener to remove.
+   */
+  var removeListener = function(listener) {
+    for (var i = 0; i < listeners.length; ++i) {
+      if (listeners[i] == listener) {
+        listeners.splice(i, 1);
+        return;
+      }
+    }
+  };
     
   /**
    * Scans all active listeners and fires off any callbacks that inserting this
-   * key satisfies.
-   * @param {string} key The key that was updated.
+   * key or list of keys satisfies.
+   * @param {string|Array<string>} keys The key that was updated.
    * @private
    */
-  var fireCallbacks = function(key) {
+  var fireCallbacks = function(keys) {
+    if (typeof(keys) == "string") {
+      keys = [ keys ];
+    }
     for (var i = 0; i < listeners.length; ++i) {
       var listener = listeners[i];
-      if (listener.keys[key] || listener.keys['*']) {
-        maybeFireListener(listener, key);
+      for (var j = 0; j < keys.length; j++) {
+        var key = keys[j];
+        if (listener.keys[key] || listener.keys['*']) {
+          maybeFireListener(listener, key);
+          break;
+        }
       }
     }
   };
 
 
   return {
+    
+    REMOVE_LISTENER : "remove",
+    
     /**
      * Map of existing data.  This is used externally by both the
      * opensocial-data and opensocial-templates feature, hence is
      * not hidden.
      */
-    dataSets_ : dataSets,
+    dataSets : dataSets,
     
     
     /**
@@ -117,7 +139,7 @@ osd.DataContext = function() {
       // Check to see if this one should fire immediately.
       if (keys !== '*' && isDataReady(listener.keys)) {
         window.setTimeout(function() {
-          listener.callback()
+          maybeFireListener(listener, keys);
         }, 1);
       }
     },
@@ -144,8 +166,9 @@ osd.DataContext = function() {
      *
      * @param {string} key The key to associate with this object.
      * @param {ResponseItem|Object} obj The data object.
+     * @param {boolean} opt_fireListeners Default true.
      */
-    putDataSet : function(key, obj) {
+    putDataSet : function(key, obj, opt_fireListeners) {
       var data = obj;
       if (typeof data === 'undefined' || data === null) {
         return;
@@ -170,8 +193,25 @@ osd.DataContext = function() {
       }
     
       dataSets[key] = data;
-      fireCallbacks(key);
-    },    
+      if (!(opt_fireListeners === false)) {
+        fireCallbacks(key);
+      }
+    }, 
+    
+    /**
+     * Inserts multiple data sets from a JSON object.
+     * @param {Object<string, Object>} dataSets a JSON object containing Data
+     * sets keyed by Data Set Key. All the DataSets are added, before firing
+     * listeners.
+     */
+    putDataSets : function(dataSets) {
+      var keys = [];
+      for (var key in dataSets) {
+        keys.push(key);
+        this.putDataSet(key, dataSets[key], false);
+      }
+      fireCallbacks(keys);
+    }
   }
 }();
 
@@ -179,7 +219,7 @@ osd.DataContext = function() {
 /**
  * Accessor to the shared, global DataContext.
  */
-osd.getDataContext = function() {
+opensocial.data.getDataContext = function() {
   return opensocial.data.DataContext;
 };
 

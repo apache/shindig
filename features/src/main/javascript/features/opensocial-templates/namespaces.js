@@ -49,12 +49,12 @@ os.nsmap_ = {};
  * Registers the given namespace with a specified URL. Throws an error if it
  * already exists as a different URL.
  * @param {string} ns Namespace tag.
- * @param {string} url URL for namespace.
+ * @param {string} url URI Reference for namespace.
  * @return {Object} The object map of registered tags.
  */
 os.createNamespace = function(ns, url) {
   var tags = os.nsmap_[ns];
-  if (!tags) {
+  if (! os.nsmap_.hasOwnProperty(ns)) {
     tags = {};
     os.nsmap_[ns] = tags;
     opensocial.xmlutil.NSMAP[ns] = url;
@@ -76,7 +76,7 @@ os.getNamespace = function(prefix) {
 };
 
 os.addNamespace = function(ns, url, nsObj) {
-  if (os.nsmap_[ns]) {
+  if (! os.nsmap_.hasOwnProperty(ns)) {
     if (opensocial.xmlutil.NSMAP[ns] == null) {
       // Lazily register an auto-created namespace.
       opensocial.xmlutil.NSMAP[ns] = url;
@@ -90,98 +90,13 @@ os.addNamespace = function(ns, url, nsObj) {
 };
 
 os.getCustomTag = function(ns, tag) {
-  var nsObj = os.nsmap_[ns];
-  if (!nsObj) {
+  if (! os.nsmap_.hasOwnProperty(ns)) {
     return null;
   }
+  var nsObj = os.nsmap_[ns];
   if (nsObj.getTag) {
     return nsObj.getTag(tag);
   } else {
     return nsObj[tag];
   }
 };
-
-/**
- * Define 'os:renderAll' and 'os:Html' tags and the @onAttach attribute
- */
-os.defineBuiltinTags = function() {
-  var osn = os.getNamespace("os") ||
-      os.createNamespace("os", "http://opensocial.com/#template");
-
-  /**
-   * <os:Render> custom tag renders the specified child nodes of the current
-   * context.
-   */
-  osn.Render = function(node, data, context) {
-    var parent = context.getVariable(os.VAR_parentnode);
-    var exp = node.getAttribute("content") || "*";
-    var result = os.getValueFromNode_(parent, exp);
-    if (!result) {
-       return "";
-    } else if (typeof(result) == "string") {
-      var textNode = document.createTextNode(result);
-      result = [];
-      result.push(textNode);
-    } else if (!isArray(result)) {
-      var resultArray = [];
-      for (var i = 0; i < result.childNodes.length; i++) {
-        resultArray.push(result.childNodes[i]);
-      }
-      result = resultArray;
-    } else if (exp != "*" && result.length == 1 &&
-        result[0].nodeType == DOM_ELEMENT_NODE) {
-      // When we call <os:renderAll content="tag"/>, render the inner content
-      // of the tag returned, not the tag itself.
-      var resultArray = [];
-      for (var i = 0; i < result[0].childNodes.length; i++) {
-        resultArray.push(result[0].childNodes[i]);
-      }
-      result = resultArray;
-    }
-
-    // Trim away leading and trailing spaces on IE, which interprets them
-    // literally.
-    if (os.isIe) {
-      for (var i = 0; i < result.length; i++) {
-        if (result[i].nodeType == DOM_TEXT_NODE) {
-          var trimmed = os.trimWhitespaceForIE_(
-              result[i].nodeValue, (i == 0), (i == result.length - 1));
-          if (trimmed != result[i].nodeValue) {
-            result[i].parentNode.removeChild(result[i]);
-            result[i] = document.createTextNode(trimmed);
-          }
-        }
-      }
-    }
-
-    return result;
-  };
-  osn.render = osn.RenderAll = osn.renderAll = osn.Render;
-
-  /**
-   * <os:Html> custom tag renders HTML content (as opposed to HTML code), so
-   * <os:Html code="<b>Hello</b>"/> would result in the bold string "Hello",
-   * rather than the text of the markup.
-   */
-  osn.Html = function(node) {
-    var html = node.code ? "" + node.code : node.getAttribute("code") || "";
-    // TODO(levik): Sanitize the HTML here to avoid script injection issues.
-    // Perhaps use the gadgets sanitizer if available.
-    return html;
-  };
-
-  function createClosure(object, method) {
-    return function() {
-      method.apply(object);
-    };
-  }
-
-  function processOnAttach(node, code, data, context) {
-    var callbacks = context.getVariable(os.VAR_callbacks);
-    var func = new Function(code);
-    callbacks.push(createClosure(node, func));
-  }
-  os.registerAttribute("onAttach", processOnAttach);
-};
-
-os.defineBuiltinTags();

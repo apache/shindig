@@ -66,7 +66,7 @@ os.compileXMLNode = function(node, opt_id) {
 
 /**
  * Takes an XML Document and compiles it into a Template object.
- * @param {Node} doc XML document to be compiled.
+ * @param {Document} doc XML document to be compiled.
  * @param {string} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object.
  */
@@ -96,6 +96,16 @@ os.operatorMap = {
 };
 
 /**
+ * Shared regular expression to split a string into lexical parts. Quoted 
+ * strings are treated as tokens, so are identifiers and any characters between 
+ * them.
+ * In "foo + bar = 'baz - bing'", the tokens are
+ *   ["foo", " + ", "bar", " = ", "'baz - bing'"]
+ */
+os.regExps_.SPLIT_INTO_TOKENS = 
+  /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\w+|[^"'\w]+/g;
+  
+/**
  * Parses operator markup into JS code. See operator map above.
  *
  * TODO: Simplify this to only work on neccessary operators - binary ones that
@@ -104,27 +114,11 @@ os.operatorMap = {
  * @param {string} src The string snippet to parse.
  */
 os.remapOperators_ = function(src) {
-  // TODO(davidbyttow): This can be further sped up if the operatorMap
-  // is sorted (if necessary).
-  var out = "";
-  var sub = "";
-  for (var i = 0; i < src.length; ++i) {
-    var c = src.charAt(i);
-    if (os.isAlphaNum(c)) {
-      sub += c;
-    } else {
-      if (sub.length > 0) {
-        if (sub.length < 4) {
-          sub = os.operatorMap[sub.toLowerCase()] || sub;
-        }
-        out += sub;
-        sub = "";
-      }
-      out += c;
-    }
-  }
-  out += sub;
-  return out;
+  return src.replace(os.regExps_.SPLIT_INTO_TOKENS, 
+      function (token) { 
+        return os.operatorMap.hasOwnProperty(token) ? 
+            os.operatorMap[token] : token;
+      });
 };
 
 /**
@@ -153,39 +147,39 @@ os.variableMap_ = {
 };
 
 /**
+ * Regular expression for finding and removing the "Context" variable
+ * reference from top-level identifier chains.
+ */
+os.regExps_.CONTEXT_VAR_REMOVAL = /(^|[^.$a-zA-Z0-9])Context[.]/g;
+
+/**
  * Replace the top level variables
  * @param {string} expr The expression
  * @return {string} Expression with replacements
  */
 os.replaceTopLevelVars_ = function(text) {
 
+  var regex;
+  
   // Currently, values specced to be inside the "Context" variable are placed
   // by JSTemplate into the top-level of the data context.
   // To make references like "Context.Index" work, remove the "Context." prefix.
-  text = text.replace(/Context[.]/g, "");
+  text = text.replace(os.regExps_.CONTEXT_VAR_REMOVAL, "$1");
 
-  // This line needed because there wasn't an obvious way to match
-  // [^.$a-zA-Z0-9] or the start of the line
-  text = ' ' + text;
-  var regex = /([^.$a-zA-Z0-9])([$a-zA-Z0-9]+)/g;
-
-  var results;
-  var dest = '';
-  var index = 0;
-
-  while ((results = regex.exec(text)) != null) {
-    dest += text.substring(index, regex.lastIndex - results[0].length);
-    dest += results[1];
-    if (results[2] in os.variableMap_) {
-      dest += os.variableMap_[results[2]];
-    } else {
-      dest += results[2];
-    }
-    index = regex.lastIndex;
+  regex = os.regExps_.TOP_LEVEL_VAR_REPLACEMENT;
+  if (!regex) {
+    regex = /(^|[^.$a-zA-Z0-9])([$a-zA-Z0-9]+)/g;
+    os.regExps_.TOP_LEVEL_VAR_REPLACEMENT = regex;
   }
-  dest += text.substring(index, text.length);
 
-  return dest.substring(1);
+  return text.replace(regex,
+      function (whole, left, right) { 
+        if (os.variableMap_.hasOwnProperty(right)) { 
+          return left + os.variableMap_[right]; 
+        } else { 
+          return whole; 
+        } 
+      }); 
 };
 
 /**
@@ -197,7 +191,7 @@ os.replaceTopLevelVars_ = function(text) {
  * TODO: This should not be in compiler.
  */
 os.identifierResolver_ = function(data, name) {
-  return data[name];
+  return data.hasOwnProperty(name) ? data[name] : ('get' in data ? data.get(name) : null);
 };
 
 /**
@@ -209,7 +203,6 @@ os.identifierResolver_ = function(data, name) {
 os.setIdentifierResolver = function(resolver) {
   os.identifierResolver_ = resolver;
 };
-
 
 /**
  * Gets a named property from a JsEvalContext (by checking data_ and vars_) or
@@ -229,9 +222,9 @@ os.getFromContext = function(context, name, opt_default) {
     // Is the context payload a DOM node?
     if (context.data_.nodeType == DOM_ELEMENT_NODE) {
       ret = os.getValueFromNode_(context.data_, name);
-      if (ret == null) {
-        var und;
-        ret = und;
+      if (ret == null) {        
+        // Set to undefined
+        ret = void(0);
       }
     } else {
       ret = os.identifierResolver_(context.data_, name);
@@ -272,7 +265,8 @@ os.transformExpression_ = function(expr, opt_default) {
 
 /**
  * A Map of special attribute names to change while copying attributes during
- * compilation.
+ * compilation. The key is OST-spec attribute, while the value is JST attribute
+ * used to implement that feature.
  */
 os.attributeMap_ = {
   'if': 'jsdisplay',
@@ -326,7 +320,8 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
           os.appendJSTAttribute_(to, ATT_eval,
               "os.setContextNode_($this, $context)");
         }
-        var outName = os.attributeMap_[name] || name;
+        var outName = os.attributeMap_.hasOwnProperty(name) ? 
+            os.attributeMap_[name] : name;
         var substitution =
             (os.attributeMap_[name] ||
                 opt_customTag && os.globalDisallowedAttributes_[outName]) ?
@@ -361,7 +356,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
           dynamicAttributes.push(outName + ':' + substitution);
         } else {
           // For special attributes, do variable transformation.
-          if (os.attributeMap_[name]) {
+          if (os.attributeMap_.hasOwnProperty(name)) {
             // If the attribute value looks like "${expr}", just use the "expr".
             if (value.length > 3 &&
               value.substring(0, 2) == '${' &&
@@ -378,7 +373,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
             // The cssText property of the style object must be set instead.
             to.style.cssText = value;
           }
-          if (os.isIe && !os.customAttributes_[outName] &&
+          if (os.isIe && !os.customAttributes_.hasOwnProperty(outName) &&
               outName.substring(0, 2).toLowerCase() == 'on') {
             // In IE, setAttribute doesn't create event handlers, so we must
             // use attachEvent in order to create handlers that are preserved
@@ -421,6 +416,7 @@ os.compileNode_ = function(node) {
       output.setAttribute(ATT_select, context);
 
       // For os:Render, create a parent node reference.
+      // TODO: remove legacy support
       if (node.tagName == "os:render" || node.tagName == "os:Render" ||
           node.tagName == "os:renderAll" || node.tagName == "os:RenderAll") {
         os.appendJSTAttribute_(output, ATT_values, os.VAR_parentnode + ":" +
@@ -435,8 +431,7 @@ os.compileNode_ = function(node) {
       for (var child = node.firstChild; child; child = child.nextSibling) {
         var compiledChild = os.compileNode_(child);
         if (compiledChild) {
-          if (!compiledChild.tagName &&
-              typeof(compiledChild.length) == 'number') {
+          if (os.isArray(compiledChild)) {
             for (var i = 0; i < compiledChild.length; i++) {
               output.appendChild(compiledChild[i]);
             }
@@ -466,7 +461,7 @@ os.compileNode_ = function(node) {
 };
 
 /**
- * XHTML Entities we need to support in XML, definted in DOCTYPE format.
+ * XHTML Entities we need to support in XML, defined in DOCTYPE format.
  *
  * TODO(levik): A better way to do this.
  */
@@ -483,21 +478,6 @@ os.xmlToHtml_ = function(xmlNode) {
 };
 
 /**
- * Creates a context object out of a json data object.
- */
-os.createContext = function(data, opt_globals) {
-  var context = JsEvalContext.create(data);
-  context.setVariable(os.VAR_callbacks, []);
-  context.setVariable(os.VAR_identifierresolver, os.getFromContext);
-  if (opt_globals) {
-    for (var global in opt_globals) {
-      context.setVariable(global, opt_globals[global]);
-    }
-  }
-  return context;
-};
-
-/**
  * Fires callbacks on a context object
  */
 os.fireCallbacks = function(context) {
@@ -507,14 +487,14 @@ os.fireCallbacks = function(context) {
     if (callback.onAttach) {
       callback.onAttach();
     // TODO(levik): Remove no-context handlers?
-    } else {
-      callback();
+    } else if (typeof(callback) == "function") {
+      callback.apply({});
     }
   }
 };
 
 /**
- * Checks for an processes an optimized case where a node only has text content.
+ * Checks for and processes an optimized case where a node only has text content
  * In this instance, any variable substitutions happen without creating
  * intermediary spans.
  *
@@ -546,10 +526,8 @@ os.processTextContent_ = function(fromNode, toNode) {
 };
 
 /**
- * IE does not hide extra whitespace if it is manually injected into a text
- * node, so we need to remove extra whitespace by hand.
- * @param {String} text A string to be create a text node.
- * @return {TextNode} A TextNode constructed with the specified text.
+ * Create a textNode out of a string, if non-empty, then puts into an array.
+ * @param {string} text A string to be created as a text node.
  */
 os.pushTextNode = function(array, text) {
   if (text.length > 0) {
@@ -560,17 +538,17 @@ os.pushTextNode = function(array, text) {
 /**
  * Removes extra whitespace and newline characters for IE - to be used for
  * transforming strings that are destined for textNode content.
- * @param {String} string The string to trim spaces from.
+ * @param {string} string The string to trim spaces from.
  * @param {boolean} opt_trimStart Trim the start of the string.
  * @param {boolean} opt_trimEnd Trim the end of the string.
- * @return {String} The string with extra spaces removed on IE, original
+ * @return {string} The string with extra spaces removed on IE, original
  * string on other browsers.
  */
 os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
   if (os.isIe) {
     // Replace newlines with spaces, then multiple spaces with single ones.
     // Then remove leading and trailing spaces.
-    var ret = string.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+    var ret = string.replace(/[\x09-\x0d ]+/g, ' ');
     if (opt_trimStart) {
       ret = ret.replace(/^\s/, '');
     }
@@ -616,7 +594,8 @@ os.breakTextNode_ = function(textNode) {
 };
 
 /**
- * Transforms a literal string for inclusion into a variable evaluation:
+ * Transforms a literal string for inclusion into a variable evaluation 
+ * (a JS string):
  *   - Escapes single quotes.
  *   - Replaces newlines with spaces.
  *   - Substitutes variable references for literal semicolons.
@@ -665,35 +644,19 @@ os.parseAttribute_ = function(value) {
 };
 
 /**
- * Returns a named value of a given object. If the object happens to be a DOM
- * node, os.getValueFromNode_() is used, otherwise, we look for a property.
- * @param {Object} object The Object to inspect.
- * @param {string} name The name of the value to get
- * @return {string|Element|Object|Array.<Element>} The value as a String,
- * Object, Element or array of Elements.
- */
-os.getValueFromObject_ = function(object, name) {
-  if (!name) {
-    return object;
-  } else if (object.nodeType == DOM_ELEMENT_NODE) {
-    return os.getValueFromNode_(object, name);
-  } else {
-    return object[name];
-  }
-};
-
-/**
- * Returns a named value of a given node. First looks for an attribute, then
- * a child node (or nodes).
+ * Returns a named value of a given node. First looks for a property, then 
+ * attribute, then a child node (or nodes). If multiple child nodes are found,
+ * they will be returned in an array. If we find a single Node that is an 
+ * Element, it's children will be returned in an array.
  * @param {Element} node The DOM node to inspect
  * @param {string} name The name of the property/attribute/child node(s) to get.
- * The special value "*" means return all child Elemens
+ * The special value "*" means return all child Nodes
  * @return {string|Element|Object|Array.<Element>} The value as a String,
  * Object, Element or array of Elements.
  */
 os.getValueFromNode_ = function(node, name) {
-  var ret = node[name];
-  if (typeof(ret) == "undefined" || ret == null) {
+  var ret = (name != "*") ? node[name] : null;
+  if (name != "*" && (typeof(ret) == "undefined" || ret == null)) {
     ret = node.getAttribute(name);
   }
 
@@ -770,7 +733,7 @@ os.identifiersNotToWrap_[VAR_index] = true;
 os.identifiersNotToWrap_[VAR_count] = true;
 
 /**
- * Checks if a character can begin an legal JS identifier name.
+ * Checks if a character can begin a legal JS identifier name.
  * @param {string} ch Character to check.
  * @return {boolean} This character can start an identifier.
  */
@@ -781,22 +744,23 @@ os.canStartIdentifier= function(ch) {
 };
 
 /**
- * Checks if a character can be contained in a legal JS identifier name.
+ * Checks if a character can be contained in a legal identifier name.
+ * (A legal identifier in Templates can contain any character a legal 
+ * JS identifier can plus the colon - to support ${My.os:Foo})
  * @param {string} ch Character to check.
  * @return {string} This is a valid identifier character.
  */
 os.canBeInIdentifier = function(ch) {
   return os.canStartIdentifier(ch) || (ch >= '0' && ch <= '9') ||
-      ch == '-' ||
       // The colon char cannot be in a real JS identifier, but we allow it,
       // so that namespaced tag names are treated as whole identifiers.
       ch == ':';
 };
 
 /**
- * Checks if a character can be contained in a legal JS identifier name.
+ * Checks if a character can be contained in a expression token.
  * @param {string} ch Character to check.
- * @return {string} This is a valid identifier character.
+ * @return {string} This is a valid token character.
  */
 os.canBeInToken = function(ch) {
   return os.canBeInIdentifier(ch) || ch == '(' || ch == ')' ||
@@ -813,7 +777,7 @@ os.canBeInToken = function(ch) {
  * literal string 'null').
  */
 os.wrapSingleIdentifier = function(iden, opt_context, opt_default) {
-  if (os.identifiersNotToWrap_[iden]) {
+  if (os.identifiersNotToWrap_.hasOwnProperty(iden)) {
     return iden;
   }
   return os.VAR_identifierresolver + '(' +
@@ -915,9 +879,9 @@ os.expressionToTokens = function(expr) {
         buffer.push(ch);
         continue;
       }
-      if (!inquotes && ch == '(') {
+      if (ch == '(') {
         inparens++;
-      } else if (!inquotes && ch == ')' && inparens > 0) {
+      } else if (ch == ')' && inparens > 0) {
         inparens--;
       }
       if (inparens > 0) {
