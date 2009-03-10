@@ -96,7 +96,6 @@ public class JPQLUtils {
       }
     }
     query = "select count(*) " + query.substring(fromIndex, query.length());
-    System.out.println("Count query [" + query + "]");
     Query q = createQuery(entityManager, query, parametersValues);
     return (Long) q.getSingleResult();
   }
