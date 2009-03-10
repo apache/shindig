@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var opensocial = window['opensocial'] || {};
+var opensocial = opensocial || {};
 
 opensocial.xmlutil = opensocial.xmlutil || {};
 

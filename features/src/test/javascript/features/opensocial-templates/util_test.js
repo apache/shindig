@@ -32,12 +32,6 @@ function testDomUtils() {
   // test removeChildren
   os.removeChildren(targetNode);
   assertEquals(0, targetNode.childNodes.length);
-
-  // test replaceNode
-  var child = document.createElement('p');
-  sourceNode.appendChild(child);
-  os.replaceNode(child, document.createElement('div'));
-  assertEquals('DIV', sourceNode.firstChild.tagName);
 }
 
 /**

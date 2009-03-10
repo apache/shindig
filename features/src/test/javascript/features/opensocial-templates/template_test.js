@@ -483,8 +483,8 @@ function testNamedContent() {
       null,
       ['<Template tag="os:HelloWorldWithNamedContent">' + content + '</Template>']);
   };
-  tryTemplateContent('<os:renderAll content="os:Content"/>');
-  tryTemplateContent('<os:renderAll content="Content"/>');
+  tryTemplateContent('<os:Render content="os:Content"/>');
+  tryTemplateContent('<os:Render content="Content"/>');
 
   // Not working yet:
   /*

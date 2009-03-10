@@ -21,6 +21,24 @@
  * compiled template that can be rendered into any DOM node.
  */
 
+
+/**
+ * Creates a context object out of a json data object.
+ */
+os.createContext = function(data, opt_globals) {
+  var context = JsEvalContext.create(data);
+  context.setVariable(os.VAR_callbacks, []);
+  context.setVariable(os.VAR_identifierresolver, os.getFromContext);
+  if (opt_globals) {
+    for (var global in opt_globals) {
+      if (opt_globals.hasOwnproperty(global)) {
+        context.setVariable(global, opt_globals[global]);
+      }
+    }
+  }
+  return context;
+};
+
 /**
  * A renderable compiled Template. A template can contain one or more
  * compiled nodes pre-processed for JST operation. 
@@ -40,7 +58,7 @@ os.Template.idCounter_ = 0;
 
 /**
  * A Map of registered templates by keyed ID.
- * @type {Object.<string|os.Template>}
+ * @type {Object.<string, os.Template>}
  * @private 
  */
 os.registeredTemplates_ = {};
@@ -93,6 +111,7 @@ os.Template.prototype.setCompiledNodes_ = function(nodes) {
 /**
  * Renders the template and returns the result.
  * Does not fire callbacks.
+ * @return {Element} a DOM element containing the result of template processing
  */
 os.Template.prototype.render = function(opt_data, opt_context) {
   if (!opt_context) {

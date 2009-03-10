@@ -37,7 +37,7 @@
  *   - doTag() safeguards node from abuse (no parent access, etc).
  */
 
-var opensocial = opensocial || {};
+opensocial = opensocial || {};
 opensocial.template = opensocial.template || {};
 var os = opensocial.template;
 
@@ -56,18 +56,22 @@ os.log = function(msg) {
 
 // Register our logging function as the global logger function.
 // TODO: Remove global variables once JsTemplates supports setting logger
-if (typeof log != 'undefined') {
-  // Overwrite existing variable if present.
-  log = os.log;
-} else {
-  window['log'] = os.log;
-}
+window['log'] = os.log;
 
 /**
  * Logs a warning to the console.
  */
 os.warn = function(msg) {
   os.log("WARNING: " + msg);
+};
+
+/**
+ * Is the object an array? 
+ */
+os.isArray = function(obj) {
+  return typeof(obj) == "object" && 
+      typeof(obj.length) == "number" && 
+      typeof(obj.push) == "function";
 };
 
 /**
@@ -96,7 +100,7 @@ os.regExps_ = {
 
 /**
  * Preprocess the template.
- * @param {Element|string} node DOM node containing the template data, or the
+ * @param {Element|TextNode|string} node DOM node containing the template data, or the
  * string source.
  * @param {string} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object
@@ -107,16 +111,21 @@ os.compileTemplate = function(node, opt_id) {
     return os.compileTemplateString(node, opt_id);
   }
 
-  opt_id = opt_id || node.id;
+  opt_id = opt_id || node.name;
   var src = node.value || node.innerHTML;
   src = os.trim(src);
   var template = os.compileTemplateString(src, opt_id);
+  // Decorate the node with the template's ID, so we consistently render it
+  // into the same DIV, and so that it doesn't get treated as anonymous anymore.
+  if (! node.name) {
+    node.name = template.id;
+  }
   return template;
 };
 
 /**
  * Compile a template without requiring a DOM node.
- * @param {Element} src XML data to be compiled.
+ * @param {string} src XML data to be compiled.
  * @param {string} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object.
  */
@@ -128,6 +137,7 @@ os.compileTemplateString = function(src, opt_id) {
 
 /**
  * Render one compiled node with a context.
+ * @return {Element} a DOM element containing the result of template processing
  */
 os.renderTemplateNode_ = function(compiledNode, context) {
   var template = domCloneElement(compiledNode);
@@ -221,7 +231,7 @@ os.customAttributes_ = {};
  * @param {Function} functor A function with signature
  *     function({Element}, {string}, {Object}, {JSEvalContext})
  */
-os.registerAttribute = function(attrName, functor) {
+os.registerAttribute_ = function(attrName, functor) {
   os.customAttributes_[attrName] = functor;
 };
 
@@ -229,10 +239,10 @@ os.registerAttribute = function(attrName, functor) {
  * Calls a pre-registered custom attribute handler.
  */
 os.doAttribute = function(node, attrName, data, context) {
-  var attrFunctor = os.customAttributes_[attrName];
-  if (!attrFunctor) {
+  if (!os.customAttributes_.hasOwnProperty(attrName)) {
     return;
   }
+  var attrFunctor = os.customAttributes_[attrName];
   attrFunctor(node, node.getAttribute(attrName), data, context);
 };
 
@@ -267,12 +277,11 @@ os.doTag = function(node, ns, tag, data, context) {
 
   if (typeof(result) == "string") {
     node.innerHTML = result ? result : "";
-  } else if (isArray(result) && result.nodeType != DOM_TEXT_NODE) {
+  } else if (os.isArray(result)) {
     os.removeChildren(node);
     for (var i = 0; i < result.length; i++) {
-      if (result[i].nodeType &&
-          (result[i].nodeType == DOM_ELEMENT_NODE ||
-           result[i].nodeType == DOM_TEXT_NODE)) {
+      if (result[i].nodeType == DOM_ELEMENT_NODE ||
+          result[i].nodeType == DOM_TEXT_NODE) {
         node.appendChild(result[i]);
         if (result[i].nodeType == DOM_ELEMENT_NODE) {
           os.markNodeToSkip(result[i]);
@@ -282,10 +291,9 @@ os.doTag = function(node, ns, tag, data, context) {
   } else {
     var callbacks = context.getVariable(os.VAR_callbacks);
     var resultNode = null;
-    if (result.nodeType && result.nodeType == DOM_ELEMENT_NODE) {
+    if (result.nodeType == DOM_ELEMENT_NODE) {
       resultNode = result;
-    } else if (result.root && result.root.nodeType &&
-        result.root.nodeType == DOM_ELEMENT_NODE) {
+    } else if (result.root && result.root.nodeType == DOM_ELEMENT_NODE) {
       resultNode = result.root;
     }
 
@@ -294,7 +302,7 @@ os.doTag = function(node, ns, tag, data, context) {
     // DocumentFragments, so we check for that as well.
     if (resultNode && resultNode != node && (
         !resultNode.parentNode ||
-        result.parentNode.nodeType == DOM_DOCUMENT_FRAGMENT_NODE)) {
+        resultNode.parentNode.nodeType == DOM_DOCUMENT_FRAGMENT_NODE)) {
       os.removeChildren(node);
       node.appendChild(resultNode);
       os.markNodeToSkip(resultNode);

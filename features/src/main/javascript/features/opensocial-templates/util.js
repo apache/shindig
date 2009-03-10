@@ -24,18 +24,20 @@
 /**
  * Trims leading and trailing whitespace from a string.
  * @param {string} string The input string.
- * @returns {string} Input with leading and trailing whitespace removed.
+ * @return {string} Input with leading and trailing whitespace removed.
  */
 os.trim = function(string) {
-  return string.replace(/^\s+/, '').replace(/\s+$/, '');         
+  return string.replace(/^\s+|\s+$/g, '');         
 };
 
+
 /**
- * Checks whether or not a given character is alpha-numeric.
+ * Checks whether or not a given character is alpha-numeric. * 
  * @param {string} ch Character to check.
  * @return {boolean} This character is alpha-numeric.
  */
 os.isAlphaNum = function(ch) {
+  // TODO: Try with ch.charCodeAt() to see if faster.
   return ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
       (ch >= '0' && ch <= '9') || ch == '_');
 };
@@ -51,35 +53,16 @@ os.removeChildren = function(node) {
 };
 
 /**
- * Clears the children of a given DOM node.
+ * Copies all children from one node to another.
  * @param {Node} sourceNode DOM node with children to append.
  * @param {Node} targetNode DOM node to append sourceNode's children to.
  */
 os.appendChildren = function(sourceNode, targetNode) {
+  if (sourceNode == targetNode) {
+    return;
+  }
   while (sourceNode.firstChild) {
     targetNode.appendChild(sourceNode.firstChild);
-  }
-};
-
-/**
- * Replaces a specified DOM node with other node(s).
- * @param {Element} node The node to be replaced
- * @param {Element|Array.<Element>} replacement Can be a node or an array of 
- *     nodes. Elements can be TextNodes.
- */
-os.replaceNode = function(node, replacement) {
-  var parent = node.parentNode;
-  if (!parent) {
-    throw 'Error in replaceNode() - Node has no parent: ' + node;
-  }
-  if (replacement.nodeType == DOM_ELEMENT_NODE ||
-      replacement.nodeType == DOM_TEXT_NODE) {
-    parent.replaceChild(replacement, node);
-  } else if (isArray(replacement)) {
-    for (var i = 0; i < replacement.length; i++) {
-      parent.insertBefore(replacement[i], node);
-    }
-    parent.removeChild(node);
   }
 };
 
@@ -103,12 +86,19 @@ os.getPropertyGetterName = function(propertyName) {
  * @return {string} The camel-cased string.
  */
 os.convertToCamelCase = function(str) {
+  // Preserve the upper case string, to work around problems in some locales
+  // (such as Turkish, where 'I'.toLowerCase().toUpperCase() != 'I')
+  var upper = str.toUpperCase();
   var words = str.toLowerCase().split('_');
   var out = [];
-  out.push(words[0].toLowerCase());
+  var index = words[0].length + 1;
+  out.push(words[0]);
   for (var i = 1; i < words.length; ++i) {
-    var piece = words[i].charAt(0).toUpperCase() + words[i].substring(1);
-    out.push(piece);
+    if (words[i].length > 0) {
+      var piece = upper.charAt(index) + words[i].substring(1);
+      out.push(piece);
+    }
+    index += words[i].length + 1
   }
   return out.join('');
 };

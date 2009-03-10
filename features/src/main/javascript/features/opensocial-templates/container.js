@@ -59,6 +59,38 @@ os.Container.domLoadCallbacks_ = null;
 os.Container.domLoaded_ = false;
 
 /**
+ * @type {boolean} Determines whether all templates are automatically processed.
+ */
+os.Container.autoProcess_ = true;
+
+
+/**
+ * In gadgets, honor the "disableAutoProcessing" feature param.
+ */
+if (window['gadgets']) {
+  var params = gadgets.util.getFeatureParameters("opensocial-templates");
+  if (params && params.disableAutoProcessing && 
+      params.disableAutoProcessing.toLowerCase != "false") {
+    os.Container.autoProcess_ = false;
+  }
+};
+
+/**
+ * @type {boolean} Has the document been processed already?
+ */
+os.Container.processed_ = false;
+
+os.Container.disableAutoProcessing = function() {
+  if (os.Container.processed_) {
+    throw "Document already processed.";
+  }
+  os.Container.autoProcess_ = false;
+};
+
+// Create reference from opensocial-templates.
+os.disableAutoProcessing = os.Container.disableAutoProcessing;
+
+/**
  * Registers the DOM Load listener to fire when the page DOM is available.
  * TODO: See if we can use gadgets.util.regiterOnLoadHandler() here.
  * TODO: Currently for everything but Mozilla, this just registers an
@@ -70,7 +102,8 @@ os.Container.registerDomLoadListener_ = function() {
   var gadgets = window['gadgets'];
   if (gadgets && gadgets.util) {
     gadgets.util.registerOnLoadHandler(os.Container.onDomLoad_);
-  } else if (navigator.product == 'Gecko') {
+  } else if (typeof(navigator) != 'undefined' && navigator.product && 
+      navigator.product == 'Gecko') {
     window.addEventListener('DOMContentLoaded', os.Container.onDomLoad_, false);
   } if (window.addEventListener) {
     window.addEventListener('load', os.Container.onDomLoad_, false);
@@ -174,8 +207,9 @@ os.Container.defaultContext = null;
 
 os.Container.getDefaultContext = function() {
   if (!os.Container.defaultContext) {
-    if (window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) {
-      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.dataSets_);
+    if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
+        (opensocial.data.DataContext)) {
+      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.dataSets);
     } else {
       os.Container.defaultContext = os.createContext({});
     }
@@ -185,13 +219,11 @@ os.Container.getDefaultContext = function() {
 
 /**
  * Renders any registered inline templates.
- * @param {Object} opt_data Optional JSON data.
  * @param {Object} opt_doc Optional document to use instead of window.document.
  */
-os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
+os.Container.renderInlineTemplates = function(opt_doc) {
   var doc = opt_doc || document;
-  var context = opt_data ?
-      os.createContext(opt_data) : os.Container.getDefaultContext();
+  var context = os.Container.getDefaultContext();
   var inlined = os.Container.inlineTemplates_;
   for (var i = 0; i < inlined.length; ++i) {
     var template = inlined[i].template;
@@ -206,7 +238,8 @@ os.Container.renderInlineTemplates = function(opt_data, opt_doc) {
 
     // Only honor @before and @require attributes if the opensocial-data
     // feature is present.
-    if (window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) {
+    if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
+        (opensocial.data.DataContext)) {
       var beforeData = node.getAttribute('before') ||
           node.getAttribute('beforeData');
       if (beforeData) {
@@ -247,6 +280,7 @@ os.Container.createRenderClosure = function(template, element, opt_data,
     opt_context) {
  var closure = function() {
    template.renderInto(element, opt_data, opt_context);
+   return opensocial.data.DataContext.REMOVE_LISTENER;
  };
  return closure;
 };
@@ -305,28 +339,34 @@ os.Container.renderElement = function(elementId, templateId, opt_data) {
 
 /**
  * Compiles and renders all inline templates.
- * @param {Object} opt_data Optional JSON data.
  * @param {Object} opt_doc Optional document to use instead of window.document.
  */
-os.Container.processInlineTemplates = function(opt_data, opt_doc) {
+os.Container.processInlineTemplates = function(opt_doc) {
   os.Container.compileInlineTemplates(opt_doc);
-  os.Container.renderInlineTemplates(opt_data, opt_doc);
+  os.Container.renderInlineTemplates(opt_doc);
 };
 
 /**
  * Utility method which will automatically register all templates
  * and render all that are inline.
- * @param {Object} opt_data Optional JSON data.
  * @param {Object} opt_doc Optional document to use instead of window.document.
  */
-os.Container.processDocument = function(opt_data, opt_doc) {
+os.Container.processDocument = function(opt_doc) {
   os.Container.registerDocumentTemplates(opt_doc);
-  os.Container.processInlineTemplates(opt_data, opt_doc);
+  os.Container.processInlineTemplates(opt_doc);
+  os.Container.processed_ = true;
 };
 
-os.Container.executeOnDomLoad(os.Container.processDocument);
+// Expose function in opensocial.template namespace.
+os.process = os.Container.processDocument;
 
-/***
+os.Container.executeOnDomLoad(function() {
+  if (os.Container.autoProcess_) {
+    os.Container.processDocument();
+  }
+});
+
+/**
  * @type {string} Tag name of a template.
  * @private
  */
