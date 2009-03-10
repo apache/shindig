@@ -75,6 +75,10 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
     </dependency>
@@ -109,6 +113,13 @@
     <dependency>
       <groupId>net.sf.ehcache</groupId>
       <artifactId>ehcache</artifactId>
+    </dependency>
+
+    <!-- test -->
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
