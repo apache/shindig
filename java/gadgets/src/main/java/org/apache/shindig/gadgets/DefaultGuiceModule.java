@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadModule;
 import org.apache.shindig.gadgets.render.RenderModule;
 import org.apache.shindig.gadgets.rewrite.RewriteModule;
+import org.apache.shindig.gadgets.templates.TemplateModule;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +48,7 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new PreloadModule());
     install(new RenderModule());
     install(new RewriteModule());
+    install(new TemplateModule());
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
