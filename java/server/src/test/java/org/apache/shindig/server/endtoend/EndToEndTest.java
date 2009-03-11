@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,17 +36,21 @@ import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,7 +104,7 @@ public class EndToEndTest {
 
   @Test
   public void messageBundlesRtl() throws Exception {
-    // Repeeat the messageBundle tests, but with the language set to "ar"
+    // Repeat the messageBundle tests, but with the language set to "ar"
     language = "ar";
 
     executeAllPageTests("messageBundle");
@@ -167,6 +172,50 @@ public class EndToEndTest {
     JSONObject json = jsonObjects.get("json").getJSONObject("data");
     JSONObject expected = new JSONObject("{key: 'value'}");
     assertEquals(expected.toString(), json.toString());
+  }
+
+  @Test
+  public void testTemplateRewrite() throws Exception {
+    HtmlPage page = executePageTest("templateRewriter", null);
+    
+    // Verify that iteration attributes were processed
+    Element attrs = page.getElementById("attrs");
+    List<Element> attrsList = getChildrenByTagName(attrs, "li");
+    assertEquals(3, attrsList.size());
+    
+    Element element = page.getElementById("id0");
+    assertNotNull(element);
+    assertEquals("Jane", element.getTextContent().trim());
+
+    element = page.getElementById("id2");
+    assertNotNull(element);
+    assertEquals("Maija", element.getTextContent().trim());
+    
+    // Verify that the repeatTag was processed
+    Element repeat = page.getElementById("repeatTag");
+    List<Element> repeatList = getChildrenByTagName(repeat, "li");
+    assertEquals(1, repeatList.size());
+    assertEquals("George", repeatList.get(0).getTextContent().trim());
+    
+    // Verify that the ifTag was processed
+    Element ifTag = page.getElementById("ifTag");
+    List<Element> ifList = getChildrenByTagName(ifTag, "li");
+    assertEquals(3, ifList.size());
+    assertEquals(1, page.getElementsByTagName("b").getLength());
+    assertEquals(1, getChildrenByTagName(ifList.get(2), "b").size());
+  }
+
+  // HtmlUnits implementation of Element.getElementsByTagName() is just
+  // executing Document.getElementsByTagName()
+  private List<Element> getChildrenByTagName(Element parent, String name) {
+    List<Element> elements = Lists.newArrayList();
+    for (Node child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
+      if (child instanceof Element && name.equals(child.getNodeName())) {
+        elements.add((Element) child);
+      }
+    }
+    
+    return elements;
   }
 
   @BeforeClass
