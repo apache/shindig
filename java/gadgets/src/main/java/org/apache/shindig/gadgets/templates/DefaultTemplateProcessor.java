@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 
 import java.io.IOException;
@@ -98,6 +99,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
 
     this.templateContext = templateContext;
     this.elContext = expressions.newELContext(globals,
+        new GadgetELResolver(templateContext.getGadgetContext()),
         new TemplateELResolver(templateContext));
 
     DocumentFragment result = template.getOwnerDocument().createDocumentFragment();
@@ -112,7 +114,11 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       processNode(result, nodes.item(i));
     }
   }
-   
+  
+  public TemplateContext getTemplateContext() {
+    return templateContext;
+  }
+  
   /**
    * Process a node.
    * 

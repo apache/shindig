@@ -35,6 +35,7 @@ import com.google.common.collect.Maps;
  */
 public class FakeTemplateProcessor implements TemplateProcessor {
   public Map<String, ? extends Object> expressionResults = Maps.newHashMap();
+  public TemplateContext context;
   
   public final <T extends Object> T evaluate(String expression, Class<T> type, T defaultValue) {
     // Some quick-and-dirty mocking:  put a List in the map, and
@@ -47,6 +48,10 @@ public class FakeTemplateProcessor implements TemplateProcessor {
     return type.cast(result);
   }
   
+  public TemplateContext getTemplateContext() {
+    return context;
+  }
+
   public DocumentFragment processTemplate(Element template,
       TemplateContext templateContext, ELResolver globals) {
     throw new UnsupportedOperationException();
@@ -64,5 +69,4 @@ public class FakeTemplateProcessor implements TemplateProcessor {
       onEachLoop.run();
     }
   }
-
 }

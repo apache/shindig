@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import org.apache.shindig.gadgets.GadgetContext;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -29,11 +30,14 @@ import com.google.common.collect.ImmutableMap;
  */
 public class TemplateContext {
   private final Map<String, JSONObject> top;
+  private final GadgetContext gadgetContext;
+
   private Object cur = null;
   // TODO: support unique Id
   private Map<String, ? extends Object> context = ImmutableMap.of();
 
-  public TemplateContext(Map<String, JSONObject> top) {
+  public TemplateContext(GadgetContext gadgetContext, Map<String, JSONObject> top) {
+    this.gadgetContext = gadgetContext;
     this.top = top;
   }
   
@@ -59,5 +63,9 @@ public class TemplateContext {
     Map<String, ? extends Object> oldContext = context;
     context = newContext;
     return oldContext;
+  }
+  
+  public GadgetContext getGadgetContext() {
+    return gadgetContext;
   }
 }
