@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -38,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import javax.el.CompositeELResolver;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -135,19 +132,16 @@ public class TemplateRewriter implements ContentRewriter {
       return null;
     }
 
-    TemplateContext templateContext = new TemplateContext(pipelinedData);
-    GadgetELResolver globalGadgetVars = new GadgetELResolver(gadget.getContext());
+    TemplateContext templateContext = new TemplateContext(
+        gadget.getContext(), pipelinedData);
     
     MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
         gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
     MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
-    CompositeELResolver resolvers = new CompositeELResolver();
-    resolvers.add(globalGadgetVars);
-    resolvers.add(messageELResolver);
 
     for (Element template : templates) {
       DocumentFragment result = processor.get().processTemplate(
-          template, templateContext, resolvers);
+          template, templateContext, messageELResolver);
       // Note: replaceNode errors when replacing Element with DocumentFragment
       template.getParentNode().insertBefore(result, template);
       // TODO: clients that need to update data that is initially available,

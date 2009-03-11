@@ -45,6 +45,12 @@ public interface TemplateProcessor {
   DocumentFragment processTemplate(Element template,
       TemplateContext templateContext, ELResolver globals);    
   
+  
+  /**
+   * @return the current template context.
+   */
+  TemplateContext getTemplateContext();
+  
   /**
    * Process the children of an element or document.
    * @param result the node to which results should be appended
