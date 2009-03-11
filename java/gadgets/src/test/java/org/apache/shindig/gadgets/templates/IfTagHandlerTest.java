@@ -18,45 +18,60 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import static org.junit.Assert.assertEquals;
+import static org.easymock.EasyMock.isNull;
+import static org.easymock.EasyMock.same;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
 
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.google.common.collect.ImmutableMap;
 
-/**
- * Test of the <os:Html> tag.
- */
-public class HtmlTagHandlerTest {
+public class IfTagHandlerTest {
   private FakeTemplateProcessor processor;
   private DOMImplementation documentProvider;
-  private HtmlTagHandler handler;
-  
+  private TagHandler handler;
+   
   @Before
   public void setUp() throws Exception {
-    processor = new FakeTemplateProcessor();
+    processor = EasyMock.createMock(FakeTemplateProcessor.class);
     documentProvider = new ParseModule.DOMImplementationProvider().get();
-    handler = new HtmlTagHandler(new SocialMarkupHtmlParser(documentProvider));
+    handler = new IfTagHandler();
   }
   
   @Test
-  public void testHtmlTag() throws Exception {
+  public void conditionIsFalse() throws Exception {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
-    Element tag = doc.createElement("test");
-    tag.setAttribute("code", "${code}");
-    processor.expressionResults = ImmutableMap.of(
-        "${code}", "Hello <b>World</b>!");
-    DocumentFragment fragment = doc.createDocumentFragment();
-    handler.process(fragment, tag, processor);
-    assertEquals(3, fragment.getChildNodes().getLength());
-    assertEquals("b", fragment.getChildNodes().item(1).getNodeName());
+    Element tag = doc.createElement("if");
+    
+    tag.setAttribute(IfTagHandler.CONDITION_ATTR, "fakeExpression");
+    processor.expressionResults = ImmutableMap.of("fakeExpression", false);
+    
+    replay(processor);
+    handler.process(null, tag, processor);
+    verify(processor);
+  }
+
+  @Test
+  public void conditionIsTrue() throws Exception {
+    Document doc = documentProvider.createDocument(null, null, null);
+    // Create a mock tag;  the name doesn't truly matter
+    Element tag = doc.createElement("if");
+    tag.setAttribute(IfTagHandler.CONDITION_ATTR, "fakeExpression");
+    
+    processor.expressionResults = ImmutableMap.of("fakeExpression", true);
+    processor.processChildNodes((Node) isNull(), same(tag));
+    
+    replay(processor);
+    handler.process(null, tag, processor);
+    verify(processor);
   }
 }

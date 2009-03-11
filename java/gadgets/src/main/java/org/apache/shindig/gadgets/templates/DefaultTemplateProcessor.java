@@ -204,69 +204,81 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     }
   }
 
-
   /**
    * Process repeater state, if needed, on an element.
    */
-  private void processElement(Node result, Element element) {
+  private void processElement(final Node result, final Element element) {
     Attr repeat = element.getAttributeNode(ATTRIBUTE_REPEAT);
     if (repeat != null) {
-      // TODO: Is Iterable the right interface here? The spec calls for
-      // length to be available.
       Iterable<?> dataList = evaluate(repeat.getValue(), Iterable.class, null);
-      if (dataList != null) {
-        // Compute list size
-        int size = Iterables.size(dataList);
-        
-        // Save the initial EL state
-        Map<String, ? extends Object> oldContext = templateContext.getContext();
-        Object oldCur = templateContext.getCur();
-        ValueExpression oldVarExpression = null;
-        
-        // Set the new Context variable.  Copy the old context to preserve
-        // any existing "index" variable
-        Map<String, Object> loopData = Maps.newHashMap(oldContext);
-        loopData.put(PROPERTY_COUNT, size);
-        templateContext.setContext(loopData);
-
-        // TODO: This means that any loop with @var doesn't make the loop
-        // variable available in the default expression context.
-        // Update the specification to make this explicit.
-        Attr varAttr = element.getAttributeNode(ATTRIBUTE_VAR);
-        if (varAttr == null) {
-          oldCur = templateContext.getCur();
-        } else {
-          oldVarExpression = elContext.getVariableMapper().resolveVariable(varAttr.getValue());
-        }
-
-        Attr indexVarAttr = element.getAttributeNode(ATTRIBUTE_INDEX);
-        String indexVar = indexVarAttr == null ? PROPERTY_INDEX : indexVarAttr.getValue();
-          
-        int index = 0;
-        for (Object data : dataList) {
-          loopData.put(indexVar, index++);
-          
-          // Set up context for rendering inner node
-          templateContext.setCur(data);
-          if (varAttr != null) {
-            ValueExpression varExpression = expressions.constant(data, Object.class);
-            elContext.getVariableMapper().setVariable(varAttr.getValue(), varExpression);
-          }
-          
+      processRepeat(result, element, dataList, new Runnable() {
+        public void run() {
           processElementInner(result, element);
         }
-        
-        // Restore EL state        
-        if (varAttr == null) {
-          templateContext.setCur(oldCur);
-        } else {
-          elContext.getVariableMapper().setVariable(varAttr.getValue(), oldVarExpression);
-        }
-        
-        templateContext.setContext(oldContext);
-      }
+      });
     } else {
       processElementInner(result, element);
+    }
+  }
+
+  /**
+   * @param result
+   * @param element
+   * @param dataList
+   */
+  public void processRepeat(Node result, Element element, Iterable<?> dataList,
+      Runnable onEachLoop) {
+    // Compute list size
+    int size = Iterables.size(dataList);
+    
+    if (size > 0) {
+      // Save the initial EL state
+      Map<String, ? extends Object> oldContext = templateContext.getContext();
+      Object oldCur = templateContext.getCur();
+      ValueExpression oldVarExpression = null;
+      
+      // Set the new Context variable.  Copy the old context to preserve
+      // any existing "index" variable
+      Map<String, Object> loopData = Maps.newHashMap(oldContext);
+      loopData.put(PROPERTY_COUNT, size);
+      templateContext.setContext(loopData);
+
+      // TODO: This means that any loop with @var doesn't make the loop
+      // variable available in the default expression context.
+      // Update the specification to make this explicit.
+      Attr varAttr = element.getAttributeNode(ATTRIBUTE_VAR);
+      if (varAttr == null) {
+        oldCur = templateContext.getCur();
+      } else {
+        oldVarExpression = elContext.getVariableMapper().resolveVariable(varAttr.getValue());
+      }
+
+      Attr indexVarAttr = element.getAttributeNode(ATTRIBUTE_INDEX);
+      String indexVar = indexVarAttr == null ? PROPERTY_INDEX : indexVarAttr.getValue();
+        
+      int index = 0;
+      for (Object data : dataList) {
+        loopData.put(indexVar, index++);
+        
+        // Set up context for rendering inner node
+        templateContext.setCur(data);
+        if (varAttr != null) {
+          ValueExpression varExpression = expressions.constant(data, Object.class);
+          elContext.getVariableMapper().setVariable(varAttr.getValue(), varExpression);
+        }
+        
+        onEachLoop.run();
+
+      }
+      
+      // Restore EL state        
+      if (varAttr == null) {
+        templateContext.setCur(oldCur);
+      } else {
+        elContext.getVariableMapper().setVariable(varAttr.getValue(), oldVarExpression);
+      }
+      
+      templateContext.setContext(oldContext);
     }
   }
   
@@ -274,15 +286,19 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    * Process conditionals and non-repeat attributes on an element 
    */
   private void processElementInner(Node result, Element element) {
-    Attr ifAttribute = element.getAttributeNode(ATTRIBUTE_IF);
-    if (ifAttribute != null) {
-      if (!evaluate(ifAttribute.getValue(), Boolean.class, false)) {
-        return;
+    TagHandler handler = registry.getHandlerFor(element);
+    
+    // An ugly special-case:  <os:Repeat> will re-evaluate the "if" attribute
+    // (as it should) for each loop of the repeat.  Don't evaluate it here.
+    if (!(handler instanceof RepeatTagHandler)) {
+      Attr ifAttribute = element.getAttributeNode(ATTRIBUTE_IF);
+      if (ifAttribute != null) {
+        if (!evaluate(ifAttribute.getValue(), Boolean.class, false)) {
+          return;
+        }
       }
     }
 
-    TagHandler handler = registry.getHandlerFor(element);
-    
     if (handler != null) {
       // TODO: We are passing in an element with all special attributes intact.
       // This may be problematic. Perhaps doing a deep clone and stripping them
@@ -320,19 +336,26 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    *  Evaluates an expression within the scope of this processor's context.
    *  @param expression The String expression
    *  @param type Expected result type
-   *  @param defaultValue Default value to return 
+   *  @param defaultValue Default value to return in case of error
    */
-  @SuppressWarnings("unchecked")
   public <T> T evaluate(String expression, Class<T> type, T defaultValue) {
-    T result = defaultValue;
-    Class requestType = (type == Iterable.class) ? Object.class : type;
     try {
-      ValueExpression expr = expressions.parse(expression, requestType);
-      result = (T) expr.getValue(elContext);
+      Object result;
+      // Coerce iterables specially
+      if (type == Iterable.class) {
+        ValueExpression expr = expressions.parse(expression, Object.class);
+        Object value = expr.getValue(elContext);
+        result = coerceToIterable(value);
+      } else {
+        ValueExpression expr = expressions.parse(expression, type);
+        result = expr.getValue(elContext);
+      }
+      
+      return type.cast(result);
     } catch (ELException e) {
       logger.warning(e.getMessage());
+      return defaultValue;
     }
-    return (type == Iterable.class) ? (T) coerceToIterable(result) : result;
   }
   
   /**

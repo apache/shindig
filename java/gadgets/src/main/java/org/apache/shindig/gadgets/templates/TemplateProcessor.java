@@ -52,7 +52,10 @@ public interface TemplateProcessor {
    */
   void processChildNodes(Node result, Node source);
   
-  /**
+  void processRepeat(Node result, Element element, Iterable<?> dataList,
+      Runnable onEachLoop);
+
+    /**
    *  Evaluates an expression within the scope of this processor's context.
    *  @param expression The String expression
    *  @param type Expected result type
