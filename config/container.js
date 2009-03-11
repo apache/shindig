@@ -141,6 +141,11 @@
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
        "activity" : ["id", "title"]
     }
+  },
+  "osapi.base" : {
+    // Use EL when available.
+    "rpcUrl" : "http://%host%/social"
   }
+
 
 }}
