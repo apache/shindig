@@ -32,7 +32,7 @@ DataContextTest.prototype.setUp = function() {
 };
 
 DataContextTest.prototype.tearDown = function() {
-  var dataSets = osd.getDataContext().dataSets_;
+  var dataSets = opensocial.data.getDataContext().dataSets;
   for (var key in dataSets) {
     if (dataSets.hasOwnProperty(key)) {
       delete dataSets[key];
@@ -41,7 +41,7 @@ DataContextTest.prototype.tearDown = function() {
 };
 
 DataContextTest.prototype.testPutDataSet = function() {
-  var context = osd.getDataContext();
+  var context = opensocial.data.getDataContext();
 
   context.putDataSet('key', 'value');
   this.assertEquals('value', context.getDataSet('key'));
@@ -60,7 +60,7 @@ DataContextTest.prototype.testPutDataSet = function() {
  * Test registerListener()
  */
 DataContextTest.prototype.testRegisterListener = function() {
-  var context = osd.getDataContext();
+  var context = opensocial.data.getDataContext();
   var listenerCalledWithKey = null;
   var that = this;
   var listener = function(key) {
@@ -88,7 +88,7 @@ DataContextTest.prototype.testRegisterListener = function() {
  * Test registerListener()
  */
 DataContextTest.prototype.testRegisterListenerWithArray = function() {
-  var context = osd.getDataContext();
+  var context = opensocial.data.getDataContext();
   var listenerCalledWithKey = null;
   var that = this;
   var listener = function(key) {
@@ -114,7 +114,7 @@ DataContextTest.prototype.testRegisterListenerWithArray = function() {
  * Test registerListener() with '*'
  */
 DataContextTest.prototype.testRegisterListenerWithStar = function() {
-  var context = osd.getDataContext();
+  var context = opensocial.data.getDataContext();
   var listenerCalledWithKey = null;
   var that = this;
   var listener = function(key) {
