@@ -80,7 +80,7 @@ public class TemplateRewriterTest {
         new Provider<TemplateProcessor>() {
           public TemplateProcessor get() {
             Set<TagHandler> handlers = ImmutableSet.of();
-            return new DefaultTemplateProcessor(Expressions.sharedInstance(), 
+            return new DefaultTemplateProcessor(new Expressions(), 
                 new TagRegistry(handlers));
           }
         },

@@ -48,21 +48,10 @@ import de.odysseus.el.ExpressionFactoryImpl;
  */
 @Singleton
 public class Expressions {
-  private static final Expressions sharedInstance = new Expressions();
-  
   private final ExpressionFactory factory;
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
 
-  /**
-   * Return a shared instance.
-   * TODO: inject Expressions into the gadget spec code and get rid of
-   * this singleton.
-   */
-  public static Expressions sharedInstance() {
-    return sharedInstance;
-  }
-  
   @Inject
   public Expressions() {
     factory = newExpressionFactory();

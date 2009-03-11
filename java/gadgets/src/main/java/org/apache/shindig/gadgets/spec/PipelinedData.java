@@ -153,20 +153,21 @@ public class PipelinedData {
    * @see GadgetELResolver
    * @return a batch, or null if no batch could be created
    */
-  public Batch getBatch(ELResolver rootObjects) {
-    return getBatch(rootObjects, socialPreloads, httpPreloads);
+  public Batch getBatch(Expressions expressions, ELResolver rootObjects) {
+    return getBatch(expressions, rootObjects, socialPreloads, httpPreloads);
   }
 
   /**
    * Create a Batch of preload requests
+   * @param expressions expressions instance for parsing expressions
    * @param rootObjects an ELResolver that can evaluate currently available
    *     root objects.
    * @param currentSocialPreloads the remaining social preloads
    * @param currentHttpPreloads the remaining http preloads
    */
-  private Batch getBatch(ELResolver rootObjects, Map<String, SocialData> currentSocialPreloads,
+  private Batch getBatch(Expressions expressions, ELResolver rootObjects,
+      Map<String, SocialData> currentSocialPreloads,
       Map<String, HttpData> currentHttpPreloads) {
-    Expressions expressions = Expressions.sharedInstance();
     ELContext elContext = expressions.newELContext(rootObjects);
 
     // Evaluate all existing social preloads
@@ -176,7 +177,7 @@ public class PipelinedData {
     if (currentSocialPreloads != null) {
       for (Map.Entry<String, SocialData> preload : currentSocialPreloads.entrySet()) {
         try {
-          Object value = preload.getValue().toJson(elContext);
+          Object value = preload.getValue().toJson(expressions, elContext);
           evaluatedSocialPreloads.put(preload.getKey(), value);
         } catch (PropertyNotFoundException pnfe) {
           // Missing top-level property: put it in the pending set
@@ -197,7 +198,7 @@ public class PipelinedData {
     if (currentHttpPreloads != null) {
       for (Map.Entry<String, HttpData> preload : currentHttpPreloads.entrySet()) {
         try {
-          RequestAuthenticationInfo value = preload.getValue().evaluate(elContext);
+          RequestAuthenticationInfo value = preload.getValue().evaluate(expressions, elContext);
           evaluatedHttpPreloads.put(preload.getKey(), value);
         } catch (PropertyNotFoundException pnfe) {
           if (pendingHttpPreloads == null) {
@@ -220,21 +221,24 @@ public class PipelinedData {
       return null;
     }
 
-    return new BatchImpl(evaluatedSocialPreloads, evaluatedHttpPreloads,
+    return new BatchImpl(expressions, evaluatedSocialPreloads, evaluatedHttpPreloads,
         pendingSocialPreloads, pendingHttpPreloads);
   }
 
   /** Batch implementation */
   class BatchImpl implements Batch {
 
+    private final Expressions expressions;
     private final Map<String, Object> evaluatedSocialPreloads;
     private final Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads;
     private final Map<String, SocialData> pendingSocialPreloads;
     private final Map<String, HttpData> pendingHttpPreloads;
 
-    public BatchImpl(Map<String, Object> evaluatedSocialPreloads,
+    public BatchImpl(Expressions expressions,
+        Map<String, Object> evaluatedSocialPreloads,
         Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads,
         Map<String, SocialData> pendingSocialPreloads, Map<String, HttpData> pendingHttpPreloads) {
+      this.expressions = expressions;
       this.evaluatedSocialPreloads = evaluatedSocialPreloads;
       this.evaluatedHttpPreloads = evaluatedHttpPreloads;
       this.pendingSocialPreloads = pendingSocialPreloads;
@@ -250,7 +254,7 @@ public class PipelinedData {
     }
 
     public Batch getNextBatch(ELResolver rootObjects) {
-      return getBatch(rootObjects, pendingSocialPreloads, pendingHttpPreloads);
+      return getBatch(expressions, rootObjects, pendingSocialPreloads, pendingHttpPreloads);
     }
   }
 
@@ -424,7 +428,7 @@ public class PipelinedData {
     private final String href;
     private final boolean signOwner;
     private final boolean signViewer;
-    private final Map<String, ValueExpression> attributes;
+    private final Map<String, String> attributes;
 
     private static final Set<String> KNOWN_ATTRIBUTES =
           ImmutableSet.of("authz", "href", "sign_owner", "sign_viewer");
@@ -445,19 +449,16 @@ public class PipelinedData {
       this.signOwner = booleanValue(element, "sign_owner", true);
       this.signViewer = booleanValue(element, "sign_viewer", true);
 
-      Expressions expressions = Expressions.sharedInstance();
-
       // TODO: many of these attributes should not be EL enabled
-      Map<String, ValueExpression> attributes = Maps.newHashMap();
+      ImmutableMap.Builder<String, String> attributes = ImmutableMap.builder();
       for (int i = 0; i < element.getAttributes().getLength(); i++) {
         Node attr = element.getAttributes().item(i);
         if (!KNOWN_ATTRIBUTES.contains(attr.getNodeName())) {
-          attributes.put(attr.getNodeName(),
-              expressions.parse(attr.getNodeValue(), String.class));
+          attributes.put(attr.getNodeName(), attr.getNodeValue());
         }
       }
 
-      this.attributes = ImmutableMap.copyOf(attributes);
+      this.attributes = attributes.build();
     }
 
     private HttpData(HttpData data, Substitutions substituter) {
@@ -478,15 +479,17 @@ public class PipelinedData {
      * Evaluate expressions and return a RequestAuthenticationInfo.
      * @throws ELException if expression evaluation fails.
      */
-    public RequestAuthenticationInfo evaluate(ELContext context) throws ELException {
-      Expressions expressions = Expressions.sharedInstance();
+    public RequestAuthenticationInfo evaluate(Expressions expressions, ELContext context)
+        throws ELException {
       String hrefString = String.valueOf(expressions.parse(href, String.class)
           .getValue(context));
       final Uri evaluatedHref = base.resolve(Uri.parse(hrefString));
 
       final Map<String, String> evaluatedAttributes = Maps.newHashMap();
-      for (Map.Entry<String, ValueExpression> attr : attributes.entrySet()) {
-        evaluatedAttributes.put(attr.getKey(), (String) attr.getValue().getValue(context));
+      for (Map.Entry<String, String> attr : attributes.entrySet()) {
+        ValueExpression expression = expressions.parse(attr.getValue(), String.class);
+        evaluatedAttributes.put(attr.getKey(),
+            String.valueOf(expression.getValue(context)));
       }
 
       return new RequestAuthenticationInfo() {
@@ -537,12 +540,11 @@ public class PipelinedData {
     }
 
     public void addProperty(String name, String value, Class<?> type) throws ELException {
-      ValueExpression expression = Expressions.sharedInstance().parse(value, type);
-      properties.add(new Property(name, expression));
+      properties.add(new Property(name, value, type));
     }
 
     /** Create the JSON request form for the social data */
-    public JSONObject toJson(ELContext elContext) throws ELException {
+    public JSONObject toJson(Expressions expressions, ELContext elContext) throws ELException {
       JSONObject object = new JSONObject();
       try {
         object.put("method", method);
@@ -550,7 +552,7 @@ public class PipelinedData {
 
         JSONObject params = new JSONObject();
         for (Property property : properties) {
-          property.set(elContext, params);
+          property.set(expressions, elContext, params);
         }
         object.put("params", params);
       } catch (JSONException je) {
@@ -562,15 +564,19 @@ public class PipelinedData {
 
     /** Single property for an expression */
     private static class Property {
-      private final ValueExpression expression;
       private final String name;
+      private final String value;
+      private final Class<?> type;
 
-      public Property(String name, ValueExpression expression) {
+      public Property(String name, String value, Class<?> type) {
         this.name = name;
-        this.expression = expression;
+        this.value = value;
+        this.type = type;
       }
 
-      public void set(ELContext elContext, JSONObject object) throws ELException {
+      public void set(Expressions expressions, ELContext elContext, JSONObject object)
+          throws ELException {
+        ValueExpression expression = expressions.parse(value, type);
         Object value = expression.getValue(elContext);
         try {
           if (value != null) {

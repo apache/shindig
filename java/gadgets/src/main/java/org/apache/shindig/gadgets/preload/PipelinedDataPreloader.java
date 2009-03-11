@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.preload;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetELResolver;
@@ -58,11 +59,14 @@ public class PipelinedDataPreloader implements Preloader {
   private final ContainerConfig config;
 
   private static final Charset UTF8 = Charset.forName("UTF-8");
+  private final Expressions expressions;
 
   @Inject
-  public PipelinedDataPreloader(RequestPipeline requestPipeline, ContainerConfig config) {
+  public PipelinedDataPreloader(RequestPipeline requestPipeline, ContainerConfig config,
+      Expressions expressions) {
     this.requestPipeline = requestPipeline;
     this.config = config;
+    this.expressions = expressions;
   }
 
   /** Create preloads from a gadget view */
@@ -74,7 +78,8 @@ public class PipelinedDataPreloader implements Preloader {
         && phase == PreloaderService.PreloadPhase.PROXY_FETCH) {
 
       ELResolver resolver = new GadgetELResolver(context);
-      PipelinedData.Batch batch = view.getPipelinedData().getBatch(resolver);
+      PipelinedData.Batch batch = view.getPipelinedData().getBatch(expressions,
+          resolver);
       if (batch != null) {
         return createPreloadTasks(context, batch);
       }

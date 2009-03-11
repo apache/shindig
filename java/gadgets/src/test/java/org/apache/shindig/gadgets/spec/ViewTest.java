@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
@@ -222,7 +223,8 @@ public class ViewTest {
         + " fields=\"name,id\""
         + "/></Content>";
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
-    PipelinedData.Batch batch = view.getPipelinedData().getBatch(new RootELResolver());
+    PipelinedData.Batch batch = view.getPipelinedData().getBatch(
+        new Expressions(), new RootELResolver());
     
     assertEquals(1, batch.getSocialPreloads().size());
     assertTrue(batch.getSocialPreloads().containsKey("key"));

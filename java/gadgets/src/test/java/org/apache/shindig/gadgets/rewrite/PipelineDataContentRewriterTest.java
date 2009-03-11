@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -101,9 +102,9 @@ public class PipelineDataContentRewriterTest {
   public void setUp() throws Exception {
     control = EasyMock.createStrictControl();
     preloader = control.createMock(PipelinedDataPreloader.class);
-//    preloaderService = control.createMock(PreloaderService.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
-    rewriter = new PipelineDataContentRewriter(preloader, preloaderService);
+    rewriter = new PipelineDataContentRewriter(preloader, preloaderService,
+        new Expressions());
   }
 
   private void setupGadget(String gadgetXml) throws SpecParserException {

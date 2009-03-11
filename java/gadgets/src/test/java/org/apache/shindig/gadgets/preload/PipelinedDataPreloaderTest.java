@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -45,6 +46,7 @@ import com.google.common.collect.Lists;
  */
 public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   private ContainerConfig containerConfig;
+  private Expressions expressions = new Expressions();
 
   private static final String XML = "<Module xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE
       + "\">" + "<ModulePrefs title=\"Title\"/>"
@@ -78,6 +80,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
     + "                  method=\"GET\" params=\"" + XML_PARAMS + "\"/>"
     + "</Content></Module>";
+  
   @Before
   public void createContainerConfig() {
     containerConfig = EasyMock.createMock(ContainerConfig.class);
@@ -92,7 +95,9 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
+    
     view = "profile";
     contextParams.put("st", "token");
 
@@ -127,7 +132,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String httpResult = "{foo: 'bar'}";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
     view = "profile";
 
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
@@ -157,7 +163,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String httpResult = "{foo: 'bar'}";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
     view = "profile";
 
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
@@ -179,7 +186,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String httpResult = "{foo: 'bar'}";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
     view = "profile";
 
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
@@ -201,7 +209,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
     view = "canvas";
     contextParams.put("st", "token");
 
@@ -216,7 +225,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
-    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
     view = "profile";
     contextParams.put("st", "token");
 
