@@ -21,6 +21,12 @@ features/opensocial-jsonrpc/feature.xml
 features/opensocial-reference/feature.xml
 features/opensocial-rest/feature.xml
 features/opensocial-templates/feature.xml
+features/osapi/feature.xml
+features/osapi.activities/feature.xml
+features/osapi.appdata/feature.xml
+features/osapi.base/feature.xml
+features/osapi.people/feature.xml
+features/osapi.ui/feature.xml
 features/rpc/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml

@@ -30,6 +30,7 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -47,11 +48,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base class for end-to-end tests.
@@ -62,7 +64,13 @@ public class EndToEndTest {
     "fetchPeopleTest.xml",
     "errorTest.xml",
     "cajaTest.xml",
-    "failCajaTest.xml",
+    "failCajaTest.xml",      
+    "osapi/personTest.xml",
+    "osapi/peopleTest.xml",
+    "osapi/activitiesTest.xml",
+    "osapi/appdataTest.xml",
+    "osapi/batchTest.xml",
+    "osapi/makeRequestTest.xml",
     "testframework.js"
   };
 
@@ -172,6 +180,36 @@ public class EndToEndTest {
     JSONObject json = jsonObjects.get("json").getJSONObject("data");
     JSONObject expected = new JSONObject("{key: 'value'}");
     assertEquals(expected.toString(), json.toString());
+  }
+
+  @Test
+  public void testOsapiPeople() throws Exception {
+    executeAllPageTests("osapi/peopleTest");
+  }
+
+  @Test
+  public void testOsapiPerson() throws Exception {
+    executeAllPageTests("osapi/personTest");
+  }
+
+  @Test
+  public void testOsapiActivities() throws Exception {
+    executeAllPageTests("osapi/activitiesTest");
+  }
+
+  @Test
+  public void testOsapiAppdata() throws Exception {
+    executeAllPageTests("osapi/appdataTest");
+  }
+
+  @Test
+  public void testOsapiBatch() throws Exception {
+    executeAllPageTests("osapi/batchTest");
+  }
+
+  @Test
+  public void testOsapiMakeRequest() throws Exception {
+    executeAllPageTests("osapi/makeRequestTest");
   }
 
   @Test

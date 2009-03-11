@@ -106,6 +106,14 @@
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-rest/restfulcontainer.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
+                <source>osapi.activities/activities.js</source>
+                <source>osapi.appdata/appdata.js</source>
+                <source>osapi.base/batch.js</source>
+                <source>osapi.base/jsonrequest.js</source>
+                <source>osapi.base/makerequest.js</source>
+                <source>osapi.base/util.js</source>
+                <source>osapi.people/people.js</source>
+                <source>../../../../src/test/javascript/lib/testutils.js</source>
                 <source>oauthpopup/oauthpopup.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
