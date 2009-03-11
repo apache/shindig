@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetELResolver;
@@ -66,12 +67,15 @@ public class PipelineDataContentRewriter implements ContentRewriter {
   
   private final PipelinedDataPreloader preloader;
   private final PreloaderService preloaderService;
+  private final Expressions expressions;
 
   @Inject
   public PipelineDataContentRewriter(PipelinedDataPreloader preloader,
-      PreloaderService preloaderService) {
+      PreloaderService preloaderService,
+      Expressions expressions) {
     this.preloader = preloader;
     this.preloaderService = preloaderService;
+    this.expressions = expressions;
   }
   
   public RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
@@ -110,7 +114,7 @@ public class PipelineDataContentRewriter implements ContentRewriter {
     for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
       try {
         PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
-        PipelinedData.Batch batch = pipelineData.getBatch(rootObjects);
+        PipelinedData.Batch batch = pipelineData.getBatch(expressions, rootObjects);
         if (batch == null) {
           // An empty pipeline element - just remove it
           n.getParentNode().removeChild(n);

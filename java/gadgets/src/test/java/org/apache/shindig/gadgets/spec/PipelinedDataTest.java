@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.AuthType;
 
@@ -47,12 +48,13 @@ public class PipelinedDataTest {
   private static final Uri GADGET_URI = Uri.parse("http://example.org/");
   private ELResolver elResolver;
   private Map<String, Object> elValues;
+  private Expressions expressions;
 
   @Before
   public void setUp() {
     elValues = Maps.newHashMap();
     elResolver = new RootELResolver(elValues);
-    
+    expressions = new Expressions();
   }
   
   @Test
@@ -81,7 +83,7 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -110,7 +112,7 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -143,7 +145,7 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -165,7 +167,7 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -187,7 +189,7 @@ public class PipelinedDataTest {
         + "fields: ['name','id']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -210,7 +212,7 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -233,7 +235,7 @@ public class PipelinedDataTest {
         + "fields: ['foo','bar']"
         + "}}");
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getHttpPreloads().isEmpty());
     assertEquals(1, batch.getSocialPreloads().size());
     assertEquals(expected.toString(), batch.getSocialPreloads().get("key").toString());
@@ -250,7 +252,7 @@ public class PipelinedDataTest {
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertFalse(socialData.needsOwner());
 
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertNull(batch);
   }
 
@@ -271,7 +273,7 @@ public class PipelinedDataTest {
 
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
     
-    PipelinedData.Batch batch = socialData.getBatch(elResolver);
+    PipelinedData.Batch batch = socialData.getBatch(expressions, elResolver);
     assertTrue(batch.getSocialPreloads().isEmpty());
     assertTrue(batch.getHttpPreloads().isEmpty());
 
@@ -297,7 +299,7 @@ public class PipelinedDataTest {
         + "/></Content>";
 
     PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
-    PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
+    PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
     assertFalse(pipelinedData.needsViewer());
     assertFalse(pipelinedData.needsOwner());
     
@@ -318,7 +320,7 @@ public class PipelinedDataTest {
         + "/></Content>";
 
     PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
-    PipelinedData.Batch batch = pipelinedData.getBatch(elResolver);
+    PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
     assertTrue(pipelinedData.needsViewer());
     assertFalse(pipelinedData.needsOwner());
     
