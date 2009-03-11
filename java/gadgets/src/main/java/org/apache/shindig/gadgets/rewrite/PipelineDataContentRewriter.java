@@ -31,6 +31,10 @@ import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -40,18 +44,13 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 
+import javax.el.CompositeELResolver;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.el.CompositeELResolver;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 
 /**
  * ContentRewriter that resolves opensocial-data elements on the server.
@@ -195,7 +194,7 @@ public class PipelineDataContentRewriter implements ContentRewriter {
 
       // TODO: escape key
       content.addPipelinedData(key, entry.getValue());
-      script.append("osd.DataContext.putDataSet(\"")
+      script.append("opensocial.data.DataContext.putDataSet(\"")
           .append(key)
           .append("\",")
           .append(JsonSerializer.serialize(entry.getValue()))
