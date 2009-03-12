@@ -18,7 +18,6 @@
 package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.IOException;
@@ -75,7 +74,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
       rewrite(resp);
       fail("Should error with invalid ICC data");
     } catch (Throwable t) {
-      // We expect to fail
+      //assertTrue(t instanceof ImageReadException);
     }
   }
 
@@ -87,7 +86,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
       rewrite(resp);
       fail("Should error with invalid ICC data");
     } catch (Throwable t) {
-      // We expect to fail
+      //assertTrue(t instanceof ImageReadException);
     }
   }
 
@@ -112,9 +111,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
 
   HttpResponse rewrite(HttpResponse original)
       throws IOException, ImageReadException {
-    // Get the profile, throwing exceptions if that fails
-    Sanselan.getICCProfile(original.getResponse(), null);
     return new JPEGOptimizer(new OptimizerConfig(), original).rewrite(
-        ImageIO.read(original.getResponse()));
+        JPEGOptimizer.readJpeg(original.getResponse()));
   }
 }

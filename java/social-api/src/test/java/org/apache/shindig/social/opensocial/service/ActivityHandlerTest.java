@@ -82,8 +82,9 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new ActivityHandler(activityService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

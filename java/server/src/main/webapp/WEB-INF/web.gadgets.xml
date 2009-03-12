@@ -50,6 +50,11 @@
     <url-pattern>/gadgets/makeRequest</url-pattern>
   </filter-mapping>
 
+  <filter-mapping>
+    <filter-name>authFilter</filter-name>
+    <url-pattern>/gadgets/rpc/*</url-pattern>
+  </filter-mapping>
+
   <listener>
     <listener-class>org.apache.shindig.common.servlet.GuiceServletContextListener</listener-class>
   </listener>
@@ -93,6 +98,27 @@
     </servlet-class>
   </servlet>
 
+  <!-- makeRequest -->
+  <servlet>
+    <servlet-name>makeRequest</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.MakeRequestServlet
+    </servlet-class>
+  </servlet>
+
+
+  <!-- Serve gadgets RPC api -->
+  <servlet>
+    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
+    <servlet-class>
+      org.apache.shindig.protocol.JsonRpcServlet
+    </servlet-class>
+    <init-param>
+      <param-name>handlers</param-name>
+      <param-value>org.apache.shindig.gadgets.handlers</param-value>
+    </init-param>
+  </servlet>
+
   <!-- javascript serving -->
   <servlet>
     <servlet-name>js</servlet-name>
@@ -107,6 +133,16 @@
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
     <url-pattern>/gadgets/proxy/*</url-pattern>
+  </servlet-mapping>
+
+   <servlet-mapping>
+    <servlet-name>makeRequest</servlet-name>
+    <url-pattern>/gadgets/makeRequest</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
+    <url-pattern>/gadgets/rpc/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

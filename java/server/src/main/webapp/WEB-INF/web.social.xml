@@ -43,29 +43,37 @@
     <listener-class>org.apache.shindig.common.servlet.GuiceServletContextListener</listener-class>
   </listener>
 
-  <!-- Serve REST api -->
+  <!-- Serve social REST api -->
   <servlet>
-    <servlet-name>restapiServlet</servlet-name>
+    <servlet-name>socialRestapiServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.DataServiceServlet
     </servlet-class>
+    <init-param>
+      <param-name>handlers</param-name>
+      <param-value>org.apache.shindig.social.handlers</param-value>
+    </init-param>
   </servlet>
 
-  <!-- Serve RPC api -->
+  <!-- Serve social RPC api -->
   <servlet>
-    <servlet-name>jsonRpcServlet</servlet-name>
+    <servlet-name>socialJsonRpcServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.JsonRpcServlet
     </servlet-class>
+    <init-param>
+      <param-name>handlers</param-name>
+      <param-value>org.apache.shindig.social.handlers</param-value>
+    </init-param>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>restapiServlet</servlet-name>
+    <servlet-name>socialRestapiServlet</servlet-name>
     <url-pattern>/social/rest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>jsonRpcServlet</servlet-name>
+    <servlet-name>socialJsonRpcServlet</servlet-name>
     <url-pattern>/social/rpc/*</url-pattern>
   </servlet-mapping>
 </web-app>

@@ -59,8 +59,9 @@ public class MessageHandlerTest extends TestCase {
     recipients = ImmutableList.of("second.recipient", "first.recipient");
 
     handler = new MessageHandler(messageService);
-    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 
   public void testPostMessage() 

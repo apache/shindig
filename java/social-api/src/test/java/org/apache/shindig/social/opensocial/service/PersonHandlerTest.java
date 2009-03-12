@@ -38,7 +38,11 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -87,8 +91,9 @@ public class PersonHandlerTest extends EasyMockTestCase {
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new PersonHandler(personService, containerConfig);
-    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 
   public void testHandleGetAllNoParams() throws Exception {

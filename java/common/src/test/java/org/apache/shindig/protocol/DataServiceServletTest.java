@@ -23,6 +23,12 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+
+import junit.framework.TestCase;
+
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
 
@@ -31,11 +37,6 @@ import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.TestCase;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 
 public class DataServiceServletTest extends TestCase {
 
@@ -64,9 +65,9 @@ public class DataServiceServletTest extends TestCase {
     EasyMock.expect(xmlConverter.getContentType()).andReturn("application/xml").anyTimes();
     EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml").anyTimes();
 
-    HandlerRegistry registry = new DefaultHandlerRegistry(null,
-        Sets.<Object>newHashSet(new TestHandler()), jsonConverter,
+    HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));
 
     servlet.setHandlerRegistry(registry);
 

@@ -24,20 +24,18 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.InvalidationService;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles open proxy requests.
@@ -45,12 +43,6 @@ import java.util.logging.Logger;
 @Singleton
 public class ProxyHandler extends ProxyBase {
   private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
-
-  private static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
-      "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
-      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding",
-      InvalidationService.INVALIDATION_HEADER
-  );
 
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
@@ -63,14 +55,6 @@ public class ProxyHandler extends ProxyBase {
     this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
-  }
-
-  private boolean getIgnoreCache(HttpServletRequest request) {
-    String ignoreCache = request.getParameter(IGNORE_CACHE_PARAM);
-    if (ignoreCache == null) {
-      return false;
-    }
-    return !ignoreCache.equals("0");
   }
 
   /**

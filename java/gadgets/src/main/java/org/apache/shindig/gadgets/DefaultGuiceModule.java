@@ -19,17 +19,23 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadModule;
 import org.apache.shindig.gadgets.render.RenderModule;
 import org.apache.shindig.gadgets.rewrite.RewriteModule;
+import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
+
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.google.inject.AbstractModule;
 
 /**
  * Creates a module to supply all of the core gadget classes.
@@ -49,6 +55,13 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new RenderModule());
     install(new RewriteModule());
     install(new TemplateModule());
+
+    // Handlers for /gadgets/rpc
+    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(
+        Names.named("org.apache.shindig.gadgets.handlers"))
+        .toInstance(ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class));
+
+
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);

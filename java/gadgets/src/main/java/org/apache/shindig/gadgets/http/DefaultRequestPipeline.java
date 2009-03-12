@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
+import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -51,6 +53,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
   }
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
+    normalizeProtocol(request);
+
     HttpResponse cachedResponse = null;
 
     if (!request.getIgnoreCache()) {
@@ -95,5 +99,18 @@ public class DefaultRequestPipeline implements RequestPipeline {
       httpCache.addResponse(request, fetchedResponse);
     }
     return fetchedResponse;
+  }
+
+  public void normalizeProtocol(HttpRequest request) throws GadgetException {
+    // Normalize the protocol part of the URI
+    if (request.getUri().getScheme()== null) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "Url " + request.getUri().toString() + " does not include scheme");
+    } else if (!"http".equals(request.getUri().getScheme()) &&
+        !"https".equals(request.getUri().getScheme())) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "Invalid request url scheme in url: " + Utf8UrlCoder.encode(request.getUri().toString()) +
+            "; only \"http\" and \"https\" supported.");
+    }
   }
 }

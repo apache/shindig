@@ -19,6 +19,7 @@ package org.apache.shindig.protocol.conversion;
 
 import org.apache.shindig.common.JsonProperty;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
 
@@ -245,6 +246,8 @@ public class BeanJsonConverter implements BeanConverter {
                   + "' in " + expectedType.getName());
         }
       }
+    } else if (expectedType.equals(Uri.class)) {
+      value = Uri.parse(jsonObject.getString(fieldName));
     } else if (expectedType.equals(String.class)) {
       value = jsonObject.getString(fieldName);
     } else if (expectedType.equals(Date.class)) {

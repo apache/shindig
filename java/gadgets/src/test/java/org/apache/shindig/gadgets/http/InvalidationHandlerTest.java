@@ -32,6 +32,7 @@ import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expectLastCall;
 import org.junit.Test;
@@ -68,8 +69,9 @@ public class InvalidationHandlerTest extends EasyMockTestCase {
     invalidationService = mock(InvalidationService.class);
 
     handler = new InvalidationHandler(invalidationService);
-    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(handler));
 
     params = Maps.newHashMap();
   }

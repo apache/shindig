@@ -30,11 +30,16 @@ import org.apache.shindig.protocol.JsonRpcServlet;
 
 import com.google.common.base.Join;
 import com.google.common.collect.Maps;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -44,9 +49,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Map;
 
 /**
  * Suite for running the end-to-end tests. The suite is responsible for starting up and shutting
@@ -120,12 +122,14 @@ public class EndToEndServer {
     // Attach DataServiceServlet, wrapped in a proxy to fake errors
     ServletHolder restServletHolder = new ServletHolder(new ForceErrorServlet(
         new DataServiceServlet()));
+    restServletHolder.setInitParameter("handlers", "org.apache.shindig.social.handlers");
     context.addServlet(restServletHolder, REST_BASE);
     context.addFilter(AuthenticationServletFilter.class, REST_BASE, 0);
 
     // Attach JsonRpcServlet, wrapped in a proxy to fake errors
     ServletHolder rpcServletHolder = new ServletHolder(new ForceErrorServlet(
         new JsonRpcServlet()));
+    rpcServletHolder.setInitParameter("handlers", "org.apache.shindig.social.handlers");
     context.addServlet(rpcServletHolder, JSON_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
 
