@@ -40,17 +40,25 @@ return _IG_Prefs;
 })();
 
 function _IG_Fetch_wrapper(callback, obj) {
-  callback(obj.data);
+  callback(obj.data ? obj.data : "");
 }
 
 function _IG_FetchContent(url, callback, opt_params) {
   var params = opt_params || {};
-  // this is really the only legacy parameter documented
+  // This is really the only legacy parameter documented
   // at http://code.google.com/apis/gadgets/docs/remote-content.html#Params
   if (params.refreshInterval) {
     params['REFRESH_INTERVAL'] = params.refreshInterval;
   } else {
     params['REFRESH_INTERVAL'] = 3600;
+  }
+  // Other params, such as POST_DATA, were supported in lower case.
+  // Upper-case all param keys as a convenience, since all valid values
+  // are uppercased.
+  for (var param in params) {
+    var pvalue = params[param];
+    delete params[param];
+    params[param.toUpperCase()] = pvalue;
   }
   var cb = gadgets.util.makeClosure(null, _IG_Fetch_wrapper, callback);
   gadgets.io.makeRequest(url, cb, params);
