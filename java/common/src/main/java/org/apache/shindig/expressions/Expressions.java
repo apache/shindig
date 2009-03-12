@@ -37,6 +37,7 @@ import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
+import com.google.common.base.Nullable;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -51,9 +52,18 @@ public class Expressions {
   private final ExpressionFactory factory;
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
+  private final Functions functions;
 
-  @Inject
+  /**
+   * Convenience constructor that doesn't require any Functions.
+   */
   public Expressions() {
+    this(null);
+  }
+  
+  @Inject
+  public Expressions(@Nullable Functions functions) {
+    this.functions = functions;
     factory = newExpressionFactory();
     // Stub context with no FunctionMapper, used only to parse expressions
     parseContext = new Context(null);
@@ -123,7 +133,7 @@ public class Expressions {
    * sufficient if not for:
    * https://sourceforge.net/tracker2/?func=detail&aid=2590830&group_id=165179&atid=834616
    */
-  static private class Context extends ELContext {
+  private class Context extends ELContext {
     private final ELResolver resolver;
     private VariableMapper variables;
 
@@ -138,7 +148,7 @@ public class Expressions {
 
     @Override
     public FunctionMapper getFunctionMapper() {
-      return null;
+      return functions;
     }
 
     @Override
