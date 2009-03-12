@@ -14,7 +14,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.
+ * under the License.Blob
  */
 package org.apache.shindig.gadgets.preload;
 
@@ -29,6 +29,8 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
+import org.apache.shindig.gadgets.GadgetException;
+
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -249,5 +251,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       requests.add(request);
       return new HttpResponseBuilder().setResponseString(content).create();
     }
+
+    public void normalizeProtocol(HttpRequest request) throws GadgetException {}
   }
 }

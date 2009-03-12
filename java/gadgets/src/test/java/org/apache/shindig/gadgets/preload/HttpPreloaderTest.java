@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -60,6 +61,8 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
       }
       return oauthFetcher.fetch(request);
     }
+
+    public void normalizeProtocol(HttpRequest request) throws GadgetException {}
   };
 
   private void checkRequest(HttpRequest request) {

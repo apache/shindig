@@ -34,6 +34,7 @@ import org.apache.shindig.server.endtoend.EndToEndModule;
 
 import com.google.common.base.Join;
 import com.google.common.collect.Maps;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -51,6 +52,7 @@ public class JettyLauncher {
   private static final String GADGET_BASE = "/gadgets/ifr";
   private static final String PROXY_BASE = "/gadgets/proxy";
   private static final String MAKEREQUEST_BASE = "/gadgets/makeRequest";
+  private static final String GADGETS_RPC_BASE = "/gadgets/rpc/*";
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
@@ -106,14 +108,22 @@ public class JettyLauncher {
     ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());
     context.addServlet(makeRequestHolder, MAKEREQUEST_BASE);
     context.addFilter(AuthenticationServletFilter.class, MAKEREQUEST_BASE, 0);
+
+    // Attach the gadgets rpc servlet
+    ServletHolder gadgetsRpcServletHolder = new ServletHolder(new JsonRpcServlet());
+    gadgetsRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
+    context.addServlet(gadgetsRpcServletHolder, GADGETS_RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, GADGETS_RPC_BASE, 0);
     
     // Attach DataServiceServlet
     ServletHolder restServletHolder = new ServletHolder(new DataServiceServlet());
+    restServletHolder.setInitParameter("handlers", "org.apache.shindig.social.handlers");
     context.addServlet(restServletHolder, REST_BASE);
     context.addFilter(AuthenticationServletFilter.class, REST_BASE, 0);
 
     // Attach JsonRpcServlet
     ServletHolder rpcServletHolder = new ServletHolder(new JsonRpcServlet());
+    rpcServletHolder.setInitParameter("handlers", "org.apache.shindig.social.handlers");
     context.addServlet(rpcServletHolder, JSON_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
 

@@ -128,19 +128,31 @@ public class OAuthArguments {
    * Parse OAuthArguments from parameters to Preload, proxied content rendering, and OSML tags.
    */
   public OAuthArguments(RequestAuthenticationInfo info) throws GadgetException {
-    Map<String, String> attrs = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
-    attrs.putAll(info.getAttributes());
-    useToken = parseUseToken(info.getAuthType(), getAuthInfoParam(attrs, USE_TOKEN_PARAM, ""));
-    serviceName = getAuthInfoParam(attrs, SERVICE_PARAM, "");
-    tokenName = getAuthInfoParam(attrs, TOKEN_PARAM, "");
-    requestToken = getAuthInfoParam(attrs, REQUEST_TOKEN_PARAM, null);
-    requestTokenSecret = getAuthInfoParam(attrs, REQUEST_TOKEN_SECRET_PARAM, null);
-    origClientState = null;
-    bypassSpecCache = false;
+    this(info.getAuthType(), info.getAttributes());
+
+    origClientState = null;  // Client has no state for declarative calls
+    bypassSpecCache = false; // too much trouble to copy nocache=1 from the request context to here.
+
     signOwner = info.isSignOwner();
     signViewer = info.isSignViewer();
-    requestOptions.putAll(info.getAttributes());
   }
+
+  /**
+   * Parse OAuthArguments from a Map of settings
+   */
+  public OAuthArguments(AuthType auth,  Map<String, String> map) throws GadgetException {
+    requestOptions.putAll(map);
+    useToken = parseUseToken(auth, getAuthInfoParam(requestOptions, USE_TOKEN_PARAM, ""));
+    serviceName = getAuthInfoParam(requestOptions, SERVICE_PARAM, "");
+    tokenName = getAuthInfoParam(requestOptions, TOKEN_PARAM, "");
+    requestToken = getAuthInfoParam(requestOptions, REQUEST_TOKEN_PARAM, null);
+    requestTokenSecret = getAuthInfoParam(requestOptions, REQUEST_TOKEN_SECRET_PARAM, null);
+    origClientState = getAuthInfoParam(requestOptions, CLIENT_STATE_PARAM, null);
+    bypassSpecCache = "1".equals(getAuthInfoParam(requestOptions, BYPASS_SPEC_CACHE_PARAM, null));
+    signOwner =  Boolean.parseBoolean(getAuthInfoParam(requestOptions, SIGN_OWNER_PARAM, "true"));
+    signViewer = Boolean.parseBoolean(getAuthInfoParam(requestOptions, SIGN_VIEWER_PARAM, "true"));
+  }
+
 
   /**
    * @return the named attribute from the Preload tag attributes, or default if the attribute is

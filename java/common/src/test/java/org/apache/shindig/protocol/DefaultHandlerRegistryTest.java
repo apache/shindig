@@ -19,6 +19,8 @@
 package org.apache.shindig.protocol;
 
 
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -28,7 +30,6 @@ import com.google.inject.Guice;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.json.JSONObject;
 import static org.junit.Assert.assertArrayEquals;
 
@@ -50,9 +51,9 @@ public class DefaultHandlerRegistryTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     converter = new BeanJsonConverter(Guice.createInjector());
-    registry = new DefaultHandlerRegistry(null,
-        Sets.<Object>newHashSet(new TestHandler()), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));
   }
 
   public void testGetHandlerRPC() throws Exception {
@@ -187,7 +188,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
 
   public void testAddNonService() {
     try {
-      registry.addHandlers(new Object());
+      registry.addHandlers(Sets.newHashSet(new Object()));
       fail("Adding an invalid service object succeded");
     } catch (IllegalStateException ise) {
 

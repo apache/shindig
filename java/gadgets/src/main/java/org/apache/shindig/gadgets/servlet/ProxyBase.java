@@ -25,7 +25,10 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +48,11 @@ public abstract class ProxyBase {
   // Public because of rewriter. Rewriter should be cleaned up.
   public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
   public static final String SANITIZE_CONTENT_PARAM = "sanitize";
+
+  protected static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
+      "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
+      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding"
+  );
 
   /**
    * Validates the given url.
@@ -126,4 +134,12 @@ public abstract class ProxyBase {
    */
   abstract public void fetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException;
+
+  protected boolean getIgnoreCache(HttpServletRequest request) {
+    String ignoreCache = request.getParameter(IGNORE_CACHE_PARAM);
+    if (ignoreCache == null) {
+      return false;
+    }
+    return !ignoreCache.equals("0");
+  }
 }

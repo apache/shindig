@@ -127,11 +127,12 @@ public class MakeRequestHandler extends ProxyBase {
           throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
               "Malformed header specified,");
         }
-        req.addHeader(Utf8UrlCoder.decode(parts[0]), Utf8UrlCoder.decode(parts[1]));
+        String headerName = Utf8UrlCoder.decode(parts[0]);
+        if (!HttpRequestHandler.BAD_HEADERS.contains(headerName.toUpperCase())) {
+          req.addHeader(headerName, Utf8UrlCoder.decode(parts[1]));
+        }
       }
     }
-
-    removeUnsafeHeaders(req);
 
     req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
 
@@ -152,21 +153,6 @@ public class MakeRequestHandler extends ProxyBase {
       req.setOAuthArguments(new OAuthArguments(auth, request));
     }
     return req;
-  }
-
-  /**
-   * Removes unsafe headers from the header set.
-   */
-  private void removeUnsafeHeaders(HttpRequest request) {
-    // Host must be removed.
-    final String[] badHeaders = new String[] {
-        // No legitimate reason to over ride these.
-        // TODO: We probably need to test variations as well.
-        "Host", "Accept", "Accept-Encoding"
-    };
-    for (String bad : badHeaders) {
-      request.removeHeader(bad);
-    }
   }
 
   /**

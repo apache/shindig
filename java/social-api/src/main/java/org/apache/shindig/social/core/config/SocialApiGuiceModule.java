@@ -81,6 +81,6 @@ public class SocialApiGuiceModule extends AbstractModule {
   
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class, MessageHandler.class, SampleContainerHandler.class, SystemHandler.class));
+            PersonHandler.class, MessageHandler.class, SampleContainerHandler.class));
   }
 }

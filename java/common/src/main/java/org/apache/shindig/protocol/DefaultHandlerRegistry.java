@@ -32,8 +32,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,13 +53,13 @@ import java.util.logging.Logger;
  * Default implementation of HandlerRegistry. Bind to appropriately
  * annotated handlers.
  */
-@Singleton
 public class DefaultHandlerRegistry implements HandlerRegistry {
 
   private static final Logger logger = Logger.getLogger(DefaultHandlerRegistry.class.getName());
 
   // Map service - > method -> { handler, ...}
-  private final Map<String, Map<String, SortedSet<RestPath>>> serviceMethodPathMap = Maps.newHashMap();
+  private final Map<String, Map<String, SortedSet<RestPath>>> serviceMethodPathMap =
+      Maps.newHashMap();
   private final Map<String, RpcInvocationHandler> rpcOperations = Maps.newHashMap();
 
   private final Injector injector;
@@ -72,17 +70,49 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    * Creates a dispatcher with the specified handler classes
    *
    * @param injector Used to create instance if handler is a Class
-   * @param handlers List of handler instances or classes.
    */
   @Inject
   public DefaultHandlerRegistry(Injector injector,
-                                @Named("org.apache.shindig.handlers")Set<Object> handlers,
                                 BeanJsonConverter beanJsonConverter,
                                 HandlerExecutionListener executionListener) {
     this.injector = injector;
     this.beanJsonConverter = beanJsonConverter;
     this.executionListener = executionListener;
-    addHandlers(handlers.toArray());
+  }
+
+  /**
+   * Add handlers to the registry
+   * @param handlers
+   */
+  public void addHandlers(Set<Object> handlers) {
+    for (final Object handler : handlers) {
+      Class<?> handlerType;
+      Provider<?> handlerProvider;
+      if (handler instanceof Class) {
+        handlerType = (Class<?>) handler;
+        handlerProvider = injector.getProvider(handlerType);
+      } else {
+        handlerType = handler.getClass();
+        handlerProvider = new Provider<Object>() {
+          public Object get() {
+            return handler;
+          }
+        };
+      }
+      if (!handlerType.isAnnotationPresent(Service.class)) {
+        throw new IllegalStateException("Attempt to bind unannotated service implementation " +
+            handlerType.getName());
+      }
+      Service service = handlerType.getAnnotation(Service.class);
+
+      for (Method m : handlerType.getMethods()) {
+        if (m.isAnnotationPresent(Operation.class)) {
+          Operation op = m.getAnnotation(Operation.class);
+          createRpcHandler(handlerProvider, service, op, m);
+          createRestHandler(handlerProvider, service, op, m);
+        }
+      }
+    }
   }
 
   /**
@@ -142,40 +172,6 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
   public Set<String> getSupportedRpcServices() {
     return Collections.unmodifiableSet(rpcOperations.keySet());
-  }
-
-  /**
-   * Adds a custom handler.
-   */
-  public void addHandlers(Object... handlers) {
-    for (final Object handler : handlers) {
-      Class<?> handlerType;
-      Provider<?> handlerProvider;
-      if (handler instanceof Class) {
-        handlerType = (Class<?>) handler;
-        handlerProvider = injector.getProvider(handlerType);
-      } else {
-        handlerType = handler.getClass();
-        handlerProvider = new Provider<Object>() {
-          public Object get() {
-            return handler;
-          }
-        };
-      }
-      if (!handlerType.isAnnotationPresent(Service.class)) {
-        throw new IllegalStateException("Attempt to bind unannotated service implementation " +
-            handlerType.getName());
-      }
-      Service service = handlerType.getAnnotation(Service.class);
-
-      for (Method m : handlerType.getMethods()) {
-        if (m.isAnnotationPresent(Operation.class)) {
-          Operation op = m.getAnnotation(Operation.class);
-          createRpcHandler(handlerProvider, service, op, m);
-          createRestHandler(handlerProvider, service, op, m);
-        }
-      }
-    }
   }
 
   private void createRestHandler(Provider<?> handlerProvider,

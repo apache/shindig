@@ -19,6 +19,7 @@
 package org.apache.shindig.protocol;
 
 import com.google.inject.ImplementedBy;
+
 import org.json.JSONObject;
 
 import java.util.Set;
@@ -28,6 +29,12 @@ import java.util.Set;
  */
 @ImplementedBy(DefaultHandlerRegistry.class)
 public interface HandlerRegistry {
+
+  /**
+   * Add a set of handlers to the registry
+   * @param handlers
+   */
+  void addHandlers(Set<Object> handlers);
 
   /**
    * @param rpc The rpc to dispatch

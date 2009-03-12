@@ -24,15 +24,21 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
 import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,12 +51,28 @@ public abstract class ApiServlet extends InjectedServlet {
   
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
+  public static final String HANDLERS_PARAM = "handlers";
+
   protected HandlerRegistry dispatcher;
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
 
-  @Inject
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+
+    // Lookup the set of handlers to bind to this api endpoint and
+    // populate the registry with them
+    String handlers = config.getInitParameter(HANDLERS_PARAM);
+    this.dispatcher = injector.getInstance(HandlerRegistry.class);
+    this.dispatcher.addHandlers(
+        injector.getInstance(Key.get(new TypeLiteral<Set<Object>>(){}, Names.named(handlers))));
+    this.dispatcher.addHandlers(Collections.<Object>singleton(new SystemHandler(dispatcher)));
+  }
+
+
+  // Only used for testing
   public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
   }

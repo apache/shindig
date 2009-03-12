@@ -34,6 +34,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
@@ -53,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
   protected static final String XMLSCHEMA = " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
@@ -88,7 +92,10 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
 
     servlet = new DataServiceServlet();
 
-    servlet.setHandlerRegistry(injector.getInstance(HandlerRegistry.class));
+    HandlerRegistry dispatcher = injector.getInstance(HandlerRegistry.class);
+    dispatcher.addHandlers(injector.getInstance(Key.get(new TypeLiteral<Set<Object>>(){},
+        Names.named("org.apache.shindig.social.handlers"))));
+    servlet.setHandlerRegistry(dispatcher);
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));

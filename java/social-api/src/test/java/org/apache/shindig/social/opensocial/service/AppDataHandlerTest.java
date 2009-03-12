@@ -68,8 +68,9 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
-    registry = new DefaultHandlerRegistry(null, Sets.<Object>newHashSet(handler), converter,
+    registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {

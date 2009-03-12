@@ -33,7 +33,6 @@ public class SystemHandler {
 
   HandlerRegistry registry;
 
-  @Inject
   public SystemHandler(HandlerRegistry registry) {
     this.registry = registry;
   }

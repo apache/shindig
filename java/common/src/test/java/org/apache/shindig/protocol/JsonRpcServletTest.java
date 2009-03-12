@@ -24,13 +24,17 @@ import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
+
+import junit.framework.TestCase;
+
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.reset;
-
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
+import static org.easymock.classextension.EasyMock.reset;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,11 +48,6 @@ import java.util.List;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.TestCase;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
 
 /**
  *
@@ -89,9 +88,9 @@ public class JsonRpcServletTest extends TestCase {
     EasyMock.expect(multipartFormParser.isMultipartContent(req)).andStubReturn(false);
     servlet.setMultipartFormParser(multipartFormParser);
     
-    HandlerRegistry registry = new DefaultHandlerRegistry(null,
-        Collections.<Object>singleton(handler), jsonConverter,
+    HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
+    registry.addHandlers(Collections.<Object>singleton(handler));
 
     servlet.setHandlerRegistry(registry);
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);

@@ -344,6 +344,8 @@ public class HtmlRendererTest {
     public HttpRequest getLastHttpRequest() {
       return lastHttpRequest;
     }
+
+    public void normalizeProtocol(HttpRequest request) throws GadgetException { }
   }
 
   private static class FakePreloaderService implements PreloaderService {

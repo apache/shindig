@@ -399,5 +399,9 @@ public class DefaultGadgetSpecFactoryTest {
       this.request = request;
       return new HttpResponse(LOCAL_SPEC_XML);
     }
+
+    public void normalizeProtocol(HttpRequest request) throws GadgetException {
+      //No Op
+    }
   }
 }
