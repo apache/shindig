@@ -23,12 +23,6 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
-import com.google.inject.Inject;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
@@ -42,6 +36,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+
 /**
  * Common base class for API servlets.
  */
@@ -51,7 +51,12 @@ public abstract class ApiServlet extends InjectedServlet {
   
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
+  /** ServletConfig parameter set to provide an explicit named binding for handlers */
   public static final String HANDLERS_PARAM = "handlers";
+  
+  /** The default key used to look up handlers if the servlet config parameter is not available */
+  public static final Key<Set<Object>> DEFAULT_HANDLER_KEY =
+       Key.get(new TypeLiteral<Set<Object>>(){}, Names.named("org.apache.shindig.protocol.handlers"));
 
   protected HandlerRegistry dispatcher;
   protected BeanJsonConverter jsonConverter;
@@ -65,14 +70,18 @@ public abstract class ApiServlet extends InjectedServlet {
     // Lookup the set of handlers to bind to this api endpoint and
     // populate the registry with them
     String handlers = config.getInitParameter(HANDLERS_PARAM);
-    this.dispatcher = injector.getInstance(HandlerRegistry.class);
-    this.dispatcher.addHandlers(
-        injector.getInstance(Key.get(new TypeLiteral<Set<Object>>(){}, Names.named(handlers))));
+    Key<Set<Object>> handlerKey;
+    if (handlers == null || "".equals(handlers)) {
+      handlerKey = DEFAULT_HANDLER_KEY;
+    } else {
+      handlerKey = Key.get(new TypeLiteral<Set<Object>>(){}, Names.named(handlers));
+    }
+    
+    this.dispatcher.addHandlers(injector.getInstance(handlerKey));
     this.dispatcher.addHandlers(Collections.<Object>singleton(new SystemHandler(dispatcher)));
   }
 
-
-  // Only used for testing
+  @Inject
   public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
   }
