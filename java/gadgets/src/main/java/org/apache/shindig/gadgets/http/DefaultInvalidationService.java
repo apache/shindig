@@ -55,6 +55,7 @@ public class DefaultInvalidationService implements InvalidationService {
   protected final Cache<String,Long> invalidationEntries;
   private final AtomicLong marker;
 
+  private static final String TOKEN_PREFIX = "INV_TOK:";
 
   @Inject
   public DefaultInvalidationService(HttpCache httpCache, CacheProvider cacheProvider) {
@@ -125,9 +126,9 @@ public class DefaultInvalidationService implements InvalidationService {
     // Assume the container is consistent in its use of either appId or appUrl.
     // Use appId
     if (!StringUtils.isEmpty(token.getAppId())) {
-      return "INVALIDATION_TOKEN:" + token.getAppId() + ":" + userId;
+      return TOKEN_PREFIX + token.getAppId() + ":" + userId;
     }
-    return "INVALIDATION_TOKEN:" + token.getAppUrl() + ":" + userId;
+    return TOKEN_PREFIX + token.getAppUrl() + ":" + userId;
   }
 
   /**
@@ -136,20 +137,28 @@ public class DefaultInvalidationService implements InvalidationService {
   private String getInvalidationMark(HttpRequest request) {
     StringBuilder currentInvalidation = new StringBuilder();
 
+    Long ownerStamp = null;
     if (request.getOAuthArguments().getSignOwner()) {
       String ownerKey = getKey(request.getSecurityToken().getOwnerId(), request.getSecurityToken());
-      Long ownerStamp = invalidationEntries.getElement(ownerKey);
-      if (ownerStamp != null) {
-        currentInvalidation.append("o=").append(ownerStamp).append(";");
+      ownerStamp = invalidationEntries.getElement(ownerKey);
+    }
+    Long viewerStamp = null;
+    if (request.getOAuthArguments().getSignViewer()) {
+      if (ownerStamp != null &&
+          request.getSecurityToken().getOwnerId().equals(
+              request.getSecurityToken().getViewerId())) {
+        viewerStamp = ownerStamp;
+      } else {
+        String viewerKey = getKey(request.getSecurityToken().getViewerId(),
+            request.getSecurityToken());
+        viewerStamp = invalidationEntries.getElement(viewerKey);
       }
     }
-    if (request.getOAuthArguments().getSignViewer()) {
-      String viewerKey = getKey(request.getSecurityToken().getViewerId(),
-          request.getSecurityToken());
-      Long viewerStamp = invalidationEntries.getElement(viewerKey);
-      if (viewerStamp != null) {
-        currentInvalidation.append("v=").append(viewerStamp).append(";");
-      }
+    if (ownerStamp != null) {
+      currentInvalidation.append("o=").append(ownerStamp).append(";");
+    }
+    if (viewerStamp != null) {
+      currentInvalidation.append("v=").append(viewerStamp).append(";");
     }
     return currentInvalidation.toString();
   }

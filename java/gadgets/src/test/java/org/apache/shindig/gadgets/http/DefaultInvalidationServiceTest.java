@@ -26,7 +26,9 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
 
 import com.google.common.collect.ImmutableSet;
+
 import junit.framework.TestCase;
+
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 
@@ -100,13 +102,13 @@ public class DefaultInvalidationServiceTest extends TestCase {
         appyToken);
     assertEquals(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME).getSize(), 4);
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
-        .getElement("INVALIDATION_TOKEN:AppX:1"));
+        .getElement("INV_TOK:AppX:1"));
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
-        .getElement("INVALIDATION_TOKEN:AppX:2"));
+        .getElement("INV_TOK:AppX:2"));
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
-        .getElement("INVALIDATION_TOKEN:AppY:1"));
+        .getElement("INV_TOK:AppY:1"));
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
-        .getElement("INVALIDATION_TOKEN:AppY:2"));
+        .getElement("INV_TOK:AppY:2"));
 
   }
 
