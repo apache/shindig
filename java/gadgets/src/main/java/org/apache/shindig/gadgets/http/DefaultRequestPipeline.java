@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.http;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import com.google.inject.Inject;

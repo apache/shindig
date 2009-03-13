@@ -20,8 +20,6 @@ package org.apache.shindig.protocol;
 
 import org.apache.shindig.protocol.model.FilterOperation;
 
-import com.google.inject.Inject;
-
 import java.util.Set;
 
 

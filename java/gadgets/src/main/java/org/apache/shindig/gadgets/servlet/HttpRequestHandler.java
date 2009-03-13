@@ -40,7 +40,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collection;

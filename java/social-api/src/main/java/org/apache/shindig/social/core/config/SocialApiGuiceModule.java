@@ -24,7 +24,6 @@ import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.protocol.DataServiceServletFetcher;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerRegistry;
-import org.apache.shindig.protocol.SystemHandler;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
