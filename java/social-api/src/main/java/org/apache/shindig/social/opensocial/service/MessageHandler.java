@@ -112,7 +112,7 @@ public class MessageHandler {
 
     HandlerPreconditions.requireEmpty(messageIds,"Message IDs not allowed here, use PUT instead");
 
-    Message message = request.getTypedParameter("updatedData", Message.class);
+    Message message = request.getTypedParameter("entity", Message.class);
     HandlerPreconditions.requireNotEmpty(message.getRecipients(), "No recipients specified");
 
     return service.createMessage(userIds.iterator().next(), request.getAppId(), msgCollId, message,
