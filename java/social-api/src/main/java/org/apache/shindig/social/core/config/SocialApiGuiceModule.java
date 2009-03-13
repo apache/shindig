@@ -78,7 +78,7 @@ public class SocialApiGuiceModule extends AbstractModule {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
   
-    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.handlers"))
+    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.social.handlers"))
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, MessageHandler.class, SampleContainerHandler.class));
   }
