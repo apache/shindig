@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
-import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -53,18 +53,19 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
     normalizeProtocol(request);
-
-    HttpResponse cachedResponse = null;
+    HttpResponse invalidatedResponse = null;
 
     if (!request.getIgnoreCache()) {
-      cachedResponse = httpCache.getResponse(request);
+      HttpResponse cachedResponse = httpCache.getResponse(request);
       // Note that we dont remove invalidated entries from the cache as we want them to be
       // available in the event of a backend fetch failure
       if (cachedResponse != null) {
-        if (cachedResponse.isStale()) {
-          cachedResponse = null;
-        } else if(invalidationService.isValid(request, cachedResponse)) {
-          return cachedResponse;
+        if (!cachedResponse.isStale()) {
+          if(invalidationService.isValid(request, cachedResponse)) {
+            return cachedResponse;
+          } else {
+            invalidatedResponse = cachedResponse;
+          }
         }
       }
     }
@@ -82,19 +83,21 @@ public class DefaultRequestPipeline implements RequestPipeline {
         return HttpResponse.error();
     }
 
-    if (fetchedResponse.isError() && cachedResponse != null) {
-      // Use the invalidated cache response if it is not stale. We don't update its
+    if (fetchedResponse.isError() && invalidatedResponse != null) {
+      // Use the invalidated cached response if it is not stale. We don't update its
       // mark so it remains invalidated
-      return cachedResponse;
+      return invalidatedResponse;
     }
 
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       fetchedResponse = imageRewriter.rewrite(request.getUri(), fetchedResponse);
     }
 
-    if (!request.getIgnoreCache()) {
+    if (!request.getIgnoreCache() ) {
       // Mark the response with invalidation information prior to caching
-      fetchedResponse = invalidationService.markResponse(request, fetchedResponse);
+      if (fetchedResponse.getCacheTtl() > 0) {
+        fetchedResponse = invalidationService.markResponse(request, fetchedResponse);
+      }
       httpCache.addResponse(request, fetchedResponse);
     }
     return fetchedResponse;
