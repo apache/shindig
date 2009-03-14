@@ -39,7 +39,7 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
     try {
       //TODO remove this once we have a better way to generate a fake token
       // in the example files
-      if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 6) {
+      if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 7) {
         $tokens = explode(":", $stringToken);
         return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
       } else {

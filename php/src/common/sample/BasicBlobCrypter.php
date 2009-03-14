@@ -23,27 +23,27 @@ class BlobExpiredException extends Exception {
 
 /**
  * This class provides basic binary blob encryption and decryption, for use with the security token
- * 
+ *
  */
 class BasicBlobCrypter extends BlobCrypter {
   //FIXME make this compatible with the java's blobcrypter
-  
+
 
   // Labels for key derivation
   private $CIPHER_KEY_LABEL = 0;
   private $HMAC_KEY_LABEL = 1;
-  
+
   /** Key used for time stamp (in seconds) of data */
   public $TIMESTAMP_KEY = "t";
-  
+
   /** minimum length of master key */
   public $MASTER_KEY_MIN_LEN = 16;
-  
+
   /** allow three minutes for clock skew */
   private $CLOCK_SKEW_ALLOWANCE = 180;
-  
+
   private $UTF8 = "UTF-8";
-  
+
   protected $cipherKey;
   protected $hmacKey;
   protected $allowPlaintextToken;
@@ -83,7 +83,7 @@ class BasicBlobCrypter extends BlobCrypter {
    */
   public function unwrap($in, $maxAgeSec) {
     //TODO remove this once we have a better way to generate a fake token in the example files
-    if ($this->allowPlaintextToken && count(explode(':', $in)) == 6) {
+    if ($this->allowPlaintextToken && count(explode(':', $in)) == 7) {
       $data = explode(":", $in);
       $out = array();
       $out['o'] = $data[0];
