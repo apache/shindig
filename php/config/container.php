@@ -117,12 +117,12 @@ $shindigConfig = array(
   'security_token' => 'BasicSecurityToken',
   'oauth_lookup_service' => 'BasicOAuthLookupService',
 
-  // Caching back-end's to use. Shindig ships with CacheFile, CacheApc and CacheMemcache support
+  // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript
-  // On a production system you probably want to use CacheApc for features, and CacheMemcache for the data cache
-  'data_cache' => 'CacheFile',
-  'feature_cache' => 'CacheFile',
+  // On a production system you probably want to use CacheStorageApc for features, and CacheStorageMemcache for the data cache
+  'data_cache' => 'CacheStorageFile',
+  'feature_cache' => 'CacheStorageFile',
 
   // RESTful API data service classes to use
   // See http://code.google.com/p/partuza/source/browse/#svn/trunk/Shindig for a MySql powered example
@@ -141,7 +141,7 @@ $shindigConfig = array(
   'cache_host' => 'localhost',
   'cache_port' => 11211,
   'cache_time' => 24 * 60 * 60,
-  // If you use CacheFile as caching backend, this is the directory where it stores the temporary files
+  // If you use CacheStorageFile as caching backend, this is the directory where it stores the temporary files
   'cache_root' => '/tmp/shindig',
 
   // connection timeout setting for all curl requests, set this time something low if you want errors reported

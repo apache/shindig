@@ -34,7 +34,8 @@ class ProxyHandler extends ProxyBase {
    */
   public function fetch($url) {
     $url = $this->validateUrl($url);
-    $result = $this->fetchContent($url, 'GET');
+    $request = $this->buildRequest($url, 'GET');
+    $result = $this->context->getHttpFetcher()->fetch($request, $this->context);
     $httpCode = (int)$result->getHttpCode();
     $isShockwaveFlash = false;
     foreach ($result->getResponseHeaders() as $key => $val) {

@@ -37,8 +37,8 @@ abstract class CacheStorage {
     do {
       usleep(100);
       $cnt ++;
-    } while ($cnt <= $tries && $this->isLocked());
-    if ($this->isLocked()) {
+    } while ($cnt <= $tries && $this->isLocked($key));
+    if ($this->isLocked($key)) {
       $this->unlock($key);
     }
   }

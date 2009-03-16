@@ -19,33 +19,45 @@
  */
 
 class BasicRemoteContent extends RemoteContent {
-  private $remoteContentFetcher = null;
+  /**
+   * @var BesicRemoteContentFetcher
+   */
+  private $basicFetcher = null;
+  
+  /**
+   * @var SigningFetcherFactory
+   */
+  private $signingFetcherFactory = null;
+  
+  /**
+   * @var SecurityTokenDecoder
+   */
+  private $signer = null;
 
-  public function __construct($fetcher = null) {
-    if (!$fetcher) {
-      $this->remoteContentFetcher = new BasicRemoteContentFetcher();
-    } else {
-      $this->remoteContentFetcher = $fetcher;
-    }
+  public function __construct(RemoteContentFetcher $basicFetcher = null, $signingFetcherFactory = null, $signer = null) {
+    $this->basicFetcher = $basicFetcher ? $basicFetcher : new BasicRemoteContentFetcher();
+    $this->signingFetcherFactory = $signingFetcherFactory;
+    $this->signer = $signer;
   }
 
-  public function setRemoteContentFetcher($fetcher) {
-    $this->remoteContentFetcher = $fetcher;
+  public function setBasicFetcher(RemoteContentFetcher $basicFetcher) {
+    $this->basicFetcher = $basicFetcher;
   }
 
-  public function fetch(RemoteContentRequest $request, $context) {
+  public function fetch(RemoteContentRequest $request, GadgetContext $context) {
     $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
     if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
       $request = $cachedRequest;
     } else {
-      $request = $this->remoteContentFetcher->fetchRequest($request);
+      $originalRequest = clone $request;
+      $request = $this->divertFetch($request, $context);
       if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
         $cachedRequest = $cache->expiredGet($request->toHash());
         if ($cachedRequest['found'] == true) {
           return $cachedRequest['data'];
         }
       }
-      $this->setRequestCache($request, $cache, $context);
+      $this->setRequestCache($originalRequest, $request, $cache, $context);
     }
     return $request;
   }
@@ -63,19 +75,25 @@ class BasicRemoteContent extends RemoteContent {
       if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
         $rets[] = $cachedRequest;
       } else {
+        $originalRequest = clone $request;
         $requestsToProc[] = $request;
+        $originalRequestArray[] = $originalRequest;
       }
     }
-    $newRets = $this->remoteContentFetcher->multiFetchRequest($requestsToProc);
-    foreach ($newRets as $request) {
-      if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
-        $cachedRequest = $cache->expiredGet($request->toHash());
-        if ($cachedRequest['found'] == true) {
-          $rets[] = $cachedRequest['data'];
+    
+    if ($requestsToProc) {
+      $newRets = $this->basicFetcher->multiFetchRequest($requestsToProc);
+      foreach ($newRets as $request) {
+        list(, $originalRequest) = each($originalRequestArray);
+        if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
+          $cachedRequest = $cache->expiredGet($request->toHash());
+          if ($cachedRequest['found'] == true) {
+            $rets[] = $cachedRequest['data'];
+          }
+        } else {
+          $this->setRequestCache($originalRequest, $request, $cache, $context);
+          $rets[] = $request;
         }
-      } else {
-        $this->setRequestCache($request, $cache, $context);
-        $rets[] = $request;
       }
     }
     return $rets;
@@ -86,7 +104,7 @@ class BasicRemoteContent extends RemoteContent {
     $cache->invalidate($request->toHash());
   }
 
-  private function setRequestCache(RemoteContentRequest $request, Cache $cache, GadgetContext $context) {
+  private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache, GadgetContext $context) {
     if (! $request->isPost() && ! $context->getIgnoreCache()) {
       $ttl = Config::get('cache_time');
       if ($request->getHttpCode() == '200') {
@@ -116,7 +134,31 @@ class BasicRemoteContent extends RemoteContent {
       } else {
         $ttl = 5 * 60; // cache errors for 5 minutes, takes the denial of service attack type behaviour out of having an error :)
       }
-      $cache->set($request->toHash(), $request, $ttl);
+      $cache->set($originalRequest->toHash(), $request, $ttl);
+    }
+  }
+  
+  private function divertFetch(RemoteContentRequest $request, GadgetContext $context) {
+    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
+    switch (strtoupper($authz)) {
+      case 'SIGNED':
+        $token = $context->extractAndValidateToken($this->signer);
+        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
+        $url = $request->getUrl();
+        $method = $request->isPost() ? 'POST' : 'GET'; 
+        return $fetcher->fetch($url, $method);
+      case 'OAUTH':
+        $params = new OAuthRequestParams();
+        $token = $context->extractAndValidateToken($this->signer);
+        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
+        $oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);
+        $oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
+        $url = $request->getUrl();
+        $request = new RemoteContentRequest($url);
+        $request->createRemoteContentRequestWithUri($url);
+        return $oauthFetcher->fetch($request);
+      default:
+        return $this->basicFetcher->fetchRequest($request);
     }
   }
 }

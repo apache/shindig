@@ -53,7 +53,7 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheFile', 'TestCache', $this->time);
+    $this->cache = Cache::createCache('CacheStorageFile', 'TestCache', $this->time);
   }
 
   /**
@@ -65,6 +65,13 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
     parent::tearDown();
   }
 
+  /**
+   * Tests Cache::createCache()
+   */
+  public function testCreateCache() {
+    $cache = Cache::createCache('CacheStorageFile', 'TestCache');
+  }
+  
   /**
    * Tests cache->delete()
    */

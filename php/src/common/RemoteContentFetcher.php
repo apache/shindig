@@ -20,18 +20,7 @@
 
 
 abstract class RemoteContentFetcher {
-
-  protected $fetcher;
-
-  protected function setNextFetcher($fetcher = null) {
-    $this->fetcher = $fetcher;
-  }
-
   abstract public function fetchRequest(RemoteContentRequest $request);
 
   abstract public function multiFetchRequest(Array $requests);
-
-  public function getNextFetcher() {
-    return $this->fetcher;
-  }
 }

@@ -19,6 +19,9 @@
  */
 
 class CacheStorageMemcache extends CacheStorage {
+  /**
+   * @var Memcache
+   */
   private static $memcache = null;
 
   private $prefix = null;

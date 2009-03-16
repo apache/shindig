@@ -22,7 +22,11 @@
  * This class contains the shared methods between the Proxy and makeRequest handlers
  */
 class ProxyBase {
+  /**
+   * @var GadgetContext
+   */
   public $context;
+  
   protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie', 'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary', 'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
 
   public function __construct($context) {
@@ -35,7 +39,7 @@ class ProxyBase {
    * @param string $url the url to fetch
    * @return the filled in request (RemoteContentRequest)
    */
-  protected function fetchContent($url, $method = 'GET') {
+  protected function buildRequest($url, $method = 'GET') {
     // Check the protocol requested - curl doesn't really support file://
     // requests but the 'error' should be handled properly
     $protocolSplit = explode('://', $url, 2);
@@ -71,10 +75,8 @@ class ProxyBase {
       // even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
       // so the request to POST is still honored
       $request = new RemoteContentRequest($url, null, $postData);
-      $request = $this->context->getHttpFetcher()->fetch($request, $this->context);
     } else {
       $request = new RemoteContentRequest($url);
-      $request = $this->context->getHttpFetcher()->fetch($request, $this->context);
     }
     return $request;
   }

@@ -51,6 +51,11 @@ class SigningFetcher extends RemoteContentFetcher {
    * The name of the key, included in the fetch to help with key rotation.
    */
   protected $keyName;
+  
+  /**
+   * @var RemoteContentFetcher
+   */
+  private $fetcher;
 
   /**
    * Constructor based on signing with the given PrivateKey object.
@@ -59,8 +64,8 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
    */
-  public static function makeFromPrivateKey($next, $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($next, $authToken, $keyName, $privateKey);
+  public static function makeFromPrivateKey($fetcher, $authToken, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
   /**
@@ -70,8 +75,8 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
    */
-  public static function makeFromB64PrivateKey($next, $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($next, $authToken, $keyName, $privateKey);
+  public static function makeFromB64PrivateKey($fetcher, $authToken, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
   /**
@@ -81,28 +86,28 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey DER encoded private key
    */
-  public static function makeFromPrivateKeyBytes($next, $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($next, $authToken, $keyName, $privateKey);
+  public static function makeFromPrivateKeyBytes($fetcher, $authToken, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
-  protected function __construct($next, $authToken, $keyName, $privateKeyObject) {
-    parent::setNextFetcher($next);
+  protected function __construct($fetcher, $authToken, $keyName, $privateKeyObject) {
+    $this->fetcher = $fetcher;
     $this->authToken = $authToken;
     $this->keyName = $keyName;
     $this->privateKeyObject = $privateKeyObject;
   }
 
   public function fetchRequest(RemoteContentRequest $request) {
-    return $this->getNextFetcher()->fetchRequest($request);
+    return $this->fetcher->fetchRequest($request);
   }
 
   public function fetch($url, $method) {
     $signed = $this->signRequest($url, $method);
-    return $this->getNextFetcher()->fetchRequest($signed);
+    return $this->fetcher->fetchRequest($signed);
   }
 
   public function multiFetchRequest(Array $requests) {
-    return $this->getNextFetcher()->multiFetchRequest($requests);
+    return $this->fetcher->multiFetchRequest($requests);
   }
 
   public function signRequest($url, $method) {

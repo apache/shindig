@@ -262,7 +262,7 @@ class GadgetContext {
    * Extracts the 'st' token from the GET or POST params and calls the
    * signer to validate the token
    *
-   * @param GadgetSigner $signer the signer to use (configured in config.php)
+   * @param SecurityTokenDecoder $signer the signer to use (configured in config.php)
    * @return string the token to use in the signed url
    */
   public function extractAndValidateToken($signer) {
