@@ -102,6 +102,7 @@
                 <source>opensocial-reference/phone.js</source>
                 <source>opensocial-reference/responseitem.js</source>
                 <source>opensocial-reference/url.js</source>
+                <source>opensocial-base/fieldtranslations.js</source>
                 <source>opensocial-base/jsonactivity.js</source>
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-rest/restfulcontainer.js</source>

@@ -28,10 +28,11 @@ var JsonPerson = function(opt_params) {
 
   JsonPerson.constructObject(opt_params, "bodyType", opensocial.BodyType);
   JsonPerson.constructObject(opt_params, "currentLocation", opensocial.Address);
-  JsonPerson.constructObject(opt_params, "dateOfBirth", Date);
   JsonPerson.constructObject(opt_params, "name", opensocial.Name);
   JsonPerson.constructObject(opt_params, "profileSong", opensocial.Url);
   JsonPerson.constructObject(opt_params, "profileVideo", opensocial.Url);
+
+  JsonPerson.constructDate(opt_params, "dateOfBirth");
 
   JsonPerson.constructArrayObject(opt_params, "addresses", opensocial.Address);
   JsonPerson.constructArrayObject(opt_params, "emails", opensocial.Email);
@@ -75,6 +76,14 @@ JsonPerson.constructObject = function(map, fieldName, className) {
   var fieldValue = map[fieldName];
   if (fieldValue) {
     map[fieldName] = new className(fieldValue);
+  }
+};
+
+// Converts the fieldName into an instance of a Date
+JsonPerson.constructDate = function(map, fieldName) {
+  var fieldValue = map[fieldName];
+  if (fieldValue) {
+    map[fieldName] = FieldTranslations.translateIsoStringToDate(fieldValue);
   }
 };
 

@@ -363,7 +363,7 @@ public final class HttpResponse implements Externalizable {
   private long getExpiresTime() {
     String expires = getHeader("Expires");
     if (expires != null) {
-      Date expiresDate = DateUtil.parseDate(expires);
+      Date expiresDate = DateUtil.parseRfc1123Date(expires);
       if (expiresDate != null) {
         return expiresDate.getTime();
       }
@@ -406,14 +406,14 @@ public final class HttpResponse implements Externalizable {
     Collection<String> dates = headers.get("Date");
 
     if (!dates.isEmpty()) {
-      Date d = DateUtil.parseDate(dates.iterator().next());
+      Date d = DateUtil.parseRfc1123Date(dates.iterator().next());
       if (d != null) {
         timestamp = d.getTime();
       }
     }
     if (timestamp == -1) {
       timestamp = System.currentTimeMillis();
-      headers.put("Date", DateUtil.formatDate(timestamp));
+      headers.put("Date", DateUtil.formatRfc1123Date(timestamp));
     }
     return timestamp;
   }

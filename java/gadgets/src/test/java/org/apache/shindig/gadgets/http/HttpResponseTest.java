@@ -246,7 +246,7 @@ public class HttpResponseTest {
     int maxAge = 10;
     int time = roundToSeconds(System.currentTimeMillis()) + maxAge;
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Expires", DateUtil.formatDate(1000L * time))
+        .addHeader("Expires", DateUtil.formatRfc1123Date(1000L * time))
         .create();
     assertEquals(time, roundToSeconds(response.getCacheExpiration()));
     // Second rounding makes this n-1.
@@ -288,7 +288,7 @@ public class HttpResponseTest {
     int maxAge = 10;
     int now = roundToSeconds(System.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatDate(1000L * now))
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * now))
         .addHeader("Cache-Control", "public, max-age=" + maxAge)
         .create();
 
@@ -300,7 +300,7 @@ public class HttpResponseTest {
   public void testFixedDate() throws Exception {
     int time = roundToSeconds(System.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Date", DateUtil.formatDate(1000L * time))
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time))
         .create();
     assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
         roundToSeconds(response.getCacheExpiration()));
@@ -352,7 +352,7 @@ public class HttpResponseTest {
   public void testSetNoCache() {
     int time = roundToSeconds(System.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Expires", DateUtil.formatDate(1000L * time))
+        .addHeader("Expires", DateUtil.formatRfc1123Date(1000L * time))
         .setStrictNoCache()
         .create();
     assertNull(response.getHeader("Expires"));
@@ -423,7 +423,7 @@ public class HttpResponseTest {
         .addHeader("Foo", "bar")
         .addHeader("Foo", "baz")
         .addHeader("Blah", "blah")
-        .addHeader("Date", DateUtil.formatDate(now))
+        .addHeader("Date", DateUtil.formatRfc1123Date(now))
         .setHttpStatusCode(204)
         .setResponseString("This is the response string")
         .setMetadata("foo", "bar")
@@ -440,7 +440,7 @@ public class HttpResponseTest {
         .addHeader("Foo", "bar")
         .addHeader("Foo", "baz")
         .addHeader("Blah", "blah")
-        .addHeader("Date", DateUtil.formatDate(now))
+        .addHeader("Date", DateUtil.formatRfc1123Date(now))
         .setHttpStatusCode(204)
         .setResponseString("This is the response string")
         .create();
