@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,7 +18,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 
 /*
  * This class impliments memcached based caching It'll generally be more
@@ -80,7 +80,8 @@ class CacheMemcache extends Cache {
   // I prefer lazy initalization since the cache isn't used every request
   // so this potentially saves a lot of overhead
   private function connect() {
-    if (! self::$connection = @memcache_pconnect($this->host, $this->port)) {
+    $func = Config::get('cache_memcache_pconnect') ? 'memcache_pconnect' : 'memcache_connect';
+    if (! self::$connection = @$func($this->host, $this->port)) {
       throw new CacheException("Couldn't connect to memcache server");
     }
   }
@@ -110,8 +111,7 @@ class CacheMemcache extends Cache {
   public function set($key, $value) {
     $this->check();
     // we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
-    if (@memcache_set(self::$connection, $key, array('time' => time(),
-        'data' => $value), false, Config::Get('cache_time')) == false) {
+    if (@memcache_set(self::$connection, $key, array('time' => time(), 'data' => $value), false, Config::Get('cache_time')) == false) {
       // Memcache write can fail occasionally, in a production environment
       // it's not a good idea to overreact it
       if (Config::get('debug')) {

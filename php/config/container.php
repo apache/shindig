@@ -122,6 +122,9 @@ $shindigConfig = array(
   // If you use CacheMemcache as caching backend, change these to the memcache server settings
   'cache_host' => 'localhost',
   'cache_port' => 11211,
+  // When using CacheMemcache, should we use pconnect? There are some reports that apache/mpm + memcache_pconnect can lead to segfaults
+  'cache_memcache_pconnect' => true,
+
   'cache_time' => 24 * 60 * 60,
   // If you use CacheFile as caching backend, this is the directory where it stores the temporary files
   'cache_root' => '/tmp/shindig',
