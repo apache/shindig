@@ -32,8 +32,14 @@ class CacheStorageMemcache extends CacheStorage {
       self::$memcache = new Memcache();
       $host = Config::get('cache_host');
       $port = Config::get('cache_port');
-      if (!self::$memcache->pconnect($host, $port)) {
-        throw new CacheException("Couldn't connect to memcache server");
+      if (Config::get('cache_memcache_pconnect')) {
+        if (!self::$memcache->pconnect($host, $port)) {
+          throw new CacheException("Couldn't connect to memcache server");
+        }
+      } else {
+        if (!self::$memcache->connect($host, $port)) {
+          throw new CacheException("Couldn't connect to memcache server");
+        }
       }
     }
   }
