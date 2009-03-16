@@ -112,8 +112,17 @@ class CacheMemcache extends Cache {
     // we store it with the cache_time default expiration so objects will atleast get cleaned eventually.
     if (@memcache_set(self::$connection, $key, array('time' => time(),
         'data' => $value), false, Config::Get('cache_time')) == false) {
-      throw new CacheException("Couldn't store data in cache");
+      // Memcache write can fail occasionally, in a production environment
+      // it's not a good idea to overreact it
+      if (Config::get('debug')) {
+        throw new CacheException("Couldn't store data in cache");
+      } else {
+        // If debug is off, we just signal the error in the return value,
+        // so those who depend on memcache writes could take adequate steps
+        return false;
+      }
     }
+    return true;
   }
 
   public function delete($key) {
