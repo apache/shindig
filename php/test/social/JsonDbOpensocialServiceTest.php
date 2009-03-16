@@ -53,7 +53,7 @@ class JsonDbOpensocialServiceTest extends PHPUnit_Framework_TestCase {
    * Tests JsonDbOpensocialService->getActivities() with paging.
    */
   public function testGetActivities() {
-  	$token = BasicSecurityToken::createFromValues('jane.doe', 'jane.doe', 1, 1, 1, 1);
+  	$token = BasicSecurityToken::createFromValues('jane.doe', 'jane.doe', 1, 1, 1, 1, 'default');
   	$userId = new UserId('owner', null);
   	$userIds = array($userId);
   	$groupId = new GroupId('self', null);

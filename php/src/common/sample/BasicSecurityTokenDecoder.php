@@ -23,9 +23,10 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
   private $OWNER_INDEX = 0;
   private $VIEWER_INDEX = 1;
   private $APP_ID_INDEX = 2;
-  private $CONTAINER_INDEX = 3;
+  private $DOMAIN_INDEX = 3;
   private $APP_URL_INDEX = 4;
   private $MODULE_ID_INDEX = 5;
+  private $CONTAINER_INDEX = 6;
 
   /**
    * {@inheritDoc}
@@ -41,7 +42,7 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
       // in the example files
       if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 7) {
         $tokens = explode(":", $stringToken);
-        return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]));
+        return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->DOMAIN_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]));
       } else {
         return BasicSecurityToken::createFromToken($stringToken, Config::get('token_max_age'));
       }

@@ -38,6 +38,7 @@ class BasicSecurityToken extends SecurityToken {
   private $DOMAIN_KEY = "d";
   private $APPURL_KEY = "u";
   private $MODULE_KEY = "m";
+  private $CONTAINER_KEY = "c";
 
   /**
    * {@inheritDoc}
@@ -53,7 +54,7 @@ class BasicSecurityToken extends SecurityToken {
    * @throws BlobCrypterException 
    */
   static public function createFromToken($token, $maxAge) {
-    return new BasicSecurityToken($token, $maxAge, null, null, null, null, null, null);
+    return new BasicSecurityToken($token, $maxAge, null, null, null, null, null, null, null);
   }
 
   /**
@@ -66,11 +67,11 @@ class BasicSecurityToken extends SecurityToken {
    * @param moduleId module id of this gadget 
    * @throws BlobCrypterException 
    */
-  static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId) {
-    return new BasicSecurityToken(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId);
+  static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {
+    return new BasicSecurityToken(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId);
   }
 
-  public function __construct($token, $maxAge, $owner, $viewer, $app, $domain, $appUrl, $moduleId) {
+  public function __construct($token, $maxAge, $owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {
     $this->crypter = $this->getCrypter();
     if (! empty($token)) {
       $this->token = $token;
@@ -83,6 +84,7 @@ class BasicSecurityToken extends SecurityToken {
       $this->tokenData[$this->DOMAIN_KEY] = $domain;
       $this->tokenData[$this->APPURL_KEY] = $appUrl;
       $this->tokenData[$this->MODULE_KEY] = $moduleId;
+      $this->tokenData[$this->CONTAINER_KEY] = $containerId;
       $this->token = $this->crypter->wrap($this->tokenData);
     }
   }
@@ -156,5 +158,15 @@ class BasicSecurityToken extends SecurityToken {
       throw new Exception("Module ID should be an integer");
     }
     return $this->tokenData[$this->MODULE_KEY];
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getContainer() {
+    if ($this->isAnonymous()) {
+      throw new Exception("Can't get container from an anonymous token");
+    }
+    return $this->tokenData[$this->CONTAINER_KEY];
   }
 }
