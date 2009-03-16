@@ -122,6 +122,14 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
     $this->fetcher = null;
     parent::tearDown();
   }
+  
+  /**
+   * Tests BasicRemoteContent->__construct()
+   */
+  public function testConstruct() {
+    $basic = new BasicRemoteContent(new BasicRemoteContentFetcher(), null, false);
+    $signing = new BasicRemoteContent(new BasicRemoteContentFetcher(), new SigningFetcherFactory(), new BasicSecurityTokenDecoder());
+  }
 
   /**
    * Tests BasicRemoteContent->fetch()
@@ -292,7 +300,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testFeedFetch() {
     $fetcher = new BasicRemoteContentFetcher();
-    $this->basicRemoteContent->setRemoteContentFetcher($fetcher);
+    $this->basicRemoteContent->setBasicFetcher($fetcher);
     $request = new RemoteContentRequest('http://adwordsapi.blogspot.com/atom.xml');
     $context = new TestContext();
     $ret = $this->basicRemoteContent->fetch($request, $context);

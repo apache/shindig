@@ -33,22 +33,18 @@ class Cache {
    * @var RequestTime
    */
   private $time = null;
+  
+  /**
+   * @var CacheStorage
+   */
   private $storage = null;
 
-  static public function createCache($type, $name, $time = null) {
-    return new Cache($type, $name, $time);
+  static public function createCache($cacheClass, $name, RequestTime $time = null) {
+    return new Cache($cacheClass, $name, $time);
   }
 
-  private function __construct($type, $name, $time) {
-    if ($type == 'CacheFile') {
-      $this->storage = new CacheStorageFile($name);
-    } else if ($type == 'CacheApc') {
-      $this->storage = new CacheStorageApc($name);
-    } else if ($type == 'CacheMemcache') {
-      $this->storage = new CacheStorageMemcache($name);
-    } else {
-      throw CacheException('undefined cache storage');
-    }
+  private function __construct($cacheClass, $name, RequestTime $time = null) {
+    $this->storage = new $cacheClass($name);
     if ($time == null) {
       $this->time = new RequestTime();
     } else {
@@ -77,7 +73,7 @@ class Cache {
     $data = $this->storage->fetch($key);
     if ($data) {
       $data = unserialize($data);
-      return array('found' => true, 'time' => $data['time'], 'ttl' => $data['ttl'], 'valid' => $data['valid'], 'data' => $data['data']);
+      return array_merge(array('found' => true), $data);
     }
     return array('found' => false);
   }

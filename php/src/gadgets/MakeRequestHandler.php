@@ -25,11 +25,14 @@ define('UNPARSEABLE_CRUFT', "throw 1; < don't be evil' >");
  * Handles the gadget.io.makeRequest requests
  */
 class MakeRequestHandler extends ProxyBase {
-  public $signingFetcher;
-
-  public function __construct($context, $signingFetcher) {
+  /**
+   * @var SingingFetcherFactory
+   */
+  private $signingFetcherFactory;
+  
+  public function __construct($context, $signingFetcherFactory) {
     $this->context = $context;
-    $this->signingFetcher = $signingFetcher;
+    $this->signingFetcherFactory = $signingFetcherFactory;
   }
 
   /**
@@ -78,26 +81,14 @@ class MakeRequestHandler extends ProxyBase {
    *
    * @param string $url
    * @param string $method
-   * @param SingingFetcher $signer
+   * @param SecurityTokenDecoder $signer
    * @return RemoteContentRequest
    */
   private function fetchContentDivert($url, $method, $signer) {
-    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
-    $token = $this->context->extractAndValidateToken($signer);
-    switch (strtoupper($authz)) {
-      case 'SIGNED':
-        $fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
-        return $fetcher->fetch($url, $method);
-      case 'OAUTH':
-        $params = new OAuthRequestParams();
-        $fetcher = $this->signingFetcher->getSigningFetcher(new BasicRemoteContentFetcher(), $token);
-        $oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);
-        $this->oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
-        $request = new RemoteContentRequest($url);
-        $request->createRemoteContentRequestWithUri($url);
-        return $this->oauthFetcher->fetch($request);
-    }
-    return $this->fetchContent($url, $method);
+    $basicFetcher = new BasicRemoteContentFetcher();
+    $basicRemoteContent = new BasicRemoteContent($basicFetcher, $this->signingFetcherFactory, $signer);
+    $request = $this->buildRequest($url, $method);
+    return $basicRemoteContent->fetch($request, $this->context);
   }
 
   /**

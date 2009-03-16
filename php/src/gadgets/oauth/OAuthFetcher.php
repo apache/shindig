@@ -28,7 +28,7 @@
  * requires OAuth signing.
  */
 class OAuthFetcher extends RemoteContentFetcher {
-  
+
   // We store some blobs of data on the client for later reuse; the blobs
   // contain key/value pairs, and these are the key names.
   private static $REQ_TOKEN_KEY = "r";
@@ -36,7 +36,7 @@ class OAuthFetcher extends RemoteContentFetcher {
   private static $ACCESS_TOKEN_KEY = "a";
   private static $ACCESS_TOKEN_SECRET_KEY = "as";
   private static $OWNER_KEY = "o";
-  
+
   // names for the JSON values we return to the client
   public static $CLIENT_STATE = "oauthState";
   public static $APPROVAL_URL = "oauthApprovalUrl";
@@ -44,76 +44,76 @@ class OAuthFetcher extends RemoteContentFetcher {
   public static $ERROR_TEXT = "oauthErrorText";
   // names of additional OAuth parameters we include in outgoing requests
   public static $XOAUTH_APP_URL = "xoauth_app_url";
-  
+
   /**
    * Maximum age for our client state; if this is exceeded we start over. One
    * hour is a fairly arbitrary time limit here.
    */
   private static $CLIENT_STATE_MAX_AGE_SECS = 3600;
-  
+
   /**
    * The gadget security token, with info about owner/viewer/gadget.
    */
   protected $authToken;
-  
+
   /**
    * Parameters from makeRequest
    */
   protected $requestParams;
-  
+
   /**
    * Reference to our persistent store for OAuth metadata.
    */
   protected $tokenStore;
-  
+
   /**
    * The accessor we use for signing messages. This also holds metadata about
    * the service provider, such as their URLs and the keys we use to access
    * those URLs.
    */
   private $accessorInfo;
-  
+
   /**
    * We use this to encrypt and sign the state we cache on the client.
    */
   private $oauthCrypter;
-  
+
   /**
    * State the client sent with their request.
    */
   private $origClientState = array();
-  
+
   /**
    * The request the client really wants to make.
    */
   private $realRequest;
-  
+
   /**
    * State to cache on the client.
    */
   private $newClientState;
-  
+
   /**
    * Authorization URL for the client
    */
   private $aznUrl;
-  
+
   /**
    * Error code for the client
    */
   private $error;
-  
+
   /**
    * Error text for the client
    */
   private $errorText;
-  
+
   /**
    * Whether or not we're supposed to ignore the spec cache when referring
    * to the gadget spec for information (e.g. OAuth URLs).
    */
   private $bypassSpecCache;
-  
+
   private $responseMetadata = array();
 
   /**
@@ -124,8 +124,8 @@ class OAuthFetcher extends RemoteContentFetcher {
    * @param params OAuth fetch parameters sent from makeRequest
    * @param tokenStore storage for long lived tokens.
    */
-  public function __construct($tokenStore, $oauthCrypter, $nextFetcher, $authToken, OAuthRequestParams $params) {
-    parent::setNextFetcher($nextFetcher);
+  public function __construct($tokenStore, $oauthCrypter, $fetcher, $authToken, OAuthRequestParams $params) {
+    $this->fetcher = $fetcher;
     $this->oauthCrypter = $oauthCrypter;
     $this->authToken = $authToken;
     $this->bypassSpecCache = $params->getBypassSpecCache();
@@ -139,7 +139,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       try {
         $this->origClientState = $this->oauthCrypter->unwrap($origClientState, self::$CLIENT_STATE_MAX_AGE_SECS);
       } catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
-}
+      }
     }
     if ($this->origClientState == null) {
       $this->origClientState = array();
@@ -312,9 +312,9 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   /*
-	 * @deprecated (All outgoing messages must send additional params
-	 * like XOAUTH_APP_URL, so use newRequestMessageParams instead)
-	 */
+   * @deprecated (All outgoing messages must send additional params
+   * like XOAUTH_APP_URL, so use newRequestMessageParams instead)
+   */
   private function newRequestMessageUrlOnly($url) {
     $params = array();
     return $this->newRequestMessageParams($url, $params);
@@ -365,7 +365,7 @@ class OAuthFetcher extends RemoteContentFetcher {
         $authHeader = $this->getAuthorizationHeader($oauthParams);
         $newHeaders["Authorization"] = $authHeader;
         break;
-      
+
       case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
         if (! OAuthUtil::isFormEncoded($contentType)) {
           throw new GadgetException("Invalid param: OAuth param location can only " . "be post_body if post body if of type x-www-form-urlencoded");
@@ -376,7 +376,7 @@ class OAuthFetcher extends RemoteContentFetcher {
           $postBody = $postBody . "&" . OAuthUtil::getPostBodyString($oauthParams);
         }
         break;
-      
+
       case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
         $url = OAuthUtil::addParameters($url, $oauthParams);
         break;
@@ -392,7 +392,7 @@ class OAuthFetcher extends RemoteContentFetcher {
    */
   private function sendOAuthMessage(OAuthRequest $request) {
     $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
-    $content = $this->getNextFetcher()->fetchRequest($rcr);
+    $content = $this->fetcher->fetchRequest($rcr);
     $reply = OAuthRequest::from_request();
     $params = OAuthUtil::decodeForm($content->getResponseContent());
     $reply->set_parameters($params);
@@ -502,7 +502,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       // Build and sign the message.
       $oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
       $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
-      $content = $this->getNextFetcher()->fetchRequest($rcr);
+      $content = $this->fetcher->fetchRequest($rcr);
       //TODO is there a better way to detect an SP error?
       $statusCode = $content->getHttpCode();
       if ($statusCode >= 400 && $statusCode < 500) {
@@ -584,6 +584,6 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
-  public function multiFetchRequest(Array $requests) {  // Do nothing  
+  public function multiFetchRequest(Array $requests) {  // Do nothing
   }
 }

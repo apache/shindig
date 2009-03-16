@@ -67,16 +67,15 @@ class OAuthFetcherFactory {
 
   /**
    * Produces an OAuthFetcher that will sign requests and delegate actual
-   * network retrieval to the {@code nextFetcher}
+   * network retrieval to the {@code fetcher}
    *
-   * @param nextFetcher The fetcher that will fetch real content
+   * @param fetcher The fetcher that will fetch real content
    * @param token The gadget token used to identity the user and gadget
    * @param params The parsed parameters the gadget requested
    * @return The oauth fetcher.
    * @throws GadgetException
    */
-  public function getOAuthFetcher($nextFetcher, $token, $params) {
-    $fetcher = new OAuthFetcher($this->tokenStore, $this->oauthCrypter, $nextFetcher, $token, $params);
-    return $fetcher;
+  public function getOAuthFetcher($fetcher, $token, $params) {
+    return new OAuthFetcher($this->tokenStore, $this->oauthCrypter, $fetcher, $token, $params);
   }
 }

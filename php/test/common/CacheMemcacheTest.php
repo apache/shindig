@@ -42,7 +42,7 @@ class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheMemcache', 'TestCache',
+    $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache',
                                       $this->time);
   }
 
