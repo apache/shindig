@@ -569,7 +569,9 @@ gadgets.rpc = function() {
     var relay = gadgets.rpc.getRelayUrl(targetId);
 
     if (!relay) {
-      throw new Error('No relay file assigned for IFPC');
+      if (console && console.log) {
+        console.log('No relay file assigned for IFPC');
+      }
     }
 
     // The RPC mechanism supports two formats for IFPC (legacy and current).
