@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 
+import org.apache.shindig.common.util.DateUtil;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -157,10 +158,11 @@ public final class JsonSerializer {
       buf.append(value.toString());
     } else if (value instanceof CharSequence ||
                value instanceof DateTime ||
-               value instanceof Date ||
                value.getClass().isEnum()) {
       // String-like Primitives
       appendString(buf, value.toString());
+    } else if(value instanceof Date) {
+      appendString(buf, DateUtil.formatIso8601Date((Date)value));  
     } else if (value instanceof JSONObject) {
       appendJsonObject(buf, (JSONObject) value);
     } else if (value instanceof JSONArray) {

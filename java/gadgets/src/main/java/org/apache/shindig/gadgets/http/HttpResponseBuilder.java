@@ -160,7 +160,7 @@ public class HttpResponseBuilder {
   public HttpResponseBuilder setExpirationTime(long expirationTime) {
     headers.removeAll("Cache-Control");
     headers.removeAll("Pragma");
-    headers.put("Expires", DateUtil.formatDate(expirationTime));
+    headers.put("Expires", DateUtil.formatRfc1123Date(expirationTime));
     return this;
   }
 

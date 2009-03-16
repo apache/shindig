@@ -100,7 +100,7 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
 
   @Override
   public void addDateHeader(String name, long date) {
-    headers.put(name, DateUtil.formatDate(date));
+    headers.put(name, DateUtil.formatRfc1123Date(date));
   }
 
   @Override

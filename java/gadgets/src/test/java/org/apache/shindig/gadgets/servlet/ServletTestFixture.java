@@ -64,7 +64,7 @@ public class ServletTestFixture extends EasyMockTestCase {
 
   public void checkCacheControlHeaders(int ttl, boolean noProxy) {
 
-    long expires = DateUtil.parseDate(recorder.getHeader("Expires")).getTime();
+    long expires = DateUtil.parseRfc1123Date(recorder.getHeader("Expires")).getTime();
 
     long lowerBound = testStartTime + (1000L * (ttl - 1));
     long upperBound = lowerBound + 2000L;

@@ -28,14 +28,21 @@ import java.util.Locale;
 
 public class DateUtilTest {
 
-  String[] text = {
+  String[] rfc1123text = new String[] {
     "Tue, 27 May 2008 05:12:50 GMT",
     "Wed, 28 May 2008 04:40:48 GMT",
     "Mon, 30 Jun 3090 03:29:55 GMT",
     "Fri, 06 Jun 1670 01:57:27 GMT",
   };
 
-  Date[] timeStamps = {
+  String[] iso8601text = new String[] {
+          "2008-05-27T05:12:50.000Z",
+          "2008-05-28T04:40:48.000Z",
+          "3090-06-30T03:29:55.000Z",
+          "1670-06-06T01:57:27.000Z"
+   };
+  
+  Date[] timeStamps = new Date[] {
     new Date(1211865170000L),
     new Date(1211949648000L),
     new Date(35359385395000L),
@@ -44,48 +51,67 @@ public class DateUtilTest {
 
   @Test
   public void parse() {
-    for (int i = 0, j = text.length; i < j; ++i) {
-      assertEquals(timeStamps[i].getTime(), DateUtil.parseDate(text[i]).getTime());
-    }
+    for (int i = 0, j = rfc1123text.length; i < j; ++i) {
+      assertEquals(timeStamps[i].getTime(), DateUtil.parseRfc1123Date(rfc1123text[i]).getTime());
+    }    
   }
 
   @Test
   public void format() {
     for (int i = 0, j = timeStamps.length; i < j; ++i) {
-      assertEquals(text[i], DateUtil.formatDate(timeStamps[i].getTime()));
+      assertEquals(rfc1123text[i], DateUtil.formatRfc1123Date(timeStamps[i].getTime()));
     }
   }
-
+  
   @Test
-  public void formatDate() {
+  public void formatIso8601() {
+      for (int i = 0, j = timeStamps.length; i < j; ++i) {
+          assertEquals(iso8601text[i], DateUtil.formatIso8601Date(timeStamps[i].getTime()));
+      }
+  }
+  
+  @Test
+  public void formatRfc1123Date() {
     for (int i = 0, j = timeStamps.length; i < j; ++i) {
-      assertEquals(text[i], DateUtil.formatDate(timeStamps[i]));
+      assertEquals(rfc1123text[i], DateUtil.formatRfc1123Date(timeStamps[i]));
     }
   }
-
+  
   @Test
-  public void parseMalformed() {
-    assertNull(DateUtil.parseDate("Invalid date format"));
+  public void formatIso8601Date() {
+      for (int i = 0, j = timeStamps.length; i < j; ++i) {
+          assertEquals(iso8601text[i], DateUtil.formatIso8601Date(timeStamps[i]));
+      }
   }
-
+  
+  @Test
+  public void parseMalformedRfc1123() {
+    assertNull(DateUtil.parseRfc1123Date("Invalid date format"));
+  }
+  
+  @Test
+  public void parseMalformedIso8691() {
+      assertNull(DateUtil.parseIso8601DateTime("invalid date format"));
+  }
+  
   @Test
   public void parseWrongTimeZone() {
     String expires = "Mon, 12 May 2008 09:23:29 PDT";
-    assertNull(DateUtil.parseDate(expires));
+    assertNull(DateUtil.parseRfc1123Date(expires));
   }
 
   @Test
   public void parseRfc1036() {
     // We don't support this, though RFC 2616 suggests we should
     String expires = "Sunday, 06-Nov-94 08:49:37 GMT";
-    assertNull(DateUtil.parseDate(expires));
+    assertNull(DateUtil.parseRfc1123Date(expires));
   }
 
   @Test
   public void parseAsctime() {
     // We don't support this, though RFC 2616 suggests we should
     String expires = "Sun Nov  6 08:49:37 1994";
-    assertNull(DateUtil.parseDate(expires));
+    assertNull(DateUtil.parseRfc1123Date(expires));
   }
 
   @Test
@@ -93,7 +119,7 @@ public class DateUtilTest {
     Locale orig = Locale.getDefault();
     try {
       Locale.setDefault(Locale.ITALY);
-      formatDate();
+      formatRfc1123Date();
     } finally {
       Locale.setDefault(orig);
     }
