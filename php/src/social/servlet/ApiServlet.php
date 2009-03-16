@@ -109,7 +109,7 @@ abstract class ApiServlet extends HttpServlet {
         return null;
       }
     }
-    if (count(explode(':', $token)) != 6) {
+    if (count(explode(':', $token)) != 7) {
       $token = urldecode(base64_decode($token));
     }
     $gadgetSigner = Config::get('security_token_signer');

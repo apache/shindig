@@ -273,7 +273,7 @@ class GadgetContext {
     if (! isset($token) || $token == '') {
       $token = isset($_POST['st']) ? $_POST['st'] : '';
     }
-    if (count(explode(':', $token)) != 6) {
+    if (count(explode(':', $token)) != 7) {
       $token = urldecode(base64_decode($token));
     }
     if (empty($token)) {

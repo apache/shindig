@@ -51,7 +51,7 @@ class SigningFetcher extends RemoteContentFetcher {
    * The name of the key, included in the fetch to help with key rotation.
    */
   protected $keyName;
-  
+
   /**
    * @var RemoteContentFetcher
    */

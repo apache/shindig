@@ -42,8 +42,8 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->BasicSecurityToken = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1');
-    $this->anonymousToken = BasicSecurityToken::createFromValues(0, 0, 'app', 'domain', 'appUrl', '1');
+    $this->BasicSecurityToken = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
+    $this->anonymousToken = BasicSecurityToken::createFromValues(0, 0, 'app', 'domain', 'appUrl', '1', 'default');
   }
 
   /**
@@ -59,7 +59,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
    * Tests BasicSecurityToken::createFromValues(), toSerialForm() and createFromToken() 
    */
   public function testCreateFromValues() {
-    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1');
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
     $this->assertEquals('owner', $token->getOwnerId());
     $this->assertEquals('viewer', $token->getViewerId());
     $this->assertEquals('app', $token->getAppId());

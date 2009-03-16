@@ -51,7 +51,8 @@ class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
     $inputConverter = new InputXmlConverter();
     $outputConverter = new OutputXmlConverter();
     $servletRequest = array('url' => '/people/1/@self');
-    $requestItem = RestRequestItem::createWithRequest($servletRequest, null, $inputConverter, $outputConverter);
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
     $entry = array('isOwner' => false, 'isViewer' => false,
                    'displayName' => '1 1', 'id' => '1');
