@@ -46,6 +46,11 @@ class OAuthFetcher extends RemoteContentFetcher {
   public static $XOAUTH_APP_URL = "xoauth_app_url";
 
   /**
+   * @var RemoteContentFetcher
+   */
+  private $fetcher;
+
+  /**
    * Maximum age for our client state; if this is exceeded we start over. One
    * hour is a fairly arbitrary time limit here.
    */
