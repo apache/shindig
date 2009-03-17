@@ -30,11 +30,7 @@ import org.apache.shindig.gadgets.servlet.ProxyServlet;
 import org.apache.shindig.gadgets.servlet.RpcServlet;
 import org.apache.shindig.protocol.DataServiceServlet;
 import org.apache.shindig.protocol.JsonRpcServlet;
-import org.apache.shindig.server.endtoend.EndToEndModule;
-
-import com.google.common.base.Join;
-import com.google.common.collect.Maps;
-
+import org.apache.shindig.social.sample.SampleModule;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -43,6 +39,9 @@ import org.mortbay.resource.Resource;
 
 import java.io.IOException;
 import java.util.Map;
+
+import com.google.common.base.Join;
+import com.google.common.collect.Maps;
 
 /**
  * Simple programmatic initialization of Shindig using Jetty and common paths.
@@ -77,7 +76,7 @@ public class JettyLauncher {
 
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Join
-        .join(":", EndToEndModule.class.getName(), DefaultGuiceModule.class.getName(),
+        .join(":", SampleModule.class.getName(), DefaultGuiceModule.class.getName(),
             PropertiesModule.class.getName(), OAuthModule.class.getName());
 
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);

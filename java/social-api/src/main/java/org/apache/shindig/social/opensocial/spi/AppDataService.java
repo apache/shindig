@@ -19,9 +19,6 @@ package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.DataCollection;
-import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-
-import com.google.inject.ImplementedBy;
 
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +28,6 @@ import java.util.concurrent.Future;
  * Data Service SPI interface. This interface represents is used to retrieve information bound to a
  * person, there are methods to update and delete data.
  */
-@ImplementedBy(JsonDbOpensocialService.class)
 public interface AppDataService {
 
   /**

@@ -22,8 +22,6 @@ import org.apache.shindig.auth.AnonymousAuthenticationHandler;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
 import org.apache.shindig.protocol.DataServiceServletFetcher;
-import org.apache.shindig.protocol.DefaultHandlerRegistry;
-import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
@@ -33,17 +31,16 @@ import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
-import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
-import org.apache.shindig.social.sample.service.SampleContainerHandler;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
+
+import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Provides social api component injection. Implementor may want to replace this module if they need
@@ -56,13 +53,8 @@ public class SocialApiGuiceModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(HandlerRegistry.class).to(DefaultHandlerRegistry.class);
-
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
-
-    bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
-        .toInstance("sampledata/canonicaldb.json");
 
     bind(Boolean.class)
         .annotatedWith(Names.named(AnonymousAuthenticationHandler.ALLOW_UNAUTHENTICATED))
@@ -79,7 +71,15 @@ public class SocialApiGuiceModule extends AbstractModule {
         AuthenticationHandlerProvider.class);
   
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.social.handlers"))
-        .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
-            PersonHandler.class, MessageHandler.class, SampleContainerHandler.class));
+        .toInstance(getHandlers());
+  }
+  
+  /**
+   * Hook to provide a Set of request handlers.  Subclasses may override
+   * to add or replace additional handlers.
+   */
+  protected Set<Object> getHandlers() {
+    return ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
+        PersonHandler.class, MessageHandler.class);
   }
 }

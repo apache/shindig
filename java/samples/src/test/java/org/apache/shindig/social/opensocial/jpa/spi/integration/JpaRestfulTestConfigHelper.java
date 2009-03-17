@@ -25,9 +25,14 @@ import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.jpa.spi.SpiEntityManagerFactory;
+import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.AppDataHandler;
+import org.apache.shindig.social.opensocial.service.MessageHandler;
+import org.apache.shindig.social.opensocial.service.PersonHandler;
 
 import javax.persistence.EntityManager;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -54,10 +59,15 @@ public class JpaRestfulTestConfigHelper {
    * 
    * @return the data service servlet
    */
-  protected static DataServiceServlet getDataServiceServlet(Injector injector) {
- // Set data service servlet again to use JPA guice dependencies
+  public static DataServiceServlet getDataServiceServlet(Injector injector) {
+    // Set data service servlet again to use JPA guice dependencies
     DataServiceServlet servlet = new DataServiceServlet();
-    servlet.setHandlerRegistry(injector.getInstance(HandlerRegistry.class));
+    HandlerRegistry registry = injector.getInstance(HandlerRegistry.class);
+    registry.addHandlers(
+        ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
+            PersonHandler.class, MessageHandler.class));
+
+    servlet.setHandlerRegistry(registry);
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
