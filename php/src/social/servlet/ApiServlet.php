@@ -104,7 +104,7 @@ abstract class ApiServlet extends HttpServlet {
         
         //FIXME change this to a new AnonymousToken when reworking auth token
         $gadgetSigner = Config::get('security_token');
-        return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0);
+        return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0, Config::get('container_id'));
       } else {
         return null;
       }

@@ -151,5 +151,8 @@ $shindigConfig = array(
   'curl_connection_timeout' => '10',
 
   // If your development server is behind a proxy, enter the proxy details here in 'proxy.host.com:port' format.
-  'proxy' => ''
+  'proxy' => '',
+  
+  // Container id, used for security token
+  'container_id' => 'default'
 );
