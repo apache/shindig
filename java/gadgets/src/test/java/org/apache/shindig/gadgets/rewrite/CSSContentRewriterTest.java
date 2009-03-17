@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -25,6 +28,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.easymock.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -40,17 +45,18 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
   private Uri dummyUri;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     ContentRewriterFeature overrideFeature =
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE, null);
     rewriter = new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser());
     dummyUri = Uri.parse("http://www.w3c.org");
   }
 
+  @Test
   public void testCssBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
@@ -70,6 +76,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         StringUtils.deleteWhitespace(mc.getContent()));
   }
 
+  @Test
   public void testCssWithContainerProxy() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
@@ -92,14 +99,14 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         StringUtils.deleteWhitespace(mc.getContent()));
   }
 
+  @Test
   public void testNoRewriteUnknownMimeType() {
-    // Strict mock as we expect no calls
-    MutableContent mc = mock(MutableContent.class, true);
-    HttpRequest req = mock(HttpRequest.class);
+    MutableContent mc = control.createMock(MutableContent.class); 
+    HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
-    replay();
+    control.replay();
     assertNull(rewriter.rewrite(req, fakeResponse, mc));
-    verify();
+    control.verify();
   }
 
   private void validateRewritten(String content, Uri base,
@@ -116,6 +123,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     validateRewritten(content, dummyUri, defaultLinkRewriter, expected);
   }
 
+  @Test
   public void testUrlDeclarationRewrite() {
     String original =
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
@@ -128,6 +136,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     validateRewritten(original, rewritten);
   }
 
+  @Test
   public void testExtractImports() {
     String original = " @import url(www.example.org/some.css);\n" +
         "@import url('www.example.org/someother.css');\n" +

@@ -30,18 +30,12 @@ import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -59,6 +53,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
 
 /**
  * A content rewriter that will sanitize output for simple 'badge' like display.
@@ -103,19 +102,19 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
   private final Set<String> allowedAttributes;
   private final CajaCssSanitizer cssSanitizer;
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final String proxyBaseNoGadget;
+  private final ContentRewriterUris rewriterUris;
 
   @Inject
   public SanitizedRenderingContentRewriter(@AllowedTags Set<String> allowedTags,
       @AllowedAttributes Set<String> allowedAttributes,
       ContentRewriterFeatureFactory rewriterFeatureFactory,
-      @Named("shindig.content-rewrite.proxy-url")String proxyBaseNoGadget,
+      ContentRewriterUris rewriterUris,
       CajaCssSanitizer cssSanitizer) {
     this.allowedTags = allowedTags;
     this.allowedAttributes = allowedAttributes;
+    this.rewriterUris = rewriterUris;
     this.cssSanitizer = cssSanitizer;
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    this.proxyBaseNoGadget = proxyBaseNoGadget;
   }
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse resp, MutableContent content) {
@@ -148,7 +147,7 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
         content.documentChanged();
         sanitized = true;
       } finally {
-        // Defensively cleat the content in case of failure
+        // Defensively clean the content in case of failure
         if (!sanitized) {
           content.setContent("");
         }
@@ -204,6 +203,7 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
     try {
       String contentType = response.getHeader("Content-Type");
       if (contentType == null || contentType.toLowerCase().startsWith("text/")) {
+        String proxyBaseNoGadget = rewriterUris.getProxyBase(request.getContainer());
         SanitizingProxyingLinkRewriter cssLinkRewriter = new SanitizingProxyingLinkRewriter(
             request.getGadget(), rewriterFeature, proxyBaseNoGadget, "text/css");
         sanitized = cssSanitizer.sanitize(content.getContent(), request.getUri(), cssLinkRewriter);
@@ -233,6 +233,7 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
       ContentRewriterFeature rewriterFeature =
           rewriterFeatureFactory.createRewriteAllFeature(expires == null ? -1 : expires);
 
+      String proxyBaseNoGadget = rewriterUris.getProxyBase(gadget.getContext().getContainer());
       cssRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
           rewriterFeature, proxyBaseNoGadget, "text/css");
       imageRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),

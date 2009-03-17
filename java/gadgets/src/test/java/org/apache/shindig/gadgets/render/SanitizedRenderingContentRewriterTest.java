@@ -22,17 +22,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
+import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -51,10 +49,8 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
-public class SanitizedRenderingContentRewriterTest {
+public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase {
   private static final Set<String> DEFAULT_TAGS = ImmutableSet.of("html", "head", "body");
   private static final Pattern BODY_REGEX = Pattern.compile(".*<body>(.*)</body>.*");
 
@@ -65,18 +61,21 @@ public class SanitizedRenderingContentRewriterTest {
     public String getParameter(String name) {
       return ProxyBase.SANITIZE_CONTENT_PARAM.equals(name) ? "1" : null;
     }
+    
+    @Override
+    public String getContainer() {
+      return MOCK_CONTAINER;
+    }
   };
 
   private final GadgetContext unsanitaryGadgetContext = new GadgetContext();
-
-  private GadgetHtmlParser parser;
-
   private Gadget gadget;
 
   @Before
+  @Override
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
-    parser = injector.getInstance(GadgetHtmlParser.class);
+    super.setUp();
+    
     gadget = new Gadget().setContext(unsanitaryGadgetContext);
     gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
@@ -118,7 +117,7 @@ public class SanitizedRenderingContentRewriterTest {
     ContentRewriterFeatureFactory rewriterFeatureFactory =
         new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style");
     return new SanitizedRenderingContentRewriter(newTags, attributes, rewriterFeatureFactory,
-        "http://www.test.com/base", new CajaCssSanitizer(new CajaCssParser()));
+        rewriterUris, new CajaCssSanitizer(new CajaCssParser()));
   }
 
   @Test
@@ -147,7 +146,7 @@ public class SanitizedRenderingContentRewriterTest {
   public void enforceCssImportLinkRewritten() {
     String markup =
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
-    String sanitized = "<style>@import url('http\\3A//www.test.com/basewww.example.org%2Fwww.evil.com%2Fx.js\\26gadget\\3Dwww.example.org%2Fgadget.xml\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');</style>";
+    String sanitized = "<style>@import url('http\\3A//www.test.com/dir/proxy?url\\3Dwww.example.org%2Fwww.evil.com%2Fx.js\\26gadget\\3Dwww.example.org%2Fgadget.xml\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');</style>";
     assertEquals(sanitized, rewrite(gadget, markup, set("style"), set()));
   }
 
@@ -171,7 +170,7 @@ public class SanitizedRenderingContentRewriterTest {
   @Test
   public void enforceImageSrcProxied() {
     String markup = "<img src='http://www.evil.com/x.js'>Evil happens</img>";
-    String sanitized = "<img src=\"http://www.test.com/basehttp%3A%2F%2Fwww.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&fp=45508&sanitize=1&rewriteMime=image/*\">Evil happens";
+    String sanitized = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&fp=45508&sanitize=1&rewriteMime=image/*\">Evil happens";
     assertEquals(sanitized, rewrite(gadget, markup, set("img"), set("src")));
   }
 
@@ -197,7 +196,7 @@ public class SanitizedRenderingContentRewriterTest {
     req.setRewriteMimeType("text/css");
     HttpResponse response = new HttpResponseBuilder().setResponseString(
         "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
-    String sanitized = "@import url('http\\3A//www.test.com/basehttp%3A%2F%2Fwww.evil.com%2Fmore.css\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');\n"
+    String sanitized = "@import url('http\\3A//www.test.com/dir/proxy?url\\3Dhttp%3A%2F%2Fwww.evil.com%2Fmore.css\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + "}";
