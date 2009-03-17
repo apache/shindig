@@ -17,11 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.easymock.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 
 /**
@@ -31,19 +38,19 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   private HTMLContentRewriter rewriter;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     ContentRewriterFeature overrideFeature =
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    ContentRewriterUris rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
-        DEFAULT_CONCAT_BASE);
 
     rewriter = new HTMLContentRewriter(factory, rewriterUris,
         new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser()));
   }
 
+  @Test
   public void testScriptsBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
@@ -101,6 +108,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
 
   }
   
+  @Test
   public void testScriptsForContainer() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
@@ -110,6 +118,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertTrue(text.contains(MOCK_CONCAT_BASE));
   }
   
+  @Test
   public void testLinksBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
@@ -136,6 +145,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
   }
 
+  @Test
   public void testLinksForContainer() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
@@ -145,6 +155,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertTrue(text.contains(MOCK_PROXY_BASE));
   }
   
+  @Test
   public void testStyleBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
@@ -179,6 +190,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals("div { color : black; }", wrapper.getValue("//style[1]").trim());
   }
 
+  @Test
   public void testStyleBasic2() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestyle2.html"));
@@ -189,6 +201,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
                  StringUtils.deleteWhitespace(expected));
   }
 
+  @Test
   public void testStyleForContainer() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
@@ -197,14 +210,14 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertFalse(text.contains(DEFAULT_CONCAT_BASE));
     assertTrue(text.contains(MOCK_CONCAT_BASE));
   }
-  
+
+  @Test
   public void testNoRewriteUnknownMimeType() {
-    // Strict mock as we expect no calls
-    MutableContent mc = mock(MutableContent.class, true);
-    HttpRequest req = mock(HttpRequest.class);
+    MutableContent mc = control.createMock(MutableContent.class); 
+    HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
-    replay();
+    control.replay();
     assertNull(rewriter.rewrite(req, fakeResponse, mc));
-    verify();
+    control.verify();
   }
 }

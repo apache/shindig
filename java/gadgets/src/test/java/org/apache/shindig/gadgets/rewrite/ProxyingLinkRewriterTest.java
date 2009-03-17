@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
 import com.google.common.collect.Sets;
 
 /**
@@ -28,30 +32,35 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
     return defaultLinkRewriter.rewrite(uri, SPEC_URL);
   }
 
+  @Test
   public void testAbsoluteRewrite() {
     String val = "http://a.b.com";
     assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
         rewrite(val));
   }
 
+  @Test
   public void testHostRelativeRewrite() {
     String val = "/somepath/test.gif";
     assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fsomepath%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
         rewrite(val));
   }
 
+  @Test
   public void testPathRelativeRewrite() {
     String val = "test.gif";
     assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
         rewrite(val));
   }
 
+  @Test
   public void testLeadingAndTrailingSpace() {
     String val = " test.gif ";
     assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
         rewrite(val));
   }
 
+  @Test
   public void testWithRefresh() throws Exception {
     ContentRewriterFeature contentRewriterFeature = new ContentRewriterFeature(
         createSpecWithoutRewrite(), ".*", "", "86400",
@@ -65,13 +74,15 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
         rewriter.rewrite(val, SPEC_URL));
   }
 
+  @Test
   public void testInvalidCharRewrite() {
     String val = "/images/opensocial/movie_trivia/76/${quiz.picture_url}";
     assertEquals(val,
         rewrite(val));
   }
 
-   public void testEmpty() {
+  @Test
+  public void testEmpty() {
     String val = " ";
     assertEquals("", rewrite(val));
   }

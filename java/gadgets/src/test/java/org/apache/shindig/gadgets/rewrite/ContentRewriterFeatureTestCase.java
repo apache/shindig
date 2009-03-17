@@ -17,27 +17,33 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.junit.Test;
+
 import com.google.common.collect.Sets;
 
 import java.util.Set;
+import static org.junit.Assert.*;
 
 /**
  * Test basic parsing of content-rewriter feature
  */
 public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
 
+  @Test
   public void testContainerDefaultIncludeAll() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithoutRewrite(), ".*", "", "0", tags);
     assertTrue(defaultRewriterFeature.isRewriteEnabled());
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testContainerDefaultIncludeNone() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithoutRewrite(), "", ".*", "0", tags);
     assertFalse(defaultRewriterFeature.isRewriteEnabled());
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testContainerDefaultExcludeOverridesInclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithoutRewrite(), ".*", ".*", "0",
         tags);
@@ -45,6 +51,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testSpecExcludeOverridesContainerDefaultInclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithRewrite("", ".*", "0", tags), ".*",
         "", "0", tags);
@@ -52,6 +59,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testSpecIncludeOverridesContainerDefaultExclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithRewrite(".*", "", "0", tags), "",
         ".*", "0", tags);
@@ -59,6 +67,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertTrue(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testExcludeOverridesInclude() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "test", "0", tags), "", "", "0", tags);
@@ -66,6 +75,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://www.test.com"));
   }
 
+  @Test
   public void testIncludeOnlyMatch() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "testx", "0", tags), "", "", "0", tags);
@@ -74,6 +84,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertFalse(defaultRewriterFeature.shouldRewriteURL("http://testx.test.com"));
   }
 
+  @Test
   public void testTagRewrite() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "testx", "0", tags), "", "", "0", tags);
@@ -82,6 +93,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertTrue(defaultRewriterFeature.shouldRewriteTag("ScripT"));
   }
 
+  @Test
   public void testOverrideTagRewrite() throws Exception {
     Set<String> newTags = Sets.newHashSet("iframe");
     defaultRewriterFeature = new ContentRewriterFeature(
@@ -92,6 +104,7 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertFalse(defaultRewriterFeature.shouldRewriteTag("link"));
   }
 
+  @Test
   public void testExpiresTimeParse() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "testx", "12345", tags), "", "", "0", tags);
@@ -99,12 +112,14 @@ public class ContentRewriterFeatureTestCase extends BaseRewriterTestCase {
     assertNotNull(defaultRewriterFeature.getExpires() == 12345);
   }
 
+  @Test
   public void testExpiresHTTPParse() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "testx", "htTp ", tags), "", "", "12345", tags);
     assertNull(defaultRewriterFeature.getExpires());
   }
 
+  @Test
   public void testExpiresInvalidParse() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(
         createSpecWithRewrite("test\\.com", "testx", "junk", tags), "", "", "12345", tags);

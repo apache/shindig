@@ -17,19 +17,24 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.Lists;
-
 import org.easymock.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
@@ -37,14 +42,16 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private List<ContentRewriter> contentRewriters;
   private ContentRewriterRegistry registry;
 
+  @Before
   @Override
-  protected void setUp() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
     rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
     contentRewriters = Lists.<ContentRewriter>newArrayList(rewriters);
     registry = new DefaultContentRewriterRegistry(contentRewriters, parser);
   }
 
+  @Test
   public void testRewriteGadget() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
@@ -62,6 +69,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     assertEquals(body, rewritten);
   }
 
+  @Test
   public void testRewriteHttpResponse() throws Exception {
     String body = "Hello, world";
     HttpRequest request = new HttpRequest(SPEC_URL);
@@ -75,6 +83,7 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     assertEquals(response, rewritten);
   }
 
+  @Test
   public void testRewriteView() throws Exception {
     String body = "Hello, world";
     String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
@@ -98,19 +107,20 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
    * from a performance and content consistency standpoint. Because HttpResonse is final
    * we test that no new
    */
+  @Test
   public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() {
     List<ContentRewriter> rewriters = Lists.newArrayList();
     rewriters.add(injector.getInstance(HTMLContentRewriter.class));
     rewriters.add(injector.getInstance(CSSContentRewriter.class));
     registry = new DefaultContentRewriterRegistry(rewriters, parser);
 
-    HttpRequest req = mock(HttpRequest.class);
-    EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
+    HttpRequest req = control.createMock(HttpRequest.class);
+    EasyMock.expect(req.getRewriteMimeType()).andStubReturn("unknown");
 
-    replay();
+    control.replay();
     HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse);
     // Assert that response is untouched
     assertSame(rewritten, fakeResponse);
-    verify();
+    control.verify();
   }
 }

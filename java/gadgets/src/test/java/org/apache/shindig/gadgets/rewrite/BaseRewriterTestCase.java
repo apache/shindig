@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.common.EasyMockTestCase;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
@@ -33,20 +33,21 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.easymock.classextension.EasyMock;
+import org.easymock.classextension.IMocksControl;
+import org.junit.Before;
+
+import java.net.URI;
+import java.util.Set;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.net.URI;
-import java.util.Set;
-
 /**
  * Base class for testing content rewriting functionality
  */
-public abstract class BaseRewriterTestCase extends EasyMockTestCase {
+public abstract class BaseRewriterTestCase {
   public static final Uri SPEC_URL = Uri.parse("http://www.example.org/dir/g.xml");
   public static final String DEFAULT_PROXY_BASE = "http://www.test.com/dir/proxy?url=";
   public static final String DEFAULT_CONCAT_BASE = "http://www.test.com/dir/concat?";
@@ -65,10 +66,11 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
   protected Injector injector;
   protected HttpResponse fakeResponse;
   protected ContainerConfig config;
+  protected ContentRewriterUris rewriterUris;
+  protected IMocksControl control;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     rewriterFeatureFactory = new ContentRewriterFeatureFactory(null, ".*", "", "HTTP",
         "embed,img,script,link,style");
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
@@ -97,7 +99,10 @@ public abstract class BaseRewriterTestCase extends EasyMockTestCase {
       }
     };
     
-}
+    rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
+        DEFAULT_CONCAT_BASE);
+    control = EasyMock.createControl();
+  }
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,
       Set<String> tags) throws GadgetException {
