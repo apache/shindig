@@ -17,9 +17,13 @@
  */
 package org.apache.shindig.protocol;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.reset;
+
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
@@ -27,14 +31,10 @@ import org.apache.shindig.protocol.multipart.MultipartFormParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 
-import junit.framework.TestCase;
-
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.reset;
+
+import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,15 +60,11 @@ public class JsonRpcServletTest extends TestCase {
   private static final String IMAGE_FIELDNAME = "profile-photo";
   private static final byte[] IMAGE_DATA = "image data".getBytes();
   private static final String IMAGE_TYPE = "image/jpeg";
-  
+
   private HttpServletRequest req;
   private HttpServletResponse res;
   private JsonRpcServlet servlet;
   private MultipartFormParser multipartFormParser;
-  
-  private BeanJsonConverter jsonConverter;
-  private BeanConverter xmlConverter;
-  protected BeanConverter atomConverter;
 
   private final IMocksControl mockControl = EasyMock.createNiceControl();
 
@@ -80,20 +76,19 @@ public class JsonRpcServletTest extends TestCase {
     servlet = new JsonRpcServlet();
     req = mockControl.createMock(HttpServletRequest.class);
     res = mockControl.createMock(HttpServletResponse.class);
-    jsonConverter = new BeanJsonConverter(Guice.createInjector());
-    xmlConverter = mockControl.createMock(BeanConverter.class);
-    atomConverter = mockControl.createMock(BeanConverter.class);
 
     multipartFormParser = mockControl.createMock(MultipartFormParser.class);
     EasyMock.expect(multipartFormParser.isMultipartContent(req)).andStubReturn(false);
     servlet.setMultipartFormParser(multipartFormParser);
-    
-    HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
+
+    BeanJsonConverter converter = new BeanJsonConverter(Guice.createInjector());
+
+    HandlerRegistry registry = new DefaultHandlerRegistry(null, null,
         new HandlerExecutionListener.NoOpHandlerExecutionListener());
     registry.addHandlers(Collections.<Object>singleton(handler));
 
     servlet.setHandlerRegistry(registry);
-    servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
+    servlet.setBeanConverters(converter, null, null);
     handler.setMock(new TestHandler() {
       @Override
       public Object get(RequestItem req) {
@@ -122,7 +117,7 @@ public class JsonRpcServletTest extends TestCase {
 
   public void testPostMultipartFormData() throws Exception {
     reset(multipartFormParser);
-    
+
     handler.setMock(new TestHandler() {
       @Override
       public Object get(RequestItem req) {
@@ -137,11 +132,11 @@ public class JsonRpcServletTest extends TestCase {
     expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
     res.setContentType("application/json");
-    
+
     List<FormDataItem> formItems = new ArrayList<FormDataItem>();
     String request = "{method:test.get,id:id,params:" +
         "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
-    formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM, "application/json", 
+    formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM, "application/json",
         request.getBytes(), true));
     formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
@@ -153,15 +148,15 @@ public class JsonRpcServletTest extends TestCase {
     servlet.service(req, res);
     mockControl.verify();
 
-    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) + 
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) +
         "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
   }
-  
-  /** 
+
+  /**
    * Tests whether mime part with content type appliction/json is picked up as
    * request even when its fieldname is not "request".
    */
-  public void testPostMultipartFormDataWithNoExplicitRequestField() throws Exception {  
+  public void testPostMultipartFormDataWithNoExplicitRequestField() throws Exception {
     reset(multipartFormParser);
 
     handler.setMock(new TestHandler() {
@@ -178,12 +173,12 @@ public class JsonRpcServletTest extends TestCase {
     expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
     res.setCharacterEncoding("UTF-8");
     res.setContentType("application/json");
-    
+
     List<FormDataItem> formItems = new ArrayList<FormDataItem>();
     String request = "{method:test.get,id:id,params:" +
         "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
     formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
-    formItems.add(mockFormDataItem("json", "application/json", 
+    formItems.add(mockFormDataItem("json", "application/json",
         request.getBytes(), true));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
     expect(multipartFormParser.parse(req)).andReturn(formItems);
@@ -194,11 +189,11 @@ public class JsonRpcServletTest extends TestCase {
     servlet.service(req, res);
     mockControl.verify();
 
-    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) + 
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) +
         "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
   }
 
-  
+
   public void testInvalidService() throws Exception {
     setupRequest("{method:junk.get,id:id,params:{userId:5,groupId:@self}}");
 
@@ -228,7 +223,7 @@ public class JsonRpcServletTest extends TestCase {
     mockControl.replay();
     servlet.service(req, res);
     mockControl.verify();
-    
+
     JsonAssert.assertJsonEquals(
         "{id:id,error:{message:'badRequest: FAILURE_MESSAGE',code:400}}", getOutput());
   }

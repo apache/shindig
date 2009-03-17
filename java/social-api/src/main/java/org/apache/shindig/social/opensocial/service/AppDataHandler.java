@@ -27,7 +27,6 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.inject.Inject;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -93,8 +92,7 @@ public class AppDataHandler {
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
-    @SuppressWarnings("unchecked")
-    Map<String, String> values = request.getTypedParameter("data", HashMap.class);
+    Map<String, String> values = request.getTypedParameter("data", Map.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
         throw new SocialSpiException(ResponseError.BAD_REQUEST,

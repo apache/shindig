@@ -23,10 +23,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
+import com.google.inject.TypeLiteral;
 
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -37,6 +40,69 @@ public class BeanJsonConverterTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     beanJsonConverter = new BeanJsonConverter(Guice.createInjector());
+  }
+
+  public static class TestObject {
+    static String staticValue;
+    String hello;
+    int count;
+    List<TestObject> children;
+    TestEnum testEnum;
+
+    public static void setSomeStatic(String staticValue) {
+      TestObject.staticValue = staticValue;
+    }
+
+    public void setHello(String hello) {
+      this.hello = hello;
+    }
+
+    public void setCount(int count) {
+      this.count = count;
+    }
+
+    public void setChildren(List<TestObject> children) {
+      this.children = children;
+    }
+
+    public enum TestEnum {
+      foo, bar, baz;
+    }
+
+    public void setTestEnum(TestEnum testEnum) {
+      this.testEnum = testEnum;
+    }
+  }
+
+  public void testJsonToObject() throws Exception {
+    String json = "{" +
+        "hello:'world'," +
+        "count:10," +
+        "someStatic:'foo'," +
+        "testEnum:'bar'," +
+        "children:[{hello:'world-2',count:11},{hello:'world-3',count:12}]}";
+
+    TestObject object = beanJsonConverter.convertToObject(json, TestObject.class);
+
+    assertEquals("world", object.hello);
+    assertEquals(10, object.count);
+    assertEquals("world-2", object.children.get(0).hello);
+    assertEquals(11, object.children.get(0).count);
+    assertEquals("world-3", object.children.get(1).hello);
+    assertEquals(12, object.children.get(1).count);
+    assertNull("Should not set static values", TestObject.staticValue);
+    assertEquals(TestObject.TestEnum.bar, object.testEnum);
+  }
+
+  public void testJsonToPrimitives() throws Exception {
+    String simpleJson = "{hello:'world',count:10}";
+
+    Object object = beanJsonConverter.convertToObject(simpleJson, null);
+
+    Map<String, Object> map = (Map<String,  Object>) object;
+
+    assertEquals("world", map.get("hello"));
+    assertEquals(10, map.get("count"));
   }
 
   public void testJsonToCar() throws Exception {
@@ -59,12 +125,30 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(dad.getName(), "Dad");
   }
 
-  @SuppressWarnings("unchecked")
   public void testJsonToMap() throws Exception {
+    String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
+    Map<String, Object> data = Maps.newHashMap();
+    data = beanJsonConverter.convertToObject(jsonActivity,
+        new TypeLiteral<Map<String, Object>>(){}.getType());
+
+    assertEquals(2, data.size());
+
+    for (Entry<String, Object> entry : data.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      if (key.equals("count")) {
+        assertEquals(0, value);
+      } else if (key.equals("favoriteColor")) {
+        assertEquals("yellow", value);
+      }
+    }
+  }
+
+  public void testJsonToMapWithConversion() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
     Map<String, String> data = Maps.newHashMap();
     data = beanJsonConverter.convertToObject(jsonActivity,
-        (Class<Map<String, String>>) data.getClass());
+        new TypeLiteral<Map<String, String>>(){}.getType());
 
     assertEquals(2, data.size());
 
@@ -77,5 +161,17 @@ public class BeanJsonConverterTest extends TestCase {
         assertEquals("yellow", value);
       }
     }
+  }
+
+  public void testJsonToNestedGeneric() throws Exception {
+    String jsonActivity = "{key0:[0,1,2],key1:[3,4,5]}";
+    Map<String, List<Integer>> data = Maps.newHashMap();
+    data = beanJsonConverter.convertToObject(jsonActivity,
+        new TypeLiteral<Map<String, List<Integer>>>(){}.getType());
+
+    assertEquals(2, data.size());
+
+    assertEquals(Arrays.asList(0, 1, 2), data.get("key0"));
+    assertEquals(Arrays.asList(3, 4, 5), data.get("key1"));
   }
 }

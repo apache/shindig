@@ -23,8 +23,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -37,17 +35,22 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Converts pojos to json objects.
- * TODO: Replace with standard library
+ * Converts between JSON and java objects.
+ *
+ * TODO: Eliminate BeanConverter interface.
  */
 public class BeanJsonConverter implements BeanConverter {
 
@@ -61,50 +64,35 @@ public class BeanJsonConverter implements BeanConverter {
     this.injector = injector;
   }
 
-  public String getContentType() {
-    return "application/json";
-  }
-
-  /**
-   * Convert the passed in object to a string.
-   *
-   * @param pojo The object to convert
-   * @return An object whos toString method will return json
-   */
-  public String convertToString(final Object pojo) {
-    return JsonSerializer.serialize(pojo);
-  }
-
   public void append(Appendable buf, Object pojo) throws IOException {
     JsonSerializer.append(buf, pojo);
   }
 
-  private static Map<String, Method> getSetters(Object pojo) {
-    Class<?> clazz = pojo.getClass();
+  private static Map<String, Method> getSetters(Class<?> type) {
+    Map<String, Method> methods = setters.get(type);
 
-    Map<String, Method> methods = setters.get(clazz);
     if (methods != null) {
       return methods;
     }
-    // Ensure consistent method ordering by using a linked hash map.
-    methods = Maps.newHashMap();
 
-    for (Method method : clazz.getMethods()) {
+    methods = new HashMap<String, Method>();
+
+    for (Method method : type.getMethods()) {
       String name = getPropertyName(method);
       if (name != null) {
         methods.put(name, method);
       }
     }
 
-    setters.put(clazz, methods);
+    setters.put(type, methods);
     return methods;
   }
 
-  private static String getPropertyName(Method method) {
-    JsonProperty property = method.getAnnotation(JsonProperty.class);
+  private static String getPropertyName(Method setter) {
+    JsonProperty property = setter.getAnnotation(JsonProperty.class);
     if (property == null) {
-      String name = method.getName();
-      if (name.startsWith("set")) {
+      String name = setter.getName();
+      if (name.startsWith("set") && !Modifier.isStatic(setter.getModifiers())) {
         return name.substring(3, 4).toLowerCase() + name.substring(4);
       }
       return null;
@@ -113,183 +101,158 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
-  public <T> T convertToObject(String json, Class<T> className) {
-    String errorMessage = "Could not convert " + json + " to " + className;
+  public <T> T convertToObject(String string, Class<T> className) {
+    return convertToObject(string, (Type) className);
+  }
 
-    try {
-      T pojo = injector.getInstance(className);
-      return convertToObject(json, pojo);
-    } catch (JSONException e) {
-      throw new RuntimeException(errorMessage, e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(errorMessage, e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(errorMessage, e);
-    } catch (NoSuchFieldException e) {
-      throw new RuntimeException(errorMessage, e);
-    }
+  public String convertToString(Object pojo) {
+    return JsonSerializer.serialize(pojo);
+  }
+
+  public String getContentType() {
+    return "application/json";
   }
 
   @SuppressWarnings("unchecked")
-  private <T> T convertToObject(String json, T pojo)
-      throws JSONException, InvocationTargetException, IllegalAccessException,
-      NoSuchFieldException {
-
-    if (pojo instanceof String) {
-      pojo = (T) json; // This is a weird cast...
-
-    } else if (pojo instanceof Map) {
-      // TODO: Figure out how to get the actual generic type for the
-      // second Map parameter. Right now we are hardcoding to String
-      Class<?> mapValueClass = String.class;
-
-      JSONObject jsonObject = new JSONObject(json);
-      Iterator<?> iterator = jsonObject.keys();
-      while (iterator.hasNext()) {
-        String key = (String) iterator.next();
-        Object value = convertToObject(jsonObject.getString(key), mapValueClass);
-        ((Map<String, Object>) pojo).put(key, value);
-      }
-
-    } else if (pojo instanceof Collection) {
-      JSONArray array = new JSONArray(json);
-      for (int i = 0; i < array.length(); i++) {
-        ((Collection<Object>) pojo).add(array.get(i));
-      }
-    } else {
-      JSONObject jsonObject = new JSONObject(json);
-      for (Map.Entry<String, Method> setter : getSetters(pojo).entrySet()) {
-        if (jsonObject.has(setter.getKey())) {
-          callSetterWithValue(pojo, setter.getValue(), jsonObject, setter.getKey());
-        }
-      }
-    }
-    return pojo;
-  }
-
-  @SuppressWarnings("boxing")
-  private <T> void callSetterWithValue(T pojo, Method method,
-      JSONObject jsonObject, String fieldName)
-      throws IllegalAccessException, InvocationTargetException, NoSuchFieldException,
-      JSONException {
-
-    Class<?> expectedType = method.getParameterTypes()[0];
-    Object value = null;
-
-    if (!jsonObject.has(fieldName)) {
-      // Skip
-    } else if (expectedType.equals(List.class)) {
-      ParameterizedType genericListType
-          = (ParameterizedType) method.getGenericParameterTypes()[0];
-      Type type = genericListType.getActualTypeArguments()[0];
-      Class<?> rawType;
-      Class<?> listElementClass;
-      if (type instanceof ParameterizedType) {
-        listElementClass = (Class<?>)((ParameterizedType)type).getActualTypeArguments()[0];
-        rawType = (Class<?>)((ParameterizedType)type).getRawType();
-      } else {
-        listElementClass = (Class<?>) type;
-        rawType = listElementClass;
-      }
-
-      List<Object> list = Lists.newArrayList();
-      JSONArray jsonArray = jsonObject.getJSONArray(fieldName);
-      for (int i = 0; i < jsonArray.length(); i++) {
-        if (org.apache.shindig.protocol.model.Enum.class
-            .isAssignableFrom(rawType)) {
-          list.add(convertEnum(listElementClass, jsonArray.getJSONObject(i)));
-        } else {
-          list.add(convertToObject(jsonArray.getString(i), listElementClass));
-        }
-      }
-
-      value = list;
-
-    } else if (expectedType.equals(Map.class)) {
-      ParameterizedType genericListType
-          = (ParameterizedType) method.getGenericParameterTypes()[0];
-      Type[] types = genericListType.getActualTypeArguments();
-      Class<?> valueClass = (Class<?>) types[1];
-
-      // We only support keys being typed as Strings.
-      // Nothing else really makes sense in json.
-      Map<String, Object> map = Maps.newHashMap();
-      JSONObject jsonMap = jsonObject.getJSONObject(fieldName);
-
-      Iterator<?> keys = jsonMap.keys();
-      while (keys.hasNext()) {
-        String keyName = (String) keys.next();
-        map.put(keyName, convertToObject(jsonMap.getString(keyName),
-            valueClass));
-      }
-
-      value = map;
-
-    } else if (org.apache.shindig.protocol.model.Enum.class
-        .isAssignableFrom(expectedType)) {
-      // TODO Need to stop using Enum as a class name :(
-      value = convertEnum(
-          (Class<?>)((ParameterizedType) method.getGenericParameterTypes()[0]).
-              getActualTypeArguments()[0],
-          jsonObject.getJSONObject(fieldName));
-    } else if (expectedType.isEnum()) {
-      if (jsonObject.has(fieldName)) {
-        for (Object v : expectedType.getEnumConstants()) {
-          if (v.toString().equals(jsonObject.getString(fieldName))) {
-            value = v;
-            break;
-          }
-        }
-        if (value == null) {
-          throw new IllegalArgumentException(
-              "No enum value  '" + jsonObject.getString(fieldName)
-                  + "' in " + expectedType.getName());
-        }
-      }
-    } else if (expectedType.equals(Uri.class)) {
-      value = Uri.parse(jsonObject.getString(fieldName));
-    } else if (expectedType.equals(String.class)) {
-      value = jsonObject.getString(fieldName);
-    } else if (expectedType.equals(Date.class)) {
-      // Use JODA ISO parsing for the conversion
-      value = new DateTime(jsonObject.getString(fieldName)).toDate();
-    } else if (expectedType.equals(Long.class) || expectedType.equals(Long.TYPE)) {
-      value = jsonObject.getLong(fieldName);
-    } else if (expectedType.equals(Integer.class) || expectedType.equals(Integer.TYPE)) {
-      value = jsonObject.getInt(fieldName);
-    } else if (expectedType.equals(Boolean.class) || expectedType.equals(Boolean.TYPE)) {
-      value = jsonObject.getBoolean(fieldName);
-    } else if (expectedType.equals(Float.class) || expectedType.equals(Float.TYPE)) {
-      value = ((Double) jsonObject.getDouble(fieldName)).floatValue();
-    } else if (expectedType.equals(Double.class) || expectedType.equals(Double.TYPE)) {
-      value = jsonObject.getDouble(fieldName);
-    } else {
-      // Assume its an injected type
-      value = convertToObject(jsonObject.getJSONObject(fieldName).toString(), expectedType);
-    }
-
-    if (value != null) {
-      method.invoke(pojo, value);
+  public <T> T convertToObject(String json, Type type) {
+    try {
+      return (T) convertToObject(new JSONObject(json), type);
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
     }
   }
 
-  private Object convertEnum(Class<?> enumKeyType, JSONObject jsonEnum)
-      throws JSONException, IllegalAccessException, NoSuchFieldException {
-    // TODO This isnt injector friendly but perhaps implementors dont need it. If they do a
-    // refactoring of the Enum handling in general is needed.
-    Object value;
-    if (jsonEnum.has(Enum.Field.VALUE.toString())) {
-      Enum.EnumKey enumKey = (Enum.EnumKey) enumKeyType
-          .getField(jsonEnum.getString(Enum.Field.VALUE.toString())).get(null);
+  private Object convertToObject(Object value, Type type) {
+    if (type == null || type.equals(Object.class)) {
+      // Use the source type instead.
+      if (value instanceof JSONObject) {
+        return convertToMap((JSONObject) value, null);
+      } else if (value instanceof JSONArray) {
+        return convertToCollection((JSONArray) value, new ArrayList<Object>(), null);
+      }
+      return value;
+    } else if (type instanceof ParameterizedType) {
+      return convertGeneric(value, (ParameterizedType) type);
+    } else if (type.equals(String.class)) {
+      return String.valueOf(value);
+    } else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
+      return Boolean.TRUE.equals(value);
+    } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
+      return value instanceof String ? Integer.valueOf((String) value) : ((Number) value).intValue();
+    } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
+      return value instanceof String ? Long.valueOf((String) value) : ((Number) value).longValue();
+    } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
+      return value instanceof String ? Double.valueOf((String) value) : ((Number) value).doubleValue();
+    } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
+      return value instanceof String ? Float.valueOf((String) value) : ((Number) value).floatValue();
+    } else if (type.equals(Date.class)) {
+      return new DateTime(String.valueOf(value)).toDate();
+    } else if (type.equals(Uri.class)) {
+      return Uri.parse(String.valueOf(value));
+    } else if (type.equals(Map.class)) {
+      return convertToMap((JSONObject) value, null);
+    } else if (type.equals(List.class) || type.equals(Collection.class)) {
+      return convertToCollection((JSONArray) value, new ArrayList<Object>(), null);
+    } else if (type.equals(Set.class)) {
+      return convertToCollection((JSONArray) value, new HashSet<Object>(), null);
+    }
+
+    Class<?> clazz = (Class<?>) type;
+
+    if (clazz.isEnum()) {
+      return convertToEnum((String) value, clazz);
+    }
+
+    return convertToClass((JSONObject) value, clazz);
+  }
+
+  private Object convertGeneric(Object value, ParameterizedType type) {
+    Type[] typeArgs = type.getActualTypeArguments();
+    Class<?> clazz = (Class<?>) type.getRawType();
+
+    if (Set.class.isAssignableFrom(clazz)) {
+      return convertToCollection((JSONArray) value, new HashSet<Object>(), typeArgs[0]);
+    } else if (Collection.class.isAssignableFrom(clazz)) {
+      return convertToCollection((JSONArray) value, new ArrayList<Object>(), typeArgs[0]);
+    } else if (Map.class.isAssignableFrom(clazz)) {
+      return convertToMap((JSONObject) value, typeArgs[1]);
+    } else if (org.apache.shindig.protocol.model.Enum.class.isAssignableFrom(clazz)) {
+      // Special case for opensocial Enum objects. These really need to be refactored to not require
+      // this handling.
+      return convertToOsEnum((JSONObject) value, (Class<?>) typeArgs[0]);
+    }
+    return convertToClass((JSONObject) value, clazz);
+  }
+
+  private Enum<Enum.EnumKey> convertToOsEnum(JSONObject json, Class<?> enumKeyType) {
+    Enum<Enum.EnumKey> value;
+    String val = Enum.Field.VALUE.toString();
+    String display = Enum.Field.DISPLAY_VALUE.toString();
+    if (json.has(val)) {
+      Enum.EnumKey enumKey;
+      try {
+        enumKey = (Enum.EnumKey) enumKeyType.getField(json.optString(val)).get(null);
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException(e);
+      } catch (SecurityException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (NoSuchFieldException e) {
+        throw new RuntimeException(e);
+      }
       String displayValue = null;
-      if (jsonEnum.has(Enum.Field.DISPLAY_VALUE.toString())) {
-        displayValue = jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString());
+      if (json.has(display)) {
+        displayValue = json.optString(display);
       }
       value = new EnumImpl<Enum.EnumKey>(enumKey,displayValue);
     } else {
-      value = new EnumImpl<Enum.EnumKey>(null,
-          jsonEnum.getString(Enum.Field.DISPLAY_VALUE.toString()));
+      value = new EnumImpl<Enum.EnumKey>(null, json.optString(display));
     }
     return value;
+  }
+
+  private Object convertToEnum(String value, Class<?> type) {
+    for (Object o : type.getEnumConstants()) {
+      if (o.toString().equals(value)) {
+        return o;
+      }
+    }
+    throw new IllegalArgumentException("No enum value " + value + " in " + type.getName());
+  }
+
+  private Map<String, Object> convertToMap(JSONObject in, Type type) {
+    Map<String, Object> out = new HashMap<String, Object>(in.length(), 1);
+    for (String name : JSONObject.getNames(in)) {
+      out.put(name, convertToObject(in.opt(name), type));
+    }
+    return out;
+  }
+
+  private Collection<Object> convertToCollection(JSONArray in, Collection<Object> out, Type type) {
+    for (int i = 0, j = in.length(); i < j; ++i) {
+      out.add(convertToObject(in.opt(i), type));
+    }
+    return out;
+  }
+
+  private Object convertToClass(JSONObject in, Class<?> type) {
+    Object out = injector.getInstance(type);
+    for (Map.Entry<String, Method> entry : getSetters(type).entrySet()) {
+      Object value = in.opt(entry.getKey());
+      if (value != null) {
+        Method method = entry.getValue();
+        try {
+          method.invoke(out, convertToObject(value, method.getGenericParameterTypes()[0]));
+        } catch (IllegalArgumentException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    return out;
   }
 }
