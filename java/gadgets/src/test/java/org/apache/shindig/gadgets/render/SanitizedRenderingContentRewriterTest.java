@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -27,34 +30,29 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
-import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class SanitizedRenderingContentRewriterTest {
   private static final Set<String> DEFAULT_TAGS = ImmutableSet.of("html", "head", "body");
@@ -77,7 +75,7 @@ public class SanitizedRenderingContentRewriterTest {
 
   @Before
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector(new TestParseModule(), new PropertiesModule());
+    Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     gadget = new Gadget().setContext(unsanitaryGadgetContext);
     gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
@@ -225,7 +223,28 @@ public class SanitizedRenderingContentRewriterTest {
     assertNull(rewrite(req, response));
   }
 
-  @Test
+   @Test
+   public void sanitizationBypassAllowed() {
+     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
+     // Create a rewriter that would strip everything
+     ContentRewriter rewriter = createRewriter(set(), set());
+
+     MutableContent mc = new MutableContent(parser, markup);
+     Document document = mc.getDocument();
+     // Force the content to get re-serialized
+     MutableContent.notifyEdit(document);
+     String fullMarkup = mc.getContent();
+     
+     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
+     // Mark the paragraph tag element as trusted
+     SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag);
+     rewriter.rewrite(gadget, mc);
+     
+     // The document should be unchanged
+     assertEquals(fullMarkup, mc.getContent());
+   }
+
+   @Test
   public void restrictHrefAndSrcAttributes() {
     String markup =
         "<element " +
@@ -293,55 +312,5 @@ public class SanitizedRenderingContentRewriterTest {
         "<Module><ModulePrefs title=''/><Content type='html'/></Module>"));
     gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
     assertEquals(sanitized, rewrite(gadget, markup, set("p", "b", "style"), set()));
-  }
-
-  private static class TestParseModule extends AbstractModule {
-
-    @Override
-    protected void configure() {
-      bind(GadgetHtmlParser.class).to(NekoHtmlParser.class);
-      bind(DOMImplementation.class).toProvider(DOMImplementationProvider.class);
-    }
-
-    /**
-     * Provider of new HTMLDocument implementations. Used to hide XML parser weirdness
-     */
-    public static class DOMImplementationProvider implements Provider<DOMImplementation> {
-
-      DOMImplementation domImpl;
-
-      public DOMImplementationProvider() {
-        try {
-          DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-          // Require the traversal API
-          domImpl = registry.getDOMImplementation("XML 1.0 Traversal 2.0");
-        } catch (Exception e) {
-          // Try another
-        }
-        // This is ugly but effective
-        try {
-          if (domImpl == null) {
-            domImpl = (DOMImplementation)
-                Class.forName("org.apache.xerces.internal.dom.DOMImplementationImpl").
-                    getMethod("getDOMImplementation").invoke(null);
-          }
-        } catch (Exception ex) {
-          //try another
-        }
-        try {
-          if (domImpl == null) {
-          domImpl = (DOMImplementation)
-            Class.forName("com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl").
-                getMethod("getDOMImplementation").invoke(null);
-          }
-        } catch (Exception ex) {
-          throw new RuntimeException("Could not find HTML DOM implementation", ex);
-        }
-      }
-
-      public DOMImplementation get() {
-        return domImpl;
-      }
-    }
   }
 }
