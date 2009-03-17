@@ -272,7 +272,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     /** Create an Element in the DOM for an important element */
     private Element startImportantElement(QName qName, XMLAttributes xmlAttributes) {
       if (builder.length() > 0) {
-        elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+        appendChild(document.createTextNode(builder.toString()));
         builder.setLength(0);
       }
 
@@ -292,7 +292,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
           element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
         }
       }
-      elementStack.peek().appendChild(element);
+      appendChild(element);
       return element;
     }
 
@@ -377,7 +377,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public void endDocument(Augmentations augs) throws XNIException {
       if (builder.length() > 0) {
-        elementStack.peek().appendChild(document.createTextNode(builder.toString()));
+        appendChild(document.createTextNode(builder.toString()));
         builder.setLength(0);
       }
       elementStack.pop();
@@ -388,6 +388,10 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public XMLDocumentSource getDocumentSource() {
       return null;
+    }
+    
+    protected final void appendChild(Node node) {
+      elementStack.peek().appendChild(node);
     }
   }
 }

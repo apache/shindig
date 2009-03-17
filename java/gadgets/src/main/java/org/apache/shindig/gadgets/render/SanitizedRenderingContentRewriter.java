@@ -76,19 +76,29 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
 
   private static final Set<String> URI_ATTRIBUTES = ImmutableSet.of("href", "src");
 
-  // Attributes to forcibly rewrite and require an image mime type
+  /** Key stored as element user-data to bypass sanitization */
+  private static final String BYPASS_SANITIZATION_KEY = "shindig.bypassSanitization";
+  
+  /** Attributes to forcibly rewrite and require an image mime type */
   private static final Map<String, ImmutableSet<String>> PROXY_IMAGE_ATTRIBUTES =
       ImmutableMap.of("img", ImmutableSet.of("src"));
 
   /**
-   * Is the Gadget to be rendered sanitized
-   * @param gadget
-   * @return
+   * Is the Gadget to be rendered sanitized?
+   * @return true if sanitization will be enabled
    */
   public static boolean isSanitizedRenderingRequest(Gadget gadget) {
     return ("1".equals(gadget.getContext().getParameter("sanitize")));
   }
-
+  
+  /**
+   * Marks that an element - and all its attributes and children - are
+   * trusted content. 
+   */
+  public static void bypassSanitization(Element element) {
+    element.setUserData(BYPASS_SANITIZATION_KEY, true, null);
+  }
+  
   private final Set<String> allowedTags;
   private final Set<String> allowedAttributes;
   private final CajaCssSanitizer cssSanitizer;
@@ -238,7 +248,9 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
         case Node.ELEMENT_NODE:
         case Node.DOCUMENT_NODE:
           Element element = (Element) node;
-          if (allowedTags.contains(element.getTagName().toLowerCase())) {
+          if (canBypassSanitization(element)) {
+            return;
+          } else if (allowedTags.contains(element.getTagName().toLowerCase())) {
             // TODO - Add special case for stylesheet LINK nodes.
             // Special case handling for style nodes
             if (element.getTagName().equalsIgnoreCase("style")) {
@@ -299,6 +311,10 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
     }
 
     return list;
+  }
+
+  private static boolean canBypassSanitization(Element element) {
+    return (element.getUserData(BYPASS_SANITIZATION_KEY) != null);
   }
 
   /** Convert a NamedNodeMap to a list for easy and safe operations */

@@ -29,6 +29,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 import org.cyberneko.html.HTMLConfiguration;
 import org.cyberneko.html.HTMLScanner;
 import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Node;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -97,6 +98,15 @@ public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
       }
       
       super.endElement(name, augs);
+    }
+
+    
+    @Override
+    public void comment(XMLString text, Augmentations augs) throws XNIException {
+      // Add comments as comment nodes - needed to support sanitization
+      // of SocialMarkup-parsed content
+      Node comment = getDocument().createComment(new String(text.ch, text.offset, text.length)); 
+      appendChild(comment);
     }
 
     @Override
