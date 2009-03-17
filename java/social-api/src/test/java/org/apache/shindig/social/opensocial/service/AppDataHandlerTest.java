@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import static org.easymock.EasyMock.eq;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
@@ -36,7 +38,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.eq;
 
 import java.io.StringReader;
 import java.util.Collections;
@@ -147,7 +148,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     params.put("fields", new String[]{"pandas"});
 
     HashMap<String, String> values = Maps.newHashMap();
-    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(Map.class)))
         .andReturn(values);
 
     org.easymock.EasyMock.expect(appDataService.updatePersonData(eq(JOHN_DOE.iterator().next()),
@@ -184,7 +185,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("", "an empty value");
-    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(Map.class)))
         .andReturn(values);
 
     replay();
@@ -213,7 +214,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     // create an invalid set of app data and inject
     values.put("Aokkey", "an ok key");
     values.put("a bad key", "a good value");
-    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(HashMap.class)))
+    org.easymock.EasyMock.expect(converter.convertToObject(eq(jsonAppData), eq(Map.class)))
         .andReturn(values);
 
     replay();
