@@ -27,10 +27,7 @@ import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.protocol.DataServiceServlet;
 import org.apache.shindig.protocol.JsonRpcServlet;
-
-import com.google.common.base.Join;
-import com.google.common.collect.Maps;
-
+import org.apache.shindig.social.sample.SampleModule;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
@@ -49,6 +46,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.base.Join;
+import com.google.common.collect.Maps;
 
 /**
  * Suite for running the end-to-end tests. The suite is responsible for starting up and shutting
@@ -109,7 +109,7 @@ public class EndToEndServer {
 
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Join
-        .join(":", EndToEndModule.class.getName(), DefaultGuiceModule.class.getName(),
+        .join(":", SampleModule.class.getName(), DefaultGuiceModule.class.getName(),
             PropertiesModule.class.getName(), OAuthModule.class.getName());
 
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);

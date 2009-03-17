@@ -20,6 +20,7 @@ package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
 import javax.persistence.EntityManager;
 
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
@@ -49,12 +50,16 @@ import org.apache.shindig.social.opensocial.model.Name;
 import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
+import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
+import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+
+import net.oauth.OAuthConsumer;
 
 /**
  * Provides component injection for tests
@@ -89,6 +94,8 @@ public class JpaTestGuiceModule extends AbstractModule {
     this.bind(AppDataService.class).to(AppDataServiceDb.class).in(Scopes.SINGLETON);
     this.bind(PersonService.class).to(PersonServiceDb.class).in(Scopes.SINGLETON);
 
+    this.bind(OAuthDataStore.class).toInstance(new NullOAuthDataStore());
+
     // Entities
     this.bind(Activity.class).to(ActivityDb.class);
     this.bind(Account.class).to(AccountDb.class);
@@ -101,5 +108,31 @@ public class JpaTestGuiceModule extends AbstractModule {
     this.bind(Organization.class).to(OrganizationDb.class);
     this.bind(Person.class).to(PersonDb.class);
     this.bind(Url.class).to(UrlDb.class);
+  }
+
+  private static class NullOAuthDataStore implements OAuthDataStore {
+    public OAuthEntry getEntry(String oauthToken) {
+      return null;
+    }
+
+    public OAuthConsumer getConsumer(String consumerKey) {
+      return null;
+    }
+
+    public OAuthEntry generateRequestToken(String consumerKey) {
+      throw new UnsupportedOperationException();
+    }
+
+    public OAuthEntry convertToAccessToken(OAuthEntry entry) {
+      throw new UnsupportedOperationException();
+    }
+
+    public void authorizeToken(OAuthEntry entry, String userId) {
+      throw new UnsupportedOperationException();
+    }
+
+    public SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId) {
+      throw new UnsupportedOperationException();
+    }
   }
 }

@@ -20,9 +20,6 @@ package org.apache.shindig.social.opensocial.spi;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-
-import com.google.inject.ImplementedBy;
 
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -31,7 +28,6 @@ import java.util.concurrent.Future;
  * The ActivityService interface defines the service provider interface to retrieve activities from
  * the underlying SNS.
  */
-@ImplementedBy(JsonDbOpensocialService.class)
 public interface ActivityService {
 
   /**

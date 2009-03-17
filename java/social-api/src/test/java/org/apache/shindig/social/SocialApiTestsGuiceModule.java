@@ -31,6 +31,10 @@ import org.apache.shindig.social.opensocial.service.ActivityHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
+import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.PersonService;
+import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -48,6 +52,10 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
   protected void configure() {
     bind(ParameterFetcher.class).annotatedWith(Names.named("DataServiceServlet"))
         .to(DataServiceServletFetcher.class);
+
+    bind(ActivityService.class).to(JsonDbOpensocialService.class);
+    bind(AppDataService.class).to(JsonDbOpensocialService.class);
+    bind(PersonService.class).to(JsonDbOpensocialService.class);
 
     bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");

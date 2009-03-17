@@ -20,7 +20,10 @@ package org.apache.shindig.social.core.config;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
+import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
+import org.easymock.EasyMock;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -34,7 +37,13 @@ public class SocialApiGuiceModuleTest extends TestCase {
 
   @Override public void setUp() throws Exception {
     super.setUp();
-    injector = Guice.createInjector(new SocialApiGuiceModule(), new PropertiesModule());
+    injector = Guice.createInjector(new SocialApiGuiceModule(), new PropertiesModule(),
+        new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(OAuthDataStore.class).toInstance(EasyMock.createMock(OAuthDataStore.class));
+          }
+    });
   }
 
   /**

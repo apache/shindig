@@ -17,13 +17,9 @@
  */
 package org.apache.shindig.social.opensocial.oauth;
 
-import com.google.inject.ImplementedBy;
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
-
 import net.oauth.OAuthConsumer;
 
-@ImplementedBy(SampleOAuthDataStore.class)
+import org.apache.shindig.auth.SecurityToken;
 
 /**
  * A class that manages the OAuth data for Shindig, including
