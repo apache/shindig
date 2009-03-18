@@ -144,12 +144,13 @@ public class NekoSerializer extends HtmlSerializer
       Attr attr = (Attr)attributes.item(i);
       String attrName = attr.getNodeName();
       output.append(' ').append(attrName);
-      if (attr.getNodeValue() != null &&
-          attr.getNodeValue().length() > 0) {
+      if (attr.getNodeValue() != null) {
         output.append("=\"");
-        boolean isUrlAttribute =
-          elem.getNamespaceURI() == null && URL_ATTRIBUTES.contains(attrName);
-        printAttributeValue(attr.getNodeValue(), output, isUrlAttribute);
+        if (attr.getNodeValue().length() != 0) {
+          boolean isUrlAttribute =
+            elem.getNamespaceURI() == null && URL_ATTRIBUTES.contains(attrName);
+          printAttributeValue(attr.getNodeValue(), output, isUrlAttribute);
+        }
         output.append('"');
       }
     }
