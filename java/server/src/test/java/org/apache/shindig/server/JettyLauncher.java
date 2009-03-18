@@ -73,7 +73,7 @@ public class JettyLauncher {
     context.addServlet(defaultHolder, "/");
 
     context.addEventListener(new GuiceServletContextListener());
-
+                                                                                                   
     Map<String, String> initParams = Maps.newHashMap();
     String modules = Join
         .join(":", SampleModule.class.getName(), DefaultGuiceModule.class.getName(),
