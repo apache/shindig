@@ -27,6 +27,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.templates.MessageELResolver;
+import org.apache.shindig.gadgets.templates.TagHandler;
+import org.apache.shindig.gadgets.templates.TagRegistry;
+import org.apache.shindig.gadgets.templates.TemplateBasedTagHandler;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.json.JSONObject;
@@ -66,13 +69,16 @@ public class TemplateRewriter implements ContentRewriter {
   private final Provider<TemplateProcessor> processor;
   private final MessageBundleFactory messageBundleFactory;
   private final Expressions expressions;
+  private final TagRegistry baseTagRegistry;
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
-      MessageBundleFactory messageBundleFactory, Expressions expressions) {
+      MessageBundleFactory messageBundleFactory, Expressions expressions, 
+      TagRegistry baseTagRegistry) {
     this.processor = processor;
     this.messageBundleFactory = messageBundleFactory;
     this.expressions = expressions;
+    this.baseTagRegistry = baseTagRegistry;
   }
 
   public RewriterResults rewrite(HttpRequest request, HttpResponse original,
@@ -107,22 +113,65 @@ public class TemplateRewriter implements ContentRewriter {
 
   private RewriterResults rewriteImpl(Gadget gadget, MutableContent content)
       throws GadgetException {
-    List<Element> tagList =
-      DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS);
+    List<Element> templates = ImmutableList.copyOf(
+      Iterables.filter(
+          DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS),
+          new Predicate<Element>() {
+            public boolean apply(Element element) {
+              return "text/os-template".equals(element.getAttribute("type"));
+            }
+          }));
+    
+    TagRegistry registry = registerCustomTags(templates);
+    
+    return processInlineTemplates(gadget, content, templates, registry);
+  }
+  
+  /**
+   * Register templates with a "tag" attribute.
+   */
+  private TagRegistry registerCustomTags(List<Element> allTemplates) {
+    ImmutableSet.Builder<TagHandler> handlers = ImmutableSet.builder();
+    for (Element template : allTemplates) {
+      // Only process templates with a tag attribute
+      if (template.getAttribute("tag").length() == 0) {
+        continue;
+      }
+      
+      // TODO: split() is a regex compile, and should be avoided
+      String [] nameParts = template.getAttribute("tag").split(":");
+      // At this time, we only support 
+      if (nameParts.length != 2) {
+        continue;
+      }
+      String namespaceUri = template.lookupPrefix(nameParts[0]);      
+      if (namespaceUri == null) {
+        // If the namespace prefix is defined on the template tag, get it from
+        // the attribute.
+        namespaceUri = template.getAttribute("xmlns:" + nameParts[0]);
+      }
+      if (namespaceUri.length() > 0) {
+        handlers.add(new TemplateBasedTagHandler(template, namespaceUri, nameParts[1]));
+      }
+    }
+    
+    return baseTagRegistry.addHandlers(handlers.build());
+  }
+  
+  private RewriterResults processInlineTemplates(Gadget gadget, MutableContent content,
+      List<Element> allTemplates, TagRegistry registry) throws GadgetException {
     final Map<String, JSONObject> pipelinedData = content.getPipelinedData();
 
     List<Element> templates = ImmutableList.copyOf(
-        Iterables.filter(tagList, new Predicate<Element>() {
+        Iterables.filter(allTemplates, new Predicate<Element>() {
       public boolean apply(Element element) {
-        String type = element.getAttribute("type");
         String name = element.getAttribute("name");
         String tag = element.getAttribute("tag");
         String require = element.getAttribute("require");
         // Templates with "tag" or "name" can't be processed;  templates
         // that require data that isn't available on the server can't
         // be processed either
-        return "text/os-template".equals(type)
-            && "".equals(name)
+        return "".equals(name)
             && "".equals(tag)
             && checkRequiredData(require, pipelinedData.keySet());
       }
@@ -141,7 +190,7 @@ public class TemplateRewriter implements ContentRewriter {
 
     for (Element template : templates) {
       DocumentFragment result = processor.get().processTemplate(
-          template, templateContext, messageELResolver);
+          template, templateContext, messageELResolver, registry);
       // Note: replaceNode errors when replacing Element with DocumentFragment
       template.getParentNode().insertBefore(result, template);
       // TODO: clients that need to update data that is initially available,

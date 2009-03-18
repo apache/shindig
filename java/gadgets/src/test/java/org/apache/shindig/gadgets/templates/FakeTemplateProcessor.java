@@ -53,7 +53,7 @@ public class FakeTemplateProcessor implements TemplateProcessor {
   }
 
   public DocumentFragment processTemplate(Element template,
-      TemplateContext templateContext, ELResolver globals) {
+      TemplateContext templateContext, ELResolver globals, TagRegistry registry) {
     throw new UnsupportedOperationException();
   }
 

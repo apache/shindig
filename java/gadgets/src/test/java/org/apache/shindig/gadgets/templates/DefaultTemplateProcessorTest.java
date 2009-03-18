@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.templates;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 import org.apache.shindig.expressions.Expressions;
@@ -73,7 +74,7 @@ public class DefaultTemplateProcessorTest {
     Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new TestTagHandler());
     registry = new TagRegistry(handlers);
 
-    processor = new DefaultTemplateProcessor(expressions, registry);
+    processor = new DefaultTemplateProcessor(expressions);
     resolver = new RootELResolver();
     parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());    
     context = new TemplateContext(new GadgetContext(), variables);
@@ -155,7 +156,7 @@ public class DefaultTemplateProcessorTest {
   
   @Test
   public void testCustomTag() throws Exception {
-    String output = executeTemplate("<test:Foo text='${foo.title}'/>", 
+    String output = executeTemplate("<test:Foo text='${foo.title}' data='${user}'/>", 
         "xmlns:test='" + TEST_NS + "'");
     assertEquals("<b>BAR</b>", output);
   }
@@ -166,7 +167,7 @@ public class DefaultTemplateProcessorTest {
   
   private String executeTemplate(String markup, String extra) throws Exception {
     Element template = prepareTemplate(markup, extra);
-    DocumentFragment result = processor.processTemplate(template, context, resolver);
+    DocumentFragment result = processor.processTemplate(template, context, resolver, registry);
     return serialize(result);
   }
   
@@ -191,9 +192,10 @@ public class DefaultTemplateProcessorTest {
   }
   
   /**
-   * A dummy custom tag that looks for the @text attribute, uppercases it and
-   * encloses it in a &lt;b&gt; tag.  <code>&lt;test:Foo text="bar"/&gt;</code>
-   * turns into <code>&lt;b&gt;BAR&lt;/b&gt;</code> 
+   * A dummy custom tag.
+   * Expects a @text attribute equal to "bar", and a @data attribute that
+   * evaluates to a JSONObject with an id property equal to "101".
+   * If these conditions are met, returns <code>&lt;b&gt;BAR&lt;/b&gt;</code> 
    */
   private static class TestTagHandler extends AbstractTagHandler {
     
@@ -201,9 +203,13 @@ public class DefaultTemplateProcessorTest {
       super(TEST_NS, "Foo");
     }
     
-    public void process(Node result, Element tag, TemplateProcessor processor) {
+    public void process(Node result, Element tag, TemplateProcessor processor) {     
+      Object data = getValueFromTag(tag, "data", processor, Object.class);
+      assertTrue(data instanceof JSONObject);
+      assertEquals("101", ((JSONObject) data).optString("id"));
+            
       String text = getValueFromTag(tag, "text", processor, String.class);
-      text = (text == null) ? "" : text.toUpperCase();
+      text = text.toUpperCase();
       Document doc = result.getOwnerDocument();
       Element b = doc.createElement("b");
       b.appendChild(doc.createTextNode(text));

@@ -70,17 +70,16 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   public static final String ATTRIBUTE_VAR = "var";
   
   private final Expressions expressions;
-  private final TagRegistry registry;
   // Reused buffer for creating template output
   private final StringBuilder outputBuffer;
 
+  private TagRegistry registry;
   private TemplateContext templateContext;
   private ELContext elContext;
   
   @Inject
-  public DefaultTemplateProcessor(Expressions expressions, TagRegistry registry) {  
+  public DefaultTemplateProcessor(Expressions expressions) {  
     this.expressions = expressions;
-    this.registry = registry;
     outputBuffer = new StringBuilder();
   }
 
@@ -95,12 +94,14 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    * @return a document fragment with the resolved content
    */
   public DocumentFragment processTemplate(Element template,
-      TemplateContext templateContext, ELResolver globals) {
+      TemplateContext templateContext, ELResolver globals, TagRegistry registry) {
 
+    this.registry = registry;
     this.templateContext = templateContext;
     this.elContext = expressions.newELContext(globals,
         new GadgetELResolver(templateContext.getGadgetContext()),
-        new TemplateELResolver(templateContext));
+        new TemplateELResolver(templateContext),
+        new ElementELResolver());
 
     DocumentFragment result = template.getOwnerDocument().createDocumentFragment();
     processChildNodes(result, template);
@@ -234,6 +235,10 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    */
   public void processRepeat(Node result, Element element, Iterable<?> dataList,
       Runnable onEachLoop) {
+    if (dataList == null) {
+      return;
+    }
+    
     // Compute list size
     int size = Iterables.size(dataList);
     
@@ -306,18 +311,15 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     }
 
     if (handler != null) {
-      // TODO: We are passing in an element with all special attributes intact.
-      // This may be problematic. Perhaps doing a deep clone and stripping them
-      // would work better.
       handler.process(result, element, this);
     } else {
       Element resultNode = (Element) element.cloneNode(false);
       clearSpecialAttributes(resultNode);
       processAttributes(resultNode);
-      result.appendChild(resultNode);
-      
       processChildNodes(resultNode, element);
+      result.appendChild(resultNode);
     }
+    
   }
 
   private void clearSpecialAttributes(Element element) {
@@ -328,13 +330,15 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   }
   
   /**
-   * Process expressions on attributes
+   * Process expressions on attributes. For custom tags, in addition to 
+   * processing attributes, 
+   * @param element The Element to process attributes on
    */
   private void processAttributes(Element element) {
     NamedNodeMap attributes = element.getAttributes();
     for (int i = 0; i < attributes.getLength(); i++) {
       Attr attribute = (Attr) attributes.item(i);
-      attribute.setNodeValue(evaluate(attribute.getValue(), String.class, null));
+      attribute.setNodeValue(evaluate(attribute.getValue(), String.class, null));      
     }
   }
   
@@ -424,6 +428,6 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       return ImmutableList.of(json);
     }
     
-    return null;
+    return ImmutableList.of(value);
   }
 }

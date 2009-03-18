@@ -43,7 +43,7 @@ public interface TemplateProcessor {
    * @return a document fragment with the resolved content
    */
   DocumentFragment processTemplate(Element template,
-      TemplateContext templateContext, ELResolver globals);    
+      TemplateContext templateContext, ELResolver globals, TagRegistry registry);    
   
   
   /**
