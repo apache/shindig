@@ -55,6 +55,7 @@ public class NameTagHandler extends AbstractTagHandler {
 
     Document doc = result.getOwnerDocument();
     Element root = doc.createElement("b");
+    result.appendChild(root);
 
     appendTextNode(root, formatted);
   }
