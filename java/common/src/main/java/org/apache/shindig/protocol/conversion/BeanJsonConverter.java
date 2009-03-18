@@ -101,8 +101,8 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
-  public <T> T convertToObject(String string, Class<T> className) {
-    return convertToObject(string, (Type) className);
+  public <T> T convertToObject(String string, Class<T> clazz) {
+    return clazz.cast(convertToObject(string, (Type) clazz));
   }
 
   public String convertToString(Object pojo) {
