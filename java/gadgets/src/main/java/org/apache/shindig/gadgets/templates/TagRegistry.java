@@ -20,11 +20,11 @@ package org.apache.shindig.gadgets.templates;
 
 import org.w3c.dom.Element;
 
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 /**
  * A registry of custom tag handlers, keyed by a combination of namespace URL
@@ -32,22 +32,56 @@ import java.util.Set;
  */
 public class TagRegistry {
 
+  private final TagRegistry parentRegistry;
   private final Map<NSName, TagHandler> handlers = Maps.newHashMap();
 
   @Inject
   public TagRegistry(Set<TagHandler> handlers) {
-    for (TagHandler handler : handlers) {
-      this.handlers.put(new NSName(handler.getNamespaceUri(), 
-          handler.getTagName()), handler);
-    }
+    this(handlers, null);
   }
   
+  /**
+   * Create a new TagRegistry containing all the existing handlers, with
+   * new tags added.  The handlers from the existing registry will take
+   * precedence over any newly registered tags.
+   */
+  public TagRegistry addHandlers(Set<? extends TagHandler> handlers) {
+    if (handlers.isEmpty()) {
+      return this;
+    }
+
+    return new TagRegistry(handlers, this);
+  }
+  
+  private TagRegistry(Set<? extends TagHandler> handlers, TagRegistry parentRegistry) {
+    this.parentRegistry = parentRegistry;
+    for (TagHandler handler : handlers) {
+      this.handlers.put(new NSName(handler.getNamespaceUri(), handler.getTagName()), handler);
+    }    
+  }
+  
+  /**
+   * Look up a tag handler for an element.
+   */
   public TagHandler getHandlerFor(Element element) {
     if (element.getNamespaceURI() == null) {
       return null;
     }
-    TagHandler handler = handlers.get(new NSName(element.getNamespaceURI(), 
-        element.getLocalName()));
+    
+    return getHandlerFor(new NSName(element.getNamespaceURI(),  element.getLocalName()));
+  }
+  
+  private TagHandler getHandlerFor(NSName name) {
+    // Check the parent registry first;  built-in tags cannot be overridden
+    TagHandler handler = null;
+    if (parentRegistry != null) {
+      handler = parentRegistry.getHandlerFor(name);
+    }
+    
+    if (handler == null) {
+      handler =  handlers.get(name);
+    }
+
     return handler;
   }
   
@@ -81,8 +115,6 @@ public class TagRegistry {
     @Override
     public int hashCode() {    
       return hash;
-    }
-    
+    }    
   }
-  
 }

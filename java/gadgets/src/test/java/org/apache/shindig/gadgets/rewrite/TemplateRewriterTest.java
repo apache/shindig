@@ -38,10 +38,10 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provider;
-
-import java.util.Set;
 
 /** 
  * Tests for TemplateRewriter
@@ -71,21 +71,21 @@ public class TemplateRewriterTest {
     "<script type='text/os-template' name='myTemplate'>Hello, ${user.name}</script>";  
   
   private static final String CONTENT_WITH_TAG =
-    "<script type='text/os-template' tag='foo:Bar'>Hello, ${user.name}</script>";  
+    "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";  
 
   
   @Before
   public void setUp() {
+    Set<TagHandler> handlers = ImmutableSet.of();
     rewriter = new TemplateRewriter(
         new Provider<TemplateProcessor>() {
           public TemplateProcessor get() {
-            Set<TagHandler> handlers = ImmutableSet.of();
-            return new DefaultTemplateProcessor(new Expressions(), 
-                new TagRegistry(handlers));
+            return new DefaultTemplateProcessor(new Expressions());
           }
         },
         new FakeMessageBundleFactory(),
-        new Expressions());
+        new Expressions(),
+        new TagRegistry(handlers));
   }
   
   @Test

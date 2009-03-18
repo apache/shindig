@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.json.JSONObject;
+import org.w3c.dom.Node;
 
 import java.util.Map;
 
@@ -35,7 +36,9 @@ public class TemplateContext {
   private Object cur = null;
   // TODO: support unique Id
   private Map<String, ? extends Object> context = ImmutableMap.of();
-
+  private Map<String, Object> myMap = null;
+  private Node templateRoot;
+  
   public TemplateContext(GadgetContext gadgetContext, Map<String, JSONObject> top) {
     this.gadgetContext = gadgetContext;
     this.top = top;
@@ -65,7 +68,27 @@ public class TemplateContext {
     return oldContext;
   }
   
+  public Map<String, Object> setMy(Map<String, Object> myMap) {
+    Map<String, Object> oldMy = this.myMap;
+    this.myMap = myMap;
+    return oldMy;
+  }
+  
+  public Map<String, Object> getMy() {
+    return myMap;
+  }
+  
   public GadgetContext getGadgetContext() {
     return gadgetContext;
+  }
+
+  public Node setTemplateRoot(Node root) {
+    Node oldRoot = this.templateRoot;
+    this.templateRoot = root;
+    return oldRoot;
+  }
+  
+  public Node getTemplateRoot() {
+    return this.templateRoot;
   }
 }

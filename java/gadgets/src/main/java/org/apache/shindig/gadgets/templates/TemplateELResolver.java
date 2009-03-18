@@ -41,9 +41,10 @@ public class TemplateELResolver extends ELResolver {
   public static final String PROPERTY_TOP = "Top";
   public static final String PROPERTY_CONTEXT = "Context";
   public static final String PROPERTY_CUR = "Cur";
+  public static final String PROPERTY_MY = "My";
   
   private static final Set<String> TOP_LEVEL_PROPERTIES =
-    ImmutableSet.of(PROPERTY_TOP, PROPERTY_CONTEXT, PROPERTY_CUR);
+    ImmutableSet.of(PROPERTY_TOP, PROPERTY_CONTEXT, PROPERTY_CUR, PROPERTY_MY);
   
   private final TemplateContext templateContext;
 
@@ -81,6 +82,8 @@ public class TemplateELResolver extends ELResolver {
           return templateContext.getTop();
         } else if (PROPERTY_CONTEXT.equals(property)) {
           return templateContext.getContext();
+        } else if (PROPERTY_MY.equals(property)) {
+          return templateContext.getMy();
         } else {
           return templateContext.getCur();
         }
@@ -99,25 +102,27 @@ public class TemplateELResolver extends ELResolver {
       Object cur = templateContext.getCur();
       // Resolve through "cur" as if it were a value - if "isPropertyResolved()"
       // is true, it was handled
-      Object value = context.getELResolver().getValue(context, cur, property);
-      if (context.isPropertyResolved()) {
-        if (value != null) {
-          return value;
-        } else {
-          context.setPropertyResolved(false);
+      if (cur != null) {
+        Object value = context.getELResolver().getValue(context, cur, property);
+        if (context.isPropertyResolved()) {
+          if (value != null) {
+            return value;
+          } else {
+            context.setPropertyResolved(false);
+          }
         }
       }
       
       // Check current scope variables next.
-      Map<String, ? extends Object> scope = templateContext.getContext();
-      if (scope.containsKey(property)) {
+      Map<String, ? extends Object> scope = templateContext.getMy();
+      if (scope != null && scope.containsKey(property)) {
         context.setPropertyResolved(true);
         return scope.get(property);
       }
       
       // Look at Top context last.
       scope = templateContext.getTop();
-      if (scope.containsKey(property)) {
+      if (scope != null && scope.containsKey(property)) {
         context.setPropertyResolved(true);
         return scope.get(property);
       }

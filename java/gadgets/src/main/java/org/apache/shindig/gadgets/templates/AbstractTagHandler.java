@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -50,10 +51,17 @@ public abstract class AbstractTagHandler implements TagHandler {
   public String getNamespaceUri() {
     return namespaceUri;
   }
-  
+
   protected final <T> T getValueFromTag(Element tag, String name, 
       TemplateProcessor processor, Class<T> type) {
     return processor.evaluate(tag.getAttribute(name), type, null);
+  }
+  
+  protected final DocumentFragment processChildren(Element tag, 
+      TemplateProcessor processor) {
+    DocumentFragment fragment = tag.getOwnerDocument().createDocumentFragment();
+    processor.processChildNodes(fragment, tag);
+    return fragment;
   }
   
   /** 
