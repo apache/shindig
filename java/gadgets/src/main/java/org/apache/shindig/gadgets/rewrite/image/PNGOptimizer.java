@@ -80,12 +80,21 @@ class PNGOptimizer extends BaseOptimizer {
       if (isOpaque) {
         byte[] lastBytes = minBytes;
         int prevReductionPct = reductionPct;
+
+        // Workaround for bug in JPEG image writer
+        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6444933
+        // Writer seems to think color space is CMYK and not RGBA. In this
+        // case the image is fully opaque so we can just down-convert to just RGB.
+        BufferedImage rgbOnlyImage = new BufferedImage(bufferedImage.getWidth(),
+            bufferedImage.getHeight(),
+            BufferedImage.TYPE_INT_RGB);
+        rgbOnlyImage.getGraphics().drawImage(bufferedImage, 0, 0, null);
         ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
         ImageWriteParam param = writer.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(config.getJpegCompression());
         outputter = new ImageIOOutputter(writer, param);
-        write(bufferedImage);
+        write(rgbOnlyImage);
         // Only use JPEG if it offers a significant reduction over other methods
         if (reductionPct > prevReductionPct + 20) {
           useJpeg = true;
