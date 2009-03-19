@@ -55,7 +55,6 @@ DataContextTest.prototype.testPutDataSet = function() {
   this.assertEquals('value', context.getDataSet('key'));
 };
 
-
 /**
  * Test registerListener()
  */
@@ -75,14 +74,12 @@ DataContextTest.prototype.testRegisterListener = function() {
   this.assertNull(listenerCalledWithKey);
 
   context.putDataSet('key', 2);
-  this.assertEquals('key', listenerCalledWithKey);
+  this.assertEquals('key', listenerCalledWithKey[0]);
 
   listenerCalledWithKey = null;
   context.putDataSet('key', 3);
-  this.assertEquals('key', listenerCalledWithKey);
+  this.assertEquals('key', listenerCalledWithKey[0]);
 }
-
-
 
 /**
  * Test registerListener()
@@ -96,19 +93,18 @@ DataContextTest.prototype.testRegisterListenerWithArray = function() {
     that.assertNotNull(key);
   };
   
-  context.registerListener(['one', 'two'], listener);
-  this.assertNull(listenerCalledWithKey);
-  
-  context.putDataSet('one', 1);
+  context.registerListener(['aone', 'atwo'], listener);
   this.assertNull(listenerCalledWithKey);
 
-  context.putDataSet('two', 2);
-  this.assertEquals('two', listenerCalledWithKey);
+  context.putDataSet('aone', 1);
+  this.assertNull(listenerCalledWithKey);
 
-  context.putDataSet('one', 3);
-  this.assertEquals('one', listenerCalledWithKey);
+  context.putDataSet('atwo', 2);
+  this.assertEquals('atwo', listenerCalledWithKey[0]);
+
+  context.putDataSet('aone', 3);
+  this.assertEquals('aone', listenerCalledWithKey[0]);
 }
-
 
 /**
  * Test registerListener() with '*'
@@ -126,8 +122,63 @@ DataContextTest.prototype.testRegisterListenerWithStar = function() {
   this.assertNull(listenerCalledWithKey);
   
   context.putDataSet('one', 1);
-  this.assertEquals('one', listenerCalledWithKey);
+  this.assertEquals('one', listenerCalledWithKey[0]);
 
   context.putDataSet('two', 2);
-  this.assertEquals('two', listenerCalledWithKey);
+  this.assertEquals('two', listenerCalledWithKey[0]);
+}
+
+/**
+ * Test getData()
+ */
+DataContextTest.prototype.testGetData = function() {
+  var context = opensocial.data.getDataContext();
+  context.putDataSet('key', 'value');
+  this.assertEquals('value', context.getData()['key']);
+  context.putDataSet('key', 'value2');
+  this.assertEquals('value2', context.getData()['key']);
+  
+  // Test that altering the result of getData doesn't change the context
+  var data = context.getData();
+  data['key'] = 'ball';
+  this.assertEquals('value2', context.getDataSet('key'));
+}
+
+/**
+ * Test putDataSets()
+ */
+DataContextTest.prototype.testPutDataSets = function() {
+  var context = opensocial.data.getDataContext();
+  var counter = 0;
+  var passedKeys = null;
+  var listener = function(keys) {
+    counter++;
+    passedKeys = keys;
+  }
+  context.registerListener(['sets1', 'sets2'], listener);
+  context.putDataSets({ sets1: 'a', sets2: 'b' });
+  this.assertEquals('a', context.getDataSet('sets1'));
+  this.assertEquals('b', context.getDataSet('sets2'));
+  
+  // Test that listener was only called once.
+  this.assertEquals(1, counter);
+  
+  // Test that listener was passed both keys.
+  this.assertEquals(2, passedKeys.length);
+}
+
+/**
+ * Test registerOneTimeListener_()
+ */
+DataContextTest.prototype.testOneTimeListener = function() {
+  var context = opensocial.data.getDataContext();
+  var counter = 0;
+  var listener = function(keys) {
+    counter++;
+  }
+  context.registerOneTimeListener_('oneTime', listener);
+  context.putDataSet('oneTime', 'foo');
+  this.assertEquals(1, counter);
+  context.putDataSet('oneTime', 'bar');
+  this.assertEquals(1, counter);
 }

@@ -384,36 +384,6 @@ function testTag_input() {
   assertEquals(contentNode.value, data.data);
 }
 
-function testTag_blink() {
-  var custom = os.createNamespace("custom", "http://google.com/#custom");
-  /**
-   * A controller that reproduces blink behavior.
-   */
-  custom.blink = function(node, context) { // returns HTML
-    var root = document.createElement("span");
-    root.appendChild(node.firstChild);
-    function blink() {
-      var isVisible = root.style["visibility"] == "visible";
-      root.style["visibility"] = isVisible ? "hidden" : "visible";
-      setTimeout(blink, 500);
-    }
-    root.onAttach = function() {
-      blink();
-    };
-    return root;
-  };
-
-  Clock.reset();
-  var outputNode = compileAndRender_("_T_Tag_blink");
-  // contentNode is wrapped by <div><span>
-  var contentNode = outputNode.firstChild.firstChild;
-  assertEquals(contentNode.style.visibility, "visible");
-  Clock.tick(500);
-  assertEquals(contentNode.style.visibility, "hidden");
-  Clock.tick(500);
-  assertEquals(contentNode.style.visibility, "visible");
-}
-
 function testHelloWorld() {
   assertTemplateOutput(
     '<div>Hello world!</div>',

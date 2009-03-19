@@ -213,7 +213,7 @@ opensocial.data.RequestDescriptor.prototype.register_ = function() {
  */
 opensocial.data.DataContext.evalExpression = function(expr) {
   return (new Function("context", "with (context) return " + expr))
-      (opensocial.data.DataContext.dataSets);
+      (opensocial.data.DataContext.getData());
 };
 
 

@@ -1,6 +1,4 @@
 <!--
-Copyright 2006 Google Inc.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,23 +14,43 @@ limitations under the License.
 <html>
   <head>
     <title>OpenSocial templates JsUnit tests</title>
-    <script src="jsunit/app/jsUnitCore.js"></script>
-    <script src="jsunit/app/jsUnitMockTimeout.js"></script>
+    <script src="../../lib/JsUtil.js"></script>
+    <script src="../../lib/JsUnit.js"></script>
+    <script>
+      // TODO: These adapters are needed because the tests were originally
+      // created with a different version of JSUnit in mind. Refactor this file
+      // and the various test files to use the TestCase class infrastructure.
+      var _assert = new Assert();
+      function assertTrue(a) {
+        _assert.assertTrue(a);
+      }
+      function assertEquals(a,b) {
+        _assert.assertEquals(a,b);
+      }
+      function assertNotNull(a) {
+        _assert.assertNotNull(a);
+      }
+      function assertContains(a,b) {
+        _assert.assertTrue(b.indexOf(a) >= 0);
+      }
+    </script>
+    
     <!-- the set of js files that make up opensocial-templates feature, as they appear in feature.xml -->
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/util.js"></script>
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>
     <script src="http://google-jstemplate.googlecode.com/svn/trunk/jstemplate.js"></script>
-    <script src="jstemplate_debug.js"></script>
-    <script src="../xmlutil/xmlutil.js"></script>
-    <script src="../opensocial-data/data.js"></script>
-    <script src="base.js"></script>
-    <script src="namespaces.js"></script>
-    <script src="util.js"></script>
-    <script src="template.js"></script>
-    <script src="compiler.js"></script>
-    <script src="loader.js"></script>
-    <script src="container.js"></script>
-    <script src="os.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-template/jstemplate_debug.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-data-context/datacontext.js"></script>
+    <script src="../../../../main/javascript/features/xmlutil/xmlutil.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-data/data.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/base.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/namespaces.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/util.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/template.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/compiler.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/loader.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/container.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/os.js"></script>
     <!-- the JsUnit tests -->
     <script src="domutil.js"></script>
     <script type="text/javascript" src="compiler_test.js"></script>
@@ -46,18 +64,44 @@ limitations under the License.
       function exposeTestFunctionNames() {
         var testSource = typeof RuntimeObject != 'undefined' ?
                          RuntimeObject('test' + '*') : self;
-        var testFunctionNames = new Array();
-        for (i in testSource) {
+        var testFunctionNames = [];
+        for (var i in testSource) {
           if (i.substring(0, 4) == 'test' && typeof(testSource[i]) == 'function')
-            push(testFunctionNames, i);
+           testFunctionNames.push(i);
         }
         return testFunctionNames;
       }
 
+      function runAllTests() {
+        var log = function(msg, forcePage) {
+          if (window.console && !forcePage) {
+            console.log(msg);
+            return;
+          } 
+          var div = document.createElement("div");
+          div.appendChild(document.createTextNode(msg));
+          document.body.appendChild(div); 
+        };
+        var tests = exposeTestFunctionNames();
+        var failed = 0;
+        for (var i = 0; i < tests.length; i++) {
+          log(tests[i]);
+          try {
+            window[tests[i]]();
+            log("OK");
+          } catch (e) {
+            log("FAIL: " + e);
+            failed++;
+          }
+        }
+        log("All finished. " + i + " run. " + failed + " failed.", true);
+      }
+      
       os.createNamespace("test", "http://www.google.com/#test");
     </script>
   </head>
   <body>
+    <input type="button" onclick="runAllTests()" value="Run tests"/>
     <script type="text/os-template" tag="os:Test">tag template</script>
     <script type="text/os-template">
       <div id="test"><os:Test/></div>

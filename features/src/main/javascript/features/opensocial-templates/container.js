@@ -209,7 +209,7 @@ os.Container.getDefaultContext = function() {
   if (!os.Container.defaultContext) {
     if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
         (opensocial.data.DataContext)) {
-      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.dataSets);
+      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.getData());
     } else {
       os.Container.defaultContext = os.createContext({});
     }
@@ -254,9 +254,13 @@ os.Container.renderInlineTemplates = function(opt_doc) {
       if (requiredData) {
         // This template will render when the specified data is available.
         var keys = requiredData.split(/[\, ]+/);
-        opensocial.data.DataContext.registerListener(keys,
-            os.Container.createRenderClosure(template, el, null,
-                os.Container.getDefaultContext()));
+        var callback = os.Container.createRenderClosure(template, el, null,
+            os.Container.getDefaultContext());
+        if ("true".equalsIgnoreCase(node.getAttribute("autoUpdate"))) {
+          opensocial.data.DataContext.registerListener(keys, callback);
+        } else {
+          opensocial.data.DataContext.registerOneTimeListener_(keys, callback);
+        }
       } else {
         template.renderInto(el, null, context);
       }
@@ -280,7 +284,6 @@ os.Container.createRenderClosure = function(template, element, opt_data,
     opt_context) {
  var closure = function() {
    template.renderInto(element, opt_data, opt_context);
-   return opensocial.data.DataContext.REMOVE_LISTENER;
  };
  return closure;
 };
