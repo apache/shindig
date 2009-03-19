@@ -314,6 +314,13 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       handler.process(result, element, this);
     } else {
       Element resultNode = (Element) element.cloneNode(false);
+      // Make sure that the resultNode is in the correct owner document.
+      // It would be cleaner to require that the incoming element is
+      // already in the correct document, but would require extra clones.
+      if (resultNode.getOwnerDocument() != result.getOwnerDocument()) {
+        result.getOwnerDocument().adoptNode(resultNode);
+      }
+      
       clearSpecialAttributes(resultNode);
       processAttributes(resultNode);
       processChildNodes(resultNode, element);
