@@ -238,7 +238,7 @@ public class BeanJsonConverter implements BeanConverter {
 
   private Object convertToClass(JSONObject in, Class<?> type) {
     Object out = injector.getInstance(type);
-    for (Map.Entry<String, Method> entry : getSetters(type).entrySet()) {
+    for (Map.Entry<String, Method> entry : getSetters(out.getClass()).entrySet()) {
       Object value = in.opt(entry.getKey());
       if (value != null) {
         Method method = entry.getValue();
