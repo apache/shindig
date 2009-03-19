@@ -40,7 +40,7 @@ opensocial.xmlutil.parseXML = function(str) {
       throw doc.firstChild.firstChild.nodeValue;
     }
     return doc;
-  } else {
+  } else if (typeof(ActiveXObject) != "undefined") {
     var doc = new ActiveXObject("MSXML2.DomDocument");
     doc.validateOnParse = false;
     doc.loadXML(str);
@@ -49,6 +49,7 @@ opensocial.xmlutil.parseXML = function(str) {
     }
     return doc;
   }
+  throw "No XML parser found in this browser.";
 };
 
 

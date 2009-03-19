@@ -81,6 +81,8 @@
                 <source>setprefs/setprefs.js</source>
                 <source>views/views.js</source>
                 <source>opensocial-data-context/datacontext.js</source>
+                <source>xmlutil/xmlutil.js</source>
+                <source>opensocial-data/data.js</source>
                 <source>opensocial-reference/opensocial.js</source>
                 <source>opensocial-reference/activity.js</source>
                 <source>opensocial-reference/address.js</source>
