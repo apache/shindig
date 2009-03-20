@@ -140,6 +140,16 @@ public class MakeRequestHandler extends ProxyBase {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
 
+    // If the proxy request specifies a refresh param then we want to force the min TTL for
+    // the retrieved entry in the cache regardless of the headers on the content when it
+    // is fetched from the original source.
+    if (request.getParameter(REFRESH_PARAM) != null) {
+      try {
+        req.setCacheTtl(Integer.parseInt(request.getParameter(REFRESH_PARAM)));
+      } catch (NumberFormatException nfe) {
+        // Ignore
+      }
+    }
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
