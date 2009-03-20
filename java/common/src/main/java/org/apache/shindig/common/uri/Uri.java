@@ -20,6 +20,7 @@ package org.apache.shindig.common.uri;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,6 +45,12 @@ public final class Uri {
 
   private final Map<String, List<String>> queryParameters;
 
+  private static UriParser parser = new DefaultUriParser();
+
+  @Inject(optional = true)
+  public static void setUriParser(UriParser uriParser) {
+    parser = uriParser;
+  }
 
   Uri(UriBuilder builder) {
     scheme = builder.getScheme();
@@ -81,11 +88,7 @@ public final class Uri {
    * @return A new Uri, parsed into components.
    */
   public static Uri parse(String text) {
-    try {
-      return fromJavaUri(new URI(text));
-    } catch (URISyntaxException e) {
-      throw new IllegalArgumentException(e);
-    }
+    return parser.parse(text);
   }
 
   /**
