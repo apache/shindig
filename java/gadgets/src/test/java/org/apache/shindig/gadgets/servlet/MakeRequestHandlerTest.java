@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static junitx.framework.StringAssert.assertStartsWith;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.expect;
+
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -27,11 +31,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-
-import com.google.common.collect.Lists;
-
-import static org.easymock.EasyMock.*;
-
 import org.easymock.Capture;
 import org.easymock.IAnswer;
 import org.json.JSONArray;
@@ -45,7 +44,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static junitx.framework.StringAssert.assertStartsWith;
+import com.google.common.collect.Lists;
 
 /**
  * Tests for MakeRequestHandler.
