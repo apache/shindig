@@ -30,7 +30,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import com.google.common.collect.Lists;
 
-import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.*;
+
+import org.easymock.Capture;
 import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -105,6 +107,21 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
     assertEquals(RESPONSE_BODY, results.get("body"));
     assertTrue(rewriter.responseWasRewritten());
+  }
+
+  public void testGetRequestWIthRefresh() throws Exception {
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").anyTimes();
+
+    Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(requestCapture))).andReturn(new HttpResponse(RESPONSE_BODY));
+
+    replay();
+
+    handler.fetch(request, recorder);
+
+    HttpRequest httpRequest = requestCapture.getValue();
+    assertEquals("public,max-age=120", recorder.getHeader("Cache-Control"));
+    assertEquals(120, httpRequest.getCacheTtl());
   }
 
   public void testExplicitHeaders() throws Exception {
