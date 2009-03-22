@@ -148,11 +148,10 @@ public class UserPref {
     if (enumValues.isEmpty()) {
       buf.append("/>");
     } else {
-      buf.append('\n');
+      buf.append(">\n");
       for (Map.Entry<String, String> entry : enumValues.entrySet()) {
         buf.append("<EnumValue value=\"")
            .append(entry.getKey())
-           .append("\" value=\"")
            .append("\" display_value=\"")
            .append(entry.getValue())
            .append("\"/>\n");
