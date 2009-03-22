@@ -100,4 +100,14 @@ public class UserPrefTest extends TestCase {
       // OK
     }
   }
+
+  public void testToString() throws Exception {
+    String xml = "<UserPref name=\"name\" display_name=\"__MSG_display_name__\" "
+        + "default_value=\"__MSG_default_value__\" required=\"false\" "
+        + "datatype=\"enum\">"
+        + "<EnumValue value=\"0\" display_value=\"__MSG_dv__\"/>"
+        + "</UserPref>";
+    UserPref userPref = new UserPref(XmlUtil.parse(xml));
+    assertEquals(xml, userPref.toString().replaceAll("\n", ""));
+  }
 }
