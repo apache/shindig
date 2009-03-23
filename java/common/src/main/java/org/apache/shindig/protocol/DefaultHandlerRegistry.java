@@ -253,6 +253,10 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     private void executing(RequestItem req) {
       listener.executing(service, operation, req);
     }
+
+    private void executed(RequestItem req) {
+      listener.executed(service, operation, req);
+    }
   }
 
 
@@ -279,14 +283,21 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
     public Future<?> execute(JSONObject rpc, Map<String, FormDataItem> formItems,
         SecurityToken token, BeanConverter converter) {
+      RequestItem item;
       try {
         JSONObject params = rpc.has("params") ? (JSONObject)rpc.get("params") : new JSONObject();
-        RequestItem item = methodCaller.getRpcRequestItem(params, formItems, token, beanJsonConverter);
+        item = methodCaller.getRpcRequestItem(params, formItems, token, beanJsonConverter);
+      } catch (Exception e) {
+        return ImmediateFuture.errorInstance(e);
+      }
 
+      try {
         listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
         return ImmediateFuture.errorInstance(e);
+      } finally {
+        listener.executed(item);
       }
     }
   }
