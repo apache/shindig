@@ -87,7 +87,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
     HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry);
     registry = new DefaultHandlerRegistry(injector, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(handler));
     builder = new HttpResponseBuilder().setResponseString("CONTENT");
     emptyFormItems = Collections.emptyMap();

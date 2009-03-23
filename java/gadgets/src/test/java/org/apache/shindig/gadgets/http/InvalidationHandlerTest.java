@@ -70,7 +70,7 @@ public class InvalidationHandlerTest extends EasyMockTestCase {
 
     handler = new InvalidationHandler(invalidationService);
     registry = new DefaultHandlerRegistry(null, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(handler));
 
     params = Maps.newHashMap();

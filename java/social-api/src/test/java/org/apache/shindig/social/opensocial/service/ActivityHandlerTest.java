@@ -83,7 +83,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     containerConfig = new JsonContainerConfig(config, new Expressions());
     handler = new ActivityHandler(activityService, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 
