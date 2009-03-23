@@ -25,6 +25,8 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuth.Parameter;
 
+import org.apache.shindig.gadgets.http.HttpRequest;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -78,5 +80,21 @@ public class OAuthUtil {
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public static enum SignatureType {
+    URL_ONLY,
+    URL_AND_FORM_PARAMS,
+    URL_AND_BODY_HASH,
+  }
+  
+  public static SignatureType getSignatureType(HttpRequest request) {
+    if (OAuth.isFormEncoded(request.getHeader("Content-Type"))) {
+      return SignatureType.URL_AND_FORM_PARAMS;
+    }
+    if ("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod())) {
+      return SignatureType.URL_ONLY;
+    }
+    return SignatureType.URL_AND_BODY_HASH;
   }
 }

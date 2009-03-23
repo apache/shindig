@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
@@ -54,6 +55,7 @@ public class MakeRequestClient {
   private String approvalUrl;
   private boolean ignoreCache;
   private Map<String, String> trustedParams = Maps.newHashMap();
+  private HttpFetcher nextFetcher;
 
   /**
    * Create a make request client with the given security token, sending requests through an
@@ -88,20 +90,28 @@ public class MakeRequestClient {
   public void setIgnoreCache(boolean ignoreCache) {
     this.ignoreCache = ignoreCache;
   }
+  
+  public void setNextFetcher(HttpFetcher nextFetcher) {
+    this.nextFetcher = nextFetcher;
+  }
 
   public void setTrustedParam(String name, String value) {
     trustedParams.put(name, value);
   }
 
   private OAuthRequest createRequest() {
+    HttpFetcher dest = serviceProvider;
+    if (nextFetcher != null) {
+      dest = nextFetcher;
+    }
     if (trustedParams != null) {
       List<Parameter> trusted = Lists.newArrayList();
       for (Entry<String, String> e : trustedParams.entrySet()) {
         trusted.add(new Parameter(e.getKey(), e.getValue()));
       }
-      return new OAuthRequest(fetcherConfig, serviceProvider, trusted);
+      return new OAuthRequest(fetcherConfig, dest, trusted);
     }
-    return new OAuthRequest(fetcherConfig, serviceProvider);
+    return new OAuthRequest(fetcherConfig, dest);
   }
 
   /**
