@@ -87,7 +87,7 @@ class MakeRequestHandler extends ProxyBase {
   private function fetchContentDivert($url, $method, $signer) {
     $basicFetcher = new BasicRemoteContentFetcher();
     $basicRemoteContent = new BasicRemoteContent($basicFetcher, $this->signingFetcherFactory, $signer);
-    $request = $this->buildRequest($url, $method);
+    $request = $this->buildRequest($url, $method, $signer);
     return $basicRemoteContent->fetch($request, $this->context);
   }
 

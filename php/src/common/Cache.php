@@ -39,6 +39,9 @@ class Cache {
    */
   private $storage = null;
 
+  /**
+   * @return Cache
+   */
   static public function createCache($cacheClass, $name, RequestTime $time = null) {
     return new Cache($cacheClass, $name, $time);
   }

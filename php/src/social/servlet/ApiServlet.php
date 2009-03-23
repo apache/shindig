@@ -63,6 +63,7 @@ abstract class ApiServlet extends HttpServlet {
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
+  public static $INVALIDATE_ROUTE = "invalidate";
 
   public function __construct() {
     parent::__construct();
@@ -71,6 +72,7 @@ abstract class ApiServlet extends HttpServlet {
     $this->handlers[self::$ACTIVITY_ROUTE] = new ActivityHandler();
     $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
     $this->handlers[self::$MESSAGE_ROUTE] = new MessagesHandler();
+    $this->handlers[self::$INVALIDATE_ROUTE] = new InvalidateHandler();
   }
 
   public function getSecurityToken() {
@@ -86,6 +88,7 @@ abstract class ApiServlet extends HttpServlet {
       $oauthLookupService = new $oauthLookupService();
       $token = $oauthLookupService->getSecurityToken($request, $appUrl, $userId);
       if ($token) {
+        $token->setAuthenticationMode(AuthenticationMode::$OAUTH_CONSUMER_REQUEST);
         return $token;
       } else {
         return null; // invalid oauth request, or 3rd party doesn't have access to this user

@@ -20,10 +20,19 @@
 
 class Gadget {
   const DEFAULT_VIEW = 'profile';
+
+  /**
+   * @var GadgetSpec
+   */
   public $gadgetSpec;
+
   public $features;
   public $substitutions;
   public $rightToLeft;
+
+  /**
+   * @var GadgetContext
+   */
   public $gadgetContext;
 
   public function __construct(GadgetSpec $gadgetSpec, GadgetContext $gadgetContext) {

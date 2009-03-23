@@ -74,4 +74,11 @@ abstract class SecurityToken {
    * @return the module ID of the application
    */
   abstract public function getModuleId();
+  
+  /**
+   * @return string
+   */
+  abstract public function getAuthenticationMode();
+  
+  abstract public function setAuthenticationMode($mode);
 }

@@ -184,7 +184,7 @@ class GadgetFactory {
    */
   private function fetchResources(Gadget &$gadget) {
     $contextLocale = $this->context->getLocale();
-    $unsignedRequests = $unsignedContexts = $signedRequests = array();
+    $unsignedRequests = $unsignedContexts = $signedRequests = $signedContexts = array();
     foreach ($gadget->getLocales() as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
@@ -230,17 +230,14 @@ class GadgetFactory {
     // Perform the signed requests
     foreach ($signedRequests as $key => $requestUrl) {
       $request = new RemoteContentRequest($requestUrl);
-      $request->createRemoteContentRequestWithUri($requestUrl);
+      $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+      $request->setNotSignedUri($requestUrl);
       $signedRequests[$key] = $request;
-      $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
-      $fetcher = $signingFetcherFactory->getSigningFetcher(new BasicRemoteContentFetcher(), $this->token);
-      $req = $fetcher->signRequest($requestUrl, 'GET');
-      $req->setNotSignedUri($requestUrl);
-      $signedRequests[] = $req;
+      $signedContexts[$key] = $this->context;
     }
     if (count($signedRequests)) {
-      $fetcher = $signingFetcherFactory->getSigningFetcher(new BasicRemoteContentFetcher(), $this->token);
-      $resps = $fetcher->multiFetchRequest($signedRequests);
+      $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
+      $resps = $remoteContent->multiFetch($signedRequests,$signedContexts);
       foreach ($resps as $response) {
         $responses[$response->getNotSignedUrl()] = array(
             'body' => $response->getResponseContent(),
@@ -299,6 +296,7 @@ class GadgetFactory {
    */
   protected function fetchGadget($gadgetUrl) {
     $request = new RemoteContentRequest($gadgetUrl);
+    $request->setToken($this->token);
     $xml = $this->context->getHttpFetcher()->fetch($request, $this->context);
     if ($xml->getHttpCode() != '200') {
       throw new GadgetException("Failed to retrieve gadget content (recieved http code " . $xml->getHttpCode() . ")");

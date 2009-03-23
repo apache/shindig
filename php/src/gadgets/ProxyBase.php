@@ -37,9 +37,11 @@ class ProxyBase {
    * Retrieves the actual content
    *
    * @param string $url the url to fetch
+   * @param string $method http method
+   * @param SecurityTokenDecoder $signer
    * @return the filled in request (RemoteContentRequest)
    */
-  protected function buildRequest($url, $method = 'GET') {
+  protected function buildRequest($url, $method = 'GET', $signer = null) {
     // Check the protocol requested - curl doesn't really support file://
     // requests but the 'error' should be handled properly
     $protocolSplit = explode('://', $url, 2);
@@ -77,6 +79,20 @@ class ProxyBase {
       $request = new RemoteContentRequest($url, null, $postData);
     } else {
       $request = new RemoteContentRequest($url);
+    }
+    
+    if ($signer) {
+      $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
+      switch (strtoupper($authz)) {
+        case 'SIGNED':
+          $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+          break;
+        case 'OAUTH':
+          $request->setAuthType(RemoteContentRequest::$AUTH_OAUTH);
+          break;
+      }
+      $token = $this->context->extractAndValidateToken($signer);
+      $request->setToken($token);
     }
     return $request;
   }

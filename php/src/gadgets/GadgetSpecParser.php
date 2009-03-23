@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -78,7 +79,10 @@ class GadgetSpecParser {
           $gadget->views[$view]['content'] .= $viewNode->nodeValue;
         } else {
           $gadget->views[$view] = array('view' => $view, 'type' => strtoupper($viewNode->getAttribute('type')), 'href' => $viewNode->getAttribute('href'), 'preferedHeight' => $viewNode->getAttribute('prefered_height'),
-              'preferedWidth' => $viewNode->getAttribute('prefered_width'), 'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue);
+              'preferedWidth' => $viewNode->getAttribute('prefered_width'), 'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue, 'authz' => $viewNode->getAttribute('authz'),
+              'oauthServiceName' => $viewNode->getAttribute('oauth_service_name'), 'oauthTokenName' => $viewNode->getAttribute('oauth_token_name'), 'oauthRequestToken' => $viewNode->getAttribute('oauth_request_token'),
+              'oauthRequestTokenSecret' => $viewNode->getAttribute('oauth_request_token_secret'), 'signOwner' => $viewNode->getAttribute('sign_owner'), 'signViewer' => $viewNode->getAttribute('sign_viewer'),
+              'refreshInterval' => $viewNode->getAttribute('refresh_interval'));
         }
       }
     }
