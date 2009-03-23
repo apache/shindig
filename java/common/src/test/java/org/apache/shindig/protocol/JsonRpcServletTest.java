@@ -84,7 +84,7 @@ public class JsonRpcServletTest extends TestCase {
     BeanJsonConverter converter = new BeanJsonConverter(Guice.createInjector());
 
     HandlerRegistry registry = new DefaultHandlerRegistry(null, null,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Collections.<Object>singleton(handler));
 
     servlet.setHandlerRegistry(registry);

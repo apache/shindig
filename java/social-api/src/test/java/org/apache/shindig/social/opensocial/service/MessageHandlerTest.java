@@ -60,7 +60,7 @@ public class MessageHandlerTest extends TestCase {
 
     handler = new MessageHandler(messageService);
     registry = new DefaultHandlerRegistry(null, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 

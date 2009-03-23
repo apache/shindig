@@ -70,7 +70,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     appDataService = mock(AppDataService.class);
     AppDataHandler handler = new AppDataHandler(appDataService);
     registry = new DefaultHandlerRegistry(null, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(handler));
   }
 

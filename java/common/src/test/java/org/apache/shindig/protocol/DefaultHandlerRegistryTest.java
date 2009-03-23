@@ -52,7 +52,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     super.setUp();
     converter = new BeanJsonConverter(Guice.createInjector());
     registry = new DefaultHandlerRegistry(null, converter,
-        new HandlerExecutionListener.NoOpHandlerExecutionListener());
+        new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));
   }
 
