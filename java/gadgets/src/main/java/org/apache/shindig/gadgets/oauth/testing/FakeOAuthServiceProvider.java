@@ -24,14 +24,17 @@ import com.google.common.collect.Sets;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
+import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
-import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.signature.RSA_SHA1;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
@@ -41,9 +44,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.OAuthUtil;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -164,7 +167,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
    * Table of OAuth access tokens
    */
   private final HashMap<String, TokenState> tokenState;
-  private final OAuthValidator validator;
   private final OAuthConsumer signedFetchConsumer;
   private final OAuthConsumer oauthConsumer;
   private final TimeSource clock;
@@ -205,7 +207,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     oauthConsumer = new OAuthConsumer(null, CONSUMER_KEY, CONSUMER_SECRET, provider);
 
     tokenState = Maps.newHashMap();
-    validator = new FakeTimeOAuthValidator();
     validParamLocations = Sets.newHashSet();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
   }
@@ -280,8 +281,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse handleRequestTokenUrl(HttpRequest request)
       throws Exception {
-    OAuthMessage message = parseMessage(request).message;
-    String requestConsumer = message.getParameter(OAuth.OAUTH_CONSUMER_KEY);
+    MessageInfo info = parseMessage(request);
+    String requestConsumer = info.message.getParameter(OAuth.OAUTH_CONSUMER_KEY);
     OAuthConsumer consumer;
     if (CONSUMER_KEY.equals(requestConsumer)) {
       consumer = oauthConsumer;
@@ -294,13 +295,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
           "consumer_key_refused", "exceeded quota exhausted");
     }
     if (rejectExtraParams) {
-      String extra = hasExtraParams(message);
+      String extra = hasExtraParams(info.message);
       if (extra != null) {
         return makeOAuthProblemReport("parameter_rejected", extra);
       }
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-    message.validateMessage(accessor, validator);
+    validateMessage(accessor, info);
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
     tokenState.put(
@@ -345,6 +346,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   // to the OAuth specification
   private MessageInfo parseMessage(HttpRequest request) {
     MessageInfo info = new MessageInfo();
+    info.request = request;
     String method = request.getMethod();
     ParsedUrl parsed = new ParsedUrl(request.getUri().toString());
 
@@ -374,9 +376,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
 
     // Parse body
-    if (request.getMethod().equals("POST")) {
-      String type = request.getHeader("Content-Type");
-      if ("application/x-www-form-urlencoded".equals(type)) {
+    switch(OAuthUtil.getSignatureType(request)) {
+      case URL_AND_FORM_PARAMS:
         String body = request.getPostBodyAsString();
         info.body = body;
         params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
@@ -387,20 +388,16 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
             throw new RuntimeException("Found unexpected post body data" + body);
           }
         }
-      } else {
+        break;
+      case URL_AND_BODY_HASH:
         try {
-          InputStream is = request.getPostBody();
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
-          byte[] buf = new byte[1024];
-          int read;
-          while ((read = is.read(buf, 0, buf.length)) != -1) {
-            baos.write(buf, 0, read);
-          }
-          info.rawBody = baos.toByteArray();
+          info.rawBody = IOUtils.toByteArray(request.getPostBody());
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-      }
+        break;
+      case URL_ONLY:
+        break;
     }
 
     // Return the lot
@@ -431,6 +428,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     public String aznHeader;
     public String body;
     public byte[] rawBody;
+    public HttpRequest request;
   }
 
   /**
@@ -542,8 +540,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private HttpResponse handleAccessTokenUrl(HttpRequest request)
       throws Exception {
-    OAuthMessage message = parseMessage(request).message;
-    String requestToken = message.getParameter("oauth_token");
+    MessageInfo info = parseMessage(request);
+    String requestToken = info.message.getParameter("oauth_token");
     TokenState state = tokenState.get(requestToken);
     if (throttled) {
       return makeOAuthProblemReport(
@@ -552,7 +550,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       return makeOAuthProblemReport("token_rejected", "Unknown request token");
     }   
     if (rejectExtraParams) {
-      String extra = hasExtraParams(message);
+      String extra = hasExtraParams(info.message);
       if (extra != null) {
         return makeOAuthProblemReport("parameter_rejected", extra);
       }
@@ -561,13 +559,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
     accessor.requestToken = requestToken;
     accessor.tokenSecret = state.tokenSecret;
-    message.validateMessage(accessor, validator);
+    validateMessage(accessor, info);
 
     if (state.getState() == State.APPROVED_UNCLAIMED) {
       state.claimToken();
     } else if (state.getState() == State.APPROVED) {
       // Verify can refresh
-      String sentHandle = message.getParameter("oauth_session_handle");
+      String sentHandle = info.message.getParameter("oauth_session_handle");
       if (sentHandle == null) {
         return makeOAuthProblemReport("parameter_absent", "no oauth_session_handle");
       }
@@ -634,7 +632,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       // Check the signature
       accessor.accessToken = accessToken;
       accessor.tokenSecret = state.getSecret();
-      info.message.validateMessage(accessor, validator);
+      validateMessage(accessor, info);
 
       if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
@@ -649,7 +647,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       responseBody = "User data is " + state.getUserData();
     } else {
       // Check the signature
-      info.message.validateMessage(accessor, validator);
+      validateMessage(accessor, info);
 
       // For signed fetch, just echo back the query parameters in the body
       responseBody = request.getUri().getQuery();
@@ -670,6 +668,30 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       resp.setHeader(RAW_BODY_ECHO_HEADER, new String(Base64.encodeBase64(info.rawBody)));
     }
     return resp.create();
+  }
+  
+  private void validateMessage(OAuthAccessor accessor, MessageInfo info)
+      throws OAuthException, IOException, URISyntaxException {
+    info.message.validateMessage(accessor, new FakeTimeOAuthValidator());
+    String bodyHash = info.message.getParameter("oauth_body_hash");
+    switch (OAuthUtil.getSignatureType(info.request)) {
+      case URL_ONLY:
+        break;
+      case URL_AND_FORM_PARAMS:
+        if (bodyHash != null) {
+          throw new RuntimeException("Can't have body hash in form-encoded request");
+        }
+        break;
+      case URL_AND_BODY_HASH:
+        if (bodyHash == null) {
+          throw new RuntimeException("Requiring oauth_body_hash parameter");
+        }
+        byte[] received = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(bodyHash));
+        byte[] expected = DigestUtils.sha(info.rawBody);
+        if (!Arrays.equals(received, expected)) {
+          throw new RuntimeException("oauth_body_hash mismatch");
+        }
+    }
   }
 
   private HttpResponse handleNotFoundUrl(HttpRequest request) throws Exception {

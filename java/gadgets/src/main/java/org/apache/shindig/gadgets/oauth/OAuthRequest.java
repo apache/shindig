@@ -16,6 +16,9 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -41,6 +44,7 @@ import net.oauth.OAuth.Parameter;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +91,8 @@ public class OAuthRequest {
   private static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
 
   private static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
+  
+  private static final String OAUTH_BODY_HASH = "oauth_body_hash";
 
   private static final long ACCESS_TOKEN_EXPIRE_UNKNOWN = 0;
   private static final long ACCESS_TOKEN_FORCE_EXPIRE = -1;
@@ -455,8 +461,24 @@ public class OAuthRequest {
     String query = target.getQuery();
     target.setQuery(null);
     params.addAll(sanitize(OAuth.decodeForm(query)));
-    if (OAuth.isFormEncoded(base.getHeader("Content-Type"))) {
-      params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+
+    switch(OAuthUtil.getSignatureType(base)) {
+      case URL_ONLY:
+        break;
+      case URL_AND_FORM_PARAMS:
+        params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+        break;
+      case URL_AND_BODY_HASH:
+        try {
+          byte[] body = IOUtils.toByteArray(base.getPostBody());
+          byte[] hash = DigestUtils.sha(body);
+          String b64 = new String(Base64.encodeBase64(hash), CharsetUtil.UTF8.name());
+          params.add(new Parameter(OAUTH_BODY_HASH, b64));
+        } catch (IOException e) {
+          throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+              "Error taking body hash", e);
+        }
+        break;
     }
 
     addIdentityParams(params);

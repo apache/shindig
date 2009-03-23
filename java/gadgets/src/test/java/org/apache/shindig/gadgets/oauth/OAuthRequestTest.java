@@ -32,6 +32,8 @@ import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
@@ -46,6 +48,7 @@ import net.oauth.OAuth;
 import net.oauth.OAuth.Parameter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -1025,6 +1028,65 @@ public class OAuthRequestTest {
     String echoed = resp.getHeader(FakeOAuthServiceProvider.RAW_BODY_ECHO_HEADER);
     byte[] echoedBytes = Base64.decodeBase64(CharsetUtil.getUtf8Bytes(echoed));
     assertTrue(Arrays.equals(raw, echoedBytes));
+  }
+  
+  @Test
+  public void testPostTamperedRawContent() throws Exception {
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody("yo momma".getBytes());
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+          "funky-content", raw);
+      fail("Should have thrown with oauth_body_hash mismatch");
+    } catch (RuntimeException e) {
+      // good
+    }
+  }
+
+  @Test
+  public void testPostTamperedFormContent() throws Exception {
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody("foo=quux".getBytes());
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      HttpResponse resp = client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
+      fail("Should have thrown with oauth signature mismatch");
+    } catch (RuntimeException e) {
+      // good
+    }
+  }
+  
+  @Test
+  public void testPostTamperedRemoveRawContent() throws Exception {
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody(ArrayUtils.EMPTY_BYTE_ARRAY);
+        request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+          "funky-content", raw);
+      fail("Should have thrown with body hash in form encoded request");
+    } catch (RuntimeException e) {
+      // good
+    }
   }
 
   @Test
