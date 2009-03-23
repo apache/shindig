@@ -39,6 +39,8 @@ class BasicSecurityToken extends SecurityToken {
   private $APPURL_KEY = "u";
   private $MODULE_KEY = "m";
   private $CONTAINER_KEY = "c";
+  
+  private $authenticationMode;
 
   /**
    * {@inheritDoc}
@@ -64,7 +66,8 @@ class BasicSecurityToken extends SecurityToken {
    * @param app application id
    * @param domain domain of the container
    * @param appUrl url where the application lives
-   * @param moduleId module id of this gadget 
+   * @param moduleId module id of this gadget
+   * @return BasicSecurityToken 
    * @throws BlobCrypterException 
    */
   static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {
@@ -168,5 +171,16 @@ class BasicSecurityToken extends SecurityToken {
       throw new Exception("Can't get container from an anonymous token");
     }
     return $this->tokenData[$this->CONTAINER_KEY];
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  public function getAuthenticationMode() {
+    return $this->authenticationMode;
+  }
+  
+  public function setAuthenticationMode($mode) {
+    $this->authenticationMode = $mode;
   }
 }

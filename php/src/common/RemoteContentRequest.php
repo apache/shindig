@@ -18,7 +18,6 @@
  * under the License.
  */
 
-
 class RemoteContentRequest {
   // these are used for making the request
   private $uri = '';
@@ -39,12 +38,32 @@ class RemoteContentRequest {
   public $handle = false;
   public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
+  /**
+   * @var SecurityToken
+   */
+  private $token;
+
+  /**
+   * @var string
+   */
+  private $invalidation;
+
+  public static $AUTH_NONE = 'none';
+  public static $AUTH_SIGNED = 'signed';
+  public static $AUTH_OAUTH = 'oauth';
+
+  /**
+   * @var string
+   */
+  private $authType;
+
   public function __construct($uri, $headers = false, $postBody = false) {
     $this->uri = $uri;
     $this->notSignedUri = $uri;
     $this->headers = $headers;
     $this->postBody = $postBody;
     $this->created = time();
+    $this->authType = self::$AUTH_NONE;
   }
 
   public function createRemoteContentRequest($method, $uri, $headers, $postBody, $options) {
@@ -224,6 +243,33 @@ class RemoteContentRequest {
   public function setNotSignedUri($uri) {
     $this->notSignedUri = $uri;
   }
+
+  public function setInvalidation($invalidation) {
+    $this->invalidation = $invalidation;
+  }
+
+  public function getInvalidation() {
+    return $this->invalidation;
+  }
+
+  /**
+   * @param SecurityToken $token
+   */
+  public function setToken($token) {
+    $this->token = $token;
+  }
+
+  public function getToken() {
+    return $this->token;
+  }
+
+  public function setAuthType($type) {
+    $this->authType = $type;
+  }
+
+  public function getAuthType() {
+    return $this->authType;
+  }
 }
 
 /**
@@ -247,5 +293,4 @@ class Options {
     $this->ownerSigned = $copyFrom->ownerSigned;
     $this->viewerSigned = $copyFrom->viewerSigned;
   }
-
 }

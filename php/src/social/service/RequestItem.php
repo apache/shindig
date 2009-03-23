@@ -50,6 +50,9 @@ abstract class RequestItem {
   
   public static $APP_SUBSTITUTION_TOKEN = "@app";
   
+  /**
+   * @var SecurityToken
+   */
   protected $token;
   
   protected $operation;
@@ -179,6 +182,9 @@ abstract class RequestItem {
     return $this->service;
   }
 
+  /**
+   * @return SecurityToken
+   */
   public function getToken() {
     return $this->token;
   }

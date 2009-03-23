@@ -23,21 +23,38 @@ class BasicRemoteContent extends RemoteContent {
    * @var BesicRemoteContentFetcher
    */
   private $basicFetcher = null;
-  
+
   /**
    * @var SigningFetcherFactory
    */
   private $signingFetcherFactory = null;
-  
+
   /**
    * @var SecurityTokenDecoder
    */
   private $signer = null;
 
+  /**
+   * @var Cache
+   */
+  private $cache = null;
+
+  /**
+   * @var InvalidateService
+   */
+  private $invalidateService = null;
+
+  /**
+   * @param RemoteContentFetcher $basicFetcher
+   * @param SigningFetcherFactory $signingFetcherFactory
+   * @param SecurityTokenDecoder $signer
+   */
   public function __construct(RemoteContentFetcher $basicFetcher = null, $signingFetcherFactory = null, $signer = null) {
     $this->basicFetcher = $basicFetcher ? $basicFetcher : new BasicRemoteContentFetcher();
     $this->signingFetcherFactory = $signingFetcherFactory;
     $this->signer = $signer;
+    $this->cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
+    $this->invalidateService = new DefaultInvalidateService($this->cache);
   }
 
   public function setBasicFetcher(RemoteContentFetcher $basicFetcher) {
@@ -45,25 +62,23 @@ class BasicRemoteContent extends RemoteContent {
   }
 
   public function fetch(RemoteContentRequest $request, GadgetContext $context) {
-    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
-    if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+    if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
       $request = $cachedRequest;
     } else {
       $originalRequest = clone $request;
-      $request = $this->divertFetch($request, $context);
-      if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
-        $cachedRequest = $cache->expiredGet($request->toHash());
+      $request = $this->divertFetch($request);
+      if ($request->getHttpCode() != 200 && ! $context->getIgnoreCache() && ! $request->isPost()) {
+        $cachedRequest = $this->cache->expiredGet($request->toHash());
         if ($cachedRequest['found'] == true) {
           return $cachedRequest['data'];
         }
       }
-      $this->setRequestCache($originalRequest, $request, $cache, $context);
+      $this->setRequestCache($originalRequest, $request, $this->cache, $context);
     }
     return $request;
   }
 
   public function multiFetch(Array $requests, Array $contexts) {
-    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
     $rets = array();
     $requestsToProc = array();
     foreach ($requests as $request) {
@@ -72,7 +87,7 @@ class BasicRemoteContent extends RemoteContent {
         throw new RemoteContentException("Invalid request type in remoteContent");
       }
       // determine which requests we can load from cache, and which we have to actually fetch
-      if (!$context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $cache->get($request->toHash())) !== false) {
+      if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
         $rets[] = $cachedRequest;
       } else {
         $originalRequest = clone $request;
@@ -80,18 +95,18 @@ class BasicRemoteContent extends RemoteContent {
         $originalRequestArray[] = $originalRequest;
       }
     }
-    
+
     if ($requestsToProc) {
       $newRets = $this->basicFetcher->multiFetchRequest($requestsToProc);
       foreach ($newRets as $request) {
         list(, $originalRequest) = each($originalRequestArray);
-        if ($request->getHttpCode() != 200 && !$context->getIgnoreCache() && !$request->isPost()) {
-          $cachedRequest = $cache->expiredGet($request->toHash());
+        if ($request->getHttpCode() != 200 && ! $context->getIgnoreCache() && ! $request->isPost()) {
+          $cachedRequest = $this->cache->expiredGet($request->toHash());
           if ($cachedRequest['found'] == true) {
             $rets[] = $cachedRequest['data'];
           }
         } else {
-          $this->setRequestCache($originalRequest, $request, $cache, $context);
+          $this->setRequestCache($originalRequest, $request, $this->cache, $context);
           $rets[] = $request;
         }
       }
@@ -100,8 +115,7 @@ class BasicRemoteContent extends RemoteContent {
   }
 
   public function invalidate(RemoteContentRequest $request) {
-    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
-    $cache->invalidate($request->toHash());
+    $this->cache->invalidate($request->toHash());
   }
 
   private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache, GadgetContext $context) {
@@ -134,28 +148,23 @@ class BasicRemoteContent extends RemoteContent {
       } else {
         $ttl = 5 * 60; // cache errors for 5 minutes, takes the denial of service attack type behaviour out of having an error :)
       }
-      $cache->set($originalRequest->toHash(), $request, $ttl);
+      $this->invalidateService->markResponse($request);
+      $this->cache->set($originalRequest->toHash(), $request, $ttl);
     }
   }
-  
-  private function divertFetch(RemoteContentRequest $request, GadgetContext $context) {
-    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
-    switch (strtoupper($authz)) {
-      case 'SIGNED':
-        $token = $context->extractAndValidateToken($this->signer);
+
+  private function divertFetch(RemoteContentRequest $request) {
+    switch ($request->getAuthType()) {
+      case RemoteContentRequest::$AUTH_SIGNED:
+        $token = $request->getToken();
         $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
-        $url = $request->getUrl();
-        $method = $request->isPost() ? 'POST' : 'GET'; 
-        return $fetcher->fetch($url, $method);
-      case 'OAUTH':
+        return $fetcher->fetchRequest($request);
+      case RemoteContentRequest::$AUTH_OAUTH:
         $params = new OAuthRequestParams();
-        $token = $context->extractAndValidateToken($this->signer);
+        $token = $request->getToken();
         $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
         $oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);
         $oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
-        $url = $request->getUrl();
-        $request = new RemoteContentRequest($url);
-        $request->createRemoteContentRequestWithUri($url);
         return $oauthFetcher->fetch($request);
       default:
         return $this->basicFetcher->fetchRequest($request);

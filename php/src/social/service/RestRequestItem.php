@@ -80,11 +80,22 @@ class RestRequestItem extends RequestItem {
   
   }
 
+  /**
+   * '/people/@me/@self' => 'people'
+   * '/invalidate?invalidationKey=1' => 'invalidate'
+   */
   static function getServiceFromPath($pathInfo) {
     $pathInfo = substr($pathInfo, 1);
     $indexOfNextPathSeparator = strpos($pathInfo, '/');
+    $indexOfNextQuestionMark = strpos($pathInfo, '?');
+    if ($indexOfNextPathSeparator !== false && $indexOfNextQuestionMark !== false) {
+      return substr($pathInfo, 0, min($indexOfNextPathSeparator, $indexOfNextQuestionMark));
+    }
     if ($indexOfNextPathSeparator !== false) {
       return substr($pathInfo, 0, $indexOfNextPathSeparator);
+    }
+    if ($indexOfNextQuestionMark !== false) {
+      return substr($pathInfo, 0, $indexOfNextQuestionMark);
     }
     return $pathInfo;
   }

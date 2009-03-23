@@ -26,6 +26,8 @@ class OAuthSecurityToken extends SecurityToken {
   private $appUrl;
   private $appId;
   private $domain;
+  
+  private $authenticationMode;
 
   public function __construct($userId, $appUrl, $appId, $domain) {
     $this->userId = $userId;
@@ -64,5 +66,13 @@ class OAuthSecurityToken extends SecurityToken {
 
   public function toSerialForm() {
     return "OAuthSecurityToken[userId=$userId,appUrl=$appUrl,appId=$appId,domain=$domain]";
+  }
+  
+  public function getAuthenticationMode() {
+    return $this->authenticationMode;
+  }
+  
+  public function setAuthenticationMode($mode) {
+    $this->authenticationMode = $mode;
   }
 }

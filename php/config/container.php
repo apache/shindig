@@ -130,6 +130,7 @@ $shindigConfig = array(
   'activity_service' => 'JsonDbOpensocialService',
   'app_data_service' => 'JsonDbOpensocialService',
   'messages_service' => 'JsonDbOpensocialService',
+  'invalidate_service' => 'DefaultInvalidateService',
 
   // Also scan these directories when looking for <Class>.php files. You can include multiple paths by seperating them with a ,
   'extension_class_paths' => '',

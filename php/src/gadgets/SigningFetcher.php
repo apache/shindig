@@ -37,6 +37,7 @@ class SigningFetcher extends RemoteContentFetcher {
 
   /**
    * Authentication token for the user and gadget making the request.
+   * @var SecurityToken
    */
   protected $authToken;
 
@@ -64,7 +65,7 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
    */
-  public static function makeFromPrivateKey($fetcher, $authToken, $keyName, $privateKey) {
+  public static function makeFromPrivateKey(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
     return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
@@ -75,7 +76,7 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
    */
-  public static function makeFromB64PrivateKey($fetcher, $authToken, $keyName, $privateKey) {
+  public static function makeFromB64PrivateKey(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
     return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
@@ -86,11 +87,11 @@ class SigningFetcher extends RemoteContentFetcher {
    * @param keyName name of the key to include in the request
    * @param privateKey DER encoded private key
    */
-  public static function makeFromPrivateKeyBytes($fetcher, $authToken, $keyName, $privateKey) {
+  public static function makeFromPrivateKeyBytes(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
     return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
   }
 
-  protected function __construct($fetcher, $authToken, $keyName, $privateKeyObject) {
+  protected function __construct(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKeyObject) {
     $this->fetcher = $fetcher;
     $this->authToken = $authToken;
     $this->keyName = $keyName;
@@ -98,19 +99,20 @@ class SigningFetcher extends RemoteContentFetcher {
   }
 
   public function fetchRequest(RemoteContentRequest $request) {
+    $this->signRequest($request);
     return $this->fetcher->fetchRequest($request);
   }
 
-  public function fetch($url, $method) {
-    $signed = $this->signRequest($url, $method);
-    return $this->fetcher->fetchRequest($signed);
-  }
-
   public function multiFetchRequest(Array $requests) {
+    foreach ($requests as $request) {
+      $this->signRequest($requests);
+    }
     return $this->fetcher->multiFetchRequest($requests);
   }
 
-  public function signRequest($url, $method) {
+  private function signRequest(RemoteContentRequest $request) {
+    $url = $request->getUrl();
+    $method = $request->getMethod();
     try {
       // Parse the request into parameters for OAuth signing, stripping out
       // any OAuth or OpenSocial parameters injected by the client
@@ -181,7 +183,9 @@ class SigningFetcher extends RemoteContentFetcher {
       // The headers are transmitted in the POST-data array in the field 'headers'
       // if no post should be made, the value should be false for this parameter
       $postHeaders = ((isset($_POST['headers']) && $method == 'POST') ? $_POST['headers'] : false);
-      return new RemoteContentRequest($url, $postHeaders, $postData);
+      $request->setUri($url);
+      $request->setHeaders($postHeaders);
+      $request->setPostBody($postData);
     } catch (Exception $e) {
       throw new GadgetException($e);
     }
