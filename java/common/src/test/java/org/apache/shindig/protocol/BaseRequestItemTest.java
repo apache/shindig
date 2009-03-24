@@ -110,6 +110,14 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
   }
 
+  public void testAttributes() throws Exception {
+    assertNull(request.getAttribute("undefined"));
+    request.setAttribute("test", "value");
+    assertEquals((String)request.getAttribute("test"), "value");
+    request.setAttribute("test", null);
+    assertNull(request.getAttribute("undefined"));
+  }
+
   public static class InputData {
     String name;
     int id;
