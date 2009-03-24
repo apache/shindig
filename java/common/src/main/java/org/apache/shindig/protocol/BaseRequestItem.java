@@ -27,6 +27,7 @@ import org.apache.shindig.protocol.multipart.FormDataItem;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +51,7 @@ public class BaseRequestItem implements RequestItem {
   final Map<String,Object> parameters;
   final Map<String, FormDataItem> formItems;
   final BeanJsonConverter jsonConverter;
+  Map<String,Object> attributes;
 
   public BaseRequestItem(Map<String, String[]> parameters,
       SecurityToken token,
@@ -58,6 +60,7 @@ public class BaseRequestItem implements RequestItem {
     this.token = token;
     this.converter = converter;
     this.parameters = Maps.newHashMap();
+
     for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
       if  (entry.getValue() == null) {
         setParameter(entry.getKey(), null);
@@ -192,12 +195,6 @@ public class BaseRequestItem implements RequestItem {
     return converter.convertToObject(getParameter(parameterName), dataTypeClass);
   }
 
-  /**
-   * Assume that all the parameters in the request belong to single aggregate
-   * type and convert to it.
-   * @param dataTypeClass
-   * @return Typed request object
-   */
   public <T> T getTypedRequest(Class<T> dataTypeClass) {
     return jsonConverter.convertToObject(new JSONObject(this.parameters).toString(),
         dataTypeClass);
@@ -283,6 +280,27 @@ public class BaseRequestItem implements RequestItem {
       return formItems.get(partName);
     } else {
       return null;
+    }
+  }
+
+  private Map<String,Object> getAttributeMap() {
+     if (this.attributes == null){
+       this.attributes = Maps.newHashMap();
+     }
+     return attributes;
+  }
+
+  public Object getAttribute(String val) {
+    Preconditions.checkNotNull(val);
+    return getAttributeMap().get(val);
+  }
+
+  public void setAttribute(String val, Object obj) {
+    Preconditions.checkNotNull(val);
+    if (obj == null) {
+      getAttributeMap().remove(val);
+    } else {
+      getAttributeMap().put(val, obj);
     }
   }
 }
