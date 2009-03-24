@@ -17,11 +17,17 @@
  */
 package org.apache.shindig.auth;
 
-import org.apache.shindig.common.servlet.InjectedFilter;
-
 import com.google.inject.Inject;
 
+import org.apache.shindig.common.servlet.InjectedFilter;
+import org.apache.shindig.common.util.CharsetUtil;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,9 +35,11 @@ import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -75,7 +83,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
         SecurityToken token = handler.getSecurityTokenFromRequest(req);
         if (token != null) {
           new AuthInfo(req).setAuthType(handler.getName()).setSecurityToken(token);
-          chain.doFilter(req, response);
+          callChain(chain, req, resp);
           return;
         } else {
           String authHeader = handler.getWWWAuthenticateHeader(realm);
@@ -86,7 +94,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
       }
 
       // We did not find a security token so we will just pass null
-      chain.doFilter(req, response);
+      callChain(chain, req, resp);
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       logger.log(Level.INFO, iae.getMessage(), iae.getCause());
       if (iae.getAdditionalHeaders() != null) {
@@ -99,6 +107,61 @@ public class AuthenticationServletFilter extends InjectedFilter {
       } else {
         resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, iae.getMessage());
       }
+    }
+  }
+
+  private void callChain(FilterChain chain, HttpServletRequest request,
+      HttpServletResponse response) throws IOException, ServletException {
+    if (request.getAttribute(AuthenticationHandler.STASHED_BODY) != null) {
+      chain.doFilter(new StashedBodyRequestwrapper(request), response);
+    } else {
+      chain.doFilter(request, response);      
+    }
+  }
+
+  private static class StashedBodyRequestwrapper extends HttpServletRequestWrapper {
+
+    final InputStream rawStream;
+    ServletInputStream stream;
+    BufferedReader reader;
+
+
+    StashedBodyRequestwrapper(HttpServletRequest wrapped) {
+      super(wrapped);
+      rawStream = new ByteArrayInputStream(
+          (byte[])wrapped.getAttribute(AuthenticationHandler.STASHED_BODY));
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+      if (reader != null) {
+        throw new IllegalStateException(
+            "The methods getInputStream() and getReader() are mutually exclusive.");
+      }
+      if (stream == null) {
+        stream = new ServletInputStream() {
+          public int read() throws IOException {
+            return rawStream.read();
+          }
+        };
+      }
+      return stream;
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+      if (stream != null) {
+        throw new IllegalStateException(
+            "The methods getInputStream() and getReader() are mutually exclusive.");
+      }
+      if (reader == null) {
+        Charset charset = Charset.forName(getCharacterEncoding());
+        if (charset == null) {
+          charset =  CharsetUtil.UTF8;
+        }
+        reader = new BufferedReader(new InputStreamReader(rawStream, charset));
+      }
+      return reader;
     }
   }
 }

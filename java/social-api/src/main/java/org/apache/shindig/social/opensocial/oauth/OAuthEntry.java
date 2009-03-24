@@ -17,16 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.oauth;
 
-import java.util.Date;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * The OAuthEntry class contains state information about OAuth Tokens and
  * Authorization.
  */
 public class OAuthEntry implements Serializable {
-  private static final long ONE_YEAR = 365 * 24 * 60 * 60 * 1000L;
-  private static final long FIVE_MINUTES = 5 * 60 * 1000L;
+  public static final long ONE_YEAR = 365 * 24 * 60 * 60 * 1000L;
+  public static final long FIVE_MINUTES = 5 * 60 * 1000L;
 
   // Change this when incompatible changes occur..
   static final long serialVersionUID = 2;

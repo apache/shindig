@@ -24,6 +24,8 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -53,8 +55,15 @@ import java.util.Map;
  *  --postBody <encoded post body>
  *  --postFile <file path of post body contents>
  *  --paramLocation <URI_QUERY | POST_BODY | AUTH_HEADER>
+ *  --bodySigning hash|legacy|none
  */
 public class OAuthCommandLine {
+
+  public static enum BodySigning {
+    none,
+    hash,
+    legacy
+  }
 
   public static void main(String[] argv) throws Exception {
     Map<String, String> params = Maps.newHashMap();
@@ -71,6 +80,7 @@ public class OAuthCommandLine {
     String postBody = params.get("--postBody");
     String postFile = params.get("--postFile");
     String paramLocation = params.get("--paramLocation");
+    String bodySigning = params.get("--bodySigning");
 
     HttpRequest request = new HttpRequest(Uri.parse(url));
     if (contentType != null) {
@@ -90,6 +100,10 @@ public class OAuthCommandLine {
       paramLocationEnum = OAuthParamLocation.valueOf(paramLocation);
     }
 
+    BodySigning bodySigningEnum = BodySigning.none;
+    if (bodySigning != null) {
+      bodySigningEnum = BodySigning.valueOf(bodySigning);
+    }
 
     List<OAuth.Parameter> oauthParams = Lists.newArrayList();
     UriBuilder target = new UriBuilder(Uri.parse(url));
@@ -98,7 +112,14 @@ public class OAuthCommandLine {
     oauthParams.addAll(OAuth.decodeForm(query));
     if (OAuth.isFormEncoded(contentType) && request.getPostBodyAsString() != null) {
       oauthParams.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+    } else if (bodySigningEnum == BodySigning.legacy) {
+      oauthParams.add(new OAuth.Parameter(request.getPostBodyAsString(), ""));
+    } else if (bodySigningEnum == BodySigning.hash) {
+      oauthParams.add(
+            new OAuth.Parameter("oauth_body_hash",
+                new String(Base64.encodeBase64(DigestUtils.sha(postBody.getBytes())), "UTF-8")));
     }
+
     if (consumerKey != null) {
       oauthParams.add(new OAuth.Parameter(OAuth.OAUTH_CONSUMER_KEY, consumerKey));
     }
@@ -124,12 +145,8 @@ public class OAuthCommandLine {
               "OAuth param location can only be post_body if post body if of " +
                   "type x-www-form-urlencoded");
         }
-        String oauthData = OAuthUtil.formEncode(oauthParams);
-        if (request.getPostBodyLength() == 0) {
-          request.setPostBody(CharsetUtil.getUtf8Bytes(oauthData));
-        } else {
-          request.setPostBody((request.getPostBodyAsString() + '&' + oauthData).getBytes());
-        }
+        String oauthData = OAuthUtil.formEncode(message.getParameters());
+        request.setPostBody(CharsetUtil.getUtf8Bytes(oauthData));
         break;
 
       case URI_QUERY:
