@@ -32,10 +32,9 @@ public class AuthenticationHandlerProvider implements Provider<List<Authenticati
 
   @Inject
   public AuthenticationHandlerProvider(UrlParameterAuthenticationHandler urlParam,
-      OAuthConsumerRequestAuthenticationHandler twoLeggedOAuth,
       OAuthAuthenticationHandler threeLeggedOAuth,
       AnonymousAuthenticationHandler anonymous) {
-    handlers = Lists.newArrayList(urlParam, twoLeggedOAuth, threeLeggedOAuth, anonymous);
+    handlers = Lists.newArrayList(urlParam, threeLeggedOAuth, anonymous);
   }
 
   public List<AuthenticationHandler> get() {

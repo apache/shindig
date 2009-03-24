@@ -19,9 +19,10 @@ package org.apache.shindig.auth;
 
 import com.google.inject.Inject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Produces security tokens by extracting the "st" parameter from the request url or post body.
@@ -40,7 +41,8 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     return AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   }
 
-  public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request) {
+  public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request)
+      throws InvalidAuthenticationException {
     Map<String, String> parameters = getMappedParameters(request);
     try {
       if (parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME) == null) {
@@ -48,7 +50,8 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
       }
       return securityTokenDecoder.createToken(parameters);
     } catch (SecurityTokenException e) {
-      throw new InvalidAuthenticationException("Malformed security token " + parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME), e);
+      throw new InvalidAuthenticationException("Malformed security token " +
+          parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME), e);
     }
   }
 
@@ -66,5 +69,4 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     return Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME,
         token);
   }
-
 }
