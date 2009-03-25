@@ -34,7 +34,7 @@ class OrganizationTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     
-    $this->Organization = new Organization(/* parameters */);
+    $this->Organization = new Organization('NAME');
     $this->Organization->address = 'ADDRESS';
     $this->Organization->description = 'DESCRIPTION';
     $this->Organization->endDate = 'ENDDATE';

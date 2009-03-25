@@ -142,7 +142,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
    * Tests InputAtomConverter->convertPeople()
    */
   public function testConvertPeople() {
-    $this->setExpectedException(Exception);
+    $this->setExpectedException('Exception');
     $this->InputAtomConverter->convertPeople('');
   }
 }

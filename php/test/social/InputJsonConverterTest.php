@@ -102,7 +102,7 @@ class InputJsonConverterTest extends PHPUnit_Framework_TestCase {
    * Tests InputJsonConverter->convertPeople()
    */
   public function testConvertPeople() {
-    $this->setExpectedException(Exception);
+    $this->setExpectedException('Exception');
     $this->InputJsonConverter->convertPeople();
   }
 
