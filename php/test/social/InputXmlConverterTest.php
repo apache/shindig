@@ -126,7 +126,7 @@ class InputXmlConverterTest extends PHPUnit_Framework_TestCase {
    * Tests InputXmlConverter->convertPeople()
    */
   public function testConvertPeople() {
-    $this->setExpectedException(Exception);
+    $this->setExpectedException('Exception');
     $this->InputXmlConverter->convertPeople('');
   }
 }

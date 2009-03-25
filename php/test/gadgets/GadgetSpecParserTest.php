@@ -70,7 +70,7 @@ class GadgetSpecParserTest extends PHPUnit_Framework_TestCase {
    */
   public function testParseExeption() {
     $this->setExpectedException('GadgetSpecException');
-    $this->assertTrue($this->GadgetSpecParser->parse('', $this->Context));
+    $this->assertTrue($this->GadgetSpecParser->parse('<', $this->Context));
   }
 
   /**

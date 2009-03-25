@@ -33,7 +33,7 @@ class JsMinTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->JsMin = new JsMin();
+    $this->JsMin = new JsMin('');
   }
 
   /**
@@ -53,7 +53,7 @@ class JsMinTest extends PHPUnit_Framework_TestCase {
    * Tests JsMin->__construct()
    */
   public function test__construct() {
-    $this->JsMin->__construct();
+    $this->JsMin->__construct('');
   }
 
   /**

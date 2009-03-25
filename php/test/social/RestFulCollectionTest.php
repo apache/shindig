@@ -33,6 +33,7 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
    */
   protected function setUp() {
     parent::setUp();
+    $entry = array('Entry');
     $this->RestFulCollection = new RestfulCollection($entry, 1, 1);
   }
 
@@ -53,8 +54,7 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
    * Tests RestFulCollection->__construct()
    */
   public function test__construct() {
-    $entry = array();
-    $entry[] = "Entry";
+    $entry = array('Entry');
     $this->RestFulCollection->__construct($entry, 1, 1);
   }
 
@@ -62,8 +62,7 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
    * Tests RestFulCollection->getEntry()
    */
   public function testGetEntry() {
-    $entry = array();
-    $entry[] = "Entry";
+    $entry = array('Entry');
     $this->RestFulCollection->setEntry($entry);
     $this->assertEquals($entry, $this->RestFulCollection->getEntry());
   }
@@ -88,8 +87,7 @@ class RestFulCollectionTest extends PHPUnit_Framework_TestCase {
    * Tests RestFulCollection->createFromEntry()
    */
   public function testCreateFromEntry() {
-    $entry = array();
-    $entry[] = "Entry";
+    $entry = array('Entry');
     $restFulCollection = RestFulCollection::createFromEntry($entry);
     $this->assertEquals(1, $restFulCollection->getTotalResults());
     $this->assertEquals($entry, $restFulCollection->getEntry());
