@@ -34,6 +34,7 @@ class RemoteContentRequest {
   private $contentType = null;
   private $options;
   private $created;
+  private $refreshInterval;
   private static $SC_OK = 200; //Please, use only for testing!
   public $handle = false;
   public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
@@ -253,22 +254,59 @@ class RemoteContentRequest {
   }
 
   /**
+   * Sets the security token to use (used if the request has authorization set (signed, oauth))
    * @param SecurityToken $token
    */
   public function setToken($token) {
     $this->token = $token;
   }
 
+  /**
+   * Returns the SecurityToken for this request
+   *
+   * @return unknown
+   */
   public function getToken() {
     return $this->token;
   }
 
+  /**
+   * Sets the authorization type for this request, can be one of
+   * - none, no signing or authorization
+   * - signed, sign the request with an oauth_signature
+   * - oauth, logges in to the remote oauth service and uses it as base for signing the requests
+   *
+   * @param string $type ('none', 'signed', 'oauth')
+   */
   public function setAuthType($type) {
     $this->authType = $type;
   }
 
+  /**
+   * Returns the auth type of the request
+   *
+   * @return string ('none', 'signed', 'oauth')
+   */
   public function getAuthType() {
     return $this->authType;
+  }
+
+  /**
+   * Sets the cache refresh interval to use for this request
+   *
+   * @param int $refreshInterval (in seconds)
+   */
+  public function setRefreshInterval($refreshInterval) {
+    $this->refreshInterval = $refreshInterval;
+  }
+
+  /**
+   * Returns the cache's refresh interval for this request
+   *
+   * @return int refreshInterval (in seconds)
+   */
+  public function getRefreshInterval() {
+    return $this->refreshInterval;
   }
 }
 
