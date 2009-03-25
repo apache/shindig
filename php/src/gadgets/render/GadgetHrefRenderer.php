@@ -47,7 +47,7 @@ class GadgetHrefRenderer extends GadgetRenderer {
     parse_str($uri['query'], $_GET);
 
     $request = new RemoteContentRequest($href);
-
+    $request->setMethod('GET');
     $request->setToken($token);
     $request->setRefreshInterval($refreshInterval);
     $request->setAuthType($authz);
@@ -81,14 +81,16 @@ class GadgetHrefRenderer extends GadgetRenderer {
     $firstSeperator = strpos($href, '?') === false ? '?' : '&';
     $href .= $firstSeperator . 'lang=' . urlencode($lang);
     $href .= '&country=' . urlencode($country);
-
     // our internal caching is based on the raw url, but the spec states that the container should only cache for a
     // unique url + lang + country + owner + viewer + appid, so we add those to the url too, so caching works as it should
     // (so in essense we *always* signOwner and signViewer)
+    //NOTE should check how this will work in the limited cache invalidation scope
     $href .= '&opensocial_owner_id=' . urlencode($token->getOwnerId());
     $href .= '&opensocial_viewer_id=' . urlencode($token->getViewerId());
     $href .= '&opensocial_app_id=' . urlencode($token->getAppId());
     $href .= "&opensocial_app_url=" . urlencode($token->getAppUrl());
+    $container = isset($_GET['container']) ? $_GET['container'] : (isset($_GET['synd']) ? $_GET['synd'] : 'default');
+    $href .= "&oauth_consumer_key=" . urlencode($container);
     return $href;
   }
 

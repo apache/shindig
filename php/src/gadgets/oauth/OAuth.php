@@ -271,8 +271,8 @@ class OAuthRequest {
    */
   public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters = NULL) {
     $parameters = is_array($parameters) ? $parameters : array();
-    $defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), 
-        "oauth_timestamp" => OAuthRequest::generate_timestamp(), 
+    $defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(),
+        "oauth_timestamp" => OAuthRequest::generate_timestamp(),
         "oauth_consumer_key" => $consumer->key);
     $parameters = array_merge($defaults, $parameters);
     if (isset($token)) {
@@ -371,7 +371,7 @@ class OAuthRequest {
       }
       $this->parameters[$key] = $value;
     }
-    $parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(), 
+    $parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(),
         $this->get_signable_parameters());
     $parts = array_map(array('OAuthUtil', 'urlencodeRFC3986'), $parts);
     $this->parameters = $tmp;
@@ -394,7 +394,7 @@ class OAuthRequest {
     // FIXME: port should handle according to http://groups.google.com/group/oauth/browse_thread/thread/1b203a51d9590226
     $port = (isset($parts['port']) && $parts['port'] != '80') ? ':' . $parts['port'] : '';
     $path = (isset($parts['path'])) ? $parts['path'] : '';
-    
+
     return $parts['scheme'] . '://' . $parts['host'] . $port . $path;
   }
 
@@ -515,7 +515,7 @@ class OAuthRequest {
 }
 
 class OAuthUtil {
-  
+
   public static $AUTH_SCHEME = "OAuth";
   private static $AUTHORIZATION = "\ *[a-zA-Z0-9*]\ +(.*)";
   private static $NVP = "(\\S*)\\s*\\=\\s*\"([^\"]*)\"";

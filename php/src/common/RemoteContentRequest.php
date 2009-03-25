@@ -183,6 +183,10 @@ class RemoteContentRequest {
     return $this->method;
   }
 
+  public function setMethod($method) {
+    $this->method = $method;
+  }
+
   public function getOptions() {
     if (empty($this->options)) {
       return new Options();
