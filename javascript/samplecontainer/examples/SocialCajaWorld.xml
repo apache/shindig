@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
- <ModulePrefs title="Social Hello World">
+ <ModulePrefs title="Social Caja World">
    <Require feature="opensocial-0.7"></Require>
    <Require feature="caja"></Require>
    <Require feature="dynamic-height"></Require>

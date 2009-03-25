@@ -146,8 +146,16 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   public void enforceCssImportLinkRewritten() {
     String markup =
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
-    String sanitized = "<style>@import url('http\\3A//www.test.com/dir/proxy?url\\3Dwww.example.org%2Fwww.evil.com%2Fx.js\\26gadget\\3Dwww.example.org%2Fgadget.xml\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');</style>";
-    assertEquals(sanitized, rewrite(gadget, markup, set("style"), set()));
+    // The caja css sanitizer does *not* remove the initial colon in urls
+    // since this does not work in IE
+    String sanitized = 
+        "<style>" 
+      + "@import url('http://www.test.com/dir/proxy?url=www.example.org%2F"
+      +	"www.evil.com%2Fx.js\\26gadget=www.example.org%2Fgadget.xml\\26 "
+      +	"fp=45508\\26sanitize=1\\26rewriteMime=text/css');" 
+      + "</style>";
+    String rewritten = rewrite(gadget, markup, set("style"), set());
+    assertEquals(sanitized, rewritten);
   }
 
   @Test
@@ -196,11 +204,17 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     req.setRewriteMimeType("text/css");
     HttpResponse response = new HttpResponseBuilder().setResponseString(
         "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
-    String sanitized = "@import url('http\\3A//www.test.com/dir/proxy?url\\3Dhttp%3A%2F%2Fwww.evil.com%2Fmore.css\\26 fp\\3D 45508\\26sanitize\\3D 1\\26rewriteMime\\3Dtext/css');\n"
+    // The caja css sanitizer does *not* remove the initial colon in urls
+    // since this does not work in IE
+    String sanitized = 
+      "@import url('http://www.test.com/dir/proxy?"
+        + "url=http%3A%2F%2Fwww.evil.com%2Fmore.css"
+        + "\\26 fp=45508\\26sanitize=1\\26rewriteMime=text/css');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + "}";
-    assertEquals(sanitized, rewrite(req, response));
+    String rewritten = rewrite(req, response);
+    assertEquals(sanitized, rewritten);
   }
 
   @Test

@@ -34,7 +34,10 @@ import com.google.caja.parser.css.CssParser;
 import com.google.caja.parser.css.CssTree;
 import com.google.caja.render.CssPrettyPrinter;
 import com.google.caja.reporting.MessageContext;
+import com.google.caja.reporting.MessageLevel;
+import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.RenderContext;
+import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.util.Criterion;
 import com.google.inject.Inject;
 
@@ -123,7 +126,8 @@ public class CajaCssParser {
       // Return empty stylesheet
       return new CssTree.StyleSheet(null, Collections.<CssTree.CssStatement>emptyList());
     }
-    CssParser parser = new CssParser(queue);
+    MessageQueue mq = new SimpleMessageQueue();
+    CssParser parser = new CssParser(queue, mq, MessageLevel.WARNING);
     return parser.parseStyleSheet();
   }
 

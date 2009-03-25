@@ -172,7 +172,7 @@ public class CajaCssSanitizer {
     if (chain.node instanceof CssTree.Declaration ||
         chain.node instanceof CssTree.Import) {
       // Remove the entire subtree
-      ((AbstractParseTreeNode<?>)chain.getParentNode()).removeChild(chain.node);
+      ((AbstractParseTreeNode)chain.getParentNode()).removeChild(chain.node);
     } else {
       clean(chain.parent);
     }

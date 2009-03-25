@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.parse.caja;
 
-import org.apache.shindig.gadgets.GadgetException;
-
 import com.google.caja.parser.css.CssTree;
 
 import junit.framework.TestCase;
@@ -48,62 +46,61 @@ public class CajaCssParserTest extends TestCase {
   }
 
   /**
-   * These tests will fail when Caja successfully parses funky CSS.
-   * They can be converted into a test of success once that happens
+   * These tests test Caja's parsing of "funky" CSS which are not legal
+   * but accepted by commonly used browsers
    */
-  public void testCajaParseFailureColonInRValue() {
+  public void testCajaParseColonInRValue() throws Exception {
     String original = " A {\n"
         + " -moz-opacity: 0.80;\n"
         + " filter: alpha(opacity=40);\n"
         + " filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);\n"
         + "}";
-    try {
-      cajaCssParser.parseDom(original);
-      fail();
-    } catch (GadgetException ge) {
-      // Expected
-    }
+    CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
+    List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
+        styleSheet, CssTree.SimpleSelector.class);
+    assertEquals(1, selectorList.size());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
-  public void testCajaParseFailureNoLValue() {
+  public void testCajaParseNoLValue() throws Exception {
     String original = "body, input, td {\n"
         + "  Arial, sans-serif;\n"
         + "}";
-    try {
-      cajaCssParser.parseDom(original);
-      fail();
-    } catch (GadgetException ge) {
-      // Expected
-    }
+    cajaCssParser.parseDom(original);
+    CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
+    List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
+        styleSheet, CssTree.SimpleSelector.class);
+    assertEquals(3, selectorList.size());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
-  public void testCajaParseFailureCommentInContent() {
+  public void testCajaParseCommentInContent() throws Exception {
     String original = "body { font : bold; } \n//A comment\n A { font : bold; }";
-    try {
-      cajaCssParser.parseDom(original);
-      fail();
-    } catch (GadgetException ge) {
-      // Expected
-    }
+    cajaCssParser.parseDom(original);
+    CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
+    List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
+        styleSheet, CssTree.SimpleSelector.class);
+    assertEquals(2, selectorList.size());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
-  public void testCajaParseFailureDotInIdent() {
+  public void testCajaParseDotInIdent() throws Exception {
     String original = "li{list-style:none;.padding-bottom:4px;}";
-    try {
-      cajaCssParser.parseDom(original);
-      fail();
-    } catch (GadgetException ge) {
-      // Expected
-    }
+    cajaCssParser.parseDom(original);
+    CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
+    List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
+        styleSheet, CssTree.SimpleSelector.class);
+    assertEquals(1, selectorList.size());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
-  public void testCajaParseFailureDotInFunction() {
+  public void testCajaParseDotInFunction() throws Exception {
     String original = ".iepngfix {behavior: expression(IEPNGFIX.fix(this)); }";
-    try {
-      cajaCssParser.parseDom(original);
-      fail();
-    } catch (GadgetException ge) {
-      // Expected
-    }
+    cajaCssParser.parseDom(original);
+    CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
+    List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
+        styleSheet, CssTree.SimpleSelector.class);
+    assertEquals(1, selectorList.size());
+    assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 }
