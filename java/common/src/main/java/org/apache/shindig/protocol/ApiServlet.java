@@ -46,14 +46,19 @@ import com.google.inject.name.Names;
  * Common base class for API servlets.
  */
 public abstract class ApiServlet extends InjectedServlet {
-  
+
   private static final Logger logger = Logger.getLogger(ApiServlet.class.getName());
-  
+
+  protected static final String FORMAT_PARAM = "format";
+  protected static final String JSON_FORMAT = "json";
+  protected static final String ATOM_FORMAT = "atom";
+  protected static final String XML_FORMAT = "xml";
+
   protected static final String DEFAULT_ENCODING = "UTF-8";
 
   /** ServletConfig parameter set to provide an explicit named binding for handlers */
   public static final String HANDLERS_PARAM = "handlers";
-  
+
   /** The default key used to look up handlers if the servlet config parameter is not available */
   public static final Key<Set<Object>> DEFAULT_HANDLER_KEY =
        Key.get(new TypeLiteral<Set<Object>>(){}, Names.named("org.apache.shindig.protocol.handlers"));
@@ -62,6 +67,9 @@ public abstract class ApiServlet extends InjectedServlet {
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
+
+  @Deprecated
+  protected boolean disallowUnknownContentTypes = true;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -76,7 +84,6 @@ public abstract class ApiServlet extends InjectedServlet {
     } else {
       handlerKey = Key.get(new TypeLiteral<Set<Object>>(){}, Names.named(handlers));
     }
-    
     this.dispatcher.addHandlers(injector.getInstance(handlerKey));
     this.dispatcher.addHandlers(Collections.<Object>singleton(new SystemHandler(dispatcher)));
   }
@@ -84,6 +91,12 @@ public abstract class ApiServlet extends InjectedServlet {
   @Inject
   public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
+  }
+
+  @Inject
+  public void setDisallowUnknownContentTypes(
+      @Named("shindig.api.disallow-unknown-content-types") boolean disallowUnknownContentTypes) {
+    this.disallowUnknownContentTypes = disallowUnknownContentTypes;
   }
 
   @Inject
@@ -133,7 +146,6 @@ public abstract class ApiServlet extends InjectedServlet {
       logger.log(Level.INFO, "Returning a response error as result of a protocol exception", spe);
       return new ResponseItem(spe.getError(), spe.getMessage());
     }
-    
     logger.log(Level.WARNING, "Returning a response error as result of an exception", t);
     return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
   }
@@ -144,5 +156,10 @@ public abstract class ApiServlet extends InjectedServlet {
       servletRequest.setCharacterEncoding(DEFAULT_ENCODING);
     }
     servletResponse.setCharacterEncoding(DEFAULT_ENCODING);
+  }
+
+  public void checkContentTypes(Set<String> allowedContentTypes,
+      String contentType) throws ContentTypes.InvalidContentTypeException {
+    ContentTypes.checkContentTypes(allowedContentTypes, contentType, disallowUnknownContentTypes);
   }
 }

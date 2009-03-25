@@ -17,24 +17,22 @@
  */
 package org.apache.shindig.protocol;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.reset;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
+
+import junit.framework.TestCase;
 
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
-
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
-
-import junit.framework.TestCase;
+import static org.easymock.classextension.EasyMock.reset;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -130,14 +128,15 @@ public class JsonRpcServletTest extends TestCase {
     expect(req.getMethod()).andStubReturn("POST");
     expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getContentType()).andStubReturn(ContentTypes.MULTIPART_FORM_CONTENT_TYPE);
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     List<FormDataItem> formItems = new ArrayList<FormDataItem>();
     String request = "{method:test.get,id:id,params:" +
         "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
-    formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM, "application/json",
-        request.getBytes(), true));
+    formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE, request.getBytes(), true));
     formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
     expect(multipartFormParser.parse(req)).andReturn(formItems);
@@ -171,14 +170,15 @@ public class JsonRpcServletTest extends TestCase {
     expect(req.getMethod()).andStubReturn("POST");
     expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getContentType()).andStubReturn(ContentTypes.MULTIPART_FORM_CONTENT_TYPE);
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     List<FormDataItem> formItems = new ArrayList<FormDataItem>();
     String request = "{method:test.get,id:id,params:" +
         "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
     formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
-    formItems.add(mockFormDataItem("json", "application/json",
+    formItems.add(mockFormDataItem("json", ContentTypes.OUTPUT_JSON_CONTENT_TYPE,
         request.getBytes(), true));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
     expect(multipartFormParser.parse(req)).andReturn(formItems);
@@ -273,9 +273,9 @@ public class JsonRpcServletTest extends TestCase {
     expect(req.getMethod()).andStubReturn("POST");
     expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
     expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
-    expect(req.getContentType()).andStubReturn("application/json");
+    expect(req.getContentType()).andStubReturn(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
   }
 
   private FormDataItem mockFormDataItem(String fieldName, String contentType, byte content[],

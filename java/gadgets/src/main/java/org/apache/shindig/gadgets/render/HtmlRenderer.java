@@ -185,7 +185,7 @@ public class HtmlRenderer {
       // to enable caching
       request.setMethod("POST")
           .setPostBody(UTF8.encode(postContent).array())
-          .setHeader("Content-Type", "text/json;charset=utf-8");
+          .setHeader("Content-Type", "application/json;charset=utf-8");
     }
     return request;
   }

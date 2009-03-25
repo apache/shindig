@@ -17,16 +17,16 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import org.apache.shindig.common.JsonProperty;
-import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.protocol.model.Enum;
-import org.apache.shindig.protocol.model.EnumImpl;
-
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import org.apache.shindig.common.JsonProperty;
+import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.protocol.ContentTypes;
+import org.apache.shindig.protocol.model.Enum;
+import org.apache.shindig.protocol.model.EnumImpl;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +62,20 @@ public class BeanJsonConverter implements BeanConverter {
   @Inject
   public BeanJsonConverter(Injector injector) {
     this.injector = injector;
+  }
+
+  public String getContentType() {
+    return ContentTypes.OUTPUT_JSON_CONTENT_TYPE;
+  }
+
+  /**
+   * Convert the passed in object to a string.
+   *
+   * @param pojo The object to convert
+   * @return An object whose toString method will return json
+   */
+  public String convertToString(final Object pojo) {
+    return JsonSerializer.serialize(pojo);
   }
 
   public void append(Appendable buf, Object pojo) throws IOException {
@@ -105,14 +119,6 @@ public class BeanJsonConverter implements BeanConverter {
     return (T)convertToObject(string, (Type) clazz);
   }
 
-  public String convertToString(Object pojo) {
-    return JsonSerializer.serialize(pojo);
-  }
-
-  public String getContentType() {
-    return "application/json";
-  }
-
   @SuppressWarnings("unchecked")
   public <T> T convertToObject(String json, Type type) {
     try {
@@ -122,7 +128,7 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
-  private Object convertToObject(Object value, Type type) {
+  public Object convertToObject(Object value, Type type) {
     if (type == null || type.equals(Object.class)) {
       // Use the source type instead.
       if (value instanceof JSONObject) {
@@ -136,7 +142,7 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (type.equals(String.class)) {
       return String.valueOf(value);
     } else if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
-      return Boolean.TRUE.equals(value);
+      return value instanceof String ? Boolean.valueOf((String) value) : Boolean.TRUE.equals(value);
     } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
       return value instanceof String ? Integer.valueOf((String) value) : ((Number) value).intValue();
     } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {

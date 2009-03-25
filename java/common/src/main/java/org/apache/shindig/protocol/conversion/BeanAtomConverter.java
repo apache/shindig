@@ -20,6 +20,7 @@ package org.apache.shindig.protocol.conversion;
 import org.apache.commons.betwixt.IntrospectionConfiguration;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.BeanWriter;
+import org.apache.shindig.protocol.ContentTypes;
 
 import org.xml.sax.SAXException;
 
@@ -37,7 +38,7 @@ public class BeanAtomConverter implements BeanConverter {
 
 
   public String getContentType() {
-    return "application/atom+xml";
+    return ContentTypes.OUTPUT_ATOM_CONTENT_TYPE;
   }
 
   public String convertToString(Object pojo) {

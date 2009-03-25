@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 
@@ -50,7 +51,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetActivityJson() throws Exception {
-    String resp = getResponse("/activities/john.doe/@self/@app/1", "GET", null, "application/json");
+    String resp = getResponse("/activities/john.doe/@self/@app/1", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
     assertActivitiesEqual(johnsActivity, result.getJSONObject("entry"));
   }
@@ -71,7 +73,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetActivitiesJson() throws Exception {
-    String resp = getResponse("/activities/john.doe/@self", "GET", null, "application/json");
+    String resp = getResponse("/activities/john.doe/@self", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
     assertEquals(1, result.getInt("totalResults"));
@@ -95,7 +98,8 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
    */
   @Test
   public void testGetFriendsActivitiesJson() throws Exception {
-    String resp = getResponse("/activities/john.doe/@friends", "GET", null, "application/json");
+    String resp = getResponse("/activities/john.doe/@friends", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
     assertEquals(2, result.getInt("totalResults"));
@@ -114,10 +118,12 @@ public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   public void testCreateActivity() throws Exception {
     String postData = "{title : 'hi mom!', body : 'and dad.'}";
     // Create the activity
-    getResponse("/activities/john.doe/@self", "POST", postData, null, "application/json");
+    getResponse("/activities/john.doe/@self", "POST", postData, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     // Verify it can be retrieved
-    String resp = getResponse("/activities/john.doe/@self", "GET", null, "application/json");
+    String resp = getResponse("/activities/john.doe/@self", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
     assertEquals(2, result.getInt("totalResults"));
