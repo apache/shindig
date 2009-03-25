@@ -55,7 +55,7 @@ shindig.samplecontainer = {};
 
   var useCaja;
   var useCache;
-  var usePermissive;
+  var useDebug;
   var doEvil;
   var gadget;
 
@@ -101,8 +101,8 @@ shindig.samplecontainer = {};
     if (useCaja) {
       params += "&caja=1&libs=caja";
     }
-    if (usePermissive) {
-      params += "&usepermissive=1";
+    if (useDebug) {
+      params += "&debug=1";
     }
     return params;
   };
@@ -233,7 +233,7 @@ shindig.samplecontainer = {};
   shindig.samplecontainer.unpackFormState = function() {
     useCaja = document.getElementById("useCajaCheckbox").checked;
     useCache = document.getElementById("useCacheCheckbox").checked;
-    usePermissive = document.getElementById("usePermissiveCheckbox").checked;
+    useDebug = document.getElementById("useDebugCheckbox").checked;
     doEvil = document.getElementById("doEvilCheckbox").checked;
   };
 

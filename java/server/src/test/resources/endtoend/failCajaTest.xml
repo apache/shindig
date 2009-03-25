@@ -19,14 +19,14 @@
 -->
 <Module>
   <ModulePrefs title="EndToEndTest">
-    <Require feature="caja" />
     <Require feature="opensocial-0.8" />
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
-		  <script>
-      x___ = 1; // This should fail to cajole in caja
-			</script>
+      <script type="text/javascript">
+			  var x = {};
+        with(x) {};
+      </script>
     ]]>
   </Content>
 </Module>

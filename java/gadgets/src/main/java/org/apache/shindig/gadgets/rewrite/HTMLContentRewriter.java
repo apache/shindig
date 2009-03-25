@@ -87,6 +87,11 @@ public class HTMLContentRewriter implements ContentRewriter {
   }
 
   public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+    // Don't rewrite urls if caja is enabled since caja will inline them anyway
+    if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
+        "1".equals(gadget.getContext().getParameter("caja"))) {
+      return null;
+    }
     ContentRewriterFeature feature = rewriterFeatureFactory.get(gadget.getSpec());
     Uri contentBase = gadget.getSpec().getUrl();
     View view = gadget.getCurrentView();

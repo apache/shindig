@@ -36,6 +36,7 @@ import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
 import com.google.caja.opensocial.UriCallbackOption;
+import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
@@ -73,8 +74,9 @@ public class CajaContentRewriter implements ContentRewriter {
             throws UriCallbackException {
           logger.info("Retrieving " + externalReference.toString());
           try {
+            URI resourceUri = retrievedUri.resolve(externalReference.getUri());
             Reader in = new InputStreamReader(
-                externalReference.getUri().toURL().openConnection().getInputStream(), "UTF-8");
+                resourceUri.toURL().openConnection().getInputStream(), "UTF-8");
             char[] buf = new char[4096];
             StringBuilder sb = new StringBuilder();
             for (int n; (n = in.read(buf)) > 0;) {
@@ -85,7 +87,7 @@ public class CajaContentRewriter implements ContentRewriter {
             throw new UriCallbackException(externalReference, ex);
           } catch (IOException ex) {
             throw new UriCallbackException(externalReference, ex);
-          }
+          } 
         }
 
         public URI rewrite(ExternalReference externalReference, String string) {
@@ -94,12 +96,14 @@ public class CajaContentRewriter implements ContentRewriter {
       };
 
       MessageQueue mq = new SimpleMessageQueue();
-      DefaultGadgetRewriter rw = new DefaultGadgetRewriter(mq);
+      BuildInfo bi = BuildInfo.getInstance();
+      DefaultGadgetRewriter rw = new DefaultGadgetRewriter(bi, mq);
+      rw.setValijaMode(true);
       InputSource is = new InputSource(retrievedUri);
       String origContent = content.getContent();
       CharProducer input = CharProducer.Factory.create(
           new StringReader(origContent),
-          FilePosition.instance(is, 2, 1, 1));
+          FilePosition.instance(is, 5, 5, 5));
       StringBuilder output = new StringBuilder();
 
       // Secure default to remove content in case there 
@@ -125,8 +129,7 @@ public class CajaContentRewriter implements ContentRewriter {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
     originalSrc.put(is, orig);
-
-    mc.inputSources = originalSrc.keySet();
+    mc.addInputSource(is);
     SnippetProducer sp = new SnippetProducer(originalSrc, mc);
 
     StringBuilder messageText = new StringBuilder();
