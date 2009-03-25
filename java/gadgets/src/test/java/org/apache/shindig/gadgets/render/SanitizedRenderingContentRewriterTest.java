@@ -226,7 +226,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     assertEquals(sanitized, rewrite(req, response));
   }
 
-   @Test
+  @Test
   public void validProxiedImageAccepted() throws Exception {
     HttpRequest req = new HttpRequest(CONTENT_URI);
     req.setRewriteMimeType("image/*");
@@ -236,28 +236,75 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     assertNull(rewrite(req, response));
   }
 
-   @Test
-   public void sanitizationBypassAllowed() {
-     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
-     // Create a rewriter that would strip everything
-     ContentRewriter rewriter = createRewriter(set(), set());
+  @Test
+  public void sanitizationBypassAllowed() {
+    String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
+    // Create a rewriter that would strip everything
+    ContentRewriter rewriter = createRewriter(set(), set());
 
-     MutableContent mc = new MutableContent(parser, markup);
-     Document document = mc.getDocument();
-     // Force the content to get re-serialized
-     MutableContent.notifyEdit(document);
-     String fullMarkup = mc.getContent();
+    MutableContent mc = new MutableContent(parser, markup);
+    Document document = mc.getDocument();
+    // Force the content to get re-serialized
+    MutableContent.notifyEdit(document);
+    String fullMarkup = mc.getContent();
+    
+    Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
+    // Mark the paragraph tag element as trusted
+    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, true);
+    rewriter.rewrite(gadget, mc);
      
-     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
-     // Mark the paragraph tag element as trusted
-     SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag);
-     rewriter.rewrite(gadget, mc);
+    // The document should be unchanged
+    assertEquals(fullMarkup, mc.getContent());
+  }
      
-     // The document should be unchanged
-     assertEquals(fullMarkup, mc.getContent());
-   }
+  @Test
+  public void sanitizationBypassOnlySelf() {
+    String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
+    // Create a rewriter that would strip everything
+    ContentRewriter rewriter = createRewriter(set(), set());
 
-   @Test
+    MutableContent mc = new MutableContent(parser, markup);
+    Document document = mc.getDocument();
+    
+    Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
+    // Mark the paragraph tag element as trusted
+    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, false);
+    rewriter.rewrite(gadget, mc);
+     
+    // The document should be unchanged
+    String content = mc.getContent();
+    Matcher matcher = BODY_REGEX.matcher(content);
+    matcher.matches();
+    assertEquals("<p foo=\"bar\"></p>", matcher.group(1));
+  }
+     
+  @Test
+  public void sanitizationBypassPreservedAcrossClone() {
+    String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
+    // Create a rewriter that would strip everything
+    ContentRewriter rewriter = createRewriter(set(), set());
+
+    MutableContent mc = new MutableContent(parser, markup);
+    Document document = mc.getDocument();
+    
+    Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
+    // Mark the paragraph tag element as trusted
+    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, false);
+
+    // Now, clone the paragraph tag and replace the paragraph tag
+    Element cloned = (Element) paragraphTag.cloneNode(true);
+    paragraphTag.getParentNode().replaceChild(cloned, paragraphTag);
+
+    rewriter.rewrite(gadget, mc);
+     
+    // The document should be unchanged
+    String content = mc.getContent();
+    Matcher matcher = BODY_REGEX.matcher(content);
+    matcher.matches();
+    assertEquals("<p foo=\"bar\"></p>", matcher.group(1));
+  }
+     
+ @Test
   public void restrictHrefAndSrcAttributes() {
     String markup =
         "<element " +

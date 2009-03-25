@@ -41,6 +41,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.UserDataHandler;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -91,12 +92,30 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
   }
   
   /**
-   * Marks that an element - and all its attributes and children - are
-   * trusted content. 
+   * Marks that an element and all its attributes are trusted content.
+   * This status is preserved across {@link Node#cloneNode} calls.  Be
+   * extremely careful when using this, especially with {@code includingChildren}
+   * set to {@code true}, as untrusted content that gets inserted (e.g, via
+   * os:RenderAll in templating) would become trusted.
+   * 
+   * @param element the trusted element
+   * @param includingChildren if true, children of this element will are also
+   *     trusted.  Never set this to true on an element that will ever have
+   *     untrusted children inserted (e.g., if it contains or may contain os:Render).
    */
-  public static void bypassSanitization(Element element) {
-    element.setUserData(BYPASS_SANITIZATION_KEY, true, null);
+  public static void bypassSanitization(Element element, boolean includingChildren) {
+    element.setUserData(BYPASS_SANITIZATION_KEY,
+        includingChildren ? Bypass.ALL : Bypass.ONLY_SELF, copyOnClone);
   }
+  
+  private static enum Bypass { ALL, ONLY_SELF, NONE };
+  private static UserDataHandler copyOnClone = new UserDataHandler() {
+    public void handle(short operation, String key, Object data, Node src, Node dst) {
+      if (operation == NODE_CLONED) {
+        dst.setUserData(key, data, copyOnClone);
+      }
+    }
+  };
   
   private final Set<String> allowedTags;
   private final Set<String> allowedAttributes;
@@ -249,8 +268,13 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
         case Node.ELEMENT_NODE:
         case Node.DOCUMENT_NODE:
           Element element = (Element) node;
-          if (canBypassSanitization(element)) {
+          Bypass bypass = canBypassSanitization(element);
+          if (bypass == Bypass.ALL) {
             return;
+          } else if (bypass == Bypass.ONLY_SELF) {
+            for (Node child : toList(node.getChildNodes())) {
+              sanitize(child);
+            }
           } else if (allowedTags.contains(element.getTagName().toLowerCase())) {
             // TODO - Add special case for stylesheet LINK nodes.
             // Special case handling for style nodes
@@ -314,8 +338,12 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
     return list;
   }
 
-  private static boolean canBypassSanitization(Element element) {
-    return (element.getUserData(BYPASS_SANITIZATION_KEY) != null);
+  private static Bypass canBypassSanitization(Element element) {
+    Bypass bypass = (Bypass) element.getUserData(BYPASS_SANITIZATION_KEY);
+    if (bypass == null) {
+      bypass = Bypass.NONE;
+    }
+    return bypass;
   }
 
   /** Convert a NamedNodeMap to a list for easy and safe operations */
