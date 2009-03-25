@@ -40,6 +40,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,6 +230,9 @@ public class BeanJsonConverter implements BeanConverter {
 
   private Map<String, Object> convertToMap(JSONObject in, Type type) {
     Map<String, Object> out = new HashMap<String, Object>(in.length(), 1);
+    if(in.length() == 0)
+      return Collections.emptyMap();
+
     for (String name : JSONObject.getNames(in)) {
       out.put(name, convertToObject(in.opt(name), type));
     }
