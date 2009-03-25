@@ -404,11 +404,36 @@
   }
 },
 //
-// Consumer Secrets for OAuth REST validations
-// In this case the consumerKey is the App URL.
+// Gadgets/App information.  OAuth Consumer Key defaults to the app url.
 //
-"consumerSecrets" : {
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml": "secret",
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : "secret"
-}
+"apps" : {
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml":
+        { "title" : "Social Hello World",
+          "consumerSecret" : "secret",
+           "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" :
+        { "title" : "Social Activities World",
+          "consumerSecret" : "secret",
+          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml" :
+        { "title" : "Demo OAuth Gadget",
+          "consumerSecret" : "secret",
+          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"}
+ },
+
+ // duplicates userApplications as above..
+ "permissions": {
+   "john.doe" : { "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { installed : true},
+                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { installed : true}
+   },
+   "canonical" :{ "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { installed : true},
+                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { installed : true}
+   }
+ },
+// Passwords for authenticaiton service
+ "passwords" : {
+    "john.doe" : "password",
+    "jane.doe" : "password",
+    "canonical" : "password"
+  }
 }

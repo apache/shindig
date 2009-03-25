@@ -19,6 +19,7 @@ package org.apache.shindig.social.sample.oauth;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -29,6 +30,7 @@ import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.UUID;
@@ -60,12 +62,20 @@ public class SampleOAuthDataStore implements OAuthDataStore {
 
   public OAuthConsumer getConsumer(String consumerKey) {
     try {
-      String consumerSecret = service.getDb().getJSONObject("consumerSecrets").getString(Preconditions.checkNotNull(consumerKey));
+      JSONObject app = service.getDb().getJSONObject("apps").getJSONObject(Preconditions.checkNotNull(consumerKey));
+      String consumerSecret = app.getString("consumerSecret");
+
       if (consumerSecret == null)
           return null;
+
       // null below is for the callbackUrl, which we don't have in the db
       OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, SERVICE_PROVIDER);
-      consumer.setProperty("samplecontainer-attribute", "value");
+
+      // Set some properties loosely based on the ModulePrefs of a gadget
+      for (String key : ImmutableList.of("title", "summary", "description", "thumbnail", "icon")) {
+        if (app.has(key))
+          consumer.setProperty(key, app.getString(key));
+      }
 
       return consumer;
 
@@ -125,8 +135,9 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   public SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId) {
     String domain = "samplecontainer.com";
     String container = "default";
-    
+
     return new OAuthSecurityToken(userId, null, consumerKey, domain, container,
         AuthenticationMode.OAUTH_CONSUMER_REQUEST.name());
+    
   }
 }

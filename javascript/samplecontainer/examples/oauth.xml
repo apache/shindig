@@ -1,6 +1,7 @@
  <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="Demo OAuth Gadget">
+  <ModulePrefs title="Demo OAuth Gadget"
+               icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
     <OAuth>
       <Service>
         <Request url="http://localhost:9090/oauth-provider/request_token" />

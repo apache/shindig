@@ -23,6 +23,7 @@ import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
+import org.apache.shindig.social.sample.oauth.SampleRealm;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
@@ -50,6 +51,10 @@ public class SampleModule extends SocialApiGuiceModule {
     bind(PersonService.class).to(JsonDbOpensocialService.class);
     
     bind(OAuthDataStore.class).to(SampleOAuthDataStore.class);
+
+
+    // We do this so that jsecurity realms can get access to the jsondbservice singleton
+    requestStaticInjection(SampleRealm.class);
   }
 
   @Override

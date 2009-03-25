@@ -149,7 +149,15 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
     </dependency>
-    
+    <dependency>
+      <groupId>org.jsecurity</groupId>
+      <artifactId>jsecurity</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+    </dependency>
+
     <!-- test -->
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -161,5 +169,6 @@
       <artifactId>htmlunit</artifactId>
       <scope>test</scope>
     </dependency>
+ 
   </dependencies>
 </project>

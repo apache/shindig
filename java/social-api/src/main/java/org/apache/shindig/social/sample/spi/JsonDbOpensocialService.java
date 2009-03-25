@@ -109,6 +109,11 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    */
   private static final String MESSAGE_TABLE = "messages";
 
+  /**
+   * db["passwords"] -> Map<Person.Id, String>
+   */
+  private static final String PASSWORDS_TABLE = "passwords";
+
   @Inject
   public JsonDbOpensocialService(@Named("shindig.canonical.json.db")String jsonLocation,
       @Named("shindig.bean.converter.json")BeanConverter converter) throws Exception {
@@ -495,6 +500,17 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) 
       throws SocialSpiException {
     throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  }
+
+  /**
+   * Public methods for use with Authentication Classes
+   */
+  public String getPassword(String username) {
+    try {
+      return db.getJSONObject(PASSWORDS_TABLE).getString(username);
+    } catch (JSONException e) {
+       return null;
+    }
   }
 
   /**
