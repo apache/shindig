@@ -174,4 +174,11 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(Arrays.asList(0, 1, 2), data.get("key0"));
     assertEquals(Arrays.asList(3, 4, 5), data.get("key1"));
   }
+
+  public void testEmptyJsonMap() throws Exception {
+    String emptyMap = "{}";
+    Map<String, String> data = beanJsonConverter.convertToObject(emptyMap, 
+         new TypeLiteral<Map<String,String>>(){}.getType());
+    assertTrue(data.size() == 0);
+  }
 }
