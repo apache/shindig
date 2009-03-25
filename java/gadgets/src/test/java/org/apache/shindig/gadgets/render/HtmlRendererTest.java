@@ -221,7 +221,7 @@ public class HtmlRendererTest {
 
     HttpRequest lastHttpRequest = pipeline.getLastHttpRequest();
     assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("text/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
+    assertEquals("application/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
     JSONArray actualJson = new JSONArray(postBody);
 
@@ -246,7 +246,7 @@ public class HtmlRendererTest {
 
     HttpRequest lastHttpRequest = pipeline.getLastHttpRequest();
     assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("text/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
+    assertEquals("application/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
     JSONArray actualJson = new JSONArray(postBody);
 

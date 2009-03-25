@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.conversion.jsonlib.JsonLibConverterUtils;
 
 import com.google.inject.Inject;
@@ -63,7 +64,7 @@ public class BeanJsonLibConverter implements BeanConverter {
   }
 
   public String getContentType() {
-    return "application/json";
+    return ContentTypes.OUTPUT_JSON_CONTENT_TYPE;
   }
 
   /**

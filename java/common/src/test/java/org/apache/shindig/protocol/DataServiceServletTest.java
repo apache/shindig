@@ -61,9 +61,12 @@ public class DataServiceServletTest extends TestCase {
     xmlConverter = mockControl.createMock(BeanConverter.class);
     atomConverter = mockControl.createMock(BeanConverter.class);
 
-    EasyMock.expect(jsonConverter.getContentType()).andReturn("application/json").anyTimes();
-    EasyMock.expect(xmlConverter.getContentType()).andReturn("application/xml").anyTimes();
-    EasyMock.expect(atomConverter.getContentType()).andReturn("application/atom+xml").anyTimes();
+    EasyMock.expect(jsonConverter.getContentType()).andReturn(
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE).anyTimes();
+    EasyMock.expect(xmlConverter.getContentType()).andReturn(
+        ContentTypes.OUTPUT_XML_CONTENT_TYPE).anyTimes();
+    EasyMock.expect(atomConverter.getContentType()).andReturn(
+        ContentTypes.OUTPUT_ATOM_CONTENT_TYPE).anyTimes();
 
     HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
         new HandlerExecutionListener.NoOpHandler());
@@ -99,7 +102,7 @@ public class DataServiceServletTest extends TestCase {
     writerMock.write(TestHandler.GET_RESPONSE);
     EasyMock.expectLastCall();
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     mockControl.replay();
     servlet.service(req, res);
@@ -127,7 +130,7 @@ public class DataServiceServletTest extends TestCase {
     // Shouldnt these be expectations
     res.sendError(ResponseError.BAD_REQUEST.getHttpErrorCode(), TestHandler.FAILURE_MESSAGE);
     res.setCharacterEncoding("UTF-8");
-    res.setContentType("application/json");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     mockControl.replay();
     servlet.service(req, res);
@@ -146,6 +149,7 @@ public class DataServiceServletTest extends TestCase {
     }
     fakeReq.setMethod(actualMethod);
     fakeReq.setAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId(), FAKE_GADGET_TOKEN);
+    fakeReq.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     req = fakeReq;
   }
 
@@ -158,15 +162,18 @@ public class DataServiceServletTest extends TestCase {
   }
 
   public void testGetConverterForRequestContentType() throws Exception {
-    assertConverterForContentType(atomConverter, "application/atom+xml");
-    assertConverterForContentType(xmlConverter, "application/xml");
+    assertConverterForContentType(atomConverter, ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
+    assertConverterForContentType(xmlConverter, ContentTypes.OUTPUT_XML_CONTENT_TYPE);
+    assertConverterForContentType(xmlConverter, "text/xml");
+    assertConverterForContentType(jsonConverter, ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+    assertConverterForContentType(jsonConverter, "application/json");
     assertConverterForContentType(jsonConverter, "");
     assertConverterForContentType(jsonConverter, null);
     assertConverterForContentType(jsonConverter, "abcd!");
   }
 
   private void assertConverter(BeanConverter converter, String format) {
-    EasyMock.expect(req.getParameter(DataServiceServlet.FORMAT_PARAM))
+    EasyMock.expect(req.getParameter(ApiServlet.FORMAT_PARAM))
         .andReturn(format);
     EasyMock.replay(req);
     assertEquals(converter, servlet.getConverterForRequest(req));
@@ -176,8 +183,7 @@ public class DataServiceServletTest extends TestCase {
 
   private void assertConverterForContentType(BeanConverter converter,
       String contentType) {
-    EasyMock.expect(req.getHeader(DataServiceServlet.CONTENT_TYPE)).andReturn(
-        contentType);
+    EasyMock.expect(req.getContentType()).andReturn(contentType);
     EasyMock.replay(req);
     assertEquals(converter, servlet.getConverterForRequest(req));
     EasyMock.verify(req);

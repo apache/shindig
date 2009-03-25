@@ -21,28 +21,28 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 
 import com.google.common.collect.ImmutableMap;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.common.collect.ImmutableSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DataServiceServlet extends ApiServlet {
 
-  protected static final String FORMAT_PARAM = "format";
-  protected static final String ATOM_FORMAT = "atom";
-  protected static final String XML_FORMAT = "xml";
+  private static final Logger logger = Logger.getLogger(DataServiceServlet.class.getName());
 
-  public static final String CONTENT_TYPE = "CONTENT_TYPE";
-
-  private static final Logger logger = Logger.getLogger("org.apache.shindig.social.opensocial.spi");
+  public static final Set<String> ALLOWED_CONTENT_TYPES =
+      new ImmutableSet.Builder<String>().addAll(ContentTypes.ALLOWED_JSON_CONTENT_TYPES)
+          .addAll(ContentTypes.ALLOWED_XML_CONTENT_TYPES)
+          .addAll(ContentTypes.ALLOWED_ATOM_CONTENT_TYPES).build();
 
   protected static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
 
@@ -50,28 +50,48 @@ public class DataServiceServlet extends ApiServlet {
   protected void doGet(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    doPost(servletRequest, servletResponse);
+    executeRequest(servletRequest, servletResponse);
   }
 
   @Override
   protected void doPut(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    doPost(servletRequest, servletResponse);
+    try {
+      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
+      executeRequest(servletRequest, servletResponse);
+    } catch (ContentTypes.InvalidContentTypeException icte) {
+      sendError(servletResponse, new ResponseItem(ResponseError.BAD_REQUEST, icte.getMessage()));
+    }
   }
 
   @Override
   protected void doDelete(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    doPost(servletRequest, servletResponse);
+    executeRequest(servletRequest, servletResponse);
   }
 
   @Override
   protected void doPost(HttpServletRequest servletRequest,
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
-    if (logger.isLoggable(Level.FINEST)) logger.finest("Handling restful request for " + servletRequest.getPathInfo());
+    try {
+      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
+      executeRequest(servletRequest, servletResponse);
+    } catch (ContentTypes.InvalidContentTypeException icte) {
+      sendError(servletResponse, new ResponseItem(ResponseError.BAD_REQUEST, icte.getMessage()));
+    }
+  }
+
+  /**
+   * Actual dispatch handling for servlet requests
+   */
+  void executeRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+      throws IOException {
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("Handling restful request for " + servletRequest.getPathInfo());
+    }
 
     setCharacterEncodings(servletRequest, servletResponse);
 
@@ -105,10 +125,7 @@ public class DataServiceServlet extends ApiServlet {
 
     Reader bodyReader = null;
     if (!servletRequest.getMethod().equals("GET") && !servletRequest.getMethod().equals("HEAD")) {
-      String contentType = servletRequest.getContentType();
-      if (contentType == null || !contentType.startsWith("application/x-www-form-urlencoded")) {
-        bodyReader = servletRequest.getReader();
-      }
+      bodyReader = servletRequest.getReader();
     }
 
     // Execute the request
@@ -156,21 +173,26 @@ public class DataServiceServlet extends ApiServlet {
       formatString = servletRequest.getParameter(FORMAT_PARAM);
     } catch (Throwable t) {
       // this happens while testing
-      if (logger.isLoggable(Level.FINE)) logger.fine("Unexpected error : format param is null " + t.toString());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Unexpected error : format param is null " + t.toString());
+      }
     }
     try {
-      contentType = servletRequest.getHeader(CONTENT_TYPE);
+      contentType = servletRequest.getContentType();
     } catch (Throwable t) {
       //this happens while testing
-      if (logger.isLoggable(Level.FINE)) logger.fine("Unexpected error : content type is null " + t.toString());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Unexpected error : content type is null " + t.toString());
+      }
     }
 
+
     if (contentType != null) {
-      if (contentType.equals("application/json")) {
+      if (ContentTypes.ALLOWED_JSON_CONTENT_TYPES.contains(contentType)) {
         converter = jsonConverter;
-      } else if (contentType.equals("application/atom+xml")) {
+      } else if (ContentTypes.ALLOWED_ATOM_CONTENT_TYPES.contains(contentType)) {
         converter = atomConverter;
-      } else if (contentType.equals("application/xml")) {
+      } else if (ContentTypes.ALLOWED_XML_CONTENT_TYPES.contains(contentType)) {
         converter = xmlConverter;
       } else if (formatString == null) {
         // takes care of cases where content!= null but is ""

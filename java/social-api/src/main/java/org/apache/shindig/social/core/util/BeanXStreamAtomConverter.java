@@ -17,11 +17,12 @@
  */
 package org.apache.shindig.social.core.util;
 
+import com.google.inject.Inject;
+
+import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
 import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
 import org.apache.shindig.social.core.util.atom.AtomFeed;
-
-import com.google.inject.Inject;
 
 /**
  * Converts output to atom.
@@ -44,7 +45,7 @@ public class BeanXStreamAtomConverter extends BeanXStreamConverter {
    */
   @Override
   public String getContentType() {
-    return "application/atom+xml";
+    return ContentTypes.OUTPUT_ATOM_CONTENT_TYPE;
   }
 
   /**

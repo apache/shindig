@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
 import org.apache.shindig.social.core.model.AddressImpl;
@@ -37,9 +41,6 @@ import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Smoker;
 import org.apache.shindig.social.opensocial.model.Url;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -219,7 +220,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", allFieldsParam);
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
-    String resp = getResponse("/people/canonical/@self", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/people/canonical/@self", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp).getJSONObject("entry");
 
     assertStringField(result, canonical.getAboutMe(), Person.Field.ABOUT_ME);
@@ -459,7 +461,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("fields", null);
 
     // Currently, for Shindig @all == @friends
-    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));
@@ -482,7 +485,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     extraParams.put("count", "1");
     extraParams.put("fields", null);
 
-    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));
@@ -493,7 +497,8 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     // Get the second page
     extraParams.put("startIndex", "1");
-    resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null, "application/json");
+    resp = getResponse("/people/john.doe/@friends", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     result = getJson(resp);
 
     assertEquals(3, result.getInt("totalResults"));

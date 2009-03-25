@@ -20,6 +20,7 @@ package org.apache.shindig.protocol.conversion;
 import org.apache.commons.betwixt.IntrospectionConfiguration;
 import org.apache.commons.betwixt.io.BeanReader;
 import org.apache.commons.betwixt.io.BeanWriter;
+import org.apache.shindig.protocol.ContentTypes;
 
 import org.xml.sax.SAXException;
 
@@ -35,7 +36,7 @@ public class BeanXmlConverter implements BeanConverter {
       Logger.getLogger(BeanXmlConverter.class.getName());
 
   public String getContentType() {
-    return "application/xml";
+    return ContentTypes.OUTPUT_XML_CONTENT_TYPE;
   }
 
   public String convertToString(Object pojo) {

@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.social.dataservice.integration;
 
+import org.apache.shindig.protocol.ContentTypes;
+
 import com.google.common.collect.Maps;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -44,7 +46,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
-    String resp = getResponse("/appdata/john.doe/@friends/app", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/appdata/john.doe/@friends/app", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(3, data.length());
@@ -74,7 +77,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", null);
-    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -100,7 +104,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
-    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -127,7 +132,8 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // app id is mocked out
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "peabody");
-    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null, "application/json");
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
@@ -143,12 +149,14 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     // With the wrong field
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "peabody");
-    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null, "application/json");
+    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     assertCount("0");
 
     extraParams.put("fields", "count");
-    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null, "application/json");
+    getResponse("/appdata/john.doe/@self/app", "DELETE", extraParams, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     assertCount(null);
   }
@@ -160,13 +168,15 @@ public class RestfulJsonDataTest extends AbstractLargeRestfulTests {
     Map<String, String> extraParams = Maps.newHashMap();
     extraParams.put("fields", "count");
     String postData = "{count : 5}";
-    getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData, null, "application/json");
+    getResponse("/appdata/john.doe/@self/app", "POST", extraParams, postData, null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     assertCount("5");
   }
 
   private void assertCount(String expectedCount) throws Exception {
-    String resp = getResponse("/appdata/john.doe/@self/app", "GET", null, "application/json");
+    String resp = getResponse("/appdata/john.doe/@self/app", "GET", null,
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
     JSONObject data = getJson(resp).getJSONObject("entry");
     assertEquals(1, data.length());
 

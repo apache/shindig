@@ -17,42 +17,45 @@
  */
 package org.apache.shindig.protocol;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * JSON-RPC handler servlet.
  */
 public class JsonRpcServlet extends ApiServlet {
 
+  public static final Set<String> ALLOWED_CONTENT_TYPES =
+      new ImmutableSet.Builder<String>().addAll(ContentTypes.ALLOWED_JSON_CONTENT_TYPES)
+          .addAll(ContentTypes.ALLOWED_MULTIPART_CONTENT_TYPES).build();
+
   /**
    * In a multipart request, the form item with field name "request" will contain the
    * actual request, per the proposed Opensocial 0.9 specification.
    */
   public static final String REQUEST_PARAM = "request";
-  private static final String CONTENT_TYPE_JSON = "application/json";
   
   private MultipartFormParser formParser;
 
@@ -82,19 +85,20 @@ public class JsonRpcServlet extends ApiServlet {
   @Override
   protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
-    SecurityToken token = getSecurityToken(servletRequest);
-    if (token == null) {
-      sendSecurityError(servletResponse);
-      return;
-    }
-
-    setCharacterEncodings(servletRequest, servletResponse);
-    servletResponse.setContentType(CONTENT_TYPE_JSON);
-
     try {
+      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
+      SecurityToken token = getSecurityToken(servletRequest);
+      if (token == null) {
+        sendSecurityError(servletResponse);
+        return;
+      }
+
+      setCharacterEncodings(servletRequest, servletResponse);
+      servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
       String content = null;
       Map<String, FormDataItem> formItems = new HashMap<String, FormDataItem>();
-      
+
       if (formParser.isMultipartContent(servletRequest)) {
         for (FormDataItem item : formParser.parse(servletRequest)) {
           if (item.isFormField() && content == null) {
@@ -103,15 +107,15 @@ public class JsonRpcServlet extends ApiServlet {
             // field or file item will not be parsed out, but will be exposed via getFormItem
             // method of RequestItem. Here we are lenient where a mime part which has content type
             // application/json will be considered as request.
-            if (REQUEST_PARAM.equals(item.getFieldName()) ||
-                CONTENT_TYPE_JSON.equals(item.getContentType())) {
-              content = IOUtils.toString(item.getInputStream());
+            if (!REQUEST_PARAM.equals(item.getFieldName())) {
+              checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
             }
+            content = IOUtils.toString(item.getInputStream());
           } else {
             formItems.put(item.getFieldName(), item);
           }
         }
-        
+
         if (content == null) {
           content = "";
         }
@@ -130,6 +134,8 @@ public class JsonRpcServlet extends ApiServlet {
       }
     } catch (JSONException je) {
       sendBadRequest(je, servletResponse);
+    } catch (ContentTypes.InvalidContentTypeException icte) {
+      sendBadRequest(icte, servletResponse);
     }
   }
 

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.xstream.StackDriver;
@@ -80,7 +81,7 @@ public class BeanXStreamConverter implements BeanConverter {
   }
 
   public String getContentType() {
-    return "application/xml";
+    return ContentTypes.OUTPUT_XML_CONTENT_TYPE;
   }
 
   public String convertToString(Object pojo) {
