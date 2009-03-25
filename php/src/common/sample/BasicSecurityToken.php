@@ -25,13 +25,13 @@
 class BasicSecurityToken extends SecurityToken {
   /** serialized form of the token */
   private $token;
-  
+
   /** data from the token */
   private $tokenData;
-  
+
   /** tool to use for signing and encrypting the token */
   protected $crypter;
-  
+
   private $OWNER_KEY = "o";
   private $APP_KEY = "a";
   private $VIEWER_KEY = "v";
@@ -39,7 +39,7 @@ class BasicSecurityToken extends SecurityToken {
   private $APPURL_KEY = "u";
   private $MODULE_KEY = "m";
   private $CONTAINER_KEY = "c";
-  
+
   private $authenticationMode;
 
   /**
@@ -53,7 +53,7 @@ class BasicSecurityToken extends SecurityToken {
    * Generates a token from an input string
    * @param token String form of token
    * @param maxAge max age of the token (in seconds)
-   * @throws BlobCrypterException 
+   * @throws BlobCrypterException
    */
   static public function createFromToken($token, $maxAge) {
     return new BasicSecurityToken($token, $maxAge, null, null, null, null, null, null, null);
@@ -67,8 +67,8 @@ class BasicSecurityToken extends SecurityToken {
    * @param domain domain of the container
    * @param appUrl url where the application lives
    * @param moduleId module id of this gadget
-   * @return BasicSecurityToken 
-   * @throws BlobCrypterException 
+   * @return BasicSecurityToken
+   * @throws BlobCrypterException
    */
   static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {
     return new BasicSecurityToken(null, null, $owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId);
@@ -147,7 +147,7 @@ class BasicSecurityToken extends SecurityToken {
     if ($this->isAnonymous()) {
       throw new Exception("Can't get appUrl from an anonymous token");
     }
-    return $this->tokenData[$this->APPURL_KEY];
+    return urldecode($this->tokenData[$this->APPURL_KEY]);
   }
 
   /**
@@ -172,14 +172,14 @@ class BasicSecurityToken extends SecurityToken {
     }
     return $this->tokenData[$this->CONTAINER_KEY];
   }
-  
+
   /**
    * {@inheritDoc}
    */
   public function getAuthenticationMode() {
     return $this->authenticationMode;
   }
-  
+
   public function setAuthenticationMode($mode) {
     $this->authenticationMode = $mode;
   }

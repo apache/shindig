@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,12 +20,18 @@
 
 class GadgetHrefRenderer extends GadgetRenderer {
 
+  /**
+   * Renders a 'proxied content' view, for reference see:
+   * http://opensocial-resources.googlecode.com/svn/spec/draft/OpenSocial-Data-Pipelining.xml
+   *
+   * @param Gadget $gadget
+   * @param array $view
+   */
   public function renderGadget(Gadget $gadget, $view) {
     /* TODO
      * We should really re-add OAuth fetching support some day, uses these view atributes:
      * $view['oauthServiceName'], $view['oauthTokenName'], $view['oauthRequestToken'], $view['oauthRequestTokenSecret'];
     */
-
     $gadgetSigner = Config::get('security_token_signer');
     $gadgetSigner = new $gadgetSigner();
     $token = $gadget->gadgetContext->extractAndValidateToken($gadgetSigner);
@@ -35,18 +40,22 @@ class GadgetHrefRenderer extends GadgetRenderer {
     $refreshInterval = $this->getRefreshInterval($view);
     $href = $this->buildHref($view, $token);
 
-    $signingFetcherFactory = false;
-    $request = new RemoteContentRequest($href);
-    $request->setToken($token);
-    if ($authz != 'NONE') {
-      $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
-      $request->setAuthType($authz);
-    }
+    // rewrite our $_GET to match the outgoing request, this is currently needed for the oauth library
+    // to generate it's correct signature
+    $_GET = $_POST = array();
+    $uri = parse_url($href);
+    parse_str($uri['query'], $_GET);
 
-    //TODO Currently our signing fetcher assumes it's being called from the makeRequest handler and the $_GET and $_POST should be relayed.
-    // Here that's not the case, so we reset our super globals. We should refactor the signing fetcher to not make this assumption anymore.
-    $_GET = array('st' => $_GET['st']);
-    $_POST = array();
+    $request = new RemoteContentRequest($href);
+
+    $request->setToken($token);
+    $request->setRefreshInterval($refreshInterval);
+    $request->setAuthType($authz);
+
+    $signingFetcherFactory = false;
+    if ($authz != 'none') {
+      $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+    }
 
     $basicFetcher = new BasicRemoteContentFetcher();
     $basicRemoteContent = new BasicRemoteContent($basicFetcher, $signingFetcherFactory, $gadgetSigner);
@@ -54,6 +63,14 @@ class GadgetHrefRenderer extends GadgetRenderer {
     echo $response->getResponseContent();
   }
 
+  /**
+   * Builds the outgoing URL by taking the href attribute of the view and appending
+   * the country, lang, and opensocial query params to it
+   *
+   * @param array $view
+   * @param SecurityToken $token
+   * @return string the url
+   */
   private function buildHref($view, $token) {
     $href = $view['href'];
     if (empty($href)) {
@@ -75,11 +92,24 @@ class GadgetHrefRenderer extends GadgetRenderer {
     return $href;
   }
 
+  /**
+   * Returns the requested refreshInterval (cache time) of the view, or if none is specified
+   * it will return the configured default_refresh_interval value
+   *
+   * @param array $view
+   * @return int refresh interval
+   */
   private function getRefreshInterval($view) {
-    return ! empty($view['refreshInterval']) && is_numeric($view['refreshInterval']) ? $view['refreshInterval'] : 3500;
+    return ! empty($view['refreshInterval']) && is_numeric($view['refreshInterval']) ? $view['refreshInterval'] : Config::get('default_refresh_interval');
   }
 
+  /**
+   * Returns the authz attribute of the view, can be 'none', 'signed' or 'oauth'
+   *
+   * @param array $view
+   * @return string authz attribute
+   */
   private function getAuthz($view) {
-    return ! empty($view['authz']) ? strtoupper($view['authz']) : 'NONE';
+    return ! empty($view['authz']) ? strtolower($view['authz']) : 'none';
   }
 }
