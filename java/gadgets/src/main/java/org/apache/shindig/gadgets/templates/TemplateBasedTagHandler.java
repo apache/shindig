@@ -54,8 +54,7 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
     Object oldCur = processor.getTemplateContext().setCur(null);
     Node oldTemplateRoot = processor.getTemplateContext().setTemplateRoot(processedContent);
     
-    // Process the template content given the new EL state
-    processor.processChildNodes(result, templateDefinition);
+    processTemplate(result, tagInstance, processor);
     
     // And restore the template context
     processor.getTemplateContext().setMy(oldMy);
@@ -63,10 +62,15 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
     processor.getTemplateContext().setTemplateRoot(oldTemplateRoot);
   }
   
+  /** Process the template content in the new EL state */
+  protected void processTemplate(Node result, Element tagInstance, TemplateProcessor processor) {
+    processor.processChildNodes(result, templateDefinition);
+    
+  }
   /**
    * Compute the value of ${My} for this tag execution.
    */
-  private Map<String, Object> computeMy(Element tagInstance, Node processedContent,
+  protected Map<String, Object> computeMy(Element tagInstance, Node processedContent,
       TemplateProcessor processor) {
     Map<String, Object> myMap = Maps.newHashMap();
     
