@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
- <ModulePrefs title="Social Activities World">
+ <ModulePrefs title="Social Activities World"
+              icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
    <Require feature="opensocial-0.7"></Require>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>

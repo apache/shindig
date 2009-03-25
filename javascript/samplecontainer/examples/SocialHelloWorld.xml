@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
- <ModulePrefs title="Social Hello World">
+ <ModulePrefs title="Social Hello World"
+              description="The Social Hello World Application Displays multilingual hello messages"
+              thumbnail="http://localhost:8080/"
+              icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
    <Require feature="opensocial-0.7"></Require>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>

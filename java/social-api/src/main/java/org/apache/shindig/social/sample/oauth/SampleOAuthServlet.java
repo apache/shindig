@@ -91,14 +91,14 @@ public class SampleOAuthServlet extends InjectedServlet {
 
     String consumerKey = requestMessage.getConsumerKey();
     if (consumerKey == null) {
-      OAuthProblemException e = new OAuthProblemException("parameter_absent");
-      e.setParameter("oauth_paramaeters_absent", "oauth_consumer_key");
+      OAuthProblemException e = new OAuthProblemException(OAuth.Problems.PARAMETER_ABSENT);
+      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, "oauth_consumer_key");
       throw e;
     }
     OAuthConsumer consumer = dataStore.getConsumer(consumerKey);
 
     if (consumer == null)
-      throw new OAuthProblemException("consumer_key_unknown");
+      throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
 
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     VALIDATOR.validateMessage(requestMessage, accessor);
@@ -117,10 +117,16 @@ public class SampleOAuthServlet extends InjectedServlet {
       HttpServletResponse servletResponse) throws ServletException, IOException, OAuthException, URISyntaxException {
 
     OAuthMessage requestMessage = OAuthServlet.getMessage(servletRequest, null);
+
+    if (requestMessage.getToken() == null) {
+      // MALFORMED REQUEST
+      servletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Authentication token not found");
+      return;
+    }
     OAuthEntry entry = dataStore.getEntry(requestMessage.getToken());
 
     if (entry == null) {
-      servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "Authentication Token not found");
+      servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "OAuth Entry not found");
       return;
     }
 
@@ -163,6 +169,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       out.close();
     } else {
       callback = OAuth.addParameters(callback, OAuth.OAUTH_TOKEN, entry.token);
+      // Add user_id to the callback
       callback = OAuth.addParameters(callback, "user_id", entry.userId);
 
       servletResponse.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
@@ -178,7 +185,7 @@ public class SampleOAuthServlet extends InjectedServlet {
 
     OAuthEntry entry = getValidatedEntry(requestMessage);
     if (entry == null)
-      throw new OAuthProblemException("token_rejected");
+      throw new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
 
     if (!entry.authorized) {
       throw new ServletException("additional_authorization_required");
@@ -199,30 +206,30 @@ public class SampleOAuthServlet extends InjectedServlet {
 
     OAuthEntry entry = dataStore.getEntry(requestMessage.getToken());
     if (entry == null)
-      throw new OAuthProblemException("token_rejected");
+      throw new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
 
     if (entry.type != OAuthEntry.Type.REQUEST)
-      throw new OAuthProblemException("token_used");
+      throw new OAuthProblemException(OAuth.Problems.TOKEN_USED);
 
     if (entry.isExpired())
-      throw new OAuthProblemException("token_expired");
+      throw new OAuthProblemException(OAuth.Problems.TOKEN_EXPIRED);
 
     // find consumer key, compare with supplied value, if present.
 
     if  (requestMessage.getConsumerKey() == null) {
-      OAuthProblemException e = new OAuthProblemException("parameter_absent");
-      e.setParameter("oauth_paramaeters_absent", "oauth_consumer");
+      OAuthProblemException e = new OAuthProblemException(OAuth.Problems.PARAMETER_ABSENT);
+      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, "oauth_consumer");
       throw e;
     }
 
     String consumerKey = entry.consumerKey;
     if (!consumerKey.equals(requestMessage.getConsumerKey()))
-        throw new OAuthProblemException("consumer_key_refused");
+        throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_REFUSED);
 
     OAuthConsumer consumer = dataStore.getConsumer(consumerKey);
 
     if (consumer == null)
-      throw new OAuthProblemException("consumer_key_unknown");
+      throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
     
     OAuthAccessor accessor = new OAuthAccessor(consumer);
 
