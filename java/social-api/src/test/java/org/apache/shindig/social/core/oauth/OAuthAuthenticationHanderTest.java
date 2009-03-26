@@ -374,7 +374,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     FakeHttpServletRequest req = new FakeHttpServletRequest();
     String body = "BODY";
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    byte[] bytes = reqHandler.readBody(req);
+    byte[] bytes = OAuthAuthenticationHandler.readBody(req);
     assertTrue(Arrays.equals(bytes, CharsetUtil.getUtf8Bytes(body)));
     assertEquals(req.getAttribute(AuthenticationHandler.STASHED_BODY), bytes);
   }
@@ -388,7 +388,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
         "UTF-8");
     req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
-    reqHandler.verifyBodyHash(req, hash);
+    OAuthAuthenticationHandler.verifyBodyHash(req, hash);
   }
 
   @Test
@@ -401,7 +401,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
         DigestUtils.sha(CharsetUtil.getUtf8Bytes("NOTBODY"))), "UTF-8");
     req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
     try {
-      reqHandler.verifyBodyHash(req, hash);
+      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       // Pass
@@ -418,7 +418,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
         "UTF-8");
     req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
     try {
-      reqHandler.verifyBodyHash(req, hash);
+      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       // Pass
@@ -436,7 +436,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
         "UTF-8");
     req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
     try {
-      reqHandler.verifyBodyHash(req, hash);
+      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       // Pass
@@ -454,7 +454,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
         "UTF-8");
     req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
     try {
-      reqHandler.verifyBodyHash(req, hash);
+      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       // Pass
