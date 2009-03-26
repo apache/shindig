@@ -93,7 +93,7 @@ public abstract class ApiServlet extends InjectedServlet {
     this.dispatcher = dispatcher;
   }
 
-  @Inject
+  @Inject(optional = true)
   public void setDisallowUnknownContentTypes(
       @Named("shindig.api.disallow-unknown-content-types") boolean disallowUnknownContentTypes) {
     this.disallowUnknownContentTypes = disallowUnknownContentTypes;
