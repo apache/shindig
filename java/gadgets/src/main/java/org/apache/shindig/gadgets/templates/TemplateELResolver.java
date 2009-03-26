@@ -98,7 +98,7 @@ public class TemplateELResolver extends ELResolver {
         }
       }
       
-      // Check current context next.
+      // Check ${Cur} next.
       Object cur = templateContext.getCur();
       // Resolve through "cur" as if it were a value - if "isPropertyResolved()"
       // is true, it was handled
@@ -113,14 +113,14 @@ public class TemplateELResolver extends ELResolver {
         }
       }
       
-      // Check current scope variables next.
+      // Check ${My} next.
       Map<String, ? extends Object> scope = templateContext.getMy();
       if (scope != null && scope.containsKey(property)) {
         context.setPropertyResolved(true);
         return scope.get(property);
       }
       
-      // Look at Top context last.
+      // Look at ${Top} context last.
       scope = templateContext.getTop();
       if (scope != null && scope.containsKey(property)) {
         context.setPropertyResolved(true);

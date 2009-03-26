@@ -93,6 +93,26 @@ public class DefaultTemplateProcessorTest {
   }
   
   @Test
+  public void testTopVariable() throws Exception {
+    String output = executeTemplate("${Top.foo.title}");
+    assertEquals("bar", output);
+  }
+  
+  @Test
+  public void testCurVariable() throws Exception {
+    // Cur starts as Top
+    String output = executeTemplate("${Cur.foo.title}");
+    assertEquals("bar", output);
+  }
+  
+  @Test
+  public void testMyVariable() throws Exception {
+    // My starts as null
+    String output = executeTemplate("${My.foo.title}");
+    assertEquals("", output);
+  }
+  
+  @Test
   public void testPlainText() throws Exception {
     // Verify that plain text is not interfered with, or incorrectly escaped
     String output = executeTemplate("<span>foo&amp;&bar</span>");
@@ -142,6 +162,12 @@ public class DefaultTemplateProcessorTest {
   public void testRepeat() throws Exception {
     String output = executeTemplate("<span repeat=\"${toys}\">${name}</span>");
     assertEquals("<span>Ball</span><span>Car</span>", output);
+  }
+  
+  @Test
+  public void testCurAttribute() throws Exception {
+    String output = executeTemplate("<span cur=\"${user.name}\">${first}</span>");
+    assertEquals("<span>John</span>", output);
   }
   
   @Test

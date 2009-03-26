@@ -68,6 +68,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   public static final String ATTRIBUTE_INDEX = "index";
   public static final String ATTRIBUTE_REPEAT = "repeat";
   public static final String ATTRIBUTE_VAR = "var";
+  public static final String ATTRIBUTE_CUR = "cur";
   
   private final Expressions expressions;
   // Reused buffer for creating template output
@@ -310,6 +311,14 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       }
     }
 
+    // TODO: the spec is silent on order of evaluation of "cur" relative
+    // to "if" and "repeat"
+    Attr curAttribute = element.getAttributeNode(ATTRIBUTE_CUR);
+    Object oldCur = templateContext.getCur();
+    if (curAttribute != null) {
+      templateContext.setCur(evaluate(curAttribute.getValue(), Object.class, null));
+    }
+    
     if (handler != null) {
       handler.process(result, element, this);
     } else {
@@ -327,13 +336,17 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       result.appendChild(resultNode);
     }
     
+    if (curAttribute != null) {
+      templateContext.setCur(oldCur);
+    }
   }
 
   private void clearSpecialAttributes(Element element) {
     element.removeAttribute(ATTRIBUTE_IF);
     element.removeAttribute(ATTRIBUTE_REPEAT);
     element.removeAttribute(ATTRIBUTE_INDEX);
-    element.removeAttribute(ATTRIBUTE_VAR);    
+    element.removeAttribute(ATTRIBUTE_VAR);
+    element.removeAttribute(ATTRIBUTE_CUR);
   }
   
   /**

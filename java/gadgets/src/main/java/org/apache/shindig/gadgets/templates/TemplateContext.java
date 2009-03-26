@@ -42,6 +42,7 @@ public class TemplateContext {
   public TemplateContext(GadgetContext gadgetContext, Map<String, JSONObject> top) {
     this.gadgetContext = gadgetContext;
     this.top = top;
+    this.cur = top;
   }
   
   public Map<String, ? extends Object> getTop() {
@@ -49,7 +50,7 @@ public class TemplateContext {
   }
   
   public Object getCur() {
-    return cur != null ? cur : top;
+    return cur;
   }
 
   public Object setCur(Object data) {
