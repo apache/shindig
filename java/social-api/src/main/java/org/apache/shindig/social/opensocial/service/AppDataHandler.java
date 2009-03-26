@@ -92,6 +92,8 @@ public class AppDataHandler {
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
+    @SuppressWarnings("unchecked")
+    // As of today, this is the only format supported by the AppData protocol
     Map<String, String> values = request.getTypedParameter("data", Map.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {

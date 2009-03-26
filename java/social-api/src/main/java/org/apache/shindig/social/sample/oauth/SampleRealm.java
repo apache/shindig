@@ -18,29 +18,23 @@
  */
 package org.apache.shindig.social.sample.oauth;
 
-import org.jsecurity.realm.AuthorizingRealm;
-import org.jsecurity.authz.AuthorizationInfo;
-import org.jsecurity.authz.AuthorizationException;
-import org.jsecurity.authz.SimpleAuthorizationInfo;
-import org.jsecurity.subject.PrincipalCollection;
+import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
+import org.jsecurity.authc.AccountException;
+import org.jsecurity.authc.AuthenticationException;
 import org.jsecurity.authc.AuthenticationInfo;
 import org.jsecurity.authc.AuthenticationToken;
-import org.jsecurity.authc.AuthenticationException;
-import org.jsecurity.authc.AccountException;
-import org.jsecurity.authc.UsernamePasswordToken;
 import org.jsecurity.authc.SimpleAuthenticationInfo;
-import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
-import org.apache.shindig.social.opensocial.model.Person;
-import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.protocol.ResponseError;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
+import org.jsecurity.authc.UsernamePasswordToken;
+import org.jsecurity.authz.AuthorizationException;
+import org.jsecurity.authz.AuthorizationInfo;
+import org.jsecurity.authz.SimpleAuthorizationInfo;
+import org.jsecurity.realm.AuthorizingRealm;
+import org.jsecurity.subject.PrincipalCollection;
 
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 
 /**
  * A Sample Jsecurity Realm that uses the JSON DB to get passwords
