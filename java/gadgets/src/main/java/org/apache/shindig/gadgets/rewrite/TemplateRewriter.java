@@ -45,6 +45,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -59,8 +60,8 @@ public class TemplateRewriter implements ContentRewriter {
 
   public final static Set<String> TAGS = ImmutableSet.of("script");
 
-  /** A temporary parameter while server-side templating is in development */
-  static final String SERVER_TEMPLATING_PARAM = "process-on-server";
+  /** Set to true to block auto-processing of templates */
+  static final Object DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
 
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
@@ -102,13 +103,13 @@ public class TemplateRewriter implements ContentRewriter {
   }
 
   /**
-   * For now, only enable server-side templating when the feature contains:
+   * Disable server-side templating when the feature contains:
    * <pre>
-   *   &lt;Param name="process-on-server"&gt;true&lt;/Param&gt;
+   *   &lt;Param name="disableAutoProcessing"&gt;true&lt;/Param&gt;
    * </pre>
    */
   private boolean isServerTemplatingEnabled(Feature f) {
-    return ("true".equalsIgnoreCase(f.getParams().get(SERVER_TEMPLATING_PARAM)));
+    return (!"true".equalsIgnoreCase(f.getParams().get(DISABLE_AUTO_PROCESSING_PARAM)));
   }
 
   private RewriterResults rewriteImpl(Gadget gadget, MutableContent content)
@@ -160,50 +161,57 @@ public class TemplateRewriter implements ContentRewriter {
   
   private RewriterResults processInlineTemplates(Gadget gadget, MutableContent content,
       List<Element> allTemplates, TagRegistry registry) throws GadgetException {
-    final Map<String, JSONObject> pipelinedData = content.getPipelinedData();
+    Map<String, JSONObject> pipelinedData = content.getPipelinedData();
 
-    List<Element> templates = ImmutableList.copyOf(
-        Iterables.filter(allTemplates, new Predicate<Element>() {
-      public boolean apply(Element element) {
-        String name = element.getAttribute("name");
-        String tag = element.getAttribute("tag");
-        String require = element.getAttribute("require");
-        // Templates with "tag" or "name" can't be processed;  templates
-        // that require data that isn't available on the server can't
-        // be processed either
-        return "".equals(name)
-            && "".equals(tag)
-            && checkRequiredData(require, pipelinedData.keySet());
+    // If true, client-side processing will be needed
+    boolean needsFeature = false;
+    List<Element> templates = Lists.newArrayList();
+    for (Element element : allTemplates) {
+      String name = element.getAttribute("name");
+      String tag = element.getAttribute("tag");
+      String require = element.getAttribute("require");
+
+      if (!"".equals(name) ||
+          !checkRequiredData(require, pipelinedData.keySet())) {
+        // Can't be processed on the server at all;  keep client-side processing
+        needsFeature = true;
+      } else if ("".equals(tag)) {
+        templates.add(element);
       }
-    }));
-
-    if (templates.isEmpty()) {
-      return null;
     }
-
-    TemplateContext templateContext = new TemplateContext(
-        gadget.getContext(), pipelinedData);
     
-    MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
-        gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
-    MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
-
-    for (Element template : templates) {
-      DocumentFragment result = processor.get().processTemplate(
-          template, templateContext, messageELResolver, registry);
-      // Note: replaceNode errors when replacing Element with DocumentFragment
-      template.getParentNode().insertBefore(result, template);
-      // TODO: clients that need to update data that is initially available,
-      // e.g. paging through friend lists, will still need the template
-      template.getParentNode().removeChild(template);
+    if (!templates.isEmpty()) {
+      TemplateContext templateContext = new TemplateContext(
+          gadget.getContext(), pipelinedData);
+      
+      MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
+          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
+      MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
+  
+      for (Element template : templates) {
+        DocumentFragment result = processor.get().processTemplate(
+            template, templateContext, messageELResolver, registry);
+        template.getParentNode().insertBefore(result, template);
+        if ("true".equals(template.getAttribute("autoUpdate"))) {
+          // autoUpdate requires client-side processing.
+          // TODO: give client-side processing some hope of finding the pre-rendered content
+          needsFeature = true;
+        } else {
+          template.getParentNode().removeChild(template);
+        }
+      }
+  
+      MutableContent.notifyEdit(content.getDocument());
     }
-
-    // TODO: Deactivate the "os-templates" feature if all templates have
-    // been rendered.
-    // Note: This may not always be correct behavior since client may want
-    // some purely client-side templating (such as from libraries)
-    MutableContent.notifyEdit(content.getDocument());
-    return RewriterResults.cacheableIndefinitely();
+    
+    // Remove the opensocial-templates feature if we've fully processed all
+    // inline templates.
+    // TODO: remove inline custom tags as well.
+    if (!needsFeature) {
+      gadget.removeFeature("opensocial-templates");
+    }
+    
+    return RewriterResults.notCacheable();
   }
 
   /**

@@ -20,7 +20,9 @@
 <Module>
   <ModulePrefs title="TemplatesEndToEndTest">
     <Require feature="opensocial-0.8"/>
-    <Require feature="opensocial-templates"/>
+    <Require feature="opensocial-templates">
+      <Param name="disableAutoProcessing">true</Param>
+    </Require>
   </ModulePrefs>
   <Content type="html">
     <![CDATA[

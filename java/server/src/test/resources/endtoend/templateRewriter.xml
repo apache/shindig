@@ -20,9 +20,7 @@
 <Module>
   <ModulePrefs title="EndToEndTest">
     <Require feature="opensocial-data" />
-    <Require feature="opensocial-templates">
-      <Param name="process-on-server">true</Param>	
-    </Require>
+    <Require feature="opensocial-templates"/>
   </ModulePrefs>
   <Content type="html">
     <![CDATA[

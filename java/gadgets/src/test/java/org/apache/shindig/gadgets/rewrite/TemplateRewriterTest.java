@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
@@ -72,8 +73,9 @@ public class TemplateRewriterTest {
   
   private static final String CONTENT_WITH_TAG =
     "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";  
-
   
+  private static final String CONTENT_WITH_AUTO_UPDATE =
+    "<script type='text/os-template' autoUpdate='true'>Hello, ${user.name}</script>";  
   @Before
   public void setUp() {
     Set<TagHandler> handlers = ImmutableSet.of();
@@ -92,6 +94,7 @@ public class TemplateRewriterTest {
   public void simpleTemplate() throws Exception {
     // Render a simple template
     testExpectingTransform(getGadgetXml(CONTENT_PLAIN), "simple");
+    testFeatureRemoved();
   }
   
   @Test
@@ -104,32 +107,59 @@ public class TemplateRewriterTest {
   public void requiredDataPresent() throws Exception {
     // Required data is present - render 
     testExpectingTransform(getGadgetXml(CONTENT_REQUIRE), "required data");
+    testFeatureRemoved();
   }
   
   @Test
   public void requiredDataMissing() throws Exception {
     // Required data is missing - don't render
     testExpectingNoTransform(getGadgetXml(CONTENT_REQUIRE_MISSING), "missing data");
+    testFeatureNotRemoved();
   }
   
   @Test
   public void nameAttributePresent() throws Exception {
     // Don't render templates with a @name
     testExpectingNoTransform(getGadgetXml(CONTENT_WITH_NAME), "with @name");
+    testFeatureNotRemoved();
   }
   
   @Test
   public void tagAttributePresent() throws Exception {
     // Don't render templates with a @tag
     testExpectingNoTransform(getGadgetXml(CONTENT_WITH_TAG), "with @tag");
+    testFeatureRemoved();
   }
    
   @Test
   public void templateUsingMessage() throws Exception {
     // Render a simple template
     testExpectingTransform(getGadgetXml(CONTENT_WITH_MESSAGE), "simple");
+    testFeatureRemoved();
   }
   
+  @Test
+  public void autoUpdateTemplate() throws Exception {
+    setupGadget(getGadgetXml(CONTENT_WITH_AUTO_UPDATE));
+    rewriter.rewrite(gadget, content);
+    // The template should get transformed, but not removed
+    assertTrue("Template wasn't transformed", 
+        content.getContent().indexOf("Hello, John") > 0);
+    assertTrue("Template tag was removed",
+        content.getContent().contains("text/os-template"));
+    testFeatureNotRemoved();
+  }
+
+  private void testFeatureRemoved() {
+    assertTrue("Feature wasn't removed",
+        gadget.getRemovedFeatures().contains("opensocial-templates"));
+  }
+
+  private void testFeatureNotRemoved() {
+    assertFalse("Feature was removed",
+        gadget.getRemovedFeatures().contains("opensocial-templates"));
+  }
+
   private void testExpectingTransform(String code, String condition) throws Exception {
     setupGadget(code);
     rewriter.rewrite(gadget, content);
@@ -170,9 +200,7 @@ public class TemplateRewriterTest {
   
   private static String getGadgetXml(String content, boolean requireFeature) {
     String feature = requireFeature ?
-        "<Require feature='opensocial-templates'>" +
-        "  <Param name='" + TemplateRewriter.SERVER_TEMPLATING_PARAM + "'>true</Param>" +
-        "</Require>" : "";
+        "<Require feature='opensocial-templates'/>" : "";
     return "<Module>" + "<ModulePrefs title='Title'>"
         + feature
         + "  <Locale>"
