@@ -97,7 +97,9 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       // to well so now these clients are required to specify the correct content type. This code
       // lets clients which sign using the old technique to work if they specify the correct content
       // type. This support is deprecated and should be removed later.
-      if (allowLegacyBodySigning && !request.getContentType().contains(OAuth.FORM_ENCODED)) {
+      if (allowLegacyBodySigning && requestHasBody(request) &&
+          (StringUtils.isEmpty(request.getContentType())  ||
+          !request.getContentType().contains(OAuth.FORM_ENCODED))) {
         try {
           message.addParameter(readBodyString(request), "");
           return verifyMessage(message);
@@ -172,7 +174,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     }
   }
 
-  protected byte[] readBody(HttpServletRequest request) throws IOException {
+  public static byte[] readBody(HttpServletRequest request) throws IOException {
     if (request.getAttribute(AuthenticationHandler.STASHED_BODY) != null) {
       return (byte[])request.getAttribute(AuthenticationHandler.STASHED_BODY);
     }
@@ -181,19 +183,19 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     return rawBody;
   }
 
-  protected String readBodyString(HttpServletRequest request) throws IOException {
+  public static String readBodyString(HttpServletRequest request) throws IOException {
     byte[] rawBody = readBody(request);
     return IOUtils.toString(new ByteArrayInputStream(rawBody), request.getCharacterEncoding());
   }
 
-  protected void verifyBodyHash(HttpServletRequest request, String oauthBodyHash)
+  public static void verifyBodyHash(HttpServletRequest request, String oauthBodyHash)
       throws InvalidAuthenticationException {
     // we are doing body hash signing which is not permitted for form-encoded data
     if (request.getContentType().contains(OAuth.FORM_ENCODED)) {
       throw new AuthenticationHandler.InvalidAuthenticationException(
           "Cannot use oauth_body_hash with a Content-Type of application/x-www-form-urlencoded",
           null);
-    } else if ("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod())) {
+    } else if (!requestHasBody(request)) {
       throw new AuthenticationHandler.InvalidAuthenticationException(
           "Cannot use oauth_body_hash with a GET or HEAD request",null);
     } else {
@@ -212,11 +214,15 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     }
   }
 
-  protected String getParameter(OAuthMessage requestMessage, String key) {
+  public static String getParameter(OAuthMessage requestMessage, String key) {
     try {
       return StringUtils.trim(requestMessage.getParameter(key));
     } catch (IOException e) {
       return null;
     }
+  }
+
+  public static boolean requestHasBody(HttpServletRequest request) {
+    return !("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod()));
   }
 }
