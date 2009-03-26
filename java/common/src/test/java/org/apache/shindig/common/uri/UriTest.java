@@ -174,6 +174,22 @@ public class UriTest {
   }
 
   @Test
+  public void resolvePathIncludesSubdirs() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("fez/../huey/./dewey/../louis");
+
+    assertEquals("http://example.org/foo/bar/huey/louis", base.resolve(other).toString());
+  }
+
+  @Test
+  public void resolvePathSubdirsExtendsBeyondRoot() throws Exception {
+    Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
+    Uri other = Uri.parse("../random/../../../../../home");
+
+    assertEquals("http://example.org/home", base.resolve(other).toString());
+  }
+
+  @Test
   public void resolvePathRelative() throws Exception {
     Uri base = Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo");
     Uri other = Uri.parse("wee");
