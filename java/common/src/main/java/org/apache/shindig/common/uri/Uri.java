@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.uri;
 
+import com.google.common.base.Join;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -26,8 +27,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
 * Represents a Uniform Resource Identifier (URI) reference as defined by <a
@@ -124,11 +127,99 @@ public final class Uri {
    * @return The new url.
    */
   public Uri resolve(Uri other) {
-    // TODO: We can probably make this more efficient by implementing resolve ourselves.
     if (other == null) {
       return null;
     }
-    return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
+
+    String scheme = other.getScheme();
+    String authority = other.getAuthority();
+    String path = other.getPath();
+    String query = other.getQuery();
+    String fragment = other.getFragment();
+
+    if (scheme != null && scheme.length() > 0) {
+      // Do nothing - this will accept other's fields verbatim.
+    } else if (authority != null) {
+      // Schema-relative ie. "//newhost.com/foo?q=s". Take base scheme.
+      scheme = getScheme();
+    } else if (path != null && path.length() > 0) {
+      // Resolve other path against current. Keep prerequisites.
+      scheme = getScheme();
+      authority = getAuthority();
+      path = resolvePath(path);
+    } else if (query != null && query.length() > 0) {
+      // Accept query + fragment verbatim. Use base scheme/authority/path.
+      scheme = getScheme();
+      authority = getAuthority();
+      // Treat query-relative as ""-path with query.
+      path = resolvePath("");
+    } else if (fragment != null && fragment.length() > 0) {
+      // Accept fragment verbatim. Use base scheme/authority/path/query.
+      scheme = getScheme();
+      authority = getAuthority();
+      path = getPath();
+      query = getQuery();
+    }
+
+    return new UriBuilder()
+        .setScheme(scheme)
+        .setAuthority(authority)
+        .setPath(path)
+        .setQuery(query)
+        .setFragment(fragment)
+        .toUri();
+  }
+
+  /**
+   * Resolves {@code otherPath} against the current path, returning the result.
+   * Implements RFC 2396 resolution rules.
+   */
+  private String resolvePath(String otherPath) {
+    if (otherPath.startsWith("/")) {
+      // Optimization: just accept other.
+      return otherPath;
+    }
+    // Relative path. Treat current path as a stack, otherPath as a List
+    // in order to merge.
+    LinkedList<String> pathStack = new LinkedList<String>();
+    String curPath = getPath() != null ? getPath() : "/";  // Just in case.
+    StringTokenizer tok = new StringTokenizer(curPath, "/");
+    while (tok.hasMoreTokens()) {
+      pathStack.add(tok.nextToken());
+    }
+    if (!curPath.endsWith("/")) {
+      // The first entry in mergePath overwrites the last in the pathStack.
+      // eg. curPath = "/foo/bar", otherPath = "baz" --> "/foo/baz".
+      pathStack.removeLast();
+    }
+
+    LinkedList<String> mergePath = new LinkedList<String>();
+    StringTokenizer tok2 = new StringTokenizer(otherPath, "/");
+    while (tok2.hasMoreTokens()) {
+      mergePath.add(tok2.nextToken());
+    }
+    if (otherPath.endsWith("/") || otherPath.equals("")) {
+      // Retains the ending slash in the final join.
+      mergePath.add("");
+    }
+
+    // Merge mergePath into pathStack.
+    for (String mergeComponent : mergePath) {
+      if (mergeComponent.equals(".")) {
+        // Retain current position in the path. Continue.
+        continue;
+      } else if (mergeComponent.equals("..")) {
+        // Pop one off the path stack if available. If not do nothing.
+        if (!pathStack.isEmpty()) {
+          pathStack.removeLast();
+        }
+      } else {
+        // Append latest to the path.
+        pathStack.add(mergeComponent);
+      }
+    }
+
+    return "/" + Join.join("/", pathStack);
   }
 
   /**
