@@ -117,7 +117,7 @@ public class BeanJsonConverter implements BeanConverter {
   }
 
   public <T> T convertToObject(String string, Class<T> clazz) {
-    return (T)convertToObject(string, (Type) clazz);
+    return clazz.cast(convertToObject(string, (Type) clazz));
   }
 
   @SuppressWarnings("unchecked")

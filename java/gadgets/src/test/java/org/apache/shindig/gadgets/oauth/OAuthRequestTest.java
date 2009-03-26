@@ -1042,7 +1042,7 @@ public class OAuthRequestTest {
       }
     });
     try {
-      HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+      client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
           "funky-content", raw);
       fail("Should have thrown with oauth_body_hash mismatch");
     } catch (RuntimeException e) {
@@ -1061,7 +1061,7 @@ public class OAuthRequestTest {
       }
     });
     try {
-      HttpResponse resp = client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
+      client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
       fail("Should have thrown with oauth signature mismatch");
     } catch (RuntimeException e) {
       // good
@@ -1081,7 +1081,7 @@ public class OAuthRequestTest {
       }
     });
     try {
-      HttpResponse resp = client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+      client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
           "funky-content", raw);
       fail("Should have thrown with body hash in form encoded request");
     } catch (RuntimeException e) {

@@ -99,7 +99,7 @@ public class BeanJsonConverterTest extends TestCase {
 
     Object object = beanJsonConverter.convertToObject(simpleJson, null);
 
-    Map<String, Object> map = (Map<String,  Object>) object;
+    Map<?, ?> map = (Map<?, ?>) object;
 
     assertEquals("world", map.get("hello"));
     assertEquals(10, map.get("count"));
