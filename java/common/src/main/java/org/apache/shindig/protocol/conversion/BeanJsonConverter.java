@@ -116,8 +116,10 @@ public class BeanJsonConverter implements BeanConverter {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  // Class.cast() would be better - but the Class object may be null
   public <T> T convertToObject(String string, Class<T> clazz) {
-    return clazz.cast(convertToObject(string, (Type) clazz));
+    return (T)convertToObject(string, (Type) clazz);
   }
 
   @SuppressWarnings("unchecked")
