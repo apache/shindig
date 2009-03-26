@@ -51,7 +51,7 @@ public abstract class ProxyBase {
 
   protected static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
-      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding"
+      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding", "www-authenticate"
   );
 
   /**
