@@ -43,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -142,11 +143,8 @@ public class EndToEndTest {
   }
 
   @Test
+  @Ignore("per jasvir, this test is failing with webclient for an unknown reason")
   public void testFailCaja() throws Exception {
-    // TODO(jasvir):
-    // This test is failing with webclient
-    // for an unknown reason
-    /**
     HtmlPage page = executePageTest("failCajaTest", null);
     NodeList bodyList = page.getElementsByTagName("body");
     
@@ -158,7 +156,6 @@ public class EndToEndTest {
     assertEquals(body.getChildNodes().getLength(), 2);
     assertEquals(body.getFirstChild().getNodeName(), "pre");
     assertEquals(body.getLastChild().getNodeName(), "script");
-    */
   }
 
   @Test
