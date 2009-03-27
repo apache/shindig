@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+ -->
+
+<document xmlns="http://maven.apache.org/DOCUMENT/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.0 http://maven.apache.org/xsd/document-1.0.0.xsd"
+  outputName="shindig-site">
+  <meta>
+    <title>Shindig Documentation</title>
+    <author>The Apache Shindig Team</author>
+  </meta>
+
+  <toc name="Table of Contents">
+    <item name="Introduction" ref="index.xml"/>
+    <item name="Download" ref="download/index.apt"/>
+    <item name="Overview" ref="overview.xml"/>
+    <item name="Getting Started" ref="getting-started.apt"/>
+    <item name="Documentation Centre" ref="developers/index.xml"/>
+    <item name="Java" ref="developers/java/index.xml"/>
+    <item name="Building Java" ref="developers/java/build.xml"/>
+    <item name="Samples" ref="developers/java/samples.xml"/>
+    <item name="PHP" ref="developers/php/index.xml"/>
+    <item name="Building PHP" ref="developers/php/build.xml"/>
+    <item name="Features" ref="developers/features/index.xml"/>
+    <item name="Community Overview" ref="community/index.apt"/>
+    <item name="Getting Help" ref="community/getting-help.apt"/>
+    <item name="Code Conventions" ref="community/conventions/code.apt"/>
+    <item name="Jira Conventions" ref="community/conventions/jira.apt"/>
+    <item name="SVN Conventions" ref="community/conventions/svn.apt"/>
+    <item name="FAQ" ref="faq.fml"/>
+    <item name="Powered By" ref="powered-by.apt"/>
+    <item name="Resources" ref="resources.apt"/>
+  </toc>
+</document>

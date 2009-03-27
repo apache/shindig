@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd"
+  name="Shindig">
+  <bannerLeft>
+    <name>${project.name}</name>
+    <src>images/logos/shindig-logo.png</src>
+    <href>http://incubator.apache.org/shindig/</href>
+  </bannerLeft>
+  <bannerRight>
+    <name>ASF Incubator Project</name>
+    <src>images/logos/apache-incubator-logo.png</src> <!-- TODO change to HTTP url -->
+    <href>http://incubator.apache.org/</href>
+  </bannerRight>
+
+  <publishDate format="yyyy-MM-dd" position="right" />
+  <version position="none" />
+
+  <body>
+    <head>
+      <!-- TODO Add google analytics -->
+    </head>
+
+    <links>
+      <item name="Opensocial Foundation" href="http://www.opensocial.org"/>
+      <item name="Opensocial spec." href="http://www.opensocial.org/page/specs-1"/>
+    </links>
+
+    <breadcrumbs>
+      <item name="Apache" href="http://www.apache.org/" />
+      <item name="Incubator" href="http://incubator.apache.org/" />
+    </breadcrumbs>
+
+    <menu name="Main">
+      <item name="Welcome" href="/index.html"/>
+    </menu>
+
+    <menu name="Get Shindig">
+      <item name="Download" href="/download/index.html"/>
+      <item name="License" href="license.html"/>
+    </menu>
+
+    <menu name="About Shindig">
+      <item name="Overview" href="/overview.html"/>
+      <item name="Getting Started" href="/getting-started.html"/>
+      <item name="FAQ" href="/faq.html"/>
+      <item name="Resources" href="/resources.html"/>
+      <item name="Powered By" href="/powered-by.html"/>
+    </menu>
+
+    <menu name="Documentation">
+      <item name="Centre" href="/developers/index.html"/>
+      <item name="Java" href="/developers/java/index.html"  collapse="true">
+        <item name="Building" href="/developers/java/build.html"/>
+        <item name="Samples" href="/developers/java/samples.html"/>
+        <item name="Javadoc (1.1.x)" href="/shindig-1.1.x/apidocs/index.html"/>
+        <item name="Doc. (1.1.x)" href="/shindig-1.1.x/index.html"/>
+        <item name="Javadoc (1.0.x)" href="/shindig-1.0.x/apidocs/index.html"/>
+        <item name="Doc. (1.0.x)" href="/shindig-1.0.x/index.html"/>
+      </item>
+      <item name="PHP" href="/developers/php/index.html"  collapse="true">
+        <item name="Building" href="/developers/php/build.html"/>
+      </item>
+      <item name="Features" href="/developers/features/index.html"/>
+    </menu>
+
+    <menu name="Community">
+      <item name="Overview" href="/community/index.html"/>
+      <item name="Getting Help" href="/community/getting-help.html"/>
+      <item name="Issue Tracking" href="/issue-tracking.html"/>
+      <item name="Source Repository" href="/source-repository.html"/>
+      <item name="Wiki" href="http://cwiki.apache.org/confluence/display/SHINDIG/"/>
+      <item name="The Shindig Team" href="/team-list.html"/>
+    </menu>
+
+    <menu ref="reports" inherit="bottom" />
+  </body>
+</project>

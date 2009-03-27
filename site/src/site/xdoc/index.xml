@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Welcome To Shindig!</title>
+    <author>Vincent Siveton</author>
+    <date>2009-03-25</date>
+  </properties>
+  <body>
+    <!-- TODO Add a Google CSE Search Box -->
+    <!-- TODO Add Stay Connected with Ning, Twitter... -->
+
+    <section name="Welcome To Shindig !">
+      <div class="logo">
+        <a href="http://www.opensocial.org/">
+          <img src="./images/logos/opensocialsite-logo.png" alt="OpsenSocial Logo"/>
+        </a>
+      </div>
+      <p> Shindig is an OpenSocial container and helps you to start hosting OpenSocial apps
+        quickly by providing the code to render gadgets, proxy requests, and handle REST and
+        RPC requests.</p>
+
+      <p> Shindig's goal is to allow new sites to start hosting social apps in under an hour's
+        worth of work.</p>
+    </section>
+
+    <section name="What is Shindig?">
+      <div class="logo">
+        <img src="./images/gadget-server.png" alt="Gadget Server"/>
+      </div>
+      <p>Shindig is a container for hosting social application consisting of four parts:</p>
+      <ul>
+        <li><b>Gadget Container JavaScript</b>: core JavaScript foundation for general
+          gadget functionality (<a
+            href="http://code.google.com/apis/gadgets/docs/dev_guide.html">read more
+            about gadget functionality</a>). This JavaScript manages security,
+          communication, UI layout, and feature extensions, such as the OpenSocial API.</li>
+        <li><b>Gadget Rendering Server</b>: used to render the gadget XML into JavaScript
+          and HTML for the container to expose via the container JavaScript.</li>
+        <li><b>OpenSocial Container JavaScript</b>: JavaScript environment that sits on top
+          of the Gadget Container JavaScript and provides OpenSocial specific
+          functionality (profiles, friends, activities, datastore).</li>
+        <li><b>OpenSocial Data Server</b>: an implementation of the server interface to
+          container-specific information, including the OpenSocial REST APIs, with clear
+          extension points so others can connect it to their own backends.</li>
+      </ul>
+      <p>Shindig is a reference implementation of OpenSocial specifications for developers to
+        develop against container providers to use as a reference. Shindig implements the <a
+          href="http://www.opensocial.org/page/specs-1"> OpenSocial API
+        specifications</a>.</p>
+      <p>See the <a href="./overview.html">overview</a> page for more information.</p>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Shindig Features</title>
+    <author>Vincent Siveton</author>
+    <date>2009-03-26</date>
+  </properties>
+  <body>
+    <section name="Shindig Features">
+      <p>Current Shindig comes with several features.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/analytics/feature.xml">analytics/feature.xml</a></td>
+            <td>Google Analytics</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/auth-refresh/feature.xml">auth-refresh/feature.xml</a></td>
+            <td>To refresh the gadget security token</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/caja/feature.xml">caja/feature.xml</a></td>
+            <td>Caja support</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/core/feature.xml">core/feature.xml</a></td>
+            <td>Core feature</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/core.io/feature.xml">core.io/feature.xml</a></td>
+            <td>Core IO feature to provide  remote content retrieval facilities.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/dynamic-height/feature.xml">dynamic-height/feature.xml</a></td>
+            <td>To augment gadgets.window with functionality to change the height of a gadget dynamically.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/flash/feature.xml">flash/feature.xml</a></td>
+            <td>To embed Flash content into gadgets.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/locked-domain/feature.xml">locked-domain/feature.xml</a></td>
+            <td>Locked domain.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/minimessage/feature.xml">minimessage/feature.xml</a></td>
+            <td>To create small dismissible messages in gadgets.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/oauthpopup/feature.xml">oauthpopup/feature.xml</a></td>
+            <td>To assist with management of the OAuth popup window.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-0.6/feature.xml">opensocial-0.6/feature.xml</a></td>
+            <td>Opensocial-0.6.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-0.7/feature.xml">opensocial-0.7/feature.xml</a></td>
+            <td>Opensocial-0.7.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-0.8/feature.xml">opensocial-0.8/feature.xml</a></td>
+            <td>Opensocial-0.8.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-base/feature.xml">opensocial-base/feature.xml</a></td>
+            <td>Opensocial base.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-current/feature.xml">opensocial-current/feature.xml</a></td>
+            <td>Opensocial current.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-data/feature.xml">opensocial-data/feature.xml</a></td>
+            <td>Opensocial data.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-data-context/feature.xml">opensocial-data-context/feature.xml</a></td>
+            <td>Opensocial data-context.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-jsonrpc/feature.xml">opensocial-jsonrpc/feature.xml</a></td>
+            <td>Opensocial jsonrpc.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-reference/feature.xml">opensocial-reference/feature.xml</a></td>
+            <td>Opensocial reference.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-rest/feature.xml">opensocial-rest/feature.xml</a></td>
+            <td>Opensocial rest.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/opensocial-templates/feature.xml">opensocial-templates/feature.xml</a></td>
+            <td>Opensocial templates.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi/feature.xml">osapi/feature.xml</a></td>
+            <td>Opensocial API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.activities/feature.xml">osapi.activities/feature.xml</a></td>
+            <td>Opensocial Activities API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.appdata/feature.xml">osapi.appdata/feature.xml</a></td>
+            <td>Opensocial Appdata API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.base/feature.xml">osapi.base/feature.xml</a></td>
+            <td>Opensocial base API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.people/feature.xml">osapi.people/feature.xml</a></td>
+            <td>Opensocial People API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.ui/feature.xml">osapi.ui/feature.xml</a></td>
+            <td>Opensocial UI API.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/pubsub/feature.xml">pubsub/feature.xml</a></td>
+            <td>Gadget-side PubSub library for gadget-to-gadget communication.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/rpc/feature.xml">rpc/feature.xml</a></td>
+            <td>RPC support.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/setprefs/feature.xml">setprefs/feature.xml</a></td>
+            <td>To augment gadgets.Prefs with functionality to store prefs dynamically.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/settitle/feature.xml">settitle/feature.xml</a></td>
+            <td>To augment gadets.window with functionality to set the title of a gadget dynamically.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/skins/feature.xml">skins/feature.xml</a></td>
+            <td>Provide operations for getting display information about the currently shown skin.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/tabs/feature.xml">tabs/feature.xml</a></td>
+            <td>Tab suuport.</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/views/feature.xml">views/feature.xml</a></td>
+            <td>Gadgets.views API spec</td>
+          </tr>
+          <tr>
+            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/xmlutil/feature.xml">xmlutil/feature.xml</a></td>
+            <td>Provide xml utilities.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section name="Create Your Own Feature">
+      <p><i>TODO, see <a href="../../community/index.html">How to Contribute</a> page</i></p>
+    </section>
+  </body>
+</document>
