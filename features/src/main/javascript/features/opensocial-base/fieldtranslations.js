@@ -110,6 +110,10 @@ FieldTranslations.translateJsPersonFieldsToServerFields = function(fields) {
       fields[i] = 'birthday';
     } else if (fields[i] == 'timeZone') {
       fields[i] = 'utcOffset';
+    } else if (fields[i] == 'jobs') {
+      fields[i] = 'organizations';
+    } else if (fields[i] == 'schools') {
+      fields[i] = 'organizations';
     }
   }
 
