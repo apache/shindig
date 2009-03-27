@@ -129,6 +129,10 @@ public final class Uri {
    */
   public Uri resolve(Uri other) {
     // return  this.resolveNew(other);
+    if (other == null) {
+      return null;
+    }
+    
     return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
   }
 
