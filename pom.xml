@@ -103,6 +103,20 @@
         <otherArchive>http://shindig-dev.markmail.org/</otherArchive>
       </otherArchives>
     </mailingList>
+    <mailingList>
+      <name>Shindig Commit List</name>
+      <subscribe>shindig-commits-subscribe@incubator.apache.org</subscribe>
+      <unsubscribe>shindig-commits-unsubscribe@incubator.apache.org</unsubscribe>
+      <!-- No archive SHINDIG-783
+      <archive>http://mail-archives.apache.org/mod_mbox/incubator-shindig-commits/</archive>-->
+    </mailingList>
+    <mailingList>
+      <name>Shindig Issues List</name>
+      <subscribe>shindig-issues-subscribe@incubator.apache.org</subscribe>
+      <unsubscribe>shindig-issues-unsubscribe@incubator.apache.org</unsubscribe>
+      <!-- No archive SHINDIG-783
+      <archive>http://mail-archives.apache.org/mod_mbox/incubator-shindig-issues/</archive>-->
+    </mailingList>
   </mailingLists>
 
   <!-- ====================================================================== -->
