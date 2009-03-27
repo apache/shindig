@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.oauth;
 
 import net.oauth.OAuthConsumer;
+import net.oauth.OAuthProblemException;
 
 import org.apache.shindig.auth.SecurityToken;
 
@@ -43,11 +44,15 @@ public interface OAuthDataStore {
    * for the given consumerKey. App specific checks like making sure the requested user has the
    * app installed should take place in this method.
    *
+   * Returning null may allow for other authentication schemes to be used.  Throwing an
+   * OAuthProblemException will allows errors to be returned to the caller.
+   *
    * @param consumerKey A consumer key
    * @param userId The userId to validate.
    * @return A valid Security Token
+   * @throws OAuthProblemException when there are errors
    */
-  SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId);
+  SecurityToken getSecurityTokenForConsumerRequest(String consumerKey, String userId) throws OAuthProblemException;
 
   /**
    * Lookup consumers.  Generally this corresponds to an opensocial Application
@@ -58,18 +63,23 @@ public interface OAuthDataStore {
    * plus you should consider setting properties that correspond to the metadata
    * in the opensocial app like icon, description, etc.
    *
+   * Returning null will inform the client that the consumer key does not exist.  If you
+   * want to control the error response throw an OAuthProblemException
+   *
    * @param consumerKey A valid, non-null ConsumerKey
    * @return the consumer object corresponding to the specified key.
+   * @throws OAuthProblemException when the implementing class wants to signal errors
    */
-  OAuthConsumer getConsumer(String consumerKey);
+  OAuthConsumer getConsumer(String consumerKey) throws OAuthProblemException;
 
   /**
    * Generate a valid requestToken for the given consumerKey.
    *
    * @param consumerKey A valid consumer key
    * @return An OAuthEntry containing a valid request token.
+   * @throws OAuthProblemException when the implementing class wants to control the error response
    */
-  OAuthEntry generateRequestToken(String consumerKey);
+  OAuthEntry generateRequestToken(String consumerKey) throws OAuthProblemException;
 
 
   /**
@@ -77,9 +87,10 @@ public interface OAuthDataStore {
    * in the final phase of 3-legged OAuth after the user authorizes the app.
    *
    * @param entry The Entry to convert
-   * @return a new entry wiht type Type.ACCESS
+   * @return a new entry with type Type.ACCESS
+   * @throws OAuthProblemException when the implementing class wants to control the error response
    */
-  OAuthEntry convertToAccessToken(OAuthEntry entry);
+  OAuthEntry convertToAccessToken(OAuthEntry entry) throws OAuthProblemException;
 
 
   /**
@@ -87,6 +98,7 @@ public interface OAuthDataStore {
    *
    * @param entry A valid OAuthEntry
    * @param userId A user id
+   * @throws OAuthProblemException when the implementing class wants to control the error response
    */
-  void authorizeToken(OAuthEntry entry, String userId);
+  void authorizeToken(OAuthEntry entry, String userId) throws OAuthProblemException;
 }

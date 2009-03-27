@@ -27,6 +27,7 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.SimpleOAuthValidator;
+import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
 
 import org.apache.commons.codec.binary.Base64;
@@ -87,7 +88,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     }
     try {
       return verifyMessage(message);
-    } catch (InvalidAuthenticationException iae) {
+    } catch (OAuthProblemException oauthException) {
       // Legacy body signing is intended for backwards compatability with opensocial clients
       // that assumed they could use the raw request body as a pseudo query param to get
       // body signing. This assumption was born out of the limitations of the OAuth 1.0 spec which
@@ -103,16 +104,18 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
         try {
           message.addParameter(readBodyString(request), "");
           return verifyMessage(message);
-        } catch (IOException ioe) {
-          throw iae;
+        } catch (OAuthProblemException ioe) {
+          // ignore, let original exception be thrown
+        } catch (IOException e) {
+          // also ignore;
         }
       }
-      throw iae;
+      throw new InvalidAuthenticationException("OAuth Authentication Failure", oauthException);
     }
   }
 
   protected SecurityToken verifyMessage(OAuthMessage message)
-      throws InvalidAuthenticationException {
+      throws OAuthProblemException {
     OAuthEntry entry = getOAuthEntry(message);
     OAuthConsumer authConsumer = getConsumer(message);
 
@@ -128,43 +131,46 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     try {
       message.validateMessage(accessor, new SimpleOAuthValidator());
     } catch (OAuthException e) {
-      throw new InvalidAuthenticationException("Unable to verify OAuth request", e);
+      throw new OAuthProblemException();
     } catch (IOException e) {
-      throw new InvalidAuthenticationException("Unable to verify OAuth request", e);
+      throw new OAuthProblemException();
     } catch (URISyntaxException e) {
-      throw new InvalidAuthenticationException("Unable to verify OAuth request", e);
+      throw new OAuthProblemException();
     }
     return getTokenFromVerifiedRequest(message, entry, authConsumer);
   }
 
-  protected OAuthEntry getOAuthEntry(OAuthMessage message) throws InvalidAuthenticationException {
+  protected OAuthEntry getOAuthEntry(OAuthMessage message) throws OAuthProblemException {
     OAuthEntry entry = null;
     String token = getParameter(message, OAuth.OAUTH_TOKEN);
     if (!StringUtils.isEmpty(token))  {
       entry = store.getEntry(token);
       if (entry == null) {
-        throw new InvalidAuthenticationException("No oauth entry for token: " + token, null);
+        OAuthProblemException e = new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
+        e.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, "cannot find token");
+        throw e;
       } else if (entry.type != OAuthEntry.Type.ACCESS) {
-        throw new InvalidAuthenticationException("token is not an access token.", null);
+        OAuthProblemException e = new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
+        e.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, "token is not an access token");
+        throw e;
       } else if (entry.isExpired()) {
-        throw new InvalidAuthenticationException("access token has expired.", null);
+        throw new OAuthProblemException(OAuth.Problems.TOKEN_EXPIRED);
       }
     }
     return entry;
   }
 
-  protected OAuthConsumer getConsumer(OAuthMessage message) throws InvalidAuthenticationException {
+  protected OAuthConsumer getConsumer(OAuthMessage message) throws OAuthProblemException {
     String consumerKey = getParameter(message, OAuth.OAUTH_CONSUMER_KEY);
     OAuthConsumer authConsumer = store.getConsumer(consumerKey);
     if (authConsumer == null) {
-      throw new InvalidAuthenticationException("No consumer registered for key " + consumerKey,
-          null);
+      throw new OAuthProblemException(OAuth.Problems.CONSUMER_KEY_UNKNOWN);
     }
     return authConsumer;
   }
 
   protected SecurityToken getTokenFromVerifiedRequest(OAuthMessage message, OAuthEntry entry,
-      OAuthConsumer authConsumer) {
+      OAuthConsumer authConsumer) throws OAuthProblemException {
     if (entry != null) {
       return new OAuthSecurityToken(entry.userId, entry.callbackUrl, entry.appId,
           entry.domain, entry.container);
