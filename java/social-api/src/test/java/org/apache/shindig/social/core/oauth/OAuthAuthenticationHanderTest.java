@@ -20,6 +20,7 @@ package org.apache.shindig.social.core.oauth;
 import net.oauth.OAuth;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
+import net.oauth.OAuthProblemException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -92,17 +93,25 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   }
 
   private void expectConsumer() {
-    EasyMock.expect(mockStore.getConsumer(
-        EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY))).
-          andReturn(new OAuthConsumer(null, FakeOAuthRequest.CONSUMER_KEY,
+    try {
+      EasyMock.expect(mockStore.getConsumer(
+          EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY))).
+            andReturn(new OAuthConsumer(null, FakeOAuthRequest.CONSUMER_KEY,
               FakeOAuthRequest.CONSUMER_SECRET, new OAuthServiceProvider(null, null, null)))
-        .anyTimes();
+          .anyTimes();
+    } catch (OAuthProblemException e) {
+
+    }
   }
 
   private void expectSecurityToken() {
-    EasyMock.expect(mockStore.getSecurityTokenForConsumerRequest(
-        EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY), EasyMock.eq(FakeOAuthRequest.REQUESTOR))).
-          andReturn(new AnonymousSecurityToken());
+    try {
+      EasyMock.expect(mockStore.getSecurityTokenForConsumerRequest(
+          EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY), EasyMock.eq(FakeOAuthRequest.REQUESTOR))).
+            andReturn(new AnonymousSecurityToken());
+    } catch (OAuthProblemException e) {
+
+    }
   }
 
   @Test

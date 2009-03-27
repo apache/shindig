@@ -96,7 +96,9 @@ public class AuthenticationServletFilter extends InjectedFilter {
       // We did not find a security token so we will just pass null
       callChain(chain, req, resp);
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
-      logger.log(Level.INFO, iae.getMessage(), iae.getCause());
+      Throwable cause = iae.getCause();
+      logger.log(Level.INFO, iae.getMessage(), cause);
+
       if (iae.getAdditionalHeaders() != null) {
         for (Map.Entry<String,String> entry : iae.getAdditionalHeaders().entrySet()) {
           resp.addHeader(entry.getKey(), entry.getValue());
@@ -105,7 +107,10 @@ public class AuthenticationServletFilter extends InjectedFilter {
       if (iae.getRedirect() != null) {
         resp.sendRedirect(iae.getRedirect());
       } else {
-        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, iae.getMessage());
+        // For now append the cause message if set, this allows us to send any underlying oauth errors
+        String message = (cause==null) ? iae.getMessage() : iae.getMessage() + cause.getMessage();
+
+        resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
       }
     }
   }
