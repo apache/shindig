@@ -369,8 +369,8 @@ gadgets.rpc = function() {
 
   // Create the Default RPC handler.
   services[DEFAULT_NAME] = function() {
-    if (console && console.log) {
-      console.log('Unknown RPC service: ' + this.s);
+    if (window['console'] && window['console']['log']) {
+      window['console']['log']('Unknown RPC service: ' + this.s);
     }
   };
 
@@ -500,8 +500,8 @@ gadgets.rpc = function() {
     var relay = gadgets.rpc.getRelayUrl(targetId);
 
     if (!relay) {
-      if (console && console.log) {
-        console.log('No relay file assigned for IFPC');
+      if (window['console'] && window['console']['log']) {
+        window['console']['log']('No relay file assigned for IFPC');
       }
     }
 
