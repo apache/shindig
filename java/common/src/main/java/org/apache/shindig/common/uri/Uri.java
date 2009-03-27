@@ -20,6 +20,7 @@ package org.apache.shindig.common.uri;
 
 import com.google.common.base.Join;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -127,9 +128,15 @@ public final class Uri {
    * @return The new url.
    */
   public Uri resolve(Uri other) {
+    // return  this.resolveNew(other);
+    return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
+  }
+
+  public Uri resolveNew(Uri other) {
     if (other == null) {
       return null;
     }
+
 
     String scheme = other.getScheme();
     String authority = other.getAuthority();
@@ -179,11 +186,13 @@ public final class Uri {
       // Optimization: just accept other.
       return otherPath;
     }
+    
     // Relative path. Treat current path as a stack, otherPath as a List
     // in order to merge.
     LinkedList<String> pathStack = new LinkedList<String>();
     String curPath = getPath() != null ? getPath() : "/";  // Just in case.
     StringTokenizer tok = new StringTokenizer(curPath, "/");
+
     while (tok.hasMoreTokens()) {
       pathStack.add(tok.nextToken());
     }
@@ -219,7 +228,10 @@ public final class Uri {
       }
     }
 
-    return "/" + Join.join("/", pathStack);
+    if (getAuthority() != null) {
+      pathStack.addFirst(""); // get an initial / on the front..
+    }
+    return Join.join("/", pathStack);
   }
 
   /**
