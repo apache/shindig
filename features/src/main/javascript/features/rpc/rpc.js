@@ -783,6 +783,18 @@ gadgets.rpc = function() {
     },
 
     /**
+     * Forces all subsequent calls to be made by a transport
+     * method that allows the caller to verify the message receiver
+     * (by way of the parent parameter, through getRelayUrl(...)).
+     * At present this means IFPC or WPM.
+     */
+    forceParentVerifiable: function() {
+      if (relayChannel !== 'wpm') {
+        relayChannel = 'ifpc';
+      }
+    },
+
+    /**
      * Calls an RPC service.
      * @param {String} targetId Module Id of the RPC service provider.
      *                          Empty if calling the parent container.
