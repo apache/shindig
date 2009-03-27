@@ -505,8 +505,8 @@
             <artifactId>maven-checkstyle-plugin</artifactId>
             <version>2.2</version>
             <configuration>
-              <configLocation>http://svn.apache.org/repos/asf/incubator/shindig/trunk/site/checkstyle.xml</configLocation>
-              <headerLocation>http://svn.apache.org/repos/asf/incubator/shindig/trunk/site/java.header</headerLocation>
+              <configLocation>http://svn.apache.org/repos/asf/incubator/shindig/trunk/etc/checkstyle/checkstyle.xml</configLocation>
+              <headerLocation>http://svn.apache.org/repos/asf/incubator/shindig/trunk/etc/checkstyle/java.header</headerLocation>
               <encoding>${project.build.sourceEncoding}</encoding>
             </configuration>
           </plugin>
