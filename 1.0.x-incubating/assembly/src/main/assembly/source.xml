@@ -34,12 +34,33 @@
       <excludes>
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
-        <exclude>**/.project/**</exclude>
-        <exclude>**/.classpath/**</exclude>
-        <exclude>**/.settings/**</exclude>
         <exclude>**/target/**</exclude>
-        <exclude>*.patch</exclude>
-        <exclude>*.diff</exclude>
+        <exclude>**/*.patch</exclude>
+        <exclude>**/*.diff</exclude>
+        <exclude>**/*.iws</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
+        <exclude>**/.project</exclude>
+        <exclude>**/.classpath</exclude>
+        <exclude>**/.settings/**</exclude>
+        <exclude>**/.deployables</exclude>
+        <exclude>**/.wtpmodules</exclude>
+        <exclude>**/.externalToolBuilders/**</exclude>
+        <exclude>**/maven-eclipse.xml</exclude>
+        <exclude>**/*.log</exclude>
+        <exclude>**/*.bak</exclude>
+        <exclude>**/*~</exclude>
+        <exclude>**/#*#</exclude>
+        <exclude>**/%*%</exclude>
+        <exclude>**/*.jar</exclude>
+        <exclude>**/*.rar</exclude>
+        <exclude>**/*.tar</exclude>
+        <exclude>**/*.tar.bz2</exclude>
+        <exclude>**/*.tar.gz</exclude>
+        <exclude>**/*.zip</exclude>
+        <exclude>**/samples/create.sql</exclude>
+        <exclude>**/samples/drop.sql</exclude>
+        <exclude>**/derby.log</exclude>
       </excludes>
     </fileSet>
   </fileSets>
