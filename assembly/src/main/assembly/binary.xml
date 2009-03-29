@@ -31,7 +31,10 @@
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <includes>
         <include>*:war:*</include>
-        <include>*:jar:*</include>
+        <include>org.apache.shindig:shindig-common</include>
+        <include>org.apache.shindig:shindig-features</include>
+        <include>org.apache.shindig:shindig-gadgets</include>
+        <include>org.apache.shindig:shindig-social-api</include>
       </includes>
     </dependencySet>
   </dependencySets>
