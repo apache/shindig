@@ -60,9 +60,9 @@ class ProxyBase {
       }
       $postData = '';
       if ($data) {
-        $data = urldecode($data);
         $entries = explode('&', $data);
         foreach ($entries as $entry) {
+          $entry = urldecode($entry);
           $parts = explode('=', $entry);
           // Process only if its a valid value=something pair
           if (count($parts) == 2) {
