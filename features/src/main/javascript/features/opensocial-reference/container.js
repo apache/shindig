@@ -563,7 +563,7 @@ var taming = {
 	return orig.call(this, swfUrl, swfContainer.node___, swfVersion,
 			 opt_params);
       });
-    },
+    }
   },
 
   MiniMessage: function($vs) {
@@ -620,7 +620,7 @@ var taming = {
 	}),
 	send: ___.frozenFunc(function(callback) {
 	  return this.super_.send(tameCallback($v, callback));
-	}),
+	})
       };
       return dr;
     }
@@ -656,7 +656,7 @@ var taming = {
       return function tamedRegisterOnLoadHandler(callback) {
         orig(tameCallback($v, callback));
       };
-    },
+    }
   },
 
   views: {
@@ -670,7 +670,7 @@ var taming = {
 	return view;
       }
     }
-  },
+  }
 };
 
 /**
@@ -759,7 +759,7 @@ opensocial.Container.prototype.enableCaja = function() {
         m_getNameContainer: 0
       },
       c_TabSet: {
-        m_addTab: 0,
+        m_addTab: 0
 //        m_alignTabs: 0,
 //        m_displayTabs: 0,
 //        m_getHeaderContainer: 0,
