@@ -39,7 +39,19 @@ Discovering Shindig Samples
 
 [./images/samples/samplecontainer.png] Sample Container
 
-  You could also browse the other samples from {{http://localhost:8080}}:
+  You could change the <"Displaying gadget"> field with one of them and click on <"reset all">:
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml}}
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialCajaWorld.xml}}
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml}}
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/examples/getFriendsHasApp.xml}}
+
+  []
+
+  You could also discover other samples on {{http://localhost:8080}}:
 
   * {{http://localhost:8080/gadgets/files/container/sample1.html}}
 
