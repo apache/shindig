@@ -57,13 +57,16 @@
         </includes>
       </resource>
       <resource>
-        <directory>src/main/bundle</directory>
+        <directory>src/main/resources</directory>
         <includes>
           <include>**/*</include>
         </includes>
       </resource>
       <resource>
         <directory>conf</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
       </resource>
     </resources>
   </build>
