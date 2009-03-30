@@ -262,8 +262,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         if (!idSet.contains(person.get(Person.Field.ID.toString()))) {
           continue;
         }
+
         // Add group support later
-        result.add(filterFields(person, fields, Person.class));
+        Person personObj = filterFields(person, fields, Person.class);
+        Map<String, Object> appData = getPersonAppData(
+            person.getString(Person.Field.ID.toString()), fields);
+        personObj.setAppData(appData);
+
+        result.add(personObj);
       }
 
       if (GroupId.Type.self == groupId.getType() && result.isEmpty()) {
@@ -302,10 +308,51 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         JSONObject person = people.getJSONObject(i);
         if (id != null && person.get(Person.Field.ID.toString())
             .equals(id.getUserId(token))) {
-          return ImmediateFuture.newInstance(filterFields(person, fields, Person.class));
+          Person personObj = filterFields(person, fields, Person.class);
+          Map<String, Object> appData = getPersonAppData(
+              person.getString(Person.Field.ID.toString()), fields);
+          personObj.setAppData(appData);
+          
+          return ImmediateFuture.newInstance(personObj);
         }
       }
       throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+    } catch (JSONException je) {
+      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+    }
+  }
+
+  private Map<String, Object> getPersonAppData(String id, Set<String> fields) {
+    try {
+      Map<String, Object> appData = null;
+      JSONObject personData = db.getJSONObject(DATA_TABLE).optJSONObject(id);
+      if (personData != null) {
+        if (fields.contains(Person.Field.APP_DATA.toString())) {
+            appData = Maps.newHashMap();
+            @SuppressWarnings("unchecked")
+            Iterator<String> keys = personData.keys();
+            while (keys.hasNext()) {
+              String key = keys.next();
+              appData.put(key, personData.get(key));
+            }
+        } else {
+          String appDataPrefix = Person.Field.APP_DATA.toString() + ".";
+          for (String field : fields) {
+            if (field.startsWith(appDataPrefix)) {
+              if (appData == null) {
+                appData = Maps.newHashMap();
+              }
+              
+              String appDataField = field.substring(appDataPrefix.length());
+              if (personData.has(appDataField)) {
+                appData.put(appDataField, personData.get(appDataField));
+              }
+            }
+          }
+        }
+      }
+    
+      return appData;
     } catch (JSONException je) {
       throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
     }

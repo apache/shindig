@@ -125,9 +125,51 @@
 
             // Send the request
             req.send(receivedData);
-          }
-        };
+          },
+          
+          /** Test fetching app data */
+          fetchAppData: function() {
+            var req = opensocial.newDataRequest();
 
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical",
+                {appData: '*'}), "canonical");
+
+            var receivedData = function(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              assertEquals("Wrong app data returned", "2", user.getAppData("count"));
+              assertEquals("Wrong app data returned", "100", user.getAppData("size"));
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching app data via the array */
+          fetchTwoProperties: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical",
+                {appData: ['count', 'notThere']}), "canonical");
+
+            var receivedData = function(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              assertEquals("Wrong app data returned", "2", user.getAppData("count"));
+              assertEquals("Too much app data returned", undefined, user.getAppData("size"));
+              assertEquals("App data that shouldn't exist returned", undefined, user.getAppData("notThere"));
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+        };
 
         function getAndCheckError(response, key) {
           assertFalse("Data error", response.hadError());

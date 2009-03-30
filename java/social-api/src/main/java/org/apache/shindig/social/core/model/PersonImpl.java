@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Default Implementation of the Person object in the model.
@@ -45,6 +46,7 @@ public class PersonImpl implements Person {
   private List<String> activities;
   private List<Address> addresses;
   private Integer age;
+  private Map<String, ? extends Object> appData;
   private Date birthday;
   private BodyType bodyType;
   private List<String> books;
@@ -156,6 +158,14 @@ public class PersonImpl implements Person {
 
   public void setAge(Integer age) {
     this.age = age;
+  }
+
+  public Map<String, ? extends Object> getAppData() {
+    return this.appData;
+  }
+  
+  public void setAppData(Map<String, ? extends Object> appData) {
+    this.appData = appData;
   }
 
   public BodyType getBodyType() {
@@ -611,8 +621,7 @@ public class PersonImpl implements Person {
   public void setIsViewer(boolean isViewer) {
     this.isViewer = isViewer;
   }
-
-
+  
   // Proxied fields
 
   public String getProfileUrl() {

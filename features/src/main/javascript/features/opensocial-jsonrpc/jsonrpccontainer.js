@@ -273,7 +273,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     var me = this;
     return new JsonRpcRequestItem(peopleRequest.rpc,
             function(rawJson) {
-              return me.createPersonFromJson(rawJson);
+              return me.createPersonFromJson(rawJson, opt_params);
             });
   };
 
@@ -281,6 +281,9 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
       opt_params) {
     var rpc = { method : "people.get" };
     rpc.params = this.translateIdSpec(idSpec);
+
+    FieldTranslations.addAppDataAsProfileFields(opt_params);
+
     if (opt_params['profileDetail']) {
       FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
       rpc.params.fields = opt_params['profileDetail'];
@@ -315,15 +318,15 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
 
           var people = [];
           for (var i = 0; i < jsonPeople.length; i++) {
-            people.push(me.createPersonFromJson(jsonPeople[i]));
+            people.push(me.createPersonFromJson(jsonPeople[i], opt_params));
           }
           return new opensocial.Collection(people,
               rawJson['startIndex'], rawJson['totalResults']);
         });
   };
 
-  JsonRpcContainer.prototype.createPersonFromJson = function(serverJson) {
-    FieldTranslations.translateServerPersonToJsPerson(serverJson);
+  JsonRpcContainer.prototype.createPersonFromJson = function(serverJson, opt_params) {
+    FieldTranslations.translateServerPersonToJsPerson(serverJson, opt_params);
     return new JsonPerson(serverJson);
   };
 
@@ -362,10 +365,10 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
         });
   };
 
-  JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
+  JsonRpcContainer.prototype.newUpdatePersonAppDataRequest = function(key,
       value) {
     var rpc = { method : "appdata.update" };
-    rpc.params = this.translateIdSpec(this.makeIdSpec(id));
+    rpc.params = {userId: ["@viewer"], groupId: "@self"};
     rpc.params.appId = "@app";
     rpc.params.data = {};
     rpc.params.data[key] = value;
@@ -373,9 +376,9 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     return new JsonRpcRequestItem(rpc);
   };
 
-  JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
+  JsonRpcContainer.prototype.newRemovePersonAppDataRequest = function(keys) {
     var rpc = { method : "appdata.delete" };
-    rpc.params = this.translateIdSpec(this.makeIdSpec(id));
+    rpc.params = {userId: ["@viewer"], groupId: "@self"};
     rpc.params.appId = "@app";
     rpc.params.fields = this.getFieldsList(keys);
 

@@ -271,33 +271,32 @@ opensocial.Container.prototype.newFetchPersonAppDataRequest = function(idSpec,
 
 
 /**
- * Used to request an update of an app field for the given person.
+ * Creates an item to request an update of an app field for the current VIEWER
  * When processed, does not return any data.
+ * App Data is stored as a series of key value pairs of strings, scoped per
+ * person, per application. Containers supporting this request SHOULD provide
+ * at least 10KB of space per user per application for this data.
  *
- * @param {String} id The id of the person to update. (Right now only the
- *    special VIEWER id is allowed.)
  * @param {String} key The name of the key
  * @param {String} value The value
  * @return {Object} a request object
  * @private
  */
-opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(id,
+opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(
     key, value) {};
 
 
 /**
- * Deletes the given keys from the datastore for the given person.
+ * Deletes the given keys from the datastore for the current VIEWER.
  * When processed, does not return any data.
  *
- * @param {String} id The ID of the person to update; only the
- *     special <code>VIEWER</code> ID is currently allowed.
  * @param {Array.&lt;String&gt; | String} keys The keys you want to delete from
  *     the datastore; this can be an array of key names, a single key name,
  *     or "*" to mean "all keys"
  * @return {Object} A request object
  * @private
  */
-opensocial.Container.prototype.newRemovePersonAppDataRequest = function(id,
+opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
     keys) {};
 
 

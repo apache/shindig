@@ -251,7 +251,24 @@ opensocial.DataRequest.PeopleRequestFields = {
    *
    * @member opensocial.DataRequest.PeopleRequestFields
    */
-  MAX : 'max'
+  MAX : 'max',
+
+  /**
+   * A string or array of strings, specifying the app data keys to fetch for
+   * each of the Person objects. This field may be used interchangeably with
+   * the string 'appData'.  Pass the string '*' to fetch all app data keys.
+   * @member opensocial.DataRequest.PeopleRequestFields
+   */
+  APP_DATA : 'appData',
+
+  /**
+   * How to escape app data returned from the server;
+   * defaults to HTML_ESCAPE. Possible values are defined by
+   * <a href="opensocial.EscapeType.html">EscapeType</a>.
+   * This field may be used interchangeably with the string 'escapeType'.
+   * @member opensocial.DataRequest.PeopleRequestFields
+   */
+   ESCAPE_TYPE : 'escapeType' 
 };
 
 
@@ -368,7 +385,11 @@ opensocial.DataRequest.DataRequestFields = {
    * How to escape person data returned from the server; defaults to HTML_ESCAPE.
    * Possible values are defined by
    * <a href="opensocial.EscapeType.html">EscapeType</a>.
+   * Use of this function is deprecated in favor of using the
+   * <a href="#opensocial.DataRequest.PeopleRequestFields.ESCAPE_TYPE">
+   * ESCAPE_TYPE</a> request field.
    *
+   * @deprecated
    * @member opensocial.DataRequest.DataRequestFields
    */
   ESCAPE_TYPE : 'escapeType'
@@ -381,7 +402,11 @@ opensocial.DataRequest.DataRequestFields = {
  * <a href="opensocial.DataRequest.PersonId.html">PersonId</a>,
  * Map&lt;String, String&gt;&gt; object.
  * All of the data values returned will be valid json.
+ * Use of this function is deprecated in favor of using the
+ * <a href="#opensocial.DataRequest.PeopleRequestFields.APP_DATA">APP_DATA</a>
+ * request field.
  *
+ * @deprecated
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people to
  *     fetch. See also <a href="opensocial.IdSpec.html">IdSpec</a>.
  * @param {Array.&lt;String&gt; | String} keys The keys you want data for; this
@@ -401,37 +426,34 @@ opensocial.DataRequest.prototype.newFetchPersonAppDataRequest = function(idSpec,
 
 
 /**
- * Creates an item to request an update of an app field for the given person.
+ * Creates an item to request an update of an app field for the current VIEWER
  * When processed, does not return any data.
- *
- * @param {String} id The ID of the person to update; only the
- *     special <code>VIEWER</code> ID is currently allowed.
+ * App Data is stored as a series of key value pairs of strings, scoped per
+ * person, per application. Containers supporting this request SHOULD provide
+ * at least 10KB of space per user per application for this data.
  * @param {String} key The name of the key. This may only contain alphanumeric
  *     (A-Za-z0-9) characters, underscore(_), dot(.) or dash(-).
  * @param {String} value The value, must be valid json
  * @return {Object} A request object
  */
-opensocial.DataRequest.prototype.newUpdatePersonAppDataRequest = function(id,
+opensocial.DataRequest.prototype.newUpdatePersonAppDataRequest = function(
     key, value) {
-  return opensocial.Container.get().newUpdatePersonAppDataRequest(id, key,
+  return opensocial.Container.get().newUpdatePersonAppDataRequest(key,
       value);
 };
 
 
 /**
- * Deletes the given keys from the datastore for the given person.
+ * Deletes the given keys from the datastore for the current VIEWER.
  * When processed, does not return any data.
  *
- * @param {String} id The ID of the person to update; only the
- *     special <code>VIEWER</code> ID is currently allowed.
  * @param {Array.&lt;String&gt; | String} keys The keys you want to delete from
  *     the datastore; this can be an array of key names, a single key name,
  *     or "*" to mean "all keys"
  * @return {Object} A request object
  */
-opensocial.DataRequest.prototype.newRemovePersonAppDataRequest = function(id,
-    keys) {
-  return opensocial.Container.get().newRemovePersonAppDataRequest(id, keys);
+opensocial.DataRequest.prototype.newRemovePersonAppDataRequest = function(keys) {
+  return opensocial.Container.get().newRemovePersonAppDataRequest(keys);
 };
 
 

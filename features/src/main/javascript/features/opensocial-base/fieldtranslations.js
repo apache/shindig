@@ -23,7 +23,7 @@
 
 var FieldTranslations = {};
 
-FieldTranslations.translateServerPersonToJsPerson = function(serverJson) {
+FieldTranslations.translateServerPersonToJsPerson = function(serverJson, opt_params) {
   if (serverJson.emails) {
     for (var i = 0; i < serverJson.emails.length; i++) {
       serverJson.emails[i].address = serverJson.emails[i].value;
@@ -88,6 +88,11 @@ FieldTranslations.translateServerPersonToJsPerson = function(serverJson) {
   if (serverJson.name) {
     serverJson.name.unstructured = serverJson.name.formatted;
   }
+  
+  if (serverJson.appData) {
+    serverJson.appData = opensocial.Container.escape(
+        serverJson.appData, opt_params, true);
+  }
 
 };
 
@@ -147,4 +152,33 @@ FieldTranslations.translateIsoStringToDate = function(isoString) {
   time = (Number(date) + (offset * 60 * 1000));
   
   return new Date(Number(time));
+}
+
+/**
+ * AppData is provided by the REST and JSON-RPC protocols using
+ * an "appData" or "appData.key" field, but is described by
+ * the JS fetchPerson() API in terms of an appData param.  Translate
+ * between the two.
+ */
+FieldTranslations.addAppDataAsProfileFields = function(opt_params) {
+  if (opt_params) {
+    // Push the appData keys in as profileDetails
+    if (opt_params['appData']) {
+      var appDataKeys = opt_params['appData'];
+      if (typeof appDataKeys === 'string') {
+        appDataKeys = [appDataKeys];
+      }
+      
+      var profileDetail = opt_params['profileDetail'] || [];
+      for (var i = 0; i < appDataKeys.length; i++) {
+        if (appDataKeys[i] === '*') {
+          profileDetail.push('appData');
+        } else {
+          profileDetail.push('appData.' + appDataKeys[i]);
+        }
+      }
+      
+      opt_params['appData'] = appDataKeys;
+    }
+  }    
 }

@@ -82,6 +82,7 @@
       <xs:element minOccurs="0" maxOccurs="unbounded" name="addresses" type="tns:Address" />
       <xs:element minOccurs="0" name="age" type="xs:string"/>
       <xs:element minOccurs="0" name="anniversary" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="appData" type="tns:Appdata"/>
       <xs:element minOccurs="0" name="birthday" type="xs:dateTime" />
       <xs:element minOccurs="0" name="bodyType" type="tns:BodyType" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="books" type="xs:string" />

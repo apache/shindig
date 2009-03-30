@@ -209,7 +209,7 @@ RestfulContainer.prototype.newFetchPersonRequest = function(id, opt_params) {
   var me = this;
   return new RestfulRequestItem(peopleRequest.url, peopleRequest.method, null,
       function(rawJson) {
-        return me.createPersonFromJson(rawJson['entry']);
+        return me.createPersonFromJson(rawJson['entry'], opt_params);
       });
 };
 
@@ -217,7 +217,9 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
     opt_params) {
   var url = "/people/" + this.translateIdSpec(idSpec);
 
+  FieldTranslations.addAppDataAsProfileFields(opt_params);
   FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
+  
   url += "?fields=" + (opt_params['profileDetail'].join(','));
   url += "&startIndex=" + (opt_params['first'] || 0);
   url += "&count=" + (opt_params['max'] || 20);
@@ -240,15 +242,15 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
 
         var people = [];
         for (var i = 0; i < jsonPeople.length; i++) {
-          people.push(me.createPersonFromJson(jsonPeople[i]));
+          people.push(me.createPersonFromJson(jsonPeople[i], opt_params));
         }
         return new opensocial.Collection(people,
             rawJson['startIndex'], rawJson['totalResults']);
       });
 };
 
-RestfulContainer.prototype.createPersonFromJson = function(serverJson) {
-  FieldTranslations.translateServerPersonToJsPerson(serverJson);
+RestfulContainer.prototype.createPersonFromJson = function(serverJson, opt_params) {
+  FieldTranslations.translateServerPersonToJsPerson(serverJson, opt_params);
   return new JsonPerson(serverJson);
 };
 
@@ -281,17 +283,17 @@ RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,
       });
 };
 
-RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(id, key,
+RestfulContainer.prototype.newUpdatePersonAppDataRequest = function(key,
     value) {
-  var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
+  var url = "/appdata/@viewer/@self"
       + "/@app?fields=" + key;
   var data = {};
   data[key] = value;
   return new RestfulRequestItem(url, "POST", data);
 };
 
-RestfulContainer.prototype.newRemovePersonAppDataRequest = function(id, keys) {
-  var url = "/appdata/" + this.translateIdSpec(this.makeIdSpec(id))
+RestfulContainer.prototype.newRemovePersonAppDataRequest = function(keys) {
+  var url = "/appdata/@viewer/@self"
       + "/@app?" + this.getFieldsList(keys);
   return new RestfulRequestItem(url, "DELETE");
 };

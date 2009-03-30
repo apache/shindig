@@ -83,6 +83,38 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertNotNull("Canonical user not found", person);
   }
 
+  public void testGetPersonAllAppData() throws Exception {
+    Person person = db
+        .getPerson(CANON_USER, ImmutableSet.of("id", "appData"), token).get();
+
+    assertNotNull("Canonical user not found", person);
+    assertEquals("Canonical user has wrong id", "canonical", person.getId());
+    assertEquals("Canonical user has wrong app data",
+        ImmutableMap.of("count", "2", "size", "100"), person.getAppData());
+  }
+
+  public void testGetPersonOneAppDataField() throws Exception {
+    Person person = db
+        .getPerson(CANON_USER, ImmutableSet.of("id", "appData.size"), token).get();
+
+    assertNotNull("Canonical user not found", person);
+    assertEquals("Canonical user has wrong id", "canonical", person.getId());
+    assertEquals("Canonical user has wrong app data",
+        ImmutableMap.of("size", "100"), person.getAppData());
+  }
+
+  public void testGetPersonMultipleAppDataFields() throws Exception {
+    Person person = db
+        .getPerson(CANON_USER,
+            ImmutableSet.of("id", "appData.size", "appData.count", "appData.bogus"),
+            token).get();
+
+    assertNotNull("Canonical user not found", person);
+    assertEquals("Canonical user has wrong id", "canonical", person.getId());
+    assertEquals("Canonical user has wrong app data",
+        ImmutableMap.of("count", "2", "size", "100"), person.getAppData());
+  }
+
   public void testGetExpectedFriends() throws Exception {
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(PersonService.TOP_FRIENDS_SORT);

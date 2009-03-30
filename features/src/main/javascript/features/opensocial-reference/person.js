@@ -554,6 +554,17 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
 
 
 /**
+ * Gets the app data for this person that is associated with the specified
+ * key.
+ *
+ * @param {String} key The key to get app data for.
+ * @return {String} The corresponding app data.
+ */
+opensocial.Person.prototype.getAppData = function(key) {
+};
+
+
+/**
  * Returns true if this person object represents the currently logged in user.
  *
  * @return {Boolean} True if this is the currently logged in user;

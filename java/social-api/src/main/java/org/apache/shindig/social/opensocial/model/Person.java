@@ -79,7 +79,7 @@ public interface Person {
   }
 
   /**
-   * The fields that represent the person object ion json form.
+   * The fields that represent the person object in json form.
    */
   public static enum Field {
     /** the json field for aboutMe. */
@@ -92,6 +92,8 @@ public interface Person {
     ADDRESSES("addresses"),
     /** the json field for age. */
     AGE("age"),
+    /** the json field for appData. */
+    APP_DATA("appData"),
     /** the json field for bodyType. */
     BODY_TYPE("bodyType"),
     /** the json field for books. */
@@ -334,6 +336,20 @@ public interface Person {
    * @param age the persons age
    */
   void setAge(Integer age);
+
+  /**
+   * Get app data for the person.
+   * 
+   * @return the app data, possibly a subset.
+   */
+  Map<String, ? extends Object> getAppData();
+  
+  /**
+   * Sets app data for the person.
+   * 
+   * @param appData the app data, possibly a subset 
+   */
+  void setAppData(Map<String, ? extends Object> appData);
 
   /**
    * Get the person's date of birth, specified as a {@link Date} object. Container support for this
@@ -1201,5 +1217,4 @@ public interface Person {
    * @param thumbnailUrl the person's photo thumbnail URL
    */
   void setThumbnailUrl(String thumbnailUrl);
-
 }
