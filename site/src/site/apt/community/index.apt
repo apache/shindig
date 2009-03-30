@@ -74,6 +74,7 @@ The Shindig Community
 ** {Creating and submitting a patch}
 
   <<Note>>: Be sure to respect our {{{http://cwiki.apache.org/SHINDIGxSITE/java-style.html}Java code style}}!
+  You could also read this thread {{http://markmail.org/message/t6b7jgzvfjj4fiqu}}.
 
   For new people to the project, creating patches is the way to get started and build your reputation.
 
