@@ -192,7 +192,8 @@ under the License.
         <param name="id" value="TabExample"/>
         <param name="url" value="file:///D:/java/apache.org/incubator/shindig/trunk/site/src/site/resources/developers/features/simpletab.xml"/>
       </macro>
-      <p>You could test your code using the Gadget testing container at: </p>
+      <p>You could test your code using the Gadget testing container at:
+        <a href="http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html">http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html</a></p>
       <img src="../../images/samples/tab.png" alt="Tab Example"/>
     </section>
 
