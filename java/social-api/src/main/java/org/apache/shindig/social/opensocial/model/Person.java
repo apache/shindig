@@ -162,6 +162,8 @@ public interface Person {
     PHOTOS("photos"),
     /** the json field for politicalViews. */
     POLITICAL_VIEWS("politicalViews"),
+    /** the json field for preferredUsername */
+    PREFFERED_USERNAME("preferredUsername"),
     /** the json field for profileSong. */
     PROFILE_SONG("profileSong"),
     /** the json field for profileUrl. */
@@ -873,6 +875,20 @@ public interface Person {
    * @param politicalViews the Person's political views
    */
   void setPoliticalViews(String politicalViews);
+  
+  /**
+   * Get the Person's preffered username, specified as a string. Container support for this field is OPTIONAL
+   * 
+   * @return the Person's preffered username
+   */
+  String getPrefferedUsername();
+  
+  /**
+   * Set the Person's preffered username, specified as a string. Container support for this field is OPTIONAL
+   *  
+   * @param prefferedString the Person's preffered username
+   */
+  void setPrefferedUsername(String prefferedString);
 
   /**
    * Get the Person's profile song, specified as an {@link Url}. Container support for this field
