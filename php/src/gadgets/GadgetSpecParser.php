@@ -75,17 +75,68 @@ class GadgetSpecParser {
       }
       foreach (explode(',', $viewNode->getAttribute('view')) as $view) {
         $view = trim($view);
+        $href = trim($viewNode->getAttribute('href'));
+        $type = trim(strtoupper($viewNode->getAttribute('type')));
+        $dataPipelining = array();
+        if (! empty($href) && $type == 'HTML') {
+          // a non empty href & type == 'HTML' means there might be data-pipelining tags in the content section
+          $dataPipelining = $this->parseDataPipelining($viewNode);
+        }
         if (isset($gadget->views[$view])) {
           $gadget->views[$view]['content'] .= $viewNode->nodeValue;
         } else {
-          $gadget->views[$view] = array('view' => $view, 'type' => strtoupper($viewNode->getAttribute('type')), 'href' => $viewNode->getAttribute('href'), 'preferedHeight' => $viewNode->getAttribute('prefered_height'),
-              'preferedWidth' => $viewNode->getAttribute('prefered_width'), 'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue, 'authz' => $viewNode->getAttribute('authz'),
-              'oauthServiceName' => $viewNode->getAttribute('oauth_service_name'), 'oauthTokenName' => $viewNode->getAttribute('oauth_token_name'), 'oauthRequestToken' => $viewNode->getAttribute('oauth_request_token'),
-              'oauthRequestTokenSecret' => $viewNode->getAttribute('oauth_request_token_secret'), 'signOwner' => $viewNode->getAttribute('sign_owner'), 'signViewer' => $viewNode->getAttribute('sign_viewer'),
-              'refreshInterval' => $viewNode->getAttribute('refresh_interval'));
+          $gadget->views[$view] = array('view' => $view, 'type' => $type, 'href' => $href, 'preferedHeight' => $viewNode->getAttribute('prefered_height'), 'preferedWidth' => $viewNode->getAttribute('prefered_width'),
+              'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue, 'authz' => $viewNode->getAttribute('authz'), 'oauthServiceName' => $viewNode->getAttribute('oauth_service_name'),
+              'oauthTokenName' => $viewNode->getAttribute('oauth_token_name'), 'oauthRequestToken' => $viewNode->getAttribute('oauth_request_token'), 'oauthRequestTokenSecret' => $viewNode->getAttribute('oauth_request_token_secret'),
+              'signOwner' => $viewNode->getAttribute('sign_owner'), 'signViewer' => $viewNode->getAttribute('sign_viewer'), 'refreshInterval' => $viewNode->getAttribute('refresh_interval'), 'dataPipelining' => $dataPipelining);
         }
       }
     }
+  }
+
+  /**
+   * Parses the data-pipelining tags of a html/href view
+   *
+   * @param DOMNodeList $dataTags
+   */
+  private function parseDataPipelining(DOMElement &$viewNode) {
+    $dataTags = $viewNode->getElementsByTagName('*');
+    if ($dataTags->length > 0) {
+      $dataPipeliningTags = array();
+      foreach ($dataTags as $dataTag) {
+        $tag = array();
+        $tag['type'] = $dataTag->tagName;
+        $supportedDataAttributes = array('key', 'method', 'userId', 'groupId', 'fields', 'startIndex', 'count', 'sortBy', 'sortOrder', 'filterBy', 'filterOp', 'filterValue', 'activityIds', 'href', 'params');
+        foreach ($supportedDataAttributes as $dataAttribute) {
+          $val = $dataTag->getAttribute($dataAttribute);
+          if (! empty($val)) {
+            $tag[$dataAttribute] = $val;
+          }
+        }
+        // normalize the methods so that os:PeopleRequest becomes a os:DataRequest with a people.get method, and os:ViewerRequest becomes a people.get with a userId = @viewer & groupId = @self, this
+        // makes it a whole lot simpler to implement the actual data fetching in the renderer
+        switch ($tag['type']) {
+          case 'os:PeopleRequest':
+            $tag['type'] = 'os:DataRequest';
+            $tag['method'] = 'people.get';
+            break;
+          case 'os:ViewerRequest':
+          case 'os:OwnerRequest':
+            $tag['type'] = 'os:DataRequest';
+            $tag['method'] = 'people.get';
+            $tag['userId'] = $tag['type'] == 'osViewerRequest' ? '@viewer' : '@owner';
+            $tag['groupId'] = '@self';
+            break;
+          case 'os:ActivitiesRequest':
+            $tag['type'] = 'os:DataRequest';
+            $tag['method'] = 'activity.get';
+            break;
+        }
+        $dataPipeliningTags[] = $tag;
+      }
+      return $dataPipeliningTags;
+    }
+    return null;
   }
 
   /**
