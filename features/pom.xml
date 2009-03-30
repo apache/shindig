@@ -78,6 +78,11 @@
                 <source>core/util.js</source>
                 <source>core/prefs.js</source>
                 <source>core.io/io.js</source>
+                <source>i18n/currencycodemap.js</source>
+                <source>i18n/datetimeformat.js</source>
+                <source>i18n/datetimeparse.js</source>
+                <source>i18n/formatting.js</source>
+                <source>i18n/numberformat.js</source>
                 <source>setprefs/setprefs.js</source>
                 <source>views/views.js</source>
                 <source>opensocial-data-context/datacontext.js</source>

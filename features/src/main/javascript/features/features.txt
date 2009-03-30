@@ -7,6 +7,7 @@ features/core.io/feature.xml
 features/core/feature.xml
 features/dynamic-height/feature.xml
 features/flash/feature.xml
++features/i18n/feature.xml
 features/locked-domain/feature.xml
 features/minimessage/feature.xml
 features/oauthpopup/feature.xml
@@ -21,6 +22,7 @@ features/opensocial-jsonrpc/feature.xml
 features/opensocial-reference/feature.xml
 features/opensocial-rest/feature.xml
 features/opensocial-templates/feature.xml
+features/pubsub/feature.xml
 features/osapi/feature.xml
 features/osapi.activities/feature.xml
 features/osapi.appdata/feature.xml
@@ -33,5 +35,4 @@ features/settitle/feature.xml
 features/skins/feature.xml
 features/tabs/feature.xml
 features/views/feature.xml
-features/pubsub/feature.xml
 features/xmlutil/feature.xml
