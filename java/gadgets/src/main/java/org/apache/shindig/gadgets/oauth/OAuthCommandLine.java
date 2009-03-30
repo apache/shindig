@@ -27,6 +27,9 @@ import net.oauth.OAuthMessage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+
+import org.apache.shindig.auth.OAuthConstants;
+import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -116,7 +119,7 @@ public class OAuthCommandLine {
       oauthParams.add(new OAuth.Parameter(request.getPostBodyAsString(), ""));
     } else if (bodySigningEnum == BodySigning.hash) {
       oauthParams.add(
-            new OAuth.Parameter("oauth_body_hash",
+            new OAuth.Parameter(OAuthConstants.OAUTH_BODY_HASH,
                 new String(Base64.encodeBase64(DigestUtils.sha(postBody.getBytes())), "UTF-8")));
     }
 

@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.oauth;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+
+import org.apache.shindig.auth.OAuthConstants;
+import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -87,12 +90,6 @@ public class OAuthRequest {
   protected static final String XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
 
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
-
-  private static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
-
-  private static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
-  
-  private static final String OAUTH_BODY_HASH = "oauth_body_hash";
 
   private static final long ACCESS_TOKEN_EXPIRE_UNKNOWN = 0;
   private static final long ACCESS_TOKEN_FORCE_EXPIRE = -1;
@@ -462,7 +459,7 @@ public class OAuthRequest {
     target.setQuery(null);
     params.addAll(sanitize(OAuth.decodeForm(query)));
 
-    switch(OAuthUtil.getSignatureType(base)) {
+    switch(OAuthUtil.getSignatureType(base.getMethod(), base.getHeader("Content-Type"))) {
       case URL_ONLY:
         break;
       case URL_AND_FORM_PARAMS:
@@ -473,7 +470,7 @@ public class OAuthRequest {
           byte[] body = IOUtils.toByteArray(base.getPostBody());
           byte[] hash = DigestUtils.sha(body);
           String b64 = new String(Base64.encodeBase64(hash), CharsetUtil.UTF8.name());
-          params.add(new Parameter(OAUTH_BODY_HASH, b64));
+          params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
         } catch (IOException e) {
           throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
               "Error taking body hash", e);
@@ -662,7 +659,8 @@ public class OAuthRequest {
     List<Parameter> msgParams = Lists.newArrayList();
     msgParams.add(new Parameter(OAuth.OAUTH_TOKEN, accessor.requestToken));
     if (accessorInfo.getSessionHandle() != null) {
-      msgParams.add(new Parameter(OAUTH_SESSION_HANDLE, accessorInfo.getSessionHandle()));
+      msgParams.add(new Parameter(OAuthConstants.OAUTH_SESSION_HANDLE,
+          accessorInfo.getSessionHandle()));
     }
 
     HttpRequest signed = sanitizeAndSign(request, msgParams);
@@ -671,11 +669,13 @@ public class OAuthRequest {
 
     accessor.accessToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
     accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
-    accessorInfo.setSessionHandle(OAuthUtil.getParameter(reply, OAUTH_SESSION_HANDLE));
+    accessorInfo.setSessionHandle(OAuthUtil.getParameter(reply,
+        OAuthConstants.OAUTH_SESSION_HANDLE));
     accessorInfo.setTokenExpireMillis(ACCESS_TOKEN_EXPIRE_UNKNOWN);
-    if (OAuthUtil.getParameter(reply, OAUTH_EXPIRES_IN) != null) {
+    if (OAuthUtil.getParameter(reply, OAuthConstants.OAUTH_EXPIRES_IN) != null) {
       try {
-        int expireSecs = Integer.parseInt(OAuthUtil.getParameter(reply, OAUTH_EXPIRES_IN));
+        int expireSecs = Integer.parseInt(OAuthUtil.getParameter(reply,
+            OAuthConstants.OAUTH_EXPIRES_IN));
         long expireMillis = fetcherConfig.getClock().currentTimeMillis() + expireSecs * 1000;
         accessorInfo.setTokenExpireMillis(expireMillis);
       } catch (NumberFormatException e) {

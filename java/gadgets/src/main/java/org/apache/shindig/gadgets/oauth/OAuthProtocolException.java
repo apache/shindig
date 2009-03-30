@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.shindig.auth.OAuthUtil;
+
 import com.google.common.collect.ImmutableSet;
 
 import net.oauth.OAuthMessage;

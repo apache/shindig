@@ -27,6 +27,8 @@ import net.oauth.OAuthMessage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+
+import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -96,7 +98,7 @@ public class FakeOAuthRequest {
         oauthParams.add(new OAuth.Parameter(body, ""));
       } else if (bodySigning == BodySigning.HASH) {
         oauthParams.add(
-            new OAuth.Parameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH,
+            new OAuth.Parameter(OAuthConstants.OAUTH_BODY_HASH,
                 new String(Base64.encodeBase64(DigestUtils.sha(body.getBytes())), "UTF-8")));
       }
     }

@@ -26,6 +26,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
@@ -396,7 +397,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
     String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
         "UTF-8");
-    req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
+    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     OAuthAuthenticationHandler.verifyBodyHash(req, hash);
   }
 
@@ -408,7 +409,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
     String hash = new String(Base64.encodeBase64(
         DigestUtils.sha(CharsetUtil.getUtf8Bytes("NOTBODY"))), "UTF-8");
-    req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
+    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
@@ -425,7 +426,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setPostData(CharsetUtil.getUtf8Bytes(body));
     String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
         "UTF-8");
-    req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
+    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
@@ -443,7 +444,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setMethod("GET");
     String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
         "UTF-8");
-    req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
+    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");
@@ -461,7 +462,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     req.setMethod("HEAD");
     String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
         "UTF-8");
-    req.setParameter(OAuthAuthenticationHandler.OAUTH_BODY_HASH, hash);
+    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
     try {
       OAuthAuthenticationHandler.verifyBodyHash(req, hash);
       fail("Body verification should fail");

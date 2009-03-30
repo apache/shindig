@@ -33,6 +33,9 @@ import net.oauth.signature.RSA_SHA1;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+
+import org.apache.shindig.auth.OAuthUtil;
+import org.apache.shindig.auth.OAuthUtil.SignatureType;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
@@ -41,7 +44,6 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.oauth.OAuthUtil;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 
 import java.io.IOException;
@@ -376,7 +378,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
 
     // Parse body
-    switch(OAuthUtil.getSignatureType(request)) {
+    switch(OAuthUtil.getSignatureType(request.getMethod(), request.getHeader("Content-Type"))) {
       case URL_AND_FORM_PARAMS:
         String body = request.getPostBodyAsString();
         info.body = body;
@@ -674,7 +676,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       throws OAuthException, IOException, URISyntaxException {
     info.message.validateMessage(accessor, new FakeTimeOAuthValidator());
     String bodyHash = info.message.getParameter("oauth_body_hash");
-    switch (OAuthUtil.getSignatureType(info.request)) {
+    SignatureType sigType = OAuthUtil.getSignatureType(info.request.getMethod(),
+        info.request.getHeader("Content-Type"));
+    switch (sigType) {
       case URL_ONLY:
         break;
       case URL_AND_FORM_PARAMS:

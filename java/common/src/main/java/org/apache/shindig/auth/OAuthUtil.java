@@ -17,15 +17,13 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets.oauth;
+package org.apache.shindig.auth;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuth.Parameter;
-
-import org.apache.shindig.gadgets.http.HttpRequest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -88,11 +86,11 @@ public class OAuthUtil {
     URL_AND_BODY_HASH,
   }
   
-  public static SignatureType getSignatureType(HttpRequest request) {
-    if (OAuth.isFormEncoded(request.getHeader("Content-Type"))) {
+  public static SignatureType getSignatureType(String method, String contentType) {
+    if (OAuth.isFormEncoded(contentType)) {
       return SignatureType.URL_AND_FORM_PARAMS;
     }
-    if ("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod())) {
+    if ("GET".equals(method) || "HEAD".equals(method)) {
       return SignatureType.URL_ONLY;
     }
     return SignatureType.URL_AND_BODY_HASH;

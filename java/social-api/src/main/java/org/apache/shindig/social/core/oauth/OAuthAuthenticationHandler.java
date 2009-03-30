@@ -35,6 +35,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthenticationHandler;
+import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
@@ -53,7 +54,6 @@ import javax.servlet.http.HttpServletRequest;
 public class OAuthAuthenticationHandler implements AuthenticationHandler {
 
   public static final String REQUESTOR_ID_PARAM = "xoauth_requestor_id";
-  public static final String OAUTH_BODY_HASH = "oauth_body_hash";
 
   private final OAuthDataStore store;
 
@@ -82,7 +82,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       // Is not an oauth request
       return null;
     }
-    String bodyHash = getParameter(message, OAUTH_BODY_HASH);
+    String bodyHash = getParameter(message, OAuthConstants.OAUTH_BODY_HASH);
     if (!StringUtils.isEmpty(bodyHash)) {
       verifyBodyHash(request, bodyHash);
     }
