@@ -55,7 +55,8 @@ class GadgetFeatureRegistry {
       switch ($entry['type']) {
         case 'URL':
           $request = new RemoteContentRequest($entry['content']);
-          $context->getHttpFetcher()->fetch($request, $context);
+          $request->getOptions()->ignoreCache = $context->getIgnoreCache();
+          $context->getHttpFetcher()->fetch($request);
           if ($request->getHttpCode() == '200') {
             $ret .= $request->getResponseContent()."\n";
           }

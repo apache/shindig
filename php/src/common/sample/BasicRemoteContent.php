@@ -61,33 +61,34 @@ class BasicRemoteContent extends RemoteContent {
     $this->basicFetcher = $basicFetcher;
   }
 
-  public function fetch(RemoteContentRequest $request, GadgetContext $context) {
-    if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
+  public function fetch(RemoteContentRequest $request) {
+    $ignoreCache = $request->getOptions()->ignoreCache;
+    if (!$ignoreCache && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
       $request = $cachedRequest;
     } else {
       $originalRequest = clone $request;
       $request = $this->divertFetch($request);
-      if ($request->getHttpCode() != 200 && ! $context->getIgnoreCache() && ! $request->isPost()) {
+      if ($request->getHttpCode() != 200 && !$ignoreCache && !$request->isPost()) {
         $cachedRequest = $this->cache->expiredGet($request->toHash());
         if ($cachedRequest['found'] == true) {
           return $cachedRequest['data'];
         }
       }
-      $this->setRequestCache($originalRequest, $request, $this->cache, $context);
+      $this->setRequestCache($originalRequest, $request, $this->cache);
     }
     return $request;
   }
 
-  public function multiFetch(Array $requests, Array $contexts) {
+  public function multiFetch(Array $requests) {
     $rets = array();
     $requestsToProc = array();
     foreach ($requests as $request) {
-      list(, $context) = each($contexts);
       if (! ($request instanceof RemoteContentRequest)) {
         throw new RemoteContentException("Invalid request type in remoteContent");
       }
+      $ignoreCache = $request->getOptions()->ignoreCache;
       // determine which requests we can load from cache, and which we have to actually fetch
-      if (! $context->getIgnoreCache() && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
+      if (!$ignoreCache && !$request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
         $rets[] = $cachedRequest;
       } else {
         $originalRequest = clone $request;
@@ -97,16 +98,37 @@ class BasicRemoteContent extends RemoteContent {
     }
 
     if ($requestsToProc) {
-      $newRets = $this->basicFetcher->multiFetchRequest($requestsToProc);
-      foreach ($newRets as $request) {
+      $normal = array();
+      $signing = array();
+      foreach ($requestsToProc as $request) {
+        switch ($request->getAuthType()) {
+          case RemoteContentRequest::$AUTH_SIGNED:
+            $signing[] = $request;
+            break;
+          case RemoteContentRequest::$AUTH_OAUTH:
+            // We do not allow multi fetch oauth content.
+            break;
+          default:
+            $normal[] = $request;
+        }
+      }
+      if ($signing) {
+        $signingFetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher);
+        $signingFetcher->multiFetchRequest($signing);
+      }
+      if ($normal) {
+        $this->basicFetcher->multiFetchRequest($normal);
+      }
+      foreach ($requestsToProc as $request) {
         list(, $originalRequest) = each($originalRequestArray);
-        if ($request->getHttpCode() != 200 && ! $context->getIgnoreCache() && ! $request->isPost()) {
+        $ignoreCache = $request->getOptions()->ignoreCache;
+        if ($request->getHttpCode() != 200 && !$ignoreCache && !$request->isPost()) {
           $cachedRequest = $this->cache->expiredGet($request->toHash());
           if ($cachedRequest['found'] == true) {
             $rets[] = $cachedRequest['data'];
           }
         } else {
-          $this->setRequestCache($originalRequest, $request, $this->cache, $context);
+          $this->setRequestCache($originalRequest, $request, $this->cache);
           $rets[] = $request;
         }
       }
@@ -118,8 +140,9 @@ class BasicRemoteContent extends RemoteContent {
     $this->cache->invalidate($request->toHash());
   }
 
-  private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache, GadgetContext $context) {
-    if (! $request->isPost() && ! $context->getIgnoreCache()) {
+  private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache) {
+    $ignoreCache = $originalRequest->getOptions()->ignoreCache;
+    if (!$request->isPost() && !$ignoreCache) {
       $ttl = Config::get('cache_time');
       if ($request->getHttpCode() == '200') {
         // Got a 200 OK response, calculate the TTL to use for caching it
@@ -156,13 +179,12 @@ class BasicRemoteContent extends RemoteContent {
   private function divertFetch(RemoteContentRequest $request) {
     switch ($request->getAuthType()) {
       case RemoteContentRequest::$AUTH_SIGNED:
-        $token = $request->getToken();
-        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
+        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher);
         return $fetcher->fetchRequest($request);
       case RemoteContentRequest::$AUTH_OAUTH:
         $params = new OAuthRequestParams();
         $token = $request->getToken();
-        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher, $token);
+        $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher);
         $oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);
         $oauthFetcher = $oAuthFetcherFactory->getOAuthFetcher($fetcher, $token, $params);
         return $oauthFetcher->fetch($request);

@@ -24,6 +24,9 @@
  *
  */
 class GadgetFactory {
+  /**
+   * @var GadgetContext
+   */
   private $context;
   private $token;
 
@@ -184,7 +187,7 @@ class GadgetFactory {
    */
   private function fetchResources(Gadget &$gadget) {
     $contextLocale = $this->context->getLocale();
-    $unsignedRequests = $unsignedContexts = $signedRequests = $signedContexts = array();
+    $unsignedRequests = $signedRequests = array();
     foreach ($gadget->getLocales() as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
@@ -214,13 +217,13 @@ class GadgetFactory {
     foreach ($unsignedRequests as $key => $requestUrl) {
       $request = new RemoteContentRequest($requestUrl);
       $request->createRemoteContentRequestWithUri($requestUrl);
+      $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
       $unsignedRequests[$key] = $request;
-      $unsignedContexts[$key] = $this->context;
     }
     $responses = array();
     if (count($unsignedRequests)) {
       $brc = new BasicRemoteContent();
-      $resps = $brc->multiFetch($unsignedRequests, $unsignedContexts);
+      $resps = $brc->multiFetch($unsignedRequests);
       foreach ($resps as $response) {
         $responses[$response->getUrl()] = array(
             'body' => $response->getResponseContent(),
@@ -232,12 +235,12 @@ class GadgetFactory {
       $request = new RemoteContentRequest($requestUrl);
       $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
       $request->setNotSignedUri($requestUrl);
+      $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
       $signedRequests[$key] = $request;
-      $signedContexts[$key] = $this->context;
     }
     if (count($signedRequests)) {
       $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
-      $resps = $remoteContent->multiFetch($signedRequests,$signedContexts);
+      $resps = $remoteContent->multiFetch($signedRequests);
       foreach ($resps as $response) {
         $responses[$response->getNotSignedUrl()] = array(
             'body' => $response->getResponseContent(),
@@ -297,7 +300,8 @@ class GadgetFactory {
   protected function fetchGadget($gadgetUrl) {
     $request = new RemoteContentRequest($gadgetUrl);
     $request->setToken($this->token);
-    $xml = $this->context->getHttpFetcher()->fetch($request, $this->context);
+    $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+    $xml = $this->context->getHttpFetcher()->fetch($request);
     if ($xml->getHttpCode() != '200') {
       throw new GadgetException("Failed to retrieve gadget content (recieved http code " . $xml->getHttpCode() . ")");
     }

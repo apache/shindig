@@ -32,13 +32,17 @@ class RemoteContentRequest {
   private $responseHeaders = false;
   private $httpCode = false;
   private $contentType = null;
-  private $options;
   private $created;
   private $refreshInterval;
   private static $SC_OK = 200; //Please, use only for testing!
   public $handle = false;
   public static $DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
+  /**
+   * @var Options
+   */
+  private $options;
+  
   /**
    * @var SecurityToken
    */
@@ -113,18 +117,6 @@ class RemoteContentRequest {
     $this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::getDefaultOptions());
   }
 
-  /**
-   * Creates a simple GET request
-   *
-   * @param uri
-   * @param ignoreCache
-   */
-  public function getRequest($uri, $ignoreCache) {
-    $options = new Options();
-    $options->ignoreCache = $ignoreCache;
-    return $this->createRemoteContentRequestWithUriOptions($uri, $options);
-  }
-
   // returns a hash code which identifies this request, used for caching
   // takes url and postbody into account for constructing the sha1 checksum
   public function toHash() {
@@ -187,9 +179,12 @@ class RemoteContentRequest {
     $this->method = $method;
   }
 
+  /**
+   * @return Options
+   */
   public function getOptions() {
     if (empty($this->options)) {
-      return new Options();
+      $this->options = new Options();
     }
     return $this->options;
   }

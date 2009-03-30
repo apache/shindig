@@ -39,7 +39,7 @@ class ProxyBase {
    * @param string $url the url to fetch
    * @param string $method http method
    * @param SecurityTokenDecoder $signer
-   * @return the filled in request (RemoteContentRequest)
+   * @return RemoteContentRequest the filled in request (RemoteContentRequest)
    */
   protected function buildRequest($url, $method = 'GET', $signer = null) {
     // Check the protocol requested - curl doesn't really support file://

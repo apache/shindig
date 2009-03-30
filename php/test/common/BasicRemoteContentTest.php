@@ -86,6 +86,17 @@ class MockRemoteContentFetcher extends RemoteContentFetcher {
       } else {
         $request->setHttpCode(404);
       }
+    } else if (strpos($request->getUrl(), 'http://test.chabotc.com/signing.html') == 0) {
+      $url = parse_url($request->getUrl());
+      $query = array();
+      parse_str($url['query'], $query);
+      $request->setHttpCode(200);
+      $request->setContentType('text/html; charset=UTF-8');
+      if ($query['xoauth_signature_publickey'] && $query['oauth_signature']) {
+        $request->setResponseContent('OK');
+      } else {
+        $request->setResponseContent('FAILED');
+      }
     }
   }
 }
@@ -111,7 +122,8 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->fetcher = new MockRemoteContentFetcher();
-    $this->basicRemoteContent = new BasicRemoteContent($this->fetcher);
+    $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+    $this->basicRemoteContent = new BasicRemoteContent($this->fetcher, $signingFetcherFactory, new BasicSecurityTokenDecoder());
   }
 
   /**
@@ -136,8 +148,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testFetch() {
     $request = new RemoteContentRequest('http://test.chabotc.com/ok.html');
-    $context = new TestContext();
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $content = $ret->getResponseContent();
     $this->assertEquals("OK", trim($content));
   }
@@ -147,8 +158,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testFetch404() {
     $request = new RemoteContentRequest('http://test.chabotc.com/fail.html');
-    $context = new TestContext();
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->assertEquals('404', $ret->getHttpCode());
   }
   
@@ -158,19 +168,17 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
   public function testFetchValid() {
     $this->fetcher->clean();
     $request = new RemoteContentRequest('http://test.chabotc.com/valid0.html');
-    $context = new TestContext();
     $this->basicRemoteContent->invalidate($request);
     $this->fetcher->expectFetchRequest($request);
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->assertTrue($this->fetcher->verify());
     $content = $ret->getResponseContent();
     $this->assertEquals("OK", trim($content));
     
     $request = new RemoteContentRequest('http://test.chabotc.com/valid0.html');
-    $context = new TestContext();
     $this->basicRemoteContent->invalidate($request);
     $this->fetcher->expectFetchRequest($request);
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->assertTrue($this->fetcher->verify());
     $content = $ret->getResponseContent();
     $this->assertEquals("OK", trim($content));
@@ -183,18 +191,14 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
     $this->fetcher->clean();
     
     $requests = array();
-    $contexts = array();
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid1.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid2.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid3.html');
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
     $this->basicRemoteContent->invalidate($requests[0]);
     $this->basicRemoteContent->invalidate($requests[1]);
     $this->basicRemoteContent->invalidate($requests[2]);
     $this->fetcher->expectMultiFetchRequest($requests);
-    $rets = $this->basicRemoteContent->multiFetch($requests, $contexts);
+    $rets = $this->basicRemoteContent->multiFetch($requests);
     $this->assertTrue($this->fetcher->verify());
     $content_0 = $rets[0]->getResponseContent();
     $content_1 = $rets[1]->getResponseContent();
@@ -209,14 +213,11 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid1.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid2.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid3.html');
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
     $this->basicRemoteContent->invalidate($requests[0]);
     $this->basicRemoteContent->invalidate($requests[1]);
     $this->basicRemoteContent->invalidate($requests[2]);
     $this->fetcher->expectMultiFetchRequest($requests);
-    $rets = $this->basicRemoteContent->multiFetch($requests, $contexts);
+    $rets = $this->basicRemoteContent->multiFetch($requests);
     $this->assertTrue($this->fetcher->verify());
     $content_0 = $rets[0]->getResponseContent();
     $content_1 = $rets[1]->getResponseContent();
@@ -234,15 +235,11 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testMultiFetch() {
     $requests = array();
-    $contexts = array();
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/ok.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/ok.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/ok.html');
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
 
-    $rets = $this->basicRemoteContent->multiFetch($requests, $contexts);
+    $rets = $this->basicRemoteContent->multiFetch($requests);
     $content_0 = $rets[0]->getResponseContent();
     $content_1 = $rets[1]->getResponseContent();
     $content_2 = $rets[2]->getResponseContent();
@@ -259,15 +256,11 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testMultiFetchMix() {
     $requests = array();
-    $contexts = array();
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/ok.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/ok.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/fail.html');
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
 
-    $rets = $this->basicRemoteContent->multiFetch($requests, $contexts);
+    $rets = $this->basicRemoteContent->multiFetch($requests);
     $content_0 = $rets[0]->getResponseContent();
     $content_1 = $rets[1]->getResponseContent();
     $this->assertEquals("OK", trim($content_0));
@@ -282,32 +275,14 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testMultiFetch404() {
     $requests = array();
-    $contexts = array();
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/fail.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/fail.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/fail.html');
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $contexts[] = new TestContext();
-    $rets = $this->basicRemoteContent->multiFetch($requests, $contexts);
+    $rets = $this->basicRemoteContent->multiFetch($requests);
     $this->assertEquals('404', $rets[0]->getHttpCode());
     $this->assertEquals('404', $rets[1]->getHttpCode());
     $this->assertEquals('404', $rets[2]->getHttpCode());
   }
-
-  /**
-   * Tests BasicRemoteContent->fetch.
-   */
-  public function testFeedFetch() {
-    $fetcher = new BasicRemoteContentFetcher();
-    $this->basicRemoteContent->setBasicFetcher($fetcher);
-    $request = new RemoteContentRequest('http://adwordsapi.blogspot.com/atom.xml');
-    $context = new TestContext();
-    $ret = $this->basicRemoteContent->fetch($request, $context);
-    $content = $ret->getResponseContent();
-    $this->assertNotEquals(null, $content);
-  }
-
 
   /**
    * Tests BasicRemoteContent->invalidate()
@@ -315,16 +290,14 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
   public function testInvalidate() {
     // Fetches url for the first time.
     $request = new RemoteContentRequest('http://test.chabotc.com/ok.html');
-    $context = new TestContext();
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->fetcher->clean();
     $content = $ret->getResponseContent();
     $this->assertEquals("OK", trim($content));
 
     // Fetches url again and $this->fetcher->fetchRequest will not be called.
     $request = new RemoteContentRequest('http://test.chabotc.com/ok.html');
-    $context = new TestContext();
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->assertTrue($this->fetcher->verify());
     $content = $ret->getResponseContent();
     $this->assertEquals("OK", trim($content));
@@ -332,12 +305,30 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
     // Invalidates cache and fetches url.
     // $this->fetcher->fetchRequest will be called.
     $request = new RemoteContentRequest('http://test.chabotc.com/ok.html');
-    $context = new TestContext();
     $this->fetcher->expectFetchRequest($request);
     $this->basicRemoteContent->invalidate($request);
-    $ret = $this->basicRemoteContent->fetch($request, $context);
+    $ret = $this->basicRemoteContent->fetch($request);
     $this->assertTrue($this->fetcher->verify());
     $content = $ret->getResponseContent();
+    $this->assertEquals("OK", trim($content));
+  }
+  
+  /**
+   * Tests through SigningFetcher
+   */
+  public function testSigningFetch() {
+    $request1 = new RemoteContentRequest('http://test.chabotc.com/signing.html');
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
+    $request1->setToken($token);
+    $request1->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+    $request2 = new RemoteContentRequest('http://test.chabotc.com/ok.html');
+    $this->basicRemoteContent->invalidate($request1);
+    $this->basicRemoteContent->invalidate($request2);
+    $requests = array($request1, $request2);
+    $this->basicRemoteContent->multiFetch($requests);
+    $content = $request1->getResponseContent();
+    $this->assertEquals("OK", trim($content));
+    $content = $request2->getResponseContent();
     $this->assertEquals("OK", trim($content));
   }
 }

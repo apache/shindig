@@ -36,12 +36,6 @@ class SigningFetcher extends RemoteContentFetcher {
   protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
 
   /**
-   * Authentication token for the user and gadget making the request.
-   * @var SecurityToken
-   */
-  protected $authToken;
-
-  /**
    * Private key we pass to the OAuth RSA_SHA1 algorithm.This can be a
    * PrivateKey object, or a PEM formatted private key, or a DER encoded byte
    * array for the private key.(No, really, they accept any of them.)
@@ -61,39 +55,41 @@ class SigningFetcher extends RemoteContentFetcher {
   /**
    * Constructor based on signing with the given PrivateKey object.
    *
-   * @param authToken verified gadget security token
+   * @param RemoteContentFetcher $fetcher
    * @param keyName name of the key to include in the request
    * @param privateKey the key to use for the signing
+   * @return SigningFetcher
    */
-  public static function makeFromPrivateKey(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
+  public static function makeFromPrivateKey(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $keyName, $privateKey);
   }
 
   /**
    * Constructor based on signing with the given PrivateKey object.
    *
-   * @param authToken verified gadget security token
+   * @param RemoteContentFetcher $fetcher
    * @param keyName name of the key to include in the request
    * @param privateKey base64 encoded private key
+   * @return SigningFetcher
    */
-  public static function makeFromB64PrivateKey(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
+  public static function makeFromB64PrivateKey(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $keyName, $privateKey);
   }
 
   /**
    * Constructor based on signing with the given PrivateKey object.
    *
-   * @param authToken verified gadget security token
+   * @param RemoteContentFetcher $fetcher
    * @param keyName name of the key to include in the request
    * @param privateKey DER encoded private key
+   * @return SigningFetcher
    */
-  public static function makeFromPrivateKeyBytes(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKey) {
-    return new SigningFetcher($fetcher, $authToken, $keyName, $privateKey);
+  public static function makeFromPrivateKeyBytes(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
+    return new SigningFetcher($fetcher, $keyName, $privateKey);
   }
 
-  protected function __construct(RemoteContentFetcher $fetcher, SecurityToken $authToken, $keyName, $privateKeyObject) {
+  protected function __construct(RemoteContentFetcher $fetcher, $keyName, $privateKeyObject) {
     $this->fetcher = $fetcher;
-    $this->authToken = $authToken;
     $this->keyName = $keyName;
     $this->privateKeyObject = $privateKeyObject;
   }
@@ -105,7 +101,7 @@ class SigningFetcher extends RemoteContentFetcher {
 
   public function multiFetchRequest(Array $requests) {
     foreach ($requests as $request) {
-      $this->signRequest($requests);
+      $this->signRequest($request);
     }
     return $this->fetcher->multiFetchRequest($requests);
   }
@@ -137,8 +133,8 @@ class SigningFetcher extends RemoteContentFetcher {
       $msgParams = array();
       $msgParams = array_merge($msgParams, $queryParams);
       $msgParams = array_merge($msgParams, $postParams);
-      $this->addOpenSocialParams($msgParams);
-      $this->addOAuthParams($msgParams);
+      $this->addOpenSocialParams($msgParams, $request->getToken());
+      $this->addOAuthParams($msgParams, $request->getToken());
       $consumer = new OAuthConsumer(NULL, NULL, NULL);
       $consumer->setProperty(OAuthSignatureMethod_RSA_SHA1::$PRIVATE_KEY, $this->privateKeyObject);
       $signatureMethod = new OAuthSignatureMethod_RSA_SHA1();
@@ -191,24 +187,24 @@ class SigningFetcher extends RemoteContentFetcher {
     }
   }
 
-  private function addOpenSocialParams(&$msgParams) {
-    $owner = $this->authToken->getOwnerId();
+  private function addOpenSocialParams(&$msgParams, SecurityToken $token) {
+    $owner = $token->getOwnerId();
     if ($owner != null) {
       $msgParams[SigningFetcher::$OPENSOCIAL_OWNERID] = $owner;
     }
-    $viewer = $this->authToken->getViewerId();
+    $viewer = $token->getViewerId();
     if ($viewer != null) {
       $msgParams[SigningFetcher::$OPENSOCIAL_VIEWERID] = $viewer;
     }
-    $app = $this->authToken->getAppId();
+    $app = $token->getAppId();
     if ($app != null) {
       $msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
     }
   }
 
-  private function addOAuthParams(&$msgParams) {
+  private function addOAuthParams(&$msgParams, SecurityToken $token) {
     $msgParams[OAuth::$OAUTH_TOKEN] = '';
-    $domain = $this->authToken->getDomain();
+    $domain = $token->getDomain();
     if ($domain != null) {
       $msgParams[OAuth::$OAUTH_CONSUMER_KEY] = $domain;
     }

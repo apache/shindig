@@ -29,13 +29,12 @@ class SigningFetcherFactory {
    * Produces a signing fetcher that will sign requests and delegate actual
    * network retrieval to the {@code networkFetcher}
    *
-   * @param networkFetcher The fetcher that will be doing actual work.
-   * @param token The gadget token used for extracting signing parameters.
-   * @return The signing fetcher.
+   * @param RemoteContentFetcher $networkFetcher The fetcher that will be doing actual work.
+   * @return SigningFetcher
    * @throws GadgetException
    */
-  public function getSigningFetcher($networkFetcher, $token) {
-    return SigningFetcher::makeFromB64PrivateKey($networkFetcher, $token, $this->keyName, $this->privateKey);
+  public function getSigningFetcher(RemoteContentFetcher $networkFetcher) {
+    return SigningFetcher::makeFromB64PrivateKey($networkFetcher, $this->keyName, $this->privateKey);
   }
 
   /**
