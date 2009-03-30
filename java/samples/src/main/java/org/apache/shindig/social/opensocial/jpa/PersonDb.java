@@ -456,8 +456,8 @@ public class PersonDb implements Person, DbObject {
   protected String politicalViews;
   
   @Basic
-  @Column(name = "prefferedUsername", length = 255)
-  protected String prefferedUsername;
+  @Column(name = "preferredUsername", length = 255)
+  protected String preferredUsername;
 
   /**
    *
@@ -926,12 +926,12 @@ public class PersonDb implements Person, DbObject {
     this.politicalViews = politicalViews;
   }
   
-  public String getPrefferedUsername() {
-    return prefferedUsername;
+  public String getPreferredUsername() {
+    return preferredUsername;
   }
 
-  public void setPrefferedUsername(String prefferedUsername) {
-    this.prefferedUsername = prefferedUsername;
+  public void setPreferredUsername(String preferredUsername) {
+    this.preferredUsername = preferredUsername;
   }
 
   public Url getProfileSong() {

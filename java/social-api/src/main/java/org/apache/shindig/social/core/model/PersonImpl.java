@@ -79,7 +79,7 @@ public class PersonImpl implements Person {
   private List<ListField> phoneNumbers;
   private List<ListField> photos;
   private String politicalViews;
-  private String prefferedUsername;
+  private String preferredUsername;
   private Url profileSong;
   private Url profileVideo;
   private List<String> quotes;
@@ -452,12 +452,12 @@ public class PersonImpl implements Person {
     this.politicalViews = politicalViews;
   }
   
-  public String getPrefferedUsername() {
-    return prefferedUsername;
+  public String getPreferredUsername() {
+    return preferredUsername;
   }
 
-  public void setPrefferedUsername(String prefferedUsername) {
-    this.prefferedUsername = prefferedUsername;
+  public void setPreferredUsername(String preferredUsername) {
+    this.preferredUsername = preferredUsername;
   }
 
   public Url getProfileSong() {

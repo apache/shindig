@@ -253,7 +253,12 @@ public class SampleOAuthServlet extends InjectedServlet {
       HttpServletResponse response, boolean sendBody)
       throws IOException, ServletException {
     String realm = (request.isSecure()) ? "https://" : "http://";
-    realm += request.getLocalName();
+
+    if (request.getHeader("Host") != null) {
+      realm += request.getHeader("Host");
+    } else {
+      realm += request.getLocalName();
+    }
     OAuthServlet.handleException(response, e, realm, sendBody);
   }
 
