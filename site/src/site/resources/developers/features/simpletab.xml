@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: TabExample -->
+<Module>
+  <ModulePrefs title="TabExample" description="Tabs Example">
+    <Require feature="tabs"></Require>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+    <script type="text/javascript">
+      function onLoad(){ 
+        var tabset=new gadgets.TabSet();
+        tabset.alignTabs('left');        
+
+        tabset.addTab("Tab1",{contentContainer:document.getElementById("tab1")});
+
+        tabset.addTab("Tab2",{contentContainer:document.getElementById("tab2")});
+      } 
+  
+      gadgets.util.registerOnLoadHandler(onLoad);
+    </script>
+
+    <div id="tab1">
+      Contents go to Tab1
+    </div>
+
+    <div id="tab2">
+      Contents go to Tab2
+    </div>
+    ]]>
+  </Content>
+</Module>
+<!-- END SNIPPET: TabExample -->

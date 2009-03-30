@@ -29,7 +29,7 @@ under the License.
   </properties>
   <body>
     <section name="Shindig Features">
-      <p>Current Shindig comes with several features.</p>
+      <p>Current Shindig comes with several features. We plan to include the Javascript API in the website.</p>
       <table>
         <thead>
           <tr>
@@ -182,8 +182,28 @@ under the License.
       </table>
     </section>
 
+    <section name="Using Features">
+      <p>To use an above feature in your gadget, you need to specify the feature as
+        <i>&lt;require/&gt;</i> in <i>&lt;ModulePrefs/&gt;</i> and defining some Javascript codes to use it.</p>
+      <p>For example, if you plan to use the
+        <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/tabs/feature.xml">tabs/feature.xml</a>,
+        your gadget will look like the following:</p>
+      <macro name="snippet">
+        <param name="id" value="TabExample"/>
+        <param name="url" value="file:///D:/java/apache.org/incubator/shindig/trunk/site/src/site/resources/developers/features/simpletab.xml"/>
+      </macro>
+      <p>You could test your code using the Gadget testing container at: </p>
+      <img src="../../images/samples/tab.png" alt="Tab Example"/>
+    </section>
+
     <section name="Create Your Own Feature">
       <p><i>TODO, see <a href="../../community/index.html">How to Contribute</a> page</i></p>
+    </section>
+
+    <section name="Resources">
+      <ul>
+        <li><a href="http://code.google.com/p/gadget-resources/">The gadget-resources project</a></li>
+      </ul>
     </section>
   </body>
 </document>
