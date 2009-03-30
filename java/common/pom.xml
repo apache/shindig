@@ -48,13 +48,16 @@
         </includes>
       </resource>
       <resource>
-        <directory>src/main/bundle</directory>
+        <directory>src/main/resources</directory>
         <includes>
           <include>**/*</include>
         </includes>
       </resource>
       <resource>
         <directory>conf</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
       </resource>
     </resources>
     <plugins>
@@ -148,7 +151,7 @@
       <groupId>net.sf.ezmorph</groupId>
       <artifactId>ezmorph</artifactId>
     </dependency>
-    
+
     <!-- test -->
     <dependency>
       <groupId>xerces</groupId>
