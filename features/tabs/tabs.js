@@ -503,7 +503,10 @@ gadgets.TabSet.prototype.adjustNavigation_ = function() {
   this.leftNavContainer_.style.display = 'none';
   this.rightNavContainer_.style.display = 'none';
   if (this.tabsContainer_.scrollWidth <= this.tabsContainer_.offsetWidth) {
-    this.tabsContainer_.scrollLeft = 0;
+    if(this.tabsContainer_.scrollLeft) {
+      // to avoid JS error in IE
+      this.tabsContainer_.scrollLeft = 0;
+    }
     return;
   }
 
