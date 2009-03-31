@@ -17,11 +17,13 @@
  * under the License.
  */
 
+/*global gadgets */
+
 /**
  * @fileoverview
  *
  * Manages the gadget security token AKA the gadget auth token AKA the
- * social token.  Also provides an API for the container server to 
+ * social token.  Also provides an API for the container server to
  * efficiently pass authenticated data to the gadget at render time.
  *
  * The shindig.auth package is not part of the opensocial or gadgets spec,
@@ -30,7 +32,7 @@
  * internal use only.
  *
  * Passing authenticated data into the gadget at render time:
- * 
+ *
  * The gadget auth token is the only way for the container to allow the
  * gadget access to authenticated data.  gadgets.io.makeRequest for SIGNED
  * or OAUTH requests relies on the authentication token.  Access to social data
@@ -85,28 +87,6 @@ shindig.Auth = function() {
    */
   var trusted = null;
 
-  function init (configuration) {
-    var urlParams = gadgets.util.getUrlParameters();
-    var config = configuration["shindig.auth"] || {};
-
-    // Auth token - might be injected into the gadget directly, or might
-    // be on the URL (hopefully on the fragment).
-    if (config.authToken) {
-      authToken = config.authToken;
-    } else if (urlParams.st) {
-      authToken = urlParams.st;
-    }
-    if (authToken != null) {
-      addParamsToToken(urlParams);
-    }
-
-    // Trusted JSON.  We use eval directly because this was injected by the 
-    // container server and json parsing is slow in IE.
-    if (config.trustedJson) {
-      trusted = eval("(" + config.trustedJson + ")");
-    }
-  }
-
   /**
    * Copy URL parameters into the auth token
    *
@@ -127,7 +107,7 @@ shindig.Auth = function() {
    * by browsers, and then things break.  To work around this, the
    * security token can include only a (much shorter) hash of the gadget-url:
    *  /gadgets/ifr?url=<gadget-url>#st=<xyz>
-   *  
+   *
    * However, we still want the proxy that handles gadgets.io.makeRequest
    * to be able to look up the gadget URL efficiently, without requring
    * a database hit.  To do that, we modify the auth token here to fill
@@ -142,7 +122,7 @@ shindig.Auth = function() {
     var args = authToken.split('&');
     for (var i = 0; i < args.length; i++) {
       var nameAndValue = args[i].split('=');
-      if (nameAndValue.length == 2) {
+      if (nameAndValue.length === 2) {
         var name = nameAndValue[0];
         var value = nameAndValue[1];
         if (value === '$') {
@@ -152,6 +132,28 @@ shindig.Auth = function() {
       }
     }
     authToken = args.join('&');
+  }
+
+  function init (configuration) {
+    var urlParams = gadgets.util.getUrlParameters();
+    var config = configuration["shindig.auth"] || {};
+
+    // Auth token - might be injected into the gadget directly, or might
+    // be on the URL (hopefully on the fragment).
+    if (config.authToken) {
+      authToken = config.authToken;
+    } else if (urlParams.st) {
+      authToken = urlParams.st;
+    }
+    if (authToken !== null) {
+      addParamsToToken(urlParams);
+    }
+
+    // Trusted JSON.  We use eval directly because this was injected by the
+    // container server and json parsing is slow in IE.
+    if (config.trustedJson) {
+      trusted = eval("(" + config.trustedJson + ")");
+    }
   }
 
   gadgets.config.register("shindig.auth", null, init);

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @fileoverview Collection of multiple objects with useful accessors.
  *
@@ -58,7 +60,7 @@ opensocial.Collection.prototype.getById = function(id) {
    // TODO(doll): A non-linear search would be better
   for (var i = 0; i < this.size(); i++) {
     var item = this.array_[i];
-    if (item.getId() == id) {
+    if (item.getId() === id) {
       return item;
     }
   }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global gadgets,opensocial */
+
 opensocial.Activity.MediaItem = opensocial.MediaItem;
 opensocial.newActivityMediaItem = opensocial.newMediaItem;
 
@@ -76,7 +78,7 @@ opensocial.Environment.ObjectType.ACTIVITY_MEDIA_ITEM
 opensocial.Person.prototype.getField_v08 = opensocial.Person.prototype.getField;
 opensocial.Person.prototype.getField = function(key, opt_params) {
   var value =  this.getField_v08(key, opt_params);
-  if (key == 'lookingFor' && value) {
+  if (key === 'lookingFor' && value) {
     // The lookingFor field used to return a string instead of an enum
     var returnValue = new Array(value.length);
     for (var i = 0; i < value.length; i++) {

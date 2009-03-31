@@ -92,17 +92,19 @@ gadgets.views = function() {
    */
   function init(config) {
     var conf = config.views || {};
-    for (var s in conf) if (conf.hasOwnProperty(s)) {
-      // TODO: Fix this by moving view names / config into a sub property.
-      if (s != "rewriteLinks") {
-        var obj = conf[s];
-        if (!obj) {
-          continue;
-        }
-        supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
-        var aliases = obj.aliases || [];
-        for (var i = 0, alias; alias = aliases[i]; ++i) {
-          supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+    for (var s in conf) {
+      if (conf.hasOwnProperty(s)) {
+        // TODO: Fix this by moving view names / config into a sub property.
+        if (s != "rewriteLinks") {
+          var obj = conf[s];
+          if (!obj) {
+            continue;
+          }
+          supportedViews[s] = new gadgets.views.View(s, obj.isOnlyVisible);
+          var aliases = obj.aliases || [];
+          for (var i = 0, alias; (alias = aliases[i]); ++i) {
+            supportedViews[alias] = new gadgets.views.View(s, obj.isOnlyVisible);
+          }
         }
       }
     }
@@ -139,11 +141,11 @@ gadgets.views = function() {
      * @return {string} A URL string with substituted variables.
      */
     bind : function(urlTemplate, environment) {
-      if (typeof urlTemplate != 'string') {
+      if (typeof urlTemplate !== 'string') {
         throw new Error('Invalid urlTemplate');
       }
 
-      if (typeof environment != 'object') {
+      if (typeof environment !== 'object') {
         throw new Error('Invalid environment');
       }
 
@@ -183,15 +185,15 @@ gadgets.views = function() {
         return j;
       }
 
-      while (group = expansionRE.exec(urlTemplate)) {
+      while ((group = expansionRE.exec(urlTemplate))) {
         result.push(urlTemplate.substring(textStart, group.index));
         textStart = expansionRE.lastIndex;
-        if (match = group[1].match(varRE)) {
+        if ((match = group[1].match(varRE))) {
           varName = match[1];
           defaultValue = match[2] ? match[2].substr(1) : '';
           result.push(getVar(varName, defaultValue));
         } else {
-          if (match = group[1].match(opRE)) {
+          if ((match = group[1].match(opRE))) {
             op = match[1];
             arg = match[2];
             vars = match[3];
@@ -201,7 +203,7 @@ gadgets.views = function() {
               flag = 1;
             case 'opt':
               if (matchVars(vars, {flag: flag}, function(j, v) {
-                    if (typeof v != 'undefined' && (typeof v != 'object' || v.length)) {
+                    if (typeof v !== 'undefined' && (typeof v !== 'object' || v.length)) {
                       j.flag = !j.flag;
                       return 1;
                     }

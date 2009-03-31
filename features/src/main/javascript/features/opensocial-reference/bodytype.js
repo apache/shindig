@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @fileoverview Representation of a body type.
  */

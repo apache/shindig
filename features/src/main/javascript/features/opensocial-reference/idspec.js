@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @fileoverview Representation of an group of people ids.
  */
@@ -162,5 +164,5 @@ opensocial.IdSpec.prototype.getField = function(key, opt_params) {
  * @param {String} data The data to set
  */
 opensocial.IdSpec.prototype.setField = function(key, data) {
-  return this.fields_[key] = data;
+  return (this.fields_[key] = data);
 };

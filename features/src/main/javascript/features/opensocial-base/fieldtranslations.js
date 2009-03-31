@@ -150,7 +150,7 @@ FieldTranslations.translateIsoStringToDate = function(isoString) {
 
   offset -= date.getTimezoneOffset();
   time = (Number(date) + (offset * 60 * 1000));
-  
+
   return new Date(Number(time));
 }
 

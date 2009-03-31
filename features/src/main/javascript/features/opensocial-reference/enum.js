@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial,gadgets */
+
 /**
  * @fileoverview Representation of an enum.
  */

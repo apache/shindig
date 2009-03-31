@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
+/*global gadgets, shindig */
+
 /**
  * @fileoverview Allows the container to refresh the gadget security token.
  */

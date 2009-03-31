@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
+/*global opensocial,gadgets,shindig */
+/*global RestfulRequestItem, JsonPerson, JsonActivity, JsonMediaItem, FieldTranslations */
+
 /**
  * @fileoverview RESTful based opensocial container.
  *
@@ -151,17 +154,17 @@ RestfulContainer.generateErrorResponse = function(result, requestObjects, callba
 };
 
 RestfulContainer.translateHttpError = function(httpError) {
-  if (httpError == "Error 501") {
+  if (httpError === "Error 501") {
     return opensocial.ResponseItem.Error.NOT_IMPLEMENTED;
-  } else if (httpError == "Error 401") {
+  } else if (httpError === "Error 401") {
     return opensocial.ResponseItem.Error.UNAUTHORIZED;
-  } else if (httpError == "Error 403") {
+  } else if (httpError === "Error 403") {
     return opensocial.ResponseItem.Error.FORBIDDEN;
-  } else if (httpError == "Error 400") {
+  } else if (httpError === "Error 400") {
     return opensocial.ResponseItem.Error.BAD_REQUEST;
-  } else if (httpError == "Error 500") {
+  } else if (httpError === "Error 500") {
     return opensocial.ResponseItem.Error.INTERNAL_ERROR;
-  } else if (httpError == "Error 404") {
+  } else if (httpError === "Error 404") {
     return opensocial.ResponseItem.Error.BAD_REQUEST;
   // TODO: Which one should the limit exceeded error be?
     // } else if (httpError == "Error ???") {
@@ -177,9 +180,9 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
   var userId = newIdSpec.getField('userId');
   var groupId = newIdSpec.getField('groupId');
 
-  if (userId == 'OWNER') {
+  if (userId === 'OWNER') {
     userId = '@owner';
-  } else if (userId == 'VIEWER') {
+  } else if (userId === 'VIEWER') {
     userId = '@viewer';
   } else if (opensocial.Container.isArray(newIdSpec)) {
     for (var i = 0; i < newIdSpec.length; i++) {
@@ -188,9 +191,9 @@ RestfulContainer.prototype.translateIdSpec = function(newIdSpec) {
     }
   }
 
-  if (groupId == 'FRIENDS') {
+  if (groupId === 'FRIENDS') {
     groupId = "@friends";
-  } else if (groupId == 'SELF' || !groupId) {
+  } else if (groupId === 'SELF' || !groupId) {
     groupId = "@self";
   }
 
@@ -219,8 +222,8 @@ RestfulContainer.prototype.newFetchPeopleRequest = function(idSpec,
 
   FieldTranslations.addAppDataAsProfileFields(opt_params);
   FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
-  
-  url += "?fields=" + (opt_params['profileDetail'].join(','));
+
+  url += "?fields=" + opt_params['profileDetail'].join(',');
   url += "&startIndex=" + (opt_params['first'] || 0);
   url += "&count=" + (opt_params['max'] || 20);
   url += "&orderBy=" + (opt_params['sortOrder'] || 'topFriends');
@@ -270,7 +273,7 @@ RestfulContainer.prototype.hasNoKeys = function(keys) {
 RestfulContainer.prototype.isWildcardKey = function(key) {
   // Some containers support * to mean all keys in the js apis.
   // This allows the RESTful apis to be compatible with them.
-  return key == "*";
+  return key === "*";
 };
 
 RestfulContainer.prototype.newFetchPersonAppDataRequest = function(idSpec,

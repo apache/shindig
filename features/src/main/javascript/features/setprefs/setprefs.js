@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
+/*global gadgets */
+
 /**
  * @fileoverview This library augments gadgets.Prefs with functionality
  * to store prefs dynamically.

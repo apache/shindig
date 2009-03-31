@@ -95,8 +95,7 @@ gadgets.json = function () {
             c = a.charCodeAt();
             return '\\u00' + Math.floor(c / 16).toString(16) +
                 (c % 16).toString(16);
-            }) + '"'
-          : '"' + value + '"';
+            }) + '"' : '"' + value + '"';
     case 'number':
     // JSON numbers must be finite. Encode non-finite numbers as null.
       return isFinite(value) ? String(value) : 'null';
@@ -112,7 +111,7 @@ gadgets.json = function () {
       // toJSON check removed; re-implement when it doesn't break other libs.
       a = [];
       if (typeof value.length === 'number' &&
-          !(value.propertyIsEnumerable('length'))) {
+          !value.propertyIsEnumerable('length')) {
         // The object is an array. Stringify every element. Use null as a
         // placeholder for non-JSON values.
         l = value.length;
@@ -123,11 +122,13 @@ gadgets.json = function () {
         return '[' + a.join(',') + ']';
       }
       // Otherwise, iterate through all of the keys in the object.
-      for (k in value) if (value.hasOwnProperty(k)) {
-        if (typeof k === 'string') {
-          v = stringify(value[k]);
-          if (v) {
-            a.push(stringify(k) + ':' + v);
+      for (k in value) {
+        if (value.hasOwnProperty(k)) {
+          if (typeof k === 'string') {
+            v = stringify(value[k]);
+            if (v) {
+              a.push(stringify(k) + ':' + v);
+            }
           }
         }
       }

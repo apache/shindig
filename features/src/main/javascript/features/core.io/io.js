@@ -17,6 +17,9 @@
  * under the License.
  */
 
+/*global ActiveXObject, DOMParser */
+/*global shindig */
+
 var gadgets = gadgets || {};
 
 /**
@@ -351,9 +354,11 @@ gadgets.io = function() {
       if (auth === "oauth" || auth === "signed") {
         paramData.oauthState = oauthState || "";
         // Just copy the OAuth parameters into the req to the server
-        for (opt in params) if (params.hasOwnProperty(opt)) {
-          if (opt.indexOf("OAUTH_") === 0) {
-            paramData[opt] = params[opt];
+        for (opt in params) {
+          if (params.hasOwnProperty(opt)) {
+            if (opt.indexOf("OAUTH_") === 0) {
+              paramData[opt] = params[opt];
+            }
           }
         }
       }
@@ -412,15 +417,17 @@ gadgets.io = function() {
 
       var buf = [];
       var first = false;
-      for (var i in fields) if (fields.hasOwnProperty(i)) {
-        if (!first) {
-          first = true;
-        } else {
-          buf.push("&");
+      for (var i in fields) {
+        if (fields.hasOwnProperty(i)) {
+          if (!first) {
+            first = true;
+          } else {
+            buf.push("&");
+          }
+          buf.push(escape ? encodeURIComponent(i) : i);
+          buf.push("=");
+          buf.push(escape ? encodeURIComponent(fields[i]) : fields[i]);
         }
-        buf.push(escape ? encodeURIComponent(i) : i);
-        buf.push("=");
-        buf.push(escape ? encodeURIComponent(fields[i]) : fields[i]);
       }
       return buf.join("");
     },

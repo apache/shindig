@@ -40,7 +40,7 @@ var gadgets = gadgets || {};
 gadgets.MiniMessage = function(opt_moduleId, opt_container) {
   this.numMessages_ = 0;
   this.moduleId_ = opt_moduleId || 0;
-  this.container_ = typeof opt_container == 'object' ?
+  this.container_ = typeof opt_container === 'object' ?
                     opt_container : this.createContainer_();
 };
 
@@ -105,7 +105,7 @@ gadgets.MiniMessage.prototype.cascade_ = function(label) {
  */
 gadgets.MiniMessage.prototype.dismissFunction_ = function(element, opt_callback) {
   return function() {
-    if (typeof opt_callback == 'function' && !opt_callback()) {
+    if (typeof opt_callback === 'function' && !opt_callback()) {
       return;
     }
     try {
@@ -183,16 +183,16 @@ gadgets.MiniMessage.prototype.createStaticMessage = function(message) {
   // If the message already exists in DOM, preserve its location.
   // Otherwise, insert it at the top.
   var ELEMENT_NODE = 1;
-  if (typeof message == 'object' &&
+  if (typeof message === 'object' &&
       message.parentNode &&
-      message.parentNode.nodeType == ELEMENT_NODE) {
+      message.parentNode.nodeType === ELEMENT_NODE) {
     var messageClone = message.cloneNode(true);
     message.style.display = 'none';
     messageClone.id = '';
     td.appendChild(messageClone);
     message.parentNode.insertBefore(table, message.nextSibling);
   } else {
-    if (typeof message == 'object') {
+    if (typeof message === 'object') {
       td.appendChild(message);
     } else {
       td.innerHTML = message;

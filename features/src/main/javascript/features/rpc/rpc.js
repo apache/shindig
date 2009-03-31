@@ -63,6 +63,7 @@ gadgets.rpc = function() {
   var setup = {};
   var sameDomain = {};
   var params = {};
+  var relayChannel;
 
   // Load the authentication token for speaking to the container
   // from the gadget's parameters, or default to '0' if not found.
@@ -185,7 +186,7 @@ gadgets.rpc = function() {
   }
 
   // Pick the most efficient RPC relay mechanism
-  var relayChannel = getRelayChannel();
+  relayChannel = getRelayChannel();
 
   /**
    * Helper function to process an RPC request
@@ -209,6 +210,67 @@ gadgets.rpc = function() {
         // We allow type coercion here because all the url params are strings.
         if (authToken[rpc.f] != rpc.t) {
           throw new Error("Invalid auth token. " + rpc.f + " vs " + rpc.t);
+        }
+      }
+
+      // If there is a callback for this service, attach a callback function
+      // to the rpc context object for asynchronous rpc services.
+      //
+      // Synchronous rpc request handlers should simply ignore it and return a
+      // value as usual.
+      // Asynchronous rpc request handlers, on the other hand, should pass its
+      // result to this callback function and not return a value on exit.
+      //
+      // For example, the following rpc handler passes the first parameter back
+      // to its rpc client with a one-second delay.
+      //
+      // function asyncRpcHandler(param) {
+      //   var me = this;
+      //   setTimeout(function() {
+      //     me.callback(param);
+      //   }, 1000);
+      // }
+      if (rpc.c) {
+        rpc.callback = function(result) {
+          gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
+        };
+      }
+
+      // Call the requested RPC service.
+      var result = (services[rpc.s] ||
+                    services[DEFAULT_NAME]).apply(rpc, rpc.a);
+
+      // If the rpc request handler returns a value, immediately pass it back
+      // to the callback. Otherwise, do nothing, assuming that the rpc handler
+      // will make an asynchronous call later.
+      if (rpc.c && typeof result !== 'undefined') {
+        gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
+      }
+    }
+  }
+
+  /**
+   * Helper function to process an RPC request
+   * @param {Object} rpc RPC request object
+   * @private
+   */
+  function process(rpc) {
+    //
+    // RPC object contents:
+    //   s: Service Name
+    //   f: From
+    //   c: The callback ID or 0 if none.
+    //   a: The arguments for this RPC call.
+    //   t: The authentication token.
+    //
+    if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
+        rpc.a instanceof Array) {
+
+      // Validate auth token.
+      if (authToken[rpc.f]) {
+        // We allow type coercion here because all the url params are strings.
+        if (authToken[rpc.f] !== rpc.t) {
+          throw new Error("Invalid auth token.");
         }
       }
 
@@ -698,7 +760,7 @@ gadgets.rpc = function() {
         // the fragment.
         var params = document.location.search.substring(0).split("&");
         var parentParam = "";
-        for (var i = 0, param; param = params[i]; ++i) {
+        for (var i = 0, param; (param = params[i]); ++i) {
           // Only the first parent can be validated.
           if (param.indexOf("parent=") === 0) {
             parentParam = decodeURIComponent(param.substring(7));
@@ -735,8 +797,7 @@ gadgets.rpc = function() {
       }
 
       if (serviceName === DEFAULT_NAME) {
-        throw new Error("Cannot overwrite default service:"
-                        + " use registerDefault");
+        throw new Error("Cannot overwrite default service: use registerDefault");
       }
 
       services[serviceName] = handler;
@@ -754,8 +815,7 @@ gadgets.rpc = function() {
       }
 
       if (serviceName === DEFAULT_NAME) {
-        throw new Error("Cannot delete default service:"
-                        + " use unregisterDefault");
+        throw new Error("Cannot delete default service: use unregisterDefault");
       }
 
       delete services[serviceName];

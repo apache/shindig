@@ -28,7 +28,7 @@ var gadgets = gadgets || {};
  * @class Routes PubSub messages.
  * @name gadgets.pubsubrouter
  */
-gadgets.pubsubrouter = (function() {
+gadgets.pubsubrouter = function() {
   var gadgetIdToSpecUrl;
   var subscribers = {};
   var onSubscribe;
@@ -91,7 +91,7 @@ gadgets.pubsubrouter = (function() {
      *                 request by returning true.
      */
     init: function(gadgetIdToSpecUrlHandler, opt_callbacks) {
-      if (typeof gadgetIdToSpecUrlHandler != 'function') {
+      if (typeof gadgetIdToSpecUrlHandler !== 'function') {
         throw new Error('Invalid handler');
       }
       if (typeof opt_callbacks === 'object') {
@@ -103,5 +103,5 @@ gadgets.pubsubrouter = (function() {
       gadgets.rpc.register('pubsub', router);
     }
   };
-})();
+}();
 

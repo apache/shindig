@@ -17,7 +17,9 @@
  * under the License.
  */
 
- // All functions in this file should be treated as deprecated legacy routines.
+/*global gadgets */
+
+// All functions in this file should be treated as deprecated legacy routines.
  // Gadget authors are explicitly discouraged from using any of them.
 
 var JSON = gadgets.json;

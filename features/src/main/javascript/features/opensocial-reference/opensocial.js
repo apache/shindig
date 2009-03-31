@@ -166,8 +166,7 @@ opensocial.requestShareApp = function(recipients, reason, opt_callback,
  * @member opensocial
  */
 opensocial.requestCreateActivity = function(activity, priority, opt_callback) {
-  if (!activity || (!activity.getField(opensocial.Activity.Field.TITLE)
-      && !activity.getField(opensocial.Activity.Field.TITLE_ID))) {
+  if (!activity || (!activity.getField(opensocial.Activity.Field.TITLE) && !activity.getField(opensocial.Activity.Field.TITLE_ID))) {
     if (opt_callback) {
       window.setTimeout(function() {
         opt_callback(new opensocial.ResponseItem(null, null,
@@ -453,7 +452,7 @@ opensocial.newNavigationParameters = function(params) {
 // opensocial and gadgets use the same one
 /** @private */
 Function.prototype.inherits = function(parentCtor) {
-  function tempCtor() {};
+  function tempCtor() {}
 
   tempCtor.prototype = parentCtor.prototype;
   this.superClass_ = parentCtor.prototype;

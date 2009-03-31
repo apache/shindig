@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @fileoverview Representation of a message.
  */
@@ -255,5 +257,5 @@ opensocial.Message.prototype.getField = function(key, opt_params) {
  * @param {String} data The data to set
  */
 opensocial.Message.prototype.setField = function(key, data) {
-  return this.fields_[key] = data;
+  return (this.fields_[key] = data);
 };

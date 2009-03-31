@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @class
  * Represents images, movies, and audio.
@@ -124,5 +126,5 @@ opensocial.MediaItem.prototype.getField = function(key, opt_params) {
  * @param {String} data The data to set
  */
 opensocial.MediaItem.prototype.setField = function(key, data) {
-  return this.fields_[key] = data;
+  return (this.fields_[key] = data);
 };

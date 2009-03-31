@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @fileoverview Object used to request social information from the container.
  * This includes data for friends, profiles, app data, and activities.

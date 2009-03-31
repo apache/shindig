@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global opensocial */
+
 /**
  * @class
  * Representation of an activity.
@@ -369,5 +371,5 @@ opensocial.Activity.prototype.getField = function(key, opt_params) {
  * @param {String} data The data to set
  */
 opensocial.Activity.prototype.setField = function(key, data) {
-  return this.fields_[key] = data;
+  return (this.fields_[key] = data);
 };

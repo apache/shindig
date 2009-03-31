@@ -91,14 +91,14 @@ gadgets.window = gadgets.window || {};
       var vh = gadgets.window.getViewportDimensions().height;
       var body = document.body;
       var docEl = document.documentElement;
-      if (document.compatMode == 'CSS1Compat' && docEl.scrollHeight) {
+      if (document.compatMode === 'CSS1Compat' && docEl.scrollHeight) {
         // In Strict mode:
         // The inner content height is contained in either:
         //    document.documentElement.scrollHeight
         //    document.documentElement.offsetHeight
         // Based on studying the values output by different browsers,
         // use the value that's NOT equal to the viewport height found above.
-        newHeight = docEl.scrollHeight != vh ?
+        newHeight = docEl.scrollHeight !== vh ?
                      docEl.scrollHeight : docEl.offsetHeight;
       } else {
         // In Quirks mode:
@@ -111,7 +111,7 @@ gadgets.window = gadgets.window || {};
         // document.documentElement.offsetHeight, then use document.body.
         var sh = docEl.scrollHeight;
         var oh = docEl.offsetHeight;
-        if (docEl.clientHeight != oh) {
+        if (docEl.clientHeight !== oh) {
           sh = body.scrollHeight;
           oh = body.offsetHeight;
         }
@@ -130,7 +130,7 @@ gadgets.window = gadgets.window || {};
     }
 
     // Only make the IFPC call if height has changed
-    if (newHeight != oldHeight) {
+    if (newHeight !== oldHeight) {
       oldHeight = newHeight;
       gadgets.rpc.call(null, "resize_iframe", null, newHeight);
     }

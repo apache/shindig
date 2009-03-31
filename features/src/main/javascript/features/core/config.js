@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/*global configuration */
+
 /**
  * @fileoverview
  *
@@ -118,25 +120,29 @@ gadgets.config = function() {
      */
     init: function(config, opt_noValidation) {
       configuration = config;
-      for (var name in components) if (components.hasOwnProperty(name)) {
-        var componentList = components[name],
-            conf = config[name];
+      for (var name in components) {
+        if (components.hasOwnProperty(name)) {
+          var componentList = components[name],
+              conf = config[name];
 
-        for (var i = 0, j = componentList.length; i < j; ++i) {
-          var component = componentList[i];
-          if (conf && !opt_noValidation) {
-            var validators = component.validators;
-            for (var v in validators) if (validators.hasOwnProperty(v)) {
-              if (!validators[v](conf[v])) {
-                throw new Error('Invalid config value "' + conf[v] +
-                    '" for parameter "' + v + '" in component "' +
-                    name + '"');
+          for (var i = 0, j = componentList.length; i < j; ++i) {
+            var component = componentList[i];
+            if (conf && !opt_noValidation) {
+              var validators = component.validators;
+              for (var v in validators) {
+                if (validators.hasOwnProperty(v)) {
+                  if (!validators[v](conf[v])) {
+                    throw new Error('Invalid config value "' + conf[v] +
+                        '" for parameter "' + v + '" in component "' +
+                        name + '"');
+                  }
+                }
               }
             }
-          }
 
-          if (component.callback) {
-            component.callback(config);
+            if (component.callback) {
+              component.callback(config);
+            }
           }
         }
       }
@@ -152,14 +158,14 @@ gadgets.config = function() {
     EnumValidator: function(list) {
       var listItems = [];
       if (arguments.length > 1) {
-        for (var i = 0, arg; arg = arguments[i]; ++i) {
+        for (var i = 0, arg; (arg = arguments[i]); ++i) {
           listItems.push(arg);
         }
       } else {
         listItems = list;
       }
       return function(data) {
-        for (var i = 0, test; test = listItems[i]; ++i) {
+        for (var i = 0, test; (test = listItems[i]); ++i) {
           if (data === listItems[i]) {
             return true;
           }
@@ -216,10 +222,12 @@ gadgets.config = function() {
      */
     LikeValidator : function(test) {
       return function(data) {
-        for (var member in test) if (test.hasOwnProperty(member)) {
-          var t = test[member];
-          if (!t(data[member])) {
-            return false;
+        for (var member in test) {
+          if (test.hasOwnProperty(member)) {
+            var t = test[member];
+            if (!t(data[member])) {
+              return false;
+            }
           }
         }
         return true;
