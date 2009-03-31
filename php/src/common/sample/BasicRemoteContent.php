@@ -158,7 +158,7 @@ class BasicRemoteContent extends RemoteContent {
             $ttl = $expires - $date;
           }
         }
-        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html : The Cache-Control: max-age=<seconds> overrides the expires header, sp if both are present this one will overwrite the $ttl
+        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html : The Cache-Control: max-age=<seconds> overrides the expires header, so if both are present this one will overwrite the $ttl
         if (($cacheControl = $request->getResponseHeader('Cache-Control')) != null) {
           $bits = explode('=', $cacheControl);
           foreach ($bits as $key => $val) {

@@ -42,7 +42,7 @@ class RemoteContentRequest {
    * @var Options
    */
   private $options;
-  
+
   /**
    * @var SecurityToken
    */

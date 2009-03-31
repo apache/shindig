@@ -129,7 +129,7 @@ class GadgetSpecParser {
             break;
           case 'os:ActivitiesRequest':
             $tag['type'] = 'os:DataRequest';
-            $tag['method'] = 'activity.get';
+            $tag['method'] = 'activities.get';
             break;
         }
         $dataPipeliningTags[] = $tag;

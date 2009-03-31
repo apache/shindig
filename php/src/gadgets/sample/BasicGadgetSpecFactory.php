@@ -47,7 +47,10 @@ class BasicGadgetSpecFactory implements GadgetSpecFactory {
    */
   private function fetchFromWeb($url, $ignoreCache) {
     $remoteContentRequest = new RemoteContentRequest($url);
-    $remoteContentRequest->getRequest($url, $ignoreCache);
+    $remoteContentRequest->getOptions()->ignoreCache = $ignoreCache;
+    $remoteContent = new BasicRemoteContent($this->fetcher);
+    $spec = $remoteContent->fetch($remoteContentRequest);
+    
     $spec = $this->fetcher->fetchRequest($remoteContentRequest);
     $specParser = new GadgetSpecParser();
     $context = new ProxyGadgetContext($url);
