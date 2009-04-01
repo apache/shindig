@@ -78,7 +78,6 @@ class GadgetHrefRenderer extends GadgetRenderer {
       $request->setToken($token);
       $request->setAuthType($authz);
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
-      $_GET = $_POST = array();
     }
 
     $basicFetcher = new BasicRemoteContentFetcher();
@@ -105,7 +104,10 @@ class GadgetHrefRenderer extends GadgetRenderer {
         }
       }
       if (count($requestQueue)) {
-        $result = array_merge($this->performRequests($requestQueue), $result);
+        $returnedResults = $this->performRequests($requestQueue);
+        if (is_array($returnedResults)) {
+          $result = array_merge($returnedResults, $result);
+        }
       }
     } while (count($requestQueue));
     return $result;
@@ -150,7 +152,7 @@ class GadgetHrefRenderer extends GadgetRenderer {
     }
     if (count($jsonRequests)) {
       // perform social api requests
-      $request = new RemoteContentRequest($_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-type: application/json\n", json_encode($jsonRequests));
+      $request = new RemoteContentRequest($_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
       $request->setMethod('POST');
       $basicFetcher = new BasicRemoteContentFetcher();
       $basicRemoteContent = new BasicRemoteContent($basicFetcher);

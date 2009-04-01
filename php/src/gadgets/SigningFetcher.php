@@ -125,14 +125,25 @@ class SigningFetcher extends RemoteContentFetcher {
         }
         $queryParams = $this->sanitize($queryParams);
       }
-      $postParams = array();
+      $contentType = $request->getHeader('Content-Type');
+      $signBody = (stripos($contentType, 'application/x-www-form-urlencoded') !== false || $contentType == null);
       if ($request->getPostBody()) {
-        parse_str($request->getPostBody(), $postParams);
-        $postParams = $this->sanitize($postParams);
+        if ($signBody) {
+          $postParams = array();
+          // on normal application/x-www-form-urlencoded type post's encode and parse the post vars
+          parse_str($request->getPostBody(), $postParams);
+          $postParams = $this->sanitize($postParams);
+        } else {
+          // on any other content-type of post (application/{json,xml,xml+atom}) use the body signing hash
+          // see http://oauth.googlecode.com/svn/spec/ext/body_hash/1.0/drafts/4/spec.html for details
+          $queryParams['oauth_body_hash'] = sha1($request->getPostBody());
+        }
       }
       $msgParams = array();
       $msgParams = array_merge($msgParams, $queryParams);
-      $msgParams = array_merge($msgParams, $postParams);
+      if ($signBody) {
+        $msgParams = array_merge($msgParams, $postParams);
+      }
       $this->addOpenSocialParams($msgParams, $request->getToken());
       $this->addOAuthParams($msgParams, $request->getToken());
       $consumer = new OAuthConsumer(NULL, NULL, NULL);
@@ -146,7 +157,7 @@ class SigningFetcher extends RemoteContentFetcher {
       // from the query.
       $forPost = array();
       $postData = false;
-      if ($method == 'POST') {
+      if ($method == 'POST' && $signBody) {
         foreach ($postParams as $key => $param) {
           $forPost[$key] = $param;
           if ($postData === false) {
@@ -177,7 +188,9 @@ class SigningFetcher extends RemoteContentFetcher {
       // formEncode method.
       $url = $parsedUri['scheme'] . '://' . $parsedUri['host'] . (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') . $parsedUri['path'] . '?' . $newQuery;
       $request->setUri($url);
-      $request->setPostBody($postData);
+      if ($signBody) {
+        $request->setPostBody($postData);
+      }
     } catch (Exception $e) {
       throw new GadgetException($e);
     }
