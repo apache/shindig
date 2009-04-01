@@ -83,9 +83,10 @@
       <name>Apache Development Snapshot Repository</name>
       <url>scp://people.apache.org/www/people.apache.org/repo/m2-snapshot-repository</url>
     </snapshotRepository>
+    <!-- This is the technical website for Shindig 1.1.x -->
     <site>
       <id>apache.website</id>
-      <url>scp://people.apache.org/www/incubator.apache.org/shindig</url>
+      <url>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.1.x</url>
     </site>
   </distributionManagement>
 
@@ -686,26 +687,6 @@
           </plugin>
         </plugins>
       </reporting>
-      <properties>
-        <!-- You can override the site.html.dir property in your ~/.m2/settings.xml file -->
-        <!-- <settings> -->
-        <!--   <profiles> -->
-        <!--     <profile> -->
-        <!--       <id>reporting</id> -->
-        <!--       <properties> -->
-        <!--         <site.html.dir> NEW VALUE </site.html.dir> -->
-        <!--       </properties> -->
-        <!--     </profile> -->
-        <!--   </profiles> -->
-        <!-- </settings> -->
-        <site.html.dir>scp://people.apache.org/www/incubator.apache.org/shindig</site.html.dir>
-      </properties>
-      <distributionManagement>
-        <site>
-          <id>local</id>
-          <url>${site.html.dir}</url>
-        </site>
-      </distributionManagement>
     </profile>
 
     <profile>
