@@ -44,7 +44,6 @@ public class FakeTemplateProcessor implements TemplateProcessor {
     if (result instanceof List && !type.isAssignableFrom(List.class)) {
       result = ((List<?>) result).remove(0);
     }
-    
     return type.cast(result);
   }
   

@@ -26,6 +26,7 @@ import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
@@ -77,7 +78,7 @@ public class DefaultTemplateProcessorTest {
     processor = new DefaultTemplateProcessor(expressions);
     resolver = new RootELResolver();
     parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());    
-    context = new TemplateContext(new GadgetContext(), variables);
+    context = new TemplateContext(new Gadget(), variables);
     
     addVariable("foo", new JSONObject("{ title: 'bar' }"));
     addVariable("user", new JSONObject("{ id: '101', name: { first: 'John', last: 'Doe' }}"));

@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.Gadget;
+
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 
@@ -31,7 +33,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class TemplateContext {
   private final Map<String, JSONObject> top;
-  private final GadgetContext gadgetContext;
+  private final Gadget gadget;
 
   private Object cur = null;
   // TODO: support unique Id
@@ -39,8 +41,8 @@ public class TemplateContext {
   private Map<String, Object> myMap = null;
   private Node templateRoot;
   
-  public TemplateContext(GadgetContext gadgetContext, Map<String, JSONObject> top) {
-    this.gadgetContext = gadgetContext;
+  public TemplateContext(Gadget gadget, Map<String, JSONObject> top) {
+    this.gadget = gadget;
     this.top = top;
     this.cur = top;
   }
@@ -79,8 +81,8 @@ public class TemplateContext {
     return myMap;
   }
   
-  public GadgetContext getGadgetContext() {
-    return gadgetContext;
+  public Gadget getGadget() {
+    return gadget;
   }
 
   public Node setTemplateRoot(Node root) {

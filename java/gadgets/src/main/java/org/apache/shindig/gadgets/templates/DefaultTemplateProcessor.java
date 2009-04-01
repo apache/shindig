@@ -100,7 +100,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     this.registry = registry;
     this.templateContext = templateContext;
     this.elContext = expressions.newELContext(globals,
-        new GadgetELResolver(templateContext.getGadgetContext()),
+        new GadgetELResolver(templateContext.getGadget().getContext()),
         new TemplateELResolver(templateContext),
         new ElementELResolver());
 

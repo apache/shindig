@@ -24,6 +24,7 @@ import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
@@ -62,7 +63,7 @@ public class TemplateBasedTagHandlerTest {
         new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     processor = injector.getInstance(TemplateProcessor.class);
-    context = new TemplateContext(new GadgetContext(), null);
+    context = new TemplateContext(new Gadget(), null);
   }
 
   @Test

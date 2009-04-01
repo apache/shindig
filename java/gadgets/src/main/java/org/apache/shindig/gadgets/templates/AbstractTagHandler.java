@@ -43,28 +43,28 @@ public abstract class AbstractTagHandler implements TagHandler {
     this.tagName = tagName;
     this.namespaceUri = namespaceUri;
   }
-  
+
   public String getTagName() {
     return tagName;
   }
-  
+
   public String getNamespaceUri() {
     return namespaceUri;
   }
 
-  protected final <T> T getValueFromTag(Element tag, String name, 
+  protected final <T> T getValueFromTag(Element tag, String name,
       TemplateProcessor processor, Class<T> type) {
     return processor.evaluate(tag.getAttribute(name), type, null);
   }
-  
-  protected final DocumentFragment processChildren(Element tag, 
+
+  protected final DocumentFragment processChildren(Element tag,
       TemplateProcessor processor) {
     DocumentFragment fragment = tag.getOwnerDocument().createDocumentFragment();
     processor.processChildNodes(fragment, tag);
     return fragment;
   }
-  
-  /** 
+
+  /**
    * Create a text node with proper escaping.
    */
   protected final void appendTextNode(Node parent, String text) {

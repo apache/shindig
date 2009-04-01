@@ -1,0 +1,34 @@
+<Module>
+  <ModulePrefs title="FlashTagTest">
+    <Require feature="opensocial-data"/>
+    <Require feature="opensocial-templates">
+      <Param name="process-on-server">true</Param>
+    </Require>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+
+    <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-data">
+      <!--  Load the canonical user -->
+      <os:PeopleRequest key="me" userId="canonical"/>
+    </script>
+
+    <div>
+      <p>Simple test of flash, which will only load and play when the nested content is clicked</p>
+      <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-template">
+        <os:xFlash swf="http://www.adobe.com/shockwave/welcome/flash.swf" width="500px" height="500px" bgcolor="#123456" menu="false" play="onclick" flashvars="${os:xUrlEncode(me.id)}=${os:xUrlEncode(me.name.familyName)}">
+          <b><p>alternate content. Click me!</p></b>
+        </os:Flash>
+      </script>
+    </div>
+    <div>
+      <p>Flash which has internal network access, no script access, liveconnect</p>
+      <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-template">
+        <os:xFlash swf="http://swfobject.googlecode.com/svn/trunk/swfobject/test.swf" width="500px" height="500px" swliveconnect="false" allowscriptaccess="never" allownetworking="internal" play="immediate">
+          <p>alternate content</p>
+        </os:Flash>
+      </script>
+    </div>
+    ]]>
+  </Content>
+</Module>

@@ -19,6 +19,7 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import java.util.Map;
 
@@ -61,5 +62,23 @@ public class OpensocialFunctionsTest extends TestCase {
     ValueExpression testDecodeBase64 =
       expressions.parse("${os:xDecodeBase64(encoded)}", String.class);
     assertEquals("12345", testDecodeBase64.getValue(context));
+  }
+
+  public void testUrlEncode() throws Exception {
+    String test = "He He";
+    vars.put("test", test);
+
+    ValueExpression testUrlEncode =
+      expressions.parse("${os:xUrlEncode(test)}", String.class);
+    assertEquals("He+He", testUrlEncode.getValue(context));
+  }
+
+  public void testUrlDecode() throws Exception {
+    String test = "He+He";
+    vars.put("encoded", test);
+
+    ValueExpression testUrlDecode =
+      expressions.parse("${os:xUrlDecode(encoded)}", String.class);
+    assertEquals("He He", testUrlDecode.getValue(context));
   }
 }

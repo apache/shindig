@@ -162,8 +162,9 @@
           <suffix>.opt</suffix>
           <excludes>
             <exclude>**/*.xml</exclude>
-            <!-- Caja is already minified -->
+            <!-- Caja & swfobject are already minified -->
             <exclude>**/caja/*.js</exclude>
+            <exclude>**/swfobject/*.js</exclude>
           </excludes>
           <jswarn>false</jswarn>
           <statistics>false</statistics>

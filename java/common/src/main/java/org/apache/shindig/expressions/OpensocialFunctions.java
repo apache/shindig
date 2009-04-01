@@ -19,6 +19,8 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.shindig.common.util.Utf8UrlCoder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,5 +69,23 @@ public class OpensocialFunctions {
       // UTF-8 will be supported everywhere
       throw new RuntimeException(uee);
     }
+  }
+
+  /**
+   * Form encode a string
+   */
+  @Functions.Expose(prefix = "os", names = {"xUrlEncode"})
+  public static String formEncode(String text) {
+    return Utf8UrlCoder.encode(text);
+  }
+
+  /**
+   * Form decode a string
+   * @param text
+   * @return
+   */
+  @Functions.Expose(prefix = "os", names = {"xUrlDecode"})
+  public static String formDecode(String text) {
+    return Utf8UrlCoder.decode(text);
   }
 }

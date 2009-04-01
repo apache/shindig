@@ -33,6 +33,7 @@ features/rpc/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
 features/skins/feature.xml
+features/swfobject/feature.xml
 features/tabs/feature.xml
 features/views/feature.xml
 features/xmlutil/feature.xml

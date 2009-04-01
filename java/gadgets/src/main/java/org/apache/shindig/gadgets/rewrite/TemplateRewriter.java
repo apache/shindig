@@ -181,8 +181,7 @@ public class TemplateRewriter implements ContentRewriter {
     }
     
     if (!templates.isEmpty()) {
-      TemplateContext templateContext = new TemplateContext(
-          gadget.getContext(), pipelinedData);
+      TemplateContext templateContext = new TemplateContext(gadget, pipelinedData);
       
       MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
           gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
