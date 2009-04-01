@@ -60,13 +60,9 @@ class GadgetHrefRenderer extends GadgetRenderer {
      * We should really re-add OAuth fetching support some day, uses these view atributes:
      * $view['oauthServiceName'], $view['oauthTokenName'], $view['oauthRequestToken'], $view['oauthRequestTokenSecret'];
     */
-    $gadgetSigner = Config::get('security_token_signer');
-    $gadgetSigner = new $gadgetSigner();
-    $token = $gadget->gadgetContext->extractAndValidateToken($gadgetSigner);
-
     $authz = $this->getAuthz($view);
     $refreshInterval = $this->getRefreshInterval($view);
-    $href = $this->buildHref($view, $token);
+    $href = $this->buildHref($view);
 
     // rewrite our $_GET to match the outgoing request, this is currently needed for the oauth library
     // to generate it's correct signature
@@ -87,6 +83,9 @@ class GadgetHrefRenderer extends GadgetRenderer {
 
     $signingFetcherFactory = $gadgetSigner = false;
     if ($authz != 'none') {
+      $gadgetSigner = Config::get('security_token_signer');
+      $gadgetSigner = new $gadgetSigner();
+      $token = $gadget->gadgetContext->extractAndValidateToken($gadgetSigner);
       $request->setToken($token);
       $request->setAuthType($authz);
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
@@ -233,7 +232,7 @@ class GadgetHrefRenderer extends GadgetRenderer {
    * @param SecurityToken $token
    * @return string the url
    */
-  private function buildHref($view, $token) {
+  private function buildHref($view) {
     $href = $view['href'];
     if (empty($href)) {
       throw new Exception("Invalid empty href in the gadget view");
@@ -243,16 +242,6 @@ class GadgetHrefRenderer extends GadgetRenderer {
     $firstSeperator = strpos($href, '?') === false ? '?' : '&';
     $href .= $firstSeperator . 'lang=' . urlencode($lang);
     $href .= '&country=' . urlencode($country);
-    // our internal caching is based on the raw url, but the spec states that the container should only cache for a
-    // unique url + lang + country + owner + viewer + appid, so we add those to the url too, so caching works as it should
-    // (so in essense we *always* signOwner and signViewer)
-    //NOTE should check how this will work in the limited cache invalidation scope
-    $href .= '&opensocial_owner_id=' . urlencode($token->getOwnerId());
-    $href .= '&opensocial_viewer_id=' . urlencode($token->getViewerId());
-    $href .= '&opensocial_app_id=' . urlencode($token->getAppId());
-    $href .= "&opensocial_app_url=" . urlencode($token->getAppUrl());
-    $container = isset($_GET['container']) ? $_GET['container'] : (isset($_GET['synd']) ? $_GET['synd'] : 'default');
-    $href .= "&oauth_consumer_key=" . urlencode($container);
     return $href;
   }
 
