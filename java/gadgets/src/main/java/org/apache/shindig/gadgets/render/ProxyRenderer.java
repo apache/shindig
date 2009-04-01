@@ -91,6 +91,7 @@ public class ProxyRenderer {
     UriBuilder uri = new UriBuilder(href);
     uri.addQueryParameter("lang", context.getLocale().getLanguage());
     uri.addQueryParameter("country", context.getLocale().getCountry());
+    uri.addQueryParameter("opensocial_proxied_content", "1");
 
     HttpRequest request = new HttpRequest(uri.toUri())
         .setIgnoreCache(context.getIgnoreCache())

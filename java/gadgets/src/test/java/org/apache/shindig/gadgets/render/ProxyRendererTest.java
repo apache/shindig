@@ -58,7 +58,7 @@ public class ProxyRendererTest {
   private static final String PROXIED_HTML_CONTENT = "Hello, Universe!";
   private static final Uri PROXIED_HTML_HREF = Uri.parse("http://example.org/proxied.php");
   private static final Uri EXPECTED_PROXIED_HTML_HREF
-      = Uri.parse("http://example.org/proxied.php?lang=all&country=ALL");
+      = Uri.parse("http://example.org/proxied.php?lang=all&country=ALL&opensocial_proxied_content=1");
   private static final GadgetContext CONTEXT = new GadgetContext() {
     @Override
     public SecurityToken getToken() {
@@ -107,6 +107,7 @@ public class ProxyRendererTest {
     Uri resolved = new UriBuilder(base.resolve(relative))
       .addQueryParameter("lang", GadgetSpec.DEFAULT_LOCALE.getLanguage())
       .addQueryParameter("country", GadgetSpec.DEFAULT_LOCALE.getCountry())
+      .addQueryParameter("opensocial_proxied_content", "1")
       .toUri();
 
     HttpRequest request = new HttpRequest(resolved);
@@ -176,6 +177,8 @@ public class ProxyRendererTest {
     UriBuilder uri = new UriBuilder(PROXIED_HTML_HREF);
     uri.putQueryParameter("lang", "foo");
     uri.putQueryParameter("country", "BAR");
+    uri.putQueryParameter("opensocial_proxied_content", "1");
+
     Gadget gadget = makeHrefGadget("none");
     gadget.setContext(new GadgetContext() {
       @Override
