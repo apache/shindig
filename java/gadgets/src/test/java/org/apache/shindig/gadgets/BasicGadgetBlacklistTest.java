@@ -18,23 +18,24 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
+
 import junit.framework.TestCase;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.util.regex.PatternSyntaxException;
 
 public class BasicGadgetBlacklistTest extends TestCase {
 
-  private URI someUri;
+  private Uri someUri;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    someUri = new URI("http://bla.com/foo.xml");
+    someUri = Uri.parse("http://bla.com/foo.xml");
   }
 
   private GadgetBlacklist createBlacklist(String contents) throws IOException {
@@ -53,15 +54,15 @@ public class BasicGadgetBlacklistTest extends TestCase {
 
   public void testExactMatches() throws Exception {
     GadgetBlacklist bl = createBlacklist(someUri + "\nhttp://baz.com/foo.xml");
-    assertFalse(bl.isBlacklisted(new URI("http://random.com/uri.xml")));
+    assertFalse(bl.isBlacklisted(Uri.parse("http://random.com/uri.xml")));
     assertTrue(bl.isBlacklisted(someUri));
   }
 
   public void testExactMatchesWithCaseMixture() throws Exception {
     GadgetBlacklist bl = createBlacklist(someUri + "\nhttp://BAZ.com/foo.xml");
     assertTrue(bl.isBlacklisted(someUri));
-    assertTrue(bl.isBlacklisted(new URI("http://BLA.com/foo.xml")));
-    assertTrue(bl.isBlacklisted(new URI("http://baz.com/foo.xml")));
+    assertTrue(bl.isBlacklisted(Uri.parse("http://BLA.com/foo.xml")));
+    assertTrue(bl.isBlacklisted(Uri.parse("http://baz.com/foo.xml")));
   }
 
   public void testIgnoredCommentsAndWhitespace() throws Exception {
@@ -73,8 +74,8 @@ public class BasicGadgetBlacklistTest extends TestCase {
   public void testRegexpMatches() throws Exception {
     GadgetBlacklist bl = createBlacklist("REGEXP http://bla.com/.*");
     assertTrue(bl.isBlacklisted(someUri));
-    assertTrue(bl.isBlacklisted(new URI("http://bla.com/bar.xml")));
-    assertFalse(bl.isBlacklisted(new URI("http://blo.com/bar.xml")));
+    assertTrue(bl.isBlacklisted(Uri.parse("http://bla.com/bar.xml")));
+    assertFalse(bl.isBlacklisted(Uri.parse("http://blo.com/bar.xml")));
   }
 
   public void testInvalidRegularExpression() throws Exception {

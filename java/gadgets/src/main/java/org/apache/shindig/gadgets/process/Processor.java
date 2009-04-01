@@ -72,7 +72,7 @@ public class Processor {
       throw new ProcessingException("Unsupported scheme (must be http or https).");
     }
 
-    if (blacklist.isBlacklisted(context.getUrl().toJavaUri())) {
+    if (blacklist.isBlacklisted(context.getUrl())) {
       LOG.info("Attempted to render blacklisted gadget: " + context.getUrl());
       throw new ProcessingException("The requested gadget is unavailable");
     }

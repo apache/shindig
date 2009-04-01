@@ -17,22 +17,20 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.ImplementedBy;
+import org.apache.shindig.common.uri.Uri;
 
-import java.net.URI;
+import com.google.inject.ImplementedBy;
 
 /**
  * A blacklist for gadgets. Gadgets found to be blacklisted cannot be rendered.
  */
-
 @ImplementedBy(BasicGadgetBlacklist.class)
-
 public interface GadgetBlacklist {
 
   /**
    * @return true if {@code gadgetUri} was found in this blacklist, false
    * otherwise.
    */
-  boolean isBlacklisted(URI gadgetUri);
+  boolean isBlacklisted(Uri gadgetUri);
 
 }

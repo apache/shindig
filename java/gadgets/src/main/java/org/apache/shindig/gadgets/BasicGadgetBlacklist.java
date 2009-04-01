@@ -17,9 +17,10 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.common.uri.Uri;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -28,7 +29,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -108,8 +108,7 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
     }
   }
 
-  /** {@inheritDoc} */
-  public boolean isBlacklisted(URI gadgetUri) {
+  public boolean isBlacklisted(Uri gadgetUri) {
     String uriString = gadgetUri.toString().toLowerCase();
     if (exactMatches.contains(uriString)) {
       return true;

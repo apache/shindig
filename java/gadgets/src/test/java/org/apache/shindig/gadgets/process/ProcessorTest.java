@@ -37,8 +37,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
-
 public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
@@ -155,7 +153,7 @@ public class ProcessorTest {
     protected FakeBlacklist() {
     }
 
-    public boolean isBlacklisted(URI gadgetUri) {
+    public boolean isBlacklisted(Uri gadgetUri) {
       wasChecked = true;
       return isBlacklisted;
     }
