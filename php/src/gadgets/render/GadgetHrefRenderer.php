@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -50,28 +49,18 @@ class GadgetHrefRenderer extends GadgetRenderer {
    * @param array $view
    */
   public function renderGadget(Gadget $gadget, $view) {
-
-    $dataPipelining = false;
-    if (count($view['dataPipelining'])) {
-      $dataPipelining = $this->fetchDataPipelining($view['dataPipelining']);
-    }
-
     /* TODO
      * We should really re-add OAuth fetching support some day, uses these view atributes:
      * $view['oauthServiceName'], $view['oauthTokenName'], $view['oauthRequestToken'], $view['oauthRequestTokenSecret'];
     */
     $authz = $this->getAuthz($view);
     $refreshInterval = $this->getRefreshInterval($view);
-    $href = $this->buildHref($view);
+    $href = $this->buildHref($view, $authz);
 
-    // rewrite our $_GET to match the outgoing request, this is currently needed for the oauth library
-    // to generate it's correct signature
-    $uri = parse_url($href);
-    parse_str($uri['query'], $_GET);
-
-    if ($dataPipelining) {
-      // if data-pipeling results are set in $dataPipelining, post the json encoded version to the remote url
-      $request = new RemoteContentRequest($href, "Content-type: application/json\n", json_encode($dataPipelining));
+    if (count($view['dataPipelining'])) {
+      $dataPipeliningResults = $this->fetchDataPipelining($view['dataPipelining']);
+      // if data-pipeling tags are present, post the json encoded results to the remote url
+      $request = new RemoteContentRequest($href, "Content-type: application/json\n", json_encode($dataPipeliningResults));
       $request->setMethod('POST');
     } else {
       // no data-pipelining set, use GET and set cache/refresh interval options
@@ -232,7 +221,7 @@ class GadgetHrefRenderer extends GadgetRenderer {
    * @param SecurityToken $token
    * @return string the url
    */
-  private function buildHref($view) {
+  private function buildHref($view, $authz) {
     $href = $view['href'];
     if (empty($href)) {
       throw new Exception("Invalid empty href in the gadget view");
@@ -242,6 +231,9 @@ class GadgetHrefRenderer extends GadgetRenderer {
     $firstSeperator = strpos($href, '?') === false ? '?' : '&';
     $href .= $firstSeperator . 'lang=' . urlencode($lang);
     $href .= '&country=' . urlencode($country);
+    if ($authz != 'none') {
+      $href .= '&opensocial_proxied_content=1';
+    }
     return $href;
   }
 
