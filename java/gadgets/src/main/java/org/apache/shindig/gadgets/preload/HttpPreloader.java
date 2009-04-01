@@ -20,13 +20,13 @@ package org.apache.shindig.gadgets.preload;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.FetchResponseUtils;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.json.JSONException;
@@ -54,12 +54,14 @@ public class HttpPreloader implements Preloader {
     this.requestPipeline = requestPipeline;
   }
 
-  public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
-      GadgetSpec gadget, PreloaderService.PreloadPhase phase) {
+  public Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
+      PreloaderService.PreloadPhase phase) {
     List<Callable<PreloadedData>> preloads = Lists.newArrayList();
 
+    GadgetContext context = gadget.getContext();
+    
     if (phase == PreloaderService.PreloadPhase.HTML_RENDER) {
-      for (Preload preload : gadget.getModulePrefs().getPreloads()) {
+      for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
         Set<String> preloadViews = preload.getViews();
         if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
           preloads.add(new PreloadTask(context, preload, preload.getHref().toString()));

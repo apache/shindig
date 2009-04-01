@@ -18,29 +18,14 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpCache;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
-import org.json.JSONArray;
 
-import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.inject.Inject;
 
@@ -49,13 +34,9 @@ import com.google.inject.Inject;
  */
 public class HtmlRenderer {
   public static final String PATH_PARAM = "path";
-  private static final Charset UTF8 = Charset.forName("UTF-8");
-  private static final Logger logger = Logger.getLogger(HtmlRenderer.class.getName());
-
-  private final RequestPipeline requestPipeline;
-  private final HttpCache httpCache;
   private final PreloaderService preloader;
   private final ContentRewriterRegistry rewriter;
+  private final ProxyRenderer proxyRenderer;
 
   /**
    * @param requestPipeline Used for performing the proxy request. Always ignores caching because
@@ -64,13 +45,11 @@ public class HtmlRenderer {
    *                  whether to perform the preload / fetch cycle.
    */
   @Inject
-  public HtmlRenderer(RequestPipeline requestPipeline,
-                      HttpCache httpCache,
-                      PreloaderService preloader,
+  public HtmlRenderer(PreloaderService preloader,
+                      ProxyRenderer proxyRenderer,
                       ContentRewriterRegistry rewriter) {
-    this.requestPipeline = requestPipeline;
-    this.httpCache = httpCache;
     this.preloader = preloader;
+    this.proxyRenderer = proxyRenderer;
     this.rewriter = rewriter;
   }
 
@@ -90,11 +69,9 @@ public class HtmlRenderer {
   public String render(Gadget gadget) throws RenderingException {
     try {
       View view = gadget.getCurrentView();
-      GadgetContext context = gadget.getContext();
-      GadgetSpec spec = gadget.getSpec();
 
       // We always execute these preloads, they have nothing to do with the cache output.
-      Collection<PreloadedData> preloads = preloader.preload(context, spec,
+      Collection<PreloadedData> preloads = preloader.preload(gadget,
           PreloaderService.PreloadPhase.HTML_RENDER);
       gadget.setPreloads(preloads);
 
@@ -103,90 +80,12 @@ public class HtmlRenderer {
       if (view.getHref() == null) {
         content = view.getContent();
       } else {
-        Uri href = view.getHref();
-        String path = context.getParameter(PATH_PARAM);
-        if (path != null) {
-          try {
-            Uri relative = Uri.parse(path);
-            if (!relative.isAbsolute()) {
-              href = href.resolve(relative);
-            }
-          } catch (IllegalArgumentException e) {
-            // TODO: Spec does not say what to do for an invalid relative path.
-            // Just ignoring for now.
-          }
-        }
-
-        UriBuilder uri = new UriBuilder(href);
-        uri.addQueryParameter("lang", context.getLocale().getLanguage());
-        uri.addQueryParameter("country", context.getLocale().getCountry());
-
-        HttpRequest request = new HttpRequest(uri.toUri())
-            .setIgnoreCache(context.getIgnoreCache())
-            .setOAuthArguments(new OAuthArguments(view))
-            .setAuthType(view.getAuthType())
-            .setSecurityToken(context.getToken())
-            .setContainer(context.getContainer())
-            .setGadget(spec.getUrl());
-
-        HttpResponse response = httpCache.getResponse(request);
-
-        if (response == null || response.isStale()) {
-          HttpRequest proxyRequest = createPipelinedProxyRequest(gadget, request);
-          response = requestPipeline.execute(proxyRequest);
-          httpCache.addResponse(request, response);
-        }
-
-        if (response.isError()) {
-          throw new RenderingException("Unable to reach remote host. HTTP status " +
-            response.getHttpStatusCode());
-        }
-
-        content = response.getResponseAsString();
+        content = proxyRenderer.render(gadget);
       }
 
       return rewriter.rewriteGadget(gadget, content);
     } catch (GadgetException e) {
       throw new RenderingException(e.getMessage(), e);
     }
-  }
-
-  /**
-   * Creates a proxy request by fetching pipelined data and adding it to an existing request.
-   *
-   */
-  private HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
-    HttpRequest request = new HttpRequest(original);
-    request.setIgnoreCache(true);
-    GadgetSpec spec = gadget.getSpec();
-    GadgetContext context = gadget.getContext();
-    Collection<PreloadedData> proxyPreloads = preloader.preload(context, spec,
-          PreloaderService.PreloadPhase.PROXY_FETCH);
-    // TODO: Add current url to GadgetContext to support transitive proxying.
-
-    // POST any preloaded content
-    if ((proxyPreloads != null) && !proxyPreloads.isEmpty()) {
-      JSONArray array = new JSONArray();
-
-      for (PreloadedData preload : proxyPreloads) {
-        try {
-          for (Object entry : preload.toJson()) {
-            array.put(entry);
-          }
-        } catch (PreloadException pe) {
-          // TODO: Determine whether this is a terminal path for the request. The spec is not
-          // clear.
-          logger.log(Level.WARNING, "Unexpected error when preloading", pe);
-        }
-      }
-
-      String postContent = JsonSerializer.serialize(array);
-      // POST the preloaded content, with a method override of GET
-      // to enable caching
-      request.setMethod("POST")
-          .setPostBody(UTF8.encode(postContent).array())
-          .setHeader("Content-Type", "application/json;charset=utf-8");
-    }
-    return request;
   }
 }

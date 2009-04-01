@@ -17,17 +17,17 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.Gadget;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 /**
  * Preloads will be fetched concurrently using the injected ExecutorService, and they can be read
@@ -46,7 +46,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
     this.preloaders = preloaders;
   }
 
-  public Collection<PreloadedData> preload(GadgetContext context, GadgetSpec gadget, PreloadPhase phase) {
+  public Collection<PreloadedData> preload(Gadget gadget, PreloadPhase phase) {
     if (preloaders.isEmpty()) {
       return ImmutableList.of();
     }
@@ -54,7 +54,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
     List<Callable<PreloadedData>> tasks = Lists.newArrayList();
     for (Preloader preloader : preloaders) {
       Collection<Callable<PreloadedData>> taskCollection =
-          preloader.createPreloadTasks(context, gadget, phase);
+          preloader.createPreloadTasks(gadget, phase);
       tasks.addAll(taskCollection);
     }
 

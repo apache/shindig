@@ -23,13 +23,13 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
@@ -70,18 +70,18 @@ public class PipelinedDataPreloader implements Preloader {
   }
 
   /** Create preloads from a gadget view */
-  public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
-      GadgetSpec gadget, PreloaderService.PreloadPhase phase) {
-    View view = gadget.getView(context.getView());
+  public Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
+      PreloaderService.PreloadPhase phase) {
+    View view = gadget.getCurrentView();
     if (view != null
         && view.getPipelinedData() != null
         && phase == PreloaderService.PreloadPhase.PROXY_FETCH) {
 
-      ELResolver resolver = new GadgetELResolver(context);
+      ELResolver resolver = new GadgetELResolver(gadget.getContext());
       PipelinedData.Batch batch = view.getPipelinedData().getBatch(expressions,
           resolver);
       if (batch != null) {
-        return createPreloadTasks(context, batch);
+        return createPreloadTasks(gadget.getContext(), batch);
       }
     }
 
@@ -234,6 +234,7 @@ public class PipelinedDataPreloader implements Preloader {
 
           if (format == null || "json".equals(format)) {
             try {
+              // TODO: support arrays and objects
               data.put("data", new JSONObject(response.getResponseAsString()));
             } catch (JSONException je) {
               data.put("code", 500);

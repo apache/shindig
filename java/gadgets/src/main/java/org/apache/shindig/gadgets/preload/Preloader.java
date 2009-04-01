@@ -17,8 +17,7 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.Gadget;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -33,12 +32,11 @@ public interface Preloader {
    * register a different list of preloaders for each phase.  Guice
    * MultimapBinder would come in handy here.
    *
-   * @param context The request that needs preloading.
    * @param gadget The gadget that the operations will be performed for.
    * @param phase The preload phase being executed.
    * @return Preloading tasks that will be executed by
    *  {@link PreloaderService#}.
    */
-  Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
-      GadgetSpec gadget, PreloaderService.PreloadPhase phase);
+  Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
+      PreloaderService.PreloadPhase phase);
 }

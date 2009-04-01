@@ -23,8 +23,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.testing.TestExecutorService;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.Gadget;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -62,7 +61,7 @@ public class ConcurrentPreloaderServiceTest {
         Arrays.<Preloader>asList(preloader));
 
     Collection<PreloadedData> preloads = service.preload(
-        null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+        null, PreloaderService.PreloadPhase.HTML_RENDER);
 
     Collection<Object> preloaded = getAll(preloads);
     assertEquals(ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE),
@@ -94,7 +93,7 @@ public class ConcurrentPreloaderServiceTest {
         Arrays.<Preloader>asList(preloader, preloader2));
 
     Collection<PreloadedData> preloads =
-      service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+      service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
 
     Collection<Object> preloaded = getAll(preloads);
     assertEquals(ImmutableList.<Object>of(
@@ -119,7 +118,7 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service = new ConcurrentPreloaderService(Executors.newFixedThreadPool(5),
         Arrays.<Preloader>asList(preloader));
 
-    service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
 
     TestPreloadCallable ranInSameThread = null;
     for (TestPreloadCallable preloadCallable: Lists.newArrayList(first, second, third)) {
@@ -144,7 +143,7 @@ public class ConcurrentPreloaderServiceTest {
     PreloaderService service = new ConcurrentPreloaderService(Executors.newCachedThreadPool(),
         Arrays.<Preloader>asList(preloader));
 
-    service.preload(null, null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertSame("Single request not run in current thread",
         Thread.currentThread(), callable.executedThread);
@@ -157,7 +156,7 @@ public class ConcurrentPreloaderServiceTest {
     }
 
     public Collection<Callable<PreloadedData>> createPreloadTasks(
-        GadgetContext context, GadgetSpec spec, PreloaderService.PreloadPhase phase) {
+        Gadget gadget, PreloaderService.PreloadPhase phase) {
       assertEquals(PreloaderService.PreloadPhase.HTML_RENDER, phase);
       return tasks;
     }

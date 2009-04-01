@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 
 import org.easymock.EasyMock;
@@ -83,6 +84,12 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     + "                  method=\"GET\" params=\"" + XML_PARAMS + "\"/>"
     + "</Content></Module>";
   
+  private static final String XML_IN_DEFAULT_CONTAINER = "<Module xmlns:os=\""
+    + PipelinedData.OPENSOCIAL_NAMESPACE + "\">" + "<ModulePrefs title=\"Title\"/>"
+    + "<Content href=\"http://example.org/proxied.php\">"
+    + "  <os:PeopleRequest key=\"p\" userIds=\"you\"/>"
+    + "  <os:PersonAppDataRequest key=\"a\" userId=\"she\"/>" + "</Content></Module>";
+
   @Before
   public void createContainerConfig() {
     containerConfig = EasyMock.createMock(ContainerConfig.class);
@@ -103,7 +110,12 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "profile";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+    
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
     // Nothing fetched yet
@@ -138,7 +150,12 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         expressions);
     view = "profile";
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
     // Nothing fetched yet
@@ -169,7 +186,11 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         expressions);
     view = "profile";
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     tasks.iterator().next().call();
 
@@ -192,7 +213,11 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         expressions);
     view = "profile";
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+   Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     tasks.iterator().next().call();
 
@@ -216,9 +241,40 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "canvas";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("canvas"));
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     assertTrue(tasks.isEmpty());
+  }
+
+  /** 
+   * Verify that social preloads pay attention to view resolution by
+   * using gadget.getCurrentView().
+   */
+  @Test
+  public void testSocialPreloadViewResolution() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_IN_DEFAULT_CONTAINER);
+
+    String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
+        expressions);
+    
+    view = "profile";
+    contextParams.put("st", "token");
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        // Assume view resolution has behaved correctly
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
+    
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
+        PreloaderService.PreloadPhase.PROXY_FETCH);
+    assertEquals(1, tasks.size());
   }
 
   @Test
@@ -232,7 +288,11 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     view = "profile";
     contextParams.put("st", "token");
 
-    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(context, spec,
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.HTML_RENDER);
     assertTrue(tasks.isEmpty());
   }

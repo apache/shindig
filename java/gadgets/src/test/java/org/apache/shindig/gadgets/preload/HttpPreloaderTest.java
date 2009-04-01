@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -88,11 +89,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         "<Module><ModulePrefs title=''>" +
         " <Preload href='" + PRELOAD_HREF + "'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -107,11 +112,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         "<Module><ModulePrefs title=''>" +
         " <Preload href='" + PRELOAD_HREF + "' authz='signed' sign_viewer='false'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -130,11 +139,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         // This is kind of a bogus test since oauth params aren't set.
         " <Preload href='" + PRELOAD_HREF + "' authz='oauth'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -151,11 +164,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "'/>" +
         " <Preload href='" + PRELOAD_HREF2 + "'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     assertEquals(2, preloaded.size());
     List<Object> list = getAll(preloaded);
@@ -185,13 +202,17 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         " <Preload href='" + PRELOAD_HREF + "' views='foo,bar,baz'/>" +
         " <Preload href='" + PRELOAD_HREF2 + "' views='bar'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
     view = "foo";
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded
-        = preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        = preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
 
     List<Object> list = getAll(preloaded);
     assertEquals(1, list.size());
@@ -205,11 +226,15 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         "<Module><ModulePrefs title=''>" +
         " <Preload href='" + PRELOAD_HREF + "'/>" +
         "</ModulePrefs><Content/></Module>";
-    GadgetSpec gadget = new GadgetSpec(GADGET_URL, xml);
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
     Preloader preloader = new HttpPreloader(requestPipeline);
 
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(context, gadget, PreloaderService.PreloadPhase.PROXY_FETCH);
+        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.PROXY_FETCH);
 
     assertEquals(0, preloaded.size());
   }
