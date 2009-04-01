@@ -226,7 +226,7 @@ class RemoteContentRequest {
     $headers = explode("\n", $this->headers);
     foreach ($headers as $header) {
       $key = explode(":", $header, 2);
-      if ($key[0] == $headerName) return trim($key[1]);
+      if (strtolower(trim($key[0])) == strtolower($headerName)) return trim($key[1]);
     }
     return null;
   }
