@@ -97,8 +97,7 @@ gadgets.io = function() {
       return;
     }
     var data = {
-      body: xobj.responseText,
-      rc: 200
+      body: xobj.responseText
     };
     callback(transformResponseData(params, data));
   }
@@ -145,46 +144,41 @@ gadgets.io = function() {
      oauthErrorText: data.oauthErrorText,
      errors: []
     };
-    if (resp.rc === 200) {
-      if (resp.text) {
-        switch (params.CONTENT_TYPE) {
-          case "JSON":
-          case "FEED":
-            resp.data = gadgets.json.parse(resp.text);
-            if (!resp.data) {
-              resp.errors.push("failed to parse JSON");
-              resp.data = null;
-            }
-            break;
-          case "DOM":
-            var dom;
-            if (window.ActiveXObject) {
-              dom = new ActiveXObject("Microsoft.XMLDOM");
-              dom.async = false;
-              dom.validateOnParse = false;
-              dom.resolveExternals = false;
-              if (!dom.loadXML(resp.text)) {
-                resp.errors.push("failed to parse XML");
-              } else {
-                resp.data = dom;
-              }
+    if (resp.text) {
+      switch (params.CONTENT_TYPE) {
+        case "JSON":
+        case "FEED":
+          resp.data = gadgets.json.parse(resp.text);
+          if (!resp.data) {
+            resp.errors.push("failed to parse JSON");
+            resp.data = null;
+          }
+          break;
+        case "DOM":
+          var dom;
+          if (window.ActiveXObject) {
+            dom = new ActiveXObject("Microsoft.XMLDOM");
+            dom.async = false;
+            dom.validateOnParse = false;
+            dom.resolveExternals = false;
+            if (!dom.loadXML(resp.text)) {
+              resp.errors.push("failed to parse XML");
             } else {
-              var parser = new DOMParser();
-              dom = parser.parseFromString(resp.text, "text/xml");
-              if ("parsererror" === dom.documentElement.nodeName) {
-                resp.errors.push("failed to parse XML");
-              } else {
-                resp.data = dom;
-              }
+              resp.data = dom;
             }
-            break;
-          default:
-            resp.data = resp.text;
-            break;
-        }
-      } else {
-        resp.errors.push("failed to retrieve data from backend");
-        resp.data = null;
+          } else {
+            var parser = new DOMParser();
+            dom = parser.parseFromString(resp.text, "text/xml");
+            if ("parsererror" === dom.documentElement.nodeName) {
+              resp.errors.push("failed to parse XML");
+            } else {
+              resp.data = dom;
+            }
+          }
+          break;
+        default:
+          resp.data = resp.text;
+          break;
       }
   }
     return resp;
