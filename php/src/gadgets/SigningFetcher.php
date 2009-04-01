@@ -117,6 +117,12 @@ class SigningFetcher extends RemoteContentFetcher {
       $queryParams = array();
       if (isset($parsedUri['query'])) {
         parse_str($parsedUri['query'], $queryParams);
+        // strip out all opensocial_* and oauth_* params so they can't be spoofed by the client
+        foreach ($queryParams as $key => $val) {
+          if ((strtolower(substr($key, 0, strlen('opensocial_'))) == 'opensocial_') || (strtolower(substr($key, 0, strlen('oauth_'))) == 'oauth_')) {
+            unset($queryParams[$key]);
+          }
+        }
         $queryParams = $this->sanitize($queryParams);
       }
       $postParams = array();
