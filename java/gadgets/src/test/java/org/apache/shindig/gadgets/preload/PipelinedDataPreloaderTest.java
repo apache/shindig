@@ -22,17 +22,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
-
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -135,8 +135,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     JSONObject resultWithKeyP = new JSONObject("{id: 'p', data: 1}");
     JSONObject resultWithKeyA = new JSONObject("{id: 'a', data: 2}");
     Iterator<Object> iter = result.iterator();
-    assertEquals(resultWithKeyP.toString(), iter.next().toString());
-    assertEquals(resultWithKeyA.toString(), iter.next().toString());
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
 
     // Should have only fetched one request
     assertEquals(1, pipeline.requests.size());
@@ -216,12 +216,12 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
             "content: '{foo: \\'bar\\'}'}, id: 'p'}";
 
     String resultString = executeHttpPreload(response, XML_WITH_HTTP_REQUEST_FOR_TEXT);
-    assertEquals(new JSONObject(expectedResult).toString(), resultString);
+    JsonAssert.assertJsonEquals(expectedResult, resultString);
   }
 
   private void verifyHttpPreload(HttpResponse response, String expectedJson) throws Exception {
     String resultString = executeHttpPreload(response, XML_WITH_HTTP_REQUEST);
-    assertEquals(new JSONObject(expectedJson).toString(), resultString);
+    JsonAssert.assertJsonEquals(expectedJson, resultString);
   }
   
   /**

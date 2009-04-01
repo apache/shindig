@@ -20,6 +20,7 @@ package org.apache.shindig.server.endtoend;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.BasicSecurityTokenDecoder;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
@@ -176,7 +177,7 @@ public class EndToEndTest {
     
     JSONObject json = jsonObjects.get("json").getJSONObject("data");
     JSONObject expected = new JSONObject("{content: {key: 'value'}, status: 200}");
-    assertEquals(expected.toString(), json.toString());
+    JsonAssert.assertJsonObjectEquals(expected, json);
   }
 
   @Test
