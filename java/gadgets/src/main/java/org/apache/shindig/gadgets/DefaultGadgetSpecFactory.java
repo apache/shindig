@@ -30,15 +30,16 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.ApplicationManifest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-import org.w3c.dom.Element;
-
-import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
+import org.w3c.dom.Element;
+
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 /**
  * Default implementation of a gadget spec factory.
@@ -84,7 +85,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
       }
     }
 
-    return fetchObject(Uri.fromJavaUri(context.getUrl()), context, false);
+    return fetchObject(context.getUrl(), context, false);
   }
 
   private GadgetSpec getSpecFromManifest(ApplicationManifest manifest, GadgetContext context)

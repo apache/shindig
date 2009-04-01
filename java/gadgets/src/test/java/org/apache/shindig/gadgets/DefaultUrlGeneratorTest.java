@@ -22,11 +22,19 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.caja.util.Join;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import org.apache.commons.lang.StringEscapeUtils;
+
+import junitx.framework.StringAssert;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -34,13 +42,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import junitx.framework.StringAssert;
-
-import com.google.caja.util.Join;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Tests for DefaultUrlGenerator.
@@ -70,7 +71,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   public void setUp() throws Exception {
     super.setUp();
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
-    expect(context.getUrl()).andReturn(URI.create(SPEC_URL)).anyTimes();
+    expect(context.getUrl()).andReturn(Uri.parse(SPEC_URL)).anyTimes();
     Map<String, String> prefMap = Maps.newHashMap();
     prefMap.put(UP_NAME, UP_VALUE);
     UserPrefs prefs = new UserPrefs(prefMap);

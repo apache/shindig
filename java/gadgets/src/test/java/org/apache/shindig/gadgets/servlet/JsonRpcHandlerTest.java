@@ -41,7 +41,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -89,8 +88,8 @@ public class JsonRpcHandlerTest {
 
   @Before
   public void setUp() {
-    processor.gadgets.put(SPEC_URL.toJavaUri(), SPEC_XML);
-    processor.gadgets.put(SPEC_URL2.toJavaUri(), SPEC_XML2);
+    processor.gadgets.put(SPEC_URL, SPEC_XML);
+    processor.gadgets.put(SPEC_URL2, SPEC_XML2);
   }
 
   private JSONObject createGadget(String url, int moduleId, Map<String, String> prefs)
@@ -201,7 +200,7 @@ public class JsonRpcHandlerTest {
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    processor.exceptions.put(SPEC_URL2.toJavaUri(), new ProcessingException("broken"));
+    processor.exceptions.put(SPEC_URL2, new ProcessingException("broken"));
 
     JSONObject response = jsonRpcHandler.process(input);
 
@@ -228,8 +227,8 @@ public class JsonRpcHandlerTest {
   }
 
   private static class FakeProcessor extends Processor {
-    protected final Map<URI, ProcessingException> exceptions = Maps.newHashMap();
-    protected final Map<URI, String> gadgets = Maps.newHashMap();
+    protected final Map<Uri, ProcessingException> exceptions = Maps.newHashMap();
+    protected final Map<Uri, String> gadgets = Maps.newHashMap();
 
     public FakeProcessor() {
       super(null, null, null, null);
@@ -237,6 +236,7 @@ public class JsonRpcHandlerTest {
 
     @Override
     public Gadget process(GadgetContext context) throws ProcessingException {
+
       ProcessingException exception = exceptions.get(context.getUrl());
       if (exception != null) {
         throw exception;

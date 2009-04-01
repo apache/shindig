@@ -33,6 +33,13 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.View;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,12 +54,6 @@ import java.util.concurrent.Callable;
 
 import javax.el.ELResolver;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-
 /**
  * Preloader for loading Data Pipelining Preload data.
  */
@@ -63,7 +64,7 @@ public class PipelinedDataPreloader implements Preloader {
   private static final Charset UTF8 = Charset.forName("UTF-8");
   private static Set<String> HTTP_RESPONSE_HEADERS =
     ImmutableSet.of("content-type", "location", "set-cookie");
-  
+
   private final Expressions expressions;
 
   @Inject
@@ -125,7 +126,7 @@ public class PipelinedDataPreloader implements Preloader {
   /**
    * Hook for executing a JSON RPC fetch for social data.  Subclasses can override
    * to provide special handling (e.g., directly invoking a local API)
-   * 
+   *
    * @param request the social request
    * @return the response to the request
    */
@@ -157,7 +158,7 @@ public class PipelinedDataPreloader implements Preloader {
           .setPostBody(UTF8.encode(array.toString()).array())
           .addHeader("Content-Type", "application/json; charset=UTF-8")
           .setContainer(context.getContainer())
-          .setGadget(Uri.fromJavaUri(context.getUrl()));
+          .setGadget(context.getUrl());
 
       HttpResponse response = executeSocialRequest(request);
 
@@ -206,10 +207,10 @@ public class PipelinedDataPreloader implements Preloader {
       if (method != null) {
         request.setMethod(method);
       }
-      
+
       // TODO: params EL implementation is not yet properly escaped per spec
       String params = preload.getAttributes().get("params");
-      if ((params != null) && !"".equals(params)) { 
+      if ((params != null) && !"".equals(params)) {
         if ("POST".equalsIgnoreCase(request.getMethod())) {
           request.setPostBody(params.getBytes("UTF-8"));
           request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
@@ -239,20 +240,20 @@ public class PipelinedDataPreloader implements Preloader {
           if (response.getHttpStatusCode() >= 400) {
             wrapper.put("error", createJSONError(response.getHttpStatusCode(), null, response));
           } else {
-            // Create {data: {status: [CODE], content: {...}|[...]|"...", headers:{...}}} 
+            // Create {data: {status: [CODE], content: {...}|[...]|"...", headers:{...}}}
             JSONObject data = new JSONObject();
             wrapper.put("data", data);
 
             // Add the status
             data.put("status", response.getHttpStatusCode());
             String responseText = response.getResponseAsString();
-            
+
             // Add allowed headers
             JSONObject headers = createJSONHeaders(response);
             if (headers != null) {
               data.put("headers", headers);
             }
-            
+
             // And add the parsed content
             if (format == null || "json".equals(format)) {
               try {
@@ -287,7 +288,7 @@ public class PipelinedDataPreloader implements Preloader {
   private static JSONObject createJSONHeaders(HttpResponse response)
       throws JSONException {
     JSONObject headers = null;
-    
+
     // Add allowed headers
     for (String header: HTTP_RESPONSE_HEADERS) {
       Collection<String> values = response.getHeaders(header);
@@ -304,10 +305,10 @@ public class PipelinedDataPreloader implements Preloader {
         headers.put(header, array);
       }
     }
-    
+
     return headers;
   }
-  
+
   /**
    * Create {error: { code: [CODE], data: {content: "....", headers: {...}}}}
    */
@@ -328,10 +329,10 @@ public class PipelinedDataPreloader implements Preloader {
     if (headers != null) {
       data.put("headers", headers);
     }
-    
+
     return error;
   }
-  
+
   private Uri getSocialUri(GadgetContext context) {
     String jsonUri = config.getString(context.getContainer(), "gadgets.osDataUri");
     Preconditions.checkNotNull(jsonUri, "No JSON URI available for social preloads");

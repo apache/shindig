@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class ProcessorTest {
         "{'gadgets.features':{views:" +
            "{aliased: {aliases: ['some-alias', 'alias']}}" +
          "}}}");
-    
+
     containerConfig = new JsonContainerConfig(config, new Expressions());
     processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist);
   }
@@ -71,11 +72,11 @@ public class ProcessorTest {
   private GadgetContext makeContext(final String view, final Uri specUrl) {
     return new GadgetContext() {
       @Override
-      public URI getUrl() {
+      public Uri getUrl() {
         if (specUrl == null) {
           return null;
         }
-        return specUrl.toJavaUri();
+        return specUrl;
       }
 
       @Override
@@ -170,7 +171,7 @@ public class ProcessorTest {
       if (exception != null) {
         throw exception;
       }
-      return new GadgetSpec(Uri.fromJavaUri(context.getUrl()), GADGET);
+      return new GadgetSpec(context.getUrl(), GADGET);
     }
   }
 

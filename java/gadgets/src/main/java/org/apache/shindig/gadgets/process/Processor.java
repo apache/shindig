@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.process;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
@@ -30,7 +31,6 @@ import org.apache.shindig.gadgets.variables.VariableSubstituter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import java.net.URI;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +62,7 @@ public class Processor {
    * @throws ProcessingException If there is a problem processing the gadget.
    */
   public Gadget process(GadgetContext context) throws ProcessingException {
-    URI url = context.getUrl();
+    Uri url = context.getUrl();
 
     if (url == null) {
       throw new ProcessingException("Missing or malformed url parameter");
@@ -72,7 +72,7 @@ public class Processor {
       throw new ProcessingException("Unsupported scheme (must be http or https).");
     }
 
-    if (blacklist.isBlacklisted(context.getUrl())) {
+    if (blacklist.isBlacklisted(context.getUrl().toJavaUri())) {
       LOG.info("Attempted to render blacklisted gadget: " + context.getUrl());
       throw new ProcessingException("The requested gadget is unavailable");
     }

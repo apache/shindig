@@ -42,7 +42,6 @@ import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import java.net.URI;
 
 /**
  * Tests for DefaultGadgetSpecFactory
@@ -91,8 +90,8 @@ public class DefaultGadgetSpecFactoryTest {
     }
 
     @Override
-    public URI getUrl() {
-      return SPEC_URL.toJavaUri();
+    public Uri getUrl() {
+      return SPEC_URL;
     }
 
     @Override
@@ -131,8 +130,8 @@ public class DefaultGadgetSpecFactoryTest {
   private static GadgetContext createContext(final Uri uri, final boolean ignoreCache) {
     return new GadgetContext() {
       @Override
-      public URI getUrl() {
-        return uri.toJavaUri();
+      public Uri getUrl() {
+        return uri;
       }
 
       @Override
@@ -207,8 +206,8 @@ public class DefaultGadgetSpecFactoryTest {
 
     GadgetSpec spec = specFactory.getGadgetSpec(new GadgetContext() {
       @Override
-      public URI getUrl() {
-        return MANIFEST_URI.toJavaUri();
+      public Uri getUrl() {
+        return MANIFEST_URI;
       }
 
       @Override

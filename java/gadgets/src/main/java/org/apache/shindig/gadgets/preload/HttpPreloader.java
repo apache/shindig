@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -29,6 +28,11 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.Preload;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,10 +40,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 
 /**
  * Handles HTTP Preloading (/ModulePrefs/Preload elements).
@@ -59,7 +59,7 @@ public class HttpPreloader implements Preloader {
     List<Callable<PreloadedData>> preloads = Lists.newArrayList();
 
     GadgetContext context = gadget.getContext();
-    
+
     if (phase == PreloaderService.PreloadPhase.HTML_RENDER) {
       for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
         Set<String> preloadViews = preload.getViews();
@@ -81,7 +81,7 @@ public class HttpPreloader implements Preloader {
         .setOAuthArguments(new OAuthArguments(authenticationInfo))
         .setAuthType(authenticationInfo.getAuthType())
         .setContainer(context.getContainer())
-        .setGadget(Uri.fromJavaUri(context.getUrl()));
+        .setGadget(context.getUrl());
   }
 
   class PreloadTask implements Callable<PreloadedData> {

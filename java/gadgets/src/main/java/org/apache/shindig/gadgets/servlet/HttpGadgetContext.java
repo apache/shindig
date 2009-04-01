@@ -19,16 +19,15 @@
 
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.google.common.collect.Maps;
+
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class HttpGadgetContext extends GadgetContext {
   private final Locale locale;
   private final Integer moduleId;
   private final RenderingContext renderingContext;
-  private final URI url;
+  private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
 
@@ -144,7 +143,7 @@ public class HttpGadgetContext extends GadgetContext {
   }
 
   @Override
-  public URI getUrl() {
+  public Uri getUrl() {
     if (url == null) {
       return super.getUrl();
     }
@@ -254,14 +253,14 @@ private static Integer getModuleId(HttpServletRequest req) {
    * @param req
    * @return The ignore cache setting, if appropriate params are set, or null.
    */
-  private static URI getUrl(HttpServletRequest req) {
+  private static Uri getUrl(HttpServletRequest req) {
     String url = req.getParameter("url");
     if (url == null) {
       return null;
     }
     try {
-      return new URI(url);
-    } catch (URISyntaxException e) {
+      return Uri.parse(url);
+    } catch (IllegalArgumentException e) {
       return null;
     }
   }

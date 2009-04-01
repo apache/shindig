@@ -18,13 +18,13 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import com.google.common.collect.Maps;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 
-import java.net.URI;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
 /**
@@ -54,8 +54,8 @@ public class PreloaderTestFixture {
     }
 
     @Override
-    public URI getUrl() {
-      return GADGET_URL.toJavaUri();
+    public Uri getUrl() {
+      return GADGET_URL;
     }
 
     @Override

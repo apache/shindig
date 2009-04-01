@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -45,6 +44,8 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
 import com.google.common.collect.Maps;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -64,7 +65,7 @@ public class CajaContentRewriter implements ContentRewriter {
     if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
         "1".equals(gadget.getContext().getParameter("caja"))) {
 
-      final URI retrievedUri = gadget.getContext().getUrl();
+      final URI retrievedUri = gadget.getContext().getUrl().toJavaUri();
       UriCallback cb = new UriCallback() {
         public UriCallbackOption getOption(ExternalReference externalReference, String string) {
           return UriCallbackOption.REWRITE;
@@ -87,7 +88,7 @@ public class CajaContentRewriter implements ContentRewriter {
             throw new UriCallbackException(externalReference, ex);
           } catch (IOException ex) {
             throw new UriCallbackException(externalReference, ex);
-          } 
+          }
         }
 
         public URI rewrite(ExternalReference externalReference, String string) {
@@ -106,7 +107,7 @@ public class CajaContentRewriter implements ContentRewriter {
           FilePosition.instance(is, 5, 5, 5));
       StringBuilder output = new StringBuilder();
 
-      // Secure default to remove content in case there 
+      // Secure default to remove content in case there
       // are problems cajoling a gadget
       content.setContent("");
       try {
@@ -174,7 +175,7 @@ public class CajaContentRewriter implements ContentRewriter {
     for (Message m : mq.getMessages()) {
       errbuilder.append(m.format(mc)).append('\n');
     }
-    
+
     logger.info("Unable to cajole gadget: " + errbuilder);
 
     // throw new GadgetException(

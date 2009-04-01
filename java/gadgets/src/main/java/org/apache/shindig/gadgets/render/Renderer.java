@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -30,7 +31,6 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 
-import java.net.URI;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -99,7 +99,7 @@ public class Renderer {
     }
   }
 
-  private RenderingResults logError(URI gadgetUrl, Throwable t) {
+  private RenderingResults logError(Uri gadgetUrl, Throwable t) {
     LOG.info("Failed to render gadget " + gadgetUrl + ": " + t.getMessage());
     return RenderingResults.error(t.getMessage());
   }

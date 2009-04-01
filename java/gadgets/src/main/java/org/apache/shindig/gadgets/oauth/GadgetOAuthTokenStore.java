@@ -42,9 +42,6 @@ import net.oauth.OAuthServiceProvider;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 /**
  * Higher-level interface that allows callers to store and retrieve
  * OAuth-related data directly from {@code GadgetSpec}s, {@code GadgetContext}s,
@@ -154,7 +151,7 @@ public class GadgetOAuthTokenStore {
         service.getAuthorizationUrl().toJavaUri().toASCIIString(),
         service.getAccessUrl().url.toJavaUri().toASCIIString());
   }
-  
+
   private OAuthServiceProvider loadProgrammaticConfig(OAuthArguments arguments,
       AccessorInfoBuilder accessorBuilder, OAuthResponseParams responseParams)
       throws OAuthRequestException {
@@ -166,7 +163,7 @@ public class GadgetOAuthTokenStore {
       String requestMethod = arguments.getRequestOption(OAuthArguments.REQUEST_METHOD_PARAM, "GET");
       Method m = Method.parse(requestMethod);
       accessorBuilder.setMethod(getStoreMethod(m, responseParams));
-      
+
       String requestTokenUrl = arguments.getRequestOption(OAuthArguments.REQUEST_TOKEN_URL_PARAM);
       verifyUrl(requestTokenUrl, responseParams);
       String accessTokenUrl = arguments.getRequestOption(OAuthArguments.ACCESS_TOKEN_URL_PARAM);
@@ -181,7 +178,7 @@ public class GadgetOAuthTokenStore {
           e.getMessage());
     }
   }
-  
+
   private void verifyUrl(String url, OAuthResponseParams responseParams)
       throws OAuthRequestException {
     if (url == null) {
@@ -283,8 +280,8 @@ public class GadgetOAuthTokenStore {
   private GadgetSpec findSpec(final SecurityToken securityToken, final OAuthArguments arguments,
       OAuthResponseParams responseParams) throws OAuthRequestException {
     try {
-      final URI uri = new URI(securityToken.getAppUrl());
-      
+      final Uri uri = Uri.parse(securityToken.getAppUrl());
+
       GadgetContext context = new GadgetContext() {
         @Override
         public String getContainer() {
@@ -298,7 +295,7 @@ public class GadgetOAuthTokenStore {
         }
 
         @Override
-        public URI getUrl() {
+        public Uri getUrl() {
           return uri;
         }
 
@@ -307,9 +304,9 @@ public class GadgetOAuthTokenStore {
           return arguments.getBypassSpecCache();
         }
       };
-      
+
       return specFactory.getGadgetSpec(context);
-    } catch (URISyntaxException e) {
+    } catch (IllegalArgumentException e) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Could not fetch gadget spec, gadget URI invalid.", e);
     } catch (GadgetException e) {

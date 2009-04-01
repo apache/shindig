@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
@@ -45,7 +44,7 @@ public class ContentRewriterFeatureFactory {
   private final String expires;
   private final Set<String> includeTags;
 
-  private ContentRewriterFeature defaultFeature;
+  private final ContentRewriterFeature defaultFeature;
 
   @Inject
   public ContentRewriterFeatureFactory(
@@ -73,18 +72,17 @@ public class ContentRewriterFeatureFactory {
   }
 
   public ContentRewriterFeature get(HttpRequest request) {
-    Uri gadgetUri = request.getGadget();
+    final Uri gadgetUri = request.getGadget();
     GadgetSpec spec;
     if (gadgetUri != null) {
-      final URI gadgetJavaUri = gadgetUri.toJavaUri();
       try {
         GadgetContext context = new GadgetContext() {
           @Override
-          public URI getUrl() {
-            return gadgetJavaUri;
+          public Uri getUrl() {
+            return gadgetUri;
           }
         };
-        
+
         spec = specFactory.getGadgetSpec(context);
         if (spec != null) {
           return get(spec);

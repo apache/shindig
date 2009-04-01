@@ -18,17 +18,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.Maps;
-
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UserPrefs;
 
+import com.google.common.collect.Maps;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
   private final Locale locale;
   private final Integer moduleId;
   private final RenderingContext renderingContext;
-  private final URI url;
+  private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
 
@@ -124,7 +123,7 @@ public class JsonRpcGadgetContext extends GadgetContext {
     return renderingContext;
   }
   @Override
-  public URI getUrl() {
+  public Uri getUrl() {
     if (url == null) {
       return super.getUrl();
     }
@@ -177,11 +176,11 @@ public class JsonRpcGadgetContext extends GadgetContext {
    * @return URL from the request, or null if not present
    * @throws JSONException
    */
-  private static URI getUrl(JSONObject json) throws JSONException {
+  private static Uri getUrl(JSONObject json) throws JSONException {
     try {
       String url = json.getString("url");
-      return new URI(url);
-    } catch (URISyntaxException e) {
+      return Uri.parse(url);
+    } catch (IllegalArgumentException e) {
       return null;
     }
   }

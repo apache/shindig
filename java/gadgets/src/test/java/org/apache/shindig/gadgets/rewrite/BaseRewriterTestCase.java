@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
@@ -33,16 +32,17 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
-import org.junit.Before;
-
-import java.net.URI;
-import java.util.Set;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import org.apache.commons.lang.StringUtils;
+import org.easymock.classextension.EasyMock;
+import org.easymock.classextension.IMocksControl;
+import org.junit.Before;
+
+import java.util.Set;
 
 /**
  * Base class for testing content rewriting functionality
@@ -53,9 +53,9 @@ public abstract class BaseRewriterTestCase {
   public static final String DEFAULT_CONCAT_BASE = "http://www.test.com/dir/concat?";
 
   public static final String MOCK_CONTAINER = "mock";
-  public static final String MOCK_PROXY_BASE = 
+  public static final String MOCK_PROXY_BASE =
     replaceDefaultWithMockServer(DEFAULT_PROXY_BASE);
-  public static final String MOCK_CONCAT_BASE = 
+  public static final String MOCK_CONCAT_BASE =
     replaceDefaultWithMockServer(DEFAULT_CONCAT_BASE);
 
   protected Set<String> tags;
@@ -94,11 +94,11 @@ public abstract class BaseRewriterTestCase {
             return MOCK_CONCAT_BASE;
           }
         }
-        
+
         return null;
       }
     };
-    
+
     rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
         DEFAULT_CONCAT_BASE);
     control = EasyMock.createControl();
@@ -132,7 +132,7 @@ public abstract class BaseRewriterTestCase {
   public static String replaceDefaultWithMockServer(String originalText) {
     return originalText.replace("test.com", "mock.com");
   }
-  
+
   ContentRewriterFeatureFactory mockContentRewriterFeatureFactory(
       ContentRewriterFeature feature) {
     return new FakeRewriterFeatureFactory(feature);
@@ -161,10 +161,10 @@ public abstract class BaseRewriterTestCase {
 
     GadgetContext context = new GadgetContext() {
       @Override
-      public URI getUrl() {
-        return SPEC_URL.toJavaUri();
+      public Uri getUrl() {
+        return SPEC_URL;
       }
-      
+
       @Override
       public String getContainer() {
         return container;
