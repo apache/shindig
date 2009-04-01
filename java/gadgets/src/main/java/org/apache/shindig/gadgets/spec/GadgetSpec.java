@@ -17,16 +17,17 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.gadgets.variables.Substitutions;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.gadgets.variables.Substitutions;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

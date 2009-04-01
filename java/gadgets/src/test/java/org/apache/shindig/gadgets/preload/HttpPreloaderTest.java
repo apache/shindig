@@ -31,6 +31,10 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -40,9 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 /**
  * Tests for HttpPreloader.

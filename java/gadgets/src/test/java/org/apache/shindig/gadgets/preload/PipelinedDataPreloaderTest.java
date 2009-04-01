@@ -33,6 +33,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
+
+import com.google.common.collect.Lists;
+
 import org.easymock.EasyMock;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -43,14 +46,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import com.google.common.collect.Lists;
-
 /**
  * Test for PipelinedDataPreloader.
  */
 public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   private ContainerConfig containerConfig;
-  private Expressions expressions = new Expressions();
+  private final Expressions expressions = new Expressions();
 
   private static final String XML = "<Module xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE
       + "\">" + "<ModulePrefs title=\"Title\"/>"
@@ -61,7 +62,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   private static final String HTTP_REQUEST_URL =  "http://example.org/preload.html";
   private static final String PARAMS = "a=b&c=d";
   private static final String XML_PARAMS = "a=b&amp;c=d";
-  
+
   private static final String XML_WITH_HTTP_REQUEST = "<Module xmlns:os=\""
       + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
       + "<ModulePrefs title=\"Title\"/>"
@@ -91,7 +92,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
     + "                  method=\"GET\" params=\"" + XML_PARAMS + "\"/>"
     + "</Content></Module>";
-  
+
   private static final String XML_IN_DEFAULT_CONTAINER = "<Module xmlns:os=\""
     + PipelinedData.OPENSOCIAL_NAMESPACE + "\">" + "<ModulePrefs title=\"Title\"/>"
     + "<Content href=\"http://example.org/proxied.php\">"
@@ -114,7 +115,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
         expressions);
-    
+
     view = "profile";
     contextParams.put("st", "token");
 
@@ -122,7 +123,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .setContext(context)
         .setSpec(spec)
         .setCurrentView(spec.getView("profile"));
-    
+
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
@@ -166,10 +167,10 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .addHeader("set-cookie", "cookiecookie")
         .addHeader("not-ok", "shouldn'tbehere")
         .create();
-    
+
     String expectedResult = "{data: {status: 200, headers:" +
-    		"{'content-type': ['application/json; charset=UTF-8'], 'set-cookie': ['cookiecookie']}," +
-    		"content: [1, 2]}, id: 'p'}";
+        "{'content-type': ['application/json; charset=UTF-8'], 'set-cookie': ['cookiecookie']}," +
+        "content: [1, 2]}, id: 'p'}";
 
     verifyHttpPreload(response, expectedResult);
   }
@@ -181,9 +182,9 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .addHeader("content-type", "text/html")
         .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
         .create();
-    
+
     String expectedResult = "{error: {code: 404, data:" +
-    		"{headers: {'content-type': ['text/html; charset=UTF-8']}," +
+        "{headers: {'content-type': ['text/html; charset=UTF-8']}," +
             "content: 'not found'}}, id: 'p'}";
 
     verifyHttpPreload(response, expectedResult);
@@ -198,7 +199,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     JSONObject result = new JSONObject(executeHttpPreload(response, XML_WITH_HTTP_REQUEST));
     assertFalse(result.has("data"));
-    
+
     JSONObject error = result.getJSONObject("error");
     assertEquals(HttpResponse.SC_NOT_ACCEPTABLE, error.getInt("code"));
   }
@@ -223,7 +224,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     String resultString = executeHttpPreload(response, XML_WITH_HTTP_REQUEST);
     JsonAssert.assertJsonEquals(expectedJson, resultString);
   }
-  
+
   /**
    * Run an HTTP Preload test, returning the String result.
    */
@@ -256,7 +257,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(HTTP_REQUEST_URL, request.getUri().toString());
     assertEquals("POST", request.getMethod());
     assertEquals(60, request.getCacheTtl());
-    
+
     return result.iterator().next().toString();
   }
 
@@ -334,7 +335,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertTrue(tasks.isEmpty());
   }
 
-  /** 
+  /**
    * Verify that social preloads pay attention to view resolution by
    * using gadget.getCurrentView().
    */
@@ -346,7 +347,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
         expressions);
-    
+
     view = "profile";
     contextParams.put("st", "token");
 
@@ -355,7 +356,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         // Assume view resolution has behaved correctly
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
-    
+
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(gadget,
         PreloaderService.PreloadPhase.PROXY_FETCH);
     assertEquals(1, tasks.size());
