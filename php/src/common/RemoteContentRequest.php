@@ -172,7 +172,14 @@ class RemoteContentRequest {
   }
 
   public function getMethod() {
-    return $this->method;
+    if ($this->method) {
+      return $this->method;
+    }
+    if ($this->postBody) {
+      return 'POST';
+    } else {
+      return 'GET';
+    }
   }
 
   public function setMethod($method) {

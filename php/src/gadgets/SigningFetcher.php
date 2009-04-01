@@ -114,22 +114,16 @@ class SigningFetcher extends RemoteContentFetcher {
       // any OAuth or OpenSocial parameters injected by the client
       $parsedUri = parse_url($url);
       $resource = $url;
-      $queryParams = $this->sanitize($_GET);
-      $postParams = $this->sanitize($_POST);
-      // The data that is supposed to be posted to the target page is contained in the postData field
-      // in the $_POST to the Shindig proxy server
-      // Here we parse it and put it into the $postDataParams array which then is merged into the postParams
-      // to be used for the GET/POST request and the building of the signature
-      $postDataParams = array();
-      if (isset($_POST['postData']) && count($postDataParts = split('&', urldecode($_POST['postData']))) > 0) {
-        foreach ($postDataParts as $postDataPart) {
-          $position = strpos($postDataPart, '=');
-          $key = substr($postDataPart, 0, $position);
-          $value = substr($postDataPart, $position + 1);
-          $postDataParams[$key] = $value;
-        }
+      $queryParams = array();
+      if (isset($parsedUri['query'])) {
+        parse_str($parsedUri['query'], $queryParams);
+        $queryParams = $this->sanitize($queryParams);
       }
-      $postParams = array_merge($postParams, $this->sanitize($postDataParams));
+      $postParams = array();
+      if ($request->getPostBody()) {
+        parse_str($request->getPostBody(), $postParams);
+        $postParams = $this->sanitize($postParams);
+      }
       $msgParams = array();
       $msgParams = array_merge($msgParams, $queryParams);
       $msgParams = array_merge($msgParams, $postParams);
@@ -176,11 +170,7 @@ class SigningFetcher extends RemoteContentFetcher {
       // the normal form encoding scheme, so we have to use the OAuth library
       // formEncode method.
       $url = $parsedUri['scheme'] . '://' . $parsedUri['host'] . (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') . $parsedUri['path'] . '?' . $newQuery;
-      // The headers are transmitted in the POST-data array in the field 'headers'
-      // if no post should be made, the value should be false for this parameter
-      $postHeaders = ((isset($_POST['headers']) && $method == 'POST') ? $_POST['headers'] : false);
       $request->setUri($url);
-      $request->setHeaders($postHeaders);
       $request->setPostBody($postData);
     } catch (Exception $e) {
       throw new GadgetException($e);

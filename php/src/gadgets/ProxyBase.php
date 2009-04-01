@@ -94,6 +94,9 @@ class ProxyBase {
       $token = $this->context->extractAndValidateToken($signer);
       $request->setToken($token);
     }
+    if (isset($_POST['headers'])) {
+      $request->setHeaders($_POST['headers']);
+    }
     return $request;
   }
 

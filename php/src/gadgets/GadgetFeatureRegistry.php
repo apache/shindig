@@ -138,6 +138,9 @@ class GadgetFeatureRegistry {
     }
     // And make sure non-core features depend on core.
     foreach ($this->features as $key => $entry) {
+      if ($entry == null) {
+        continue;
+      }
       if (strtolower(substr($entry['name'], 0, strlen('core'))) != 'core') {
         $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
       }
