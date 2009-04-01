@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.preload;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.config.ContainerConfig;
@@ -67,6 +68,13 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
       + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
       + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
+
+  private static final String XML_WITH_HTTP_REQUEST_FOR_TEXT = "<Module xmlns:os=\""
+    + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
+    + "<ModulePrefs title=\"Title\"/>"
+    + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
+    + "  <os:HttpRequest key=\"p\" format=\"text\" href=\"" + HTTP_REQUEST_URL + "\" "
+    + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
   private static final String XML_WITH_HTTP_REQUEST_AND_PARAMS = "<Module xmlns:os=\""
     + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
@@ -141,11 +149,88 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   }
 
   @Test
-  public void testHttpPreload() throws Exception {
-    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_HTTP_REQUEST);
+  public void testHttpPreloadOfJsonObject() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("{foo: 'bar'}")
+        .create();
+    String expectedResult = "{data: {status: 200, content: {foo: 'bar'}}, id: 'p'}";
 
-    String httpResult = "{foo: 'bar'}";
-    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpResult);
+    verifyHttpPreload(response, expectedResult);
+  }
+
+  @Test
+  public void testHttpPreloadOfJsonArrayWithHeaders() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("[1, 2]")
+        .addHeader("content-type", "application/json")
+        .addHeader("set-cookie", "cookiecookie")
+        .addHeader("not-ok", "shouldn'tbehere")
+        .create();
+    
+    String expectedResult = "{data: {status: 200, headers:" +
+    		"{'content-type': ['application/json; charset=UTF-8'], 'set-cookie': ['cookiecookie']}," +
+    		"content: [1, 2]}, id: 'p'}";
+
+    verifyHttpPreload(response, expectedResult);
+  }
+
+  @Test
+  public void testHttpPreloadOfJsonWithErrorCode() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("not found")
+        .addHeader("content-type", "text/html")
+        .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
+        .create();
+    
+    String expectedResult = "{error: {code: 404, data:" +
+    		"{headers: {'content-type': ['text/html; charset=UTF-8']}," +
+            "content: 'not found'}}, id: 'p'}";
+
+    verifyHttpPreload(response, expectedResult);
+  }
+
+  @Test
+  public void testHttpPreloadWithBadJson() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("notjson")
+        .addHeader("content-type", "text/html")
+        .create();
+
+    JSONObject result = new JSONObject(executeHttpPreload(response, XML_WITH_HTTP_REQUEST));
+    assertFalse(result.has("data"));
+    
+    JSONObject error = result.getJSONObject("error");
+    assertEquals(HttpResponse.SC_NOT_ACCEPTABLE, error.getInt("code"));
+  }
+
+  @Test
+  public void testHttpPreloadOfText() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("{foo: 'bar'}")
+        .addHeader("content-type", "application/json")
+        .create();
+    // Even though the response was actually JSON, @format=text, so the content
+    // will be a block of text
+    String expectedResult = "{data: {status: 200, headers:" +
+            "{'content-type': ['application/json; charset=UTF-8']}," +
+            "content: '{foo: \\'bar\\'}'}, id: 'p'}";
+
+    String resultString = executeHttpPreload(response, XML_WITH_HTTP_REQUEST_FOR_TEXT);
+    assertEquals(new JSONObject(expectedResult).toString(), resultString);
+  }
+
+  private void verifyHttpPreload(HttpResponse response, String expectedJson) throws Exception {
+    String resultString = executeHttpPreload(response, XML_WITH_HTTP_REQUEST);
+    assertEquals(new JSONObject(expectedJson).toString(), resultString);
+  }
+  
+  /**
+   * Run an HTTP Preload test, returning the String result.
+   */
+  private String executeHttpPreload(HttpResponse response, String xml) throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
+
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(response);
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig,
         expressions);
     view = "profile";
@@ -164,9 +249,6 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     Collection<Object> result = tasks.iterator().next().call().toJson();
     assertEquals(1, result.size());
 
-    String expectedResult = "{data: {foo: 'bar'}, id: 'p'}";
-    assertEquals(new JSONObject(expectedResult).toString(), result.iterator().next().toString());
-
     // Should have only fetched one request
     assertEquals(1, pipeline.requests.size());
     HttpRequest request = pipeline.requests.get(0);
@@ -174,6 +256,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(HTTP_REQUEST_URL, request.getUri().toString());
     assertEquals("POST", request.getMethod());
     assertEquals(60, request.getCacheTtl());
+    
+    return result.iterator().next().toString();
   }
 
   @Test
@@ -297,19 +381,21 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertTrue(tasks.isEmpty());
   }
 
-  // TODO: test HttpPreloads
-
   private static class RecordingRequestPipeline implements RequestPipeline {
     public final List<HttpRequest> requests = Lists.newArrayList();
-    private final String content;
+    private final HttpResponse response;
 
     public RecordingRequestPipeline(String content) {
-      this.content = content;
+      this(new HttpResponseBuilder().setResponseString(content).create());
+    }
+
+    public RecordingRequestPipeline(HttpResponse response) {
+      this.response = response;
     }
 
     public HttpResponse execute(HttpRequest request) {
       requests.add(request);
-      return new HttpResponseBuilder().setResponseString(content).create();
+      return response;
     }
 
     public void normalizeProtocol(HttpRequest request) throws GadgetException {}

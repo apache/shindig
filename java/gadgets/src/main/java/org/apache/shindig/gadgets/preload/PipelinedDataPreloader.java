@@ -42,12 +42,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.el.ELResolver;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -59,6 +61,9 @@ public class PipelinedDataPreloader implements Preloader {
   private final ContainerConfig config;
 
   private static final Charset UTF8 = Charset.forName("UTF-8");
+  private static Set<String> HTTP_RESPONSE_HEADERS =
+    ImmutableSet.of("content-type", "location", "set-cookie");
+  
   private final Expressions expressions;
 
   @Inject
@@ -227,32 +232,50 @@ public class PipelinedDataPreloader implements Preloader {
 
       public Data(HttpResponse response) {
         String format = preload.getAttributes().get("format");
-        JSONObject data = new JSONObject();
+        JSONObject wrapper = new JSONObject();
 
         try {
-          data.put("id", key);
-
-          if (format == null || "json".equals(format)) {
-            try {
-              // TODO: support arrays and objects
-              data.put("data", new JSONObject(response.getResponseAsString()));
-            } catch (JSONException je) {
-              data.put("code", 500);
-              data.put("message", je.getMessage());
-            }
+          wrapper.put("id", key);
+          if (response.getHttpStatusCode() >= 400) {
+            wrapper.put("error", createJSONError(response.getHttpStatusCode(), null, response));
           } else {
-            if (response.isError()) {
-              data.put("code", response.getHttpStatusCode());
-              data.put("message", response.getResponseAsString());
+            // Create {data: {status: [CODE], content: {...}|[...]|"...", headers:{...}}} 
+            JSONObject data = new JSONObject();
+            wrapper.put("data", data);
+
+            // Add the status
+            data.put("status", response.getHttpStatusCode());
+            String responseText = response.getResponseAsString();
+            
+            // Add allowed headers
+            JSONObject headers = createJSONHeaders(response);
+            if (headers != null) {
+              data.put("headers", headers);
+            }
+            
+            // And add the parsed content
+            if (format == null || "json".equals(format)) {
+              try {
+                if (responseText.startsWith("[")) {
+                  data.put("content", new JSONArray(responseText));
+                } else {
+                  data.put("content", new JSONObject(responseText));
+                }
+              } catch (JSONException je) {
+                // JSON parse failed: create a 406 error, and remove the "data" section
+                wrapper.remove("data");
+                wrapper.put("error", createJSONError(
+                    HttpResponse.SC_NOT_ACCEPTABLE, je.getMessage(), response));
+              }
             } else {
-              data.put("data", response.getResponseAsString());
+              data.put("content", responseText);
             }
           }
         } catch (JSONException outerJe) {
           throw new RuntimeException(outerJe);
         }
 
-        this.data = data;
+        this.data = wrapper;
       }
 
       public Collection<Object> toJson() {
@@ -261,6 +284,54 @@ public class PipelinedDataPreloader implements Preloader {
     }
   }
 
+  private static JSONObject createJSONHeaders(HttpResponse response)
+      throws JSONException {
+    JSONObject headers = null;
+    
+    // Add allowed headers
+    for (String header: HTTP_RESPONSE_HEADERS) {
+      Collection<String> values = response.getHeaders(header);
+      if (values != null && !values.isEmpty()) {
+        JSONArray array = new JSONArray();
+        for (String value : values) {
+          array.put(value);
+        }
+
+        if (headers == null) {
+          headers = new JSONObject();
+        }
+
+        headers.put(header, array);
+      }
+    }
+    
+    return headers;
+  }
+  
+  /**
+   * Create {error: { code: [CODE], data: {content: "....", headers: {...}}}}
+   */
+  private static JSONObject createJSONError(int code, String message, HttpResponse response)
+      throws JSONException {
+    JSONObject error = new JSONObject();
+    error.put("code", code);
+    if (message != null) {
+      error.put("message", message);
+    }
+
+    JSONObject data = new JSONObject();
+    error.put("data", data);
+    data.put("content", response.getResponseAsString());
+
+    // Add allowed headers
+    JSONObject headers = createJSONHeaders(response);
+    if (headers != null) {
+      data.put("headers", headers);
+    }
+    
+    return error;
+  }
+  
   private Uri getSocialUri(GadgetContext context) {
     String jsonUri = config.getString(context.getContainer(), "gadgets.osDataUri");
     Preconditions.checkNotNull(jsonUri, "No JSON URI available for social preloads");

@@ -25,8 +25,10 @@
   <Content type="html">
     <![CDATA[
       <script xmlns:os="http://ns.opensocial.org/2008/markup" type="text/os-data">
-	    <os:PeopleRequest key="friends" userId="@viewer" groupId="@friends"/>
-	  </script>
+        <os:PeopleRequest key="friends" userId="@viewer" groupId="@friends"/>
+        <os:HttpRequest key="json" href="test.json"/>
+        <os:HttpRequest key="text" href="test.json" format="text"/>
+    </script>
 
       <script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup">
         <ul id="attrs">
@@ -48,7 +50,10 @@
             </os:If>
           </li>
         </ul>
-	  </script>
+        
+        <span id="json">${json.content.key}</span>
+        <span id="text">${text.content}</span>
+      </script>
     ]]>
   </Content>
 </Module>

@@ -175,7 +175,7 @@ public class EndToEndTest {
     assertEquals("Digg", me.getJSONObject("name").getString("familyName"));
     
     JSONObject json = jsonObjects.get("json").getJSONObject("data");
-    JSONObject expected = new JSONObject("{key: 'value'}");
+    JSONObject expected = new JSONObject("{content: {key: 'value'}, status: 200}");
     assertEquals(expected.toString(), json.toString());
   }
 
@@ -238,6 +238,12 @@ public class EndToEndTest {
     assertEquals(3, ifList.size());
     assertEquals(1, page.getElementsByTagName("b").getLength());
     assertEquals(1, getChildrenByTagName(ifList.get(2), "b").size());
+    
+    Element jsonPipeline = page.getElementById("json");
+    assertEquals("value", jsonPipeline.getTextContent().trim());
+
+    Element textPipeline = page.getElementById("text");
+    assertEquals("{'key': 'value'}", textPipeline.getTextContent().trim());
   }
 
   // HtmlUnits implementation of Element.getElementsByTagName() is just
