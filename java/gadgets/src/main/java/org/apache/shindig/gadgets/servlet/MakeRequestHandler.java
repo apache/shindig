@@ -173,9 +173,13 @@ public class MakeRequestHandler extends ProxyBase {
       HttpResponse results) throws GadgetException {
     try {
       String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
-      String body = results.getResponseAsString();
-      if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
-        body = processFeed(originalUrl, request, body);
+      String body = "";
+      if (results.getHttpStatusCode() == 200) {
+        body = results.getResponseAsString();
+
+        if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
+          body = processFeed(originalUrl, request, body);
+        }
       }
       JSONObject resp = FetchResponseUtils.getResponseAsJson(results, null, body);
 
