@@ -176,6 +176,18 @@ public class JsonSerializerTest {
     assertEquals("\"\\t\\r value \\\\\\foo\\b\uFFFF\uBCAD\\n\\u0083\"", builder.toString());
   }
 
+  @Test
+  public void escapeBrackets() throws Exception {
+    StringBuilder builder = new StringBuilder();
+    JsonSerializer.appendString(builder, "Hello<world>foo < bar");
+
+    assertEquals("Hello\\u003cworld\\u003efoo \\u003c bar", builder.toString());
+
+    // Quick sanity check to make sure that this converts back cleanly.
+    JSONObject obj = new JSONObject("{foo:\"" + builder.toString() + "\"}");
+    assertEquals("Hello<world>foo < bar", obj.get("foo"));
+  }
+
   private static String avg(long start, long end, long runs) {
     double delta = end - start;
     return String.format("%f5", delta / runs);

@@ -18,11 +18,12 @@
  */
 package org.apache.shindig.common;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.MapMaker;
-
 import org.apache.shindig.common.util.DateUtil;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -162,7 +163,7 @@ public final class JsonSerializer {
       // String-like Primitives
       appendString(buf, value.toString());
     } else if(value instanceof Date) {
-      appendString(buf, DateUtil.formatIso8601Date((Date)value));  
+      appendString(buf, DateUtil.formatIso8601Date((Date)value));
     } else if (value instanceof JSONObject) {
       appendJsonObject(buf, (JSONObject) value);
     } else if (value instanceof JSONArray) {
@@ -347,10 +348,9 @@ public final class JsonSerializer {
       return;
     }
 
-    char previous, current = 0;
+    char current = 0;
     buf.append('"');
     for (int i = 0, j = string.length(); i < j; ++i) {
-      previous = current;
       current = string.charAt(i);
       switch (current) {
         case '\\':
@@ -358,11 +358,13 @@ public final class JsonSerializer {
           buf.append('\\');
           buf.append(current);
           break;
-        case '/':
-          if (previous == '<') {
-            buf.append('\\');
-          }
-          buf.append(current);
+        // We escape angle brackets in order to prevent content sniffing in user agents like IE.
+        // This content sniffing can potentially be used to bypass other security restrictions.
+        case '<':
+          buf.append("\\u003c");
+          break;
+        case '>':
+          buf.append("\\u003e");
           break;
         default:
           if (current < ' ' || (current >= '\u0080' && current < '\u00a0') ||
