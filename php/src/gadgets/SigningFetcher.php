@@ -136,7 +136,7 @@ class SigningFetcher extends RemoteContentFetcher {
         } else {
           // on any other content-type of post (application/{json,xml,xml+atom}) use the body signing hash
           // see http://oauth.googlecode.com/svn/spec/ext/body_hash/1.0/drafts/4/spec.html for details
-          $queryParams['oauth_body_hash'] = sha1($request->getPostBody());
+          $queryParams['oauth_body_hash'] = base64_encode(sha1($request->getPostBody()));
         }
       }
       $msgParams = array();
