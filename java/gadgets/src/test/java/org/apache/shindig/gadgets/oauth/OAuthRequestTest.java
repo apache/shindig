@@ -987,6 +987,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertFalse(contains(queryParams, "opensocial_proxied_content", "1"));
   }
   
   @Test
@@ -1003,6 +1004,20 @@ public class OAuthRequestTest {
         "opensocial_owner_id=\"o\"");
   }
 
+  @Test
+  public void testSignedFetchParametersSetProxiedContent() throws Exception {
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    client.getBaseArgs().setProxiedContentRequest(true);
+    HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
+    assertTrue(contains(queryParams, "opensocial_owner_id", "o"));
+    assertTrue(contains(queryParams, "opensocial_viewer_id", "v"));
+    assertTrue(contains(queryParams, "opensocial_app_id", "app"));
+    assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
+    assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertTrue(contains(queryParams, "opensocial_proxied_content", "1"));
+  }
+  
   @Test
   public void testPostBinaryData() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };

@@ -87,6 +87,8 @@ public class OAuthRequest {
   // TODO(beaton): figure out if this is the name in the 0.8 spec.
   protected static final String OPENSOCIAL_APPURL = "opensocial_app_url";
 
+  protected static final String OPENSOCIAL_PROXIED_CONTENT = "opensocial_proxied_content";
+
   protected static final String XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
 
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
@@ -402,6 +404,10 @@ public class OAuthRequest {
 
     if (trustedParams != null) {
       params.addAll(trustedParams);
+    }
+    
+    if (realRequest.getOAuthArguments().isProxiedContentRequest()) {
+      params.add(new Parameter(OPENSOCIAL_PROXIED_CONTENT, "1"));
     }
   }
 

@@ -95,6 +95,9 @@ public class OAuthArguments {
   /** Arbitrary name/value pairs associated with the request */
   private final Map<String, String> requestOptions = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
+  /** Whether the request is one for proxied content */
+  private boolean proxiedContentRequest = false;
+  
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
    *
@@ -230,6 +233,7 @@ public class OAuthArguments {
     signOwner = orig.signOwner;
     signViewer = orig.signViewer;
     requestOptions.putAll(orig.requestOptions);
+    proxiedContentRequest = orig.proxiedContentRequest;
   }
 
   public boolean mustUseToken() {
@@ -327,6 +331,14 @@ public class OAuthArguments {
   public String getRequestOption(String name, String def) {
     String val = requestOptions.get(name);
     return (val != null ? val : def);
+  }
+  
+  public boolean isProxiedContentRequest() {
+    return proxiedContentRequest;
+  }
+  
+  public void setProxiedContentRequest(boolean proxiedContentRequest) {
+    this.proxiedContentRequest = proxiedContentRequest;
   }
   
   public boolean programmaticConfig() {

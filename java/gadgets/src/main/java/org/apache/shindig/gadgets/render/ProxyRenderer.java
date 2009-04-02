@@ -91,11 +91,13 @@ public class ProxyRenderer {
     UriBuilder uri = new UriBuilder(href);
     uri.addQueryParameter("lang", context.getLocale().getLanguage());
     uri.addQueryParameter("country", context.getLocale().getCountry());
-    uri.addQueryParameter("opensocial_proxied_content", "1");
 
+    OAuthArguments oauthArgs = new OAuthArguments(view);
+    oauthArgs.setProxiedContentRequest(true);
+    
     HttpRequest request = new HttpRequest(uri.toUri())
         .setIgnoreCache(context.getIgnoreCache())
-        .setOAuthArguments(new OAuthArguments(view))
+        .setOAuthArguments(oauthArgs)
         .setAuthType(view.getAuthType())
         .setSecurityToken(context.getToken())
         .setContainer(context.getContainer())
