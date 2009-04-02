@@ -181,10 +181,10 @@ public class JsonSerializerTest {
     StringBuilder builder = new StringBuilder();
     JsonSerializer.appendString(builder, "Hello<world>foo < bar");
 
-    assertEquals("Hello\\u003cworld\\u003efoo \\u003c bar", builder.toString());
+    assertEquals("\"Hello\\u003cworld\\u003efoo \\u003c bar\"", builder.toString());
 
     // Quick sanity check to make sure that this converts back cleanly.
-    JSONObject obj = new JSONObject("{foo:\"" + builder.toString() + "\"}");
+    JSONObject obj = new JSONObject("{foo:" + builder.toString() + "}");
     assertEquals("Hello<world>foo < bar", obj.get("foo"));
   }
 

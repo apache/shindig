@@ -387,7 +387,7 @@ public final class JsonSerializer {
                 buf.append('r');
                 break;
               default:
-                // The three possible alternative approaches for dealing with unicode characters are
+                // The possible alternative approaches for dealing with unicode characters are
                 // as follows:
                 // Method 1 (from json.org.JSONObject)
                 // 1. Append "000" + Integer.toHexString(current)
