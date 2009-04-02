@@ -141,7 +141,7 @@ class SigningFetcher extends RemoteContentFetcher {
       }
       $msgParams = array();
       $msgParams = array_merge($msgParams, $queryParams);
-      if ($signBody) {
+      if ($signBody && isset($postParams)) {
         $msgParams = array_merge($msgParams, $postParams);
       }
       $this->addOpenSocialParams($msgParams, $request->getToken());

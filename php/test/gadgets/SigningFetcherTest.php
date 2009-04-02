@@ -101,15 +101,37 @@ EOD;
     $request->setToken(BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default'));
     $request->setPostBody('key=value&anotherkey=value');
     $this->signingFetcher->fetchRequest($request);
+    $this->verifySignedRequest($request);
+  }
+
+  /**
+   * Tests SigningFetcher->fetchRequest
+   */
+  public function testFetchRequestForJson() {
+    $request = new RemoteContentRequest('http://example.org/signed');
+    $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+    $request->setToken(BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default'));
+    $request->setPostBody('{key:value}');
+    $request->setHeaders('Content-Type:application/json');
+    $this->signingFetcher->fetchRequest($request);
+    $this->verifySignedRequest($request);    
+  }
   
+  private function verifySignedRequest(RemoteContentRequest $request) {
     $url = parse_url($request->getUrl());
+    $query = array();
     parse_str($url['query'], $query);
-    parse_str($request->getPostBody(), $post);
+    $post = array();
+    $contentType = $request->getHeader('Content-Type');
+    if ((stripos($contentType, 'application/x-www-form-urlencoded') !== false || $contentType == null)) {
+      parse_str($request->getPostBody(), $post);
+    } else {
+      $this->assertEquals(sha1($request->getPostBody()), $query['oauth_body_hash']);
+    }
     $oauthRequest = OAuthRequest::from_request($request->getMethod(), $request->getUrl(), array_merge($query, $post));
     $signature_method = new MockSignatureMethod();
     $signature_valid = $signature_method->check_signature($oauthRequest, null, null, $query['oauth_signature']);
     $this->assertTrue($signature_valid);
   }
-
 }
 
