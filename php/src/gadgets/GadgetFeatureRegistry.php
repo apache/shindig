@@ -34,6 +34,7 @@ class GadgetFeatureRegistry {
   }
 
   public function getFeatureContent($feature, GadgetContext $context, $isGadgetContext) {
+    if (empty($feature)) return '';
     if (!isset($this->features[$feature])) {
       throw new GadgetException("Invalid feature: ".htmlentities($feature));
     }
