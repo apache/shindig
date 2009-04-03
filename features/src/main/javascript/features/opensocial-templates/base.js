@@ -171,6 +171,35 @@ os.createTemplateCustomTag = function(template) {
   };
 };
 
+os.computeChildMap_ = function(node) {
+  var map = {};
+  for (var i = 0; i < node.childNodes.length; i++) {
+    var child = node.childNodes[i];
+    if (!child.tagName) {
+      continue;
+    }
+    var name = child.getAttribute(os.ATT_customtag);    
+    if (name) {
+      var parts = name.split(":");
+      parts.length == 2 ? name = parts[1] : name = parts[0];
+    } else {
+      name = child.tagName;
+    }
+    name = name.toLowerCase();
+    var prev = map[name];
+    if (!prev) {
+      map[name] = child;
+    } else if (os.isArray(prev)) {
+      prev.push(child);
+    } else {
+      map[name] = [];
+      map[name].push(prev);
+      map[name].push(child);
+    }
+  }
+  return map;
+};
+
 /**
  * Creates a functor which returns a value from the specified node given a
  * name.
@@ -268,8 +297,15 @@ os.doTag = function(node, ns, tag, data, context) {
       os.markNodeToSkip(child);
     }
   }
+  
+  var ctx = context;
+  var selectInner = node[PROP_jstcache] ? node[PROP_jstcache][ATT_innerselect] : null;
+  if (selectInner) {
+    var data = context.jsexec(selectInner, node);
+    ctx = context.clone(data, 0, 0);
+  }
 
-  var result = tagFunction.call(null, node, data, context);
+  var result = tagFunction.call(null, node, data, ctx);
 
   if (!result && typeof(result) != "string") {
     throw "Custom tag <" + ns + ":" + tag + "> failed to return anything.";

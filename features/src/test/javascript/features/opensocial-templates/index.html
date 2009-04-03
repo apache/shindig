@@ -36,10 +36,10 @@ limitations under the License.
     </script>
     
     <!-- the set of js files that make up opensocial-templates feature, as they appear in feature.xml -->
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/util.js"></script>
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jstemplate.js"></script>
-    <script src="../../../../main/javascript/features/opensocial-template/jstemplate_debug.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/util.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/jsevalcontext.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jsTemplate/jstemplate.js"></script>
+    <script src="../../../../main/javascript/features/opensocial-templates/jstemplate_debug.js"></script>
     <script src="../../../../main/javascript/features/opensocial-data-context/datacontext.js"></script>
     <script src="../../../../main/javascript/features/xmlutil/xmlutil.js"></script>
     <script src="../../../../main/javascript/features/opensocial-data/data.js"></script>
@@ -126,11 +126,11 @@ limitations under the License.
       <a href="${url}">${name}</a> (${$my.foo})
     </xmp>
     <xmp id="my:record" style="display: none">
-      <b style="color: ${$my.color}">${title}</b>: <my:user context="user" foo="${$my.foo}"/>
+      <b style="color: ${My.color}">${title}</b>: <my:user foo="${My.foo}" cur="user"/>
     </xmp>
     <xmp id="_T_Substitution_nested" style="display: none">
       <div repeat="users">
-        <my:record color="${color}" foo="${user.id}"/>
+        <my:record color="${color}" foo="${user.id}" cur="Cur"/>
       </div>
     </xmp>
 

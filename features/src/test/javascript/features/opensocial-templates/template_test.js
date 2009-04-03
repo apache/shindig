@@ -375,7 +375,7 @@ function testTag_input() {
   var data = {
     data: "Some default data"
   };
-  var template = os.compileTemplateString("<custom:input value=\"data\"/>");
+  var template = os.compileTemplateString("<custom:input value=\"data\" cur=\"Cur\"/>");
   var output = template.render(data);
 
   // extract contentNode
@@ -434,8 +434,7 @@ function testContent() {
       ['<Template tag="os:HelloWorldWithContent">' + content + '</Template>']);
   };
 
-  tryTemplateContent('<os:renderAll/>');
-  tryTemplateContent('<os:RenderAll/>');
+  tryTemplateContent('<os:Render/>');
 }
 
 function testNamedContent() {
@@ -444,7 +443,7 @@ function testNamedContent() {
       '<div>' +
       '<os:HelloWorldWithNamedContent>' +
         '<os:DontShowThis>Don\'t show this</os:DontShowThis>' +
-        '<os:Content>Hello <b>world!</b></os:Content>' +
+        '<os:Foo>Hello <b>world!</b></os:Foo>' +
         '<Content>Hello <b>world!</b></Content>' +
       '</os:HelloWorldWithNamedContent>' +
       '</div>',
@@ -453,18 +452,18 @@ function testNamedContent() {
       null,
       ['<Template tag="os:HelloWorldWithNamedContent">' + content + '</Template>']);
   };
-  tryTemplateContent('<os:Render content="os:Content"/>');
+  tryTemplateContent('<os:Render content="os:Foo"/>');
   tryTemplateContent('<os:Render content="Content"/>');
 
   // Not working yet:
   /*
-  tryTemplateContent('<os:renderAll content="${my.os:Content}"/>');
-  tryTemplateContent('<os:renderAll content="my.os:Content"/>');
-  tryTemplateContent('<os:renderAll content="${My.os:Content}"/>');
-  tryTemplateContent('<os:renderAll content="${my.Content}"/>');
-  tryTemplateContent('<os:renderAll content="my.Content"/>');
-  tryTemplateContent('<os:renderAll content="${My.Content}"/>');
-  tryTemplateContent('<os:renderAll content="${Content}"/>');
+  tryTemplateContent('<os:Render content="${my.os:Content}"/>');
+  tryTemplateContent('<os:Render content="my.os:Content"/>');
+  tryTemplateContent('<os:Render content="${My.os:Content}"/>');
+  tryTemplateContent('<os:Render content="${my.Content}"/>');
+  tryTemplateContent('<os:Render content="my.Content"/>');
+  tryTemplateContent('<os:Render content="${My.Content}"/>');
+  tryTemplateContent('<os:Render content="${Content}"/>');
   */
 }
 
@@ -473,8 +472,6 @@ function testRepeatedContent() {
     assertTemplateOutput(
       '<os:HelloWorldRepeatedContent>' +
         '<Word>Hello</Word>' +
-        '<Word>world!</Word>' +
-        '<os:Word>Hello</os:Word>' +
         '<os:Word>world!</os:Word>' +
       '</os:HelloWorldRepeatedContent>',
 
@@ -483,27 +480,22 @@ function testRepeatedContent() {
       ['<Template tag="os:HelloWorldRepeatedContent">' + content + '</Template>']);
   };
 
-  tryTemplateContent('<div><span repeat="$my.Word"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="${$my.Word}"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="${$my.os:Word}"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="$my.os:Word"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="${my.os:Word}"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="$my.os:Word"><os:renderAll/></span></div>');
-  tryTemplateContent('<div><span repeat="${My.os:Word}"><os:renderAll/></span></div>');
+  tryTemplateContent('<div><span repeat="${My.Word}"><os:Render/></span></div>');
+  tryTemplateContent('<div><span repeat="${Word}"><os:Render/></span></div>');
 
   // Not working yet because $my must be explicit:
   /*
-    tryTemplateContent('<div><span repeat="${Word}"><os:renderAll/></span></div>');
-    tryTemplateContent('<div><span repeat="${os:Word}"><os:renderAll/></span></div>');
-    tryTemplateContent('<div><span repeat="Word"><os:renderAll/></span></div>');
-    tryTemplateContent('<div><span repeat="os:Word"><os:renderAll/></span></div>');
+    tryTemplateContent('<div><span repeat="${Word}"><os:Render/></span></div>');
+    tryTemplateContent('<div><span repeat="${os:Word}"><os:Render/></span></div>');
+    tryTemplateContent('<div><span repeat="Word"><os:Render/></span></div>');
+    tryTemplateContent('<div><span repeat="os:Word"><os:Render/></span></div>');
   */
 };
 
 /**
  * Bug when calling a repeat twice - 2nd time fails
  *
- * This is because <os:renderAll> moves the child tags out to destination, so
+ * This is because <os:Render> moves the child tags out to destination, so
  * the second loop is empty.
  */
 function testRepeatedContentTwice() {
@@ -518,8 +510,8 @@ function testRepeatedContentTwice() {
     null,
     ['<Template tag="os:HelloWorldRepeatedContent">
       '<div>' +
-      '<div><span repeat="$my.os:Word"><os:renderAll/></span></div>' +
-      '<div><span repeat="$my.os:Word"><os:renderAll/></span></div>' +
+      '<div><span repeat="$my.os:Word"><os:Render/></span></div>' +
+      '<div><span repeat="$my.os:Word"><os:Render/></span></div>' +
       '</Template>']
     );
   */
@@ -530,8 +522,8 @@ function testRepeatedContentTwice() {
  * Probably should just include no data.
  *
  * I.e.
- * <os:renderAll content="${os:NoMatch}"/> currently has same output as
- * <os:renderAll/>
+ * <os:Render content="${os:NoMatch}"/> currently has same output as
+ * <os:Render/>
  */
 function testRenderAllBadExprInContent() {
   /*
@@ -545,7 +537,7 @@ function testRenderAllBadExprInContent() {
     '<div></div>',
     null,
     ['<Template tag="os:HelloWorldBadExpr">' +
-     '<os:renderAll content="${os:NoMatch}"/>' +
+     '<os:Render content="${os:NoMatch}"/>' +
      '</Template>']);
   */
 }
@@ -623,13 +615,13 @@ function testDynamicRepeatedContent() {
 
   assertTemplateOutput(
     '<os:DynamicRepeat>' +
-      '<Word repeat="WordObjects">${$cur.value}</Word>' +
+      '<Word repeat="WordObjects">${Cur.value}</Word>' +
     '</os:DynamicRepeat>',
     '<div>Helloworld!</div>',
     {WordObjects: [{value: 'Hello'}, {value: 'world!'}]},
 
     ['<Template tag="os:DynamicRepeat">' +
-     '<div><span repeat="$my.Word"><os:renderAll/></span></div>' +
+     '<div><span repeat="My.Word"><os:Render/></span></div>' +
      '</Template>']);
 
 };
@@ -737,4 +729,43 @@ function testSpacesAmongTags() {
       '  <os:msg>world!</os:msg></div>');
   tryTemplateContent('<div>\n  <os:msg>Hello</os:msg>' +
       '  <os:msg>world!</os:msg>\n</div>');
+};
+
+function testVariablePrecedence() { 
+  // TODO: Update tests to reflect @cur not propagating into custom tags  
+  // Precedence should be ${Cur} -> ${My} -> ${Top}  
+  var tryTemplateContent = function(templateText, data) {
+    var output = os.compileTemplateString(templateText).render(data);
+    assertEquals('Right', domutil.getVisibleTextTrim(output));
+  }
+  os.Loader.loadContent('<Templates xmlns:os="uri:unused">' + 
+    '<Template tag="os:msg">${Value}</Template></Templates>');
+  
+  tryTemplateContent('<os:msg/>', { Value: 'Right' } );
+  tryTemplateContent('<os:msg Value="Right"/>', { } );
+  tryTemplateContent('<os:msg Value="Wrong" cur="${Top}"/>', { Value: 'Right' } );
+  tryTemplateContent('<os:msg Value="Right"/>', { Value: 'Wrong' } );
+  tryTemplateContent('<os:msg cur="${Inner}"/>', { Value: 'Wrong', Inner: { Value: 'Right' }} );
+  tryTemplateContent('<os:msg cur="${Inner}" Value="Wrong"/>', { Value: 'Wrong', Inner: { Value: 'Right' }} );
+  tryTemplateContent('<os:msg cur="${Inner}"/>', { Value: 'Right', Inner: { Foo: 'Bar' }} );
+  tryTemplateContent('<os:msg cur="${Inner}" Value="Right"/>', { Value: 'Wrong', Inner: { Foo: 'Bar' }} );
+};
+
+function testOsRepeat() {
+  var data = { list : [ { name: 'a' }, { name: 'b' }, { name: 'c' } ] };
+  var output = os.compileTemplateString('<os:Repeat expression="${list}"><b>${name}</b> <b>${name}</b> </os:Repeat>').render(data);
+  assertEquals("a a b b c c", domutil.getVisibleTextTrim(output));
+  
+  output = os.compileTemplateString('<select><os:Repeat expression="${list}"><option>${name}</option><option>${name} again</option></os:Repeat></select>').render(data);
+  assertEquals(6, output.firstChild.options.length);
+  
+  output = os.compileTemplateString('<table><os:Repeat expression="${list}"><tr><td>${name}</td></tr><tr><td>${name} again</td></tr></os:Repeat></table>').render(data);
+  console.log(output.firstChild);
+  assertEquals(6, output.firstChild.rows.length);
+};
+
+function testOsIf() {
+  var data = { list : [ { name: 'a' }, { name: 'b' }, { name: 'c' } ] };
+  var output = os.compileTemplateString('<os:Repeat expression="${list}"><os:If condition="${name != \'b\'}"><b>${name}</b> <b>${name}</b> </os:If></os:Repeat>').render(data);
+  assertEquals("a a c c", domutil.getVisibleTextTrim(output));
 };

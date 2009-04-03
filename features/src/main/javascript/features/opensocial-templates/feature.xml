@@ -34,9 +34,9 @@ This should not be used in a production setting.
   <dependency>opensocial-0.8</dependency>
   <dependency>xmlutil</dependency>
   <gadget>
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/util.js"></script>
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>
-    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jstemplate.js"></script>
+    <script src="jsTemplate/util.js"></script>
+    <script src="jsTemplate/jsevalcontext.js"></script>
+    <script src="jsTemplate/jstemplate.js"></script>
     <script src="jstemplate_debug.js"></script>
     <script src="base.js"></script>
     <script src="namespaces.js"></script>
