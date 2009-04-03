@@ -20,11 +20,11 @@
  */
 
 class DataServiceServlet extends ApiServlet {
-  
+
   protected static $FORMAT_PARAM = "format";
   protected static $ATOM_FORMAT = "atom";
   protected static $XML_FORMAT = "atom";
-  
+
   public static $PEOPLE_ROUTE = "people";
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";

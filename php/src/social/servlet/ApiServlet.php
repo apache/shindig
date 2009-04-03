@@ -56,9 +56,9 @@ require 'src/social/oauth/OAuth.php';
  */
 abstract class ApiServlet extends HttpServlet {
   protected $handlers = array();
-  
+
   protected static $DEFAULT_ENCODING = "UTF-8";
-  
+
   public static $PEOPLE_ROUTE = "people";
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";
@@ -73,6 +73,24 @@ abstract class ApiServlet extends HttpServlet {
     $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
     $this->handlers[self::$MESSAGE_ROUTE] = new MessagesHandler();
     $this->handlers[self::$INVALIDATE_ROUTE] = new InvalidateHandler();
+    if (isset($_SERVER['CONTENT_TYPE']) && (strtolower($_SERVER['CONTENT_TYPE']) != $_SERVER['CONTENT_TYPE'])) {
+      // make sure the content type is in all lower case since that's what we'll check for in the handlers
+      $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);
+    }
+    // normalize things like "application/json; charset=utf-8" to application/json
+    $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json');
+    foreach ($acceptedContentTypes as $contentType) {
+      if (strpos($_SERVER['CONTENT_TYPE'], $contentType) !== false) {
+        $_SERVER['CONTENT_TYPE'] = $contentType;
+        $this->setContentType($contentType);
+        break;
+      }
+    }
+    if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+      if (! isset($_SERVER['CONTENT_TYPE']) || ! in_array($_SERVER['CONTENT_TYPE'], $acceptedContentTypes)) {
+        //throw new Exception("[{$_SERVER['CONTENT_TYPE']}] When posting to the social end-point you *must* specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
+      }
+    }
   }
 
   public function getSecurityToken() {
@@ -94,7 +112,7 @@ abstract class ApiServlet extends HttpServlet {
         return null; // invalid oauth request, or 3rd party doesn't have access to this user
       }
     } // else, not a valid oauth request, so don't bother
-    
+
 
     // look for encrypted security token
     $token = isset($_POST['st']) ? $_POST['st'] : (isset($_GET['st']) ? $_GET['st'] : '');
@@ -104,7 +122,8 @@ abstract class ApiServlet extends HttpServlet {
         // for private profiles etc in your code so their not publicly
         // accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
         // create token with 0 values, no gadget url, no domain and 0 duration
-        
+
+
         //FIXME change this to a new AnonymousToken when reworking auth token
         $gadgetSigner = Config::get('security_token');
         return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0, Config::get('container_id'));
