@@ -23,13 +23,23 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Shindig Features</title>
+    <title>Shindig Features Documentation</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-26</date>
+    <date>2009-04-03</date>
   </properties>
   <body>
+    <section name="Documentation Centre for the Shindig's Features">
+      <p>This documentation centre is for developer who wants to use the Shindig's features.</p>
+      <ul>
+        <li><a href="#Shindig_Features">Features List</a></li>
+        <li><a href="#Using_Features">Using Features</a></li>
+        <li><a href="#Create_Your_Own_Feature">Create Your Own Feature</a></li>
+        <li><a href="../../shindig-1.1.x/shindig-features/jsdoc/index.html">JavascriptDoc for 1.1.x</a></li>
+      </ul>
+    </section>
+
     <section name="Shindig Features">
-      <p>Current Shindig comes with several features. We plan to include the Javascript API in the website.</p>
+      <p>Shindig 1.1.x supports several features.</p>
       <table>
         <thead>
           <tr>
@@ -184,7 +194,8 @@ under the License.
 
     <section name="Using Features">
       <p>To use an above feature in your gadget, you need to specify the feature as
-        <i>&lt;require/&gt;</i> in <i>&lt;ModulePrefs/&gt;</i> and defining some Javascript codes to use it.</p>
+        <i>&lt;require/&gt;</i> in <i>&lt;ModulePrefs/&gt;</i> and defining some Javascript codes to use it. Refer to the
+        <a href="../../shindig-1.1.x/shindig-features/jsdoc/index.html">JavascriptDoc for 1.1.x</a> to write your own Javascript.</p>
       <p>For example, if you plan to use the
         <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/tabs/feature.xml">tabs/feature.xml</a>,
         your gadget will look like the following:</p>
