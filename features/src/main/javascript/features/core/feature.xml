@@ -29,6 +29,7 @@
     <script src="prefs.js"/>
     <script src="json.js"/>
     <script src="legacy.js"/>
+    <script src="log.js"/>
   </gadget>
   <container>
     <script src="util.js"/>
