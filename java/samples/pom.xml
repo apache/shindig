@@ -119,6 +119,10 @@
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.oauth</groupId>
+      <artifactId>oauth-core</artifactId>
+    </dependency>
 
     <!-- Hibernate -->
     <dependency>
