@@ -474,6 +474,7 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "GET_SUMMARIES",
   "REFRESH_INTERVAL",
   "OAUTH_SERVICE_NAME",
+  "OAUTH_USE_TOKEN",
   "OAUTH_TOKEN_NAME",
   "OAUTH_REQUEST_TOKEN",
   "OAUTH_REQUEST_TOKEN_SECRET"
