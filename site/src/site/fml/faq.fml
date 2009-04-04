@@ -73,5 +73,35 @@ under the License.
         </dl>
       </answer>
     </faq>
+    <faq id="Where are the opensocial/gadget XSDs">
+      <question>Where are the opensocial/gadget XSDs?</question>
+      <answer>
+        <p>No official XSDs exist yet but you could find unofficial XSDs in the Opensocial
+          resources project:</p>
+        <ul>
+          <li>
+            <a
+              href="http://opensocial-resources.googlecode.com/svn/spec/0.8/gadgets/"
+              >OpenSocial Gadgets API Specification v0.8</a>
+          </li>
+          <li>
+            <a
+              href="http://opensocial-resources.googlecode.com/svn/spec/draft/Gadgets-API-Specification.xml"
+              >OpenSocial Gadgets API Specification v0.9</a>
+          </li>
+          <li>
+            <a
+              href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/restful-protocol.html"
+              >OpenSocial Restful Protocol v0.81</a>
+          </li>
+          <li>
+            <a
+              href="http://opensocial-resources.googlecode.com/svn/spec/draft/REST-API.xml"
+              >OpenSocial RESTful Protocol Specification v0.9</a>
+          </li>
+        </ul>
+        <p><b>Note</b>: for performance reasons, Shindig will not validate files against these XSDs at runtime.</p>
+      </answer>
+    </faq>
   </part>
 </faqs>
