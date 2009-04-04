@@ -1306,4 +1306,15 @@ public class PersonDb implements Person, DbObject {
   public void setApplictions(List<ApplicationDb> applictions) {
     this.applictions = applictions;
   }
+
+  /** {@inheritDoc} */
+  public Map<String, ? extends Object> getAppData()
+  {
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  public void setAppData( Map<String, ? extends Object> appData )
+  {
+  }
 }

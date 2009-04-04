@@ -36,9 +36,7 @@ import org.apache.shindig.social.opensocial.jpa.NameDb;
 import org.apache.shindig.social.opensocial.jpa.OrganizationDb;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
 import org.apache.shindig.social.opensocial.jpa.UrlDb;
-import org.apache.shindig.social.opensocial.jpa.spi.ActivityServiceDb;
-import org.apache.shindig.social.opensocial.jpa.spi.AppDataServiceDb;
-import org.apache.shindig.social.opensocial.jpa.spi.PersonServiceDb;
+import org.apache.shindig.social.opensocial.jpa.spi.JPASocialModule;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Address;
@@ -52,12 +50,8 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
-import org.apache.shindig.social.opensocial.spi.ActivityService;
-import org.apache.shindig.social.opensocial.spi.AppDataService;
-import org.apache.shindig.social.opensocial.spi.PersonService;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
 
 import net.oauth.OAuthConsumer;
 
@@ -85,14 +79,7 @@ public class JpaTestGuiceModule extends AbstractModule {
     install(new DefaultGuiceModule());
     install(new SocialApiGuiceModule());
     install(new OAuthModule());
-
-    // Entity manager
-    this.bind(EntityManager.class).toInstance(this.entityManager);
-
-    // Service implementations
-    this.bind(ActivityService.class).to(ActivityServiceDb.class).in(Scopes.SINGLETON);
-    this.bind(AppDataService.class).to(AppDataServiceDb.class).in(Scopes.SINGLETON);
-    this.bind(PersonService.class).to(PersonServiceDb.class).in(Scopes.SINGLETON);
+    install(new JPASocialModule(entityManager));
 
     this.bind(OAuthDataStore.class).toInstance(new NullOAuthDataStore());
 

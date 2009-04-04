@@ -43,11 +43,20 @@ public class JPASocialModule extends AbstractModule {
 
   private final static String DEFAULT_PROPERTIES = "socialjpa.properties";
   private Properties properties;
+  private EntityManager entityManager;
 
   /**
    *
    */
   public JPASocialModule() {
+      this(null);
+  }
+
+  /**
+   *
+   */
+  public JPASocialModule(EntityManager entityManager) {
+    this.entityManager = entityManager;
     InputStream is = null;
     try {
       is = this.getClass().getClassLoader().getResourceAsStream(DEFAULT_PROPERTIES);
@@ -73,8 +82,12 @@ public class JPASocialModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), properties);
-    bind(EntityManager.class).toProvider(EclipseEntityManagerProvider.class)
-        .in(Scopes.SINGLETON);
+    if (entityManager == null) {
+      bind(EntityManager.class).toProvider(EclipseEntityManagerProvider.class)
+          .in(Scopes.SINGLETON);
+    } else {
+      bind(EntityManager.class).toInstance(this.entityManager);
+    }
     bind(ActivityService.class).to(ActivityServiceDb.class)
         .in(Scopes.SINGLETON);
     bind(PersonService.class).to(PersonServiceDb.class).in(Scopes.SINGLETON);
