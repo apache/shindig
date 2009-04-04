@@ -454,7 +454,7 @@ public class PersonDb implements Person, DbObject {
   @Basic
   @Column(name = "political_views", length = 255)
   protected String politicalViews;
-  
+
   @Basic
   @Column(name = "preferredUsername", length = 255)
   protected String preferredUsername;
@@ -925,7 +925,7 @@ public class PersonDb implements Person, DbObject {
   public void setPoliticalViews(String politicalViews) {
     this.politicalViews = politicalViews;
   }
-  
+
   public String getPreferredUsername() {
     return preferredUsername;
   }

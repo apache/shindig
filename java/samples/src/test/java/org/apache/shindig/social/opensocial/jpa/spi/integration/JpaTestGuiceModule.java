@@ -64,18 +64,18 @@ import net.oauth.OAuthConsumer;
 /**
  * Provides component injection for tests
  * Injects Social API and JPA persistence guice modules
- * 
+ *
  * @author bens
  */
 public class JpaTestGuiceModule extends AbstractModule {
-  
+
 
   private EntityManager entityManager;
-  
+
   JpaTestGuiceModule(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
-  
+
   /**
    * Bind entity manager, services and entities used by samples
    */
@@ -85,10 +85,10 @@ public class JpaTestGuiceModule extends AbstractModule {
     install(new DefaultGuiceModule());
     install(new SocialApiGuiceModule());
     install(new OAuthModule());
-    
+
     // Entity manager
     this.bind(EntityManager.class).toInstance(this.entityManager);
-    
+
     // Service implementations
     this.bind(ActivityService.class).to(ActivityServiceDb.class).in(Scopes.SINGLETON);
     this.bind(AppDataService.class).to(AppDataServiceDb.class).in(Scopes.SINGLETON);
