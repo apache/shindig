@@ -25,7 +25,7 @@ under the License.
   <properties>
     <title>Shindig Features Documentation</title>
     <author>Vincent Siveton</author>
-    <date>2009-04-03</date>
+    <date>2009-04-04</date>
   </properties>
   <body>
     <section name="Documentation Centre for the Shindig's Features">
@@ -214,6 +214,7 @@ under the License.
 
     <section name="Resources">
       <ul>
+        <li><a href="http://code.google.com/p/opensocial-resources/">The opensocial-resources project</a></li>
         <li><a href="http://code.google.com/p/gadget-resources/">The gadget-resources project</a></li>
       </ul>
     </section>
