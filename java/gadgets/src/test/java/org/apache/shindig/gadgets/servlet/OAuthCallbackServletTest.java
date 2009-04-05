@@ -26,16 +26,14 @@ import org.junit.Assert;
  */
 public class OAuthCallbackServletTest extends ServletTestFixture {
 
-  private final ServletTestFixture fixture = new ServletTestFixture();
-
   @Test
   public void testServlet() throws Exception {
     OAuthCallbackServlet servlet = new OAuthCallbackServlet();
     replay();
-    servlet.doGet(fixture.request, fixture.recorder);
+    servlet.doGet(this.request, this.recorder);
     verify();
-    assertEquals("text/html; charset=UTF-8", fixture.recorder.getContentType());
-    String body = fixture.recorder.getResponseAsString();
+    assertEquals("text/html; charset=UTF-8", this.recorder.getContentType());
+    String body = this.recorder.getResponseAsString();
     Assert.assertNotSame("body is " + body, body.indexOf("window.close()"), -1);
   }
 }

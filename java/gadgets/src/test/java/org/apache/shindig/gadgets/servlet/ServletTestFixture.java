@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * TODO: Get rid of 'stuff that shouldn't be here'.
  */
-public class ServletTestFixture extends EasyMockTestCase {
+public abstract class ServletTestFixture extends EasyMockTestCase {
   public final RequestPipeline pipeline = mock(RequestPipeline.class);
   public final CaptureRewriter rewriter = new CaptureRewriter();
   public final ContentRewriterRegistry rewriterRegistry
