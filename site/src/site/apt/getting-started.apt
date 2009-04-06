@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-03-26
+ 2009-04-06
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -33,21 +33,35 @@ Getting Started
 
 Discovering Shindig Samples
 
-  Shindig comes with several samples. The sample container should be your first starting point:
+  The sample container should be your first starting point:
 
-  {{http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html}}.
+  {{http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html}}
+
+  The page displayed in the figure bellow is the Shindig sample container. Its goal is to help you to deploy
+  and test your applications. You could also change the application state: changing the number and kind of friends,
+  application data, or changing the viewer (i.e. the user accessing the application).
 
 [./images/samples/samplecontainer.png] Sample Container
 
-  You could change the <"Displaying gadget"> field with one of them and click on <"reset all">:
-
-  * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml}}
+  By default, the gadget is {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml}}.
+  You could try to use another gadget by specifying one of following URLs in the <"Displaying gadget"> field and
+  click on <"reset all">:
 
   * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialCajaWorld.xml}}
 
   * {{http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml}}
 
   * {{http://localhost:8080/gadgets/files/samplecontainer/examples/getFriendsHasApp.xml}}
+
+  []
+
+  By default, all the datas are in the {{http://localhost:8080/gadgets/files/samplecontainer/../sampledata/canonicaldb.json}}.
+  You could try to use another state by specifying one of following URLs in the <"Using state"> field and
+  click on <"reset all">:
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/state-basicfriendlist.xml}}
+
+  * {{http://localhost:8080/gadgets/files/samplecontainer/state-smallfriendlist.xml}}
 
   []
 
@@ -75,37 +89,230 @@ Discovering Shindig Samples
 
  []
 
+Playing With Shindig
+
+  This part is mainly to play with OpenSocial APIs.
+
+* OpenSocial REST
+
+  Shindig implements the {{{http://docs.google.com/View?docid=dcc2jvzt_37hdzwkmf8}OpenSocial Restful Protocol}} based
+  on {{{http://bitworking.org/projects/atom/rfc5023.html}AtomPub}}. It supports XML and JSON formats in addition to
+  Atom format XML. The following REST samples will focus on the Read only operation (GET). All sample data are
+  located in {{http://localhost:8080/gadgets/files/sampledata/canonicaldb.json}}.
+
+  * Getting all people connected to <john.doe>:
+
+    * URL: {{http://localhost:8080/social/rest/people/john.doe/@all}}
+
+    * Result:
+
++-----+
+{"entry":[{"id":"jane.doe","name":{"formatted":"Jane Doe","givenName":"Jane","familyName":"Doe"}},
+{"id":"george.doe","name":{"formatted":"George Doe","givenName":"George","familyName":"Doe"}},
+{"id":"maija.m","name":{"formatted":"Maija Meikäläinen","givenName":"Maija","familyName":"Meikäläinen"}}],"totalResults":3,"startIndex":0}
++-----+
+
+    []
+
+  * Getting the profile of <john.doe>:
+
+    * URL: {{http://localhost:8080/social/rest/people/john.doe/@self}}
+
+    * Result:
+
++-----+
+{"entry":{"id":"john.doe","name":{"formatted":"John Doe","givenName":"John","familyName":"Doe"}}}
++-----+
+
+    []
+
+  * Getting all the friends of <jane.doe>:
+
+    * URL: {{http://localhost:8080/social/rest/people/jane.doe/@friends}}
+
+    * Result:
+
++-----+
+{"entry":[{"id":"john.doe","name":{"formatted":"John Doe","givenName":"John","familyName":"Doe"}}],"totalResults":1,"startIndex":0}
++-----+
+
+    []
+
+  * Getting the activities of <john.doe>:
+
+    * URL: {{http://localhost:8080/social/rest/activities/john.doe/@self}}
+
+    * Result:
+
++-----+
+{"entry":[{"title":"yellow","userId":"john.doe","id":"1","body":"what a color!"}],"totalResults":1,"startIndex":0}
++-----+
+
+    []
+
+  * Getting the activities of <john.doe> using a <<security token>>:
+
+    * URL: {{http://localhost:8080/social/rest/people/jane.doe/@friends?st=a:a:a:a:a:a:a}}
+
+    * Result:
+
++-----+
+{"entry":[{"title":"yellow","userId":"john.doe","id":"1","body":"what a color!"}],"totalResults":1,"startIndex":0}
++-----+
+
+    []
+
+  []
+
+  For more information on the URI templates, please read {{{./overview.html#OpenSocial_REST}OpenSocial REST}} section
+  in the overview page.
+
+* OpenSocial JSON-RPC
+
+  Shindig also implements {{{http://docs.google.com/View?docid=dhjrqr8t_4cwzqq7gh}OpenSocial RPC Protocol}}. The
+  following RPC samples are similar to the REST samples.
+
+  * Getting the profile of <john.doe>:
+
+    * URL: {{http://localhost:8080/social/rpc?method=people.get&userId=john.doe&groupId=@self}}
+
+    * Result:
+
++-----+
+{"data":{"id":"john.doe","name":{"formatted":"John Doe","givenName":"John","familyName":"Doe"}}}
++-----+
+
+    []
+
+  * Getting all the friends of <jane.doe>:
+
+    * URL: {{http://localhost:8080/social/rpc?method=people.get&userId=john.doe&groupId=@all}}
+
+    * Result:
+
++-----+
+{"data":{"list":[{"id":"jane.doe","name":{"formatted":"Jane Doe","givenName":"Jane","familyName":"Doe"}},
+{"id":"george.doe","name":{"formatted":"George Doe","givenName":"George","familyName":"Doe"}},
+{"id":"maija.m","name":{"formatted":"Maija Meikäläinen","givenName":"Maija","familyName":"Meikäläinen"}}],"totalResults":3,"startIndex":0}}
++-----+
+
+    []
+
+  []
+
+  For more information on the URI templates, please read {{{./overview.html#OpenSocial_JSON-RPC}OpenSocial JSON-RPC}} section
+  in the overview page.
+
 Go Further: Building a Container Supporting OpenSocial
 
-* Create Your Own Gadget Renderer
+  You are now ready to create your first OpenSocial application!
+
+* Create Your First OpenSocial Gadget
 
   Shindig implements
   {{{http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadget-spec.html}Gadgets Specification}}.
   Gadgets are web-based software components based on HTML, CSS, and JavaScript. Please read
   {{{http://code.google.com/apis/gadgets/docs/gs.html}Getting Started: gadgets.* API}} to learn more.
 
-  Typically, an Opensocial gadget will be composed by <metadata>, <gadget features>, <user preferences>, <message bundles>
-  and <content>. Here is a small snippet:
+  Typically, an Opensocial gadget is similar to a Google Gadget since its should respect the Google Gadgets
+  specifications. Here is a small snippet:
 
 +------+
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="Hello World">
+  <ModulePrefs title="A Title">
     <Require feature="opensocial-0.8"/>
     ...
   </ModulePrefs>
   <Content type="html">
      <![CDATA[
-...
+     <script type="text/javascript">
+       ...
+       gadgets.util.registerOnLoadHandler(init);
+     </script>
+     <div id="id"/>
+     ...
      ]]>
   </Content>
 </Module>
 +------+
 
-  You could see a real gadget
-  {{{http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/server/src/test/resources/endtoend/fetchPeopleTest.xml}here}}.
+  This XML file describes the OpenSocial application.
 
-  All features supported by Shindig are described {{{./developers/features/index.html}here}}.
+  * The <ModulePrefs> section contains application metadata, such as title and required libraries. Also, you would
+  notice the <require> element which includes the OpenSocial APIs as feature. Always declaring this requirement make
+  your applications as an OpenSocial application. Others features supported by Shindig are described
+  {{{./developers/features/index.html}here}}.
+
+  * The application contents live within the <Content> section. You should include additional JavaScript that contains
+  the application logic and an handler to fire an <init()> function at launch time with the
+  <gadgets.util.registerOnLoadHandler()> function. Finally, you will include an HTML section to display the result.
+
+  []
+
+  To access data from the Shindig, you have to create a <DataRequest> object using the <opensocial.newDataRequest()>
+  call.
+
+  Your first application will enumerate the friends currently belonging to the network of the user accessing the
+  application. The following snippet is the code of
+  {{http://localhost:8080/gadgets/files/samplecontainer/examples/getFriendsHasApp.xml}}.
+
++-----+
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="List Friends using HAS_APP filter Example">
+    <Require feature="opensocial-0.7"/>
+  </ModulePrefs>
+  <Content type="html">
+  <![CDATA[
+    <script type="text/javascript">
+      /**
+       * Request for friend information.
+       */
+      function getData() {
+        var req = opensocial.newDataRequest();
+
+        req.add(req.newFetchPersonRequest(opensocial.DataRequest.PersonId.OWNER), 'owner');
+        var params = {};
+        params[opensocial.DataRequest.PeopleRequestFields.MAX] = 50;
+        params[opensocial.DataRequest.PeopleRequestFields.FILTER] = opensocial.DataRequest.FilterType.HAS_APP;
+        params[opensocial.DataRequest.PeopleRequestFields.SORT_ORDER] = opensocial.DataRequest.SortOrder.NAME;
+        req.add(req.newFetchPeopleRequest(opensocial.DataRequest.Group.OWNER_FRIENDS, params), 'ownerFriends');
+        req.send(onLoadFriends);
+      };
+
+      /**
+       * Parses the response to the friend information request and generates
+       * html to list the friends along with their display name.
+       *
+       * @param {Object} dataResponse Friend information that was requested.
+       */
+      function onLoadFriends(dataResponse) {
+        var owner = dataResponse.get('owner').getData();
+        var html = 'Friends of ' + owner.getDisplayName();
+        html += ':<br><ul>';
+        var ownerFriends = dataResponse.get('ownerFriends').getData();
+        ownerFriends.each(function(person) {
+          html += '<li>' + person.getDisplayName() + '</li>';
+        });
+        html += '</ul>';
+        document.getElementById('message').innerHTML = html;
+      };
+
+      gadgets.util.registerOnLoadHandler(getData);
+    </script>
+    <div id="message"> </div>
+  ]]>
+  </Content>
+</Module>
++-----+
+
+  The following is the result of {{http://localhost:8080/gadgets/files/samplecontainer/examples/getFriendsHasApp.xml}}
+  in the sample container {{http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html}}:
+
+[./images/samples/getFriendsHasApp.png] Get Friends
+
+  This is your first overview of the APIs that deals with people and relationships.
 
 * Create Your Own OpenSocial Back-end
 
