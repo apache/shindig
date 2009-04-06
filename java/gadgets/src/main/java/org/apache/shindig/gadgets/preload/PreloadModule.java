@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.preload;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -39,8 +39,8 @@ public class PreloadModule extends AbstractModule {
     private final List<Preloader> preloaders;
 
     @Inject
-    public PreloaderProvider(HttpPreloader httpPreloader, PipelinedDataPreloader socialPreloader) {
-      preloaders = Lists.newArrayList(httpPreloader, socialPreloader);
+    public PreloaderProvider(HttpPreloader httpPreloader) {
+      preloaders = ImmutableList.of((Preloader) httpPreloader);
     }
 
     public List<Preloader> get() {

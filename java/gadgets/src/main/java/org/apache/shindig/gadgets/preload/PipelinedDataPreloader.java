@@ -21,18 +21,14 @@ package org.apache.shindig.gadgets.preload;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.AuthType;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
-import org.apache.shindig.gadgets.spec.View;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -46,18 +42,15 @@ import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import javax.el.ELResolver;
-
 /**
- * Preloader for loading Data Pipelining Preload data.
+ * Processes a single batch of pipeline data into tasks.
  */
-public class PipelinedDataPreloader implements Preloader {
+public class PipelinedDataPreloader {
   private final RequestPipeline requestPipeline;
   private final ContainerConfig config;
 
@@ -65,36 +58,13 @@ public class PipelinedDataPreloader implements Preloader {
   private static Set<String> HTTP_RESPONSE_HEADERS =
     ImmutableSet.of("content-type", "location", "set-cookie");
 
-  private final Expressions expressions;
-
   @Inject
-  public PipelinedDataPreloader(RequestPipeline requestPipeline, ContainerConfig config,
-      Expressions expressions) {
+  public PipelinedDataPreloader(RequestPipeline requestPipeline, ContainerConfig config) {
     this.requestPipeline = requestPipeline;
     this.config = config;
-    this.expressions = expressions;
   }
 
-  /** Create preloads from a gadget view */
-  public Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
-      PreloaderService.PreloadPhase phase) {
-    View view = gadget.getCurrentView();
-    if (view != null
-        && view.getPipelinedData() != null
-        && phase == PreloaderService.PreloadPhase.PROXY_FETCH) {
-
-      ELResolver resolver = new GadgetELResolver(gadget.getContext());
-      PipelinedData.Batch batch = view.getPipelinedData().getBatch(expressions,
-          resolver);
-      if (batch != null) {
-        return createPreloadTasks(gadget.getContext(), batch);
-      }
-    }
-
-    return Collections.emptyList();
-  }
-
-  /** Create preload tasks from an explicit list of social and http preloads */
+  /** Create preload tasks from a batch of social and http preloads */
   public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
       PipelinedData.Batch batch) {
     List<Callable<PreloadedData>> preloadList = Lists.newArrayList();

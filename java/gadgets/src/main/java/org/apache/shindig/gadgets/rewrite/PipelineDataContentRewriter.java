@@ -20,23 +20,12 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.expressions.Expressions;
-import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.preload.PipelinedDataPreloader;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.PreloaderService;
+import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,13 +34,12 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 
-import javax.el.CompositeELResolver;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 /**
  * ContentRewriter that resolves opensocial-data elements on the server.
@@ -62,20 +50,12 @@ public class PipelineDataContentRewriter implements ContentRewriter {
 
   private static final Logger logger = Logger.getLogger(
       PipelineDataContentRewriter.class.getName());
-  // TODO: support configuration
-  private static final int MAX_BATCH_COUNT = 3;
   
-  private final PipelinedDataPreloader preloader;
-  private final PreloaderService preloaderService;
-  private final Expressions expressions;
+  private final PipelineExecutor executor;
 
   @Inject
-  public PipelineDataContentRewriter(PipelinedDataPreloader preloader,
-      PreloaderService preloaderService,
-      Expressions expressions) {
-    this.preloader = preloader;
-    this.preloaderService = preloaderService;
-    this.expressions = expressions;
+  public PipelineDataContentRewriter(PipelineExecutor executor) {
+    this.executor = executor;
   }
   
   public RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
@@ -101,123 +81,59 @@ public class PipelineDataContentRewriter implements ContentRewriter {
               }
             }, false);
     
-    
-    Map<String, JSONObject> results = Maps.newHashMap();
-    
-    // Use the default objects in the GadgetContext, and any objects that
-    // have been resolved
-    List<PipelineState> pipelines = Lists.newArrayList();
-    CompositeELResolver rootObjects = new CompositeELResolver();
-    rootObjects.add(new GadgetELResolver(gadget.getContext()));
-    rootObjects.add(new RootELResolver(results));
-    
+    Map<PipelinedData, Node> pipelineNodes = Maps.newHashMap();
     for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
       try {
         PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
-        PipelinedData.Batch batch = pipelineData.getBatch(expressions, rootObjects);
-        if (batch == null) {
-          // An empty pipeline element - just remove it
-          n.getParentNode().removeChild(n);
-        } else {
-          // Not empty, ready it 
-          PipelineState state = new PipelineState();
-          state.batch = batch;
-          state.node = n;
-          pipelines.add(state);
-        }
+        pipelineNodes.put(pipelineData, n);
       } catch (SpecParserException e) {
         // Leave the element to the client
         logger.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
       }
     }
     
-    // No pipline elements found, return early
-    if (pipelines.isEmpty()) {
+    if (pipelineNodes.isEmpty()) {
       return null;
     }
-
-    // Run batches until we run out
-    int batchCount = 0;
-    while (true) {
-      // Gather all tasks from the first batch
-      List<Callable<PreloadedData>> tasks = Lists.newArrayList();
-      for (PipelineState pipeline : pipelines) {
-        if (pipeline.batch != null) {
-          tasks.addAll(preloader.createPreloadTasks(gadget.getContext(), pipeline.batch));
-        }
-      }
-     
-      // No further progress - quit
-      if (tasks.isEmpty()) {
-        break;
-      }
-      
-    // And run the pipeline
-      Collection<PreloadedData> preloads = preloaderService.preload(tasks);
-      for (PreloadedData preloaded : preloads) {
-        try {
-          for (Object entry : preloaded.toJson()) {
-            JSONObject obj = (JSONObject) entry;
-            if (obj.has("data")) {
-              results.put(obj.getString("id"), obj.getJSONObject("data"));
-            }
-            // TODO: handle errors?
-          }
-        } catch (PreloadException pe) {
-          // This will be thrown in the event of some unexpected exception. We can move on.
-          logger.log(Level.WARNING, "Unexpected error when preloading", pe);
-        } catch (JSONException je) {
-          throw new RuntimeException(je);
-        }
-      }
-      
-      // Advance to the next batch
-      for (PipelineState pipeline : pipelines) {
-        if (pipeline.batch != null) {
-          pipeline.batch = pipeline.batch.getNextBatch(rootObjects);
-          // Once there are no more batches, delete the associated script node.
-          if (pipeline.batch == null) {
-            pipeline.node.getParentNode().removeChild(pipeline.node);
-          }
-        }
-      }
-      
-      // TODO: necessary?
-      if (batchCount++ >= MAX_BATCH_COUNT) {
-        break;
+    
+    PipelineExecutor.Results results =
+        executor.execute(gadget.getContext(), pipelineNodes.keySet());
+    
+    // Remove all pipeline entries that were fully evaluated
+    for (Map.Entry<PipelinedData, Node> nodeEntry : pipelineNodes.entrySet()) {
+      if (!results.remainingPipelines.contains(nodeEntry.getKey())) {
+        Node node = nodeEntry.getValue();
+        node.getParentNode().removeChild(node);
+        MutableContent.notifyEdit(doc);
       }
     }
-    
-    Element head = (Element) DomUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
-    Element pipelineScript = doc.createElement("script");
-    pipelineScript.setAttribute("type", "text/javascript");
 
-    StringBuilder script = new StringBuilder();
-    for (Map.Entry<String, JSONObject> entry : results.entrySet()) {
-      String key = entry.getKey();
-
-      // TODO: escape key
-      content.addPipelinedData(key, entry.getValue());
-      script.append("opensocial.data.DataContext.putDataSet(\"")
-          .append(key)
-          .append("\",")
-          .append(JsonSerializer.serialize(entry.getValue()))
-          .append(");");
-    }
-
-    pipelineScript.appendChild(doc.createTextNode(script.toString()));
-    head.appendChild(pipelineScript);
-    MutableContent.notifyEdit(doc);
-    
-    boolean allBatchesCompleted = true;
-    for (PipelineState pipeline : pipelines) {
-      if (pipeline.batch != null) {
-        allBatchesCompleted = false;
-        break;
+    // Insert script elements for all the successful results
+    if (!results.keyedResults.isEmpty()) {
+      Element head = (Element) DomUtil.getFirstNamedChildNode(doc.getDocumentElement(), "head");
+      Element pipelineScript = doc.createElement("script");
+      pipelineScript.setAttribute("type", "text/javascript");
+  
+      StringBuilder script = new StringBuilder();
+      for (Map.Entry<String, JSONObject> entry : results.keyedResults.entrySet()) {
+        String key = entry.getKey();
+  
+        // TODO: escape key
+        content.addPipelinedData(key, entry.getValue());
+        script.append("opensocial.data.DataContext.putDataSet(\"")
+            .append(key)
+            .append("\",")
+            .append(JsonSerializer.serialize(entry.getValue()))
+            .append(");");
       }
+  
+      pipelineScript.appendChild(doc.createTextNode(script.toString()));
+      head.appendChild(pipelineScript);
+      MutableContent.notifyEdit(doc);
     }
     
-    if (allBatchesCompleted) {
+    // And if no pipelines remain unexecuted, remove the opensocial-data feature
+    if (results.remainingPipelines.isEmpty()) {
       gadget.addFeature("opensocial-data-context");
       gadget.removeFeature("opensocial-data");
     }

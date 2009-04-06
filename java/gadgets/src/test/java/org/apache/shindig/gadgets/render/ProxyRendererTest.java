@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -33,22 +34,18 @@ import org.apache.shindig.gadgets.http.AbstractHttpCache;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.PreloaderService;
+import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 /**
@@ -69,8 +66,9 @@ public class ProxyRendererTest {
 
   private final FakeHttpCache cache = new FakeHttpCache();
   private final FakeRequestPipeline pipeline = new FakeRequestPipeline();
-  private final FakePreloaderService preloaderService = new FakePreloaderService();
-  private final ProxyRenderer proxyRenderer = new ProxyRenderer(pipeline, cache, preloaderService);
+  private final FakePipelineExecutor pipelineExecutor = new FakePipelineExecutor();
+  private final ProxyRenderer proxyRenderer = new ProxyRenderer(pipeline,
+      cache, pipelineExecutor);
 
   private Gadget makeGadget(String content) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(SPEC_URL,
@@ -198,16 +196,11 @@ public class ProxyRendererTest {
 
   @Test
   public void renderProxiedWithPreload() throws Exception {
-    final JSONObject prefetchedJson = new JSONObject("{id: 'foo', data: 'bar'}");
-
-    preloaderService.preloads = ImmutableList.of((PreloadedData)
-        new PreloadedData() {
-          public Collection<Object> toJson() throws PreloadException {
-            return ImmutableList.<Object>of(prefetchedJson);
-          }
-        });
+    JSONArray prefetchedJson = new JSONArray("[{id: 'foo', data: 'bar'}]");
+    pipelineExecutor.results = new PipelineExecutor.Results(null, prefetchedJson, null);
 
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
+
     String content = proxyRenderer.render(makeHrefGadget("none"));
     assertEquals(PROXIED_HTML_CONTENT, content);
 
@@ -215,34 +208,10 @@ public class ProxyRendererTest {
     assertEquals("POST", lastHttpRequest.getMethod());
     assertEquals("application/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
+
     JSONArray actualJson = new JSONArray(postBody);
-
-    assertEquals(1, actualJson.length());
-    assertEquals(prefetchedJson.toString(), actualJson.getJSONObject(0).toString());
-  }
-
-  @Test
-  public void renderProxiedWithFailedPreload() throws Exception {
-    new JSONObject("{id: 'foo', data: 'bar'}");
-
-    preloaderService.preloads = ImmutableList.of((PreloadedData)
-        new PreloadedData() {
-          public Collection<Object> toJson() throws PreloadException {
-            throw new PreloadException("test");
-          }
-        });
-
-    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
-    String content = proxyRenderer.render(makeHrefGadget("none"));
-    assertEquals(PROXIED_HTML_CONTENT, content);
-
-    HttpRequest lastHttpRequest = pipeline.getLastHttpRequest();
-    assertEquals("POST", lastHttpRequest.getMethod());
-    assertEquals("application/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
-    String postBody = lastHttpRequest.getPostBodyAsString();
-    JSONArray actualJson = new JSONArray(postBody);
-
-    assertEquals(0, actualJson.length());
+    JsonAssert.assertJsonArrayEquals(prefetchedJson, actualJson);
+    assertTrue(pipelineExecutor.wasPreloaded);
   }
 
   private static class FakeHttpCache extends AbstractHttpCache {
@@ -330,21 +299,18 @@ public class ProxyRendererTest {
     public void normalizeProtocol(HttpRequest request) throws GadgetException { }
   }
 
-  private static class FakePreloaderService implements PreloaderService {
+  private static class FakePipelineExecutor extends PipelineExecutor {
     protected boolean wasPreloaded;
-    protected Collection<PreloadedData> preloads;
-
-    protected FakePreloaderService() {
+    protected Results results;
+    
+    public FakePipelineExecutor() {
+      super(null, null, null);
     }
-
-    public Collection<PreloadedData> preload(Gadget gadget, PreloadPhase phase) {
+    
+    @Override
+    public Results execute(GadgetContext context, Collection<PipelinedData> pipelines) {
       wasPreloaded = true;
-      return preloads;
-    }
-
-    public Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks) {
-      wasPreloaded = true;
-      return preloads;
+      return results;
     }
   }
 }

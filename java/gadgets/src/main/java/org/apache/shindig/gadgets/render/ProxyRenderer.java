@@ -29,18 +29,14 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.preload.PreloadException;
-import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.preload.PreloaderService;
+import org.apache.shindig.gadgets.preload.PipelineExecutor;
+import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
-import org.json.JSONArray;
 
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 /**
@@ -49,11 +45,10 @@ import com.google.inject.Inject;
 public class ProxyRenderer {
   public static final String PATH_PARAM = "path";
   private static final Charset UTF8 = Charset.forName("UTF-8");
-  private static final Logger logger = Logger.getLogger(ProxyRenderer.class.getName());
 
-  private RequestPipeline requestPipeline;
-  private HttpCache httpCache;
-  private PreloaderService preloader;
+  private final RequestPipeline requestPipeline;
+  private final HttpCache httpCache;
+  private final PipelineExecutor pipelineExecutor;
 
   /**
    * @param requestPipeline Used for performing the proxy request. Always ignores caching because
@@ -63,10 +58,10 @@ public class ProxyRenderer {
    */
   @Inject
   public ProxyRenderer(RequestPipeline requestPipeline,
-      HttpCache httpCache, PreloaderService preloader) {
+      HttpCache httpCache, PipelineExecutor pipelineExecutor) {
     this.requestPipeline = requestPipeline;
     this.httpCache = httpCache;
-    this.preloader = preloader;
+    this.pipelineExecutor = pipelineExecutor;
   }
 
   public String render(Gadget gadget) throws RenderingException, GadgetException {
@@ -126,33 +121,22 @@ public class ProxyRenderer {
   private HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
     HttpRequest request = new HttpRequest(original);
     request.setIgnoreCache(true);
-    Collection<PreloadedData> proxyPreloads = preloader.preload(gadget,
-          PreloaderService.PreloadPhase.PROXY_FETCH);
-    // TODO: Add current url to GadgetContext to support transitive proxying.
-
-    // POST any preloaded content
-    if ((proxyPreloads != null) && !proxyPreloads.isEmpty()) {
-      JSONArray array = new JSONArray();
-
-      for (PreloadedData preload : proxyPreloads) {
-        try {
-          for (Object entry : preload.toJson()) {
-            array.put(entry);
-          }
-        } catch (PreloadException pe) {
-          // TODO: Determine whether this is a terminal path for the request. The spec is not
-          // clear.
-          logger.log(Level.WARNING, "Unexpected error when preloading", pe);
-        }
+    
+    PipelinedData data = gadget.getCurrentView().getPipelinedData();
+    if (data != null) {
+      PipelineExecutor.Results results = 
+        pipelineExecutor.execute(gadget.getContext(), ImmutableList.of(data));
+    
+      if (results != null && results.results.length() != 0) {
+        String postContent = JsonSerializer.serialize(results.results);
+        // POST the preloaded content, with a method override of GET
+        // to enable caching
+        request.setMethod("POST")
+            .setPostBody(UTF8.encode(postContent).array())
+            .setHeader("Content-Type", "application/json;charset=utf-8");
       }
-
-      String postContent = JsonSerializer.serialize(array);
-      // POST the preloaded content, with a method override of GET
-      // to enable caching
-      request.setMethod("POST")
-          .setPostBody(UTF8.encode(postContent).array())
-          .setHeader("Content-Type", "application/json;charset=utf-8");
     }
+    
     return request;
   }
 }

@@ -35,13 +35,13 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.apache.shindig.gadgets.preload.ConcurrentPreloaderService;
+import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.preload.PipelinedDataPreloader;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
-import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.easymock.Capture;
 import org.easymock.IArgumentMatcher;
@@ -74,37 +74,30 @@ public class PipelineDataContentRewriterTest {
   private static final Uri GADGET_URI = Uri.parse("http://example.org/gadget.php");
 
   private static final String CONTENT =
-    "<script xmlns:os='http://ns.opensocial.org/2008/markup' type='text/os-data'>"
-      + "  <os:PeopleRequest key='me' userId='canonical'/>"
-      + "  <os:HttpRequest key='json' href='test.json'/>"
+    "<script xmlns:os=\"http://ns.opensocial.org/2008/markup\" type=\"text/os-data\">"
+      + "  <os:PeopleRequest key=\"me\" userId=\"canonical\"/>"
+      + "  <os:HttpRequest key=\"json\" href=\"test.json\"/>"
       + "</script>";
 
-  // Two requests, one depends on the other
-  private static final String TWO_BATCH_CONTENT =
-    "<script xmlns:os='http://ns.opensocial.org/2008/markup' type='text/os-data'>"
-    + "  <os:PeopleRequest key='me' userId='${json.user}'/>"
-    + "  <os:HttpRequest key='json' href='${ViewParams.file}'/>"
-    + "</script>";
-
-  // One request, but it requires data that isn't present
+  // One request, but it requires data that isn\"t present
   private static final String BLOCKED_FIRST_BATCH_CONTENT =
-    "<script xmlns:os='http://ns.opensocial.org/2008/markup' type='text/os-data'>"
-    + "  <os:PeopleRequest key='me' userId='${json.user}'/>"
+    "<script xmlns:os=\"http://ns.opensocial.org/2008/markup\" type=\"text/os-data\">"
+    + "  <os:PeopleRequest key=\"me\" userId=\"${json.user}\"/>"
     + "</script>";
 
-  private static final String XML_WITHOUT_FEATURE = "<Module>" + "<ModulePrefs title='Title'>"
+  private static final String XML_WITHOUT_FEATURE = "<Module>" + "<ModulePrefs title=\"Title\">"
       + "</ModulePrefs>" + "<Content>" + "    <![CDATA[" + CONTENT + "]]></Content></Module>";
 
-  private static final String XML_WITHOUT_PIPELINE = "<Module>" + "<ModulePrefs title='Title'>"
-      + "<Require feature='opensocial-data'/>" + "</ModulePrefs>" + "<Content/></Module>";
+  private static final String XML_WITHOUT_PIPELINE = "<Module>" + "<ModulePrefs title=\"Title\">"
+      + "<Require feature=\"opensocial-data\"/>" + "</ModulePrefs>" + "<Content/></Module>";
 
   @Before
   public void setUp() throws Exception {
     control = EasyMock.createStrictControl();
     preloader = control.createMock(PipelinedDataPreloader.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
-    rewriter = new PipelineDataContentRewriter(preloader, preloaderService,
-        new Expressions());
+    rewriter = new PipelineDataContentRewriter(new PipelineExecutor(preloader, preloaderService,
+        new Expressions()));
   }
 
   private void setupGadget(String gadgetXml) throws SpecParserException {
@@ -151,69 +144,6 @@ public class PipelineDataContentRewriterTest {
 
     control.verify();
   }
-
-  @Test
-  public void rewriteWithTwoBatches() throws Exception {
-    setupGadget(getGadgetXml(TWO_BATCH_CONTENT));
-
-    gadget.setContext(new GadgetContext() {
-      @Override
-      public String getParameter(String property) {
-        // Provide the filename to be requested in the first batch
-        if ("view-params".equals(property)) {
-          return "{'file': 'test.json'}";
-        }
-        return null;
-      }
-    });
-
-    // First batch, the HTTP fetch
-    Capture<PipelinedData.Batch> firstBatch =
-      new Capture<PipelinedData.Batch>();
-    Callable<PreloadedData> firstTask = createPreloadTask("json",
-        "{data: {user: 'canonical'}}");
-    
-    // Second batch, the user fetch
-    Capture<PipelinedData.Batch> secondBatch =
-      new Capture<PipelinedData.Batch>();
-    Callable<PreloadedData> secondTask = createPreloadTask("me",
-        "{data: {'id':'canonical'}}");
-    
-    // First, a batch with an HTTP request
-    expect(
-        preloader.createPreloadTasks(same(gadget.getContext()),
-            and(eqBatch(0, 1), capture(firstBatch))))
-            .andReturn(ImmutableList.of(firstTask));
-    // Second, a batch with a social request
-    expect(
-        preloader.createPreloadTasks(same(gadget.getContext()),
-            and(eqBatch(1, 0), capture(secondBatch))))
-            .andReturn(ImmutableList.of(secondTask));
-
-    control.replay();
-
-    rewriter.rewrite(gadget, content);
-    
-    control.verify();
-
-    // Verify the data set is injected, and the os-data was deleted
-    assertTrue("First batch not inserted", content.getContent().contains("DataContext.putDataSet(\"json\",{\"user\":\"canonical\"})"));
-    assertTrue("Second batch not inserted", content.getContent().contains("DataContext.putDataSet(\"me\",{\"id\":\"canonical\"})"));
-    assertFalse("os-data wasn't deleted",
-        content.getContent().contains("type=\"text/os-data\""));
-
-    // Check the evaluated HTTP request
-    RequestAuthenticationInfo request = firstBatch.getValue().getHttpPreloads().get("json");
-    assertEquals("http://example.org/test.json", request.getHref().toString());
-    
-    // Check the evaluated person request
-    JSONObject personRequest = (JSONObject) secondBatch.getValue().getSocialPreloads().get("me");
-    assertEquals("canonical", personRequest.getJSONObject("params").getJSONArray("userId").get(0));
-
-    assertEquals(ImmutableSet.of("opensocial-data"), gadget.getRemovedFeatures());
-    assertEquals(ImmutableSet.of("opensocial-data-context"), gadget.getAddedFeatures());
-  }
-
   @Test
   public void rewriteWithBlockedBatch() throws Exception {
     setupGadget(getGadgetXml(BLOCKED_FIRST_BATCH_CONTENT));
