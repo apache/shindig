@@ -88,7 +88,7 @@ abstract class ApiServlet extends HttpServlet {
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       if (! isset($_SERVER['CONTENT_TYPE']) || ! in_array($_SERVER['CONTENT_TYPE'], $acceptedContentTypes)) {
-        //throw new Exception("[{$_SERVER['CONTENT_TYPE']}] When posting to the social end-point you *must* specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
+        throw new Exception("[{$_SERVER['CONTENT_TYPE']}] When posting to the social end-point you *must* specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
       }
     }
   }
@@ -104,7 +104,7 @@ abstract class ApiServlet extends HttpServlet {
       // look up the user and perms for this oauth request
       $oauthLookupService = Config::get('oauth_lookup_service');
       $oauthLookupService = new $oauthLookupService();
-      $token = $oauthLookupService->getSecurityToken($request, $appUrl, $userId);
+      $token = $oauthLookupService->getSecurityToken($request, $appUrl, $userId, $this->getContentType());
       if ($token) {
         $token->setAuthenticationMode(AuthenticationMode::$OAUTH_CONSUMER_REQUEST);
         return $token;
@@ -122,9 +122,6 @@ abstract class ApiServlet extends HttpServlet {
         // for private profiles etc in your code so their not publicly
         // accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
         // create token with 0 values, no gadget url, no domain and 0 duration
-
-
-        //FIXME change this to a new AnonymousToken when reworking auth token
         $gadgetSigner = Config::get('security_token');
         return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0, Config::get('container_id'));
       } else {
