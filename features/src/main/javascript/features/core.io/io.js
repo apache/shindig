@@ -199,6 +199,10 @@ gadgets.io = function() {
       params, processResponseFunction, opt_contentType) {
     var xhr = makeXhr();
 
+    if (proxyUrl.indexOf('//') == 0) {
+      proxyUrl = document.location.protocol + proxyUrl;
+    }
+    
     xhr.open(method, proxyUrl, true);
     if (callback) {
       xhr.onreadystatechange = gadgets.util.makeClosure(

@@ -99,6 +99,10 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
       return false;
   }
 
+  if (swfUrl.indexOf('//') == 0) {
+    swfUrl = document.location.protocol + swfUrl;
+  }
+  
   var ver = gadgets.flash.getMajorVersion();
   if (ver) {
     var swfVer = parseInt(swfVersion, 10);
