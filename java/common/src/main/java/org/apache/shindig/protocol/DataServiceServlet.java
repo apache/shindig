@@ -164,7 +164,7 @@ public class DataServiceServlet extends ApiServlet {
     return dispatcher.getRestHandler(path, method.toUpperCase());
   }
 
-  BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
+  public BeanConverter getConverterForRequest(HttpServletRequest servletRequest) {
     String formatString = null;
     BeanConverter converter = null;
     String contentType = null;
