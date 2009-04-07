@@ -20,13 +20,10 @@ package org.apache.shindig.gadgets.preload;
 import org.apache.shindig.gadgets.Gadget;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 /**
@@ -38,25 +35,17 @@ import com.google.inject.Inject;
  */
 public class ConcurrentPreloaderService implements PreloaderService {
   private final ExecutorService executor;
-  private final List<? extends Preloader> preloaders;
+  private Preloader preloader;
 
   @Inject
-  public ConcurrentPreloaderService(ExecutorService executor, List<Preloader> preloaders) {
+  public ConcurrentPreloaderService(ExecutorService executor, Preloader preloader) {
     this.executor = executor;
-    this.preloaders = preloaders;
+    this.preloader = preloader;
   }
 
-  public Collection<PreloadedData> preload(Gadget gadget, PreloadPhase phase) {
-    if (preloaders.isEmpty()) {
-      return ImmutableList.of();
-    }
-
-    List<Callable<PreloadedData>> tasks = Lists.newArrayList();
-    for (Preloader preloader : preloaders) {
-      Collection<Callable<PreloadedData>> taskCollection =
-          preloader.createPreloadTasks(gadget, phase);
-      tasks.addAll(taskCollection);
-    }
+  public Collection<PreloadedData> preload(Gadget gadget) {
+    Collection<Callable<PreloadedData>> tasks =
+        preloader.createPreloadTasks(gadget);
 
     return preload(tasks);
   }
@@ -68,8 +57,6 @@ public class ConcurrentPreloaderService implements PreloaderService {
       processed -= 1;
       if (processed == 0) {
         // The last preload fires in the current thread.
-        // TODO: for the HTML_RENDER phase, if there's also a proxied fetch, this
-        // is counter-productive
         FutureTask<PreloadedData> futureTask = new FutureTask<PreloadedData>(task);
         futureTask.run();
         preloads.add(futureTask);

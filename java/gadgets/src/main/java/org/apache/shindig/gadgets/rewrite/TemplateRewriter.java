@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateBasedTagHandler;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
-import org.json.JSONObject;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 
@@ -161,7 +160,7 @@ public class TemplateRewriter implements ContentRewriter {
   
   private RewriterResults processInlineTemplates(Gadget gadget, MutableContent content,
       List<Element> allTemplates, TagRegistry registry) throws GadgetException {
-    Map<String, JSONObject> pipelinedData = content.getPipelinedData();
+    Map<String, Object> pipelinedData = content.getPipelinedData();
 
     // If true, client-side processing will be needed
     boolean needsFeature = false;

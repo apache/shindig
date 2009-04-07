@@ -20,6 +20,7 @@ package org.apache.shindig.common;
 
 import static org.apache.shindig.common.JsonAssert.assertJsonEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -186,6 +187,31 @@ public class JsonSerializerTest {
     // Quick sanity check to make sure that this converts back cleanly.
     JSONObject obj = new JSONObject("{foo:" + builder.toString() + "}");
     assertEquals("Hello<world>foo < bar", obj.get("foo"));
+  }
+
+  @Test
+  public void getPropertyOfJsonObject() throws Exception {
+    JSONObject json = new JSONObject("{a: 1, b: '2'}");
+    assertEquals(1, JsonSerializer.getProperty(json, "a"));
+    assertEquals("2", JsonSerializer.getProperty(json, "b"));
+    assertNull(JsonSerializer.getProperty(json, "c"));
+  }
+  
+  @Test
+  public void getPropertyOfMap() throws Exception {
+    Map<String, Object> map = ImmutableMap.of("a", (Object) 1, "b", "2");
+        assertEquals(1, JsonSerializer.getProperty(map, "a"));
+    assertEquals("2", JsonSerializer.getProperty(map, "b"));
+    assertNull(JsonSerializer.getProperty(map, "c"));
+  }
+
+  @Test
+  public void getPropertyOfPojo() throws Exception {
+    JsonPojo pojo = new JsonPojo();
+    assertEquals("string-value", JsonSerializer.getProperty(pojo, "string"));
+    assertEquals(100, JsonSerializer.getProperty(pojo, "integer"));
+    assertEquals(3, JsonSerializer.getProperty(pojo, "simple!"));
+    assertNull(JsonSerializer.getProperty(pojo, "not"));
   }
 
   private static String avg(long start, long end, long runs) {

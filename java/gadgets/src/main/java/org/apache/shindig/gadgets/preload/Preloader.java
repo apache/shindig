@@ -22,21 +22,19 @@ import org.apache.shindig.gadgets.Gadget;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * Performs an individual preloading operation.
  */
+@ImplementedBy(HttpPreloader.class)
 public interface Preloader {
   /**
    * Create new preload tasks for the provided gadget.
-   * TODO: instead of requiring each Preloader to check the preload phase,
-   * register a different list of preloaders for each phase.  Guice
-   * MultimapBinder would come in handy here.
    *
    * @param gadget The gadget that the operations will be performed for.
-   * @param phase The preload phase being executed.
    * @return Preloading tasks that will be executed by
    *  {@link PreloaderService#}.
    */
-  Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
-      PreloaderService.PreloadPhase phase);
+  Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget);
 }

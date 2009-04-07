@@ -20,6 +20,7 @@ package org.apache.shindig.common;
 
 import org.apache.shindig.common.util.DateUtil;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -162,7 +163,7 @@ public final class JsonSerializer {
                value.getClass().isEnum()) {
       // String-like Primitives
       appendString(buf, value.toString());
-    } else if(value instanceof Date) {
+    } else if (value instanceof Date) {
       appendString(buf, DateUtil.formatIso8601Date((Date)value));
     } else if (value instanceof JSONObject) {
       appendJsonObject(buf, (JSONObject) value);
@@ -429,6 +430,41 @@ public final class JsonSerializer {
     buf.append('"');
   }
 
+  /**
+   * Gets a property of an Object.  Will return a property value if
+   * serializing the value would produce a JSON object containing that 
+   * property, otherwise returns null.
+   */
+  public static Object getProperty(Object value, String propertyName) {
+    Preconditions.checkNotNull(value);
+    Preconditions.checkNotNull(propertyName);
+
+    if (value instanceof JSONObject) {
+      return ((JSONObject) value).opt(propertyName);
+    } else if (value instanceof Map) {
+      return ((Map<?, ?>) value).get(propertyName);
+    } else {
+      // Try getter conversion
+      Method method = getGetters(value).get(propertyName);
+      if (method != null) {
+        try {
+          return method.invoke(value);
+        } catch (IllegalArgumentException e) {
+          // Shouldn't be possible.
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          // Bad class.
+          throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+          // Bad class.
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    
+    return null;
+  }
+  
   private static Map<String, Method> getGetters(Object pojo) {
     Class<?> clazz = pojo.getClass();
 

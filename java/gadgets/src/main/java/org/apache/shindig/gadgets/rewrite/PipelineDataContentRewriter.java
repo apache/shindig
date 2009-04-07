@@ -26,7 +26,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -115,7 +114,7 @@ public class PipelineDataContentRewriter implements ContentRewriter {
       pipelineScript.setAttribute("type", "text/javascript");
   
       StringBuilder script = new StringBuilder();
-      for (Map.Entry<String, JSONObject> entry : results.keyedResults.entrySet()) {
+      for (Map.Entry<String, ? extends Object> entry : results.keyedResults.entrySet()) {
         String key = entry.getKey();
   
         // TODO: escape key

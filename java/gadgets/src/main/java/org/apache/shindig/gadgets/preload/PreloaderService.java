@@ -31,27 +31,12 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ConcurrentPreloaderService.class)
 public interface PreloaderService {
   /**
-   * Phases for preloading.
-   */
-  public enum PreloadPhase {
-    /**
-     * Preloaded content that will be POSTed to a proxied render.
-     */
-    PROXY_FETCH,
-
-    /**
-     * Preloaded content that will be delivered to the final render
-     */
-    HTML_RENDER
-  }
-
-  /**
    * Begin all preload operations.
    *
    * @param gadget The gadget that the operations will be performed for.
    * @return The preloads for the gadget.
    */
-  Collection<PreloadedData> preload(Gadget gadget, PreloadPhase phase);
+  Collection<PreloadedData> preload(Gadget gadget);
 
   /**
    * Execute preloads with a specific set of preload tasks.

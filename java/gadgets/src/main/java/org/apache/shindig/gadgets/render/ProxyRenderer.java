@@ -127,7 +127,7 @@ public class ProxyRenderer {
       PipelineExecutor.Results results = 
         pipelineExecutor.execute(gadget.getContext(), ImmutableList.of(data));
     
-      if (results != null && results.results.length() != 0) {
+      if (results != null && !results.results.isEmpty()) {
         String postContent = JsonSerializer.serialize(results.results);
         // POST the preloaded content, with a method override of GET
         // to enable caching

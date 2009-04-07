@@ -26,7 +26,6 @@ import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.gadgets.Gadget;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,6 @@ public class ConcurrentPreloaderServiceTest {
       = ImmutableMap.of("foo", "bar", "baz", "blah");
 
   private final TestPreloader preloader = new TestPreloader();
-  private final TestPreloader preloader2 = new TestPreloader();
 
   @Test
   public void preloadSingleService() throws Exception {
@@ -58,10 +56,9 @@ public class ConcurrentPreloaderServiceTest {
         new DataPreload(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
-        Arrays.<Preloader>asList(preloader));
+        preloader);
 
-    Collection<PreloadedData> preloads = service.preload(
-        null, PreloaderService.PreloadPhase.HTML_RENDER);
+    Collection<PreloadedData> preloads = service.preload((Gadget) null);
 
     Collection<Object> preloaded = getAll(preloads);
     assertEquals(ImmutableMap.of(PRELOAD_STRING_KEY, PRELOAD_STRING_VALUE),
@@ -86,14 +83,14 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.add(new TestPreloadCallable(
         new DataPreload(PRELOAD_NUMERIC_KEY, PRELOAD_NUMERIC_VALUE)));
 
-    preloader2.tasks.add(new TestPreloadCallable(
+    preloader.tasks.add(new TestPreloadCallable(
         new DataPreload(PRELOAD_MAP_KEY, PRELOAD_MAP_VALUE)));
 
     PreloaderService service = new ConcurrentPreloaderService(new TestExecutorService(),
-        Arrays.<Preloader>asList(preloader, preloader2));
+        preloader);
 
     Collection<PreloadedData> preloads =
-      service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
+      service.preload((Gadget) null);
 
     Collection<Object> preloaded = getAll(preloads);
     assertEquals(ImmutableList.<Object>of(
@@ -116,9 +113,9 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.add(third);
 
     PreloaderService service = new ConcurrentPreloaderService(Executors.newFixedThreadPool(5),
-        Arrays.<Preloader>asList(preloader));
+        preloader);
 
-    service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload((Gadget) null);
 
     TestPreloadCallable ranInSameThread = null;
     for (TestPreloadCallable preloadCallable: Lists.newArrayList(first, second, third)) {
@@ -141,9 +138,9 @@ public class ConcurrentPreloaderServiceTest {
     preloader.tasks.add(callable);
 
     PreloaderService service = new ConcurrentPreloaderService(Executors.newCachedThreadPool(),
-        Arrays.<Preloader>asList(preloader));
+        preloader);
 
-    service.preload(null, PreloaderService.PreloadPhase.HTML_RENDER);
+    service.preload((Gadget) null);
 
     assertSame("Single request not run in current thread",
         Thread.currentThread(), callable.executedThread);
@@ -156,8 +153,7 @@ public class ConcurrentPreloaderServiceTest {
     }
 
     public Collection<Callable<PreloadedData>> createPreloadTasks(
-        Gadget gadget, PreloaderService.PreloadPhase phase) {
-      assertEquals(PreloaderService.PreloadPhase.HTML_RENDER, phase);
+        Gadget gadget) {
       return tasks;
     }
   }

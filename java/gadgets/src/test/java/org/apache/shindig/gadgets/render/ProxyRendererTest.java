@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonAssert;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -38,14 +39,16 @@ import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
-import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 /**
@@ -196,7 +199,8 @@ public class ProxyRendererTest {
 
   @Test
   public void renderProxiedWithPreload() throws Exception {
-    JSONArray prefetchedJson = new JSONArray("[{id: 'foo', data: 'bar'}]");
+    List<JSONObject> prefetchedJson = ImmutableList.of(new JSONObject("{id: 'foo', data: 'bar'}"));
+    
     pipelineExecutor.results = new PipelineExecutor.Results(null, prefetchedJson, null);
 
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, new HttpResponse(PROXIED_HTML_CONTENT));
@@ -209,8 +213,7 @@ public class ProxyRendererTest {
     assertEquals("application/json;charset=utf-8", lastHttpRequest.getHeader("Content-Type"));
     String postBody = lastHttpRequest.getPostBodyAsString();
 
-    JSONArray actualJson = new JSONArray(postBody);
-    JsonAssert.assertJsonArrayEquals(prefetchedJson, actualJson);
+    JsonAssert.assertJsonEquals(JsonSerializer.serialize(prefetchedJson), postBody);
     assertTrue(pipelineExecutor.wasPreloaded);
   }
 

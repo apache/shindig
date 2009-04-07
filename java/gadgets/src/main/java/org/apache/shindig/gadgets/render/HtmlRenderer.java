@@ -71,8 +71,7 @@ public class HtmlRenderer {
       View view = gadget.getCurrentView();
 
       // We always execute these preloads, they have nothing to do with the cache output.
-      Collection<PreloadedData> preloads = preloader.preload(gadget,
-          PreloaderService.PreloadPhase.HTML_RENDER);
+      Collection<PreloadedData> preloads = preloader.preload(gadget);
       gadget.setPreloads(preloads);
 
       String content;

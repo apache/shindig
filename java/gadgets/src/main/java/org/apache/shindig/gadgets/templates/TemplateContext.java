@@ -18,10 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.Gadget;
-
-import org.json.JSONObject;
 import org.w3c.dom.Node;
 
 import java.util.Map;
@@ -32,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
  * Context for processing a single template.
  */
 public class TemplateContext {
-  private final Map<String, JSONObject> top;
+  private final Map<String, ? extends Object> top;
   private final Gadget gadget;
 
   private Object cur = null;
@@ -41,7 +38,7 @@ public class TemplateContext {
   private Map<String, Object> myMap = null;
   private Node templateRoot;
   
-  public TemplateContext(Gadget gadget, Map<String, JSONObject> top) {
+  public TemplateContext(Gadget gadget, Map<String, ? extends Object> top) {
     this.gadget = gadget;
     this.top = top;
     this.cur = top;

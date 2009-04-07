@@ -18,15 +18,13 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.PipelinedData.Batch;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -75,16 +73,16 @@ public class PipelineExecutor {
     /**
      * Results in the form of a full JSON-RPC batch response.
      */
-    public final JSONArray results;
+    public final Collection<? extends Object> results;
     
     /**
-     * Results in the form of a Map from id to JSONObject.
+     * Results in the form of a Map from id to a JSON-serializable object.
      */
-    public final Map<String, JSONObject> keyedResults;
+    public final Map<String, ? extends Object> keyedResults;
     
     public Results(Collection<PipelinedData> remainingPipelines,
-        JSONArray results,
-        Map<String, JSONObject> keyedResults) {
+        Collection<? extends Object> results,
+        Map<String, ? extends Object> keyedResults) {
       this.remainingPipelines = remainingPipelines;
       this.results = results;
       this.keyedResults = keyedResults;
@@ -98,8 +96,8 @@ public class PipelineExecutor {
    * @return results from the pipeline, or null if there are no results
    */
   public Results execute(GadgetContext context, Collection<PipelinedData> pipelines) {
-    JSONArray results = new JSONArray();
-    Map<String, JSONObject> elResults = Maps.newHashMap();
+    List<Object> results = Lists.newArrayList();
+    Map<String, Object> elResults = Maps.newHashMap();
     CompositeELResolver rootObjects = new CompositeELResolver();
     rootObjects.add(new GadgetELResolver(context));
     rootObjects.add(new RootELResolver(elResults));
@@ -127,19 +125,23 @@ public class PipelineExecutor {
       for (PreloadedData preloaded : preloads) {
         try {
           for (Object entry : preloaded.toJson()) {
-            JSONObject obj = (JSONObject) entry;
-            results.put(obj);
-            if (obj.has("data")) {
-              elResults.put(obj.getString("id"), obj.getJSONObject("data"));
-            } else if (obj.has("error")) {
-              elResults.put(obj.getString("id"), obj.getJSONObject("error"));
+            results.add(entry);
+            
+            String id = (String) JsonSerializer.getProperty(entry, "id");
+
+            Object data = JsonSerializer.getProperty(entry, "data");
+            if (data != null) {
+              elResults.put(id, data);
+            } else {
+              Object error = JsonSerializer.getProperty(entry, "error");
+              if (error != null) {
+                elResults.put(id, error);
+              }
             }
           }
         } catch (PreloadException pe) {
           // This will be thrown in the event of some unexpected exception. We can move on.
           logger.log(Level.WARNING, "Unexpected error when preloading", pe);
-        } catch (JSONException je) {
-          throw new RuntimeException(je);
         }
       }
 

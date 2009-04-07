@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.preload;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -72,12 +74,8 @@ public class PipelinedDataPreloader {
     // Load any social preloads into a JSONArray for delivery to
     // JsonRpcServlet
     if (!batch.getSocialPreloads().isEmpty()) {
-      JSONArray array = new JSONArray();
-      for (Object socialRequest : batch.getSocialPreloads().values()) {
-        array.put(socialRequest);
-      }
-
-      Callable<PreloadedData> preloader = new SocialPreloadTask(context, array);
+      Callable<PreloadedData> preloader = new SocialPreloadTask(context,
+          batch.getSocialPreloads().values());
       preloadList.add(preloader);
     }
 
@@ -111,21 +109,23 @@ public class PipelinedDataPreloader {
   private class SocialPreloadTask implements Callable<PreloadedData> {
 
     private final GadgetContext context;
-    private final JSONArray array;
+    private final Collection<? extends Object> socialRequests;
 
-    public SocialPreloadTask(GadgetContext context, JSONArray array) {
+    public SocialPreloadTask(GadgetContext context, Collection<? extends Object> socialRequests) {
       this.context = context;
-      this.array = array;
+      this.socialRequests = socialRequests;
     }
 
     public PreloadedData call() throws Exception {
       Uri uri = getSocialUri(context);
+
+      String socialRequestsJson = JsonSerializer.serialize(socialRequests);
       HttpRequest request = new HttpRequest(uri)
           .setIgnoreCache(context.getIgnoreCache())
           .setSecurityToken(context.getToken())
           .setMethod("POST")
           .setAuthType(AuthType.NONE)
-          .setPostBody(UTF8.encode(array.toString()).array())
+          .setPostBody(UTF8.encode(socialRequestsJson).array())
           .addHeader("Content-Type", "application/json; charset=UTF-8")
           .setContainer(context.getContainer())
           .setGadget(context.getUrl());
@@ -133,13 +133,17 @@ public class PipelinedDataPreloader {
       HttpResponse response = executeSocialRequest(request);
 
       // Unpack the response into a list of PreloadedData responses
-      final List<Object> data = Lists.newArrayList();
-      // TODO: if the entire request fails, the result is an object,
-      // not an array
-      JSONArray array = new JSONArray(response.getResponseAsString());
-      for (int i = 0; i < array.length(); i++) {
-        data.add(array.getJSONObject(i));
+      String responseText;
+      if (response.getHttpStatusCode() < 400) {
+        responseText = response.getResponseAsString();
+      } else {
+        // For error responses, unpack into the same error format used
+        // for os:HttpRequest
+        responseText = JsonSerializer.serialize(
+            createJsonError(response.getHttpStatusCode(), null, response));
       }
+
+      final List<Object> data = parseSocialResponse(socialRequests, responseText);
 
       return new PreloadedData() {
         public Collection<Object> toJson() {
@@ -149,7 +153,36 @@ public class PipelinedDataPreloader {
     }
   }
 
-  // A task for preloading os:MakeRequest
+  /**
+   * Parse the response from a social request into a list of response objects
+   */
+  static List<Object> parseSocialResponse(Collection<? extends Object> requests,
+      String response) throws JSONException {
+    // Unpack the response into a list of PreloadedData responses
+    final List<Object> data = Lists.newArrayList();
+    
+    if (response.startsWith("[")) {
+      // A non-error response is a JSON array
+      JSONArray array = new JSONArray(response);
+      for (int i = 0; i < array.length(); i++) {
+        data.add(array.get(i));
+      }
+    } else {
+      // But a global failure is a JSON object.  Per spec requirements, copy
+      // the overall error into per-id errors
+      JSONObject error = new JSONObject(response);
+      for (Object request : requests) {
+        JSONObject itemResponse = new JSONObject();
+        itemResponse.put("error", error);
+        itemResponse.put("id", JsonSerializer.getProperty(request, "id"));
+        data.add(itemResponse);
+      }
+    }
+    
+    return data;
+  }
+  
+  /** A task for loading os:HttpRequest */
   class HttpPreloadTask implements Callable<PreloadedData> {
     private final GadgetContext context;
     private final RequestAuthenticationInfo preload;
@@ -196,8 +229,7 @@ public class PipelinedDataPreloader {
       return new Data(requestPipeline.execute(request));
     }
 
-    // TODO: is this format correct?
-    // TODO: change HttpPreloader to use this format?
+    // TODO: change HttpPreloader to use this format
     class Data implements PreloadedData {
       private final JSONObject data;
 
@@ -208,7 +240,7 @@ public class PipelinedDataPreloader {
         try {
           wrapper.put("id", key);
           if (response.getHttpStatusCode() >= 400) {
-            wrapper.put("error", createJSONError(response.getHttpStatusCode(), null, response));
+            wrapper.put("error", createJsonError(response.getHttpStatusCode(), null, response));
           } else {
             // Create {data: {status: [CODE], content: {...}|[...]|"...", headers:{...}}}
             JSONObject data = new JSONObject();
@@ -219,7 +251,7 @@ public class PipelinedDataPreloader {
             String responseText = response.getResponseAsString();
 
             // Add allowed headers
-            JSONObject headers = createJSONHeaders(response);
+            JSONObject headers = createJsonHeaders(response);
             if (headers != null) {
               data.put("headers", headers);
             }
@@ -235,7 +267,7 @@ public class PipelinedDataPreloader {
               } catch (JSONException je) {
                 // JSON parse failed: create a 406 error, and remove the "data" section
                 wrapper.remove("data");
-                wrapper.put("error", createJSONError(
+                wrapper.put("error", createJsonError(
                     HttpResponse.SC_NOT_ACCEPTABLE, je.getMessage(), response));
               }
             } else {
@@ -255,7 +287,7 @@ public class PipelinedDataPreloader {
     }
   }
 
-  private static JSONObject createJSONHeaders(HttpResponse response)
+  private static JSONObject createJsonHeaders(HttpResponse response)
       throws JSONException {
     JSONObject headers = null;
 
@@ -282,7 +314,7 @@ public class PipelinedDataPreloader {
   /**
    * Create {error: { code: [CODE], data: {content: "....", headers: {...}}}}
    */
-  private static JSONObject createJSONError(int code, String message, HttpResponse response)
+  private static JSONObject createJsonError(int code, String message, HttpResponse response)
       throws JSONException {
     JSONObject error = new JSONObject();
     error.put("code", code);
@@ -291,15 +323,21 @@ public class PipelinedDataPreloader {
     }
 
     JSONObject data = new JSONObject();
-    error.put("data", data);
-    data.put("content", response.getResponseAsString());
+    String responseText = response.getResponseAsString();
+    if (StringUtils.isNotEmpty(responseText)) {
+      data.put("content", responseText);
+    }
 
     // Add allowed headers
-    JSONObject headers = createJSONHeaders(response);
+    JSONObject headers = createJsonHeaders(response);
     if (headers != null) {
       data.put("headers", headers);
     }
 
+    if (data.length() > 0) {
+      error.put("data", data);
+    }
+    
     return error;
   }
 
@@ -309,7 +347,6 @@ public class PipelinedDataPreloader {
 
     UriBuilder builder = UriBuilder.parse(
         jsonUri.replace("%host%", context.getHost()))
-        //TODO: bogus?  find correct way.
         .addQueryParameter("st", context.getParameter("st"));
     return builder.toUri();
   }

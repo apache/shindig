@@ -17,17 +17,15 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
-import org.json.JSONObject;
-
 import org.w3c.dom.Document;
 
 import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 /**
  * Object that maintains a String representation of arbitrary contents
@@ -38,7 +36,7 @@ public class MutableContent {
   private HttpResponse contentSource;
   private Document document;
   private final GadgetHtmlParser contentParser;
-  private final Map<String, JSONObject> pipelinedData;
+  private final Map<String, Object> pipelinedData;
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
 
@@ -150,11 +148,11 @@ public class MutableContent {
     return (document != null);
   }
   
-  public void addPipelinedData(String key, JSONObject value) {
+  public void addPipelinedData(String key, Object value) {
     pipelinedData.put(key, value);
   }
   
-  public Map<String, JSONObject> getPipelinedData() {
+  public Map<String, Object> getPipelinedData() {
     return pipelinedData;
   }
 }

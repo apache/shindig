@@ -128,7 +128,7 @@ public class HtmlRendererTest {
     protected FakePreloaderService() {
     }
 
-    public Collection<PreloadedData> preload(Gadget gadget, PreloadPhase phase) {
+    public Collection<PreloadedData> preload(Gadget gadget) {
       wasPreloaded = true;
       return preloads;
     }

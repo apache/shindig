@@ -29,6 +29,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.JsonAssert;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
@@ -40,7 +41,6 @@ import org.easymock.Capture;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -124,11 +124,10 @@ public class PipelineExecutorTest {
     assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
     
-    JSONArray expectedArray = new JSONArray(
-        "[{id: 'key', data: {foo: 'bar'}}]");
-    
-    JsonAssert.assertJsonArrayEquals(expectedArray, results.results);
-    JsonAssert.assertJsonObjectEquals(expectedData.getJSONObject("data"), results.keyedResults.get("key"));
+    JsonAssert.assertJsonEquals("[{id: 'key', data: {foo: 'bar'}}]",
+        JsonSerializer.serialize(results.results));
+    JsonAssert.assertJsonEquals("{foo: 'bar'}",
+        JsonSerializer.serialize(results.keyedResults.get("key")));
     assertTrue(results.remainingPipelines.isEmpty());
     
     control.verify();
@@ -177,10 +176,9 @@ public class PipelineExecutorTest {
     PipelineExecutor.Results results = executor.execute(context,
         ImmutableList.of(pipeline));
 
-    JSONArray expectedArray = new JSONArray(
-        "[{id: 'json', data: {user: 'canonical'}}," +
-         "{id: 'me', data: {id: 'canonical'}}]");
-    JsonAssert.assertJsonArrayEquals(expectedArray, results.results);
+    JsonAssert.assertJsonEquals("[{id: 'json', data: {user: 'canonical'}}," +
+        "{id: 'me', data: {id: 'canonical'}}]",
+        JsonSerializer.serialize(results.results));
     assertEquals(ImmutableSet.of("json", "me"), results.keyedResults.keySet());
     assertTrue(results.remainingPipelines.isEmpty());
     
@@ -210,7 +208,7 @@ public class PipelineExecutorTest {
 
     PipelineExecutor.Results results = executor.execute(context,
         ImmutableList.of(pipeline));
-    assertEquals(0, results.results.length());
+    assertEquals(0, results.results.size());
     assertTrue(results.keyedResults.isEmpty());
     assertEquals(1, results.remainingPipelines.size());
     assertSame(pipeline, results.remainingPipelines.iterator().next());
@@ -244,11 +242,10 @@ public class PipelineExecutorTest {
     assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
     
-    JSONArray expectedArray = new JSONArray(
-        "[{id: 'key', error: {message: 'NO!', code: 500}}]");
-    
-    JsonAssert.assertJsonArrayEquals(expectedArray, results.results);
-    JsonAssert.assertJsonObjectEquals(expectedData.getJSONObject("error"), results.keyedResults.get("key"));
+    JsonAssert.assertJsonEquals("[{id: 'key', error: {message: 'NO!', code: 500}}]",
+        JsonSerializer.serialize(results.results));
+    JsonAssert.assertJsonEquals("{message: 'NO!', code: 500}",
+        JsonSerializer.serialize(results.keyedResults.get("key")));
     assertTrue(results.remainingPipelines.isEmpty());
     
     control.verify();
@@ -278,7 +275,7 @@ public class PipelineExecutorTest {
         ImmutableList.of(pipeline));
 
     // The exception is fully handled, and leads to empty results
-    assertEquals(0, results.results.length());
+    assertEquals(0, results.results.size());
     assertTrue(results.keyedResults.isEmpty());
     assertTrue(results.remainingPipelines.isEmpty());
     

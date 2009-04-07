@@ -54,18 +54,15 @@ public class HttpPreloader implements Preloader {
     this.requestPipeline = requestPipeline;
   }
 
-  public Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget,
-      PreloaderService.PreloadPhase phase) {
+  public Collection<Callable<PreloadedData>> createPreloadTasks(Gadget gadget) {
     List<Callable<PreloadedData>> preloads = Lists.newArrayList();
 
     GadgetContext context = gadget.getContext();
 
-    if (phase == PreloaderService.PreloadPhase.HTML_RENDER) {
-      for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
-        Set<String> preloadViews = preload.getViews();
-        if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
-          preloads.add(new PreloadTask(context, preload, preload.getHref().toString()));
-        }
+    for (Preload preload : gadget.getSpec().getModulePrefs().getPreloads()) {
+      Set<String> preloadViews = preload.getViews();
+      if (preloadViews.isEmpty() || preloadViews.contains(context.getView())) {
+        preloads.add(new PreloadTask(context, preload, preload.getHref().toString()));
       }
     }
 

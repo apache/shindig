@@ -150,6 +150,72 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertTrue(request.getContentType().startsWith("application/json"));
   }
 
+  @Test
+  public void testSocialPreloadWithBatchError() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
+
+    String socialResult = "{code: 401, message: 'unauthorized'}";
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+
+    view = "profile";
+    contextParams.put("st", "token");
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+
+    PipelinedData.Batch batch = getBatch(gadget);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
+        context, batch);
+    assertEquals(1, tasks.size());
+    // Nothing fetched yet
+    assertEquals(0, pipeline.requests.size());
+
+    Collection<Object> result = tasks.iterator().next().call().toJson();
+    assertEquals(2, result.size());
+
+    JSONObject resultWithKeyP = new JSONObject("{id: 'p', error: {code: 401, message: 'unauthorized'}}");
+    JSONObject resultWithKeyA = new JSONObject("{id: 'a', error: {code: 401, message: 'unauthorized'}}");
+    Iterator<Object> iter = result.iterator();
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
+  }
+
+  @Test
+  public void testSocialPreloadWithHttpError() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
+
+    HttpResponse httpError = new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_INTERNAL_SERVER_ERROR)
+        .create();
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline(httpError);
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+
+    view = "profile";
+    contextParams.put("st", "token");
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+
+    PipelinedData.Batch batch = getBatch(gadget);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
+        context, batch);
+
+    Collection<Object> result = tasks.iterator().next().call().toJson();
+    assertEquals(2, result.size());
+
+    JSONObject resultWithKeyP = new JSONObject("{id: 'p', error: {code: 500}}");
+    JSONObject resultWithKeyA = new JSONObject("{id: 'a', error: {code: 500}}");
+    Iterator<Object> iter = result.iterator();
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
+  }
+
+
   private Batch getBatch(Gadget gadget) {
     return gadget.getCurrentView().getPipelinedData().getBatch(expressions,
         new GadgetELResolver(gadget.getContext()));

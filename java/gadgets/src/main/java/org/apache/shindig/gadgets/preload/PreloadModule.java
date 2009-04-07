@@ -18,13 +18,7 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 
 /**
  * Guice bindings for the render package.
@@ -32,19 +26,5 @@ import com.google.inject.TypeLiteral;
 public class PreloadModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(new TypeLiteral<List<Preloader>>(){}).toProvider(PreloaderProvider.class);
-  }
-  
-  private static class PreloaderProvider implements Provider<List<Preloader>> {
-    private final List<Preloader> preloaders;
-
-    @Inject
-    public PreloaderProvider(HttpPreloader httpPreloader) {
-      preloaders = ImmutableList.of((Preloader) httpPreloader);
-    }
-
-    public List<Preloader> get() {
-      return preloaders;
-    }
   }
 }

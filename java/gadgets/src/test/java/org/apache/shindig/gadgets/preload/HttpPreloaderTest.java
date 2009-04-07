@@ -98,7 +98,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        preloader.createPreloadTasks(gadget);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -121,7 +121,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        preloader.createPreloadTasks(gadget);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -148,7 +148,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        gadget);
 
     assertEquals(1, preloaded.size());
     PreloadedData data = preloaded.iterator().next().call();
@@ -173,7 +173,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded = preloader.createPreloadTasks(
-        gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        gadget);
 
     assertEquals(2, preloaded.size());
     List<Object> list = getAll(preloaded);
@@ -213,31 +213,12 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         .setSpec(spec)
         .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
     Collection<Callable<PreloadedData>> preloaded
-        = preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.HTML_RENDER);
+        = preloader.createPreloadTasks(gadget);
 
     List<Object> list = getAll(preloaded);
     assertEquals(1, list.size());
     checkRequest(plainFetcher.requests.get(0));
     checkResults((JSONObject) list.get(0));
-  }
-
-  @Test
-  public void proxiedPreloadIsEmpty() throws Exception {
-    String xml =
-        "<Module><ModulePrefs title=''>" +
-        " <Preload href='" + PRELOAD_HREF + "'/>" +
-        "</ModulePrefs><Content/></Module>";
-    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
-    Preloader preloader = new HttpPreloader(requestPipeline);
-
-    Gadget gadget = new Gadget()
-        .setContext(context)
-        .setSpec(spec)
-        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
-    Collection<Callable<PreloadedData>> preloaded =
-        preloader.createPreloadTasks(gadget, PreloaderService.PreloadPhase.PROXY_FETCH);
-
-    assertEquals(0, preloaded.size());
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {
