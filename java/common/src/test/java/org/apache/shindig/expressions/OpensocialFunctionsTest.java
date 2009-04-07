@@ -19,8 +19,6 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.shindig.common.util.Utf8UrlCoder;
-
 import java.util.Map;
 
 import javax.el.ELContext;

@@ -24,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.ParseModule;

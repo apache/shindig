@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.expressions.RootELResolver;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;

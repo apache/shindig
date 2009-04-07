@@ -20,7 +20,6 @@ package org.apache.shindig.common.uri;
 
 import com.google.common.base.Join;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 

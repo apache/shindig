@@ -34,7 +34,6 @@ import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
