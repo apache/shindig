@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.preload;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.JsonUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -174,7 +175,7 @@ public class PipelinedDataPreloader {
       for (Object request : requests) {
         JSONObject itemResponse = new JSONObject();
         itemResponse.put("error", error);
-        itemResponse.put("id", JsonSerializer.getProperty(request, "id"));
+        itemResponse.put("id", JsonUtil.getProperty(request, "id"));
         data.add(itemResponse);
       }
     }

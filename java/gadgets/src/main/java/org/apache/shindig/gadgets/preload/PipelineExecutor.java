@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.JsonUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -127,13 +127,13 @@ public class PipelineExecutor {
           for (Object entry : preloaded.toJson()) {
             results.add(entry);
             
-            String id = (String) JsonSerializer.getProperty(entry, "id");
+            String id = (String) JsonUtil.getProperty(entry, "id");
 
-            Object data = JsonSerializer.getProperty(entry, "data");
+            Object data = JsonUtil.getProperty(entry, "data");
             if (data != null) {
               elResults.put(id, data);
             } else {
-              Object error = JsonSerializer.getProperty(entry, "error");
+              Object error = JsonUtil.getProperty(entry, "error");
               if (error != null) {
                 elResults.put(id, error);
               }

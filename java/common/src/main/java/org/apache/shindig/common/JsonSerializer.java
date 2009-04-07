@@ -19,12 +19,6 @@
 package org.apache.shindig.common;
 
 import org.apache.shindig.common.util.DateUtil;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +30,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Serializes a JSONObject.
@@ -57,11 +50,6 @@ public final class JsonSerializer {
   private static final char[] HEX_DIGITS = {
     '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
   };
-
-  private static final Set<String> EXCLUDE_METHODS
-      = ImmutableSet.of("getClass", "getDeclaringClass");
-
-  private static final Map<Class<?>, Map<String, Method>> getters = new MapMaker().makeMap();
 
   private JsonSerializer() {}
 
@@ -187,7 +175,7 @@ public final class JsonSerializer {
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
   public static void appendPojo(Appendable buf, Object pojo) throws IOException {
-    Map<String, Method> methods = getGetters(pojo);
+    Map<String, Method> methods = JsonUtil.getGetters(pojo);
     buf.append('{');
     boolean firstDone = false;
     for (Map.Entry<String, Method> entry : methods.entrySet()) {
@@ -428,74 +416,5 @@ public final class JsonSerializer {
       }
     }
     buf.append('"');
-  }
-
-  /**
-   * Gets a property of an Object.  Will return a property value if
-   * serializing the value would produce a JSON object containing that 
-   * property, otherwise returns null.
-   */
-  public static Object getProperty(Object value, String propertyName) {
-    Preconditions.checkNotNull(value);
-    Preconditions.checkNotNull(propertyName);
-
-    if (value instanceof JSONObject) {
-      return ((JSONObject) value).opt(propertyName);
-    } else if (value instanceof Map) {
-      return ((Map<?, ?>) value).get(propertyName);
-    } else {
-      // Try getter conversion
-      Method method = getGetters(value).get(propertyName);
-      if (method != null) {
-        try {
-          return method.invoke(value);
-        } catch (IllegalArgumentException e) {
-          // Shouldn't be possible.
-          throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-          // Bad class.
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          // Bad class.
-          throw new RuntimeException(e);
-        }
-      }
-    }
-    
-    return null;
-  }
-  
-  private static Map<String, Method> getGetters(Object pojo) {
-    Class<?> clazz = pojo.getClass();
-
-    Map<String, Method> methods = getters.get(clazz);
-    if (methods != null) {
-      return methods;
-    }
-    // Ensure consistent method ordering by using a linked hash map.
-    methods = Maps.newHashMap();
-
-    for (Method method : clazz.getMethods()) {
-      String name = getPropertyName(method);
-      if (name != null) {
-        methods.put(name, method);
-      }
-    }
-
-    getters.put(clazz, methods);
-    return methods;
-  }
-
-  private static String getPropertyName(Method method) {
-    JsonProperty property = method.getAnnotation(JsonProperty.class);
-    if (property == null) {
-      String name = method.getName();
-      if (name.startsWith("get") && (!EXCLUDE_METHODS.contains(name))) {
-        return name.substring(3, 4).toLowerCase() + name.substring(4);
-      }
-      return null;
-    } else {
-      return property.value();
-    }
   }
 }
