@@ -119,9 +119,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     OAuthEntry entry = getOAuthEntry(message);
     OAuthConsumer authConsumer = getConsumer(message);
 
-    OAuthServiceProvider provider = new OAuthServiceProvider(null, null, null);
-    OAuthAccessor accessor = new OAuthAccessor(new OAuthConsumer(null, authConsumer.consumerKey,
-        authConsumer.consumerSecret, provider));
+    OAuthAccessor accessor = new OAuthAccessor(authConsumer);
 
     if (entry != null) {
       accessor.tokenSecret = entry.tokenSecret;
@@ -130,12 +128,20 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
 
     try {
       message.validateMessage(accessor, new SimpleOAuthValidator());
+    } catch (OAuthProblemException e) {
+      throw e;
     } catch (OAuthException e) {
-      throw new OAuthProblemException();
+      OAuthProblemException ope = new OAuthProblemException(OAuth.Problems.SIGNATURE_INVALID);
+      ope.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, e.getMessage());
+      throw ope;
     } catch (IOException e) {
-      throw new OAuthProblemException();
+      OAuthProblemException ope = new OAuthProblemException(OAuth.Problems.SIGNATURE_INVALID);
+      ope.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, e.getMessage());
+      throw ope;
     } catch (URISyntaxException e) {
-      throw new OAuthProblemException();
+      OAuthProblemException ope = new OAuthProblemException(OAuth.Problems.SIGNATURE_INVALID);
+      ope.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, e.getMessage());
+      throw ope;
     }
     return getTokenFromVerifiedRequest(message, entry, authConsumer);
   }
