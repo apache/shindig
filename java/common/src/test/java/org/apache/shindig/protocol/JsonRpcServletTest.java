@@ -17,35 +17,36 @@
  */
 package org.apache.shindig.protocol;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
-
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.reset;
 
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.reset;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
 
 /**
  *
@@ -56,7 +57,8 @@ public class JsonRpcServletTest extends TestCase {
       .setOwnerId("john.doe").setViewerId("john.doe");
 
   private static final String IMAGE_FIELDNAME = "profile-photo";
-  private static final byte[] IMAGE_DATA = "image data".getBytes();
+  private static final String IMAGE_DATA = "image data";
+  private static final byte[] IMAGE_DATA_BYTES = IMAGE_DATA.getBytes();
   private static final String IMAGE_TYPE = "image/jpeg";
 
   private HttpServletRequest req;
@@ -132,12 +134,12 @@ public class JsonRpcServletTest extends TestCase {
     res.setCharacterEncoding("UTF-8");
     res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
-    List<FormDataItem> formItems = new ArrayList<FormDataItem>();
-    String request = "{method:test.get,id:id,params:" +
-        "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
+    List<FormDataItem> formItems = Lists.newArrayList();
+    String request = "{method:'test.get',id:'id',params:" +
+        "{userId:5,groupId:'@self',image-ref:'@" + IMAGE_FIELDNAME + "'}}";
     formItems.add(mockFormDataItem(JsonRpcServlet.REQUEST_PARAM,
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE, request.getBytes(), true));
-    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA_BYTES, false));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
     expect(multipartFormParser.parse(req)).andReturn(formItems);
     expect(res.getWriter()).andReturn(writer);
@@ -147,15 +149,15 @@ public class JsonRpcServletTest extends TestCase {
     servlet.service(req, res);
     mockControl.verify();
 
-    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) +
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + IMAGE_DATA +
         "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
   }
 
   /**
-   * Tests whether mime part with content type appliction/json is picked up as
-   * request even when its fieldname is not "request".
+   * Test that it passes even when content-type is not set for "request" parameter. This would
+   * be the case where the request is published via webform.
    */
-  public void testPostMultipartFormDataWithNoExplicitRequestField() throws Exception {
+  public void testPostMultipartFormDataWithRequestFieldHavingNoContentType() throws Exception {
     reset(multipartFormParser);
 
     handler.setMock(new TestHandler() {
@@ -174,12 +176,11 @@ public class JsonRpcServletTest extends TestCase {
     res.setCharacterEncoding("UTF-8");
     res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
-    List<FormDataItem> formItems = new ArrayList<FormDataItem>();
-    String request = "{method:test.get,id:id,params:" +
-        "{userId:5,groupId:@self,image-ref:@" + IMAGE_FIELDNAME + "}}";
-    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA, false));
-    formItems.add(mockFormDataItem("json", ContentTypes.OUTPUT_JSON_CONTENT_TYPE,
-        request.getBytes(), true));
+    List<FormDataItem> formItems = Lists.newArrayList();
+    String request = "{method:'test.get',id:'id',params:" +
+        "{userId:5,groupId:'@self',image-ref:'@" + IMAGE_FIELDNAME + "'}}";
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA_BYTES, false));
+    formItems.add(mockFormDataItem("request", null, request.getBytes(), true));
     expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
     expect(multipartFormParser.parse(req)).andReturn(formItems);
     expect(res.getWriter()).andReturn(writer);
@@ -189,10 +190,98 @@ public class JsonRpcServletTest extends TestCase {
     servlet.service(req, res);
     mockControl.verify();
 
-    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + new String(IMAGE_DATA) +
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + IMAGE_DATA +
         "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
   }
 
+
+  /**
+   * Test that any form-data other than "request" does not undergo any content type check.
+   */
+  public void testPostMultipartFormDataOnlyRequestFieldHasContentTypeChecked()
+      throws Exception {
+    reset(multipartFormParser);
+
+    handler.setMock(new TestHandler() {
+      @Override
+      public Object get(RequestItem req) {
+        FormDataItem item = req.getFormMimePart(IMAGE_FIELDNAME);
+        return ImmutableMap.of("image-data", new String(item.get()),
+            "image-type", item.getContentType(),
+            "image-ref", req.getParameter("image-ref"));
+      }
+    });
+    expect(req.getMethod()).andStubReturn("POST");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getContentType()).andStubReturn(ContentTypes.MULTIPART_FORM_CONTENT_TYPE);
+    res.setCharacterEncoding("UTF-8");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
+    List<FormDataItem> formItems = Lists.newArrayList();
+    String request = "{method:'test.get',id:'id',params:" +
+        "{userId:5,groupId:'@self',image-ref:'@" + IMAGE_FIELDNAME + "'}}";
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA_BYTES, false));
+    formItems.add(mockFormDataItem("oauth_hash", "application/octet-stream",
+        "oauth-hash".getBytes(), true));
+    formItems.add(mockFormDataItem("request", null, request.getBytes(), true));
+    formItems.add(mockFormDataItem("oauth_signature", "application/octet-stream",
+        "oauth_signature".getBytes(), true));
+    expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
+    expect(multipartFormParser.parse(req)).andReturn(formItems);
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+
+    JsonAssert.assertJsonEquals("{id: 'id', data: {image-data:'" + IMAGE_DATA +
+        "', image-type:'" + IMAGE_TYPE + "', image-ref:'@" + IMAGE_FIELDNAME + "'}}", getOutput());
+  }
+
+  /**
+   * Test that "request" field undergoes contentType check, and error is thrown if wrong content
+   * type is present. 
+   */
+  public void testPostMultipartFormDataRequestFieldIsSubjectedToContentTypeCheck()
+      throws Exception {
+    reset(multipartFormParser);
+
+    handler.setMock(new TestHandler() {
+      @Override
+      public Object get(RequestItem req) {
+        FormDataItem item = req.getFormMimePart(IMAGE_FIELDNAME);
+        return ImmutableMap.of("image-data", item.get(),
+            "image-type", item.getContentType(),
+            "image-ref", req.getParameter("image-ref"));
+      }
+    });
+    expect(req.getMethod()).andStubReturn("POST");
+    expect(req.getAttribute(isA(String.class))).andReturn(FAKE_GADGET_TOKEN);
+    expect(req.getCharacterEncoding()).andStubReturn("UTF-8");
+    expect(req.getContentType()).andStubReturn(ContentTypes.MULTIPART_FORM_CONTENT_TYPE);
+    res.setCharacterEncoding("UTF-8");
+    res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
+    List<FormDataItem> formItems = Lists.newArrayList();
+    String request = "{method:'test.get',id:'id',params:" +
+        "{userId:5,groupId:'@self',image-ref:'@" + IMAGE_FIELDNAME + "'}}";
+    formItems.add(mockFormDataItem(IMAGE_FIELDNAME, IMAGE_TYPE, IMAGE_DATA_BYTES, false));
+    formItems.add(mockFormDataItem("request", "application/octet-stream", request.getBytes(),
+        true));
+    expect(multipartFormParser.isMultipartContent(req)).andReturn(true);
+    expect(multipartFormParser.parse(req)).andReturn(formItems);
+    expect(res.getWriter()).andReturn(writer);
+    expectLastCall();
+
+    mockControl.replay();
+    servlet.service(req, res);
+    mockControl.verify();
+
+    String output = getOutput();
+    assertTrue(-1 != output.indexOf("Unsupported Content-Type application/octet-stream"));
+  }
 
   public void testInvalidService() throws Exception {
     setupRequest("{method:junk.get,id:id,params:{userId:5,groupId:@self}}");

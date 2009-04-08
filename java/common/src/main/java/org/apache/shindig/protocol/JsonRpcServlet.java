@@ -101,13 +101,12 @@ public class JsonRpcServlet extends ApiServlet {
 
       if (formParser.isMultipartContent(servletRequest)) {
         for (FormDataItem item : formParser.parse(servletRequest)) {
-          if (item.isFormField() && content == null) {
+          if (item.isFormField() && REQUEST_PARAM.equals(item.getFieldName()) && content == null) {
             // As per spec, in case of a multipart/form-data content, there will be one form field
             // with field name as "request". It will contain the json request. Any further form
             // field or file item will not be parsed out, but will be exposed via getFormItem
-            // method of RequestItem. Here we are lenient where a mime part which has content type
-            // application/json will be considered as request.
-            if (!REQUEST_PARAM.equals(item.getFieldName())) {
+            // method of RequestItem.
+            if (!StringUtils.isEmpty(item.getContentType())) {
               checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
             }
             content = IOUtils.toString(item.getInputStream());
