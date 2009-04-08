@@ -82,7 +82,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
       throws ContainerConfigException {
     this.expressions = expressions;
     config = createContainers(loadContainers(containers));
-    evaluateConfig();
+    init();
   }
 
   /**
@@ -91,9 +91,20 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   public JsonContainerConfig(JSONObject json, Expressions expressions) {
     this.expressions = expressions;
     config = createContainers(json);
-    evaluateConfig();
+    init();
   }
 
+  /**
+   * Initializes the configuration.  Called during construction.
+   */
+  protected void init() {
+    for (Map.Entry<String, Map<String, Object>> configEntry : config.entrySet()) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> value = (Map<String, Object>) evaluateAll(configEntry.getValue());
+      configEntry.setValue(value);
+    }
+  }
+  
   @Override
   public Collection<String> getContainers() {
     return Collections.unmodifiableSet(config.keySet());
@@ -353,14 +364,6 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   @Override
   public String toString() {
     return JsonSerializer.serialize(config);
-  }
-
-  private void evaluateConfig() {
-    for (Map.Entry<String, Map<String, Object>> configEntry : config.entrySet()) {
-      @SuppressWarnings("unchecked")
-      Map<String, Object> value = (Map<String, Object>) evaluateAll(configEntry.getValue());
-      configEntry.setValue(value);
-    }
   }
   
   private Object evaluateAll(Object value) {
