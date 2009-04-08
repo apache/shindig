@@ -550,7 +550,7 @@ opensocial.Container.prototype.enableCaja = function() {
   var imports = ___.copy(___.sharedImports);
   imports.outers = imports;
   imports.console = console;
-  imports.$v = ___.asSimpleFunc(valijaMaker)(imports);
+  imports.$v = ___.asFunc(valijaMaker)(imports);
   ___.getNewModuleHandler().setImports(imports);
 
   
@@ -1075,20 +1075,20 @@ opensocial.Container.prototype.enableCaja = function() {
         var type = m[1], name = m[2];
         switch (type) {
           case 'c':
-            ___.allowRead(obj, name);
+            ___.grantRead(obj, name);
             whitelist(schema[k], obj[name]);
             break;
           case 'm':
-            ___.allowCall(obj.prototype, name);
+            ___.grantCall(obj.prototype, name);
             break;
           case 'f':
-            ___.allowRead(obj.prototype, name);
+            ___.grantRead(obj.prototype, name);
             break;
           case 's':
             if ('function' === typeof obj[name]) {
-              ___.allowCall(obj, name);
+              ___.grantCall(obj, name);
             } else {
-              ___.allowRead(obj, name);
+              ___.grantRead(obj, name);
             }
             break;
         }
