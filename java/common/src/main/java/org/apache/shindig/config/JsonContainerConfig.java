@@ -24,6 +24,8 @@ import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.expressions.Expressions;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -80,6 +82,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
       throws ContainerConfigException {
     this.expressions = expressions;
     config = createContainers(loadContainers(containers));
+    evaluateConfig();
   }
 
   /**
@@ -88,6 +91,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   public JsonContainerConfig(JSONObject json, Expressions expressions) {
     this.expressions = expressions;
     config = createContainers(json);
+    evaluateConfig();
   }
 
   @Override
@@ -349,5 +353,35 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   @Override
   public String toString() {
     return JsonSerializer.serialize(config);
+  }
+
+  private void evaluateConfig() {
+    for (Map.Entry<String, Map<String, Object>> configEntry : config.entrySet()) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> value = (Map<String, Object>) evaluateAll(configEntry.getValue());
+      configEntry.setValue(value);
+    }
+  }
+  
+  private Object evaluateAll(Object value) {
+    if (value instanceof CharSequence) {
+      return value.toString();
+    } else if (value instanceof Map) {
+      ImmutableMap.Builder<Object, Object> newMap = ImmutableMap.builder();
+      for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+        newMap.put(entry.getKey(), evaluateAll(entry.getValue()));
+      }
+      
+      return newMap.build();
+    } else if (value instanceof List) {
+      ImmutableList.Builder<Object> newList = ImmutableList.builder(); 
+      for (Object entry : (List<?>) value) {
+        newList.add(evaluateAll(entry));
+      }
+      
+      return newList.build();
+    } else {
+      return value;
+    }
   }
 }
