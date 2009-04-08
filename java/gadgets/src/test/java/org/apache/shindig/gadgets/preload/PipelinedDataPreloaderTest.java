@@ -23,6 +23,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.JsonAssert;
+import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.JsonUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
@@ -41,11 +43,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Test for PipelinedDataPreloader.
@@ -136,9 +139,9 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     JSONObject resultWithKeyP = new JSONObject("{id: 'p', data: 1}");
     JSONObject resultWithKeyA = new JSONObject("{id: 'a', data: 2}");
-    Iterator<Object> iter = result.iterator();
-    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
-    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
+    Map<String, String> resultsById = getResultsById(result);
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), resultsById.get("a"));
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
 
     // Should have only fetched one request
     assertEquals(1, pipeline.requests.size());
@@ -178,9 +181,9 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     JSONObject resultWithKeyP = new JSONObject("{id: 'p', error: {code: 401, message: 'unauthorized'}}");
     JSONObject resultWithKeyA = new JSONObject("{id: 'a', error: {code: 401, message: 'unauthorized'}}");
-    Iterator<Object> iter = result.iterator();
-    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
-    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
+    Map<String, String> resultsById = getResultsById(result);
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), resultsById.get("a"));
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
   }
 
   @Test
@@ -210,11 +213,20 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
 
     JSONObject resultWithKeyP = new JSONObject("{id: 'p', error: {code: 500}}");
     JSONObject resultWithKeyA = new JSONObject("{id: 'a', error: {code: 500}}");
-    Iterator<Object> iter = result.iterator();
-    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), iter.next().toString());
-    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), iter.next().toString());
+    Map<String, String> resultsById = getResultsById(result);
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), resultsById.get("a"));
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
   }
 
+  private Map<String, String> getResultsById(Collection<Object> result) {
+    Map<String, String> resultsById = Maps.newHashMap();
+    for (Object o : result) {
+      resultsById.put((String) JsonUtil.getProperty(o, "id"),
+          JsonSerializer.serialize(o));
+    }
+    
+    return resultsById;
+  }
 
   private Batch getBatch(Gadget gadget) {
     return gadget.getCurrentView().getPipelinedData().getBatch(expressions,
