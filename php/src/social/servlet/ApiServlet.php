@@ -77,18 +77,20 @@ abstract class ApiServlet extends HttpServlet {
       // make sure the content type is in all lower case since that's what we'll check for in the handlers
       $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);
     }
-    // normalize things like "application/json; charset=utf-8" to application/json
     $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json');
-    foreach ($acceptedContentTypes as $contentType) {
-      if (strpos($_SERVER['CONTENT_TYPE'], $contentType) !== false) {
-        $_SERVER['CONTENT_TYPE'] = $contentType;
-        $this->setContentType($contentType);
-        break;
+    if (isset($_SERVER['CONTENT_TYPE'])) {
+      // normalize things like "application/json; charset=utf-8" to application/json
+      foreach ($acceptedContentTypes as $contentType) {
+        if (strpos($_SERVER['CONTENT_TYPE'], $contentType) !== false) {
+          $_SERVER['CONTENT_TYPE'] = $contentType;
+          $this->setContentType($contentType);
+          break;
+        }
       }
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       if (! isset($_SERVER['CONTENT_TYPE']) || ! in_array($_SERVER['CONTENT_TYPE'], $acceptedContentTypes)) {
-        throw new Exception("[{$_SERVER['CONTENT_TYPE']}] When posting to the social end-point you *must* specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
+        throw new Exception("When posting to the social end-point you have to specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
       }
     }
   }
