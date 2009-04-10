@@ -25,6 +25,8 @@ import org.apache.shindig.gadgets.render.RenderingResults;
 
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,7 +78,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
         resp.getWriter().print(results.getContent());
         break;
       case ERROR:
-        resp.getWriter().print(results.getErrorMessage());
+        resp.getWriter().print(StringEscapeUtils.escapeHtml(results.getErrorMessage()));
         break;
       case MUST_REDIRECT:
         resp.sendRedirect(results.getRedirect().toString());
