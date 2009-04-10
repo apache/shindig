@@ -19,12 +19,11 @@
 package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
+
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Handles converting HttpResponse objects to the format expected by the makeRequest javascript.
@@ -33,43 +32,47 @@ public class FetchResponseUtils {
 
   /**
    * Convert a response to a JSON object.
-   * 
+   *
    * The returned JSON object contains the following values:
    * id: the id of the response
    * rc: integer response code
    * body: string response body
    * headers: object, keys are header names, values are lists of header values
-   * 
+   *
+   * The returned object is guaranteed to be mutable.
+   *
    * @param response the response body
    * @param id the response id, or null if not needed
    * @param body string to use as the body of the response.
    * @return a JSONObject representation of the response body.
    */
-  public static JSONObject getResponseAsJson(HttpResponse response, String id, String body)
-      throws JSONException {
-    JSONObject resp = new JSONObject();
+  public static Map<String, Object> getResponseAsJson(HttpResponse response, String id,
+      String body) {
+    Map<String, Object> resp = Maps.newHashMap();
     if (id != null) {
       resp.put("id", id);
     }
     resp.put("rc", response.getHttpStatusCode());
     resp.put("body", body);
-    JSONObject headers = new JSONObject();
+    Map<String, Collection<String>> headers = Maps.newHashMap();
     addHeaders(headers, response, "set-cookie");
     addHeaders(headers, response, "location");
-    resp.put("headers", headers);
+    if (headers.size() > 0) {
+      resp.put("headers", headers);
+    }
     // Merge in additional response data
     for (Map.Entry<String, String> entry : response.getMetadata().entrySet()) {
       resp.put(entry.getKey(), entry.getValue());
     }
     return resp;
   }
-  
-  private static void addHeaders(JSONObject headers, HttpResponse response, String headerName)
-      throws JSONException {
-    Collection<String> values = response.getHeaders(headerName);
+
+  private static void addHeaders(Map<String, Collection<String>> headers, HttpResponse response,
+      String name) {
+    Collection<String> values = response.getHeaders(name);
     if (!values.isEmpty()) {
-      headers.put(headerName.toLowerCase(), new JSONArray(values));
+      headers.put(name.toLowerCase(), values);
     }
   }
-  
+
 }

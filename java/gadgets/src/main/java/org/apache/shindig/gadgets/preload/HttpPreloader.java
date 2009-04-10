@@ -33,11 +33,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -103,16 +101,11 @@ public class HttpPreloader implements Preloader {
    * Implements PreloadData by returning a Map that matches the output format used by makeRequest.
    */
   private static class HttpPreloadData implements PreloadedData {
-    private final JSONObject data;
+    private final Map<String, Object> data;
 
     public HttpPreloadData(HttpResponse response, String key) {
-      JSONObject data = null;
-      try {
-        data = FetchResponseUtils.getResponseAsJson(response, key, response.getResponseAsString());
-      } catch (JSONException e) {
-        data = new JSONObject();
-      }
-      this.data = data;
+      this.data
+          = FetchResponseUtils.getResponseAsJson(response, key, response.getResponseAsString());
     }
 
     public Collection<Object> toJson() {

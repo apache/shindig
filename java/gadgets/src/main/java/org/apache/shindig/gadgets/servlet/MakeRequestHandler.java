@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.AuthType;
@@ -35,10 +36,9 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -171,29 +171,26 @@ public class MakeRequestHandler extends ProxyBase {
    */
   private String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
       HttpResponse results) throws GadgetException {
-    try {
-      String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
-      String body = "";
-      if (results.getHttpStatusCode() == 200) {
-        body = results.getResponseAsString();
+    String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
+    String body = "";
+    if (results.getHttpStatusCode() == 200) {
+      body = results.getResponseAsString();
 
-        if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
-          body = processFeed(originalUrl, request, body);
-        }
+      if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
+        body = processFeed(originalUrl, request, body);
       }
-      JSONObject resp = FetchResponseUtils.getResponseAsJson(results, null, body);
-
-      if (authToken != null) {
-        String updatedAuthToken = authToken.getUpdatedToken();
-        if (updatedAuthToken != null) {
-          resp.put("st", updatedAuthToken);
-        }
-      }
-      // Use raw param as key as URL may have to be decoded
-      return new JSONObject().put(originalUrl, resp).toString();
-    } catch (JSONException e) {
-      return "";
     }
+    Map<String, Object> resp = FetchResponseUtils.getResponseAsJson(results, null, body);
+
+    if (authToken != null) {
+      String updatedAuthToken = authToken.getUpdatedToken();
+      if (updatedAuthToken != null) {
+        resp.put("st", updatedAuthToken);
+      }
+    }
+
+    // Use raw param as key as URL may have to be decoded
+    return JsonSerializer.serialize(Collections.singletonMap(originalUrl, resp));
   }
 
   /**

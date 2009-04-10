@@ -18,13 +18,13 @@
  */
 package org.apache.shindig.gadgets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.json.JSONObject;
+
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * Test of FetchResponseUtils
@@ -36,13 +36,11 @@ public class FetchResponseUtilsTest {
     HttpResponse response = new HttpResponseBuilder()
         .setHttpStatusCode(999)
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
-    assertEquals(999, obj.getInt("rc"));
-    assertEquals("key", obj.getString("id"));
-    assertEquals("body", obj.getString("body"));
-    assertEquals(0, obj.getJSONObject("headers").length());
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+
+    JsonAssert.assertObjectEquals("{'rc':999,'id':'key',body:'body'}", obj);
   }
-  
+
   @Test
   public void testMetadata() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -50,31 +48,24 @@ public class FetchResponseUtilsTest {
         .setMetadata("metaname", "metavalue")
         .setMetadata("more meta", "more value")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, null, "body");
-    assertEquals(999, obj.getInt("rc"));
-    assertFalse(obj.has("id"));
-    assertEquals("body", obj.getString("body"));
-    assertEquals("metavalue", obj.getString("metaname"));
-    assertEquals("more value", obj.getString("more meta"));
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, null, "body");
+
+    JsonAssert.assertObjectEquals(
+        "{rc:999,body:'body',metaname:'metavalue','more meta':'more value'}", obj);
   }
-  
+
   @Test
   public void testHeaders() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .setHttpStatusCode(999)
         .setHeader("Set-Cookie", "cookie")
-        .setHeader("location", "somewhere")
+        .setHeader("location", "here")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
-    assertEquals(999, obj.getInt("rc"));
-    assertEquals("key", obj.getString("id"));
-    assertEquals("body", obj.getString("body"));
-    assertEquals(1, obj.getJSONObject("headers").getJSONArray("set-cookie").length());
-    assertEquals("cookie", obj.getJSONObject("headers").getJSONArray("set-cookie").get(0));
-    assertEquals(1, obj.getJSONObject("headers").getJSONArray("location").length());
-    assertEquals("somewhere", obj.getJSONObject("headers").getJSONArray("location").get(0));
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+    JsonAssert.assertObjectEquals(
+        "{rc:999,id:'key',body:'body',headers:{set-cookie:['cookie'],location:['here']}}", obj);
   }
-  
+
   @Test
   public void testMultiValuedHeaders() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -83,13 +74,8 @@ public class FetchResponseUtilsTest {
         .addHeader("Set-Cookie", "cookie2")
         .addHeader("Set-Cookie", "cookie3")
         .create();
-    JSONObject obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
-    assertEquals(999, obj.getInt("rc"));
-    assertEquals("key", obj.getString("id"));
-    assertEquals("body", obj.getString("body"));
-    assertEquals(3, obj.getJSONObject("headers").getJSONArray("set-cookie").length());
-    assertEquals("cookie", obj.getJSONObject("headers").getJSONArray("set-cookie").get(0));
-    assertEquals("cookie2", obj.getJSONObject("headers").getJSONArray("set-cookie").get(1));
-    assertEquals("cookie3", obj.getJSONObject("headers").getJSONArray("set-cookie").get(2));
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+    JsonAssert.assertObjectEquals(
+        "{rc:999,id:'key',body:'body',headers:{set-cookie:['cookie','cookie2','cookie3']}}", obj);
   }
 }

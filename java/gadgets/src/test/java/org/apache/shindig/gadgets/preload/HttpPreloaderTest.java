@@ -22,9 +22,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -34,15 +34,15 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 /**
@@ -64,7 +64,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
       return oauthFetcher.fetch(request);
     }
 
-    public void normalizeProtocol(HttpRequest request) throws GadgetException {}
+    public void normalizeProtocol(HttpRequest request) {}
   };
 
   private void checkRequest(HttpRequest request) {
@@ -73,15 +73,19 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     assertEquals(context.getToken().getAppId(), request.getSecurityToken().getAppId());
   }
 
-  private static void checkResults(JSONObject results) throws JSONException {
-    assertEquals(PRELOAD_CONTENT, results.get("body"));
-    assertEquals(HttpResponse.SC_OK, results.getInt("rc"));
-    assertEquals("yo=momma", results.getJSONObject("headers").getJSONArray("set-cookie").get(0));
+  private static void checkResults(Object results, String url) throws Exception {
+    Map<String, Object> expected = Maps.newHashMap();
+    expected.put("body", PRELOAD_CONTENT);
+    expected.put("rc", HttpResponse.SC_OK);
+    expected.put("id", url);
+    expected.put("headers", Collections.singletonMap("set-cookie", Arrays.asList("yo=momma")));
+    expected.putAll(PRELOAD_METADATA);
 
-    for (Entry<String, String> entry : PRELOAD_METADATA.entrySet()) {
-      assertEquals("Metadata values not copied to output.",
-          entry.getValue(), results.get(entry.getKey()));
-    }
+    JsonAssert.assertObjectEquals(expected, results);
+  }
+
+  private static void checkResults(Object results) throws Exception {
+    checkResults(results, PRELOAD_HREF);
   }
 
   @Test
@@ -104,7 +108,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     PreloadedData data = preloaded.iterator().next().call();
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) data.toJson().iterator().next());
+    checkResults(data.toJson().iterator().next());
   }
 
   @Test
@@ -130,7 +134,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     checkRequest(request);
     assertTrue(request.getOAuthArguments().getSignOwner());
     assertFalse(request.getOAuthArguments().getSignViewer());
-    checkResults((JSONObject) data.toJson().iterator().next());
+    checkResults(data.toJson().iterator().next());
   }
 
   @Test
@@ -155,7 +159,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
 
     HttpRequest request = oauthFetcher.requests.get(0);
     checkRequest(request);
-    checkResults((JSONObject) data.toJson().iterator().next());
+    checkResults(data.toJson().iterator().next());
   }
 
   @Test
@@ -180,14 +184,13 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     assertEquals(2, list.size());
 
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) list.get(0));
+    checkResults(list.get(0));
 
     checkRequest(plainFetcher.requests.get(1));
-    checkResults((JSONObject) list.get(1));
+    checkResults(list.get(1), PRELOAD_HREF2);
   }
 
-  private List<Object> getAll(
-      Collection<Callable<PreloadedData>> preloaded) throws Exception {
+  private List<Object> getAll(Collection<Callable<PreloadedData>> preloaded) throws Exception {
     List<Object> list = Lists.newArrayList();
     for (Callable<PreloadedData> preloadCallable : preloaded) {
       list.addAll(preloadCallable.call().toJson());
@@ -218,7 +221,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     List<Object> list = getAll(preloaded);
     assertEquals(1, list.size());
     checkRequest(plainFetcher.requests.get(0));
-    checkResults((JSONObject) list.get(0));
+    checkResults(list.get(0));
   }
 
   private static class RecordingHttpFetcher implements HttpFetcher {

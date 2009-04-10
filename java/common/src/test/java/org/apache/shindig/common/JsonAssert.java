@@ -91,4 +91,16 @@ public final class JsonAssert {
         break;
     }
   }
+
+  public static void assertObjectEquals(Object left, Object right) throws Exception {
+    if (!(left instanceof String)) {
+      left = JsonSerializer.serialize(left);
+    }
+
+    if (!(right instanceof String)){
+      right = JsonSerializer.serialize(right);
+    }
+
+    assertJsonEquals((String) left, (String) right);
+  }
 }
