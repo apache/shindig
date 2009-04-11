@@ -303,7 +303,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       }
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
-    validateMessage(accessor, info);
+    validateMessage(accessor, info, true);
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
     tokenState.put(
@@ -378,30 +378,23 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     }
 
     // Parse body
-    switch(OAuthUtil.getSignatureType(request.getMethod(), request.getHeader("Content-Type"))) {
-      case URL_AND_FORM_PARAMS:
-        String body = request.getPostBodyAsString();
-        info.body = body;
-        params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
-        // If we're not configured to pass oauth parameters in the post body, double check
-        // that they didn't end up there.
-        if (!validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
-          if (body.contains("oauth_")) {
-            throw new RuntimeException("Found unexpected post body data" + body);
-          }
-        }
-        break;
-      case URL_AND_BODY_HASH:
-        try {
-          info.rawBody = IOUtils.toByteArray(request.getPostBody());
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-        break;
-      case URL_ONLY:
-        break;
+    info.body = request.getPostBodyAsString();
+    try {
+      info.rawBody = IOUtils.toByteArray(request.getPostBody());
+    } catch (IOException e) {
+      throw new RuntimeException("Can't read post body bytes", e);
     }
-
+    if (OAuth.isFormEncoded(request.getHeader("Content-Type"))) {
+      params.addAll(OAuth.decodeForm(request.getPostBodyAsString()));
+      // If we're not configured to pass oauth parameters in the post body, double check
+      // that they didn't end up there.
+      if (!validParamLocations.contains(OAuthParamLocation.POST_BODY)) {
+        if (info.body.contains("oauth_")) {
+          throw new RuntimeException("Found unexpected post body data" + info.body);
+        }
+      }
+    }
+    
     // Return the lot
     info.message = new OAuthMessage(method, parsed.getLocation(), params);
     
@@ -561,7 +554,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     OAuthAccessor accessor = new OAuthAccessor(oauthConsumer);
     accessor.requestToken = requestToken;
     accessor.tokenSecret = state.tokenSecret;
-    validateMessage(accessor, info);
+    validateMessage(accessor, info, true);
 
     if (state.getState() == State.APPROVED_UNCLAIMED) {
       state.claimToken();
@@ -634,7 +627,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       // Check the signature
       accessor.accessToken = accessToken;
       accessor.tokenSecret = state.getSecret();
-      validateMessage(accessor, info);
+      validateMessage(accessor, info, false);
 
       if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
@@ -649,7 +642,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       responseBody = "User data is " + state.getUserData();
     } else {
       // Check the signature
-      validateMessage(accessor, info);
+      validateMessage(accessor, info, false);
 
       // For signed fetch, just echo back the query parameters in the body
       responseBody = request.getUri().getQuery();
@@ -672,11 +665,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     return resp.create();
   }
   
-  private void validateMessage(OAuthAccessor accessor, MessageInfo info)
+  private void validateMessage(OAuthAccessor accessor, MessageInfo info, boolean tokenEndpoint)
       throws OAuthException, IOException, URISyntaxException {
     info.message.validateMessage(accessor, new FakeTimeOAuthValidator());
     String bodyHash = info.message.getParameter("oauth_body_hash");
-    SignatureType sigType = OAuthUtil.getSignatureType(info.request.getMethod(),
+    if (tokenEndpoint && bodyHash != null) {
+      throw new RuntimeException("Can't have body hash on token endpoints");
+    }
+    SignatureType sigType = OAuthUtil.getSignatureType(tokenEndpoint,
         info.request.getHeader("Content-Type"));
     switch (sigType) {
       case URL_ONLY:

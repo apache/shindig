@@ -336,7 +336,7 @@ public class OAuthRequest {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }
 
-    HttpRequest signed = sanitizeAndSign(request, null);
+    HttpRequest signed = sanitizeAndSign(request, null, true);
 
     OAuthMessage reply = sendOAuthMessage(signed);
 
@@ -455,8 +455,8 @@ public class OAuthRequest {
    * Add OAuth parameters to new request.
    * Send it.
    */
-  public HttpRequest sanitizeAndSign(HttpRequest base, List<Parameter> params)
-      throws OAuthRequestException {
+  public HttpRequest sanitizeAndSign(HttpRequest base, List<Parameter> params,
+      boolean tokenEndpoint) throws OAuthRequestException {
     if (params == null) {
       params = Lists.newArrayList();
     }
@@ -465,7 +465,7 @@ public class OAuthRequest {
     target.setQuery(null);
     params.addAll(sanitize(OAuth.decodeForm(query)));
 
-    switch(OAuthUtil.getSignatureType(base.getMethod(), base.getHeader("Content-Type"))) {
+    switch(OAuthUtil.getSignatureType(tokenEndpoint, base.getHeader("Content-Type"))) {
       case URL_ONLY:
         break;
       case URL_AND_FORM_PARAMS:
@@ -669,7 +669,7 @@ public class OAuthRequest {
           accessorInfo.getSessionHandle()));
     }
 
-    HttpRequest signed = sanitizeAndSign(request, msgParams);
+    HttpRequest signed = sanitizeAndSign(request, msgParams, true);
 
     OAuthMessage reply = sendOAuthMessage(signed);
 
@@ -748,7 +748,7 @@ public class OAuthRequest {
       // This is a request for access token data, return it.
       builder = formatAccessTokenData();
     } else {
-      HttpRequest signed = sanitizeAndSign(realRequest, null);
+      HttpRequest signed = sanitizeAndSign(realRequest, null, false);
 
       HttpResponse response = fetchFromServer(signed);
 

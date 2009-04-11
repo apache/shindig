@@ -86,11 +86,15 @@ public class OAuthUtil {
     URL_AND_BODY_HASH,
   }
   
-  public static SignatureType getSignatureType(String method, String contentType) {
+  /**
+   * @param tokenEndpoint true if this is a request token or access token request.  We don't check
+   * oauth_body_hash on those.
+   */
+  public static SignatureType getSignatureType(boolean tokenEndpoint, String contentType) {
     if (OAuth.isFormEncoded(contentType)) {
       return SignatureType.URL_AND_FORM_PARAMS;
     }
-    if ("GET".equals(method) || "HEAD".equals(method)) {
+    if (tokenEndpoint) {
       return SignatureType.URL_ONLY;
     }
     return SignatureType.URL_AND_BODY_HASH;

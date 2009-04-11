@@ -94,11 +94,11 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       // body signing. This assumption was born out of the limitations of the OAuth 1.0 spec which
       // states that request bodies are only signed if they are form-encoded. This lead many clients
       // to force a content type of application/x-www-form-urlencoded for xml/json bodies and then
-      // hope that recevier decoding of the body didnt have encoding issues. This didnt work out
+      // hope that receiver decoding of the body didnt have encoding issues. This didn't work out
       // to well so now these clients are required to specify the correct content type. This code
       // lets clients which sign using the old technique to work if they specify the correct content
       // type. This support is deprecated and should be removed later.
-      if (allowLegacyBodySigning && requestHasBody(request) &&
+      if (allowLegacyBodySigning &&
           (StringUtils.isEmpty(request.getContentType())  ||
           !request.getContentType().contains(OAuth.FORM_ENCODED))) {
         try {
@@ -207,9 +207,6 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       throw new AuthenticationHandler.InvalidAuthenticationException(
           "Cannot use oauth_body_hash with a Content-Type of application/x-www-form-urlencoded",
           null);
-    } else if (!requestHasBody(request)) {
-      throw new AuthenticationHandler.InvalidAuthenticationException(
-          "Cannot use oauth_body_hash with a GET or HEAD request",null);
     } else {
       try {
         byte[] rawBody = readBody(request);
@@ -232,9 +229,5 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     } catch (IOException e) {
       return null;
     }
-  }
-
-  public static boolean requestHasBody(HttpServletRequest request) {
-    return !("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod()));
   }
 }

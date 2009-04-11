@@ -434,40 +434,4 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
       // Pass
     }
   }
-
-  @Test
-  public void testFailBodyForGet() throws Exception {
-    FakeHttpServletRequest req = new FakeHttpServletRequest();
-    req.setContentType("text/plain");
-    String body = "BODY";
-    req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    req.setMethod("GET");
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
-        "UTF-8");
-    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
-    try {
-      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
-      fail("Body verification should fail");
-    } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
-      // Pass
-    }
-  }
-
-  @Test
-  public void testFailBodyForHead() throws Exception {
-    FakeHttpServletRequest req = new FakeHttpServletRequest();
-    req.setContentType("text/plain");
-    String body = "BODY";
-    req.setPostData(CharsetUtil.getUtf8Bytes(body));
-    req.setMethod("HEAD");
-    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(body))),
-        "UTF-8");
-    req.setParameter(OAuthConstants.OAUTH_BODY_HASH, hash);
-    try {
-      OAuthAuthenticationHandler.verifyBodyHash(req, hash);
-      fail("Body verification should fail");
-    } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
-      // Pass
-    }
-  }
 }

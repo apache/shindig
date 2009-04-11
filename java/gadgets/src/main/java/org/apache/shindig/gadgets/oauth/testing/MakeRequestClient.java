@@ -128,6 +128,21 @@ public class MakeRequestClient {
     return response;
   }
 
+  // Yes, this is really allowed by the HTTP spec and supported by real servers.
+  public HttpResponse sendGetWithBody(String target, String type, byte[] body) {
+    HttpRequest request = new HttpRequest(Uri.parse(target));
+    request.setOAuthArguments(recallState());
+    OAuthRequest dest = createRequest();
+    if (type != null) {
+      request.setHeader("Content-Type", type);
+    }
+    request.setPostBody(body);
+    request.setSecurityToken(securityToken);
+    HttpResponse response = dest.fetch(request);
+    saveState(response);
+    return response;
+  }
+
   /**
    * Send an OAuth POST request to the given URL.
    */

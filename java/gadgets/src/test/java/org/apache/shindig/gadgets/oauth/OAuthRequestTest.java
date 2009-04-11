@@ -851,7 +851,7 @@ public class OAuthRequestTest {
     checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
         "GET /data?cachebust=2\n");
     checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
-        "GET /data?cachebust=2&opensocial_owner_id=owner");
+        "GET /data?cachebust=2&oauth_body_hash=2jm");
 
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
@@ -1046,6 +1046,84 @@ public class OAuthRequestTest {
   }
   
   @Test
+  public void testGetWithFormEncodedBody() throws Exception {
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    HttpResponse resp = client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+        OAuth.FORM_ENCODED, "war=peace&yes=no".getBytes());
+    assertEquals("war=peace&yes=no", resp.getHeader(FakeOAuthServiceProvider.BODY_ECHO_HEADER));
+  }
+  
+  @Test
+  public void testGetWithRawBody() throws Exception {
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    HttpResponse resp = client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+        "application/json", "war=peace&yes=no".getBytes());
+    assertEquals("war=peace&yes=no", resp.getHeader(FakeOAuthServiceProvider.BODY_ECHO_HEADER));
+    List<Parameter> queryParams = OAuth.decodeForm(resp.getResponseAsString());
+    checkContains(queryParams, "oauth_body_hash", "MfhwxPN6ns5CwQAZN9OcJXu3Jv4=");
+  }
+
+  @Test
+  public void testGetTamperedRawContent() throws Exception {
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody("yo momma".getBytes());
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+          "funky-content", raw);
+      fail("Should have thrown with oauth_body_hash mismatch");
+    } catch (RuntimeException e) {
+      // good
+    }
+  }
+
+  @Test
+  public void testGetTamperedFormContent() throws Exception {
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody("foo=quux".getBytes());
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+          OAuth.FORM_ENCODED, "foo=bar".getBytes());
+      fail("Should have thrown with oauth signature mismatch");
+    } catch (RuntimeException e) {
+      // good
+    }
+  }
+  
+  @Test
+  public void testGetTamperedRemoveRawContent() throws Exception {
+    byte[] raw = { 0, 1, 2, 3, 4, 5 };
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+    // Tamper with the body before it hits the service provider
+    client.setNextFetcher(new HttpFetcher() {
+      public HttpResponse fetch(HttpRequest request) throws GadgetException {
+        request.setPostBody(ArrayUtils.EMPTY_BYTE_ARRAY);
+        request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        return serviceProvider.fetch(request);
+      }
+    });
+    try {
+      client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+          "funky-content", raw);
+      fail("Should have thrown with body hash in form encoded request");
+    } catch (RuntimeException e) {
+      // good
+    }
+  }
+
+  @Test
   public void testPostTamperedRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1103,7 +1181,7 @@ public class OAuthRequestTest {
       // good
     }
   }
-
+  
   @Test
   public void testSignedFetch_error401() throws Exception {
     assertEquals(0, base.getAccessTokenRemoveCount());
@@ -1114,7 +1192,7 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertNull(response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
-    checkStringContains("Should return sent request", errorText, "GET /data?opensocial_owner");
+    checkStringContains("Should return sent request", errorText, "GET /data");
     checkStringContains("Should return response", errorText, "HTTP/1.1 401");
     checkStringContains("Should return response", errorText, "some vague error");
     assertEquals(0, base.getAccessTokenRemoveCount());
@@ -1573,9 +1651,12 @@ public class OAuthRequestTest {
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
 
-    response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
-    assertEquals("", response.getResponseAsString());
-    assertTrue(response.getMetadata().containsKey("oauthApprovalUrl"));
+    try {
+      client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+      fail("Service provider should have rejected bogus request to access token URL");
+    } catch (RuntimeException e) {
+      // good
+    }
   }
 
   @Test
@@ -1661,6 +1742,16 @@ public class OAuthRequestTest {
       }
     }
     return false;
+  }
+  
+  private void checkContains(List<Parameter> params, String key, String value) {
+    for (Parameter p : params) {
+      if (p.getKey().equals(key)) {
+        assertEquals(value, p.getValue());
+        return;
+      }
+    }
+    fail("List did not contain " + key + "=" + value + "; instead was " + params);
   }
 
   private String getLogText() {
