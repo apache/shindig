@@ -193,7 +193,11 @@ public class OAuthRequest {
       response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
-      responseParams.logDetailedWarning("OAuth fetch fatal error", e);
+      if (OAuthError.UNAUTHENTICATED.toString().equals(responseParams.getError())) {
+        responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
+      } else {
+        responseParams.logDetailedWarning("OAuth fetch fatal error", e);
+      }
       responseParams.setSendTraceToClient(true);
       if (response == null) {
         response = new HttpResponseBuilder()

@@ -120,6 +120,10 @@ public class OAuthResponseParams {
   public void logDetailedWarning(String note, Throwable cause) {
     logger.log(Level.WARNING, note + '\n' + getDetails(), cause);
   }
+  
+  public void logDetailedInfo(String note, Throwable cause) {
+    logger.log(Level.INFO, note + '\n' + getDetails(), cause);
+  }
 
   /**
    * Add a request/response pair to our trace of actions associated with this request.
