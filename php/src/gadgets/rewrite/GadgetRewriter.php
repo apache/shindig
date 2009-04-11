@@ -25,6 +25,7 @@
  */
 class GadgetRewriter {
   private $context;
+  private $doc;
   private $domObservers = array();
 
   public function __construct(GadgetContext $context) {
@@ -44,42 +45,35 @@ class GadgetRewriter {
       $contentRewriter = new ContentRewriter($this->context, $gadget);
       $contentRewriter->register($this);
     }
-
     // Are we configured to sanitize certain views? (if so the config should be an array of view names to sanitize, iaw: array('profile', 'home'))
     if (is_array(Config::get('sanitize_views'))) {
       require_once "src/gadgets/rewrite/SanitizeRewriter.php";
       $sanitizeRewriter = new SanitizeRewriter($this->context, $gadget);
       $sanitizeRewriter->register($this);
     }
-
     // no observers registered, return the original content, otherwise parse the DOM tree and call the observers
-    if (!count($this->domObservers)) {
+    if (! count($this->domObservers)) {
       return $content;
     } else {
       libxml_use_internal_errors(true);
-      $doc = new DOMDocument(null, 'utf-8');
-      $doc->preserveWhiteSpace = false;
-      $doc->formatOutput = false;
-      $doc->strictErrorChecking = false;
-      $doc->recover = false;
-      if (! $doc->loadHtml($content)) {
+      $this->doc = new DOMDocument(null, 'utf-8');
+      $this->doc->preserveWhiteSpace = true;
+      $this->doc->formatOutput = false;
+      $this->doc->strictErrorChecking = false;
+      $this->doc->recover = false;
+      if (! $this->doc->loadHtml($content)) {
         // parsing failed, return the unmodified content
         return $content;
       }
-
       // find and parse all nodes in the dom document
-      $rootNodes = $doc->getElementsByTagName('*');
+      $rootNodes = $this->doc->getElementsByTagName('*');
       $this->parseNodes($rootNodes);
-
       // DomDocument tries to make the document a valid html document, so added the html/body/head elements to it.. so lets strip them off before returning the content
-      $html = $doc->saveHTML();
-      $html = preg_replace('/^<!DOCTYPE.+?>/', '', str_replace(array('&amp;', '<head>', '</head>', '<html>', '</html>', '<body>', '</body>'), array('&', '', '', '', '', '', ''), $html));
-
+      $html = $this->doc->saveHTML();
       // If the gadget specified the caja feature, cajole it
       if (in_array('caja', $gadget->features)) {
         //TODO : use the caja daemon to cajole the content (experimental patch is available and will be added soon)
       }
-
       return $html;
     }
   }
@@ -92,7 +86,7 @@ class GadgetRewriter {
    * @param object instance $class
    * @param string $function
    */
-  public function addObserver($tag, DomRewriter $class, $function) {
+  public function addObserver($tag, $class, $function) {
     // add the tag => function to call relationship to our $observers array
     $this->domObservers[] = array('tag' => $tag, 'class' => $class, 'function' => $function);
   }
@@ -109,7 +103,7 @@ class GadgetRewriter {
         if ($observer['tag'] == $tagName) {
           $class = $observer['class'];
           $function = $observer['function'];
-          $class->$function($node);
+          $class->$function($node, $this->doc);
         }
       }
     }

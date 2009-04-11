@@ -39,7 +39,9 @@
  * <os:HttpRequest href="http://developersite.com/api?ids=${PagedFriends.ids}"/>
  */
 
-class GadgetHrefRenderer extends GadgetRenderer {
+require 'GadgetHtmlRenderer.php';
+
+class GadgetHrefRenderer extends GadgetHtmlRenderer {
 
   /**
    * Renders a 'proxied content' view, for reference see:
@@ -49,6 +51,7 @@ class GadgetHrefRenderer extends GadgetRenderer {
    * @param array $view
    */
   public function renderGadget(Gadget $gadget, $view) {
+    $this->gadget = $gadget;
     /* TODO
      * We should really re-add OAuth fetching support some day, uses these view atributes:
      * $view['oauthServiceName'], $view['oauthTokenName'], $view['oauthRequestToken'], $view['oauthRequestTokenSecret'];
@@ -56,7 +59,6 @@ class GadgetHrefRenderer extends GadgetRenderer {
     $authz = $this->getAuthz($view);
     $refreshInterval = $this->getRefreshInterval($view);
     $href = $this->buildHref($view, $authz);
-
     if (count($view['dataPipelining'])) {
       $dataPipeliningResults = $this->fetchDataPipelining($view['dataPipelining']);
       // if data-pipeling tags are present, post the json encoded results to the remote url
@@ -69,7 +71,6 @@ class GadgetHrefRenderer extends GadgetRenderer {
       $request->setRefreshInterval($refreshInterval);
       $request->getOptions()->ignoreCache = $gadget->gadgetContext->getIgnoreCache();
     }
-
     $signingFetcherFactory = $gadgetSigner = false;
     if ($authz != 'none') {
       $gadgetSigner = Config::get('security_token_signer');
@@ -79,11 +80,16 @@ class GadgetHrefRenderer extends GadgetRenderer {
       $request->setAuthType($authz);
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
     }
-
     $basicFetcher = new BasicRemoteContentFetcher();
     $basicRemoteContent = new BasicRemoteContent($basicFetcher, $signingFetcherFactory, $gadgetSigner);
     $response = $basicRemoteContent->fetch($request);
-    echo $response->getResponseContent();
+    // Rewrite the content, this will rewrite resource links to proxied versions (if requested), sanitize if configured, and
+    // add the various javascript tags to the document
+    $rewriter = new GadgetRewriter($this->context);
+    $rewriter->addObserver('head', $this, 'addHeadTags');
+    $rewriter->addObserver('body', $this, 'addBodyTags');
+    $content = $rewriter->rewrite($response->getResponseContent(), $gadget);
+    echo $content;
   }
 
   /**
