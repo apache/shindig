@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
-import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 /**
@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
  */
 public final class NoOpImageRewriter implements ImageRewriter {
 
-  public HttpResponse rewrite(Uri uri, HttpResponse response) {
+  public HttpResponse rewrite(HttpRequest request, HttpResponse response) {
     return response;
   }
 

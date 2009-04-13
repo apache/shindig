@@ -17,12 +17,15 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import static org.apache.shindig.gadgets.http.AbstractHttpCache.DEFAULT_KEY_VALUE;
-import static org.apache.shindig.gadgets.http.AbstractHttpCache.KEY_SEPARATOR;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
@@ -32,10 +35,7 @@ import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
+import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
 import java.util.Map;
@@ -52,57 +52,22 @@ public class AbstractHttpCacheTest {
 
   @Test
   public void createKeySimple() {
-    HttpRequest request = new HttpRequest(DEFAULT_URI)
-        .setAuthType(AuthType.NONE);
+    HttpRequest request = new HttpRequest(DEFAULT_URI).setAuthType(AuthType.NONE);
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, DEFAULT_URI).setLegacyParam(1, AuthType.NONE);
 
-    StringBuilder key = new StringBuilder();
-    key.append(DEFAULT_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(AuthType.NONE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-
-    String actual = cache.createKey(request);
-    assertEquals(key.toString(), actual);
+    assertEquals(key.build(), cache.createKey(request));
   }
 
   @Test
   public void createKeySignedOwner() throws Exception {
-    OAuthArguments args = new OAuthArguments(new RequestAuthenticationInfo() {
-
-      public Map<String, String> getAttributes() {
-        return ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME,
-                               "OAUTH_TOKEN_NAME", TOKEN_NAME);
-      }
-
-      public AuthType getAuthType() {
-        return AuthType.SIGNED;
-      }
-
-      public Uri getHref() {
-        return DEFAULT_URI;
-      }
-
-      public boolean isSignOwner() {
-        return true;
-      }
-
-      public boolean isSignViewer() {
-        return false;
-      }
-    });
+    // Using a mock instead of a fake object makes the test less brittle if the interface should
+    // change.
+    RequestAuthenticationInfo authInfo = newMockAuthInfo(
+        true /* isSignOwner */,
+        false /* isSignViewer */,
+        ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME, "OAUTH_TOKEN_NAME", TOKEN_NAME));
+    replay(authInfo);
 
     String ownerId = "owner eye dee";
     SecurityToken securityToken
@@ -110,178 +75,104 @@ public class AbstractHttpCacheTest {
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
-        .setOAuthArguments(args)
+        .setOAuthArguments(new OAuthArguments(authInfo))
         .setSecurityToken(securityToken);
 
-    StringBuilder key = new StringBuilder();
-    key.append(DEFAULT_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(AuthType.SIGNED);
-    key.append(KEY_SEPARATOR);
-    key.append(ownerId);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(APP_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(MODULE_ID);
-    key.append(KEY_SEPARATOR);
-    key.append(SERVICE_NAME);
-    key.append(KEY_SEPARATOR);
-    key.append(TOKEN_NAME);
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, DEFAULT_URI)
+        .setLegacyParam(1, AuthType.SIGNED)
+        .setLegacyParam(2, ownerId)
+        .setLegacyParam(3, "")
+        .setLegacyParam(5, APP_URI)
+        .setLegacyParam(6, MODULE_ID)
+        .setLegacyParam(7, SERVICE_NAME)
+        .setLegacyParam(8, TOKEN_NAME);
 
-    String actual = cache.createKey(request);
-    assertEquals(key.toString(), actual);
+    assertEquals(key.build(), cache.createKey(request));
+  }
+
+  private RequestAuthenticationInfo newMockAuthInfo(boolean isSignOwner, boolean isSignViewer,
+      Map<String, String> attributesMap) {
+    RequestAuthenticationInfo authInfo = EasyMock.createNiceMock(RequestAuthenticationInfo.class);
+    expect(authInfo.getAttributes()).andReturn(attributesMap).anyTimes();
+    expect(authInfo.getAuthType()).andReturn(AuthType.SIGNED).anyTimes();
+    expect(authInfo.getHref()).andReturn(DEFAULT_URI).anyTimes();
+    expect(authInfo.isSignOwner()).andReturn(isSignOwner).anyTimes();
+    expect(authInfo.isSignViewer()).andReturn(isSignOwner).anyTimes();
+    return authInfo;
   }
 
   @Test
   public void createKeySignedViewer() throws Exception {
-    OAuthArguments args = new OAuthArguments(new RequestAuthenticationInfo() {
-
-      public Map<String, String> getAttributes() {
-        return ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME,
-                               "OAUTH_TOKEN_NAME", TOKEN_NAME);
-      }
-
-      public AuthType getAuthType() {
-        return AuthType.SIGNED;
-      }
-
-      public Uri getHref() {
-        return DEFAULT_URI;
-      }
-
-      public boolean isSignOwner() {
-        return false;
-      }
-
-      public boolean isSignViewer() {
-        return true;
-      }
-    });
+    RequestAuthenticationInfo authInfo = newMockAuthInfo(
+        false /* isSignOwner */,
+        true /* isSignViewer */,
+        ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME, "OAUTH_TOKEN_NAME", TOKEN_NAME));
+    replay(authInfo);
 
     String viewerId = "viewer eye dee";
-    SecurityToken securityToken
-        = new BasicSecurityToken("", viewerId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
+    SecurityToken securityToken = new BasicSecurityToken(
+        "", viewerId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
-        .setOAuthArguments(args)
+        .setOAuthArguments(new OAuthArguments(authInfo))
         .setSecurityToken(securityToken);
 
-    StringBuilder key = new StringBuilder();
-    key.append(DEFAULT_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(AuthType.SIGNED);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(viewerId);
-    key.append(KEY_SEPARATOR);
-    key.append(DEFAULT_KEY_VALUE);
-    key.append(KEY_SEPARATOR);
-    key.append(APP_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(MODULE_ID);
-    key.append(KEY_SEPARATOR);
-    key.append(SERVICE_NAME);
-    key.append(KEY_SEPARATOR);
-    key.append(TOKEN_NAME);
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, DEFAULT_URI)
+        .setLegacyParam(1, AuthType.SIGNED)
+        .setLegacyParam(3, null) // The Viewer ID is in this case defaults to null
+        .setLegacyParam(5, APP_URI)
+        .setLegacyParam(6, MODULE_ID)
+        .setLegacyParam(7, SERVICE_NAME)
+        .setLegacyParam(8, TOKEN_NAME);
 
-    String actual = cache.createKey(request);
-    assertEquals(key.toString(), actual);
+    assertEquals(key.build(), cache.createKey(request));
   }
 
   @Test
   public void createKeyWithTokenOwner() throws Exception {
-    OAuthArguments args = new OAuthArguments(new RequestAuthenticationInfo() {
-
-      public Map<String, String> getAttributes() {
-        return ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME,
-                               "OAUTH_TOKEN_NAME", TOKEN_NAME,
-                               "OAUTH_USE_TOKEN", "always");
-      }
-
-      public AuthType getAuthType() {
-        return AuthType.SIGNED;
-      }
-
-      public Uri getHref() {
-        return DEFAULT_URI;
-      }
-
-      public boolean isSignOwner() {
-        return true;
-      }
-
-      public boolean isSignViewer() {
-        return true;
-      }
-    });
+    RequestAuthenticationInfo authInfo = newMockAuthInfo(
+        true /* isSignOwner */,
+        true /* isSignViewer */,
+        ImmutableMap.of("OAUTH_SERVICE_NAME", SERVICE_NAME, "OAUTH_TOKEN_NAME", TOKEN_NAME,
+            "OAUTH_USE_TOKEN", "always"));
+    replay(authInfo);
 
     String userId = "user id";
-    SecurityToken securityToken
-        = new BasicSecurityToken(userId, userId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
+    SecurityToken securityToken = new BasicSecurityToken(
+        userId, userId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
-        .setOAuthArguments(args)
+        .setOAuthArguments(new OAuthArguments(authInfo))
         .setSecurityToken(securityToken);
 
-    StringBuilder key = new StringBuilder();
-    key.append(DEFAULT_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(AuthType.SIGNED);
-    key.append(KEY_SEPARATOR);
-    key.append(userId);
-    key.append(KEY_SEPARATOR);
-    key.append(userId);
-    key.append(KEY_SEPARATOR);
-    key.append(userId);
-    key.append(KEY_SEPARATOR);
-    key.append(APP_URI);
-    key.append(KEY_SEPARATOR);
-    key.append(MODULE_ID);
-    key.append(KEY_SEPARATOR);
-    key.append(SERVICE_NAME);
-    key.append(KEY_SEPARATOR);
-    key.append(TOKEN_NAME);
+    CacheKeyBuilder key = new CacheKeyBuilder()
+        .setLegacyParam(0, DEFAULT_URI)
+        .setLegacyParam(1, AuthType.SIGNED)
+        .setLegacyParam(2, userId)
+        .setLegacyParam(3, userId)
+        .setLegacyParam(4, userId)
+        .setLegacyParam(5, APP_URI)
+        .setLegacyParam(6, MODULE_ID)
+        .setLegacyParam(7, SERVICE_NAME)
+        .setLegacyParam(8, TOKEN_NAME);
 
-    String actual = cache.createKey(request);
-    assertEquals(key.toString(), actual);
+    assertEquals(key.build(), cache.createKey(request));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void createKeyWithoutSecurityToken() throws Exception {
-    OAuthArguments args = new OAuthArguments(new RequestAuthenticationInfo() {
-
-      public Map<String, String> getAttributes() {
-        return ImmutableMap.of();
-      }
-
-      public AuthType getAuthType() {
-        return AuthType.SIGNED;
-      }
-
-      public Uri getHref() {
-        return DEFAULT_URI;
-      }
-
-      public boolean isSignOwner() {
-        return true;
-      }
-
-      public boolean isSignViewer() {
-        return false;
-      }
-    });
-
+    RequestAuthenticationInfo authInfo = newMockAuthInfo(
+        true /* isSignOwner */,
+        false /* isSignViewer */,
+        ImmutableMap.<String, String>of());
+    replay(authInfo);
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
-        .setOAuthArguments(args);
-
+        .setOAuthArguments(new OAuthArguments(authInfo));
     cache.createKey(request);
   }
 

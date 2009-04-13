@@ -18,15 +18,17 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
+
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-
-import com.google.common.collect.Maps;
+import org.easymock.Capture;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +90,27 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  public void testHttpRequestFillsParentAndContainer() throws Exception {
+    setupProxyRequestMock("www.example.com", URL_ONE);
+    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
+    //HttpRequest req = new HttpRequest(Uri.parse(URL_ONE));
+    HttpResponse resp = new HttpResponseBuilder().setResponse(DATA_ONE.getBytes()).create();
+
+    Capture<HttpRequest> httpRequest = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(httpRequest))).andReturn(resp);
+
+    replay();
+    proxyHandler.fetch(request, recorder);
+    verify();
+
+    // Check that the HttpRequest passed in has all the relevant fields sets
+    assertEquals("default", httpRequest.getValue().getContainer());
+    assertEquals(Uri.parse(URL_ONE), httpRequest.getValue().getUri());
+
+    assertEquals(DATA_ONE, recorder.getResponseAsString());
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
   public void testLockedDomainFailedEmbed() throws Exception {
     setupFailedProxyRequestMock("www.example.com", URL_ONE);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
@@ -101,7 +124,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
   }
 
   public void testHeadersPreserved() throws Exception {
-    // Some headers may be blacklisted. These are ok.
+    // Some headers may be blacklisted. These are OK.
     String url = "http://example.org/file.evil";
     String domain = "example.org";
     String contentType = "text/evil; charset=utf-8";

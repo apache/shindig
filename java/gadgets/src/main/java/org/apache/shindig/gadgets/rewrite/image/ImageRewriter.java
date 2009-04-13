@@ -19,11 +19,11 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import com.google.inject.ImplementedBy;
 
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 /**
- * Rewrite images when it is read from the network
+ * Rewrite an image when it is read from the network
  */
 @ImplementedBy(NoOpImageRewriter.class)
 public interface ImageRewriter {
@@ -31,23 +31,22 @@ public interface ImageRewriter {
   /**
    * Take an HttpResponse object and rewrite it if it contains image data. If
    * it does not contain image data it should return the original content
-   * unchanged
-   * @param uri of original content
-   * @param response to rewrite
-   * @return Rewritten image or original content
+   * unchanged.
+   *
+   * @param request the HTTP request that caused the response
+   * @param response the response to rewrite
+   * @return either a rewritten image if the rewriting has been triggered; or the original
+   *         unchanged content
    */
-  HttpResponse rewrite(Uri uri, HttpResponse response);
+  HttpResponse rewrite(HttpRequest request, HttpResponse response);
 
   /**
-   * Number of original image bytes read 
-   * @return
+   * @return the number of total original image bytes read
    */
   long getOriginalImageBytes();
 
   /**
-   * Number of rewriteen image bytes generated
-   * @return
+   * @return the number of total rewritten image bytes generated
    */
   long getRewrittenImageBytes();
-
 }

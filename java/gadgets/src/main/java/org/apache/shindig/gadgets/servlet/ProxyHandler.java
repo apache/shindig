@@ -18,7 +18,15 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -26,9 +34,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.util.Map;
@@ -43,6 +48,10 @@ import javax.servlet.http.HttpServletResponse;
 @Singleton
 public class ProxyHandler extends ProxyBase {
   private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
+
+  private static final String[] INTEGER_RESIZE_PARAMS = new String[] {
+    PARAM_RESIZE_HEIGHT, PARAM_RESIZE_WIDTH, PARAM_RESIZE_QUALITY
+  };
 
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
@@ -63,21 +72,24 @@ public class ProxyHandler extends ProxyBase {
   private HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
     Uri url = validateUrl(request.getParameter(URL_PARAM));
 
-    HttpRequest req = new HttpRequest(url);
+    HttpRequest req = new HttpRequest(url)
+        .setContainer(getContainer(request));
 
-    req.setContainer(getContainer(request));
+    copySanitizedIntegerParams(request, req);
+
     if (request.getParameter(GADGET_PARAM) != null) {
       req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
     }
 
-    // Allow the rewriter to use an externally forced mime type. This is needed
+    // Allow the rewriter to use an externally forced MIME type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
     req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
 
     req.setIgnoreCache(getIgnoreCache(request));
 
-    req.setSanitizationRequested("1".equals(request.getParameter(SANITIZE_CONTENT_PARAM)));
+    req.setSanitizationRequested(
+        "1".equals(request.getParameter(SANITIZE_CONTENT_PARAM)));
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it
@@ -91,6 +103,15 @@ public class ProxyHandler extends ProxyBase {
     }
 
     return req;
+  }
+
+  private void copySanitizedIntegerParams(HttpServletRequest request, HttpRequest req) {
+    for (String resizeParamName : INTEGER_RESIZE_PARAMS) {
+      if (request.getParameter(resizeParamName) != null) {
+      req.setParam(resizeParamName,
+          NumberUtils.createInteger(request.getParameter(resizeParamName)));
+      }
+    }
   }
 
   @Override

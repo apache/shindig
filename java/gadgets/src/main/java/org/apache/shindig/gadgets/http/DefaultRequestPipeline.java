@@ -57,7 +57,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
 
     if (!request.getIgnoreCache()) {
       HttpResponse cachedResponse = httpCache.getResponse(request);
-      // Note that we dont remove invalidated entries from the cache as we want them to be
+      // Note that we don't remove invalidated entries from the cache as we want them to be
       // available in the event of a backend fetch failure
       if (cachedResponse != null) {
         if (!cachedResponse.isStale()) {
@@ -90,7 +90,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
     }
 
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
-      fetchedResponse = imageRewriter.rewrite(request.getUri(), fetchedResponse);
+      fetchedResponse = imageRewriter.rewrite(request, fetchedResponse);
     }
 
     if (!request.getIgnoreCache() ) {

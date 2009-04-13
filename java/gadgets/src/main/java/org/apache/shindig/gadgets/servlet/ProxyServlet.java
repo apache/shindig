@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Handles open proxy requests (used in rewriting and for urls returned by
+ * Handles open proxy requests (used in rewriting and for URLs returned by
  * gadgets.io.getProxyUrl).
  */
 public class ProxyServlet extends InjectedServlet {

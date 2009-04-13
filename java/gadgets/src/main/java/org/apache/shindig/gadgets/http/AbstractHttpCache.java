@@ -17,11 +17,15 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
+
+import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
-
-import com.google.inject.Inject;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
@@ -33,9 +37,6 @@ import com.google.inject.Inject;
  * of building your own keys from scratch.
  */
 public abstract class AbstractHttpCache implements HttpCache {
-  public static final char KEY_SEPARATOR = ':';
-  public static final String DEFAULT_KEY_VALUE = "0";
-
   private TimeSource clock = new TimeSource();
 
   /**
@@ -116,54 +117,56 @@ public abstract class AbstractHttpCache implements HttpCache {
    * - instance id
    * - oauth service name
    * - oauth token name
+   * - the resize height parameter
+   * - the resize width parameter
+   * - the resize quality parameter
    *
-   * Except for the first two, all of these may be "0" depending on authentication rules. See
-   * individual methods for details.
+   * Except for the first two, all of these may be unset or <code>null</code>,
+   * depending on authentication rules. See individual methods for details.  New cache key items
+   * should always be inserted using {@code CacheKeyBuilder#setParam(String, Object)}.
    */
   public String createKey(HttpRequest request) {
     if ((request.getAuthType() != AuthType.NONE) &&
         (request.getSecurityToken() == null)) {
-      throw new IllegalArgumentException("Cannot sign request without security token: [" + request + ']');
+      throw new IllegalArgumentException(
+          "Cannot sign request without security token: [" + request + ']');
     }
-    
-    String uri = request.getUri().toString();
-    StringBuilder key = new StringBuilder(uri.length() * 2);
-    key.append(request.getUri());
-    key.append(KEY_SEPARATOR);
-    key.append(request.getAuthType());
-    key.append(KEY_SEPARATOR);
-    key.append(getOwnerId(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getViewerId(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getTokenOwner(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getAppUrl(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getInstanceId(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getServiceName(request));
-    key.append(KEY_SEPARATOR);
-    key.append(getTokenName(request));
-    return key.toString();
+
+    CacheKeyBuilder keyBuilder = new CacheKeyBuilder()
+        .setLegacyParam(0, request.getUri())
+        .setLegacyParam(1, request.getAuthType())
+        .setLegacyParam(2, getOwnerId(request))
+        .setLegacyParam(3, getViewerId(request))
+        .setLegacyParam(4, getTokenOwner(request))
+        .setLegacyParam(5, getAppUrl(request))
+        .setLegacyParam(6, getInstanceId(request))
+        .setLegacyParam(7, getServiceName(request))
+        .setLegacyParam(8, getTokenName(request))
+        .setParam("rh", request.getParam(PARAM_RESIZE_HEIGHT))
+        .setParam("rw", request.getParam(PARAM_RESIZE_WIDTH))
+        .setParam("rq", request.getParam(PARAM_RESIZE_QUALITY));
+
+    return keyBuilder.build();
   }
 
   protected static String getOwnerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignOwner()) {
-      return request.getSecurityToken().getOwnerId();
+      String ownerId = request.getSecurityToken().getOwnerId();
+      return ownerId == null ? "" : ownerId;
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getViewerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignViewer()) {
-      return request.getSecurityToken().getViewerId();
+      String viewerId = request.getSecurityToken().getViewerId();
+      return viewerId == null ? "" : viewerId;
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getTokenOwner(HttpRequest request) {
@@ -175,7 +178,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return st.getOwnerId();
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getAppUrl(HttpRequest request) {
@@ -183,7 +186,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return request.getSecurityToken().getAppUrl();
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getInstanceId(HttpRequest request) {
@@ -191,7 +194,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return Long.toString(request.getSecurityToken().getModuleId());
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getServiceName(HttpRequest request) {
@@ -199,7 +202,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return request.getOAuthArguments().getServiceName();
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   protected static String getTokenName(HttpRequest request) {
@@ -207,7 +210,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       return request.getOAuthArguments().getTokenName();
     }
     // Requests that don't use authentication can share the result.
-    return DEFAULT_KEY_VALUE;
+    return null;
   }
 
   /**

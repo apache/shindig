@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
@@ -50,6 +51,8 @@ public class HttpRequest {
   private String method = "GET";
   private Uri uri;
   private final Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+  private final Map<String, String> params = Maps.newHashMap();
+
   private byte[] postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
 
   // TODO: It might be useful to refactor these into a simple map of objects and use sub classes
@@ -385,6 +388,26 @@ public class HttpRequest {
     return gadget;
   }
 
+  public String getParam(String paramName) {
+    return params.get(paramName);
+  }
+
+  public Integer getParamAsInteger(String paramName) {
+    String value = params.get(paramName);
+    if (value == null) {
+      return null;
+    }
+    return NumberUtils.createInteger(value);
+  }
+
+  public <T> void setParam(String paramName, T paramValue) {
+    params.put(paramName, String.valueOf(paramValue));
+  }
+
+  public Map<String, String> getParams() {
+    return params;
+  }
+
   /**
    * @return The container responsible for making this request.
    */
@@ -463,6 +486,8 @@ public class HttpRequest {
     }
     return false;
   }
+
+
 
 }
 
