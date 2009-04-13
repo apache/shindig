@@ -175,31 +175,14 @@
       <resource>
         <targetPath>features</targetPath>
         <directory>${basedir}/src/main/javascript/features</directory>
-        <excludes>
-          <exclude>pom.xml</exclude>
-          <!-- SVN ignore -->
-          <exclude>target/**</exclude>
-          <exclude>work</exclude>
-          <exclude>dojo</exclude>
-          <exclude>*.iws</exclude>
-          <exclude>*.ipr</exclude>
-          <exclude>*.iml</exclude>
-          <exclude>derby.log</exclude>
-          <exclude>maven.log</exclude>
-          <exclude>build.xml</exclude>
-          <exclude>build-dependency.xml</exclude>
-          <exclude>velocity.log*</exclude>
-          <exclude>junit*.properties</exclude>
-          <exclude>surefire*.properties</exclude>
-          <exclude>.project</exclude>
-          <exclude>.classpath</exclude>
-          <exclude>.settings/**</exclude>
-          <exclude>.deployables</exclude>
-          <exclude>.wtpmodules</exclude>
-          <exclude>.externalToolBuilders/**</exclude>
-        </excludes>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/test/javascript/features</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <profiles>
