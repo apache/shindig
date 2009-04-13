@@ -36,7 +36,6 @@ gadgets.window = gadgets.window || {};
 (function() {
 
   var oldHeight;
-  var oldHeight2;
 
   /**
    * Detects the inner dimensions of a frame.
@@ -131,31 +130,15 @@ gadgets.window = gadgets.window || {};
     }
 
     // Only make the IFPC call if height has changed
-    if (newHeight != oldHeight && (newHeight != oldHeight2 || newHeight > oldHeight)) {
-      oldHeight2 = oldHeight;
+    if (newHeight !== oldHeight) {
       oldHeight = newHeight;
       gadgets.rpc.call(null, "resize_iframe", null, newHeight);
-    }
-
-    gadgets.window.opt_height = opt_height;
-
-    if (gadgets.window.resizeListenerIsAttached) {
-      return;
-    }
-    gadgets.window.resizeListenerIsAttached = true;
-
-    var resizeAgain = function () {
-        gadgets.window.adjustHeight(gadgets.window.opt_height);
-    };
-
-    if (window.addEventListener) {
-        window.addEventListener("resize", resizeAgain, false);
-    }
-    else if (window.attachEvent) {
-        window.attachEvent("resize", resizeAgain);
     }
   };
 }());
 
 // Alias for legacy code
 var _IG_AdjustIFrameHeight = gadgets.window.adjustHeight;
+
+// TODO Attach gadgets.window.adjustHeight to the onresize event
+
