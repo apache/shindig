@@ -881,7 +881,13 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     getRelayUrl: function(targetId) {
-      return relayUrl[targetId];
+      var url = relayUrl[targetId];
+      // Some RPC methods (wpm, for one) are unhappy with schemeless URLs.
+      if (url.indexOf('//') == 0) {
+        url = document.location.protocol + url;
+      }
+      
+      return url;
     },
 
     /**
