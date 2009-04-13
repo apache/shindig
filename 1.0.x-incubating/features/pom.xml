@@ -41,6 +41,19 @@
   </scm>
 
   <build>
+    <resources>
+      <resource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/main/javascript/features</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/test/javascript/features</directory>
+      </testResource>
+    </testResources>
+
     <pluginManagement>
       <!-- set versions of common plugins for reproducibility, ordered alphabetically by owner -->
       <plugins>
@@ -66,10 +79,10 @@
         <executions>
           <execution>
             <configuration>
-              <sourceDirectory>${basedir}</sourceDirectory>
+              <sourceDirectory>${basedir}/src/main/javascript/features</sourceDirectory>
               <sources>
-                <source>mocks/env.js</source>
-                <source>mocks/xhr.js</source>
+                <source>../../../../src/test/javascript/features/mocks/env.js</source>
+                <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
                 <source>core/config.js</source>
                 <source>core/json.js</source>
                 <source>core/auth.js</source>
@@ -103,23 +116,14 @@
                 <source>opensocial-rest/restfulcontainer.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
               </sources>
-              <testSourceDirectory>${basedir}</testSourceDirectory>
+              <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>
                 <testSuite>
-                  <name>GadgetsJSAPITests</name>
+                  <name>FeatureTests</name>
                   <type>TESTCASES</type>
                   <includes>
-                    <include>core/*test.js</include>
-                    <include>core.io/*test.js</include>
-                    <include>views/*test.js</include>
-                  </includes>
-                </testSuite>
-                <testSuite>
-                  <name>OpenSocialJsTests</name>
-                  <type>TESTCASES</type>
-                  <includes>
-                    <include>opensocial-reference/*test.js</include>
-                    <include>opensocial-base/*test.js</include>
+                    <include>mocks/*.js</include>
+                    <include>**/*test.js</include>
                   </includes>
                 </testSuite>
               </testSuites>
@@ -160,13 +164,7 @@
         <configuration>
           <suffix>.opt</suffix>
           <excludes>
-            <exclude>target/**</exclude>
-            <!-- don't bother with other file types. -->
             <exclude>**/*.xml</exclude>
-            <exclude>**/*.html</exclude>
-            <exclude>**/*.gif</exclude>
-            <exclude>**/*.jpeg</exclude>
-            <exclude>**/*.png</exclude>
             <!-- Caja is already minified -->
             <exclude>**/caja/*.js</exclude>
           </excludes>
@@ -175,35 +173,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <targetPath>features</targetPath>
-        <directory>${basedir}</directory>
-        <excludes>
-          <exclude>pom.xml</exclude>
-          <!-- SVN ignore -->
-          <exclude>target/**</exclude>
-          <exclude>work</exclude>
-          <exclude>dojo</exclude>
-          <exclude>*.iws</exclude>
-          <exclude>*.ipr</exclude>
-          <exclude>*.iml</exclude>
-          <exclude>derby.log</exclude>
-          <exclude>maven.log</exclude>
-          <exclude>build.xml</exclude>
-          <exclude>build-dependency.xml</exclude>
-          <exclude>velocity.log*</exclude>
-          <exclude>junit*.properties</exclude>
-          <exclude>surefire*.properties</exclude>
-          <exclude>.project</exclude>
-          <exclude>.classpath</exclude>
-          <exclude>.settings/**</exclude>
-          <exclude>.deployables</exclude>
-          <exclude>.wtpmodules</exclude>
-          <exclude>.externalToolBuilders/**</exclude>
-        </excludes>
-      </resource>
-    </resources>
   </build>
 
   <dependencies />
