@@ -32,6 +32,11 @@ under the License.
       <p>There is a JPA implementation of SPI in our SVN <a
           href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples"
           >/java/samples</a></p>
+      <p>You could also have a look to the <a
+          href="https://issues.apache.org/jira/browse/SHINDIG-204">SHINDIG-204</a> issue
+        which provides an other (old) implementation and the <a
+          href="https://socialsite.dev.java.net/">Socialsite project</a>which implements
+        the persistence for social data via JPA.</p>
     </section>
     <section name="Resources">
       <ul>

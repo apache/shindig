@@ -314,6 +314,10 @@ Go Further: Building a Container Supporting OpenSocial
 
   This is your first overview of the APIs that deals with people and relationships.
 
+  To go further, you could also try the opensocialdevapp {{http://osda.appspot.com/gadget/osda-0.8.xml}}, for instance:
+
+  {{http://localhost:8080/gadgets/ifr?url=http://osda.appspot.com/gadget/osda-0.8.xml&view=canvas}}
+
 * Create Your Own OpenSocial Back-end
 
   Shindig implements
