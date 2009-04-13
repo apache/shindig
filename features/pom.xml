@@ -42,6 +42,19 @@
   </scm>
 
   <build>
+    <resources>
+      <resource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/main/javascript/features</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <targetPath>features</targetPath>
+        <directory>${basedir}/src/test/javascript/features</directory>
+      </testResource>
+    </testResources>
+
     <pluginManagement>
       <!-- set versions of common plugins for reproducibility, ordered alphabetically by owner -->
       <plugins>
@@ -171,18 +184,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <targetPath>features</targetPath>
-        <directory>${basedir}/src/main/javascript/features</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <targetPath>features</targetPath>
-        <directory>${basedir}/src/test/javascript/features</directory>
-      </testResource>
-    </testResources>
   </build>
 
   <profiles>
