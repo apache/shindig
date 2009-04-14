@@ -111,7 +111,8 @@ class GadgetHtmlRenderer extends GadgetRenderer {
     $script .= $this->appendPreloads($this->gadget);
 
     $scriptNode = $doc->createElement('script');
-    $scriptNode->nodeValue = $script;
+    $scriptNode->setAttribute('type', 'text/javascript');
+    $scriptNode->nodeValue = str_replace('&', '&amp;', $script);
     $node->appendChild($scriptNode);
   }
 
