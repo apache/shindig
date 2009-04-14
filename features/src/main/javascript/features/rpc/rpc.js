@@ -276,7 +276,8 @@ gadgets.rpc = function() {
       // won't see this for a real Javascript object.
       if (typeof window[NIX_GET_WRAPPER] !== 'unknown') {
         window[NIX_HANDLE_MESSAGE] = function(data) {
-          process(gadgets.json.parse(data));
+          window.setTimeout(
+              function() { process(gadgets.json.parse(data)) }, 0);
         };
 
         window[NIX_CREATE_CHANNEL] = function(name, channel, token) {
