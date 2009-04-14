@@ -76,7 +76,8 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     documentProvider = injector.getInstance(DOMImplementation.class);
     parser = injector.getInstance(SocialMarkupHtmlParser.class);
     featureRegistry = mock(GadgetFeatureRegistry.class);
-    handler = new FlashTagHandler(new BeanJsonConverter(injector), featureRegistry);
+    handler = new FlashTagHandler(new BeanJsonConverter(injector), featureRegistry,
+        "http://example.org/ns");
     result = parser.parseDom("");
 
     EasyMock.expect(gadget.getContext()).andReturn(gadgetContext).anyTimes();
@@ -98,10 +99,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   public void testBasicRender() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
-            + "<os:xFlash swf='http://www.example.org/test.swf'>"
+            + "<osx:Flash swf='http://www.example.org/test.swf'>"
             + "Click Me"
-          + "</os:xFlash></script>");
-    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("os:xflash"))
+          + "</osx:Flash></script>");
+    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("osx:flash"))
         .get(0);
 
     expectSecurityToken();
@@ -123,10 +124,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   public void testSanitizedRender() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
-            + "<os:xFlash swf='http://www.example.org/test.swf'>"
+            + "<osx:Flash swf='http://www.example.org/test.swf'>"
             + "Click Me"
-          + "</os:xFlash></script>");
-    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("os:xflash"))
+          + "</osx:Flash></script>");
+    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("osx:flash"))
         .get(0);
 
     expectSecurityToken();
@@ -149,10 +150,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   public void testSanitizedRenderClickToPlay() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
-            + "<os:xFlash swf='http://www.example.org/test.swf' play='onclick'>"
+            + "<osx:flash swf='http://www.example.org/test.swf' play='onclick'>"
             + "Click Me"
-          + "</os:xFlash></script>");
-    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("os:xflash"))
+          + "</osx:flash></script>");
+    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("osx:flash"))
         .get(0);
 
     expectSecurityToken();
@@ -224,10 +225,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   public void testConfigBindingFailure() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
-            + "<os:xFlash swf='http://www.example.org/test.swf' play='junk'>"
+            + "<osx:flash swf='http://www.example.org/test.swf' play='junk'>"
             + "Click Me"
-          + "</os:xFlash></script>");
-    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("os:xflash"))
+          + "</osx:flash></script>");
+    Element tag = DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("osx:flash"))
         .get(0);
     handler.process(result.getDocumentElement().getFirstChild().getNextSibling(), tag, processor);
     XPathWrapper wrapper = new XPathWrapper(result);

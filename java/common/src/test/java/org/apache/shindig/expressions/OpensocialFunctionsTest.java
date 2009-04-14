@@ -42,13 +42,13 @@ public class OpensocialFunctionsTest extends TestCase {
   
   public void testParseJsonObject() {
     ValueExpression testParseJsonObject =
-      expressions.parse("${os:xParseJson('{a: 1}').a}", Integer.class);
+      expressions.parse("${osx:parseJson('{a: 1}').a}", Integer.class);
     assertEquals(1, testParseJsonObject.getValue(context));
   }
 
   public void testParseJsonArray() {
     ValueExpression testParseJsonArray =
-      expressions.parse("${os:xParseJson('[1, 2, 3]')[1]}", Integer.class);
+      expressions.parse("${osx:parseJson('[1, 2, 3]')[1]}", Integer.class);
     assertEquals(2, testParseJsonArray.getValue(context));
   }
   
@@ -58,7 +58,7 @@ public class OpensocialFunctionsTest extends TestCase {
     vars.put("encoded", encoded);
     
     ValueExpression testDecodeBase64 =
-      expressions.parse("${os:xDecodeBase64(encoded)}", String.class);
+      expressions.parse("${osx:decodeBase64(encoded)}", String.class);
     assertEquals("12345", testDecodeBase64.getValue(context));
   }
 
@@ -67,7 +67,7 @@ public class OpensocialFunctionsTest extends TestCase {
     vars.put("test", test);
 
     ValueExpression testUrlEncode =
-      expressions.parse("${os:xUrlEncode(test)}", String.class);
+      expressions.parse("${osx:urlEncode(test)}", String.class);
     assertEquals("He+He", testUrlEncode.getValue(context));
   }
 
@@ -76,7 +76,7 @@ public class OpensocialFunctionsTest extends TestCase {
     vars.put("encoded", test);
 
     ValueExpression testUrlDecode =
-      expressions.parse("${os:xUrlDecode(encoded)}", String.class);
+      expressions.parse("${osx:urlDecode(encoded)}", String.class);
     assertEquals("He He", testUrlDecode.getValue(context));
   }
 }

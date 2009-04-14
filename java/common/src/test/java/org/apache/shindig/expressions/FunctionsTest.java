@@ -57,7 +57,7 @@ public class FunctionsTest extends TestCase {
     Injector injector = Guice.createInjector();
     functions = injector.getInstance(Functions.class);
     
-    Method toJson = functions.resolveFunction("os", "xParseJson");
+    Method toJson = functions.resolveFunction("osx", "parseJson");
     Object o = toJson.invoke(null, "{a : 1}");
     assertTrue(o instanceof JSONObject);
     assertEquals(1, ((JSONObject) o).getInt("a"));

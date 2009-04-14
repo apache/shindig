@@ -39,7 +39,7 @@ public class OpensocialFunctions {
   /**
    * Convert a string to a JSON Object or JSON Array.
    */
-  @Functions.Expose(prefix = "os", names = {"xParseJson"})
+  @Functions.Expose(prefix = "osx", names = {"parseJson"})
   public static Object parseJson(String text) {
     if ((text == null) || "".equals(text)) {
       return null;
@@ -59,7 +59,7 @@ public class OpensocialFunctions {
   /**
    * Decode a base-64 encoded string.
    */
-  @Functions.Expose(prefix = "os", names = {"xDecodeBase64"})
+  @Functions.Expose(prefix = "osx", names = {"decodeBase64"})
   public static String decodeBase64(String text) {
     try {
       // TODO: allow a charset to be passed in?
@@ -74,7 +74,7 @@ public class OpensocialFunctions {
   /**
    * Form encode a string
    */
-  @Functions.Expose(prefix = "os", names = {"xUrlEncode"})
+  @Functions.Expose(prefix = "osx", names = {"urlEncode"})
   public static String formEncode(String text) {
     return Utf8UrlCoder.encode(text);
   }
@@ -84,7 +84,7 @@ public class OpensocialFunctions {
    * @param text
    * @return
    */
-  @Functions.Expose(prefix = "os", names = {"xUrlDecode"})
+  @Functions.Expose(prefix = "osx", names = {"urlDecode"})
   public static String formDecode(String text) {
     return Utf8UrlCoder.decode(text);
   }

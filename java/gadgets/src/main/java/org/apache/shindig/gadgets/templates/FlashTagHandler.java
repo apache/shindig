@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.templates;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -53,7 +54,7 @@ public class FlashTagHandler extends AbstractTagHandler {
 
   static final String FLASH_MIN_VER = "9.0.115";
   static final String SWFOBJECT = "swfobject";
-  static final String TAG_NAME = "xFlash";
+  static final String TAG_NAME = "Flash";
 
   private final BeanJsonConverter beanConverter;
   private final GadgetFeatureRegistry featureRegistry;
@@ -65,8 +66,9 @@ public class FlashTagHandler extends AbstractTagHandler {
   private static final String ALT_CONTENT_PREFIX = "os_xFlash_alt_";
 
   @Inject
-  public FlashTagHandler(BeanJsonConverter beanConverter, GadgetFeatureRegistry featureRegistry) {
-    super(TagHandler.OPENSOCIAL_NAMESPACE, TAG_NAME);
+  public FlashTagHandler(BeanJsonConverter beanConverter, GadgetFeatureRegistry featureRegistry,
+      @Named("shindig.template-rewrite.extension-tag-namespace") String namespace) {
+    super(namespace, TAG_NAME);
     this.beanConverter = beanConverter;
     this.featureRegistry = featureRegistry;
   }
