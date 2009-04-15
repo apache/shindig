@@ -56,7 +56,7 @@
         <exclude>**/.settings/**</exclude>
         <exclude>**/.externalToolBuilders/**</exclude>
         <exclude>**/maven-eclipse.xml</exclude>
-        <exclude>**/.deployables</**/exclude>
+        <exclude>**/.deployables/**</exclude>
         <exclude>**/.wtpmodules/**</exclude>
         <!-- maven -->
         <exclude>**/pom.xml</exclude>
@@ -84,7 +84,7 @@
         <exclude>**/.settings/**</exclude>
         <exclude>**/.externalToolBuilders/**</exclude>
         <exclude>**/maven-eclipse.xml</exclude>
-        <exclude>**/.deployables</**/exclude>
+        <exclude>**/.deployables/**</exclude>
         <exclude>**/.wtpmodules/**</exclude>
         <!-- maven -->
         <exclude>**/pom.xml</exclude>
