@@ -51,7 +51,7 @@ import com.google.inject.Inject;
  * - Moving all style into head and converting @imports into links
  * - Proxying referred content of images and embeds
  */
-public class HTMLContentRewriter implements ContentRewriter {
+public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
   private final static int MAX_URL_LENGTH = 1500;
   
   private final static String JS_MIME_TYPE = "text/javascript";
@@ -64,48 +64,51 @@ public class HTMLContentRewriter implements ContentRewriter {
   );
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final CSSContentRewriter cssRewriter;
+  private final CssRequestRewriter cssRewriter;
   private final ContentRewriterUris rewriterUris;
 
   @Inject
   public HTMLContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
       ContentRewriterUris rewriterUris,
-      CSSContentRewriter cssRewriter) {
+      CssRequestRewriter cssRewriter) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
     this.rewriterUris = rewriterUris;
     this.cssRewriter = cssRewriter;
   }
 
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+  public boolean rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     if (RewriterUtils.isHtml(request, original)) {
       ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
       return rewriteImpl(feature, request.getGadget(), request.getUri(), content,
           request.getContainer());
     }
-    return null;
+    
+    return false;
   }
 
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) {
     // Don't rewrite urls if caja is enabled since caja will inline them anyway
     if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
         "1".equals(gadget.getContext().getParameter("caja"))) {
-      return null;
+      return;
     }
+    
     ContentRewriterFeature feature = rewriterFeatureFactory.get(gadget.getSpec());
     Uri contentBase = gadget.getSpec().getUrl();
     View view = gadget.getCurrentView();
     if (view != null && view.getHref() != null) {
       contentBase = view.getHref();
     }
-    return rewriteImpl(feature, gadget.getSpec().getUrl(), contentBase, content,
+    
+    rewriteImpl(feature, gadget.getSpec().getUrl(), contentBase, content,
         gadget.getContext().getContainer());
   }
 
-  RewriterResults rewriteImpl(ContentRewriterFeature feature, Uri gadgetUri,
+  boolean rewriteImpl(ContentRewriterFeature feature, Uri gadgetUri,
                                         Uri contentBase, MutableContent content, String container) {
     if (!feature.isRewriteEnabled() || content.getDocument() == null) {
-      return null;
+      return false;
     }
 
     // Get ALL interesting tags
@@ -131,7 +134,7 @@ public class HTMLContentRewriter implements ContentRewriter {
       MutableContent.notifyEdit(content.getDocument());
     }
 
-    return RewriterResults.cacheableIndefinitely();
+    return mutated;
   }
 
   protected boolean rewriteStyleTags(Element head, List<Element> elementList,

@@ -22,8 +22,6 @@ import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.templates.MessageELResolver;
@@ -55,7 +53,7 @@ import com.google.inject.Provider;
  * Only templates without the @name and @tag attributes are processed
  * automatically.
  */
-public class TemplateRewriter implements ContentRewriter {
+public class TemplateRewriter implements GadgetRewriter {
 
   public final static Set<String> TAGS = ImmutableSet.of("script");
 
@@ -81,24 +79,18 @@ public class TemplateRewriter implements ContentRewriter {
     this.baseTagRegistry = baseTagRegistry;
   }
 
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
     if (f != null && isServerTemplatingEnabled(f)) {
       try {
-        return rewriteImpl(gadget, content);
+        rewriteImpl(gadget, content);
       } catch (GadgetException ge) {
         // TODO: Rewriter interface needs to be modified to handle GadgetException or
         // RewriterException or something along those lines.
         throw new RuntimeException(ge);
       }
     }
-    return null;
   }
 
   /**
@@ -111,7 +103,7 @@ public class TemplateRewriter implements ContentRewriter {
     return (!"true".equalsIgnoreCase(f.getParams().get(DISABLE_AUTO_PROCESSING_PARAM)));
   }
 
-  private RewriterResults rewriteImpl(Gadget gadget, MutableContent content)
+  private void rewriteImpl(Gadget gadget, MutableContent content)
       throws GadgetException {
     List<Element> templates = ImmutableList.copyOf(
       Iterables.filter(
@@ -124,7 +116,7 @@ public class TemplateRewriter implements ContentRewriter {
     
     TagRegistry registry = registerCustomTags(templates);
     
-    return processInlineTemplates(gadget, content, templates, registry);
+    processInlineTemplates(gadget, content, templates, registry);
   }
   
   /**
@@ -158,7 +150,7 @@ public class TemplateRewriter implements ContentRewriter {
     return baseTagRegistry.addHandlers(handlers.build());
   }
   
-  private RewriterResults processInlineTemplates(Gadget gadget, MutableContent content,
+  private void processInlineTemplates(Gadget gadget, MutableContent content,
       List<Element> allTemplates, TagRegistry registry) throws GadgetException {
     Map<String, Object> pipelinedData = content.getPipelinedData();
 
@@ -208,8 +200,6 @@ public class TemplateRewriter implements ContentRewriter {
     if (!needsFeature) {
       gadget.removeFeature("opensocial-templates");
     }
-    
-    return RewriterResults.notCacheable();
   }
 
   /**

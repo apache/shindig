@@ -18,23 +18,16 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.sanselan.ImageFormat;
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -43,7 +36,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.UserDataHandler;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,8 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -70,10 +60,7 @@ import com.google.inject.Inject;
  * Generally used in conjunction with a gadget that gets its dynamic behavior externally (proxied
  * rendering, OSML, etc.)
  */
-public class SanitizedRenderingContentRewriter implements ContentRewriter {
-  private static final Logger logger =
-      Logger.getLogger(SanitizedRenderingContentRewriter.class.getName());
-
+public class SanitizingGadgetRewriter implements GadgetRewriter {
   private static final Set<String> URI_ATTRIBUTES = ImmutableSet.of("href", "src");
 
   /** Key stored as element user-data to bypass sanitization */
@@ -124,7 +111,7 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
   private final ContentRewriterUris rewriterUris;
 
   @Inject
-  public SanitizedRenderingContentRewriter(@AllowedTags Set<String> allowedTags,
+  public SanitizingGadgetRewriter(@AllowedTags Set<String> allowedTags,
       @AllowedAttributes Set<String> allowedAttributes,
       ContentRewriterFeatureFactory rewriterFeatureFactory,
       ContentRewriterUris rewriterUris,
@@ -136,29 +123,8 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
   }
 
-  public RewriterResults rewrite(HttpRequest request, HttpResponse resp, MutableContent content) {
-    // Content fetched through the proxy can stipulate that it must be sanitized.
-    if (request.isSanitizationRequested()) {
-      ContentRewriterFeature rewriterFeature =
-          rewriterFeatureFactory.createRewriteAllFeature(request.getCacheTtl());
-      if (request.getRewriteMimeType().equalsIgnoreCase("text/css")) {
-        return rewriteProxiedCss(request, resp, content, rewriterFeature);
-      } else if (request.getRewriteMimeType().toLowerCase().startsWith("image/")) {
-        return rewriteProxiedImage(request, resp, content);
-      } else {
-        logger.log(Level.WARNING, "Request to sanitize unknown content type "
-            + request.getRewriteMimeType()
-            + " for " + request.getUri().toString());
-        content.setContent("");
-        return RewriterResults.notCacheable();
-      }
-    } else {
-      // No Op
-      return null;
-    }
-  }
 
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) {
     if (gadget.sanitizeOutput()) {
       boolean sanitized = false;
       try {
@@ -171,69 +137,6 @@ public class SanitizedRenderingContentRewriter implements ContentRewriter {
           content.setContent("");
         }
       }
-    }
-    return RewriterResults.notCacheable();
-  }
-
-  /**
-   * We don't actually rewrite the image we just ensure that it is in fact a valid
-   * and known image type.
-   */
-  private RewriterResults rewriteProxiedImage(HttpRequest request, HttpResponse resp,
-      MutableContent content) {
-    boolean imageIsSafe = false;
-    try {
-      String contentType = resp.getHeader("Content-Type");
-      if (contentType == null || contentType.toLowerCase().startsWith("image/")) {
-        // Unspecified or unknown image mime type.
-        try {
-          ImageFormat imageFormat = Sanselan
-              .guessFormat(new ByteSourceInputStream(resp.getResponse(),
-                  request.getUri().getPath()));
-          if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
-            logger.log(Level.INFO, "Unable to sanitize unknown image type "
-                + request.getUri().toString());
-            return RewriterResults.notCacheable();
-          }
-          imageIsSafe = true;
-          // Return null to indicate that no rewriting occurred
-          return null;
-        } catch (IOException ioe) {
-          throw new RuntimeException(ioe);
-        } catch (ImageReadException ire) {
-          throw new RuntimeException(ire);
-        }
-      } else {
-        return RewriterResults.notCacheable();
-      }
-    } finally {
-      if (!imageIsSafe) {
-        content.setContent("");
-      }
-    }
-  }
-
-  /**
-   * Sanitize a CSS file.
-   */
-  private RewriterResults rewriteProxiedCss(HttpRequest request, HttpResponse response,
-      MutableContent content, ContentRewriterFeature rewriterFeature) {
-    String sanitized = "";
-    try {
-      String contentType = response.getHeader("Content-Type");
-      if (contentType == null || contentType.toLowerCase().startsWith("text/")) {
-        String proxyBaseNoGadget = rewriterUris.getProxyBase(request.getContainer());
-        SanitizingProxyingLinkRewriter cssLinkRewriter = new SanitizingProxyingLinkRewriter(
-            request.getGadget(), rewriterFeature, proxyBaseNoGadget, "text/css");
-        sanitized = cssSanitizer.sanitize(content.getContent(), request.getUri(), cssLinkRewriter);
-        return RewriterResults.cacheable(response.getCacheTtl());
-      } else {
-        return RewriterResults.notCacheable();
-      }
-    } finally {
-      // Set sanitized content in finally to ensure it is always cleared in
-      // the case of errors
-      content.setContent(sanitized);
     }
   }
 

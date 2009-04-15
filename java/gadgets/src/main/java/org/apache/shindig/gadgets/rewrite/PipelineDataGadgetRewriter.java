@@ -21,8 +21,6 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
@@ -45,26 +43,22 @@ import com.google.inject.Inject;
  * 
  * This rewriter cannot be used currently without the SocialMarkupHtmlParser.
  */
-public class PipelineDataContentRewriter implements ContentRewriter {
+public class PipelineDataGadgetRewriter implements GadgetRewriter {
 
   private static final Logger logger = Logger.getLogger(
-      PipelineDataContentRewriter.class.getName());
+      PipelineDataGadgetRewriter.class.getName());
   
   private final PipelineExecutor executor;
 
   @Inject
-  public PipelineDataContentRewriter(PipelineExecutor executor) {
+  public PipelineDataGadgetRewriter(PipelineExecutor executor) {
     this.executor = executor;
   }
   
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original, MutableContent content) {
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) {
     // Only bother for gadgets using the opensocial-data feature
     if (!gadget.getSpec().getModulePrefs().getFeatures().containsKey("opensocial-data")) {
-      return null;
+      return;
     }
     
     Document doc = content.getDocument();
@@ -92,7 +86,7 @@ public class PipelineDataContentRewriter implements ContentRewriter {
     }
     
     if (pipelineNodes.isEmpty()) {
-      return null;
+      return;
     }
     
     PipelineExecutor.Results results =
@@ -136,8 +130,6 @@ public class PipelineDataContentRewriter implements ContentRewriter {
       gadget.addFeature("opensocial-data-context");
       gadget.removeFeature("opensocial-data");
     }
-    
-    return RewriterResults.notCacheable();
   }
   
   static class PipelineState {

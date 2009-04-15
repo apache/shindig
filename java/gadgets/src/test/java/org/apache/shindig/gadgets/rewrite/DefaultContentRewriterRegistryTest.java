@@ -22,16 +22,12 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -39,34 +35,16 @@ import com.google.common.collect.Lists;
 public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private List<CaptureRewriter> rewriters;
-  private List<ContentRewriter> contentRewriters;
-  private ContentRewriterRegistry registry;
+  private List<RequestRewriter> contentRewriters;
+  private RequestRewriterRegistry registry;
 
   @Before
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    rewriters = Arrays.asList(new CaptureRewriter(), new CaptureRewriter());
-    contentRewriters = Lists.<ContentRewriter>newArrayList(rewriters);
-    registry = new DefaultContentRewriterRegistry(contentRewriters, parser);
-  }
-
-  @Test
-  public void testRewriteGadget() throws Exception {
-    String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
-    GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget()
-        .setContext(context)
-        .setSpec(spec);
-
-    String rewritten = registry.rewriteGadget(gadget, body);
-
-    assertTrue("First rewriter not invoked.", rewriters.get(0).viewWasRewritten());
-    assertTrue("Second rewriter not invoked.", rewriters.get(1).viewWasRewritten());
-
-    assertEquals(body, rewritten);
+    rewriters = Lists.newArrayList(new CaptureRewriter(), new CaptureRewriter());
+    contentRewriters = Lists.<RequestRewriter>newArrayList(rewriters);
+    registry = new DefaultRequestRewriterRegistry(contentRewriters, parser);
   }
 
   @Test
@@ -83,36 +61,18 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
     assertEquals(response, rewritten);
   }
 
-  @Test
-  public void testRewriteView() throws Exception {
-    String body = "Hello, world";
-    String xml = "<Module><ModulePrefs title=''/><Content>" + body + "</Content></Module>";
-    GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
-    GadgetContext context = new GadgetContext();
-    Gadget gadget = new Gadget()
-        .setContext(context)
-        .setSpec(spec);
-
-    String rewritten = registry.rewriteGadget(gadget, spec.getView("default"));
-
-    assertTrue("First rewriter invoked.", rewriters.get(0).viewWasRewritten());
-    assertTrue("Second rewriter invoked.", rewriters.get(1).viewWasRewritten());
-
-    assertEquals(body, rewritten);
-  }
-
   /**
    * This test ensures that we dont call HttpRespose.getResponseAsString for content types
    * that are not rewriteable by the default set of content rewriters. This is important
-   * from a performance and content consistency standpoint. Because HttpResonse is final
-   * we test that no new
+   * from a performance and content consistency standpoint. Because HttpResponse is final
+   * we test that no new response object was created.
    */
   @Test
-  public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() {
-    List<ContentRewriter> rewriters = Lists.newArrayList();
+  public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() throws Exception {
+    List<RequestRewriter> rewriters = Lists.newArrayList();
     rewriters.add(injector.getInstance(HTMLContentRewriter.class));
-    rewriters.add(injector.getInstance(CSSContentRewriter.class));
-    registry = new DefaultContentRewriterRegistry(rewriters, parser);
+    rewriters.add(injector.getInstance(CssRequestRewriter.class));
+    registry = new DefaultRequestRewriterRegistry(rewriters, parser);
 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andStubReturn("unknown");

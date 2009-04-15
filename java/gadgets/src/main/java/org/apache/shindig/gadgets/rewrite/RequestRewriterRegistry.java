@@ -17,36 +17,16 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.inject.ImplementedBy;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.spec.View;
+
+import com.google.inject.ImplementedBy;
 
 /**
- * Performs rewriting operations by invoking one or more ContentRewriters.
+ * Performs rewriting operations by invoking one or more {@link RequestRewriter}s.
  */
-@ImplementedBy(DefaultContentRewriterRegistry.class)
-public interface ContentRewriterRegistry {
-
-  /**
-   * Rewrites a {@code Gadget} object given the registered rewriters.
-   * @param gadget Gadget object to use as a rewriting context.
-   * @param currentView The gadget view to rewrite
-   * @return The rewritten content.
-   * @throws GadgetException Potentially passed through from rewriters
-   */
-  String rewriteGadget(Gadget gadget, View currentView) throws GadgetException;
-
-  /**
-   * Rewrites a {@code Gadget} object given the registered rewriters.
-   * @param gadget Gadget object to use as a rewriting context.
-   * @param content The content to be rewritten.
-   * @return The rewritten content.
-   * @throws GadgetException Potentially passed through from rewriters
-   */
-  String rewriteGadget(Gadget gadget, String content) throws GadgetException;
+@ImplementedBy(DefaultRequestRewriterRegistry.class)
+public interface RequestRewriterRegistry {
 
   /**
    * Rewrites an {@code HttpResponse} object with the given request as context,
@@ -55,5 +35,6 @@ public interface ContentRewriterRegistry {
    * @param resp Original response object.
    * @return Rewritten response object, or resp if not modified.
    */
-  HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp);
+  HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
+    throws RewritingException;
 }

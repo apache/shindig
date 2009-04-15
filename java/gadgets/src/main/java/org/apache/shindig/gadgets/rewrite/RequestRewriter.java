@@ -18,32 +18,22 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 /**
- * Utility rewriter for testing.
+ * Interface for rewriters that modify request content.
  */
-public class CaptureRewriter implements RequestRewriter, GadgetRewriter {
-  private boolean rewroteView = false;
-  private boolean rewroteResponse = false;
+public interface RequestRewriter {
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
-    rewroteResponse = true;
-    return true;
-  }
-
-  public boolean responseWasRewritten() {
-    return rewroteResponse;
-  }
-
-  public void rewrite(Gadget gadget, MutableContent content) {
-    rewroteView = true;
-  }
-
-  public boolean viewWasRewritten() {
-    return rewroteView;
-  }
+  /**
+   * Rewrite the original content located at source.
+   *
+   * @param request Originating request, as context.
+   * @param original Original HTTP response, for context.
+   * @param content Original content.
+   * @return true if any rewriting occurred
+   */
+  boolean rewrite(HttpRequest request, HttpResponse original, MutableContent content)
+      throws RewritingException;
 }

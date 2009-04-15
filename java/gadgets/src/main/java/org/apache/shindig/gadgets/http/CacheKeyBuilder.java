@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import com.google.common.collect.Maps;
-
 import java.util.Map;
 import java.util.SortedMap;
+
+import com.google.common.collect.Maps;
 
 /**
  * Builds the cache key object.

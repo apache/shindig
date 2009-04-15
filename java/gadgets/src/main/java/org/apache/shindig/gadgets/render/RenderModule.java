@@ -35,7 +35,7 @@ public class RenderModule extends AbstractModule {
     // NOTE: Sanitization only works when using the "full" Neko HTML parser. It is not recommended
     // that you attempt to use sanitization without it.
     bind(setLiteral)
-        .annotatedWith(SanitizedRenderingContentRewriter.AllowedTags.class)
+        .annotatedWith(SanitizingGadgetRewriter.AllowedTags.class)
         .toInstance(ImmutableSet.of("a", "abbr", "acronym", "area", "b", "bdo", "big", "blockquote",
             "body", "br", "caption", "center", "cite", "code", "col", "colgroup", "dd", "del",
             "dfn", "div", "dl", "dt", "em", "font", "h1", "h2", "h3", "h4", "h5", "h6", "head",
@@ -44,7 +44,7 @@ public class RenderModule extends AbstractModule {
             "tbody", "td", "tfoot", "th", "thead", "tr", "tt", "u", "ul"));
 
     bind(setLiteral)
-        .annotatedWith(SanitizedRenderingContentRewriter.AllowedAttributes.class)
+        .annotatedWith(SanitizingGadgetRewriter.AllowedAttributes.class)
         .toInstance(ImmutableSet.of("abbr", "align", "alt", "axis", "bgcolor", "border",
             "cellpadding", "cellspacing", "char", "charoff", "cite", "class", "clear", "color",
             "cols", "colspan", "compact", "coords", "datetime", "dir", "face", "headers", "height",

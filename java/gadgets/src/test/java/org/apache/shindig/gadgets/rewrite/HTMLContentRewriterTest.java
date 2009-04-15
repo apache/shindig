@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.rewrite;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.io.IOUtils;
@@ -47,7 +46,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
 
     rewriter = new HTMLContentRewriter(factory, rewriterUris,
-        new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser()));
+        new CssRequestRewriter(factory, rewriterUris, new CajaCssLexerParser()));
   }
 
   @Test
@@ -217,7 +216,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
-    assertNull(rewriter.rewrite(req, fakeResponse, mc));
+    assertFalse(rewriter.rewrite(req, fakeResponse, mc));
     control.verify();
   }
 }

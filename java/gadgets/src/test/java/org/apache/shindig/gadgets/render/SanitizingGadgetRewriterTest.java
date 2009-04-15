@@ -19,20 +19,15 @@
 package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -41,7 +36,6 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,11 +44,9 @@ import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase {
+public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   private static final Set<String> DEFAULT_TAGS = ImmutableSet.of("html", "head", "body");
   private static final Pattern BODY_REGEX = Pattern.compile(".*<body>(.*)</body>.*");
-
-  private static final Uri CONTENT_URI = Uri.parse("www.example.org/content");
 
   private final GadgetContext sanitaryGadgetContext = new GadgetContext() {
     @Override
@@ -82,11 +74,12 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
   }
 
-  private String rewrite(Gadget gadget, String content, Set<String> tags, Set<String> attributes) {
-    ContentRewriter rewriter = createRewriter(tags, attributes);
+  private String rewrite(Gadget gadget, String content, Set<String> tags, Set<String> attributes)
+      throws Exception {
+    GadgetRewriter rewriter = createRewriter(tags, attributes);
 
     MutableContent mc = new MutableContent(parser, content);
-    assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
+    rewriter.rewrite(gadget, mc);
 
     Matcher matcher = BODY_REGEX.matcher(mc.getContent());
     if (matcher.matches()) {
@@ -95,28 +88,16 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     return mc.getContent();
   }
 
-  private String rewrite(HttpRequest request, HttpResponse response) {
-    request.setSanitizationRequested(true);
-    ContentRewriter rewriter = createRewriter(Collections.<String>emptySet(),
-        Collections.<String>emptySet());
-
-    MutableContent mc = new MutableContent(parser, response);
-    if (rewriter.rewrite(request, response, mc) == null) {
-      return null;
-    }
-    return mc.getContent();
-  }
-
   private static Set<String> set(String... items) {
     return Sets.newHashSet(items);
   }
 
-  private ContentRewriter createRewriter(Set<String> tags, Set<String> attributes) {
+  private GadgetRewriter createRewriter(Set<String> tags, Set<String> attributes) {
     Set<String> newTags = new HashSet<String>(tags);
     newTags.addAll(DEFAULT_TAGS);
     ContentRewriterFeatureFactory rewriterFeatureFactory =
         new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style");
-    return new SanitizedRenderingContentRewriter(newTags, attributes, rewriterFeatureFactory,
+    return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
         rewriterUris, new CajaCssSanitizer(new CajaCssParser()));
   }
 
@@ -132,7 +113,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
 
   @Test
-  public void enforceStyleSanitized() {
+  public void enforceStyleSanitized() throws Exception {
     String markup =
         "<p><style type=\"text/css\">A { font : bold; behavior : bad }</style>text <b>bold text</b></p>" +
         "<b>Bold text</b><i>Italic text<b>Bold text</b></i>";
@@ -143,7 +124,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
 
   @Test
-  public void enforceCssImportLinkRewritten() {
+  public void enforceCssImportLinkRewritten() throws Exception {
     String markup =
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
     // The caja css sanitizer does *not* remove the initial colon in urls
@@ -159,7 +140,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
 
   @Test
-  public void enforceCssImportBadLinkStripped() {
+  public void enforceCssImportBadLinkStripped() throws Exception {
     String markup =
         "<style type=\"text/css\">@import url('javascript:doevil()'); A { font : bold }</style>";
     String sanitized = "<html><head></head><body><style>A {\n"
@@ -169,78 +150,31 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
 
   @Test
-  public void enforceAttributeWhiteList() {
+  public void enforceAttributeWhiteList() throws Exception {
     String markup = "<p foo=\"bar\" bar=\"baz\">Paragraph</p>";
     String sanitized = "<p bar=\"baz\">Paragraph</p>";
     assertEquals(sanitized, rewrite(gadget, markup, set("p"), set("bar")));
   }
 
   @Test
-  public void enforceImageSrcProxied() {
+  public void enforceImageSrcProxied() throws Exception {
     String markup = "<img src='http://www.evil.com/x.js'>Evil happens</img>";
     String sanitized = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&fp=45508&sanitize=1&rewriteMime=image/*\">Evil happens";
     assertEquals(sanitized, rewrite(gadget, markup, set("img"), set("src")));
   }
 
   @Test
-  public void enforceBadImageUrlStripped() {
+  public void enforceBadImageUrlStripped() throws Exception {
     String markup = "<img src='java\\ script:evil()'>Evil happens</img>";
     String sanitized = "<img>Evil happens";
     assertEquals(sanitized, rewrite(gadget, markup, set("img"), set("src")));
   }
 
   @Test
-  public void enforceInvalidProxedCssRejected() {
-    HttpRequest req = new HttpRequest(CONTENT_URI);
-    req.setRewriteMimeType("text/css");
-    HttpResponse response = new HttpResponseBuilder().setResponseString("doEvil()").create();
-    String sanitized = "";
-    assertEquals(sanitized, rewrite(req, response));
-  }
-
-  @Test
-  public void enforceValidProxedCssAccepted() {
-    HttpRequest req = new HttpRequest(CONTENT_URI);
-    req.setRewriteMimeType("text/css");
-    HttpResponse response = new HttpResponseBuilder().setResponseString(
-        "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
-    // The caja css sanitizer does *not* remove the initial colon in urls
-    // since this does not work in IE
-    String sanitized = 
-      "@import url('http://www.test.com/dir/proxy?"
-        + "url=http%3A%2F%2Fwww.evil.com%2Fmore.css"
-        + "\\26 fp=45508\\26sanitize=1\\26rewriteMime=text/css');\n"
-        + "A {\n"
-        + "  font: BOLD\n"
-        + "}";
-    String rewritten = rewrite(req, response);
-    assertEquals(sanitized, rewritten);
-  }
-
-  @Test
-  public void enforceInvalidProxedImageRejected() {
-    HttpRequest req = new HttpRequest(CONTENT_URI);
-    req.setRewriteMimeType("image/*");
-    HttpResponse response = new HttpResponseBuilder().setResponse("NOTIMAGE".getBytes()).create();
-    String sanitized = "";
-    assertEquals(sanitized, rewrite(req, response));
-  }
-
-  @Test
-  public void validProxiedImageAccepted() throws Exception {
-    HttpRequest req = new HttpRequest(CONTENT_URI);
-    req.setRewriteMimeType("image/*");
-    HttpResponse response = new HttpResponseBuilder().setResponse(
-        IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
-            "org/apache/shindig/gadgets/rewrite/image/inefficient.png"))).create();
-    assertNull(rewrite(req, response));
-  }
-
-  @Test
-  public void sanitizationBypassAllowed() {
+  public void sanitizationBypassAllowed() throws Exception {
     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
     // Create a rewriter that would strip everything
-    ContentRewriter rewriter = createRewriter(set(), set());
+    GadgetRewriter rewriter = createRewriter(set(), set());
 
     MutableContent mc = new MutableContent(parser, markup);
     Document document = mc.getDocument();
@@ -250,7 +184,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, true);
+    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, true);
     rewriter.rewrite(gadget, mc);
      
     // The document should be unchanged
@@ -258,17 +192,17 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
      
   @Test
-  public void sanitizationBypassOnlySelf() {
+  public void sanitizationBypassOnlySelf() throws Exception {
     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
     // Create a rewriter that would strip everything
-    ContentRewriter rewriter = createRewriter(set(), set());
+    GadgetRewriter rewriter = createRewriter(set(), set());
 
     MutableContent mc = new MutableContent(parser, markup);
     Document document = mc.getDocument();
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, false);
+    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
     rewriter.rewrite(gadget, mc);
      
     // The document should be unchanged
@@ -279,17 +213,17 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
      
   @Test
-  public void sanitizationBypassPreservedAcrossClone() {
+  public void sanitizationBypassPreservedAcrossClone() throws Exception {
     String markup = "<p foo=\"bar\"><b>Parag</b><!--raph--></p>";
     // Create a rewriter that would strip everything
-    ContentRewriter rewriter = createRewriter(set(), set());
+    GadgetRewriter rewriter = createRewriter(set(), set());
 
     MutableContent mc = new MutableContent(parser, markup);
     Document document = mc.getDocument();
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizedRenderingContentRewriter.bypassSanitization(paragraphTag, false);
+    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
 
     // Now, clone the paragraph tag and replace the paragraph tag
     Element cloned = (Element) paragraphTag.cloneNode(true);
@@ -305,7 +239,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
      
  @Test
-  public void restrictHrefAndSrcAttributes() {
+  public void restrictHrefAndSrcAttributes() throws Exception {
     String markup =
         "<element " +
         "href=\"http://example.org/valid-href\" " +
@@ -343,7 +277,7 @@ public class SanitizedRenderingContentRewriterTest extends BaseRewriterTestCase 
   }
 
   @Test
-  public void allCommentsStripped() {
+  public void allCommentsStripped() throws Exception {
     String markup = "<b>Hello, world</b><!--<b>evil</b>-->";
     assertEquals("<b>Hello, world</b>", rewrite(gadget, markup, set("b"), set()));
   }

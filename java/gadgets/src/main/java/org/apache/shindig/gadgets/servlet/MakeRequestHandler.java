@@ -31,7 +31,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -63,11 +64,11 @@ public class MakeRequestHandler extends ProxyBase {
   public static final String AUTHZ_PARAM = "authz";
 
   private final RequestPipeline requestPipeline;
-  private final ContentRewriterRegistry contentRewriterRegistry;
+  private final RequestRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
-      ContentRewriterRegistry contentRewriterRegistry) {
+      RequestRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
@@ -85,7 +86,11 @@ public class MakeRequestHandler extends ProxyBase {
 
     // Rewrite the response
     if (contentRewriterRegistry != null) {
-      results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+      try {
+        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+      } catch (RewritingException e) {
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+      }
     }
 
     // Serialize the response

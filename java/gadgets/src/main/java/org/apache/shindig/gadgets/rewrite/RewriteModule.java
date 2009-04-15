@@ -18,8 +18,9 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.render.RenderingContentRewriter;
-import org.apache.shindig.gadgets.render.SanitizedRenderingContentRewriter;
+import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingRequestRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import java.util.List;
@@ -37,31 +38,49 @@ public class RewriteModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(new TypeLiteral<List<ContentRewriter>>(){}).toProvider(ContentRewritersProvider.class);
+    bind(new TypeLiteral<List<GadgetRewriter>>(){}).toProvider(GadgetRewritersProvider.class);
+    bind(new TypeLiteral<List<RequestRewriter>>(){}).toProvider(RequestRewritersProvider.class);
   }
 
-  private static class ContentRewritersProvider implements Provider<List<ContentRewriter>> {
-    private final List<ContentRewriter> rewriters;
+  private static class GadgetRewritersProvider implements Provider<List<GadgetRewriter>> {
+    private final List<GadgetRewriter> rewriters;
 
     @Inject
-    public ContentRewritersProvider(PipelineDataContentRewriter pipelineRewriter,
+    public GadgetRewritersProvider(PipelineDataGadgetRewriter pipelineRewriter,
         TemplateRewriter templateRewriter,
         HTMLContentRewriter optimizingRewriter,
-        CSSContentRewriter cssRewriter,
+        CssRequestRewriter cssRewriter,
         CajaContentRewriter cajaRewriter,
-        SanitizedRenderingContentRewriter sanitizedRewriter,
-        RenderingContentRewriter renderingRewriter) {
+        SanitizingGadgetRewriter sanitizedRewriter,
+        RenderingGadgetRewriter renderingRewriter) {
       rewriters = Lists.newArrayList();
       rewriters.add(pipelineRewriter);
       rewriters.add(templateRewriter);
       rewriters.add(optimizingRewriter);
-      rewriters.add(cssRewriter);
       rewriters.add(cajaRewriter);
       rewriters.add(sanitizedRewriter);
       rewriters.add(renderingRewriter);
     }
 
-    public List<ContentRewriter> get() {
+    public List<GadgetRewriter> get() {
+      return rewriters;
+    }
+  }
+
+  private static class RequestRewritersProvider implements Provider<List<RequestRewriter>> {
+    private final List<RequestRewriter> rewriters;
+
+    @Inject
+    public RequestRewritersProvider(HTMLContentRewriter optimizingRewriter,
+        CssRequestRewriter cssRewriter,
+        SanitizingRequestRewriter sanitizedRewriter) {
+      rewriters = Lists.newArrayList();
+      rewriters.add(optimizingRewriter);
+      rewriters.add(cssRewriter);
+      rewriters.add(sanitizedRewriter);
+    }
+
+    public List<RequestRewriter> get() {
       return rewriters;
     }
   }

@@ -18,7 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,8 +40,8 @@ import com.google.common.collect.Lists;
 /**
  *
  */
-public class CSSContentRewriterTest extends BaseRewriterTestCase {
-  private CSSContentRewriter rewriter;
+public class CssRequestRewriterTest extends BaseRewriterTestCase {
+  private CssRequestRewriter rewriter;
   private Uri dummyUri;
 
   @Override
@@ -52,7 +52,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    rewriter = new CSSContentRewriter(factory, rewriterUris, new CajaCssLexerParser());
+    rewriter = new CssRequestRewriter(factory, rewriterUris, new CajaCssLexerParser());
     dummyUri = Uri.parse("http://www.w3c.org");
   }
 
@@ -105,7 +105,7 @@ public class CSSContentRewriterTest extends BaseRewriterTestCase {
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
-    assertNull(rewriter.rewrite(req, fakeResponse, mc));
+    assertFalse(rewriter.rewrite(req, fakeResponse, mc));
     control.verify();
   }
 

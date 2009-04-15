@@ -29,7 +29,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.gadgets.render.SanitizedRenderingContentRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetFeature;
@@ -134,8 +134,8 @@ public class FlashTagHandler extends AbstractTagHandler {
     }
 
     // Bypass sanitization for the holder tag and the call to swfobject
-    SanitizedRenderingContentRewriter.bypassSanitization(altHolder, false);
-    SanitizedRenderingContentRewriter.bypassSanitization(script, false);
+    SanitizingGadgetRewriter.bypassSanitization(altHolder, false);
+    SanitizingGadgetRewriter.bypassSanitization(script, false);
     ensureSwfobject(result.getOwnerDocument(), processor);
   }
 
@@ -212,7 +212,7 @@ public class FlashTagHandler extends AbstractTagHandler {
     }
     swfobject.setUserData(SWFOBJECT, SWFOBJECT, null);
     head.appendChild(swfobject);
-    SanitizedRenderingContentRewriter.bypassSanitization(swfobject, false);
+    SanitizingGadgetRewriter.bypassSanitization(swfobject, false);
   }
 
   /**

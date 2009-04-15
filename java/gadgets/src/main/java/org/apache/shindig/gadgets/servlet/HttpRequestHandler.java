@@ -28,7 +28,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
@@ -90,11 +91,11 @@ public class HttpRequestHandler {
   static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT", "ACCEPT-ENCODING");
 
   private final RequestPipeline requestPipeline;
-  private final ContentRewriterRegistry contentRewriterRegistry;
+  private final RequestRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public HttpRequestHandler(RequestPipeline requestPipeline,
-      ContentRewriterRegistry contentRewriterRegistry) {
+      RequestRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
@@ -226,6 +227,8 @@ public class HttpRequestHandler {
       return httpApiResponse;
     } catch (GadgetException ge) {
       throw new ProtocolException(ResponseError.INTERNAL_ERROR, ge.getMessage());
+    } catch (RewritingException re) {
+      throw new ProtocolException(ResponseError.INTERNAL_ERROR, re.getMessage());
     }
   }
 

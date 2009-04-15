@@ -19,22 +19,16 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 
 /**
- *  A no-op content rewriter
+ * Interface for rewriters that modify gadget content.
  */
-public class NoOpContentRewriter implements ContentRewriter {
-
-  public NoOpContentRewriter() { }
-
-  public RewriterResults rewrite(HttpRequest request,
-      HttpResponse original, MutableContent content) {
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    return null;
-  }
+public interface GadgetRewriter {
+  /**
+   * Rewrite the gadget.
+   * 
+   * @param gadget Gadget to rewrite.
+   * @param content the content of the gadget to be manipulated.
+   */
+  void rewrite(Gadget gadget, MutableContent content) throws RewritingException;
 }

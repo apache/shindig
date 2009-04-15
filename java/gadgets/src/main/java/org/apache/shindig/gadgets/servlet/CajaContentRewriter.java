@@ -18,12 +18,17 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
@@ -44,24 +49,10 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.Map;
-import java.util.logging.Logger;
-
-public class CajaContentRewriter implements ContentRewriter {
+public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.GadgetRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
 
-  public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent content) {
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) {
     if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
         "1".equals(gadget.getContext().getParameter("caja"))) {
 
@@ -115,15 +106,14 @@ public class CajaContentRewriter implements ContentRewriter {
       } catch (GadgetRewriteException e) {
         content.setContent(messagesToHtml(is, origContent, mq));
         throwCajolingException(e, mq);
-        return RewriterResults.notCacheable();
+        return;
       } catch (IOException e) {
         content.setContent(messagesToHtml(is, origContent, mq));
         throwCajolingException(e, mq);
-        return RewriterResults.notCacheable();
+        return;
       }
       content.setContent(tameCajaClientApi() + output);
     }
-    return null;
   }
 
   private String messagesToHtml(InputSource is, CharSequence orig, MessageQueue mq) {

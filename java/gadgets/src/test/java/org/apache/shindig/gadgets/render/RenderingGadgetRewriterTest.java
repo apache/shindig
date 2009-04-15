@@ -18,9 +18,9 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.DEFAULT_CSS;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.FEATURES_KEY;
-import static org.apache.shindig.gadgets.render.RenderingContentRewriter.INSERT_BASE_ELEMENT_KEY;
+import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.DEFAULT_CSS;
+import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.FEATURES_KEY;
+import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.INSERT_BASE_ELEMENT_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +70,7 @@ import com.google.inject.Injector;
 /**
  * Tests for RenderingContentRewriter.
  */
-public class RenderingContentRewriterTest {
+public class RenderingGadgetRewriterTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final String BODY_CONTENT = "Some body content";
   static final Pattern DOCUMENT_SPLIT_PATTERN = Pattern.compile(
@@ -88,14 +88,14 @@ public class RenderingContentRewriterTest {
   private final MapGadgetContext context = new MapGadgetContext();
 
   private FakeGadgetFeatureRegistry featureRegistry;
-  private RenderingContentRewriter rewriter;
+  private RenderingGadgetRewriter rewriter;
   private GadgetHtmlParser parser;
 
   @Before
   public void setUp() throws Exception {
     featureRegistry = new FakeGadgetFeatureRegistry();
     rewriter
-        = new RenderingContentRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
@@ -115,7 +115,7 @@ public class RenderingContentRewriterTest {
 
   private String rewrite(Gadget gadget, String content) {
     MutableContent mc = new MutableContent(parser, content);
-    assertEquals(0, rewriter.rewrite(gadget, mc).getCacheTtl());
+    rewriter.rewrite(gadget, mc);
     return mc.getContent();
   }
 

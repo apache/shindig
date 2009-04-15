@@ -25,7 +25,6 @@ import static org.easymock.EasyMock.reportMatcher;
 import static org.easymock.EasyMock.same;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
@@ -62,12 +61,12 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Test of PipelineDataContentRewriter.
  */
-public class PipelineDataContentRewriterTest {
+public class PipelineDataGadgetRewriterTest {
 
   private IMocksControl control;
   private PipelinedDataPreloader preloader;
   private PreloaderService preloaderService;
-  private PipelineDataContentRewriter rewriter;
+  private PipelineDataGadgetRewriter rewriter;
   private GadgetSpec gadgetSpec;
   private Gadget gadget;
   private MutableContent content;
@@ -96,7 +95,7 @@ public class PipelineDataContentRewriterTest {
     control = EasyMock.createStrictControl();
     preloader = control.createMock(PipelinedDataPreloader.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
-    rewriter = new PipelineDataContentRewriter(new PipelineExecutor(preloader, preloaderService,
+    rewriter = new PipelineDataGadgetRewriter(new PipelineExecutor(preloader, preloaderService,
         new Expressions()));
   }
 
@@ -207,7 +206,7 @@ public class PipelineDataContentRewriterTest {
     control.replay();
 
     // If there are no pipeline elements, the rewrite is a no-op
-    assertNull(rewriter.rewrite(gadget, content));
+    rewriter.rewrite(gadget, content);
 
     control.verify();
   }
@@ -219,7 +218,7 @@ public class PipelineDataContentRewriterTest {
 
     control.replay();
 
-    assertNull(rewriter.rewrite(gadget, content));
+    rewriter.rewrite(gadget, content);
 
     control.verify();
   }

@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -44,16 +43,16 @@ import com.google.inject.Inject;
 /**
  * Rewrite links to referenced content in a stylesheet
  */
-public class CSSContentRewriter implements ContentRewriter {
+public class CssRequestRewriter implements RequestRewriter {
 
-  private static final Logger logger = Logger.getLogger(CSSContentRewriter.class.getName());
+  private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
   private final CajaCssLexerParser cssParser;
   private final ContentRewriterUris rewriterUris;
 
   @Inject
-  public CSSContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
+  public CssRequestRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
       ContentRewriterUris rewriterUris,
       CajaCssLexerParser cssParser) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
@@ -61,15 +60,10 @@ public class CSSContentRewriter implements ContentRewriter {
     this.cssParser = cssParser;
   }
 
-  public RewriterResults rewrite(Gadget gadget, MutableContent content) {
-    // Not supported
-    return null;
-  }
-
-  public RewriterResults rewrite(HttpRequest request, HttpResponse original,
+  public boolean rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) {
     if (!RewriterUtils.isCss(request, original)) {
-      return null;
+      return false;
     }
     ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
     String css = content.getContent();
@@ -78,7 +72,7 @@ public class CSSContentRewriter implements ContentRewriter {
         createLinkRewriter(request.getGadget(), feature, request.getContainer()), sw, false);
     content.setContent(sw.toString());
 
-    return RewriterResults.cacheableIndefinitely();
+    return true;
   }
 
   /**

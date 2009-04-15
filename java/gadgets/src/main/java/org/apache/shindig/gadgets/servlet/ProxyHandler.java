@@ -33,7 +33,8 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -55,12 +56,12 @@ public class ProxyHandler extends ProxyBase {
 
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
-  private final ContentRewriterRegistry contentRewriterRegistry;
+  private final RequestRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
                       LockedDomainService lockedDomainService,
-                      ContentRewriterRegistry contentRewriterRegistry) {
+                      RequestRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
@@ -135,7 +136,11 @@ public class ProxyHandler extends ProxyBase {
     HttpRequest rcr = buildHttpRequest(request);
     HttpResponse results = requestPipeline.execute(rcr);
     if (contentRewriterRegistry != null) {
-      results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+      try {
+        results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
+      } catch (RewritingException e) {
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+      }
     }
 
     setResponseHeaders(request, response, results);

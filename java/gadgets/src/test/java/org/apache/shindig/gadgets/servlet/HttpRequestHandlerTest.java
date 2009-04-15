@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.reportMatcher;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -28,9 +31,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
-import org.apache.shindig.gadgets.rewrite.DefaultContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultRequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RequestRewriter;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -38,13 +41,6 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RpcHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
-
-import com.google.common.collect.Sets;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.reportMatcher;
 import org.easymock.IArgumentMatcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,6 +50,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import com.google.common.collect.Sets;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Has coverage for all tests in MakeRequestHandlerTest and should be maintained in sync  until
@@ -67,8 +67,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
   private final RequestPipeline pipeline = mock(RequestPipeline.class);
   private final CaptureRewriter rewriter = new CaptureRewriter();
-  private final ContentRewriterRegistry rewriterRegistry
-      = new DefaultContentRewriterRegistry(Arrays.<ContentRewriter>asList(rewriter), null);
+  private final RequestRewriterRegistry rewriterRegistry
+      = new DefaultRequestRewriterRegistry(Arrays.<RequestRewriter>asList(rewriter), null);
 
   private HandlerRegistry registry;
 

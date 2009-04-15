@@ -33,26 +33,16 @@ import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.rewrite.ContentRewriter;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RewriterResults;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,6 +58,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
  * document wrapper data as needed.
@@ -75,8 +71,7 @@ import java.util.logging.Logger;
  * Currently, this is only invoked directly since the rewriting infrastructure doesn't properly
  * deal with uncacheable rewrite operations.
  *
- * TODO: Break this up into multiple rewriters if and when rewriting infrastructure supports
- * parse tree manipulation without worrying about caching.
+ * TODO: Break this up into multiple rewriters.
  *
  * Should be:
  *
@@ -84,8 +79,8 @@ import java.util.logging.Logger;
  * - Javascript injection (including configuration)
  * - html document normalization
  */
-public class RenderingContentRewriter implements ContentRewriter {
-  private static final Logger LOG = Logger.getLogger(RenderingContentRewriter.class.getName());
+public class RenderingGadgetRewriter implements GadgetRewriter {
+  private static final Logger LOG = Logger.getLogger(RenderingGadgetRewriter.class.getName());
 
   static final String DEFAULT_CSS =
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
@@ -104,7 +99,7 @@ public class RenderingContentRewriter implements ContentRewriter {
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
    */
   @Inject
-  public RenderingContentRewriter(MessageBundleFactory messageBundleFactory,
+  public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
                                   ContainerConfig containerConfig,
                                   GadgetFeatureRegistry featureRegistry,
                                   UrlGenerator urlGenerator) {
@@ -114,15 +109,10 @@ public class RenderingContentRewriter implements ContentRewriter {
     this.urlGenerator = urlGenerator;
   }
 
-  public RewriterResults rewrite(HttpRequest req, HttpResponse resp, MutableContent content) {
-    // Rendering does not rewrite arbitrary HTTP responses currently
-    return null;
-  }
-
-  public RewriterResults rewrite(Gadget gadget, MutableContent mutableContent) {
+  public void rewrite(Gadget gadget, MutableContent mutableContent) {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
-      return RewriterResults.notCacheable();
+      return;
     }
 
     try {
@@ -177,7 +167,6 @@ public class RenderingContentRewriter implements ContentRewriter {
       injectOnLoadHandlers(body);
 
       mutableContent.documentChanged();
-      return RewriterResults.notCacheable();
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
       // RewriterException or something along those lines.

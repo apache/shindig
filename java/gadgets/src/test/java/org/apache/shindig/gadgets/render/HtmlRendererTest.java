@@ -28,11 +28,10 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.junit.Before;
@@ -41,6 +40,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Tests for HtmlRenderer
@@ -58,10 +59,9 @@ public class HtmlRendererTest {
   };
 
   private final FakePreloaderService preloaderService = new FakePreloaderService();
-  private final FakeContentRewriterRegistry rewriter = new FakeContentRewriterRegistry();
   private final FakeProxyRenderer proxyRenderer = new FakeProxyRenderer();
-  private final HtmlRenderer renderer
-      = new HtmlRenderer(preloaderService, proxyRenderer,  rewriter);
+  private final CaptureRewriter captureRewriter = new CaptureRewriter();
+  private HtmlRenderer renderer;
 
   private Gadget makeGadget(String content) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(SPEC_URL,
@@ -83,6 +83,8 @@ public class HtmlRendererTest {
 
   @Before
   public void setUp() throws Exception {
+    renderer = new HtmlRenderer(preloaderService, proxyRenderer,
+        ImmutableList.of((GadgetRewriter) captureRewriter), null);
     
   }
   
@@ -107,7 +109,7 @@ public class HtmlRendererTest {
   @Test
   public void doRewriting() throws Exception {
     renderer.render(makeGadget(BASIC_HTML_CONTENT));
-    assertTrue("Rewriting not performed.", rewriter.wasRewritten);
+    assertTrue("Rewriting not performed.", captureRewriter.viewWasRewritten());
   }
 
   private static class FakeProxyRenderer extends ProxyRenderer {
@@ -136,26 +138,6 @@ public class HtmlRendererTest {
     public Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks) {
       wasPreloaded = true;
       return preloads;
-    }
-  }
-
-  private static class FakeContentRewriterRegistry implements ContentRewriterRegistry {
-    protected boolean wasRewritten = false;
-
-    protected FakeContentRewriterRegistry() {
-    }
-
-    public String rewriteGadget(Gadget gadget, View currentView) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String rewriteGadget(Gadget gadget, String content) {
-      wasRewritten = true;
-      return content;
-    }
-
-    public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
-      throw new UnsupportedOperationException();
     }
   }
 }

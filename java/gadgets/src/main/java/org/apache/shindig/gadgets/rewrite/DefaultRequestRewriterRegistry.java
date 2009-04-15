@@ -17,29 +17,26 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.spec.View;
-
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+
 /**
  * Basic registry -- just iterates over rewriters and invokes them sequentially.
  */
-public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
-  protected final List<ContentRewriter> rewriters;
+public class DefaultRequestRewriterRegistry implements RequestRewriterRegistry {
+  protected final List<RequestRewriter> rewriters;
   protected final GadgetHtmlParser htmlParser;
 
   @Inject
-  public DefaultContentRewriterRegistry(List<ContentRewriter> rewriters,
+  public DefaultRequestRewriterRegistry(List<RequestRewriter> rewriters,
       GadgetHtmlParser htmlParser) {
     if (rewriters == null) {
       rewriters = Collections.emptyList();
@@ -49,50 +46,18 @@ public class DefaultContentRewriterRegistry implements ContentRewriterRegistry {
   }
 
   /** {@inheritDoc} */
-  public String rewriteGadget(Gadget gadget, View currentView) throws GadgetException {
-    if (currentView == null) {
-      // Nothing to rewrite.
-      return null;
-    }
-    MutableContent mc = new MutableContent(htmlParser, currentView.getContent());
-
-    for (ContentRewriter rewriter : rewriters) {
-      rewriter.rewrite(gadget, mc);
-    }
-    return mc.getContent();
-  }
-
-  /** {@inheritDoc} */
-  public String rewriteGadget(Gadget gadget, String content) {
-    if (content == null) {
-      // Nothing to rewrite.
-      return null;
-    }
-    MutableContent mc = new MutableContent(htmlParser, content);
-
-    for (ContentRewriter rewriter : rewriters) {
-      rewriter.rewrite(gadget, mc);
-    }
-
-    return mc.getContent();
-  }
-
-  /** {@inheritDoc} */
-  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp) {
+  public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
+      throws RewritingException {
     MutableContent mc = new MutableContent(htmlParser, resp);
 
     boolean wasRewritten = false;
-    for (ContentRewriter rewriter : rewriters) {
-      wasRewritten |= (rewriter.rewrite(req, resp, mc) != null);
+    for (RequestRewriter rewriter : rewriters) {
+      wasRewritten |= rewriter.rewrite(req, resp, mc);
     }
 
     if (wasRewritten) {
       return new HttpResponseBuilder(resp).setResponseString(mc.getContent()).create();
     }
     return resp;
-  }
-
-  protected List<ContentRewriter> getRewriters() {
-    return rewriters;
   }
 }

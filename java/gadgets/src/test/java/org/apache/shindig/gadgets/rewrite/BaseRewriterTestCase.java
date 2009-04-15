@@ -138,7 +138,7 @@ public abstract class BaseRewriterTestCase {
     return new FakeRewriterFeatureFactory(feature);
   }
 
-  String rewriteHelper(ContentRewriter rewriter, String s)
+  String rewriteHelper(GadgetRewriter rewriter, String s)
       throws Exception {
     MutableContent mc = rewriteContent(rewriter, s, null);
     String rewrittenContent = mc.getContent();
@@ -152,7 +152,7 @@ public abstract class BaseRewriterTestCase {
     return rewrittenContent;
   }
 
-  MutableContent rewriteContent(ContentRewriter rewriter, String s, final String container)
+  MutableContent rewriteContent(GadgetRewriter rewriter, String s, final String container)
       throws Exception {
     MutableContent mc = new MutableContent(parser, s);
 

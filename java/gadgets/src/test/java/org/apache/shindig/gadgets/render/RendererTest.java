@@ -181,7 +181,7 @@ public class RendererTest {
     protected RuntimeException runtimeException;
 
     public FakeHtmlRenderer() {
-      super(null, null, null);
+      super(null, null, null, null);
     }
 
     @Override

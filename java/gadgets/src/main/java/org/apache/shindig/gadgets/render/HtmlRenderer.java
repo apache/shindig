@@ -20,12 +20,16 @@ package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.inject.Inject;
 
@@ -35,8 +39,9 @@ import com.google.inject.Inject;
 public class HtmlRenderer {
   public static final String PATH_PARAM = "path";
   private final PreloaderService preloader;
-  private final ContentRewriterRegistry rewriter;
   private final ProxyRenderer proxyRenderer;
+  private final List<GadgetRewriter> gadgetRewriters;
+  private final GadgetHtmlParser htmlParser;
 
   /**
    * @param requestPipeline Used for performing the proxy request. Always ignores caching because
@@ -47,10 +52,12 @@ public class HtmlRenderer {
   @Inject
   public HtmlRenderer(PreloaderService preloader,
                       ProxyRenderer proxyRenderer,
-                      ContentRewriterRegistry rewriter) {
+                      List<GadgetRewriter> gadgetRewriters,
+                      GadgetHtmlParser htmlParser) {
     this.preloader = preloader;
     this.proxyRenderer = proxyRenderer;
-    this.rewriter = rewriter;
+    this.gadgetRewriters = gadgetRewriters;
+    this.htmlParser = htmlParser;
   }
 
   /**
@@ -82,8 +89,15 @@ public class HtmlRenderer {
         content = proxyRenderer.render(gadget);
       }
 
-      return rewriter.rewriteGadget(gadget, content);
+      MutableContent mc = new MutableContent(htmlParser, content);
+      for (GadgetRewriter rewriter : gadgetRewriters) {
+        rewriter.rewrite(gadget, mc);
+      }
+      
+      return mc.getContent();
     } catch (GadgetException e) {
+      throw new RenderingException(e.getMessage(), e);
+    } catch (RewritingException e) {
       throw new RenderingException(e.getMessage(), e);
     }
   }
