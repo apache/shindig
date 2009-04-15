@@ -300,18 +300,14 @@ function _max(a, b) {
  * @param {Array.<String | Object>} sym
  */
 function _exportSymbols(name, sym) {
-  var obj = {};
-
-  for (var i = 0, j = sym.length; i < j; i += 2) {
-    obj[sym[i]] = sym[i + 1];
-  }
-  var parts = name.split(".");
   var attach = window;
-  for (var k = 0, l = parts.length - 1; k < l; ++k) {
-    var tmp = {};
-    attach[parts[k]] = tmp;
-    attach = tmp;
+  var parts = name.split(".");
+  for (var i = 0, j = parts.length; i < j; i++) {
+    var part = parts[i];
+    attach[part] = attach[part] || {};
+    attach = attach[part];
   }
-  attach[parts[parts.length - 1]] = obj;
+  for (var k = 0, l = sym.length; k < l; k += 2) {
+    attach[sym[k]] = sym[k + 1];
+  }
 }
-
