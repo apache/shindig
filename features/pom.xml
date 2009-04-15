@@ -253,6 +253,12 @@
                 <groupId>org.jsdoctoolkit</groupId>
                 <artifactId>jsdoctoolkit-ant-task</artifactId>
                 <version>1.0</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>ant</groupId>
+                    <artifactId>ant-contrib</artifactId>
+                  </exclusion>
+                </exclusions>
               </dependency>
               <dependency>
                 <groupId>rhino</groupId>
