@@ -26,7 +26,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-php</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
       <directory>../</directory>
       <includes>
         <include>features/**</include>
@@ -47,12 +47,17 @@
         <!-- scm -->
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
-        <!-- eclipse -->
+        <!-- IDE -->
+        <exclude>**/*.iws</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
         <exclude>**/.project/**</exclude>
         <exclude>**/.classpath/**</exclude>
         <exclude>**/.settings/**</exclude>
         <exclude>**/.externalToolBuilders/**</exclude>
         <exclude>**/maven-eclipse.xml</exclude>
+        <exclude>**/.deployables</**/exclude>
+        <exclude>**/.wtpmodules/**</exclude>
         <!-- maven -->
         <exclude>**/pom.xml</exclude>
         <exclude>**/target/**</exclude>
@@ -63,19 +68,24 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <outputDirectory>shindig-php</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
       <directory>../php</directory>
       <excludes>
         <exclude>config/**</exclude>
         <!-- scm -->
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
-        <!-- eclipse -->
+        <!-- IDE -->
+        <exclude>**/*.iws</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
         <exclude>**/.project/**</exclude>
         <exclude>**/.classpath/**</exclude>
         <exclude>**/.settings/**</exclude>
         <exclude>**/.externalToolBuilders/**</exclude>
         <exclude>**/maven-eclipse.xml</exclude>
+        <exclude>**/.deployables</**/exclude>
+        <exclude>**/.wtpmodules/**</exclude>
         <!-- maven -->
         <exclude>**/pom.xml</exclude>
         <exclude>**/target/**</exclude>
@@ -92,7 +102,7 @@
     <!-- Using the temp container.php created by Maven using Antrun plugin to rewrite
       default configuration to release structure -->
     <fileSet>
-      <outputDirectory>shindig-php/config</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-php/config</outputDirectory>
       <directory>target/php/config</directory>
       <excludes>
         <!-- scm -->

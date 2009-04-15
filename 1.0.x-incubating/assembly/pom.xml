@@ -44,21 +44,22 @@
     </filters>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
             <descriptor>src/main/assembly/php.xml</descriptor>
+            <descriptor>src/main/assembly/java.xml</descriptor>
             <descriptor>src/main/assembly/source.xml</descriptor>
-            <descriptor>src/main/assembly/binary.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- append to the packaging phase. -->
+            <id>make-assembly</id>
+            <phase>package</phase>
             <goals>
-              <goal>attached</goal> <!-- goals == mojos -->
+              <goal>single</goal>
             </goals>
           </execution>
         </executions>
@@ -66,7 +67,6 @@
       <plugin>
         <groupId>org.apache.geronimo.genesis.plugins</groupId>
         <artifactId>tools-maven-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>verify-legal-files</id>
