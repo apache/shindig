@@ -26,34 +26,88 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-php</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
       <directory>../</directory>
       <includes>
-        <include>php/**</include>
         <include>features/**</include>
         <include>javascript/**</include>
         <include>config/**</include>
         <include>COMMITTERS</include>
         <include>COPYING</include>
+        <include>DISCLAIMER</include>
         <include>LICENSE</include>
         <include>NOTICE</include>
-        <include>README</include>
       </includes>
       <excludes>
         <exclude>site/**</exclude>
         <exclude>resources/**</exclude>
         <exclude>etc/**</exclude>
-        <exclude>pom.xml</exclude>
         <exclude>assembly/**</exclude>
         <exclude>java/**</exclude>
+        <!-- scm -->
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
+        <!-- IDE -->
+        <exclude>**/*.iws</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
         <exclude>**/.project/**</exclude>
         <exclude>**/.classpath/**</exclude>
         <exclude>**/.settings/**</exclude>
+        <exclude>**/.externalToolBuilders/**</exclude>
+        <exclude>**/maven-eclipse.xml</exclude>
+        <exclude>**/.deployables/**</exclude>
+        <exclude>**/.wtpmodules/**</exclude>
+        <!-- maven -->
+        <exclude>**/pom.xml</exclude>
         <exclude>**/target/**</exclude>
+        <!-- misc -->
         <exclude>*.patch</exclude>
         <exclude>*.diff</exclude>
+        <exclude>README</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <directory>../php</directory>
+      <excludes>
+        <exclude>config/**</exclude>
+        <!-- scm -->
+        <exclude>**/.git/**</exclude>
+        <exclude>**/.svn/**</exclude>
+        <!-- IDE -->
+        <exclude>**/*.iws</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
+        <exclude>**/.project/**</exclude>
+        <exclude>**/.classpath/**</exclude>
+        <exclude>**/.settings/**</exclude>
+        <exclude>**/.externalToolBuilders/**</exclude>
+        <exclude>**/maven-eclipse.xml</exclude>
+        <exclude>**/.deployables/**</exclude>
+        <exclude>**/.wtpmodules/**</exclude>
+        <!-- maven -->
+        <exclude>**/pom.xml</exclude>
+        <exclude>**/target/**</exclude>
+        <!-- misc -->
+        <exclude>*.patch</exclude>
+        <exclude>*.diff</exclude>
+        <exclude>*.zip</exclude>
+        <exclude>*.tar.gz</exclude>
+        <exclude>*.tar.bz2</exclude>
+        <exclude>*.sh</exclude>
+        <exclude>*.bat</exclude>
+      </excludes>
+    </fileSet>
+    <!-- Using the temp container.php created by Maven using Antrun plugin to rewrite
+      default configuration to release structure -->
+    <fileSet>
+      <outputDirectory>shindig-${pom.version}-php/config</outputDirectory>
+      <directory>target/php/config</directory>
+      <excludes>
+        <!-- scm -->
+        <exclude>**/.git/**</exclude>
+        <exclude>**/.svn/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>

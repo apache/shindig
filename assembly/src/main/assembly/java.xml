@@ -17,7 +17,7 @@
  * under the License.
 -->
 <assembly>
-  <id>binary</id>
+  <id>java</id>
   <formats>
     <format>zip</format>
     <format>tar.gz</format>
@@ -26,7 +26,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>shindig-binary</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <includes>
@@ -40,7 +40,7 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-binary</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
       <directory>../</directory>
       <includes>
         <include>COMMITTERS</include>
@@ -51,7 +51,7 @@
       </includes>
     </fileSet>
     <fileSet>
-      <outputDirectory>shindig-binary</outputDirectory>
+      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
       <directory>src/main/assembly/binary-src/</directory>
       <filtered>true</filtered>
       <includes>
