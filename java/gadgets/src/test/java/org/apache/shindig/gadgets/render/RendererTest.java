@@ -200,7 +200,7 @@ public class RendererTest {
     protected ProcessingException exception;
 
     public FakeProcessor() {
-      super(null, null, null, null);
+      super(null, null, null, null, null);
     }
 
     @Override

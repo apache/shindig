@@ -231,7 +231,7 @@ public class JsonRpcHandlerTest {
     protected final Map<Uri, String> gadgets = Maps.newHashMap();
 
     public FakeProcessor() {
-      super(null, null, null, null);
+      super(null, null, null, null, null);
     }
 
     @Override

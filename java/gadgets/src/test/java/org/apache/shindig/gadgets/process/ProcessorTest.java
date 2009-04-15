@@ -64,7 +64,7 @@ public class ProcessorTest {
          "}}}");
 
     containerConfig = new JsonContainerConfig(config, new Expressions());
-    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist);
+    processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist, null);
   }
 
   private GadgetContext makeContext(final String view, final Uri specUrl) {
@@ -187,5 +187,3 @@ public class ProcessorTest {
     }
   }
 }
-
-

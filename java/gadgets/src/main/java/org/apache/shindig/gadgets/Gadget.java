@@ -23,10 +23,12 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,6 +36,7 @@ import java.util.Set;
  * of a single gadget request.
  */
 public class Gadget {
+  private GadgetFeatureRegistry gadgetFeatureRegistry;
   private GadgetContext context;
   private GadgetSpec spec;
   private Collection<PreloadedData> preloads;
@@ -51,6 +54,15 @@ public class Gadget {
 
   public GadgetContext getContext() {
     return context;
+  }
+
+  /**
+   * @param registry The gadget feature registry to use to find dependent
+   *                 features.
+   */
+  public Gadget setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
+    this.gadgetFeatureRegistry = registry;
+    return this;
   }
 
   /**
@@ -75,6 +87,24 @@ public class Gadget {
 
   public Collection<PreloadedData> getPreloads() {
     return preloads;
+  }
+
+  /**
+   * List of all features this spec depends on (including all transitive
+   * dependencies).
+   */
+  private List<String> allGadgetFeatures;
+  public synchronized List<String> getAllFeatures() {
+    if (allGadgetFeatures == null && gadgetFeatureRegistry != null) {
+      allGadgetFeatures = Lists.newArrayList();
+      for (GadgetFeature gadgetFeature :
+             gadgetFeatureRegistry.getFeatures(this.spec.getModulePrefs().getFeatures().keySet())) {
+        allGadgetFeatures.add(gadgetFeature.getName());
+      }
+      // now all features are in reverse order of dependency. So reverse the list.
+      Collections.reverse(allGadgetFeatures);
+    }
+    return allGadgetFeatures;
   }
 
   public Gadget setCurrentView(View currentView) {
