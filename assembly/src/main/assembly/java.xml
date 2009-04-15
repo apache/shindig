@@ -17,7 +17,7 @@
  * under the License.
 -->
 <assembly>
-  <id>binary</id>
+  <id>java</id>
   <formats>
     <format>zip</format>
     <format>tar.gz</format>
