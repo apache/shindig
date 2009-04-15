@@ -28,7 +28,7 @@
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
-  <version>1.0.0-incubating</version>
+  <version>1.0.0-incubating-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project</name>
@@ -48,9 +48,9 @@
   <!-- S C M                                                                  -->
   <!-- ====================================================================== -->
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.0.0-incubating</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.0.0-incubating</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/shindig-project-1.0.0-incubating</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/1.0.x-incubating</url>
   </scm>
 
   <!-- ====================================================================== -->
