@@ -125,7 +125,6 @@
                 <source>opensocial-base/fieldtranslations.js</source>
                 <source>opensocial-base/jsonactivity.js</source>
                 <source>opensocial-base/jsonperson.js</source>
-                <source>opensocial-rest/restfulcontainer.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
                 <source>osapi.activities/activities.js</source>
                 <source>osapi.appdata/appdata.js</source>

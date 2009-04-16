@@ -20,14 +20,12 @@
 <feature>
   <name>opensocial-0.9</name>
   <dependency>opensocial-jsonrpc</dependency>
-  <dependency>opensocial-rest</dependency>
   <!-- <dependency>caja</dependency> -->
   <!-- Must include the "caja" feature to display samplecontainer -->
   <!-- gadgets when "use caja" is checked -->
   <gadget>    
     <script>
       var requiredConfig = {
-        "impl": gadgets.config.NonEmptyStringValidator,
         "path": gadgets.config.NonEmptyStringValidator,
         "domain": gadgets.config.NonEmptyStringValidator,
         "enableCaja": gadgets.config.BooleanValidator,
@@ -40,19 +38,11 @@
           var path = configParams.path;
           path = path.replace("%host%", document.location.host);
 
-          if (configParams.impl == "rpc") {
-            ShindigContainer = function() {
-              JsonRpcContainer.call(this, path,
-              configParams.domain, configParams.supportedFields);
-            };
-            ShindigContainer.inherits(JsonRpcContainer);
-          } else {
-            ShindigContainer = function() {
-              RestfulContainer.call(this, path,
-              configParams.domain, configParams.supportedFields);
-            };
-            ShindigContainer.inherits(RestfulContainer);
-          }
+          ShindigContainer = function() {
+            JsonRpcContainer.call(this, path,
+            configParams.domain, configParams.supportedFields);
+          };
+          ShindigContainer.inherits(JsonRpcContainer);
 
           opensocial.Container.setContainer(new ShindigContainer());
       });
