@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-03-25
+ 2009-04-16
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -55,11 +55,11 @@
 *-------------------------+-----------------+----------+
 ||                        || Implementation || Download Link
 *-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-binary.tar.bz2}shindig-1.1-SNAPSHOT-binary.tar.bz2}}
+| Shindig (tar.bz2)       | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.bz2}shindig-1.1-SNAPSHOT-java.tar.bz2}}
 *-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-binary.tar.gz}shindig-1.1-SNAPSHOT-binary.tar.gz}}
+| Shindig (tar.gz)        | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.gz}shindig-1.1-SNAPSHOT-java.tar.gz}}
 *-------------------------+-----------------+----------+
-| Shindig (zip)           | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-binary.zip}shindig-1.1-SNAPSHOT-binary.zip}}
+| Shindig (zip)           | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.zip}shindig-1.1-SNAPSHOT-java.zip}}
 *-------------------------+-----------------+----------+
 | Shindig (tar.bz2)       | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.tar.bz2}shindig-1.1-SNAPSHOT-php.tar.bz2}}
 *-------------------------+-----------------+----------+
