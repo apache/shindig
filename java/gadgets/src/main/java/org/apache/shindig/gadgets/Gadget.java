@@ -95,14 +95,20 @@ public class Gadget {
    */
   private List<String> allGadgetFeatures;
   public synchronized List<String> getAllFeatures() {
-    if (allGadgetFeatures == null && gadgetFeatureRegistry != null) {
-      allGadgetFeatures = Lists.newArrayList();
-      for (GadgetFeature gadgetFeature :
-             gadgetFeatureRegistry.getFeatures(this.spec.getModulePrefs().getFeatures().keySet())) {
-        allGadgetFeatures.add(gadgetFeature.getName());
+    if (allGadgetFeatures == null) {
+      if (gadgetFeatureRegistry != null) {
+        allGadgetFeatures = Lists.newArrayList();
+        for (GadgetFeature gadgetFeature :
+               gadgetFeatureRegistry.getFeatures(
+                   this.spec.getModulePrefs().getFeatures().keySet())) {
+          allGadgetFeatures.add(gadgetFeature.getName());
+        }
+        // now all features are in reverse order of dependency. So reverse the list.
+        Collections.reverse(allGadgetFeatures);
+      } else {
+        throw new IllegalStateException(
+            "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");
       }
-      // now all features are in reverse order of dependency. So reverse the list.
-      Collections.reverse(allGadgetFeatures);
     }
     return allGadgetFeatures;
   }
