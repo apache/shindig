@@ -52,7 +52,7 @@ import com.google.inject.Singleton;
  * the following issues are addressed:
  *
  * 1. This class potentially allows access to resources behind an organization's firewall.
- * 2. This class does not handle most advanced HTTP functionality correctly (SSL, gzip, etc.)
+ * 2. This class does not handle most advanced HTTP functionality correctly (SSL, etc.)
  * 3. This class does not enforce any limits on what is fetched from remote hosts.
  */
 @Singleton
@@ -123,7 +123,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       responseBodyStream = new ByteArrayInputStream(ArrayUtils.EMPTY_BYTE_ARRAY);
     }
 
-    String encoding = headers.get("Content-Type");
+    String encoding = headers.get("Content-Encoding");
 
     // Create the appropriate stream wrapper based on the encoding type.
     InputStream is = responseBodyStream;
