@@ -62,30 +62,13 @@ public class HttpResponseTest {
   }
 
   @Test
-  public void testGetEncoding() throws Exception {
-    HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Content-Type", "text/plain; charset=TEST-CHARACTER-SET")
-        .setResponse(new byte[] {'j', 'u', 'n', 'k'})
-        .create();
-    assertEquals("TEST-CHARACTER-SET", response.getEncoding());
-  }
-
-  @Test
-  public void testGetEncodingQuotes() throws Exception {
-    HttpResponse response = new HttpResponseBuilder()
-        .addHeader("Content-Type", "text/plain; charset=\"TEST-CHARACTER-SET\"")
-        .setResponse(new byte[] {'j', 'u', 'n', 'k'})
-        .create();
-    assertEquals("TEST-CHARACTER-SET", response.getEncoding());
-  }
-
-  @Test
   public void testEncodingDetectionUtf8WithBom() throws Exception {
      HttpResponse response = new HttpResponseBuilder()
          .addHeader("Content-Type", "text/plain; charset=UTF-8")
          .setResponse(UTF8_DATA)
          .create();
     assertEquals(UTF8_STRING, response.getResponseAsString());
+    assertEquals("UTF-8", response.getEncoding());
   }
 
   @Test
@@ -99,9 +82,50 @@ public class HttpResponseTest {
   }
 
   @Test
+  public void testEncodingDetectionLatin1withIncorrectCharset() throws Exception {
+    // Input is a basic latin-1 string with 1 non-UTF8 compatible char.
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/plain; charset=iso-88859-1")
+        .setResponse(LATIN1_DATA)
+        .create();
+    assertEquals(LATIN1_STRING, response.getResponseAsString());
+    assertEquals("ISO-8859-1", response.getEncoding());
+  }
+
+  @Test
+  public void testEncodingDetectionUtf8WithBomAndIncorrectCharset() throws Exception {
+     HttpResponse response = new HttpResponseBuilder()
+         .addHeader("Content-Type", "text/plain; charset=UTTFF-88")
+         .setResponse(UTF8_DATA)
+         .create();
+    assertEquals(UTF8_STRING, response.getResponseAsString());
+    assertEquals("UTF-8", response.getEncoding());
+  }
+
+  @Test
+  public void testEncodingDetectionUtf8WithBomAndInvalidCharset() throws Exception {
+     HttpResponse response = new HttpResponseBuilder()
+         // Use a charset that will generate an IllegalCharsetNameException
+         .addHeader("Content-Type", "text/plain; charset=.UTF-8")
+         .setResponse(UTF8_DATA)
+         .create();
+    assertEquals(UTF8_STRING, response.getResponseAsString());
+    assertEquals("UTF-8", response.getEncoding());
+  }
+
+  @Test
   public void testEncodingDetectionBig5() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/plain; charset=BIG5")
+        .setResponse(BIG5_DATA)
+        .create();
+    assertEquals(BIG5_STRING, response.getResponseAsString());
+  }
+
+  @Test
+  public void testEncodingDetectionBig5WithQuotes() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/plain; charset=\"BIG5\"")
         .setResponse(BIG5_DATA)
         .create();
     assertEquals(BIG5_STRING, response.getResponseAsString());
@@ -141,7 +165,7 @@ public class HttpResponseTest {
      HttpResponse response = new HttpResponseBuilder()
         .setResponse(LATIN1_DATA)
         .create();
-    assertEquals(HttpResponse.DEFAULT_ENCODING, response.getEncoding());
+    assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding());
   }
 
   @Test
@@ -150,7 +174,7 @@ public class HttpResponseTest {
         .setResponse(LATIN1_DATA)
         .addHeader("Content-Type", "image/png; charset=iso-8859-1")
         .create();
-    assertEquals(HttpResponse.DEFAULT_ENCODING, response.getEncoding().toUpperCase());
+    assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding().toUpperCase());
   }
 
   @Test
@@ -159,7 +183,7 @@ public class HttpResponseTest {
         .setResponse(LATIN1_DATA)
         .addHeader("Content-Type", "application/x-shockwave-flash; charset=iso-8859-1")
         .create();
-    assertEquals(HttpResponse.DEFAULT_ENCODING, response.getEncoding().toUpperCase());
+    assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding().toUpperCase());
   }
 
   @Test

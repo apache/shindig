@@ -27,7 +27,7 @@ public class EncodingDetectorTest {
   @Test
   public void asciiAssumesUtf8() throws Exception {
     byte[] data = "Hello, world".getBytes("US-ASCII");
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true));
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
   }
 
   @Test
@@ -36,14 +36,14 @@ public class EncodingDetectorTest {
         (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
     };
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true));
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
   }
 
   @Test
   public void assumeLatin1OnInvalidUtf8() throws Exception {
     byte[] data = "\u4F60\u597D".getBytes("BIG5");
 
-    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true));
+    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true).name());
   }
 
   @Test
@@ -53,7 +53,7 @@ public class EncodingDetectorTest {
                    "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
                    .getBytes("GB18030");
 
-    assertEquals("GB18030", EncodingDetector.detectEncoding(data, false));
+    assertEquals("GB18030", EncodingDetector.detectEncoding(data, false).name());
   }
 
   @Test
@@ -63,13 +63,13 @@ public class EncodingDetectorTest {
                    "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
                    .getBytes("UTF-8");
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true));
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
   }
 
   @Test
   public void shortUtf8StringIsUtf8() throws Exception {
     byte[] data = "Games, HQ, Mang\u00E1, Anime e tudo que um bom nerd ama".getBytes("UTF-8");
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true));
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
   }
 }

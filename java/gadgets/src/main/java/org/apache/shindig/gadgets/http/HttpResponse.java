@@ -122,7 +122,7 @@ public final class HttpResponse implements Externalizable {
   // Default TTL for an entry in the cache that does not have any cache control headers.
   static final long DEFAULT_TTL = 5L * 60L * 1000L;
 
-  static final String DEFAULT_ENCODING = "UTF-8";
+  static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
@@ -138,7 +138,7 @@ public final class HttpResponse implements Externalizable {
 
   private transient String responseString;
   private transient long date;
-  private transient String encoding;
+  private transient Charset encoding;
   private transient Map<String, String> metadata;
 
   private int httpStatusCode;
@@ -208,7 +208,7 @@ public final class HttpResponse implements Externalizable {
    * @return The encoding of the response body, if we're able to determine it.
    */
   public String getEncoding() {
-    return encoding;
+    return encoding.name();
   }
 
   /**
@@ -234,12 +234,7 @@ public final class HttpResponse implements Externalizable {
    */
   public String getResponseAsString() {
     if (responseString == null) {
-      Charset charset = encodingToCharset.get(encoding);
-      if (charset == null) {
-        charset = Charset.forName(encoding);
-        encodingToCharset.put(encoding, charset);
-      }
-      responseString = charset.decode(ByteBuffer.wrap(responseBytes)).toString();
+      responseString = encoding.decode(ByteBuffer.wrap(responseBytes)).toString();
 
       // Strip BOM if present
       if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
@@ -424,7 +419,7 @@ public final class HttpResponse implements Externalizable {
    *
    * @return The detected encoding or DEFAULT_ENCODING.
    */
-  private static String getAndUpdateEncoding(Multimap<String, String> headers, byte[] body) {
+  private static Charset getAndUpdateEncoding(Multimap<String, String> headers, byte[] body) {
     if (body == null || body.length == 0) {
       return DEFAULT_ENCODING;
     }
@@ -445,14 +440,19 @@ public final class HttpResponse implements Externalizable {
           if (charset.charAt(0) == '"') {
             charset = charset.substring(1, charset.length() - 1);
           }
-          return charset;
+          
+          try {
+            return charsetForName(charset);
+          } catch (IllegalArgumentException e) {
+            // fall through to detection
+          }
         }
       }
-      String encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection);
+      Charset encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection);
       // Record the charset in the content-type header so that its value can be cached
       // and re-used. This is a BIG performance win.
       values.clear();
-      values.add(contentType + "; charset=" + encoding);
+      values.add(contentType + "; charset=" + encoding.name());
 
       return encoding;
     } else {
@@ -461,6 +461,21 @@ public final class HttpResponse implements Externalizable {
     }
   }
 
+  /**
+   * Cover for Charset.forName() that caches results.
+   * @return the charset
+   * @throws IllegalArgumentException if the encoding is invalid
+   */
+  private static Charset charsetForName(String encoding) {
+    Charset charset = encodingToCharset.get(encoding);
+    if (charset == null) {
+      charset = Charset.forName(encoding);
+      encodingToCharset.put(encoding, charset);
+    }
+    
+    return charset;
+  }
+  
   @Override
   public boolean equals(Object obj) {
     if (obj == this) { return true; }

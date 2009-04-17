@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.encoding;
 
+import java.nio.charset.Charset;
+
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
@@ -27,6 +29,8 @@ import com.ibm.icu.text.CharsetMatch;
  * Highly skewed towards common encodings (UTF-8 and Latin-1).
  */
 public class EncodingDetector {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+  private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
   /**
    * Returns the detected encoding of the given byte array.
@@ -38,20 +42,20 @@ public class EncodingDetector {
    *     expensive!
    * @return The detected encoding.
    */
-  public static String detectEncoding(byte[] input, boolean assume88591IfNotUtf8) {
+  public static Charset detectEncoding(byte[] input, boolean assume88591IfNotUtf8) {
     if (looksLikeValidUtf8(input)) {
-      return "UTF-8";
+      return UTF_8;
     }
 
     if (assume88591IfNotUtf8) {
-      return "ISO-8859-1";
+      return ISO_8859_1;
     }
 
     // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.
     CharsetDetector detector = new CharsetDetector();
     detector.setText(input);
     CharsetMatch match = detector.detect();
-    return match.getName().toUpperCase();
+    return Charset.forName(match.getName().toUpperCase());
   }
 
   /**
