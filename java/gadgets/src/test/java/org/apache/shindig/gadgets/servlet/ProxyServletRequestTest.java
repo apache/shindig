@@ -30,7 +30,14 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
   private final HttpServletRequest request = mock(HttpServletRequest.class);
 
   public ProxyServletRequest setupMockRequest(String url) {
+    String query = null;
+    int qPos = url.indexOf('?');
+    if (qPos != -1) {
+      query = url.substring(qPos + 1);
+      url = url.substring(0, qPos);
+    }
     expect(request.getRequestURI()).andReturn(url).atLeastOnce();
+    expect(request.getQueryString()).andReturn(query).anyTimes();
     expect(request.getParameter("url")).andReturn(URL).anyTimes();
     replay();
     return new ProxyServletRequest(request);
