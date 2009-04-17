@@ -80,7 +80,7 @@ function parseUrl() {
  */
 function mergeDefaults() {
   for (var name in defaultPrefs) {
-    if (!prefs[name]) {
+    if (typeof prefs[name] === 'undefined') {
       prefs[name] = defaultPrefs[name];
     }
   }
