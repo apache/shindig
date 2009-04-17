@@ -88,7 +88,7 @@ public class EndToEndTest {
     for ( String resource : EXPECTED_RESOURCES ) {
       String url = EndToEndServer.SERVER_URL + '/' + resource;
       Page p = webClient.getPage(url);
-      assertEquals("Failed to load test resource "+url,200,p.getWebResponse().getStatusCode());
+      assertEquals("Failed to load test resource " + url, 200, p.getWebResponse().getStatusCode());
     }
   }
 
@@ -111,6 +111,12 @@ public class EndToEndTest {
   public void caja() throws Exception {
     executeAllPageTests("cajaTest.xml");
   }
+
+  @Test
+  public void testMakeRequest() throws Exception {
+    executeAllPageTests("makeRequestTest");
+  }
+
 
   @Test
   public void messageBundlesRtl() throws Exception {
@@ -151,7 +157,7 @@ public class EndToEndTest {
     
     // Result should contain just one body
     assertEquals(bodyList.getLength(), 1);
-    DomNode body = (DomNode)bodyList.item(0);
+    DomNode body = (DomNode) bodyList.item(0);
 
     // Failed output contains only an error block plus a onload script block
     assertEquals(body.getChildNodes().getLength(), 2);
@@ -244,7 +250,7 @@ public class EndToEndTest {
     assertEquals("value", jsonPipeline.getTextContent().trim());
 
     Element textPipeline = page.getElementById("text");
-    assertEquals("{'key': 'value'}", textPipeline.getTextContent().trim());
+    assertEquals("{\"key\": \"value\"}", textPipeline.getTextContent().trim());
   }
 
   // HtmlUnits implementation of Element.getElementsByTagName() is just

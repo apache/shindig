@@ -30,12 +30,11 @@
           fetchMakeRequest: function() {
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              // Figure out why makeRequest isn't working in EndToEndTest environment, but works in jsunit test environment.
-              //	assertEquals("Should have Google page",'foo', response.data);
+              assertEquals("Didn't load file", '{"key": "value"}', response.data);
               finished();
             }
 
-            osapi.makeRequest("http://www.google.com/", null).execute(receivedData);
+            osapi.makeRequest('http://localhost:9003/test.json').execute(receivedData);
           }
         };
       </script>
