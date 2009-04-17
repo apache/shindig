@@ -407,8 +407,10 @@ gadgets.Gadget.prototype.setUserPref = function(name, value) {
 
 gadgets.Gadget.prototype.render = function(chrome) {
   if (chrome) {
+    var gadget = this;
     this.getContent(function(content) {
       chrome.innerHTML = content;
+      window.frames[gadget.getIframeId()].location = gadget.getIframeUrl(); 
     });
   }
 };
@@ -517,7 +519,7 @@ gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
   gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
   continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
       iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
-      '" src="' + this.getIframeUrl() +
+      '" src="about:blank' +
       '" frameborder="no" scrolling="no"' +
       (this.height ? ' height="' + this.height + '"' : '') +
       (this.width ? ' width="' + this.width + '"' : '') +
