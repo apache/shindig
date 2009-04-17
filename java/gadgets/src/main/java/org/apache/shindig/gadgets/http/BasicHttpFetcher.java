@@ -17,17 +17,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Proxy;
-import java.net.Socket;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -41,6 +30,17 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Proxy;
+import java.net.Socket;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -57,10 +57,11 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class BasicHttpFetcher implements HttpFetcher {
-  private static final int CONNECT_TIMEOUT_MS = 5000;
+  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
   private Provider<Proxy> proxyProvider;
+  private volatile int connectionTimeoutMs;
 
   /**
    * Creates a new fetcher for fetching HTTP objects.  Not really suitable
@@ -70,8 +71,10 @@ public class BasicHttpFetcher implements HttpFetcher {
    *
    * @param maxObjSize Maximum size, in bytes, of object to fetch.  Except this
    * isn't actually implemented.
+   * @param connectionTimeoutMs timeout, in milliseconds, for requests.
    */
-  public BasicHttpFetcher(int maxObjSize) {
+  public BasicHttpFetcher(int maxObjSize, int connectionTimeoutMs) {
+	  this.connectionTimeoutMs = connectionTimeoutMs;
   }
 
   /**
@@ -79,7 +82,7 @@ public class BasicHttpFetcher implements HttpFetcher {
    */
   @Inject
   public BasicHttpFetcher() {
-    this(DEFAULT_MAX_OBJECT_SIZE);
+    this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS);
   }
 
   // TODO Re-add Inject annotation once shindig is upgraded to guice 2.0, because at the moment this causes problems
@@ -88,6 +91,15 @@ public class BasicHttpFetcher implements HttpFetcher {
   // @Inject(optional=true)
   public void setProxyProvider(Provider<Proxy> proxyProvider) {
     this.proxyProvider = proxyProvider;
+  }
+
+  /**
+   * Change the connection timeout for fetches.
+   *
+   * @param connectionTimeoutMs new connection timeout in milliseconds
+   */
+  public void setConnectionTimeoutMs(int connectionTimeoutMs) {
+    this.connectionTimeoutMs = connectionTimeoutMs;
   }
 
   /**
@@ -173,7 +185,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     }
 
     httpMethod.setFollowRedirects(false);
-    httpMethod.getParams().setSoTimeout(CONNECT_TIMEOUT_MS);
+    httpMethod.getParams().setSoTimeout(connectionTimeoutMs);
     httpMethod.setRequestHeader("Content-Length", String.valueOf(request.getPostBodyLength()));
     httpMethod.setRequestHeader("Accept-Encoding", "gzip, deflate");
 
