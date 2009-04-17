@@ -30,30 +30,43 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
   private HashLockedDomainService lockedDomainService;
-  private final GadgetSpec wantsLocked = makeSpec(true, "http://somehost.com/somegadget.xml");
-  private final GadgetSpec notLocked = makeSpec(false, "not-locked");
+  private Gadget wantsLocked = null;
+  private Gadget notLocked = null;
   private final ContainerConfig requiredConfig = mock(ContainerConfig.class);
   private final ContainerConfig enabledConfig = mock(ContainerConfig.class);
 
-  private static GadgetSpec makeSpec(boolean wantsLocked, String url) {
+  private Gadget makeGadget(boolean wantsLocked, String url) {
     String gadgetXml;
+    List<String> features = new ArrayList<String>();
+    List<GadgetFeature> gadgetFeatures = new ArrayList<GadgetFeature>();
     if (wantsLocked) {
       gadgetXml =
           "<Module><ModulePrefs title=''>" +
           "  <Require feature='locked-domain'/>" +
           "</ModulePrefs><Content/></Module>";
+      features = Arrays.asList("locked-domain");
+      gadgetFeatures = Arrays.asList(new GadgetFeature("locked-domain",
+          new ArrayList<JsLibrary>(), null));
     } else {
       gadgetXml = "<Module><ModulePrefs title=''/><Content/></Module>";
     }
 
+    GadgetSpec spec = null;
     try {
-      return new GadgetSpec(Uri.parse(url), gadgetXml);
+      spec = new GadgetSpec(Uri.parse(url), gadgetXml);
     } catch (GadgetException e) {
       return null;
     }
+
+    GadgetFeatureRegistry registry = mock(GadgetFeatureRegistry.class);
+    expect(registry.getFeatures(isA(Collection.class))).andReturn(gadgetFeatures).anyTimes();
+    return new Gadget().setSpec(spec).setGadgetFeatureRegistry(registry);
   }
 
   @Override
@@ -70,6 +83,8 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
     expect(enabledConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
+    wantsLocked = makeGadget(true, "http://somehost.com/somegadget.xml");
+    notLocked = makeGadget(false, "not-locked");
   }
 
 

@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.util.Base32;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -88,7 +87,7 @@ public class HashLockedDomainService implements LockedDomainService {
     return true;
   }
 
-  public boolean gadgetCanRender(String host, GadgetSpec gadget, String container) {
+  public boolean gadgetCanRender(String host, Gadget gadget, String container) {
     container = normalizeContainer(container);
     if (enabled) {
       if (gadgetWantsLockedDomain(gadget) ||
@@ -101,7 +100,7 @@ public class HashLockedDomainService implements LockedDomainService {
     return true;
   }
 
-  public String getLockedDomainForGadget(GadgetSpec gadget, String container) {
+  public String getLockedDomainForGadget(Gadget gadget, String container) {
     container = normalizeContainer(container);
     if (enabled) {
       if (gadgetWantsLockedDomain(gadget) ||
@@ -112,18 +111,18 @@ public class HashLockedDomainService implements LockedDomainService {
     return null;
   }
 
-  private String getLockedDomain(GadgetSpec gadget, String container) {
+  private String getLockedDomain(Gadget gadget, String container) {
     String suffix = lockedSuffixes.get(container);
     if (suffix == null) {
       return null;
     }
-    byte[] sha1 = DigestUtils.sha(gadget.getUrl().toString());
+    byte[] sha1 = DigestUtils.sha(gadget.getSpec().getUrl().toString());
     String hash = new String(Base32.encodeBase32(sha1));
     return hash + suffix;
   }
 
-  private boolean gadgetWantsLockedDomain(GadgetSpec gadget) {
-    return gadget.getModulePrefs().getFeatures().containsKey("locked-domain");
+  private boolean gadgetWantsLockedDomain(Gadget gadget) {
+    return gadget.getAllFeatures().contains("locked-domain");
   }
 
   private boolean hostRequiresLockedDomain(String host) {

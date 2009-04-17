@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets;
 
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-
 import com.google.inject.ImplementedBy;
 
 /**
@@ -45,7 +43,7 @@ public interface LockedDomainService {
    * @param container container
    * @return true if the gadget can render
    */
-  boolean gadgetCanRender(String host, GadgetSpec gadget, String container);
+  boolean gadgetCanRender(String host, Gadget gadget, String container);
 
   /**
    * Calculate the locked domain for a particular gadget on a particular
@@ -56,6 +54,6 @@ public interface LockedDomainService {
    * @return the host name on which the gadget should render, or null if locked domain should not
    * be used to render this gadget.
    */
-  public String getLockedDomainForGadget(GadgetSpec gadget, String container);
+  public String getLockedDomainForGadget(Gadget gadget, String container);
 
 }

@@ -125,7 +125,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
       default:
         Uri iframeBaseUri = iframeBaseUris.get(context.getContainer());
         uri = iframeBaseUri != null ? new UriBuilder(iframeBaseUri) : new UriBuilder();
-        String host = lockedDomainService.getLockedDomainForGadget(spec, context.getContainer());
+        String host = lockedDomainService.getLockedDomainForGadget(gadget, context.getContainer());
         if (host != null) {
           uri.setAuthority(host);
         }

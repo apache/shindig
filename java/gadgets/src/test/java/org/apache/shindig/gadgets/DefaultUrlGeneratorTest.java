@@ -181,7 +181,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
           "</Module>";
     GadgetSpec spec = new GadgetSpec(Uri.parse(SPEC_URL), xml);
 
-    expect(lockedDomainService.getLockedDomainForGadget(isA(GadgetSpec.class), eq(CONTAINER)))
+    expect(lockedDomainService.getLockedDomainForGadget(isA(Gadget.class), eq(CONTAINER)))
         .andReturn("locked.example.org");
     replay();
 

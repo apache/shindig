@@ -228,12 +228,12 @@ public class RendererTest {
     protected FakeLockedDomainService() {
     }
 
-    public boolean gadgetCanRender(String host, GadgetSpec gadget, String container) {
+    public boolean gadgetCanRender(String host, Gadget gadget, String container) {
       wasChecked = true;
       return canRender;
     }
 
-    public String getLockedDomainForGadget(GadgetSpec gadget, String container) {
+    public String getLockedDomainForGadget(Gadget gadget, String container) {
       return null;
     }
 

@@ -81,8 +81,7 @@ public class Renderer {
         return RenderingResults.mustRedirect(gadget.getCurrentView().getHref());
       }
 
-      GadgetSpec spec = gadget.getSpec();
-      if (!lockedDomainService.gadgetCanRender(context.getHost(), spec, context.getContainer())) {
+      if (!lockedDomainService.gadgetCanRender(context.getHost(), gadget, context.getContainer())) {
         return RenderingResults.error("Invalid domain");
       }
 
