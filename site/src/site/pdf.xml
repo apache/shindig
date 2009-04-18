@@ -47,6 +47,7 @@
     <item name="Code Conventions" ref="community/conventions/code.apt"/>
     <item name="Jira Conventions" ref="community/conventions/jira.apt"/>
     <item name="SVN Conventions" ref="community/conventions/svn.apt"/>
+    <item name="Shindig Release Process" ref="community/releasing.apt"/>
     <item name="FAQ" ref="faq.fml"/>
     <item name="Powered By" ref="powered-by.apt"/>
     <item name="Resources" ref="resources.apt"/>

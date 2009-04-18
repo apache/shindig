@@ -151,6 +151,12 @@ Developers Conventions
 
   []
 
+Developers Documentation
+
+  * {{{./releasing.html}Shindig Release Process}}
+
+  []
+
 Apache Resources
 
   * {{{http://www.apache.org/foundation/}About the Apache Software Foundation}}
