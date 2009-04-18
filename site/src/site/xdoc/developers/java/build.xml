@@ -139,7 +139,7 @@ under the License.
           <li>http://localhost:&lt;port&gt;/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml</li>
         </ul>
 
-        <p><img src="./../../images/samples/task.png" alt="Sample Container"/></p>
+        <p><img src="../../images/samples/task.png" alt="Sample Container"/></p>
       </subsection>
 
       <subsection name="Setting up an Eclipse project to build Shindig">
