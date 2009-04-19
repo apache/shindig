@@ -50,7 +50,6 @@
           <descriptors>
             <descriptor>src/main/assembly/php.xml</descriptor>
             <descriptor>src/main/assembly/java.xml</descriptor>
-            <descriptor>src/main/assembly/source.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
         </configuration>
