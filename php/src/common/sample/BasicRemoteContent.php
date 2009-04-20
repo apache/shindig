@@ -64,19 +64,19 @@ class BasicRemoteContent extends RemoteContent {
   public function fetch(RemoteContentRequest $request) {
     $ignoreCache = $request->getOptions()->ignoreCache;
     if (!$ignoreCache && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
-      $request = $cachedRequest;
+      $response = $cachedRequest;
     } else {
       $originalRequest = clone $request;
-      $request = $this->divertFetch($request);
-      if ($request->getHttpCode() != 200 && !$ignoreCache && !$request->isPost()) {
-        $cachedRequest = $this->cache->expiredGet($request->toHash());
+      $response = $this->divertFetch($request);
+      if ($response->getHttpCode() != 200 && !$ignoreCache && !$originalRequest->isPost()) {
+        $cachedRequest = $this->cache->expiredGet($originalRequest->toHash());
         if ($cachedRequest['found'] == true) {
           return $cachedRequest['data'];
         }
       }
-      $this->setRequestCache($originalRequest, $request, $this->cache);
+      $this->setRequestCache($originalRequest, $response, $this->cache);
     }
-    return $request;
+    return $response;
   }
 
   public function multiFetch(Array $requests) {
@@ -141,6 +141,9 @@ class BasicRemoteContent extends RemoteContent {
   }
 
   private function setRequestCache(RemoteContentRequest $originalRequest, RemoteContentRequest $request, Cache $cache) {
+    if ($request->isStrictNoCache()) {
+      return;
+    }
     $ignoreCache = $originalRequest->getOptions()->ignoreCache;
     if (!$request->isPost() && !$ignoreCache) {
       $ttl = Config::get('cache_time');

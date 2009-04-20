@@ -28,36 +28,80 @@ class OAuthService {
   private static $METHOD_ATTR = "method";
   
   private $name;
+  
+  /**
+   * @var EndPoint
+   */
   private $requestUrl;
+  
+  /**
+   * @var EndPoint
+   */
   private $authorizationUrl;
+  
+  /**
+   * @var EndPoint
+   */
   private $accessUrl;
 
-  public function __construct($service) {
-    $attrs = $service->attributes();
-    $this->name = (string)$attrs['name'];
-    if (isset($service->Request)) {
-      $this->requestUrl = $this->parseEndPoint($service->Request->attributes());
+  public function __construct(DOMElement $service) {
+    $this->name = (string)$service->getAttribute('name');
+    $elements = $service->getElementsByTagName('*');
+    foreach ($elements as $element) {
+      $type = $element->tagName;
+      if ($type == 'Request') {
+        if ($this->requestUrl) {
+          throw new SpecParserException("Multiple OAuth/Service/Request elements");
+        }
+        $this->requestUrl = $this->parseEndPoint($element);
+      } else if ($type == 'Authorization') {
+        if ($this->authorizationUrl) {
+          throw new SpecParserException("Multiple OAuth/Service/Authorization elements");
+        }
+        $this->authorizationUrl = $this->parseEndPoint($element);
+      } else if ($type == 'Access') {
+        if ($this->accessUrl) {
+          throw new SpecParserException("Multiple OAuth/Service/Access elements");
+        }
+        $this->accessUrl = $this->parseEndPoint($element);
+      }
     }
-    if (isset($service->Authorization)) {
-      $this->authorizationUrl = $this->parseEndPoint($service->Authorization->attributes());
+    if ($this->requestUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Request is required");
     }
-    if (isset($service->Access)) {
-      $this->accessUrl = $this->parseEndPoint($service->Access->attributes());
+    if ($this->accessUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Access is required");
+    }
+    if ($this->authorizationUrl == null) {
+      throw new SpecParserException("/OAuth/Service/Authorization is required");
+    }
+    if ($this->requestUrl->location != $this->accessUrl->location) {
+      throw new SpecParserException(
+          "Access@location must be identical to Request@location");
+    }
+    if ($this->requestUrl->method != $this->accessUrl->method) {
+      throw new SpecParserException(
+          "Access@method must be identical to Request@method");
+    }
+    if ($this->requestUrl->location == Location::$body &&
+        $this->requestUrl->method == Method::$GET) {
+      throw new SpecParserException("Incompatible parameter location, cannot" +
+          "use post-body with GET requests");
     }
   }
 
   private function parseEndPoint($element) {
-    $url = trim((string)$element[OAuthService::$URL_ATTR]);
+    $url = trim($element->getAttribute(OAuthService::$URL_ATTR));
     if (empty($url)) {
       throw new SpecParserException("Not an HTTP url");
     }
     $location = Location::$header;
-    $locationString = trim((string)$element[OAuthService::$PARAM_LOCATION_ATTR]);
+    $locationString = trim($element->getAttribute(OAuthService::$PARAM_LOCATION_ATTR));
     if (! empty($locationString)) {
       $location = $locationString;
     }
     $method = Method::$GET;
-    $methodString = trim((string)$element[OAuthService::$METHOD_ATTR]);
+    $methodString = trim($element->getAttribute(OAuthService::$METHOD_ATTR));
     if (! empty($methodString)) {
       $method = $methodString;
     }

@@ -40,6 +40,9 @@ class OAuthAccessor {
     $this->properties[$name] = $value;
   }
 
+  /**
+   * @return OAuthRequest
+   */
   public function newRequestMessage($method, $url, $parameters) {
     if (! isset($method)) {
       $method = $this->getProperty("httpMethod");

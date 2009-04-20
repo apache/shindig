@@ -61,6 +61,9 @@ class OAuthStoreVars {
 }
 
 class AccesorInfo {
+  /**
+   * @var OAuthAccessor
+   */
   public $accessor;
   public $httpMethod;
   public $signatureType;
@@ -74,6 +77,9 @@ class AccesorInfo {
     $this->paramLocation = $paramLocation;
   }
 
+  /**
+   * @return OAuthAccessor
+   */
   public function getAccessor() {
     return $this->accessor;
   }

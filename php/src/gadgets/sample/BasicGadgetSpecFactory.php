@@ -21,7 +21,7 @@
 /**
  * Basic implementation of a gadget spec factory.
  */
-class BasicGadgetSpecFactory implements GadgetSpecFactory {
+class BasicGadgetSpecFactory {
 
   private $fetcher;
   private $cache;
@@ -48,13 +48,11 @@ class BasicGadgetSpecFactory implements GadgetSpecFactory {
   private function fetchFromWeb($url, $ignoreCache) {
     $remoteContentRequest = new RemoteContentRequest($url);
     $remoteContentRequest->getOptions()->ignoreCache = $ignoreCache;
-    $remoteContent = new BasicRemoteContent($this->fetcher);
+    $remoteContent = new BasicRemoteContent();
     $spec = $remoteContent->fetch($remoteContentRequest);
     
-    $spec = $this->fetcher->fetchRequest($remoteContentRequest);
-    $specParser = new GadgetSpecParser();
-    $context = new ProxyGadgetContext($url);
-    $gadgetSpec = $specParser->parse($spec->getResponseContent(), $context);
+    $gadgetSpecParser = new GadgetSpecParser();
+    $gadgetSpec = $gadgetSpecParser->parse($spec->getResponseContent());
     return $gadgetSpec;
   }
 

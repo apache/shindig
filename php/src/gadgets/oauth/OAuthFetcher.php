@@ -75,6 +75,7 @@ class OAuthFetcher extends RemoteContentFetcher {
    * The accessor we use for signing messages. This also holds metadata about
    * the service provider, such as their URLs and the keys we use to access
    * those URLs.
+   * @var AccesorInfo
    */
   private $accessorInfo;
 
@@ -90,6 +91,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * The request the client really wants to make.
+   * @var RemoteContentRequest
    */
   private $realRequest;
 
@@ -167,8 +169,15 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $this->buildNonDataResponse();
   }
 
+  /**
+   * @return RemoteContentRequest
+   */
   private function buildNonDataResponse() {
-    return $this->addResponseMetadata();
+    $response = new RemoteContentRequest($this->realRequest->getUrl());
+    $this->addResponseMetadata($response);
+    $response->setResponseHeader('Pragma', 'no-cache');
+    $response->setResponseHeader('Cache-Control', 'no-cache');
+    return $response;
   }
 
   /**
@@ -222,11 +231,14 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $response;
   }
 
-  public function fetchRequest($request) {
+  /**
+   * @return RemoteContentRequest
+   */
+  public function fetchRequest(RemoteContentRequest $request) {
     if ($this->needApproval()) {
       // This is section 6.1 of the OAuth spec.
       $this->checkCanApprove();
-      $this->fetchRequestToken();
+      $this->fetchRequestToken($request);
       // This is section 6.2 of the OAuth spec.
       $this->buildClientApprovalState();
       $this->buildAznUrl();
@@ -236,7 +248,7 @@ class OAuthFetcher extends RemoteContentFetcher {
     } elseif ($this->needAccessToken()) {
       // This is section 6.3 of the OAuth spec
       $this->checkCanApprove();
-      $this->exchangeRequestToken();
+      $this->exchangeRequestToken($request);
       $this->saveAccessToken();
       $this->buildClientAccessState();
     }
@@ -268,10 +280,13 @@ class OAuthFetcher extends RemoteContentFetcher {
     $pageOwner = $this->authToken->getOwnerId();
     $pageViewer = $this->authToken->getViewerId();
     $stateOwner = @$this->origClientState[self::$OWNER_KEY];
-    if (! $pageOwner == $pageViewer) {
+    if (!$pageOwner) {
+      throw new GadgetException('Unauthenticated');
+    }
+    if ($pageOwner != $pageViewer) {
       throw new GadgetException("Only page owners can grant OAuth approval");
     }
-    if ($stateOwner != null && ! $stateOwner == $pageOwner) {
+    if ($stateOwner != null && !$stateOwner == $pageOwner) {
       throw new GadgetException("Client state belongs to a different person.");
     }
   }
@@ -280,13 +295,16 @@ class OAuthFetcher extends RemoteContentFetcher {
    *
    * @throws GadgetException
    */
-  private function fetchRequestToken() {
+  private function fetchRequestToken(RemoteContentRequest $request) {
     try {
       $accessor = $this->accessorInfo->getAccessor();
       //TODO The implementations of oauth differs from the one in JAVA. Fix the type OAuthMessage
       $url = $accessor->consumer->callback_url->requestTokenURL;
       $msgParams = array();
-      $msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
+      $msgParams['opensocial_owner_id'] = $request->getToken()->getOwnerId();
+      $msgParams['opensocial_viewer_id'] = $request->getToken()->getViewerId();
+      $msgParams['opensocial_app_id'] = $request->getToken()->getAppId();
+      $msgParams['opensocial_app_url'] = $request->getToken()->getAppUrl();
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
@@ -298,6 +316,9 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
+  /**
+   * @return OAuthRequest
+   */
   private function newRequestMessageMethod($method, $url, $params) {
     if (! isset($params)) {
       throw new Exception("params was null in " . "newRequestMessage " . "Use newRequesMessage if you don't have a params to pass");
@@ -325,6 +346,9 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $this->newRequestMessageParams($url, $params);
   }
 
+  /**
+   * @return OAuthRequest
+   */
   private function newRequestMessageParams($url, $params) {
     $method = "POST";
     if ($this->accessorInfo->getHttpMethod() == OAuthStoreVars::$HttpMethod['GET']) {
@@ -357,6 +381,9 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $result;
   }
 
+  /**
+   * @return RemoteContentRequest
+   */
   private function createRemoteContentRequest($oauthParams, $method, $url, $headers, $contentType, $postBody, $options) {
     $paramLocation = $this->accessorInfo->getParamLocation();
     $newHeaders = array();
@@ -397,7 +424,9 @@ class OAuthFetcher extends RemoteContentFetcher {
    */
   private function sendOAuthMessage(OAuthRequest $request) {
     $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
-    $content = $this->fetcher->fetchRequest($rcr);
+    $rcr->setToken($this->authToken);
+    $fetcher = new BasicRemoteContentFetcher();
+    $content = $fetcher->fetchRequest($rcr);
     $reply = OAuthRequest::from_request();
     $params = OAuthUtil::decodeForm($content->getResponseContent());
     $reply->set_parameters($params);
@@ -429,7 +458,7 @@ class OAuthFetcher extends RemoteContentFetcher {
     $accessor = $this->accessorInfo->getAccessor();
     $azn = $accessor->consumer->callback_url->userAuthorizationURL;
     $authUrl = $azn->url;
-    if (strstr($authUrl, "?") != - 1) {
+    if (strstr($authUrl, "?") == FALSE ) {
       $authUrl .= "?";
     } else {
       $authUrl .= "&";
@@ -450,13 +479,16 @@ class OAuthFetcher extends RemoteContentFetcher {
   /**
    * Implements section 6.3 of the OAuth spec.
    */
-  private function exchangeRequestToken() {
+  private function exchangeRequestToken(RemoteContentRequest $request) {
     try {
       $accessor = $this->accessorInfo->getAccessor();
       $url = $accessor->consumer->callback_url->accessTokenURL;
       $msgParams = array();
-      $msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
       $msgParams[OAuth::$OAUTH_TOKEN] = $accessor->requestToken;
+      $msgParams['opensocial_owner_id'] = $request->getToken()->getOwnerId();
+      $msgParams['opensocial_viewer_id'] = $request->getToken()->getViewerId();
+      $msgParams['opensocial_app_id'] = $request->getToken()->getAppId();
+      $msgParams['opensocial_app_url'] = $request->getToken()->getAppUrl();
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
@@ -507,8 +539,9 @@ class OAuthFetcher extends RemoteContentFetcher {
       // Build and sign the message.
       $oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
       $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
-      $content = $this->fetcher->fetchRequest($rcr);
       //TODO is there a better way to detect an SP error?
+      $fetcher = new BasicRemoteContentFetcher();
+      $content = $fetcher->fetchRequest($rcr);
       $statusCode = $content->getHttpCode();
       if ($statusCode >= 400 && $statusCode < 500) {
         $message = $this->parseAuthHeader(null, $content);
@@ -517,7 +550,7 @@ class OAuthFetcher extends RemoteContentFetcher {
         }
       }
       // Track metadata on the response
-      $this->addResponseMetadata();
+      $this->addResponseMetadata($content);
       return $content;
     } catch (Exception $e) {
       throw new GadgetException("INTERNAL SERVER ERROR: " . $e);
@@ -574,18 +607,26 @@ class OAuthFetcher extends RemoteContentFetcher {
     return $this->responseMetadata;
   }
 
-  public function addResponseMetadata() {
+  /**
+   * @var RemoteContentRequest $response
+   */
+  public function addResponseMetadata(RemoteContentRequest $response) {
+    $response->setHttpCode(200);
     if ($this->newClientState != null) {
       $this->responseMetadata[self::$CLIENT_STATE] = $this->newClientState;
+      $response->setMetadata(self::$CLIENT_STATE, $this->newClientState);
     }
     if ($this->aznUrl != null) {
       $this->responseMetadata[self::$APPROVAL_URL] = $this->aznUrl;
+      $response->setMetadata(self::$APPROVAL_URL, $this->aznUrl);
     }
     if ($this->error != null) {
       $this->responseMetadata[self::$ERROR_CODE] = $this->error;
+      $response->setMetadata(self::$ERROR_CODE, $this->error);
     }
     if ($this->errorText != null) {
       $this->responseMetadata[self::$ERROR_TEXT] = $this->errorText;
+      $response->setMetadata(self::$ERROR_TEXT, $this->errorText);
     }
   }
 

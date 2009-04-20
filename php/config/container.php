@@ -153,7 +153,7 @@ $shindigConfig = array(
 
   // If your development server is behind a proxy, enter the proxy details here in 'proxy.host.com:port' format.
   'proxy' => '',
-  
+
   // Container id, used for security token
   'container_id' => 'default'
 );

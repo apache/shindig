@@ -29,7 +29,8 @@ class RemoteContentRequest {
   // these fields are filled in once the request has completed
   private $responseContent = false;
   private $responseSize = false;
-  private $responseHeaders = false;
+  private $responseHeaders = array();
+  private $metadata = array();
   private $httpCode = false;
   private $contentType = null;
   private $created;
@@ -120,7 +121,7 @@ class RemoteContentRequest {
   // returns a hash code which identifies this request, used for caching
   // takes url and postbody into account for constructing the sha1 checksum
   public function toHash() {
-    return md5($this->uri . $this->postBody);
+    return md5($this->method . $this->uri . $this->authType . $this->postBody . $this->headers);
   }
 
   public static function getDefaultOptions() {
@@ -207,6 +208,10 @@ class RemoteContentRequest {
   public function setResponseContent($content) {
     $this->responseContent = $content;
   }
+  
+  public function setResponseHeader($headerName, $headerValue) {
+    $this->responseHeaders[$headerName] = $headerValue;
+  }
 
   public function setResponseHeaders($headers) {
     $this->responseHeaders = $headers;
@@ -270,7 +275,7 @@ class RemoteContentRequest {
   /**
    * Returns the SecurityToken for this request
    *
-   * @return unknown
+   * @return SecurityToken
    */
   public function getToken() {
     return $this->token;
@@ -313,6 +318,37 @@ class RemoteContentRequest {
    */
   public function getRefreshInterval() {
     return $this->refreshInterval;
+  }
+  
+  public function setMetadata($key, $value) {
+    $this->metadata[$key] = $value;
+  }
+  
+  public function getMetadatas() {
+    return $this->metadata;
+  }
+  
+  public function isStrictNoCache() {
+    $cacheControl = $this->getResponseHeader('Cache-Control');
+    if ($cacheControl != null) {
+      $directives = split(',', $cacheControl);
+      foreach ($directives as $directive) {
+        if (strcasecmp($directive, 'no-cache') == 0
+            || strcasecmp($directive, 'no-store') == 0
+            || strcasecmp($directive, 'private') == 0) {
+          return true;
+        }
+      }
+    }
+    $progmas = $this->getResponseHeader('Progma');
+    if ($progmas != null) {
+      foreach ($progmas as $progma) {
+        if (strcasecmp($progma, 'no-cache') == 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 

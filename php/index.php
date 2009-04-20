@@ -84,6 +84,7 @@ $servletMap = array(
     Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet',
     Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet',
     Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet',
+    Config::get('web_prefix') . '/gadgets/oauthcallback' => 'OAuthCallbackServlet',
     Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet',
     Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet',
     Config::get('web_prefix') . '/public.crt' => 'CertServlet',

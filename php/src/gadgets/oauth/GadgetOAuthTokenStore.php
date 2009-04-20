@@ -138,16 +138,15 @@ class GadgetOAuthTokenStore {
    * @param spec
    * @return a GadgetInfo
    */
-  public static function getProviderInfo(Gadget $spec, $serviceName) {
-    $oauthSpec = $spec->getOAuthSpec();
+  public static function getProviderInfo(GadgetSpec $spec, $serviceName) {
+    $oauthSpec = $spec->oauth;
     if ($oauthSpec == null) {
       $message = "gadget spec is missing /ModulePrefs/OAuth section";
       throw new GadgetException($message);
     }
-    $services = $oauthSpec->getServices();
     $service = null;
-    if (isset($services[$serviceName])) {
-      $service = $services[$serviceName];
+    if (isset($oauthSpec[$serviceName])) {
+      $service = $oauthSpec[$serviceName];
     }
     if ($service == null) {
       $message = '';

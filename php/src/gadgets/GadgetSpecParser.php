@@ -297,14 +297,8 @@ class GadgetSpecParser {
         $oauthNode = $oauthNodes->item(0);
         if (($serviceNodes = $oauthNode->getElementsByTagName('Service')) != null) {
           foreach ($serviceNodes as $service) {
-            if (($entryNodes = $service->getElementsByTagName('*')) != null) {
-              foreach ($entryNodes as $entry) {
-                $type = strtolower($entry->tagName);
-                $url = $entry->getAttribute('url');
-                $method = $entry->getAttribute('method') != null ? strtoupper($entry->getAttribute('method')) : 'GET';
-                $oauth[$type] = array('url' => $url, 'method' => $method);
-              }
-            }
+            $oauthService = new OAuthService($service);
+            $oauth[$oauthService->getName()] = $oauthService;
           }
         }
         $gadget->oauth = $oauth;

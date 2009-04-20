@@ -268,12 +268,11 @@ class OAuthRequest {
 
   /**
    * pretty much a helper function to set up the request
+   * @return OAuthRequest
    */
   public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters = NULL) {
     $parameters = is_array($parameters) ? $parameters : array();
-    $defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(),
-        "oauth_timestamp" => OAuthRequest::generate_timestamp(),
-        "oauth_consumer_key" => $consumer->key);
+    $defaults = array("oauth_nonce" => OAuthRequest::generate_nonce(), "oauth_timestamp" => OAuthRequest::generate_timestamp(), "oauth_consumer_key" => $consumer->key);
     $parameters = array_merge($defaults, $parameters);
     if (isset($token)) {
       $parameters['oauth_token'] = $token;
@@ -371,8 +370,7 @@ class OAuthRequest {
       }
       $this->parameters[$key] = $value;
     }
-    $parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(),
-        $this->get_signable_parameters());
+    $parts = array($this->get_normalized_http_method(), $this->get_normalized_http_url(), $this->get_signable_parameters());
     $parts = array_map(array('OAuthUtil', 'urlencodeRFC3986'), $parts);
     $this->parameters = $tmp;
     return implode('&', $parts);

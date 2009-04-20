@@ -64,9 +64,13 @@ class MakeRequestHandler extends ProxyBase {
     if (isset($_REQUEST['contentType']) && $_REQUEST['contentType'] == 'FEED' && $status == 200) {
       $this->parseFeed($result, $url);
     } else {
-      $resp = $result->getResponseContent();
+      $body = $result->getResponseContent();
     }
-    $json = array($url => array('body' => $resp, 'rc' => $status));
+    $responseArray = array('body' => $body, 'rc' => $status);
+    foreach ($result->getMetadatas() as $key => $value) {
+      $responseArray[$key] = $value;
+    }
+    $json = array($url => $responseArray);
     $json = json_encode($json);
     $output = UNPARSEABLE_CRUFT . $json;
     if ($status == 200) {
