@@ -24,8 +24,10 @@ import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.el.ELContext;
@@ -44,7 +46,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -70,6 +74,13 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   public static final String ATTRIBUTE_VAR = "var";
   public static final String ATTRIBUTE_CUR = "cur";
   
+  /** 
+   * Set of attributes in HTML 4 that are boolean, and may only be set
+   * to that value, and should be omitted to indicate "false". 
+   */
+  private static final Set<String> HTML4_BOOLEAN_ATTRIBUTES =
+    ImmutableSet.of("checked", "compact", "declare", "defer", "disabled", "ismap",
+        "multiple", "nohref", "noresize", "noshade", "nowrap", "readonly", "selected");
   private final Expressions expressions;
   // Reused buffer for creating template output
   private final StringBuilder outputBuffer;
@@ -350,15 +361,42 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   }
   
   /**
-   * Process expressions on attributes. For custom tags, in addition to 
-   * processing attributes, 
+   * Process expressions on attributes.
    * @param element The Element to process attributes on
    */
   private void processAttributes(Element element) {
     NamedNodeMap attributes = element.getAttributes();
+    List<Attr> attrsToRemove = null;
     for (int i = 0; i < attributes.getLength(); i++) {
       Attr attribute = (Attr) attributes.item(i);
-      attribute.setNodeValue(evaluate(attribute.getValue(), String.class, null));      
+      // Boolean attributes: evaluate as a boolean.  If true, set the value to the
+      // name of the attribute, e.g. selected="selected".  If false, remove the attribute
+      // altogether.  The check here has some limitations for efficiency:  it assumes the
+      // attribute is lowercase, and doesn't bother to check whether the boolean attribute
+      // actually exists on the referred element (but HTML has no attrs that are sometimes
+      // boolean and sometimes not)
+      if (element.getNamespaceURI() == null &&
+          HTML4_BOOLEAN_ATTRIBUTES.contains(attribute.getName())) {
+        if (Boolean.TRUE.equals(evaluate(attribute.getValue(), Boolean.class, Boolean.FALSE))) {
+          attribute.setNodeValue(attribute.getName());
+        } else {
+          // Because NamedNodeMaps are live, removing them interferes with iteration.
+          // Remove the attributes in a later pass
+          if (attrsToRemove == null) {
+            attrsToRemove = Lists.newArrayListWithCapacity(attributes.getLength());
+          }
+          
+          attrsToRemove.add(attribute);
+        }
+      } else {
+        attribute.setNodeValue(evaluate(attribute.getValue(), String.class, null));
+      }
+    }
+    
+    if (attrsToRemove != null) {
+      for (Attr attr : attrsToRemove) {
+        element.removeAttributeNode(attr);
+      }
     }
   }
   

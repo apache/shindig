@@ -187,6 +187,13 @@ public class DefaultTemplateProcessorTest {
     assertEquals("<b>BAR</b>", output);
   }
 
+  @Test
+  public void testBooleanAttributes() throws Exception {
+    String output = executeTemplate("<input class=\"${1 == 2}\" readonly=\"${1 == 2}\"" +
+    		"disabled=\"${1 == 1}\">");
+    assertEquals("<input class=\"false\" disabled=\"disabled\">", output);
+  }
+
   private String executeTemplate(String markup) throws Exception {
     return executeTemplate(markup, "");
   }
