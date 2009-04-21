@@ -423,11 +423,11 @@
 
  // duplicates userApplications as above..
  "permissions": {
-   "john.doe" : { "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { installed : true},
-                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { installed : true}
+   "john.doe" : { "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    },
-   "canonical" :{ "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { installed : true},
-                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { installed : true}
+   "canonical" :{ "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    }
  },
 // Passwords for authenticaiton service
