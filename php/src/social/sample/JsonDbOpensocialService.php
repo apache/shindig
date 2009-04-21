@@ -22,43 +22,43 @@
  * Implementation of supported services backed by a JSON DB
  */
 class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, MessagesService {
-  
+
   /**
    * The DB
    */
   private $db;
-  
+
   /**
    * db["activities"] -> Array<Person>
    */
   private static $PEOPLE_TABLE = "people";
-  
+
   /**
    * db["people"] -> Map<Person.Id, Array<Activity>>
    */
   private static $ACTIVITIES_TABLE = "activities";
-  
+
   /**
    * db["data"] -> Map<Person.Id, Map<String, String>>
    */
   private static $DATA_TABLE = "data";
-  
+
   /**
    * db["friendLinks"] -> Map<Person.Id, Array<Person.Id>>
    */
   private static $FRIEND_LINK_TABLE = "friendLinks";
-  
+
   /**
    * db["userApplications"] -> Map<Person.Id, Array<Application Ids>>
    */
   private static $USER_APPLICATIONS_TABLE = "userApplications";
-  
+
   private $allPeople = null;
-  
+
   private $allData = null;
-  
+
   private $allActivities = null;
-  
+
   private $jsonDbFileName = 'ShindigDb.json';
 
   public function getDb() {
@@ -70,7 +70,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         }
         $cachedDb = file_get_contents($fileName);
         $jsonDecoded = json_decode($cachedDb, true);
-        if ($jsonDecoded == $cachedDb) {
+        if ($jsonDecoded == $cachedDb || $jsonDecoded == null) {
           throw new SocialSpiException("Failed to decode the json db", ResponseError::$INTERNAL_ERROR);
         }
         return $jsonDecoded;
@@ -82,7 +82,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         $dbConfig = @file_get_contents($jsonDb);
         $contents = preg_replace('/(?<!http:|https:)\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $dbConfig));
         $jsonDecoded = json_decode($contents, true);
-        if ($jsonDecoded == $contents) {
+        if ($jsonDecoded == $contents || $jsonDecoded == null) {
           throw new SocialSpiException("Failed to decode the json db", ResponseError::$INTERNAL_ERROR);
         }
         $this->saveDb($jsonDecoded);
@@ -156,7 +156,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token) {
-    
+
     $sortOrder = $options->getSortOrder();
     $filter = $options->getFilterBy();
     $first = $options->getStartIndex();
@@ -202,20 +202,20 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     if ($sortOrder == 'name') {
       usort($people, array($this, 'comparator'));
     }
-    
+
     try {
       $people = $this->filterResults($people, $options);
     } catch(Exception $e) {
       $people['filtered'] = 'false';
     }
-    
+
     //TODO: The samplecontainer doesn't support any filters yet. We should fix this.
     $totalSize = count($people);
     $collection = new RestfulCollection($people, $options->getStartIndex(), $totalSize);
     $collection->setItemsPerPage($options->getCount());
     return $collection;
   }
-  
+
   private function filterResults($peopleById, $options) {
     if (! $options->getFilterBy()) {
       return $peopleById; // no filtering specified
@@ -259,7 +259,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     } else {
       return $this->passesStringFilter($fieldValue, $op, $value);
     }
-    
+
     return false;
   }
 
@@ -406,7 +406,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   /*
-	* 
+	*
 	* to check the activity against filter
 	*
 	*/
