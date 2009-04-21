@@ -175,8 +175,7 @@ class OAuthFetcher extends RemoteContentFetcher {
   private function buildNonDataResponse() {
     $response = new RemoteContentRequest($this->realRequest->getUrl());
     $this->addResponseMetadata($response);
-    $response->setResponseHeader('Pragma', 'no-cache');
-    $response->setResponseHeader('Cache-Control', 'no-cache');
+    self::setStrictNoCache($response);
     return $response;
   }
 
@@ -301,10 +300,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       //TODO The implementations of oauth differs from the one in JAVA. Fix the type OAuthMessage
       $url = $accessor->consumer->callback_url->requestTokenURL;
       $msgParams = array();
-      $msgParams['opensocial_owner_id'] = $request->getToken()->getOwnerId();
-      $msgParams['opensocial_viewer_id'] = $request->getToken()->getViewerId();
-      $msgParams['opensocial_app_id'] = $request->getToken()->getAppId();
-      $msgParams['opensocial_app_url'] = $request->getToken()->getAppUrl();
+      self::addIdentityParams($msgParams, $request->getToken());
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
@@ -485,10 +481,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       $url = $accessor->consumer->callback_url->accessTokenURL;
       $msgParams = array();
       $msgParams[OAuth::$OAUTH_TOKEN] = $accessor->requestToken;
-      $msgParams['opensocial_owner_id'] = $request->getToken()->getOwnerId();
-      $msgParams['opensocial_viewer_id'] = $request->getToken()->getViewerId();
-      $msgParams['opensocial_app_id'] = $request->getToken()->getAppId();
-      $msgParams['opensocial_app_url'] = $request->getToken()->getAppUrl();
+      self::addIdentityParams($msgParams, $request->getToken());
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
@@ -631,5 +624,17 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   public function multiFetchRequest(Array $requests) {  // Do nothing
+  }
+  
+  private static function addIdentityParams(array& $params, SecurityToken $token) {
+    $params['opensocial_owner_id'] = $token->getOwnerId();
+    $params['opensocial_viewer_id'] = $token->getViewerId();
+    $params['opensocial_app_id'] = $token->getAppId();
+    $params['opensocial_app_url'] = $token->getAppUrl();
+  }
+  
+  private static function setStrictNoCache(RemoteContentRequest $response) {
+    $response->setResponseHeader('Pragma', 'no-cache');
+    $response->setResponseHeader('Cache-Control', 'no-cache');
   }
 }

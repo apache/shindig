@@ -22,13 +22,7 @@
  * Basic implementation of a gadget spec factory.
  */
 class BasicGadgetSpecFactory {
-
-  private $fetcher;
   private $cache;
-
-  public function __construct($fetcher) {
-    $this->fetcher = $fetcher;
-  }
 
   public function getGadgetSpec(GadgetContext $context) {
     return $this->getGadgetSpecUri($context->getUrl(), $context->getIgnoreCache());

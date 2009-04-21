@@ -47,7 +47,7 @@ class OAuthFetcherFactory {
     try {
       $BBC = new BasicBlobCrypter();
       $this->oauthCrypter = new BasicBlobCrypter(srand($BBC->MASTER_KEY_MIN_LEN));
-      $specFactory = new BasicGadgetSpecFactory($fetcher);
+      $specFactory = new BasicGadgetSpecFactory();
       $basicStore = new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), $specFactory);
       $basicStore->initFromConfigFile($fetcher);
       $this->tokenStore = $basicStore;

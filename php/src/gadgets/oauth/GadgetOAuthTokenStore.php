@@ -28,41 +28,24 @@ class OAuthStoreException extends GadgetException {
  * Data Store.
  */
 class GadgetOAuthTokenStore {
-  
-  /**
-   * Internal class used to communicate results of parsing the gadget spec
-   * between methods.
-   */
-  // name of the OAuth feature in the gadget spec
-  public static $OAUTH_FEATURE = "oauth";
-  // name of the Param that identifies the service name
-  public static $SERVICE_NAME = "service_name";
-  // name of the Param that identifies the access URL
-  public static $ACCESS_URL = "access_url";
-  // name of the optional Param that identifies the HTTP method for access URL
-  public static $ACCESS_HTTP_METHOD = "access_method";
-  // name of the Param that identifies the request URL
-  public static $REQUEST_URL = "request_url";
-  // name of the optional Param that identifies the HTTP method for request URL
-  public static $REQUEST_HTTP_METHOD = "request_method";
-  // name of the Param that identifies the user authorization URL
-  public static $AUTHORIZE_URL = "authorize_url";
-  // name of the Param that identifies the location of OAuth parameters
-  public static $OAUTH_PARAM_LOCATION = "param_location";
-  public static $AUTH_HEADER = "auth_header";
-  public static $POST_BODY = "post_body";
-  public static $URI_QUERY = "uri_query";
-  
-  //public static $DEFAULT_OAUTH_PARAM_LOCATION = AUTH_HEADER;
-  public static $DEFAULT_OAUTH_PARAM_LOCATION = "auth_header"; //It has to be like the line above this.
-  //TODO: Check why java use AUTH_HEADER
-  
 
   // we use POST if no HTTP method is specified for access and request URLs
   // (user authorization always uses GET)
   public static $DEFAULT_HTTP_METHOD = "POST";
+
+  /**
+   * @var OAuthStore
+   */
   private $store;
+
+  /**
+   * @var GadgetSpec
+   */
   private $gadgetSpec;
+
+  /**
+   * @var BasicGadgetSpecFactory
+   */
   private $specFactory;
 
   /**

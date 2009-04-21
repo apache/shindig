@@ -186,7 +186,7 @@ class SigningFetcher extends RemoteContentFetcher {
       // Careful here; the OAuth form encoding scheme is slightly different than
       // the normal form encoding scheme, so we have to use the OAuth library
       // formEncode method.
-      $url = $parsedUri['scheme'] . '://' . $parsedUri['host'] . (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') . $parsedUri['path'] . '?' . $newQuery;
+      $url = $parsedUri['scheme'] . '://' . $parsedUri['host'] . (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') . (isset($parsedUri['path']) ? $parsedUri['path'] : '') . '?' . $newQuery;
       $request->setUri($url);
       if ($signBody) {
         $request->setPostBody($postData);
