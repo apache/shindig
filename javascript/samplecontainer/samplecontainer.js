@@ -150,7 +150,12 @@ shindig.samplecontainer = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
       gadget = gadgets.container.createGadget(
           {'specUrl': metadata.gadgets[i].url, 'title': metadata.gadgets[i].title});
-      gadget.setServerBase('../../');
+      // Shindigs rpc code uses direct javascript calls when running on the same domain
+      // to simulate cross-domain when running sample container we replace 
+      // 'localhost' with '127.0.0.1' 
+      var iframeBaseUrl = baseUrl.replace("localhost", "127.0.0.1") + '../../';
+
+      gadget.setServerBase(iframeBaseUrl);
       gadget.secureToken = escape(generateSecureToken());
       gadgets.container.addGadget(gadget);
     }
