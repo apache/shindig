@@ -21,6 +21,8 @@ package org.apache.shindig.protocol;
 
 import java.util.Collection;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Utility class for common API call preconditions
  */
@@ -31,26 +33,26 @@ public class HandlerPreconditions {
   public static void requireNotEmpty(Collection<?> coll, String message)
       throws ProtocolException {
     if (coll.isEmpty()) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, message);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, message);
     }
   }
 
   public static void requireEmpty(Collection<?> coll, String message) throws ProtocolException {
     if (!coll.isEmpty()) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, message);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, message);
     }
   }
 
   public static void requireSingular(Collection<?> coll, String message)
       throws ProtocolException {
     if (coll.size() != 1) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, message);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, message);
     }
   }
 
   public static void requirePlural(Collection<?> coll, String message) throws ProtocolException {
     if (coll.size() <= 1) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, message);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, message);
     }
   }
 }

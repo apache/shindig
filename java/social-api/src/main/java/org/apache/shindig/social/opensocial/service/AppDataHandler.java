@@ -19,17 +19,18 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
-import com.google.inject.Inject;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
 
 @Service(name = "appdata", path = "/{userId}+/{groupId}/{appId}")
 public class AppDataHandler {
@@ -97,7 +98,7 @@ public class AppDataHandler {
     Map<String, String> values = request.getTypedParameter("data", Map.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
-        throw new SocialSpiException(ResponseError.BAD_REQUEST,
+        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
             "One or more of the app data keys are invalid: " + key);
       }
     }

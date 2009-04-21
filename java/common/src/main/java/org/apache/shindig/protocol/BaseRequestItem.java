@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Default implementation of RequestItem
  */
@@ -92,7 +94,7 @@ public class BaseRequestItem implements RequestItem {
       this.converter = converter;
       this.formItems = formItems;
     } catch (JSONException je) {
-      throw new ProtocolException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
     this.jsonConverter = jsonConverter;
   }
@@ -127,7 +129,7 @@ public class BaseRequestItem implements RequestItem {
             ? SortOrder.ascending
             : SortOrder.valueOf(sortOrder);
     } catch (IllegalArgumentException iae) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
            "Parameter " + SORT_ORDER + " (" + sortOrder + ") is not valid.");
     }
   }
@@ -142,7 +144,7 @@ public class BaseRequestItem implements RequestItem {
       return startIndex == null ? DEFAULT_START_INDEX
           : Integer.valueOf(startIndex);
     } catch (NumberFormatException nfe) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "Parameter " + START_INDEX + " (" + startIndex + ") is not a number.");
     }
   }
@@ -152,7 +154,7 @@ public class BaseRequestItem implements RequestItem {
     try {
       return count == null ? DEFAULT_COUNT : Integer.valueOf(count);
     } catch (NumberFormatException nfe) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
            "Parameter " + COUNT + " (" + count + ") is not a number.");
     }
   }
@@ -164,7 +166,7 @@ public class BaseRequestItem implements RequestItem {
           ? FilterOperation.contains
           : FilterOperation.valueOf(filterOp);
     } catch (IllegalArgumentException iae) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
            "Parameter " + FILTER_OPERATION + " (" + filterOp + ") is not valid.");
     }
   }
@@ -247,7 +249,7 @@ public class BaseRequestItem implements RequestItem {
         }
         return returnVal;
       } catch (JSONException je) {
-        throw new ProtocolException(ResponseError.BAD_REQUEST, je.getMessage(), je);
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, je.getMessage(), je);
       }
     } else {
       // Allow up-conversion of non-array to array params.

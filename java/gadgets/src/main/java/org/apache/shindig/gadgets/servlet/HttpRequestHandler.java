@@ -33,17 +33,18 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.Service;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.Collection;
 
 /**
  * An alternate implementation of the Http proxy service using the standard API dispatcher for REST
@@ -141,8 +142,8 @@ public class HttpRequestHandler {
 
   private void assertNoBody(HttpApiRequest httpRequest, String method) {
     if (httpRequest.body != null) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
-          "Request body not supported for " + method);
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
+         "Request body not supported for " + method);
     }
   }
 
@@ -154,7 +155,7 @@ public class HttpRequestHandler {
   private HttpApiResponse execute(String method, HttpApiRequest httpApiRequest,
       SecurityToken token) {
     if (httpApiRequest.url == null) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, "Url parameter is missing");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Url parameter is missing");
     }
 
     // Canonicalize the path
@@ -179,7 +180,7 @@ public class HttpRequestHandler {
       // Extract the gadget URI from the request or the security token
       Uri gadgetUri = getGadgetUri(token, httpApiRequest);
       if (gadgetUri == null) {
-        throw new ProtocolException(ResponseError.BAD_REQUEST,
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "Gadget URI not specified in request");
       }
       req.setGadget(gadgetUri);
@@ -226,9 +227,11 @@ public class HttpRequestHandler {
       }
       return httpApiResponse;
     } catch (GadgetException ge) {
-      throw new ProtocolException(ResponseError.INTERNAL_ERROR, ge.getMessage());
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          ge.getMessage(), ge);
     } catch (RewritingException re) {
-      throw new ProtocolException(ResponseError.INTERNAL_ERROR, re.getMessage());
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          re.getMessage(), re);
     }
   }
 
@@ -238,7 +241,8 @@ public class HttpRequestHandler {
       url = new UriBuilder(url).setScheme("http").toUri();
     } else if (!"http".equals(url.getScheme()) && !"https"
         .equals(url.getScheme())) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST, "Only HTTP and HTTPS are supported");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
+          "Only HTTP and HTTPS are supported");
     }
     return url;
   }

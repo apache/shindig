@@ -23,14 +23,13 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.protocol.DataCollection;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.Message;
-import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
+import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
@@ -39,14 +38,6 @@ import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +49,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Implementation of supported services backed by a JSON DB.
@@ -115,8 +116,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   private static final String PASSWORDS_TABLE = "passwords";
 
   @Inject
-  public JsonDbOpensocialService(@Named("shindig.canonical.json.db")String jsonLocation,
-      @Named("shindig.bean.converter.json")BeanConverter converter) throws Exception {
+  public JsonDbOpensocialService(@Named("shindig.canonical.json.db")
+  String jsonLocation, @Named("shindig.bean.converter.json")
+  BeanConverter converter) throws Exception {
     String content = IOUtils.toString(ResourceLoader.openResource(jsonLocation), "UTF-8");
     this.db = new JSONObject(content);
     this.converter = converter;
@@ -130,9 +132,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     this.db = db;
   }
 
-  public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
-      GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
-      throws SocialSpiException  {
+  public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds, GroupId groupId,
+      String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
+      throws SocialSpiException {
     List<Activity> result = Lists.newArrayList();
     try {
       Set<String> idSet = getIdSet(userIds, groupId, token);
@@ -151,13 +153,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new RestfulCollection<Activity>(result));
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-  public Future<RestfulCollection<Activity>> getActivities(UserId userId,
-      GroupId groupId, String appId, Set<String> fields, CollectionOptions options,
-      Set<String> activityIds, SecurityToken token) throws SocialSpiException {
+  public Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
+      String appId, Set<String> fields, CollectionOptions options, Set<String> activityIds,
+      SecurityToken token) throws SocialSpiException {
     List<Activity> result = Lists.newArrayList();
     try {
       String user = userId.getUserId(token);
@@ -173,13 +176,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new RestfulCollection<Activity>(result));
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-  public Future<Activity> getActivity(UserId userId,
-      GroupId groupId, String appId, Set<String> fields, String activityId, SecurityToken token)
-      throws SocialSpiException {
+  public Future<Activity> getActivity(UserId userId, GroupId groupId, String appId,
+      Set<String> fields, String activityId, SecurityToken token) throws SocialSpiException {
     try {
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITIES_TABLE).has(user)) {
@@ -193,9 +196,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
         }
       }
 
-      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Activity not found");
+      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST, "Activity not found");
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
@@ -214,16 +218,18 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
             }
           }
           db.getJSONObject(ACTIVITIES_TABLE).put(user, newList);
-          // TODO. This seems very odd that we return no useful response in this case
+          // TODO. This seems very odd that we return no useful response in this
+          // case
           // There is no way to represent not-found
           // if (found) { ??
-          //}
+          // }
         }
       }
       // What is the appropriate response here??
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
@@ -244,13 +250,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       jsonArray.put(jsonObject);
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-  public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds,
-      GroupId groupId, CollectionOptions options, Set<String> fields, SecurityToken token)
-      throws SocialSpiException {
+  public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
+      CollectionOptions options, Set<String> fields, SecurityToken token) throws SocialSpiException {
     List<Person> result = Lists.newArrayList();
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
@@ -273,7 +279,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       if (GroupId.Type.self == groupId.getType() && result.isEmpty()) {
-        throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
       }
 
       // We can pretend that by default the people are in top friends order
@@ -292,33 +298,34 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       int last = options.getFirst() + options.getMax();
       result = result.subList(options.getFirst(), Math.min(last, totalSize));
 
-      return ImmediateFuture.newInstance(new RestfulCollection<Person>(
-          result, options.getFirst(), totalSize));
+      return ImmediateFuture.newInstance(new RestfulCollection<Person>(result, options.getFirst(),
+          totalSize));
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-  public Future<Person> getPerson(UserId id, Set<String> fields,
-      SecurityToken token) throws SocialSpiException {
+  public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
+      throws SocialSpiException {
     try {
       JSONArray people = db.getJSONArray(PEOPLE_TABLE);
 
       for (int i = 0; i < people.length(); i++) {
         JSONObject person = people.getJSONObject(i);
-        if (id != null && person.get(Person.Field.ID.toString())
-            .equals(id.getUserId(token))) {
+        if (id != null && person.get(Person.Field.ID.toString()).equals(id.getUserId(token))) {
           Person personObj = filterFields(person, fields, Person.class);
-          Map<String, Object> appData = getPersonAppData(
-              person.getString(Person.Field.ID.toString()), fields);
+          Map<String, Object> appData = getPersonAppData(person.getString(Person.Field.ID
+              .toString()), fields);
           personObj.setAppData(appData);
-          
+
           return ImmediateFuture.newInstance(personObj);
         }
       }
-      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
@@ -328,13 +335,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       JSONObject personData = db.getJSONObject(DATA_TABLE).optJSONObject(id);
       if (personData != null) {
         if (fields.contains(Person.Field.APP_DATA.toString())) {
-            appData = Maps.newHashMap();
-            @SuppressWarnings("unchecked")
-            Iterator<String> keys = personData.keys();
-            while (keys.hasNext()) {
-              String key = keys.next();
-              appData.put(key, personData.get(key));
-            }
+          appData = Maps.newHashMap();
+          @SuppressWarnings("unchecked")
+          Iterator<String> keys = personData.keys();
+          while (keys.hasNext()) {
+            String key = keys.next();
+            appData.put(key, personData.get(key));
+          }
         } else {
           String appDataPrefix = Person.Field.APP_DATA.toString() + ".";
           for (String field : fields) {
@@ -342,7 +349,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
               if (appData == null) {
                 appData = Maps.newHashMap();
               }
-              
+
               String appDataField = field.substring(appDataPrefix.length());
               if (personData.has(appDataField)) {
                 appData.put(appDataField, personData.get(appDataField));
@@ -351,15 +358,16 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           }
         }
       }
-    
+
       return appData;
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-  public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException {
+  public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId, String appId,
+      Set<String> fields, SecurityToken token) throws SocialSpiException {
     try {
       Map<String, Map<String, String>> idToData = Maps.newHashMap();
       Set<String> idSet = getIdSet(userIds, groupId, token);
@@ -369,16 +377,15 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           personData = new JSONObject();
         } else {
           if (!fields.isEmpty()) {
-            personData = new JSONObject(
-                db.getJSONObject(DATA_TABLE).getJSONObject(id),
-                fields.toArray(new String[fields.size()]));
+            personData = new JSONObject(db.getJSONObject(DATA_TABLE).getJSONObject(id), fields
+                .toArray(new String[fields.size()]));
           } else {
             personData = db.getJSONObject(DATA_TABLE).getJSONObject(id);
           }
         }
 
         // TODO: We can use the converter here to do this for us
-        
+
         // JSONObject keys are always strings
         @SuppressWarnings("unchecked")
         Iterator<String> keys = personData.keys();
@@ -391,7 +398,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(new DataCollection(idToData));
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
@@ -417,15 +425,18 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       db.getJSONObject(DATA_TABLE).put(user, newPersonData);
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
   public Future<Void> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token)
       throws SocialSpiException {
-    // TODO: this seems redundant. No need to pass both fields and a map of field->value
-    // TODO: According to rest, yes there is. If a field is in the param list but not in the map
+    // TODO: this seems redundant. No need to pass both fields and a map of
+    // field->value
+    // TODO: According to rest, yes there is. If a field is in the param list
+    // but not in the map
     // that means it is a delete
 
     try {
@@ -440,31 +451,36 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
       return ImmediateFuture.newInstance(null);
     } catch (JSONException je) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
   /**
    * Post a message for a set of users.
    * 
-   * @param userId    The user sending the message.
-   * @param appId     The application sending the message.
+   * @param userId
+   *            The user sending the message.
+   * @param appId
+   *            The application sending the message.
    * @param msgCollId
-   * @param message   The message to post.
+   * @param message
+   *            The message to post.
    */
   public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
-                                    SecurityToken token) throws SocialSpiException {
+      SecurityToken token) throws SocialSpiException {
     for (String recipient : message.getRecipients()) {
-        try {
-            JSONArray outbox = db.getJSONObject(MESSAGE_TABLE).getJSONArray(recipient);
-            if (outbox == null) {
-              outbox = new JSONArray();
-              db.getJSONObject(MESSAGE_TABLE).put(recipient, outbox);
-            }
+      try {
+        JSONArray outbox = db.getJSONObject(MESSAGE_TABLE).getJSONArray(recipient);
+        if (outbox == null) {
+          outbox = new JSONArray();
+          db.getJSONObject(MESSAGE_TABLE).put(recipient, outbox);
+        }
 
         outbox.put(message);
       } catch (JSONException je) {
-        throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+        throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+            je);
       }
     }
 
@@ -472,81 +488,88 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   public Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
-     Set<String> fields, CollectionOptions options, SecurityToken token) throws SocialSpiException
-  {
+      Set<String> fields, CollectionOptions options, SecurityToken token) throws SocialSpiException {
     try {
-        List<MessageCollection> result = Lists.newArrayList();
-        JSONObject messageCollections = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token));
-        for (String msgCollId : JSONObject.getNames(messageCollections)) {
-          JSONObject msgColl = messageCollections.getJSONObject(msgCollId);
-          msgColl.put("id", msgCollId);
-          JSONArray messages = msgColl.getJSONArray("messages");
-          int numMessages = (messages == null) ? 0 : messages.length();
-          msgColl.put("total", String.valueOf(numMessages));
-          msgColl.put("unread", String.valueOf(numMessages));
+      List<MessageCollection> result = Lists.newArrayList();
+      JSONObject messageCollections = db.getJSONObject(MESSAGE_TABLE).getJSONObject(
+          userId.getUserId(token));
+      for (String msgCollId : JSONObject.getNames(messageCollections)) {
+        JSONObject msgColl = messageCollections.getJSONObject(msgCollId);
+        msgColl.put("id", msgCollId);
+        JSONArray messages = msgColl.getJSONArray("messages");
+        int numMessages = (messages == null) ? 0 : messages.length();
+        msgColl.put("total", String.valueOf(numMessages));
+        msgColl.put("unread", String.valueOf(numMessages));
 
-          
-          result.add(filterFields(msgColl, fields, MessageCollection.class));
-        }
-        return ImmediateFuture.newInstance(new RestfulCollection<MessageCollection>(result));
+        result.add(filterFields(msgColl, fields, MessageCollection.class));
+      }
+      return ImmediateFuture.newInstance(new RestfulCollection<MessageCollection>(result));
     } catch (JSONException je) {
-          throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
     }
   }
 
-
   public Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
       SecurityToken token) throws SocialSpiException {
-      throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
- 
+    throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+        "this functionality is not yet available");
   }
 
   /**
    * Gets the messsages in an user's queue.
    */
-  public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId, Set<String> fields,
-      List<String> msgIds, CollectionOptions options, SecurityToken token) throws SocialSpiException {
-      try {
-          List<Message> result = Lists.newArrayList();
-          JSONArray messages = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token)).getJSONObject(msgCollId).getJSONArray("messages");
+  public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId,
+      Set<String> fields, List<String> msgIds, CollectionOptions options, SecurityToken token)
+      throws SocialSpiException {
+    try {
+      List<Message> result = Lists.newArrayList();
+      JSONArray messages = db.getJSONObject(MESSAGE_TABLE).getJSONObject(userId.getUserId(token))
+          .getJSONObject(msgCollId).getJSONArray("messages");
 
-          // TODO: special case @all
+      // TODO: special case @all
 
-          if (messages == null) {
-            throw new SocialSpiException(ResponseError.BAD_REQUEST, "message collection" + msgCollId + " not found");
-          }
-          
-          // TODO: filter and sort outbox.
-          for (int i = 0; i < messages.length(); i++) {
-            JSONObject msg = messages.getJSONObject(i);
-            result.add(filterFields(msg, fields, Message.class));
-          }
-          
-          return ImmediateFuture.newInstance(new RestfulCollection<Message>(result));
-          
-      } catch (JSONException je) {
-          throw new SocialSpiException(ResponseError.INTERNAL_ERROR, je.getMessage(), je);
+      if (messages == null) {
+        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST, "message collection"
+            + msgCollId + " not found");
       }
+
+      // TODO: filter and sort outbox.
+      for (int i = 0; i < messages.length(); i++) {
+        JSONObject msg = messages.getJSONObject(i);
+        result.add(filterFields(msg, fields, Message.class));
+      }
+
+      return ImmediateFuture.newInstance(new RestfulCollection<Message>(result));
+
+    } catch (JSONException je) {
+      throw new SocialSpiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
+          je);
+    }
   }
 
-  public Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)
-      throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  public Future<MessageCollection> createMessageCollection(UserId userId,
+      MessageCollection msgCollection, SecurityToken token) throws SocialSpiException {
+    throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+        "this functionality is not yet available");
   }
 
-  public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token) 
-      throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId,
+      Message message, SecurityToken token) throws SocialSpiException {
+    throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+        "this functionality is not yet available");
   }
 
-  public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) 
-      throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+  public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection,
+      SecurityToken token) throws SocialSpiException {
+    throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+        "this functionality is not yet available");
   }
 
-  public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) 
+  public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token)
       throws SocialSpiException {
-    throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED, "this functionality is not yet available");
+    throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+        "this functionality is not yet available");
   }
 
   /**
@@ -556,7 +579,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     try {
       return db.getJSONObject(PASSWORDS_TABLE).getString(username);
     } catch (JSONException e) {
-       return null;
+      return null;
     }
   }
 
@@ -573,19 +596,19 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
     Set<String> returnVal = Sets.newLinkedHashSet();
     switch (group.getType()) {
-      case all:
-      case friends:
-      case groupId:
-        if (db.getJSONObject(FRIEND_LINK_TABLE).has(userId)) {
-          JSONArray friends = db.getJSONObject(FRIEND_LINK_TABLE).getJSONArray(userId);
-          for (int i = 0; i < friends.length(); i++) {
-            returnVal.add(friends.getString(i));
-          }
+    case all:
+    case friends:
+    case groupId:
+      if (db.getJSONObject(FRIEND_LINK_TABLE).has(userId)) {
+        JSONArray friends = db.getJSONObject(FRIEND_LINK_TABLE).getJSONArray(userId);
+        for (int i = 0; i < friends.length(); i++) {
+          returnVal.add(friends.getString(i));
         }
-        break;
-      case self:
-        returnVal.add(userId);
-        break;
+      }
+      break;
+    case self:
+      returnVal.add(userId);
+      break;
     }
     return returnVal;
   }
@@ -602,15 +625,14 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return ids;
   }
 
-
   private JSONObject convertFromActivity(Activity activity, Set<String> fields)
       throws JSONException {
     // TODO Not using fields yet
     return new JSONObject(converter.convertToString(activity));
   }
 
-
-  private <T> T filterFields(JSONObject object, Set<String> fields, Class<T> clz) throws JSONException {
+  private <T> T filterFields(JSONObject object, Set<String> fields, Class<T> clz)
+      throws JSONException {
     if (!fields.isEmpty()) {
       // Create a copy with just the specified fields
       object = new JSONObject(object, fields.toArray(new String[fields.size()]));

@@ -61,7 +61,8 @@ public class DataServiceServlet extends ApiServlet {
       checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
       executeRequest(servletRequest, servletResponse);
     } catch (ContentTypes.InvalidContentTypeException icte) {
-      sendError(servletResponse, new ResponseItem(ResponseError.BAD_REQUEST, icte.getMessage()));
+      sendError(servletResponse,
+          new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, icte.getMessage()));
     }
   }
 
@@ -80,7 +81,8 @@ public class DataServiceServlet extends ApiServlet {
       checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
       executeRequest(servletRequest, servletResponse);
     } catch (ContentTypes.InvalidContentTypeException icte) {
-      sendError(servletResponse, new ResponseItem(ResponseError.BAD_REQUEST, icte.getMessage()));
+      sendError(servletResponse,
+          new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, icte.getMessage()));
     }
   }
 
@@ -109,7 +111,29 @@ public class DataServiceServlet extends ApiServlet {
   @Override
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
-    servletResponse.sendError(responseItem.getError().getHttpErrorCode(),
+    int errorCode = responseItem.getErrorCode();
+    if (errorCode < 0) {
+      // Map JSON-RPC error codes into HTTP error codes as best we can
+      // TODO: Augment the error message (if missing) with a default
+      switch (errorCode) {
+        case -32700:
+        case -32602:
+        case -32600:
+          // Parse error, invalid params, and invalid request 
+          errorCode = HttpServletResponse.SC_BAD_REQUEST;
+          break;
+        case -32601:
+          // Procedure doesn't exist
+          errorCode = HttpServletResponse.SC_NOT_IMPLEMENTED;
+        case -32603:
+        default:
+          // Internal server error, or any application-defined error
+          errorCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+          break;
+      }
+    }
+
+    servletResponse.sendError(responseItem.getErrorCode(),
         responseItem.getErrorMessage());
   }
 
@@ -136,7 +160,7 @@ public class DataServiceServlet extends ApiServlet {
     ResponseItem responseItem = getResponseItem(future);
 
     servletResponse.setContentType(converter.getContentType());
-    if (responseItem.getError() == null) {
+    if (responseItem.getErrorCode() >= 200 && responseItem.getErrorCode() < 400) {
       PrintWriter writer = servletResponse.getWriter();
       Object response = responseItem.getResponse();
       // TODO: ugliness resulting from not using RestfulItem

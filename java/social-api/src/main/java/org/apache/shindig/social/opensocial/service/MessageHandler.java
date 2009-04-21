@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Service(name = "messages", path="/{userId}+/{msgCollId}/{messageIds}+")
 public class MessageHandler {
 
@@ -51,7 +53,10 @@ public class MessageHandler {
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
-    if (msgCollId == null) throw new SocialSpiException(ResponseError.BAD_REQUEST, "A message collection is required");
+    if (msgCollId == null) {
+      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+          "A message collection is required");
+    }
     
     HandlerPreconditions.requireNotEmpty(messageIds, "No message IDs specified");
 
@@ -134,12 +139,18 @@ public class MessageHandler {
 
     UserId user = request.getUsers().iterator().next();
 
-    if (msgCollId == null) throw new SocialSpiException(ResponseError.BAD_REQUEST, "A message collection is required");
+    if (msgCollId == null) {
+      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+          "A message collection is required");
+    }
 
     if (messageIds.size() == 0) {
       // No message IDs specified, this is a PUT to a message collection
       MessageCollection msgCollection = request.getTypedParameter("entity", MessageCollection.class);
-      if (msgCollection == null) throw new SocialSpiException(ResponseError.BAD_REQUEST, "cannot parse message collection");
+      if (msgCollection == null) {
+        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+            "cannot parse message collection");
+      }
 
       // TODO, do more validation.
 
@@ -151,7 +162,10 @@ public class MessageHandler {
     Message message = request.getTypedParameter("entity", Message.class);
     // TODO, do more validation.
 
-    if (message == null || message.getId() == null) throw new SocialSpiException(ResponseError.BAD_REQUEST, "cannot parse message or missing ID");
+    if (message == null || message.getId() == null) {
+      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+        "cannot parse message or missing ID");
+    }
 
     return service.modifyMessage(user, msgCollId, messageIds.get(0), message, request.getToken());
   }

@@ -23,14 +23,15 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.Service;
-
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 /**
  * Handle cache invalidation API calls
@@ -53,10 +54,9 @@ public class InvalidationHandler {
 
   @Operation(httpMethods = {"POST","GET"}, path = "/invalidate")
   public void invalidate(BaseRequestItem request) {
-
     if (StringUtils.isEmpty(request.getToken().getAppId()) &&
         StringUtils.isEmpty(request.getToken().getAppUrl())) {
-      throw new ProtocolException(ResponseError.BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "Cannot invalidate content without specifying application");
     }
 
@@ -80,7 +80,7 @@ public class InvalidationHandler {
           // Assume key is a gadget spec, message bundle or other resource
           // owned by the gadget
           if (!isBackendInvalidation) {
-            throw new ProtocolException(ResponseError.BAD_REQUEST,
+            throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
                 "Cannot flush application resources from a gadget. " +
                     "Must use OAuth consumer request");
           }
@@ -91,7 +91,7 @@ public class InvalidationHandler {
             continue;
           }
           if (!isBackendInvalidation && !key.equals(request.getToken().getViewerId())) {
-            throw new ProtocolException(ResponseError.BAD_REQUEST,
+            throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
                 "Cannot invalidate the content for a user other than the viewer from a gadget.");
           }
           userIds.add(key);

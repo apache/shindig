@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Tests BasicHandleRregistry
  */
@@ -89,7 +91,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
       assertSame(t.getCause().getClass(), ProtocolException.class);
-      Assert.assertEquals(((ProtocolException) t.getCause()).getError(), ResponseError.NOT_IMPLEMENTED);
+      Assert.assertEquals(((ProtocolException) t.getCause()).getCode(), HttpServletResponse.SC_NOT_IMPLEMENTED);
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
     }
@@ -103,7 +105,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
       assertSame(t.getCause().getClass(), ProtocolException.class);
-      Assert.assertEquals(((ProtocolException) t.getCause()).getError(), ResponseError.NOT_IMPLEMENTED);
+      Assert.assertEquals(((ProtocolException) t.getCause()).getCode(), HttpServletResponse.SC_NOT_IMPLEMENTED);
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
     }

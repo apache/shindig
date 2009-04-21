@@ -27,6 +27,8 @@ import org.junit.Ignore;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Simple test handler implementation. Can be used standalone or to wrap a mock
  * delegate.
@@ -90,7 +92,7 @@ public class TestHandler {
     if (mock != null) {
       return mock.futureException(req);
     }
-    return ImmediateFuture.errorInstance(new ProtocolException(ResponseError.BAD_REQUEST,
+    return ImmediateFuture.errorInstance(new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
         FAILURE_MESSAGE, new Throwable()));
   }
 

@@ -24,17 +24,18 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.RequestItem;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-
-import com.google.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
 
 @Service(name = "samplecontainer", path = "/{type}/{doevil}")
 public class SampleContainerHandler {
@@ -66,11 +67,11 @@ public class SampleContainerHandler {
         String stateFile = request.getParameter("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
-        throw new SocialSpiException(ResponseError.BAD_REQUEST,
+        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
             "The json state file was not valid json", e);
       }
     } else if (type.equals("setevilness")) {
-      throw new SocialSpiException(ResponseError.NOT_IMPLEMENTED,
+      throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
           "evil data has not been implemented yet");
     }
 

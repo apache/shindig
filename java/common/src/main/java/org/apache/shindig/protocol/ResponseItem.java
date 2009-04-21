@@ -25,9 +25,9 @@ import com.google.common.base.Objects;
  */
 public final class ResponseItem {
   /**
-   * The ResponseError associated with the item.
+   * The error code associated with the item.
    */
-  private final ResponseError error;
+  private final int errorCode;
 
   /**
    * The error message.
@@ -41,11 +41,11 @@ public final class ResponseItem {
 
   /**
    * Create a ResponseItem specifying the ResponseError and error Message.
-   * @param error a ResponseError
+   * @param errorCode an RPC error code
    * @param errorMessage the Error Message
    */
-  public ResponseItem(ResponseError error, String errorMessage) {
-    this.error = error;
+  public ResponseItem(int errorCode, String errorMessage) {
+    this.errorCode = errorCode;
     this.errorMessage = errorMessage;
     this.response = null;
   }
@@ -54,7 +54,7 @@ public final class ResponseItem {
    * Create a ResponseItem specifying a value.
    */
   public ResponseItem(Object response) {
-    this.error = null;
+    this.errorCode = 200;
     this.errorMessage = null;
     this.response = response;
   }
@@ -67,11 +67,11 @@ public final class ResponseItem {
   }
 
   /**
-   * Get the ResponseError associated with this ResponseItem.
-   * @return the ResponseError associated with this ResponseItem
+   * Get the error code associated with this ResponseItem.
+   * @return the error code associated with this ResponseItem
    */
-  public ResponseError getError() {
-    return error;
+  public int getErrorCode() {
+    return errorCode;
   }
 
   /**
@@ -93,13 +93,13 @@ public final class ResponseItem {
     }
 
     ResponseItem that = (ResponseItem) o;
-    return (error == that.error)
+    return (errorCode == that.errorCode)
         && Objects.equal(errorMessage, that.errorMessage)
         && Objects.equal(response, that.response);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(error, errorMessage, response);
+    return Objects.hashCode(errorCode, errorMessage, response);
   }
 }

@@ -49,6 +49,8 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Default implementation of HandlerRegistry. Bind to appropriately
  * annotated handlers.
@@ -123,12 +125,12 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       String key = rpc.getString("method");
       RpcInvocationHandler rpcHandler = rpcOperations.get(key);
       if (rpcHandler == null) {
-        return new ErrorRpcHandler(new ProtocolException(ResponseError.NOT_IMPLEMENTED,
+        return new ErrorRpcHandler(new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
             "The method " + key + " is not implemented"));
       }
       return new RpcInvocationWrapper(rpcHandler, rpc);
     } catch (JSONException je) {
-      return new ErrorRpcHandler(new ProtocolException(ResponseError.BAD_REQUEST,
+      return new ErrorRpcHandler(new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "No method requested in RPC"));
     }
   }
@@ -154,7 +156,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         }
       }
     }
-    return new ErrorRestHandler(new ProtocolException(ResponseError.NOT_IMPLEMENTED,
+    return new ErrorRestHandler(new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
         "No service defined for path " + path));
   }
 
@@ -596,7 +598,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       for (int i = 0; i < Math.min(requestPathParts.length, parts.size()); i++) {
         if (parts.get(i).type == PartType.SINGULAR_PARAM) {
           if (requestPathParts[i].indexOf(',') != -1) {
-            throw new ProtocolException(ResponseError.BAD_REQUEST,
+            throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
                 "Cannot expect plural value " + requestPathParts[i]
                     + " for singular field " + parts.get(i) + " for path " + operationPath);
           }

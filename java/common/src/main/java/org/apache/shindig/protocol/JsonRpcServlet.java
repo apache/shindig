@@ -24,6 +24,7 @@ import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -57,6 +58,11 @@ public class JsonRpcServlet extends ApiServlet {
    */
   public static final String REQUEST_PARAM = "request";
   
+  /**
+   * Error code for JSON-RPC requests with an error parsing JSON.
+   */
+  public static final int SC_JSON_PARSE_ERROR = -32700;
+  
   private MultipartFormParser formParser;
 
   @Inject
@@ -78,7 +84,7 @@ public class JsonRpcServlet extends ApiServlet {
       JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       dispatch(request, null, servletRequest, servletResponse, token);
     } catch (JSONException je) {
-      // FIXME
+      sendJsonParseError(je, servletResponse);
     }
   }
 
@@ -132,7 +138,7 @@ public class JsonRpcServlet extends ApiServlet {
         dispatch(request, formItems, servletRequest, servletResponse, token);
       }
     } catch (JSONException je) {
-      sendBadRequest(je, servletResponse);
+      sendJsonParseError(je, servletResponse);
     } catch (ContentTypes.InvalidContentTypeException icte) {
       sendBadRequest(icte, servletResponse);
     }
@@ -200,11 +206,11 @@ public class JsonRpcServlet extends ApiServlet {
     if (key != null) {
       result.put("id", key);
     }
-    if (responseItem.getError() != null) {
+    if (responseItem.getErrorCode() < 200 ||
+        responseItem.getErrorCode() >= 400) {
       result.put("error", getErrorJson(responseItem));
     } else {
       Object response = responseItem.getResponse();
-
       if (response instanceof DataCollection) {
         result.put("data", ((DataCollection) response).getEntry());
       } else if (response instanceof RestfulCollection) {
@@ -217,22 +223,42 @@ public class JsonRpcServlet extends ApiServlet {
       } else {
         result.put("data", response);
       }
+
+      // TODO: put "code" for != 200?
     }
     return result;
   }
 
+  /** Map of old-style error titles */
+  private static final Map<Integer, String> errorTitles = ImmutableMap.<Integer, String> builder()
+     .put(HttpServletResponse.SC_NOT_IMPLEMENTED, "notImplemented")
+     .put(HttpServletResponse.SC_UNAUTHORIZED, "unauthorized")
+     .put(HttpServletResponse.SC_FORBIDDEN, "forbidden")
+     .put(HttpServletResponse.SC_BAD_REQUEST, "badRequest")
+     .put(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internalError")
+     .put(HttpServletResponse.SC_EXPECTATION_FAILED, "limitExceeded")
+     .build();
+        
   // TODO(doll): Refactor the responseItem so that the fields on it line up with this format.
   // Then we can use the general converter to output the response to the client and we won't
   // be harcoded to json.
   private Object getErrorJson(ResponseItem responseItem) {
     Map<String, Object> error = new HashMap<String, Object>(2, 1);
-    error.put("code", responseItem.getError().getHttpErrorCode());
+    error.put("code", responseItem.getErrorCode());
 
-    String message = responseItem.getError().toString();
-    if (StringUtils.isNotBlank(responseItem.getErrorMessage())) {
-      message += ": " + responseItem.getErrorMessage();
+    String message = errorTitles.get(responseItem.getErrorCode());
+    if (message == null) {
+      message = responseItem.getErrorMessage();
+    } else {
+      if (StringUtils.isNotBlank(responseItem.getErrorMessage())) {
+        message += ": " + responseItem.getErrorMessage();
+      }
     }
-    error.put("message", message);
+    
+    if (StringUtils.isNotBlank(message)) {
+      error.put("message", message);
+    }
+    
     return error;
   }
 
@@ -243,7 +269,12 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
-    sendError(response, new ResponseItem(ResponseError.BAD_REQUEST,
+    sendError(response, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST,
         "Invalid batch - " + t.getMessage()));
+  }
+
+  private void sendJsonParseError(JSONException e, HttpServletResponse response) throws IOException {
+    sendError(response, new ResponseItem(SC_JSON_PARSE_ERROR,
+        "Invalid JSON - " + e.getMessage()));
   }
 }

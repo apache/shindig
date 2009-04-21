@@ -17,15 +17,16 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import org.apache.shindig.protocol.ResponseError;
-import org.apache.shindig.protocol.ResponseItem;
-
 import static junit.framework.Assert.assertFalse;
 import static junitx.framework.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+
+import org.apache.shindig.protocol.ResponseItem;
 import org.junit.Test;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -35,9 +36,12 @@ public class ResponseItemTest {
 
   @Test
   public void testEquals() {
-    ResponseItem responseItem = new ResponseItem(ResponseError.BAD_REQUEST, "message1");
-    ResponseItem responseItemSame = new ResponseItem(ResponseError.BAD_REQUEST, "message1");
-    ResponseItem responseItemDifferent = new ResponseItem(ResponseError.FORBIDDEN, "message2");
+    ResponseItem responseItem = new ResponseItem(
+        HttpServletResponse.SC_BAD_REQUEST, "message1");
+    ResponseItem responseItemSame = new ResponseItem(
+        HttpServletResponse.SC_BAD_REQUEST, "message1");
+    ResponseItem responseItemDifferent =
+      new ResponseItem(HttpServletResponse.SC_FORBIDDEN, "message2");
     ResponseItem simpleResponse = new ResponseItem("simple");
     ResponseItem simpleResponseSame = new ResponseItem("simple");
     ResponseItem simpleResponseDifferent = new ResponseItem("simpleDiffernt");

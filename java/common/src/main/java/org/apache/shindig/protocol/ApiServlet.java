@@ -118,7 +118,7 @@ public abstract class ApiServlet extends InjectedServlet {
       throws IOException;
 
   protected void sendSecurityError(HttpServletResponse servletResponse) throws IOException {
-    sendError(servletResponse, new ResponseItem(ResponseError.UNAUTHORIZED,
+    sendError(servletResponse, new ResponseItem(HttpServletResponse.SC_UNAUTHORIZED,
         "The request did not have a proper security token nor oauth message and unauthenticated "
             + "requests are not allowed"));
   }
@@ -144,10 +144,10 @@ public abstract class ApiServlet extends InjectedServlet {
     if (t instanceof ProtocolException) {
       ProtocolException spe = (ProtocolException) t;
       logger.log(Level.INFO, "Returning a response error as result of a protocol exception", spe);
-      return new ResponseItem(spe.getError(), spe.getMessage());
+      return new ResponseItem(spe.getCode(), spe.getMessage());
     }
     logger.log(Level.WARNING, "Returning a response error as result of an exception", t);
-    return new ResponseItem(ResponseError.INTERNAL_ERROR, t.getMessage());
+    return new ResponseItem(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
   }
 
   protected void setCharacterEncodings(HttpServletRequest servletRequest,

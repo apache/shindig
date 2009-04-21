@@ -23,12 +23,6 @@ import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
-import junit.framework.TestCase;
-
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
 
@@ -37,6 +31,11 @@ import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 public class DataServiceServletTest extends TestCase {
 
@@ -128,7 +127,7 @@ public class DataServiceServletTest extends TestCase {
     setupRequest(route, "DELETE", null);
 
     // Shouldnt these be expectations
-    res.sendError(ResponseError.BAD_REQUEST.getHttpErrorCode(), TestHandler.FAILURE_MESSAGE);
+    res.sendError(HttpServletResponse.SC_BAD_REQUEST, TestHandler.FAILURE_MESSAGE);
     res.setCharacterEncoding("UTF-8");
     res.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 

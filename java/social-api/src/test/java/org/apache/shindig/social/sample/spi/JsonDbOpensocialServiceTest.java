@@ -21,7 +21,6 @@ package org.apache.shindig.social.sample.spi;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.DataCollection;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
@@ -34,14 +33,17 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
+import java.util.Collections;
+
+import javax.servlet.http.HttpServletResponse;
+
+import junit.framework.TestCase;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
-
-import java.util.Collections;
 
 /**
  * Test the JSONOpensocialService
@@ -190,7 +192,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
           Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
       fail();
     } catch (SocialSpiException sse) {
-      assertEquals(ResponseError.BAD_REQUEST, sse.getError());
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST, sse.getCode());
     }
   }
 

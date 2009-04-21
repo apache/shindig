@@ -26,17 +26,12 @@ import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
-import org.apache.shindig.protocol.ResponseError;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import org.easymock.classextension.EasyMock;
 
 import java.io.StringReader;
@@ -46,6 +41,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class AppDataHandlerTest extends EasyMockTestCase {
 
@@ -193,7 +193,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
+      assertEquals(((SocialSpiException)ee.getCause()).getCode(),
+          HttpServletResponse.SC_BAD_REQUEST);
       // was expecting an Exception
     }
     verify();
@@ -222,7 +223,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((SocialSpiException)ee.getCause()).getError(), ResponseError.BAD_REQUEST);
+      assertEquals(((SocialSpiException)ee.getCause()).getCode(),
+          HttpServletResponse.SC_BAD_REQUEST);
     }
     verify();
   }

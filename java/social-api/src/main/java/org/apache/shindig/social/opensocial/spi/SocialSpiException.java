@@ -19,18 +19,17 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.protocol.ProtocolException;
-import org.apache.shindig.protocol.ResponseError;
 
 /**
  * Convenience subclass of ProtocolException to ease transition
  */
 public class SocialSpiException extends ProtocolException {
 
-  public SocialSpiException(ResponseError error, String errorMessage, Throwable cause) {
+  public SocialSpiException(int error, String errorMessage, Throwable cause) {
     super(error, errorMessage, cause);
   }
 
-  public SocialSpiException(ResponseError error, String errorMessage) {
+  public SocialSpiException(int error, String errorMessage) {
     super(error, errorMessage);
   }
 }

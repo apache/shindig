@@ -17,23 +17,35 @@
  */
 package org.apache.shindig.protocol;
 
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.base.Preconditions;
+
 /**
  * Unchecked exception class for errors thrown by request handlers
  */
 public class ProtocolException extends RuntimeException {
-  private final ResponseError error;
+  private final int errorCode;
 
-  public ProtocolException(ResponseError error, String errorMessage, Throwable cause) {
+  public ProtocolException(int errorCode, String errorMessage, Throwable cause) {
     super(errorMessage, cause);
-    this.error = error;
+    checkErrorCode(errorCode);
+    this.errorCode = errorCode;
   }
 
-  public ProtocolException(ResponseError error, String errorMessage) {
+  public ProtocolException(int errorCode, String errorMessage) {
     super(errorMessage);
-    this.error = error;
+    checkErrorCode(errorCode);
+    this.errorCode = errorCode;
   }
 
-  public ResponseError getError() {
-    return error;
+  public int getCode() {
+    return errorCode;
+  }
+
+  private void checkErrorCode(int code) {
+    // 200 is not a legit use of ProtocolExceptions. 
+    Preconditions.checkArgument(code != HttpServletResponse.SC_OK,
+        "May not use OK error code with ProtocolException");
   }
 }
