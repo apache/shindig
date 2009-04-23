@@ -45,9 +45,20 @@ public final class ResponseItem {
    * @param errorMessage the Error Message
    */
   public ResponseItem(int errorCode, String errorMessage) {
+    this(errorCode, errorMessage, null);
+  }
+
+  /**
+   * Create a ResponseItem specifying the ResponseError and error Message.
+   * @param errorCode an RPC error code
+   * @param errorMessage the Error Message
+   * @param response the application specific value that will be sent as
+   *     as part of "data" section of the error.
+   */
+  public ResponseItem(int errorCode, String errorMessage, Object response) {
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;
-    this.response = null;
+    this.response = response;
   }
 
   /**

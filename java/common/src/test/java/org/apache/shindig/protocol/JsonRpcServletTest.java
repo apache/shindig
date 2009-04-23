@@ -349,6 +349,34 @@ public class JsonRpcServletTest extends TestCase {
     JsonAssert.assertJsonEquals("{id:'1',data:{foo:'bar'}}", getOutput());
   }
 
+  public void testGetJsonResponseWithKey() throws Exception {
+    ResponseItem responseItem = new ResponseItem("Name");
+    Object result = servlet.getJSONResponse("my-key", responseItem);
+    JsonAssert.assertObjectEquals("{id: 'my-key', data: 'Name'}", result);
+  }
+
+  public void testGetJsonResponseWithoutKey() throws Exception {
+    ResponseItem responseItem = new ResponseItem("Name");
+    Object result = servlet.getJSONResponse(null, responseItem);
+    JsonAssert.assertObjectEquals("{data: 'Name'}", result);
+  }
+
+  public void testGetJsonResponseErrorWithData() throws Exception {
+    ResponseItem responseItem = new ResponseItem(401, "Error Message", "Optional Data");
+    Object result = servlet.getJSONResponse(null, responseItem);
+    JsonAssert.assertObjectEquals(
+        "{error: {message: 'unauthorized: Error Message', data: 'Optional Data', code: 401}}",
+        result);
+  }
+
+  public void testGetJsonResponseErrorWithoutData() throws Exception {
+    ResponseItem responseItem = new ResponseItem(401, "Error Message");
+    Object result = servlet.getJSONResponse(null, responseItem);
+    JsonAssert.assertObjectEquals(
+        "{error: {message:'unauthorized: Error Message', code:401}}",
+        result);
+  }
+
   private void setupRequest(String json) throws IOException {
     final InputStream in = new ByteArrayInputStream(json.getBytes());
     ServletInputStream stream = new ServletInputStream() {

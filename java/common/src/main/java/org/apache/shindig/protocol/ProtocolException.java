@@ -27,24 +27,39 @@ import com.google.common.base.Preconditions;
 public class ProtocolException extends RuntimeException {
   private final int errorCode;
 
+  /**
+   * The applicatin specific response value associated with this exception.
+   */
+  private final Object response;
+
   public ProtocolException(int errorCode, String errorMessage, Throwable cause) {
     super(errorMessage, cause);
     checkErrorCode(errorCode);
     this.errorCode = errorCode;
+    this.response = null;
   }
 
   public ProtocolException(int errorCode, String errorMessage) {
+    this(errorCode, errorMessage, null);
+  }
+
+  public ProtocolException(int errorCode, String errorMessage, Object response) {
     super(errorMessage);
     checkErrorCode(errorCode);
     this.errorCode = errorCode;
+    this.response = response;
   }
 
   public int getCode() {
     return errorCode;
   }
 
+  public Object getResponse() {
+    return response;
+  }
+
   private void checkErrorCode(int code) {
-    // 200 is not a legit use of ProtocolExceptions. 
+    // 200 is not a legit use of ProtocolExceptions.
     Preconditions.checkArgument(code != HttpServletResponse.SC_OK,
         "May not use OK error code with ProtocolException");
   }

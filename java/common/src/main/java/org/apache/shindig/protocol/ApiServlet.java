@@ -142,9 +142,9 @@ public abstract class ApiServlet extends InjectedServlet {
 
   protected ResponseItem responseItemFromException(Throwable t) {
     if (t instanceof ProtocolException) {
-      ProtocolException spe = (ProtocolException) t;
-      logger.log(Level.INFO, "Returning a response error as result of a protocol exception", spe);
-      return new ResponseItem(spe.getCode(), spe.getMessage());
+      ProtocolException pe = (ProtocolException) t;
+      logger.log(Level.INFO, "Returning a response error as result of a protocol exception", pe);
+      return new ResponseItem(pe.getCode(), pe.getMessage(), pe.getResponse());
     }
     logger.log(Level.WARNING, "Returning a response error as result of an exception", t);
     return new ResponseItem(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());

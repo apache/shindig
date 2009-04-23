@@ -201,7 +201,7 @@ public class JsonRpcServlet extends ApiServlet {
     return dispatcher.getRpcHandler(rpc);
   }
 
-  private Object getJSONResponse(String key, ResponseItem responseItem) {
+  Object getJSONResponse(String key, ResponseItem responseItem) {
     Map<String, Object> result = Maps.newHashMap();
     if (key != null) {
       result.put("id", key);
@@ -258,7 +258,11 @@ public class JsonRpcServlet extends ApiServlet {
     if (StringUtils.isNotBlank(message)) {
       error.put("message", message);
     }
-    
+
+    if (responseItem.getResponse() != null) {
+      error.put("data", responseItem.getResponse());
+    }
+
     return error;
   }
 
