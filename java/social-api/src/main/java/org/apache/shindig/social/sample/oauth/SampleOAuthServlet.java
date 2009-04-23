@@ -92,7 +92,7 @@ public class SampleOAuthServlet extends InjectedServlet {
     String consumerKey = requestMessage.getConsumerKey();
     if (consumerKey == null) {
       OAuthProblemException e = new OAuthProblemException(OAuth.Problems.PARAMETER_ABSENT);
-      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, "oauth_consumer_key");
+      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, OAuth.OAUTH_CONSUMER_KEY);
       throw e;
     }
     OAuthConsumer consumer = dataStore.getConsumer(consumerKey);
@@ -104,7 +104,7 @@ public class SampleOAuthServlet extends InjectedServlet {
     VALIDATOR.validateMessage(requestMessage, accessor);
 
     // generate request_token and secret
-    OAuthEntry entry = dataStore.generateRequestToken(consumerKey);
+    OAuthEntry entry = dataStore.generateRequestToken(consumerKey, requestMessage.getParameter(OAuth.OAUTH_VERSION));
 
     sendResponse(servletResponse, OAuth.newList(OAuth.OAUTH_TOKEN, entry.token,
         OAuth.OAUTH_TOKEN_SECRET, entry.tokenSecret));
@@ -131,10 +131,33 @@ public class SampleOAuthServlet extends InjectedServlet {
     }
 
     OAuthConsumer consumer = dataStore.getConsumer(entry.consumerKey);
-    String callback = requestMessage.getParameter("oauth_callback");
+
+    // Extremely rare case where consumer dissappears
+    if (consumer == null) {
+      servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "consumer for entry not found");
+      return;
+    }
+    
+    // A flag to deal with protocol flaws in OAuth/1.0
+    Boolean securityThreat_2009_1 = (entry.oauthVersion == null || OAuth.VERSION_1_0.equals(entry.oauthVersion));
+
+    // Check for a callback in the oauth entry
+    String callback = entry.callbackUrl;
+
+    if (callback == null) {
+      // see if there's a callback in the url params
+      callback = requestMessage.getParameter(OAuth.OAUTH_CALLBACK);
+    }
+
     if (callback == null) {
       // see if the consumer has a callback
       callback = consumer.callbackURL;
+    }
+
+    // The token is disabled if you try to convert to an access token prior to authorization
+    if (entry.type == OAuthEntry.Type.DISABLED) {
+      servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "This token is disabled, please reinitate login");
+      return;
     }
 
     // Redirect to a UI flow if the token is not authorized
@@ -153,16 +176,18 @@ public class SampleOAuthServlet extends InjectedServlet {
 
         servletRequest.setAttribute("TOKEN", entry.token);
         servletRequest.setAttribute("CONSUMER", consumer);
+        servletRequest.setAttribute("SECURITY_THREAT_2009_1", securityThreat_2009_1);
         
         servletRequest.getRequestDispatcher(oauthAuthorizeAction).forward(servletRequest,servletResponse);
       }
       return;
     }
 
-    // If we're here then the entry has been authorized out of band.
+    // If we're here then the entry has been authorized
 
-    // redirect to callback param oauth_callback
+    // redirect to callback
     if (callback == null) {
+      // consumer did not specify a callback
       servletResponse.setContentType("text/plain");
       OutputStream out = servletResponse.getOutputStream();
       out.write("Token successfully authorized.".getBytes());
@@ -188,7 +213,10 @@ public class SampleOAuthServlet extends InjectedServlet {
       throw new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
 
     if (!entry.authorized) {
-      throw new ServletException("additional_authorization_required");
+      // Catch consumers trying to convert a token to one that's not authorized
+      dataStore.disableToken(entry); 
+      servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "This token is not authorized");
+      return;
     }
 
     // turn request token into access token
@@ -218,7 +246,7 @@ public class SampleOAuthServlet extends InjectedServlet {
 
     if  (requestMessage.getConsumerKey() == null) {
       OAuthProblemException e = new OAuthProblemException(OAuth.Problems.PARAMETER_ABSENT);
-      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, "oauth_consumer");
+      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, OAuth.OAUTH_CONSUMER_KEY);
       throw e;
     }
 

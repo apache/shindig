@@ -32,7 +32,7 @@ public class OAuthEntry implements Serializable {
   static final long serialVersionUID = 2;
 
   public static enum Type {
-    REQUEST, ACCESS
+    REQUEST, ACCESS, DISABLED
   }
 
   public String appId;
@@ -50,6 +50,7 @@ public class OAuthEntry implements Serializable {
 
   public String domain;
   public String container;
+  public String oauthVersion;
 
   public OAuthEntry() {}
 
@@ -69,6 +70,7 @@ public class OAuthEntry implements Serializable {
     this.issueTime = old.issueTime;
     this.domain = old.domain;
     this.container = old.container;
+    this.oauthVersion = old.oauthVersion;
   }
 
   public boolean isExpired() {

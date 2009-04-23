@@ -85,7 +85,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   }
 
   // Generate a valid requestToken for the given consumerKey
-  public OAuthEntry generateRequestToken(String consumerKey) {
+  public OAuthEntry generateRequestToken(String consumerKey, String oauthVersion) {
     OAuthEntry entry = new OAuthEntry();
     entry.appId = consumerKey;
     entry.consumerKey = consumerKey;
@@ -97,6 +97,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
       
     entry.type = OAuthEntry.Type.REQUEST;
     entry.issueTime = new Date();
+    entry.oauthVersion = oauthVersion;
 
     oauthEntries.put(entry.token, entry);
     return entry;
@@ -115,7 +116,6 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     accessEntry.type = OAuthEntry.Type.ACCESS;
     accessEntry.issueTime = new Date();
 
-    
     oauthEntries.remove(entry.token);
     oauthEntries.put(accessEntry.token, accessEntry);
 
@@ -127,6 +127,19 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     Preconditions.checkNotNull(entry);
     entry.authorized = true;
     entry.userId = Preconditions.checkNotNull(userId);
+  }
+
+  public void disableToken(OAuthEntry entry) {
+    Preconditions.checkNotNull(entry);
+    entry.type = OAuthEntry.Type.DISABLED;
+
+    oauthEntries.put(entry.token, entry);
+  }
+
+  public void removeToken(OAuthEntry entry) {
+    Preconditions.checkNotNull(entry);
+
+    oauthEntries.remove(entry.token);
   }
 
   // Return the proper security token for a 2 legged oauth request that has been validated

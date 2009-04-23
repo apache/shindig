@@ -29,16 +29,15 @@
     // Bounce back to the servlet to handle redirecting to the callback URL
     request.getRequestDispatcher("/oauth/authorize?oauth_token=" + token + "&oauth_callback=" + callback)
             .forward(request,response);
+  } else if (request.getParameter("Deny") != null) {
+    dataStore.removeToken(entry);
   }
-
   // Gather some data
-  String appTitle =(String)consumer.getProperty("title");
-  String appDesc = (String)consumer.getProperty("description");
-  if (appDesc == null)
-    appDesc = consumer.consumerKey;
+  pageContext.setAttribute("appTitle", consumer.getProperty("title") , PageContext.PAGE_SCOPE);
+  pageContext.setAttribute("appDesc", consumer.getProperty("description"), PageContext.PAGE_SCOPE);
     
-  String appIcon = (String)consumer.getProperty("icon");
-  String appThumbnail = (String)consumer.getProperty("thumbnail");
+  pageContext.setAttribute("appIcon", consumer.getProperty("icon"));
+  pageContext.setAttribute("appThumbnail", consumer.getProperty("thumbnail"));
 %>
 <html>
 <head>
@@ -50,13 +49,21 @@ Greetings <jsec:principal/>,<br/><br/>
 
 The following application wants to access your account information<br/><br/>
 
-<h3><img src="<%= appIcon %>"/><%=appTitle %>" is trying to access your information.</h3>
-<img src="<%= appThumbnail%>" align="left" width="120" height="60"/>
-<c:out value="appDesc" default=""/>
+<h3><img src="${appIcon}"/> <b><c:out value="${appTitle}"/></b> is trying to access your information.</h3>
+<img src="${appThumbnail}" align="left" width="120" height="60"/>
+<c:out value="${appDesc}" default=""/>
 <br/>
+<c:if test="${SECURITY_THREAT_2009_1}">
+  <font color="red"><b>POSSIBLE SECURITY RISK</b> - 
+  Deny this request unless you directly initiated it from the Official 
+  <i><c:out value="${appTitle}"/></i> web site
+  </font>
+</c:if>
+
 <form name="authZForm" action="authorize" method="POST">
   <input type="hidden" name="oauth_token" value="<%= token %>"/>
   <input type="hidden" name="oauth_callback" value="<%= URLEncoder.encode(callback, "UTF-8") %>"/>
+  <input type="submit" name="Authorize" value="Deny"/>
   <input type="submit" name="Authorize" value="Authorize"/>
 </form>
 

@@ -79,7 +79,7 @@ public interface OAuthDataStore {
    * @return An OAuthEntry containing a valid request token.
    * @throws OAuthProblemException when the implementing class wants to control the error response
    */
-  OAuthEntry generateRequestToken(String consumerKey) throws OAuthProblemException;
+  OAuthEntry generateRequestToken(String consumerKey, String oauthVersion) throws OAuthProblemException;
 
 
   /**
@@ -101,4 +101,19 @@ public interface OAuthDataStore {
    * @throws OAuthProblemException when the implementing class wants to control the error response
    */
   void authorizeToken(OAuthEntry entry, String userId) throws OAuthProblemException;
+
+  /**
+   * Mark a token DISABLED and store it.
+   * 
+   * @param entry A valid OAuthEntry
+   */
+  void disableToken(OAuthEntry entry);
+
+  /**
+   * Remove a token
+   * 
+   * @param entry A valid OAuthEntry
+   */
+  void removeToken(OAuthEntry entry);
+
 }
