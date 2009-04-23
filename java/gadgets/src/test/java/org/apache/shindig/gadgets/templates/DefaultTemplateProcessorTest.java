@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -59,7 +60,7 @@ public class DefaultTemplateProcessorTest {
 
   private TemplateContext context;
   private DefaultTemplateProcessor processor;
-  private Map<String, JSONObject> variables;
+  private Map<String, Object> variables;
   private ELResolver resolver;
   private TagRegistry registry;
 
@@ -79,10 +80,11 @@ public class DefaultTemplateProcessorTest {
     parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());    
     context = new TemplateContext(new Gadget(), variables);
     
-    addVariable("foo", new JSONObject("{ title: 'bar' }"));
-    addVariable("user", new JSONObject("{ id: '101', name: { first: 'John', last: 'Doe' }}"));
-    addVariable("toys", new JSONObject("{ list: [{name: 'Ball'}, {name: 'Car'}]}"));
-    addVariable("xss", new JSONObject("{ script: '<script>alert();</script>'," +
+    variables.put("foo", new JSONObject("{ title: 'bar' }"));
+    variables.put("user", new JSONObject("{ id: '101', name: { first: 'John', last: 'Doe' }}"));
+    variables.put("toys", new JSONObject("{ list: [{name: 'Ball'}, {name: 'Car'}]}"));
+    variables.put("countries", new JSONArray("['Ireland','France']"));
+    variables.put("xss", new JSONObject("{ script: '<script>alert();</script>'," +
     		"quote:'\"><script>alert();</script>'}"));
   }
 
@@ -163,6 +165,12 @@ public class DefaultTemplateProcessorTest {
     String output = executeTemplate("<span repeat=\"${toys}\">${name}</span>");
     assertEquals("<span>Ball</span><span>Car</span>", output);
   }
+
+  @Test
+  public void testRepeatScalar() throws Exception {
+    String output = executeTemplate("<span repeat=\"${countries}\">${Cur}</span>");
+    assertEquals("<span>Ireland</span><span>France</span>", output);
+  }
   
   @Test
   public void testCurAttribute() throws Exception {
@@ -218,10 +226,6 @@ public class DefaultTemplateProcessorTest {
       new NekoSerializer().serialize(child, sb);
     }
     return sb.toString();
-  }
-  
-  private void addVariable(String key, JSONObject value) {
-    variables.put(key, value);
   }
   
   /**

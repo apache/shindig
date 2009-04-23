@@ -458,7 +458,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
               }
               
               try {
-                return array.getJSONObject(i++);
+                return array.get(i++);
               } catch (Exception e) {
                 throw new ELException(e);
               }
