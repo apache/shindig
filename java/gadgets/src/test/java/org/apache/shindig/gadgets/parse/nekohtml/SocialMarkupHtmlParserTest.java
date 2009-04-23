@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class SocialMarkupHtmlParserTest {
 
   @Test
   public void testSocialTemplateSerialization() {
-    String content = NekoSerializer.serialize(document);
+    String content = HtmlSerializer.serialize(document);
     assertTrue("Empty elements not preserved as XML inside template",
         content.contains("<img/>"));
   }

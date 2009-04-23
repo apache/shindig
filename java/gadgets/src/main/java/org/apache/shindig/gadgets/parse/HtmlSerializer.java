@@ -17,8 +17,10 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import org.cyberneko.html.HTMLEntities;
 import org.w3c.dom.Document;
 
+import java.io.IOException;
 import java.io.StringWriter;
 
 /**
@@ -46,7 +48,7 @@ public abstract class HtmlSerializer {
    * @param serializer
    * @param originalContent may be null
    */
-  public static void attach(Document doc, HtmlSerializer serializer, String originalContent) {
+  static void attach(Document doc, HtmlSerializer serializer, String originalContent) {
     doc.setUserData(KEY, serializer, null);
     if (originalContent != null) {
       doc.setUserData(ORIGINAL_LENGTH, originalContent.length(), null);
@@ -57,7 +59,7 @@ public abstract class HtmlSerializer {
    * Copy serializer from one document to another. Note this requires that
    * serializers are thread safe
    */
-  public static void copySerializer(Document from, Document to) {
+  static void copySerializer(Document from, Document to) {
     Integer length = (Integer)from.getUserData(ORIGINAL_LENGTH);
     if (length != null) to.setUserData(ORIGINAL_LENGTH, length, null);
     to.setUserData(KEY, from.getUserData(KEY), null);
@@ -95,7 +97,7 @@ public abstract class HtmlSerializer {
    * @return
    */
   public static String serialize(Document doc) {
-    return ((HtmlSerializer)doc.getUserData(KEY)).serializeImpl(doc);
+    return ((HtmlSerializer) doc.getUserData(KEY)).serializeImpl(doc);
   }
 
   /**
@@ -104,5 +106,17 @@ public abstract class HtmlSerializer {
    * @return
    */
   protected abstract String serializeImpl(Document doc);
+
+  public static void printEscapedText(CharSequence text, Appendable output) throws IOException {
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
+      String entity = HTMLEntities.get(c);
+      if (entity != null) {
+        output.append('&').append(entity).append(";");
+      } else {
+        output.append(c);
+      }
+    }
+  }
 
 }

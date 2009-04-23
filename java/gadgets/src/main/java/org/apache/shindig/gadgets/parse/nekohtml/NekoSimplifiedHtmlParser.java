@@ -71,6 +71,10 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     this.documentFactory = documentFactory;
   }
 
+  protected HtmlSerializer createSerializer() {
+    return new NekoSerializer();
+  }
+
   @Override
   protected Document parseDomImpl(String source) {
     DocumentHandler handler;
@@ -84,7 +88,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     Document document = handler.getDocument();
     DocumentFragment fragment = handler.getFragment();
     normalizeFragment(document, fragment);
-    HtmlSerializer.attach(document, new NekoSerializer(), source);
     return document;
   }
 

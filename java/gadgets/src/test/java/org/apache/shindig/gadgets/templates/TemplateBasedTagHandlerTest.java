@@ -172,7 +172,7 @@ public class TemplateBasedTagHandlerTest {
     NodeList children = node.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       Node child = children.item(i);
-      NekoSerializer.serialize(child, sb);
+      new NekoSerializer().serialize(child, sb);
     }
     return sb.toString();
   }

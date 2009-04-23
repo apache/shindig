@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.xerces.xni.QName;
 import org.cyberneko.html.HTMLElements;
-import org.cyberneko.html.HTMLEntities;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -40,12 +39,9 @@ import com.google.common.collect.ImmutableSet;
  * This parser does not try to escape entities in text content as it expects the parser
  * to have retained the original entity references rather than its resolved form in text nodes
  */
-public class NekoSerializer extends HtmlSerializer
-{
+public class NekoSerializer extends HtmlSerializer {
+
   private static final Set<String> URL_ATTRIBUTES = ImmutableSet.of("href", "src");
-  
-  public NekoSerializer() {
-  }
 
   @Override
   public String serializeImpl(Document doc) {
@@ -54,25 +50,25 @@ public class NekoSerializer extends HtmlSerializer
       if (doc.getDoctype() != null) {
         outputDocType(doc.getDoctype(), sw);
       }
-      serialize(doc, sw);
+      this.serialize(doc, sw);
       return sw.toString();
     } catch (IOException ioe) {
       return null;
     }
   }
 
-  public static void serialize(Node n, Appendable output) throws IOException {
+  public void serialize(Node n, Appendable output) throws IOException {
     serialize(n, output, false);
   }
 
-  private static void serialize(Node n, Appendable output, boolean xmlMode)
+  private void serialize(Node n, Appendable output, boolean xmlMode)
       throws IOException {
     switch (n.getNodeType()) {
       case Node.CDATA_SECTION_NODE: {
         break;
       }
       case Node.COMMENT_NODE: {
-        output.append("<!--").append(n.getNodeValue()).append("-->");
+        writeComment(n, output);
         break;
       }
       case Node.DOCUMENT_NODE: {
@@ -104,13 +100,21 @@ public class NekoSerializer extends HtmlSerializer
         break;
       }
       case Node.TEXT_NODE: {
-        output.append(n.getTextContent());
+        writeText(n, output);
         break;
       }
     }
   }
 
-  public static void outputDocType(DocumentType docType, Appendable output) throws IOException {
+  protected void writeText(Node n, Appendable output) throws IOException {
+    output.append(n.getTextContent());
+  }
+
+  protected void writeComment(Node n, Appendable output) throws IOException {
+    output.append("<!--").append(n.getNodeValue()).append("-->");
+  }
+
+  private void outputDocType(DocumentType docType, Appendable output) throws IOException {
     output.append("<!DOCTYPE ");
     // Use this so name matches case for XHTML
     output.append(docType.getOwnerDocument().getDocumentElement().getNodeName());
@@ -123,13 +127,6 @@ public class NekoSerializer extends HtmlSerializer
       output.append('"').append(docType.getSystemId()).append('"');
     }
     output.append(">\n");
-  }
-
-  /**
-   * Print the start of an HTML element.
-   */
-  public static void printStartElement(Element elem, Appendable output) throws IOException {
-    printStartElement(elem, output, false);
   }
 
   /**
@@ -157,7 +154,7 @@ public class NekoSerializer extends HtmlSerializer
     output.append(withXmlClose ? "/>" : ">");
   }
 
-  public static void printAttributeValue(String text, Appendable output, boolean isUrl) throws IOException {
+  private static void printAttributeValue(String text, Appendable output, boolean isUrl) throws IOException {
     int length = text.length();
     for (int j = 0; j < length; j++) {
       char c = text.charAt(j);
@@ -171,22 +168,10 @@ public class NekoSerializer extends HtmlSerializer
     }
   }
 
-  public static void printEscapedText(CharSequence text, Appendable output) throws IOException {
-    for (int i = 0; i < text.length(); i++) {
-      char c = text.charAt(i);
-      String entity = HTMLEntities.get(c);
-      if (entity != null) {
-        output.append('&').append(entity).append(";");
-      } else {
-        output.append(c);
-      }
-    }
-  }
-
   /**
    * Returns true if the listed attribute is an URL attribute.
    */
-  public static boolean isUrlAttribute(QName name, String attributeName) {
+  static boolean isUrlAttribute(QName name, String attributeName) {
     return name.uri == null && URL_ATTRIBUTES.contains(attributeName);
   }
 }
