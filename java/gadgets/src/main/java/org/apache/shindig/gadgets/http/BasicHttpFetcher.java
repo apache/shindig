@@ -175,8 +175,9 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       if (request.getPostBodyLength() > 0) {
         enclosingMethod.setRequestEntity(new InputStreamRequestEntity(request.getPostBody()));
+        enclosingMethod.setRequestHeader("Content-Length",
+            String.valueOf(request.getPostBodyLength()));
       }
-
       httpMethod = enclosingMethod;
     } else if ("DELETE".equals(methodType)) {
       httpMethod = new DeleteMethod(requestUri);
@@ -186,7 +187,6 @@ public class BasicHttpFetcher implements HttpFetcher {
 
     httpMethod.setFollowRedirects(false);
     httpMethod.getParams().setSoTimeout(connectionTimeoutMs);
-    httpMethod.setRequestHeader("Content-Length", String.valueOf(request.getPostBodyLength()));
     httpMethod.setRequestHeader("Accept-Encoding", "gzip, deflate");
 
     for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
