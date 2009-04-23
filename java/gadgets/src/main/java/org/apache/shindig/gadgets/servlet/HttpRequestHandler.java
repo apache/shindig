@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.JsonProperty;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.AuthType;
@@ -34,6 +35,8 @@ import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Map;
@@ -41,7 +44,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -52,18 +54,16 @@ import com.google.inject.Inject;
  * ...
  * method : http.<HTTP method name>
  * params : {
- *    url : <endpoint to fetch content from>,
+ *    href : <endpoint to fetch content from>,
  *    headers : { <header-name> : <header-value>, ...},
- *    contentType : <coerce content to specified mime type>
+ *    format : <"text", "json", "feed">
  *    body : <request body>
  *    gadget : <url of gadget spec for calling application>
- *    auth : {
- *          type : <None | OAuth | Signed>,
- *          signOwner : <boolean, default true>
- *          signViewer : <boolean, default true>
- *          ...<additional auth arguments. See OAuthArguments>
- *    },
- *    refresh : <Integer time in seconds to force as cache TTL. Default is to use response headers>
+ *    authz: : <none | oauth | signed>,
+ *    sign_owner: <boolean, default true>
+ *    sign_viewer: <boolean, default true>
+ *    ...<additional auth arguments. See OAuthArguments>
+ *    refreshInterval : <Integer time in seconds to force as cache TTL. Default is to use response headers>
  *    noCache : <Bypass container content cache. Default false>
  *    sanitize : <Force sanitize fetched content. Default false>
  *    summarize : <If contentType == "FEED" summarize the results. Default false>
@@ -75,14 +75,16 @@ import com.google.inject.Inject;
  * data : {
  *    status : <HTTP status code.>
  *    headers : { <header name> : [<header val1>, <header val2>, ...], ...}
- *    body : <response body>
+ *    content : <response body>: string if 'text', JSON is 'feed' or 'json' format
  *    token : <If security token provides a renewed value.>
  *    metadata : { <metadata entry> : <metadata value>, ...}
  * }
  *
- * Its important to note that requests which generate HTTP error responses such as 500 are returned
+ * It's important to note that requests which generate HTTP error responses such as 500 are returned
  * in the above format. The RPC itself succeeded in these cases. If an RPC error occurred the client
  * should introspect the error message for information as to the cause.
+ * 
+ * TODO: send errors using "data", not plain content
  *
  * @see MakeRequestHandler
  */
@@ -107,21 +109,21 @@ public class HttpRequestHandler {
   public HttpApiResponse get(BaseRequestItem request) {
     HttpApiRequest httpReq = request.getTypedRequest(HttpApiRequest.class);
     assertNoBody(httpReq, "GET");
-    return execute("GET", httpReq, request.getToken());
+    return execute("GET", httpReq, request);
   }
 
   /** Execute an HTTP POST request */
   @Operation(httpMethods = "POST", path = "/post")
   public HttpApiResponse post(BaseRequestItem request) {
     HttpApiRequest httpReq = request.getTypedRequest(HttpApiRequest.class);
-    return execute("POST", httpReq, request.getToken());
+    return execute("POST", httpReq, request);
   }
 
   /** Execute an HTTP PUT request */
   @Operation(httpMethods = "POST", path = "/put")
   public HttpApiResponse put(BaseRequestItem request) {
     HttpApiRequest httpReq = request.getTypedRequest(HttpApiRequest.class);
-    return execute("PUT", httpReq, request.getToken());
+    return execute("PUT", httpReq, request);
   }
 
   /** Execute an HTTP DELETE request */
@@ -129,7 +131,7 @@ public class HttpRequestHandler {
   public HttpApiResponse delete(BaseRequestItem request) {
     HttpApiRequest httpReq = request.getTypedRequest(HttpApiRequest.class);
     assertNoBody(httpReq, "DELETE");
-    return execute("DELETE", httpReq, request.getToken());
+    return execute("DELETE", httpReq, request);
   }
 
   /** Execute an HTTP HEAD request */
@@ -137,7 +139,7 @@ public class HttpRequestHandler {
   public HttpApiResponse head(BaseRequestItem request) {
     HttpApiRequest httpReq = request.getTypedRequest(HttpApiRequest.class);
     assertNoBody(httpReq, "HEAD");
-    return execute("HEAD", httpReq, request.getToken());
+    return execute("HEAD", httpReq, request);
   }
 
   private void assertNoBody(HttpApiRequest httpRequest, String method) {
@@ -151,20 +153,18 @@ public class HttpRequestHandler {
    * Dispatch the request
    *
    * @param method HTTP method to execute
+   * @param requestItem TODO
    */
   private HttpApiResponse execute(String method, HttpApiRequest httpApiRequest,
-      SecurityToken token) {
-    if (httpApiRequest.url == null) {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Url parameter is missing");
+      BaseRequestItem requestItem) {
+    if (httpApiRequest.href == null) {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "href parameter is missing");
     }
 
     // Canonicalize the path
-    if (httpApiRequest.url.getPath() == null || httpApiRequest.url.getPath().length() == 0) {
-      httpApiRequest.url = new UriBuilder(httpApiRequest.url).setPath("/").toUri();
-    }
-
+    Uri href = normalizeUrl(httpApiRequest.href);
     try {
-      HttpRequest req = new HttpRequest(httpApiRequest.url);
+      HttpRequest req = new HttpRequest(href);
       req.setMethod(method);
       if (httpApiRequest.body != null) {
         req.setPostBody(httpApiRequest.body.getBytes());
@@ -178,49 +178,55 @@ public class HttpRequestHandler {
       }
 
       // Extract the gadget URI from the request or the security token
-      Uri gadgetUri = getGadgetUri(token, httpApiRequest);
+      Uri gadgetUri = getGadgetUri(requestItem.getToken(), httpApiRequest);
       if (gadgetUri == null) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "Gadget URI not specified in request");
       }
       req.setGadget(gadgetUri);
 
-      // Detect the auth parsing
-      if (httpApiRequest.auth != null && httpApiRequest.auth.get("type") != null) {
-        req.setAuthType(AuthType.parse(httpApiRequest.auth.get("type")));
+      // Detect the authz parsing
+      if (httpApiRequest.authz != null) {
+        req.setAuthType(AuthType.parse(httpApiRequest.authz));
       }
 
       if (req.getAuthType() != AuthType.NONE) {
-        req.setSecurityToken(token);
-        req.setOAuthArguments(new OAuthArguments(req.getAuthType(), httpApiRequest.auth));
+        req.setSecurityToken(requestItem.getToken());
+        
+        Map<String, String> authSettings = getAuthSettings(requestItem);
+        OAuthArguments oauthArgs = new OAuthArguments(req.getAuthType(), authSettings);
+        oauthArgs.setSignOwner(httpApiRequest.signOwner);
+        oauthArgs.setSignViewer(httpApiRequest.signViewer);
+        
+        req.setOAuthArguments(oauthArgs);
       }
 
-      // Allow the rewriter to use an externally forced mime type. This is needed
+      // TODO: Allow the rewriter to use an externally forced mime type. This is needed
       // allows proper rewriting of <script src="x"/> where x is returned with
       // a content type like text/html which unfortunately happens all too often
-      req.setRewriteMimeType(httpApiRequest.contentType);
+      
       req.setIgnoreCache(httpApiRequest.noCache);
       req.setSanitizationRequested(httpApiRequest.sanitize);
 
       // If the proxy request specifies a refresh param then we want to force the min TTL for
       // the retrieved entry in the cache regardless of the headers on the content when it
       // is fetched from the original source.
-      if (httpApiRequest.refresh != null) {
-        req.setCacheTtl(httpApiRequest.refresh);
+      if (httpApiRequest.refreshInterval != null) {
+        req.setCacheTtl(httpApiRequest.refreshInterval);
       }
 
       HttpResponse results = requestPipeline.execute(req);
-      if (contentRewriterRegistry != null) {
-        results = contentRewriterRegistry.rewriteHttpResponse(req, results);
-      }
+      // TODO: os:HttpRequest and Preload do not use the content rewriter.
+      // Should we really do so here?
+      results = contentRewriterRegistry.rewriteHttpResponse(req, results);
 
       HttpApiResponse httpApiResponse = new HttpApiResponse(results,
-          tranformBody(httpApiRequest, results),
+          transformBody(httpApiRequest, results),
           httpApiRequest);
 
       // Renew the security token if we can
-      if (token != null) {
-        String updatedAuthToken = token.getUpdatedToken();
+      if (requestItem.getToken() != null) {
+        String updatedAuthToken = requestItem.getToken().getUpdatedToken();
         if (updatedAuthToken != null) {
           httpApiResponse.token = updatedAuthToken;
         }
@@ -235,34 +241,62 @@ public class HttpRequestHandler {
     }
   }
 
+  /**
+   * Extract all unknown keys into a map for extra auth params.
+   */
+  private Map<String, String> getAuthSettings(BaseRequestItem requestItem) {
+    // Keys in a request item are always Strings
+    @SuppressWarnings("unchecked")
+    Set<String> allParameters = requestItem.getTypedRequest(Map.class).keySet();
+    
+    Map<String, String> authSettings = Maps.newHashMap();
+    for (String paramName : allParameters) {
+      if (!HttpApiRequest.KNOWN_PARAMETERS.contains(paramName)) {
+        authSettings.put(paramName, requestItem.getParameter(paramName));
+      }
+    }
+    
+    return authSettings;
+  }
+
+
   protected Uri normalizeUrl(Uri url) {
     if (url.getScheme() == null) {
       // Assume http
       url = new UriBuilder(url).setScheme("http").toUri();
-    } else if (!"http".equals(url.getScheme()) && !"https"
-        .equals(url.getScheme())) {
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
-          "Only HTTP and HTTPS are supported");
     }
+
+    if (url.getPath() == null || url.getPath().length() == 0) {
+      url = new UriBuilder(url).setPath("/").toUri();
+    }
+
     return url;
   }
 
 
   /** Format a response as JSON, including additional JSON inserted by chained content fetchers. */
-  protected String tranformBody(HttpApiRequest request, HttpResponse results)
+  protected Object transformBody(HttpApiRequest request, HttpResponse results)
       throws GadgetException {
     String body = results.getResponseAsString();
-    if ("FEED".equals(request.contentType)) {
-      body = processFeed(request, body);
+    if ("feed".equalsIgnoreCase(request.format)) {
+      return processFeed(request, body);
+    } else if ("json".equalsIgnoreCase(request.format)) {
+      try {
+        return new JSONObject(body);
+      } catch (JSONException e) {
+        // TODO: include data block with invalid JSON
+        throw new ProtocolException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Response not valid JSON", e);
+      }
     }
+    
     return body;
   }
 
   /** Processes a feed (RSS or Atom) using FeedProcessor. */
-  protected String processFeed(HttpApiRequest req, String responseBody)
+  protected Object processFeed(HttpApiRequest req, String responseBody)
       throws GadgetException {
-    return new FeedProcessor().process(req.url.toString(), responseBody, req.summarize,
-        req.entryCount).toString();
+    return new FeedProcessor().process(req.href.toString(), responseBody, req.summarize,
+        req.entryCount);
   }
 
   /** Extract the gadget URL from the request or the security token */
@@ -279,25 +313,39 @@ public class HttpRequestHandler {
    * Simple type that represents an Http request to execute on the callers behalf
    */
   public static class HttpApiRequest {
+    static final Set<String> KNOWN_PARAMETERS = ImmutableSet.of(
+        "href", "headers", "body", "gadget", "authz", "sign_owner",
+        "sign_viewer", "format", "refreshInterval", "noCache", "sanitize",
+        "summarize", "entryCount");
 
     // Content to fetch / execute
-    Uri url;
+    Uri href;
 
     // TODO : Consider support Map<String, List<String>> to match response
     Map<String, String> headers = Maps.newHashMap();
 
+    /** POST body */
     String body;
 
     // Allowed to be null if it can be derived from the security token
+    // TODO: why is this useful?
     Uri gadget;
 
-    Map<String, String> auth = Maps.newHashMap();
-
-    // The content type to coerce the response into. "FEED" has special meaning
-    String contentType;
+    /** Authorization type ("none", "signed", "oauth") */
+    String authz = "none";
+    
+    /** Should the request be signed by owner? */
+    boolean signOwner = true;
+    
+    /** Should the request be signed by viewer? */
+    boolean signViewer = true;
+    
+    // The format type to coerce the response into. Supported values are
+    // "text", "json", and "feed".
+    String format;
 
     // Use Integer here to allow for null
-    Integer refresh;
+    Integer refreshInterval;
 
     // Bypass http caches
     boolean noCache;
@@ -309,12 +357,12 @@ public class HttpRequestHandler {
     boolean summarize;
     int entryCount = 3;
 
-    public Uri getUrl() {
-      return url;
+    public Uri getHref() {
+      return href;
     }
 
-    public void setUrl(Uri url) {
-      this.url = url;
+    public void setHref(Uri url) {
+      this.href = url;
     }
 
     public Uri getGadget() {
@@ -341,12 +389,12 @@ public class HttpRequestHandler {
       this.body = body;
     }
 
-    public Integer getRefresh() {
-      return refresh;
+    public Integer getRefreshInterval() {
+      return refreshInterval;
     }
 
-    public void setRefresh(Integer refresh) {
-      this.refresh = refresh;
+    public void setRefreshInterval(Integer refreshInterval) {
+      this.refreshInterval = refreshInterval;
     }
 
     public boolean isNoCache() {
@@ -365,22 +413,40 @@ public class HttpRequestHandler {
       this.sanitize = sanitize;
     }
 
-    public String getContentType() {
-      return contentType;
+    public String getFormat() {
+      return format;
     }
 
-    public void setContentType(String contentType) {
-      this.contentType = contentType;
+    public void setFormat(String format) {
+      this.format = format;
     }
 
-    public Map<String, String> getAuth() {
-      return auth;
+    public String getAuthz() {
+      return authz;
+    }
+    
+    public void setAuthz(String authz) {
+      this.authz = authz;
     }
 
-    public void setAuth(Map<String, String> auth) {
-      this.auth = auth;
+    public boolean isSignViewer() {
+      return signViewer;
     }
-
+    
+    @JsonProperty("sign_viewer")
+    public void setSignViewer(boolean signViewer) {
+      this.signViewer = signViewer;
+    }
+    
+    public boolean isSignOwner() {
+      return signOwner;
+    }
+    
+    @JsonProperty("sign_owner")
+    public void setSignOwner(boolean signOwner) {
+      this.signOwner = signOwner;
+    }
+    
     public boolean isSummarize() {
       return summarize;
     }
@@ -404,12 +470,12 @@ public class HttpRequestHandler {
   public static class HttpApiResponse {
     // Http status code
     int status;
-
+    
     // Returned headers
     Map<String, Collection<String>> headers;
 
-    // Body content
-    String body;
+    // Body content, either a String or a JSON-type structure
+    Object content;
 
     // Renewed security token if available
     String token;
@@ -424,7 +490,7 @@ public class HttpRequestHandler {
     /**
      * Construct response based on HttpResponse from fetcher
      */
-    public HttpApiResponse(HttpResponse response, String body, HttpApiRequest httpApiRequest) {
+    public HttpApiResponse(HttpResponse response, Object content, HttpApiRequest httpApiRequest) {
       this.status = response.getHttpStatusCode();
       this.headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
@@ -434,11 +500,8 @@ public class HttpRequestHandler {
       if (response.getHeaders().containsKey("location")) {
         this.headers.put("location", response.getHeaders("location"));
       }
-      // Override the content-type if specified
-      if (httpApiRequest.contentType != null) {
-        this.headers.put("Content-Type", ImmutableList.of(httpApiRequest.contentType));
-      }
-      this.body = body;
+      
+      this.content = content;
 
       this.metadata = response.getMetadata();
     }
@@ -459,12 +522,12 @@ public class HttpRequestHandler {
       this.headers = headers;
     }
 
-    public String getBody() {
-      return body;
+    public Object getContent() {
+      return content;
     }
 
-    public void setBody(String body) {
-      this.body = body;
+    public void setContent(Object content) {
+      this.content = content;
     }
 
     public String getToken() {
@@ -477,8 +540,8 @@ public class HttpRequestHandler {
 
     public Map<String, String> getMetadata() {
       // TODO - Review this once migration of JS occurs. Currently MakeRequestHandler suppresses
-      // this on output but that choice may not be the best one for compatability.
-      // Suppress metadata on output if its empty
+      // this on output but that choice may not be the best one for compatibility.
+      // Suppress metadata on output if it's empty
       if (metadata != null && metadata.isEmpty()) {
         return null;
       }

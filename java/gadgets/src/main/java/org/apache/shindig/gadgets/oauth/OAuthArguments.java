@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
@@ -343,5 +344,40 @@ public class OAuthArguments {
   
   public boolean programmaticConfig() {
     return Boolean.parseBoolean(requestOptions.get(PROGRAMMATIC_CONFIG_PARAM));
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (bypassSpecCache ? 1231 : 1237);
+    result = 31 * result + ((origClientState == null) ? 0 : origClientState.hashCode());
+    result = 31 * result + (proxiedContentRequest ? 1231 : 1237);
+    result = 31 * result + ((requestToken == null) ? 0 : requestToken.hashCode());
+    result = 31 * result + ((requestTokenSecret == null) ? 0 : requestTokenSecret.hashCode());
+    result = 31 * result + ((serviceName == null) ? 0 : serviceName.hashCode());
+    result = 31 * result + (signOwner ? 1231 : 1237);
+    result = 31 * result + (signViewer ? 1231 : 1237);
+    result = 31 * result + ((tokenName == null) ? 0 : tokenName.hashCode());
+    result = 31 * result + ((useToken == null) ? 0 : useToken.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    
+    if (!(obj instanceof OAuthArguments)) {
+      return false;
+    }
+
+    OAuthArguments other = (OAuthArguments) obj;
+    return (bypassSpecCache == other.bypassSpecCache
+        && StringUtils.equals(origClientState, other.origClientState)
+        && proxiedContentRequest == other.proxiedContentRequest
+        && StringUtils.equals(requestToken, other.requestToken)
+        && StringUtils.equals(requestTokenSecret, other.requestTokenSecret)
+        && StringUtils.equals(tokenName, other.tokenName)
+        && signViewer == other.signViewer
+        && useToken == other.useToken);
   }
 }

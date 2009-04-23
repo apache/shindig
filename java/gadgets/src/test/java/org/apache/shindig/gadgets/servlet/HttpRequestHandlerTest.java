@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.reportMatcher;
 
@@ -30,10 +31,11 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.DefaultRequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -41,6 +43,7 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RpcHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
+import org.easymock.Capture;
 import org.easymock.IArgumentMatcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,6 +54,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -96,7 +101,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testSimpleGet() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent'"
+        + "href:'http://www.example.org/somecontent'"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -110,13 +115,13 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT' }}");
+        "{ headers : {}, status : 200, content : 'CONTENT' }}");
   }
 
   @Test
   public void testFailGetWithBodyGet() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY'"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
@@ -133,7 +138,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testSimplePost() throws Exception {
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY'"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
@@ -149,13 +154,13 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT' }}");
+        "{ headers : {}, status : 200, content : 'CONTENT' }}");
   }
 
   @Test
   public void testPostWithHeaders() throws Exception {
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY',"
         + "headers:{goodheader:good, host : iamstripped, 'Content-Length':'1000'}"
         + "}}");
@@ -174,14 +179,14 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT' }}");
+        "{ headers : {}, status : 200, content : 'CONTENT' }}");
   }
 
   @Test
   public void testFetchContentTypeFeed() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
-        + "contentType : FEED"
+        + "href:'http://www.example.org/somecontent',"
+        + "format : FEED"
         + "}}");
 
     String entryTitle = "Feed title";
@@ -212,7 +217,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JSONObject feed = new JSONObject(httpApiResponse.getBody());
+    JSONObject feed = (JSONObject) httpApiResponse.getContent();;
     JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
 
     assertEquals(entryTitle, entry.getString("Title"));
@@ -225,8 +230,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testFetchFeedWithParameters() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
-        + "contentType : FEED,"
+        + "href:'http://www.example.org/somecontent',"
+        + "format : FEED,"
         + "summarize : true,"
         + "entryCount : 2"
         + "}}");
@@ -269,7 +274,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JSONObject feed = new JSONObject(httpApiResponse.getBody());
+    JSONObject feed = (JSONObject) httpApiResponse.getContent();
     JSONArray feeds = feed.getJSONArray("Entry");
 
     assertEquals("numEntries not parsed correctly.", 2, feeds.length());
@@ -283,14 +288,37 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   }
 
   @Test
+  public void testJsonGet() throws Exception {
+    JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
+        + "href:'http://www.example.org/somecontent', format:'json'"
+        + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("GET");
+    builder.setResponseString("{key:1}");
+    expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
+
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    HttpRequestHandler.HttpApiResponse httpApiResponse =
+        (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
+    verify();
+
+    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
+        "{ headers : {}, status : 200, content : {key: 1}}}");
+  }
+
+  @Test
   public void testSignedGetRequest() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
-        + "auth : { type: signed }"
+        + "href:'http://www.example.org/somecontent',"
+        + "authz : 'signed' }"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
     httpRequest.setAuthType(AuthType.SIGNED);
+    httpRequest.setOAuthArguments(
+        new OAuthArguments(AuthType.SIGNED, ImmutableMap.<String, String>of()));
     expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
     replay();
     RpcHandler operation = registry.getRpcHandler(request);
@@ -300,7 +328,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT' }}");
+        "{ headers : {}, status : 200, content : 'CONTENT' }}");
 
     assertTrue(rewriter.responseWasRewritten());
   }
@@ -309,13 +337,15 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   public void testSignedPostAndUpdateSecurityToken() throws Exception {
     token.setUpdatedToken("updated");
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY',"
-        + "auth : { type: signed }"
+        + "authz: 'signed' }"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("POST");
     httpRequest.setAuthType(AuthType.SIGNED);
+    httpRequest.setOAuthArguments(
+        new OAuthArguments(AuthType.SIGNED, ImmutableMap.<String, String>of()));
     httpRequest.setPostBody("POSTBODY".getBytes());
     expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
     replay();
@@ -326,7 +356,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT', token : updated }}");
+        "{ headers : {}, status : 200, content : 'CONTENT', token : updated }}");
 
     assertTrue(rewriter.responseWasRewritten());
   }
@@ -334,13 +364,15 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testOAuthRequest() throws Exception {
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY',"
-        + "auth : { type: oauth }"
+        + "authz: 'oauth' }"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("POST");
     httpRequest.setAuthType(AuthType.OAUTH);
+    httpRequest.setOAuthArguments(
+        new OAuthArguments(AuthType.OAUTH, ImmutableMap.<String, String>of()));
     httpRequest.setPostBody("POSTBODY".getBytes());
     expect(pipeline.execute(eqRequest(httpRequest))).andReturn(builder.create()).anyTimes();
     replay();
@@ -351,11 +383,43 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   }
 
   @Test
+  public void testOAuthRequestWithParameters() throws Exception {
+    JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
+        + "href:'http://www.example.org/somecontent',"
+        + "body:'POSTBODY',"
+        + "sign_owner:'false',"
+        + "sign_viewer:'true',"
+        + "oauth_service_name:'oauthService',"
+        + "authz: 'oauth' }"
+        + "}}");
+    HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
+    httpRequest.setMethod("POST");
+    httpRequest.setAuthType(AuthType.OAUTH);
+    OAuthArguments oauthArgs =
+        new OAuthArguments(AuthType.OAUTH, ImmutableMap.<String, String>of());
+    oauthArgs.setSignOwner(false);
+    oauthArgs.setServiceName("oauthService");
+    httpRequest.setOAuthArguments(oauthArgs);
+    httpRequest.setPostBody("POSTBODY".getBytes());
+    
+    Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(requestCapture))).andReturn(builder.create());
+    replay();
+    RpcHandler operation = registry.getRpcHandler(request);
+
+    operation.execute(emptyFormItems, token, converter).get();
+    verify();
+    
+    assertEquals(httpRequest.getOAuthArguments(),
+        requestCapture.getValue().getOAuthArguments());
+  }
+
+  @Test
   public void testInvalidSigningTypeTreatedAsNone() throws Exception {
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY',"
-        + "auth : { type: rubbish }"
+        + "authz : 'rubbish' }"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("POST");
@@ -372,8 +436,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testSignedGetRequestNoSecurityToken() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
-        + "auth : { type: signed }"
+        + "href:'http://www.example.org/somecontent',"
+        + "authz : 'signed'}"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -394,7 +458,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
   @Test
   public void testBadHttpResponseIsPropagated() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent'"
+        + "href:'http://www.example.org/somecontent'"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -410,13 +474,13 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 500, body : 'I AM AN ERROR MESSAGE' }}");
+        "{ headers : {}, status : 500, content : 'I AM AN ERROR MESSAGE' }}");
   }
 
   @Test
   public void testMetadataCopied() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent'"
+        + "href:'http://www.example.org/somecontent'"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -431,13 +495,13 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     verify();
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, body : 'CONTENT', metadata : { foo : 'CONTENT' }}");
+        "{ headers : {}, status : 200, content : 'CONTENT', metadata : { foo : 'CONTENT' }}");
   }
 
   @Test
   public void testSetCookiesReturned() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -454,13 +518,13 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
         "{ headers : { 'set-cookie' : ['foo=bar; Secure','name=value'] },"
-            + " status : 200, body : 'CONTENT' }");    
+            + " status : 200, content : 'CONTENT' }");    
   }
 
   @Test
   public void testLocationReturned() throws Exception {
     JSONObject request = new JSONObject("{method:http.get, id:req1, params : {"
-        + "url:'http://www.example.org/somecontent',"
+        + "href:'http://www.example.org/somecontent',"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("GET");
@@ -476,7 +540,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
     JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
         "{ headers : { 'location' : ['here'] },"
-            + " status : 200, body : 'CONTENT' }");
+            + " status : 200, content : 'CONTENT' }");
   }
 
   private static HttpRequest eqRequest(HttpRequest request) {
@@ -502,6 +566,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
           match.getUri().equals(req.getUri()) &&
           match.getAuthType().equals(req.getAuthType()) &&
           match.getPostBodyAsString().equals(req.getPostBodyAsString()) &&
+          Objects.equal(match.getOAuthArguments(), req.getOAuthArguments()) &&
           match.getHeaders().equals(req.getHeaders()));
     }
   }
