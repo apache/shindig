@@ -374,6 +374,7 @@ public class JsonRpcServletTest extends TestCase {
     expect(formDataItem.getContentType()).andStubReturn(contentType);
     expect(formDataItem.getSize()).andStubReturn((long) content.length);
     expect(formDataItem.get()).andStubReturn(content);
+    expect(formDataItem.getAsString()).andStubReturn(new String(content));
     expect(formDataItem.getFieldName()).andStubReturn(fieldName);
     expect(formDataItem.isFormField()).andStubReturn(isFormField);
     expect(formDataItem.getInputStream()).andStubReturn(in);

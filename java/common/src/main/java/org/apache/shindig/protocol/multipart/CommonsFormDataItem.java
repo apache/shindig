@@ -36,6 +36,10 @@ class CommonsFormDataItem implements FormDataItem {
     return fileItem.get();
   }
 
+  public String getAsString() {
+    return fileItem.getString();
+  }
+
   public String getContentType() {
     return fileItem.getContentType();
   }

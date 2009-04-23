@@ -56,6 +56,13 @@ public interface FormDataItem {
   byte[] get();
 
   /**
+   * Returns the content of the field item as text.
+   *
+   * @return content of the field item as text
+   */
+  String getAsString();
+
+  /**
    * Name of the uploaded file, if the item represents file upload.
    * This will be only valid when {@link #isFormField()} returns false.
    * 

@@ -115,7 +115,7 @@ public class JsonRpcServlet extends ApiServlet {
             if (!StringUtils.isEmpty(item.getContentType())) {
               checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
             }
-            content = IOUtils.toString(item.getInputStream());
+            content = item.getAsString();
           } else {
             formItems.put(item.getFieldName(), item);
           }
