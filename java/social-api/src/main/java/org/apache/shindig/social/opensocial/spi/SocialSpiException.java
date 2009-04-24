@@ -21,8 +21,10 @@ package org.apache.shindig.social.opensocial.spi;
 import org.apache.shindig.protocol.ProtocolException;
 
 /**
- * Convenience subclass of ProtocolException to ease transition
+ * Convenience subclass of ProtocolException to ease transition.
+ * @deprecated Use ProtocolException.
  */
+@Deprecated
 public class SocialSpiException extends ProtocolException {
 
   public SocialSpiException(int error, String errorMessage, Throwable cause) {

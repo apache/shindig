@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Activity;
 
@@ -43,7 +44,7 @@ public interface ActivityService {
    */
   Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 
   /**
    * Returns a set of activities for the passed in user and group that corresponds to a list of
@@ -60,7 +61,7 @@ public interface ActivityService {
    */
   Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
       String appId, Set<String> fields, CollectionOptions options, Set<String> activityIds, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 
 
   /**
@@ -77,7 +78,7 @@ public interface ActivityService {
    */
   Future<Activity> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 
   /**
    * Deletes the activity for the passed in user and group that corresponds to the activityId.
@@ -90,7 +91,7 @@ public interface ActivityService {
    * @return a response item containing any errors
    */
   Future<Void> deleteActivities(UserId userId, GroupId groupId, String appId,
-      Set<String> activityIds, SecurityToken token) throws SocialSpiException;
+      Set<String> activityIds, SecurityToken token) throws ProtocolException;
 
   /**
    * Creates the passed in activity for the passed in user and group. Once createActivity is called,
@@ -105,5 +106,5 @@ public interface ActivityService {
    * @return a response item containing any errors
    */
   Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Activity activity, SecurityToken token) throws SocialSpiException;
+      Set<String> fields, Activity activity, SecurityToken token) throws ProtocolException;
 }

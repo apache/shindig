@@ -20,12 +20,12 @@ package org.apache.shindig.social.opensocial.service;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
@@ -56,7 +56,7 @@ public class ActivityHandler  {
    */
   @Operation(httpMethods="DELETE")
   public Future<?> delete(SocialRequestItem request)
-      throws SocialSpiException {
+      throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     Set<String> activityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
@@ -74,7 +74,7 @@ public class ActivityHandler  {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   @Operation(httpMethods="PUT", bodyParam = "activity")
-  public Future<?> update(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> update(SocialRequestItem request) throws ProtocolException {
     return create(request);
   }
 
@@ -84,7 +84,7 @@ public class ActivityHandler  {
    * examples: /activities/john.doe/@self - postBody is an activity object
    */
   @Operation(httpMethods="POST", bodyParam = "activity")
-  public Future<?> create(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> create(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     List<String> activityIds = request.getListParameter("activityId");
@@ -109,7 +109,7 @@ public class ActivityHandler  {
    */
   @Operation(httpMethods="GET")
   public Future<?> get(SocialRequestItem request)
-      throws SocialSpiException {
+      throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
     Set<String> optionalActivityIds = ImmutableSet.copyOf(request.getListParameter("activityId"));
 

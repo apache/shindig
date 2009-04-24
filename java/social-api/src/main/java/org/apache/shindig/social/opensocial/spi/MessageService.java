@@ -23,6 +23,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 
 import java.util.Set;
@@ -45,10 +46,10 @@ public interface MessageService {
    * @param options  Pagination, etal
    * @param token    Given security token for this request
    * @return a collection of message collections.
-   * @throws SocialSpiException when invalid parameters are given
+   * @throws ProtocolException when invalid parameters are given
    */
   Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
-     Set<String> fields, CollectionOptions options, SecurityToken token) throws SocialSpiException; 
+     Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException; 
 
   /**
    * Creates a new message collection for the given arguments
@@ -58,9 +59,9 @@ public interface MessageService {
    * @param token  A security token for this request
    *
    * @return Data for the message collection that is created
-   * @throws SocialSpiException when invalid parameters are given or not implemented
+   * @throws ProtocolException when invalid parameters are given or not implemented
    */
-  Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)  throws SocialSpiException;
+  Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)  throws ProtocolException;
 
   /**
    * Modifies/Updates a message collection for the given arguments
@@ -69,10 +70,10 @@ public interface MessageService {
    * @param msgCollection Data for the message collection to be modified
    * @param token  A security token for this request
    *
-   * @throws SocialSpiException when invalid parameters are given or not implemented
+   * @throws ProtocolException when invalid parameters are given or not implemented
    */
 
-  Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) throws SocialSpiException;
+  Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) throws ProtocolException;
 
   /**
    * Deletes a message collection for the given arguments
@@ -81,11 +82,11 @@ public interface MessageService {
    * @param msgCollId Data for the message collection to be modified
    * @param token  A security token for this request
    *
-   * @throws SocialSpiException when invalid parameters are given, the message collection does not exist or not implemented
+   * @throws ProtocolException when invalid parameters are given, the message collection does not exist or not implemented
    * @return            Future<Void>
    */
 
-  Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) throws SocialSpiException;
+  Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) throws ProtocolException;
 
 
   /**
@@ -98,10 +99,10 @@ public interface MessageService {
    * @param options     Options to control the fetch
    * @param token       Given security token for this request
    * @return a collection of messages
-   * @throws SocialSpiException when invalid parameters are given
+   * @throws ProtocolException when invalid parameters are given
    */
   Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId,
-      Set<String> fields, List<String> msgIds, CollectionOptions options, SecurityToken token) throws SocialSpiException;
+      Set<String> fields, List<String> msgIds, CollectionOptions options, SecurityToken token) throws ProtocolException;
 
 
   /**
@@ -114,10 +115,10 @@ public interface MessageService {
    * @param message     The message to post
    * @param token       A valid security token @return a response item containing any errors/
    * @return Void Future
-   * @throws SocialSpiException when invalid parameters are given
+   * @throws ProtocolException when invalid parameters are given
    */
   Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
-                             SecurityToken token) throws SocialSpiException;
+                             SecurityToken token) throws ProtocolException;
 
   /**
    * Deletes a set of messages for a given user/message collection
@@ -126,10 +127,10 @@ public interface MessageService {
    * @param ids         List of IDs to delete
    * @param token       Given Security Token for this request
    * @return            Future<Void>
-   * @throws SocialSpiException
+   * @throws ProtocolException
    */
   Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
-      SecurityToken token) throws SocialSpiException;
+      SecurityToken token) throws ProtocolException;
 
 
   /**
@@ -140,10 +141,10 @@ public interface MessageService {
    * @param message     The message details to modify
    * @param token       Given Security Token for this request
    * @return            Future<Void>
-   * @throws SocialSpiException for invalid parameters or missing messages or users
+   * @throws ProtocolException for invalid parameters or missing messages or users
    */
 
   Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 
 }

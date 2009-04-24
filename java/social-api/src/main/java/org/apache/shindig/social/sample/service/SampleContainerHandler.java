@@ -23,9 +23,9 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +51,7 @@ public class SampleContainerHandler {
    * We don't distinguish between put and post for these urls.
    */
   @Operation(httpMethods = "PUT")
-  public Future<?> update(RequestItem request) throws SocialSpiException {
+  public Future<?> update(RequestItem request) throws ProtocolException {
     return create(request);
   }
 
@@ -60,18 +60,18 @@ public class SampleContainerHandler {
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
   @Operation(httpMethods = "POST")
-  public Future<?> create(RequestItem request) throws SocialSpiException {
+  public Future<?> create(RequestItem request) throws ProtocolException {
     String type = request.getParameter("type");
     if (type.equals("setstate")) {
       try {
         String stateFile = request.getParameter("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
-        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "The json state file was not valid json", e);
       }
     } else if (type.equals("setevilness")) {
-      throw new SocialSpiException(HttpServletResponse.SC_NOT_IMPLEMENTED,
+      throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
           "evil data has not been implemented yet");
     }
 

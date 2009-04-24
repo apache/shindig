@@ -19,9 +19,9 @@ package org.apache.shindig.social.opensocial.service;
 
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import java.util.Map;
@@ -53,7 +53,7 @@ public class AppDataHandler {
    */
   @Operation(httpMethods = "DELETE")
   public Future<?> delete(SocialRequestItem request)
-      throws SocialSpiException {
+      throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
 
@@ -74,7 +74,7 @@ public class AppDataHandler {
    * overridden.
    */
   @Operation(httpMethods = "PUT", bodyParam = "data")
-  public Future<?> update(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> update(SocialRequestItem request) throws ProtocolException {
     return create(request);
   }
 
@@ -87,7 +87,7 @@ public class AppDataHandler {
    * values and set. If there are no fields vars then all of the data will be overridden.
    */
   @Operation(httpMethods = "POST", bodyParam = "data")
-  public Future<?> create(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> create(SocialRequestItem request) throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
 
     HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
@@ -98,7 +98,7 @@ public class AppDataHandler {
     Map<String, String> values = request.getTypedParameter("data", Map.class);
     for (String key : values.keySet()) {
       if (!isValidKey(key)) {
-        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "One or more of the app data keys are invalid: " + key);
       }
     }
@@ -113,7 +113,7 @@ public class AppDataHandler {
    * examples: /appdata/john.doe/@friends/app?fields=count /appdata/john.doe/@self/app
    */
   @Operation(httpMethods = "GET")
-  public Future<?> get(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> get(SocialRequestItem request) throws ProtocolException {
     Set<UserId> userIds = request.getUsers();
 
     // Preconditions

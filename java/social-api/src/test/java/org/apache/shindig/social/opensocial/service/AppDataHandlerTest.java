@@ -26,11 +26,11 @@ import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.easymock.classextension.EasyMock;
 
@@ -138,7 +138,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     verify();
   }
 
-  private Future<?> setupPostData(String method) throws SocialSpiException {
+  private Future<?> setupPostData(String method) throws ProtocolException {
     String path = "/appdata/john.doe/@self/appId";
     RestHandler operation = registry.getRestHandler(path, method);
 
@@ -193,7 +193,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((SocialSpiException)ee.getCause()).getCode(),
+      assertEquals(((ProtocolException)ee.getCause()).getCode(),
           HttpServletResponse.SC_BAD_REQUEST);
       // was expecting an Exception
     }
@@ -223,7 +223,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((SocialSpiException)ee.getCause()).getCode(),
+      assertEquals(((ProtocolException)ee.getCause()).getCode(),
           HttpServletResponse.SC_BAD_REQUEST);
     }
     verify();

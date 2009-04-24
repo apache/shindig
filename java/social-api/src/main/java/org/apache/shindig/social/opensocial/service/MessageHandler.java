@@ -17,21 +17,23 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.inject.Inject;
-
+import org.apache.shindig.protocol.HandlerPreconditions;
+import org.apache.shindig.protocol.Operation;
+import org.apache.shindig.protocol.ProtocolException;
+import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.MessageCollection;
-import org.apache.shindig.social.opensocial.spi.MessageService;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
-import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.protocol.*;
+import org.apache.shindig.social.opensocial.spi.MessageService;
+import org.apache.shindig.social.opensocial.spi.UserId;
 
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
 
 @Service(name = "messages", path="/{userId}+/{msgCollId}/{messageIds}+")
 public class MessageHandler {
@@ -44,7 +46,7 @@ public class MessageHandler {
   }
 
   @Operation(httpMethods = "DELETE")
-  public Future<?> delete(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> delete(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
@@ -54,7 +56,7 @@ public class MessageHandler {
     HandlerPreconditions.requireSingular(userIds, "Multiple userIds not supported");
 
     if (msgCollId == null) {
-      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "A message collection is required");
     }
     
@@ -67,7 +69,7 @@ public class MessageHandler {
 
 
   @Operation(httpMethods = "GET")
-  public Future<?> get(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> get(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
@@ -94,7 +96,7 @@ public class MessageHandler {
    * Creates a new message collection or message
    */
   @Operation(httpMethods = "POST", bodyParam = "entity")
-  public Future<?> modify(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> modify(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
@@ -128,7 +130,7 @@ public class MessageHandler {
    * Handles modifying a message or a message collection.
    */
   @Operation(httpMethods = "PUT", bodyParam = "entity")
-  public Future<?> create(SocialRequestItem request) throws SocialSpiException {
+  public Future<?> create(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
@@ -140,7 +142,7 @@ public class MessageHandler {
     UserId user = request.getUsers().iterator().next();
 
     if (msgCollId == null) {
-      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
           "A message collection is required");
     }
 
@@ -148,7 +150,7 @@ public class MessageHandler {
       // No message IDs specified, this is a PUT to a message collection
       MessageCollection msgCollection = request.getTypedParameter("entity", MessageCollection.class);
       if (msgCollection == null) {
-        throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "cannot parse message collection");
       }
 
@@ -163,7 +165,7 @@ public class MessageHandler {
     // TODO, do more validation.
 
     if (message == null || message.getId() == null) {
-      throw new SocialSpiException(HttpServletResponse.SC_BAD_REQUEST,
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
         "cannot parse message or missing ID");
     }
 

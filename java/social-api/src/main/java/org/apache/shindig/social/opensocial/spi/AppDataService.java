@@ -19,6 +19,7 @@ package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.ProtocolException;
 
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,7 @@ public interface AppDataService {
    * @return The data fetched
    */
   Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException;
+      String appId, Set<String> fields, SecurityToken token) throws ProtocolException;
 
   /**
    * Deletes data for the specified user and group.
@@ -54,7 +55,7 @@ public interface AppDataService {
    * @return an error if one occurs
    */
   Future<Void> deletePersonData(UserId userId, GroupId groupId,
-      String appId, Set<String> fields, SecurityToken token) throws SocialSpiException;
+      String appId, Set<String> fields, SecurityToken token) throws ProtocolException;
 
   /**
    * Updates app data for the specified user and group with the new values.
@@ -69,5 +70,5 @@ public interface AppDataService {
    */
   Future<Void> updatePersonData(UserId userId, GroupId groupId,
       String appId, Set<String> fields, Map<String, String> values, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 }

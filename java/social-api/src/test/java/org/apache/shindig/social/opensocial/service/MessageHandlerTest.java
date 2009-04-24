@@ -17,26 +17,30 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableMap;
-
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.protocol.DefaultHandlerRegistry;
+import org.apache.shindig.protocol.HandlerExecutionListener;
+import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.ProtocolException;
+import org.apache.shindig.protocol.RequestItem;
+import org.apache.shindig.protocol.RestHandler;
+import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.core.model.MessageImpl;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.spi.MessageService;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.apache.shindig.protocol.conversion.BeanJsonConverter;
-import org.apache.shindig.protocol.*;
 import org.easymock.classextension.EasyMock;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 public class MessageHandlerTest extends TestCase {
 
@@ -65,7 +69,7 @@ public class MessageHandlerTest extends TestCase {
   }
 
   public void testPostMessage() 
-      throws SocialSpiException, InterruptedException, ExecutionException {
+      throws ProtocolException, InterruptedException, ExecutionException {
     MessageImpl message = new MessageImpl("A message body", "A title", Message.Type.PRIVATE_MESSAGE);
     message.setRecipients(recipients);
 

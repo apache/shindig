@@ -26,6 +26,7 @@ import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
@@ -34,7 +35,6 @@ import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableList;
@@ -154,7 +154,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
-  private Future<?> setupBodyRequest(String method) throws SocialSpiException {
+  private Future<?> setupBodyRequest(String method) throws ProtocolException {
     String jsonActivity = "{title: hi mom!, etc etc}";
 
     String path = "/activities/john.doe/@self/@app";

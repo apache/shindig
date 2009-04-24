@@ -21,6 +21,7 @@ package org.apache.shindig.social.sample.spi;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.model.FilterOperation;
 import org.apache.shindig.protocol.model.SortOrder;
@@ -30,7 +31,6 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import java.util.Collections;
@@ -191,7 +191,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
           CANON_USER, SELF_GROUP, APP_ID,
           Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
       fail();
-    } catch (SocialSpiException sse) {
+    } catch (ProtocolException sse) {
       assertEquals(HttpServletResponse.SC_BAD_REQUEST, sse.getCode());
     }
   }

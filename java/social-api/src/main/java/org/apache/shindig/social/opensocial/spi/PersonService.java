@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Person;
 
@@ -63,7 +64,7 @@ public interface PersonService {
    */
   Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       CollectionOptions collectionOptions, Set<String> fields, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 
   /**
    * Returns a person that corresponds to the passed in person id.
@@ -74,5 +75,5 @@ public interface PersonService {
    * @return a list of people.
    */
   Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
-      throws SocialSpiException;
+      throws ProtocolException;
 }
