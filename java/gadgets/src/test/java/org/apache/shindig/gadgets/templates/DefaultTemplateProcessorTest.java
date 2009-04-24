@@ -73,7 +73,7 @@ public class DefaultTemplateProcessorTest {
     expressions = new Expressions();
     variables = Maps.newHashMap();
     Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new TestTagHandler());
-    registry = new TagRegistry(handlers);
+    registry = new DefaultTagRegistry(handlers);
 
     processor = new DefaultTemplateProcessor(expressions);
     resolver = new RootELResolver();

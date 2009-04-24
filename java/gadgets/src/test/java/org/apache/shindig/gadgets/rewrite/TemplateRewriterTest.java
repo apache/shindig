@@ -18,21 +18,26 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+import org.apache.shindig.gadgets.templates.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
 import org.apache.shindig.gadgets.templates.TagHandler;
-import org.apache.shindig.gadgets.templates.TagRegistry;
+import org.apache.shindig.gadgets.templates.TemplateLibrary;
+import org.apache.shindig.gadgets.templates.TemplateLibraryFactory;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +80,20 @@ public class TemplateRewriterTest {
     "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";  
   
   private static final String CONTENT_WITH_AUTO_UPDATE =
-    "<script type='text/os-template' autoUpdate='true'>Hello, ${user.name}</script>";  
+    "<script type='text/os-template' autoUpdate='true'>Hello, ${user.name}</script>";
+  
+  private static final String TEMPLATE_LIBRARY =
+    "<Templates xmlns:my='#my'>" +
+    "  <Namespace prefix='my' url='#my'/>" +
+    "  <JavaScript>script</JavaScript>" +
+    "  <Style>style</Style>" +
+    "  <Template tag='my:Tag'>library tag</Template>" +
+    "</Templates>";
+
+  private static final String TEMPLATE_LIBRARY_URI = "http://example.org/library.xml";
+  private static final String CONTENT_WITH_TAG_FROM_LIBRARY =
+    "<script type='text/os-template' xmlns:my='#my'><my:Tag/></script>";  ;
+  
   @Before
   public void setUp() {
     Set<TagHandler> handlers = ImmutableSet.of();
@@ -87,7 +105,8 @@ public class TemplateRewriterTest {
         },
         new FakeMessageBundleFactory(),
         new Expressions(),
-        new TagRegistry(handlers));
+        new DefaultTagRegistry(handlers), 
+        new FakeTemplateLibraryFactory());
   }
   
   @Test
@@ -150,6 +169,20 @@ public class TemplateRewriterTest {
     testFeatureNotRemoved();
   }
 
+  @Test
+  public void templateWithLibrary() throws Exception {
+    setupGadget(getGadgetXmlWithLibrary(CONTENT_WITH_TAG_FROM_LIBRARY));
+    rewriter.rewrite(gadget, content);
+    assertTrue("Script not inserted", content.getContent().indexOf(
+        "<script type=\"text/javascript\">script</script>") > 0);
+    assertTrue("Style not inserted", content.getContent().indexOf(
+        "<style type=\"text/css\">style</style>") > 0);
+    assertTrue("Tag not executed", content.getContent().indexOf(
+        "library tag") > 0);
+    
+    testFeatureRemoved();
+  }
+  
   private void testFeatureRemoved() {
     assertTrue("Feature wasn't removed",
         gadget.getRemovedFeatures().contains("opensocial-templates"));
@@ -182,7 +215,13 @@ public class TemplateRewriterTest {
     gadgetSpec = new GadgetSpec(GADGET_URI, gadgetXml);
     gadget = new Gadget();
     gadget.setSpec(gadgetSpec);
-    gadget.setContext(new GadgetContext() {});
+    gadget.setContext(new GadgetContext() {
+
+      @Override
+      public Uri getUrl() {
+        return GADGET_URI;
+      }
+    });
     gadget.setCurrentView(gadgetSpec.getView("default"));
 
     content = new MutableContent(new SocialMarkupHtmlParser(
@@ -210,5 +249,31 @@ public class TemplateRewriterTest {
         + "<Content>"
         + "    <![CDATA[" + content + "]]>"
         + "</Content></Module>";
+  }
+  
+  private static String getGadgetXmlWithLibrary(String content) {
+    return "<Module>" + "<ModulePrefs title='Title'>"
+        + "  <Require feature='opensocial-templates'>"
+        + "    <Param name='" + TemplateRewriter.REQUIRE_LIBRARY_PARAM + "'>"
+        + TEMPLATE_LIBRARY_URI
+        + "    </Param>"
+        + "  </Require>"
+        + "</ModulePrefs>"
+        + "<Content>"
+        + "    <![CDATA[" + content + "]]>"
+        + "</Content></Module>";
+  }
+
+  private static class FakeTemplateLibraryFactory extends TemplateLibraryFactory {
+    public FakeTemplateLibraryFactory() {
+      super(null, null);
+    }
+
+    @Override
+    public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri)
+        throws GadgetException {
+      assertEquals(TEMPLATE_LIBRARY_URI, uri.toString());
+      return new TemplateLibrary(uri, XmlUtil.parseSilent(TEMPLATE_LIBRARY));
+    }
   }
 }

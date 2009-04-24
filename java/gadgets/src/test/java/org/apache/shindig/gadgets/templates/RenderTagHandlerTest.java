@@ -22,9 +22,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
@@ -39,6 +39,7 @@ import org.w3c.dom.NodeList;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class RenderTagHandlerTest {
     expressions = new Expressions();
     variables = Maps.newHashMap();
     Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new RenderTagHandler());
-    registry = new TagRegistry(handlers);
+    registry = new DefaultTagRegistry(handlers);
 
     processor = new DefaultTemplateProcessor(expressions);
     resolver = new RootELResolver();
@@ -98,8 +99,11 @@ public class RenderTagHandlerTest {
     Element tagInstance = parseTemplate(tagMarkup);
     
     templateDef.getOwnerDocument().adoptNode(tagInstance);
-    TemplateBasedTagHandler tagHandler = new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
-    TagRegistry reg = registry.addHandlers(ImmutableSet.of(tagHandler));
+    TemplateBasedTagHandler tagHandler = 
+      new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
+
+    TagRegistry reg = new CompositeTagRegistry(Lists.newArrayList(
+        registry, new DefaultTagRegistry(ImmutableSet.of((TagHandler)tagHandler))));
     
     DocumentFragment result = processor.processTemplate(templateDef, context, resolver, reg);
     String output = serialize(result);

@@ -117,7 +117,6 @@ public class EndToEndTest {
     executeAllPageTests("makeRequestTest");
   }
 
-
   @Test
   public void messageBundlesRtl() throws Exception {
     // Repeat the messageBundle tests, but with the language set to "ar"
@@ -253,6 +252,15 @@ public class EndToEndTest {
     assertEquals("{\"key\": \"value\"}", textPipeline.getTextContent().trim());
   }
 
+  @Test
+  public void testTemplateLibrary() throws Exception {
+    HtmlPage page = executeAllPageTests("templateLibrary");
+    assertTrue(page.asXml().contains("p {color: red}"));
+    
+    Node paragraph = page.getElementsByTagName("p").item(0);
+    assertEquals("Hello world", paragraph.getTextContent().trim());
+  }
+  
   // HtmlUnits implementation of Element.getElementsByTagName() is just
   // executing Document.getElementsByTagName()
   private List<Element> getChildrenByTagName(Element parent, String name) {
@@ -351,8 +359,8 @@ public class EndToEndTest {
    *     name in test/resources/endtoend (minus .xml).
    * @throws IOException
    */
-  private void executeAllPageTests(String testName) throws IOException {
-    executePageTest(testName, "all");
+  private HtmlPage executeAllPageTests(String testName) throws IOException {
+    return executePageTest(testName, "all");
   }
 
   private BasicSecurityToken createToken(String owner, String viewer)

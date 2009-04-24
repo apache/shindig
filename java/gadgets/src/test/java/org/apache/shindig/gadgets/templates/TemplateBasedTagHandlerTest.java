@@ -153,7 +153,8 @@ public class TemplateBasedTagHandlerTest {
     
     templateDef.getOwnerDocument().adoptNode(tagInstance);
     TagHandler tagHandler = new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
-    TagRegistry reg = new TagRegistry(ImmutableSet.of(tagHandler, new RepeatTagHandler()));
+    TagRegistry reg = new DefaultTagRegistry(
+        ImmutableSet.of(tagHandler, new RepeatTagHandler()));
     
     DocumentFragment result = processor.processTemplate(templateDef, context, resolver, reg);
     String output = serialize(result);
