@@ -39,7 +39,7 @@ public class NekoCompactSerializerTest extends AbstractParserAndSerializerTest {
 
   public void testWhitespaceNotCollapsedInSpecialTags() throws Exception {
     String content = loadFile(
-        "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags-expected.html");
+        "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags.html");
     String expected = loadFile(
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags-expected.html");
     parseAndCompareBalanced(content, expected, full);
