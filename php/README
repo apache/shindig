@@ -20,7 +20,7 @@ In order to build and run Shindig for PHP, you must have the following:
 - PHP 5.2.x with the json, simplexml, mcrypt and curl extentions enabled.
 
 
-Getting the code (if your running from svn and not a release tarball)
+Getting the code (if you're running from svn and not a release tarball)
 ============================================
 Create a subdirectory in your web document root, e.g. /var/www/html and
 checkout the Shindig code from its Subversion repository
@@ -30,7 +30,22 @@ cd /var/www/html/shindig
 svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
 
 
-Running Shindig
+Running Shindig from a release download
+============================================
+
+The instructions are identical as when running from an svn checkout, except
+that the /shindig/php directory in the virtual host becomes just /shindig, ie:
+
+	<VirtualHost your_ip:your_port>
+	       ServerName your.host
+	       DocumentRoot /var/www/html/shindig
+	       ... other normal settings in vhosts...
+		<Directory />
+			AllowOverride All
+		</Directory>
+	</VirtualHost>
+
+Running Shindig from an svn checkout
 ============================================
 With PHP There is no need to build anything - the source code
 is already built.
@@ -49,6 +64,7 @@ Point your apache to the php dir with a virtual host like:
 			AllowOverride All
 		</Directory>
 	</VirtualHost>
+	
 
 Restart apache, and point your browser to:
 
