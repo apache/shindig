@@ -1,19 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+* Licensed to the Apache Software Foundation (ASF) under one
+* or more contributor license agreements.  See the NOTICE file
+* distributed with this work for additional information
+* regarding copyright ownership.  The ASF licenses this file
+* to you under the Apache License, Version 2.0 (the
+* "License"); you may not use this file except in compliance
+* with the License.  You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+-->
 <xs:schema xmlns:tns="http://ns.opensocial.org/2008/opensocial"
   elementFormDefault="qualified"
   targetNamespace="http://ns.opensocial.org/2008/opensocial"
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  
+
   <!--  this is a proposal for the OpenSocial 0.9 XSD. -->
   <xs:element name="person" type="tns:Person" />
   <xs:element name="group" type="tns:Group" />
   <xs:element name="activity" type="tns:Activity" />
   <xs:element name="appdata" type="tns:Appdata" />
-  
+
   <xs:element name="response" type="tns:Response" />
-  
+
   <xs:element name="list.container" type="xs:anyType" />
-  
+
   <xs:complexType name="Response">
     <xs:choice minOccurs="0" maxOccurs="unbounded" >
       <xs:element minOccurs="0" name="itemsPerPage" type="xs:int" />
@@ -30,7 +48,7 @@
       <xs:element minOccurs="0" name="map" type="xs:anyType" />
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="Entry" >
     <xs:choice>
       <xs:element minOccurs="0" name="activity" type="tns:Activity" />
@@ -38,8 +56,8 @@
       <xs:element minOccurs="0" name="group" type="tns:Group" />
     </xs:choice>
   </xs:complexType>
-  
-    
+
+
   <xs:complexType name="Activity">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element minOccurs="0" name="appId" type="xs:string" />
@@ -61,8 +79,8 @@
       <xs:element minOccurs="0" name="userId" type="xs:string" />
     </xs:choice>
   </xs:complexType>
-  
-  
+
+
   <xs:complexType name="ActivityTemplateParams">
     <xs:all>
       <xs:element minOccurs="0" name="PersonKey" type="xs:string" />
@@ -72,7 +90,7 @@
       <xs:element minOccurs="0" name="person" type="tns:Person" />
     </xs:all>
   </xs:complexType>
-  
+
   <xs:complexType name="Person">
     <xs:choice minOccurs="1" maxOccurs="unbounded">
       <xs:element minOccurs="0" name="aboutMe" type="xs:string" />
@@ -141,7 +159,7 @@
       <xs:element minOccurs="0" name="utcOffset" type="xs:int" />
     </xs:choice>
   </xs:complexType>
-  
+
   <xs:complexType name="Group">
     <xs:all>
       <xs:element minOccurs="0" name="id" type="xs:string" />
@@ -159,7 +177,7 @@
       <xs:element minOccurs="0" maxOccurs="unbounded" name="entry" type="tns:AppdataEntry" />
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:complexType name="BodyType">
     <xs:all>
       <xs:element minOccurs="0" name="build" type="xs:string" />
@@ -169,7 +187,7 @@
       <xs:element minOccurs="0" name="weight" type="xs:double" />
     </xs:all>
   </xs:complexType>
-  
+
   <xs:complexType name="Address">
     <xs:all>
       <xs:element minOccurs="0" name="country" type="xs:string" />
@@ -186,8 +204,8 @@
       <xs:element minOccurs="0" name="formatted" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  
-  
+
+
   <xs:complexType name="Account">
     <xs:all>
       <xs:element minOccurs="0" name="domain" type="xs:string" />
@@ -195,9 +213,9 @@
       <xs:element minOccurs="0" name="userid" type="xs:string" />
       <xs:element minOccurs="0" name="username" type="xs:string" />
     </xs:all>
-  </xs:complexType> 
-  
-  
+  </xs:complexType>
+
+
   <xs:complexType name="Organization">
     <xs:all>
       <xs:element minOccurs="0" name="address" type="tns:Address" />
@@ -212,7 +230,7 @@
       <xs:element minOccurs="0" name="subField" type="xs:string" />
       <xs:element minOccurs="0" name="webpage" type="xs:string" />
       <xs:element minOccurs="0" name="salary" type="xs:string" />
-   
+
     </xs:all>
   </xs:complexType>
   <xs:complexType name="Name">
@@ -225,7 +243,7 @@
       <xs:element minOccurs="0" name="formatted" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  
+
   <xs:complexType name="Url">
     <xs:all>
       <xs:element minOccurs="0" name="value" type="xs:string" />
@@ -233,7 +251,7 @@
       <xs:element minOccurs="0" name="type" type="xs:string" />
     </xs:all>
   </xs:complexType>
-  
+
   <xs:complexType name="MediaItem">
     <xs:all>
       <xs:element minOccurs="0" name="mimeType" type="xs:string" />
@@ -248,8 +266,8 @@
       <xs:enumeration value="VIDEO" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
+
+
   <xs:complexType name="Drinker">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -268,8 +286,8 @@
       <xs:enumeration value="YES" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
+
+
   <xs:complexType name="Presence">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -286,8 +304,8 @@
       <xs:enumeration value="XA" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
+
+
   <xs:complexType name="Smoker">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -306,7 +324,7 @@
       <xs:enumeration value="YES" />
     </xs:restriction>
   </xs:simpleType>
-  
+
   <xs:complexType name="CreateActivityPriority">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -319,7 +337,7 @@
       <xs:enumeration value="LOW" />
     </xs:restriction>
   </xs:simpleType>
-  
+
   <xs:complexType name="EscapeType">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -332,9 +350,9 @@
       <xs:enumeration value="NONE" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
-  
+
+
+
   <xs:complexType name="Message">
     <xs:all>
       <xs:element minOccurs="0" name="body" type="xs:string" />
@@ -357,9 +375,9 @@
       <xs:enumeration value="PUBLIC_MESSAGE" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
-  
+
+
+
   <xs:complexType name="Environment">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -384,10 +402,10 @@
       <xs:enumeration value="URL" />
     </xs:restriction>
   </xs:simpleType>
-  
-  
-  
-  
+
+
+
+
   <xs:complexType name="LookingFor">
     <xs:all>
       <xs:element minOccurs="0" name="displayValue" type="xs:string" />
@@ -420,7 +438,7 @@
       <xs:enumeration value="XA" />
     </xs:restriction>
   </xs:simpleType>
-  
+
   <xs:complexType name="PluralPersonField">
     <xs:all>
       <xs:element minOccurs="0" name="value" type="xs:string" />
@@ -428,6 +446,6 @@
       <xs:element minOccurs="0" name="primary" type="xs:boolean"/>
     </xs:all>
   </xs:complexType>
-  
-  
+
+
 </xs:schema>
