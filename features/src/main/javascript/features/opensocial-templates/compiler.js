@@ -142,15 +142,8 @@ os.variableMap_ = {
   'Cur': VAR_this,
   '$cur': VAR_this,
   'Top': VAR_top,
-  'Index': VAR_index,
-  'Count': VAR_count
+  'Context': VAR_loop  
 };
-
-/**
- * Regular expression for finding and removing the "Context" variable
- * reference from top-level identifier chains.
- */
-os.regExps_.CONTEXT_VAR_REMOVAL = /(^|[^.$a-zA-Z0-9])Context[.]/g;
 
 /**
  * Replace the top level variables
@@ -160,11 +153,6 @@ os.regExps_.CONTEXT_VAR_REMOVAL = /(^|[^.$a-zA-Z0-9])Context[.]/g;
 os.replaceTopLevelVars_ = function(text) {
 
   var regex;
-  
-  // Currently, values specced to be inside the "Context" variable are placed
-  // by JSTemplate into the top-level of the data context.
-  // To make references like "Context.Index" work, remove the "Context." prefix.
-  text = text.replace(os.regExps_.CONTEXT_VAR_REMOVAL, "$1");
 
   regex = os.regExps_.TOP_LEVEL_VAR_REPLACEMENT;
   if (!regex) {
@@ -179,7 +167,7 @@ os.replaceTopLevelVars_ = function(text) {
         } else { 
           return whole; 
         } 
-      }); 
+      });
 };
 
 /**
@@ -315,9 +303,9 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
       if (name == 'var') {
         os.appendJSTAttribute_(to, ATT_vars, from.getAttribute(name) +
             ': $this');
-      } else if (name == 'index') {
+      } else if (name == 'context') {
         os.appendJSTAttribute_(to, ATT_vars, from.getAttribute(name) +
-            ': $index');
+            ': ' + VAR_loop);
       } else if (name.length < 7 || name.substring(0, 6) != 'xmlns:') {
         if (os.customAttributes_[name]) {
           os.appendJSTAttribute_(to, ATT_eval, "os.doAttribute(this, '" + name +
@@ -419,6 +407,14 @@ os.compileNode_ = function(node) {
       if (node.tagName == "os:Repeat") {
         output = document.createElement(os.computeContainerTag_(node));
         output.setAttribute(ATT_select, os.parseAttribute_(node.getAttribute("expression")));
+        var varAttr = node.getAttribute("var");
+        if (varAttr) {
+          os.appendJSTAttribute_(output, ATT_vars, varAttr + ': $this');
+        }
+        var contextAttr = node.getAttribute("context");
+        if (contextAttr) {
+          os.appendJSTAttribute_(output, ATT_vars, contextAttr + ': ' + VAR_loop);
+        }
         os.appendJSTAttribute_(output, ATT_eval, "os.setContextNode_($this, $context)");
       } else if (node.tagName == "os:If") {
         output = document.createElement(os.computeContainerTag_(node));
@@ -759,8 +755,7 @@ os.identifiersNotToWrap_[os.VAR_my] = true;
 os.identifiersNotToWrap_[VAR_this] = true;
 os.identifiersNotToWrap_[VAR_context] = true;
 os.identifiersNotToWrap_[VAR_top] = true;
-os.identifiersNotToWrap_[VAR_index] = true;
-os.identifiersNotToWrap_[VAR_count] = true;
+os.identifiersNotToWrap_[VAR_loop] = true;
 
 /**
  * Checks if a character can begin a legal JS identifier name.
@@ -807,7 +802,8 @@ os.canBeInToken = function(ch) {
  * literal string 'null').
  */
 os.wrapSingleIdentifier = function(iden, opt_context, opt_default) {
-  if (os.identifiersNotToWrap_.hasOwnProperty(iden)) {
+  if (os.identifiersNotToWrap_.hasOwnProperty(iden) && 
+      (!opt_context || opt_context == VAR_context)) {
     return iden;
   }
   return os.VAR_identifierresolver + '(' +

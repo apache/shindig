@@ -290,21 +290,25 @@ os.doTag = function(node, ns, tag, data, context) {
     return;
   }
 
+  var ctx = null;
   // Process tag's inner content before processing the tag.
-  for (var child = node.firstChild; child; child = child.nextSibling) {
+  for (var child = node.firstChild; child; child = child.nextSibling) {    
     if (child.nodeType == DOM_ELEMENT_NODE) {
-      jstProcess(context, child);
+      if (ctx == null) {        
+        var selectInner = node[PROP_jstcache] ? node[PROP_jstcache][ATT_innerselect] : null;
+        if (selectInner) {
+          var data = context.jsexec(selectInner, node);
+          ctx = context.clone(data, 0, 0);
+        } else {
+          ctx = context;          
+        }
+      }
+      jstProcess(ctx, child);
       os.markNodeToSkip(child);
     }
-  }
+  }  
   
-  var ctx = context;
-  var selectInner = node[PROP_jstcache] ? node[PROP_jstcache][ATT_innerselect] : null;
-  if (selectInner) {
-    var data = context.jsexec(selectInner, node);
-    ctx = context.clone(data, 0, 0);
-  }
-
+  ctx = context.clone({}, 0, 0);
   var result = tagFunction.call(null, node, data, ctx);
 
   if (!result && typeof(result) != "string") {

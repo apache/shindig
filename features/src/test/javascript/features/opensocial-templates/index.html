@@ -123,14 +123,14 @@ limitations under the License.
       <button id="${id}" style="color: ${color}" a1="value ${A1}">${text}</button>
     </xmp>
     <xmp id="my:user" style="display: none">
-      <a href="${url}">${name}</a> (${$my.foo})
+      <a href="${My.dat.url}">${My.dat.name}</a> (${My.foo})
     </xmp>
     <xmp id="my:record" style="display: none">
-      <b style="color: ${My.color}">${title}</b>: <my:user foo="${My.foo}" cur="user"/>
+      <b style="color: ${My.color}">${My.dat.title}</b>: <my:user foo="${My.foo}" dat="${My.dat.user}"/>
     </xmp>
     <xmp id="_T_Substitution_nested" style="display: none">
       <div repeat="users">
-        <my:record color="${color}" foo="${user.id}" cur="Cur"/>
+        <my:record color="${color}" foo="${user.id}" dat="${Cur}"/>
       </div>
     </xmp>
 

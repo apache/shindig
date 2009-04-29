@@ -25,8 +25,8 @@ function testSubstitution() {
     [ "hello ${Cur}", "'hello '+($this)" ],
     [ "$ ${Cur}", "'$ '+($this)" ],
     [ "$${Cur}", "'$'+($this)" ],
-    [ "${Cur} ${Index}", "($this)+' '+($index)"],
-    [ "a ${Cur} b ${Index} c", "'a '+($this)+' b '+($index)+' c'"]
+    [ "${Cur} ${Context.Index}", "($this)+' '+($_ir($loop, 'Index'))"],
+    [ "a ${Cur} b ${Context.Index} c", "'a '+($this)+' b '+($_ir($loop, 'Index'))+' c'"]
   ];
   for (var i = 0; i < values.length; i++) {
     var compiled = os.parseAttribute_(values[i][0]);
@@ -180,8 +180,8 @@ function testEventHandlers() {
 function testNestedIndex() {
   var src, template, output;
   
-  src = '<table><tr repeat="list" var="row" index="x">' + 
-      '<td repeat="row" index="y">${x},${y}</td></tr></table>';
+  src = '<table><tr repeat="list" var="row" context="x">' + 
+      '<td repeat="row" context="y">${x.Index},${y.Index}</td></tr></table>';
   template = os.compileTemplateString(src);
   output = template.render({ list: [ ['a', 'b'], ['c', 'd'] ] });
   //                           table  /  tbody  /   tr    /   td

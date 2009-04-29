@@ -743,12 +743,9 @@ function testVariablePrecedence() {
   
   tryTemplateContent('<os:msg/>', { Value: 'Right' } );
   tryTemplateContent('<os:msg Value="Right"/>', { } );
-  tryTemplateContent('<os:msg Value="Wrong" cur="${Top}"/>', { Value: 'Right' } );
   tryTemplateContent('<os:msg Value="Right"/>', { Value: 'Wrong' } );
-  tryTemplateContent('<os:msg cur="${Inner}"/>', { Value: 'Wrong', Inner: { Value: 'Right' }} );
-  tryTemplateContent('<os:msg cur="${Inner}" Value="Wrong"/>', { Value: 'Wrong', Inner: { Value: 'Right' }} );
-  tryTemplateContent('<os:msg cur="${Inner}"/>', { Value: 'Right', Inner: { Foo: 'Bar' }} );
-  tryTemplateContent('<os:msg cur="${Inner}" Value="Right"/>', { Value: 'Wrong', Inner: { Foo: 'Bar' }} );
+  tryTemplateContent('<os:msg Value="Right" cur="${Top}"/>', { Value: 'Wrong' } );
+  tryTemplateContent('<os:msg Value="${Value}"/>', { Value: 'Right' } );
 };
 
 function testOsRepeat() {
@@ -760,7 +757,6 @@ function testOsRepeat() {
   assertEquals(6, output.firstChild.options.length);
   
   output = os.compileTemplateString('<table><os:Repeat expression="${list}"><tr><td>${name}</td></tr><tr><td>${name} again</td></tr></os:Repeat></table>').render(data);
-  console.log(output.firstChild);
   assertEquals(6, output.firstChild.rows.length);
 };
 

@@ -29,11 +29,12 @@
  * context. These can be used in js expression in jstemplate
  * attributes.
  */
-var VAR_index = '$index';
-var VAR_count = '$count';
+var VAR_index = 'Index';
+var VAR_count = 'Count';
 var VAR_this = '$this';
 var VAR_context = '$context';
 var VAR_top = '$top';
+var VAR_loop = '$loop';
 
 
 /**
@@ -257,8 +258,12 @@ JsEvalContext.prototype.jsexec = function(exprFunction, template) {
  */
 JsEvalContext.prototype.clone = function(data, index, count) {
   var ret = JsEvalContext.create(data, this);
-  ret.setVariable(VAR_index, index);
-  ret.setVariable(VAR_count, count);
+  if (typeof(index) == 'number' || typeof(count) == 'number') {
+    var loopContext = {};
+    loopContext[VAR_index] = index;
+    loopContext[VAR_count] = count;
+    ret.setVariable(VAR_loop, loopContext);
+  }
   return ret;
 };
 
