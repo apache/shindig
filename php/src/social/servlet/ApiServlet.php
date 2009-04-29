@@ -63,7 +63,7 @@ abstract class ApiServlet extends HttpServlet {
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
-  public static $INVALIDATE_ROUTE = "invalidate";
+  public static $INVALIDATE_ROUTE = "cache";
 
   public function __construct() {
     parent::__construct();

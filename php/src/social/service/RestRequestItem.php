@@ -24,7 +24,15 @@
 class RestRequestItem extends RequestItem {
   private $url;
   private $params;
+  
+  /**
+   * @var InputConverter
+   */
   private $inputConverter;
+  
+  /**
+   * @var OutputConverter
+   */
   private $outputConverter;
   private $postData;
 
@@ -72,6 +80,9 @@ class RestRequestItem extends RequestItem {
       case DataServiceServlet::$MESSAGE_ROUTE:
         $data = $this->inputConverter->convertMessages($this->postData);
         $this->params['message'] = $data;
+        break;
+      case DataServiceServlet::$INVALIDATE_ROUTE:
+        $this->params = json_decode($this->postData, true);
         break;
       default:
         throw new Exception("Invalid or unknown service endpoint: $service");

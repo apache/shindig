@@ -29,7 +29,7 @@ class DataServiceServlet extends ApiServlet {
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
-  public static $INVALIDATE_ROUTE = "invalidate";
+  public static $INVALIDATE_ROUTE = "cache";
 
   public function doGet() {
     $this->doPost();
@@ -107,8 +107,9 @@ class DataServiceServlet extends ApiServlet {
    * Handler for non-batch requests (REST only has non-batch requests)
    */
   private function handleSingleRequest(SecurityToken $token, $inputConverter, $outputConverter) {
+    //uri example: /social/rest/people/@self   /gadgets/api/rest/cache/invalidate
     $servletRequest = array(
-        'url' => substr($_SERVER["REQUEST_URI"], strlen(Config::get('web_prefix') . '/social/rest')));
+        'url' => substr($_SERVER["REQUEST_URI"], strpos($_SERVER["REQUEST_URI"], '/rest') + 5));
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       $servletRequest['postData'] = $GLOBALS['HTTP_RAW_POST_DATA'];
       if (get_magic_quotes_gpc()) {

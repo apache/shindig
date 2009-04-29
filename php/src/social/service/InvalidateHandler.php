@@ -25,7 +25,7 @@ class InvalidateHandler extends DataRequestHandler {
    */
   private $invalidateService;
   
-  private static $INVALIDATE_PATH = "/invalidate";
+  private static $INVALIDATE_PATH = "/cache/invalidate";
   
   private static $KEYS_PARAM = "invalidationKeys";
 
@@ -35,25 +35,41 @@ class InvalidateHandler extends DataRequestHandler {
     $this->invalidateService = new $service($cache);
   }
 
+  public function handleItem(RequestItem $requestItem) {
+    try {
+      $method = strtolower($requestItem->getMethod());
+      $method = 'handle' . ucfirst($method);
+      $response = $this->$method($requestItem);
+    } catch (SocialSpiException $e) {
+      $response = new ResponseItem($e->getCode(), $e->getMessage());
+    } catch (Exception $e) {
+      $response = new ResponseItem(ResponseError::$INTERNAL_ERROR, "Internal error: " . $e->getMessage());
+    }
+    return $response;
+  }
   public function handleDelete(RequestItem $request) {
-    $this->handleGet($request);
+    throw new SocialSpiException("Http delete not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
   public function handlePut(RequestItem $request) {
-    $this->handleGet($request);
+    throw new SocialSpiException("Http put not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
 
   public function handlePost(RequestItem $request) {
-    $this->handleGet($request);
+    $this->handleInvalidate($request);
+  }
+  
+  public function handleGet(RequestItem $request) {
+    $this->handleInvalidate($request);
   }
 
-  public function handleGet(RequestItem $request) {
+  public function handleInvalidate(RequestItem $request) {
     if (!$request->getToken()->getAppId() && !$request->getToken()->getAppUrl()) {
       throw new SocialSpiException("Can't invalidate content without specifying application", ResponseError::$BAD_REQUEST);
     }
     
     $isBackendInvalidation = AuthenticationMode::$OAUTH_CONSUMER_REQUEST == $request->getToken()->getAuthenticationMode();
-    $invalidationKeys = $request->getListParameter('invalidationKey');
+    $invalidationKeys = $request->getListParameter('invalidationKeys');
     $resources = array();
     $userIds = array();
     if ($request->getToken()->getViewerId()) {
