@@ -139,6 +139,11 @@ public class MakeRequestHandler extends ProxyBase {
       }
     }
 
+    // Set the default content type  for post requests when a content type is not specified
+    if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type")==null) {
+      req.addHeader("Content-Type", "application/x-www-form-urlencoded"); 
+    }
+
     req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
 
     if (request.getParameter(GADGET_PARAM) != null) {

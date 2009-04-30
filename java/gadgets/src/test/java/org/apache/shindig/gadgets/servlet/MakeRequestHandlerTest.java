@@ -75,7 +75,8 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
       throws Exception {
     HttpRequest req = new HttpRequest(REQUEST_URL).setMethod("POST")
         .setPostBody(REQUEST_BODY.getBytes("UTF-8"))
-        .setAuthType(authType);
+        .setAuthType(authType)
+        .addHeader("Content-Type", "application/x-www-form-urlencoded");
     expect(pipeline.execute(req)).andReturn(new HttpResponse(response));
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expect(request.getParameter(MakeRequestHandler.POST_DATA_PARAM))
