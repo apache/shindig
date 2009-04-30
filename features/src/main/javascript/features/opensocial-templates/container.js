@@ -256,7 +256,7 @@ os.Container.renderInlineTemplates = function(opt_doc) {
         var keys = requiredData.split(/[\, ]+/);
         var callback = os.Container.createRenderClosure(template, el, null,
             os.Container.getDefaultContext());
-        if ("true".equalsIgnoreCase(node.getAttribute("autoUpdate"))) {
+        if ("true" == node.getAttribute("autoUpdate")) {
           opensocial.data.DataContext.registerListener(keys, callback);
         } else {
           opensocial.data.DataContext.registerOneTimeListener_(keys, callback);
