@@ -33,7 +33,6 @@
         <include>javascript/**</include>
         <include>config/**</include>
         <include>COMMITTERS</include>
-        <include>COPYING</include>
         <include>DISCLAIMER</include>
         <include>LICENSE</include>
         <include>NOTICE</include>
