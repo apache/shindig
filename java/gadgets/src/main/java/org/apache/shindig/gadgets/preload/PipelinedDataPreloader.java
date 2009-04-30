@@ -18,11 +18,11 @@
  */
 package org.apache.shindig.gadgets.preload;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.JsonUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +127,7 @@ public class PipelinedDataPreloader {
           .setSecurityToken(context.getToken())
           .setMethod("POST")
           .setAuthType(AuthType.NONE)
-          .setPostBody(UTF8.encode(socialRequestsJson).array())
+          .setPostBody(CharsetUtil.getUtf8Bytes(socialRequestsJson))
           .addHeader("Content-Type", "application/json; charset=UTF-8")
           .setContainer(context.getContainer())
           .setGadget(context.getUrl());
@@ -161,7 +162,7 @@ public class PipelinedDataPreloader {
       String response) throws JSONException {
     // Unpack the response into a list of PreloadedData responses
     final List<Object> data = Lists.newArrayList();
-    
+
     if (response.startsWith("[")) {
       // A non-error response is a JSON array
       JSONArray array = new JSONArray(response);
@@ -179,10 +180,10 @@ public class PipelinedDataPreloader {
         data.add(itemResponse);
       }
     }
-    
+
     return data;
   }
-  
+
   /** A task for loading os:HttpRequest */
   class HttpPreloadTask implements Callable<PreloadedData> {
     private final GadgetContext context;
@@ -338,7 +339,7 @@ public class PipelinedDataPreloader {
     if (data.length() > 0) {
       error.put("data", data);
     }
-    
+
     return error;
   }
 

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.render;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -33,11 +34,11 @@ import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
 
-import java.nio.charset.Charset;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+
+import java.nio.charset.Charset;
 
 /**
  * Implements proxied rendering.
@@ -68,7 +69,7 @@ public class ProxyRenderer {
     View view = gadget.getCurrentView();
     Uri href = view.getHref();
     Preconditions.checkArgument(href != null, "Gadget does not have href for the current view");
-    
+
     GadgetContext context = gadget.getContext();
     String path = context.getParameter(PATH_PARAM);
     if (path != null) {
@@ -89,7 +90,7 @@ public class ProxyRenderer {
 
     OAuthArguments oauthArgs = new OAuthArguments(view);
     oauthArgs.setProxiedContentRequest(true);
-    
+
     HttpRequest request = new HttpRequest(uri.toUri())
         .setIgnoreCache(context.getIgnoreCache())
         .setOAuthArguments(oauthArgs)
@@ -111,7 +112,7 @@ public class ProxyRenderer {
         response.getHttpStatusCode());
     }
 
-    return response.getResponseAsString();    
+    return response.getResponseAsString();
   }
 
   /**
@@ -121,22 +122,22 @@ public class ProxyRenderer {
   private HttpRequest createPipelinedProxyRequest(Gadget gadget, HttpRequest original) {
     HttpRequest request = new HttpRequest(original);
     request.setIgnoreCache(true);
-    
+
     PipelinedData data = gadget.getCurrentView().getPipelinedData();
     if (data != null) {
-      PipelineExecutor.Results results = 
+      PipelineExecutor.Results results =
         pipelineExecutor.execute(gadget.getContext(), ImmutableList.of(data));
-    
+
       if (results != null && !results.results.isEmpty()) {
         String postContent = JsonSerializer.serialize(results.results);
         // POST the preloaded content, with a method override of GET
         // to enable caching
         request.setMethod("POST")
-            .setPostBody(UTF8.encode(postContent).array())
+            .setPostBody(CharsetUtil.getUtf8Bytes(postContent))
             .setHeader("Content-Type", "application/json;charset=utf-8");
       }
     }
-    
+
     return request;
   }
 }
