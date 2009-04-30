@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -292,6 +293,8 @@ public class EndToEndTest {
     // to synchronous, saving the test from needing to wait or sleep for XHR
     // completion.
     webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+    webClient.setHTMLParserListener(HTMLParserListener.LOG_REPORTER);
+
     alertHandler = new CollectingAlertHandler();
     webClient.setAlertHandler(alertHandler);
     token = createToken("canonical", "john.doe");

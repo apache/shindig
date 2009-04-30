@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
+import org.apache.shindig.gadgets.servlet.JsServlet;
 import org.apache.shindig.gadgets.servlet.MakeRequestServlet;
 import org.apache.shindig.protocol.DataServiceServlet;
 import org.apache.shindig.protocol.JsonRpcServlet;
@@ -61,6 +62,7 @@ public class EndToEndServer {
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
+  private static final String JS_BASE = "/gadgets/js/*";
   private static final String MAKE_REQUEST_BASE = "/gadgets/makeRequest";
   public static final String SERVER_URL = "http://localhost:" + JETTY_PORT;
   public static final String GADGET_BASEURL = SERVER_URL + GADGET_BASE;
@@ -138,6 +140,10 @@ public class EndToEndServer {
     // Attach the ConcatProxyServlet - needed for rewritten JS
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
     context.addServlet(concatHolder, CONCAT_BASE);
+
+    // Attach the JsServlet - needed for rewritten JS
+    ServletHolder jsHolder = new ServletHolder(new JsServlet());
+    context.addServlet(jsHolder, JS_BASE);
 
     // Attach MakeRequestServlet
     ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());

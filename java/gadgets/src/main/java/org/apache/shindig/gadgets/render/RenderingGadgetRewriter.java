@@ -59,10 +59,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * Produces a valid HTML document for the gadget output, automatically inserting appropriate HTML
@@ -94,6 +96,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private final ContainerConfig containerConfig;
   private final GadgetFeatureRegistry featureRegistry;
   private final UrlGenerator urlGenerator;
+  private Set<String> defaultForcedLibs = ImmutableSet.of();
 
   /**
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
@@ -107,6 +110,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
     this.urlGenerator = urlGenerator;
+  }
+
+  @Inject
+  public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
+    if (forcedLibs != null && forcedLibs.length() > 0) {
+      defaultForcedLibs = ImmutableSortedSet.copyOf(Arrays.asList(forcedLibs.split(":")));
+    }
   }
 
   public void rewrite(Gadget gadget, MutableContent mutableContent) {
@@ -204,17 +214,16 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     GadgetContext context = gadget.getContext();
     String forcedLibs = context.getParameter("libs");
 
-    // List of libraries we need
+    // List of forced libraries we need
     Set<String> forced;
 
     // gather the libraries we'll need to generate the forced libs
     if (forcedLibs == null || forcedLibs.length() == 0) {
-      // TODO allow containers to have a default set of forced libs
-      forced = ImmutableSet.of();
+      // Don't bother making a mutable copy if the list is empty
+      forced = (defaultForcedLibs.isEmpty()) ? defaultForcedLibs :  Sets.newTreeSet(defaultForcedLibs);
     } else {
       forced = Sets.newTreeSet(Arrays.asList(forcedLibs.split(":")));
     }
-
     if (!forced.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
