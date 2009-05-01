@@ -182,12 +182,20 @@ opensocial.data.DataContext = function() {
   return {
     
     /**
-     * Returns a map of existing data.
+     * Returns a map of existing data. This is used externally by both the
+     * opensocial-data and opensocial-templates feature, hence is
+     * not hidden, despite not being part of the spec.
      * @return {Object} A map of current data sets.
      * TODO: Add to the spec API?
      */
     getData : function() {
-      return dataSets;
+      var data = {};
+      for (var key in dataSets) {
+        if (dataSets.hasOwnProperty(key)) {
+          data[key] = dataSets[key];
+        }
+      }
+      return data;
     },
     
     /**
@@ -255,3 +263,4 @@ opensocial.data.DataContext = function() {
 opensocial.data.getDataContext = function() {
   return opensocial.data.DataContext;
 };
+
