@@ -45,12 +45,17 @@ public class NameTagHandler extends AbstractTagHandler {
       return;
     }
     JSONObject name = person.optJSONObject("name");
-    if (name == null) {
+
+    String formatted;
+    if (name != null) {
+      formatted = name.optString("formatted");
+      if (formatted.length() == 0) {
+        formatted = name.optString("givenName") + " " + name.optString("familyName");
+      }
+    } else if (person.optString("displayName") != null) {
+      formatted = person.optString("displayName");
+    } else {
       return;
-    }
-    String formatted = name.optString("formatted");
-    if (formatted.length() == 0) {
-      formatted = name.optString("givenName") + " " + name.optString("familyName");
     }
 
     Document doc = result.getOwnerDocument();
