@@ -41,6 +41,7 @@ import org.json.JSONObject;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,7 +56,7 @@ import com.google.inject.Inject;
  * method : http.<HTTP method name>
  * params : {
  *    href : <endpoint to fetch content from>,
- *    headers : { <header-name> : <header-value>, ...},
+ *    headers : { <header-name> : [<header-value>, ...]},
  *    format : <"text", "json", "feed">
  *    body : <request body>
  *    gadget : <url of gadget spec for calling application>
@@ -171,9 +172,11 @@ public class HttpRequestHandler {
       }
 
       // Copy over allowed headers
-      for (Map.Entry<String, String> header : httpApiRequest.headers.entrySet()) {
+      for (Map.Entry<String, List<String>> header : httpApiRequest.headers.entrySet()) {
         if (!BAD_HEADERS.contains(header.getKey().trim().toUpperCase())) {
-          req.addHeader(header.getKey(), header.getValue());
+          for (String value : header.getValue()) {
+            req.addHeader(header.getKey(), value);
+          }
         }
       }
 
@@ -303,8 +306,6 @@ public class HttpRequestHandler {
   protected Uri getGadgetUri(SecurityToken token, HttpApiRequest httpApiRequest) {
     if (token != null && token.getAppUrl() != null) {
       return Uri.parse(token.getAppUrl());
-    } else if (httpApiRequest.gadget != null) {
-      return httpApiRequest.gadget;
     }
     return null;
   }
@@ -321,15 +322,10 @@ public class HttpRequestHandler {
     // Content to fetch / execute
     Uri href;
 
-    // TODO : Consider support Map<String, List<String>> to match response
-    Map<String, String> headers = Maps.newHashMap();
+    Map<String, List<String>> headers = Maps.newHashMap();
 
     /** POST body */
     String body;
-
-    // Allowed to be null if it can be derived from the security token
-    // TODO: why is this useful?
-    Uri gadget;
 
     /** Authorization type ("none", "signed", "oauth") */
     String authz = "none";
@@ -365,19 +361,11 @@ public class HttpRequestHandler {
       this.href = url;
     }
 
-    public Uri getGadget() {
-      return gadget;
-    }
-
-    public void setGadget(Uri gadget) {
-      this.gadget = gadget;
-    }
-
-    public Map<String, String> getHeaders() {
+    public Map<String, List<String>> getHeaders() {
       return headers;
     }
 
-    public void setHeaders(Map<String, String> headers) {
+    public void setHeaders(Map<String, List<String>> headers) {
       this.headers = headers;
     }
 

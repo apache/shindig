@@ -162,7 +162,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     JSONObject request = new JSONObject("{method:http.post, id:req1, params : {"
         + "href:'http://www.example.org/somecontent',"
         + "body:'POSTBODY',"
-        + "headers:{goodheader:good, host : iamstripped, 'Content-Length':'1000'}"
+        + "headers:{goodheader:[good], host : [iamstripped], 'Content-Length':['1000']}"
         + "}}");
     HttpRequest httpRequest = new HttpRequest(Uri.parse("http://www.example.org/somecontent"));
     httpRequest.setMethod("POST");
