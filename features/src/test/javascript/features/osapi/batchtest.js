@@ -29,8 +29,9 @@ BatchTest.prototype.setUp = function() {
     return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
   };
 
-   gadgets.config.init({ "osapi.base" : {
-      "rpcUrl" : "http://%host%/social"}
+  gadgets.config.init({ "osapi.services" : {
+      "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
+        "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
   });
 };
 
@@ -41,11 +42,9 @@ BatchTest.prototype.tearDown = function() {
 BatchTest.prototype.testAddAndExecuteOneRequests = function() {
   var batch = osapi.newBatch();
   this.assertBatchMembers(batch);
-
-  batch.add('friends', osapi.people.getViewerFriends());
-
+  batch.add('friends', osapi.people.get());
   var expectedJson = [{method:"people.get",params:
-    {userId:["@viewer"],groupId:"@friends",fields:["id","displayName"]},
+    {userId:["@viewer"],groupId:"@self"},
       id:"friends"}
     ];
 
@@ -57,7 +56,10 @@ BatchTest.prototype.testAddAndExecuteOneRequests = function() {
         contentType : contentType};
     };
     batch.execute(function() {});
+
     this.assertArgsToMakeNonProxiedRequest(argsInCallToMakeNonProxiedRequest, expectedJson);
+
+
   } finally {
     gadgets.io.makeNonProxiedRequest = oldMakeRequest;
   }
@@ -67,14 +69,14 @@ BatchTest.prototype.testAddAndExecuteTwoRequests = function() {
   var batch = osapi.newBatch();
   this.assertBatchMembers(batch);
 
-  batch.add('friends', osapi.people.getViewerFriends()).
+  batch.add('friends', osapi.people.get()).
       add('activities', osapi.activities.get());
 
   var expectedJson = [{method:"people.get",params:
-    {userId:["@viewer"],groupId:"@friends",fields:["id","displayName"]},
+    {userId:["@viewer"],groupId:"@self"},
       id:"friends"},
     {method:"activities.get",params:
-      {userId:["@viewer"],groupId:"@self",appId:"@app"},id:"activities"}
+      {userId:["@viewer"],groupId:"@self"},id:"activities"}
     ];
 
   var argsInCallToMakeNonProxiedRequest;
@@ -88,43 +90,6 @@ BatchTest.prototype.testAddAndExecuteTwoRequests = function() {
     this.assertArgsToMakeNonProxiedRequest(argsInCallToMakeNonProxiedRequest, expectedJson);
   } finally {
     gadgets.io.makeNonProxiedRequest = oldMakeRequest;
-  }
-};
-
-BatchTest.prototype.testAddAndExecuteMixedJsonAndMakeRequest = function() {
-  var that = this;
-  var batch = osapi.newBatch();
-  this.assertBatchMembers(batch);
-
-  batch.add('friends', osapi.people.getViewerFriends()).
-      add('makerequest', osapi.makeRequest('http://www.google.com', {}));
-
-  var expectedJson = [{method:"people.get",params:
-    {userId:["@viewer"],groupId:"@friends",fields:["id","displayName"]},
-      id:"friends"}];
-
-  var argsInCallToMakeNonProxiedRequest, argsInCallToMakeRequest;
-  var oldMakeNonProxiedRequest = gadgets.io.makeNonProxiedRequest;
-  var oldMakeRequest = gadgets.io.makeRequest;
-  
-  try {
-    gadgets.io.makeNonProxiedRequest = function(url, callback, params, contentType) {
-      argsInCallToMakeNonProxiedRequest = { url : url, callback : callback, params : params,
-        contentType : contentType};
-    };
-    gadgets.io.makeRequest = function(url, makeRequestCallback, options) {
-      argsInCallToMakeRequest = { url : url, callback : makeRequestCallback, options : options};
-    };
-
-    batch.execute(function(data) {
-      that.assertTrue("There is a response", data);
-    });
-
-    this.assertArgsToMakeNonProxiedRequest(argsInCallToMakeNonProxiedRequest, expectedJson);
-    this.assertArgsToMakeRequest(argsInCallToMakeRequest);
-  } finally {
-    gadgets.io.makeNonProxiedRequest = oldMakeNonProxiedRequest;
-    gadgets.io.makeRequest = oldMakeRequest;
   }
 };
 

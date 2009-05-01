@@ -33,7 +33,7 @@
               assertEquals("Names don't match", "Shin Digg", response.displayName);
               finished();
             }
-            osapi.people.get({ userId : 'canonical'}).execute(receivedData);
+            osapi.people.get({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           /** Test fetching the owner, which should be "canonical" */
@@ -43,7 +43,7 @@
               assertEquals("Names don't match", "Shin Digg", response.displayName);
               finished();
             }
-            osapi.people.getOwner({ userId : 'canonical'}).execute(receivedData);
+            osapi.people.getOwner({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           /** Test fetching the viewer, which should be "john.doe" */
@@ -53,7 +53,7 @@
               assertEquals("Names don't match", "Johnny", response.displayName);
               finished();
             }
-            osapi.people.getViewer({ userId : 'canonical'}).execute(receivedData);
+            osapi.people.getViewer({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           /** Test fetching the owner and viewer as a batch */
@@ -64,7 +64,7 @@
               assertEquals("Names don't match", "Johnny", response[1].displayName);
               finished();
             }
-            osapi.people.get({ userId : ['@owner', '@viewer']}).execute(receivedData);
+            osapi.people.get({ userId : ['@owner', '@viewer'], fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           fetchPersonNotFound: function() {
@@ -74,7 +74,7 @@
               finished();
             }
 
-            osapi.people.get({ userId : "not.a.real.id"}).execute(receivedData);
+            osapi.people.get({ userId : "not.a.real.id", fields : ["id", "displayName"]}).execute(receivedData);
           }
         };
 

@@ -32,9 +32,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 /**
  * Tests for JsonSerializer.
@@ -59,6 +63,15 @@ public class JsonSerializerTest {
     map.put("foo", "bar");
     map.put("remove", null);
     assertJsonEquals("{hello:'world',foo:'bar'}", JsonSerializer.serialize(map));
+  }
+
+  @Test
+  public void serializeSimpleMultimap() throws Exception {
+    Multimap<String, String> map = Multimaps.newLinkedHashMultimap();
+    Set<String> methods = ImmutableSet.of("system.listMethods", "people.get");
+    map.putAll("hostEndpoint", methods);
+    assertJsonEquals("{hostEndpoint : ['system.listMethods', 'people.get']}",
+        JsonSerializer.serialize(map));
   }
 
   @Test

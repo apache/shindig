@@ -1,4 +1,4 @@
-/*
+ /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,6 +22,8 @@ import org.apache.shindig.common.util.DateUtil;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.google.common.collect.Multimap;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -159,6 +161,8 @@ public final class JsonSerializer {
       appendJsonArray(buf, (JSONArray) value);
     } else if (value instanceof Map) {
       appendMap(buf, (Map<String, Object>) value);
+    } else if (value instanceof Multimap) {
+      appendMultimap(buf, (Multimap<String, Object>) value);
     } else if (value instanceof Collection) {
       appendCollection(buf, (Collection<Object>) value);
     } else if (value.getClass().isArray()) {
@@ -299,6 +303,15 @@ public final class JsonSerializer {
     buf.append('}');
   }
 
+  /**
+   * Appends a Map to the buffer.
+   *
+   * @throws IOException If {@link Appendable#append(char)} throws an exception.
+   */
+  public static void appendMultimap(Appendable buf, Multimap<String, Object> map) throws IOException {
+	appendMap(buf, map.asMap());
+  }
+  
   /**
    * Appends a JSONObject to the buffer.
    *

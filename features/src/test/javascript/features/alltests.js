@@ -65,15 +65,12 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/url.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonactivity.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonperson.js'));
-  eval(JsUtil.prototype.include(srcDir + '/opensocial-rest/restfulcontainer.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-jsonrpc/jsonrpccontainer.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.base/batch.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.base/jsonrequest.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.base/makerequest.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.base/util.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.people/people.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.activities/activities.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi.appdata/appdata.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/batch.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrequest.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/util.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/osapi.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
   eval(JsUtil.prototype.include(testToolsDir + "/JsUnit.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/authtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/config-test.js"));
@@ -89,10 +86,11 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/template_test.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/util_test.js"));
   eval(JsUtil.prototype.include(testToolsDir + '/testutils.js'));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi.people/peopletest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi.activities/activitiestest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi.appdata/appdatatest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi.base/batchtest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/peopletest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/osapitest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/activitiestest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/appdatatest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/batchtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/views/urltemplatetest.js"));
 }
 
@@ -115,6 +113,7 @@ function AllTests_suite() {
 
 AllTests.prototype = new TestSuite();
 AllTests.prototype.suite = AllTests_suite;
+AllTests.glue();
 
 var args;
 if (this.WScript) {

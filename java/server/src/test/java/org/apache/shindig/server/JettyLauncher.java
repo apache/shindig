@@ -51,7 +51,8 @@ public class JettyLauncher {
   private static final String GADGET_BASE = "/gadgets/ifr";
   private static final String PROXY_BASE = "/gadgets/proxy";
   private static final String MAKEREQUEST_BASE = "/gadgets/makeRequest";
-  private static final String GADGETS_RPC_BASE = "/gadgets/rpc/*";
+  private static final String GADGETS_RPC_BASE = "/gadgets/api/rpc/*";
+  private static final String GADGETS_REST_BASE = "/gadgets/api/rpc/*";
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
@@ -113,6 +114,12 @@ public class JettyLauncher {
     gadgetsRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
     context.addServlet(gadgetsRpcServletHolder, GADGETS_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, GADGETS_RPC_BASE, 0);
+
+    // Attach the gadgets rest servlet
+    ServletHolder gadgetsRestServletHolder = new ServletHolder(new DataServiceServlet());
+    gadgetsRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
+    context.addServlet(gadgetsRpcServletHolder, GADGETS_REST_BASE);
+    context.addFilter(AuthenticationServletFilter.class, GADGETS_REST_BASE, 0);
     
     // Attach DataServiceServlet
     ServletHolder restServletHolder = new ServletHolder(new DataServiceServlet());
@@ -133,9 +140,12 @@ public class JettyLauncher {
         
         String stripped = s.substring("/gadgets/files/".length());
         try {
-          return Resource.newResource(trunk + "/javascript/" + stripped);
+          Resource resource = Resource.newResource(trunk + "/javascript/" + stripped);
+          // Try to open it.
+          resource.getInputStream();
+          return resource;
         } catch (IOException ioe) {
-          return Resource.newClassPathResource(s);
+          return Resource.newClassPathResource(stripped);
         }
       }
     };

@@ -29,9 +29,11 @@ AppdataTest.prototype.setUp = function() {
     return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
   };
 
-  gadgets.config.init({ "osapi.base" : {
-      "rpcUrl" : "http://%host%/social"}
+  gadgets.config.init({ "osapi.services" : {
+      "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
+        "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
   });
+
 };
 
 AppdataTest.prototype.tearDown = function() {
@@ -39,14 +41,13 @@ AppdataTest.prototype.tearDown = function() {
 };
 
 AppdataTest.prototype.testJsonBuilding = function() {
-  var getFn = osapi.appdata.get({ userId : '@viewer', keys : ['nonexistent']});
+  var getFn = osapi.appdata.get({ userId : '@viewer', fields : ['nonexistent']});
   this.assertRequestPropertiesForService(getFn);
 
   var expectedJson = [{ method : 'appdata.get',
     params : {
       groupId : '@self',
       userId : ['@viewer'],
-      appId : '@app',
       fields : ['nonexistent']
     }
   }];
@@ -70,13 +71,12 @@ AppdataTest.prototype.testJsonBuilding = function() {
 
 AppdataTest.prototype.testGetAppdata = function() {
   var that = this;
-  var getAppdata = osapi.appdata.get({ userId : '@viewer', keys : ['gift']});
+  var getAppdata = osapi.appdata.get({ userId : '@viewer', fields : ['gift']});
   this.assertRequestPropertiesForService(getAppdata);
 
   var expectedJson = [{ method : "appdata.get",
     params : { userId : ['@viewer'],
       groupId : '@self',
-      appId : '@app',
       fields : ['gift']}
   }];
   this.assertEquals("Json for request params should match", expectedJson, getAppdata.json());
@@ -108,13 +108,12 @@ AppdataTest.prototype.testGetAppdata = function() {
 
 AppdataTest.prototype.testDeleteAppdata = function() {
   var that = this;
-  var getAppdata = osapi.appdata.deleteData({ userId : '@viewer', keys : ['gift']});
+  var getAppdata = osapi.appdata["delete"]({ userId : '@viewer', fields : ['gift']});
   this.assertRequestPropertiesForService(getAppdata);
 
   var expectedJson = [{ method : "appdata.delete",
     params : { userId : ['@viewer'],
       groupId : '@self',
-      appId : '@app', 
       fields : ['gift']}
   }];
   this.assertEquals("Json for request params should match", expectedJson, getAppdata.json());
@@ -150,11 +149,11 @@ AppdataTest.prototype.testUpdate = function() {
   this.assertRequestPropertiesForService(createActivityFn);
 
   var expectedJson = [{ method : "appdata.update",
-    params : { userId : ['@viewer'],
+    params : { 
       groupId : '@self',
-      appId : '@app',
-      data: {gifts: 'Ferrari'},
-      fields:[]}
+      userId : ['@viewer'],
+      data: {gifts: 'Ferrari'}
+  }
   }];
   this.assertEquals("Json for request params should match", expectedJson, createActivityFn.json());
 

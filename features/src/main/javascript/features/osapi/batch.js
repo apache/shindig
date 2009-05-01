@@ -21,8 +21,9 @@ var osapi = osapi || {};
 /**
  * It is common to batch requests together to make them more efficient.
  *
- * Currently, since makeRequest is proxied, these requests are handled separately to
- * create more parallelism.
+ * Note: the container config specified endpoints at which services are to be found.
+ * When creating a batch, the calls are split out into separate requests based on the 
+ * endpoint, as it may get sent to a different server on the backend.
  */
 osapi.newBatch = function() {
 
@@ -50,6 +51,9 @@ osapi.newBatch = function() {
       };
     }();
 
+    /**
+     * Countdown call when a request is done.
+     */
     var finishNonProxiedRequest = function(results) {
       for (var result in results) if (results.hasOwnProperty(result)) {
         responseMap[result] = results[result];
@@ -58,21 +62,15 @@ osapi.newBatch = function() {
       leftTodo.down();
     };
 
-    var finishProxiedRequest = function(key, result, error) {
-      responseMap[key] = result;
-      if (error) {
-        osapi.base.setGlobalError(responseMap, error.error);
-      }
-      leftTodo.down();
-    };
 
     return {
-      finishedJsonRequest : finishNonProxiedRequest,
-      finishProxiedRequest : finishProxiedRequest
+      finishedJsonRequest : finishNonProxiedRequest
     };
   };
 
-
+  /**
+   * Handle empty calls properly (asynchronously) to prevent browser hiccups
+   */
   var callbackAsyncAndEmpty = function(userCallback) {
     window.setTimeout(function() {
         userCallback({ data : {}});
@@ -81,43 +79,46 @@ osapi.newBatch = function() {
   };
 
   var each = function(arr, fn) {
-    for (var i=0;i<arr.length;i++) {
+    for (var i in arr) if (arr.hasOwnProperty(i)) {
       fn.apply(null, [arr[i]]);
     }
   };
+  
+  var length = function(arr) {
+    var len = 0;
+    each(arr, function() { len++;});
+    return len;
+  }
 
-  var executeJsonRequests = function(json, getDataFromResult, countDownLatch) {
-    osapi.newBatchJsonRequest(json, getDataFromResult).execute(function(results) {
-      countDownLatch.finishedJsonRequest(results);
-    });
-  };
-
-  var executeProxiedRequests = function(proxiedRequests, countDownLatch) {
-    if (proxiedRequests.length > 0) {
-      var makeRequestExecutor = function(keyRequestPair) {
-        keyRequestPair.request.execute(function(makeRequestResult) {
-          if (makeRequestResult.error) {
-            countDownLatch.finishProxiedRequest(keyRequestPair.key, {
-              error : { code : osapi.base.translateHttpError("Error " +
-                                                              makeRequestResult.error['code']),
-                  message :makeRequestResult.error.message }},
-            true);
-          } else {
-            if (makeRequestResult.data) {
-              countDownLatch.finishProxiedRequest(keyRequestPair.key, makeRequestResult.data);
-            }
-          }
-        });
+  /**
+   * takes the list of requests to execute in this call,
+   * @param {object} jsonRequests the collection of requests, by endpoint
+   * @param {function} json the json generator function for a batch 
+   * @param {function} getDataFromResult the result processor, getDataFromResult
+   * @param {object} The countdown latch which the batch is synchronized on before calling the 
+   *                 user callback
+   */
+  var executeJsonRequests = function(jsonRequests, json, getDataFromResult, countDownLatch) {
+    for (var endpoint in jsonRequests) if (jsonRequests.hasOwnProperty(endpoint)) {
+      var jsonGenerator = function() {
+        var ep = endpoint;
+        return json(ep);
       };
-      each(proxiedRequests, makeRequestExecutor);
+      var getDataFromResultForEndpoint = function(response) {
+        var ep = endpoint;
+        return getDataFromResult(ep, response);
+      }
+      osapi.newBatchJsonRequest(jsonGenerator, getDataFromResultForEndpoint, endpoint).execute(
+    	function(results) {
+          countDownLatch.finishedJsonRequest(results);
+        });
     }
   };
 
   return function() {
     var that = {};
     
-    var jsonRequests = [];
-    var proxiedRequests = [];
+    var jsonRequests = {};
 
     /**
      * Create a new request in the batch
@@ -125,18 +126,21 @@ osapi.newBatch = function() {
      * @param {object} request the opensocial request object
      */
     var add = function(key, request) {
-      if (request.isMakeRequest) {
-        proxiedRequests.push({key : key, request : request});
-      } else {
-        jsonRequests.push({key : key, request : request});
-      }
+      var endpoint = request.endpoint;
+      var existingRequestsAtEndpoint = jsonRequests[endpoint] || [];
+      existingRequestsAtEndpoint.push({key : key, request : request});
+      jsonRequests[endpoint] = existingRequestsAtEndpoint;
       return that;
     };
 
-    var json = function() {
+    /**
+     * Json generator function that generates the batch's post body.
+     * @param {string} endpoint Server-specified endpoint for rpc calls
+     */
+    var json = function(endpoint) {
       var jsonParams = [];
-      for (var i = 0; i < jsonRequests.length; i++) {
-        var request = jsonRequests[i];
+      for (var i = 0; i < jsonRequests[endpoint].length; i++) {
+        var request = jsonRequests[endpoint][i];
         var requestJson = request.request.json()[0]; // single requests make a json array by default
         requestJson.id = request.key;
         jsonParams.push(requestJson);
@@ -144,20 +148,29 @@ osapi.newBatch = function() {
       return jsonParams;
     };
 
-    var getDataFromResult = function(result) {      
+    /**
+     * Post processor for the batch call.
+     * Essentially, this function just makes error handling 
+     * work as expected, but also puts items back into the response
+     * according to the key by which they were added.
+     * @param {string} endpoint Server specified endpoint used to retrieve result
+     * @param { object} result the response from the server
+     * 
+     */
+    var getDataFromResult = function(endpoint, result) {      
       var responseMap = {};
-
+      var jsonRequestsForEndpoint = jsonRequests[endpoint];
       var data = result.data; // the json array
-      for (var k = 0; k < jsonRequests.length; k++) {
+      for (var k = 0; k < jsonRequestsForEndpoint.length; k++) {
         var response = data[k];
         if (response.error) {
-          var error = { error : { code : osapi.base.translateHttpError("Error "
+          var error = { error : { code : osapi.translateHttpError("Error "
               + response.error['code']),
             message : response.error.message }};
           responseMap[response.id] = error;
-          osapi.base.setGlobalError(responseMap, error.error);
+          osapi.setGlobalError(responseMap, error.error);
         } else {
-          if (response.id !== jsonRequests[k].key) {
+          if (response.id !== jsonRequestsForEndpoint[k].key) {
             throw "Response Id doesn't match request key";
           } else {
             if (response.data.list) { // array result
@@ -171,11 +184,17 @@ osapi.newBatch = function() {
       return responseMap;
     };
 
+    /**
+     * Creates a countdown latch that will ultimately call the usercallback,
+     * and then executes the jsonRequests.
+     * @param {function} userCallback function to call when batch is done
+     */
     var executeRequests = function(userCallback) {
-      var count =  ((jsonRequests.length > 0) ? 1 : 0 ) + proxiedRequests.length;
-      var countDownLatch = newCountdownLatch(count, userCallback);
-      executeJsonRequests(json, getDataFromResult, countDownLatch);
-      executeProxiedRequests(proxiedRequests, countDownLatch);
+      var jsonRequestLength = length(jsonRequests);
+      var countDownLatch = newCountdownLatch(jsonRequestLength, userCallback);
+      if (jsonRequestLength > 0) {
+        executeJsonRequests(jsonRequests, json, getDataFromResult, countDownLatch);
+      }
     };
 
     /**
@@ -183,7 +202,7 @@ osapi.newBatch = function() {
      * @param {Function} userCallback the callback to the gadget where results are passed.
      */
     var execute =  function(userCallback) {
-      if (jsonRequests.length == 0 && proxiedRequests.length == 0) {
+      if (length(jsonRequests) == 0) {
         callbackAsyncAndEmpty(userCallback);
       } else {                            
         executeRequests(userCallback);

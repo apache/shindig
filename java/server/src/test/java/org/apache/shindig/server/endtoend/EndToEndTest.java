@@ -73,7 +73,6 @@ public class EndToEndTest {
     "osapi/activitiesTest.xml",
     "osapi/appdataTest.xml",
     "osapi/batchTest.xml",
-    "osapi/makeRequestTest.xml",
     "testframework.js"
   };
 
@@ -209,11 +208,6 @@ public class EndToEndTest {
   @Test
   public void testOsapiBatch() throws Exception {
     executeAllPageTests("osapi/batchTest");
-  }
-
-  @Test
-  public void testOsapiMakeRequest() throws Exception {
-    executeAllPageTests("osapi/makeRequestTest");
   }
 
   @Test

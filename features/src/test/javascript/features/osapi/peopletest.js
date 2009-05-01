@@ -28,21 +28,28 @@ PeopleTest.prototype.setUp = function() {
     return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
   };
 
+  PeopleTest.formerPeople = osapi.people;
+  osapi.people = undefined;
+
+  gadgets.config.init({"osapi.services" : {
+      "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
+        "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
+  });
+
 };
 
 PeopleTest.prototype.tearDown = function() {
   shindig.auth = undefined;
+  if (PeopleTest.formerPeople) {
+	  osapi.people = PeopleTest.formerPeople;
+  }
 };
 
 PeopleTest.prototype.testJsonBuilding = function() {
   var getViewerFn = osapi.people.getViewer();
   this.assertRequestPropertiesForService(getViewerFn);
 
-  var expectedJson = [{ method : 'people.get',
-    params : {
-      groupId : '@self',
-      userId : ['@viewer'],
-      fields : ['id', 'displayName'] } }];
+  var expectedJson = [ { method : 'people.get', params : { groupId : '@self', userId : [ '@viewer' ] } } ];
   this.assertEquals('Json for request params should match', expectedJson, getViewerFn.json());
 
   var argsInCallToMakeNonProxiedRequest;
@@ -69,8 +76,7 @@ PeopleTest.prototype.testGetViewerResponse = function() {
 
   var expectedJson = [{ method : "people.get",
     params : { userId : ['@viewer'],
-      groupId : '@self',
-      fields : ['id', 'displayName'] } }];
+      groupId : '@self'} }];
   this.assertEquals("Json for request params should match", expectedJson, getViewerFn.json());
 
   var mockPersonResult = { data : [{
@@ -106,8 +112,7 @@ PeopleTest.prototype.testGetViewerFriendsResponse = function() {
 
   var expectedJson = [{ method : "people.get",
     params : { userId : ['@viewer'],
-      groupId : '@friends',
-      fields : ['id', 'displayName'] } }];
+      groupId : '@friends' } }];
   this.assertEquals("Json for request params should match", expectedJson, getViewerFn.json());
 
   var mockPeopleResult = { data :
@@ -151,8 +156,7 @@ PeopleTest.prototype.testGetUnknownUserIdErrorResponse = function() {
 
   var expectedJson = [{ method : "people.get",
     params : { userId : ['fake.id'],
-      groupId : '@self',
-      fields : ['id', 'displayName'] } }];
+      groupId : '@self'} }];
   this.assertEquals("Json for request params should match", expectedJson, getViewerFn.json());
 
   var mockPersonResult = { data : [{"error":{"code":400,"message":"badRequest: Person not found"}}],

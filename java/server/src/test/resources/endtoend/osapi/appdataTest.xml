@@ -62,7 +62,7 @@
               }
               var pet = mydata["pet"];
               assertEquals("Pet should match", "crazed monkey", pet);
-              osapi.appdata.deleteData({userId: '@viewer', keys: ['pet']}).execute(deletedResponse);
+              osapi.appdata["delete"]({userId: '@viewer', keys: ['pet']}).execute(deletedResponse);
             }
 
             function updateResponse(response) {

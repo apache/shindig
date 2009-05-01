@@ -30,11 +30,11 @@
           fetchId: function() {
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 0 activities", 0, response.length);
+              assertEquals("Should have 2 activities", 2, response.length);
               finished();
             }
 
-            osapi.activities.get({ userId : 'canonical'}).execute(receivedData);
+            osapi.activities.get({ userId : 'canonical', groupId : '@self'}).execute(receivedData);
           },
           /** Test fetching viewer's activity */
           fetchViewerActivities: function() {
@@ -66,9 +66,9 @@
           createNewActivity: function() {
             function newData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 1 activity", 1, response.length);
-              assertEquals("Titles don't match", "New activity", response[0].title);
-              assertEquals("Body doesn't match", "Hey", response[0].body);
+              assertEquals("Should have 3 activities", 3, response.length);
+              assertEquals("Titles don't match", "New activity", response[2].title);
+              assertEquals("Body doesn't match", "Hey", response[2].body);
               finished();
             }
 

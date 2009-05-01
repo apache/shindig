@@ -43,7 +43,7 @@
               finished();
             }
 
-            var req = osapi.people.getOwnerFriends().execute(receivedData);
+            var req = osapi.people.getOwnerFriends({fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           /** Test fetching 'maija.m' friends, of which there are none */
@@ -54,7 +54,7 @@
               finished();
             }
 
-            osapi.people.get({userId : 'maija.m', groupId : '@friends'}).execute(receivedData);
+            osapi.people.get({userId : 'maija.m', groupId : '@friends', fields : ["id", "displayName"]}).execute(receivedData);
           },
 
           /** Test fetching friends of a list of users */
@@ -65,7 +65,7 @@
               finished();
             }
 
-            osapi.people.get({userId : ['john.doe', 'jane.doe'], groupId : '@friends'}).execute(receivedData);
+            osapi.people.get({userId : ["john.doe", "jane.doe"], groupId : '@friends', fields : ["id", "displayName"]}).execute(receivedData);
           }
         };
       </script>

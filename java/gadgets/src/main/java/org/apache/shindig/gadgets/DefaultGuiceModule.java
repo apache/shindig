@@ -60,7 +60,7 @@ public class DefaultGuiceModule extends AbstractModule {
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(
         Names.named("org.apache.shindig.gadgets.handlers"))
         .toInstance(ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class));
-
+    // bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
 
 
     // We perform static injection on HttpResponse for cache TTLs.

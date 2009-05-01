@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations under the License.
  */
 var osapi = osapi || {};
-osapi.base = osapi.base  || {};
-
-osapi.base.defaultAppId = '@app';
-
-/**
- * Make sure that the appId param is set, using the default if none is supplied.
- *
- * @param options the parameters to a jsonrpc call.
- */
-osapi.base.ensureAppId = function(options) {
-  options.appId = options.appId || osapi.base.defaultAppId;
-};
-
 
 /**
  * Set an error property on the responseMap object
  * @param responseMap results returned to a gadget
  * @param error the particular error object to set
  */
-osapi.base.setGlobalError = function(responseMap, error) {
+osapi.setGlobalError = function(responseMap, error) {
   if (!responseMap['error']) {
     if (error === undefined) {
       responseMap['error'] = "Some requests in the batch had errors";
@@ -49,7 +36,7 @@ osapi.base.setGlobalError = function(responseMap, error) {
  * Turns an http error code into an opensocial error
  * @param httpError
  */
-osapi.base.translateHttpError = function(httpError) {
+osapi.translateHttpError = function(httpError) {
   if (httpError == "Error 501") {
     return 'notImplemented';
   } else if (httpError == "Error 401") {

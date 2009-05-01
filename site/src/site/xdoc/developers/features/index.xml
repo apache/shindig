@@ -137,22 +137,6 @@ under the License.
             <td>Opensocial API.</td>
           </tr>
           <tr>
-            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.activities/feature.xml">osapi.activities/feature.xml</a></td>
-            <td>Opensocial Activities API.</td>
-          </tr>
-          <tr>
-            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.appdata/feature.xml">osapi.appdata/feature.xml</a></td>
-            <td>Opensocial Appdata API.</td>
-          </tr>
-          <tr>
-            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.base/feature.xml">osapi.base/feature.xml</a></td>
-            <td>Opensocial base API.</td>
-          </tr>
-          <tr>
-            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.people/feature.xml">osapi.people/feature.xml</a></td>
-            <td>Opensocial People API.</td>
-          </tr>
-          <tr>
             <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.ui/feature.xml">osapi.ui/feature.xml</a></td>
             <td>Opensocial UI API.</td>
           </tr>

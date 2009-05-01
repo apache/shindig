@@ -72,6 +72,8 @@ public class SocialApiGuiceModule extends AbstractModule {
   
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.social.handlers"))
         .toInstance(getHandlers());
+    
+    bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
   }
   
   /**

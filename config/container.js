@@ -141,10 +141,8 @@
        "activity" : ["id", "title"]
     }
   },
-  "osapi.base" : {
-    // Use EL when available.
-    "rpcUrl" : "http://%host%/social"
+  "osapi" : {
+    // The endpoints to query for available JSONRPC/REST services
+    "endPoints" : [ "http://%host%/social/rpc", "http://%host%/gadgets/api/rpc" ]                   
   }
-
-
 }}

@@ -19,7 +19,7 @@
 -->
 <feature>
   <name>osapi.ui</name>
-  <dependency>osapi.base</dependency>
+  <dependency>core.io</dependency>
   <dependency>rpc</dependency>
   <gadget>
     <script src="ui.js"></script>

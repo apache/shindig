@@ -63,6 +63,13 @@
           <groupId>de.berlios.jsunit</groupId>
           <artifactId>jsunit-maven2-plugin</artifactId>
           <version>1.3</version>
+          <dependencies>
+            <dependency>
+                <groupId>rhino</groupId>
+                <artifactId>js</artifactId>
+                <version>1.7R1</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>net.sf.alchim</groupId>
@@ -98,8 +105,8 @@
                 <source>i18n/numberformat.js</source>
                 <source>setprefs/setprefs.js</source>
                 <source>views/views.js</source>
-                <source>opensocial-data-context/datacontext.js</source>
                 <source>xmlutil/xmlutil.js</source>
+                <source>opensocial-data-context/datacontext.js</source>
                 <source>opensocial-data/data.js</source>
                 <source>opensocial-reference/opensocial.js</source>
                 <source>opensocial-reference/activity.js</source>
@@ -126,15 +133,13 @@
                 <source>opensocial-base/jsonactivity.js</source>
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
-                <source>osapi.activities/activities.js</source>
-                <source>osapi.appdata/appdata.js</source>
-                <source>osapi.base/batch.js</source>
-                <source>osapi.base/jsonrequest.js</source>
-                <source>osapi.base/makerequest.js</source>
-                <source>osapi.base/util.js</source>
-                <source>osapi.people/people.js</source>
+                <source>osapi/osapi.js</source>
+                <source>osapi/peoplehelpers.js</source>
+                <source>osapi/batch.js</source>
+                <source>osapi/jsonrequest.js</source>
+                <source>osapi/util.js</source>
                 <source>../../../../src/test/javascript/lib/testutils.js</source>
-                <source>oauthpopup/oauthpopup.js</source>
+               <source>oauthpopup/oauthpopup.js</source>
               </sources>
               <testSourceDirectory>${basedir}/src/test/javascript/features</testSourceDirectory>
               <testSuites>

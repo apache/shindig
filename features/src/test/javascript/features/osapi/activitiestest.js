@@ -29,9 +29,11 @@ ActivitiesTest.prototype.setUp = function() {
     return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
   };
 
-  gadgets.config.init({ "osapi.base" : {
-      "rpcUrl" : "http://%host%/social"}
+  gadgets.config.init({ "osapi.services" : {
+      "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
+        "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
   });
+
 };
 
 ActivitiesTest.prototype.tearDown = function() {
@@ -46,7 +48,6 @@ ActivitiesTest.prototype.testJsonBuilding = function() {
     params : {
       groupId : '@self',
       userId : ['@viewer'],
-      appId : '@app'
     }
   }];
   this.assertEquals('Json for request params should match', expectedJson, getFn.json());
@@ -76,8 +77,7 @@ ActivitiesTest.prototype.testGetViewerActivities = function() {
 
   var expectedJson = [{ method : "activities.get",
     params : { userId : ['@viewer'],
-      groupId : '@self',
-      appId : '@app'
+      groupId : '@self'
     }
   }];
   this.assertEquals("Json for request params should match", expectedJson,
@@ -117,8 +117,7 @@ ActivitiesTest.prototype.testGetEmptyActivitiesUsesDefaults = function() {
 
   var expectedJson = [{ method : "activities.get",
     params : { userId : ['@viewer'],
-      groupId : '@self',
-      appId : '@app'
+      groupId : '@self'
     }
   }];
   this.assertEquals("Json for request params should match", expectedJson,
@@ -158,8 +157,7 @@ ActivitiesTest.prototype.testGetViewerFriendsActivities = function() {
 
   var expectedJson = [{ method : "activities.get",
     params : { userId : ['@viewer'],
-      groupId : '@friends',
-      appId : '@app'}
+      groupId : '@friends'}
   }];
   this.assertEquals("Json for request params should match", expectedJson,
       getViewerFriendActivitiesFn.json());
@@ -201,7 +199,6 @@ ActivitiesTest.prototype.testCreateActivity = function() {
   var expectedJson = [{ method : "activities.create",
     params : { userId : ['@viewer'],
       groupId : '@self',
-      appId : '@app',
       activity : { title : "New Activity", body : "Blah blah blah."}}
   }];
   this.assertEquals("Json for request params should match", expectedJson,

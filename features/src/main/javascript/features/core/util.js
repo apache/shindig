@@ -53,6 +53,7 @@ gadgets.util = function() {
 
   var parameters = null;
   var features = {};
+  var services = {};
   var onLoadHandlers = [];
 
   // Maps code points to the value to replace them with.
@@ -205,6 +206,18 @@ gadgets.util = function() {
      */
     hasFeature : function (feature) {
       return typeof features[feature] !== "undefined";
+    },
+    
+    /**
+     * Returns the list of services supported by the server
+     * serving this gadget.
+     *
+     * @return {Object} List of Services that enumerate their methods
+     *
+     * @member gadgets.util
+     */
+    getServices : function () {
+      return services;
     },
 
     /**

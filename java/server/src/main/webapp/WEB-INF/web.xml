@@ -102,7 +102,12 @@
 
   <filter-mapping>
     <filter-name>authFilter</filter-name>
-    <url-pattern>/gadgets/rpc/*</url-pattern>
+    <url-pattern>/gadgets/api/rpc/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>authFilter</filter-name>
+    <url-pattern>/gadgets/api/rest/*</url-pattern>
   </filter-mapping>
 
   <listener>
@@ -199,6 +204,17 @@
     </init-param>
   </servlet>
 
+  <servlet>
+    <servlet-name>gadgetsRestapiServlet</servlet-name>
+    <servlet-class>
+      org.apache.shindig.protocol.DataServiceServlet
+    </servlet-class>
+    <init-param>
+      <param-name>handlers</param-name>
+      <param-value>org.apache.shindig.gadgets.handlers</param-value>
+    </init-param>
+  </servlet>
+
   <!-- Serve sample OAuth apis -->
   <servlet>
     <servlet-name>sampleOAuth</servlet-name>
@@ -224,7 +240,12 @@
 
   <servlet-mapping>
     <servlet-name>gadgetsJsonRpcServlet</servlet-name>
-    <url-pattern>/gadgets/rpc/*</url-pattern>
+    <url-pattern>/gadgets/api/rpc/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>gadgetsRestapiServlet</servlet-name>
+    <url-pattern>/gadgets/api/rest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

@@ -62,6 +62,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -96,6 +97,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   private final ContainerConfig containerConfig;
   private final GadgetFeatureRegistry featureRegistry;
   private final UrlGenerator urlGenerator;
+  private final RpcServiceLookup rpcServiceLookup;
   private Set<String> defaultForcedLibs = ImmutableSet.of();
 
   /**
@@ -105,11 +107,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
                                   ContainerConfig containerConfig,
                                   GadgetFeatureRegistry featureRegistry,
-                                  UrlGenerator urlGenerator) {
+                                  UrlGenerator urlGenerator,
+                                  RpcServiceLookup rpcServiceLookup) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
     this.urlGenerator = urlGenerator;
+    this.rpcServiceLookup = rpcServiceLookup;
   }
 
   @Inject
@@ -366,16 +370,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       }
     }
 
-    // Add gadgets.util support. This is calculated dynamically based on request inputs.
-    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
-    Collection<Feature> values = prefs.getFeatures().values();
-    Map<String, Map<String, String>> featureMap = Maps.newHashMapWithExpectedSize(values.size());
-    for (Feature feature : values) {
-      featureMap.put(feature.getName(), feature.getParams());
-    }
-    config.put("core.util", featureMap);
+    addHasFeatureConfig(gadget, config);
+    addOsapiSystemListMethodsConfig(gadget.getContext().getContainer(), config, 
+      gadget.getContext().getHost());
+    addSecurityTokenConfig(context, config);
+    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
+  }
 
-    // Add authentication token config
+  private void addSecurityTokenConfig(GadgetContext context, Map<String, Object> config) {
     SecurityToken authToken = context.getToken();
     if (authToken != null) {
       Map<String, String> authConfig = Maps.newHashMapWithExpectedSize(2);
@@ -389,7 +391,25 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       }
       config.put("shindig.auth", authConfig);
     }
-    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
+  }
+
+  private void addHasFeatureConfig(Gadget gadget, Map<String, Object> config) {
+    // Add gadgets.util support. This is calculated dynamically based on request inputs.
+    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
+    Collection<Feature> features = prefs.getFeatures().values();
+    Map<String, Map<String, String>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
+    for (Feature feature : features) {
+      featureMap.put(feature.getName(), feature.getParams());
+    }
+    config.put("core.util", featureMap);
+  }
+
+  private void addOsapiSystemListMethodsConfig(String container, Map<String, Object> config, 
+      String host) {
+    if (rpcServiceLookup != null) {
+      Multimap<String, String> endpoints = rpcServiceLookup.getServicesFor(container, host);
+      config.put("osapi.services", endpoints);
+    }
   }
 
   /**

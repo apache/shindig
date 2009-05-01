@@ -22,7 +22,7 @@
               description="The Social Hello World Application Displays multilingual hello messages"
               thumbnail="http://localhost:8080/"
               icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
-   <Require feature="opensocial-0.7"></Require>
+   <Require feature="osapi"></Require>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">
@@ -76,33 +76,34 @@
 
      var allPeople, viewerFriendData;
      function render(data) {
-       var viewer = data.get('viewer').getData();
-       allPeople = data.get('viewerFriends').getData().asArray() || new Array();
+       var viewer = data.viewer;
+       allPeople = data.viewerFriends;
        if (viewer) {
          allPeople.push(viewer);
        }
 
-       var viewerData = data.get('viewerData').getData() || {};
-       viewerCount = getCount(viewerData[viewer.getId()]);
+       var viewerData = data.viewerData;
+       viewerCount = getCount(viewerData[viewer.id]);
 
-       viewerFriendData = data.get('viewerFriendData').getData() || {};
-       viewerFriendData[viewer.getId()] = viewerData[viewer.getId()];
+       viewerFriendData = data.viewerFriendData;
+       viewerFriendData[viewer.id] = viewerData[viewer.id];
 
        var html = '';
        for (var i = 0; i < allPeople.length; i++) {
-         var count = getCount(viewerFriendData[allPeople[i].getId()]);
+         var count = getCount(viewerFriendData[allPeople[i].id]);
          if (count == 0) {
            //continue;
          }
 
          html += '<div class="person">';
          html += '<div class="bubble c' + count % numberOfStyles + '">' + hellos[count % hellos.length];
-         html += '<div class="name">' + allPeople[i].getDisplayName() + ' (' + count + ') ' + allPeople[i].getField(opensocial.Person.Field.GENDER).getDisplayValue();
+         html += '<div class="name">' + allPeople[i].name.formatted + ' (' + count + ') '
+          + allPeople[i].gender;
          html += '</div></div>';
 
-         if (allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL)
-             && allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL).indexOf('null') == -1) {
-           html += '<img src="' + allPeople[i].getField(opensocial.Person.Field.THUMBNAIL_URL) + '"/>';
+         if (allPeople[i].thumbnailUrl
+             && allPeople[i].thumbnailUrl.indexOf('null') == -1) {
+           html += '<img src="' + allPeople[i].thumbnailUrl + '"/>';
          } else {
            html += '<img src="/gadgets/files/samplecontainer/examples/nophoto.gif"/>';
          }
@@ -119,33 +120,17 @@
 
      function sayHelloWorld() {
        viewerCount++;
-       var req = opensocial.newDataRequest();
-       req.add(req.newUpdatePersonAppDataRequest('VIEWER', 'count', viewerCount), 'updateData');
-       req.send(initData);
+       osapi.appdata.update({data:{count:viewerCount}}).execute(initData);
      }
 
-
-     var opts = {};
-     opts[opensocial.DataRequest.PeopleRequestFields.FIRST] =  0;
-     opts[opensocial.DataRequest.PeopleRequestFields.MAX] = 40;
-     opts[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] =
-                     [opensocial.Person.Field.AGE,
-                     opensocial.Person.Field.NAME,
-                     opensocial.Person.Field.GENDER,
-                     opensocial.Person.Field.PROFILE_URL,
-                     opensocial.Person.Field.THUMBNAIL_URL,
-                     opensocial.Person.Field.STATUS];
-     opts[opensocial.DataRequest.PeopleRequestFields.SORT_ORDER] = opensocial.DataRequest.SortOrder.NAME;
-
-
-
      function initData() {
-       var req = opensocial.newDataRequest();
-       req.add(req.newFetchPersonRequest('VIEWER', opts), 'viewer');
-       req.add(req.newFetchPeopleRequest('VIEWER_FRIENDS', opts), 'viewerFriends');
-       req.add(req.newFetchPersonAppDataRequest('VIEWER', 'count'), 'viewerData');
-       req.add(req.newFetchPersonAppDataRequest('VIEWER_FRIENDS', 'count'), 'viewerFriendData');
-       req.send(render);
+       var fields = ['id','age','name','gender','profileUrl','thumbnailUrl'];
+       var batch = osapi.newBatch();
+       batch.add('viewer', osapi.people.getViewer({sortBy:'name',fields:fields}));
+       batch.add('viewerFriends', osapi.people.getViewerFriends({sortBy:'name',fields:fields}));
+       batch.add('viewerData', osapi.appdata.get({keys:['count']}));
+       batch.add('viewerFriendData', osapi.appdata.get({groupId:'@friends',keys:['count']}));
+       batch.execute(render);
      }
 
      gadgets.util.registerOnLoadHandler(initData);

@@ -44,7 +44,7 @@
             }
 
             var batch = osapi.newBatch().
-                add('self', osapi.people.getOwnerFriends()).execute(receivedData);
+                add('self', osapi.people.getOwnerFriends({fields : ["id", "displayName"]})).execute(receivedData);
           },
 
           /** Test batch with two friends requests */
@@ -55,8 +55,8 @@
               finished();
             }
             var batch = osapi.newBatch().add('john',
-                osapi.people.get({userId : ['john.doe'], groupId : '@friends'})).add('jane',
-                osapi.people.get({userId : ['jane.doe'], groupId : '@friends'})).execute(receivedData);
+                osapi.people.get({userId : ['john.doe'], groupId : '@friends', fields : ["id", "displayName"]})).add('jane',
+                osapi.people.get({userId : ['jane.doe'], groupId : '@friends', fields : ["id", "displayName"]})).execute(receivedData);
           },
 
           /** Test batch with activity and friends requests */
@@ -74,7 +74,7 @@
             }
 
             var batch = osapi.newBatch().add('activities', osapi.activities.get()).
-                add('people', osapi.people.getOwnerFriends()).execute(receivedData);
+                add('people', osapi.people.getOwnerFriends({fields : ["id", "displayName"]})).execute(receivedData);
           }
         };
       </script>

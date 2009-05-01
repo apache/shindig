@@ -18,9 +18,6 @@
 /*
 <!--
 Required config:
-
-rpcUrl: The url of the opensocial data endpoint.
-
 -->
 */
 var osapi = osapi || {};
@@ -39,14 +36,13 @@ var osapi = osapi || {};
    * @private
    */
   function init (configuration) {
-    config = configuration["osapi.base"];
+    config = configuration["osapi"];
   }
 
   var requiredConfig = {
-    rpcUrl : gadgets.config.NonEmptyStringValidator
   };
 
-  gadgets.config.register("osapi.base", requiredConfig, init);
+  gadgets.config.register("osapi", requiredConfig, init);
 
   var JSON_CONTENT_TYPE = "application/json";
   var JSON_REQUEST_CONTENT_TYPE = "JSON";
@@ -60,26 +56,23 @@ var osapi = osapi || {};
     };
   };
 
-  var url = function() {
-    if (config.rpcUrl) {
-      var baseUrl = config.rpcUrl.replace("%host%", document.location.host);
-    }
-    var url = [baseUrl, "/rpc"];
+  var url = function(endpoint) {
+    var baseUrl = endpoint.replace("%host%", document.location.host);
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url.push("?st=", encodeURIComponent(token));
+      baseUrl += "?st=";
+      baseUrl += encodeURIComponent(token);
     }
-
-    return url.join('');
+    return baseUrl;
   };
 
   var generateErrorResponse = function(result) {
-    var globalErrorCode = osapi.base.translateHttpError(result.errors[0]
+    var globalErrorCode = osapi.translateHttpError(result.errors[0]
         || result.data.error) || 'internalError';
 
     // Populate each response(request?) item with the GlobalError.
     var errorResponseMap = {};
-    osapi.base.setGlobalError(errorResponseMap, { code : globalErrorCode});
+    osapi.setGlobalError(errorResponseMap, { code : globalErrorCode});
 //    for (var i = 0; i < result.data.length; i++) {
 //      errorResponseMap[result.data[i].id] = { error : globalErrorCode };
 //    }
@@ -103,7 +96,7 @@ var osapi = osapi || {};
   var getDataFromResult = function(result) {
     var jsonArray = result.data;
     if (jsonArray[0].error) {
-      return { error : { code : osapi.base.translateHttpError("Error "+ jsonArray[0].error.code),
+      return { error : { code : osapi.translateHttpError("Error "+ jsonArray[0].error.code),
         message : jsonArray[0].error.message}};
     } else if (jsonArray[0].data.list) {
       return jsonArray[0].data.list;
@@ -134,11 +127,14 @@ var osapi = osapi || {};
     options.groupId = options.groupId || defaultGroupId;
   };
 
-  var makeJsonRequest = function(method, options) {
-    ensureUserId(options);
-    ensureGroupId(options);
+  /**
+   * JsonRequest is an array of json params.
+   */
+  var makeJsonRequest = function(method, params) {
+  ensureUserId(params);
+  ensureGroupId(params);
     var jsonParams = { method : method};
-    jsonParams['params'] = options;
+    jsonParams['params'] = params;
     return [jsonParams];
   };
 
@@ -147,7 +143,7 @@ var osapi = osapi || {};
    * @returns {Function} returns a function that takes a userCallback function
    *              where results will be returned from the call.
    */
-  var makeExecuteFn = function(jsonGenerator, responseProcessor) {
+  var makeExecuteFn = function(jsonGenerator, responseProcessor, endpoint) {
     return function(userCallback) {
       userCallback = userCallback || function() {};
       var json = jsonGenerator();
@@ -157,7 +153,7 @@ var osapi = osapi || {};
             },
             0);
       } else {
-        gadgets.io.makeNonProxiedRequest(url(),
+        gadgets.io.makeNonProxiedRequest(url(endpoint),
             makeResponseProcessor(responseProcessor, userCallback),
             requestBody(json),
             JSON_CONTENT_TYPE);
@@ -170,12 +166,13 @@ var osapi = osapi || {};
   * @param {Function} jsonGenerator the function to produce the specific request's json params
   * @param {object.<JSON>} The JSON object of parameters for the specific request
   */
-  var singleRequest = function(jsonRpcServiceMethod, options) {
-    options = options || {};
-    var jsonGenerator = function() { return makeJsonRequest(jsonRpcServiceMethod, options); };
-    var execute = makeExecuteFn(jsonGenerator, getDataFromResult);
-
+  var singleRequest = function(method, params, endpoint) {
+    params = params || {};
+    var jsonGenerator = function() { return makeJsonRequest(method, params); };
+    var execute = makeExecuteFn(jsonGenerator, getDataFromResult, endpoint);
+    var endpoint = endpoint;
     return {
+      endpoint : endpoint,
       json : jsonGenerator,
       execute : execute
     };
@@ -187,8 +184,8 @@ var osapi = osapi || {};
   * @param {Function} resultDataProcessor the function to process the results for the
   *               particular json request.
   */
-  var batchRequest = function(jsonGenerator, resultDataProcessor) {
-    var execute = makeExecuteFn(jsonGenerator, resultDataProcessor);
+  var batchRequest = function(jsonGenerator, resultDataProcessor, endpoint) {
+    var execute = makeExecuteFn(jsonGenerator, resultDataProcessor, endpoint);
 
     return {
       execute : execute

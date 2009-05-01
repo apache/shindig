@@ -95,7 +95,7 @@ public class RenderingGadgetRewriterTest {
   public void setUp() throws Exception {
     featureRegistry = new FakeGadgetFeatureRegistry();
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, urlGenerator);
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, urlGenerator, null);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
