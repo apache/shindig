@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.jpa.PersonDb;
 import org.apache.shindig.social.opensocial.jpa.api.FilterCapability;
@@ -31,7 +31,6 @@ import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.PersonService;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import java.util.List;
@@ -40,6 +39,7 @@ import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Implements the PersonService from the SPI binding to the JPA model and providing queries to
@@ -69,7 +69,7 @@ public class PersonServiceDb implements PersonService {
    */
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds,
        GroupId groupId, CollectionOptions collectionOptions, Set<String> fields,
-       SecurityToken token) throws SocialSpiException {
+       SecurityToken token) throws ProtocolException {
     // for each user id get the filtered userid using the token and then, get the users identified
     // by the group id, the final set is filtered
     // using the collectionOptions and return the fields requested.
@@ -114,7 +114,7 @@ public class PersonServiceDb implements PersonService {
       lastPos = JPQLUtils.addInClause(sb, "p", "id", lastPos, paramList.size());
       break;
     default:
-      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Group ID not recognized");
 
     }
 
@@ -122,7 +122,7 @@ public class PersonServiceDb implements PersonService {
       plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
       totalResults = Long.valueOf(1);
       if (0 == plist.size()) {
-        throw new SocialSpiException(ResponseError.BAD_REQUEST, "Person not found");
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
       }
     } else {
       int filterPos = addFilterClause(sb, PersonDb.getFilterCapability(), collectionOptions,
@@ -155,7 +155,7 @@ public class PersonServiceDb implements PersonService {
    * {@inheritDoc}
    */
   public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
-      throws SocialSpiException {
+      throws ProtocolException {
     String uid = id.getUserId(token);
     Query q = entiyManager.createNamedQuery(PersonDb.FINDBY_PERSONID);
     q.setParameter(PersonDb.PARAM_PERSONID, uid);

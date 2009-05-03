@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
-import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.jpa.ActivityDb;
 import org.apache.shindig.social.opensocial.jpa.MediaItemDb;
@@ -31,7 +31,6 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * The Class ActivityServiceDb.
@@ -65,7 +65,7 @@ public class ActivityServiceDb implements ActivityService {
    * @see org.apache.shindig.social.opensocial.spi.ActivityService#createActivity(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.social.opensocial.model.Activity, org.apache.shindig.auth.SecurityToken)
    */
   public Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, Activity activity, SecurityToken token) throws SocialSpiException {
+      Set<String> fields, Activity activity, SecurityToken token) throws ProtocolException {
     String uid = SPIUtils.getUserList(userId, token);
 
     try {
@@ -111,7 +111,7 @@ public class ActivityServiceDb implements ActivityService {
       entityManager.getTransaction().commit();
 
     } catch (Exception e) {
-      throw new SocialSpiException(ResponseError.INTERNAL_ERROR, "Failed to create activity", e);
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create activity", e);
     }
 
     return null;
@@ -121,7 +121,7 @@ public class ActivityServiceDb implements ActivityService {
    * @see org.apache.shindig.social.opensocial.spi.ActivityService#deleteActivities(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, org.apache.shindig.auth.SecurityToken)
    */
   public Future<Void> deleteActivities(UserId userId, GroupId groupId, String appId,
-      Set<String> activityIds, SecurityToken token) throws SocialSpiException {
+      Set<String> activityIds, SecurityToken token) throws ProtocolException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -131,7 +131,7 @@ public class ActivityServiceDb implements ActivityService {
    */
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields,
-      CollectionOptions options, SecurityToken token) throws SocialSpiException {
+      CollectionOptions options, SecurityToken token) throws ProtocolException {
 
     // TODO currently the implementation of this method ignores the fields variable. Is this correct?
 
@@ -173,7 +173,7 @@ public class ActivityServiceDb implements ActivityService {
       lastPos = JPQLUtils.addInClause(sb, "a", "userId", lastPos, paramList.size());
       break;
     default:
-      throw new SocialSpiException(ResponseError.BAD_REQUEST, "Group ID not recognized");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Group ID not recognized");
 
     }
     
@@ -206,7 +206,7 @@ public class ActivityServiceDb implements ActivityService {
   public Future<RestfulCollection<Activity>> getActivities(UserId userId,
       GroupId groupId, String appId, Set<String> fields,
       CollectionOptions options, Set<String> activityIds, SecurityToken token)
-      throws SocialSpiException {
+      throws ProtocolException {
     return ImmediateFuture.newInstance(new RestfulCollection<Activity>(getActivities(userId, activityIds, token)));
   }
 
@@ -214,12 +214,12 @@ public class ActivityServiceDb implements ActivityService {
    * @see org.apache.shindig.social.opensocial.spi.ActivityService#getActivity(org.apache.shindig.social.opensocial.spi.UserId, org.apache.shindig.social.opensocial.spi.GroupId, java.lang.String, java.util.Set, java.lang.String, org.apache.shindig.auth.SecurityToken)
    */
   public Future<Activity> getActivity(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, String activityId, SecurityToken token) throws SocialSpiException {
+      Set<String> fields, String activityId, SecurityToken token) throws ProtocolException {
     Activity activity = getActivities(userId, activityId,  token);
     if ( activity != null  ) {
       return ImmediateFuture.newInstance(activity);
     }
-    throw new SocialSpiException(ResponseError.BAD_REQUEST,"Cant find activity");
+    throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,"Cant find activity");
   }
 
 

@@ -24,10 +24,10 @@ import com.google.inject.Inject;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DataCollection;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.social.opensocial.jpa.ApplicationDataMapDb;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class AppDataServiceDb implements AppDataService {
    * {@inheritDoc}
    */
   public Future<Void> deletePersonData(UserId userId, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token) throws SocialSpiException {
+      Set<String> fields, SecurityToken token) throws ProtocolException {
 
     List<ApplicationDataMapDb> dataMaps = getDataMap(userId, groupId, appId, token);
     for (ApplicationDataMapDb adm : dataMaps) {
@@ -131,7 +131,7 @@ public class AppDataServiceDb implements AppDataService {
    * {@inheritDoc}
    */
   public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId, String appId,
-      Set<String> fields, SecurityToken token) throws SocialSpiException {
+      Set<String> fields, SecurityToken token) throws ProtocolException {
     List<String> paramList = SPIUtils.getUserList(userIds, token);
     int lastParam = 1;
     StringBuilder sb = new StringBuilder();
@@ -201,7 +201,7 @@ public class AppDataServiceDb implements AppDataService {
    */
   public Future<Void> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token)
-      throws SocialSpiException {
+      throws ProtocolException {
     List<ApplicationDataMapDb> dataMaps = getDataMap(userId, groupId, appId, token);
     for (ApplicationDataMapDb adm : dataMaps) {
       for (String f : fields) {

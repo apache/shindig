@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.social.opensocial.jpa.spi;
 
-import org.apache.shindig.protocol.ResponseError;
+import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
-import org.apache.shindig.social.opensocial.spi.SocialSpiException;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -81,7 +81,6 @@ public class JPQLUtils {
    * @param parametersValues
    * @return
    */
-  @SuppressWarnings("unchecked")
   public static Long getTotalResults(EntityManager entityManager, String query,
       List<?> parametersValues) {
     int fromIndex = 0;
@@ -92,7 +91,7 @@ public class JPQLUtils {
       fromIndex = queryInUpperCase.indexOf(" FROM ");
       if (fromIndex == -1) {
         // Couldn't find the FROM keyword in the query
-        throw new SocialSpiException(ResponseError.INTERNAL_ERROR, "Invalid query [" + query + "]");
+        throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid query [" + query + "]");
       }
     }
     query = "select count(*) " + query.substring(fromIndex, query.length());
