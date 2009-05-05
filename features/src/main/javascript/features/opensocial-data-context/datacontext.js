@@ -163,7 +163,13 @@ opensocial.data.DataContext = function() {
      * TODO: Add to the spec API?
      */
     getData : function() {
-      return dataSets;
+      var data = {};
+      for (var key in dataSets) {
+        if (dataSets.hasOwnProperty(key)) {
+          data[key] = dataSets[key];
+        }
+      }
+      return data;
     },
     
     /**
