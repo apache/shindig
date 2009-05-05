@@ -341,16 +341,48 @@ opensocial.data.createSharedRequestCallback_ = function() {
  * @param {Object<string, Function(string, ResponseItem)>} callbacks A map of
  * any custom callbacks by key.
  */
-opensocial.data.onAPIResponse = function(data, keys, callbacks) {
+opensocial.data.onAPIResponse = function(responseItem, keys, callbacks) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    var item = data.get(key);
-    if (callbacks[key]) {
-      callbacks[key](key, item);
-    } else {
-      opensocial.data.DataContext.putDataSet(key, item);
+    var item = responseItem.get(key);
+    if (!item.hadError()) {
+      var data = opensocial.data.extractJson_(item, key);
+      if (callbacks[key]) {
+        callbacks[key](key, data);
+      } else {
+        opensocial.data.DataContext.putDataSet(key, data);
+      }
     }
+    // TODO: What should we do if there *is* an error?
   }
+};
+
+/**
+ * Extract the JSON payload from the ResponseItem. This includes
+ * iterating over an array of API objects and extracting their JSON into a
+ * simple array structure.
+ */
+opensocial.data.extractJson_ = function(responseItem, key) {
+  var data = responseItem.getData();
+  if (data.array_) {
+    var out = [];
+    for (var i = 0; i < data.array_.length; i++) {
+      out.push(data.array_[i].fields_);
+    }
+    data = out;
+    
+    // For os:PeopleRequests that request @groupId="self", crack the array
+    var request = opensocial.data.requests_[key];
+    if (request.tagName == "os:PeopleRequest") {
+      var groupId = request.getAttribute("groupId");
+      if ((!groupId || groupId == "@self") && data.length == 1) {
+        data = data[0]
+      }
+    }
+  } else {
+    data = data.fields_ || data;
+  }
+  return data;
 };
 
 

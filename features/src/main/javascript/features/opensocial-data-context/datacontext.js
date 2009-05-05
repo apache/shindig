@@ -39,40 +39,16 @@ opensocial.data.DataContext = function() {
    * Puts a data set into the global DataContext object. Fires listeners
    * if they are satisfied by the associated key being inserted.
    *
-   * Note that if this is passed a ResponseItem object, it will crack it open
-   * and extract the JSON payload of the wrapped API Object. This includes
-   * iterating over an array of API objects and extracting their JSON into a
-   * simple array structure.
-   *
    * @param {string} key The key to associate with this object.
    * @param {ResponseItem|Object} obj The data object.
    * @param {boolean} opt_fireListeners Default true.
    */
   var putDataSet = function(key, obj, opt_fireListeners) {
-    var data = obj;
-    if (typeof data === 'undefined' || data === null) {
+    if (typeof obj === 'undefined' || obj === null) {
       return;
     }
   
-    // NOTE: This is ugly, but required since we need to get access
-    // to the JSON/Array payload of API responses.
-    // This will crack the actual API objects and extract their JSON payloads.
-    // TODO: this code block is not described by the spec, and should be removed.
-    // Developers using ResponseItems should call getData() themselves.
-    if (data.getData) {
-     data = data.getData();
-     if (data.array_) {
-       var out = [];
-       for (var i = 0; i < data.array_.length; i++) {
-         out.push(data.array_[i].fields_);
-       }
-       data = out;
-     } else {
-       data = data.fields_ || data;
-     }
-    }
-  
-    dataSets[key] = data;
+    dataSets[key] = obj;
     if (!(opt_fireListeners === false)) {
       fireCallbacks(key);
     }
@@ -182,20 +158,12 @@ opensocial.data.DataContext = function() {
   return {
     
     /**
-     * Returns a map of existing data. This is used externally by both the
-     * opensocial-data and opensocial-templates feature, hence is
-     * not hidden, despite not being part of the spec.
+     * Returns a map of existing data.
      * @return {Object} A map of current data sets.
      * TODO: Add to the spec API?
      */
     getData : function() {
-      var data = {};
-      for (var key in dataSets) {
-        if (dataSets.hasOwnProperty(key)) {
-          data[key] = dataSets[key];
-        }
-      }
-      return data;
+      return dataSets;
     },
     
     /**
@@ -263,4 +231,3 @@ opensocial.data.DataContext = function() {
 opensocial.data.getDataContext = function() {
   return opensocial.data.DataContext;
 };
-
