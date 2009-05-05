@@ -104,6 +104,13 @@
  
   And then implement your own service and oauth lookup classes.
 
+  Running from an svn checkout
+  ---------
+
+  If you want to run PHP Shindig directly from an svn checkout, please refer to the
+  docs/README.svn file to learn about the configuration differences between the released
+  and svn version. 
+
   Licensing
   ---------
 
