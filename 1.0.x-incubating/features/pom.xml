@@ -46,6 +46,13 @@
         <targetPath>features</targetPath>
         <directory>${basedir}/src/main/javascript/features</directory>
       </resource>
+      <resource>
+        <targetPath>META-INF</targetPath>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
     </resources>
     <testResources>
       <testResource>
