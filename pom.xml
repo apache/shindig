@@ -1349,17 +1349,7 @@
       <dependency>
         <groupId>net.sourceforge.htmlunit</groupId>
         <artifactId>htmlunit</artifactId>
-        <version>2.1</version>
-        <!--
-          htmlunit depends on an out of date rev of commons-io, which ends
-          up causing classpath problems in generated war files.
-        -->
-        <exclusions>
-          <exclusion>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-          </exclusion>
-        </exclusions>
+        <version>2.5</version>
       </dependency>
       <dependency>
         <groupId>log4j</groupId>
