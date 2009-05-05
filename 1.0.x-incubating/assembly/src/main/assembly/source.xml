@@ -48,6 +48,8 @@
         <exclude>**/.wtpmodules/**</exclude>
         <!-- maven -->
         <exclude>**/target/**</exclude>
+        <exclude>**/pom.xml.releaseBackup</exclude>
+        <exclude>**/release.properties</exclude>
         <!-- misc -->
         <exclude>*.patch</exclude>
         <exclude>*.diff</exclude>
