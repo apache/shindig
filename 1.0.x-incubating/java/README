@@ -29,9 +29,9 @@
   Servlet container:
     Apache Tomcat or other compatible Java Servlet containers.
   Memory:
-    No minimum requirement.
+    128MB minimum requirement.
   Disk:
-    No minimum requirement. 
+    32MB minimum requirement. 
   Operating System:
     No minimum requirement. On Windows, Windows NT and above or Cygwin is 
     required for the startup scripts. Tested on Windows XP, Fedora Core 
