@@ -144,8 +144,13 @@
       <artifactId>ehcache</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.odysseus.juel</groupId>
-      <artifactId>juel</artifactId>
+      <groupId>juel</groupId>
+      <artifactId>juel-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>juel</groupId>
+      <artifactId>juel-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>net.sf.ezmorph</groupId>
