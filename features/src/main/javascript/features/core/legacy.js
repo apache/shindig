@@ -114,6 +114,10 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
             entry.Date = entry.pubDate;
           }
         }
+        for (var ix = 0; ix < resp.data.Entry.length; ++ix) {
+          var entry = resp.data.Entry[ix];
+          entry.Date = (entry.Date / 1000);  // response in sec, not ms
+        }
         // for Gadgets back-compatibility, return the feed obj directly
         callback(resp.data);
       }, params);
