@@ -158,6 +158,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>juel</groupId>
+      <artifactId>juel-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
       <version>1.1-SNAPSHOT</version>
