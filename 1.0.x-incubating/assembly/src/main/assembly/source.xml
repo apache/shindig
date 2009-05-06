@@ -27,7 +27,7 @@
   <fileSets>
     <fileSet>
       <outputDirectory>shindig-${pom.version}-source</outputDirectory>
-      <directory>../</directory>
+      <directory>${project.basedir}/../</directory>
       <includes>
         <include>**</include>
       </includes>
