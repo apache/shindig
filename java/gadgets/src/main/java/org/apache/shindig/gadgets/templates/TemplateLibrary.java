@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 /**
  * An Object representing a Library of Template-based custom OSML tags.
- * TODO: support embedded style and script per tag 
  */
 public class TemplateLibrary {
 
@@ -45,19 +44,35 @@ public class TemplateLibrary {
   public static final String TEMPLATEDEF_TAG = "TemplateDef";
   
   private final Uri libraryUri;
+  private final boolean safe;
   private TagRegistry registry;
   private String nsPrefix;
   private String nsUri;
   private String style;
   private String javaScript;
-  
+
+  /**
+   * @param uri URI of the template library
+   * @param root Element representing the Templates tag of this library
+   */
   public TemplateLibrary(Uri uri, Element root) throws GadgetException, TemplateParserException {
+    this(uri, root, false);
+  }
+
+  /**
+   * @param uri URI of the template library
+   * @param root Element representing the Templates tag of this library
+   * @param safe Is this library exempt from being sanitized?
+   */
+  public TemplateLibrary(Uri uri, Element root, boolean safe) 
+      throws GadgetException, TemplateParserException {
     libraryUri = uri;
     registry = new DefaultTagRegistry(parseLibraryDocument(root));
+    this.safe = safe;
   }
-  
+
   /**
-   * @return a registry of tags.
+   * @return a registry of tags in this library.
    */
   public TagRegistry getTagRegistry() {
     return registry;
@@ -79,6 +94,14 @@ public class TemplateLibrary {
   }
   
   /**
+   * @return this library is safe and its content doesn't need to be sanitized. 
+   */
+  public boolean isSafe() {
+    return safe;
+  }
+  
+  /**
+   * TODO: Minify javascript (here or elsewhere)
    * @return the concatenated contents of JavaScript elements for the library.
    */
   public String getJavaScript() {
@@ -124,6 +147,16 @@ public class TemplateLibrary {
     TagHandler handler = createHandler(tagAttribute.getNodeValue(), templateElement);
     if (handler != null) {
       handlers.add(handler);
+    }
+    
+    Element scriptElement = (Element) DomUtil.getFirstNamedChildNode(defElement, JAVASCRIPT_TAG);
+    if (scriptElement != null) {
+      processJavaScript(scriptElement);
+    }
+    
+    Element styleElement = (Element) DomUtil.getFirstNamedChildNode(defElement, STYLE_TAG);
+    if (styleElement != null) {
+      processStyle(styleElement);
     }
   }
 

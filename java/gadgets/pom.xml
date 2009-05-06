@@ -73,12 +73,18 @@
           <include>**/*.*</include>
         </includes>
       </resource>
+    
       <resource>
         <targetPath>config</targetPath>
         <directory>${basedir}/../../config</directory>
         <includes>
           <include>oauth.json</include>
         </includes>
+      </resource>
+
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
       </resource>
     </resources>
   </build>

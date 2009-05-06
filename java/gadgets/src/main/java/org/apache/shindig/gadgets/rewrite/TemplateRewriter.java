@@ -17,14 +17,19 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
+import org.apache.shindig.common.xml.XmlException;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.templates.CompositeTagRegistry;
@@ -41,6 +46,7 @@ import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +89,8 @@ public class TemplateRewriter implements GadgetRewriter {
   private final Expressions expressions;
   private final TagRegistry baseTagRegistry;
   private final TemplateLibraryFactory libraryFactory;
+  
+  private final TemplateLibrary osmlLibrary;
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
@@ -93,8 +101,24 @@ public class TemplateRewriter implements GadgetRewriter {
     this.expressions = expressions;
     this.baseTagRegistry = baseTagRegistry;
     this.libraryFactory = libraryFactory;
+    this.osmlLibrary = loadOsmlLibrary();
   }
 
+  private TemplateLibrary loadOsmlLibrary() {
+    try {
+      String content = ResourceLoader.getContent(
+          "org/apache/shindig/gadgets/templates/OSML_library.xml");              
+      return new TemplateLibrary(Uri.parse("#OSML"), XmlUtil.parse(content), true);
+    } catch (IOException ioe) {
+      logger.log(Level.WARNING, null, ioe);
+    } catch (XmlException xe) {
+      logger.log(Level.WARNING, null, xe);
+    } catch (GadgetException tpe) {
+      logger.log(Level.WARNING, null, tpe);
+    }
+    return null;
+  }
+  
   public void rewrite(Gadget gadget, MutableContent content) {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
@@ -120,23 +144,28 @@ public class TemplateRewriter implements GadgetRewriter {
   }
 
   private void rewriteImpl(Gadget gadget, Feature f, MutableContent content)
-      throws GadgetException {
-    List<Element> templates = ImmutableList.copyOf(
-      Iterables.filter(
-          DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS),
-          new Predicate<Element>() {
-            public boolean apply(Element element) {
-              return "text/os-template".equals(element.getAttribute("type"));
-            }
-          }));
-    
+      throws GadgetException {   
     List<TagRegistry> registries = Lists.newArrayList();
-    
-    registries.add(baseTagRegistry);
 
     Element head = (Element) DomUtil.getFirstNamedChildNode(
         content.getDocument().getDocumentElement(), "head");
+    
+    registries.add(baseTagRegistry);
+    
+    if (osmlLibrary != null) {
+      registries.add(osmlLibrary.getTagRegistry());
+      injectTemplateLibrary(osmlLibrary, head);
+    }
 
+    List<Element> templates = ImmutableList.copyOf(
+        Iterables.filter(
+            DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS),
+            new Predicate<Element>() {
+              public boolean apply(Element element) {
+                return "text/os-template".equals(element.getAttribute("type"));
+              }
+            }));
+    
     loadTemplateLibraries(gadget.getContext(), f, registries, head);
     registries.add(registerCustomTags(templates));
     
@@ -157,29 +186,41 @@ public class TemplateRewriter implements GadgetRewriter {
         TemplateLibrary library = libraryFactory.loadTemplateLibrary(context, uri);
         String script = library.getJavaScript();
         
-        // Append any needed Javascript
-        if (!StringUtils.isEmpty(script)) {
-          Element scriptElement = head.getOwnerDocument().createElement("script");
-          scriptElement.setAttribute("type", "text/javascript");
-          scriptElement.setTextContent(script);
-          head.appendChild(scriptElement);
-        }
+        // TODO: Only inject if used?
+        injectTemplateLibrary(library, head);
         
-        // Append any needed CSS
-        String style = library.getStyle();
-        if (!StringUtils.isEmpty(style)) {
-          Element styleElement = head.getOwnerDocument().createElement("style");
-          styleElement.setAttribute("type", "text/css");
-          styleElement.setTextContent(style);
-          head.appendChild(styleElement);
-        }
-
         registries.add(library.getTagRegistry());
       } catch (TemplateParserException te) {
         // Suppress exceptions due to malformed template libraries
         logger.log(Level.WARNING, null, te);
       }
     }
+  }
+  
+  private void injectTemplateLibrary(TemplateLibrary library, Element head) {  
+    // Append any needed Javascript
+    String script = library.getJavaScript();
+    if (!StringUtils.isEmpty(script)) {
+      Element scriptElement = head.getOwnerDocument().createElement("script");
+      scriptElement.setAttribute("type", "text/javascript");
+      scriptElement.setTextContent(script);
+      if (library.isSafe()) {
+        SanitizingGadgetRewriter.bypassSanitization(scriptElement, false);
+      }
+      head.appendChild(scriptElement);
+    }
+    
+    // Append any needed CSS
+    String style = library.getStyle();
+    if (!StringUtils.isEmpty(style)) {
+      Element styleElement = head.getOwnerDocument().createElement("style");
+      styleElement.setAttribute("type", "text/css");
+      styleElement.setTextContent(style);
+      if (library.isSafe()) {
+        SanitizingGadgetRewriter.bypassSanitization(styleElement, false);
+      }
+      head.appendChild(styleElement);
+    } 
   }
   
   /**

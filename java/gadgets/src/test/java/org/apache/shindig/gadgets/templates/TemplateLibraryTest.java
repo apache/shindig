@@ -45,6 +45,8 @@ public class TemplateLibraryTest {
     "  <Template tag='my:Flat'>Flat tag</Template>" +
     "  <TemplateDef tag='my:Def'>" +
     "    <Template>Def tag</Template>" +
+    "    <JavaScript>script3</JavaScript>" +
+    "    <Style>style3</Style>" +
     "  </TemplateDef>" +
     "</Templates>";
   
@@ -77,11 +79,11 @@ public class TemplateLibraryTest {
 
   @Test
   public void testScript() {
-    assertEquals("script\nscript2", lib.getJavaScript());
+    assertEquals("script\nscript2\nscript3", lib.getJavaScript());
   }
   
   @Test
   public void testStyle() {
-    assertEquals("style\nstyle2", lib.getStyle());
+    assertEquals("style\nstyle2\nstyle3", lib.getStyle());
   }
 }

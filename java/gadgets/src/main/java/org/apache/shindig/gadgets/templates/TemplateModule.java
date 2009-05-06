@@ -42,10 +42,10 @@ public class TemplateModule extends AbstractModule {
     private final Set<TagHandler> handlers;
     
     @Inject
-    public TagHandlersProvider(HtmlTagHandler htmlHandler, NameTagHandler nameHandler,
+    public TagHandlersProvider(HtmlTagHandler htmlHandler, 
         IfTagHandler ifHandler, RepeatTagHandler repeatHandler, 
         RenderTagHandler renderHandler, FlashTagHandler flashHandler) {
-      handlers = ImmutableSet.of((TagHandler) htmlHandler, nameHandler, ifHandler,
+      handlers = ImmutableSet.of((TagHandler) htmlHandler, ifHandler,
           repeatHandler, renderHandler, flashHandler);
     }
     
