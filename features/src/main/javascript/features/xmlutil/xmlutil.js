@@ -69,21 +69,52 @@ opensocial.xmlutil.NSMAP = {
  * the supplied code. An empty string is returned if no injection is needed.
  *
  * @param {string} xml XML-like source code.
+ * @param {Element} opt_container Optional container node to look for namespace
+ * declarations.
  * @return {string} A string of xmlns delcarations required for this XML.
  */
-opensocial.xmlutil.getRequiredNamespaces = function(xml) {
-  var codeToInject = [];
-  for (var ns in opensocial.xmlutil.NSMAP) {
-    if (xml.indexOf("<" + ns + ":") >= 0 &&
-        xml.indexOf("xmlns:" + ns + ":") < 0) {
-      codeToInject.push(" xmlns:");
-      codeToInject.push(ns);
-      codeToInject.push("=\"");
-      codeToInject.push(opensocial.xmlutil.NSMAP[ns]);
-      codeToInject.push("\"");
+opensocial.xmlutil.getRequiredNamespaces = function(xml, opt_container) {
+  var namespaces = opt_container ? 
+      opensocial.xmlutil.getNamespaceDeclarations_(opt_container) : {};
+  for (var prefix in opensocial.xmlutil.NSMAP) {
+    if (opensocial.xmlutil.NSMAP.hasOwnProperty(prefix) 
+        && !namespaces.hasOwnProperty(prefix) 
+        && xml.indexOf("<" + prefix + ":") >= 0 
+        && xml.indexOf("xmlns:" + prefix + ":") < 0) {
+      namespaces[prefix] = opensocial.xmlutil.NSMAP[prefix];
     }
   }
-  return codeToInject.join("");
+  return opensocial.xmlutil.serializeNamespaces_(namespaces);  
+};
+
+
+opensocial.xmlutil.serializeNamespaces_ = function(namespaces) {
+  var buffer = [];
+  for (var prefix in namespaces) {
+    if (namespaces.hasOwnProperty(prefix)) {
+      buffer.push(" xmlns:", prefix, "=\"", namespaces[prefix], "\"");
+    }
+  }
+  return buffer.join("");
+};
+
+
+/**
+ * Returns a map of XML namespaces declared on an DOM Element.
+ * @param {Element} el The Element to inspect
+ * @return {object(string, string)} A Map of keyed by prefix of declared 
+ * namespaces. 
+ */
+opensocial.xmlutil.getNamespaceDeclarations_ = function(el) {
+  var namespaces = {};
+  for (var i = 0; i < el.attributes.length; i++) {
+    var name = el.attributes[i].nodeName;
+    if (name.substring(0, 6) != 'xmlns:') {
+      continue;
+    }
+    namespaces[name.substring(6, name.length)] = el.getAttribute(name); 
+  }
+  return namespaces;
 };
 
 
@@ -99,10 +130,12 @@ opensocial.xmlutil.ENTITIES = "<!ENTITY nbsp \"&#160;\">";
  * Prepares an XML-like string to be parsed by browser parser. Injects a DOCTYPE
  * with entities and a top-level <root> element to encapsulate the code.
  * @param {string} xml XML string to be prepared.
+ * @param {Element} opt_container Optional container Element with namespace
+ * declarations.
  * @return {string} XML string prepared for client-side parsing.
  */
-opensocial.xmlutil.prepareXML = function(xml) {
-  var namespaces = opensocial.xmlutil.getRequiredNamespaces(xml);
+opensocial.xmlutil.prepareXML = function(xml, opt_container) {
+  var namespaces = opensocial.xmlutil.getRequiredNamespaces(xml, opt_container);
   return "<!DOCTYPE root [" + opensocial.xmlutil.ENTITIES +
       "]><root xml:space=\"preserve\"" +
       namespaces + ">" + xml + "</root>";

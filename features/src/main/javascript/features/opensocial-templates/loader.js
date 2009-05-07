@@ -91,8 +91,7 @@ os.Loader.requestUrlXHR_ = function(url, callback) {
   req.open("GET", url, true);
   req.onreadystatechange = function() {
     if (req.readyState == 4) {
-      os.Loader.loadContent(req.responseText);
-      os.Loader.loadedUrls_[url] = true;
+      os.Loader.loadContent(req.responseText, url);
       callback();
     }
   };
@@ -116,8 +115,7 @@ os.Loader.requestUrlGadgets_ = function(url, callback) {
   params[gadgets.io.RequestParameters.CONTENT_TYPE] =
       gadgets.io.ContentType.TEXT;
   gadgets.io.makeRequest(url, function(obj) {
-    os.Loader.loadContent(obj.data);
-    os.Loader.loadedUrls_[url] = true;
+    os.Loader.loadContent(obj.data, url);
     callback();
   }, params);
 };
@@ -142,10 +140,11 @@ os.Loader.loadUrls = function(urls, callback) {
 /**
  * Processes the XML markup of a Template Library.
  */
-os.Loader.loadContent = function(xmlString) {
+os.Loader.loadContent = function(xmlString, url) {
   var doc = opensocial.xmlutil.parseXML(xmlString);
   var templatesNode = doc.firstChild;
   os.Loader.processTemplatesNode(templatesNode);
+  os.Loader.loadedUrls_[url] = true;
 };
 
 /**

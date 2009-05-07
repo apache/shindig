@@ -376,7 +376,7 @@ opensocial.data.extractJson_ = function(responseItem, key) {
     if (request.tagName == "os:PeopleRequest") {
       var groupId = request.getAttribute("groupId");
       if ((!groupId || groupId == "@self") && data.length == 1) {
-        data = data[0]
+        data = data[0];
       }
     }
   } else {

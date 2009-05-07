@@ -114,7 +114,7 @@ os.compileTemplate = function(node, opt_id) {
   opt_id = opt_id || node.name;
   var src = node.value || node.innerHTML;
   src = os.trim(src);
-  var template = os.compileTemplateString(src, opt_id);
+  var template = os.compileTemplateString(src, opt_id, node);
   // Decorate the node with the template's ID, so we consistently render it
   // into the same DIV, and so that it doesn't get treated as anonymous anymore.
   if (! node.name) {
@@ -127,10 +127,12 @@ os.compileTemplate = function(node, opt_id) {
  * Compile a template without requiring a DOM node.
  * @param {string} src XML data to be compiled.
  * @param {string} opt_id An optional ID for the new template.
- * @return {os.Template} A compiled Template object.
+ * @param {Element} opt_container An optional container DOM Element 
+ * to look for namespaces
+ * @return {opensocial.template.Template} A compiled Template object.
  */
-os.compileTemplateString = function(src, opt_id) {
-  src = opensocial.xmlutil.prepareXML(src);
+os.compileTemplateString = function(src, opt_id, opt_container) {
+  src = opensocial.xmlutil.prepareXML(src, opt_container);
   var doc = opensocial.xmlutil.parseXML(src);
   return os.compileXMLDoc(doc, opt_id);
 };
@@ -171,6 +173,13 @@ os.createTemplateCustomTag = function(template) {
   };
 };
 
+/**
+ * Creates a map of the named children of a node. Lower-cased element names 
+ * (including transformed custom tags) are used as keys. 
+ * Where multiple elements share a name, the map value will be an array.
+ * @param {Element} node The node whose children are to be mapped
+ * @return {object} A Map of Element names to Elements.
+ */
 os.computeChildMap_ = function(node) {
   var map = {};
   for (var i = 0; i < node.childNodes.length; i++) {

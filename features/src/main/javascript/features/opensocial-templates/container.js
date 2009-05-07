@@ -20,17 +20,17 @@
  * @fileoverview Standard methods invoked by containers to use the template API.
  *
  * Sample usage:
- *  <script type="text/os-template" tag="os:Button">
+ *  &lt;script type="text/os-template" tag="os:Button">
  *    <button onclick="alert('Clicked'); return false;">
  *      <os:renderAll/>
  *    </button>
- *  </script>
+ *  &lt;/script]
  *
- *  <script type="text/os-template">
+ *  &lt;script type="text/os-template"]
  *    <os:Button>
  *      <div>Click me</div>
  *    </os:Button>
- *  </script>
+ *  &lt;/script]
  *
  * os.Container.registerDocumentTemplates();
  * os.Container.renderInlineTemplates();
@@ -59,21 +59,14 @@ os.Container.domLoadCallbacks_ = null;
 os.Container.domLoaded_ = false;
 
 /**
+ * @type {number} The number of libraries needed to load.
+ */
+os.Container.requiredLibraries_ = 0;
+
+/**
  * @type {boolean} Determines whether all templates are automatically processed.
  */
 os.Container.autoProcess_ = true;
-
-
-/**
- * In gadgets, honor the "disableAutoProcessing" feature param.
- */
-if (window['gadgets']) {
-  var params = gadgets.util.getFeatureParameters("opensocial-templates");
-  if (params && params.disableAutoProcessing && 
-      params.disableAutoProcessing.toLowerCase != "false") {
-    os.Container.autoProcess_ = false;
-  }
-};
 
 /**
  * @type {boolean} Has the document been processed already?
@@ -129,9 +122,9 @@ os.Container.onDomLoad_ = function() {
   if (os.Container.domLoaded_) {
     return;
   }
-  while (os.Container.domLoadCallbacks_.length) {
-  try {
-      os.Container.domLoadCallbacks_.pop()();
+  for (var i = 0; i < os.Container.domLoadCallbacks_.length; i ++) {
+    try {
+      os.Container.domLoadCallbacks_[i]();
     } catch (e) {
       os.log(e);
     }
@@ -189,9 +182,9 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
   for (var i = 0; i < nodes.length; ++i) {
     var node = nodes[i];
     if (os.Container.isTemplateType_(node.type)) {
-      var name = node.getAttribute('name') || node.getAttribute('tag');
+      var name = node.getAttribute('tag') || node.getAttribute('name');
       if (!name || name.length < 0) {
-        var template = os.compileTemplate(node);
+        var template = os.compileTemplate(node, name);
         if (template) {
           os.Container.inlineTemplates_.push(
               {'template': template, 'node': node});
@@ -203,18 +196,16 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
   }
 };
 
-os.Container.defaultContext = null;
-
+/**
+ * @return {JsEvalContext} the default rendering context to use - this will
+ * contain all available data. 
+ */
 os.Container.getDefaultContext = function() {
-  if (!os.Container.defaultContext) {
-    if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
-        (opensocial.data.DataContext)) {
-      os.Container.defaultContext = os.createContext(opensocial.data.DataContext.getData());
-    } else {
-      os.Container.defaultContext = os.createContext({});
-    }
+  if ((window['gadgets'] && gadgets.util.hasFeature('opensocial-data')) ||
+      (opensocial.data.getDataContext)) {
+    return os.createContext(opensocial.data.getDataContext().getData());
   }
-  return os.Container.defaultContext;
+  return os.createContext({});
 };
 
 /**
@@ -350,19 +341,60 @@ os.Container.processInlineTemplates = function(opt_doc) {
 };
 
 /**
+ * Process the gadget configuration when it is available.
+ */
+os.Container.processGadget = function() {
+  if (!window['gadgets']) {
+    return;
+  }
+  
+  // Honor the "disableAutoProcessing" feature param.
+  var params = gadgets.util.getFeatureParameters("opensocial-templates");
+  if (!params) {
+    return;
+  }
+  if (params.disableAutoProcessing && 
+      params.disableAutoProcessing.toLowerCase != "false") {
+    os.Container.autoProcess_ = false;
+  }
+  
+  // Honor the "requireLibrary" feature param.
+  // TODO: Support multiple params when Shindig does.
+  if (params.requireLibrary) {
+    os.Container.addRequiredLibrary(params.requireLibrary);
+  }  
+};
+
+//Process the gadget when the page loads.
+os.Container.executeOnDomLoad(os.Container.processGadget);
+
+/**
+ * A flag to determine if auto processing is waiting for libraries to load.
+ * @type {boolean}
+ */
+os.Container.processWaitingForLibraries_ = false;
+
+/**
  * Utility method which will automatically register all templates
  * and render all that are inline.
- * @param {Object} opt_doc Optional document to use instead of window.document.
+ * @param {Object} opt_data Optional JSON object to render templates against
+ * @param {Document} opt_doc Optional document to use instead of window.document
  */
-os.Container.processDocument = function(opt_doc) {
+os.Container.processDocument = function(opt_data, opt_doc) {
+  if (os.Container.requiredLibraries_ > 0) {
+    os.Container.processWaitingForLibraries_ = true;
+    return;
+  }
+  os.Container.processWaitingForLibraries_ = false;
   os.Container.registerDocumentTemplates(opt_doc);
-  os.Container.processInlineTemplates(opt_doc);
+  os.Container.processInlineTemplates(opt_data, opt_doc);
   os.Container.processed_ = true;
 };
 
 // Expose function in opensocial.template namespace.
 os.process = os.Container.processDocument;
 
+// Process the document when the page loads - unless requested not to.
 os.Container.executeOnDomLoad(function() {
   if (os.Container.autoProcess_) {
     os.Container.processDocument();
@@ -370,12 +402,35 @@ os.Container.executeOnDomLoad(function() {
 });
 
 /**
+ * A handler called when one of the required libraries loads.
+ */
+os.Container.onLibraryLoad_ = function() {
+  if (os.Container.requiredLibraries_ > 0) {
+    os.Container.requiredLibraries_--;
+    if (os.Container.requiredLibraries_ == 0 && 
+        os.Container.processWaitingForLibraries_) {
+      os.Container.processDocument();
+    }
+  } 
+};
+
+/**
+ * Adds a required library - the processing will be deferred until all
+ * required libraries have loaded.
+ * @param {string} libUrl The URL of the library needed to process this page
+ */
+os.Container.addRequiredLibrary = function(libUrl) {
+  os.Container.requiredLibraries_++;
+  os.Loader.loadUrl(libUrl, os.Container.onLibraryLoad_);
+};
+
+/**
  * @type {string} Tag name of a template.
  * @private
  */
 os.Container.TAG_script_ = 'script';
 
-/***
+/**
  * @type {Object} Map of allowed template content types.
  * @private
  * TODO(davidbyttow): Remove text/template.
