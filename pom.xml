@@ -484,6 +484,13 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <configuration>
+              <stagingSiteURL>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.0.x/${pom.version}</stagingSiteURL>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
       <reporting>
