@@ -73,7 +73,7 @@
   <!-- D I S T R I B U T I O N  M A N A G E M E N T                           -->
   <!-- ====================================================================== -->
   <distributionManagement>
-    <!-- This is the technical website for Shindig 1.0.x -->
+    <!-- This is the technical website for Shindig 1.0.x (SNAPSHOT) -->
     <site>
       <id>apache.website</id>
       <url>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.0.x</url>
@@ -679,6 +679,13 @@
 
     <profile>
       <id>release</id>
+      <distributionManagement>
+        <!-- This is the technical website for Shindig 1.0.x (release) -->
+        <site>
+           <id>apache.website</id>
+          <url>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.0.x/${pom.version}</url>
+        </site>
+      </distributionManagement>
       <build>
         <plugins>
           <!-- We want to sign the artifact, the POM, and all attached artifacts -->
