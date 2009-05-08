@@ -54,30 +54,20 @@
     <repository>
       <id>apache.snapshots</id>
       <name>Maven Snapshots</name>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
+      <url>http://repository.apache.org/snapshots</url>
       <releases>
         <enabled>false</enabled>
-        <updatePolicy>always</updatePolicy>
       </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
     </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>apache.snapshots</id>
       <name>Maven Plugin Snapshots</name>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
+      <url>http://repository.apache.org/snapshots</url>
       <releases>
         <enabled>false</enabled>
-        <updatePolicy>always</updatePolicy>
       </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
     </pluginRepository>
   </pluginRepositories>
 
