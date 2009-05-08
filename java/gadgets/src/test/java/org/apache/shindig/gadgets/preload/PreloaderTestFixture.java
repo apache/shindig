@@ -35,6 +35,7 @@ public class PreloaderTestFixture {
   protected static final String CONTAINER = "some-container";
   protected static final String HOST = "example.org";
   protected String view = "default";
+  protected boolean ignoreCache = false;
   public Map<String, String> contextParams = Maps.newHashMap();
 
   public final GadgetContext context = new GadgetContext() {
@@ -66,6 +67,11 @@ public class PreloaderTestFixture {
     @Override
     public String getParameter(String name) {
       return contextParams.get(name);
+    }
+    
+    @Override
+    public boolean getIgnoreCache() {
+      return ignoreCache;
     }
   };
 }

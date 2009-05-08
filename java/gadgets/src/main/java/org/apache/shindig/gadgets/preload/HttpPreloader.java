@@ -67,7 +67,6 @@ public class HttpPreloader implements Preloader {
     return preloads;
   }
 
-
   // TODO: move somewhere more sensible
   public static HttpRequest newHttpRequest(GadgetContext context,
       RequestAuthenticationInfo authenticationInfo) throws GadgetException {
@@ -76,7 +75,8 @@ public class HttpPreloader implements Preloader {
         .setOAuthArguments(new OAuthArguments(authenticationInfo))
         .setAuthType(authenticationInfo.getAuthType())
         .setContainer(context.getContainer())
-        .setGadget(context.getUrl());
+        .setGadget(context.getUrl())
+        .setIgnoreCache(context.getIgnoreCache());
   }
 
   class PreloadTask implements Callable<PreloadedData> {

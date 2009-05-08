@@ -108,8 +108,36 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
     PreloadedData data = preloaded.iterator().next().call();
 
     checkRequest(plainFetcher.requests.get(0));
+    assertFalse("request should not ignore cache", plainFetcher.requests.get(0).getIgnoreCache());
     checkResults(data.toJson().iterator().next());
   }
+  
+  @Test
+  public void ignoreCachePreloads() throws Exception {
+    String xml =
+        "<Module><ModulePrefs title=''>" +
+        " <Preload href='" + PRELOAD_HREF + "' authz='signed' sign_viewer='false'/>" +
+        "</ModulePrefs><Content/></Module>";
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, xml);
+    Preloader preloader = new HttpPreloader(requestPipeline);
+    
+    ignoreCache = true;
+    
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView(GadgetSpec.DEFAULT_VIEW));
+    Collection<Callable<PreloadedData>> preloaded =
+        preloader.createPreloadTasks(gadget);
+
+    assertEquals(1, preloaded.size());
+    PreloadedData data = preloaded.iterator().next().call();
+
+    HttpRequest request = oauthFetcher.requests.get(0);
+    assertTrue("request should ignore cache", request.getIgnoreCache());
+    checkRequest(request);
+  }
+
 
   @Test
   public void signedPreloads() throws Exception {
