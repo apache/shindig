@@ -32,7 +32,8 @@
   If your servers are on localhost:8080 and localhost:8081, then hit:
   http://localhost:8080/gadgets/files/container/rpctest_container.html? \
   http://localhost:8081/gadgets/files/container/rpctest_gadget.html& \
-  http://localhost:8081/gadgets/files/container/rpc_relay.uncompressed.html
+  http://localhost:8081/gadgets/files/container/rpc_relay.uncompressed.html& \
+  [ http://localhost:8080/gadgets/files/container/rpc_relay.uncompressed.html ]
 
   (Note the backslashes should be removed, as they exist for formatting only.)
 
@@ -53,12 +54,12 @@
         // and optionally the relay URL as arg 2
         var pageArgs = window.location.search.substring(1).split('&');
         var gadgetUrl = pageArgs[0];
-        var secret = Math.round(Math.random()*10000000);
+        var secret = Math.round(Math.random() * 10000000);
         if (pageArgs[1]) {
           gadgets.rpc.setRelayUrl('gadget', pageArgs[1]);
         }
-        var containerRelay = pageArgs[2] || '';
-        container.innerHTML = "<iframe id='gadget' name='gadget' height=300 width=300 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+        var containerRelay = pageArgs[2] || window.location.href;
+        container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
         gadgets.rpc.setAuthToken('gadget', secret);
 
         document.getElementById('relaymethod').innerHTML = gadgets.rpc.getRelayChannel();
@@ -67,7 +68,7 @@
       };
     </script>
   </head>
-  <body onload="initTest();">
+  <body style="background-color: #cccccc" onload="initTest();">
     <div>gadgets.rpc Performance: Container Page (method: <span id="relaymethod"></span>)</div><hr/>
     <div>Test<br/>
       <ul>
