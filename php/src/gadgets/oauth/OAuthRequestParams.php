@@ -35,24 +35,21 @@ class OAuthRequestParams {
   protected $origClientState;
   protected $bypassSpecCache;
 
-  public function __construct() {
-    $this->serviceName = $this->getParam(self::$SERVICE_PARAM, "");
-    $this->tokenName = $this->getParam(self::$TOKEN_PARAM, "");
-    $this->requestToken = $this->getParam(self::$REQUEST_TOKEN_PARAM, null);
-    $this->requestTokenSecret = $this->getParam(self::$REQUEST_TOKEN_SECRET_PARAM, null);
-    $this->origClientState = $this->getParam(self::$CLIENT_STATE_PARAM, null);
-    $this->bypassSpecCache = $this->parseBypassSpecCacheParam();
+  public function __construct(array $arguments) {
+    $this->serviceName = self::getParam($arguments, self::$SERVICE_PARAM, "");
+    $this->tokenName = self::getParam($arguments, self::$TOKEN_PARAM, "");
+    $this->requestToken = self::getParam($arguments, self::$REQUEST_TOKEN_PARAM, null);
+    $this->requestTokenSecret = self::getParam($arguments, self::$REQUEST_TOKEN_SECRET_PARAM, null);
+    $this->origClientState = self::getParam($arguments, self::$CLIENT_STATE_PARAM, null);
+    $this->bypassSpecCache = '1' == self::getParam($arguments, self::$BYPASS_SPEC_CACHE_PARAM, null);
   }
 
-  private function getParam($name, $def) {
-    $val = null;
-    if (isset($_REQUEST[$name])) {
-      $val = $_REQUEST[$name];
+  private static function getParam(array $arguments, $name, $defaultValue) {
+    if (isset($arguments[$name])) {
+      return $arguments[$name];
+    } else {
+      return $defaultValue;
     }
-    if ($val == null) {
-      $val = $def;
-    }
-    return $val;
   }
 
   public function getBypassSpecCache() {
@@ -65,13 +62,6 @@ class OAuthRequestParams {
 
   public function getRequestTokenSecret() {
     return $this->requestTokenSecret;
-  }
-
-  public static function parseBypassSpecCacheParam() {
-    if (isset($_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM])) {
-      return "1" == $_REQUEST[self::$BYPASS_SPEC_CACHE_PARAM];
-    }
-    return false;
   }
 
   public function getServiceName() {

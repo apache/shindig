@@ -63,6 +63,7 @@ class OAuthFetcher extends RemoteContentFetcher {
 
   /**
    * Parameters from makeRequest
+   * @var OAuthRequestParams
    */
   protected $requestParams;
 
@@ -146,7 +147,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       try {
         $this->origClientState = $this->oauthCrypter->unwrap($origClientState, self::$CLIENT_STATE_MAX_AGE_SECS);
       } catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
-      }
+}
     }
     if ($this->origClientState == null) {
       $this->origClientState = array();
@@ -199,8 +200,8 @@ class OAuthFetcher extends RemoteContentFetcher {
     } else if ($accessor->accessToken == null && $this->requestParams->getRequestToken() != null) {
       // We don't have an access token yet, but the client sent us a
       // (hopefully) preapproved request token.
-      $accessor->requestToken = $requestParams->getRequestToken();
-      $accessor->tokenSecret = $requestParams->getRequestTokenSecret();
+      $accessor->requestToken = $this->requestParams->getRequestToken();
+      $accessor->tokenSecret = $this->requestParams->getRequestTokenSecret();
     }
   }
 
@@ -279,13 +280,13 @@ class OAuthFetcher extends RemoteContentFetcher {
     $pageOwner = $this->authToken->getOwnerId();
     $pageViewer = $this->authToken->getViewerId();
     $stateOwner = @$this->origClientState[self::$OWNER_KEY];
-    if (!$pageOwner) {
+    if (! $pageOwner) {
       throw new GadgetException('Unauthenticated');
     }
     if ($pageOwner != $pageViewer) {
       throw new GadgetException("Only page owners can grant OAuth approval");
     }
-    if ($stateOwner != null && !$stateOwner == $pageOwner) {
+    if ($stateOwner != null && ! $stateOwner == $pageOwner) {
       throw new GadgetException("Client state belongs to a different person.");
     }
   }
@@ -454,7 +455,7 @@ class OAuthFetcher extends RemoteContentFetcher {
     $accessor = $this->accessorInfo->getAccessor();
     $azn = $accessor->consumer->callback_url->userAuthorizationURL;
     $authUrl = $azn->url;
-    if (strstr($authUrl, "?") == FALSE ) {
+    if (strstr($authUrl, "?") == FALSE) {
       $authUrl .= "?";
     } else {
       $authUrl .= "&";
@@ -623,16 +624,16 @@ class OAuthFetcher extends RemoteContentFetcher {
     }
   }
 
-  public function multiFetchRequest(Array $requests) {  // Do nothing
-  }
-  
-  private static function addIdentityParams(array& $params, SecurityToken $token) {
+  public function multiFetchRequest(Array $requests) {// Do nothing
+}
+
+  private static function addIdentityParams(array & $params, SecurityToken $token) {
     $params['opensocial_owner_id'] = $token->getOwnerId();
     $params['opensocial_viewer_id'] = $token->getViewerId();
     $params['opensocial_app_id'] = $token->getAppId();
     $params['opensocial_app_url'] = $token->getAppUrl();
   }
-  
+
   private static function setStrictNoCache(RemoteContentRequest $response) {
     $response->setResponseHeader('Pragma', 'no-cache');
     $response->setResponseHeader('Cache-Control', 'no-cache');

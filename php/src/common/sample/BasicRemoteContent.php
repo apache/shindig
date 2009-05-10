@@ -189,7 +189,7 @@ class BasicRemoteContent extends RemoteContent {
         $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher);
         return $fetcher->fetchRequest($request);
       case RemoteContentRequest::$AUTH_OAUTH:
-        $params = new OAuthRequestParams();
+        $params = $request->getOAuthRequestParams();
         $token = $request->getToken();
         $fetcher = $this->signingFetcherFactory->getSigningFetcher($this->basicFetcher);
         $oAuthFetcherFactory = new OAuthFetcherFactory($fetcher);

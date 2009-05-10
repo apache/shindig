@@ -75,7 +75,7 @@ class OAuthFetcherFactory {
    * @return The oauth fetcher.
    * @throws GadgetException
    */
-  public function getOAuthFetcher($fetcher, $token, $params) {
+  public function getOAuthFetcher(RemoteContentFetcher $fetcher, SecurityToken $token, OAuthRequestParams $params) {
     return new OAuthFetcher($this->tokenStore, $this->oauthCrypter, $fetcher, $token, $params);
   }
 }

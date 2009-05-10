@@ -62,6 +62,11 @@ class RemoteContentRequest {
    * @var string
    */
   private $authType;
+  
+  /**
+   * @var OAuthRequestParams
+   */
+  private $oauthParams = null;
 
   public function __construct($uri, $headers = false, $postBody = false) {
     $this->uri = $uri;
@@ -284,6 +289,17 @@ class RemoteContentRequest {
    */
   public function getToken() {
     return $this->token;
+  }
+  
+  public function setOAuthRequestParams(OAuthRequestParams $params) {
+    $this->oauthParams = $params;
+  }
+  
+  /**
+   * @return OAuthRequestParams
+   */
+  public function getOAuthRequestParams() {
+    return $this->oauthParams;
   }
 
   /**
