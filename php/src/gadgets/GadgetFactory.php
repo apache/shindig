@@ -119,6 +119,8 @@ class GadgetFactory {
     $gadget->substitutions = new Substitutions();
     if ($this->token) {
       $gadget->substitutions->addSubstitution('MODULE', "ID", $this->token->getModuleId());
+    } else {
+      $gadget->substitutions->addSubstitution('MODULE', "ID", 0);
     }
     if ($gadget->gadgetSpec->locales) {
       $gadget->substitutions->addSubstitutions('MSG', $gadget->gadgetSpec->locales);
