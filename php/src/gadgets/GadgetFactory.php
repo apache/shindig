@@ -272,13 +272,7 @@ class GadgetFactory {
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($messageBundleData, LIBXML_NOCDATA)) {
-      $errors = libxml_get_errors();
-      $errorStr = '';
-      foreach ($errors as $error) {
-        $errorStr .= $error . " \n";
-      }
-      libxml_clear_errors();
-      throw new GadgetSpecException("Error parsing gadget xml:\n$errorStr");
+      throw new GadgetSpecException("Error parsing gadget xml:\n".XmlError::getErrors($messageBundleData));
     }
     $messageBundle = array();
     if (($messageBundleNode = $doc->getElementsByTagName('messagebundle')) != null && $messageBundleNode->length > 0) {

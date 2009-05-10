@@ -118,10 +118,15 @@ class RemoteContentRequest {
     $this->createRemoteContentRequest("GET", $uri, null, null, RemoteContentRequest::getDefaultOptions());
   }
 
-  // returns a hash code which identifies this request, used for caching
-  // takes url and postbody into account for constructing the sha1 checksum
+  /**
+   * Returns a hash code which identifies this request, used for caching, takes method, url, authType and headers
+   * into account for constructing the md5 checksum
+   * NOTE: the postBody is excluded so that the GadgetHrefRenderer can use cached requests without having to
+   *       fetch the data-pipeling social data first
+   * @return string md5 checksum
+   */
   public function toHash() {
-    return md5($this->method . $this->uri . $this->authType . $this->postBody . $this->headers);
+    return md5($this->method . $this->uri . $this->authType . $this->headers);
   }
 
   public static function getDefaultOptions() {
@@ -208,7 +213,7 @@ class RemoteContentRequest {
   public function setResponseContent($content) {
     $this->responseContent = $content;
   }
-  
+
   public function setResponseHeader($headerName, $headerValue) {
     $this->responseHeaders[$headerName] = $headerValue;
   }
@@ -319,15 +324,15 @@ class RemoteContentRequest {
   public function getRefreshInterval() {
     return $this->refreshInterval;
   }
-  
+
   public function setMetadata($key, $value) {
     $this->metadata[$key] = $value;
   }
-  
+
   public function getMetadatas() {
     return $this->metadata;
   }
-  
+
   public function isStrictNoCache() {
     $cacheControl = $this->getResponseHeader('Cache-Control');
     if ($cacheControl != null) {

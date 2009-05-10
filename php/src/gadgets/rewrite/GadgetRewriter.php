@@ -61,7 +61,10 @@ class GadgetRewriter {
       $this->doc->formatOutput = false;
       $this->doc->strictErrorChecking = false;
       $this->doc->recover = false;
+      $this->doc->resolveExternals = false;
       if (! $this->doc->loadHtml($content)) {
+        //TODO parse and output libxml_get_errors();
+        libxml_clear_errors();
         // parsing failed, return the unmodified content
         return $content;
       }

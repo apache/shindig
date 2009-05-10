@@ -18,6 +18,10 @@
  * under the License.
  */
 
+/**
+ * base class that all the rendering methods inherit from
+ *
+ */
 abstract class GadgetRenderer {
   protected $context;
 

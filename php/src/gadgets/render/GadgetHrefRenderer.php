@@ -39,9 +39,9 @@
  * <os:HttpRequest href="http://developersite.com/api?ids=${PagedFriends.ids}"/>
  */
 
-require 'GadgetHtmlRenderer.php';
+require_once 'GadgetBaseRenderer.php';
 
-class GadgetHrefRenderer extends GadgetHtmlRenderer {
+class GadgetHrefRenderer extends GadgetBaseRenderer {
 
   /**
    * Renders a 'proxied content' view, for reference see:
@@ -51,7 +51,10 @@ class GadgetHrefRenderer extends GadgetHtmlRenderer {
    * @param array $view
    */
   public function renderGadget(Gadget $gadget, $view) {
-    $this->gadget = $gadget;
+    $this->setGadget($gadget);
+    if (Config::get('P3P') != '') {
+      header("P3P: " . Config::get('P3P'));
+    }
     /* TODO
      * We should really re-add OAuth fetching support some day, uses these view atributes:
      * $view['oauthServiceName'], $view['oauthTokenName'], $view['oauthRequestToken'], $view['oauthRequestTokenSecret'];
@@ -60,10 +63,9 @@ class GadgetHrefRenderer extends GadgetHtmlRenderer {
     $refreshInterval = $this->getRefreshInterval($view);
     $href = $this->buildHref($view, $authz);
     if (count($view['dataPipelining'])) {
-      $dataPipeliningResults = $this->fetchDataPipelining($view['dataPipelining']);
-      // if data-pipeling tags are present, post the json encoded results to the remote url
-      $request = new RemoteContentRequest($href, "Content-type: application/json\n", json_encode($dataPipeliningResults));
+      $request = new RemoteContentRequest($href, "Content-type: application/json\n");
       $request->setMethod('POST');
+      $request->getOptions()->ignoreCache = $gadget->gadgetContext->getIgnoreCache();
     } else {
       // no data-pipelining set, use GET and set cache/refresh interval options
       $request = new RemoteContentRequest($href);
@@ -82,143 +84,28 @@ class GadgetHrefRenderer extends GadgetHtmlRenderer {
     }
     $basicFetcher = new BasicRemoteContentFetcher();
     $basicRemoteContent = new BasicRemoteContent($basicFetcher, $signingFetcherFactory, $gadgetSigner);
-    $response = $basicRemoteContent->fetch($request);
-    // Rewrite the content, this will rewrite resource links to proxied versions (if requested), sanitize if configured, and
-    // add the various javascript tags to the document
-    $rewriter = new GadgetRewriter($this->context);
-    $rewriter->addObserver('head', $this, 'addHeadTags');
-    $rewriter->addObserver('body', $this, 'addBodyTags');
-    $content = $rewriter->rewrite($response->getResponseContent(), $gadget);
-    echo $content;
-  }
-
-  /**
-   * Fetches the requested data-pipeling info
-   *
-   * @param array $dataPipelining contains the parsed data-pipelining tags
-   * @return array result
-   */
-  private function fetchDataPipelining($dataPipelining) {
-    $result = array();
-    do {
-      // See which requests we can batch together, that either don't use dynamic tags or who's tags are resolvable
-      $requestQueue = array();
-      foreach ($dataPipelining as $key => $request) {
-        if (($resolved = $this->resolveRequest($request, $result)) !== false) {
-          $requestQueue[] = $resolved;
-          unset($dataPipelining[$key]);
-        }
-      }
-      if (count($requestQueue)) {
-        $returnedResults = $this->performRequests($requestQueue);
-        if (is_array($returnedResults)) {
-          $result = array_merge($returnedResults, $result);
-        }
-      }
-    } while (count($requestQueue));
-    return $result;
-  }
-
-  /**
-   * Peforms the actual http fetching of the data-pipelining requests, all social requests
-   * are made to $_SERVER['SERVER_NAME'] (the virtual host name of this server) / (optional) web_prefix / social / rpc, and
-   * the httpRequest's are made to $_SERVER['SERVER_NAME'] (the virtual host name of this server) / (optional) web_prefix / gadgets / makeRequest
-   * both request types use the current security token ($_GET['st']) when performing the requests so they happen in the correct context
-   *
-   * @param array $requests
-   * @return array response
-   */
-  private function performRequests($requests) {
-    $jsonRequests = array();
-    $httpRequests = array();
-    $decodedResponse = array();
-    // Using the same gadget security token for all social & http requests so everything happens in the right context
-    $securityToken = $_GET['st'];
-    foreach ($requests as $request) {
-      switch ($request['type']) {
-        case 'os:DataRequest':
-          // Add to the social request batch
-          $id = $request['key'];
-          $method = $request['method'];
-          // remove our internal fields so we can use the remainder as params
-          unset($request['key']);
-          unset($request['method']);
-          unset($request['type']);
-          $jsonRequests[] = array('method' => $method, 'id' => $id, 'params' => $request);
-          break;
-        case 'os:HttpRequest':
-          $id = $request['key'];
-          $url = $request['href'];
-          unset($request['key']);
-          unset($request['type']);
-          unset($request['href']);
-          $httpRequests[] = array('id' => $id, 'url' => $url, 'queryStr' => implode('&', $request));
-          break;
-      }
-    }
-    if (count($jsonRequests)) {
-      // perform social api requests
-      $request = new RemoteContentRequest($_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
-      $request->setMethod('POST');
-      $basicFetcher = new BasicRemoteContentFetcher();
-      $basicRemoteContent = new BasicRemoteContent($basicFetcher);
+    // Cache POST's as if they were GET's, since we don't want to re-fetch and repost the social data for each view
+    $basicRemoteContent->setCachePostRequest(true);
+    if (($response = $basicRemoteContent->getCachedRequest($request)) == false) {
+      // Don't fetch the data-pipelining social data unless we don't have a cached version of the gadget's content
+      $dataPipeliningResults = DataPipelining::fetch($view['dataPipelining'], $this->context);
+      // spec stats that the proxied content data-pipelinging data is *not* available to templates (to avoid duplicate posting
+      // of the data to the gadget dev's server and once to js space), so we don't assign it to the data context, and just
+      // post the json encoded results to the remote url.
+      $request->setPostBody(json_encode($dataPipeliningResults));
       $response = $basicRemoteContent->fetch($request);
-      $decodedResponse = json_decode($response->getResponseContent(), true);
     }
-    if (count($httpRequests)) {
-      $requestQueue = array();
-      foreach ($httpRequests as $request) {
-        $req = new RemoteContentRequest($_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/gadgets/makeRequest?url=' . urlencode($request['url']) . '&st=' . urlencode($securityToken) . (! empty($request['queryStr']) ? '&' . $request['queryStr'] : ''));
-        $req->getOptions()->ignoreCache = $this->context->getIgnoreCache();
-        $req->setNotSignedUri($request['url']);
-        $requestQueue[] = $req;
-      }
-      $basicRemoteContent = new BasicRemoteContent();
-      $resps = $basicRemoteContent->multiFetch($requestQueue);
-      foreach ($resps as $response) {
-        // strip out the UNPARSEABLE_CRUFT (see makeRequestHandler.php) on assigning the body
-        $resp = json_decode(str_replace("throw 1; < don't be evil' >", '', $response->getResponseContent()), true);
-        if (is_array($resp)) {
-          //FIXME: make sure that this is the format that java-shindig produces as well, the spec doesn't really state
-          $decodedResponse = array_merge($resp, $decodedResponse);
-        }
-      }
+    if ($response->getHttpCode() != '200') {
+      // an error occured fetching the proxied content's gadget content
+      $content = '<html><body><h1>An error occured fetching the gadget content</h1><p>http error code: '.$response->getHttpCode().'</p><p>'.$response->getResponseContent().'</body></html>';
+    } else {
+      // fetched ok, build the response document and output it
+      $content = $response->getResponseContent();
+      $content = $this->parseTemplates($content);
+      $content = $this->rewriteContent($content);
+      $content = $this->addTemplates($content);
     }
-    return $decodedResponse;
-  }
-
-  /**
-   * If a request (data-pipelining tag) doesn't include any dynamic tags, it's returned as is. If
-   * however it does contain said tag, this function will attempt to resolve it using the $result
-   * array, returning the parsed request on success, or FALSE on failure to resolve.
-   *
-   * @param array $request
-   */
-  private function resolveRequest($request, $result) {
-    foreach ($request as $key => $val) {
-      if (($pos = strpos($val, '${')) !== false) {
-        $key = substr($val, $pos + 2);
-        $key = substr($key, 0, strpos($key, '}'));
-        if (($resolved = $this->resolveExpression($key, $result)) !== null) {
-          $request[$key] = str_replace('${' . $key . '}', $resolved, $val);
-        } else {
-          return false;
-        }
-      }
-    }
-    return $request;
-  }
-
-  /**
-   * Resolves simplified JSP-EL expressions if the matching entry exists in $data
-   *
-   * @param string $expression
-   * @param array $data
-   */
-  private function resolveExpression($expression, $data) {
-    //TODO implement this, see http://opensocial-resources.googlecode.com/svn/spec/draft/OpenSocial-Data-Pipelining.xml#rfc.section.14
-    // always return null (aka can't resolve) until it's implemented
-    return null;
+    echo $content;
   }
 
   /**

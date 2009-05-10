@@ -45,6 +45,11 @@ class BasicRemoteContent extends RemoteContent {
   private $invalidateService = null;
 
   /**
+   * @var cachePostRequest
+   */
+  private $cachePostRequest = false;
+
+  /**
    * @param RemoteContentFetcher $basicFetcher
    * @param SigningFetcherFactory $signingFetcherFactory
    * @param SecurityTokenDecoder $signer
@@ -63,12 +68,12 @@ class BasicRemoteContent extends RemoteContent {
 
   public function fetch(RemoteContentRequest $request) {
     $ignoreCache = $request->getOptions()->ignoreCache;
-    if (!$ignoreCache && ! $request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
+    if (! $ignoreCache && ($this->cachePostRequest || ! $request->isPost()) && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
       $response = $cachedRequest;
     } else {
       $originalRequest = clone $request;
       $response = $this->divertFetch($request);
-      if ($response->getHttpCode() != 200 && !$ignoreCache && !$originalRequest->isPost()) {
+      if ($response->getHttpCode() != 200 && ! $ignoreCache && ($this->cachePostRequest || ! $originalRequest->isPost())) {
         $cachedRequest = $this->cache->expiredGet($originalRequest->toHash());
         if ($cachedRequest['found'] == true) {
           return $cachedRequest['data'];
@@ -88,7 +93,7 @@ class BasicRemoteContent extends RemoteContent {
       }
       $ignoreCache = $request->getOptions()->ignoreCache;
       // determine which requests we can load from cache, and which we have to actually fetch
-      if (!$ignoreCache && !$request->isPost() && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
+      if (! $ignoreCache && ($this->cachePostRequest || ! $request->isPost()) && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
         $rets[] = $cachedRequest;
       } else {
         $originalRequest = clone $request;
@@ -96,7 +101,6 @@ class BasicRemoteContent extends RemoteContent {
         $originalRequestArray[] = $originalRequest;
       }
     }
-
     if ($requestsToProc) {
       $normal = array();
       $signing = array();
@@ -122,7 +126,7 @@ class BasicRemoteContent extends RemoteContent {
       foreach ($requestsToProc as $request) {
         list(, $originalRequest) = each($originalRequestArray);
         $ignoreCache = $request->getOptions()->ignoreCache;
-        if ($request->getHttpCode() != 200 && !$ignoreCache && !$request->isPost()) {
+        if ($request->getHttpCode() != 200 && ! $ignoreCache && ($this->cachePostRequest || ! $request->isPost())) {
           $cachedRequest = $this->cache->expiredGet($request->toHash());
           if ($cachedRequest['found'] == true) {
             $rets[] = $cachedRequest['data'];
@@ -145,7 +149,7 @@ class BasicRemoteContent extends RemoteContent {
       return;
     }
     $ignoreCache = $originalRequest->getOptions()->ignoreCache;
-    if (!$request->isPost() && !$ignoreCache) {
+    if (($this->cachePostRequest || ! $request->isPost()) && ! $ignoreCache) {
       $ttl = Config::get('cache_time');
       if ($request->getHttpCode() == '200') {
         // Got a 200 OK response, calculate the TTL to use for caching it
@@ -194,5 +198,40 @@ class BasicRemoteContent extends RemoteContent {
       default:
         return $this->basicFetcher->fetchRequest($request);
     }
+  }
+
+  /**
+   * Returns the cached request, or false if there's no cached copy of this request, ignoreCache = true or if it's invalidated
+   *
+   * @param RemoteContentRequest $request
+   * @return unknown
+   */
+  public function getCachedRequest(RemoteContentRequest $request) {
+    $ignoreCache = $request->getOptions()->ignoreCache;
+    if (! $ignoreCache && ($this->cachePostRequest || ! $request->isPost()) && ($cachedRequest = $this->cache->get($request->toHash())) !== false && $this->invalidateService->isValid($cachedRequest)) {
+      return $cachedRequest;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Set wether or not POST requests should be cached, this is not something that you would usually
+   * do since it's not http spec compliant, however proxied content requests are cached even if
+   * social data is post'd to the gadget's url.
+   *
+   * @param boolean $cachePostRequest
+   */
+  public function setCachePostRequest($cachePostRequest = false) {
+    $this->cachePostRequest = $cachePostRequest;
+  }
+
+  /**
+   * Returns the current cachePostRequest value
+   *
+   * @return boolean $cachePostRequest
+   */
+  public function getCachePostRequest() {
+    return $this->cachePostRequest;
   }
 }
