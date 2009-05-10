@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -44,8 +43,8 @@ class GadgetUrlRenderer extends GadgetRenderer {
       $features = explode(':', $forcedLibs);
     }
     $query .= $this->appendLibsToQuery($features);
-    // code bugs out with me because of the invalid url syntax since we dont have a URI class to fix it for us
-    // this works around that
+    $query .= '&lang=' . urlencode(isset($_GET['lang']) ? $_GET['lang'] : 'en');
+    $query .= '&country=' . urlencode(isset($_GET['country']) ? $_GET['country'] : 'US');
     if (substr($query, 0, 1) == '&') {
       $query = '?' . substr($query, 1);
     }
