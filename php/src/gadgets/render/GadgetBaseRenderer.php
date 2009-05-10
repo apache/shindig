@@ -271,7 +271,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     // Inject our configured gadget document style
     $styleNode = $doc->createElement('style');
     $styleNode->setAttribute('type', 'text/css');
-    $styleNode->nodeValue = Config::get('gadget_css');
+    $styleNode->appendChild($doc->createTextNode(Config::get('gadget_css')));
     $node->appendChild($styleNode);
     // Inject the OpenSocial feature javascripts
     $forcedJsLibs = $this->getForcedJsLibs();
@@ -306,7 +306,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     }
     $scriptNode = $doc->createElement('script');
     $scriptNode->setAttribute('type', 'text/javascript');
-    $scriptNode->nodeValue = str_replace('&', '&amp;', $script);
+    $scriptNode->appendChild($doc->createTextNode($script));
     $node->appendChild($scriptNode);
   }
 
