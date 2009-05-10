@@ -19,25 +19,40 @@
  */
 
 /**
- *
- * Base interface for all message objects.
- *
  * see
- * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Message
+ * http://opensocial-resources.googlecode.com/svn/spec/draft/OpenSocial-Specification.xml#opensocial.Message.Field
  */
 class Message {
-  public $body;
-  public $title;
-  public $type;
+  private $appUrl;
+  private $body;
+  private $bodyId;
+  private $collectionIds = array();
+  private $id;
+  private $inReplyTo;
+  private $recipients = array();
+  private $replies = array();
+  private $senderId;
+  private $status;
+  private $timeSent;
+  private $title;
+  private $titleId;
+  private $type;
+  private $updated;
+  private $urls = array();
+
+  public static $DEFAULT_FIELDS = array('appUrl', 'body', 'bodyId', 'collectionIds', 'id', 'inReplyTo', 'recipients', 'replies', 'senderId', 'status', 'timeSent', 'title', 'titleId', 'type', 'updated', 'urls');
+
   public $types = array(
-	    /* An email */
-	    'EMAIL',
-	    /* A short private message */
-	    'NOTIFICATION',
-	    /* A message to a specific user that can be seen only by that user */
-	    'PRIVATE_MESSAGE',
-	    /* A message to a specific user that can be seen by more than that user */
-	    'PUBLIC_MESSAGE');
+      /* An email */
+      'EMAIL',
+      /* A short private message */
+      'NOTIFICATION',
+      /* A message to a specific user that can be seen only by that user */
+      'PRIVATE_MESSAGE',
+      /* A message to a specific user that can be seen by more than that user */
+      'PUBLIC_MESSAGE');
+
+  public $statuses = array('NEW', 'READ', 'DELETED');
 
   public function __construct($initBody, $initTitle, $initType) {
     $this->setBody($initBody);
@@ -45,57 +60,140 @@ class Message {
     $this->setType($initType);
   }
 
-  /**
-   * Gets the main text of the message.
-   * @return the main text of the message
-   */
+  public function getAppUrl() {
+    return $this->appUrl;
+  }
+
+  public function setAppUrl($url) {
+    $this->url = $url;
+  }
+
   public function getBody() {
     return $this->body;
   }
 
-  /**
-   * Sets the main text of the message.
-   * HTML attributes are allowed and are sanitized by the container
-   * @param newBody the main text of the message
-   */
-  public function setBody($newBody) {
-    $this->body = $newBody;
+  public function setBody($body) {
+    $this->body = $body;
   }
 
-  /**
-   * Gets the title of the message
-   * @return the title of the message
-   */
+  public function getBodyId() {
+    return $this->bodyId;
+  }
+
+  public function setBodyId($bodyId) {
+    $this->bodyId = $bodyId;
+  }
+
+  public function getCollectionIds() {
+    return $this->collectionIds;
+  }
+
+  public function setCollectionIds($collectionIds) {
+    $this->$collectionIds = $collectionIds;
+  }
+
+  public function getId() {
+    return $this->id;
+  }
+
+  public function setId($id) {
+    $this->id = $id;
+  }
+
+  public function getInReplyTo() {
+    return $this->inReplyTo;
+  }
+
+  public function setInReplyTo($inReplyTo) {
+    $this->inReplyTo = $inReplyTo;
+  }
+
+  public function getRecipients() {
+    return $this->recipients;
+  }
+
+  public function setRecipients($recipients) {
+    $this->recipients = $recipients;
+  }
+
+  public function getReplies() {
+    return $this->replies;
+  }
+
+  public function setReplies($replies) {
+    $this->replies = $replies;
+  }
+
+  public function getStatus() {
+    return $this->status;
+  }
+
+  public function setStatus($status) {
+    $this->status = $status;
+  }
+
+  public function getSenderId() {
+    return $this->senderId;
+  }
+
+  public function setSenderId($senderId) {
+    $this->senderId = $senderId;
+  }
+
+  public function getTimeSent() {
+    return $this->timeSent;
+  }
+
+  public function setTimeSent($timeSent) {
+    $this->timeSent = $timeSent;
+  }
+
   public function getTitle() {
     return $this->title;
   }
 
-  /**
-   * Sets the title of the message
-   * HTML attributes are allowed and are sanitized by the container.
-   * @param newTitle the title of the message
-   */
-  public function setTitle($newTitle) {
-    $this->title = $newTitle;
+  public function setTitle($title) {
+    $this->title = $title;
   }
 
-  /**
-   * Gets the type of the message, as specified by opensocial.Message.Type
-   * @return the type of message (enum Message.Type)
-   */
+  public function getTitleId() {
+    return $this->titleId;
+  }
+
+  public function setTitleId($titleId) {
+    $this->titleId = $titleId;
+  }
+
   public function getType() {
     return $this->type;
   }
 
+  public function setType($type) {
+    $this->type = $type;
+  }
+
+  public function getUpdated() {
+    return $this->updated;
+  }
+
+  public function setUpdated($updated) {
+    $this->updated = $updated;
+  }
+
   /**
-   * Sets the type of the message, as specified by opensocial.Message.Type
-   * @param newType the type of message (enum Message.Type)
+   * Gets the URLs related to the message
+   * @return the URLs related to the person, their webpages, or feeds
    */
-  public function setType($newType) {
-    if (! in_array($newType, $this->types)) {
-      throw new Exception('Invalid message type');
-    }
-    $this->type = $newType;
+  public function getUrls() {
+    return $this->urls;
+  }
+
+  /**
+   * Sets the URLs related to the message
+   * @param urls the URLs related to the person, their webpages, or feeds
+   */
+  public function setUrls($urls) {
+    $this->urls = $urls;
   }
 
   /**

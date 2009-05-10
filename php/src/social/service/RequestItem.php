@@ -22,41 +22,41 @@
  * Abstract base type for social API requests.
  */
 abstract class RequestItem {
-  
+
   // Common OpenSocial API fields
   public static $APP_ID = "appId";
-  
+
   public static $USER_ID = "userId";
-  
+
   public static $GROUP_ID = "groupId";
-  
+
   public static $START_INDEX = "startIndex";
-  
+
   public static $COUNT = "count";
-  
+
   public static $SORT_BY = "sortBy";
   public static $SORT_ORDER = "sortOrder";
-  
+
   public static $FILTER_BY = "filterBy";
   public static $FILTER_OPERATION = "filterOp";
   public static $FILTER_VALUE = "filterValue";
-  
+
   public static $FIELDS = "fields";
-  
+
   // Opensocial defaults
   public static $DEFAULT_START_INDEX = 0;
-  
+
   public static $DEFAULT_COUNT = 20;
-  
+
   public static $APP_SUBSTITUTION_TOKEN = "@app";
-  
+
   /**
    * @var SecurityToken
    */
   protected $token;
-  
+
   protected $operation;
-  
+
   protected $service;
 
   public function __construct($service, $operation, SecurityToken $token) {

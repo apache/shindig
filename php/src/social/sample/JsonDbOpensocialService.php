@@ -39,6 +39,11 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   private static $ACTIVITIES_TABLE = "activities";
 
   /**
+   * db["messages"] : Map<Person.Id, MessageCollection>
+   */
+  private static $MESSAGES_TABLE = "messages";
+
+  /**
    * db["data"] -> Map<Person.Id, Map<String, String>>
    */
   private static $DATA_TABLE = "data";
@@ -58,6 +63,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   private $allData = null;
 
   private $allActivities = null;
+
+  private $allMessageCollections = null;
 
   private $jsonDbFileName = 'ShindigDb.json';
 
@@ -127,6 +134,16 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     $db[self::$ACTIVITIES_TABLE] = $this->allActivities;
     return $this->allActivities;
+  }
+
+  private function getAllMessageCollections() {
+    $db = $this->getDb();
+    $messagesTable = $db[self::$MESSAGES_TABLE];
+    foreach ($messagesTable as $key => $value) {
+      $this->allMessageCollections[$key] = $value;
+    }
+    $db[self::$MESSAGES_TABLE] = $this->allMessageCollections;
+    return $this->allMessageCollections;
   }
 
   private function getPeopleWithApp($appId) {
@@ -205,7 +222,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
     try {
       $people = $this->filterResults($people, $options);
-    } catch(Exception $e) {
+    } catch (Exception $e) {
       $people['filtered'] = 'false';
     }
 
@@ -216,9 +233,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     return $collection;
   }
 
-  private function filterResults($peopleById, $options) {
+  private function filterResults($results, $options) {
     if (! $options->getFilterBy()) {
-      return $peopleById; // no filtering specified
+      return $results; // no filtering specified
     }
     $filterBy = $options->getFilterBy();
     $op = $options->getFilterOperation();
@@ -228,7 +245,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $value = $options->getFilterValue();
     $filteredResults = array();
     $numFilteredResults = 0;
-    foreach ($peopleById as $id => $person) {
+    foreach ($results as $id => $person) {
       if ($this->passesFilter($person, $filterBy, $op, $value)) {
         $filteredResults[$id] = $person;
         $numFilteredResults ++;
@@ -237,15 +254,15 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     return $filteredResults;
   }
 
-  private function passesFilter($person, $filterBy, $op, $value) {
-    $fieldValue = $person[$filterBy];
+  private function passesFilter($entity, $filterBy, $op, $value) {
+    $fieldValue = $entity[$filterBy];
     if (! $fieldValue || (is_array($fieldValue) && ! count($fieldValue))) {
       return false; // person is missing the field being filtered for
     }
     if ($op == CollectionOptions::FILTER_OP_PRESENT) {
       return true; // person has a non-empty value for the requested field
     }
-    if (!$value) {
+    if (! $value) {
       return false; // can't do an equals/startswith/contains filter on an empty filter value
     }
     // grab string value for comparison
@@ -314,14 +331,14 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token) {
-  	$db = $this->getDb();
-  	$allData = $this->getAllData();
-  	if ($fields == null || $fields[0] == '*') {
+    $db = $this->getDb();
+    $allData = $this->getAllData();
+    if ($fields == null || $fields[0] == '*') {
       $allData[$userId->getUserId($token)] = null;
       $db[self::$DATA_TABLE] = $allData;
       $this->saveDb($db);
       return null;
-  	}
+    }
     foreach ($fields as $key => $present) {
       if (! $this->isValidKey($key)) {
         throw new SocialSpiException("The person app data key had invalid characters", ResponseError::$BAD_REQUEST);
@@ -406,10 +423,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   /*
-	*
-	* to check the activity against filter
-	*
-	*/
+   * to check the activity against filter
+   */
   private function passesStringFilter($fieldValue, $filterOp, $filterValue) {
     switch ($filterOp) {
       case CollectionOptions::FILTER_OP_EQUALS:
@@ -428,6 +443,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $activitiesTable = $this->getAllActivities();
     $activity['appId'] = $token->getAppId();
     try {
+      if (! isset($activitiesTable[$userId->getUserId($token)])) {
+        $activitiesTable[$userId->getUserId($token)] = array();
+      }
+      $activity['id'] = count($activitiesTable[$userId->getUserId($token)]) + 1;
       array_push($activitiesTable[$userId->getUserId($token)], $activity);
       $db[self::$ACTIVITIES_TABLE] = $activitiesTable;
       $this->saveDb($db);
@@ -438,11 +457,226 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function deleteActivities($userId, $groupId, $appId, $activityIds, SecurityToken $token) {
+    $db = $this->getDb();
+    $activitiesTable = $this->getAllActivities();
+    if (! isset($activitiesTable[$userId->getUserId($token)])) {
+      throw new SocialSpiException("Activity not found.", ResponseError::$BAD_REQUEST);
+    }
+    $newActivities = array();
+    foreach ($activitiesTable[$userId->getUserId($token)] as $activity) {
+      $found = false;
+      foreach ($activityIds as $id) {
+        if ($activity['id'] == $id) {
+          $found = true;
+        }
+      }
+      if (! $found) {
+        array_push($newActivities, $activity);
+      }
+    }
+    if (count($newActivities) == count($activitiesTable[$userId->getUserId($token)])) {
+      throw new SocialSpiException("Activities not found.", ResponseError::$BAD_REQUEST);
+    }
+    $activitiesTable[$userId->getUserId($token)] = $newActivities;
+    $db[self::$ACTIVITIES_TABLE] = $activitiesTable;
+    $this->saveDb($db);
+  }
+
+  public function createMessage($userId, $msgCollId, $message, $token) {
+    $db = $this->getDb();
+    $messagesTable = $this->getAllMessageCollections();
+    if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollId])) {
+      throw new SocialSpiException("Message collection not found.", ResponseError::$BAD_REQUEST);
+    }
+    $msgColl = $messagesTable[$userId->getUserId($token)][$msgCollId];
+    if (! isset($msgColl['messages'])) {
+      $msgColl['messages'] = array();
+    }
+    $message['id'] = count($msgColl['messages']) + 1;
+    $msgColl['messages'][$message['id']] = $message;
+    if (isset($msgColl['total'])) {
+      ++ $msgColl['total'];
+    } else {
+      $msgColl['total'] = 1;
+    }
+    if (isset($msgColl['unread'])) {
+      ++ $msgColl['unread'];
+    } else {
+      $msgColl['unread'] = 1;
+    }
+    $messagesTable[$userId->getUserId($token)][$msgCollId] = $msgColl;
+    $db[self::$MESSAGES_TABLE] = $messagesTable;
+    $this->saveDb($db);
+  }
+
+  public function updateMessage($userId, $msgCollId, $message, $token) {
     throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
   }
 
-  public function createMessage($userId, $appId, $message, $optionalMessageId, SecurityToken $token) {
-    throw new SocialSpiException("Not implemented", ResponseError::$NOT_IMPLEMENTED);
+  public function deleteMessages($userId, $msgCollId, $messageIds, $token) {
+    $db = $this->getDb();
+    $messagesTable = $this->getAllMessageCollections();
+    if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollId])) {
+      throw new SocialSpiException("Message collection not found.", ResponseError::$BAD_REQUEST);
+    }
+    $msgColl = $messagesTable[$userId->getUserId($token)][$msgCollId];
+    foreach ($messageIds as $id) {
+      if (! isset($msgColl['messages']) || ! isset($msgColl['messages'][$id])) {
+        throw new SocialSpiException("Message not found.", ResponseError::$BAD_REQUEST);
+      }
+    }
+    foreach ($messageIds as $id) {
+      unset($msgColl['messages'][$id]);
+    }
+    if (isset($msgColl['total'])) {
+      $msgColl['total'] -= count($messageIds);
+    }
+    $messagesTable[$userId->getUserId($token)][$msgCollId] = $msgColl;
+    $db[self::$MESSAGES_TABLE] = $messagesTable;
+    $this->saveDb($db);
+  }
+
+  public function getMessages($userId, $msgCollId, $fields, $msgIds, $options, $token) {
+    $collections = $this->getAllMessageCollections();
+    $results = array();
+    // TODO: Handles @inbox and @outbox.
+    if (isset($collections[$userId->getUserId($token)]) && isset($collections[$userId->getUserId($token)][$msgCollId])) {
+      $msgColl = $collections[$userId->getUserId($token)][$msgCollId];
+      if (! isset($msgColl['messages'])) {
+        $msgColl['messages'] = array();
+      }
+      if (empty($msgIds)) {
+        $results = $msgColl['messages'];
+      } else {
+        foreach ($msgColl['messages'] as $message) {
+          if (in_array($message['id'], $msgIds)) {
+            $results[] = $message;
+          }
+        }
+      }
+      if ($options) {
+        $results = $this->filterResults($results, $options);
+      }
+      if ($fields) {
+        $results = self::adjustFields($results, $fields);
+      }
+      return self::paginateResults($results, $options);
+    } else {
+      throw new SocialSpiException("Message collections not found", ResponseError::$NOT_FOUND);
+    }
+  }
+
+  public function createMessageCollection($userId, $msgCollection, $token) {
+    $db = $this->getDb();
+    $messagesTable = $this->getAllMessageCollections();
+    try {
+      if (! isset($messagesTable[$userId->getUserId($token)])) {
+        $messagesTable[$userId->getUserId($token)] = array();
+      } else if (isset($messagesTable[$userId->getUserId($token)][$msgCollection['id']])) {
+        throw new SocialSpiException("Message collection already exists.", ResponseError::$BAD_REQUEST);
+      }
+      $msgCollection['total'] = 0;
+      $msgCollection['unread'] = 0;
+      $msgCollection['updated'] = time();
+      $messagesTable[$userId->getUserId($token)][$msgCollection['id']] = $msgCollection;
+      $db[self::$MESSAGES_TABLE] = $messagesTable;
+      $this->saveDb($db);
+    } catch (Exception $e) {
+      throw new SocialSpiException("Message collection can't be created: " . $e->getMessage(), ResponseError::$INTERNAL_ERROR);
+    }
+  }
+
+  public function updateMessageCollection($userId, $msgCollection, $token) {
+    $db = $this->getDb();
+    $messagesTable = $this->getAllMessageCollections();
+    if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollection['id']])) {
+      throw new SocialSpiException("Message collection not found.", ResponseError::$BAD_REQUEST);
+    }
+    // The total number of messages in the collection shouldn't be updated.
+    $msgCollection['total'] = $messagesTable[$userId->getUserId($token)][$msgCollection['id']]['total'];
+    $msgCollection['updated'] = time();
+    $messagesTable[$userId->getUserId($token)][$msgCollection['id']] = $msgCollection;
+    $db[self::$MESSAGES_TABLE] = $messagesTable;
+    $this->saveDb($db);
+  }
+
+  public function deleteMessageCollection($userId, $msgCollId, $token) {
+    $db = $this->getDb();
+    $messagesTable = $this->getAllMessageCollections();
+    try {
+      if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollId])) {
+        throw new SocialSpiException("Message collection not found.", ResponseError::$NOT_FOUND);
+      } else {
+        unset($messagesTable[$userId->getUserId($token)][$msgCollId]);
+      }
+      $db[self::$MESSAGES_TABLE] = $messagesTable;
+      $this->saveDb($db);
+    } catch (Exception $e) {
+      throw new SocialSpiException("Message collection can't be created: " . $e->getMessage(), ResponseError::$INTERNAL_ERROR);
+    }
+  }
+
+  public function getMessageCollections($userId, $fields, $options, $token) {
+    $all = $this->getAllMessageCollections();
+    $results = array();
+    if (isset($all[$userId->getUserId($token)])) {
+      $results = $all[$userId->getUserId($token)];
+    } else {
+      return RestfulCollection::createFromEntry(array());
+    }
+    if ($options) {
+      $results = $this->filterResults($results, $options);
+    }
+    if (empty($results)) {
+      throw new SocialSpiException("Message collections not found", ResponseError::$NOT_FOUND);
+    }
+    foreach ($results as $id => $messageCollection) {
+      if (! isset($results[$id]["id"])) {
+        $results[$id]["id"] = $id;
+      }
+      $results[$id]["total"] = isset($results[$id]["messages"]) ? count($results[$id]["messages"]) : 0;
+      $results[$id]["unread"] = $results[$id]["total"];
+    }
+    if ($fields) {
+      $results = self::adjustFields($results, $fields);
+    }
+    return self::paginateResults($results, $options);
+  }
+
+  /**
+   * Paginates the results set according to the critera specified by the options.
+   */
+  private static function paginateResults($results, $options) {
+    if (! $options) {
+      return RestfulCollection::createFromEntry($results);
+    } else {
+      $startIndex = $options->getStartIndex();
+      $count = $options->getCount();
+      $totalResults = count($results);
+      // NOTE: Assumes the index is 0 based.
+      $results = array_slice($results, $startIndex, $count);
+      $ret = new RestfulCollection($results, $startIndex, $totalResults);
+      $ret->setItemsPerPage($count);
+      return $ret;
+    }
+  }
+
+  /**
+   * Removes the unnecessary fields by sets the requested fiedls only.
+   */
+  private static function adjustFields($results, $fields) {
+    if (empty($fields) || empty($results) || in_array('@all', $fields)) {
+      return $results;
+    }
+    $newResults = array();
+    foreach ($results as $entity) {
+      $newEntity = array();
+      foreach ($fields as $field) {
+        $newEntity[$field] = isset($entity[$field]) ? $entity[$field] : null;
+      }
+      $newResults[] = $newEntity;
+    }
+    return $newResults;
   }
 
   /**

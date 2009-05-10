@@ -77,7 +77,7 @@ class MessageTest extends PHPUnit_Framework_TestCase {
    */
   public function testSetBody() {
     $this->Message->setBody('body');
-    $this->assertEquals('body', $this->Message->body);
+    $this->assertEquals('body', $this->Message->getBody());
   }
 
   /**
@@ -85,7 +85,7 @@ class MessageTest extends PHPUnit_Framework_TestCase {
    */
   public function testSetTitle() {
     $this->Message->setTitle('title');
-    $this->assertEquals('title', $this->Message->title);
+    $this->assertEquals('title', $this->Message->getTitle());
   }
 
   /**
@@ -93,6 +93,6 @@ class MessageTest extends PHPUnit_Framework_TestCase {
    */
   public function testSetType() {
     $this->Message->setType('EMAIL');
-    $this->assertEquals('EMAIL', $this->Message->type);
+    $this->assertEquals('EMAIL', $this->Message->getType());
   }
 }

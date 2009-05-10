@@ -79,7 +79,8 @@ class RestRequestItem extends RequestItem {
         break;
       case DataServiceServlet::$MESSAGE_ROUTE:
         $data = $this->inputConverter->convertMessages($this->postData);
-        $this->params['message'] = $data;
+        // 'entity' may be a message or a message collection.
+        $this->params['entity'] = $data;
         break;
       case DataServiceServlet::$INVALIDATE_ROUTE:
         $this->params = json_decode($this->postData, true);

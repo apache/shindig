@@ -19,8 +19,8 @@
  */
 
 class MessagesHandler extends DataRequestHandler {
-  
-  private static $MESSAGES_PATH = "/messages/userId/outbox/msgId";
+
+  private static $MESSAGES_PATH = "/messages/{userId}/msgCollId/{messageId}";
   private $service;
 
   public function __construct() {
@@ -28,30 +28,113 @@ class MessagesHandler extends DataRequestHandler {
     $this->service = new $service();
   }
 
+  /**
+   * Deletes the message collection or the messages.
+   */
   public function handleDelete(RequestItem $requestItem) {
-    throw new SocialSpiException("You can't delete messages", ResponseError::$NOT_IMPLEMENTED);
-  }
+    $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
-  public function handleGet(RequestItem $requestItem) {
-    throw new SocialSpiException("You can't retrieve messages", ResponseError::$NOT_IMPLEMENTED);
+    $userIds = $requestItem->getUsers();
+    HandlerPreconditions::requireSingular($userIds, "UserId can only be singular.");
+    $msgCollId = $requestItem->getParameter("msgCollId");
+    HandlerPreconditions::requireNotEmpty($msgCollId, "A message collection is required");
+
+    $token = $requestItem->getToken();
+    $messageIds = $requestItem->getListParameter("messageId");
+    if (empty($messageIds)) {
+      $this->service->deleteMessageCollection($userIds[0], $msgCollId, $token);
+    } else {
+      $this->service->deleteMessages($userIds[0], $msgCollId, $messageIds, $token);
+    }
   }
 
   /**
-   * /messages/{groupId}/outbox/{msgId}
-   * /messages/{groupId}/outbox
-   *
-   * @param RequestItem $requestItem
-   * @return responseItem
+   * Returns a list of message collections or messages.
+   * Examples:
+   * /messages/john.doe
+   * /messages/john.doe/notification
+   * /messages/john.doe/notification/1,2,3
+   */
+  public function handleGet(RequestItem $requestItem) {
+    $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
+
+    $userIds = $requestItem->getUsers();
+    HandlerPreconditions::requireSingular($userIds, "UserId is not singular.");
+
+    $options = new CollectionOptions($requestItem);
+    $msgCollId = $requestItem->getParameter("msgCollId");
+
+    $token = $requestItem->getToken();
+    if (empty($msgCollId)) {
+      // Gets the message collections.
+      return $this->service->getMessageCollections($userIds[0], $requestItem->getFields(MessageCollection::$DEFAULT_FIELDS), $options, $token);
+    }
+
+    $messageIds = $requestItem->getListParameter("messageId");
+    if (empty($messageIds)) {
+      $messageIds = array();
+    }
+    return $this->service->getMessages($userIds[0], $msgCollId, $requestItem->getFields(Message::$DEFAULT_FIELDS), $messageIds, $options, $token);
+  }
+
+  /**
+   * Creates a new message collection or message.
+   * Exapmples:
+   * /messages/john.doe
+   * /messages/john.doe/notification
    */
   public function handlePost(RequestItem $requestItem) {
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
+
     $userIds = $requestItem->getUsers();
-    $message = $requestItem->getParameter('message');
-    $optionalMessageId = $requestItem->getParameter('msgId');
-    return $this->service->createMessage($userIds[0], $requestItem->getAppId(), $message, $optionalMessageId, $requestItem->getToken());
+    HandlerPreconditions::requireSingular($userIds, "UserId is not singular.");
+
+    $msgCollId = $requestItem->getParameter("msgCollId");
+    if (empty($msgCollId)) {
+      // Creates a message collection.
+      $messageCollection = $requestItem->getParameter("entity");
+      HandlerPreconditions::requireNotEmpty($messageCollection, "Can't parse message collection.");
+      return $this->service->createMessageCollection($userIds[0], $messageCollection, $requestItem->getToken());
+    } else {
+      // Creates a message.
+      $messageIds = $requestItem->getListParameter("messageId");
+      HandlerPreconditions::requireEmpty($messageIds, "messageId cannot be specified in create method.");
+      $message = $requestItem->getParameter("entity");
+      HandlerPreconditions::requireNotEmpty($message, "Can't parse message.");
+      HandlerPreconditions::requireEmpty($messageIds, "messageId cannot be specified in create method.");
+
+      // Message fields validation.
+      HandlerPreconditions::requireCondition(! ($message['title'] === null && $message['body'] === null), "title and/or body should be specified.");
+      HandlerPreconditions::requireNotEmpty($message['recipients'], "Field recipients is required.");
+
+      return $this->service->createMessage($userIds[0], $msgCollId, $message, $requestItem->getToken());
+    }
   }
 
+  /**
+   * Updates a message or a message collection.
+   */
   public function handlePut(RequestItem $requestItem) {
-    $this->handlePost($requestItem);
+    $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
+
+    $userIds = $requestItem->getUsers();
+    HandlerPreconditions::requireSingular("UserId is not singular.");
+
+    $msgCollId = $requestItem->getParameter("msgCollId");
+    HandlerPreconditions::requireNotEmpty($msgCollId, "msgCollId is required.");
+
+    $messageIds = $requestItem->getListParameter("messageId");
+    if (empty($messageIds)) {
+      // Updates message collection. NOTE: "message" is used here to represent message collection.
+      $messageCollection = $requestItem->getParameter("message");
+      HandlerPreconditions::requireNotEmpty($messageCollection, "Can't parse message collection.");
+      return $this->service->updateMessageCollection($userIds[0], $messageCollection, $requestItem->getToken());
+    } else {
+      // Updates a message.
+      HandlerPreconditions::requireSingular("UserId is not singular.");
+      $message = $requestItem->getParameter("message");
+      HandlerPreconditions::requireNotEmpty($message, "Can't parse message.");
+      return $this->service->updateMessage($userIds[0], $msgCollId, $message, $requestItem->getToken());
+    }
   }
 }

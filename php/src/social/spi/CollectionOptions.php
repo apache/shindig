@@ -26,32 +26,41 @@ class CollectionOptions {
   private $sortOrder;
   const SORT_ORDER_ASCENDING = 'ascending';
   const SORT_ORDER_DESCENDING = 'descending';
-  
+
   private $filterBy;
   private $filterOp;
   private $filterValue;
-  
+
   const FILTER_OP_EQUALS = 'equals';
   const FILTER_OP_CONTAINS = 'contains';
   const FILTER_OP_STARTSWITH = 'startswith';
   const FILTER_OP_PRESENT = 'present';
-  
+
   const TOP_FRIENDS_SORT = "topFriends";
   const TOP_FRIENDS_FILTER = "topFriends";
   const HAS_APP_FILTER = "hasApp";
-  
+
   private $updatedSince;
-  
+
   private $networkDistance;
-  
+
   private $startIndex;
   private $count;
 
-  public function __construct() {
-    // set default values, per spec
-    $this->startIndex = 0;
-    $this->count = 0;
-    $this->sortOrder = CollectionOptions::SORT_ORDER_ASCENDING;
+  public function __construct($requestItem = NULL) {
+    if (empty($requestItem)) {
+      $this->startIndex = 0;
+      $this->count = 0;
+      $this->sortOrder = CollectionOptions::SORT_ORDER_ASCENDING;
+    } else {
+      $this->setSortBy($requestItem->getSortBy());
+      $this->setSortOrder($requestItem->getSortOrder());
+      $this->setFilterBy($requestItem->getFilterBy());
+      $this->setFilterOperation($requestItem->getFilterOperation());
+      $this->setFilterValue($requestItem->getFilterValue());
+      $this->setStartIndex($requestItem->getStartIndex());
+      $this->setCount($requestItem->getCount());
+    }
   }
 
   public function getSortBy() {

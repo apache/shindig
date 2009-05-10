@@ -58,22 +58,78 @@ class InputBasicXmlConverter {
   }
 
   public static function convertMessages($requestParam, $xml, $content) {
+    // As only message handler has the context to know whether it's a message or a message
+    // collection request. All the fields for both the Message and the MessageCollection
+    // classes are converted here. Message handler has the responsibility to validate the
+    // params.
     $message = array();
-    if (! isset($xml->title) || ! isset($content)) {
-      throw new Exception("Invalid message structure");
+    if (isset($xml->id)) {
+      $message['id'] = trim($xml->id);
     }
-    $message['id'] = isset($xml->id) ? trim($xml->id) : null;
-    $message['title'] = trim($xml->title);
-    $message['body'] = trim($content);
-    // retrieve recipients by looking at the osapi name space
-    $xml = self::loadString($requestParam, "http://opensocial.org/2008/opensocialapi");
-    if (! isset($xml->recipient)) {
-      throw new Exception("Invalid message structure");
+    if (isset($xml->title)) {
+      $message['title'] = trim($xml->title);
     }
-    $message['recipients'] = array();
-    foreach ($xml->recipient as $recipient) {
-      $message['recipients'][] = trim($recipient);
+    if (!empty($content)) {
+      $message['body'] = trim($content);
     }
+    if (isset($xml->bodyId)) {
+      $meesage['bodyId'] = trim($xml->bodyId);
+    }
+    if (isset($xml->titleId)) {
+      $message['titleId'] = trim($xml->titleId);
+    }
+    if (isset($xml->appUrl)) {
+      $message['appUrl'] = trim($xml->appUrl);
+    }
+    if (isset($xml->status)) {
+      $message['status'] = trim($xml->status);
+    }
+    if (isset($xml->timeSent)) {
+      $message['timeSent'] = trim($xml->timeSent);
+    }
+    if (isset($xml->type)) {
+      $message['type'] = trim($xml->type);
+    }
+    if (isset($xml->updated)) {
+      $message['updated'] = trim($xml->updated);
+    }
+    if (isset($xml->senderId)) {
+      $message['senderId'] = trim($xml->senderId);
+    }
+    if (isset($xml->appUrl)) {
+      $message['appUrl'] = trim($xml->appUrl);
+    }
+    if (isset($xml->collectionIds)) {
+      $message['collectionIds'] = array();
+      foreach ($xml->collectionIds as $collectionId) {
+        $message['collectionIds'][] = trim($collectionId);
+      }
+    }
+    
+    // Tries to retrieve recipients by looking at the osapi name space first then
+    // the default namespace.
+    $recipientXml = self::loadString($requestParam, "http://opensocial.org/2008/opensocialapi");
+    if (empty($recipientXml) || !isset($recipientXml->recipient)) {
+      $recipientXml = $xml;
+    }
+    
+    if (isset($recipientXml->recipient)) {
+      $message['recipients'] = array();
+      foreach ($recipientXml->recipient as $recipient) {
+        $message['recipients'][] = trim($recipient);
+      }
+    }
+    
+    // TODO: Parses the inReplyTo, replies and urls fields.
+    
+    // MessageCollection specified fiedls.
+    if (isset($xml->total)) {
+      $message['total'] = trim($xml->total);
+    }
+    if (isset($xml->unread)) {
+      $message['unread'] = trim($xml->unread);
+    }
+    
     return $message;
   }
 }
