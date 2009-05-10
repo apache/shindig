@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -113,6 +114,19 @@ public class SocialMarkupHtmlParserTest {
     NodeList spanElements = document.getElementsByTagName("span");
     assertEquals(1, spanElements.getLength());
     assertEquals("Some content", spanElements.item(0).getTextContent());
+  }
+
+  @Test
+  public void testInvalid() throws Exception {
+    String content = "<html><div id=\"div_super\" class=\"div_super\" valign:\"middle\"></div></html>";
+    try {
+      parser.parseDom(content);
+      assertTrue("No exception caught", false);
+    } catch (DOMException e) {
+      assertTrue(e.getMessage().contains("INVALID_CHARACTER_ERR"));
+      assertTrue(e.getMessage().contains(
+          "Around ...<div id=\"div_super\" class=\"div_super\"..."));
+    }
   }
 
   private List<Element> getScripts(final String type) {

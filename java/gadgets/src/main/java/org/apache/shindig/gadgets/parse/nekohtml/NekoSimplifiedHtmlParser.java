@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerializer;
@@ -37,6 +38,7 @@ import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
 import org.cyberneko.html.filters.NamespaceBinder;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -292,7 +294,34 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
           element.setAttributeNS(xmlAttributes.getURI(i), xmlAttributes.getQName(i),
               xmlAttributes.getValue(i));
         } else {
-          element.setAttribute(xmlAttributes.getLocalName(i) , xmlAttributes.getValue(i));
+          try {
+            element.setAttribute(xmlAttributes.getLocalName(i), xmlAttributes
+                .getValue(i));
+          } catch (DOMException e) {
+            switch (e.code) {
+            case DOMException.INVALID_CHARACTER_ERR:
+              StringBuilder sb = new StringBuilder(e.getMessage());
+              sb.append("Around ...<");
+              if (qName.prefix != null) {
+                sb.append(qName.prefix);
+                sb.append(":");
+              }
+              sb.append(qName.localpart);
+              for (int j = 0; j < xmlAttributes.getLength(); j++) {
+                if (StringUtils.isNotBlank(xmlAttributes.getLocalName(j))
+                    && StringUtils.isNotBlank(xmlAttributes.getValue(j))) {
+                  sb.append(' ');
+                  sb.append(xmlAttributes.getLocalName(j));
+                  sb.append("=\"");
+                  sb.append(xmlAttributes.getValue(j)).append('\"');
+                }
+              }
+              sb.append("...");
+              throw new DOMException(DOMException.INVALID_CHARACTER_ERR, sb.toString());
+            default:
+              throw e;
+            }
+          }
         }
       }
       appendChild(element);
