@@ -8,7 +8,7 @@
 //    data : Map<Person.Id, Map<String,String>>
 //    friendLinks : Map<Person.Id, Array<Person.Id>>
 //    userApplications : Map<Person.Id, Array<Application.Id>>
-//    messages : Map<Person.Id, Array<Message>>
+//    messages : Map<Person.Id, Map<MessageCollection.Id, MessageCollection>>
 //  }
 //
 //  Notes:
@@ -377,6 +377,12 @@
         "messages" : []}
   
   },
+  
+"1" : {
+    "notification" : {"title" : "Notifications", "messages" : []},
+    "privateMessage" : {"title" : "Inbox", "messages" : []},
+    "publicMessage" : {"title" : "Inbox", "messages" : []}
+},
 
 "john.doe" : {
   "notification" : {"title" : "Notifications",
