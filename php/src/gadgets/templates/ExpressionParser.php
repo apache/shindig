@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,11 +28,10 @@
  *
  */
 
-//TODO support array selection, ie: ${Foo[Bar]}
+//TODO == seems to not be working correctly
 //TODO support unary expressions, ie: ${Foo * -Bar}, or simpler: ${!Foo}
 //TODO support ${Viewer.likesRed ? 'Red' : 'Blue'} type expressions
 //TODO support string variables, ie 'Red' and it's variants like 'Red\'' and '"Red"', etc
-//TODO : add recursive loop on [] blocks and use recurse evaluate's return as array index
 
 class ExpressionException extends Exception {
 }
@@ -59,7 +59,6 @@ class ExpressionParser {
    */
   static public function evaluate($expression, $dataContext) {
     self::$dataContext = $dataContext;
-    // split expression on [] and foo == true ? a : b constructs, and evaluate each seperately
     $postfix = self::infixToPostfix($expression);
     $result = self::postfixEval($postfix);
     return $result;
@@ -73,11 +72,14 @@ class ExpressionParser {
    * @return mixed value
    */
   static public function evaluateVar($var, $dataContext) {
+    if ($var === null || $var === false) {
+      return $var;
+    }
     if (empty($var)) {
       throw new ExpressionException("Invalid variable statement");
     }
     if (in_array($var, self::$reservedWords)) {
-      throw new ExpressionException("Variable name  ".htmlentities($var) . " is reserved word");
+      throw new ExpressionException("Variable name  " . htmlentities($var) . " is reserved word");
     }
     $parts = explode('.', $var);
     if (count($parts) < 1) {
@@ -102,13 +104,12 @@ class ExpressionParser {
         break;
       }
     }
-    if (!$found) {
+    if (! $found) {
       // variable wasn't found in Cur, My and Top scope, throw an error
       throw new ExpressionException("Unknown variable: " . htmlentities($var) . ($var != $key ? " ($key)" : ''));
     }
     return $context;
   }
-
 
   /**
    * Returns the string value of the (mixed) $val, ie:
@@ -120,12 +121,11 @@ class ExpressionParser {
     if (is_array($val)) {
       return implode(',', $val);
     } elseif (is_numeric($val)) {
-      return (string) $val;
+      return (string)$val;
     } else {
       return $val;
     }
   }
-
 
   static private function isOperand($string, $index = 0) {
     if (is_array($string)) {
@@ -254,6 +254,61 @@ class ExpressionParser {
     $tokens = array();
     $tokensIndex = 0;
     for ($i = 0; $i < strlen($str); $i ++) {
+      // Resolve array index selections[] by calling self::evaluate on the nested index key, and using the return value of that to resolve the var
+      // Note: this will recurse when there's multiple levels[of[brackets]]
+      if ($str[$i] == '[') {
+        if (! empty($temp)) {
+          $tokens[$tokensIndex] = $temp;
+          $tokensIndex++;
+        }
+        $tokenOperand = array_pop($tokens);
+        if (!self::isOperand($tokenOperand)) {
+          throw new ExpressionException("Trying to reference an index on an operator");
+        }
+        $tokenOperand = self::evaluateVar($tokenOperand, self::$dataContext);
+        if (!is_array($tokenOperand)) {
+          throw new ExpressionException("Trying to reference an index on a non-array value");
+        }
+        $resolved = false;
+        $temp = '';
+        $nestCounter = $expressionLength = 0;
+        $indexExpression = '';
+        for ($y = $i + 1; $y < strlen($str); $y ++) {
+          $expressionLength ++;
+          $char = $str[$y];
+          if ($char == '[') {
+            $nestCounter ++;
+          } elseif ($char == ']') {
+            if ($nestCounter == 0) {
+              $indexResult = self::evaluate($indexExpression, self::$dataContext);
+              if (!isset($tokenOperand[$indexResult])) {
+                $resolved = null;
+              } else {
+                $resolved = $tokenOperand[$indexResult];
+              }
+              break;
+            } else {
+              $nestCounter --;
+            }
+          }
+          $indexExpression .= $char;
+        }
+        if ($resolved === false) {
+          throw new ExpressionException("Unbalanced [] expression");
+        }
+        $i += $expressionLength + 1;
+        if ($resolved === null && $i < (strlen($str) - 1)) {
+          // a null value is ok for a Foo[Bar] expression, but an "property not found" exception on Foo[Bar].id
+          if ($str[$i] != ' ' && !self::isOperator($str, $i)) {
+            throw new ExpressionException("Trying to get a property on a null value");
+          }
+        }
+        // this token has been resolved, advance our string pointer ($i) and continue to the next position in the string
+        $tokens[$tokensIndex - 1] = $resolved;
+        continue;
+      }
+
+      // Regular operant/operator token parsing
       if ($str[$i] == ' ' || $str[$i] == "\t" || $str[$i] == "\n" || $str == "\r") {
         if (! empty($temp)) {
           $tokens[$tokensIndex] = $temp;
@@ -285,12 +340,14 @@ class ExpressionParser {
         }
       }
     }
+
+    // Resolve all named variables to their actual value
     foreach ($tokens as $key => $val) {
-      if (self::isOperand($val) && ! is_numeric($val)) {
+      if (self::isOperand($val) && ! is_numeric($val) && $val !== false && $val !== null) {
         $tokens[$key] = self::evaluateVar($val, self::$dataContext);
       }
     }
-    return ($tokens);
+    return $tokens;
   }
 
   static private function compute($var1, $var2, $sym) {
