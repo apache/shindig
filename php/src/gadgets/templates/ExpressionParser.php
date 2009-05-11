@@ -30,7 +30,6 @@
 
 //TODO == seems to not be working correctly
 //TODO support unary expressions, ie: ${Foo * -Bar}, or simpler: ${!Foo}
-//TODO support ${Viewer.likesRed ? 'Red' : 'Blue'} type expressions
 //TODO support string variables, ie 'Red' and it's variants like 'Red\'' and '"Red"', etc
 
 class ExpressionException extends Exception {
@@ -59,8 +58,20 @@ class ExpressionParser {
    */
   static public function evaluate($expression, $dataContext) {
     self::$dataContext = $dataContext;
-    $postfix = self::infixToPostfix($expression);
-    $result = self::postfixEval($postfix);
+    if (strpos($expression, '?') !== false) {
+      // Quick and dirty support for Ternary operation ie: color="${ViewerData.likesRed ? 'Red' : 'Blue'}"
+      $parts = self::splitTernaryOperation($expression);
+      $condition = self::evaluate($parts[0], $dataContext);
+      if ($condition) {
+        return self::evaluate($parts[1], $dataContext);
+      } else {
+        return self::evaluate($parts[2], $dataContext);
+      }
+    } else {
+      // plain old single or binary expression, just evaluate it
+      $postfix = self::infixToPostfix($expression);
+      $result = self::postfixEval($postfix);
+    }
     return $result;
   }
 
@@ -109,6 +120,42 @@ class ExpressionParser {
       throw new ExpressionException("Unknown variable: " . htmlentities($var) . ($var != $key ? " ($key)" : ''));
     }
     return $context;
+  }
+
+  /**
+   * Internal misc function that splits a Ternary operation into it's 3 parts, so given:
+   * ${ViewerParams.likesRed ? 'Red' : 'Blue'} it will return:
+   * array('0' => 'ViewerParams.likesRed', '1' => 'Red', '2' => 'Blue')
+   *
+   * @param string $expression
+   */
+  static private function splitTernaryOperation($expression) {
+    $result = array();
+    $pos = strpos($expression, '?');
+    $result[0] = substr($expression, 0, $pos - 1);
+    $expression = substr($expression, $pos + 1);
+    // Nesting detection is used so that ${Cur.id == 1 ? Cur.id == 2 ? 12 : 1  : 2} parses into it's correct components too, ie
+    // that expression would result in: Array ( [0] => Cur.id == 1 [1] => Cur.id == 2 ? 12 : 1 [2] => 2 ), which will case self::evaluate()
+    // to recurse on the the array element that contains a nested ternary expression
+    $nestCounter = 0;
+    for ($i = 0 ; $i < strlen($expression) ; $i++) {
+      $char = $expression[$i];
+      if ($char == '?') {
+        $nestCounter++;
+      } elseif ($char == ':') {
+        if ($nestCounter == 0) {
+          $result[1] = trim(substr($expression, 0, $i - 1));
+          $result[2] = trim(substr($expression, $i + 1));
+        } else {
+          $nestCounter--;
+        }
+      }
+    }
+    if (count($result) != 3) {
+      // if count != 3, the left and right parts of the ternary operation were never detected, ie an unbalanced or uncompleted expression
+      throw new ExpressionException("Unbalanced ternary operation");
+    }
+    return $result;
   }
 
   /**
