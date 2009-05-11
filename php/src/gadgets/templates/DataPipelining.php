@@ -76,23 +76,25 @@ class DataPipelining {
    */
   static public function fetch($dataPipeliningRequests, GadgetContext $context, $dataContext = array()) {
     $result = array();
-    do {
-      // See which requests we can batch together, that either don't use dynamic tags or who's tags are resolvable
-      $requestQueue = array();
-      foreach ($dataPipeliningRequests as $key => $request) {
-        if (($resolved = self::resolveRequest($request, $result)) !== false) {
-          $requestQueue[] = $resolved;
-          unset($dataPipeliningRequests[$key]);
+    if (is_array($dataPipeliningRequests) && count($dataPipeliningRequests)) {
+      do {
+        // See which requests we can batch together, that either don't use dynamic tags or who's tags are resolvable
+        $requestQueue = array();
+        foreach ($dataPipeliningRequests as $key => $request) {
+          if (($resolved = self::resolveRequest($request, $result)) !== false) {
+            $requestQueue[] = $resolved;
+            unset($dataPipeliningRequests[$key]);
+          }
         }
-      }
-      if (count($requestQueue)) {
-        $returnedResults = self::performRequests($requestQueue, $context);
-        if (is_array($returnedResults)) {
-          $dataContext = self::addResultToContext($returnedResults, $dataContext);
-          $result = array_merge($returnedResults, $result);
+        if (count($requestQueue)) {
+          $returnedResults = self::performRequests($requestQueue, $context);
+          if (is_array($returnedResults)) {
+            $dataContext = self::addResultToContext($returnedResults, $dataContext);
+            $result = array_merge($returnedResults, $result);
+          }
         }
-      }
-    } while (count($requestQueue));
+      } while (count($requestQueue));
+    }
     return $result;
   }
 
