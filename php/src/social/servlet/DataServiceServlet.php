@@ -116,6 +116,7 @@ class DataServiceServlet extends ApiServlet {
         $servletRequest['postData'] = stripslashes($servletRequest['postData']);
       }
     }
+    $servletRequest['params'] = array_merge($_GET, $_POST);
     $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
     $responseItem = $this->getResponseItem($this->handleRequestItem($requestItem));
     if ($responseItem->getError() == null) {

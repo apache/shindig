@@ -42,10 +42,22 @@ class RestRequestItem extends RequestItem {
     $this->outputConverter = $outputConverter;
   }
 
+  /**
+   * @return RestRequestItem
+   */
   public static function createWithRequest($servletRequest, $token, $inputConverter, $outputConverter) {
     $restfulRequestItem = new RestRequestItem(self::getServiceFromPath($servletRequest['url']), self::getMethod(), $token, $inputConverter, $outputConverter);
     $restfulRequestItem->setUrl($servletRequest['url']);
-    $restfulRequestItem->setParams($restfulRequestItem->createParameterMap());
+    if (isset($servletRequest['params'])) {
+      $restfulRequestItem->setParams($servletRequest['params']);
+    } else {
+      $paramPieces = parse_url($restfulRequestItem->url);
+      if (isset($paramPieces['query'])) {
+        $params = array();
+        parse_str($paramPieces['query'], $params);
+        $restfulRequestItem->setParams($params);
+      }
+    }
     if (isset($servletRequest['postData'])) {
       $restfulRequestItem->setPostData($servletRequest['postData']);
     }
@@ -120,26 +132,6 @@ class RestRequestItem extends RequestItem {
     }
   }
 
-  protected static function createParameterMap() {
-    $parameters = array_merge($_POST, $_GET);
-    return $parameters;
-  }
-
-  /** 
-   * Use this function to parse out the query array element 
-   * Usually the servlet request code does this for us but the batch request calls have to do it
-   * by hand
-   * 
-   * @param the output of parse_url(). 
-   */
-  private function parseQuery($val) {
-    $params = explode('&', $val);
-    foreach ($params as $param) {
-      $queryParams = explode('=', $param);
-      $this->params[$queryParams[0]] = isset($queryParams[1]) ? $queryParams[1] : '';
-    }
-  }
-
   /**
    * This could definitely be cleaner..
    * TODO: Come up with a cleaner way to handle all of this code.
@@ -148,9 +140,6 @@ class RestRequestItem extends RequestItem {
    */
   public function applyUrlTemplate($urlTemplate) {
     $paramPieces = @parse_url($this->url);
-    if (isset($paramPieces['query'])) {
-      $this->parseQuery($paramPieces['query']);
-    }
     $actualUrl = explode("/", $paramPieces['path']);
     $expectedUrl = explode("/", $urlTemplate);
     for ($i = 1; $i < count($actualUrl); $i ++) {
