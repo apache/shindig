@@ -22,6 +22,38 @@ require_once 'src/common/sample/BasicRemoteContent.php';
 
 require_once 'external/PHPUnit/Framework/TestCase.php';
 
+class MockSigningFetcherFactory {
+  private $keyName;
+  private $privateKey;
+
+  /**
+   * Produces a signing fetcher that will sign requests and delegate actual
+   * network retrieval to the {@code networkFetcher}
+   *
+   * @param RemoteContentFetcher $networkFetcher The fetcher that will be doing actual work.
+   * @return SigningFetcher
+   * @throws GadgetException
+   */
+  public function getSigningFetcher(RemoteContentFetcher $networkFetcher) {
+    return SigningFetcher::makeFromB64PrivateKey($networkFetcher, $this->keyName, $this->privateKey);
+  }
+
+  /**
+   * @here will create a private key.
+   */
+  public function __construct() {
+    $privkey = openssl_pkey_new();
+    openssl_pkey_export($privkey, $rsa_private_key, "partuza"); //the string must be same as shindig container private_key_phrase
+    
+    $phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
+    if (! $rsa_private_key = @openssl_pkey_get_private($rsa_private_key, $phrase)) {
+      throw new Exception("Could not create the key");
+    }
+    $this->privateKey = $rsa_private_key;
+    $this->keyName = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/public.cer';
+  }
+}
+
 class MockRemoteContentFetcher extends RemoteContentFetcher {
   private $expectedRequest = array();
 
@@ -122,7 +154,7 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->fetcher = new MockRemoteContentFetcher();
-    $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+    $signingFetcherFactory = new MockSigningFetcherFactory();
     $this->basicRemoteContent = new BasicRemoteContent($this->fetcher, $signingFetcherFactory, new BasicSecurityTokenDecoder());
   }
 
@@ -189,7 +221,6 @@ class BasicRemoteContentTest extends PHPUnit_Framework_TestCase {
    */
   public function testmultiFetchValid() {
     $this->fetcher->clean();
-    
     $requests = array();
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid1.html');
     $requests[] = new RemoteContentRequest('http://test.chabotc.com/valid2.html');
