@@ -40,10 +40,17 @@ class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    if (!extension_loaded('memcache')) {
+      $message = 'memcache requires the memcache extention';
+      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+    }
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache',
-                                      $this->time);
+    $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache', $this->time);
+    if (! is_resource($this->cache)) {
+      $message = 'memcache server can not connect';
+      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+    }
   }
 
   /**
