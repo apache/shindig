@@ -26,21 +26,23 @@ class MessageTest extends PHPUnit_Framework_TestCase {
   /**
    * @var Message
    */
-  private $Message;
+  private $message;
 
   /**
    * Prepares the environment before running a test.
    */
   protected function setUp() {
     parent::setUp();
-    $this->Message = new Message('BODY', 'TITLE', 'NOTIFICATION');
+    $this->message = new Message(1, 'TITLE');
+    $this->message->setBody('BODY');
+    $this->message->setType('NOTIFICATION');
   }
 
   /**
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
-    $this->Message = null;
+    $this->message = null;
     parent::tearDown();
   }
 
@@ -48,51 +50,51 @@ class MessageTest extends PHPUnit_Framework_TestCase {
    * Tests Message->getBody()
    */
   public function testGetBody() {
-    $this->assertEquals('BODY', $this->Message->getBody());
+    $this->assertEquals('BODY', $this->message->getBody());
   }
 
   /**
    * Tests Message->getTitle()
    */
   public function testGetTitle() {
-    $this->assertEquals('TITLE', $this->Message->getTitle());
+    $this->assertEquals('TITLE', $this->message->getTitle());
   }
 
   /**
    * Tests Message->getType()
    */
   public function testGetType() {
-    $this->assertEquals('NOTIFICATION', $this->Message->getType());
+    $this->assertEquals('NOTIFICATION', $this->message->getType());
   }
 
   /**
    * Tests Message->sanitizeHTML()
    */
   public function testSanitizeHTML() {
-    $this->assertEquals('ABC', $this->Message->sanitizeHTML('ABC'));
+    $this->assertEquals('ABC', $this->message->sanitizeHTML('ABC'));
   }
 
   /**
    * Tests Message->setBody()
    */
   public function testSetBody() {
-    $this->Message->setBody('body');
-    $this->assertEquals('body', $this->Message->getBody());
+    $this->message->setBody('body');
+    $this->assertEquals('body', $this->message->getBody());
   }
 
   /**
    * Tests Message->setTitle()
    */
   public function testSetTitle() {
-    $this->Message->setTitle('title');
-    $this->assertEquals('title', $this->Message->getTitle());
+    $this->message->setTitle('title');
+    $this->assertEquals('title', $this->message->getTitle());
   }
 
   /**
    * Tests Message->setType()
    */
   public function testSetType() {
-    $this->Message->setType('EMAIL');
-    $this->assertEquals('EMAIL', $this->Message->getType());
+    $this->message->setType('EMAIL');
+    $this->assertEquals('EMAIL', $this->message->getType());
   }
 }

@@ -20,26 +20,35 @@
 
 require_once 'RestBase.php';
 
+/**
+ * It is an integration test. Since it's may be used by the specified container implementation.
+ * It'd better not to depends on the data in the json DB sample.  
+ */
 class MessageRestTest extends RestBase {
-	
-  private function getMessages($url) {
-    $ret = $this->curlRest($url, '', 'application/json', 'GET');
+
+  private function getAllEntities($url) {
+    $sep = strpos($url, '?') !== false ? '&' : '?';
+    $ret = $this->curlRest($url . $sep . 'startIndex=0&count=1000000', '', 'application/json', 'GET');
     $retDecoded = json_decode($ret, true);
     $this->assertTrue($ret != $retDecoded && $ret != null, "Invalid json response: $retDecoded");
     return $retDecoded['entry'];
   }
-  
+
+  /**
+   * NOTE: If there are lots of messages in the storage this test may take a long time as
+   * it retrieves all the message.
+   */
   private function verifyLifeCycle($postData, $postDataFormat, $randomTitle) {
-    $url = '/messages/1/notification';
+    $url = '/messages/1/@outbox';
     
-    $cnt = count($this->getMessages($url));
+    $cnt = count($this->getAllEntities($url));
     
     // Creates the message.
     $ret = $this->curlRest($url, $postData, $postDataFormat, 'POST');
     $this->assertTrue(empty($ret), "Create message failed. Response: $ret");
     
     // Gets the message.
-    $messages = $this->getMessages($url);
+    $messages = $this->getAllEntities($url);
     $this->assertEquals($cnt + 1, count($messages), "Size of the messages is not right.");
     $fetchedMessage = null;
     foreach ($messages as $m) {
@@ -53,7 +62,7 @@ class MessageRestTest extends RestBase {
     $ret = $this->curlRest($url . '/' . urlencode($fetchedMessage['id']), '', 'application/json', 'DELETE');
     $this->assertTrue(empty($ret), "Delete the created message failed. Response: $ret");
     
-    $messages = $this->getMessages($url, $randomTitle);
+    $messages = $this->getAllEntities($url, $randomTitle);
     $this->assertEquals($cnt, count($messages), "Size of the messages is not right after deletion.");
   }
   
@@ -61,7 +70,7 @@ class MessageRestTest extends RestBase {
     $randomTitle = "[" . rand(0, 2048) . "] message test title.";
     $postData = '{
       "id" : "msgid",
-      "recipients" : [1, 2, 3],
+      "recipients" : [2,3],
       "title" : "' . $randomTitle . '",
       "titleId" : "541141091700",
       "body" : "Short message from Joe to some friends",
@@ -75,7 +84,6 @@ class MessageRestTest extends RestBase {
   public function testLifeCycleInXml() {
     $randomTitle = "[" . rand(0, 2048) . "] message test title.";
     $postData = '<message xmlns="http://ns.opensocial.org/2008/opensocial">
-      <recipient>1</recipient>
       <recipient>2</recipient>
       <recipient>3</recipient>
       <title>' . $randomTitle . '</title>
@@ -89,7 +97,6 @@ class MessageRestTest extends RestBase {
     $randomTitle = "[" . rand(0, 2048) . "] message test title.";
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom"
              xmlns:osapi="http://opensocial.org/2008/opensocialapi">
-      <osapi:recipient>1</osapi:recipient>
       <osapi:recipient>2</osapi:recipient>
       <osapi:recipient>3</osapi:recipient>
       <title>' . $randomTitle . '</title>
@@ -102,33 +109,47 @@ class MessageRestTest extends RestBase {
   
   public function testMessageCollectionLifeCycle() {
     $url = '/messages/1';
-    $randomTitle = "[" . rand(0, 2048) . "] message collection test title.";
+    // Gets number of message collections in the repository.
+    $cnt = count($this->getAllEntities($url));
     
-    $ret = $this->curlRest($url, '', 'application/json', 'GET');
+    // Creates a message collection.
+    $createData = array();
+    $createData['title'] = "[" . rand(0, 2048) . "] message collection test title.";
+    $createData['urls'] = array("http://abc.com/abc", "http://xyz.com/xyz");
+    $ret = $this->curlRest($url, json_encode($createData), 'application/json', 'POST');
+    
+    // Verifies that whether the message collection is created.
     $retDecoded = json_decode($ret, true);
-    $this->assertTrue($ret != $retDecoded && $ret != null, "Invalid json response: $retDecoded");
-    $cnt = count($retDecoded['entry']);
+    $id = $retDecoded['entry']['id'];
+    $this->assertEquals($cnt + 1, count($this->getAllEntities($url)), "Wrong size of the collections. $ret");
     
-    $id = 'msgCollId';
+    // Updates the created message collection.
+    $newUrls = array("http://123.com/123");
+    $newTitle = 'new title';
+    $updateData = array();
+    $updateData['id'] = $id;
+    $updateData['title'] = $newTitle;
+    $updateData['urls'] = $newUrls;
     
-    $postData = '{
-      "id" : "' . $id . '",
-      "title" : "' . $randomTitle . '"
-    }';
-    $ret = $this->curlRest($url, $postData, 'application/json', 'POST');
-    $this->assertTrue(empty($ret), "Create message collection failed. Response: $ret");
+    $ret = $this->curlRest($url . "/$id", json_encode($updateData), 'application/json', 'PUT');
+    $this->assertTrue(empty($ret), "Update should return empty. $ret <$id>");
 
-    $ret = $this->curlRest($url, '', 'application/json', 'GET');
-    $retDecoded = json_decode($ret, true);
-    $this->assertTrue($ret != $retDecoded && $ret != null, "Invalid json response: $retDecoded");
-    $this->assertEquals($cnt + 1, count($retDecoded['entry']), "Wrong size of the collections. $ret");
+    $collections = $this->getAllEntities($url);
+    $this->assertEquals($cnt + 1, count($collections), "Wrong size of the collections.");
+    $found = false;
+    foreach ($collections as $collection) {
+      if ($collection['id'] == $id) {
+        $this->assertEquals($newTitle, $collection['title']);
+        $this->assertEquals($newUrls, $collection['urls']);
+        $found = true;
+      }
+    }
+    $this->assertTrue($found, "Created message not found.");
     
+    // Deletes the message collection.
     $ret = $this->curlRest($url . "/$id", '', 'application/json', 'DELETE');
     
-    $ret = $this->curlRest($url, '', 'application/json', 'GET');
-    $retDecoded = json_decode($ret, true);
-    $this->assertTrue($ret != $retDecoded && $ret != null, "Invalid json response: $retDecoded");
-    $this->assertEquals($cnt, count($retDecoded['entry']), "Wrong size of the collections. $ret");
+    // Verifies that the message collection is deleted.
+    $this->assertEquals($cnt, count($this->getAllEntities($url)), "Wrong size of the collections. $ret");
   }
 }
-

@@ -25,17 +25,20 @@
  */
 class MessageCollection {
   // Indicates the collection of all messages sent to the user
-  public static $INBOX = "@inbox";
+  public static $INBOX = '@inbox';
   // Indicates the collection of all messages sent by the user
   // and used as a special endpoint for posting outbound messages.
-  public static $OUTBOX = "@outbox";
+  public static $OUTBOX = '@outbox';
+  // All the messages both sent from and to the user.
+  public static $ALL = '@all';
 
-  private $id;
-  private $title;
-  private $total;
-  private $unread;
-  private $updated;
-  private $urls = array();
+  // These fileds should be referenced via getters and setters. 'public' only for json_encode. 
+  public $id;
+  public $title;
+  public $total;
+  public $unread;
+  public $updated;
+  public $urls = array();
 
   public static $DEFAULT_FIELDS = array('id', 'title', 'total', 'unread', 'updated', 'urls');
 

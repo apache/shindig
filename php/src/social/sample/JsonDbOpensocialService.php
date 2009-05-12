@@ -485,6 +485,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   public function createMessage($userId, $msgCollId, $message, $token) {
     $db = $this->getDb();
     $messagesTable = $this->getAllMessageCollections();
+    if ($msgCollId == '@outbox') {
+      $msgCollId = 'privateMessage';
+    }
     if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollId])) {
       throw new SocialSpiException("Message collection not found.", ResponseError::$BAD_REQUEST);
     }
@@ -516,6 +519,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   public function deleteMessages($userId, $msgCollId, $messageIds, $token) {
     $db = $this->getDb();
     $messagesTable = $this->getAllMessageCollections();
+    if ($msgCollId == '@inbox' || $msgCollId == '@outbox') {
+      $msgCollId = 'privateMessage';
+    }
     if (! isset($messagesTable[$userId->getUserId($token)]) || ! isset($messagesTable[$userId->getUserId($token)][$msgCollId])) {
       throw new SocialSpiException("Message collection not found.", ResponseError::$BAD_REQUEST);
     }
@@ -540,6 +546,9 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $collections = $this->getAllMessageCollections();
     $results = array();
     // TODO: Handles @inbox and @outbox.
+    if ($msgCollId == '@outbox' || $msgCollId == '@inbox') {
+      $msgCollId = 'privateMessage';
+    }
     if (isset($collections[$userId->getUserId($token)]) && isset($collections[$userId->getUserId($token)][$msgCollId])) {
       $msgColl = $collections[$userId->getUserId($token)][$msgCollId];
       if (! isset($msgColl['messages'])) {
@@ -578,9 +587,12 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
       $msgCollection['total'] = 0;
       $msgCollection['unread'] = 0;
       $msgCollection['updated'] = time();
-      $messagesTable[$userId->getUserId($token)][$msgCollection['id']] = $msgCollection;
+      $id = count($messagesTable[$userId->getUserId($token)]);
+      $msgCollection['id'] = $id;
+      $messagesTable[$userId->getUserId($token)][$id] = $msgCollection;
       $db[self::$MESSAGES_TABLE] = $messagesTable;
       $this->saveDb($db);
+      return $msgCollection;
     } catch (Exception $e) {
       throw new SocialSpiException("Message collection can't be created: " . $e->getMessage(), ResponseError::$INTERNAL_ERROR);
     }

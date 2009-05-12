@@ -23,26 +23,30 @@
  * http://opensocial-resources.googlecode.com/svn/spec/draft/OpenSocial-Specification.xml#opensocial.Message.Field
  */
 class Message {
-  private $appUrl;
-  private $body;
-  private $bodyId;
-  private $collectionIds = array();
-  private $id;
-  private $inReplyTo;
-  private $recipients = array();
-  private $replies = array();
-  private $senderId;
-  private $status;
-  private $timeSent;
-  private $title;
-  private $titleId;
-  private $type;
-  private $updated;
-  private $urls = array();
-
-  public static $DEFAULT_FIELDS = array('appUrl', 'body', 'bodyId', 'collectionIds', 'id', 'inReplyTo', 'recipients', 'replies', 'senderId', 'status', 'timeSent', 'title', 'titleId', 'type', 'updated', 'urls');
-
-  public $types = array(
+  // These fields should be referenced via getters and setters. 'public' only for json_encode. 
+  public $appUrl;
+  public $body;
+  public $bodyId;
+  public $collectionIds;
+  public $id;
+  public $inReplyTo;
+  public $recipients;
+  public $replies;
+  public $senderId;
+  public $status;
+  public $timeSent;
+  public $title;
+  public $titleId;
+  public $type;
+  public $updated;
+  public $urls;
+  
+  public static $DEFAULT_FIELDS = array('appUrl', 'body', 'bodyId',
+      'collectionIds', 'id', 'inReplyTo', 'recipients', 'replies',
+      'senderId', 'status', 'timeSent', 'title', 'titleId', 'type',
+      'updated', 'urls');
+  
+  public static $TYPES = array(
       /* An email */
       'EMAIL',
       /* A short private message */
@@ -51,19 +55,18 @@ class Message {
       'PRIVATE_MESSAGE',
       /* A message to a specific user that can be seen by more than that user */
       'PUBLIC_MESSAGE');
+  
+  public static $STATUS = array('NEW', 'READ', 'DELETED');
 
-  public $statuses = array('NEW', 'READ', 'DELETED');
-
-  public function __construct($initBody, $initTitle, $initType) {
-    $this->setBody($initBody);
-    $this->setTitle($initTitle);
-    $this->setType($initType);
+  public function __construct($id, $title) {
+    $this->setId($id);
+    $this->setTitle($title);
   }
 
   public function getAppUrl() {
     return $this->appUrl;
   }
-
+  
   public function setAppUrl($url) {
     $this->url = $url;
   }
@@ -115,11 +118,11 @@ class Message {
   public function setRecipients($recipients) {
     $this->recipients = $recipients;
   }
-
+  
   public function getReplies() {
     return $this->replies;
   }
-
+  
   public function setReplies($replies) {
     $this->replies = $replies;
   }
@@ -135,7 +138,7 @@ class Message {
   public function getSenderId() {
     return $this->senderId;
   }
-
+  
   public function setSenderId($senderId) {
     $this->senderId = $senderId;
   }
@@ -171,7 +174,7 @@ class Message {
   public function setType($type) {
     $this->type = $type;
   }
-
+  
   public function getUpdated() {
     return $this->updated;
   }
@@ -195,7 +198,7 @@ class Message {
   public function setUrls($urls) {
     $this->urls = $urls;
   }
-
+  
   /**
    * TODO implement either a standard 'sanitizing' facility or
    * define an interface that can be set on this class so

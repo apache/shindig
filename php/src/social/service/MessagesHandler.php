@@ -94,6 +94,8 @@ class MessagesHandler extends DataRequestHandler {
       // Creates a message collection.
       $messageCollection = $requestItem->getParameter("entity");
       HandlerPreconditions::requireNotEmpty($messageCollection, "Can't parse message collection.");
+      $title = isset($messageCollection['title']) ? trim($messageCollection['title']) : '';
+      HandlerPreconditions::requireCondition(strlen($title) > 0, "Title must be specified.");
       return $this->service->createMessageCollection($userIds[0], $messageCollection, $requestItem->getToken());
     } else {
       // Creates a message.
@@ -104,8 +106,10 @@ class MessagesHandler extends DataRequestHandler {
       HandlerPreconditions::requireEmpty($messageIds, "messageId cannot be specified in create method.");
 
       // Message fields validation.
-      HandlerPreconditions::requireCondition(! ($message['title'] === null && $message['body'] === null), "title and/or body should be specified.");
+      $title = isset($message['title']) ? trim($message['title']) : '';
+      HandlerPreconditions::requireCondition(strlen($title) > 0, "Title must be specified.");
       HandlerPreconditions::requireNotEmpty($message['recipients'], "Field recipients is required.");
+      HandlerPreconditions::requireCondition(is_array($message['recipients']), "recipients must be array.");
 
       return $this->service->createMessage($userIds[0], $msgCollId, $message, $requestItem->getToken());
     }
@@ -118,21 +122,23 @@ class MessagesHandler extends DataRequestHandler {
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
     $userIds = $requestItem->getUsers();
-    HandlerPreconditions::requireSingular("UserId is not singular.");
+    HandlerPreconditions::requireSingular($userIds, "UserId is not singular.");
 
     $msgCollId = $requestItem->getParameter("msgCollId");
     HandlerPreconditions::requireNotEmpty($msgCollId, "msgCollId is required.");
 
     $messageIds = $requestItem->getListParameter("messageId");
     if (empty($messageIds)) {
-      // Updates message collection. NOTE: "message" is used here to represent message collection.
-      $messageCollection = $requestItem->getParameter("message");
+      // Updates message collection.
+      $messageCollection = $requestItem->getParameter("entity");
+      $messageCollection['id'] = $msgCollId;
       HandlerPreconditions::requireNotEmpty($messageCollection, "Can't parse message collection.");
       return $this->service->updateMessageCollection($userIds[0], $messageCollection, $requestItem->getToken());
     } else {
       // Updates a message.
-      HandlerPreconditions::requireSingular("UserId is not singular.");
-      $message = $requestItem->getParameter("message");
+      HandlerPreconditions::requireSingular($messageIds, "Message id is not singular.");
+      $message = $requestItem->getParameter("entity");
+      $message['id'] = $messageIds[0];
       HandlerPreconditions::requireNotEmpty($message, "Can't parse message.");
       return $this->service->updateMessage($userIds[0], $msgCollId, $message, $requestItem->getToken());
     }

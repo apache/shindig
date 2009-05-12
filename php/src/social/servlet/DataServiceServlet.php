@@ -110,6 +110,13 @@ class DataServiceServlet extends ApiServlet {
     //uri example: /social/rest/people/@self   /gadgets/api/rest/cache/invalidate
     $servletRequest = array(
         'url' => substr($_SERVER["REQUEST_URI"], strpos($_SERVER["REQUEST_URI"], '/rest') + 5));
+    // Php version 5.2.9(linux) doesn't set HTTP_RAW_POST_DATA properly.
+    if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+      $tmp = file_get_contents('php://input');
+      if (!empty($tmp)) {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $tmp;  
+      }
+    }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       $servletRequest['postData'] = $GLOBALS['HTTP_RAW_POST_DATA'];
       if (get_magic_quotes_gpc()) {
