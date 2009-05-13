@@ -64,7 +64,6 @@
         <exclude>NOTICE</exclude>
         <exclude>README</exclude>
       </excludes>
-      <lineEnding>unix</lineEnding>
     </fileSet>
     <fileSet>
       <outputDirectory>shindig-${pom.version}-php</outputDirectory>
@@ -97,7 +96,6 @@
         <exclude>*.sh</exclude>
         <exclude>*.bat</exclude>
       </excludes>
-      <lineEnding>unix</lineEnding>
     </fileSet>
     <!-- Using the temp container.php created by Maven using Antrun plugin to rewrite
       default configuration to release structure -->
@@ -109,7 +107,6 @@
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
       </excludes>
-      <lineEnding>unix</lineEnding>
     </fileSet>
   </fileSets>
 </assembly>
