@@ -54,7 +54,6 @@
         <exclude>*.patch</exclude>
         <exclude>*.diff</exclude>
       </excludes>
-      <lineEnding>unix</lineEnding>
     </fileSet>
   </fileSets>
 </assembly>
