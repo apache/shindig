@@ -247,7 +247,6 @@ class SigningFetcher extends RemoteContentFetcher {
     if ($canonParamName == "output" || $canonParamName == "httpmethod" || $canonParamName == "authz" || $canonParamName == "st" || $canonParamName == "headers" || $canonParamName == "url" || $canonParamName == "contenttype" || $canonParamName == "postdata" || $canonParamName == "numentries" || $canonParamName == "getsummaries" || $canonParamName == "signowner" || $canonParamName == "signviewer" || $canonParamName == "gadget" || $canonParamName == "bypassspeccache" || substr($canonParamName, 0, 5) == "oauth" || substr($canonParamName, 0, 6) == "xoauth" || substr($canonParamName, 0, 9) == "opensocial") {
       return false;
     }
-    // make a last sanity check on the key of the data by using a regular expression
-    return ereg(SigningFetcher::$ALLOWED_PARAM_NAME, $canonParamName);
+    return true;
   }
 }

@@ -156,7 +156,7 @@ class GadgetFeatureRegistry {
    */
   private function processFile($file) {
     $feature = null;
-    if (File::exists($file)) {
+    if (!empty($file) && File::exists($file)) {
       if (($content = file_get_contents($file))) {
         $feature = $this->parse($content, dirname($file));
       }

@@ -62,7 +62,7 @@ class RemoteContentRequest {
    * @var string
    */
   private $authType;
-  
+
   /**
    * @var OAuthRequestParams
    */
@@ -290,11 +290,11 @@ class RemoteContentRequest {
   public function getToken() {
     return $this->token;
   }
-  
+
   public function setOAuthRequestParams(OAuthRequestParams $params) {
     $this->oauthParams = $params;
   }
-  
+
   /**
    * @return OAuthRequestParams
    */
@@ -352,7 +352,7 @@ class RemoteContentRequest {
   public function isStrictNoCache() {
     $cacheControl = $this->getResponseHeader('Cache-Control');
     if ($cacheControl != null) {
-      $directives = split(',', $cacheControl);
+      $directives = explode(',', $cacheControl);
       foreach ($directives as $directive) {
         if (strcasecmp($directive, 'no-cache') == 0
             || strcasecmp($directive, 'no-store') == 0

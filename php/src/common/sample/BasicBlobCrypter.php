@@ -115,12 +115,7 @@ class BasicBlobCrypter extends BlobCrypter {
 
   private function deserialize($plain) {
     $map = array();
-    $items = split("[&=]", $plain);
-    for ($i = 0; $i < count($items);) {
-      $key = urldecode($items[$i ++]);
-      $value = urldecode($items[$i ++]);
-      $map[$key] = $value;
-    }
+    parse_str($plain, $map);
     return $map;
   }
 
