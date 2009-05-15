@@ -204,6 +204,9 @@ os.setIdentifierResolver = function(resolver) {
  * @return {Object|String}
  */
 os.getFromContext = function(context, name, opt_default) {
+  if (!context) {
+    return opt_default;
+  }
   var ret;
   // Check if this is a context object.
   if (context.vars_ && context.data_) {
@@ -238,6 +241,11 @@ os.getFromContext = function(context, name, opt_default) {
     } else {
       ret = "";
     }
+  } else if (opt_default && os.isArray(opt_default) && !os.isArray(ret) && 
+      ret.list && os.isArray(ret.list)) {
+    // If we were trying to get an array, but got a JSON object with an
+    // array property "list", return that instead.
+    ret = ret.list;    
   }
   return ret;
 };
@@ -317,8 +325,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
         var outName = os.attributeMap_.hasOwnProperty(name) ? 
             os.attributeMap_[name] : name;
         var substitution =
-            (os.attributeMap_[name] ||
-                opt_customTag && os.globalDisallowedAttributes_[outName]) ?
+            (os.attributeMap_[name]) ?
             null : os.parseAttribute_(value);
 
         if (substitution) {
@@ -361,8 +368,10 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
               value.charAt(value.length - 1) == '}') {
               value = value.substring(2, value.length - 1);
             }
-            // In special attributes, default value is null.
-            value = os.transformExpression_(value, 'null');
+            // In special attributes, default value is empty array for repeats,
+            // null for others
+            value = os.transformExpression_(value, 
+                name == 'repeat' ? os.VAR_emptyArray : 'null');
           } else if (outName == 'class') {
             // In IE, we must set className instead of class.
             to.setAttribute('className', value);
@@ -654,6 +663,7 @@ os.transformLiteral_ = function(string) {
  * Parses an attribute value into a JS expression. "Hello, ${user}!" becomes
  * "Hello, " + user + "!".
  *
+ * @param {string} value Attribute value to parse
  * TODO: Rename to parseExpression()
  */
 os.parseAttribute_ = function(value) {
@@ -676,7 +686,8 @@ os.parseAttribute_ = function(value) {
     if (!expr) {
       expr = VAR_this;
     }
-    parts.push('(' + os.transformExpression_(expr) + ')');
+    parts.push('(' + 
+        os.transformExpression_(expr) + ')');
     text = match[3];
     match = text.match(substRex);
   }
@@ -839,7 +850,11 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
     var iden = identifiers[i];
     parts = os.breakUpParens(iden);
     if (!parts) {
-      output = os.wrapSingleIdentifier(iden, output, opt_default);
+      if (i == identifiers.length - 1) {
+        output = os.wrapSingleIdentifier(iden, output, opt_default);
+      } else {
+        output = os.wrapSingleIdentifier(iden, output);
+      }
     } else {
       buffer.length = 0;
       buffer.push(os.wrapSingleIdentifier(parts[0], output));

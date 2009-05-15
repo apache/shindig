@@ -111,6 +111,10 @@ os.defineBuiltinTags = function() {
     callbacks.push(createClosure(node, func));
   }
   os.registerAttribute_("onAttach", processOnAttach);
+  os.registerAttribute_("onCreate", processOnAttach);
+  os.registerAttribute_("oncreate", processOnAttach);
+  os.registerAttribute_("x-oncreate", processOnAttach);
+  os.registerAttribute_("x-onCreate", processOnAttach);
 };
 
 os.defineBuiltinTags();

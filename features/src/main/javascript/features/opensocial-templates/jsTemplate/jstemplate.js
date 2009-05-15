@@ -909,7 +909,7 @@ function jstGetTemplate(name, opt_loadHtmlFn) {
  */
 function jstGetTemplateOrDie(name, opt_loadHtmlFn) {
   var x = jstGetTemplate(name, opt_loadHtmlFn);
-  check(x !== null);
+  //check(x !== null);
   return /** @type Element */(x);
 }
 
@@ -1016,7 +1016,7 @@ JstProcessor.prototype.logState_ = function(
     }
     if (jstAttributeValues) {
       msg += '<tr><td>' + 'attr:' +
-      '</td><td>' + jsToSource(jstAttributeValues) + '</td></tr>';
+      '</td><td>' + /*jsToSource*/(jstAttributeValues) + '</td></tr>';
     }
     msg += '</tbody></table><br/>';
     this.logs_.push(msg);

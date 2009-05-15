@@ -194,7 +194,7 @@ function testLoopNullDefaultValue() {
   var src = '<div repeat="foo">a</div>';
   var template = os.compileTemplateString(src);
   var select = template.templateRoot_.firstChild.getAttribute("jsselect");
-  assertEquals("$_ir($context, 'foo', null)", select); 
+  assertEquals("$_ir($context, 'foo', $_ea)", select); 
 }
 
 function testGetFromContext() {

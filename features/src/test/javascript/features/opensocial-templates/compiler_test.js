@@ -53,24 +53,27 @@ function testSubstitution() {
  *    "foo(bar)[baz]"
  */
 function testWrapIdentifiers() {
-  assertEquals("$_ir($_ir($context, 'foo'), 'bar')", 
+  assertEquals("$_ir($_ir($context, 'foo'), 'bar')",
       os.wrapIdentifiersInExpression("foo.bar"));
 
   assertEquals("$_ir($_ir($context, 'data'), 'array')()",
       os.wrapIdentifiersInExpression("data.array()"));
 
-  assertEquals("$_ir($_ir($context, 'data')(), 'array')", 
+  assertEquals("$_ir($_ir($context, 'data')(), 'array')",
       os.wrapIdentifiersInExpression('data().array'));
 
-  // Check that namespaced tags are treated as single identifiers.      
-  assertEquals("$_ir($context, 'os:Item')", 
+  // Check that namespaced tags are treated as single identifiers.
+  assertEquals("$_ir($context, 'os:Item')",
       os.wrapIdentifiersInExpression("os:Item"));
-      
-  // Check that a colon surrounded by spaces is not treated as 
-  // part of identifier 
-  assertEquals("$_ir($context, 'foo') ? $_ir($context, 'bar') : " + 
+
+  // Check that a colon surrounded by spaces is not treated as
+  // part of identifier
+  assertEquals("$_ir($context, 'foo') ? $_ir($context, 'bar') : " +
       "$_ir($context, 'baz')",
       os.wrapIdentifiersInExpression("foo ? bar : baz"));
+
+  assertEquals("$_ir($_ir($context, 'viewer'), 'foo', $_ea)",
+      os.wrapIdentifiersInExpression("viewer.foo", "$_ea"));
 }
 
 function testTransformVariables() {
@@ -127,7 +130,7 @@ function testCopyAttributes() {
  */
 function testTbodyInjection() {
   var src, check, template, output;
-  
+
   // One row.
   src = "<table><tr><td>foo</td></tr></table>";
   check = "<table><tbody><tr><td>foo</td></tr></tbody></table>";
@@ -136,25 +139,25 @@ function testTbodyInjection() {
   output = output.toLowerCase();
   output = output.replace(/\s/g, '');
   assertEquals(check, output);
-  
+
   // Two rows.
   src = "<table><tr><td>foo</td></tr><tr><td>bar</td></tr></table>";
-  check = "<table><tbody><tr><td>foo</td></tr>" + 
+  check = "<table><tbody><tr><td>foo</td></tr>" +
       "<tr><td>bar</td></tr></tbody></table>";
   template = os.compileTemplateString(src);
   output = template.templateRoot_.innerHTML;
   output = output.toLowerCase();
   output = output.replace(/\s/g, '');
-  assertEquals(check, output);  
+  assertEquals(check, output);
 };
 
 function testEventHandlers() {
   var src, template, output;
-  
+
   window['testEvent'] = function(value) {
     window['testValue'] = value;
   };
-  
+
   // Static handler
   src = "<button onclick=\"testEvent(true)\">Foo</button>";
   template = os.compileTemplateString(src);
@@ -165,7 +168,7 @@ function testEventHandlers() {
   output.firstChild.click();
   document.body.removeChild(output);
   assertEquals(true, window['testValue']);
-  
+
   // Dynamic handler
   src = "<button onclick=\"testEvent('${title}')\">Foo</button>";
   template = os.compileTemplateString(src);
@@ -175,13 +178,13 @@ function testEventHandlers() {
   window['testValue'] = false;
   output.firstChild.click();
   document.body.removeChild(output);
-  assertEquals('foo', window['testValue']); 
+  assertEquals('foo', window['testValue']);
 };
 
 function testNestedIndex() {
   var src, template, output;
-  
-  src = '<table><tr repeat="${list}" var="row" context="x">' + 
+
+  src = '<table><tr repeat="${list}" var="row" context="x">' +
       '<td repeat="${row}" context="y">${x.Index},${y.Index}</td></tr></table>';
   template = os.compileTemplateString(src);
   output = template.render({ list: [ ['a', 'b'], ['c', 'd'] ] });
@@ -193,12 +196,12 @@ function testLoopNullDefaultValue() {
   var src = '<div repeat="foo">a</div>';
   var template = os.compileTemplateString(src);
   var select = template.templateRoot_.firstChild.getAttribute("jsselect");
-  assertEquals("$_ir($context, 'foo', null)", select); 
+  assertEquals("$_ir($context, 'foo', $_ea)", select);
 };
 /*
 function testEmbed() {
   var src, template, output;
-  
+
   src = '<embed sRc="http://www.youtube.com/v/${$my.movie}&amp;hl=en" type="application/x-shockwave-flash" wmode="transparent" height="${$my.height}" width="${$my.width}"/>';
   template = os.compileTemplateString(src);
   src = '<img sRc="http://www.youtube.com/v/${$my.movie}&amp;hl=en" type="application/x-shockwave-flash" wmode="transparent" height="${$my.height}" width="${$my.width}"/>';
@@ -211,18 +214,18 @@ function testGetFromContext() {
   // JSON context
   var context = { foo: 'bar' };
   assertEquals('bar', os.getFromContext(context, 'foo'));
-  
-  // JsEvalContext  
+
+  // JsEvalContext
   context = os.createContext(context);
   assertEquals('bar', os.getFromContext(context, 'foo'));
-  
+
   // Variable from context
   context.setVariable('baz', 'bing');
   assertEquals('bing', os.getFromContext(context, 'baz'));
-  
+
   // Non-existent value
   assertEquals('', os.getFromContext(context, 'title'));
-  
+
   // Non-existent value with default
   assertEquals(null, os.getFromContext(context, 'title', null));
 };

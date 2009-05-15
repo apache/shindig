@@ -87,7 +87,14 @@ os.VAR_msg = "Msg";
 os.VAR_parentnode = "$parentnode";
 os.VAR_uniqueId = "$uniqueId";
 os.VAR_identifierresolver = "$_ir";
+os.VAR_emptyArray = "$_ea";
 os.VAR_callbacks = "$callbacks_";
+
+/**
+ * Reusable empty array instance
+ * IE6 PERF: To avoid creating empty arrays when they are needed. 
+ */
+os.EMPTY_ARRAY = [];
 
 /**
  * Regular expressions
@@ -244,14 +251,6 @@ os.getPrefMessage = function(key) {
     return null;
   }
   return os.gadgetPrefs_.getMsg(key);
-};
-
-/**
- * Globally disallowed dynamic attributes. These are the attributes where
- * ${} notation will be ignored reguardless of the tag.
- */
-os.globalDisallowedAttributes_ = {
-  'data': 1
 };
 
 /**

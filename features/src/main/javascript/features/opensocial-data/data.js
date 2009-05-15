@@ -533,18 +533,38 @@ opensocial.data.transformSpecialValue = function(value) {
 
 
 /**
+ * Parses a string of comma-separated field names and adds the resulting array
+ * (if any) to the params object.
+ * @param {object} params The params object used to construct an Opensocial
+ * DataRequest
+ * @param {string} fieldStr A string containing comma-separated field names
+ */
+opensocial.data.addFieldsToParams_ = function(params, fieldsStr) {
+  if (!fieldsStr) {
+    return;
+  }
+  var fields = fieldsStr.replace(/(^\s*|\s*$)/g, '').split(/\s*,\s*/);
+  params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = fields;
+};
+
+
+/**
  * Anonymous function defines OpenSocial specific requests.
  * Automatically called when this file is loaded.
  */
 (function() {
   opensocial.data.registerRequestHandler("os:ViewerRequest", function(descriptor) {
-    var req = opensocial.data.getCurrentAPIRequest().newFetchPersonRequest("VIEWER");
+    var params = {};
+    opensocial.data.addFieldsToParams_(params, descriptor.getAttribute("fields"));
+    var req = opensocial.data.getCurrentAPIRequest().newFetchPersonRequest("VIEWER", params);
     // TODO: Support @fields param.
     opensocial.data.addToCurrentAPIRequest(req, descriptor.key);
   });
 
   opensocial.data.registerRequestHandler("os:OwnerRequest", function(descriptor) {
-    var req = opensocial.data.getCurrentAPIRequest().newFetchPersonRequest("OWNER");
+    var params = {};
+    opensocial.data.addFieldsToParams_(params, descriptor.getAttribute("fields"));
+    var req = opensocial.data.getCurrentAPIRequest().newFetchPersonRequest("OWNER", params);
     // TODO: Support @fields param.
     opensocial.data.addToCurrentAPIRequest(req, descriptor.key);
   });
@@ -557,9 +577,11 @@ opensocial.data.transformSpecialValue = function(value) {
     if (groupId != "@self") {
       idSpec.groupId = opensocial.data.transformSpecialValue(groupId);
     }
+    var params = {};
+    opensocial.data.addFieldsToParams_(params, descriptor.getAttribute("fields"));
     // TODO: Support other params.
     var req = opensocial.data.getCurrentAPIRequest().newFetchPeopleRequest(
-        opensocial.newIdSpec(idSpec));
+        opensocial.newIdSpec(idSpec), params);
     // TODO: Annotate with the @ids property.
     opensocial.data.addToCurrentAPIRequest(req, descriptor.key);
   });

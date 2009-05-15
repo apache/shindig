@@ -245,8 +245,7 @@ os.Container.renderInlineTemplates = function(opt_doc) {
       if (requiredData) {
         // This template will render when the specified data is available.
         var keys = requiredData.split(/[\, ]+/);
-        var callback = os.Container.createRenderClosure(template, el, null,
-            os.Container.getDefaultContext());
+        var callback = os.Container.createRenderClosure(template, el);
         if ("true" == node.getAttribute("autoUpdate")) {
           opensocial.data.DataContext.registerListener(keys, callback);
         } else {
@@ -274,7 +273,17 @@ os.Container.renderInlineTemplates = function(opt_doc) {
 os.Container.createRenderClosure = function(template, element, opt_data,
     opt_context) {
  var closure = function() {
-   template.renderInto(element, opt_data, opt_context);
+   var context = opt_context;
+   var data = opt_data;
+   if (!context) {
+     if (data) {
+       context = os.createContext(data);
+     } else {
+       context = os.Container.getDefaultContext();
+       data = context.data_;
+     }
+   }
+   template.renderInto(element, data, context);
  };
  return closure;
 };

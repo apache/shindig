@@ -37,7 +37,6 @@ This should not be used in a production setting.
     <script src="jsTemplate/util.js"></script>
     <script src="jsTemplate/jsevalcontext.js"></script>
     <script src="jsTemplate/jstemplate.js"></script>
-    <script src="jstemplate_debug.js"></script>
     <script src="base.js"></script>
     <script src="namespaces.js"></script>
     <script src="util.js"></script>

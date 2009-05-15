@@ -29,6 +29,7 @@ os.createContext = function(data, opt_globals) {
   var context = JsEvalContext.create(data);
   context.setVariable(os.VAR_callbacks, []);
   context.setVariable(os.VAR_identifierresolver, os.getFromContext);
+  context.setVariable(os.VAR_emptyArray, os.EMPTY_ARRAY);
   if (opt_globals) {
     for (var global in opt_globals) {
       if (opt_globals.hasOwnproperty(global)) {
