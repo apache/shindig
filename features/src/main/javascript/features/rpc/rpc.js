@@ -24,20 +24,173 @@
 var gadgets = gadgets || {};
 
 /**
- * @static
- * @class Provides operations for making rpc calls.
- * @name gadgets.rpc
+ * Transports used by core gadgets.rpc code to actually pass messages.
+ * each transport implements the same "interface" exposing hooks that
+ * the core library calls at strategic points to set up and use
+ * the transport. This isn't really an interface, of course, since
+ * the code is JS and each transport is a singleton, but it's treated
+ * as such by core code.
+ *
+ * The methods each transport must implement are:
+ * + getCode(): returns a string identifying the transport. For debugging.
+ * + isParentVerifiable(): indicates (via boolean) whether the method
+ *     has the property that its relay URL verifies for certain the
+ *     receiver's protocol://host:port.
+ * + init(processFn): Performs any global initialization needed. Called
+ *     before any other gadgets.rpc methods are invoked. processFn is
+ *     the function in gadgets.rpc used to process an rpc packet. Returns
+ *     true if successful, false otherwise.
+ * + setup(receiverId, token): Performs per-receiver initialization, if any.
+ *     receiverId will be '..' for gadget-to-container. Returns true if
+ *     successful, false otherwise.
+ * + call(targetId, from, rpc): Invoked to send an actual
+ *     message to the given targetId, with the given serviceName, from
+ *     the sender identified by 'from'. Payload is an rpc packet. Returns
+ *     true if successful, false otherwise.
  */
-gadgets.rpc = function() {
-  // General constants.
-  var CALLBACK_NAME = '__cb';
-  var DEFAULT_NAME = '';
-  var ACK_SVC_NAME = '__ack';
+gadgets.transports = {};
 
-  // Consts for FrameElement.
-  var FE_G2C_CHANNEL = '__g2c_rpc';
-  var FE_C2G_CHANNEL = '__c2g_rpc';
+/**
+ * Transport for browsers that support native messaging (various implementations
+ * of the HTML5 postMessage method). Officially defined at
+ * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
+ *
+ * postMessage is a native implementation of XDC. A page registers that
+ * it would like to receive messages by listening the the "message" event
+ * on the window (document in DPM) object. In turn, another page can
+ * raise that event by calling window.postMessage (document.postMessage
+ * in DPM) with a string representing the message and a string
+ * indicating on which domain the receiving page must be to receive
+ * the message. The target page will then have its "message" event raised
+ * if the domain matches and can, in turn, check the origin of the message
+ * and process the data contained within.
+ *
+ *   wpm: postMessage on the window object.
+ *      - Internet Explorer 8+
+ *      - Safari (latest nightlies as of 26/6/2008)
+ *      - Firefox 3+
+ *      - Opera 9+
+ */
+gadgets.transports.Wpm = function() {
+  return {
+    getCode: function() {
+      return 'wpm';
+    },
 
+    isParentVerifiable: function() {
+      return true;
+    },
+
+    init: function(processFn) {
+      // Set up native postMessage handler.
+      window.addEventListener('message', function(packet) {
+        // TODO validate packet.domain for security reasons
+        processFn(gadgets.json.parse(packet.data));
+      }, false);
+      return true;
+    },
+
+    setup: function(receiverId, token) {
+      // No receiver-specific setup: global only.
+      return true;
+    },
+
+    call: function(targetId, from, rpc) {
+      var targetWin = targetId === '..' ? parent : frames[targetId];
+      var relay = gadgets.rpc.getRelayUrl(targetId);
+      if (relay) {
+        targetWin.postMessage(gadgets.json.stringify(rpc), relay);
+      }
+      return true;
+    }
+  };
+}();
+
+/**
+ * Similar transport to WPM, but uses document element instead.
+ * This was implemented by Opera 8 before the WPM standard was complete.
+ *
+ *     dpm: postMessage on the document object.
+ *        - Opera 8+
+ */
+gadgets.transports.Dpm = function() {
+  return {
+    getCode: function() {
+      return 'dpm';
+    },
+
+    isParentVerifiable: function() {
+      return false;
+    },
+
+    init: function(processFn) {
+      // Set up native postMessage handler.
+      window.addEventListener('message', function(packet) {
+        // TODO validate packet.domain for security reasons
+        processFn(gadgets.json.parse(packet.data));
+      }, false);
+      return true;
+    },
+
+    setup: function(receiverId, token) {
+      // No receiver-specific setup: global only.
+      return true;
+    },
+
+    call: function(targetId, from, rpc) {
+      var targetDoc = targetId === '..' ? parent.document :
+                                          frames[targetId].document;
+      targetDoc.postMessage(gadgets.json.stringify(rpc));
+      return true;
+    }
+  };
+}();
+
+/**
+ * For Internet Explorer before version 8, the security model allows anyone
+ * parent to set the value of the "opener" property on another window,
+ * with only the receiving window able to read it.
+ * This method is dubbed "Native IE XDC" (NIX).
+ *
+ * This method works by placing a handler object in the "opener" property
+ * of a gadget when the container sets up the authentication information
+ * for that gadget (by calling setAuthToken(...)). At that point, a NIX
+ * wrapper is created and placed into the gadget by calling
+ * theframe.contentWindow.opener = wrapper. Note that as a result, NIX can
+ * only be used by a container to call a particular gadget *after* that
+ * gadget has called the container at least once via NIX.
+ *
+ * The NIX wrappers in this RPC implementation are instances of a VBScript
+ * class that is created when this implementation loads. The reason for
+ * using a VBScript class stems from the fact that any object can be passed
+ * into the opener property.
+ * While this is a good thing, as it lets us pass functions and setup a true
+ * bidirectional channel via callbacks, it opens a potential security hole
+ * by which the other page can get ahold of the "window" or "document"
+ * objects in the parent page and in turn wreak havok. This is due to the
+ * fact that any JS object useful for establishing such a bidirectional
+ * channel (such as a function) can be used to access a function
+ * (eg. obj.toString, or a function itself) created in a specific context,
+ * in particular the global context of the sender. Suppose container
+ * domain C passes object obj to gadget on domain G. Then the gadget can
+ * access C's global context using:
+ * var parentWindow = (new obj.toString.constructor("return window;"))();
+ * Nulling out all of obj's properties doesn't fix this, since IE helpfully
+ * restores them to their original values if you do something like:
+ * delete obj.toString; delete obj.toString;
+ * Thus, we wrap the necessary functions and information inside a VBScript
+ * object. VBScript objects in IE, like DOM objects, are in fact COM
+ * wrappers when used in JavaScript, so we can safely pass them around
+ * without worrying about a breach of context while at the same time
+ * allowing them to act as a pass-through mechanism for information
+ * and function calls. The implementation details of this VBScript wrapper
+ * can be found in the setupChannel() method below.
+ *
+ *   nix: Internet Explorer-specific window.opener trick.
+ *     - Internet Explorer 6
+ *     - Internet Explorer 7
+ */
+gadgets.transports.Nix = function() {
   // Consts for NIX. VBScript doesn't
   // allow items to start with _ for some reason,
   // so we need to make these names quite unique, as
@@ -47,259 +200,24 @@ gadgets.rpc = function() {
   var NIX_HANDLE_MESSAGE = 'GRPC____NIXVBS_handle_message';
   var NIX_CREATE_CHANNEL = 'GRPC____NIXVBS_create_channel';
 
-  // Consts for RMR, including time in ms RMR uses to poll for
-  // its relay frame to be created, and the max # of polls it does.
-  var RMR_SEARCH_TIMEOUT = 500;
-  var RMR_MAX_POLLS = 10;
-
   // JavaScript reference to the NIX VBScript wrappers.
   // Gadgets will have but a single channel under
   // nix_channels['..'] while containers will have a channel
   // per gadget stored under the gadget's ID.
   var nix_channels = {};
 
-  // JavaScript references to the channel objects used by RMR.
-  // Gadgets will have but a single channel under
-  // rmr_channels['..'] while containers will have a channel
-  // per gadget stored under the gadget's ID.
-  var rmr_channels = {};
+  return {
+    getCode: function() {
+      return 'nix';
+    },
 
-  var services = {};
-  var iframePool = [];
-  var relayUrl = {};
-  var useLegacyProtocol = {};
-  var authToken = {};
-  var callId = 0;
-  var callbacks = {};
-  var setup = {};
-  var sameDomain = {};
-  var params = {};
+    isParentVerifiable: function() {
+      return false;
+    },
 
-  // Load the authentication token for speaking to the container
-  // from the gadget's parameters, or default to '0' if not found.
-  if (gadgets.util) {
-    params = gadgets.util.getUrlParameters();
-  }
-
-  authToken['..'] = params.rpctoken || params.ifpctok || 0;
-
-  /*
-   * Return a short code representing the best available cross-domain
-   * message transport available to the browser.
-   *
-   * + For those browsers that support native messaging (various implementations
-   *   of the HTML5 postMessage method), use that. Officially defined at
-   *   http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html.
-   *
-   *   postMessage is a native implementation of XDC. A page registers that
-   *   it would like to receive messages by listening the the "message" event
-   *   on the window (document in DPM) object. In turn, another page can
-   *   raise that event by calling window.postMessage (document.postMessage
-   *   in DPM) with a string representing the message and a string
-   *   indicating on which domain the receiving page must be to receive
-   *   the message. The target page will then have its "message" event raised
-   *   if the domain matches and can, in turn, check the origin of the message
-   *   and process the data contained within.
-   *
-   *     wpm: postMessage on the window object.
-   *        - Internet Explorer 8+
-   *        - Safari (latest nightlies as of 26/6/2008)
-   *        - Firefox 3+
-   *        - Opera 9+
-   *
-   *     dpm: postMessage on the document object.
-   *        - Opera 8+
-   *
-   * + For Internet Explorer before version 8, the security model allows anyone
-   *   parent to set the value of the "opener" property on another window,
-   *   with only the receiving window able to read it.
-   *   This method is dubbed "Native IE XDC" (NIX).
-   *
-   *   This method works by placing a handler object in the "opener" property
-   *   of a gadget when the container sets up the authentication information
-   *   for that gadget (by calling setAuthToken(...)). At that point, a NIX
-   *   wrapper is created and placed into the gadget by calling
-   *   theframe.contentWindow.opener = wrapper. Note that as a result, NIX can
-   *   only be used by a container to call a particular gadget *after* that
-   *   gadget has called the container at least once via NIX.
-   *
-   *   The NIX wrappers in this RPC implementation are instances of a VBScript
-   *   class that is created when this implementation loads. The reason for
-   *   using a VBScript class stems from the fact that any object can be passed
-   *   into the opener property.
-   *   While this is a good thing, as it lets us pass functions and setup a true
-   *   bidirectional channel via callbacks, it opens a potential security hole
-   *   by which the other page can get ahold of the "window" or "document"
-   *   objects in the parent page and in turn wreak havok. This is due to the
-   *   fact that any JS object useful for establishing such a bidirectional
-   *   channel (such as a function) can be used to access a function
-   *   (eg. obj.toString, or a function itself) created in a specific context,
-   *   in particular the global context of the sender. Suppose container
-   *   domain C passes object obj to gadget on domain G. Then the gadget can
-   *   access C's global context using:
-   *   var parentWindow = (new obj.toString.constructor("return window;"))();
-   *   Nulling out all of obj's properties doesn't fix this, since IE helpfully
-   *   restores them to their original values if you do something like:
-   *   delete obj.toString; delete obj.toString;
-   *   Thus, we wrap the necessary functions and information inside a VBScript
-   *   object. VBScript objects in IE, like DOM objects, are in fact COM
-   *   wrappers when used in JavaScript, so we can safely pass them around
-   *   without worrying about a breach of context while at the same time
-   *   allowing them to act as a pass-through mechanism for information
-   *   and function calls. The implementation details of this VBScript wrapper
-   *   can be found in the setupChannel() method below.
-   *
-   *     nix: Internet Explorer-specific window.opener trick.
-   *       - Internet Explorer 6
-   *       - Internet Explorer 7
-   *
-   * + For Gecko-based browsers, the security model allows a child to call a
-   *   function on the frameElement of the iframe, even if the child is in
-   *   a different domain. This method is dubbed "frameElement" (fe).
-   *
-   *   The ability to add and call such functions on the frameElement allows
-   *   a bidirectional channel to be setup via the adding of simple function
-   *   references on the frameElement object itself. In this implementation,
-   *   when the container sets up the authentication information for that gadget
-   *   (by calling setAuth(...)) it as well adds a special function on the
-   *   gadget's iframe. This function can then be used by the gadget to send
-   *   messages to the container. In turn, when the gadget tries to send a
-   *   message, it checks to see if this function has its own function stored
-   *   that can be used by the container to call the gadget. If not, the
-   *   function is created and subsequently used by the container.
-   *   Note that as a result, FE can only be used by a container to call a
-   *   particular gadget *after* that gadget has called the container at
-   *   least once via FE.
-   *
-   *     fe: Gecko-specific frameElement trick.
-   *        - Firefox 1+
-   *
-   * + For WebKit-based browsers, the security model does not allow for any
-   *   known "native" hacks for conducting cross browser communication. However,
-   *   a variation of the IFPC (see below) can be used, entitled "RMR". RMR is
-   *   a technique that uses the resize event of the iframe to indicate that a
-   *   message was sent (instead of the much slower/performance heavy polling
-   *   technique used when a defined relay page is not avaliable). Simply put,
-   *   RMR uses the same "pass the message by the URL hash" trick that IFPC
-   *   uses to send a message, but instead of having an active relay page that
-   *   runs a piece of code when it is loaded, RMR merely changes the URL
-   *   of the relay page (which does not even have to exist on the domain)
-   *   and then notifies the other party by resizing the relay iframe. RMR
-   *   exploits the fact that iframes in the dom of page A can be resized
-   *   by page A while the onresize event will be fired in the DOM of page B,
-   *   thus providing a single bit channel indicating "message sent to you".
-   *   This method has the added benefit that the relay need not be active,
-   *   nor even exist: a 404 suffices just as well.
-   *
-   *     rmr: WebKit-specific resizing trick.
-   *        - Safari 2+
-   *        - Chrome 1
-   *
-   * + For all others, we have a fallback mechanism known as "ifpc". IFPC
-   *   exploits the fact that while same-origin policy prohibits a frame from
-   *   accessing members on a window not in the same domain, that frame can,
-   *   however, navigate the window heirarchy (via parent). This is exploited by
-   *   having a page on domain A that wants to talk to domain B create an iframe
-   *   on domain B pointing to a special relay file and with a message encoded
-   *   after the hash (#). This relay, in turn, finds the page on domain B, and
-   *   can call a receipt function with the message given to it. The relay URL
-   *   used by each caller is set via the gadgets.rpc.setRelayUrl(..) and
-   *   *must* be called before the call method is used.
-   *
-   *     ifpc: Iframe-based method, utilizing a relay page, to send a message.
-   *        - No known major browsers still use this method. Slated for removal.
-   */
-  function getRelayChannel() {
-    return typeof window.postMessage === 'function' ? 'wpm' :
-           typeof document.postMessage === 'function' ? 'dpm' :
-           window.ActiveXObject ? 'nix' :
-           navigator.userAgent.indexOf('WebKit') > 0 ? 'rmr' :
-           navigator.product === 'Gecko' ? 'fe' :
-           'ifpc';
-  }
-
-  /**
-   * Helper function to process an RPC request
-   * @param {Object} rpc RPC request object
-   * @private
-   */
-  function process(rpc) {
-    //
-    // RPC object contents:
-    //   s: Service Name
-    //   f: From
-    //   c: The callback ID or 0 if none.
-    //   a: The arguments for this RPC call.
-    //   t: The authentication token.
-    //
-    if (rpc && typeof rpc.s === 'string' && typeof rpc.f === 'string' &&
-        rpc.a instanceof Array) {
-
-      // Validate auth token.
-      if (authToken[rpc.f]) {
-        // We don't do type coercion here because all entries in the authToken
-        // object are strings, as are all url params. See setAuthToken(...).
-        if (authToken[rpc.f] !== rpc.t) {
-          throw new Error("Invalid auth token. " +
-              authToken[rpc.f] + " vs " + rpc.t);
-        }
-      }
-
-      // If there is a callback for this service, attach a callback function
-      // to the rpc context object for asynchronous rpc services.
-      //
-      // Synchronous rpc request handlers should simply ignore it and return a
-      // value as usual.
-      // Asynchronous rpc request handlers, on the other hand, should pass its
-      // result to this callback function and not return a value on exit.
-      //
-      // For example, the following rpc handler passes the first parameter back
-      // to its rpc client with a one-second delay.
-      //
-      // function asyncRpcHandler(param) {
-      //   var me = this;
-      //   setTimeout(function() {
-      //     me.callback(param);
-      //   }, 1000);
-      // }
-      if (rpc.c) {
-        rpc.callback = function(result) {
-          gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
-        };
-      }
-
-      // Call the requested RPC service.
-      var result = (services[rpc.s] ||
-                    services[DEFAULT_NAME]).apply(rpc, rpc.a);
-
-      // If the rpc request handler returns a value, immediately pass it back
-      // to the callback. Otherwise, do nothing, assuming that the rpc handler
-      // will make an asynchronous call later.
-      if (rpc.c && typeof result !== 'undefined') {
-        gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
-      }
-    }
-  }
-
-  /**
-   * Conducts any initial global work necessary to setup the
-   * channel type chosen.
-   */
-  function setupChannel() {
-    // If the channel type is one of the native
-    // postMessage based ones, setup the handler to receive
-    // messages.
-    if (relayChannel === 'dpm' || relayChannel === 'wpm') {
-      window.addEventListener('message', function(packet) {
-        // TODO validate packet.domain for security reasons
-        process(gadgets.json.parse(packet.data));
-      }, false);
-    }
-
-    // If the channel type is NIX, we need to ensure the
-    // VBScript wrapper code is in the page and that the
-    // global Javascript handlers have been set.
-    if (relayChannel === 'nix') {
+    init: function(processFn) {
+      // Ensure VBScript wrapper code is in the page and that the
+      // global Javascript handlers have been set.
       // VBScript methods return a type of 'unknown' when
       // checked via the typeof operator in IE. Fortunately
       // for us, this only applies to COM objects, so we
@@ -307,13 +225,13 @@ gadgets.rpc = function() {
       if (typeof window[NIX_GET_WRAPPER] !== 'unknown') {
         window[NIX_HANDLE_MESSAGE] = function(data) {
           window.setTimeout(
-              function() { process(gadgets.json.parse(data)) }, 0);
+              function() { processFn(gadgets.json.parse(data)) }, 0);
         };
 
         window[NIX_CREATE_CHANNEL] = function(name, channel, token) {
           // Verify the authentication token of the gadget trying
           // to create a channel for us.
-          if (authToken[name] === token) {
+          if (gadgets.rpc.getAuthToken(name) === token) {
             nix_channels[name] = channel;
           }
         };
@@ -390,126 +308,212 @@ gadgets.rpc = function() {
         try {
           window.execScript(vbscript, 'vbscript');
         } catch (e) {
-          // Fall through to IFPC.
-          relayChannel = 'ifpc';
+          return false;
         }
       }
-    }
-  }
+      return true;
+    },
 
-  /**
-   * Helper method returning a canonicalized schema://host[:port] for
-   * a given input URL, provided as a string. Used to compute convenient
-   * relay URLs and to determine whether a call is coming from the same
-   * domain as its receiver (bypassing the try/catch capability detection
-   * flow, thereby obviating Firebug and other tools reporting an exception).
-   *
-   * @param {string} url Base URL to canonicalize.
-   */
-  function getDomainRoot(url) {
-    if (!url) {
-      return "";
-    }
-    url = url.toLowerCase();
-    if (url.indexOf("//") == 0) {
-      url = window.location.protocol + ":" + url;
-    }
-    if (url.indexOf("http://") != 0 &&
-        url.indexOf("https://") != 0) {
-      // Assumed to be schemaless. Default to current protocol.
-      url = window.location.protocol + "://" + url;
-    }
-    // At this point we guarantee that "://" is in the URL and defines
-    // current protocol. Skip past this to search for host:port.
-    var host = url.substring(url.indexOf("://") + 3);
-
-    // Find the first slash char, delimiting the host:port.
-    var slashPos = host.indexOf("/");
-    if (slashPos != -1) {
-      host = host.substring(0, slashPos);
-    }
-
-    var protocol = url.substring(0, url.indexOf("://"));
-
-    // Use port only if it's not default for the protocol.
-    var portStr = "";
-    var portPos = host.indexOf(":");
-    if (portPos != -1) {
-      var port = host.substring(portPos + 1);
-      host = host.substring(0, portPos);
-      if ((protocol === "http" && port !== "80") ||
-          (protocol === "https" && port !== "443")) {
-        portStr = ":" + port;
+    setup: function(receiverId, token) {
+      if (receiverId === '..') {
+        return true;
       }
-    }
-
-    // Return <protocol>://<host>[<port>]
-    return protocol + "://" + host + portStr;
-  }
-
-  // Pick the most efficient RPC relay mechanism
-  var relayChannel = getRelayChannel();
-
-  // Conduct any setup necessary for the chosen channel.
-  setupChannel();
-
-  // Create the Default RPC handler.
-  services[DEFAULT_NAME] = function() {
-    gadgets.warn('Unknown RPC service: ' + this.s);
-  };
-
-  // Create a Special RPC handler for callbacks.
-  services[CALLBACK_NAME] = function(callbackId, result) {
-    var callback = callbacks[callbackId];
-    if (callback) {
-      delete callbacks[callbackId];
-      callback(result);
-    }
-  };
-
-  /**
-   * Conducts any frame-specific work necessary to setup
-   * the channel type chosen. This method is called when
-   * the container page first registers the gadget in the
-   * RPC mechanism. Gadgets, in turn, will complete the setup
-   * of the channel once they send their first messages.
-   */
-  function setupFrame(frameId, token) {
-    if (setup[frameId]) {
-      return;
-    }
-
-    if (relayChannel === 'fe') {
       try {
-        var frame = document.getElementById(frameId);
+        var frame = document.getElementById(receiverId);
+        var wrapper = window[NIX_GET_WRAPPER](receiverId, token);
+        frame.contentWindow.opener = wrapper;
+      } catch (e) {
+        return false;
+      }
+      return true;
+    },
+
+    call: function(targetId, from, rpc) {
+      try {
+        if (from !== '..') {
+          // Call from gadget to the container.
+          var handler = nix_channels['..'];
+
+          // If the gadget has yet to retrieve a reference to
+          // the NIX handler, try to do so now. We don't do a
+          // typeof(window.opener.GetAuthToken) check here
+          // because it means accessing that field on the COM object, which,
+          // being an internal function reference, is not allowed.
+          // "in" works because it merely checks for the prescence of
+          // the key, rather than actually accessing the object's property.
+          // This is just a sanity check, not a validity check.
+          if (!handler && window.opener && "GetAuthToken" in window.opener) {
+            handler = window.opener;
+
+            // Create the channel to the parent/container.
+            // First verify that it knows our auth token to ensure it's not
+            // an impostor.
+            if (handler.GetAuthToken() == gadgets.rpc.getAuthToken('..')) {
+              // Auth match - pass it back along with our wrapper to finish.
+              // own wrapper and our authentication token for co-verification.
+              var token = gadgets.rpc.getAuthToken('..');
+              handler.CreateChannel(window[NIX_GET_WRAPPER]('..', token),
+                                    token);
+              // Set channel handler
+              nix_channels['..'] = handler;
+              window.opener = null;
+            }
+          }
+
+          // If we have a handler, call it.
+          if (handler) {
+            handler.SendMessage(gadgets.json.stringify(rpc));
+          }
+        } else {
+          // Call from container to a gadget[targetId].
+          // If we have a handler, call it.
+          if (nix_channels[targetId]) {
+            nix_channels[targetId].SendMessage(gadgets.json.stringify(rpc));
+          }
+        }
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+  };
+}();
+
+/*
+ * For Gecko-based browsers, the security model allows a child to call a
+ * function on the frameElement of the iframe, even if the child is in
+ * a different domain. This method is dubbed "frameElement" (fe).
+ *
+ * The ability to add and call such functions on the frameElement allows
+ * a bidirectional channel to be setup via the adding of simple function
+ * references on the frameElement object itself. In this implementation,
+ * when the container sets up the authentication information for that gadget
+ * (by calling setAuth(...)) it as well adds a special function on the
+ * gadget's iframe. This function can then be used by the gadget to send
+ * messages to the container. In turn, when the gadget tries to send a
+ * message, it checks to see if this function has its own function stored
+ * that can be used by the container to call the gadget. If not, the
+ * function is created and subsequently used by the container.
+ * Note that as a result, FE can only be used by a container to call a
+ * particular gadget *after* that gadget has called the container at
+ * least once via FE.
+ *
+ *   fe: Gecko-specific frameElement trick.
+ *      - Firefox 1+
+ */
+gadgets.transports.FrameElement = function() {
+  // Consts for FrameElement.
+  var FE_G2C_CHANNEL = '__g2c_rpc';
+  var FE_C2G_CHANNEL = '__c2g_rpc';
+  var process;
+
+  return {
+    getCode: function() {
+      return 'fe';
+    },
+
+    isParentVerifiable: function() {
+      return false;
+    },
+  
+    init: function(processFn) {
+      // No global setup.
+      process = processFn;
+      return true;
+    },
+
+    setup: function(receiverId, token) {
+      if (receiverId === '..') {
+        return true;
+      }
+      try {
+        var frame = document.getElementById(receiverId);
         frame[FE_G2C_CHANNEL] = function(args) {
           process(gadgets.json.parse(args));
         };
-      } catch (e1) {
-        // Something went wrong. System will fallback to IFPC.
+      } catch (e) {
+        return false;
       }
-    }
+      return true;
+    },
 
-    if (relayChannel === 'nix') {
+    call: function(targetId, from, rpc) {
       try {
-        var frame = document.getElementById(frameId);
-        var wrapper = window[NIX_GET_WRAPPER](frameId, token);
-        frame.contentWindow.opener = wrapper;
-      } catch (e2) {
-        // Something went wrong. System will fallback to IFPC.
-      }
-    }
+        if (from !== '..') {
+          // Call from gadget to the container.
+          var fe = window.frameElement;
 
-    if (relayChannel === 'rmr') {
-      try {
-        setupRmr(frameId);
-      } catch (e3) {
-        // Something went wrong. System will fallback to IFPC.
-      }
-    }
+          if (typeof fe[FE_G2C_CHANNEL] === 'function') {
+            // Complete the setup of the FE channel if need be.
+            if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
+              fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
+                process(gadgets.json.parse(args));
+              };
+            }
 
-    setup[frameId] = true;
-  }
+            // Conduct the RPC call.
+            fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
+            return;
+          }
+        } else {
+          // Call from container to gadget[targetId].
+          var frame = document.getElementById(targetId);
+
+          if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
+              typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
+
+            // Conduct the RPC call.
+            frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
+            return;
+          }
+        }
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+  };
+}();
+
+/*
+ * For older WebKit-based browsers, the security model does not allow for any
+ * known "native" hacks for conducting cross browser communication. However,
+ * a variation of the IFPC (see below) can be used, entitled "RMR". RMR is
+ * a technique that uses the resize event of the iframe to indicate that a
+ * message was sent (instead of the much slower/performance heavy polling
+ * technique used when a defined relay page is not avaliable). Simply put,
+ * RMR uses the same "pass the message by the URL hash" trick that IFPC
+ * uses to send a message, but instead of having an active relay page that
+ * runs a piece of code when it is loaded, RMR merely changes the URL
+ * of the relay page (which does not even have to exist on the domain)
+ * and then notifies the other party by resizing the relay iframe. RMR
+ * exploits the fact that iframes in the dom of page A can be resized
+ * by page A while the onresize event will be fired in the DOM of page B,
+ * thus providing a single bit channel indicating "message sent to you".
+ * This method has the added benefit that the relay need not be active,
+ * nor even exist: a 404 suffices just as well.
+ *
+ *   rmr: WebKit-specific resizing trick.
+ *      - Safari 2+
+ *      - Chrome 1
+ */
+gadgets.transports.Rmr = function() {
+  // Consts for RMR, including time in ms RMR uses to poll for
+  // its relay frame to be created, and the max # of polls it does.
+  var RMR_SEARCH_TIMEOUT = 500;
+  var RMR_MAX_POLLS = 10;
+
+  // Special service name for RMR acknowledgements. This may be
+  // overwritten, but at caller's peril.
+  var ACK_SVC_NAME = '__ack';
+
+  // JavaScript references to the channel objects used by RMR.
+  // Gadgets will have but a single channel under
+  // rmr_channels['..'] while containers will have a channel
+  // per gadget stored under the gadget's ID.
+  var rmr_channels = {};
+  
+  var process;
 
   /**
    * Append an RMR relay frame to the document. This allows the receiver
@@ -538,7 +542,7 @@ gadgets.rpc = function() {
     } else {
       // Common gadget case: attaching header during in-gadget handshake,
       // when we may still be in script in head. Attach onload.
-      if (gadgets && gadgets.util && gadgets.util.registerOnLoadHandler) {
+      if (gadgets.util && gadgets.util.registerOnLoadHandler) {
         gadgets.util.registerOnLoadHandler(function() { appendFn(); });
       } else {
         var oldOnloadFn = window.onload;
@@ -583,7 +587,7 @@ gadgets.rpc = function() {
     // browsers treat 404s as legitimate for the purposes of
     // this communication.
     var relayUri =
-        getDomainRoot(relayUrl[frameId]) + '/robots.txt';
+        gadgets.rpc.getDomainRoot(gadgets.rpc.getRelayUrl(frameId)) + '/robots.txt';
 
     rmr_channels[frameId] = {
       frame: channelFrame,
@@ -608,7 +612,7 @@ gadgets.rpc = function() {
       // Number of messages received and processed from the sender.
       // This is the number that accompanies every ACK to tell the
       // sender to clear its queue.
-      recvId: 0,
+      recvId: 0
     };
 
     if (frameId !== '..') {
@@ -709,7 +713,7 @@ gadgets.rpc = function() {
         // or if we don't have anything new to send, just return.
         // Note that we don't short-return if we're ACKing just-received
         // messages.
-        return;
+        return true;
       }
 
       if (handler.queue.length > 0) {
@@ -727,19 +731,16 @@ gadgets.rpc = function() {
         handler.frame.style.width = newWidth + 'px';
         handler.width = newWidth;
 
-        // Done.
-        return;
+        // Done!
       } catch (e) {
         // Something about location-setting or resizing failed.
         // This should never happen, but if it does, fall back to
-        // IFPC for now.
+        // the default transport.
+        return false;
       }
     }
 
-    // If we have reached this point, something has failed
-    // with the RMR method, so we default to using
-    // IFPC for this call.
-    callIfpc(targetId, serviceName, from, gadgets.json.stringify(rpc));
+    return true;
   }
 
   /**
@@ -912,6 +913,57 @@ gadgets.rpc = function() {
     return true;
   }
 
+  return {
+    getCode: function() {
+      return 'rmr';
+    },
+
+    isParentVerifiable: function() {
+      return true;
+    },
+
+    init: function(processFn) {
+      // No global setup.
+      process = processFn;
+      return true;
+    },
+
+    setup: function(receiverId, token) {
+      try {
+        setupRmr(receiverId);
+      } catch (e) {
+        gadgets.warn('Caught exception setting up RMR: ' + e);
+        return false;
+      }
+      return true;
+    },
+
+    call: function(targetId, from, rpc) {
+      return callRmr(targetId, rpc.s, from, rpc);
+    }
+  };
+}();
+
+/*
+ * For all others, we have a fallback mechanism known as "ifpc". IFPC
+ * exploits the fact that while same-origin policy prohibits a frame from
+ * accessing members on a window not in the same domain, that frame can,
+ * however, navigate the window heirarchy (via parent). This is exploited by
+ * having a page on domain A that wants to talk to domain B create an iframe
+ * on domain B pointing to a special relay file and with a message encoded
+ * after the hash (#). This relay, in turn, finds the page on domain B, and
+ * can call a receipt function with the message given to it. The relay URL
+ * used by each caller is set via the gadgets.rpc.setRelayUrl(..) and
+ * *must* be called before the call method is used.
+ *
+ *   ifpc: Iframe-based method, utilizing a relay page, to send a message.
+ *      - No known major browsers still use this method, but it remains
+ *        useful as a catch-all fallback for the time being.
+ */
+gadgets.transports.Ifpc = function() {
+  var iframePool = [];
+  var callId = 0;
+
   /**
    * Encodes arguments for the legacy IFPC wire format.
    *
@@ -919,12 +971,163 @@ gadgets.rpc = function() {
    * @return {String} the encoded args
    */
   function encodeLegacyData(args) {
-    var stringify = gadgets.json.stringify;
     var argsEscaped = [];
     for(var i = 0, j = args.length; i < j; ++i) {
-      argsEscaped.push(encodeURIComponent(stringify(args[i])));
+      argsEscaped.push(encodeURIComponent(gadgets.json.stringify(args[i])));
     }
     return argsEscaped.join('&');
+  }
+
+  /**
+   * Helper function to emit an invisible IFrame.
+   * @param {String} src SRC attribute of the IFrame to emit.
+   * @private
+   */
+  function emitInvisibleIframe(src) {
+    var iframe;
+    // Recycle IFrames
+    for (var i = iframePool.length - 1; i >=0; --i) {
+      var ifr = iframePool[i];
+      try {
+        if (ifr && (ifr.recyclable || ifr.readyState === 'complete')) {
+          ifr.parentNode.removeChild(ifr);
+          if (window.ActiveXObject) {
+            // For MSIE, delete any iframes that are no longer being used. MSIE
+            // cannot reuse the IFRAME because a navigational click sound will
+            // be triggered when we set the SRC attribute.
+            // Other browsers scan the pool for a free iframe to reuse.
+            iframePool[i] = ifr = null;
+            iframePool.splice(i, 1);
+          } else {
+            ifr.recyclable = false;
+            iframe = ifr;
+            break;
+          }
+        }
+      } catch (e) {
+        // Ignore; IE7 throws an exception when trying to read readyState and
+        // readyState isn't set.
+      }
+    }
+    // Create IFrame if necessary
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.style.border = iframe.style.width = iframe.style.height = '0px';
+      iframe.style.visibility = 'hidden';
+      iframe.style.position = 'absolute';
+      iframe.onload = function() { this.recyclable = true; };
+      iframePool.push(iframe);
+    }
+    iframe.src = src;
+    setTimeout(function() { document.body.appendChild(iframe); }, 0);
+  }
+
+  return {
+    getCode: function() {
+      return 'ifpc';
+    },
+
+    isParentVerifiable: function() {
+      return true;
+    },
+
+    init: function(processFn) {
+      // No global setup.
+      return true;
+    },
+
+    setup: function(receiverId, token) {
+      // No frame-specific setup: config drives all behavior.
+      return true;
+    },
+
+    call: function(targetId, from, rpc) {
+      // Retrieve the relay file used by IFPC. Note that
+      // this must be set before the call, and so we conduct
+      // an extra check to ensure it is not blank.
+      var relay = gadgets.rpc.getRelayUrl(targetId);
+      ++callId;
+
+      if (!relay) {
+        gadgets.warn('No relay file assigned for IFPC');
+        return;
+      }
+
+      // The RPC mechanism supports two formats for IFPC (legacy and current).
+      var src = null;
+      if (rpc.l) {
+        // Use legacy protocol.
+        // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
+        var callArgs = rpc.a;
+        src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
+               encodeLegacyData([from, serviceName, '', '', from].concat(
+                 callArgs))])].join('');
+      } else {
+        // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
+        src = [relay, '#', targetId, '&', from, '@', callId,
+               '&1&0&', encodeURIComponent(gadgets.json.stringify(rpc))].join('');
+      }
+
+      // Conduct the IFPC call by creating the Iframe with
+      // the relay URL and appended message.
+      emitInvisibleIframe(src);
+      return true;
+    }
+  };
+}();
+
+/**
+ * @static
+ * @class Provides operations for making rpc calls.
+ * @name gadgets.rpc
+ */
+gadgets.rpc = function() {
+  // General constants.
+  var CALLBACK_NAME = '__cb';
+  var DEFAULT_NAME = '';
+
+  var services = {};
+  var relayUrl = {};
+  var useLegacyProtocol = {};
+  var authToken = {};
+  var callId = 0;
+  var callbacks = {};
+  var setup = {};
+  var sameDomain = {};
+  var params = {};
+  var isGadget = false;
+  var fallbackTransport = gadgets.transports.Ifpc;
+
+  // Load the authentication token for speaking to the container
+  // from the gadget's parameters, or default to '0' if not found.
+  if (gadgets.util) {
+    params = gadgets.util.getUrlParameters();
+  }
+
+  authToken['..'] = params.rpctoken || params.ifpctok || 0;
+
+  /*
+   * Return a transport representing the best available cross-domain
+   * message-passing mechanism available to the browser.
+   *
+   * Transports are selected on a cascading basis determined by browser
+   * capability and other checks. The order of preference is:
+   * 1. wpm: Uses window.postMessage standard.
+   * 2. dpm: Uses document.postMessage, similar to wpm but pre-standard.
+   * 3. nix: Uses IE-specific browser hacks.
+   * 4. rmr: Signals message passing using relay file's onresize handler.
+   * 5. fe: Uses FF2-specific window.frameElement hack.
+   * 6. ifpc: Sends messages via active load of a relay file.
+   *
+   * See each transport's commentary/documentation for details.
+   */
+  function getTransport() {
+    return typeof window.postMessage === 'function' ? gadgets.transports.Wpm :
+           typeof document.postMessage === 'function' ? gadgets.transports.Dpm :
+           window.ActiveXObject ? gadgets.transports.Nix :
+           navigator.userAgent.indexOf('WebKit') > 0 ? gadgets.transports.Rmr :
+           navigator.product === 'Gecko' ? gadgets.transports.FrameElement :
+           gadgets.transports.Ifpc;
   }
 
   /**
@@ -984,211 +1187,99 @@ gadgets.rpc = function() {
       // If the rpc request handler returns a value, immediately pass it back
       // to the callback. Otherwise, do nothing, assuming that the rpc handler
       // will make an asynchronous call later.
-      if (rpc.c && typeof result != 'undefined') {
+      if (rpc.c && typeof result !== 'undefined') {
         gadgets.rpc.call(rpc.f, CALLBACK_NAME, null, rpc.c, result);
       }
     }
   }
 
   /**
-   * Attempts to conduct an RPC call to the specified
-   * target with the specified data via the NIX
-   * method. If this method fails, the system attempts again
-   * using the known default of IFPC.
+   * Helper method returning a canonicalized schema://host[:port] for
+   * a given input URL, provided as a string. Used to compute convenient
+   * relay URLs and to determine whether a call is coming from the same
+   * domain as its receiver (bypassing the try/catch capability detection
+   * flow, thereby obviating Firebug and other tools reporting an exception).
    *
-   * @param {String} targetId Module Id of the RPC service provider.
-   * @param {String} serviceName Name of the service to call.
-   * @param {String} from Module Id of the calling provider.
-   * @param {Object} rpcData The RPC data for this call.
+   * @param {string} url Base URL to canonicalize.
    */
-  function callNix(targetId, serviceName, from, rpcData) {
-    try {
-      if (from !== '..') {
-        // Call from gadget to the container.
-        var handler = nix_channels['..'];
+  function getDomainRoot(url) {
+    if (!url) {
+      return "";
+    }
+    url = url.toLowerCase();
+    if (url.indexOf("//") == 0) {
+      url = window.location.protocol + ":" + url;
+    }
+    if (url.indexOf("http://") != 0 &&
+        url.indexOf("https://") != 0) {
+      // Assumed to be schemaless. Default to current protocol.
+      url = window.location.protocol + "://" + url;
+    }
+    // At this point we guarantee that "://" is in the URL and defines
+    // current protocol. Skip past this to search for host:port.
+    var host = url.substring(url.indexOf("://") + 3);
 
-        // If the gadget has yet to retrieve a reference to
-        // the NIX handler, try to do so now. We don't do a
-        // typeof(window.opener.GetAuthToken) check here
-        // because it means accessing that field on the COM object, which,
-        // being an internal function reference, is not allowed.
-        // "in" works because it merely checks for the prescence of
-        // the key, rather than actually accessing the object's property.
-        // This is just a sanity check, not a validity check.
-        if (!handler && window.opener && "GetAuthToken" in window.opener) {
-          handler = window.opener;
-
-          // Create the channel to the parent/container.
-          // First verify that it knows our auth token to ensure it's not
-          // an impostor.
-          if (handler.GetAuthToken() === authToken['..']) {
-            // Auth match - pass it back along with our wrapper to finish.
-            // own wrapper and our authentication token for co-verification.
-            var token = authToken['..'];
-            handler.CreateChannel(window[NIX_GET_WRAPPER]('..', token),
-                                  token);
-            // Set channel handler
-            nix_channels['..'] = handler;
-            window.opener = null;
-          }
-        }
-
-        // If we have a handler, call it.
-        if (handler) {
-          handler.SendMessage(rpcData);
-          return;
-        }
-      } else {
-        // Call from container to a gadget[targetId].
-
-        // If we have a handler, call it.
-        if (nix_channels[targetId]) {
-          nix_channels[targetId].SendMessage(rpcData);
-          return;
-        }
-      }
-    } catch (e) {
+    // Find the first slash char, delimiting the host:port.
+    var slashPos = host.indexOf("/");
+    if (slashPos != -1) {
+      host = host.substring(0, slashPos);
     }
 
-    // If we have reached this point, something has failed
-    // with the NIX method, so we default to using
-    // IFPC for this call.
-    callIfpc(targetId, serviceName, from, rpcData);
-  }
+    var protocol = url.substring(0, url.indexOf("://"));
 
-  /**
-   * Attempts to conduct an RPC call to the specified
-   * target with the specified data via the FrameElement
-   * method. If this method fails, the system attempts again
-   * using the known default of IFPC.
-   *
-   * @param {String} targetId Module Id of the RPC service provider.
-   * @param {String} serviceName Service name to call.
-   * @param {String} from Module Id of the calling provider.
-   * @param {Object} rpcData The RPC data for this call.
-   * @param {Array.<Object>} callArgs Original arguments to call()
-   */
-  function callFrameElement(targetId, serviceName, from, rpcData, callArgs) {
-    try {
-      if (from !== '..') {
-        // Call from gadget to the container.
-        var fe = window.frameElement;
-
-        if (typeof fe[FE_G2C_CHANNEL] === 'function') {
-          // Complete the setup of the FE channel if need be.
-          if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
-            fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
-              process(gadgets.json.parse(args));
-            };
-          }
-
-          // Conduct the RPC call.
-          fe[FE_G2C_CHANNEL](rpcData);
-          return;
-        }
-      } else {
-        // Call from container to gadget[targetId].
-        var frame = document.getElementById(targetId);
-
-        if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
-            typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
-
-          // Conduct the RPC call.
-          frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](rpcData);
-          return;
-        }
-      }
-    } catch (e) {
-    }
-
-    // If we have reached this point, something has failed
-    // with the FrameElement method, so we default to using
-    // IFPC for this call.
-    callIfpc(targetId, serviceName, from, rpcData, callArgs);
-  }
-
-  /**
-   * Conducts an RPC call to the specified
-   * target with the specified data via the IFPC
-   * method.
-   *
-   * @param {String} targetId Module Id of the RPC service provider.
-   * @param {String} serviceName Service name to call.
-   * @param {String} from Module Id of the calling provider.
-   * @param {Object} rpcData The RPC data for this call.
-   * @param {Array.<Object>} callArgs Original arguments to call()
-   */
-  function callIfpc(targetId, serviceName, from, rpcData, callArgs) {
-    // Retrieve the relay file used by IFPC. Note that
-    // this must be set before the call, and so we conduct
-    // an extra check to ensure it is not blank.
-    var relay = gadgets.rpc.getRelayUrl(targetId);
-
-    if (!relay) {
-      gadgets.warn('No relay file assigned for IFPC');
-    }
-
-    // The RPC mechanism supports two formats for IFPC (legacy and current).
-    var src = null;
-    if (useLegacyProtocol[targetId]) {
-      // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
-      src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
-             encodeLegacyData([from, serviceName, '', '', from].concat(
-               callArgs))])].join('');
-    } else {
-      // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
-      src = [relay, '#', targetId, '&', from, '@', callId,
-             '&1&0&', encodeURIComponent(rpcData)].join('');
-    }
-
-    // Conduct the IFPC call by creating the Iframe with
-    // the relay URL and appended message.
-    emitInvisibleIframe(src);
-  }
-
-
-  /**
-   * Helper function to emit an invisible IFrame.
-   * @param {String} src SRC attribute of the IFrame to emit.
-   * @private
-   */
-  function emitInvisibleIframe(src) {
-    var iframe;
-    // Recycle IFrames
-    for (var i = iframePool.length - 1; i >=0; --i) {
-      var ifr = iframePool[i];
-      try {
-        if (ifr && (ifr.recyclable || ifr.readyState === 'complete')) {
-          ifr.parentNode.removeChild(ifr);
-          if (window.ActiveXObject) {
-            // For MSIE, delete any iframes that are no longer being used. MSIE
-            // cannot reuse the IFRAME because a navigational click sound will
-            // be triggered when we set the SRC attribute.
-            // Other browsers scan the pool for a free iframe to reuse.
-            iframePool[i] = ifr = null;
-            iframePool.splice(i, 1);
-          } else {
-            ifr.recyclable = false;
-            iframe = ifr;
-            break;
-          }
-        }
-      } catch (e) {
-        // Ignore; IE7 throws an exception when trying to read readyState and
-        // readyState isn't set.
+    // Use port only if it's not default for the protocol.
+    var portStr = "";
+    var portPos = host.indexOf(":");
+    if (portPos != -1) {
+      var port = host.substring(portPos + 1);
+      host = host.substring(0, portPos);
+      if ((protocol === "http" && port !== "80") ||
+          (protocol === "https" && port !== "443")) {
+        portStr = ":" + port;
       }
     }
-    // Create IFrame if necessary
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.style.border = iframe.style.width = iframe.style.height = '0px';
-      iframe.style.visibility = 'hidden';
-      iframe.style.position = 'absolute';
-      iframe.onload = function() { this.recyclable = true; };
-      iframePool.push(iframe);
+
+    // Return <protocol>://<host>[<port>]
+    return protocol + "://" + host + portStr;
+  }
+
+  // Pick the most efficient RPC relay mechanism.
+  var transport = getTransport();
+
+  window.setTimeout(function() {
+  }, 0);
+
+  // Create the Default RPC handler.
+  services[DEFAULT_NAME] = function() {
+    gadgets.warn('Unknown RPC service: ' + this.s);
+  };
+
+  // Create a Special RPC handler for callbacks.
+  services[CALLBACK_NAME] = function(callbackId, result) {
+    var callback = callbacks[callbackId];
+    if (callback) {
+      delete callbacks[callbackId];
+      callback(result);
     }
-    iframe.src = src;
-    setTimeout(function() { document.body.appendChild(iframe); }, 0);
+  };
+
+  /**
+   * Conducts any frame-specific work necessary to setup
+   * the channel type chosen. This method is called when
+   * the container page first registers the gadget in the
+   * RPC mechanism. Gadgets, in turn, will complete the setup
+   * of the channel once they send their first messages.
+   */
+  function setupFrame(frameId, token) {
+    if (setup[frameId]) {
+      return;
+    }
+
+    if (transport.setup(frameId, token) === false) {
+      transport = fallbackTransport;
+    }
+
+    setup[frameId] = true;
   }
 
   /**
@@ -1269,12 +1360,9 @@ gadgets.rpc = function() {
           // relay URL with host qualification.
           relayUrl['..'] = parentParam + config.rpc.parentRelayUrl;
 
-          // RMR requires active gadget-to-container initialization.
           // We assume that any rendering context where gadgets.config
           // is defined and a parent param is provided (gets here) is a gadget.
-          if (relayChannel === 'rmr') {
-            setupRmr('..');
-          }
+          isGadget = true;
         }
       }
       useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
@@ -1295,9 +1383,8 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     register: function(serviceName, handler) {
-      if (serviceName === CALLBACK_NAME ||
-          serviceName === ACK_SVC_NAME) {
-        throw new Error("Cannot overwrite callback/ack service");
+      if (serviceName === CALLBACK_NAME) {
+        throw new Error("Cannot overwrite callback service");
       }
 
       if (serviceName === DEFAULT_NAME) {
@@ -1315,9 +1402,8 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregister: function(serviceName) {
-      if (serviceName === CALLBACK_NAME ||
-          serviceName === ACK_SVC_NAME) {
-        throw new Error("Cannot delete callback/ack service");
+      if (serviceName === CALLBACK_NAME) {
+        throw new Error("Cannot delete callback service");
       }
 
       if (serviceName === DEFAULT_NAME) {
@@ -1336,7 +1422,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     registerDefault: function(handler) {
-      services[''] = handler;
+      services[DEFAULT_NAME] = handler;
     },
 
     /**
@@ -1346,7 +1432,7 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregisterDefault: function() {
-      delete services[''];
+      delete services[DEFAULT_NAME];
     },
 
     /**
@@ -1356,8 +1442,8 @@ gadgets.rpc = function() {
      * At present this means IFPC or WPM.
      */
     forceParentVerifiable: function() {
-      if (relayChannel !== 'wpm' && relayChannel !== 'rmr') {
-        relayChannel = 'ifpc';
+      if (!transport.isParentVerifiable()) {
+        transport = gadgets.transports.Ifpc;
       }
     },
 
@@ -1386,13 +1472,13 @@ gadgets.rpc = function() {
         from = window.name;
       }
 
-      // Not used by legacy, create it anyway...
       var rpc = {
         s: serviceName,
         f: from,
         c: callback ? callId : 0,
         a: Array.prototype.slice.call(arguments, 3),
-        t: authToken[targetId]
+        t: authToken[targetId],
+        l: useLegacyProtocol[targetId]
       };
 
       // If target is on the same domain, call method directly
@@ -1400,45 +1486,18 @@ gadgets.rpc = function() {
         return;
       }
 
-      var rpcData = gadgets.json.stringify(rpc);
-      var channelType = relayChannel;
+      var channel = transport;
 
       // If we are told to use the legacy format, then we must
       // default to IFPC.
       if (useLegacyProtocol[targetId]) {
-        channelType = 'ifpc';
+        channel = fallbackTransport;
       }
 
-      switch (channelType) {
-        case 'dpm': // use document.postMessage.
-          var targetDoc = targetId === '..' ? parent.document :
-                                              frames[targetId].document;
-          targetDoc.postMessage(rpcData);
-          break;
-
-        case 'wpm': // use window.postMessage.
-          var targetWin = targetId === '..' ? parent : frames[targetId];
-          var relay = gadgets.rpc.getRelayUrl(targetId);
-          if (relay) {
-            targetWin.postMessage(rpcData, relay);
-          }
-          break;
-
-        case 'nix': // use NIX.
-          callNix(targetId, serviceName, from, rpcData);
-          break;
-
-        case 'fe': // use FrameElement.
-          callFrameElement(targetId, serviceName, from, rpcData, rpc.a);
-          break;
-
-        case 'rmr': // use RMR.
-          callRmr(targetId, serviceName, from, rpc);
-          break;
-
-        default: // use 'ifpc' as a fallback mechanism.
-          callIfpc(targetId, serviceName, from, rpcData, rpc.a);
-          break;
+      if (channel.call(targetId, from, rpc) === false) {
+        // Fall back to IFPC. This behavior may be removed as IFPC is as well.
+        transport = fallbackTransport;
+        transport.call(targetId, from, rpc);
       }
     },
 
@@ -1493,6 +1552,13 @@ gadgets.rpc = function() {
     },
 
     /**
+     * Helper method to retrieve the authToken for a given gadget.
+     */
+    getAuthToken: function(targetId) {
+      return authToken[targetId];
+    },
+
+    /**
      * Gets the RPC relay mechanism.
      * @return {String} RPC relay mechanism. See above for
      *   a list of supported types.
@@ -1500,11 +1566,12 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     getRelayChannel: function() {
-      return relayChannel;
+      return transport.getCode();
     },
 
     /**
      * Receives and processes an RPC request. (Not to be used directly.)
+     * Only used by IFPC.
      * @param {Array.<String>} fragment An RPC request fragment encoded as
      *        an array. The first 4 elements are target id, source id & call id,
      *        total packet number, packet id. The last element stores the actual
@@ -1530,6 +1597,31 @@ gadgets.rpc = function() {
       // Pass through to local process method but converting to a local Array
       rpc.a = Array.prototype.slice.call(rpc.a);
       window.setTimeout(function() { process(rpc); }, 0);
+    },
+
+    /**
+     * Helper method to get the protocol://host:port of an input URL.
+     */
+    getDomainRoot: getDomainRoot,
+
+    /**
+     * Internal-only method used to initialize gadgets.rpc.
+     */
+    init: function() {
+      // Conduct any global setup necessary for the chosen transport.
+      // Do so after gadgets.rpc definition to allow transport to access
+      // gadgets.rpc methods.
+      if (transport.init(process) === false) {
+        transport = fallbackTransport;
+      }
+      // Here, we add a hook for the transport to actively set up
+      // gadget -> container communication, if we're a gadget.
+      if (isGadget && transport.setup('..') === false) {
+        transport = fallbackTransport;
+      }
     }
   };
 }();
+
+// Initialize library/transport.
+gadgets.rpc.init();
