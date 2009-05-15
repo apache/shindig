@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,13 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.shindig.gadgets.oauth;
 
-package org.apache.shindig.auth;
+import com.google.inject.ImplementedBy;
 
-public class OAuthConstants {
-  public static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";
-  public static final String OAUTH_EXPIRES_IN = "oauth_expires_in";
-  public static final String OAUTH_BODY_HASH = "oauth_body_hash";
-  public static final String OAUTH_VERIFIER = "oauth_verifier";
-  public static final String OAUTH_CALLBACK_CONFIRMED = "oauth_callback_confirmed";
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
+
+/**
+ * Figures out the OAuth callback URL to send service providers.
+ */
+@ImplementedBy(GadgetOAuthCallbackGenerator.class)
+public interface OAuthCallbackGenerator {  
+  public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
+      HttpRequest request, OAuthResponseParams responseParams) throws OAuthRequestException;
 }

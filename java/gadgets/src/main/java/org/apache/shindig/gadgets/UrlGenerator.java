@@ -47,4 +47,10 @@ public interface UrlGenerator {
    * @return The generated iframe url.
    */
   String getIframeUrl(Gadget gadget);
+  
+  /**
+   * @return the oauthcallback URL on the gadget domain.  The returned URL may be absolute or
+   * it may be scheme relative.
+   */
+  String getGadgetDomainOAuthCallback(String container, String gadgetHost);
 }

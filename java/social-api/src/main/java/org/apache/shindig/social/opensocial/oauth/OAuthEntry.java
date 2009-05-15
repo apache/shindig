@@ -37,6 +37,7 @@ public class OAuthEntry implements Serializable {
 
   public String appId;
   public String callbackUrl;
+  public boolean callbackUrlSigned; // true if consumer supports OAuth 1.0a
   public String userId;
   public String token;
   public String tokenSecret;
@@ -51,6 +52,9 @@ public class OAuthEntry implements Serializable {
   public String domain;
   public String container;
   public String oauthVersion;
+  
+  public String callbackToken;
+  public int callbackTokenAttempts;
 
   public OAuthEntry() {}
 
@@ -61,6 +65,7 @@ public class OAuthEntry implements Serializable {
   public OAuthEntry(OAuthEntry old) {
     this.appId = old.appId;
     this.callbackUrl = old.callbackUrl;
+    this.callbackUrlSigned = old.callbackUrlSigned;
     this.userId = old.userId;
     this.token = old.token;
     this.tokenSecret= old.tokenSecret;
@@ -71,6 +76,8 @@ public class OAuthEntry implements Serializable {
     this.domain = old.domain;
     this.container = old.container;
     this.oauthVersion = old.oauthVersion;
+    this.callbackToken = old.callbackToken;
+    this.callbackTokenAttempts = old.callbackTokenAttempts;
   }
 
   public boolean isExpired() {

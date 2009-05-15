@@ -25,6 +25,7 @@ import com.google.inject.name.Named;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
+import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.social.core.oauth.OAuthSecurityToken;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
@@ -41,6 +42,14 @@ import net.oauth.OAuthServiceProvider;
 
 // Sample implementation for OAuth data store
 public class SampleOAuthDataStore implements OAuthDataStore {
+  // This needs to be long enough that an attacker can't guess it.  If the attacker can guess this
+  // value before they exceed the maximum number of attempts, they can complete a session fixation
+  // attack against a user.
+  private final int CALLBACK_TOKEN_LENGTH = 6;
+  
+  // We limit the number of trials before disabling the request token.
+  private final int CALLBACK_TOKEN_ATTEMPTS = 5;
+  
   // used to get samplecontainer data from canonicaldb.json
   private final JsonDbOpensocialService service;
   private final OAuthServiceProvider SERVICE_PROVIDER;
@@ -85,7 +94,8 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   }
 
   // Generate a valid requestToken for the given consumerKey
-  public OAuthEntry generateRequestToken(String consumerKey, String oauthVersion) {
+  public OAuthEntry generateRequestToken(String consumerKey, String oauthVersion,
+      String signedCallbackUrl) {
     OAuthEntry entry = new OAuthEntry();
     entry.appId = consumerKey;
     entry.consumerKey = consumerKey;
@@ -98,6 +108,10 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     entry.type = OAuthEntry.Type.REQUEST;
     entry.issueTime = new Date();
     entry.oauthVersion = oauthVersion;
+    if (signedCallbackUrl != null) {
+      entry.callbackUrlSigned = true;
+      entry.callbackUrl = signedCallbackUrl;
+    }
 
     oauthEntries.put(entry.token, entry);
     return entry;
@@ -127,11 +141,17 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     Preconditions.checkNotNull(entry);
     entry.authorized = true;
     entry.userId = Preconditions.checkNotNull(userId);
+    if (entry.callbackUrlSigned) {
+      entry.callbackToken = Crypto.getRandomDigits(CALLBACK_TOKEN_LENGTH);
+    }
   }
 
   public void disableToken(OAuthEntry entry) {
     Preconditions.checkNotNull(entry);
-    entry.type = OAuthEntry.Type.DISABLED;
+    ++entry.callbackTokenAttempts;
+    if (!entry.callbackUrlSigned || entry.callbackTokenAttempts >= CALLBACK_TOKEN_ATTEMPTS) {
+      entry.type = OAuthEntry.Type.DISABLED;
+    }
 
     oauthEntries.put(entry.token, entry);
   }

@@ -77,9 +77,19 @@ public interface SecurityToken {
    */
   public String getTrustedJson();
 
-
   /**
    * @return true if the token is for an anonymous viewer/owner
    */
   public boolean isAnonymous();
+  
+  /**
+   * @return the URL being used by the current request
+   * 
+   * The returned URL must contain at least protocol, host, and port.
+   * 
+   * The returned URL may contain path or query parameters.
+   * 
+   * @throws UnsupportedOperationException if the URL is not available.
+   */
+  public String getActiveUrl();
 }

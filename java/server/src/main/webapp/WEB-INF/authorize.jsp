@@ -80,7 +80,8 @@ The following application wants to access your account information<br/><br/>
 
 <form name="authZForm" action="authorize" method="POST">
   <input type="hidden" name="oauth_token" value="<%= token %>"/>
-  <input type="hidden" name="oauth_callback" value="<%= URLEncoder.encode(callback, "UTF-8") %>"/>
+  <input type="hidden" name="oauth_callback" value="<%= 
+    (callback != null ? URLEncoder.encode(callback, "UTF-8") : "") %>"/>
   <input type="submit" name="Authorize" value="Deny"/>
   <input type="submit" name="Authorize" value="Authorize"/>
 </form>

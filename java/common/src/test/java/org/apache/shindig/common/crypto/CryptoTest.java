@@ -19,6 +19,8 @@
 package org.apache.shindig.common.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
@@ -30,6 +32,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
 import java.security.GeneralSecurityException;
+import java.util.regex.Pattern;
 
 public class CryptoTest {
   public static junit.framework.Test suite() {
@@ -95,5 +98,13 @@ public class CryptoTest {
       byte[] plainText = Crypto.aes128cbcDecrypt(key, cipherText);
       assertArrayEquals("Array of length " + i, orig, plainText);
     }
+  }
+  
+  @Test
+  public void testRandomDigits() throws Exception {
+    Pattern digitPattern = Pattern.compile("^\\d+$");
+    String digits = Crypto.getRandomDigits(100);
+    assertEquals(100, digits.length());
+    assertTrue("Should be only digits: " + digits, digitPattern.matcher(digits).matches());
   }
 }

@@ -362,6 +362,6 @@ public class EndToEndTest {
 
   private BasicSecurityToken createToken(String owner, String viewer)
       throws BlobCrypterException {
-    return new BasicSecurityToken(owner, viewer, "test", "domain", "appUrl", "1", "default");
+    return new BasicSecurityToken(owner, viewer, "test", "domain", "appUrl", "1", "default", null);
   }
 }

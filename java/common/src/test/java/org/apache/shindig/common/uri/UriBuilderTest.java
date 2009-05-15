@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.common.uri;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -177,6 +178,26 @@ public class UriBuilderTest {
         .addQueryParameter("foo", "bar")
         .setFragment("foo");
     assertEquals("http://apache.org/shindig?hello=world&foo=bar#foo", builder.toString());
+  }
+
+  @Test
+  public void iterableQueryParameters() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .putQueryParameter("hello", Lists.newArrayList("world", "monde"))
+        .setFragment("foo");
+    assertEquals("http://apache.org/shindig?hello=world&hello=monde#foo", builder.toString());
+  }
+ 
+  @Test
+  public void removeQueryParameter() {
+    UriBuilder uri = UriBuilder.parse("http://www.example.com/foo?bar=baz&quux=baz");
+    uri.removeQueryParameter("bar");
+    assertEquals("http://www.example.com/foo?quux=baz", uri.toString());
+    uri.removeQueryParameter("quux");
+    assertEquals("http://www.example.com/foo", uri.toString());
   }
 
   @Test

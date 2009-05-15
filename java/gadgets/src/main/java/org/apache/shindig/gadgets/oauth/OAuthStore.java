@@ -52,15 +52,19 @@ public interface OAuthStore {
   public static class ConsumerInfo {
     private final OAuthConsumer consumer;
     private final String keyName;
+    private final String callbackUrl;
     
     /**
      * @param consumer the OAuth consumer
      * @param keyName the name of the key to use for this consumer (passed on query parameters to
      * help with key rotation.)
+     * @param callbackUrl callback URL associated with this consumer, likely to point to the
+     * shindig server.
      */
-    public ConsumerInfo(OAuthConsumer consumer, String keyName) {
+    public ConsumerInfo(OAuthConsumer consumer, String keyName, String callbackUrl) {
       this.consumer = consumer;
       this.keyName = keyName;
+      this.callbackUrl = callbackUrl;
     }
     
     public OAuthConsumer getConsumer() {
@@ -69,6 +73,10 @@ public interface OAuthStore {
     
     public String getKeyName() {
       return keyName;
+    }
+    
+    public String getCallbackUrl() {
+      return callbackUrl;
     }
   }
   

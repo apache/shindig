@@ -28,15 +28,18 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.SimpleOAuthValidator;
+import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 
+import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.auth.OAuthUtil.SignatureType;
 import org.apache.shindig.common.crypto.Crypto;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
@@ -70,7 +73,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public final static String RESOURCE_URL = SP_HOST + "/data";
   public final static String NOT_FOUND_URL = SP_HOST + "/404";
   public final static String ECHO_URL = SP_HOST + "/echo";
-
 
   public final static String CONSUMER_KEY = "consumer";
   public final static String CONSUMER_SECRET = "secret";
@@ -120,18 +122,24 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String userData;
     String sessionHandle;
     long issued;
+    String callbackUrl;
+    String verifier;
 
-    public TokenState(String tokenSecret, OAuthConsumer consumer) {
+    public TokenState(String tokenSecret, OAuthConsumer consumer, String callbackUrl) {
       this.tokenSecret = tokenSecret;
       this.consumer = consumer;
       this.state = State.PENDING;
       this.userData = null;
+      this.callbackUrl = callbackUrl;
     }
 
     public void approveToken() {
       // Waiting for the consumer to claim the token
       state = State.APPROVED_UNCLAIMED;
       issued = clock.currentTimeMillis();
+      if (callbackUrl != null) {
+        verifier = Crypto.getRandomString(8);
+      }
     }
 
     public void claimToken() {
@@ -306,12 +314,16 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     validateMessage(accessor, info, true);
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
+    String callbackUrl = info.message.getParameter(OAuth.OAUTH_CALLBACK);
     tokenState.put(
-        requestToken, new TokenState(requestTokenSecret, accessor.consumer));
-    String resp = OAuth.formEncode(OAuth.newList(
+        requestToken, new TokenState(requestTokenSecret, accessor.consumer, callbackUrl));
+    List<Parameter> responseParams = OAuth.newList(
         "oauth_token", requestToken,
-        "oauth_token_secret", requestTokenSecret));
-    return new HttpResponse(resp);
+        "oauth_token_secret", requestTokenSecret);
+    if (callbackUrl != null) {
+      responseParams.add(new Parameter(OAuthConstants.OAUTH_CALLBACK_CONFIRMED, "true"));
+    }
+    return new HttpResponse(OAuth.formEncode(responseParams));
   }
 
   private String hasExtraParams(OAuthMessage message) {
@@ -475,16 +487,22 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   /**
    * Used to fake a browser visit to approve a token.
-   * @param url
-   * @throws Exception
+   * 
+   * @return a redirect URL, which may or may not include an oauth verifier
    */
-  public void browserVisit(String url) throws Exception {
+  public String browserVisit(String url) throws Exception {
     ParsedUrl parsed = new ParsedUrl(url);
     String requestToken = parsed.getQueryParam("oauth_token");
     TokenState state = tokenState.get(requestToken);
     state.approveToken();
     // Not part of the OAuth spec, just a handy thing for testing.
     state.setUserData(parsed.getQueryParam("user_data"));
+    if (state.callbackUrl != null) {
+      UriBuilder callback = UriBuilder.parse(state.callbackUrl);
+      callback.addQueryParameter(OAuthConstants.OAUTH_VERIFIER, state.verifier);
+      return callback.toString();
+    }
+    return null;
   }
 
   public static class TokenPair {
@@ -506,7 +524,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public TokenPair getPreapprovedToken(String userData) {
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
-    TokenState state = new TokenState(requestTokenSecret, oauthConsumer);
+    TokenState state = new TokenState(requestTokenSecret, oauthConsumer, null);
     state.approveToken();
     state.setUserData(userData);
     tokenState.put(requestToken, state);
@@ -557,6 +575,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     validateMessage(accessor, info, true);
 
     if (state.getState() == State.APPROVED_UNCLAIMED) {
+      String sentVerifier = info.message.getParameter("oauth_verifier");
+      if (state.verifier != null && !state.verifier.equals(sentVerifier)) {
+        return makeOAuthProblemReport("bad_verifier", "wrong oauth verifier");
+      }
       state.claimToken();
     } else if (state.getState() == State.APPROVED) {
       // Verify can refresh

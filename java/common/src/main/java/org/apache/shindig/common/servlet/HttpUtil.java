@@ -16,15 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.servlet;
+package org.apache.shindig.common.servlet;
 
 import org.apache.shindig.common.util.TimeSource;
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.GadgetContext;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,6 +71,10 @@ public class HttpUtil {
   public static void setCachingHeaders(HttpServletResponse response, int ttl) {
     setCachingHeaders(response, ttl, false);
   }
+  
+  public static void setNoCache(HttpServletResponse response) {
+    setCachingHeaders(response, 0, false);
+  }
 
   /**
    * Sets HTTP headers that instruct the browser to cache content. Implementations should take care
@@ -100,25 +98,5 @@ public class HttpUtil {
         response.setHeader("Cache-Control", "public,max-age=" + Integer.toString(ttl));
       }
     }
-  }
-
-  /**
-   * Fetches js configuration for the given feature set & container.
-   *
-   * @param config The configuration to extract js config from.
-   * @param context The request context.
-   * @param features A set of all features needed.
-   */
-  public static Map<String, Object> getJsConfig(ContainerConfig config, GadgetContext context,
-      Collection<String> features) {
-    Map<String, Object> containerFeatures
-        = config.getMap(context.getContainer(), "gadgets.features");
-
-    Map<String, Object> out = new HashMap<String, Object>(features.size(), 1);
-    for (String requested : features) {
-      out.put(requested, containerFeatures.get(requested));
-    }
-
-    return out;
   }
 }

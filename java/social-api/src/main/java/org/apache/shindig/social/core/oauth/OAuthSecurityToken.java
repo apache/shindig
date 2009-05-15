@@ -92,4 +92,8 @@ public class OAuthSecurityToken implements SecurityToken {
   public boolean isAnonymous() {
     return false;
   }
+
+  public String getActiveUrl() {
+    throw new UnsupportedOperationException("No active URL available");
+  }
 }

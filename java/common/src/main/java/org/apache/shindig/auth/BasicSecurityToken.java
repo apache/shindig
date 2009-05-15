@@ -38,6 +38,8 @@ public class BasicSecurityToken implements SecurityToken {
 
   /** tool to use for signing and encrypting the token */
   private final BlobCrypter crypter = new BasicBlobCrypter(INSECURE_KEY);
+  
+  private final String activeUrl;
 
   private static final byte[] INSECURE_KEY =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -60,14 +62,16 @@ public class BasicSecurityToken implements SecurityToken {
    * @param maxAge max age of the token (in seconds)
    * @throws BlobCrypterException never
    */
-  public BasicSecurityToken(String token, int maxAge)
-  throws BlobCrypterException {
+  public BasicSecurityToken(String token, int maxAge, String activeUrl)
+      throws BlobCrypterException {
     this.token = token;
     this.tokenData = crypter.unwrap(token, maxAge);
+    this.activeUrl = activeUrl;
   }
 
   public BasicSecurityToken(String owner, String viewer, String app,
-      String domain, String appUrl, String moduleId, String container) throws BlobCrypterException {
+      String domain, String appUrl, String moduleId, String container, String activeUrl)
+      throws BlobCrypterException {
     tokenData = Maps.newHashMapWithExpectedSize(7);
     putNullSafe(OWNER_KEY, owner);
     putNullSafe(VIEWER_KEY, viewer);
@@ -77,6 +81,7 @@ public class BasicSecurityToken implements SecurityToken {
     putNullSafe(MODULE_KEY, moduleId);
     putNullSafe(CONTAINER_KEY, container);
     token = crypter.wrap(tokenData);
+    this.activeUrl = activeUrl;
   }
 
   private void putNullSafe(String key, String value) {
@@ -157,5 +162,12 @@ public class BasicSecurityToken implements SecurityToken {
    */
   public boolean isAnonymous() {
     return false;
+  }
+
+  public String getActiveUrl() {
+    if (activeUrl == null) {
+      throw new UnsupportedOperationException("No active URL available");
+    }
+    return activeUrl;
   }
 }

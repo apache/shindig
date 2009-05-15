@@ -76,10 +76,13 @@ public interface OAuthDataStore {
    * Generate a valid requestToken for the given consumerKey.
    *
    * @param consumerKey A valid consumer key
+   * @param signedCallbackUrl Callback URL sent from consumer, may be null.  If callbackUrl is not
+   *     null then the returned entry should have signedCallbackUrl set to true.
    * @return An OAuthEntry containing a valid request token.
    * @throws OAuthProblemException when the implementing class wants to control the error response
    */
-  OAuthEntry generateRequestToken(String consumerKey, String oauthVersion) throws OAuthProblemException;
+  OAuthEntry generateRequestToken(String consumerKey, String oauthVersion, String signedCallbackUrl)
+      throws OAuthProblemException;
 
 
   /**

@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.expect;
+
+import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.gadgets.oauth.OAuthCallbackState;
 import org.junit.Test;
 import org.junit.Assert;
 
@@ -35,5 +40,41 @@ public class OAuthCallbackServletTest extends ServletTestFixture {
     assertEquals("text/html; charset=UTF-8", this.recorder.getContentType());
     String body = this.recorder.getResponseAsString();
     Assert.assertNotSame("body is " + body, body.indexOf("window.close()"), -1);
+  }
+  
+  @Test
+  public void testServletWithCallback() throws Exception {
+    BlobCrypter crypter = new BasicBlobCrypter("00000000000000000000".getBytes());
+    OAuthCallbackState state = new OAuthCallbackState(crypter);
+    OAuthCallbackServlet servlet = new OAuthCallbackServlet();
+    servlet.setStateCrypter(crypter);    
+    state.setRealCallbackUrl("http://www.example.com/callback");
+    expect(request.getParameter("cs")).andReturn(state.getEncryptedState());
+    expect(request.getQueryString()).andReturn("cs=foo&bar=baz");
+    replay();
+    servlet.doGet(this.request, this.recorder);
+    verify();
+    assertEquals(302, this.recorder.getHttpStatusCode());
+    assertEquals("http://www.example.com/callback?bar=baz", this.recorder.getHeader("Location"));
+    String cacheControl = this.recorder.getHeader("Cache-Control");
+    assertEquals("private,max-age=3600", cacheControl);
+  }
+  
+  @Test
+  public void testServletWithCallback_noQueryParams() throws Exception {
+    BlobCrypter crypter = new BasicBlobCrypter("00000000000000000000".getBytes());
+    OAuthCallbackState state = new OAuthCallbackState(crypter);
+    OAuthCallbackServlet servlet = new OAuthCallbackServlet();
+    servlet.setStateCrypter(crypter);    
+    state.setRealCallbackUrl("http://www.example.com/callback");
+    expect(request.getParameter("cs")).andReturn(state.getEncryptedState());
+    expect(request.getQueryString()).andReturn("cs=foo");
+    replay();
+    servlet.doGet(this.request, this.recorder);
+    verify();
+    assertEquals(302, this.recorder.getHttpStatusCode());
+    assertEquals("http://www.example.com/callback", this.recorder.getHeader("Location"));
+    String cacheControl = this.recorder.getHeader("Cache-Control");
+    assertEquals("private,max-age=3600", cacheControl);
   }
 }

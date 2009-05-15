@@ -54,7 +54,7 @@ public class BlobCrypterSecurityTokenTest {
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = token.split(":");
     BlobCrypterSecurityToken t2 =
-        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1]);
+        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], null);
     assertNull(t2.getAppId(), t2.getAppId());
     assertNull(t2.getAppUrl(), t2.getAppUrl());
     assertEquals(DOMAIN, t2.getDomain());
@@ -64,6 +64,12 @@ public class BlobCrypterSecurityTokenTest {
     assertNull(t2.getTrustedJson(), t2.getTrustedJson());
     assertNull(t2.getUpdatedToken(), t2.getUpdatedToken());
     assertEquals(CONTAINER, t2.getContainer());
+    try {
+      t2.getActiveUrl();
+      fail("Should have thrown");
+    } catch (UnsupportedOperationException e) {
+      // pass
+    }
   }
 
   @Test
@@ -78,7 +84,7 @@ public class BlobCrypterSecurityTokenTest {
     assertTrue("should start with container: " + token, token.startsWith("container:"));
     String[] fields = token.split(":");
     BlobCrypterSecurityToken t2 =
-        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1]);
+        BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
     assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
     assertEquals("http://www.example.com/gadget.xml", t2.getAppUrl());
     assertEquals(DOMAIN, t2.getDomain());
@@ -87,6 +93,7 @@ public class BlobCrypterSecurityTokenTest {
     assertEquals("viewer", t2.getViewerId());
     assertEquals("trusted", t2.getTrustedJson());
     assertEquals(CONTAINER, t2.getContainer());
+    assertEquals("active", t2.getActiveUrl());
   }
 
   @Test
@@ -97,7 +104,7 @@ public class BlobCrypterSecurityTokenTest {
     timeSource.incrementSeconds(3600 + 181);
     String[] fields = token.split(":");
     try {
-      BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1]);
+      BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
       fail("Token should have expired");
     } catch (BlobExpiredException e) {
       // good

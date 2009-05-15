@@ -33,15 +33,18 @@ public class OAuthFetcherConfig {
   private final BlobCrypter stateCrypter;
   private final GadgetOAuthTokenStore tokenStore;
   private final TimeSource clock;
+  private final OAuthCallbackGenerator oauthCallbackGenerator;
 
   @Inject
   public OAuthFetcherConfig(
       @Named(OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter,
       GadgetOAuthTokenStore tokenStore,
-      TimeSource clock) {
+      TimeSource clock,
+      OAuthCallbackGenerator oauthCallbackGenerator) {
     this.stateCrypter = stateCrypter;
     this.tokenStore = tokenStore;
     this.clock = clock;
+    this.oauthCallbackGenerator = oauthCallbackGenerator;
   }
 
   /**
@@ -63,5 +66,9 @@ public class OAuthFetcherConfig {
    */
   public TimeSource getClock() {
     return clock;
+  }
+  
+  public OAuthCallbackGenerator getOAuthCallbackGenerator() {
+    return oauthCallbackGenerator;
   }
 }

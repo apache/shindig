@@ -47,9 +47,14 @@ public class DefaultUrlGenerator implements UrlGenerator {
   protected static final Pattern ALLOWED_FEATURE_NAME = Pattern.compile("[0-9a-zA-Z_\\.\\-]+");
   protected static final String IFRAME_URI_PARAM = "gadgets.iframeBaseUri";
   protected static final String JS_URI_PARAM = "gadgets.jsUriTemplate";
+  protected static final String OAUTH_GADGET_CALLBACK_URI_PARAM =
+      "gadgets.oauthGadgetCallbackTemplate";
+
   private final String jsChecksum;
   private final Map<String, Uri> iframeBaseUris;
   private final Map<String, String> jsUriTemplates;
+  private final Map<String, String> oauthCallbackUriTemplates;
+
   private final LockedDomainService lockedDomainService;
 
   @Inject
@@ -58,9 +63,12 @@ public class DefaultUrlGenerator implements UrlGenerator {
                              GadgetFeatureRegistry registry) {
     iframeBaseUris = Maps.newHashMap();
     jsUriTemplates = Maps.newHashMap();
+    oauthCallbackUriTemplates = Maps.newHashMap();
     for (String container : config.getContainers()) {
       iframeBaseUris.put(container, Uri.parse(config.getString(container, IFRAME_URI_PARAM)));
       jsUriTemplates.put(container, config.getString(container, JS_URI_PARAM));
+      oauthCallbackUriTemplates.put(container,
+          config.getString(container, OAUTH_GADGET_CALLBACK_URI_PARAM));
     }
 
     this.lockedDomainService = lockedDomainService;
@@ -161,5 +169,13 @@ public class DefaultUrlGenerator implements UrlGenerator {
     }
 
     return uri.toString();
+  }
+
+  public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+    String callback = oauthCallbackUriTemplates.get(container);
+    if (callback == null) {
+      return null;
+    }
+    return callback.replace("%host%", gadgetHost);
   }
 }

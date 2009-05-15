@@ -18,6 +18,7 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
 

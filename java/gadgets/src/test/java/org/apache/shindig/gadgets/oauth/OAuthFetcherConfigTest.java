@@ -34,8 +34,11 @@ public class OAuthFetcherConfigTest extends EasyMockTestCase {
     BlobCrypter crypter = mock(BlobCrypter.class);
     mock(HttpCache.class);
     GadgetOAuthTokenStore tokenStore = mock(GadgetOAuthTokenStore.class);
-    OAuthFetcherConfig config = new OAuthFetcherConfig(crypter, tokenStore, new TimeSource());
+    OAuthCallbackGenerator callbackGenerator = mock(OAuthCallbackGenerator.class);
+    OAuthFetcherConfig config = new OAuthFetcherConfig(crypter, tokenStore, new TimeSource(),
+        callbackGenerator);
     assertEquals(crypter, config.getStateCrypter());
     assertEquals(tokenStore, config.getTokenStore());
+    assertEquals(callbackGenerator, config.getOAuthCallbackGenerator());
   }
 }

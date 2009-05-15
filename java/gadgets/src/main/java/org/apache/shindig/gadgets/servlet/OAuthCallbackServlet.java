@@ -18,10 +18,20 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import java.io.IOException;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import org.apache.shindig.common.crypto.BlobCrypter;
+import org.apache.shindig.common.servlet.HttpUtil;
+import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.oauth.OAuthCallbackState;
+import org.apache.shindig.gadgets.oauth.OAuthFetcherConfig;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,29 +48,62 @@ import javax.servlet.http.HttpServletResponse;
  * - this servlet closes the window
  * - gadget discovers the window has closed and automatically fetches the user's data.
  */
-public class OAuthCallbackServlet extends HttpServlet {
+public class OAuthCallbackServlet extends InjectedServlet {
 
+  public static final String CALLBACK_STATE_PARAM = "cs";
+  
+  public static final String REAL_DOMAIN_PARAM = "d";
+  
   private static final int ONE_HOUR_IN_SECONDS = 3600;
   
+  // This bit of magic will check to see whether the gadget is using the oauthpopup library,
+  // and if it does passes the entire callback URL into the library for later use.
+  // gadgets.io.makeRequest (or osapi.oauth) will then pick up the callback URL to complete the
+  // oauth dance.
   private static final String RESP_BODY =
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " +
-    "\"http://www.w3.org/TR/html4/loose.dtd\">" +
-    "<html>" +
-    "<head>" +
-    "<title>Close this window</title>" +
-    "</head>" +
-    "<body>" +
-    "<script type=\"text/javascript\">" +
-    "window.close();" +
-    "</script>" +
-    "Close this window." +
-    "</body>" +
-    "</html>";
+    "\"http://www.w3.org/TR/html4/loose.dtd\">\n" +
+    "<html>\n" +
+    "<head>\n" +
+    "<title>Close this window</title>\n" +
+    "</head>\n" +
+    "<body>\n" +
+    "<script type='text/javascript'>\n" +
+    "  if (window.opener && window.opener.gadgets && window.opener.gadgets.oauth\n" +
+    "      && window.opener.gadgets.oauth.Popup) {\n" +
+    "    window.opener.gadgets.oauth.Popup.setReceivedCallbackUrl(document.location.href);\n" +
+    "  }\n" +
+    "  window.close();\n" +
+    "</script>\n" +
+    "Close this window.\n" +
+    "</body>\n" +
+    "</html>\n";
+
+  private BlobCrypter stateCrypter;
+  
+  @Inject
+  public void setStateCrypter(
+      @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter) {
+    this.stateCrypter = stateCrypter;
+  }
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    HttpUtil.setCachingHeaders(resp, ONE_HOUR_IN_SECONDS);
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    OAuthCallbackState callbackState = new OAuthCallbackState(stateCrypter,
+        req.getParameter(CALLBACK_STATE_PARAM));
+    if (callbackState.getRealCallbackUrl() != null) {
+      // Copy the query parameters from this URL over to the real URL.
+      UriBuilder realUri = UriBuilder.parse(callbackState.getRealCallbackUrl());
+      Map<String, List<String>> params = UriBuilder.splitParameters(req.getQueryString());
+      for (String param : params.keySet()) {
+        realUri.putQueryParameter(param, params.get(param));
+      }
+      realUri.removeQueryParameter(CALLBACK_STATE_PARAM);
+      HttpUtil.setCachingHeaders(resp, ONE_HOUR_IN_SECONDS, true);
+      resp.sendRedirect(realUri.toString());
+      return;
+    }
+    HttpUtil.setCachingHeaders(resp, ONE_HOUR_IN_SECONDS, true);
     resp.setContentType("text/html; charset=UTF-8");
     resp.getWriter().write(RESP_BODY);
   }

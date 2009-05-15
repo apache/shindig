@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.servlet;
+package org.apache.shindig.common.servlet;
 
 import org.apache.shindig.common.util.DateUtil;
 
@@ -116,6 +116,12 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   @Override
   public void sendError(int httpStatusCode) {
     this.httpStatusCode = httpStatusCode;
+  }
+  
+  @Override
+  public void sendRedirect(String location) {
+    setStatus(302);
+    setHeader("Location", location);
   }
 
   @Override

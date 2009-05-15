@@ -40,6 +40,8 @@ import org.junit.Assert;
 public class GadgetTokenStoreTest {
 
   private static final String GADGET_URL = "http://www.example.com/gadget.xml";
+  
+  public static final String DEFAULT_CALLBACK = "http://www.example.com/oauthcallback";
 
   public static final String GADGET_SPEC =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
@@ -83,8 +85,9 @@ public class GadgetTokenStoreTest {
   @Before
   public void setUp() throws Exception {
     backingStore = new BasicOAuthStore();
-    backingStore.setDefaultKey(
-        new BasicOAuthStoreConsumerKeyAndSecret("key", "secret", KeyType.RSA_PRIVATE, "keyname"));
+    backingStore.setDefaultKey(new BasicOAuthStoreConsumerKeyAndSecret("key", "secret",
+        KeyType.RSA_PRIVATE, "keyname", null));
+    backingStore.setDefaultCallbackUrl(DEFAULT_CALLBACK);
     store = new GadgetOAuthTokenStore(backingStore, new FakeGadgetSpecFactory());
 
     socialToken = new FakeGadgetToken();
@@ -133,8 +136,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("hmac");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
@@ -154,8 +157,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("otherservice");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
@@ -170,8 +173,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setUseToken(UseToken.NEVER);
@@ -190,8 +193,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("testservice");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
@@ -211,8 +214,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("testservice");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");
@@ -233,8 +236,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("testservice");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
 
     backingStore.setTokenInfo(privateToken, null, "testservice", "",
@@ -270,8 +273,8 @@ public class GadgetTokenStoreTest {
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(GADGET_URL);
     index.setServiceName("testservice");
-    BasicOAuthStoreConsumerKeyAndSecret cks =
-        new BasicOAuthStoreConsumerKeyAndSecret("hmac", "hmacsecret", KeyType.HMAC_SYMMETRIC, null);
+    BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret("hmac",
+        "hmacsecret", KeyType.HMAC_SYMMETRIC, null, null);
     backingStore.setConsumerKeyAndSecret(index, cks);
     OAuthArguments arguments = new OAuthArguments();
     arguments.setServiceName("testservice");

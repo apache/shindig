@@ -71,6 +71,9 @@
 // never conflict with a lockedDomainSuffix.
 "gadgets.jsUriTemplate" : "http://%host%/gadgets/js/%js%",
 
+// Callback URL.  Scheme relative URL for easy switch between https/http.
+"gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback",
+
 // Use an insecure security token by default
 "gadgets.securityTokenType" : "insecure",
 

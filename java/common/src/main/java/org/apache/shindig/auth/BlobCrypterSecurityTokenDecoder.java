@@ -108,9 +108,10 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
       throw new SecurityTokenException("Unknown container " + token);
     }
     String domain = domains.get(container);
+    String activeUrl = tokenParameters.get(SecurityTokenDecoder.ACTIVE_URL_NAME);
     String crypted = fields[1];
     try {
-      return BlobCrypterSecurityToken.decrypt(crypter, container, domain, crypted);
+      return BlobCrypterSecurityToken.decrypt(crypter, container, domain, crypted, activeUrl);
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     }

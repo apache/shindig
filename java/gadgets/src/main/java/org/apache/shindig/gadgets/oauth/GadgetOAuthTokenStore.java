@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
@@ -35,7 +34,6 @@ import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.apache.shindig.gadgets.spec.OAuthService.Location;
 import org.apache.shindig.gadgets.spec.OAuthService.Method;
 
-import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
 import net.oauth.OAuthServiceProvider;
@@ -280,31 +278,7 @@ public class GadgetOAuthTokenStore {
   private GadgetSpec findSpec(final SecurityToken securityToken, final OAuthArguments arguments,
       OAuthResponseParams responseParams) throws OAuthRequestException {
     try {
-      final Uri uri = Uri.parse(securityToken.getAppUrl());
-
-      GadgetContext context = new GadgetContext() {
-        @Override
-        public String getContainer() {
-          return Objects.firstNonNull(securityToken.getContainer(),
-              ContainerConfig.DEFAULT_CONTAINER);
-        }
-
-        @Override
-        public SecurityToken getToken() {
-          return securityToken;
-        }
-
-        @Override
-        public Uri getUrl() {
-          return uri;
-        }
-
-        @Override
-        public boolean getIgnoreCache() {
-          return arguments.getBypassSpecCache();
-        }
-      };
-
+      GadgetContext context = new OAuthGadgetContext(securityToken, arguments);
       return specFactory.getGadgetSpec(context);
     } catch (IllegalArgumentException e) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,

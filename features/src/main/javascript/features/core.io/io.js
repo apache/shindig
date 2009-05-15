@@ -356,6 +356,13 @@ gadgets.io = function() {
 
       // OAuth goodies
       if (auth === "oauth" || auth === "signed") {
+        if (gadgets.oauth && gadgets.oauth.Popup && gadgets.oauth.Popup.getReceivedCallbackUrl) {
+          var callbackResponse = gadgets.oauth.Popup.getReceivedCallbackUrl();
+          if (callbackResponse) {
+            paramData.OAUTH_RECEIVED_CALLBACK = callbackResponse;
+            gadgets.oauth.Popup.setReceivedCallbackUrl(null);
+          }
+        }
         paramData.oauthState = oauthState || "";
         // Just copy the OAuth parameters into the req to the server
         for (opt in params) {
@@ -481,7 +488,8 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "OAUTH_USE_TOKEN",
   "OAUTH_TOKEN_NAME",
   "OAUTH_REQUEST_TOKEN",
-  "OAUTH_REQUEST_TOKEN_SECRET"
+  "OAUTH_REQUEST_TOKEN_SECRET",
+  "OAUTH_RECEIVED_CALLBACK"
 ]);
 
 gadgets.io.MethodType = gadgets.util.makeEnum([

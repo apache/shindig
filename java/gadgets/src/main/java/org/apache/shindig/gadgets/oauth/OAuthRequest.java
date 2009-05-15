@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.oauth;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
@@ -199,12 +200,11 @@ public class OAuthRequest {
         responseParams.logDetailedWarning("OAuth fetch fatal error", e);
       }
       responseParams.setSendTraceToClient(true);
-      if (response == null) {
-        response = new HttpResponseBuilder()
-            .setHttpStatusCode(HttpResponse.SC_FORBIDDEN);
-        responseParams.addToResponse(response);
-        return response.create();
-      }
+      response = new HttpResponseBuilder()
+          .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
+          .setStrictNoCache();
+      responseParams.addToResponse(response);
+      return response.create();
     }
 
     // OK, got some data back, annotate it as necessary.
@@ -329,6 +329,22 @@ public class OAuthRequest {
 
   private void fetchRequestToken() throws OAuthRequestException, OAuthProtocolException {
     OAuthAccessor accessor = accessorInfo.getAccessor();
+    HttpRequest request = createRequestTokenRequest(accessor);
+    
+    List<Parameter> requestTokenParams = Lists.newArrayList();
+    
+    addCallback(requestTokenParams);
+    
+    HttpRequest signed = sanitizeAndSign(request, requestTokenParams, true);
+
+    OAuthMessage reply = sendOAuthMessage(signed);
+
+    accessor.requestToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
+    accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
+  }
+
+  private HttpRequest createRequestTokenRequest(OAuthAccessor accessor)
+      throws OAuthRequestException {
     if (accessor.consumer.serviceProvider.requestTokenURL == null) {
       throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           "No request token URL specified");
@@ -339,13 +355,19 @@ public class OAuthRequest {
     if (accessorInfo.getHttpMethod() == HttpMethod.POST) {
       request.setHeader("Content-Type", OAuth.FORM_ENCODED);
     }
+    return request;
+  }
 
-    HttpRequest signed = sanitizeAndSign(request, null, true);
-
-    OAuthMessage reply = sendOAuthMessage(signed);
-
-    accessor.requestToken = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN);
-    accessor.tokenSecret = OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET);
+  private void addCallback(List<Parameter> requestTokenParams) throws OAuthRequestException {
+    // This will be either the consumer key callback URL or the global callback URL.
+    String baseCallback = StringUtils.trimToNull(accessorInfo.getConsumer().getCallbackUrl());
+    if (baseCallback != null) {
+      String callbackUrl = fetcherConfig.getOAuthCallbackGenerator().generateCallback(
+          fetcherConfig, baseCallback, realRequest, responseParams);
+      if (callbackUrl != null) {
+        requestTokenParams.add(new Parameter(OAuth.OAUTH_CALLBACK, callbackUrl));
+      }
+    }
   }
 
   /**
@@ -671,6 +693,19 @@ public class OAuthRequest {
     if (accessorInfo.getSessionHandle() != null) {
       msgParams.add(new Parameter(OAuthConstants.OAUTH_SESSION_HANDLE,
           accessorInfo.getSessionHandle()));
+    }
+    String receivedCallback = realRequest.getOAuthArguments().getReceivedCallbackUrl();
+    if (!StringUtils.isBlank(receivedCallback)) {
+      try {
+        Uri parsed = Uri.parse(receivedCallback);
+        String verifier = parsed.getQueryParameter(OAuthConstants.OAUTH_VERIFIER);
+        if (verifier != null) {
+          msgParams.add(new Parameter(OAuthConstants.OAUTH_VERIFIER, verifier));
+        }
+      } catch (IllegalArgumentException e) {
+        throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
+            "Invalid received callback URL: " + receivedCallback, e);
+      }
     }
 
     HttpRequest signed = sanitizeAndSign(request, msgParams, true);

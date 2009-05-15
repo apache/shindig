@@ -424,6 +424,10 @@
     "http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml" :
         { "title" : "Demo OAuth Gadget",
           "consumerSecret" : "secret",
+          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/gadgets/files/samplecontainer/examples/shindigoauth.xml" :
+        { "title" : "Demo OAuth Gadget",
+          "consumerSecret" : "secret",
           "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"}
  },
 

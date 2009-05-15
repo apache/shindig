@@ -203,7 +203,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   public static void verifyBodyHash(HttpServletRequest request, String oauthBodyHash)
       throws InvalidAuthenticationException {
     // we are doing body hash signing which is not permitted for form-encoded data
-    if (request.getContentType().contains(OAuth.FORM_ENCODED)) {
+    if (request.getContentType() != null && request.getContentType().contains(OAuth.FORM_ENCODED)) {
       throw new AuthenticationHandler.InvalidAuthenticationException(
           "Cannot use oauth_body_hash with a Content-Type of application/x-www-form-urlencoded",
           null);

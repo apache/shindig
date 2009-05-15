@@ -37,12 +37,17 @@ public class BasicOAuthStoreConsumerKeyAndSecret {
 
   /** Name of public key to use with xoauth_public_key parameter.  May be null */
   private final String keyName;
+  
+  /** Callback URL associated with this consumer key */
+  private final String callbackUrl;
 
-  public BasicOAuthStoreConsumerKeyAndSecret(String key, String secret, KeyType type, String name) {
+  public BasicOAuthStoreConsumerKeyAndSecret(String key, String secret, KeyType type, String name,
+      String callbackUrl) {
     consumerKey = key;
     consumerSecret = secret;
     keyType = type;
     keyName = name;
+    this.callbackUrl = callbackUrl;
   }
   
   public String getConsumerKey() {
@@ -59,5 +64,9 @@ public class BasicOAuthStoreConsumerKeyAndSecret {
   
   public String getKeyName() {
     return keyName;
+  }
+  
+  public String getCallbackUrl() {
+    return callbackUrl;
   }
 }

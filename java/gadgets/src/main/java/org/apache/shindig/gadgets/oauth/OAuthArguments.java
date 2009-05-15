@@ -43,6 +43,7 @@ public class OAuthArguments {
   private static final String BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
   private static final String SIGN_OWNER_PARAM = "signOwner";
   private static final String SIGN_VIEWER_PARAM = "signViewer";
+  private static final String RECEIVED_CALLBACK_PARAM = "OAUTH_RECEIVED_CALLBACK";
   
   // Experimental support for configuring OAuth without special parameters in the spec XML.
   public static final String PROGRAMMATIC_CONFIG_PARAM = "OAUTH_PROGRAMMATIC_CONFIG";
@@ -51,8 +52,6 @@ public class OAuthArguments {
   public static final String REQUEST_TOKEN_URL_PARAM = "OAUTH_REQUEST_TOKEN_URL";
   public static final String ACCESS_TOKEN_URL_PARAM = "OAUTH_ACCESS_TOKEN_URL";
   public static final String AUTHORIZATION_URL_PARAM = "OAUTH_AUTHORIZATION_URL";
-
-  
 
   /**
    * Should the OAuth access token be used?
@@ -99,6 +98,9 @@ public class OAuthArguments {
   /** Whether the request is one for proxied content */
   private boolean proxiedContentRequest = false;
   
+  /** Callback URL returned from service provider */
+  private String receivedCallbackUrl = null;
+  
   /**
    * Parse OAuthArguments from parameters to the makeRequest servlet.
    *
@@ -116,6 +118,7 @@ public class OAuthArguments {
     bypassSpecCache = "1".equals(getRequestParam(request, BYPASS_SPEC_CACHE_PARAM, null));
     signOwner = Boolean.parseBoolean(getRequestParam(request, SIGN_OWNER_PARAM, "true"));
     signViewer = Boolean.parseBoolean(getRequestParam(request, SIGN_VIEWER_PARAM, "true"));
+    receivedCallbackUrl = getRequestParam(request, RECEIVED_CALLBACK_PARAM, null);
     Enumeration<String> params = getParameterNames(request);
     while (params.hasMoreElements()) {
       String name = params.nextElement();
@@ -155,6 +158,7 @@ public class OAuthArguments {
     bypassSpecCache = "1".equals(getAuthInfoParam(requestOptions, BYPASS_SPEC_CACHE_PARAM, null));
     signOwner =  Boolean.parseBoolean(getAuthInfoParam(requestOptions, SIGN_OWNER_PARAM, "true"));
     signViewer = Boolean.parseBoolean(getAuthInfoParam(requestOptions, SIGN_VIEWER_PARAM, "true"));
+    receivedCallbackUrl = getAuthInfoParam(requestOptions, RECEIVED_CALLBACK_PARAM, null);
   }
 
 
@@ -344,6 +348,14 @@ public class OAuthArguments {
   
   public boolean programmaticConfig() {
     return Boolean.parseBoolean(requestOptions.get(PROGRAMMATIC_CONFIG_PARAM));
+  }
+  
+  public String getReceivedCallbackUrl() {
+    return receivedCallbackUrl;
+  }
+  
+  public void setReceivedCallbackUrl(String receivedCallbackUrl) {
+    this.receivedCallbackUrl = receivedCallbackUrl;
   }
 
   @Override

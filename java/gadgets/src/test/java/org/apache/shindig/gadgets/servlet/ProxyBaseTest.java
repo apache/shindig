@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.expect;
 
+import org.apache.shindig.common.servlet.HttpUtilTest;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
@@ -188,7 +189,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
     proxy.setResponseHeaders(request, recorder, results);
 
-    checkCacheControlHeaders(30, false);
+    HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 

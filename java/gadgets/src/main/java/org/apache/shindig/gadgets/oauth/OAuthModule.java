@@ -49,6 +49,8 @@ public class OAuthModule extends AbstractModule {
   private static final String OAUTH_CONFIG = "config/oauth.json";
   private static final String OAUTH_SIGNING_KEY_FILE = "shindig.signing.key-file";
   private static final String OAUTH_SIGNING_KEY_NAME = "shindig.signing.key-name";
+  private static final String OAUTH_CALLBACK_URL = "shindig.signing.global-callback-url";
+
 
   @Override
   protected void configure() {
@@ -67,7 +69,7 @@ public class OAuthModule extends AbstractModule {
     private final BlobCrypter crypter;
 
     @Inject
-    public OAuthCrypterProvider(@Named("shindig.oauth.state-key") String stateCrypterPath)
+    public OAuthCrypterProvider(@Named("shindig.signing.state-key") String stateCrypterPath)
         throws IOException {
       if (StringUtils.isBlank(stateCrypterPath)) {
         logger.info("Using random key for OAuth client-side state encryption");
@@ -106,9 +108,11 @@ public class OAuthModule extends AbstractModule {
     @Inject
     public OAuthStoreProvider(
         @Named(OAUTH_SIGNING_KEY_FILE) String signingKeyFile,
-        @Named(OAUTH_SIGNING_KEY_NAME) String signingKeyName) {
+        @Named(OAUTH_SIGNING_KEY_NAME) String signingKeyName,
+        @Named(OAUTH_CALLBACK_URL) String defaultCallbackUrl) {
       store = new BasicOAuthStore();
       loadDefaultKey(signingKeyFile, signingKeyName);
+      store.setDefaultCallbackUrl(defaultCallbackUrl);
       loadConsumers();
     }
 
@@ -120,7 +124,7 @@ public class OAuthModule extends AbstractModule {
           String privateKey = IOUtils.toString(ResourceLoader.open(signingKeyFile), "UTF-8");
           privateKey = BasicOAuthStore.convertFromOpenSsl(privateKey);
           key = new BasicOAuthStoreConsumerKeyAndSecret(null, privateKey, KeyType.RSA_PRIVATE,
-              signingKeyName);
+              signingKeyName, null);
         } catch (Throwable t) {
           logger.log(Level.WARNING, "Couldn't load key file " + signingKeyFile, t);
         }

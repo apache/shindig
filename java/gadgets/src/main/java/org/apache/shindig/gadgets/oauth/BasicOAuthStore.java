@@ -49,6 +49,7 @@ public class BasicOAuthStore implements OAuthStore {
   private static final String CONSUMER_SECRET_KEY = "consumer_secret";
   private static final String CONSUMER_KEY_KEY = "consumer_key";
   private static final String KEY_TYPE_KEY = "key_type";
+  private static final String CALLBACK_URL = "callback_url";
 
   /**
    * HashMap of provider and consumer information. Maps BasicOAuthStoreConsumerIndexs (i.e.
@@ -68,7 +69,12 @@ public class BasicOAuthStore implements OAuthStore {
    * Key to use when no other key is found.
    */
   private BasicOAuthStoreConsumerKeyAndSecret defaultKey;
-
+  
+  /**
+   * Callback to use when no per-key callback URL is found.
+   */
+  private String defaultCallbackUrl;
+  
   /** Number of times we looked up a consumer key */
   private int consumerKeyLookupCount = 0;
 
@@ -118,6 +124,7 @@ public class BasicOAuthStore implements OAuthStore {
 
   private void realStoreConsumerInfo(URI gadgetUri, String serviceName, JSONObject consumerInfo)
       throws JSONException {
+    String callbackUrl = consumerInfo.optString(CALLBACK_URL, null);
     String consumerSecret = consumerInfo.getString(CONSUMER_SECRET_KEY);
     String consumerKey = consumerInfo.getString(CONSUMER_KEY_KEY);
     String keyTypeStr = consumerInfo.getString(KEY_TYPE_KEY);
@@ -129,7 +136,7 @@ public class BasicOAuthStore implements OAuthStore {
     }
 
     BasicOAuthStoreConsumerKeyAndSecret kas = new BasicOAuthStoreConsumerKeyAndSecret(
-        consumerKey, consumerSecret, keyType, null);
+        consumerKey, consumerSecret, keyType, null, callbackUrl);
 
     BasicOAuthStoreConsumerIndex index = new BasicOAuthStoreConsumerIndex();
     index.setGadgetUri(gadgetUri.toASCIIString());
@@ -144,6 +151,10 @@ public class BasicOAuthStore implements OAuthStore {
 
   public void setDefaultKey(BasicOAuthStoreConsumerKeyAndSecret defaultKey) {
     this.defaultKey = defaultKey;
+  }
+  
+  public void setDefaultCallbackUrl(String defaultCallbackUrl) {
+    this.defaultCallbackUrl = defaultCallbackUrl;
   }
 
   public void setConsumerKeyAndSecret(
@@ -178,7 +189,8 @@ public class BasicOAuthStore implements OAuthStore {
       consumer = new OAuthConsumer(null, cks.getConsumerKey(), cks.getConsumerSecret(), provider);
       consumer.setProperty(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
     }
-    return new ConsumerInfo(consumer, cks.getKeyName());
+    String callback = (cks.getCallbackUrl() != null ? cks.getCallbackUrl() : defaultCallbackUrl);
+    return new ConsumerInfo(consumer, cks.getKeyName(), callback);
   }
 
   private BasicOAuthStoreTokenIndex makeBasicOAuthStoreTokenIndex(

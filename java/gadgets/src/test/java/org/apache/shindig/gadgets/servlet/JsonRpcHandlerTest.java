@@ -276,5 +276,9 @@ public class JsonRpcHandlerTest {
       }
       return iframeUrl;
     }
+
+    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+      throw new UnsupportedOperationException();
+    }
   }
 }

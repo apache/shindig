@@ -32,3 +32,5 @@ var document = {
 
 // See mocks.FakeWindow if you need something more full featured.
 var window = {};
+
+var alert = function() {};

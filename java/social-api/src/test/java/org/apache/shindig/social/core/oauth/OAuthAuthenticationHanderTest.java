@@ -434,4 +434,13 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
       // Pass
     }
   }
+  
+  @Test
+  public void testBodyHashNoContentType() throws Exception {
+    FakeHttpServletRequest req = new FakeHttpServletRequest();
+    req.setPostData(CharsetUtil.getUtf8Bytes(""));
+    String hash = new String(Base64.encodeBase64(DigestUtils.sha(CharsetUtil.getUtf8Bytes(""))),
+        "UTF-8");
+    OAuthAuthenticationHandler.verifyBodyHash(req, hash);
+  }
 }

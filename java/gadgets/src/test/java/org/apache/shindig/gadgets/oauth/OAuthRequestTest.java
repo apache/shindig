@@ -27,6 +27,8 @@ import static org.junit.Assert.fail;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.FakeGadgetSpecFactory;
@@ -72,6 +74,7 @@ public class OAuthRequestTest {
 
   private OAuthFetcherConfig fetcherConfig;
   private FakeOAuthServiceProvider serviceProvider;
+  private OAuthCallbackGenerator callbackGenerator;
   private BasicOAuthStore base;
   private Logger logger;
   protected final List<LogRecord> logRecords = Lists.newArrayList();
@@ -84,15 +87,20 @@ public class OAuthRequestTest {
   public static final String GADGET_URL_BAD_OAUTH_URL = "http://www.example.com/badoauthurl.xml";
   public static final String GADGET_URL_APPROVAL_PARAMS =
       "http://www.example.com/approvalparams.xml";
+  public static final String GADGET_MAKE_REQUEST_URL =
+      "http://127.0.0.1/gadgets/makeRequest?params=foo";
 
   @Before
   public void setUp() throws Exception {
     base = new BasicOAuthStore();
+    base.setDefaultCallbackUrl(GadgetTokenStoreTest.DEFAULT_CALLBACK);
     serviceProvider = new FakeOAuthServiceProvider(clock);
+    callbackGenerator = createNullCallbackGenerator();
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
-        clock);
+        clock,
+        callbackGenerator);
 
     logger = Logger.getLogger(OAuthResponseParams.class.getName());
     logger.addHandler(new Handler() {
@@ -111,6 +119,32 @@ public class OAuthRequestTest {
     });
   }
 
+  private OAuthCallbackGenerator createNullCallbackGenerator() {
+    return new OAuthCallbackGenerator() {
+      public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
+          HttpRequest request, OAuthResponseParams responseParams) {
+        return null;
+      }      
+    };
+  }
+  
+  private OAuthCallbackGenerator createRealCallbackGenerator() {
+    return new OAuthCallbackGenerator() {
+      public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
+          HttpRequest request, OAuthResponseParams responseParams) {
+        SecurityToken st = request.getSecurityToken();
+        Uri activeUrl = Uri.parse(st.getActiveUrl());
+        assertEquals(GADGET_MAKE_REQUEST_URL, activeUrl.toString());
+        assertEquals(GadgetTokenStoreTest.DEFAULT_CALLBACK, baseCallback);
+        return new UriBuilder()
+            .setScheme("http")
+            .setAuthority(activeUrl.getAuthority())
+            .setPath("/realcallback")
+            .toString();
+      }      
+    };
+  }
+
   /**
    * Builds a nicely populated fake token store.
    */
@@ -122,6 +156,7 @@ public class OAuthRequestTest {
       GadgetSpecFactory specFactory) {
     if (base == null) {
       base = new BasicOAuthStore();
+      base.setDefaultCallbackUrl(GadgetTokenStoreTest.DEFAULT_CALLBACK);
     }
     addValidConsumer(base);
     addInvalidConsumer(base);
@@ -197,14 +232,14 @@ public class OAuthRequestTest {
     providerKey.setServiceName(serviceName);
 
     BasicOAuthStoreConsumerKeyAndSecret kas = new BasicOAuthStoreConsumerKeyAndSecret(
-        consumerKey, consumerSecret, KeyType.HMAC_SYMMETRIC, null);
+        consumerKey, consumerSecret, KeyType.HMAC_SYMMETRIC, null, null);
 
     base.setConsumerKeyAndSecret(providerKey, kas);
   }
 
   private static void addDefaultKey(BasicOAuthStore base) {
     BasicOAuthStoreConsumerKeyAndSecret defaultKey = new BasicOAuthStoreConsumerKeyAndSecret(
-        "signedfetch", FakeOAuthServiceProvider.PRIVATE_KEY_TEXT, KeyType.RSA_PRIVATE, "foo");
+        "signedfetch", FakeOAuthServiceProvider.PRIVATE_KEY_TEXT, KeyType.RSA_PRIVATE, "foo", null);
     base.setDefaultKey(defaultKey);
   }
 
@@ -239,7 +274,8 @@ public class OAuthRequestTest {
 
   public static SecurityToken getSecurityToken(String owner, String viewer, String gadget)
       throws Exception {
-    return new BasicSecurityToken(owner, viewer, "app", "container.com", gadget, "0", "default");
+    return new BasicSecurityToken(owner, viewer, "app", "container.com", gadget, "0", "default",
+        GADGET_MAKE_REQUEST_URL);
   }
 
   @After
@@ -297,6 +333,47 @@ public class OAuthRequestTest {
   }
 
   @Test
+  public void testOAuthFlow_withCallbackVerifier() throws Exception {
+    fetcherConfig = new OAuthFetcherConfig(
+        new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
+        getOAuthStore(base),
+        clock,
+        createRealCallbackGenerator());
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    checkEmptyLog();
+  }
+  
+  @Test
+  public void testOAuthFlow_badCallbackVerifier() throws Exception {
+    fetcherConfig = new OAuthFetcherConfig(
+        new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
+        getOAuthStore(base),
+        clock,
+        createRealCallbackGenerator());
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    
+    client.approveToken("user_data=hello-oauth");
+    client.setReceivedCallbackUrl("nonsense");
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    assertNotNull(response.getMetadata().get("oauthErrorText"));
+    
+    client.approveToken("user_data=try-again");
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is try-again", response.getResponseAsString());
+  }
+  
+  @Test
   public void testOAuthFlow_tokenReused() throws Exception {
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
@@ -319,6 +396,7 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
+    assertEquals(-1, response.getCacheTtl());
     assertEquals(OAuthError.UNAUTHENTICATED.toString(), response.getMetadata().get("oauthError"));
   }
 
@@ -327,7 +405,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -358,7 +436,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, null);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -380,7 +458,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -407,7 +485,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -431,7 +509,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -452,7 +530,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -475,7 +553,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, callbackGenerator);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -496,7 +574,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, null);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -517,7 +595,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock);
+        clock, null);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -1201,7 +1279,7 @@ public class OAuthRequestTest {
   @Test
   public void testSignedFetch_unnamedConsumerKey() throws Exception {
     BasicOAuthStoreConsumerKeyAndSecret defaultKey = new BasicOAuthStoreConsumerKeyAndSecret(
-        null, FakeOAuthServiceProvider.PRIVATE_KEY_TEXT, KeyType.RSA_PRIVATE, "foo");
+        null, FakeOAuthServiceProvider.PRIVATE_KEY_TEXT, KeyType.RSA_PRIVATE, "foo", null);
     base.setDefaultKey(defaultKey);
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);

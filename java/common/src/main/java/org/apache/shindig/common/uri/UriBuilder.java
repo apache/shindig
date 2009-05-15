@@ -164,10 +164,29 @@ public class UriBuilder {
    * Force overwrites a given query parameter with the given value.
    */
   public UriBuilder putQueryParameter(String name, String... values) {
+    query = null;
     queryParameters.put(name, Lists.newArrayList(values));
     return this;
   }
 
+  /**
+   * Force overwrites a given query parameter with the given value.
+   */
+  public UriBuilder putQueryParameter(String name, Iterable<String> values) {
+    query = null;
+    queryParameters.put(name, Lists.newArrayList(values));
+    return this;
+  }
+  
+  /**
+   * Removes a query parameter.
+   */
+  public UriBuilder removeQueryParameter(String name) {
+    query = null;
+    queryParameters.remove(name);
+    return this;
+  }
+  
   /**
    * @return The queryParameters part of the uri, separated into component parts.
    */
@@ -233,7 +252,7 @@ public class UriBuilder {
   /**
    * Utility method for splitting a parameter string into key / value pairs.
    */
-  static Map<String, List<String>> splitParameters(String query) {
+  public static Map<String, List<String>> splitParameters(String query) {
     if (query == null) {
       return Collections.emptyMap();
     }

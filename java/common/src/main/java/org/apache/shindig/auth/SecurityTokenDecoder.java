@@ -33,6 +33,12 @@ public interface SecurityTokenDecoder {
    * parameters can be passed as seen fit.
    */
   String SECURITY_TOKEN_NAME = "token";
+  
+  /**
+   * Active URL for the request.  Must include protocol, host, and port.  May include path
+   * and may include query.
+   */
+  String ACTIVE_URL_NAME = "activeUrl";
 
   /**
    * Decrypts and verifies a gadget security token to return a gadget token.

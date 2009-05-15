@@ -53,6 +53,7 @@ public class MakeRequestClient {
   private OAuthArguments baseArgs;
   private String oauthState;
   private String approvalUrl;
+  private String receivedCallbackUrl;
   private boolean ignoreCache;
   private Map<String, String> trustedParams = Maps.newHashMap();
   private HttpFetcher nextFetcher;
@@ -201,11 +202,14 @@ public class MakeRequestClient {
   }
 
   /**
-   * Track state (see gadgets.io.makeRequest handling of the oauthState parameter).
+   * Track state (see gadgets.io.makeRequest handling of the oauthState and received callback
+   * parameters.
    */
   private OAuthArguments recallState() {
     OAuthArguments params = new OAuthArguments(baseArgs);
     params.setOrigClientState(oauthState);
+    params.setReceivedCallbackUrl(receivedCallbackUrl);
+    receivedCallbackUrl = null;
     return params;
   }
 
@@ -227,6 +231,10 @@ public class MakeRequestClient {
    */
   public void approveToken(String params) throws Exception {
     // This will throw if approvalUrl looks wrong.
-    serviceProvider.browserVisit(approvalUrl + '&' + params);
+    receivedCallbackUrl = serviceProvider.browserVisit(approvalUrl + '&' + params);
+  }
+  
+  public void setReceivedCallbackUrl(String receivedCallbackUrl) {
+    this.receivedCallbackUrl = receivedCallbackUrl;
   }
 }

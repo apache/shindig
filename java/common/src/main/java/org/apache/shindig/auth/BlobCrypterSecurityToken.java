@@ -51,6 +51,7 @@ public class BlobCrypterSecurityToken implements SecurityToken {
   private String appUrl;
   private long moduleId;
   private String trustedJson;
+  private String activeUrl;
 
   /**
    * Create a new security token.
@@ -78,7 +79,7 @@ public class BlobCrypterSecurityToken implements SecurityToken {
    * @throws BlobCrypterException
    */
   static BlobCrypterSecurityToken decrypt(BlobCrypter crypter, String container, String domain,
-        String token) throws BlobCrypterException {
+        String token, String activeUrl) throws BlobCrypterException {
     Map<String, String> values = crypter.unwrap(token, MAX_TOKEN_LIFETIME_SECS);
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, container, domain);
     t.setOwnerId(values.get(OWNER_KEY));
@@ -89,6 +90,7 @@ public class BlobCrypterSecurityToken implements SecurityToken {
       t.setModuleId(Long.parseLong(moduleId));
     }
     t.setTrustedJson(values.get(TRUSTED_JSON_KEY));
+    t.setActiveUrl(activeUrl);
     return t;
   }
 
@@ -181,5 +183,16 @@ public class BlobCrypterSecurityToken implements SecurityToken {
 
   public boolean isAnonymous() {
     return false;
+  }
+
+  public void setActiveUrl(String activeUrl) {
+    this.activeUrl = activeUrl;
+  }
+
+  public String getActiveUrl() {
+    if (activeUrl == null) {
+      throw new UnsupportedOperationException("No active URL available");
+    }
+    return activeUrl;
   }
 }

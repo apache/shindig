@@ -40,6 +40,7 @@ public class FakeGadgetToken implements SecurityToken {
   private String domain = null;
   private String container = null;
   private String appUrl = null;
+  private String activeUrl = null;
   private String authMode = AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   private int moduleId = 0;
 
@@ -85,6 +86,11 @@ public class FakeGadgetToken implements SecurityToken {
 
   public FakeGadgetToken setModuleId(int moduleId) {
     this.moduleId = moduleId;
+    return this;
+  }
+  
+  public FakeGadgetToken setActiveUrl(String activeUrl) {
+    this.activeUrl = activeUrl;
     return this;
   }
 
@@ -139,6 +145,10 @@ public class FakeGadgetToken implements SecurityToken {
   public boolean isAnonymous() {
     return false;
   }
+  
+  public String getActiveUrl() {
+    return activeUrl;
+  }
 
   /**
    * Create a fake security token parameter string, allows passing around a
@@ -171,7 +181,7 @@ public class FakeGadgetToken implements SecurityToken {
    * @param paramMap
    * @return The fake token
    */
-  public static SecurityToken createToken(Map<String, String> paramMap) {
+  public static FakeGadgetToken createToken(Map<String, String> paramMap) {
     FakeGadgetToken fakeToken = new FakeGadgetToken();
 
     fakeToken.setAppId(paramMap.get("appId"));
@@ -199,5 +209,4 @@ public class FakeGadgetToken implements SecurityToken {
       return FakeGadgetToken.createToken(tokenParameters);
     }
   }
-
 }

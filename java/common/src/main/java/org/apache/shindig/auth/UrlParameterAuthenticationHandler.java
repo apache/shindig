@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.auth;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,8 +65,13 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
 
   protected Map<String, String> getMappedParameters(
       final HttpServletRequest request) {
-    String token = request.getParameter(TOKEN_PARAM);
-    return Collections.singletonMap(SecurityTokenDecoder.SECURITY_TOKEN_NAME,
-        token);
+    Map<String, String> params = Maps.newHashMap();
+    params.put(SecurityTokenDecoder.SECURITY_TOKEN_NAME, request.getParameter(TOKEN_PARAM));
+    params.put(SecurityTokenDecoder.ACTIVE_URL_NAME, getActiveUrl(request));
+    return params;
+  }
+  
+  protected String getActiveUrl(HttpServletRequest request) {
+    return request.getRequestURL().toString();
   }
 }

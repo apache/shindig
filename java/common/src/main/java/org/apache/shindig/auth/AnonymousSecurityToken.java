@@ -81,4 +81,8 @@ public class AnonymousSecurityToken implements SecurityToken {
   public String getTrustedJson() {
     return "";
   }
+
+  public String getActiveUrl() {
+    throw new UnsupportedOperationException("No active URL available");
+  }
 }

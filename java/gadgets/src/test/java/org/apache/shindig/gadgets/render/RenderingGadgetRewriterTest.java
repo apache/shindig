@@ -748,6 +748,10 @@ public class RenderingGadgetRewriterTest {
     public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
       return "/js/" + Join.join(":", features);
     }
+
+    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+      throw new UnsupportedOperationException();
+    }
   }
 
   private static class FakeGadgetFeatureRegistry extends GadgetFeatureRegistry {

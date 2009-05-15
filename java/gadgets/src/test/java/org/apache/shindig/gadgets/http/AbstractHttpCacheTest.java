@@ -70,8 +70,8 @@ public class AbstractHttpCacheTest {
     replay(authInfo);
 
     String ownerId = "owner eye dee";
-    SecurityToken securityToken
-        = new BasicSecurityToken(ownerId, "", "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
+    SecurityToken securityToken = new BasicSecurityToken(ownerId, "", "", "",
+        APP_URI.toString(), MODULE_ID, CONTAINER_NAME, null);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
@@ -112,7 +112,7 @@ public class AbstractHttpCacheTest {
 
     String viewerId = "viewer eye dee";
     SecurityToken securityToken = new BasicSecurityToken(
-        "", viewerId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
+        "", viewerId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME, null);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)
@@ -142,7 +142,7 @@ public class AbstractHttpCacheTest {
 
     String userId = "user id";
     SecurityToken securityToken = new BasicSecurityToken(
-        userId, userId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME);
+        userId, userId, "", "", APP_URI.toString(), MODULE_ID, CONTAINER_NAME, null);
 
     HttpRequest request = new HttpRequest(DEFAULT_URI)
         .setAuthType(AuthType.SIGNED)

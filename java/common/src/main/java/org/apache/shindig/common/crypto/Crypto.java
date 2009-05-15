@@ -69,6 +69,8 @@ public class Crypto {
    * Length of HMAC SHA1 output
    */
   public final static int HMAC_SHA1_LEN = 20;
+
+  private final static char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
   
   // everything is static, no instantiating this class
   private Crypto() { 
@@ -81,6 +83,18 @@ public class Crypto {
    */
   public static String getRandomString(int numBytes) {
     return new String(Hex.encodeHex(getRandomBytes(numBytes)));
+  }
+
+  /**
+   * @return a random string of digits of the specified length.
+   */
+  public static String getRandomDigits(int len) {
+    byte[] random = getRandomBytes(len);
+    StringBuilder out = new StringBuilder(len);
+    for (int i = 0; i < len; ++i) {
+      out.append(DIGITS[Math.abs(random[i] % DIGITS.length)]);
+    }
+    return out.toString();
   }
   
   /**

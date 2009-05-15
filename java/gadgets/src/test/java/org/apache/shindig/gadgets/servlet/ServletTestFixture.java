@@ -18,22 +18,16 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static junitx.framework.ComparableAssert.assertGreater;
-import static junitx.framework.ComparableAssert.assertLesser;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.EasyMockTestCase;
-import org.apache.shindig.common.util.DateUtil;
-import org.apache.shindig.common.util.FakeTimeSource;
+import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.DefaultRequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,40 +47,4 @@ public abstract class ServletTestFixture extends EasyMockTestCase {
   public final HttpServletResponse response = mock(HttpServletResponse.class);
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
-  public final FakeTimeSource timeSource = new FakeTimeSource();
-
-  private final long testStartTime = timeSource.currentTimeMillis();
-
-  public ServletTestFixture() {
-    HttpUtil.setTimeSource(timeSource);
-  }
-
-  public void checkCacheControlHeaders(int ttl, boolean noProxy) {
-
-    long expires = DateUtil.parseRfc1123Date(recorder.getHeader("Expires")).getTime();
-
-    long lowerBound = testStartTime + (1000L * (ttl - 1));
-    long upperBound = lowerBound + 2000L;
-
-    assertGreater("Expires should be at least " + ttl + " seconds more than start time.",
-        lowerBound, expires);
-
-    assertLesser("Expires should be within 2 seconds of the requested value.",
-        upperBound, expires);
-
-    if (ttl == 0) {
-      assertEquals("no-cache", recorder.getHeader("Pragma"));
-      assertEquals("no-cache", recorder.getHeader("Cache-Control"));
-    } else {
-      List<String> directives
-          = Arrays.asList(StringUtils.split(recorder.getHeader("Cache-Control"), ','));
-
-      assertTrue("Incorrect max-age set.", directives.contains("max-age=" + ttl));
-      if (noProxy) {
-        assertTrue("No private Cache-Control directive was set.", directives.contains("private"));
-      } else {
-        assertTrue("No public Cache-Control directive was set.", directives.contains("public"));
-      }
-    }
-  }
 }

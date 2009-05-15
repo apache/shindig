@@ -49,6 +49,7 @@ public class BasicOAuthStoreTest {
     "'' : {" +
     "'consumer_key' : 'rsaconsumer'," +
     "'consumer_secret' : 'rsaprivate'," +
+    "'callback_url' : 'callback'," +
     "'key_type' : 'RSA_PRIVATE'" +
           '}' +
           '}' +
@@ -61,6 +62,7 @@ public class BasicOAuthStoreTest {
   public void setUp() throws Exception {
     store = new BasicOAuthStore();
     store.initFromConfigString(SAMPLE_FILE);
+    store.setDefaultCallbackUrl("default callback");
   }
 
   @Test
@@ -75,6 +77,7 @@ public class BasicOAuthStoreTest {
     assertEquals("HMAC-SHA1", consumer.getProperty("oauth_signature_method"));
     assertEquals(provider, consumer.serviceProvider);
     assertNull(consumerInfo.getKeyName());
+    assertEquals("default callback", consumerInfo.getCallbackUrl());
 
     t.setAppUrl("http://rsagadget/test.xml");
     consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
@@ -85,12 +88,13 @@ public class BasicOAuthStoreTest {
     assertEquals(provider, consumer.serviceProvider);
     assertEquals("rsaprivate", consumer.getProperty(RSA_SHA1.PRIVATE_KEY));
     assertNull(consumerInfo.getKeyName());
+    assertEquals("callback", consumerInfo.getCallbackUrl());
   }
 
   @Test
   public void testGetAndSetAndRemoveToken() {
     FakeGadgetToken t = new FakeGadgetToken();
-    ConsumerInfo consumer = new ConsumerInfo(null, null);
+    ConsumerInfo consumer = new ConsumerInfo(null, null, null);
     t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
     t.setViewerId("viewer-one");
     assertNull(store.getTokenInfo(t, consumer, "", ""));
@@ -125,7 +129,7 @@ public class BasicOAuthStoreTest {
     }
 
     BasicOAuthStoreConsumerKeyAndSecret cks = new BasicOAuthStoreConsumerKeyAndSecret(
-        "somekey", "default", KeyType.RSA_PRIVATE, "keyname");
+        "somekey", "default", KeyType.RSA_PRIVATE, "keyname", null);
     store.setDefaultKey(cks);
 
     ConsumerInfo consumer = store.getConsumerKeyAndSecret(t, "", provider);
@@ -135,5 +139,27 @@ public class BasicOAuthStoreTest {
     assertEquals("default", consumer.getConsumer().getProperty(RSA_SHA1.PRIVATE_KEY));
     assertEquals(provider, consumer.getConsumer().serviceProvider);
     assertEquals("keyname", consumer.getKeyName());
+    assertEquals("default callback", consumer.getCallbackUrl());
+    
+    cks = new BasicOAuthStoreConsumerKeyAndSecret(
+        "somekey", "default", KeyType.RSA_PRIVATE, "keyname", "callback");
+    store.setDefaultKey(cks);
+    consumer = store.getConsumerKeyAndSecret(t, "", provider);
+    assertEquals("callback", consumer.getCallbackUrl());
+  }
+  
+  @Test
+  public void testNullCallback() throws Exception {
+    store = new BasicOAuthStore();
+    store.initFromConfigString(SAMPLE_FILE);
+    
+    FakeGadgetToken t = new FakeGadgetToken();
+    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");
+    ConsumerInfo consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
+    OAuthConsumer consumer = consumerInfo.getConsumer();
+    assertEquals("gadgetConsumer", consumer.consumerKey);
+    assertNull(consumerInfo.getKeyName());
+    assertNull(consumerInfo.getCallbackUrl());
   }
 }
