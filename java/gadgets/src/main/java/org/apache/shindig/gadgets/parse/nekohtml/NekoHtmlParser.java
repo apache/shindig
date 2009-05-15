@@ -49,10 +49,6 @@ public class NekoHtmlParser extends GadgetHtmlParser {
     this.documentProvider = documentProvider;
   }
 
-  protected HtmlSerializer createSerializer() {
-    return new NekoSerializer();
-  }
-
   @Override
   public Document parseDomImpl(String source) throws GadgetException {
     try {

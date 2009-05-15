@@ -26,8 +26,8 @@ import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.NekoSerializer;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -223,7 +223,7 @@ public class DefaultTemplateProcessorTest {
     NodeList children = node.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       Node child = children.item(i);
-      new NekoSerializer().serialize(child, sb);
+      new DefaultHtmlSerializer().serialize(child, sb);
     }
     return sb.toString();
   }

@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.w3c.dom.Document;
 
 import java.util.Map;
@@ -84,7 +84,7 @@ public class MutableContent {
         // Clear on first use
         contentSource = null;
       } else if (document != null) {
-        content = HtmlSerializer.serialize(document);
+        content = HtmlSerialization.serialize(document);
       }
     }
     return content;

@@ -108,7 +108,7 @@ public class ParseTreeSerializerBenchmark {
     try {
       long parseStart = System.currentTimeMillis();
       for (int i = 0; i < numRuns; ++i) {
-        HtmlSerializer.serialize(document);
+        HtmlSerialization.serialize(document);
       }
       long parseMillis = System.currentTimeMillis() - parseStart;
 

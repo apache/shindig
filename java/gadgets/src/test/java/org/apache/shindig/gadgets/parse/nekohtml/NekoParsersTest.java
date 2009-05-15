@@ -18,7 +18,7 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
 import org.apache.commons.io.IOUtils;
@@ -94,6 +94,6 @@ public class NekoParsersTest extends TestCase {
       throws Exception {
     Document document = parser.parseDom(content);
     expected = StringUtils.replace(expected, EOL, "\n");
-    assertEquals(expected, HtmlSerializer.serialize(document));
+    assertEquals(expected, HtmlSerialization.serialize(document));
   }
 }

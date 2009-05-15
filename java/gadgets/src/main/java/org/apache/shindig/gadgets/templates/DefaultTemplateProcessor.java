@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.GadgetELResolver;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -204,7 +204,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
         // And now escape
         outputBuffer.setLength(0);
         try {
-          HtmlSerializer.printEscapedText(value, outputBuffer);
+          HtmlSerialization.printEscapedText(value, outputBuffer);
         } catch (IOException e) {
           // Can't happen writing to StringBuilder
           throw new RuntimeException(e);

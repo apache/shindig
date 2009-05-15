@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -74,7 +74,7 @@ public abstract class AbstractTagHandler implements TagHandler {
 
     try {
       StringBuilder sb = new StringBuilder(text.length());
-      HtmlSerializer.printEscapedText(text, sb);
+      HtmlSerialization.printEscapedText(text, sb);
       parent.appendChild(parent.getOwnerDocument().createTextNode(sb.toString()));
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);

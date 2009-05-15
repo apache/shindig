@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.parse.nekohtml;
+package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import com.google.inject.Provider;
+
+import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 
 import java.io.StringWriter;
 import java.io.IOException;
 
 /**
- * Test cases for NekoCompactSerializer.
+ * Test cases for CompactHtmlSerializer.
  */
-public class NekoCompactSerializerTest extends AbstractParserAndSerializerTest {
+public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
 
   private NekoHtmlParser full = new NekoHtmlParser(
-      new ParseModule.DOMImplementationProvider().get()) {
-    @Override
-    protected HtmlSerializer createSerializer() {
-      return new NekoCompactSerializer();
-    }
-  };
+      new ParseModule.DOMImplementationProvider().get());
+
+  @Override
+  public void setUp() throws Exception {
+    full.setSerializerProvider(new Provider<HtmlSerializer>() {
+      public HtmlSerializer get() {
+        return new CompactHtmlSerializer();
+      }
+    });
+  }
 
   public void testWhitespaceNotCollapsedInSpecialTags() throws Exception {
     String content = loadFile(
@@ -61,11 +66,11 @@ public class NekoCompactSerializerTest extends AbstractParserAndSerializerTest {
 
   private static void assertSpecialTag(String tagName) {
     assertTrue(tagName + "should be special tag",
-        NekoCompactSerializer.isSpecialTag(tagName));
+        CompactHtmlSerializer.isSpecialTag(tagName));
     assertTrue(tagName.toUpperCase() + " should be special tag",
-        NekoCompactSerializer.isSpecialTag(tagName.toUpperCase()));
+        CompactHtmlSerializer.isSpecialTag(tagName.toUpperCase()));
     assertTrue(tagName.toLowerCase() + "should be special tag",
-        NekoCompactSerializer.isSpecialTag(tagName.toLowerCase()));
+        CompactHtmlSerializer.isSpecialTag(tagName.toLowerCase()));
   }
 
   public void testCollapseHtmlWhitespace() throws IOException {
@@ -82,7 +87,7 @@ public class NekoCompactSerializerTest extends AbstractParserAndSerializerTest {
 
   private static void assertCollapsed(String input, String expected) throws IOException {
     Appendable output = new StringWriter();
-    NekoCompactSerializer.collapseWhitespace(input, output);
+    CompactHtmlSerializer.collapseWhitespace(input, output);
     assertEquals(expected, output.toString());
   }
 }

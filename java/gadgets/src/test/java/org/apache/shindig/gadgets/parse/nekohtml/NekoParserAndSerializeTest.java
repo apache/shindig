@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
+import org.apache.shindig.gadgets.parse.AbstractParserAndSerializerTest;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
 /**

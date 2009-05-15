@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -56,7 +56,7 @@ public class HtmlTagHandler extends AbstractTagHandler {
     } catch (GadgetException ge) {
       try {
         StringBuilder sb = new StringBuilder("Error: ");
-        HtmlSerializer.printEscapedText(ge.getMessage(), sb);
+        HtmlSerialization.printEscapedText(ge.getMessage(), sb);
         Node comment = result.getOwnerDocument().createComment(sb.toString());
         result.appendChild(comment);
       } catch (IOException e) {

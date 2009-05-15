@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.parse.nekohtml;
+package org.apache.shindig.gadgets.parse;
 
 import com.google.common.collect.ImmutableSortedSet;
 
@@ -35,7 +35,7 @@ import java.io.IOException;
  * TODO - Consider adding attribute quoting elimination, empty attribute elimination where safe
  * end-tag elmination where safe.
  */
-public class NekoCompactSerializer extends NekoSerializer {
+public class CompactHtmlSerializer extends DefaultHtmlSerializer {
 
   private static final ImmutableSortedSet<String> SPECIAL_TAGS = ImmutableSortedSet
       .orderedBy(String.CASE_INSENSITIVE_ORDER)

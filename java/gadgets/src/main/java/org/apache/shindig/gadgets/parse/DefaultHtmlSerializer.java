@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.parse.nekohtml;
+package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
-import org.apache.xerces.xni.QName;
 import org.cyberneko.html.HTMLElements;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -33,20 +31,16 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * This parser does not try to escape entities in text content as it expects the parser
- * to have retained the original entity references rather than its resolved form in text nodes
+ * to have retained the original entity references rather than its resolved form in text nodes.
  */
-public class NekoSerializer extends HtmlSerializer {
+public class DefaultHtmlSerializer implements HtmlSerializer {
 
-  private static final Set<String> URL_ATTRIBUTES = ImmutableSet.of("href", "src");
-
-  @Override
-  public String serializeImpl(Document doc) {
+  /** {@inheritDoc} */
+  public String serialize(Document doc) {
     try {
-      StringWriter sw = createWriter(doc);
+      StringWriter sw = HtmlSerialization.createWriter(doc);
       if (doc.getDoctype() != null) {
         outputDocType(doc.getDoctype(), sw);
       }
@@ -145,7 +139,8 @@ public class NekoSerializer extends HtmlSerializer {
         output.append("=\"");
         if (attr.getNodeValue().length() != 0) {
           boolean isUrlAttribute =
-            elem.getNamespaceURI() == null && URL_ATTRIBUTES.contains(attrName);
+            elem.getNamespaceURI() == null &&
+            HtmlSerialization.URL_ATTRIBUTES.contains(attrName);
           printAttributeValue(attr.getNodeValue(), output, isUrlAttribute);
         }
         output.append('"');
@@ -166,12 +161,5 @@ public class NekoSerializer extends HtmlSerializer {
         output.append(c);
       }
     }
-  }
-
-  /**
-   * Returns true if the listed attribute is an URL attribute.
-   */
-  static boolean isUrlAttribute(QName name, String attributeName) {
-    return name.uri == null && URL_ATTRIBUTES.contains(attributeName);
   }
 }

@@ -17,13 +17,11 @@
  * under the License.
  */
 
-package org.apache.shindig.gadgets.parse.nekohtml;
+package org.apache.shindig.gadgets.parse;
 
 import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -31,20 +29,20 @@ import java.io.IOException;
 /**
  * Base test fixture for HTML parsing and serialization.
  */
-abstract class AbstractParserAndSerializerTest extends TestCase {
+public abstract class AbstractParserAndSerializerTest extends TestCase {
 
   /** The vm line separator */
   private static final String EOL = System.getProperty("line.separator");
 
-  String loadFile(String path) throws IOException {
+  protected String loadFile(String path) throws IOException {
     return IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream(path));
   }
 
-  void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
+  protected void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
       throws Exception {
     Document document = parser.parseDom(content);
     expected = StringUtils.replace(expected, EOL, "\n");
-    assertEquals(expected, HtmlSerializer.serialize(document));
+    assertEquals(expected, HtmlSerialization.serialize(document));
   }
 }

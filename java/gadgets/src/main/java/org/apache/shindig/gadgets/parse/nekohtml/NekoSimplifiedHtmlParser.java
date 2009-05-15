@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
@@ -71,10 +71,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   @Inject
   public NekoSimplifiedHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
-  }
-
-  protected HtmlSerializer createSerializer() {
-    return new NekoSerializer();
   }
 
   @Override
@@ -268,7 +264,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         String attributeName = xmlAttributes.getLocalName(i);
         builder.append(' ').append(attributeName).append("=\"");
         appendAttributeValue(xmlAttributes.getValue(i),
-            NekoSerializer.isUrlAttribute(qName, attributeName));
+            HtmlSerialization.isUrlAttribute(qName, attributeName));
         builder.append('\"');
       }
       builder.append('>');
