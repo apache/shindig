@@ -333,12 +333,15 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     if (handler != null) {
       handler.process(result, element, this);
     } else {
-      Element resultNode = (Element) element.cloneNode(false);
-      // Make sure that the resultNode is in the correct owner document.
-      // It would be cleaner to require that the incoming element is
-      // already in the correct document, but would require extra clones.
-      if (resultNode.getOwnerDocument() != result.getOwnerDocument()) {
-        result.getOwnerDocument().adoptNode(resultNode);
+      // Be careful cloning nodes! If a target node belongs to a different document than the
+      // template node then use importNode rather than cloneNode as that avoids side-effects
+      // in UserDataHandlers where the cloned template node would belong to its original
+      // document before being adopted by the target document.
+      Element resultNode;
+      if (element.getOwnerDocument() != result.getOwnerDocument()) {
+        resultNode = (Element)result.getOwnerDocument().importNode(element, false);
+      } else {
+        resultNode = (Element)element.cloneNode(false);
       }
       
       clearSpecialAttributes(resultNode);

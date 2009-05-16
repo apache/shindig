@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.GadgetException;
@@ -29,6 +30,9 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+
+
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.junit.Before;
@@ -43,6 +47,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,12 +73,16 @@ public class DefaultTemplateProcessorTest {
   private SocialMarkupHtmlParser parser;
   
   private static final String TEST_NS = "http://example.com";
-  
+  protected SingletonElementHandler singletonElementHandler;
+
   @Before
   public void setUp() throws Exception {
     expressions = new Expressions();
     variables = Maps.newHashMap();
-    Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new TestTagHandler());
+    singletonElementHandler = new SingletonElementHandler();
+    Set<TagHandler> handlers = ImmutableSet.<TagHandler>of(
+        new TestTagHandler(),
+        singletonElementHandler);
     registry = new DefaultTagRegistry(handlers);
 
     processor = new DefaultTemplateProcessor(expressions);
@@ -202,6 +212,44 @@ public class DefaultTemplateProcessorTest {
     assertEquals("<input class=\"false\" disabled=\"disabled\">", output);
   }
 
+  /**
+   * Ensure that the element cloning handling of processChildren correctly
+   * copies and element to the target element, including making sure that
+   * document references are properly cleaned up and user_data in the original
+   * content does not refer to the target document
+   * @throws Exception
+   */
+  @Test
+  public void testSafeCrossDocumentCloning() throws Exception {
+    String template = "<test:Bar text='${foo.title}' data='${user}'/>";
+    executeTemplate(template, "xmlns:test='" + TEST_NS + "'");
+    executeTemplate(template, "xmlns:test='" + TEST_NS + "'");
+
+    // This is a little hacky but is fine for testing purposes. Assumes that DOM implementation
+    // is based on Xerces which will always has a userData hashtable
+    Document doc = singletonElementHandler.elem.getOwnerDocument();
+    Class docClass = doc.getClass();
+    Field userDataField = null;
+    while (userDataField == null) {
+      try {
+        userDataField = docClass.getDeclaredField("userData");
+      } catch (NoSuchFieldException nsfe) {
+        // Ignore. Try the parent
+      }
+      docClass = docClass.getSuperclass();
+    }
+    // Access is typically protected so just bypass
+    userDataField.setAccessible(true);
+    Hashtable userDataMap = (Hashtable)userDataField.get(doc);
+
+    // There should be only one element in the user data map, if there are more then the
+    // cloning process has put them there which can be a nasty source of memory leaks. Consider
+    // the case of this test where the singleton template is a shared and re-used template where
+    // the  template documents userData starts to accumulate cloned nodes for every time that
+    // template is rendered
+    assertEquals(1, userDataMap.size());
+  }
+
   private String executeTemplate(String markup) throws Exception {
     return executeTemplate(markup, "");
   }
@@ -251,6 +299,23 @@ public class DefaultTemplateProcessorTest {
       Element b = doc.createElement("b");
       b.appendChild(doc.createTextNode(text));
       result.appendChild(b);
+    }
+  }
+
+  /**
+   * A tag to test the correct behavior of user data and element cloning
+   */
+  private static class SingletonElementHandler extends AbstractTagHandler {
+
+    Element elem = XmlUtil.parseSilent("<wrapper><div><a>out</a></div></wrapper>");
+
+    public SingletonElementHandler() {
+      super(TEST_NS, "Bar");
+      SanitizingGadgetRewriter.bypassSanitization((Element)elem.getFirstChild(), true);
+    }
+
+    public void process(Node result, Element tag, TemplateProcessor processor) {
+      processor.processChildNodes(result, elem);
     }
   }
 }

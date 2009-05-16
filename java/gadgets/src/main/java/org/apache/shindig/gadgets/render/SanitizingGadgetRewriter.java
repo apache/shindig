@@ -98,7 +98,7 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
   private static enum Bypass { ALL, ONLY_SELF, NONE };
   private static UserDataHandler copyOnClone = new UserDataHandler() {
     public void handle(short operation, String key, Object data, Node src, Node dst) {
-      if (operation == NODE_CLONED) {
+      if (operation == NODE_IMPORTED || operation == NODE_CLONED) {
         dst.setUserData(key, data, copyOnClone);
       }
     }
