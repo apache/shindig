@@ -123,29 +123,17 @@ public class JpaTestGuiceModule extends AbstractModule {
       throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     * @see org.apache.shindig.social.opensocial.oauth.OAuthDataStore#disableToken(org.apache.shindig.social.opensocial.oauth.OAuthEntry)
-     */
     public void disableToken(OAuthEntry entry) {
       throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     * @see org.apache.shindig.social.opensocial.oauth.OAuthDataStore#generateRequestToken(java.lang.String, java.lang.String)
-     */
-    public OAuthEntry generateRequestToken(String consumerKey, String oauthVersion)
-        throws OAuthProblemException {
+    public void removeToken(OAuthEntry entry) {
       throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     * @see org.apache.shindig.social.opensocial.oauth.OAuthDataStore#removeToken(org.apache.shindig.social.opensocial.oauth.OAuthEntry)
-     */
-    public void removeToken(OAuthEntry entry) {
-      throw new UnsupportedOperationException();
+    public OAuthEntry generateRequestToken(String consumerKey, String oauthVersion,
+        String signedCallbackUrl) {
+      return null;
     }
   }
 }
