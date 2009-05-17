@@ -69,11 +69,14 @@ public class OAuthCallbackServlet extends InjectedServlet {
     "</head>\n" +
     "<body>\n" +
     "<script type='text/javascript'>\n" +
+    "try {\n" +
     "  if (window.opener && window.opener.gadgets && window.opener.gadgets.oauth\n" +
     "      && window.opener.gadgets.oauth.Popup) {\n" +
     "    window.opener.gadgets.oauth.Popup.setReceivedCallbackUrl(document.location.href);\n" +
     "  }\n" +
-    "  window.close();\n" +
+    "} catch (e) {\n" +
+    "}\n" +
+    "window.close();\n" +
     "</script>\n" +
     "Close this window.\n" +
     "</body>\n" +

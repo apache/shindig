@@ -23,7 +23,7 @@
     <OAuth>
       <Service name="shindig">
         <Request url="http://localhost:8080/oauth/requestToken" />
-        <Authorization url="http://localhost:8080/oauth/authorize" />
+        <Authorization url="http://localhost:8080/oauth/authorize?oauth_callback=http://localhost:8080/gadgets/oauthcallback" />
         <Access url="http://localhost:8080/oauth/accessToken" />
       </Service>
     </OAuth>
