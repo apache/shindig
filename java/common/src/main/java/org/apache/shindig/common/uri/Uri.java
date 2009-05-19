@@ -18,7 +18,8 @@
  */
 package org.apache.shindig.common.uri;
 
-import com.google.common.base.Join;
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -27,10 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
 * Represents a Uniform Resource Identifier (URI) reference as defined by <a
@@ -98,6 +97,9 @@ public final class Uri {
    * Convert a java.net.URI to a Uri.
    */
   public static Uri fromJavaUri(URI uri) {
+    if (uri.isOpaque()) {
+      throw new IllegalArgumentException("No support for opaque Uris " + uri.toString());
+    }
     return new UriBuilder()
         .setScheme(uri.getScheme())
         .setAuthority(uri.getRawAuthority())
@@ -120,121 +122,153 @@ public final class Uri {
   }
 
   /**
+   * Derived from Harmony
    * Resolves a given url relative to this url. Resolution rules are the same as for
    * {@code java.net.URI.resolve(URI)}
-   *
-   * @param other The url to resolve against.
-   * @return The new url.
    */
-  public Uri resolve(Uri other) {
-    // return  this.resolveNew(other);
-    if (other == null) {
+  public Uri resolve(Uri relative) {
+    if (relative == null) {
       return null;
     }
-    
-    return fromJavaUri(toJavaUri().resolve(other.toJavaUri()));
+    if (relative.isAbsolute()) {
+      return relative;
+    }
+
+    UriBuilder result;
+    if (StringUtils.isEmpty(relative.path) && relative.scheme == null
+        && relative.authority == null && relative.query == null
+        && relative.fragment != null) {
+      // if the relative URI only consists of fragment,
+      // the resolved URI is very similar to this URI,
+      // except that it has the fragement from the relative URI.
+      result = new UriBuilder(this);
+      result.setFragment(relative.fragment);
+    } else if (relative.scheme != null) {
+      result = new UriBuilder(relative);
+    } else if (relative.authority != null) {
+      // if the relative URI has authority,
+      // the resolved URI is almost the same as the relative URI,
+      // except that it has the scheme of this URI.
+      result = new UriBuilder(relative);
+      result.setScheme(scheme);
+    } else {
+      // since relative URI has no authority,
+      // the resolved URI is very similar to this URI,
+      // except that it has the query and fragment of the relative URI,
+      // and the path is different.
+      result = new UriBuilder(this);
+      result.setFragment(relative.fragment);
+      result.setQuery(relative.query);
+      String relativePath = (relative.path == null) ? "" : relative.path;
+      if (relativePath.startsWith("/")) { //$NON-NLS-1$
+        result.setPath(relativePath);
+      } else {
+        // resolve a relative reference
+        int endindex = path.lastIndexOf('/') + 1;
+        result.setPath(normalizePath(path.substring(0, endindex) + relativePath));
+      }
+    }
+    Uri resolved = result.toUri();
+    validate(resolved);
+    return resolved;
   }
 
-  public Uri resolveNew(Uri other) {
-    if (other == null) {
-      return null;
+  private static void validate(Uri uri) {
+    if (StringUtils.isEmpty(uri.authority) &&
+        StringUtils.isEmpty(uri.path) &&
+        StringUtils.isEmpty(uri.query)) {
+      throw new IllegalArgumentException("Invalid scheme-specific part");
     }
-
-
-    String scheme = other.getScheme();
-    String authority = other.getAuthority();
-    String path = other.getPath();
-    String query = other.getQuery();
-    String fragment = other.getFragment();
-
-    if (scheme != null && scheme.length() > 0) {
-      // Do nothing - this will accept other's fields verbatim.
-    } else if (authority != null) {
-      // Schema-relative ie. "//newhost.com/foo?q=s". Take base scheme.
-      scheme = getScheme();
-    } else if (path != null && path.length() > 0) {
-      // Resolve other path against current. Keep prerequisites.
-      scheme = getScheme();
-      authority = getAuthority();
-      path = resolvePath(path);
-    } else if (query != null && query.length() > 0) {
-      // Accept query + fragment verbatim. Use base scheme/authority/path.
-      scheme = getScheme();
-      authority = getAuthority();
-      // Treat query-relative as ""-path with query.
-      path = resolvePath("");
-    } else if (fragment != null && fragment.length() > 0) {
-      // Accept fragment verbatim. Use base scheme/authority/path/query.
-      scheme = getScheme();
-      authority = getAuthority();
-      path = getPath();
-      query = getQuery();
-    }
-
-    return new UriBuilder()
-        .setScheme(scheme)
-        .setAuthority(authority)
-        .setPath(path)
-        .setQuery(query)
-        .setFragment(fragment)
-        .toUri();
   }
 
   /**
-   * Resolves {@code otherPath} against the current path, returning the result.
-   * Implements RFC 2396 resolution rules.
+   * Dervived from harmony
+   * normalize path, and return the resulting string
    */
-  private String resolvePath(String otherPath) {
-    if (otherPath.startsWith("/")) {
-      // Optimization: just accept other.
-      return otherPath;
+  private static String normalizePath(String path) {
+    // count the number of '/'s, to determine number of segments
+    int index = -1;
+    int pathlen = path.length();
+    int size = 0;
+    if (pathlen > 0 && path.charAt(0) != '/') {
+      size++;
     }
-    
-    // Relative path. Treat current path as a stack, otherPath as a List
-    // in order to merge.
-    LinkedList<String> pathStack = new LinkedList<String>();
-    String curPath = getPath() != null ? getPath() : "/";  // Just in case.
-    StringTokenizer tok = new StringTokenizer(curPath, "/");
-
-    while (tok.hasMoreTokens()) {
-      pathStack.add(tok.nextToken());
-    }
-    if (!curPath.endsWith("/")) {
-      // The first entry in mergePath overwrites the last in the pathStack.
-      // eg. curPath = "/foo/bar", otherPath = "baz" --> "/foo/baz".
-      pathStack.removeLast();
-    }
-
-    LinkedList<String> mergePath = new LinkedList<String>();
-    StringTokenizer tok2 = new StringTokenizer(otherPath, "/");
-    while (tok2.hasMoreTokens()) {
-      mergePath.add(tok2.nextToken());
-    }
-    if (otherPath.endsWith("/") || otherPath.equals("")) {
-      // Retains the ending slash in the final join.
-      mergePath.add("");
-    }
-
-    // Merge mergePath into pathStack.
-    for (String mergeComponent : mergePath) {
-      if (mergeComponent.equals(".")) {
-        // Retain current position in the path. Continue.
-        continue;
-      } else if (mergeComponent.equals("..")) {
-        // Pop one off the path stack if available. If not do nothing.
-        if (!pathStack.isEmpty()) {
-          pathStack.removeLast();
-        }
-      } else {
-        // Append latest to the path.
-        pathStack.add(mergeComponent);
+    while ((index = path.indexOf('/', index + 1)) != -1) {
+      if (index + 1 < pathlen && path.charAt(index + 1) != '/') {
+        size++;
       }
     }
 
-    if (getAuthority() != null) {
-      pathStack.addFirst(""); // get an initial / on the front..
+    String[] seglist = new String[size];
+    boolean[] include = new boolean[size];
+
+    // break the path into segments and store in the list
+    int current = 0;
+    int index2 = 0;
+    index = (pathlen > 0 && path.charAt(0) == '/') ? 1 : 0;
+    while ((index2 = path.indexOf('/', index + 1)) != -1) {
+      seglist[current++] = path.substring(index, index2);
+      index = index2 + 1;
     }
-    return Join.join("/", pathStack);
+
+    // if current==size, then the last character was a slash
+    // and there are no more segments
+    if (current < size) {
+      seglist[current] = path.substring(index);
+    }
+
+    // determine which segments get included in the normalized path
+    for (int i = 0; i < size; i++) {
+      include[i] = true;
+      if (seglist[i].equals("..")) { //$NON-NLS-1$
+        int remove = i - 1;
+        // search back to find a segment to remove, if possible
+        while (remove > -1 && !include[remove]) {
+          remove--;
+        }
+        // if we find a segment to remove, remove it and the ".."
+        // segment
+        if (remove > -1 && !seglist[remove].equals("..")) { //$NON-NLS-1$
+          include[remove] = false;
+          include[i] = false;
+        }
+      } else if (seglist[i].equals(".")) { //$NON-NLS-1$
+        include[i] = false;
+      }
+    }
+
+    // put the path back together
+    StringBuilder newpath = new StringBuilder();
+    if (path.startsWith("/")) { //$NON-NLS-1$
+      newpath.append('/');
+    }
+
+    for (int i = 0; i < seglist.length; i++) {
+      if (include[i]) {
+        newpath.append(seglist[i]);
+        newpath.append('/');
+      }
+    }
+
+    // if we used at least one segment and the path previously ended with
+    // a slash and the last segment is still used, then delete the extra
+    // trailing '/'
+    if (!path.endsWith("/") && seglist.length > 0 //$NON-NLS-1$
+        && include[seglist.length - 1]) {
+      newpath.deleteCharAt(newpath.length() - 1);
+    }
+
+    String result = newpath.toString();
+
+    // check for a ':' in the first segment if one exists,
+    // prepend "./" to normalize
+    index = result.indexOf(':');
+    index2 = result.indexOf('/');
+    if (index != -1 && (index < index2 || index2 == -1)) {
+      newpath.insert(0, "./"); //$NON-NLS-1$
+      result = newpath.toString();
+    }
+    return result;
   }
 
   /**
