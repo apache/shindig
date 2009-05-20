@@ -42,11 +42,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 
@@ -61,14 +60,9 @@ import com.google.inject.Inject;
  * rendering, OSML, etc.)
  */
 public class SanitizingGadgetRewriter implements GadgetRewriter {
-  private static final Set<String> URI_ATTRIBUTES = ImmutableSet.of("href", "src");
 
   /** Key stored as element user-data to bypass sanitization */
   private static final String BYPASS_SANITIZATION_KEY = "shindig.bypassSanitization";
-  
-  /** Attributes to forcibly rewrite and require an image mime type */
-  private static final Map<String, ImmutableSet<String>> PROXY_IMAGE_ATTRIBUTES =
-      ImmutableMap.of("img", ImmutableSet.of("src"));
 
   /**
    * Is the Gadget to be rendered sanitized?
@@ -144,10 +138,8 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
    * Utiliity class to sanitize HTML nodes recursively.
    */
   class NodeSanitizer {
-
-    private final LinkRewriter cssRewriter;
-    private final LinkRewriter imageRewriter;
     private final Uri context;
+    private final List<DomFilter> filters;
 
     NodeSanitizer(Gadget gadget) {
       this.context = gadget.getSpec().getUrl();
@@ -156,10 +148,20 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
           rewriterFeatureFactory.createRewriteAllFeature(expires == null ? -1 : expires);
 
       String proxyBaseNoGadget = rewriterUris.getProxyBase(gadget.getContext().getContainer());
-      cssRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
+      LinkRewriter cssRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
           rewriterFeature, proxyBaseNoGadget, "text/css");
-      imageRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
+      LinkRewriter imageRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
           rewriterFeature, proxyBaseNoGadget, "image/*");
+
+      // Create the set of filters to process in order.
+      filters = ImmutableList.of(
+        new BasicElementFilter(allowedTags, allowedAttributes),
+        new LinkSchemeCheckFilter(),
+        new StyleFilter(cssSanitizer, cssRewriter),
+        new LinkFilter(cssRewriter),
+        new ImageFilter(imageRewriter),
+        new TargetFilter()
+      );
     }
 
     private void sanitize(Node node) {
@@ -178,18 +180,30 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
             for (Node child : toList(node.getChildNodes())) {
               sanitize(child);
             }
-          } else if (allowedTags.contains(element.getTagName().toLowerCase())) {
-            // TODO - Add special case for stylesheet LINK nodes.
-            // Special case handling for style nodes
-            if (element.getTagName().equalsIgnoreCase("style")) {
-              cssSanitizer.sanitize(element, context, cssRewriter);
-            }
-            filterAttributes(element);
-            for (Node child : toList(node.getChildNodes())) {
-              sanitize(child);
-            }
           } else {
-            node.getParentNode().removeChild(node);
+            boolean removed = false;
+            for (DomFilter filter : filters) {
+              DomFilter.Result tagResult = filter.filterTag(element, context);
+              if (tagResult == DomFilter.Result.REMOVE) {
+                element.getParentNode().removeChild(element);
+                removed = true;
+                break;
+              } else if (tagResult == DomFilter.Result.CONTINUE) {
+                for (Attr attr : toList(node.getAttributes())) {
+                  DomFilter.Result attrResult = filter.filterAttribute(attr, context);
+                  if (attrResult == DomFilter.Result.PASS) {
+                    break; // No need to process more attributes
+                  } else if (attrResult == DomFilter.Result.REMOVE) {
+                    element.removeAttributeNode(attr);
+                  }
+                }
+              }
+            }
+            if (!removed) {
+              for (Node child : toList(node.getChildNodes())) {
+                sanitize(child);
+              }
+            }
           }
           break;
         case Node.COMMENT_NODE:
@@ -198,33 +212,6 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
           // There might be other, unknown types as well. Don't trust them.
           node.getParentNode().removeChild(node);
           break;
-      }
-    }
-
-    private void filterAttributes(Element element) {
-      Set<String> rewriteImageAttrs = PROXY_IMAGE_ATTRIBUTES.get(element.getNodeName().toLowerCase());
-      for (Attr attribute : toList(element.getAttributes())) {
-        String name = attribute.getNodeName().toLowerCase();
-        if (allowedAttributes.contains(name)) {
-          if (URI_ATTRIBUTES.contains(name)) {
-            try {
-              Uri uri = Uri.parse(attribute.getNodeValue());
-              String scheme = uri.getScheme();
-              if (!isAllowedScheme(scheme)) {
-                element.removeAttributeNode(attribute);
-              } else if (rewriteImageAttrs != null && rewriteImageAttrs.contains(name)) {
-                // Force rewrite the src of the image through the proxy. This is necessary
-                // because IE will run arbitrary script in files referenced from src
-                attribute.setValue(imageRewriter.rewrite(attribute.getNodeValue(), context));
-              }
-            } catch (IllegalArgumentException e) {
-              // Not a valid URI.
-              element.removeAttributeNode(attribute);
-            }
-          }
-        } else {
-          element.removeAttributeNode(attribute);
-        }
       }
     }
   }
@@ -241,14 +228,6 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
     return list;
   }
 
-  private static Bypass canBypassSanitization(Element element) {
-    Bypass bypass = (Bypass) element.getUserData(BYPASS_SANITIZATION_KEY);
-    if (bypass == null) {
-      bypass = Bypass.NONE;
-    }
-    return bypass;
-  }
-
   /** Convert a NamedNodeMap to a list for easy and safe operations */
   private static List<Node> toList(NodeList nodes) {
     List<Node> list = new ArrayList<Node>(nodes.getLength());
@@ -260,8 +239,195 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
     return list;
   }
 
-  private static boolean isAllowedScheme(String scheme) {
-    return scheme == null || scheme.equals("http") || scheme.equals("https");
+  private static Bypass canBypassSanitization(Element element) {
+    Bypass bypass = (Bypass) element.getUserData(BYPASS_SANITIZATION_KEY);
+    if (bypass == null) {
+      bypass = Bypass.NONE;
+    }
+    return bypass;
+  }
+
+  /**
+   * Filter DOM elements and attributes to check their validity and
+   * restrict their allowed content
+   */
+  static interface DomFilter {
+    enum Result {
+      PASS,  // Check passed, do not process further checks on this filter
+      CONTINUE, // Check passed, process further checks on this filter
+      REMOVE // Check failed, remove item
+    };
+
+    /**
+     * Filter the element and possibly transform it.
+     */
+    Result filterTag(Element elem, Uri context);
+
+    /**
+     * Filter the attribute and possibly transform it
+\     */
+    Result filterAttribute(Attr attr, Uri context);
+  }
+
+  /**
+   * Restrict the set of allowed tags and attributes
+   */
+  static class BasicElementFilter implements DomFilter {
+    final Set<String> allowedTags;
+    final Set<String> allowedAttrs;
+
+    BasicElementFilter(Set<String> allowedTags, Set<String> allowedAttrs) {
+      this.allowedTags = allowedTags;
+      this.allowedAttrs = allowedAttrs;
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      return allowedTags.contains(elem.getNodeName().toLowerCase()) ?
+          Result.CONTINUE : Result.REMOVE;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      return allowedAttrs.contains(attr.getName().toLowerCase()) ?
+          Result.CONTINUE : Result.REMOVE;
+    }
+  }
+
+  /**
+   * Enfore that all uri's in the document have either http or https as
+   * their scheme
+   */
+  static class LinkSchemeCheckFilter implements DomFilter {
+    protected Set<String> uriAttributes;
+
+    LinkSchemeCheckFilter() {
+      uriAttributes = ImmutableSet.of("href", "src");
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      return Result.CONTINUE;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      if (uriAttributes.contains(attr.getName().toLowerCase())) {
+        try {
+          Uri uri = Uri.parse(attr.getValue());
+          String scheme = uri.getScheme();
+          if (scheme != null && !scheme.equals("http") && !scheme.equals("https")) {
+            return Result.REMOVE;
+          }
+        } catch (IllegalArgumentException iae) {
+          return Result.REMOVE;
+        }
+      }
+      return Result.CONTINUE;
+    }
+  }
+
+  /**
+   * Enfore that all images in the document are rewritten through the proxy.
+   * Prevents issues in IE where the image content contains script
+   */
+  static class ImageFilter implements DomFilter {
+    protected final LinkRewriter imageRewriter;
+
+    ImageFilter(LinkRewriter imageRewriter) {
+      this.imageRewriter = imageRewriter;
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      if ("img".equalsIgnoreCase(elem.getNodeName())) {
+        return Result.CONTINUE;
+      }
+      return Result.PASS;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      if ("src".equalsIgnoreCase(attr.getName())) {
+        attr.setValue(imageRewriter.rewrite(attr.getValue(), context));
+      }
+      return Result.PASS;
+    }
+  }
+
+  /**
+   * Pass the contents of style tags through the CSS sanitizer
+   */
+  static class StyleFilter implements DomFilter {
+    final CajaCssSanitizer sanitizer;
+    final LinkRewriter rewriter;
+
+    StyleFilter(CajaCssSanitizer sanitizer, LinkRewriter rewriter) {
+      this.sanitizer = sanitizer;
+      this.rewriter = rewriter;
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      if ("style".equalsIgnoreCase(elem.getNodeName())) {
+        sanitizer.sanitize(elem, context, rewriter);
+      }
+      return Result.PASS;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      return Result.PASS;
+    }
+  }
+
+  /**
+   * Restrict link tags to stylesheet content only and force the link to
+   * be rewritten through the proxy and sanitized
+   */
+  static class LinkFilter implements DomFilter {
+    final LinkRewriter rewriter;
+
+    LinkFilter(LinkRewriter rewriter) {
+      this.rewriter = rewriter;
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      if (!elem.getNodeName().equalsIgnoreCase("link")) {
+        return Result.CONTINUE;
+      }
+      boolean hasType = false;
+      for (Attr attr : toList(elem.getAttributes())) {
+        if ("rel".equalsIgnoreCase(attr.getName())) {
+          hasType |= "stylesheet".equalsIgnoreCase(attr.getValue());
+        } else if ("type".equalsIgnoreCase(attr.getName())) {
+          hasType |= "text/css".equalsIgnoreCase(attr.getValue());
+        } else if ("href".equalsIgnoreCase(attr.getName())) {
+          attr.setValue(rewriter.rewrite(attr.getValue(), context));
+        }
+      }
+      return hasType ? Result.PASS : Result.REMOVE;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      return Result.PASS;
+    }
+  }
+
+  /**
+   * Restrict the value of the target attribute on anchors etc. to
+   * _blank or _self or remove the node
+   */
+  static class TargetFilter implements DomFilter {
+
+    TargetFilter() {
+    }
+
+    public Result filterTag(Element elem, Uri context) {
+      return Result.CONTINUE;
+    }
+
+    public Result filterAttribute(Attr attr, Uri context) {
+      if ("target".equalsIgnoreCase(attr.getName())) {
+        String value = attr.getValue().toLowerCase();
+        if (!("_blank".equals(value) || "_self".equals(value))) {
+          return Result.REMOVE;
+        }
+      }
+      return Result.CONTINUE;
+    }
   }
 
   /**

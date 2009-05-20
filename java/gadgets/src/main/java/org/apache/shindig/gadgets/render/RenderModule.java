@@ -39,8 +39,8 @@ public class RenderModule extends AbstractModule {
         .toInstance(ImmutableSet.of("a", "abbr", "acronym", "area", "b", "bdo", "big", "blockquote",
             "body", "br", "caption", "center", "cite", "code", "col", "colgroup", "dd", "del",
             "dfn", "div", "dl", "dt", "em", "font", "h1", "h2", "h3", "h4", "h5", "h6", "head",
-            "hr", "html", "i", "img", "ins", "legend", "li", "map", "ol", "p", "pre", "q", "s",
-            "samp", "small", "span", "strike", "strong", "style", "sub", "sup", "table",
+            "hr", "html", "i", "img", "ins", "legend", "li", "link", "map", "ol", "p", "pre",
+            "q", "s", "samp", "small", "span", "strike", "strong", "style", "sub", "sup", "table",
             "tbody", "td", "tfoot", "th", "thead", "tr", "tt", "u", "ul"));
 
     bind(setLiteral)
@@ -54,5 +54,4 @@ public class RenderModule extends AbstractModule {
             "vspace", "width"));
 
   }
-
 }

@@ -57,6 +57,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
 
   private void serialize(Node n, Appendable output, boolean xmlMode)
       throws IOException {
+    if (n == null) return;
     switch (n.getNodeType()) {
       case Node.CDATA_SECTION_NODE: {
         break;

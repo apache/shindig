@@ -124,6 +124,30 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   }
 
   @Test
+  public void enforceStyleLinkRewritten() throws Exception {
+    String markup =
+        "<link rel=\"stylesheet\" "
+            + "href=\"http://www.test.com/dir/proxy?"
+            + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
+            + "fp=45508rewriteMime=text/css\"/>";
+    String sanitized = 
+        "<link href=\"http://www.test.com/dir/proxy?"
+            + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
+            + "fp=45508&sanitize=1&rewriteMime=text/css\" rel=\"stylesheet\">";
+    String rewritten = rewrite(gadget, markup, set("link"), set("rel", "href"));
+    assertEquals(sanitized, rewritten);
+  }
+
+  @Test
+  public void enforceNonStyleLinkStripped() throws Exception {
+    String markup =
+        "<link rel=\"script\" "
+            + "href=\"www.exmaple.org/evil.js\"/>";
+    String rewritten = rewrite(gadget, markup, set("link"), set("rel", "href", "type"));
+    assertEquals("", rewritten);
+  }
+
+  @Test
   public void enforceCssImportLinkRewritten() throws Exception {
     String markup =
         "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
@@ -168,6 +192,25 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     String markup = "<img src='java\\ script:evil()'>Evil happens</img>";
     String sanitized = "<img>Evil happens";
     assertEquals(sanitized, rewrite(gadget, markup, set("img"), set("src")));
+  }
+
+  @Test
+  public void enforceTargetTopRestricted() throws Exception {
+    String markup = "<a href=\"http://www.example.com\" target=\"_top\">x</a>";
+    String sanitized = "<a href=\"http://www.example.com\">x</a>";
+    assertEquals(sanitized, rewrite(gadget, markup, set("a"), set("href", "target")));
+  }
+
+  @Test
+  public void enforceTargetSelfAllowed() throws Exception {
+    String markup = "<a href=\"http://www.example.com\" target=\"_self\">x</a>";
+    assertEquals(markup, rewrite(gadget, markup, set("a"), set("href", "target")));
+  }
+
+  @Test
+  public void enforceTargetBlankAllowed() throws Exception {
+    String markup = "<a href=\"http://www.example.com\" target=\"_BlAnK\">x</a>";
+    assertEquals(markup, rewrite(gadget, markup, set("a"), set("href", "target")));
   }
 
   @Test
