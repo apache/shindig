@@ -134,10 +134,10 @@ class DefaultInvalidateService implements InvalidateService {
       $cached = $this->invalidationEntry->expiredGet($viewerKey);
       $viewerStamp = $cached['found'] ? $cached['data'] : false;
     }
-    if ($ownerStamp) {
+    if (isset($ownerStamp)) {
       $currentInvalidation = $currentInvalidation . 'o=' . $ownerStamp . ';'; 
     }
-    if ($viewerStamp) {
+    if (isset($viewerStamp)) {
       $currentInvalidation = $currentInvalidation . 'v=' . $viewerStamp . ';'; 
     }
     return $currentInvalidation;

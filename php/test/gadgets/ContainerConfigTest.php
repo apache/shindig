@@ -22,25 +22,18 @@
  * ContainerConfig test case.
  */
 class ContainerConfigTest extends PHPUnit_Framework_TestCase {
-  
-  /**
-   * @var ContainerConfig
-   */
-  private $ContainerConfig;
 
   /**
    * Prepares the environment before running a test.
    */
   protected function setUp() {
     parent::setUp();
-    $this->ContainerConfig = new ContainerConfig(Config::get('container_path'));
-  }
+   }
 
   /**
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
-    $this->ContainerConfig = null;
     parent::tearDown();
   }
 
@@ -48,12 +41,42 @@ class ContainerConfigTest extends PHPUnit_Framework_TestCase {
    * Tests ContainerConfig->getConfig()
    */
   public function testGetConfig() {
-    $config = $this->ContainerConfig->getConfig('default', 'gadgets.features');
+    $containerConfig = new ContainerConfig(Config::get('container_path'));
+    $config = $containerConfig->getConfig('default', 'gadgets.features');
     $this->assertArrayHasKey('core.io', $config);
     $this->assertArrayHasKey('views', $config);
     $this->assertArrayHasKey('rpc', $config);
     $this->assertArrayHasKey('skins', $config);
     $this->assertArrayHasKey('opensocial-0.8', $config);
     $this->assertArrayHasKey('path', $config['opensocial-0.8']);
+  }
+  
+  /**
+   * Tests ContainerConfig::removeComments()
+   */
+  public function testRemoveComments() {
+    $jsFile = <<<EOD
+/*
+ * Comments
+ */
+
+// Comments
+{"gadgets.container" : ["default"],
+"gadgets.parent" : null,
+"gadgets.lockedDomainSuffix" : "-a.example.com:8080",
+"gadgets.iframeBaseUri" : "/gadgets/ifr",
+"gadgets.jsUriTemplate" : "http://%host%/gadgets/js/%js%",
+"gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback"
+}
+EOD;
+    $uncommented = ContainerConfig::removeComments($jsFile);
+    $jsonObj = json_decode($uncommented, true);
+    $this->assertNotEquals($uncommented, $jsonObj);
+    $this->assertEquals(array("default"), $jsonObj["gadgets.container"]);
+    $this->assertEquals(null, $jsonObj["gadgets.parent"]);
+    $this->assertEquals("-a.example.com:8080", $jsonObj["gadgets.lockedDomainSuffix"]);
+    $this->assertEquals("/gadgets/ifr", $jsonObj["gadgets.iframeBaseUri"]);
+    $this->assertEquals("http://%host%/gadgets/js/%js%", $jsonObj["gadgets.jsUriTemplate"]);
+    $this->assertEquals("//%host%/gadgets/oauthcallback", $jsonObj["gadgets.oauthGadgetCallbackTemplate"]);
   }
 }
