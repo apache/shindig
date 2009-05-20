@@ -110,7 +110,7 @@ public class MakeRequestHandler extends ProxyBase {
    * sent from the client.
    * @throws GadgetException
    */
-  private HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
+  protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
     String encoding = request.getCharacterEncoding();
     if (encoding == null) {
       encoding = "UTF-8";
@@ -179,7 +179,7 @@ public class MakeRequestHandler extends ProxyBase {
    * Format a response as JSON, including additional JSON inserted by
    * chained content fetchers.
    */
-  private String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
+  protected String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
       HttpResponse results) throws GadgetException {
     String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
     String body = "";
@@ -201,6 +201,11 @@ public class MakeRequestHandler extends ProxyBase {
 
     // Use raw param as key as URL may have to be decoded
     return JsonSerializer.serialize(Collections.singletonMap(originalUrl, resp));
+  }
+
+  protected RequestPipeline getRequestPipeline()
+  {
+    return requestPipeline;
   }
 
   /**
