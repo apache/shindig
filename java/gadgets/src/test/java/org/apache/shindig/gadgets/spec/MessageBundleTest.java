@@ -118,6 +118,15 @@ public class MessageBundleTest {
   }
 
   @Test
+  public void extractNestedTagsVerbatim() throws Exception {
+    String xml = "<messagebundle><msg name='key'>This is <x>nested</x> content</msg>" +
+                 "</messagebundle>";
+    Element element = XmlUtil.parse(xml);
+    MessageBundle bundle = new MessageBundle(element);
+    assertEquals("This is <x>nested</x> content", bundle.getMessages().get("key"));
+  }
+
+  @Test
   public void merge() throws Exception {
     MessageBundle parent = new MessageBundle(XmlUtil.parse(PARENT_LOCALE));
     MessageBundle child = new MessageBundle(XmlUtil.parse(XML));

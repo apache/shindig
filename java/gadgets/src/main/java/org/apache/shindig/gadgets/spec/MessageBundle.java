@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 
+import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap;
 
@@ -27,6 +29,8 @@ import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
 
 /**
@@ -36,6 +40,7 @@ public class MessageBundle {
 
   public static final MessageBundle EMPTY = new MessageBundle();
 
+  private static final DefaultHtmlSerializer htmlSerializer = new DefaultHtmlSerializer();
   private final ImmutableMap<String, String> messages;
   private final String languageDirection;
   private final String jsonString;
@@ -155,7 +160,17 @@ public class MessageBundle {
         throw new SpecParserException(
             "All message bundle entries must have a name attribute.");
       }
-      messages.put(name, msg.getTextContent().trim());
+      StringWriter sw = new StringWriter();
+      NodeList msgChildren = msg.getChildNodes();
+      for (int child = 0; child < msgChildren.getLength(); ++child) {
+        try {
+          htmlSerializer.serialize(msgChildren.item(child), sw);
+        } catch (IOException e) {
+          throw new SpecParserException("Unexpected error getting value of msg node", 
+                                        new XmlException(e));
+        }
+      }
+      messages.put(name, sw.toString().trim());
     }
 
     return ImmutableMap.copyOf(messages);
