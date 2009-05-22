@@ -32,6 +32,7 @@
     <script src="log.js"/>
   </gadget>
   <container>
+    <script src="log.js"/>
     <script src="util.js"/>
     <script src="json.js"/>
   </container>

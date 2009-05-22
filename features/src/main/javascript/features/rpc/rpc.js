@@ -20,7 +20,6 @@
  * @fileoverview Remote procedure call library for gadget-to-container,
  * container-to-gadget, and gadget-to-gadget (thru container) communication.
  */
-
 var gadgets = gadgets || {};
 
 /**
@@ -36,9 +35,11 @@ var gadgets = gadgets || {};
  * + isParentVerifiable(): indicates (via boolean) whether the method
  *     has the property that its relay URL verifies for certain the
  *     receiver's protocol://host:port.
- * + init(processFn): Performs any global initialization needed. Called
+ * + init(processFn, readyFn): Performs any global initialization needed. Called
  *     before any other gadgets.rpc methods are invoked. processFn is
- *     the function in gadgets.rpc used to process an rpc packet. Returns
+ *     the function in gadgets.rpc used to process an rpc packet. readyFn is
+ *     a function that must be called when the transport is ready to send
+ *     and receive messages bidirectionally. Returns
  *     true if successful, false otherwise.
  * + setup(receiverId, token): Performs per-receiver initialization, if any.
  *     receiverId will be '..' for gadget-to-container. Returns true if
@@ -72,6 +73,8 @@ gadgets.transports = {};
  *      - Opera 9+
  */
 gadgets.transports.Wpm = function() {
+  var ready;
+
   return {
     getCode: function() {
       return 'wpm';
@@ -81,17 +84,23 @@ gadgets.transports.Wpm = function() {
       return true;
     },
 
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
+      ready = readyFn;
       // Set up native postMessage handler.
       window.addEventListener('message', function(packet) {
         // TODO validate packet.domain for security reasons
         processFn(gadgets.json.parse(packet.data));
       }, false);
+      ready('..', true);  // Immediately ready to send to parent.
       return true;
     },
 
     setup: function(receiverId, token) {
-      // No receiver-specific setup: global only.
+      // If we're a gadget, send an ACK message to indicate to container
+      // that we're ready to receive messages.
+      if (receiverId === '..') {
+        gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
+      }
       return true;
     },
 
@@ -114,6 +123,7 @@ gadgets.transports.Wpm = function() {
  *        - Opera 8+
  */
 gadgets.transports.Dpm = function() {
+  var ready;
   return {
     getCode: function() {
       return 'dpm';
@@ -123,17 +133,22 @@ gadgets.transports.Dpm = function() {
       return false;
     },
 
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
+      ready = readyFn;
       // Set up native postMessage handler.
       window.addEventListener('message', function(packet) {
         // TODO validate packet.domain for security reasons
         processFn(gadgets.json.parse(packet.data));
       }, false);
+      ready('..', true);  // Ready immediately.
       return true;
     },
 
     setup: function(receiverId, token) {
-      // No receiver-specific setup: global only.
+      // See WPM setup comment.
+      if (receiverId === '..') {
+        gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
+      }
       return true;
     },
 
@@ -199,12 +214,70 @@ gadgets.transports.Nix = function() {
   var NIX_GET_WRAPPER = 'GRPC____NIXVBS_get_wrapper';
   var NIX_HANDLE_MESSAGE = 'GRPC____NIXVBS_handle_message';
   var NIX_CREATE_CHANNEL = 'GRPC____NIXVBS_create_channel';
+  var MAX_NIX_SEARCHES = 10;
+  var NIX_SEARCH_PERIOD = 500;
 
   // JavaScript reference to the NIX VBScript wrappers.
   // Gadgets will have but a single channel under
   // nix_channels['..'] while containers will have a channel
   // per gadget stored under the gadget's ID.
   var nix_channels = {};
+
+  // Store the ready signal method for use on handshake complete.
+  var ready;
+  var numHandlerSearches = 0;
+
+  // Search for NIX handler to parent. Tries MAX_NIX_SEARCHES times every
+  // NIX_SEARCH_PERIOD milliseconds.
+  function conductHandlerSearch() {
+    // Call from gadget to the container.
+    var handler = nix_channels['..'];
+    if (handler) {
+      return;
+    }
+
+    if (++numHandlerSearches > MAX_NIX_SEARCHES) {
+      // Handshake failed. Will fall back.
+      gadgets.warn('Nix transport setup failed, falling back...');
+      ready('..', false);
+      return;
+    }
+
+    // If the gadget has yet to retrieve a reference to
+    // the NIX handler, try to do so now. We don't do a
+    // typeof(window.opener.GetAuthToken) check here
+    // because it means accessing that field on the COM object, which,
+    // being an internal function reference, is not allowed.
+    // "in" works because it merely checks for the prescence of
+    // the key, rather than actually accessing the object's property.
+    // This is just a sanity check, not a validity check.
+    if (!handler && window.opener && "GetAuthToken" in window.opener) {
+      handler = window.opener;
+
+      // Create the channel to the parent/container.
+      // First verify that it knows our auth token to ensure it's not
+      // an impostor.
+      if (handler.GetAuthToken() == gadgets.rpc.getAuthToken('..')) {
+        // Auth match - pass it back along with our wrapper to finish.
+        // own wrapper and our authentication token for co-verification.
+        var token = gadgets.rpc.getAuthToken('..');
+        handler.CreateChannel(window[NIX_GET_WRAPPER]('..', token),
+                              token);
+        // Set channel handler
+        nix_channels['..'] = handler;
+        window.opener = null;
+
+        // Signal success and readiness to send to parent.
+        // Container-to-gadget bit flipped in CreateChannel.
+        ready('..', true);
+        return;
+      }
+    }
+
+    // Try again.
+    window.setTimeout(function() { conductHandlerSearch(); },
+                      NIX_SEARCH_PERIOD);
+  }
 
   return {
     getCode: function() {
@@ -215,7 +288,9 @@ gadgets.transports.Nix = function() {
       return false;
     },
 
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
+      ready = readyFn;
+
       // Ensure VBScript wrapper code is in the page and that the
       // global Javascript handlers have been set.
       // VBScript methods return a type of 'unknown' when
@@ -233,6 +308,7 @@ gadgets.transports.Nix = function() {
           // to create a channel for us.
           if (gadgets.rpc.getAuthToken(name) === token) {
             nix_channels[name] = channel;
+            ready(name, true);
           }
         };
 
@@ -316,6 +392,7 @@ gadgets.transports.Nix = function() {
 
     setup: function(receiverId, token) {
       if (receiverId === '..') {
+        conductHandlerSearch();
         return true;
       }
       try {
@@ -330,46 +407,9 @@ gadgets.transports.Nix = function() {
 
     call: function(targetId, from, rpc) {
       try {
-        if (from !== '..') {
-          // Call from gadget to the container.
-          var handler = nix_channels['..'];
-
-          // If the gadget has yet to retrieve a reference to
-          // the NIX handler, try to do so now. We don't do a
-          // typeof(window.opener.GetAuthToken) check here
-          // because it means accessing that field on the COM object, which,
-          // being an internal function reference, is not allowed.
-          // "in" works because it merely checks for the prescence of
-          // the key, rather than actually accessing the object's property.
-          // This is just a sanity check, not a validity check.
-          if (!handler && window.opener && "GetAuthToken" in window.opener) {
-            handler = window.opener;
-
-            // Create the channel to the parent/container.
-            // First verify that it knows our auth token to ensure it's not
-            // an impostor.
-            if (handler.GetAuthToken() == gadgets.rpc.getAuthToken('..')) {
-              // Auth match - pass it back along with our wrapper to finish.
-              // own wrapper and our authentication token for co-verification.
-              var token = gadgets.rpc.getAuthToken('..');
-              handler.CreateChannel(window[NIX_GET_WRAPPER]('..', token),
-                                    token);
-              // Set channel handler
-              nix_channels['..'] = handler;
-              window.opener = null;
-            }
-          }
-
-          // If we have a handler, call it.
-          if (handler) {
-            handler.SendMessage(gadgets.json.stringify(rpc));
-          }
-        } else {
-          // Call from container to a gadget[targetId].
-          // If we have a handler, call it.
-          if (nix_channels[targetId]) {
-            nix_channels[targetId].SendMessage(gadgets.json.stringify(rpc));
-          }
+        // If we have a handler, call it.
+        if (nix_channels[targetId]) {
+          nix_channels[targetId].SendMessage(gadgets.json.stringify(rpc));
         }
       } catch (e) {
         return false;
@@ -406,6 +446,43 @@ gadgets.transports.FrameElement = function() {
   var FE_G2C_CHANNEL = '__g2c_rpc';
   var FE_C2G_CHANNEL = '__c2g_rpc';
   var process;
+  var ready;
+
+  function callFrameElement(targetId, from, rpc) {
+    try {
+      if (from !== '..') {
+        // Call from gadget to the container.
+        var fe = window.frameElement;
+
+        if (typeof fe[FE_G2C_CHANNEL] === 'function') {
+          // Complete the setup of the FE channel if need be.
+          if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
+            fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
+              process(gadgets.json.parse(args));
+            };
+          }
+
+          // Conduct the RPC call.
+          fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
+          return;
+        }
+      } else {
+        // Call from container to gadget[targetId].
+        var frame = document.getElementById(targetId);
+
+        if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
+            typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
+
+          // Conduct the RPC call.
+          frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
+          return;
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
 
   return {
     getCode: function() {
@@ -416,62 +493,47 @@ gadgets.transports.FrameElement = function() {
       return false;
     },
   
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
       // No global setup.
       process = processFn;
+      ready = readyFn;
       return true;
     },
 
     setup: function(receiverId, token) {
-      if (receiverId === '..') {
-        return true;
+      // Indicate OK to call to container. This will be true
+      // by the end of this method.
+      if (receiverId !== '..') {
+        try {
+          var frame = document.getElementById(receiverId);
+          frame[FE_G2C_CHANNEL] = function(args) {
+            process(gadgets.json.parse(args));
+          };
+        } catch (e) {
+          return false;
+        }
       }
-      try {
-        var frame = document.getElementById(receiverId);
-        frame[FE_G2C_CHANNEL] = function(args) {
-          process(gadgets.json.parse(args));
-        };
-      } catch (e) {
-        return false;
+      if (receiverId === '..') {
+        ready('..', true);
+        var ackFn = function() {
+          window.setTimeout(function() {
+            gadgets.rpc.call(receiverId, gadgets.rpc.ACK)
+          }, 0);
+        }
+        if (document.body) {
+          // TODO Consider moving document.body check to registerOnLoadHandler
+          ackFn();
+        } else {
+          gadgets.util.registerOnLoadHandler(ackFn);
+        }
       }
       return true;
     },
 
     call: function(targetId, from, rpc) {
-      try {
-        if (from !== '..') {
-          // Call from gadget to the container.
-          var fe = window.frameElement;
+      callFrameElement(targetId, from, rpc);
+    } 
 
-          if (typeof fe[FE_G2C_CHANNEL] === 'function') {
-            // Complete the setup of the FE channel if need be.
-            if (typeof fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] !== 'function') {
-              fe[FE_G2C_CHANNEL][FE_C2G_CHANNEL] = function(args) {
-                process(gadgets.json.parse(args));
-              };
-            }
-
-            // Conduct the RPC call.
-            fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
-            return;
-          }
-        } else {
-          // Call from container to gadget[targetId].
-          var frame = document.getElementById(targetId);
-
-          if (typeof frame[FE_G2C_CHANNEL] === 'function' &&
-              typeof frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL] === 'function') {
-
-            // Conduct the RPC call.
-            frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
-            return;
-          }
-        }
-      } catch (e) {
-        return false;
-      }
-      return true;
-    }
   };
 }();
 
@@ -503,10 +565,6 @@ gadgets.transports.Rmr = function() {
   var RMR_SEARCH_TIMEOUT = 500;
   var RMR_MAX_POLLS = 10;
 
-  // Special service name for RMR acknowledgements. This may be
-  // overwritten, but at caller's peril.
-  var ACK_SVC_NAME = '__ack';
-
   // JavaScript references to the channel objects used by RMR.
   // Gadgets will have but a single channel under
   // rmr_channels['..'] while containers will have a channel
@@ -514,6 +572,7 @@ gadgets.transports.Rmr = function() {
   var rmr_channels = {};
   
   var process;
+  var ready;
 
   /**
    * Append an RMR relay frame to the document. This allows the receiver
@@ -542,15 +601,7 @@ gadgets.transports.Rmr = function() {
     } else {
       // Common gadget case: attaching header during in-gadget handshake,
       // when we may still be in script in head. Attach onload.
-      if (gadgets.util && gadgets.util.registerOnLoadHandler) {
-        gadgets.util.registerOnLoadHandler(function() { appendFn(); });
-      } else {
-        var oldOnloadFn = window.onload;
-        window.onload = function () {
-          oldOnloadFn();
-          appendFn();
-        }
-      }
+      gadgets.util.registerOnLoadHandler(function() { appendFn(); });
     }
   }
 
@@ -597,7 +648,7 @@ gadgets.transports.Rmr = function() {
       width: 10,
 
       // Waiting means "waiting for acknowledgement to be received."
-      // Acknowledgement always comes as a special ACK_SVC_NAME
+      // Acknowledgement always comes as a special ACK
       // message having been received. This message is received
       // during handshake in different ways by the container and
       // gadget, and by normal RMR message passing once the handshake
@@ -702,13 +753,13 @@ gadgets.transports.Rmr = function() {
     if (handler) {
       // Queue the current message if not ACK.
       // ACK is always sent through getRmrData(...).
-      if (serviceName !== ACK_SVC_NAME) {
+      if (serviceName !== gadgets.rpc.ACK) {
         handler.queue.push(rpc);
       }
 
       if (handler.waiting ||
           (handler.queue.length === 0 &&
-           !(serviceName === ACK_SVC_NAME && rpc && rpc.ackAlone === true))) {
+           !(serviceName === gadgets.rpc.ACK && rpc && rpc.ackAlone === true))) {
         // If we are awaiting a response from any previously-sent messages,
         // or if we don't have anything new to send, just return.
         // Note that we don't short-return if we're ACKing just-received
@@ -755,7 +806,7 @@ gadgets.transports.Rmr = function() {
     var rmrData = {id: channel.sendId};
     if (channel) {
       rmrData.d = Array.prototype.slice.call(channel.queue, 0);
-      rmrData.d.push({s:ACK_SVC_NAME, id:channel.recvId});
+      rmrData.d.push({s:gadgets.rpc.ACK, id:channel.recvId});
     }
     return gadgets.json.stringify(rmrData);
   }
@@ -786,7 +837,12 @@ gadgets.transports.Rmr = function() {
       // If we receive an ACK message, then mark the current
       // handler as no longer waiting and send out the next
       // queued message.
-      if (rpc.s === ACK_SVC_NAME) {
+      if (rpc.s === gadgets.rpc.ACK) {
+        // ACK received - whether this came from a handshake or
+        // an active call, in either case it indicates readiness to
+        // send messages to the from frame.
+        ready(fromFrameId, true);
+
         if (channel.waiting) {
           noLongerWaiting = true;
         }
@@ -819,7 +875,7 @@ gadgets.transports.Rmr = function() {
     if (nonAckReceived ||
         (noLongerWaiting && channel.queue.length > 0)) {
       var from = (fromFrameId === '..') ? window.name : '..';
-      callRmr(fromFrameId, ACK_SVC_NAME, from, {ackAlone: nonAckReceived});
+      callRmr(fromFrameId, gadgets.rpc.ACK, from, {ackAlone: nonAckReceived});
     }
   }
 
@@ -922,9 +978,10 @@ gadgets.transports.Rmr = function() {
       return true;
     },
 
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
       // No global setup.
       process = processFn;
+      ready = readyFn;
       return true;
     },
 
@@ -963,6 +1020,7 @@ gadgets.transports.Rmr = function() {
 gadgets.transports.Ifpc = function() {
   var iframePool = [];
   var callId = 0;
+  var ready;
 
   /**
    * Encodes arguments for the legacy IFPC wire format.
@@ -1031,13 +1089,16 @@ gadgets.transports.Ifpc = function() {
       return true;
     },
 
-    init: function(processFn) {
+    init: function(processFn, readyFn) {
       // No global setup.
+      ready = readyFn;
+      ready('..', true);  // Ready immediately.
       return true;
     },
 
     setup: function(receiverId, token) {
-      // No frame-specific setup: config drives all behavior.
+      // Indicate readiness to send to receiver.
+      ready(receiverId, true);
       return true;
     },
 
@@ -1086,6 +1147,9 @@ gadgets.rpc = function() {
   var CALLBACK_NAME = '__cb';
   var DEFAULT_NAME = '';
 
+  // Special service name for acknowledgements.
+  var ACK = '__ack';
+
   var services = {};
   var relayUrl = {};
   var useLegacyProtocol = {};
@@ -1095,6 +1159,8 @@ gadgets.rpc = function() {
   var setup = {};
   var sameDomain = {};
   var params = {};
+  var receiverTx = {};
+  var earlyRpcQueue = {};
   var isGadget = false;
   var fallbackTransport = gadgets.transports.Ifpc;
 
@@ -1131,6 +1197,31 @@ gadgets.rpc = function() {
   }
 
   /**
+   * Function passed to, and called by, a transport indicating it's ready to
+   * send and receive messages.
+   */
+  function transportReady(receiverId, readySuccess) {
+    var tx = transport;
+    if (!readySuccess) {
+      tx = fallbackTransport;
+    }
+    receiverTx[receiverId] = tx;
+
+    // If there are any early-queued messages, send them now directly through
+    // the needed transport.
+    var earlyQueue = earlyRpcQueue[receiverId] || [];
+    for (var i = 0; i < earlyQueue.length; ++i) {
+      var rpc = earlyQueue[i];
+      // There was no auth/rpc token set before, so set it now.
+      rpc.t = gadgets.rpc.getAuthToken(receiverId);
+      tx.call(receiverId, rpc.f, rpc);
+    }
+
+    // Clear the queue so it won't be sent again.
+    earlyRpcQueue[receiverId] = [];
+  }
+
+  /**
    * Helper function to process an RPC request
    * @param {Object} rpc RPC request object
    * @private
@@ -1155,6 +1246,12 @@ gadgets.rpc = function() {
           throw new Error("Invalid auth token. " +
               authToken[rpc.f] + " vs " + rpc.t);
         }
+      }
+
+      if (rpc.s === ACK) {
+        // Acknowledgement API, used to indicate a receiver is ready.
+        window.setTimeout(function() { transportReady(rpc.f, true); }, 0);
+        return;
       }
 
       // If there is a callback for this service, attach a callback function
@@ -1245,9 +1342,6 @@ gadgets.rpc = function() {
 
   // Pick the most efficient RPC relay mechanism.
   var transport = getTransport();
-
-  window.setTimeout(function() {
-  }, 0);
 
   // Create the Default RPC handler.
   services[DEFAULT_NAME] = function() {
@@ -1383,8 +1477,8 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     register: function(serviceName, handler) {
-      if (serviceName === CALLBACK_NAME) {
-        throw new Error("Cannot overwrite callback service");
+      if (serviceName === CALLBACK_NAME || serviceName === ACK) {
+        throw new Error("Cannot overwrite callback/ack service");
       }
 
       if (serviceName === DEFAULT_NAME) {
@@ -1402,8 +1496,8 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     unregister: function(serviceName) {
-      if (serviceName === CALLBACK_NAME) {
-        throw new Error("Cannot delete callback service");
+      if (serviceName === CALLBACK_NAME || serviceName === ACK) {
+        throw new Error("Cannot delete callback/ack service");
       }
 
       if (serviceName === DEFAULT_NAME) {
@@ -1459,17 +1553,17 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      */
     call: function(targetId, serviceName, callback, var_args) {
-      ++callId;
       targetId = targetId || '..';
-      if (callback) {
-        callbacks[callId] = callback;
-      }
-
       // Default to the container calling.
       var from = '..';
 
       if (targetId === '..') {
         from = window.name;
+      }
+
+      ++callId;
+      if (callback) {
+        callbacks[callId] = callback;
       }
 
       var rpc = {
@@ -1486,7 +1580,18 @@ gadgets.rpc = function() {
         return;
       }
 
-      var channel = transport;
+      // Attempt to make call via a cross-domain transport.
+      var channel = receiverTx[targetId];
+
+      if (!channel) {
+        // Not set up yet. Enqueue the rpc for such time as it is.
+        if (!earlyRpcQueue[targetId]) {
+          earlyRpcQueue[targetId] = [ rpc ];
+        } else {
+          earlyRpcQueue[targetId].push(rpc);
+        }
+        return;
+      }
 
       // If we are told to use the legacy format, then we must
       // default to IFPC.
@@ -1611,7 +1716,7 @@ gadgets.rpc = function() {
       // Conduct any global setup necessary for the chosen transport.
       // Do so after gadgets.rpc definition to allow transport to access
       // gadgets.rpc methods.
-      if (transport.init(process) === false) {
+      if (transport.init(process, transportReady) === false) {
         transport = fallbackTransport;
       }
       // Here, we add a hook for the transport to actively set up
@@ -1619,7 +1724,10 @@ gadgets.rpc = function() {
       if (isGadget && transport.setup('..') === false) {
         transport = fallbackTransport;
       }
-    }
+    },
+
+    /** Exported constant, for use by transports only. */
+    ACK: ACK
   };
 }();
 

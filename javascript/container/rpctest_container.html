@@ -35,6 +35,9 @@
   http://localhost:8081/gadgets/files/container/rpc_relay.uncompressed.html& \
   [ http://localhost:8080/gadgets/files/container/rpc_relay.uncompressed.html ]
 
+  Append &gadget=deferred to test early-message queueing from container to
+  gadget, by preventing attachment of gadget until a button is pressed.
+
   (Note the backslashes should be removed, as they exist for formatting only.)
 
   There are two arguments, separated by an ampersand:
@@ -47,20 +50,31 @@
     <script language="JavaScript" type="text/javascript" src="/gadgets/js/rpc.js?c=1&debug=1"></script>
     <script language="JavaScript" type="text/javascript" src="rpctest_perf.js"></script>
     <script>
-      function initTest() {
-        var container = document.getElementById("container");
+      var containerRelay;
+      var gadgetUrl;
 
+      function appendGadget() {
+        var secret = Math.round(Math.random() * 10000000);
+        var container = document.getElementById("container");
+        container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+        gadgets.rpc.setAuthToken('gadget', secret);
+      }
+
+      function initTest() {
         // query string is assumed to be the "gadget" URL as arg 1,
         // and optionally the relay URL as arg 2
         var pageArgs = window.location.search.substring(1).split('&');
-        var gadgetUrl = pageArgs[0];
-        var secret = Math.round(Math.random() * 10000000);
+        gadgetUrl = pageArgs[0];
         if (pageArgs[1]) {
           gadgets.rpc.setRelayUrl('gadget', pageArgs[1]);
         }
-        var containerRelay = pageArgs[2] || window.location.href;
-        container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
-        gadgets.rpc.setAuthToken('gadget', secret);
+        containerRelay = pageArgs[2] || window.location.href;
+
+        if (window.location.search.indexOf('&gadget=deferred') === -1) {
+          appendGadget();
+        } else {
+          document.getElementById('showgadget').style.display = '';
+        }
 
         document.getElementById('relaymethod').innerHTML = gadgets.rpc.getRelayChannel();
 
@@ -106,7 +120,7 @@
       Bytes/second: <span id="results_bytes_per_sec"></span>
     </div>
     <hr/>
-    <div>Gadget:</div>
+    <div>Gadget: <span id="showgadget" style="display:none"><input type="button" onclick="appendGadget(); this.style.display='none';" value="Append Gadget Now (for delayed load testing)"/></span></div>
     <div id="container"></div>
   </body>
 </html>
