@@ -34,7 +34,7 @@ import com.google.common.base.Objects;
  * Represents a javascript library, either as an external resource (url)
  * or as an inline script.
  */
-public final class JsLibrary {
+public class JsLibrary {
   private final Type type;
   public Type getType() {
     return type;
@@ -73,9 +73,9 @@ public final class JsLibrary {
   @Override
   public String toString() {
     if (type == Type.URL) {
-      return "<script src=\"" + content + "\"></script>";
+      return "<script src=\"" + getContent() + "\"></script>";
     } else {
-      return "<script><!--\n" + content + "\n--></script>";
+      return "<script><!--\n" + getContent() + "\n--></script>";
     }
   }
 
@@ -124,14 +124,11 @@ public final class JsLibrary {
     switch (type) {
       case FILE:
       case RESOURCE:
-        if (content.endsWith(".js")) {
-          optimizedContent = loadData(
-              content.substring(0, content.length() - 3) + ".opt.js", type);
-        }
-        debugContent = loadData(content, type);
-        if (optimizedContent == null || optimizedContent.length() == 0) {
-          optimizedContent = debugContent;
-        }
+        StringBuffer opt = new StringBuffer();
+        StringBuffer dbg = new StringBuffer();
+        loadOptimizedAndDebugData(content, type, opt, dbg);
+        optimizedContent = opt.toString();
+        debugContent = dbg.toString();
         break;
       case URL:
         if (fetcher == null) {
@@ -148,6 +145,22 @@ public final class JsLibrary {
     }
     return new JsLibrary(feature, type, optimizedContent, debugContent);
   }
+  
+  /**
+   * Helper method to load debug and optimized content from a path and type.
+   * Only supports types FILE and RESOURCE.
+   */
+  protected static void loadOptimizedAndDebugData(String content, Type type, StringBuffer opt,
+      StringBuffer dbg) {
+    if (content.endsWith(".js")) {
+      opt.append(loadData(
+          content.substring(0, content.length() - 3) + ".opt.js", type));
+    }
+    dbg.append(loadData(content, type));
+    if (opt.length() == 0) {
+      opt.append(dbg.toString());
+    }
+  }
 
   /**
    * Loads an external resource.
@@ -155,7 +168,7 @@ public final class JsLibrary {
    * @param type
    * @return The contents of the file or resource named by @code name.
    */
-  private static String loadData(String name, Type type) {
+  protected static String loadData(String name, Type type) {
     if (logger.isLoggable(Level.FINE)) logger.fine("Loading js from: " + name + " type: " + type.toString());
     if (type == Type.FILE) {
       return loadFile(name);
@@ -262,7 +275,7 @@ public final class JsLibrary {
    * @param content
    * @param debugContent
    */
-  private JsLibrary(String feature, Type type, String content,
+  protected JsLibrary(String feature, Type type, String content,
       String debugContent) {
     this.feature = feature;
     this.type = type;

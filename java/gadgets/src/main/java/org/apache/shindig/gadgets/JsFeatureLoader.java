@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -61,6 +62,14 @@ public class JsFeatureLoader {
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
 
+  /**
+   * @param fetcher
+   */
+  @Inject
+  public JsFeatureLoader(HttpFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+  
   /**
    * Loads all of the gadgets in the directory specified by path. Invalid
    * features will not cause this to fail, but passing an invalid path will.
@@ -299,19 +308,17 @@ public class JsFeatureLoader {
           type = JsLibrary.Type.FILE;
         }
       }
-      JsLibrary library = JsLibrary.create(
+      JsLibrary library = createJsLibrary(
           type, content, feature.name, inlineOk ? fetcher : null);
       for (String cont : container.split(",")) {
         feature.addLibrary(renderingContext, cont.trim(), library);
       }
     }
   }
-
-  /**
-   * @param fetcher
-   */
-  public JsFeatureLoader(HttpFetcher fetcher) {
-    this.fetcher = fetcher;
+  
+  protected JsLibrary createJsLibrary(JsLibrary.Type type, String content, String feature,
+      HttpFetcher fetcher) throws GadgetException {
+    return JsLibrary.create(type, content, feature, fetcher);
   }
 }
 

@@ -67,13 +67,12 @@ public class GadgetFeatureRegistry {
    */
   @Inject
   public GadgetFeatureRegistry(@Named("shindig.features.default") String featureFiles,
-      HttpFetcher httpFetcher) throws GadgetException {
+      HttpFetcher httpFetcher, JsFeatureLoader loader) throws GadgetException {
 
     features = Maps.newHashMap();
     core = Maps.newHashMap();
 
     if (featureFiles != null) {
-      JsFeatureLoader loader = new JsFeatureLoader(httpFetcher);
       loader.loadFeatures(featureFiles, this);
     }
   }

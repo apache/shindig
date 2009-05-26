@@ -52,7 +52,7 @@ public class GadgetFeatureRegistryTest {
   @Before
   public void setUp() throws Exception {
     // TODO: Add a mock fetcher here and add tests for retrieving remote files
-    registry = new GadgetFeatureRegistry(null, null);
+    registry = new GadgetFeatureRegistry(null, null, null);
     registry.register(makeFeature(CORE_NAME, CORE_CONTENT, null));
   }
 

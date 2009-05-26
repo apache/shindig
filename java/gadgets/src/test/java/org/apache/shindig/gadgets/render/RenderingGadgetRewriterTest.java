@@ -770,7 +770,7 @@ public class RenderingGadgetRewriterTest {
     }
 
     public FakeGadgetFeatureRegistry() throws GadgetException {
-      super(null, null);
+      super(null, null, null);
     }
 
     @Override
