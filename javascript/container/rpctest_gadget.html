@@ -37,6 +37,10 @@
       var containerRelay = window.location.search.substring(1);
       gadgets.rpc.setRelayUrl(null, containerRelay);
     </script>
+    <script>
+      // Pre-onload message send.
+      gadgets.rpc.call(null, 'initial_gadget_message', null, 'Hello there! Pre-onload message sent successfully.');
+    </script>
   </head>
   <body onload="initPerfTest();">
     <div>gadgets.rpc Performance: "Gadget" page</div><hr/>

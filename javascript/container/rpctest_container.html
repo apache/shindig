@@ -50,6 +50,13 @@
     <script language="JavaScript" type="text/javascript" src="/gadgets/js/rpc.js?c=1&debug=1"></script>
     <script language="JavaScript" type="text/javascript" src="rpctest_perf.js"></script>
     <script>
+      function handleInitialGadgetMessage(message) {
+        var status = document.getElementById('initconsole');
+        status.innerHTML = 'gadget says: ' + message;
+      }
+      gadgets.rpc.register('initial_gadget_message', handleInitialGadgetMessage);
+    </script>
+    <script>
       var containerRelay;
       var gadgetUrl;
 
@@ -84,6 +91,7 @@
   </head>
   <body style="background-color: #cccccc" onload="initTest();">
     <div>gadgets.rpc Performance: Container Page (method: <span id="relaymethod"></span>)</div><hr/>
+    <div>Initial gadget render console: <span id="initconsole">Gadget hasn't commented yet.</span></div><hr/>
     <div>Test<br/>
       <ul>
         <li>Number of messages to send:
