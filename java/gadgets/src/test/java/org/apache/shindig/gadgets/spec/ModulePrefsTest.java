@@ -219,4 +219,26 @@ public class ModulePrefsTest {
     ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(FULL_XML), SPEC_URL);
     doAsserts(new ModulePrefs(XmlUtil.parse(prefs.toString()), SPEC_URL));
   }
+  
+  @Test
+  public void needsUserPrefSubstInTitle() throws Exception {
+    String xml = "<ModulePrefs title='Title __UP_foo__'/>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertTrue(prefs.needsUserPrefSubstitution());
+  }
+  
+  @Test
+  public void needsUserPrefSubstInTitleUrl() throws Exception {
+    String xml = "<ModulePrefs title='foo' title_url='http://__UP_url__'/>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertTrue(prefs.needsUserPrefSubstitution());
+  }
+  
+  @Test
+  public void needsUserPrefSubstInPreload() throws Exception {
+    String xml = "<ModulePrefs title='foo'>" +
+        "  <Preload href='__UP_foo__' authz='signed'/></ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertTrue(prefs.needsUserPrefSubstitution());
+  }
 }

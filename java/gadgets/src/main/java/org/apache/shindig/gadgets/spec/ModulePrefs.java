@@ -68,9 +68,11 @@ public class ModulePrefs {
   private static final String ATTR_CATEGORY = "category";
   private static final String ATTR_CATEGORY2 = "category2";
   private static final Uri EMPTY_URI = Uri.parse("");
+  private static final String UP_SUBST_PREFIX = "__UP_";
 
   private final Map<String, String> attributes;
   private final Uri base;
+  private final boolean needsUserPrefSubstitution;
 
   public ModulePrefs(Element element, Uri base) throws SpecParserException {
     this.base = base;
@@ -114,6 +116,7 @@ public class ModulePrefs {
     locales = Collections.unmodifiableMap(localeVisitor.localeMap);
     links = Collections.unmodifiableMap(linkVisitor.linkMap);
     oauth = oauthVisitor.oauthSpec;
+    needsUserPrefSubstitution = prefsNeedsUserPrefSubstitution(this);
   }
 
   /**
@@ -151,6 +154,7 @@ public class ModulePrefs {
       attributes.put(attr.getKey(), substituted);
     }
     this.attributes = attributes.build();
+    this.needsUserPrefSubstitution = prefs.needsUserPrefSubstitution;
   }
 
   // Canonical spec items first.
@@ -454,6 +458,14 @@ public class ModulePrefs {
   public OAuthSpec getOAuthSpec() {
     return oauth;
   }
+  
+  /**
+   * Not part of the spec. Indicates whether UserPref-substitutable
+   * fields in this prefs require __UP_ substitution.
+   */
+  public boolean needsUserPrefSubstitution() {
+    return needsUserPrefSubstitution;
+  }
 
   /**
    * Attempts to retrieve a valid LocaleSpec for the given Locale.
@@ -531,6 +543,21 @@ public class ModulePrefs {
     }
     buf.append("</ModulePrefs>");
     return buf.toString();
+  }
+  
+  /**
+   * @param prefs ModulePrefs object
+   * @return true if any UserPref-substitutable fields in the given
+   * {@code prefs} require such substitution.
+   */
+  static boolean prefsNeedsUserPrefSubstitution(ModulePrefs prefs) {
+    for (Preload preload : prefs.preloads) {
+      if (preload.getHref().toString().contains(UP_SUBST_PREFIX)) {
+        return true;
+      }
+    }
+    return prefs.getTitle().contains(UP_SUBST_PREFIX) ||
+           prefs.getTitleUrl().toString().contains(UP_SUBST_PREFIX);
   }
 
   interface ElementVisitor {
