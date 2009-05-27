@@ -139,7 +139,7 @@ gadgets.rpctx.Ifpc = function() {
         // Format: #iframe_id&callId&num_packets&packet_num&block_of_data
         var callArgs = rpc.a;
         src = [relay, '#', encodeLegacyData([from, callId, 1, 0,
-               encodeLegacyData([from, serviceName, '', '', from].concat(
+               encodeLegacyData([from, rpc.s, '', '', from].concat(
                  callArgs))])].join('');
       } else {
         // Format: #targetId & sourceId@callId & packetNum & packetId & packetData
