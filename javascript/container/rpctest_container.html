@@ -63,8 +63,15 @@
       function appendGadget() {
         var secret = Math.round(Math.random() * 10000000);
         var container = document.getElementById("container");
-        container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
-        gadgets.rpc.setAuthToken('gadget', secret);
+        if (window.location.search.indexOf('&ua=backward') !== -1) {
+          // incorrect but likely widely used
+          gadgets.rpc.setAuthToken('gadget', secret);
+          container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+        } else {
+          // "correct" way.
+          container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+          gadgets.rpc.setAuthToken('gadget', secret);
+        }
       }
 
       function initTest() {

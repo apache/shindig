@@ -79,7 +79,6 @@ gadgets.rpctx.FrameElement = function() {
         }
       }
     } catch (e) {
-      return false;
     }
     return true;
   }
@@ -118,14 +117,11 @@ gadgets.rpctx.FrameElement = function() {
         var ackFn = function() {
           window.setTimeout(function() {
             gadgets.rpc.call(receiverId, gadgets.rpc.ACK)
-          }, 0);
+          }, 500);
         }
-        if (document.body) {
-          // TODO Consider moving document.body check to registerOnLoadHandler
-          ackFn();
-        } else {
-          gadgets.util.registerOnLoadHandler(ackFn);
-        }
+        // Setup to container always happens before onload.
+        // If it didn't, the correct fix would be in gadgets.util.
+        gadgets.util.registerOnLoadHandler(ackFn);
       }
       return true;
     },

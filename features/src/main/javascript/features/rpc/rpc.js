@@ -68,6 +68,11 @@ gadgets.rpc = function() {
   // Special service name for acknowledgements.
   var ACK = '__ack';
 
+  // Timeout and number of setup attempts between each
+  // for when setAuthToken is called before the target it specifies exists.
+  var SETUP_FRAME_TIMEOUT = 500;
+  var SETUP_FRAME_MAX_TRIES = 10;
+
   var services = {};
   var relayUrl = {};
   var useLegacyProtocol = {};
@@ -283,15 +288,31 @@ gadgets.rpc = function() {
    * of the channel once they send their first messages.
    */
   function setupFrame(frameId, token) {
-    if (setup[frameId]) {
+    if (setup[frameId] === true) {
       return;
     }
 
-    if (transport.setup(frameId, token) === false) {
-      transport = fallbackTransport;
+    if (typeof setup[frameId] === 'undefined') {
+      setup[frameId] = 0;
     }
 
-    setup[frameId] = true;
+    var tgtFrame = document.getElementById(frameId);
+    if (frameId === '..' || tgtFrame != null) {
+      if (transport.setup(frameId, token) === true) {
+        setup[frameId] = true;
+        return;
+      }
+    }
+
+    if (setup[frameId] !== true && setup[frameId]++ < SETUP_FRAME_MAX_TRIES) {
+      // Try again in a bit, assuming that frame will soon exist.
+      window.setTimeout(function() { setupFrame(frameId, token) },
+                        SETUP_FRAME_TIMEOUT);
+    } else {
+      // Fail: fall back.
+      transport = fallbackTransport;
+      setup[frameId] = true;
+    }
   }
 
   /**
