@@ -81,9 +81,6 @@ public class TemplateRewriterTest {
   private static final String CONTENT_REQUIRE_MISSING =
     "<script type='text/os-template' require='foo'>Hello, ${user.name}</script>";  
 
-  private static final String CONTENT_WITH_NAME =
-    "<script type='text/os-template' name='myTemplate'>Hello, ${user.name}</script>";  
-  
   private static final String CONTENT_WITH_TAG =
     "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";
   
@@ -161,14 +158,7 @@ public class TemplateRewriterTest {
     testExpectingNoTransform(getGadgetXml(CONTENT_REQUIRE_MISSING), "missing data");
     testFeatureNotRemoved();
   }
-  
-  @Test
-  public void nameAttributePresent() throws Exception {
-    // Don't render templates with a @name
-    testExpectingNoTransform(getGadgetXml(CONTENT_WITH_NAME), "with @name");
-    testFeatureNotRemoved();
-  }
-  
+   
   @Test
   public void tagAttributePresent() throws Exception {
     // Don't render templates with a @tag
@@ -192,6 +182,8 @@ public class TemplateRewriterTest {
         content.getContent().indexOf("Hello, John") > 0);
     assertTrue("Template tag was removed",
         content.getContent().contains("text/os-template"));
+    assertTrue("ID span was not created",
+        content.getContent().contains("<span id=\"_T_template_auto0\">"));
     testFeatureNotRemoved();
   }
 
@@ -244,6 +236,17 @@ public class TemplateRewriterTest {
     assertTrue("Precedence rules violated",
         content.getContent().indexOf("default1inline2inline3external4") > 0);
    
+    testFeatureRemoved();
+  }
+  
+  @Test
+  public void testClientOverride() throws Exception {
+    // Should normally remove feature
+    testExpectingTransform(getGadgetXml(CONTENT_PLAIN, true, "true"), "keep client");
+    testFeatureNotRemoved();
+    
+    // Should normally keep feature
+    testExpectingNoTransform(getGadgetXml(CONTENT_WITH_TAG, true, "false"), "remove client");
     testFeatureRemoved();
   }
   
@@ -302,8 +305,17 @@ public class TemplateRewriterTest {
   }
   
   private static String getGadgetXml(String content, boolean requireFeature) {
+    return getGadgetXml(content, requireFeature, null);
+  }
+  
+  private static String getGadgetXml(String content, boolean requireFeature, 
+      String clientParam) {
     String feature = requireFeature ?
-        "<Require feature='opensocial-templates'/>" : "";
+        "<Require feature='opensocial-templates'" + 
+        (clientParam != null ? 
+            ("><Param name='client'>" + clientParam + "</Param></Require>") 
+            : "/>") 
+        : "";
     return "<Module>" + "<ModulePrefs title='Title'>"
         + feature
         + "  <Locale>"

@@ -60,8 +60,9 @@ opensocial.data.DataContext = function() {
    * @param {Function(Array.<string>)} callback Function to call when a
    * listener is fired.
    * @param {booelan} oneTimeListener Remove this listener after first callback?
+   * @param {boolean} fireIfReady Instantly fire this if all data is available?
    */
-  var registerListener = function(keys, callback, oneTimeListener) {
+  var registerListener = function(keys, callback, oneTimeListener, fireIfReady) {
     var oneTime = !!oneTimeListener;
     var listener = {keys : {}, callback : callback, oneTime: oneTime};
 
@@ -79,7 +80,7 @@ opensocial.data.DataContext = function() {
     listeners.push(listener);
   
     // Check to see if this one should fire immediately.
-    if (keys !== '*' && isDataReady(listener.keys)) {
+    if (fireIfReady && keys !== '*' && isDataReady(listener.keys)) {
       window.setTimeout(function() {
         maybeFireListener(listener, keys);
       }, 1);
@@ -179,7 +180,7 @@ opensocial.data.DataContext = function() {
      * listener is fired.
      */
     registerListener : function(keys, callback) {
-      registerListener(keys, callback, false);
+      registerListener(keys, callback, false, true);
     },
         
     /**
@@ -190,7 +191,18 @@ opensocial.data.DataContext = function() {
      * @param {Function(Array.<string>)} callback Function to call when a 
      */
     registerOneTimeListener_ : function(keys, callback) {
-      registerListener(keys, callback, true);
+      registerListener(keys, callback, true, true);
+    },
+    
+    /**
+     * Private version of registerListener which allows listeners to be
+     * registered that do not fire initially, but only after a data change.
+     * Exposed because needed by opensocial-templates.
+     * @param {string|Array.<string>} keys Key or set of keys to listen on.
+     * @param {Function(Array.<string>)} callback Function to call when a
+     */
+    registerDeferredListener_ : function(keys, callback) {
+      registerListener(keys, callback, false, false);
     },
     
     /**

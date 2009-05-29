@@ -182,7 +182,7 @@ os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
   for (var i = 0; i < nodes.length; ++i) {
     var node = nodes[i];
     if (os.Container.isTemplateType_(node.type)) {
-      var name = node.getAttribute('tag') || node.getAttribute('name');
+      var name = node.getAttribute('tag');
       if (!name || name.length < 0) {
         var template = os.compileTemplate(node, name);
         if (template) {
@@ -220,11 +220,13 @@ os.Container.renderInlineTemplates = function(opt_doc) {
     var template = inlined[i].template;
     var node = inlined[i].node;
     var id = '_T_' + template.id;
+    var rendered = true;
     var el = doc.getElementById(id);
     if (!el) {
       el = doc.createElement('div');
       el.setAttribute('id', id);
       node.parentNode.insertBefore(el, node);
+      rendered = false;
     }
 
     // Only honor @before and @require attributes if the opensocial-data
@@ -247,9 +249,13 @@ os.Container.renderInlineTemplates = function(opt_doc) {
         var keys = requiredData.split(/[\, ]+/);
         var callback = os.Container.createRenderClosure(template, el);
         if ("true" == node.getAttribute("autoUpdate")) {
-          opensocial.data.DataContext.registerListener(keys, callback);
+          if (rendered) {
+            opensocial.data.getDataContext().registerDeferredListener_(keys, callback);
+          } else {
+            opensocial.data.getDataContext().registerListener(keys, callback);
+          }
         } else {
-          opensocial.data.DataContext.registerOneTimeListener_(keys, callback);
+          opensocial.data.getDataContext().registerOneTimeListener_(keys, callback);
         }
       } else {
         template.renderInto(el, null, context);

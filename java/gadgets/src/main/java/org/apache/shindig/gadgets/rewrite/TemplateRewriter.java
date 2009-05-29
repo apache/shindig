@@ -86,6 +86,9 @@ public class TemplateRewriter implements GadgetRewriter {
   
   /** Specifies what template libraries to load */
   static final Object REQUIRE_LIBRARY_PARAM = "requireLibrary";
+  
+  /** Enable client support? **/
+  static final Object CLIENT_SUPPORT_PARAM = "client";  
 
   static private final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
   
@@ -205,6 +208,15 @@ public class TemplateRewriter implements GadgetRewriter {
     
     TemplateContext templateContext = new TemplateContext(gadget, content.getPipelinedData());    
     boolean needsFeature = executeTemplates(templateContext, content, templates, registry);
+
+    // Check if a feature param overrides  our guess at whether the client-side    
+    // feature is needed.                                                  
+    String clientOverride = f.getParams().get(CLIENT_SUPPORT_PARAM);            
+    if ("true".equalsIgnoreCase(clientOverride)) {                              
+      needsFeature = true;                                                      
+    } else if ("false".equalsIgnoreCase(clientOverride)) {                      
+      needsFeature = false;                                                     
+    }                                                                           
 
     Element head = (Element) DomUtil.getFirstNamedChildNode(
         content.getDocument().getDocumentElement(), "head");
@@ -351,12 +363,10 @@ public class TemplateRewriter implements GadgetRewriter {
     boolean needsFeature = false;
     List<Element> templates = Lists.newArrayList();
     for (Element element : allTemplates) {
-      String name = element.getAttribute("name");
       String tag = element.getAttribute("tag");
       String require = element.getAttribute("require");
 
-      if (!"".equals(name) ||
-          !checkRequiredData(require, pipelinedData.keySet())) {
+      if (!checkRequiredData(require, pipelinedData.keySet())) {
         // Can't be processed on the server at all;  keep client-side processing
         needsFeature = true;
       } else if ("".equals(tag)) {
@@ -371,19 +381,25 @@ public class TemplateRewriter implements GadgetRewriter {
           gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
       MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
   
+      int autoUpdateID = 0;
       for (Element template : templates) {
         DocumentFragment result = processor.get().processTemplate(
             template, templateContext, messageELResolver, registry);
-        template.getParentNode().insertBefore(result, template);
         // TODO: sanitized renders should ignore this value
         if ("true".equals(template.getAttribute("autoUpdate"))) {
           // autoUpdate requires client-side processing.
-          // TODO: give client-side processing some hope of finding the pre-rendered content
           needsFeature = true;
+          Element span = template.getOwnerDocument().createElement("span");     
+          String id = "template_auto" + (autoUpdateID++);                       
+          span.setAttribute("id", "_T_" + id);                                  
+          template.setAttribute("name", id);                                    
+          template.getParentNode().insertBefore(span, template);                
+          span.appendChild(result);                                             
         } else {
+          template.getParentNode().insertBefore(result, template);
           template.getParentNode().removeChild(template);
         }
-      } 
+      }
       MutableContent.notifyEdit(content.getDocument());
     } 
     return needsFeature;
