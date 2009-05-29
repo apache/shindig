@@ -70,6 +70,8 @@ public interface Message {
     TITLE_ID("titleId"),
     /** the field name for type. */
     TYPE("type"),
+    /** the field name for status. */
+    STATUS("status"),
     /** the field name for updated time stamp. */
     UPDATED("updated"),
     /** the field name for urls. */
