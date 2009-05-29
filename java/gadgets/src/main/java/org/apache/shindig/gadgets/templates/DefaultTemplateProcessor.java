@@ -81,6 +81,10 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   private static final Set<String> HTML4_BOOLEAN_ATTRIBUTES =
     ImmutableSet.of("checked", "compact", "declare", "defer", "disabled", "ismap",
         "multiple", "nohref", "noresize", "noshade", "nowrap", "readonly", "selected");
+  
+  private static final Set<String> ONCREATE_ATTRIBUTES =
+    ImmutableSet.of("oncreate", "x-oncreate");
+  
   private final Expressions expressions;
   // Reused buffer for creating template output
   private final StringBuilder outputBuffer;
@@ -88,6 +92,8 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   private TagRegistry registry;
   private TemplateContext templateContext;
   private ELContext elContext;
+  
+  private int uniqueIdCounter = 0;
   
   @Inject
   public DefaultTemplateProcessor(Expressions expressions) {  
@@ -345,9 +351,14 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       }
       
       clearSpecialAttributes(resultNode);
-      processAttributes(resultNode);
+      Node additionalNode = processAttributes(resultNode);
+      
       processChildNodes(resultNode, element);
-      result.appendChild(resultNode);
+      result.appendChild(resultNode);      
+      
+      if (additionalNode != null) {
+        result.appendChild(additionalNode);
+      }
     }
     
     if (curAttribute != null) {
@@ -366,11 +377,19 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   /**
    * Process expressions on attributes.
    * @param element The Element to process attributes on
+   * @return Node to attach after this Element, or null
    */
-  private void processAttributes(Element element) {
+  private Node processAttributes(Element element) {
     NamedNodeMap attributes = element.getAttributes();
+    Node additionalNode = null;
+    
+    // Mutations to perform after iterating (if needed)
     List<Attr> attrsToRemove = null;
+    String newId = null;
+    
     for (int i = 0; i < attributes.getLength(); i++) {
+      boolean removeThisAttribute = false;
+      
       Attr attribute = (Attr) attributes.item(i);
       // Boolean attributes: evaluate as a boolean.  If true, set the value to the
       // name of the attribute, e.g. selected="selected".  If false, remove the attribute
@@ -383,24 +402,75 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
         if (Boolean.TRUE.equals(evaluate(attribute.getValue(), Boolean.class, Boolean.FALSE))) {
           attribute.setNodeValue(attribute.getName());
         } else {
-          // Because NamedNodeMaps are live, removing them interferes with iteration.
-          // Remove the attributes in a later pass
-          if (attrsToRemove == null) {
-            attrsToRemove = Lists.newArrayListWithCapacity(attributes.getLength());
-          }
-          
-          attrsToRemove.add(attribute);
+          removeThisAttribute = true;
         }
-      } else {
+      } else if (ONCREATE_ATTRIBUTES.contains(attribute.getName())) {
+        String id = element.getAttribute("id");
+        if (id.length() == 0) {
+          newId = id = getUniqueId();
+        }
+        
+        additionalNode = buildOnCreateScript(
+            evaluate(attribute.getValue(), String.class, null), id, element.getOwnerDocument());
+        removeThisAttribute = true;
+      } else {      
         attribute.setNodeValue(evaluate(attribute.getValue(), String.class, null));
+      }
+      
+      // Because NamedNodeMaps are live, removing them interferes with iteration.
+      // Remove the attributes in a later pass
+      if (removeThisAttribute) {
+        if (attrsToRemove == null) {
+          attrsToRemove = Lists.newArrayListWithCapacity(attributes.getLength());
+        }
+        
+        attrsToRemove.add(attribute);
       }
     }
     
+    // Now that iteration is complete, perform mutations
     if (attrsToRemove != null) {
       for (Attr attr : attrsToRemove) {
         element.removeAttributeNode(attr);
       }
     }
+    
+    if (newId != null) {
+      element.setAttribute("id", newId);
+    }
+    
+    return additionalNode;
+  }
+  
+  /**
+   * Inserts an inline script element that executes a snippet of Javascript 
+   * code after the element is emitted.
+   * <p>
+   * The approach used involves using Javascript to find the previous sibling 
+   * node and apply the code to it - this avoids decorating nodes with IDs, an
+   * approach that could potentially clash with existing element IDs that could
+   * be non-unique.
+   * <p>
+   * The resulting script element is subject to sanitization.
+   * <p>
+   * @param code Javascript code to execute
+   * @param id Element ID which should be used
+   * @param document document for creating elements
+   * 
+   * TODO: Move boilerplate code for finding the right node out to a function
+   * to reduce code size.
+   */
+  private Node buildOnCreateScript(String code, String id, Document document) {
+    Element script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    StringBuilder builder = new StringBuilder();
+    builder.append("(function(){");
+    builder.append(code);
+    builder.append("}).apply(document.getElementById('");
+    builder.append(id);
+    builder.append("'));");
+    script.setTextContent(builder.toString());
+    return script;
   }
   
   /**
@@ -428,7 +498,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       return defaultValue;
     }
   }
-  
+
   /**
    * Coerce objects to iterables.  Iterables and JSONArrays have the obvious
    * coercion.  JSONObjects are coerced to single-element lists, unless
@@ -490,5 +560,9 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     }
     
     return ImmutableList.of(value);
+  }
+  
+  private String getUniqueId() {
+    return "ostid" + (uniqueIdCounter++);
   }
 }

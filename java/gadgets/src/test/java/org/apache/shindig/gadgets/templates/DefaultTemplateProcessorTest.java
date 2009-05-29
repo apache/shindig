@@ -19,22 +19,20 @@
 package org.apache.shindig.gadgets.templates;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
-
-
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -212,6 +210,22 @@ public class DefaultTemplateProcessorTest {
     assertEquals("<input class=\"false\" disabled=\"disabled\">", output);
   }
 
+  @Test
+  public void testOnCreate() throws Exception {
+    String output = executeTemplate("<span oncreate=\"foo\"></span>");
+    assertEquals("<span id=\"ostid0\"></span><script type=\"text/javascript\">" +
+        "(function(){foo}).apply(document.getElementById('ostid0'));</script>", output);
+    
+    output = executeTemplate("<span x-oncreate=\"foo\"></span>");
+    assertEquals("<span id=\"ostid1\"></span><script type=\"text/javascript\">" +
+        "(function(){foo}).apply(document.getElementById('ostid1'));</script>", output);
+    
+    output = executeTemplate("<span id=\"bar\" oncreate=\"foo\"></span>");
+    assertEquals("<span id=\"bar\"></span><script type=\"text/javascript\">" +
+        "(function(){foo}).apply(document.getElementById('bar'));</script>", output);
+
+  }
+  
   /**
    * Ensure that the element cloning handling of processChildren correctly
    * copies and element to the target element, including making sure that

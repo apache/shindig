@@ -245,7 +245,11 @@ public class EndToEndTest {
 
     Element textPipeline = page.getElementById("text");
     assertEquals("{\"key\": \"value\"}", textPipeline.getTextContent().trim());
-  }
+
+    // Test of oncreate
+    Element oncreateSpan = page.getElementById("mutate");
+    assertEquals("mutated", oncreateSpan.getTextContent().trim());
+}
 
   @Test
   public void testTemplateLibrary() throws Exception {

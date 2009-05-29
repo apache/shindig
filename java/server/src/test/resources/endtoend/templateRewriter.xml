@@ -53,6 +53,7 @@
         
         <span id="json">${json.content.key}</span>
         <span id="text">${text.content}</span>
+        <span id="mutate" oncreate="this.innerHTML='mutated'"></span>
       </script>
     ]]>
   </Content>
