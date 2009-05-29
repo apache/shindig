@@ -228,7 +228,7 @@ public class DefaultTemplateProcessorTest {
     // This is a little hacky but is fine for testing purposes. Assumes that DOM implementation
     // is based on Xerces which will always has a userData hashtable
     Document doc = singletonElementHandler.elem.getOwnerDocument();
-    Class docClass = doc.getClass();
+    Class<?> docClass = doc.getClass();
     Field userDataField = null;
     while (userDataField == null) {
       try {
@@ -240,7 +240,7 @@ public class DefaultTemplateProcessorTest {
     }
     // Access is typically protected so just bypass
     userDataField.setAccessible(true);
-    Hashtable userDataMap = (Hashtable)userDataField.get(doc);
+    Hashtable<?, ?> userDataMap = (Hashtable<?, ?>) userDataField.get(doc);
 
     // There should be only one element in the user data map, if there are more then the
     // cloning process has put them there which can be a nasty source of memory leaks. Consider

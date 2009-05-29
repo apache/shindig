@@ -20,21 +20,32 @@ package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.common.uri.Uri;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
- * A Template Library is a collection of tag handlers, and any necessary
- * assets (CSS and Javascript).
+ * Null object implementation of TemplateLibrary.
  */
-public interface TemplateLibrary {
+public class NullTemplateLibrary implements TemplateLibrary {
+  public static final TemplateLibrary INSTANCE = new NullTemplateLibrary();
 
-  /**
-   * @return a registry of tags in this library.
-   */
-  public TagRegistry getTagRegistry();
+  private final TagRegistry registry = new DefaultTagRegistry(ImmutableSet.<TagHandler>of());
   
-  public Uri getLibraryUri();
+  private NullTemplateLibrary() {  
+  }
+  
+  public Uri getLibraryUri() {
+    return null;
+  }
 
-  public boolean isSafe();
-  
-  public String serialize();
-  
+  public TagRegistry getTagRegistry() {
+    return registry;
+  }
+
+  public boolean isSafe() {
+    return false;
+  }
+
+  public String serialize() {
+    return null;
+  }
 }

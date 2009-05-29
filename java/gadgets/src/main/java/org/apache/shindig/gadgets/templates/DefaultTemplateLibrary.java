@@ -21,20 +21,39 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.common.uri.Uri;
 
 /**
- * A Template Library is a collection of tag handlers, and any necessary
- * assets (CSS and Javascript).
+ * A default implementation of TemplateLibrary which serves as a wrapper for
+ * an existing TagRegistry.
  */
-public interface TemplateLibrary {
+public class DefaultTemplateLibrary implements TemplateLibrary {
 
-  /**
-   * @return a registry of tags in this library.
-   */
-  public TagRegistry getTagRegistry();
+  private final TagRegistry registry;
   
-  public Uri getLibraryUri();
+  public DefaultTemplateLibrary(TagRegistry registry) {
+    this.registry = registry;
+  }
+  
+  public String getJavaScript() {
+    return null;
+  }
 
-  public boolean isSafe();
-  
-  public String serialize();
-  
+  public Uri getLibraryUri() {
+    return null;
+  }
+
+  public String getStyle() {
+    return null;
+  }
+
+  public TagRegistry getTagRegistry() {
+    return registry;
+  }
+
+  public boolean isSafe() {
+    return false;
+  }
+
+  public String serialize() {
+    return null;
+  }
+
 }

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -33,20 +34,26 @@ import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
 import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+import org.apache.shindig.gadgets.templates.AbstractTagHandler;
 import org.apache.shindig.gadgets.templates.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
 import org.apache.shindig.gadgets.templates.TagHandler;
 import org.apache.shindig.gadgets.templates.TemplateLibrary;
 import org.apache.shindig.gadgets.templates.TemplateLibraryFactory;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.XmlTemplateLibrary;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Provider;
 
 /** 
@@ -58,6 +65,7 @@ public class TemplateRewriterTest {
   private Gadget gadget;
   private MutableContent content;
   private TemplateRewriter rewriter;
+  private final Map<String, Object> config = Maps.newHashMap();
   
   private static final Uri GADGET_URI = Uri.parse("http://example.org/gadget.php");
   
@@ -77,7 +85,7 @@ public class TemplateRewriterTest {
     "<script type='text/os-template' name='myTemplate'>Hello, ${user.name}</script>";  
   
   private static final String CONTENT_WITH_TAG =
-    "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";  
+    "<script type='text/os-template' xmlns:foo='#foo' tag='foo:Bar'>Hello, ${user.name}</script>";
   
   private static final String CONTENT_WITH_AUTO_UPDATE =
     "<script type='text/os-template' autoUpdate='true'>Hello, ${user.name}</script>";
@@ -87,16 +95,25 @@ public class TemplateRewriterTest {
     "  <Namespace prefix='my' url='#my'/>" +
     "  <JavaScript>script</JavaScript>" +
     "  <Style>style</Style>" +
-    "  <Template tag='my:Tag'>library tag</Template>" +
+    "  <Template tag='my:Tag1'>external1</Template>" +
+    "  <Template tag='my:Tag2'>external2</Template>" +
+    "  <Template tag='my:Tag3'>external3</Template>" +
+    "  <Template tag='my:Tag4'>external4</Template>" +
     "</Templates>";
 
   private static final String TEMPLATE_LIBRARY_URI = "http://example.org/library.xml";
   private static final String CONTENT_WITH_TAG_FROM_LIBRARY =
-    "<script type='text/os-template' xmlns:my='#my'><my:Tag/></script>";  ;
-  
+    "<script type='text/os-template' xmlns:my='#my'><my:Tag4/></script>";  ;
+ 
+  private static final String CONTENT_TESTING_PRECEDENCE_RULES =
+    "<script type='text/os-template' xmlns:my='#my' tag='my:Tag1'>inline1</script>" +
+    "<script type='text/os-template' xmlns:my='#my' tag='my:Tag2'>inline2</script>" +
+    "<script type='text/os-template' xmlns:my='#my' tag='my:Tag3'>inline3</script>" +
+    "<script type='text/os-template' xmlns:my='#my'><my:Tag1/><my:Tag2/><my:Tag3/><my:Tag4/></script>";  ;
+
   @Before
   public void setUp() {
-    Set<TagHandler> handlers = ImmutableSet.of();
+    Set<TagHandler> handlers = ImmutableSet.of(testTagHandler("Tag1", "default1"));
     rewriter = new TemplateRewriter(
         new Provider<TemplateProcessor>() {
           public TemplateProcessor get() {
@@ -106,9 +123,18 @@ public class TemplateRewriterTest {
         new FakeMessageBundleFactory(),
         new Expressions(),
         new DefaultTagRegistry(handlers), 
-        new FakeTemplateLibraryFactory());
+        new FakeTemplateLibraryFactory(),
+        new FakeContainerConfig());
   }
   
+ private static TagHandler testTagHandler(String name, final String content) {
+   return new AbstractTagHandler("#my", name) {
+    public void process(Node result, Element tag, TemplateProcessor processor) {
+      result.appendChild(result.getOwnerDocument().createTextNode(content));
+    }
+   };
+ }
+ 
   @Test
   public void simpleTemplate() throws Exception {
     // Render a simple template
@@ -178,8 +204,46 @@ public class TemplateRewriterTest {
     assertTrue("Style not inserted", content.getContent().indexOf(
         "<style type=\"text/css\">style</style>") > 0);
     assertTrue("Tag not executed", content.getContent().indexOf(
-        "library tag") > 0);
+        "external4") > 0);
     
+    testFeatureRemoved();
+  }
+  
+  @Test
+  public void tagPrecedenceRules() throws Exception {
+    // Tag definitions include:
+    // Default handlers: tag1 default1
+    // OSML: tag1 osml1 tag2 osml2
+    // inline tags: tag1 inline1 tag2 inline2 tag3 inline3
+    // External tags: tag1 external1 tag2 external2 tag3 external3 tag4 external4
+    
+    config.put("${Cur['gadgets.features'].osml.library}",
+        "org/apache/shindig/gadgets/rewrite/OSML_test.xml");
+
+    setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES));
+    rewriter.rewrite(gadget, content);
+    assertTrue("Precedence rules violated",
+        content.getContent().indexOf("default1osml2inline3external4") > 0);
+   
+    testFeatureRemoved();
+  }
+  
+  @Test
+  public void tagPrecedenceRulesWithoutOSML() throws Exception {
+    // Tag definitions include:
+    // Default handlers: tag1 default1
+    // OSML: tag1 osml1 tag2 osml2
+    // inline tags: tag1 inline1 tag2 inline2 tag3 inline3
+    // External tags: tag1 external1 tag2 external2 tag3 external3 tag4 external4
+
+    // Explicitly don't support OSML
+    config.put("${Cur['gadgets.features'].osml.library}", "");
+
+    setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES));
+    rewriter.rewrite(gadget, content);
+    assertTrue("Precedence rules violated",
+        content.getContent().indexOf("default1inline2inline3external4") > 0);
+   
     testFeatureRemoved();
   }
   
@@ -273,7 +337,16 @@ public class TemplateRewriterTest {
     public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri)
         throws GadgetException {
       assertEquals(TEMPLATE_LIBRARY_URI, uri.toString());
-      return new TemplateLibrary(uri, XmlUtil.parseSilent(TEMPLATE_LIBRARY));
+      return new XmlTemplateLibrary(uri, XmlUtil.parseSilent(TEMPLATE_LIBRARY), 
+          TEMPLATE_LIBRARY);
     }
+  }
+  
+  private class FakeContainerConfig extends AbstractContainerConfig {
+    @Override
+    public Object getProperty(String container, String name) {
+      return config.get(name);
+    }
+    
   }
 }

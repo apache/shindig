@@ -147,5 +147,10 @@
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
     "endPoints" : [ "http://%host%/social/rpc", "http://%host%/gadgets/api/rpc" ]                   
+  },
+  "osml": {
+    // OSML library resource.  Can be set to null or the empty string to disable OSML
+    // for a container.
+    "library": "org/apache/shindig/gadgets/templates/OSML_library.xml"
   }
 }}

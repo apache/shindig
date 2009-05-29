@@ -21,9 +21,11 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.gadgets.Gadget;
 import org.w3c.dom.Node;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 /**
  * Context for processing a single template.
@@ -37,6 +39,7 @@ public class TemplateContext {
   private Map<String, ? extends Object> context = ImmutableMap.of();
   private Map<String, Object> myMap = null;
   private Node templateRoot;
+  private Map<Object, TemplateResource> resources = Maps.newLinkedHashMap();
   
   public TemplateContext(Gadget gadget, Map<String, ? extends Object> top) {
     this.gadget = gadget;
@@ -90,5 +93,15 @@ public class TemplateContext {
   
   public Node getTemplateRoot() {
     return this.templateRoot;
+  }
+  
+  public void addResource(Object key, TemplateResource resource) {
+    if (!resources.containsKey(key)) {
+      resources.put(key, resource);
+    }
+  }
+  
+  public Collection<TemplateResource> getResources() {
+    return resources.values();
   }
 }

@@ -17,13 +17,14 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -35,6 +36,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.templates.CompositeTagRegistry;
 import org.apache.shindig.gadgets.templates.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.MessageELResolver;
+import org.apache.shindig.gadgets.templates.NullTemplateLibrary;
 import org.apache.shindig.gadgets.templates.TagHandler;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateBasedTagHandler;
@@ -43,22 +45,28 @@ import org.apache.shindig.gadgets.templates.TemplateLibrary;
 import org.apache.shindig.gadgets.templates.TemplateLibraryFactory;
 import org.apache.shindig.gadgets.templates.TemplateParserException;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.TemplateResource;
+import org.apache.shindig.gadgets.templates.XmlTemplateLibrary;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -80,6 +88,7 @@ public class TemplateRewriter implements GadgetRewriter {
   static final Object REQUIRE_LIBRARY_PARAM = "requireLibrary";
 
   static private final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
+  
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
    * processors are not.
@@ -89,26 +98,44 @@ public class TemplateRewriter implements GadgetRewriter {
   private final Expressions expressions;
   private final TagRegistry baseTagRegistry;
   private final TemplateLibraryFactory libraryFactory;
+  private final ContainerConfig config;
   
-  private final TemplateLibrary osmlLibrary;
+  private final ConcurrentMap<String, TemplateLibrary> osmlLibraryCache = 
+    new MapMaker().makeComputingMap(
+        new Function<String, TemplateLibrary>() {
+          public TemplateLibrary apply(String resourceName) {
+            return loadTrustedLibrary(resourceName);
+          }
+        });
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
       MessageBundleFactory messageBundleFactory, Expressions expressions, 
-      TagRegistry baseTagRegistry, TemplateLibraryFactory libraryFactory) {
+      TagRegistry baseTagRegistry, TemplateLibraryFactory libraryFactory,
+      ContainerConfig config) {
     this.processor = processor;
     this.messageBundleFactory = messageBundleFactory;
     this.expressions = expressions;
     this.baseTagRegistry = baseTagRegistry;
     this.libraryFactory = libraryFactory;
-    this.osmlLibrary = loadOsmlLibrary();
+    this.config = config;
   }
 
-  private TemplateLibrary loadOsmlLibrary() {
+  private TemplateLibrary getOsmlLibrary(Gadget gadget) {
+    String library = config.getString(gadget.getContext().getContainer(),
+        "${Cur['gadgets.features'].osml.library}");
+    if (StringUtils.isEmpty(library)) {
+      return NullTemplateLibrary.INSTANCE;
+    }
+    
+    return osmlLibraryCache.get(library);
+  }
+  
+  static private TemplateLibrary loadTrustedLibrary(String resource) {
     try {
-      String content = ResourceLoader.getContent(
-          "org/apache/shindig/gadgets/templates/OSML_library.xml");              
-      return new TemplateLibrary(Uri.parse("#OSML"), XmlUtil.parse(content), true);
+      String content = ResourceLoader.getContent(resource);
+      return new XmlTemplateLibrary(Uri.parse("#OSML"), XmlUtil.parse(content), 
+          content, true);
     } catch (IOException ioe) {
       logger.log(Level.WARNING, null, ioe);
     } catch (XmlException xe) {
@@ -116,7 +143,8 @@ public class TemplateRewriter implements GadgetRewriter {
     } catch (GadgetException tpe) {
       logger.log(Level.WARNING, null, tpe);
     }
-    return null;
+
+    return NullTemplateLibrary.INSTANCE;
   }
   
   public void rewrite(Gadget gadget, MutableContent content) {
@@ -146,16 +174,17 @@ public class TemplateRewriter implements GadgetRewriter {
   private void rewriteImpl(Gadget gadget, Feature f, MutableContent content)
       throws GadgetException {   
     List<TagRegistry> registries = Lists.newArrayList();
-
-    Element head = (Element) DomUtil.getFirstNamedChildNode(
-        content.getDocument().getDocumentElement(), "head");
+    List<TemplateLibrary> libraries = Lists.newArrayList();
+   
+    // TODO: Add View-specific library as Priority 0
     
+    // Built-in Java-based tags - Priority 1
     registries.add(baseTagRegistry);
     
-    if (osmlLibrary != null) {
-      registries.add(osmlLibrary.getTagRegistry());
-      injectTemplateLibrary(osmlLibrary, head);
-    }
+    TemplateLibrary osmlLibrary = getOsmlLibrary(gadget);
+    // OSML Built-in tags - Priority 2
+    registries.add(osmlLibrary.getTagRegistry());
+    libraries.add(osmlLibrary);
 
     List<Element> templates = ImmutableList.copyOf(
         Iterables.filter(
@@ -166,16 +195,63 @@ public class TemplateRewriter implements GadgetRewriter {
               }
             }));
     
-    loadTemplateLibraries(gadget.getContext(), f, registries, head);
+    // User-defined custom tags - Priority 3
     registries.add(registerCustomTags(templates));
+    
+    // User-defined libraries - Priority 4
+    loadTemplateLibraries(gadget.getContext(), f, registries, libraries);
     
     TagRegistry registry = new CompositeTagRegistry(registries);
     
-    processInlineTemplates(gadget, content, templates, registry);
+    TemplateContext templateContext = new TemplateContext(gadget, content.getPipelinedData());    
+    boolean needsFeature = executeTemplates(templateContext, content, templates, registry);
+
+    Element head = (Element) DomUtil.getFirstNamedChildNode(
+        content.getDocument().getDocumentElement(), "head");
+    postProcess(templateContext, needsFeature, head, templates, libraries);
+  }
+
+  /**
+   * Post-processes the gadget content after rendering templates.
+   * 
+   * @param templateContext TemplateContext to operate on
+   * @param needsFeature Should the templates feature be made available to 
+   * client?
+   * @param head Head element of the gadget's document
+   * @param libraries Keeps track of all libraries, and which got used
+   * @param allTemplates A list of all the template nodes
+   * @param libraries A list of all registered libraries
+   */
+  private void postProcess(TemplateContext templateContext, boolean needsFeature, Element head,
+      List<Element> allTemplates, List<TemplateLibrary> libraries) {
+    // Inject all the needed library assets.
+    // TODO: inject library assets that aren't used on the server, but will
+    // be needed on the client
+    for (TemplateResource resource : templateContext.getResources()) {
+      injectTemplateLibraryAssets(resource, head);
+    }
+
+    // If we don't need the feature, remove it and all templates from the gadget
+    if (!needsFeature) {
+      templateContext.getGadget().removeFeature("opensocial-templates");
+      for (Element template : allTemplates) {
+        Node parent = template.getParentNode();
+        if (parent != null) {
+          parent.removeChild(template);
+        }
+      }
+    } else {
+      // If the feature is to be kept, inject the libraries.
+      // Library assets will be generated on the client.
+      // TODO: only inject the templates, not the full scripts/styles
+      for (TemplateLibrary library : libraries) {
+        injectTemplateLibrary(library, head);
+      }
+    }
   }
 
   private void loadTemplateLibraries(GadgetContext context,
-      Feature f, List<TagRegistry> registries, Element head)  throws GadgetException {
+      Feature f, List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
     // TODO: Support multiple values when Shindig does
     String url = f.getParams().get(REQUIRE_LIBRARY_PARAM);
     if (url != null) {
@@ -184,12 +260,8 @@ public class TemplateRewriter implements GadgetRewriter {
       
       try {
         TemplateLibrary library = libraryFactory.loadTemplateLibrary(context, uri);
-        String script = library.getJavaScript();
-        
-        // TODO: Only inject if used?
-        injectTemplateLibrary(library, head);
-        
         registries.add(library.getTagRegistry());
+        libraries.add(library);
       } catch (TemplateParserException te) {
         // Suppress exceptions due to malformed template libraries
         logger.log(Level.WARNING, null, te);
@@ -197,30 +269,48 @@ public class TemplateRewriter implements GadgetRewriter {
     }
   }
   
-  private void injectTemplateLibrary(TemplateLibrary library, Element head) {  
-    // Append any needed Javascript
-    String script = library.getJavaScript();
-    if (!StringUtils.isEmpty(script)) {
+  private void injectTemplateLibraryAssets(TemplateResource resource, Element head) {
+    Element contentElement;
+    switch (resource.getType()) {
+      case JAVASCRIPT:
+        contentElement = head.getOwnerDocument().createElement("script");
+        contentElement.setAttribute("type", "text/javascript");
+        break;
+      case STYLE:
+        contentElement = head.getOwnerDocument().createElement("style");
+        contentElement.setAttribute("type", "text/css");
+        break;
+      default:
+        throw new IllegalStateException("Unhandled type");  
+    }
+
+    if (resource.isSafe()) {
+      SanitizingGadgetRewriter.bypassSanitization(contentElement, false);
+    }
+    contentElement.setTextContent(resource.getContent());
+    head.appendChild(contentElement);    
+  }
+  
+  private void injectTemplateLibrary(TemplateLibrary library, Element head) {
+    try {
+      String libraryContent = library.serialize();
+      if (StringUtils.isEmpty(libraryContent)) {
+        return;
+      }
+      
       Element scriptElement = head.getOwnerDocument().createElement("script");
       scriptElement.setAttribute("type", "text/javascript");
-      scriptElement.setTextContent(script);
-      if (library.isSafe()) {
-        SanitizingGadgetRewriter.bypassSanitization(scriptElement, false);
-      }
+      StringBuilder buffer = new StringBuilder();
+      buffer.append("opensocial.template.Loader.loadContent(");
+      JsonSerializer.appendString(buffer, library.serialize());
+      buffer.append(",");
+      JsonSerializer.appendString(buffer, library.getLibraryUri().toString());
+      buffer.append(");");       
+      scriptElement.setTextContent(buffer.toString());
       head.appendChild(scriptElement);
+    } catch (IOException ioe) {
+      // This should never happen.
     }
-    
-    // Append any needed CSS
-    String style = library.getStyle();
-    if (!StringUtils.isEmpty(style)) {
-      Element styleElement = head.getOwnerDocument().createElement("style");
-      styleElement.setAttribute("type", "text/css");
-      styleElement.setTextContent(style);
-      if (library.isSafe()) {
-        SanitizingGadgetRewriter.bypassSanitization(styleElement, false);
-      }
-      head.appendChild(styleElement);
-    } 
   }
   
   /**
@@ -249,7 +339,11 @@ public class TemplateRewriter implements GadgetRewriter {
     return new DefaultTagRegistry(handlers.build());
   }
   
-  private void processInlineTemplates(Gadget gadget, MutableContent content,
+  /**
+   * Processes and renders inline templates.
+   * @return Do we think the templates feature is still needed on the client?
+   */
+  private boolean executeTemplates(TemplateContext templateContext, MutableContent content,
       List<Element> allTemplates, TagRegistry registry) throws GadgetException {
     Map<String, Object> pipelinedData = content.getPipelinedData();
 
@@ -271,7 +365,7 @@ public class TemplateRewriter implements GadgetRewriter {
     }
     
     if (!templates.isEmpty()) {
-      TemplateContext templateContext = new TemplateContext(gadget, pipelinedData);
+      Gadget gadget = templateContext.getGadget();
       
       MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
           gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
@@ -281,6 +375,7 @@ public class TemplateRewriter implements GadgetRewriter {
         DocumentFragment result = processor.get().processTemplate(
             template, templateContext, messageELResolver, registry);
         template.getParentNode().insertBefore(result, template);
+        // TODO: sanitized renders should ignore this value
         if ("true".equals(template.getAttribute("autoUpdate"))) {
           // autoUpdate requires client-side processing.
           // TODO: give client-side processing some hope of finding the pre-rendered content
@@ -288,19 +383,12 @@ public class TemplateRewriter implements GadgetRewriter {
         } else {
           template.getParentNode().removeChild(template);
         }
-      }
-  
+      } 
       MutableContent.notifyEdit(content.getDocument());
-    }
-    
-    // Remove the opensocial-templates feature if we've fully processed all
-    // inline templates.
-    // TODO: remove inline custom tags as well.
-    if (!needsFeature) {
-      gadget.removeFeature("opensocial-templates");
-    }
+    } 
+    return needsFeature;
   }
-
+  
   /**
    * Checks that all the required data is available at rewriting time.
    * @param requiredData A string of comma-separated data set names

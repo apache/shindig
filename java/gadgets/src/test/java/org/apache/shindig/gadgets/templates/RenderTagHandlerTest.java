@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
@@ -99,12 +100,13 @@ public class RenderTagHandlerTest {
     Element tagInstance = parseTemplate(tagMarkup);
     
     templateDef.getOwnerDocument().adoptNode(tagInstance);
-    TemplateBasedTagHandler tagHandler = 
+    TagHandler tagHandler = 
       new TemplateBasedTagHandler(tagInstance, TEST_NS, tagName);
 
-    TagRegistry reg = new CompositeTagRegistry(Lists.newArrayList(
-        registry, new DefaultTagRegistry(ImmutableSet.of((TagHandler)tagHandler))));
-    
+    TagRegistry reg = new CompositeTagRegistry(ImmutableList.of(
+        registry,
+        new DefaultTagRegistry(ImmutableSet.of(tagHandler))));
+        
     DocumentFragment result = processor.processTemplate(templateDef, context, resolver, reg);
     String output = serialize(result);
     assertEquals(expectedResult, output);
