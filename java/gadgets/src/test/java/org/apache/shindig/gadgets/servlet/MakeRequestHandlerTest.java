@@ -22,6 +22,8 @@ import static junitx.framework.StringAssert.assertStartsWith;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -43,8 +45,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.google.common.collect.Lists;
 
 /**
  * Tests for MakeRequestHandler.
@@ -109,7 +109,24 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
-  public void testGetRequestWIthRefresh() throws Exception {
+  public void testGetRequestWithUncommonStatusCode() throws Exception {
+    HttpRequest req = new HttpRequest(REQUEST_URL);
+    HttpResponse response = new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_CREATED)
+        .setResponseString(RESPONSE_BODY)
+        .create();
+    expect(pipeline.execute(req)).andReturn(response);
+    replay();
+
+    handler.fetch(request, recorder);
+
+    JSONObject results = extractJsonFromResponse();
+    assertEquals(HttpResponse.SC_CREATED, results.getInt("rc"));
+    assertEquals(RESPONSE_BODY, results.get("body"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  public void testGetRequestWithRefresh() throws Exception {
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").anyTimes();
 
     Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();

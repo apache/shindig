@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
@@ -33,9 +36,6 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -141,7 +141,7 @@ public class MakeRequestHandler extends ProxyBase {
 
     // Set the default content type  for post requests when a content type is not specified
     if ("POST".equals(req.getMethod()) && req.getHeader("Content-Type")==null) {
-      req.addHeader("Content-Type", "application/x-www-form-urlencoded"); 
+      req.addHeader("Content-Type", "application/x-www-form-urlencoded");
     }
 
     req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
@@ -182,10 +182,8 @@ public class MakeRequestHandler extends ProxyBase {
   protected String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
       HttpResponse results) throws GadgetException {
     String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
-    String body = "";
-    if (results.getHttpStatusCode() == 200) {
-      body = results.getResponseAsString();
-
+    String body = results.getResponseAsString();
+    if (body.length() > 0) {
       if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
         body = processFeed(originalUrl, request, body);
       }
