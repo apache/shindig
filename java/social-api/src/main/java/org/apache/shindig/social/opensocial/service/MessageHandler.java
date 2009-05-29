@@ -84,12 +84,12 @@ public class MessageHandler {
 
     if (msgCollId == null) {
       // No message collection specified, return list of message collections
-      return service.getMessageCollections(user, MessageCollection.Field.ALL_FIELDS,
-          options, request.getToken());
+      Set<String> fields = request.getFields(MessageCollection.Field.ALL_FIELDS);
+      return service.getMessageCollections(user, fields, options, request.getToken());
     }
     // If messageIds are specified return them, otherwise return entries in the given collection.
-    return service.getMessages(user, msgCollId,
-        Message.Field.ALL_FIELDS, messageIds, options, request.getToken());
+    Set<String> fields = request.getFields(Message.Field.ALL_FIELDS);
+    return service.getMessages(user, msgCollId, fields, messageIds, options, request.getToken());
   }
 
   /**
