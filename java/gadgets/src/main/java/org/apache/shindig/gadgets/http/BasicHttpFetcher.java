@@ -31,21 +31,21 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Socket;
+import java.net.ProxySelector;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
 /**
  * A very primitive HTTP fetcher implementation. Not recommended for production deployments until
@@ -60,7 +60,6 @@ public class BasicHttpFetcher implements HttpFetcher {
   private static final int DEFAULT_CONNECT_TIMEOUT_MS = 5000;
   private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
 
-  private Provider<Proxy> proxyProvider;
   private volatile int connectionTimeoutMs;
 
   /**
@@ -83,14 +82,6 @@ public class BasicHttpFetcher implements HttpFetcher {
   @Inject
   public BasicHttpFetcher() {
     this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS);
-  }
-
-  // TODO Re-add Inject annotation once shindig is upgraded to guice 2.0, because at the moment this causes problems
-  // when running shindig behind a proxy as guice still injects a proxy provider even though optional is set to true.
-  // See issue http://code.google.com/p/google-guice/issues/detail?id=107 for more details.
-  // @Inject(optional=true)
-  public void setProxyProvider(Provider<Proxy> proxyProvider) {
-    this.proxyProvider = proxyProvider;
   }
 
   /**
@@ -163,9 +154,12 @@ public class BasicHttpFetcher implements HttpFetcher {
     String methodType = request.getMethod();
     String requestUri = request.getUri().toString();
 
-    if (proxyProvider != null) {
-      Socket proxySocket = new Socket(proxyProvider.get());
-      httpClient.getHostConfiguration().setLocalAddress(proxySocket.getLocalAddress());
+    // Select a proxy based on the URI. May be Proxy.NO_PROXY
+    Proxy proxy = ProxySelector.getDefault().select(request.getUri().toJavaUri()).get(0);
+
+    if (proxy != Proxy.NO_PROXY) {
+      InetSocketAddress address = (InetSocketAddress) proxy.address();
+      httpClient.getHostConfiguration().setProxy(address.getHostName(), address.getPort());
     }
 
     if ("POST".equals(methodType) || "PUT".equals(methodType)) {
