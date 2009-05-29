@@ -398,7 +398,11 @@ gadgets.rpc = function() {
           isGadget = true;
         }
       }
-      useLegacyProtocol['..'] = !!config.rpc.useLegacyProtocol;
+      var useLegacy = !!config.rpc.useLegacyProtocol;
+      useLegacyProtocol['..'] = useLegacy;
+      if (useLegacy) {
+        transport = gadgets.rpctx.Ifpc;
+      }
     }
 
     var requiredConfig = {
@@ -535,7 +539,7 @@ gadgets.rpc = function() {
       // If we are told to use the legacy format, then we must
       // default to IFPC.
       if (useLegacyProtocol[targetId]) {
-        channel = fallbackTransport;
+        channel = gadgets.rpctx.Ifpc;
       }
 
       if (channel.call(targetId, from, rpc) === false) {

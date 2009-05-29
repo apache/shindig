@@ -47,6 +47,18 @@
 <html>
   <head>
     <title>gadgets.rpc Performance Tests: Container</title>
+    <script>
+      var useLegacy = (window.location.search.indexOf('&uselegacy=1') !== -1);
+      var gadgets = {};
+      gadgets.config = {
+        register: function(rpc, requiredConfig, callback) {
+          // rpc === "rpc", requiredConfig is ignored here.
+          // Just call the callback (function init(...) in rpc.js)
+          // with a dummy config object.
+          callback({ rpc: { parentRelayUrl: "", useLegacyProtocol: useLegacy } });
+        }
+      };
+    </script>
     <script language="JavaScript" type="text/javascript" src="/gadgets/js/rpc.js?c=1&debug=1"></script>
     <script language="JavaScript" type="text/javascript" src="rpctest_perf.js"></script>
     <script>
@@ -63,13 +75,14 @@
       function appendGadget() {
         var secret = Math.round(Math.random() * 10000000);
         var container = document.getElementById("container");
+        var iframeHtml = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "&uselegacy=" + (useLegacy ? "1" : "0") + "#rpctoken=" + secret + "'></iframe>";
         if (window.location.search.indexOf('&ua=backward') !== -1) {
           // incorrect but likely widely used
           gadgets.rpc.setAuthToken('gadget', secret);
-          container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+          container.innerHTML = iframeHtml;
         } else {
           // "correct" way.
-          container.innerHTML = "<iframe id='gadget' name='gadget' height=400 width=800 src='" + gadgetUrl + "?parent=" + containerRelay + "#rpctoken=" + secret + "'></iframe>";
+          container.innerHTML = iframeHtml;
           gadgets.rpc.setAuthToken('gadget', secret);
         }
       }

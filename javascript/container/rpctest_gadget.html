@@ -21,13 +21,14 @@
     <title>gadgets.rpc Performance Tests: Gadget</title>
     <script>
       // Fake a version of gadgets.config that rpc.js uses for configuration.
+      var useLegacy = (window.location.search.indexOf('&uselegacy=1') !== -1);
       var gadgets = {};
       gadgets.config = {
         register: function(rpc, requiredConfig, callback) {
           // rpc === "rpc", requiredConfig is ignored here.
           // Just call the callback (function init(...) in rpc.js)
           // with a dummy config object.
-          callback({ rpc: { parentRelayUrl: "" } });
+          callback({ rpc: { parentRelayUrl: "", useLegacyProtocol: useLegacy } });
         }
       };
     </script>
