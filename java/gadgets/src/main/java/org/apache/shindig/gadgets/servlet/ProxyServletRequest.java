@@ -58,7 +58,7 @@ public class ProxyServletRequest extends HttpServletRequestWrapper {
                                 Utf8UrlCoder.decode(paramMatcher.group(2)));
       }
 
-      String urlParam = Utf8UrlCoder.decode(chainedMatcher.group(2));
+      String urlParam = chainedMatcher.group(2);
       if (request.getQueryString() != null) {
         urlParam += "?" + request.getQueryString();
       }

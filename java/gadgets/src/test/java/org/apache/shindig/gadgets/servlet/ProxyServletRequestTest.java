@@ -72,12 +72,12 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
     verify();
   }
 
-  public void testChainedSyntaxWithParameters() throws Exception {
+  public void testChainedSyntaxWithParametersDontDecode() throws Exception {
     ProxyServletRequest req = setupMockRequest(
-      "http://u:p@127.0.0.1:80/g/proxy/a=b%20+c&url=u/http://r/p%3Fa%3Dd%2Be"
+      "http://u:p@127.0.0.1:80/g/proxy/a=b%20+c&url=u/http://r/p%3Fa+e"
     );
     assertTrue(req.isUsingChainedSyntax());
-    assertEquals("http://r/p?a=d+e", req.getParameter("url"));
+    assertEquals("http://r/p%3Fa+e", req.getParameter("url"));
     assertEquals("b  c", req.getParameter("a"));
     verify();
   }
