@@ -300,27 +300,13 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     rpc.params = this.translateIdSpec(idSpec);
 
     FieldTranslations.addAppDataAsProfileFields(opt_params);
+    FieldTranslations.translateStandardArguments(opt_params, rpc.params);
+    FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
 
     if (opt_params['profileDetail']) {
       FieldTranslations.translateJsPersonFieldsToServerFields(opt_params['profileDetail']);
       rpc.params.fields = opt_params['profileDetail'];
     }
-    if (opt_params['first']) {
-      rpc.params.startIndex = opt_params['first'];
-    }
-    if (opt_params['max']) {
-      rpc.params.count = opt_params['max'];
-    }
-    if (opt_params['sortOrder']) {
-      rpc.params.sortBy = opt_params['sortOrder'];
-    }
-    if (opt_params['filter']) {
-      rpc.params.filterBy = opt_params['filter'];
-    }
-    if (idSpec.getField('networkDistance')) {
-      rpc.params.networkDistance = idSpec.getField('networkDistance');
-    }
-
     var me = this;
     return new JsonRpcRequestItem(rpc,
         function(rawJson) {
@@ -372,9 +358,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     rpc.params = this.translateIdSpec(idSpec);
     rpc.params.appId = "@app";
     rpc.params.fields = this.getFieldsList(keys);
-    if (idSpec.getField('networkDistance')) {
-      rpc.params.networkDistance = idSpec.getField('networkDistance');
-    }
+    FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
 
     return new JsonRpcRequestItem(rpc,
         function (appData) {
@@ -407,9 +391,8 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     var rpc = { method : "activities.get" };
     rpc.params = this.translateIdSpec(idSpec);
     rpc.params.appId = "@app";
-    if (idSpec.getField('networkDistance')) {
-      rpc.params.networkDistance = idSpec.getField('networkDistance');
-    }
+    FieldTranslations.translateStandardArguments(opt_params, rpc.params);
+    FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
 
     return new JsonRpcRequestItem(rpc,
         function(rawJson) {
@@ -438,9 +421,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     var rpc = { method : "activities.create" };
     rpc.params = this.translateIdSpec(idSpec);
     rpc.params.appId = "@app";
-    if (idSpec.getField('networkDistance')) {
-      rpc.params.networkDistance = idSpec.getField('networkDistance');
-    }
+    FieldTranslations.translateNetworkDistance(idSpec, rpc.params);
     rpc.params.activity = activity.toJsonObject();
 
     return new JsonRpcRequestItem(rpc);
