@@ -30,7 +30,6 @@
       <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <includes>
-        <include>*:war:*</include>
         <include>org.apache.shindig:shindig-common</include>
         <include>org.apache.shindig:shindig-features</include>
         <include>org.apache.shindig:shindig-gadgets</include>
