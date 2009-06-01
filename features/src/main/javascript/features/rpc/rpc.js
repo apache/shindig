@@ -95,6 +95,13 @@ gadgets.rpc = function() {
 
   authToken['..'] = params.rpctoken || params.ifpctok || 0;
 
+  // Indicates whether to support early-message queueing, which is designed
+  // to ensure that all messages sent by gadgets.rpc.call, irrespective
+  // when they were made (before/after setAuthToken, before/after transport
+  // setup complete), are sent. Hiding behind a query param to allow opt-in
+  // for a time while this technique is proven.
+  var useEarlyQueueing = (params['rpc_earlyq'] === "1");
+
   /*
    * Return a transport representing the best available cross-domain
    * message-passing mechanism available to the browser.
@@ -131,7 +138,8 @@ gadgets.rpc = function() {
     receiverTx[receiverId] = tx;
 
     // If there are any early-queued messages, send them now directly through
-    // the needed transport.
+    // the needed transport. This queue will only have contents if
+    // useEarlyQueueing === true (see call method).
     var earlyQueue = earlyRpcQueue[receiverId] || [];
     for (var i = 0; i < earlyQueue.length; ++i) {
       var rpc = earlyQueue[i];
@@ -524,7 +532,7 @@ gadgets.rpc = function() {
       }
 
       // Attempt to make call via a cross-domain transport.
-      var channel = receiverTx[targetId];
+      var channel = useEarlyQueueing ? receiverTx[targetId] : transport;
 
       if (!channel) {
         // Not set up yet. Enqueue the rpc for such time as it is.
