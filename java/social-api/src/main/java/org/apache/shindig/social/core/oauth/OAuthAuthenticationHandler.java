@@ -25,7 +25,6 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
-import net.oauth.OAuthServiceProvider;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;

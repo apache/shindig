@@ -43,14 +43,12 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
   private Gadget makeGadget(boolean wantsLocked, String url) {
     String gadgetXml;
-    List<String> features = new ArrayList<String>();
     List<GadgetFeature> gadgetFeatures = new ArrayList<GadgetFeature>();
     if (wantsLocked) {
       gadgetXml =
           "<Module><ModulePrefs title=''>" +
           "  <Require feature='locked-domain'/>" +
           "</ModulePrefs><Content/></Module>";
-      features = Arrays.asList("locked-domain");
       gadgetFeatures = Arrays.asList(new GadgetFeature("locked-domain",
           new ArrayList<JsLibrary>(), null));
     } else {

@@ -29,7 +29,6 @@ import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Set;
 
 /**
  * This parser does not try to escape entities in text content as it expects the parser

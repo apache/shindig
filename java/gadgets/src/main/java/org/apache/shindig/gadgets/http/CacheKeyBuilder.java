@@ -96,7 +96,6 @@ public class CacheKeyBuilder {
     appendLegacyKeys(keyBuilder);
 
     if (!paramMap.isEmpty()) {
-      boolean first = true;
       for (Map.Entry<String, Object> mapEntry : paramMap.entrySet()) {
         keyBuilder.append(KEY_SEPARATOR);
         keyBuilder.append(String.format("%s=%s", mapEntry.getKey(), mapEntry.getValue()));

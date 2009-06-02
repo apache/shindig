@@ -19,10 +19,6 @@
 package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.spec.GadgetSpec;

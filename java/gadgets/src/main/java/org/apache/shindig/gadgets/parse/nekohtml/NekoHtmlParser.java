@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.cyberneko.html.parsers.DOMFragmentParser;
 import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.DOMImplementation;

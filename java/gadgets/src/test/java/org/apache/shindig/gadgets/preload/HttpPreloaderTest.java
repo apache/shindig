@@ -131,7 +131,7 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
         preloader.createPreloadTasks(gadget);
 
     assertEquals(1, preloaded.size());
-    PreloadedData data = preloaded.iterator().next().call();
+    preloaded.iterator().next().call();
 
     HttpRequest request = oauthFetcher.requests.get(0);
     assertTrue("request should ignore cache", request.getIgnoreCache());

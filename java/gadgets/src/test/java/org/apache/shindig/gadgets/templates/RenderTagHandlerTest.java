@@ -40,7 +40,6 @@ import org.w3c.dom.NodeList;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.Map;

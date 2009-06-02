@@ -92,7 +92,9 @@ public class DefaultServiceFetcher {
     Map<String, Object> declaredServices = containerConfig.getMap(container, OSAPI_SERVICES);
     if (!declaredServices.isEmpty()) {
       for (Map.Entry<String, Object> entry : declaredServices.entrySet()) {
-        endpointServices.putAll(entry.getKey(), (Iterable<String>)entry.getValue());
+        @SuppressWarnings("unchecked")
+        Iterable<String> entryValue = (Iterable<String>) entry.getValue();
+        endpointServices.putAll(entry.getKey(), entryValue);
       }
     }
 

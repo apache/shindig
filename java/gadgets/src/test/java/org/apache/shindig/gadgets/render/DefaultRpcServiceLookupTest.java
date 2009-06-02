@@ -52,7 +52,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
   public void testGetServicesForContainer_Null() throws Exception {
     String container = null;
     try {
-      Multimap<String, String> services = svcLookup.getServicesFor(container, host);
+      svcLookup.getServicesFor(container, host);
       fail("Should have thrown an exception for an invalid container");
     } catch (Exception e) {
       
@@ -69,7 +69,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     Multimap<String, String> actualServices = svcLookup.getServicesFor(container, host);
     assertEquals(1, actualServices.size());
     assertTrue(actualServices.containsKey(socialEndpoint));
-    Set actualServiceMethods = (Set) actualServices.get(socialEndpoint);
+    Set<String> actualServiceMethods = (Set<String>) actualServices.get(socialEndpoint);
     assertEquals(expectedServiceMethods, actualServiceMethods);
   }
 
@@ -112,7 +112,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     Multimap<String, String> actualServices = svcLookup.getServicesFor(container, host);
     assertEquals(expectedServiceCount, actualServices.keySet().size());
     assertTrue(actualServices.containsKey(socialEndpoint));
-    Set actualServiceMethods = (Set) actualServices.get(socialEndpoint);
+    Set<String> actualServiceMethods = (Set<String>) actualServices.get(socialEndpoint);
     assertEquals(expectedServiceMethods, actualServiceMethods);
   }
 }

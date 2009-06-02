@@ -38,14 +38,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
-import java.nio.charset.Charset;
-
 /**
  * Implements proxied rendering.
  */
 public class ProxyRenderer {
   public static final String PATH_PARAM = "path";
-  private static final Charset UTF8 = Charset.forName("UTF-8");
 
   private final RequestPipeline requestPipeline;
   private final HttpCache httpCache;
