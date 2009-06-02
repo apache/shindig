@@ -38,7 +38,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    svcLookup = new DefaultRpcServiceLookup(new RpcServiceFetcher(null, new BasicHttpFetcher()), 60l);
+    svcLookup = new DefaultRpcServiceLookup(new DefaultServiceFetcher(null, new BasicHttpFetcher()), 60l);
     socialEndpoint = "http://localhost:8080/social/rpc";
     host = "localhost:8080";
   }

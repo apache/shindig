@@ -46,14 +46,14 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
 
   private final ConcurrentMap<String, Multimap<String, String>> containerServices;
 
-  private final RpcServiceFetcher fetcher;
+  private final DefaultServiceFetcher fetcher;
 
   /**
    * @param fetcher  RpcServiceFetcher to retrieve services available from endpoints
    * @param duration in seconds service definitions should remain in the cache
    */
   @Inject
-  public DefaultRpcServiceLookup(RpcServiceFetcher fetcher,
+  public DefaultRpcServiceLookup(DefaultServiceFetcher fetcher,
       @Named("org.apache.shindig.serviceExpirationDurationMinutes")Long duration) {
     containerServices = new MapMaker().expiration(duration * 60, TimeUnit.SECONDS).makeMap();
     this.fetcher = fetcher;

@@ -41,26 +41,29 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 /**
  * Retrieves the rpc services for a container by fetching them from the container's
  * system.listMethods endpoints as defined in the container config.
  */
-public class RpcServiceFetcher {
+public class DefaultServiceFetcher {
 
-  private static final Logger logger = Logger.getLogger(Renderer.class.getName());
+  static final Logger logger = Logger.getLogger(Renderer.class.getName());
 
-  private static final String JSON_RESPONSE_WRAPPER_ELEMENT = "data";
+  static final String JSON_RESPONSE_WRAPPER_ELEMENT = "data";
 
-  private static final String OSAPI_FEATURE_CONFIG = "osapi";
+  static final String OSAPI_FEATURE_CONFIG = "osapi";
 
-  private static final String GADGETS_FEATURES_CONFIG = "gadgets.features";
+  static final String OSAPI_SERVICES = "osapi.services";
 
-  private static final String SYSTEM_LIST_METHODS_METHOD = "system.listMethods";
+  static final String GADGETS_FEATURES_CONFIG = "gadgets.features";
+
+  static final String SYSTEM_LIST_METHODS_METHOD = "system.listMethods";
 
   /** Key in container config that lists the endpoints offering services */
-  private static final String OSAPI_BASE_ENDPOINTS = "endPoints";
+  static final String OSAPI_BASE_ENDPOINTS = "endPoints";
 
   private final ContainerConfig containerConfig;
 
@@ -68,7 +71,7 @@ public class RpcServiceFetcher {
 
   /** @param config Container Config for looking up endpoints */
   @Inject
-  public RpcServiceFetcher(ContainerConfig config, HttpFetcher fetcher) {
+  public DefaultServiceFetcher(ContainerConfig config, HttpFetcher fetcher) {
     this.containerConfig = config;
     this.fetcher = fetcher;
   }
@@ -83,22 +86,35 @@ public class RpcServiceFetcher {
     if (containerConfig == null) {
       return ImmutableMultimap.<String, String>builder().build();
     }
-    List<String> endpoints = getEndpointsFromContainerConfig(container, host);
     LinkedHashMultimap<String, String> endpointServices = Multimaps.newLinkedHashMultimap();
+
+    // First check services directly declared in container config
+    Map<String, Object> declaredServices = containerConfig.getMap(container, OSAPI_SERVICES);
+    if (!declaredServices.isEmpty()) {
+      for (Map.Entry<String, Object> entry : declaredServices.entrySet()) {
+        endpointServices.putAll(entry.getKey(), (Iterable<String>)entry.getValue());
+      }
+    }
+
+    // Merge services lazily loaded from the endpoints if any
+    List<String> endpoints = getEndpointsFromContainerConfig(container, host);
     for (String endpoint : endpoints) {
       endpointServices.putAll(endpoint, retrieveServices(endpoint.replace("%host%", host)));
     }
+    
     return ImmutableMultimap.copyOf(endpointServices);
   }
 
+  @SuppressWarnings("unchecked")
   private List<String> getEndpointsFromContainerConfig(String container, String host) {
     @SuppressWarnings("unchecked")
     Map<String, Object> properties = (Map<String, Object>) containerConfig.getMap(container,
         GADGETS_FEATURES_CONFIG).get(OSAPI_FEATURE_CONFIG);
 
-    @SuppressWarnings("unchecked")
-    List<String> endpoints = (List<String>) properties.get(OSAPI_BASE_ENDPOINTS);
-    return endpoints;
+    if (properties != null) {
+      return (List<String>) properties.get(OSAPI_BASE_ENDPOINTS);
+    }
+    return ImmutableList.of();
   }
 
   private Set<String> retrieveServices(String endpoint) {
