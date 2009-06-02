@@ -164,4 +164,47 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     verify();
   }
+
+  private void expectMime(String expectedMime, String contentMime, String outputMime)
+      throws Exception {
+    String url = "http://example.org/file.img?" + ProxyHandler.REWRITE_MIME_TYPE_PARAM +
+        "=" + expectedMime;
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expect(request.getParameter(ProxyHandler.REWRITE_MIME_TYPE_PARAM))
+        .andReturn(expectedMime).anyTimes();
+
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setRewriteMimeType(expectedMime);
+
+    HttpResponse resp = new HttpResponseBuilder()
+      .setResponseString("Hello")
+      .addHeader("Content-Type", contentMime)
+      .create();
+
+    expect(pipeline.execute(req)).andReturn(resp);
+    replay();
+    proxyHandler.fetch(request, recorder);
+    verify();
+    assertEquals(recorder.getContentType(), outputMime);
+    reset();
+  }
+
+  public void testMimeMatchPass() throws Exception {
+    expectMime("text/css", "text/css", "text/css");
+  }
+
+  public void testMimeMatchPassWithAdditionalAttributes() throws Exception {
+    expectMime("text/css", "text/css; charset=UTF-8", "text/css");
+  }
+
+  public void testMimeMatchOverrideNonMatch() throws Exception {
+    expectMime("text/css", "image/png; charset=UTF-8", "text/css");
+  }
+
+  public void testMimeMatchVarySupport() throws Exception {
+    expectMime("image/*", "image/gif", "image/gif");
+  }
 }

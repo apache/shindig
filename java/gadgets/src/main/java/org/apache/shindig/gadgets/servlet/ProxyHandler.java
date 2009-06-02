@@ -27,6 +27,7 @@ import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
@@ -152,8 +153,19 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    if (rcr.getRewriteMimeType() != null) {
-      response.setContentType(rcr.getRewriteMimeType());
+    if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
+      String requiredType = rcr.getRewriteMimeType();
+      String responseType = results.getHeader("Content-Type");
+      // Use a 'Vary' style check on the response
+      if (requiredType.endsWith("/*") &&
+          !StringUtils.isEmpty(responseType)) {
+        requiredType = requiredType.substring(0, requiredType.length() - 2);
+        if (!responseType.toLowerCase().startsWith(requiredType.toLowerCase())) {
+          response.setContentType(requiredType);
+        }
+      } else {
+        response.setContentType(requiredType);
+      }
     }
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {

@@ -42,7 +42,6 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
   private PrintWriter writer;
   private final Map<String, String> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
   private int httpStatusCode = 200;
-  private String contentType;
   private String encoding = Charset.defaultCharset().name();
 
   public HttpServletResponseRecorder(HttpServletResponse response) {
@@ -146,12 +145,12 @@ public class HttpServletResponseRecorder extends HttpServletResponseWrapper {
 
   @Override
   public void setContentType(String type) {
-    this.contentType = type;
+    headers.put("Content-Type", type);
   }
 
   @Override
   public String getContentType() {
-    return contentType;
+    return headers.get("Content-Type");
   }
 
   @Override
