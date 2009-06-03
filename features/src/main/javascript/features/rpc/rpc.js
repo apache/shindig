@@ -84,7 +84,9 @@ gadgets.rpc = function() {
   var params = {};
   var receiverTx = {};
   var earlyRpcQueue = {};
-  var isGadget = false;
+
+  // isGadget =~ isChild for the purposes of rpc (used only in setup).
+  var isGadget = (window.top !== window.self);
   var fallbackTransport = gadgets.rpctx.Ifpc;
 
   // Load the authentication token for speaking to the container
@@ -400,10 +402,6 @@ gadgets.rpc = function() {
           // code to ignore rpc calls since they cannot work without a
           // relay URL with host qualification.
           relayUrl['..'] = parentParam + config.rpc.parentRelayUrl;
-
-          // We assume that any rendering context where gadgets.config
-          // is defined and a parent param is provided (gets here) is a gadget.
-          isGadget = true;
         }
       }
       var useLegacy = !!config.rpc.useLegacyProtocol;
