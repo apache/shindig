@@ -103,6 +103,8 @@ public class SocialMarkupHtmlParser extends NekoSimplifiedHtmlParser {
     
     @Override
     public void comment(XMLString text, Augmentations augs) throws XNIException {
+      flushTextBuffer();
+      
       // Add comments as comment nodes - needed to support sanitization
       // of SocialMarkup-parsed content
       Node comment = getDocument().createComment(new String(text.ch, text.offset, text.length)); 

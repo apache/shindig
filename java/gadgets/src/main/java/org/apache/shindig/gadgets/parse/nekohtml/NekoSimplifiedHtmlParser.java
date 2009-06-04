@@ -257,6 +257,17 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       }
     }
 
+    /**
+     * Flush any existing text content to the document.  Call this before appending any
+     * nodes.
+     */
+    protected void flushTextBuffer() {
+      if (builder.length() > 0) {
+        appendChild(document.createTextNode(builder.toString()));
+        builder.setLength(0);
+      }
+    }
+
     /** Write an unimportant element into content as raw text */
     private void startUnimportantElement(QName qName, XMLAttributes xmlAttributes) {
       builder.append('<').append(qName.rawname);
@@ -272,10 +283,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     /** Create an Element in the DOM for an important element */
     private Element startImportantElement(QName qName, XMLAttributes xmlAttributes) {
-      if (builder.length() > 0) {
-        appendChild(document.createTextNode(builder.toString()));
-        builder.setLength(0);
-      }
+      flushTextBuffer();
 
       Element element;
       // Preserve XML namespace if present
@@ -385,10 +393,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public void endElement(QName qName, Augmentations augs) throws XNIException {
       if (isElementImportant(qName)) {
-        if (builder.length() > 0) {
-          elementStack.peek().appendChild(document.createTextNode(builder.toString()));
-          builder.setLength(0);
-        }
+        flushTextBuffer();
         elementStack.pop();
       } else {
         builder.append("</").append(qName.rawname).append('>');
@@ -404,10 +409,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void endDocument(Augmentations augs) throws XNIException {
-      if (builder.length() > 0) {
-        appendChild(document.createTextNode(builder.toString()));
-        builder.setLength(0);
-      }
+      flushTextBuffer();
       elementStack.pop();
     }
 

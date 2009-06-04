@@ -108,7 +108,6 @@ public class SocialMarkupHtmlParserTest {
   }
 
   @Test
-  @org.junit.Ignore
   public void testPlainContent() {
     // Verify text content is preserved in non-script content
     NodeList spanElements = document.getElementsByTagName("span");
@@ -116,6 +115,19 @@ public class SocialMarkupHtmlParserTest {
     assertEquals("Some content", spanElements.item(0).getTextContent());
   }
 
+  @Test
+  public void testCommentOrdering() {
+    NodeList divElements = document.getElementsByTagName("div");
+    assertEquals(1, divElements.getLength());
+    NodeList children = divElements.item(0).getChildNodes();
+    assertEquals(3, children.getLength());
+    
+    // Should be comment/text/comment, not comment/comment/text
+    assertEquals(Node.COMMENT_NODE, children.item(0).getNodeType());
+    assertEquals(Node.TEXT_NODE, children.item(1).getNodeType());
+    assertEquals(Node.COMMENT_NODE, children.item(2).getNodeType());
+  }
+  
   @Test
   public void testInvalid() throws Exception {
     String content = "<html><div id=\"div_super\" class=\"div_super\" valign:\"middle\"></div></html>";
