@@ -27,8 +27,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -52,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
@@ -221,6 +224,27 @@ public class PipelineDataGadgetRewriterTest {
     rewriter.rewrite(gadget, content);
 
     control.verify();
+  }
+
+  @Test
+  /** Test that os:DataRequest is parsed correctly */
+  public void parseOfDataRequest() throws Exception {
+    final String contentWithDataRequest =
+      "<script xmlns:os=\"http://ns.opensocial.org/2008/markup\" type=\"text/os-data\">"
+        + "  <os:DataRequest key=\"me\" method=\"people.get\" userId=\"canonical\"/>"
+        + "</script>";
+
+    setupGadget(getGadgetXml(contentWithDataRequest));
+    Map<PipelinedData, ? extends Object> pipelines =
+        rewriter.parsePipelinedData(gadget, content.getDocument());
+    assertEquals(1, pipelines.size());
+    PipelinedData pipeline = pipelines.keySet().iterator().next();
+    PipelinedData.Batch batch = pipeline.getBatch(new Expressions(), new RootELResolver());
+    Map<String, Object> preloads = batch.getSocialPreloads();
+    
+    JsonAssert.assertObjectEquals(
+        "{me: {params: {userId: 'canonical'}, method: 'people.get', id: 'me'}}",
+        preloads);
   }
 
   /** Create a mock Callable for a single preload task */

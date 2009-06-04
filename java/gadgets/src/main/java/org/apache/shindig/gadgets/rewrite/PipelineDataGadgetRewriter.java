@@ -62,28 +62,7 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
     }
     
     Document doc = content.getDocument();
-    NodeIterator nodeIterator = ((DocumentTraversal) doc)
-        .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
-            new NodeFilter() {
-              public short acceptNode(Node n) {
-                if ("script".equalsIgnoreCase(n.getNodeName()) &&
-                    "text/os-data".equals(((Element) n).getAttribute("type"))) {
-                  return NodeFilter.FILTER_ACCEPT;
-                }
-                return NodeFilter.FILTER_REJECT;
-              }
-            }, false);
-    
-    Map<PipelinedData, Node> pipelineNodes = Maps.newHashMap();
-    for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
-      try {
-        PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
-        pipelineNodes.put(pipelineData, n);
-      } catch (SpecParserException e) {
-        // Leave the element to the client
-        logger.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
-      }
-    }
+    Map<PipelinedData, Node> pipelineNodes = parsePipelinedData(gadget, doc);
     
     if (pipelineNodes.isEmpty()) {
       return;
@@ -131,10 +110,38 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
       gadget.removeFeature("opensocial-data");
     }
   }
+
+  /**
+   * Parses pipelined data out of a Document.
+   */
+  Map<PipelinedData, Node> parsePipelinedData(Gadget gadget, Document doc) {
+    NodeIterator nodeIterator = ((DocumentTraversal) doc)
+        .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
+            new NodeFilter() {
+              public short acceptNode(Node n) {
+                if ("script".equalsIgnoreCase(n.getNodeName()) &&
+                    "text/os-data".equals(((Element) n).getAttribute("type"))) {
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+                return NodeFilter.FILTER_REJECT;
+              }
+            }, false);
+    
+    Map<PipelinedData, Node> pipelineNodes = Maps.newHashMap();
+    for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
+      try {
+        PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
+        pipelineNodes.put(pipelineData, n);
+      } catch (SpecParserException e) {
+        // Leave the element to the client
+        logger.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
+      }
+    }
+    return pipelineNodes;
+  }
   
   static class PipelineState {
     public Node node;
-    public PipelinedData.Batch batch;
-    
+    public PipelinedData.Batch batch; 
   }
 }

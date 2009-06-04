@@ -362,7 +362,9 @@ public class PipelinedData {
         continue;
       }
 
-      String name = attrNode.getLocalName();
+      // Use getNodeName() instead of getLocalName().  NekoHTML has an incorrect
+      // implementation of node name that returns null.
+      String name = attrNode.getNodeName();
       // Skip the built-in names
       if ("method".equals(name) || "key".equals(name)) {
         continue;
