@@ -37,17 +37,18 @@ public class BMPOptimizer extends PNGOptimizer {
     return Sanselan.getBufferedImage(is);
   }
 
-  public BMPOptimizer(OptimizerConfig config, HttpResponse original)
-      throws IOException {
+  public BMPOptimizer(OptimizerConfig config, HttpResponse original) {
     super(config, original);
     ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
     outputter = new ImageIOOutputter(writer, null);
   }
 
-  protected void rewriteImpl(BufferedImage image) throws IOException {
+  @Override
+  protected void rewriteImpl(BufferedImage image) throws IOException  {
     super.rewriteImpl(image);
   }
 
+  @Override
   protected String getOriginalContentType() {
     return "image/bmp";
   }

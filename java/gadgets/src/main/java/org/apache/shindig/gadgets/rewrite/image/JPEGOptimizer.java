@@ -53,11 +53,11 @@ public class JPEGOptimizer extends BaseOptimizer {
 
   private boolean usePng;
 
-  public JPEGOptimizer(OptimizerConfig config, HttpResponse original)
-      throws IOException, ImageReadException {
+  public JPEGOptimizer(OptimizerConfig config, HttpResponse original) {
     super(config, original);
   }
 
+  @Override
   protected void rewriteImpl(BufferedImage image) throws IOException {
     // Create a new optimizer config and disable JPEG conversion
     OptimizerConfig pngConfig = new OptimizerConfig(config.getMaxInMemoryBytes(),
@@ -85,6 +85,7 @@ public class JPEGOptimizer extends BaseOptimizer {
     }
   }
 
+  @Override
   protected String getOutputContentType() {
     if (usePng) {
       return "image/png";
@@ -92,10 +93,12 @@ public class JPEGOptimizer extends BaseOptimizer {
     return "image/jpeg";
   }
 
+  @Override
   protected String getOriginalContentType() {
     return "image/jpeg";
   }
 
+  @Override
   protected String getOriginalFormatName() {
     return "jpeg";
   }

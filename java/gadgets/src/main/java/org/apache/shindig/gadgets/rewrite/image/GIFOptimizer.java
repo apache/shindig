@@ -38,17 +38,17 @@ public class GIFOptimizer extends PNGOptimizer {
 
   private boolean usePng;
 
-  public GIFOptimizer(OptimizerConfig config, HttpResponse original)
-      throws IOException {
+  public GIFOptimizer(OptimizerConfig config, HttpResponse original) {
     super(config, original);
   }
 
+  @Override
   protected void rewriteImpl(BufferedImage image) throws IOException {
     if (!ImageUtils.isOpaque(image)) {
-      // We can rewrite tranparent GIFs to PNG but for IE6 it requires the use of
+      // We can rewrite transparent GIFs to PNG but for IE6 it requires the use of
       // the AlphaImageReader and some pain. Deferring this until that is proven to work
 
-      // Write to stip any metadata and re-compute the palette. We allow arbitrary large palettes
+      // Write to strip any metadata and re-compute the palette. We allow arbitrary large palettes
       // here as if the image is already in a direct color model it will already have been
       // constrained by the max in-mem constraint.
       write(ImageUtils.palettize(image, Integer.MAX_VALUE));

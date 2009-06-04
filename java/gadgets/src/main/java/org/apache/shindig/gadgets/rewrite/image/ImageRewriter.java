@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 /**
  * Rewrite an image when it is read from the network
  */
-@ImplementedBy(NoOpImageRewriter.class)
+@ImplementedBy(BasicImageRewriter.class)
 public interface ImageRewriter {
 
   /**

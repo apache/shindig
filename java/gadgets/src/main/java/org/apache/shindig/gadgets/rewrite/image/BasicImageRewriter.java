@@ -33,6 +33,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageIOOutputter;
+import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageOutputter;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -45,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
 
 /**
  * Rewrite images to more efficiently compress their content. Can output to a different format file
@@ -55,6 +58,13 @@ import javax.imageio.ImageIO;
  */
 public class BasicImageRewriter implements ImageRewriter {
 
+  private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
+  /** Returned as the output message if a huge image is submitted to be scaled */
+  private static final String RESIZE_IMAGE_TOO_LARGE = "The image is too large to resize";
+  /** With resizing active, all images become PNGs */
+  private static final String RESIZE_OUTPUT_FORMAT = "png";
+
+  private static final String CONTENT_LENGTH = "Content-Length";
   /** Parameter used to request image rendering quality */
   public static final String PARAM_RESIZE_QUALITY = "resize_q";
   /** Parameter used to request image width change */
@@ -71,12 +81,12 @@ public class BasicImageRewriter implements ImageRewriter {
 
   private static final int DEFAULT_QUALITY = 100;
   private static final int BITS_PER_BYTE = 8;
-  private static final Color COLOR_TRANSPARENT = new Color(0, 0, 0, 0);
+  private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
   private static final String CONTENT_TYPE = "Content-Type";
   private static final Logger log = Logger.getLogger(BasicImageRewriter.class.getName());
 
   private static final Set<String> SUPPORTED_MIME_TYPES = ImmutableSet.of(
-      "image/gif", "image/png", "image/jpeg", "image/bmp");
+      "image/gif", CONTENT_TYPE_IMAGE_PNG, "image/jpeg", "image/bmp");
 
   private static final Set<String> SUPPORTED_FILE_EXTENSIONS = ImmutableSet.of(
       ".gif", ".png", ".jpeg", ".jpg", ".bmp");
@@ -129,13 +139,20 @@ public class BasicImageRewriter implements ImageRewriter {
 
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
 
+      boolean isOversizedImage = isImageTooLarge(imageInfo);
+      if (isResizeRequested && isOversizedImage) {
+        HttpResponseBuilder rejectedResponseBuilder = new HttpResponseBuilder()
+            .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
+            .setResponseString(RESIZE_IMAGE_TOO_LARGE);
+        return rejectedResponseBuilder.create();
+      }
+
       // Don't handle animations.
       // TODO: This doesn't work as current Sanselan doesn't return accurate image counts.
       // See animated GIF detection below.
-      if (imageInfo.getNumberOfImages() > 1 || isImageTooLarge(imageInfo)) {
+      if (imageInfo.getNumberOfImages() > 1 || isOversizedImage) {
         return response;
       }
-
       int originalContentSize = response.getContentLength();
       totalSourceImageSize.addAndGet(originalContentSize);
       BufferedImage image = ImageIO.read(response.getResponse());
@@ -173,8 +190,10 @@ public class BasicImageRewriter implements ImageRewriter {
           resizeQuality = DEFAULT_QUALITY;
         }
 
-        if (isResizeRequired(requestedWidth, requestedHeight, imageInfo)) {
+        if (isResizeRequired(requestedWidth, requestedHeight, imageInfo)
+            && !isTargetImageTooLarge(requestedWidth, requestedHeight, imageInfo)) {
           image = resizeImage(image, requestedWidth, requestedHeight, widthDelta, heightDelta);
+          response = updateResponse(response, image);
         }
       }
       response = getOptimizer(response, imageFormat, image);
@@ -189,6 +208,27 @@ public class BasicImageRewriter implements ImageRewriter {
       log.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire);
     }
     return response;
+  }
+
+  /**
+   * As the image is resized, the request needs to change so that the optimizer can
+   * make sensible image size-related decisions down the pipeline.  GIF images are rewritten
+   * as PNGs though, so as not to include the dependency on the GIF decoder.
+   *
+   * @param response the base response that will be modified with the resized image
+   * @param image the resized image that needs to be substituted for the original image from
+   *        the response
+   */
+  private HttpResponse updateResponse(HttpResponse response, BufferedImage image)
+      throws IOException {
+    ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(RESIZE_OUTPUT_FORMAT).next();
+    ImageOutputter outputter = new ImageIOOutputter(imageWriter, null);
+    byte[] imageBytes = outputter.toBytes(image);
+    HttpResponseBuilder newResponseBuilder = new HttpResponseBuilder(response)
+        .setResponse(imageBytes)
+        .setHeader(CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG)
+        .setHeader(CONTENT_LENGTH, String.valueOf(imageBytes.length));
+    return newResponseBuilder.create();
   }
 
   private boolean isUsableParameter(Integer parameterValue) {
@@ -241,7 +281,7 @@ public class BasicImageRewriter implements ImageRewriter {
   private BufferedImage stretchImage(BufferedImage image, Integer requestedWidth,
       Integer requestedHeight) {
     BufferedImage scaledImage = new BufferedImage(requestedWidth, requestedHeight,
-        BufferedImage.TYPE_INT_RGB);
+        BufferedImage.TYPE_INT_ARGB_PRE);
 
     Graphics2D g2d = scaledImage.createGraphics();
     g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -256,7 +296,8 @@ public class BasicImageRewriter implements ImageRewriter {
   }
 
   private HttpResponse getOptimizer(HttpResponse response, ImageFormat imageFormat,
-      BufferedImage image) throws IOException, ImageReadException {
+      BufferedImage image) throws IOException {
+
     if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
       // Detecting the existence of the NETSCAPE2.0 extension by string comparison
       // is not exactly clean but is good enough to determine if a GIF is animated
@@ -275,7 +316,19 @@ public class BasicImageRewriter implements ImageRewriter {
   }
 
   private boolean isImageTooLarge(ImageInfo imageInfo) {
-    long imagePixels = abs((long) imageInfo.getWidth()) * abs((long) imageInfo.getHeight());
+    return isTargetImageTooLarge(imageInfo.getWidth(), imageInfo.getHeight(), imageInfo);
+  }
+
+  /**
+   * @param requestedHeight the requested image height, assumed always nonnegative
+   * @param requestedWidth the requested image width, assumed always nonnegative
+   * @param imageInfo the image information to analyze
+   * @return {@code true} if the image size given by the parameters is too large to be acceptable
+   *         for serving
+   */
+  private boolean isTargetImageTooLarge(int requestedHeight, int requestedWidth,
+      ImageInfo imageInfo) {
+    long imagePixels = abs(requestedHeight) * abs(requestedWidth);
     long imageSizeBits = imagePixels * imageInfo.getBitsPerPixel();
     return imageSizeBits > config.getMaxInMemoryBytes() * BITS_PER_BYTE;
   }

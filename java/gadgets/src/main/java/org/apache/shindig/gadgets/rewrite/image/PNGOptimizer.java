@@ -41,11 +41,11 @@ class PNGOptimizer extends BaseOptimizer {
 
   private boolean useJpeg;
 
-  public PNGOptimizer(OptimizerConfig config, HttpResponse original)
-      throws IOException {
+  public PNGOptimizer(OptimizerConfig config, HttpResponse original) {
     super(config, original);
   }
 
+  @Override
   protected void rewriteImpl(BufferedImage bufferedImage) throws IOException {
     BufferedImage palettized = ImageUtils.palettize(bufferedImage, config.getMaxPaletteSize());
     if (palettized != null) {
@@ -53,7 +53,7 @@ class PNGOptimizer extends BaseOptimizer {
     }
 
     if (palettized == null) {
-      // If we are efficiently palettized then only JPEG can really win
+      // If we are efficiently palletized then only JPEG can really win
       if  (this.minBytes == null) {
         // nothing has been written yet, so just strip metadata
         write(bufferedImage);
@@ -105,6 +105,7 @@ class PNGOptimizer extends BaseOptimizer {
     }
   }
 
+  @Override
   protected String getOutputContentType() {
     if (useJpeg) {
       return "image/jpeg";
@@ -112,10 +113,12 @@ class PNGOptimizer extends BaseOptimizer {
     return "image/png";
   }
 
+  @Override
   protected String getOriginalContentType() {
     return "image/png";
   }
 
+  @Override
   protected String getOriginalFormatName() {
     return "png";
   }

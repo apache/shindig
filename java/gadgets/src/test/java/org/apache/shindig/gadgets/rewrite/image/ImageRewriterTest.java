@@ -38,6 +38,7 @@ import org.easymock.IMocksControl;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -46,10 +47,20 @@ import javax.imageio.ImageIO;
  */
 public class ImageRewriterTest extends TestCase {
 
-  /** The image used for the scaling tests, a head-shot of a white dog, 600pix x 600pix */
+  /** The image used for the scaling tests, a head-shot of a white dog, 500pix x 500pix */
   private static final String SCALE_IMAGE = "org/apache/shindig/gadgets/rewrite/image/dog.gif";
 
+  /** A 60 x 30 image whose size in bytes expands when resized to 120 x 60 */
+  private static final String EXPAND_IMAGE = "org/apache/shindig/gadgets/rewrite/image/expand.gif";
+
+  /**
+   * This image has a huge memory footprint that the rewriter should refuse to resize, but not
+   * refuse to render.  The response containing this image should not be rewritten.
+   */
+  private static final String HUGE_IMAGE = "org/apache/shindig/gadgets/rewrite/image/huge.gif";
+
   private static final String CONTENT_TYPE_BOGUS = "notimage/anything";
+  private static final String CONTENT_TYPE_JPG = "image/jpeg";
   private static final String CONTENT_TYPE_GIF = "image/gif";
   private static final String CONTENT_TYPE_PNG = "image/png";
   private static final String CONTENT_TYPE_HEADER = "Content-Type";
@@ -88,11 +99,7 @@ public class ImageRewriterTest extends TestCase {
       String targetContentType, String imageName, Integer width, Integer height, Integer quality)
       throws Exception {
     HttpResponse originalResponse = getImageResponse(sourceContentType, getImageBytes(imageName));
-    HttpRequest request = mockControl.createMock(HttpRequest.class);
-    expect(request.getUri()).andReturn(IMAGE_URL);
-    expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
-    expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
-    expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
+    HttpRequest request = getMockRequest(width, height, quality);
 
     mockControl.replay();
     HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
@@ -100,6 +107,15 @@ public class ImageRewriterTest extends TestCase {
 
     assertEquals(targetContentType, rewrittenResponse.getHeader(CONTENT_TYPE_HEADER));
     return ImageIO.read(rewrittenResponse.getResponse());
+  }
+
+  private HttpRequest getMockRequest(Integer width, Integer height, Integer quality) {
+    HttpRequest request = mockControl.createMock(HttpRequest.class);
+    expect(request.getUri()).andReturn(IMAGE_URL);
+    expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
+    expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
+    expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
+    return request;
   }
 
   public void testRewriteValidImageWithValidMimeAndExtn() throws Exception {
@@ -157,7 +173,7 @@ public class ImageRewriterTest extends TestCase {
   // image content, as the ImageIO implementations vary across JVMs, so we have to skip it.
 
   public void testResize_width() throws Exception {
-    BufferedImage image = getResizedHttpResponseContent(CONTENT_TYPE_GIF, CONTENT_TYPE_PNG,
+    BufferedImage image = getResizedHttpResponseContent(CONTENT_TYPE_GIF, CONTENT_TYPE_JPG,
         SCALE_IMAGE, 100 /* width */, null /* height */, null /* quality */);
     assertEquals(100, image.getWidth());
     assertEquals(100, image.getHeight());
@@ -165,14 +181,14 @@ public class ImageRewriterTest extends TestCase {
 
   public void testResize_height() throws Exception {
     BufferedImage image = getResizedHttpResponseContent(
-        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, SCALE_IMAGE,  null, 100, null);
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE,  null, 100, null);
     assertEquals(100, image.getWidth());
     assertEquals(100, image.getHeight());
   }
 
   public void testResize_both() throws Exception {
     BufferedImage image = getResizedHttpResponseContent(
-        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, SCALE_IMAGE, 100, 100, null);
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE, 100, 100, null);
     assertEquals(100, image.getWidth());
     assertEquals(100, image.getHeight());
   }
@@ -180,23 +196,30 @@ public class ImageRewriterTest extends TestCase {
   public void testResize_all() throws Exception {
     // The quality hint apparently has no effect on the result here
     BufferedImage image = getResizedHttpResponseContent(
-        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, SCALE_IMAGE, 100, 100, 10);
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE, 100, 100, 10);
     assertEquals(100, image.getWidth());
     assertEquals(100, image.getHeight());
   }
 
   public void testResize_wideImage() throws Exception {
     BufferedImage image = getResizedHttpResponseContent(
-        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, SCALE_IMAGE, 100, 50, null);
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE, 100, 50, null);
     assertEquals(100, image.getWidth());
     assertEquals(50, image.getHeight());
   }
 
   public void testResize_tallImage() throws Exception {
     BufferedImage image = getResizedHttpResponseContent(
-        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG, SCALE_IMAGE,  50, 100, null);
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE,  50, 100, null);
     assertEquals(50, image.getWidth());
     assertEquals(100, image.getHeight());
+  }
+
+  public void testResize_skipResizeHugeOutputImage() throws Exception {
+    BufferedImage image = getResizedHttpResponseContent(
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, SCALE_IMAGE, 10000, 10000, null);
+    assertEquals(500, image.getWidth());
+    assertEquals(500, image.getHeight());
   }
 
   public void testResize_brokenParameter() throws Exception {
@@ -204,5 +227,32 @@ public class ImageRewriterTest extends TestCase {
         CONTENT_TYPE_GIF, CONTENT_TYPE_GIF, SCALE_IMAGE, -1, null, null);
     assertEquals(500, image.getWidth());
     assertEquals(500, image.getHeight());
+  }
+
+  public void testResize_expandImage() throws Exception {
+    BufferedImage image = getResizedHttpResponseContent(
+        CONTENT_TYPE_GIF, CONTENT_TYPE_JPG, EXPAND_IMAGE, 120, 60, null);
+    assertEquals(120, image.getWidth());
+    assertEquals(60, image.getHeight());
+  }
+
+  public void testResize_refuseHugeInputImages() throws Exception {
+    HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, getImageBytes(HUGE_IMAGE));
+    HttpRequest request = getMockRequest(120, 60, null);
+    mockControl.replay();
+    HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
+    mockControl.verify();
+    assertEquals(HttpResponse.SC_FORBIDDEN, rewrittenResponse.getHttpStatusCode());
+  }
+
+  public void testResize_acceptServeHugeImages() throws Exception {
+    byte[] imageBytes = getImageBytes(HUGE_IMAGE);
+    HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, imageBytes);
+    HttpRequest request = getMockRequest(null, null, null);
+    mockControl.replay();
+    HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
+    mockControl.verify();
+    assertEquals(HttpResponse.SC_OK, rewrittenResponse.getHttpStatusCode());
+    assertTrue(Arrays.equals(imageBytes, IOUtils.toByteArray(rewrittenResponse.getResponse())));
   }
 }

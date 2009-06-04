@@ -60,8 +60,7 @@ abstract class BaseOptimizer {
   int reductionPct;
 
 
-  public BaseOptimizer(OptimizerConfig config, HttpResponse original)
-      throws IOException {
+  public BaseOptimizer(OptimizerConfig config, HttpResponse original) {
     this.config = config;
     this.originalResponse = original;
     this.minLength = original.getContentLength();
@@ -124,7 +123,6 @@ abstract class BaseOptimizer {
 
   /**
    * Get the rewritten image if available
-   * @return
    */
   protected final byte[] getRewrittenImage() {
     return minBytes;
