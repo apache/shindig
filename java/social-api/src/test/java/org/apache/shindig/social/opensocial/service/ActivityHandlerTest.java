@@ -94,7 +94,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     List<Activity> activityList = ImmutableList.of();
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(activityList);
     org.easymock.EasyMock.expect(activityService.getActivities(eq(JOHN_DOE),
-       eq(new GroupId(group, null)), (String)isNull(), eq(Sets.<String>newHashSet()),
+       eq(new GroupId(group, null)), eq("appId"), eq(Sets.<String>newHashSet()),
         org.easymock.EasyMock.isA(CollectionOptions.class), eq(token))).
         andReturn(ImmediateFuture.newInstance(data));
 
