@@ -320,7 +320,7 @@ os.doTag = function(node, ns, tag, data, context) {
   var result = tagFunction.call(null, node, data, ctx);
 
   if (!result && typeof(result) != "string") {
-    throw "Custom tag <" + ns + ":" + tag + "> failed to return anything.";
+    throw Error("Custom tag <" + ns + ":" + tag + "> failed to return anything.");
   }
 
   if (typeof(result) == "string") {

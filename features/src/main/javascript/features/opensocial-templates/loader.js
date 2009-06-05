@@ -206,12 +206,12 @@ os.Loader.processTemplateNode = function(node, opt_tag, opt_name) {
   if (tag) {
     var tagParts = tag.split(":");
     if (tagParts.length != 2) {
-      throw "Invalid tag name: " + tag;
+      throw Error("Invalid tag name: " + tag);
     }
     var nsObj = os.getNamespace(tagParts[0]);
     if (!nsObj) {
-      throw "Namespace not registered: " + tagParts[0] +
-          " while trying to define " + tag;
+      throw Error("Namespace not registered: " + tagParts[0] +
+          " while trying to define " + tag);
     }
     var template = os.compileXMLNode(node);
     nsObj[tagParts[1]] = os.createTemplateCustomTag(template);

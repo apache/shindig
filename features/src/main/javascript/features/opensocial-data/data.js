@@ -156,7 +156,7 @@ opensocial.data.RequestDescriptor.prototype.sendRequest = function() {
     handler = ns[this.tagParts[1]];
   }
   if (!handler) {
-    throw "Data handler undefined for " + this.tagName;
+    throw Error("Data handler undefined for " + this.tagName);
   }
   handler(this);
 };
@@ -231,7 +231,7 @@ opensocial.data.requests_ = {};
  */
 opensocial.data.registerRequestDescriptor = function(requestDescriptor) {
   if (opensocial.data.requests_[requestDescriptor.key]) {
-    throw "Request already registered for " + requestDescriptor.key;
+    throw Error("Request already registered for " + requestDescriptor.key);
   }
   opensocial.data.requests_[requestDescriptor.key] = requestDescriptor;
 };
@@ -403,7 +403,7 @@ opensocial.data.registerRequestHandler = function(name, handler) {
     }
     ns = opensocial.data.NSMAP[tagParts[0]] = {};
   } else if (ns[tagParts[1]]) {
-    throw 'Request handler ' + tagParts[1] + ' is already defined.';
+    throw Error('Request handler ' + tagParts[1] + ' is already defined.');
   }
 
   ns[tagParts[1]] = handler;

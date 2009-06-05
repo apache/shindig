@@ -75,7 +75,7 @@ os.Container.processed_ = false;
 
 os.Container.disableAutoProcessing = function() {
   if (os.Container.processed_) {
-    throw "Document already processed.";
+    throw Error("Document already processed.");
   }
   os.Container.autoProcess_ = false;
 };

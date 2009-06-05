@@ -37,7 +37,7 @@ opensocial.xmlutil.parseXML = function(str) {
     opensocial.xmlutil.parser_ = opensocial.xmlutil.parser_ || new DOMParser();
     var doc = opensocial.xmlutil.parser_.parseFromString(str, "text/xml");
     if (doc.firstChild && doc.firstChild.tagName == 'parsererror') {
-      throw doc.firstChild.firstChild.nodeValue;
+      throw Error(doc.firstChild.firstChild.nodeValue);
     }
     return doc;
   } else if (typeof(ActiveXObject) != "undefined") {
@@ -45,11 +45,11 @@ opensocial.xmlutil.parseXML = function(str) {
     doc.validateOnParse = false;
     doc.loadXML(str);
     if (doc.parseError && doc.parseError.errorCode) {
-      throw doc.parseError.reason;
+      throw Error(doc.parseError.reason);
     }
     return doc;
   }
-  throw "No XML parser found in this browser.";
+  throw Error("No XML parser found in this browser.");
 };
 
 
