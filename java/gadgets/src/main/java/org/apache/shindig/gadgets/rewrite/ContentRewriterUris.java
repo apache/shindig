@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.config.ContainerConfig;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -45,16 +46,19 @@ public class ContentRewriterUris {
   }
   
   public String getProxyBase(String container) {
-    container = Objects.firstNonNull(container, ContainerConfig.DEFAULT_CONTAINER);
+    container = firstNonNull(container, ContainerConfig.DEFAULT_CONTAINER);
     
-    return Objects.firstNonNull(config.getString(container, PROXY_BASE_CONFIG_PROPERTY),
+    return firstNonNull(config.getString(container, PROXY_BASE_CONFIG_PROPERTY),
         proxyBaseNoGadget);
   }
   
   public String getConcatBase(String container) {
-    container = Objects.firstNonNull(container, ContainerConfig.DEFAULT_CONTAINER);
+    container = firstNonNull(container, ContainerConfig.DEFAULT_CONTAINER);
     
-    return Objects.firstNonNull(config.getString(container, CONCAT_BASE_CONFIG_PROPERTY),
+    return firstNonNull(config.getString(container, CONCAT_BASE_CONFIG_PROPERTY),
         concatBaseNoGadget);
+  }
+  private static <T> T firstNonNull(T first, T second) {
+    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

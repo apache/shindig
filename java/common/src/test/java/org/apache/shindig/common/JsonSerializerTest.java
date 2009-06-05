@@ -38,6 +38,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
 
 /**
@@ -67,7 +68,7 @@ public class JsonSerializerTest {
 
   @Test
   public void serializeSimpleMultimap() throws Exception {
-    Multimap<String, String> map = Multimaps.newLinkedHashMultimap();
+    Multimap<String, String> map = LinkedHashMultimap.create();
     Set<String> methods = ImmutableSet.of("system.listMethods", "people.get");
     map.putAll("hostEndpoint", methods);
     assertJsonEquals("{hostEndpoint : ['system.listMethods', 'people.get']}",

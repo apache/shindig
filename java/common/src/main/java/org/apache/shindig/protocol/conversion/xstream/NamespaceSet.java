@@ -73,7 +73,7 @@ public class NamespaceSet {
    * @return the converted name, left as is if no conversion was required.
    */
   public String getElementName(String name) {
-    return Objects.firstNonNull(elementNames.get(name), name);
+    return elementNames.get(name) != null ? elementNames.get(name) : name;
   }
 
   /**

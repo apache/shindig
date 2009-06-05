@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -145,7 +145,7 @@ public class HttpResponseBuilderTest {
     HttpResponse resp = b.create();
 
     // Insure that headers are stored in the order they are added
-    assertEquals(Join.join(",",resp.getHeaders("Soup")), Join.join(",", soupList));
+    assertEquals(Joiner.on(",").join(resp.getHeaders("Soup")), Joiner.on(",").join(soupList));
 
   }
 }

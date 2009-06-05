@@ -37,7 +37,6 @@ import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
-import com.google.common.base.Nullable;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -62,7 +61,7 @@ public class Expressions {
   }
   
   @Inject
-  public Expressions(@Nullable Functions functions) {
+  public Expressions(Functions functions) {
     this.functions = functions;
     factory = newExpressionFactory();
     // Stub context with no FunctionMapper, used only to parse expressions

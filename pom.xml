@@ -1273,7 +1273,7 @@
       <dependency>
         <groupId>com.google.collections</groupId>
         <artifactId>google-collections</artifactId>
-        <version>0.9</version>
+        <version>1.0-rc2</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>

@@ -86,7 +86,7 @@ public class DefaultServiceFetcher {
     if (containerConfig == null) {
       return ImmutableMultimap.<String, String>builder().build();
     }
-    LinkedHashMultimap<String, String> endpointServices = Multimaps.newLinkedHashMultimap();
+    LinkedHashMultimap<String, String> endpointServices = LinkedHashMultimap.create();
 
     // First check services directly declared in container config
     Map<String, Object> declaredServices = containerConfig.getMap(container, OSAPI_SERVICES);

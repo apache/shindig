@@ -26,10 +26,7 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.*;
 import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -126,10 +123,10 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     replay();
     Multimap<String, String> services = fetcher.getServicesForContainer("default", "dontcare");
     verify();
-    Multimap<String, String> mergedServices = Multimaps.newLinkedHashMultimap(configuredServices);
+    Multimap<String, String> mergedServices = LinkedHashMultimap.create(configuredServices);
     mergedServices.putAll(endPoint1, endPoint1Services);
     mergedServices.putAll(endPoint2, endPoint2Services);
-    assertEquals(mergedServices, Multimaps.newLinkedHashMultimap(services));
+    assertEquals(mergedServices, LinkedHashMultimap.create(services));
   }
 
   public void testReadConfigBadContainer() throws Exception {

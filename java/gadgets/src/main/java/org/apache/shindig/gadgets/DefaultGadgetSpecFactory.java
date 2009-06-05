@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -95,7 +96,7 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
     if (version == null) {
       // TODO: The label param should only be used for metadata calls. This should probably be
       // exposed up a layer in the stack, perhaps at the interface level.
-      String label = Objects.firstNonNull(context.getParameter(LABEL_PARAM), DEFAULT_LABEL);
+      String label = firstNonNull(context.getParameter(LABEL_PARAM), DEFAULT_LABEL);
 
       version = manifest.getVersion(label);
 
@@ -222,5 +223,8 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
         }
       }
     }
+  }
+  private static <T> T firstNonNull(T first, T second) {
+    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

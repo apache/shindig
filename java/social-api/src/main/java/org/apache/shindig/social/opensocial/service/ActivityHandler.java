@@ -29,6 +29,7 @@ import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -142,9 +143,12 @@ public class ActivityHandler  {
   @Operation(httpMethods = "GET", path="/@supportedFields")
   public List<Object> supportedFields(RequestItem request) {
     // TODO: Would be nice if name in config matched name of service.
-    String container = Objects.firstNonNull(request.getToken().getContainer(),
-        ContainerConfig.DEFAULT_CONTAINER);
+    String container = firstNonNull(request.getToken().getContainer(), ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
         "${Cur['gadgets.features']['opensocial-0.8'].supportedFields.activity}");
+  }
+
+  private static <T> T firstNonNull(T first, T second) {
+    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

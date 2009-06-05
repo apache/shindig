@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 
 /**
@@ -112,8 +112,8 @@ public class EndToEndServer {
     context.addEventListener(new GuiceServletContextListener());
 
     Map<String, String> initParams = Maps.newHashMap();
-    String modules = Join
-        .join(":", SampleModule.class.getName(), DefaultGuiceModule.class.getName(),
+    String modules = Joiner.on(":")
+        .join(SampleModule.class.getName(), DefaultGuiceModule.class.getName(),
             PropertiesModule.class.getName(), OAuthModule.class.getName());
 
     initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);

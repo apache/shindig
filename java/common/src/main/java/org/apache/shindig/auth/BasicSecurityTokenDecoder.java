@@ -22,7 +22,7 @@ import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 import com.google.inject.Singleton;
 
 import java.util.Map;
@@ -49,7 +49,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
    * @return token with values separated by colons
    */
   public String encodeToken(SecurityToken token) {
-    return Join.join(":",
+    return Joiner.on(":").join(
         Utf8UrlCoder.encode(token.getOwnerId()),
         Utf8UrlCoder.encode(token.getViewerId()),
         Utf8UrlCoder.encode(token.getAppId()),

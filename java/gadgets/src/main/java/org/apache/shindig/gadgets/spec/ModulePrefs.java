@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -532,11 +532,13 @@ public class ModulePrefs {
     }
     buf.append(">\n");
 
-    Join.join(buf, "\n", preloads);
-    Join.join(buf, "\n", features.values());
-    Join.join(buf, "\n", icons);
-    Join.join(buf, "\n", locales.values());
-    Join.join(buf, "\n", links.values());
+    Joiner j = Joiner.on("\n");
+
+    j.appendTo(buf, preloads);
+    j.appendTo(buf, features.values());
+    j.appendTo(buf, icons);
+    j.appendTo(buf, locales.values());
+    j.appendTo(buf, links.values());
 
     if (oauth != null) {
       buf.append(oauth).append('\n');

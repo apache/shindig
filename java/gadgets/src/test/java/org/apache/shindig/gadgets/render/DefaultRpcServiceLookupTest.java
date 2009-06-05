@@ -61,7 +61,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
 
   public void testGetServicesForContainer_OneContainerOneService() throws Exception {
     ImmutableSet<String> expectedServiceMethods = ImmutableSet.of("system.listMethods");
-    LinkedHashMultimap<String, String> expectedServices = new LinkedHashMultimap<String, String>();
+    LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
     expectedServices.putAll(socialEndpoint, expectedServiceMethods);
     String container = "ig";
     svcLookup.setServicesFor(container, expectedServices);
@@ -77,7 +77,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get", 
             "people.update", "people.create", "people.delete");
     
-    LinkedHashMultimap<String, String> expectedServices = new LinkedHashMultimap<String, String>();
+    LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
     expectedServices.putAll(socialEndpoint, expectedServiceMethods);
 
     String container = "ig";
@@ -92,10 +92,10 @@ public class DefaultRpcServiceLookupTest extends TestCase {
             "people.update", "people.create", "people.delete");
     Set<String> expectedServiceMethods2 = Sets.newHashSet("cache.invalidate");
     
-    LinkedHashMultimap<String, String> expectedServices = new LinkedHashMultimap<String, String>();
+    LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
     expectedServices.putAll(socialEndpoint, expectedServiceMethods);
 
-    LinkedHashMultimap<String, String> expectedServices2 = new LinkedHashMultimap<String, String>();
+    LinkedHashMultimap<String, String> expectedServices2 = LinkedHashMultimap.create();
     expectedServices2.putAll(socialEndpoint2, expectedServiceMethods2);
 
     String container = "ig";

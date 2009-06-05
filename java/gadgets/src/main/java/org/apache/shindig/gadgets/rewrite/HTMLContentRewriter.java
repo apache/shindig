@@ -35,7 +35,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Nullable;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -147,7 +146,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     // Filter to just style tags
     Iterable<Element> styleTags = Lists.newArrayList(Iterables.filter(elementList,
         new Predicate<Element>() {
-      public boolean apply(@Nullable Element element) {
+      public boolean apply(Element element) {
         return element.getNodeName().equalsIgnoreCase("style");
       }
     }));
@@ -177,7 +176,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     // Filter to just stylesheet link tags
     List<Element> linkTags = Lists.newArrayList(Iterables.filter(elementList,
         new Predicate<Element>() {
-          public boolean apply(@Nullable Element element) {
+          public boolean apply(Element element) {
             return element.getNodeName().equalsIgnoreCase("link") &&
                 ("stylesheet".equalsIgnoreCase(element.getAttribute("rel")) ||
                     element.getAttribute("type").toLowerCase().contains("css"));
@@ -216,7 +215,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     // Filter to just script tags
     List<Element> scriptTags = Lists.newArrayList(Iterables.filter(elementList,
         new Predicate<Element>() {
-      public boolean apply(@Nullable Element node) {
+      public boolean apply(Element node) {
         if (node.getNodeName().equalsIgnoreCase("script")) {
           String type = node.getAttribute("type");
           return type == null || type.length() == 0 || type.equalsIgnoreCase(JS_MIME_TYPE);
@@ -261,7 +260,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
 
     // Filter to just style tags
     Iterable<Element> tags = Iterables.filter(elementList, new Predicate<Element>() {
-      public boolean apply(@Nullable Element node) {
+      public boolean apply(Element node) {
         return tagNames.contains(node.getNodeName().toLowerCase());
       }
     });
@@ -285,7 +284,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
                                final String attr) {
     // Filter out excluded URLs
     tags = Lists.newArrayList(Iterables.filter(tags, new Predicate<Element>() {
-      public boolean apply(@Nullable Element element) {
+      public boolean apply(Element element) {
         return (element.hasAttribute(attr) && feature.shouldRewriteURL(element.getAttribute(attr)));
       }
     }));
