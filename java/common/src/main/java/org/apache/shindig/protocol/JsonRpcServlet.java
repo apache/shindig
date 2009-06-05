@@ -73,6 +73,9 @@ public class JsonRpcServlet extends ApiServlet {
   @Override
   protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
+    setCharacterEncodings(servletRequest, servletResponse);
+    servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
       sendSecurityError(servletResponse);
@@ -80,7 +83,6 @@ public class JsonRpcServlet extends ApiServlet {
     }
 
     try {
-      setCharacterEncodings(servletRequest, servletResponse);
       JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
       dispatch(request, null, servletRequest, servletResponse, token);
     } catch (JSONException je) {
@@ -91,6 +93,9 @@ public class JsonRpcServlet extends ApiServlet {
   @Override
   protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
+    setCharacterEncodings(servletRequest, servletResponse);
+    servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
     try {
       checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
       SecurityToken token = getSecurityToken(servletRequest);
@@ -98,9 +103,6 @@ public class JsonRpcServlet extends ApiServlet {
         sendSecurityError(servletResponse);
         return;
       }
-
-      setCharacterEncodings(servletRequest, servletResponse);
-      servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
       String content = null;
       Map<String, FormDataItem> formItems = new HashMap<String, FormDataItem>();
