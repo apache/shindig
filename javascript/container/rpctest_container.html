@@ -56,7 +56,7 @@
       // Useful per-page variables.
       var gadgeturl = gadgethost + '/gadgets/files/container/rpctest_gadget.xml';
       var cachebust = 'cachebust=' + Math.random();
-      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&' + cachebust;
+      var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&' + cachebust;
       var gadgetrelay = gadgethost + '/gadgets/files/container/rpc_relay.uncompressed.html';
 
       // Set up faux gadgets.config(...)

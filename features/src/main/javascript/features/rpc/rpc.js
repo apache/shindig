@@ -372,42 +372,42 @@ gadgets.rpc = function() {
   }
 
   // gadgets.config might not be available, such as when serving container js.
-  if (gadgets.config) {
+  if (isGadget && gadgets.config) {
     /**
-     * Initializes RPC from the provided configuration.
+     * Initializes gadget to container RPC params from the provided configuration.
      */
     function init(config) {
+      var configRpc = config ? config.rpc : {};
+      var parentRelayUrl = configRpc.parentRelayUrl;
+
       // Allow for wild card parent relay files as long as it's from a
       // white listed domain. This is enforced by the rendering servlet.
-      if (config.rpc.parentRelayUrl.substring(0, 7) === 'http://' ||
-          config.rpc.parentRelayUrl.substring(0, 8) === 'https://' ||
-          config.rpc.parentRelayUrl.substring(0, 2) === '//') {
-        relayUrl['..'] = config.rpc.parentRelayUrl;
-      } else {
-        // It's a relative path, and we must append to the parent.
+      if (parentRelayUrl.substring(0, 7) !== 'http://' &&
+          parentRelayUrl.substring(0, 8) !== 'https://' &&
+          parentRelayUrl.substring(0, 2) !== '//') {
+        // Relative path: we append to the parent.
         // We're relying on the server validating the parent parameter in this
-        // case. Because of this, parent may only be passed in the query, not
-        // the fragment.
-        var params = document.location.search.substring(1).split("&");
-        var parentParam = "";
-        for (var i = 0, param; (param = params[i]); ++i) {
-          // Only the first parent can be validated.
-          if (param.indexOf("parent=") === 0) {
-            parentParam = decodeURIComponent(param.substring(7));
-            break;
-          }
-        }
-        if (parentParam !== "") {
+        // case. Because of this, parent may only be passed in the query, not fragment.
+        if (params.parent !== "") {
           // Otherwise, relayUrl['..'] will be null, signaling transport
           // code to ignore rpc calls since they cannot work without a
           // relay URL with host qualification.
-          relayUrl['..'] = parentParam + config.rpc.parentRelayUrl;
+          parentRelayUrl = getDomainRoot(params.parent) + parentRelayUrl;
         }
       }
-      var useLegacy = !!config.rpc.useLegacyProtocol;
+      relayUrl['..'] = parentRelayUrl;
+
+      var useLegacy = !!configRpc.useLegacyProtocol;
       useLegacyProtocol['..'] = useLegacy;
       if (useLegacy) {
         transport = gadgets.rpctx.Ifpc;
+      }
+
+      // Here, we add a hook for the transport to actively set up
+      // gadget -> container communication. Running here ensures
+      // that relayUri info will be available.
+      if (transport.setup('..') === false) {
+        transport = fallbackTransport;
       }
     }
 
@@ -666,11 +666,6 @@ gadgets.rpc = function() {
       // Do so after gadgets.rpc definition to allow transport to access
       // gadgets.rpc methods.
       if (transport.init(process, transportReady) === false) {
-        transport = fallbackTransport;
-      }
-      // Here, we add a hook for the transport to actively set up
-      // gadget -> container communication, if we're a gadget.
-      if (isGadget && transport.setup('..') === false) {
         transport = fallbackTransport;
       }
     },

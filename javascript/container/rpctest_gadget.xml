@@ -35,6 +35,9 @@
       gadgets.util.registerOnLoadHandler(initPerfTest);
     </script>
     <div>gadgets.rpc Performance: "Gadget" page</div><hr/>
+    <script>
+      document.write("<div>"Parent relay: " + gadgets.rpc.getRelayUrl('..') + "</div><hr/>");
+    </script>
     <div>Test<br/>
       <ul>
         <li>Number of messages to send:
