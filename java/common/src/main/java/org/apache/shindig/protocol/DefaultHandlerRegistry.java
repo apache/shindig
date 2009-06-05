@@ -140,18 +140,20 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
    */
   public RestHandler getRestHandler(String path, String method) {
     method = method.toUpperCase();
-    if (path.startsWith("/")) {
-      path = path.substring(1);
-    }
-    String[] pathParts = path.split("/");
-    Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(pathParts[0]);
-    if (methods != null) {
-      SortedSet<RestPath> paths = methods.get(method);
-      if (paths != null) {
-        for (RestPath restPath : paths) {
-          RestHandler handler = restPath.accept(pathParts);
-          if (handler != null) {
-            return handler;
+    if (path != null) {
+      if (path.startsWith("/")) {
+        path = path.substring(1);
+      }
+      String[] pathParts = path.split("/");
+      Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(pathParts[0]);
+      if (methods != null) {
+        SortedSet<RestPath> paths = methods.get(method);
+        if (paths != null) {
+          for (RestPath restPath : paths) {
+            RestHandler handler = restPath.accept(pathParts);
+            if (handler != null) {
+              return handler;
+            }
           }
         }
       }
