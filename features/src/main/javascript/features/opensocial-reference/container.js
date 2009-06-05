@@ -502,7 +502,7 @@ opensocial.Container.getField = function(fields, key, opt_params) {
 };
 
 opensocial.Container.escape = function(value, opt_params, opt_escapeObjects) {
-  if (opt_params && opt_params['escapeType'] == 'none') {
+  if (opt_params && opt_params[opensocial.DataRequest.DataRequestFields.ESCAPE_TYPE] == opensocial.EscapeType.NONE) {
     return value;
   } else {
     return gadgets.util.escape(value, opt_escapeObjects);
