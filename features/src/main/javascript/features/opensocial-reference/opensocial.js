@@ -76,8 +76,8 @@ var opensocial = opensocial || {};
  */
 opensocial.requestSendMessage = function(recipients, message, opt_callback,
     opt_params) {
-  opensocial.Container.get().requestSendMessage(recipients, message,
-      opt_callback, opt_params);
+    gadgets.rpc.call(null, "requestSendMessage", opt_callback, recipients, message, opt_callback,
+        opt_params);
 };
 
 

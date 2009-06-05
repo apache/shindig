@@ -98,12 +98,7 @@ opensocial.Container.prototype.getEnvironment = function() {};
  */
 opensocial.Container.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
-  if (opt_callback) {
-    window.setTimeout(function() {
-      opt_callback(new opensocial.ResponseItem(
-          null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
-    }, 0);
-  }
+    return opensocial.requestSendMessage(recipients, message, opt_callback, opt_params);
 };
 
 

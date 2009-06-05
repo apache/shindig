@@ -183,6 +183,7 @@ gadgets.IfrGadgetService = function() {
   gadgets.rpc.register('set_pref', this.setUserPref);
   gadgets.rpc.register('set_title', this.setTitle);
   gadgets.rpc.register('requestNavigateTo', this.requestNavigateTo);
+  gadgets.rpc.register('requestSendMessage', this.requestSendMessage);
 };
 
 gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
@@ -221,6 +222,29 @@ gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
     prefs[arguments[i]] = arguments[i + 1];
   }
   gadget.setUserPrefs(prefs);
+};
+
+/**
+ * Requests the container to send a specific message to the specified users.
+ * @param {Array.<String>, String} An ID, array of IDs, or a group reference;
+ * the supported keys are VIEWER, OWNER, VIEWER_FRIENDS, OWNER_FRIENDS, or a
+ * single ID within one of those groups
+ * @param {opensocial.Message} message The message to send to the specified users
+ * @param {Function} opt_callback The function to call once the request has been
+ * processed; either this callback will be called or the gadget will be reloaded
+ * from scratch
+ * @param {opensocial.NavigationParameters} opt_params The optional parameters
+ * indicating where to send a user when a request is made, or when a request
+ * is accepted; options are of type  NavigationParameters.DestinationType
+ */
+gadgets.IfrGadgetService.prototype.requestSendMessage = function(recipients,
+    message, opt_callback, opt_params) {
+    if (opt_callback) {
+      window.setTimeout(function() {
+        opt_callback(new opensocial.ResponseItem(
+            null, null, opensocial.ResponseItem.Error.NOT_IMPLEMENTED, null));
+      }, 0);
+    }
 };
 
 /**
