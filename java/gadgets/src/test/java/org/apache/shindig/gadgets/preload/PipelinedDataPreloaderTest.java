@@ -218,6 +218,33 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
   }
 
+  @Test
+  /** 
+   * Verify that social preloads where the request doesn't contain a token
+   * serve up 403s for the preloaded data, instead of failing the whole request.
+   */
+  public void testSocialPreloadWithoutToken() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
+    
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline("");
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+    view = "profile";
+    // But don't set the security token
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+    PipelinedData.Batch batch = getBatch(gadget);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
+        context, batch);
+    PreloadedData data = tasks.iterator().next().call();
+    JsonAssert.assertObjectEquals(
+        "[{error:{code:403,data:{content:\"Security token missing\"}},id:\"a\"}," +
+        "{error:{code:403,data:{content:\"Security token missing\"}},id:\"p\"}]",
+        data.toJson());
+  }
+
   private Map<String, String> getResultsById(Collection<Object> result) {
     Map<String, String> resultsById = Maps.newHashMap();
     for (Object o : result) {

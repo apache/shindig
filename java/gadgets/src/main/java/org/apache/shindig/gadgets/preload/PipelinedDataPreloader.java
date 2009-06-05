@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
@@ -42,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -116,20 +119,30 @@ public class PipelinedDataPreloader {
     }
 
     public PreloadedData call() throws Exception {
-      Uri uri = getSocialUri(context);
+      HttpResponse response;
+      
+      String token = context.getParameter("st");
+      if (token == null) {
+        response = new HttpResponseBuilder()
+           .setHttpStatusCode(HttpServletResponse.SC_FORBIDDEN)
+           .setResponseString("Security token missing")
+           .create();
+      } else {
+        Uri uri = getSocialUri(context, token);
 
-      String socialRequestsJson = JsonSerializer.serialize(socialRequests);
-      HttpRequest request = new HttpRequest(uri)
-          .setIgnoreCache(context.getIgnoreCache())
-          .setSecurityToken(context.getToken())
-          .setMethod("POST")
-          .setAuthType(AuthType.NONE)
-          .setPostBody(CharsetUtil.getUtf8Bytes(socialRequestsJson))
-          .addHeader("Content-Type", "application/json; charset=UTF-8")
-          .setContainer(context.getContainer())
-          .setGadget(context.getUrl());
+        String socialRequestsJson = JsonSerializer.serialize(socialRequests);
+        HttpRequest request = new HttpRequest(uri)
+            .setIgnoreCache(context.getIgnoreCache())
+            .setSecurityToken(context.getToken())
+            .setMethod("POST")
+            .setAuthType(AuthType.NONE)
+            .setPostBody(CharsetUtil.getUtf8Bytes(socialRequestsJson))
+            .addHeader("Content-Type", "application/json; charset=UTF-8")
+            .setContainer(context.getContainer())
+            .setGadget(context.getUrl());
 
-      HttpResponse response = executeSocialRequest(request);
+        response = executeSocialRequest(request);
+      }
 
       // Unpack the response into a list of PreloadedData responses
       String responseText;
@@ -340,13 +353,14 @@ public class PipelinedDataPreloader {
     return error;
   }
 
-  private Uri getSocialUri(GadgetContext context) {
+  private Uri getSocialUri(GadgetContext context, String token) {
     String jsonUri = config.getString(context.getContainer(), "gadgets.osDataUri");
     Preconditions.checkNotNull(jsonUri, "No JSON URI available for social preloads");
+    Preconditions.checkNotNull(token, "No token available for social preloads");
 
     UriBuilder builder = UriBuilder.parse(
         jsonUri.replace("%host%", context.getHost()))
-        .addQueryParameter("st", context.getParameter("st"));
+        .addQueryParameter("st", token);
     return builder.toUri();
   }
 }
