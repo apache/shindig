@@ -34,24 +34,24 @@ import java.util.Map;
  */
 public class BlobCrypterSecurityToken implements SecurityToken {
 
-  private static final int MAX_TOKEN_LIFETIME_SECS = 3600;
+  protected static final int MAX_TOKEN_LIFETIME_SECS = 3600;
 
-  private static final String OWNER_KEY = "o";
-  private static final String VIEWER_KEY = "v";
-  private static final String GADGET_KEY = "g";
-  private static final String GADGET_INSTANCE_KEY = "i";
-  private static final String TRUSTED_JSON_KEY = "j";
+  protected static final String OWNER_KEY = "o";
+  protected static final String VIEWER_KEY = "v";
+  protected static final String GADGET_KEY = "g";
+  protected static final String GADGET_INSTANCE_KEY = "i";
+  protected static final String TRUSTED_JSON_KEY = "j";
 
-  private final BlobCrypter crypter;
-  private final String container;
-  private final String domain;
+  protected final BlobCrypter crypter;
+  protected final String container;
+  protected final String domain;
 
-  private String ownerId;
-  private String viewerId;
-  private String appUrl;
-  private long moduleId;
-  private String trustedJson;
-  private String activeUrl;
+  protected String ownerId;
+  protected String viewerId;
+  protected String appUrl;
+  protected long moduleId;
+  protected String trustedJson;
+  protected String activeUrl;
 
   /**
    * Create a new security token.
@@ -82,16 +82,20 @@ public class BlobCrypterSecurityToken implements SecurityToken {
         String token, String activeUrl) throws BlobCrypterException {
     Map<String, String> values = crypter.unwrap(token, MAX_TOKEN_LIFETIME_SECS);
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, container, domain);
-    t.setOwnerId(values.get(OWNER_KEY));
-    t.setViewerId(values.get(VIEWER_KEY));
-    t.setAppUrl(values.get(GADGET_KEY));
-    String moduleId = values.get(GADGET_INSTANCE_KEY);
-    if (moduleId != null) {
-      t.setModuleId(Long.parseLong(moduleId));
-    }
-    t.setTrustedJson(values.get(TRUSTED_JSON_KEY));
+    setTokenValues(t, values);
     t.setActiveUrl(activeUrl);
     return t;
+  }
+  
+  protected static void setTokenValues(BlobCrypterSecurityToken token, Map<String, String> values) {
+    token.setOwnerId(values.get(OWNER_KEY));
+    token.setViewerId(values.get(VIEWER_KEY));
+    token.setAppUrl(values.get(GADGET_KEY));
+    String moduleId = values.get(GADGET_INSTANCE_KEY);
+    if (moduleId != null) {
+      token.setModuleId(Long.parseLong(moduleId));
+    }
+    token.setTrustedJson(values.get(TRUSTED_JSON_KEY));
   }
 
   /**
@@ -99,6 +103,11 @@ public class BlobCrypterSecurityToken implements SecurityToken {
    * encoded before being used as a form parameter.
    */
   public String encrypt() throws BlobCrypterException {
+    Map<String, String> values = buildValuesMap();
+    return container + ':' + crypter.wrap(values);
+  }
+
+  protected Map<String, String> buildValuesMap() {
     Map<String, String> values = Maps.newHashMap();
     if (ownerId != null) {
       values.put(OWNER_KEY, ownerId);
@@ -115,8 +124,8 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     if (trustedJson != null) {
       values.put(TRUSTED_JSON_KEY, trustedJson);
     }
-    return container + ':' + crypter.wrap(values);
-  }
+    return values;                                                                                           
+   }
 
   // Legacy value for signed fetch, opensocial 0.8 prefers opensocial_app_url
   public String getAppId() {

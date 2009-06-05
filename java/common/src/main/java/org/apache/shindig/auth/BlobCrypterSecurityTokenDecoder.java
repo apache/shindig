@@ -54,12 +54,12 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
   /**
    * Keys are container ids, values are crypters
    */
-  private final Map<String, BlobCrypter> crypters = Maps.newHashMap();
+  protected final Map<String, BlobCrypter> crypters = Maps.newHashMap();
 
   /**
    * Keys are container ids, values are domains used for signed fetch.
    */
-  private final Map<String, String> domains = Maps.newHashMap();
+  protected final Map<String, String> domains = Maps.newHashMap();
 
   @Inject
   public BlobCrypterSecurityTokenDecoder(ContainerConfig config) {
