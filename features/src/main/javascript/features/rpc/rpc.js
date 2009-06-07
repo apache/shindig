@@ -401,6 +401,7 @@ gadgets.rpc = function() {
       useLegacyProtocol['..'] = useLegacy;
       if (useLegacy) {
         transport = gadgets.rpctx.Ifpc;
+        transport.init(process, transportReady);
       }
 
       // Here, we add a hook for the transport to actively set up
