@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.protocol;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.model.SortOrder;
@@ -99,6 +101,17 @@ public class BaseRequestItemTest extends TestCase {
     InputData input = request.getTypedParameter("anykey", InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);
+  }
+  
+  public void testGetInvalidJsonTypedParameter() throws Exception {
+    request.setParameter("anykey", "{name: 'Bob");
+    int code = 0;
+    try {
+      request.getTypedParameter("anykey", InputData.class);
+    } catch(ProtocolException e) {
+      code = e.getCode();
+    }
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST, code);
   }
 
   public void testJSONConstructor() throws Exception {

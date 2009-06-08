@@ -194,12 +194,24 @@ public class BaseRequestItem implements RequestItem {
   }
 
   public <T> T getTypedParameter(String parameterName, Class<T> dataTypeClass) {
-    return converter.convertToObject(getParameter(parameterName), dataTypeClass);
+    try {
+      return converter.convertToObject(getParameter(parameterName), dataTypeClass);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof JSONException)
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      throw e;
+    }
   }
 
   public <T> T getTypedRequest(Class<T> dataTypeClass) {
-    return jsonConverter.convertToObject(new JSONObject(this.parameters).toString(),
-        dataTypeClass);
+    try {
+      return jsonConverter.convertToObject(new JSONObject(this.parameters).toString(),
+          dataTypeClass);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof JSONException)
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      throw e;
+    }
   }
 
   public String getParameter(String paramName) {
