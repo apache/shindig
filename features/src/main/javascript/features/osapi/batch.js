@@ -18,194 +18,121 @@
 
 var osapi = osapi || {};
 
-/**
- * It is common to batch requests together to make them more efficient.
- *
- * Note: the container config specified endpoints at which services are to be found.
- * When creating a batch, the calls are split out into separate requests based on the 
- * endpoint, as it may get sent to a different server on the backend.
- */
-osapi.newBatch = function() {
-
-  /*
-   * Latch that waits for the batch of json requests and each makeRequest call to finish before
-   * calling the user callback with the responseMap.
-   * Note, this makes the makeRequest calls happen in parallel, but changes the order of those calls
-   * luckily everything in a batch is keyed instead of requiring ordering.
-   */
-  var newCountdownLatch = function(count, userCallback) {
-    var responseMap = {};
-
-    var leftTodo = function() {
-      var done = false;
-      return {
-        down : function() {
-          if (!done) {
-            count--;
-            if (count === 0) {
-              done = true;
-              userCallback(responseMap);
-            }
-          }
-        }
-      };
-    }();
-
-    /**
-     * Countdown call when a request is done.
-     */
-    var finishNonProxiedRequest = function(results) {
-      for (var result in results) if (results.hasOwnProperty(result)) {
-        responseMap[result] = results[result];
-        // TODO does this copy errors over as well.
-      }
-      leftTodo.down();
-    };
-
-
-    return {
-      finishedJsonRequest : finishNonProxiedRequest
-    };
-  };
+(function() {
 
   /**
-   * Handle empty calls properly (asynchronously) to prevent browser hiccups
+   * It is common to batch requests together to make them more efficient.
+   *
+   * Note: the container config specified endpoints at which services are to be found.
+   * When creating a batch, the calls are split out into separate requests based on the
+   * transport, as it may get sent to a different server on the backend.
    */
-  var callbackAsyncAndEmpty = function(userCallback) {
-    window.setTimeout(function() {
-        userCallback({ data : {}});
-      },
-      0);
-  };
-
-  var each = function(arr, fn) {
-    for (var i in arr) if (arr.hasOwnProperty(i)) {
-      fn.apply(null, [arr[i]]);
-    }
-  };
-  
-  var length = function(arr) {
-    var len = 0;
-    each(arr, function() { len++;});
-    return len;
-  }
-
-  /**
-   * takes the list of requests to execute in this call,
-   * @param {object} jsonRequests the collection of requests, by endpoint
-   * @param {function} json the json generator function for a batch 
-   * @param {function} getDataFromResult the result processor, getDataFromResult
-   * @param {object} The countdown latch which the batch is synchronized on before calling the 
-   *                 user callback
-   */
-  var executeJsonRequests = function(jsonRequests, json, getDataFromResult, countDownLatch) {
-    for (var endpoint in jsonRequests) if (jsonRequests.hasOwnProperty(endpoint)) {
-      var jsonGenerator = function() {
-        var ep = endpoint;
-        return json(ep);
-      };
-      var getDataFromResultForEndpoint = function(response) {
-        var ep = endpoint;
-        return getDataFromResult(ep, response);
-      }
-      osapi.newBatchJsonRequest(jsonGenerator, getDataFromResultForEndpoint, endpoint).execute(
-    	function(results) {
-          countDownLatch.finishedJsonRequest(results);
-        });
-    }
-  };
-
-  return function() {
+  var newBatch = function() {
     var that = {};
-    
-    var jsonRequests = {};
+
+    // An array of requests where each request is
+    // { key : <key>
+    //   request : {
+    //     method : <service-method>
+    //     rpc  : <request params>
+    //     transport : <rpc dispatcher>
+    //  }
+    // }
+    var keyedRequests = [];
 
     /**
      * Create a new request in the batch
      * @param {string} key id for the request
-     * @param {object} request the opensocial request object
+     * @param {object} request the opensocial request object which is of the form
+     * { method : <service-method>
+     *   rpc  : <request>
+     *   transport : <rpc dispatcher>
+     * }
      */
     var add = function(key, request) {
-      var endpoint = request.endpoint;
-      var existingRequestsAtEndpoint = jsonRequests[endpoint] || [];
-      existingRequestsAtEndpoint.push({key : key, request : request});
-      jsonRequests[endpoint] = existingRequestsAtEndpoint;
-      return that;
-    };
-
-    /**
-     * Json generator function that generates the batch's post body.
-     * @param {string} endpoint Server-specified endpoint for rpc calls
-     */
-    var json = function(endpoint) {
-      var jsonParams = [];
-      for (var i = 0; i < jsonRequests[endpoint].length; i++) {
-        var request = jsonRequests[endpoint][i];
-        var requestJson = request.request.json()[0]; // single requests make a json array by default
-        requestJson.id = request.key;
-        jsonParams.push(requestJson);
-      }
-      return jsonParams;
-    };
-
-    /**
-     * Post processor for the batch call.
-     * Essentially, this function just makes error handling 
-     * work as expected, but also puts items back into the response
-     * according to the key by which they were added.
-     * @param {string} endpoint Server specified endpoint used to retrieve result
-     * @param { object} result the response from the server
-     * 
-     */
-    var getDataFromResult = function(endpoint, result) {      
-      var responseMap = {};
-      var jsonRequestsForEndpoint = jsonRequests[endpoint];
-      var data = result.data; // the json array
-      for (var k = 0; k < jsonRequestsForEndpoint.length; k++) {
-        var response = data[k];
-        if (response.error) {
-          var error = { error : { code : osapi.translateHttpError("Error "
-              + response.error['code']),
-            message : response.error.message }};
-          responseMap[response.id] = error;
-          osapi.setGlobalError(responseMap, error.error);
-        } else {
-          if (response.id !== jsonRequestsForEndpoint[k].key) {
-            throw "Response Id doesn't match request key";
-          } else {
-            if (response.data.list) { // array result
-              responseMap[response.id] = response.data.list;
-            } else {  //single result
-              responseMap[response.id] = response.data;
-            }
-          }
-        }
-      }
-      return responseMap;
-    };
-
-    /**
-     * Creates a countdown latch that will ultimately call the usercallback,
-     * and then executes the jsonRequests.
-     * @param {function} userCallback function to call when batch is done
-     */
-    var executeRequests = function(userCallback) {
-      var jsonRequestLength = length(jsonRequests);
-      var countDownLatch = newCountdownLatch(jsonRequestLength, userCallback);
-      if (jsonRequestLength > 0) {
-        executeJsonRequests(jsonRequests, json, getDataFromResult, countDownLatch);
+      if (request && key) {
+        keyedRequests.push({"key" : key, "request" : request});
+        return that;
       }
     };
 
     /**
-     * Call to make a batch execute its requests.
+     * Convert our internal request format into a JSON-RPC
+     * @param request
+     */
+    var toJsonRpc = function(request) {
+      var jsonRpc = {method : request.request.method, id : request.key};
+      if (request.request.rpc) {
+        jsonRpc.params = request.request.rpc;
+      }
+      return jsonRpc;
+    };
+
+    /**
+     * Call to make a batch execute its requests. Batch will distribute calls over their
+     * bound transports and then merge them before calling the userCallback. If the result
+     * of an rpc is another rpc request then it will be chained and executed.
+     *
      * @param {Function} userCallback the callback to the gadget where results are passed.
      */
     var execute =  function(userCallback) {
-      if (length(jsonRequests) == 0) {
-        callbackAsyncAndEmpty(userCallback);
-      } else {                            
-        executeRequests(userCallback);
+      var batchResult = {};
+
+      var perTransportBatch = {};
+
+      // Break requests into their per-transport batches in call order
+      var latchCount = 0;
+      var transports = [];
+      for (var i = 0; i < keyedRequests.length; i++) {
+        // Batch requests per-transport
+        var transport = keyedRequests[i].request.transport;
+        if (!perTransportBatch[transport.name]) {
+          transports.push(transport);
+          latchCount++;
+        }
+        perTransportBatch[transport.name] = perTransportBatch[transport.name] || [];
+
+        // Transform the request into JSON-RPC form before sending to the transport
+        perTransportBatch[transport.name].push(toJsonRpc(keyedRequests[i]));
+      }
+
+      // Define callback for transports
+      var transportCallback = function(transportBatchResult) {
+        if (transportBatchResult.error) {
+          batchResult.error = transportBatchResult.error;
+        }
+        // Merge transport results into overall result and hoist data.
+        // All transport results are required to be of the format
+        // { <key> : <JSON-RPC response>, ...}
+        for (var i = 0; i < keyedRequests.length; i++) {
+          var key = keyedRequests[i].key;
+          var response = transportBatchResult[key];
+          if (response) {
+            if (response.error) {
+              // No need to hoist error responses
+              batchResult[key] = response;
+            } else {
+              // Handle both compliant and non-compliant JSON-RPC data responses.
+              batchResult[key] = response.data || response.result;
+            }
+          }
+        }
+
+        // Latch on no. of transports before calling user callback
+        latchCount--;
+        if (latchCount === 0) {
+          userCallback(batchResult);
+        }
+      };
+
+      // For each transport execute its local batch of requests
+      for (var j = 0; j < transports.length; j++) {
+        transports[j].execute(perTransportBatch[transports[j].name], transportCallback);
+      }
+
+      // Force the callback to occur asynchronously even if there were no actual calls
+      if (latchCount == 0) {
+        window.setTimeout(function(){userCallback(batchResult)}, 0);
       }
     };
 
@@ -213,5 +140,6 @@ osapi.newBatch = function() {
     that.add = add;
     return that;
   };
-}();
 
+  osapi.newBatch = newBatch;
+})();

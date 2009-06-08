@@ -29,6 +29,9 @@ BatchTest.prototype.setUp = function() {
     return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
   };
 
+  window._setTimeout = window.setTimeout;
+  window.setTimeout = function(fn, time) { fn.call()};
+
   gadgets.config.init({ "osapi.services" : {
       "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
         "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
@@ -37,6 +40,7 @@ BatchTest.prototype.setUp = function() {
 
 BatchTest.prototype.tearDown = function() {
   shindig.auth = undefined;
+  window.setTimeout = window._setTimeout;
 };
 
 BatchTest.prototype.testAddAndExecuteOneRequests = function() {
@@ -44,7 +48,7 @@ BatchTest.prototype.testAddAndExecuteOneRequests = function() {
   this.assertBatchMembers(batch);
   batch.add('friends', osapi.people.get());
   var expectedJson = [{method:"people.get",params:
-    {userId:["@viewer"],groupId:"@self"},
+    {userId:"@viewer",groupId:"@self"},
       id:"friends"}
     ];
 
@@ -73,10 +77,10 @@ BatchTest.prototype.testAddAndExecuteTwoRequests = function() {
       add('activities', osapi.activities.get());
 
   var expectedJson = [{method:"people.get",params:
-    {userId:["@viewer"],groupId:"@self"},
+    {userId:"@viewer",groupId:"@self"},
       id:"friends"},
     {method:"activities.get",params:
-      {userId:["@viewer"],groupId:"@self"},id:"activities"}
+      {userId:"@viewer",groupId:"@self"},id:"activities"}
     ];
 
   var argsInCallToMakeNonProxiedRequest;
@@ -97,18 +101,11 @@ BatchTest.prototype.testEmptyBatch = function() {
   var batch = osapi.newBatch();
   this.assertBatchMembers(batch);
 
-  var oldTimeout = window.setTimeout;
-  try {
-    window.setTimeout = function(fn, time) { fn.call()};
-
-    var that = this;
-    batch.execute(function(data) {
-      that.assertTrue("Data should be returned", data);
-      that.assertTrue("Data should be empty", data.length === undefined);
-    });
-  } finally {
-    window.setTimeout = oldTimeout;
-  }
+  var that = this;
+  batch.execute(function(data) {
+    that.assertTrue("Data should be returned", data);
+    that.assertTrue("Data should be empty", data.length === undefined);
+  });
 };
 
 /**

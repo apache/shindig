@@ -18,35 +18,53 @@
 
 var osapi = osapi || {};
 (function() {
-	
-  var buildRequestFunction = function(serviceName, methodName, endpointName) {
-	osapi[serviceName][methodName] = function(params) {
-	  params = params || {};
-	  method = ""+serviceName+"."+methodName;
-	  return osapi.newJsonRequest(method, params, endpointName);
-	}; 
-  };
-  
-  /**
-  * @param {Object} configuration Configuration settings
-  * @private
-  */
-  osapi.init = function(config) {
-    var services = config["osapi.services"];
-    if (services) {
-      for (var endpointName in services) if (services.hasOwnProperty(endpointName)) {
-        var endpoint = services[endpointName];
-        for (var i=0; i < endpoint.length; i++) {
-          var serviceMethod = endpoint[i];
-          var serviceMethodArray = serviceMethod.split(".");
-          var serviceName = serviceMethodArray[0];
-          var methodName = serviceMethodArray[1];
-          osapi[serviceName] = osapi[serviceName] || {};
-          buildRequestFunction(serviceName, methodName, endpointName);
-        }
-      }
-    }
-  };
 
-  gadgets.config.register("osapi.services", {}, osapi.init);
+  /**
+   * Called by the transports for each service method that they expose
+   * @param method  The method to expose e.g. "people.get"
+   * @param transport The transport used to execute a call for the method
+   */
+  osapi._registerMethod = function (method, transport) {
+    var parts = method.split(".");
+    var last = osapi;
+    for (var i = 0; i < parts.length - 1; i++) {
+      last[parts[i]] = last[parts[i]] || {};
+      last = last[parts[i]];
+    }
+
+    // Use the batch as the actual executor of calls.
+    var apiMethod = function(rpc) {
+      var batch = osapi.newBatch();
+      var boundCall = {};
+      boundCall.execute = function(callback) {
+        batch.add(method, this);
+        batch.execute(function(batchResult) {
+          if (batchResult.error) {
+            callback(batchResult.error);
+          } else {
+            callback(batchResult[method]);
+          }
+        });
+      }
+
+      // TODO: This shouldnt really be necessary. The spec should be clear enough about
+      // defaults that we dont have to populate this.
+      rpc = rpc || {};
+      rpc.userId = rpc.userId || "@viewer";
+      rpc.groupId = rpc.groupId || "@self";
+
+      // Decorate the execute method with the information necessary for batching
+      boundCall.method = method;
+      boundCall.transport = transport;
+      boundCall.rpc = rpc;
+
+      return boundCall;
+    };
+
+    if (last[parts[parts.length - 1]]) {
+      gadgets.warn("Duplicate osapi method definition " + method);
+    }
+    last[parts[parts.length - 1]] = apiMethod;
+  }
+
 })();

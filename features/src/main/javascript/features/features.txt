@@ -23,7 +23,6 @@ features/opensocial-reference/feature.xml
 features/opensocial-templates/feature.xml
 features/pubsub/feature.xml
 features/osapi/feature.xml
-features/osapi.ui/feature.xml
 features/rpc/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml

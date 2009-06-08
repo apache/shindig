@@ -144,6 +144,16 @@
        "activity" : ["id", "title"]
     }
   },
+  "osapi.services" : {
+    // Specifying a binding to "container.listMethods" instructs osapi to dynamicaly introspect the services
+    // provided by the container and delay the gadget onLoad handler until that introspection is
+    // complete.
+    // Alternatively a container can directly configure services here rather than having them 
+    // introspected. Simply list out the available servies and omit "container.listMethods" to
+    // avoid the initialization delay caused by gadgets.rpc
+    // E.g. "gadgets.rpc" : ["activities.requestCreate", "messages.requestSend", "requestShareApp", "requestPermission"]
+    "gadgets.rpc" : ["container.listMethods"]
+  },
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
     "endPoints" : [ "http://%host%/social/rpc", "http://%host%/gadgets/api/rpc" ]                   

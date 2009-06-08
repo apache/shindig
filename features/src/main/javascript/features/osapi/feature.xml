@@ -20,12 +20,12 @@
 <feature>
   <name>osapi</name>
   <dependency>core.io</dependency>
-  <dependency>osapi.ui</dependency>
+  <dependency>rpc</dependency>
   <gadget>
-    <script src="batch.js"></script>
-    <script src="jsonrequest.js"></script>
-    <script src="util.js"></script>
     <script src="osapi.js"></script>
+    <script src="batch.js"></script>
+    <script src="jsonrpctransport.js"></script>
+    <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>    
   </gadget>
 </feature>

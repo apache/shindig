@@ -69,7 +69,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     for (String key : configuredServices.keySet()) {
       services.put(key, configuredServices.get(key));
     }
-    container.put(DefaultServiceFetcher.OSAPI_SERVICES, services);
+    features.put(DefaultServiceFetcher.OSAPI_SERVICES, services);
 
     JSONObject endpoints = new JSONObject();
 
@@ -84,7 +84,9 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
 
   public void testReadConfigNoEndpoints() throws Exception {
     JSONObject config = createConfig();
-    config.getJSONObject("default").remove(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG);
+    config.getJSONObject("default").
+        getJSONObject(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG)
+        .remove(DefaultServiceFetcher.OSAPI_FEATURE_CONFIG);
     JsonContainerConfig containerConfig =
         new JsonContainerConfig(config, new Expressions(new Functions()));
     fetcher = new DefaultServiceFetcher(containerConfig, mockFetcher);

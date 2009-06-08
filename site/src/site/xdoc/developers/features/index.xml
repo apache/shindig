@@ -137,10 +137,6 @@ under the License.
             <td>Opensocial API.</td>
           </tr>
           <tr>
-            <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/osapi.ui/feature.xml">osapi.ui/feature.xml</a></td>
-            <td>Opensocial UI API.</td>
-          </tr>
-          <tr>
             <td><a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/features/src/main/javascript/features/pubsub/feature.xml">pubsub/feature.xml</a></td>
             <td>Gadget-side PubSub library for gadget-to-gadget communication.</td>
           </tr>

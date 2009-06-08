@@ -40,6 +40,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/core/auth.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/core/prefs.js'));
+  eval(JsUtil.prototype.include(srcDir + '/core/log.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.io/io.js'));
   eval(JsUtil.prototype.include(srcDir + '/views/views.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/opensocial.js'));
@@ -66,10 +67,10 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonactivity.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-base/jsonperson.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-jsonrpc/jsonrpccontainer.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi/batch.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrequest.js'));
-  eval(JsUtil.prototype.include(srcDir + '/osapi/util.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/osapi.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/batch.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrpctransport.js'));
+  eval(JsUtil.prototype.include(srcDir + '/osapi/gadgetsrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
   eval(JsUtil.prototype.include(testToolsDir + "/JsUnit.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/authtest.js"));
@@ -86,11 +87,9 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/template_test.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-templates/util_test.js"));
   eval(JsUtil.prototype.include(testToolsDir + '/testutils.js'));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi/peopletest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/osapi/osapitest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi/activitiestest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/osapi/appdatatest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/osapi/batchtest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/osapi/jsonrpctransporttest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/views/urltemplatetest.js"));
 }
 
@@ -103,9 +102,7 @@ AllTests.inherits(TestSuite);
 
 function AllTests_suite() {
   var suite = new AllTests();
-  suite.addTest(PeopleTestSuite.prototype.suite());
-  suite.addTest(ActivitiesTestSuite.prototype.suite());
-  suite.addTest(AppdataTestSuite.prototype.suite());
+  suite.addTest(JsonRpcTransportTestSuite.prototype.suite());
   suite.addTest(BatchTestSuite.prototype.suite());
   return suite;
 }

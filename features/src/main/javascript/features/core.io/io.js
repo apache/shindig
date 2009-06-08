@@ -74,11 +74,19 @@ gadgets.io = function() {
     try {
       if (xobj.status !== 200) {
         // TODO Need to work on standardizing errors
-        callback({errors : ["Error " + xobj.status]});
+        callback({
+          errors : ["Error " + xobj.status],
+          rc : xobj.status,
+          text : xobj.responseText
+          });
         return true;
       }
     } catch(e) {
-      callback({errors : ["Error not specified"]});
+      callback({
+         errors : ["Error not specified"],
+          rc : e.number,
+          text : e.description
+      });
       return true;
     }
     return false;

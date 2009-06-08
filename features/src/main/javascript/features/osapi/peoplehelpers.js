@@ -18,8 +18,10 @@
 
 /**
  * Service to retrieve People via JSON RPC opensocial calls.
+ * Called in onLoad handler as osapi.people.get could be defined by
+ * the container over the gadgets.rpc transport.
  */
-gadgets.config.register("osapi.services", {}, function() {
+gadgets.util.registerOnLoadHandler(function() {
 
   // No point defining these if osapi.people.get doesnt exist
   if (osapi && osapi.people && osapi.people.get) {

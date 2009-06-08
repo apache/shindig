@@ -44,7 +44,7 @@ gadgets.log = function(message) {
  */
 gadgets.warn = function(message) {
   gadgets.log.logAtLevel(gadgets.log.WARNING, message);
-}
+};
 
 /**
  * Log an error

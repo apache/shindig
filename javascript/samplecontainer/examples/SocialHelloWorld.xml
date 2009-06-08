@@ -77,7 +77,7 @@
      var allPeople, viewerFriendData;
      function render(data) {
        var viewer = data.viewer;
-       allPeople = data.viewerFriends;
+       allPeople = data.viewerFriends.list;
        if (viewer) {
          allPeople.push(viewer);
        }

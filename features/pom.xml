@@ -97,6 +97,7 @@
                 <source>core/auth.js</source>
                 <source>core/util.js</source>
                 <source>core/prefs.js</source>
+                <source>core/log.js</source>
                 <source>core.io/io.js</source>
                 <source>i18n/currencycodemap.js</source>
                 <source>i18n/datetimeformat.js</source>
@@ -134,10 +135,9 @@
                 <source>opensocial-base/jsonperson.js</source>
                 <source>opensocial-jsonrpc/jsonrpccontainer.js</source>
                 <source>osapi/osapi.js</source>
-                <source>osapi/peoplehelpers.js</source>
                 <source>osapi/batch.js</source>
-                <source>osapi/jsonrequest.js</source>
-                <source>osapi/util.js</source>
+                <source>osapi/jsonrpctransport.js</source>
+                <source>osapi/peoplehelpers.js</source>
                 <source>../../../../src/test/javascript/lib/testutils.js</source>
                <source>oauthpopup/oauthpopup.js</source>
               </sources>

@@ -89,8 +89,10 @@ public class DefaultServiceFetcher {
     LinkedHashMultimap<String, String> endpointServices = LinkedHashMultimap.create();
 
     // First check services directly declared in container config
-    Map<String, Object> declaredServices = containerConfig.getMap(container, OSAPI_SERVICES);
-    if (!declaredServices.isEmpty()) {
+    @SuppressWarnings("unchecked")
+    Map<String, Object> declaredServices = (Map<String, Object>) containerConfig.getMap(container,
+        GADGETS_FEATURES_CONFIG).get(OSAPI_SERVICES);
+    if (declaredServices != null) {
       for (Map.Entry<String, Object> entry : declaredServices.entrySet()) {
         @SuppressWarnings("unchecked")
         Iterable<String> entryValue = (Iterable<String>) entry.getValue();

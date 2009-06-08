@@ -24,7 +24,8 @@
 TestCase.prototype.assertRequestPropertiesForService = function(fn) {
   this.assertTrue('Should have produced a result', fn);
   this.assertTrue('Should have an execute method', fn.execute);
-  this.assertTrue('Should have a json method', fn.json);
+  this.assertTrue('Should have a json-rpc method', !!fn.method);
+  this.assertTrue('Should have a json-rpc', fn.rpc);
 };
 
 

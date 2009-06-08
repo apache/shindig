@@ -22,70 +22,28 @@ function OsapiTest(name) {
 OsapiTest.inherits(TestCase);
 
 OsapiTest.prototype.setUp = function() {
-  shindig = shindig || {};
-  shindig.auth = {};
-  shindig.auth.getSecurityToken = function() {
-    return 'dsjk452487sdf7sdf865%&^*&^8cjhsdf';
-  };
-
-  OsapiTest.formerPeople = osapi.people;
-  osapi.people = undefined;
-
-  gadgets.config.init({ "osapi.services" : {
-      "http://%host%/social/rpc" : ["system.listMethods", "people.get", "activities.get", 
-        "activities.create", "appdata.get", "appdata.update", "appdata.delete"] }
-  });
-
+  window._setTimeout = window.setTimeout;
+  window.setTimeout = function() {};
 };
 
 OsapiTest.prototype.tearDown = function() {
-  shindig.auth = undefined;
-  if (OsapiTest.formerPeople) {
-	  osapi.people = OsapiTest.formerPeople;
-  }
+  window.setTimeout = window._setTimeout;
 };
 
-function debug(obj) {
-	for (var o in obj) if (obj.hasOwnProperty(o)) {
-		java.lang.System.out.println(o + " = " + obj[o]);
-		debug(obj[o]);
-	}
-}
-
-OsapiTest.prototype.testGen = function() {
-  var that = this;
-  var getViewerFn = osapi.people.get();
-  that.assertTrue(getViewerFn !== undefined)
-//  debug(getViewerFn);
-  this.assertRequestPropertiesForService(getViewerFn);
-  var expectedJson = [{ method : "people.get",
-    params : { userId : ['@viewer'],
-      groupId : '@self' } }];
-  this.assertEquals("Json for request params should match", expectedJson, getViewerFn.json());
-  var mockPersonResult = { data : [{
-    data:{
-      id:'5551212',
-      isViewer:true, name:{familyName:"Evans",givenName:"Bob"}, isOwner:true, displayName:"Bob Evans"
-    }
-  }], errors : []};
-
-  var inspectableCallback = makeInspectableCallback(function (response) {
-    that.assertTrue("callback from execute should have gotten a response", response);
-    that.assertFalse("should not be an error in callback response", response.error);
-    that.assertEquals("Ids should match", "5551212", response.id);
-    that.assertEquals("Displayname should match", "Bob Evans", response.displayName);
-  });
-  var oldMakeRequest = gadgets.io.makeNonProxiedRequest;
-  try {
-    gadgets.io.makeNonProxiedRequest = function(url, callback2, params, contentType) {
-      callback2(mockPersonResult);
-    };
-    
-    getViewerFn.execute(inspectableCallback.callback);
-    this.assertTrue("should have called the callback", inspectableCallback.wasCalled());
-  } finally {
-    gadgets.io.makeNonProxiedHttpRequest = oldMakeRequest;
+OsapiTest.prototype.testCall = function() {
+  var transport = {};
+  osapi._registerMethod("test.method", transport);
+  var transportCalled = false;
+  transport.execute = function(requests, callback) {
+    transportCalled = true;
+    callback([{id:"test.method",result:{a:"b"}}]);
   }
+  var callbackCalled = false;
+  osapi.test.method({}).execute(function(result) {
+    callbackCalled = true;
+  });
+  this.assertTrue("osapi transport correctly called", transportCalled);
+  this.assertTrue("osapi callback correctly called", callbackCalled);
 };
 
 

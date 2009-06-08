@@ -272,4 +272,20 @@ shindig.samplecontainer = {};
     );
   };
 
+  osapi.messages = {};
+  osapi.messages.requestSend = function(request, callback) {
+    alert("osapi.messages.requestSend called");
+    callback({});
+  };
+
+  osapi.requestShareApp = function(request, callback) {
+    alert("osapi.requestShareApp called");
+    callback({});
+  };
+
+  osapi.requestPermission = function(request, callback) {
+    alert("osapi.requestPermission called");
+    callback({});
+  };
+
 })();
