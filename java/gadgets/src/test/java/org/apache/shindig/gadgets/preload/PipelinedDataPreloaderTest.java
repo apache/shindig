@@ -239,10 +239,15 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
         context, batch);
     PreloadedData data = tasks.iterator().next().call();
-    JsonAssert.assertObjectEquals(
-        "[{error:{code:403,data:{content:\"Security token missing\"}},id:\"a\"}," +
-        "{error:{code:403,data:{content:\"Security token missing\"}},id:\"p\"}]",
-        data.toJson());
+    JSONObject resultWithKeyA = new JSONObject(
+        "{error:{code:403,data:{content:\"Security token missing\"}},id:\"a\"}");
+    JSONObject resultWithKeyP = new JSONObject(
+        "{error:{code:403,data:{content:\"Security token missing\"}},id:\"p\"}");
+    Collection<Object> result = data.toJson();
+    assertEquals(2, result.size());
+    Map<String, String> resultsById = getResultsById(result);
+    JsonAssert.assertJsonEquals(resultWithKeyA.toString(), resultsById.get("a"));
+    JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
   }
 
   private Map<String, String> getResultsById(Collection<Object> result) {
