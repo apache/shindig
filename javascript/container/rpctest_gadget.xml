@@ -31,12 +31,39 @@
       document.write('<scr' + 'ipt language="JavaScript" type="text/javascript" src="/gadgets/files/container/rpctest_perf.js?' + cachebust + '"></scr' + 'ipt>');
     </script>
     <script>
+      // Register ping handler.
+      gadgets.rpc.register('gadget_service_ping', function() {
+        var queryConsole = document.getElementById('queryconsole');
+        var numQueries = queryConsole.innerHTML;
+        ++numQueries;
+        queryConsole.innerHTML = numQueries;
+        var whoAsked = document.getElementById('whoasked');
+        whoAsked.innerHTML = this.f;
+      });
+
+      function appendChildGadget() {
+        var childgadgetdiv = document.getElementById('childgadgetdiv');
+        var parentDomain = gadgets.rpc.getDomainRoot(gadgets.util.getUrlParameters().parent);
+        var myDomain = gadgets.rpc.getDomainRoot(window.location.href);
+        var rpctoken = Math.round(Math.random() * 10000000);
+        var childGadgetUrl = parentDomain + '/gadgets/ifr?url=' + parentDomain + '/gadgets/files/container/rpctest_childgadget.xml&parent=' + myDomain + '#rpctoken=' + rpctoken;
+        childgadgetdiv.innerHTML = '<div><input type="button" value="Ping Parent (Container)" onclick="callGadgetServicePing();"/><hr/>' +
+          '<div>Who-am-I query count: <span id="queryconsole">0</span>, last q from: <span id="whoasked"></span></div>' +
+          '<div><iframe id="childgadget" name="childgadget" height=100 width=200 src="about:blank"></iframe></div>';
+        document.getElementById("childgadget").src = childGadgetUrl;
+        gadgets.rpc.setAuthToken('childgadget', rpctoken);
+      }
+
+      function callGadgetServicePing() {
+        gadgets.rpc.call(null, 'gadget_service_ping');
+      }
+
       // Initialize performance test onLoad.
       gadgets.util.registerOnLoadHandler(initPerfTest);
     </script>
     <div>gadgets.rpc Performance: "Gadget" page</div><hr/>
     <script>
-      document.write("<div>"Parent relay: " + gadgets.rpc.getRelayUrl('..') + "</div><hr/>");
+      document.write("<div>Parent relay: " + gadgets.rpc.getRelayUrl('..') + "</div><hr/>");
     </script>
     <div>Test<br/>
       <ul>
@@ -72,7 +99,8 @@
       Time elapsed for test run: <span id="results_time_used"></span><br/>
       Messages/second: <span id="results_msgs_per_sec"></span><br/>
       Bytes/second: <span id="results_bytes_per_sec"></span>
-    </div>
+    </div><hr/>
+    <div id="childgadgetdiv"><input type="button" value="Child Gadget Tests" onclick="appendChildGadget();"/></div>
   ]]>
   </Content>
 </Module>

@@ -86,6 +86,14 @@
         status.innerHTML = 'gadget says: ' + message;
       }
       gadgets.rpc.register('initial_gadget_message', handleInitialGadgetMessage);
+
+      function handleGadgetServicePing() {
+        var childping = document.getElementById('childping');
+        var pingval = childping.innerHTML;
+        pingval++;
+        childping.innerHTML = pingval;
+      }
+      gadgets.rpc.register('gadget_service_ping', handleGadgetServicePing);
     
       function appendGadget() {
         var secret = Math.round(Math.random() * 10000000);
@@ -125,7 +133,8 @@
   </head>
   <body style="background-color: #cccccc" onload="initTestContainer();">
     <div>gadgets.rpc Performance: Container Page (method: <span id="relaymethod"></span>)</div><hr/>
-    <div>Initial gadget render console: <span id="initconsole">Gadget hasn't commented yet.</span></div><hr/>
+    <div>Initial gadget render console: <span id="initconsole">Gadget hasn't commented yet.</span></div>
+    <div>Child gadget ping count: <span id="childping">0</span></div><hr/>
     <div>Test<br/>
       <ul>
         <li>Number of messages to send:
