@@ -66,10 +66,12 @@ gadgets.config = function() {
   return {
     /**
      * Registers a configurable component and its configuration parameters.
+     * Multiple callbacks may be registered for a single component if needed.
      *
      * @param {String} component The name of the component to register. Should
      *     be the same as the fully qualified name of the <Require> feature or
-     *     the fully qualified javascript object reference (e.g. gadgets.io).
+     *     the name of a fully qualified javascript object reference
+     *     (e.g. "gadgets.io").
      * @param {Object} opt_validators Mapping of option name to validation
      *     functions that take the form function(data) {return isValid(data);}
      * @param {Function} opt_callback A function to be invoked when a
@@ -81,7 +83,6 @@ gadgets.config = function() {
      *     complete. Takes the form function(config), where config will be
      *     all registered config data for all components. This allows your
      *     component to read configuration from other components.
-     * @throws {Error} If the component has already been registered.
      */
     register: function(component, opt_validators, opt_callback) {
       var registered = components[component];
@@ -101,8 +102,8 @@ gadgets.config = function() {
      *
      * @param {String} opt_component The component to fetch. If not provided
      *     all configuration will be returned.
-     * @return {Object} The requested configuration.
-     * @throws {Error} If the given component has not been registered
+     * @return {Object} The requested configuration, or an empty object if no
+     *     configuration has been registered for that component.
      */
     get: function(opt_component) {
       if (opt_component) {
