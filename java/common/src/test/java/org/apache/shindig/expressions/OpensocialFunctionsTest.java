@@ -79,4 +79,28 @@ public class OpensocialFunctionsTest extends TestCase {
       expressions.parse("${osx:urlDecode(encoded)}", String.class);
     assertEquals("He He", testUrlDecode.getValue(context));
   }
+
+  public void testParseJsonNull() throws Exception {
+    ValueExpression testUrlEncode =
+      expressions.parse("${osx:parseJson(null)}", String.class);
+    assertEquals("", testUrlEncode.getValue(context));
+  }
+
+  public void testDecodeBase64Null() throws Exception {
+    ValueExpression testUrlEncode =
+      expressions.parse("${osx:decodeBase64(null)}", String.class);
+    assertEquals("", testUrlEncode.getValue(context));
+  }
+
+  public void testUrlEncodeNull() throws Exception {
+    ValueExpression testUrlEncode =
+      expressions.parse("${osx:urlEncode(null)}", String.class);
+    assertEquals("", testUrlEncode.getValue(context));
+  }
+
+  public void testUrlDecodeNull() throws Exception {
+    ValueExpression testUrlDecode =
+      expressions.parse("${osx:urlDecode(null)}", String.class);
+    assertEquals("", testUrlDecode.getValue(context));
+  }
 }

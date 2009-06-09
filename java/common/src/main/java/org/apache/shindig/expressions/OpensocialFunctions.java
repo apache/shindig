@@ -61,6 +61,10 @@ public class OpensocialFunctions {
    */
   @Functions.Expose(prefix = "osx", names = {"decodeBase64"})
   public static String decodeBase64(String text) {
+    if (text == null) {
+      return null;
+    }
+    
     try {
       // TODO: allow a charset to be passed in?
       return new String(Base64.decodeBase64(text.getBytes("UTF-8")),
@@ -76,6 +80,10 @@ public class OpensocialFunctions {
    */
   @Functions.Expose(prefix = "osx", names = {"urlEncode"})
   public static String formEncode(String text) {
+    if (text == null) {
+      return null;
+    }
+    
     return Utf8UrlCoder.encode(text);
   }
 
@@ -86,6 +94,10 @@ public class OpensocialFunctions {
    */
   @Functions.Expose(prefix = "osx", names = {"urlDecode"})
   public static String formDecode(String text) {
+    if (text == null) {
+      return null;
+    }
+    
     return Utf8UrlCoder.decode(text);
   }
 }
