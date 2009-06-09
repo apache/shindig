@@ -29,21 +29,9 @@ useLegacyProtocol: Boolean
 -->
   <name>rpc</name>
   <gadget>
-    <script src="wpm.transport.js"/>
-    <script src="dpm.transport.js"/>
-    <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
-    <script src="rmr.transport.js"/>
-    <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
   </gadget>
   <container>
-    <script src="wpm.transport.js"/>
-    <script src="dpm.transport.js"/>
-    <script src="fe.transport.js"/>
-    <script src="nix.transport.js"/>
-    <script src="rmr.transport.js"/>
-    <script src="ifpc.transport.js"/>
     <script src="rpc.js"/>
   </container>
 </feature>
