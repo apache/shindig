@@ -77,7 +77,7 @@ public class MakeRequestHandler extends ProxyBase {
    * Executes a request, returning the response as JSON to be handled by makeRequest.
    */
   @Override
-  public void fetch(HttpServletRequest request, HttpServletResponse response)
+  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
 

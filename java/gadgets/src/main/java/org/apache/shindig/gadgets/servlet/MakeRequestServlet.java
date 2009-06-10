@@ -19,16 +19,13 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.GadgetException;
-
-import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
 
 /**
  * Handles calls to gadgets.io.makeRequest.
@@ -39,8 +36,6 @@ import javax.servlet.http.HttpServletResponse;
  * makeRequest and open proxy calls.
  */
 public class MakeRequestServlet extends InjectedServlet {
-  private final static Logger LOG = Logger.getLogger(MakeRequestServlet.class.getName());
-
   private MakeRequestHandler makeRequestHandler;
 
   @Inject
@@ -51,28 +46,12 @@ public class MakeRequestServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    try {
-      makeRequestHandler.fetch(request, response);
-    } catch (GadgetException e) {
-      // TODO: Move this logic into ProxyHandler / MakeRequestHandler.
-      outputError(e, response);
-    }
+    makeRequestHandler.fetch(request, response);
   }
 
   @Override
   protected void doPost(HttpServletRequest request,  HttpServletResponse response)
       throws IOException {
     doGet(request, response);
-  }
-
-  /**
-   * Outputs an error message for the request if it fails.
-   *
-   * TODO: Eliminate this.
-   */
-  private static void outputError(GadgetException e, HttpServletResponse resp)
-      throws IOException {
-    LOG.log(Level.INFO, "makeRequest failed", e);
-    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
   }
 }

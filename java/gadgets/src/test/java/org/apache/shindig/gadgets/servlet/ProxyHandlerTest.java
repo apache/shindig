@@ -116,7 +116,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
     replay();
     try {
-      proxyHandler.fetch(request, response);
+      proxyHandler.doFetch(request, response);
       fail("Should have thrown");
     } catch (GadgetException e) {
       // good

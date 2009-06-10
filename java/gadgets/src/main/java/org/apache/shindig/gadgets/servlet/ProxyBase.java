@@ -30,6 +30,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,6 +57,8 @@ public abstract class ProxyBase {
       "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding", "www-authenticate"
   );
 
+  private static final Logger logger = Logger.getLogger(ProxyBase.class.getName());
+  
   /**
    * Validates the given url.
    *
@@ -112,12 +116,17 @@ public abstract class ProxyBase {
    */
   @SuppressWarnings("boxing")
   protected void setResponseHeaders(HttpServletRequest request,
-      HttpServletResponse response, HttpResponse results) {
+      HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
     if (results.isStrictNoCache()) {
       refreshInterval = 0;
-    } else  if (request.getParameter(REFRESH_PARAM) != null) {
-      refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
+    } else if (request.getParameter(REFRESH_PARAM) != null) {
+      try {
+        refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
+      } catch (NumberFormatException nfe) {
+        throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+            "refresh parameter is not a number");
+      }
     } else {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
     }
@@ -133,7 +142,39 @@ public abstract class ProxyBase {
   /**
    * Processes the given request.
    */
-  abstract public void fetch(HttpServletRequest request, HttpServletResponse response)
+  public final void fetch(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    try {
+      doFetch(request, response);
+    } catch (GadgetException e) {
+      outputError(response, e);
+    }
+  }
+
+  /**
+   * Outputs an error message for the request if it fails.
+   */
+  protected void outputError(HttpServletResponse resp, GadgetException e)
+      throws IOException {
+    
+    int responseCode;
+    Level level = Level.FINE;
+    
+    switch (e.getCode()) {
+      case INTERNAL_SERVER_ERROR:
+        responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        level = Level.WARNING;
+        break;
+      default:
+        responseCode = HttpServletResponse.SC_BAD_REQUEST;
+        break;
+    }
+    
+    logger.log(level, "Request failed", e);
+    resp.sendError(responseCode, e.getMessage());
+  }
+
+  abstract protected void doFetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException;
 
   protected boolean getIgnoreCache(HttpServletRequest request) {

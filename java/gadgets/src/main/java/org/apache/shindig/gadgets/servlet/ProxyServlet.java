@@ -19,24 +19,19 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.GadgetException;
-
-import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
 
 /**
  * Handles open proxy requests (used in rewriting and for URLs returned by
  * gadgets.io.getProxyUrl).
  */
 public class ProxyServlet extends InjectedServlet {
-  private final static Logger LOG = Logger.getLogger(ProxyServlet.class.getName());
-
   private ProxyHandler proxyHandler;
 
   @Inject
@@ -47,21 +42,6 @@ public class ProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    try {
-      proxyHandler.fetch(new ProxyServletRequest(request), response);
-    } catch (GadgetException e) {
-      outputError(e, response);
-    }
-  }
-
-  /**
-   * Outputs an error message for the request if it fails and if FINE logging level.
-   */
-  private static void outputError(GadgetException e, HttpServletResponse resp)
-      throws IOException {
-    if (LOG.isLoggable(Level.FINE)) {
-      LOG.log(Level.FINE, "Make Request failed", e);
-    }
-    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    proxyHandler.fetch(new ProxyServletRequest(request), response);
   }
 }

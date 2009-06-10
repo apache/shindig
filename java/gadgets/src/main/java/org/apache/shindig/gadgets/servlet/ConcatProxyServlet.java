@@ -79,7 +79,7 @@ public class ConcatProxyServlet extends InjectedServlet {
         response.getOutputStream().println("/* ---- Start " + url + " ---- */");
 
         ResponseWrapper wrapper = new ResponseWrapper(response);
-        proxyHandler.fetch(new RequestWrapper(request, url), wrapper);
+        proxyHandler.doFetch(new RequestWrapper(request, url), wrapper);
 
         if (wrapper.getStatus() != HttpServletResponse.SC_OK) {
           response.getOutputStream().println(

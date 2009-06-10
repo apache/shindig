@@ -391,7 +391,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     replay();
 
     try {
-      handler.fetch(request, recorder);
+      handler.doFetch(request, recorder);
       fail("Should have thrown");
     } catch (GadgetException e) {
       // good.

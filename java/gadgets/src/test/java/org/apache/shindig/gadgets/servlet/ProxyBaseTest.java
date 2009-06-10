@@ -43,7 +43,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   private final ProxyBase proxy = new ProxyBase() {
     @Override
-    public void fetch(HttpServletRequest request, HttpServletResponse response) {
+    protected void doFetch(HttpServletRequest request, HttpServletResponse response) {
       // Nothing.
     }
   };
@@ -137,7 +137,7 @@ public class ProxyBaseTest extends ServletTestFixture {
   }
   }
 
-  public void testSetResponseHeaders() {
+  public void testSetResponseHeaders() throws Exception {
     HttpResponse results = new HttpResponseBuilder().create();
     replay();
 
@@ -149,7 +149,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
-  public void testSetResponseHeadersForFlash() {
+  public void testSetResponseHeadersForFlash() throws Exception {
     HttpResponse results = new HttpResponseBuilder()
         .setHeader("Content-Type", "application/x-shockwave-flash")
         .create();
@@ -165,7 +165,7 @@ public class ProxyBaseTest extends ServletTestFixture {
         recorder.getHeader("Content-Disposition"));
   }
 
-  public void testSetResponseHeadersNoCache() {
+  public void testSetResponseHeadersNoCache() throws Exception {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
     HttpResponse results = new HttpResponseBuilder()
@@ -182,7 +182,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
-  public void testSetResponseHeadersForceParam() {
+  public void testSetResponseHeadersForceParam() throws Exception {
     HttpResponse results = new HttpResponseBuilder().create();
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
     replay();
@@ -192,6 +192,19 @@ public class ProxyBaseTest extends ServletTestFixture {
     HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
+
+  public void testSetResponseHeadersForceParamInvalid() throws Exception {
+    HttpResponse results = new HttpResponseBuilder().create();
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").anyTimes();
+    replay();
+
+    try {
+      proxy.setResponseHeaders(request, recorder, results);
+    } catch (GadgetException e) {
+      assertEquals(GadgetException.Code.INVALID_PARAMETER, e.getCode());
+    }
+  }
+
 
   public void testGetParameter() {
     expect(request.getParameter("foo")).andReturn("bar");

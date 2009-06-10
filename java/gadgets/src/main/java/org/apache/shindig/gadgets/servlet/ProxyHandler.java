@@ -117,7 +117,7 @@ public class ProxyHandler extends ProxyBase {
   }
 
   @Override
-  public void fetch(HttpServletRequest request, HttpServletResponse response)
+  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
       throws IOException, GadgetException {
     if (request.getHeader("If-Modified-Since") != null) {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
