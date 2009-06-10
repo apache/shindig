@@ -39,7 +39,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimaps;
 
 /**
  * Tests for JsonSerializer.

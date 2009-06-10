@@ -42,7 +42,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.isNull;
 import org.json.JSONObject;
 
 import java.io.StringReader;

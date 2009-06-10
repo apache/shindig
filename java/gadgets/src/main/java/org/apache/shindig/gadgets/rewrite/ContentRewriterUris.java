@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.config.ContainerConfig;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

@@ -25,7 +25,6 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import java.awt.image.BufferedImage;
