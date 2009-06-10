@@ -37,7 +37,7 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
       $oauthConfigStr = file_get_contents($this->OAUTH_CONFIG);
       // remove all comments because this confuses the json parser
       // note: the json parser also crashes on trailing ,'s in records so please don't use them
-      $contents = preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $oauthConfigStr);
+      $contents = preg_replace('@/\\*.*?\\*/@s', '', $oauthConfigStr);
       $oauthConfig = json_decode($contents, true);
       if ($oauthConfig == $contents) {
         throw new GadgetException("OAuth configuration json failed to parse.");

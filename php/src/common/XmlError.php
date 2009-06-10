@@ -32,13 +32,13 @@ class XmlError {
       $xml = explode("\n", $xml);
     }
     foreach ($errors as $error) {
-      $ret .= parseXmlError($error, $xml);
+      $ret .= self::parseXmlError($error, $xml);
     }
     libxml_clear_errors();
     return $ret;
   }
 
-  static public function display_xml_error($error, $xml) {
+  static public function parseXmlError($error, $xml) {
     if ($xml) {
       $ret = $xml[$error->line - 1] . "\n";
       $ret .= str_repeat('-', $error->column) . "^\n";
