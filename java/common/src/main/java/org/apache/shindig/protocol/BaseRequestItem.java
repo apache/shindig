@@ -101,7 +101,7 @@ public class BaseRequestItem implements RequestItem {
 
   public String getAppId() {
     String appId = getParameter(APP_ID);
-    if (appId == null || appId.equals(APP_SUBSTITUTION_TOKEN)) {
+    if (appId != null && appId.equals(APP_SUBSTITUTION_TOKEN)) {
       return token.getAppId();
     } else {
       return appId;

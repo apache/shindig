@@ -56,7 +56,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   private static final UserId JANE_DOE = new UserId(UserId.Type.userId, "jane.doe");
 
   private static final GroupId SELF_GROUP = new GroupId(GroupId.Type.self, null);
-  private static final String APP_ID = "test";
+  private static final String APP_ID = "1";
   private static final String CANONICAL_USER_ID = "canonical";
 
   private SecurityToken token = new FakeGadgetToken();
@@ -174,7 +174,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedActivity() throws Exception {
     Activity activity = db.getActivity(
         CANON_USER, SELF_GROUP, APP_ID,
-        Sets.newHashSet("appId", "body", "mediaItems"), "1", new FakeGadgetToken()).get();
+        Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
     assertNotNull(activity);
     // Check that some fields are fetched and others are not
     assertNotNull(activity.getBody());

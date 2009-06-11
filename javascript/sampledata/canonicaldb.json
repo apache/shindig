@@ -247,7 +247,7 @@
 },
 "activities" : {
 "canonical" : [{
-"appId" : "test",
+"appId" : "1",
 "body" : "Went rafting",
 "bodyId" : "1",
 "externalId" : "http://www.example.org/123456",
@@ -277,7 +277,7 @@
 "url" : "http://www.example.org/canonical/activities/1",
 "userId" : "canonical"
 },{
-"appId" : "test",
+"appId" : "1",
 "body" : "Went skiing",
 "bodyId" : "1",
 "externalId" : "http://www.example.org/123457",
