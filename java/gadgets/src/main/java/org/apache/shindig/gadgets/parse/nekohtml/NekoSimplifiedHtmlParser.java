@@ -110,15 +110,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     HTMLConfiguration config = newConfiguration();
 
     HTMLScanner htmlScanner = new HTMLScanner();
-    HTMLTagBalancer tagBalancer = new HTMLTagBalancer() {
-      @Override
-      protected HTMLElements.Element getElement(String name) {
-        // Neko's implementation of this method strips off namespace prefixes
-        // before calling HTMLElements.getElement().
-        // This breaks elements like "os:Html", is slower, and has no obvious benefit.
-        return HTMLElements.getElement(name);
-      }
-    };
+    HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
 
     DocumentHandler handler = newDocumentHandler(source, htmlScanner);
 
