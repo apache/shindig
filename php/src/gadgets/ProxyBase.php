@@ -26,7 +26,7 @@ class ProxyBase {
    * @var GadgetContext
    */
   public $context;
-  
+
   protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie', 'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary', 'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
 
   public function __construct($context) {
@@ -54,33 +54,13 @@ class ProxyBase {
       }
     }
     if ($method == 'POST') {
-      $data = isset($_GET['postData']) ? $_GET['postData'] : false;
-      if (! $data) {
-        $data = isset($_POST['postData']) ? $_POST['postData'] : false;
-      }
-      $postData = '';
-      if ($data) {
-        $entries = explode('&', $data);
-        foreach ($entries as $entry) {
-          $entry = urldecode($entry);
-          $parts = explode('=', $entry);
-          // Process only if its a valid value=something pair
-          if (count($parts) == 2) {
-            $postData .= urlencode($parts[0]) . '=' . urlencode($parts[1]) . '&';
-          }
-        }
-        // chop of the trailing &
-        if (strlen($postData)) {
-          $postData = substr($postData, 0, strlen($postData) - 1);
-        }
-      }
+      $postData = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
       // even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
       // so the request to POST is still honored
       $request = new RemoteContentRequest($url, null, $postData);
     } else {
       $request = new RemoteContentRequest($url);
     }
-    
     if ($signer) {
       $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
       switch (strtoupper($authz)) {
