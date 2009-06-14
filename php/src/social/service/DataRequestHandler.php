@@ -19,10 +19,10 @@
  */
 
 abstract class DataRequestHandler {
-  
+
   private static $GET_SYNONYMS = array("get");
-  private static $CREATE_SYNONYMS = array("put", "create");
-  private static $UPDATE_SYNONYMS = array("post", "update");
+  private static $CREATE_SYNONYMS = array("post", "create");
+  private static $UPDATE_SYNONYMS = array("put", "update");
   private static $DELETE_SYNONYMS = array("delete");
 
   public function handleItem(RequestItem $requestItem) {
@@ -74,7 +74,7 @@ abstract class DataRequestHandler {
   }
 
   /**
-   *  To support people/@supportedFields and activity/@supportedFields 
+   *  To support people/@supportedFields and activity/@supportedFields
    *  @param parameters url parameters to get request type(people/activity)
    */
   public function getSupportedFields($parameters) {
@@ -93,7 +93,7 @@ abstract class DataRequestHandler {
   }
 
   /**
-   *  To get OpenSocial version for getting supportedFields 
+   *  To get OpenSocial version for getting supportedFields
    *  @param config configuration values from container's js files
    */
   private function getOpenSocialVersion($config) {
