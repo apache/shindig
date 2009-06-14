@@ -23,6 +23,7 @@ require_once 'src/gadgets/templates/TemplateParser.php';
 
 //TODO check if the opensocial-templates feature has disableAutoProcessing = true as param, if so don't
 
+
 class EmptyClass {
 }
 
@@ -173,7 +174,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $this->addContextData($this->dataInserts);
       }
     } else {
-      echo "Error parsing os-data:\n".XmlError::getErrors($osDataRequests);
+      echo "Error parsing os-data:\n" . XmlError::getErrors($osDataRequests);
     }
   }
 
@@ -194,7 +195,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $this->doc->recover = false;
     $this->doc->resolveExternals = false;
     if (! $this->doc->loadXML($template)) {
-      return "Error parsing os-template:\n".XmlError::getErrors($template);
+      return "Error parsing os-template:\n" . XmlError::getErrors($template);
     }
     if ($this->doc->childNodes->length < 1 || $this->doc->childNodes->length >> 1) {
       return 'Invalid script block';
@@ -206,7 +207,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $requires = explode(',', $require);
         foreach ($requires as $val) {
           $val = trim($val);
-          if (!isset($this->dataContext[$val])) {
+          if (! isset($this->dataContext[$val])) {
             return false;
           }
         }
@@ -221,7 +222,8 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $output->appendChild($outNode);
       }
       // Restore single tags to their html variant, and remove the xml header
-      $ret = str_replace(array('<?xml version="" encoding="utf-8"?>', '<br/>'), array('', '<br>'), $output->saveXML());
+      $ret = str_replace(array(
+          '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', '<br>'), $output->saveXML());
       return $ret;
     }
     return false;
@@ -245,43 +247,40 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   }
 
   /**
+   * Generates the body script content
+   *
+   * @return string script
+   */
+  public function getBodyScript() {
+    $script = "gadgets.util.runOnLoadHandlers();";
+    if ($this instanceof GadgetHrefRenderer) {
+      $script .= " window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
+    }
+    return $script;
+  }
+
+  /**
    * Append the runOnLoadHandlers script to the gadget's document body
    *
    * @param DOMElement $node
    * @param DOMDocument $doc
    */
   public function addBodyTags(DOMElement &$node, DOMDocument &$doc) {
-    $script = "gadgets.util.runOnLoadHandlers();";
-    if ($this instanceof GadgetHrefRenderer) {
-      $script .= " window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
-    }
+    $script = $this->getBodyScript();
     $scriptNode = $doc->createElement('script');
     $scriptNode->setAttribute('type', 'text/javascript');
     $scriptNode->nodeValue = str_replace('&', '&amp;', $script);
     $node->appendChild($scriptNode);
   }
 
-  /**
-   * Adds the various bits of javascript to the gadget's document head element
-   *
-   * @param DOMElement $node
-   * @param DOMDocument $doc
-   */
-  public function addHeadTags(DOMElement &$node, DOMDocument &$doc) {
-    // Inject our configured gadget document style
-    $styleNode = $doc->createElement('style');
-    $styleNode->setAttribute('type', 'text/css');
-    $styleNode->appendChild($doc->createTextNode(Config::get('gadget_css')));
-    $node->appendChild($styleNode);
-    // Inject the OpenSocial feature javascripts
+  public function getJavaScripts() {
     $forcedJsLibs = $this->getForcedJsLibs();
+    $externalScript = false;
     if (! empty($forcedJsLibs)) {
       // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.9:settitle.js"> type url)
       // we inject the tag and don't inline those libs (and their dependencies)
       $forcedJsLibs = explode(':', $forcedJsLibs);
-      $scriptNode = $doc->createElement('script');
-      $scriptNode->setAttribute('src', Config::get('default_js_prefix') . $this->getJsUrl($forcedJsLibs, $this->gadget) . "&container=" . $this->context->getContainer());
-      $node->appendChild($scriptNode);
+      $externalScript = Config::get('default_js_prefix') . $this->getJsUrl($forcedJsLibs, $this->gadget) . "&container=" . $this->context->getContainer();
       $registry = $this->context->getRegistry();
       $missing = array();
       $registry->resolveFeatures($forcedJsLibs, $forcedJsLibs, $missing);
@@ -304,9 +303,31 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
       }
     }
+    return array('inline' => $script, 'external' => $externalScript);
+  }
+
+  /**
+   * Adds the various bits of javascript to the gadget's document head element
+   *
+   * @param DOMElement $node
+   * @param DOMDocument $doc
+   */
+  public function addHeadTags(DOMElement &$node, DOMDocument &$doc) {
+    // Inject our configured gadget document style
+    $styleNode = $doc->createElement('style');
+    $styleNode->setAttribute('type', 'text/css');
+    $styleNode->appendChild($doc->createTextNode(Config::get('gadget_css')));
+    $node->appendChild($styleNode);
+    // Inject the OpenSocial feature javascripts
+    $scripts = $this->getJavaScripts();
+    if ($scripts['external']) {
+      $scriptNode = $doc->createElement('script');
+      $scriptNode->setAttribute('src', $scripts['external']);
+      $node->appendChild($scriptNode);
+    }
     $scriptNode = $doc->createElement('script');
     $scriptNode->setAttribute('type', 'text/javascript');
-    $scriptNode->appendChild($doc->createTextNode($script));
+    $scriptNode->appendChild($doc->createTextNode($scripts['inline']));
     $node->appendChild($scriptNode);
   }
 

@@ -38,13 +38,39 @@ class GadgetHtmlRenderer extends GadgetBaseRenderer {
     if (! empty($view['quirks']) || ! $view['quirks']) {
       $content .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
     }
-    $content .= "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>\n";
-    // Append the content for the selected view
-    $content .= $gadget->substitutions->substitute($view['content']);
-    $content .= "\n</body>\n</html>";
-    $content = $this->parseTemplates($content);
-    $content = $this->rewriteContent($content);
-    $content = $this->addTemplates($content);
+    // Rewriting the gadget's content using the libxml library does impose some restrictions to the validity of the input html, so
+    // for the time being (until either gadgets are all fixed, or we find a more tolerant html parsing lib), we try to avoid it when we can
+    $domRewrite = false;
+    if (isset($gadget->gadgetSpec->rewrite) || Config::get('rewrite_by_default')) {
+      $domRewrite = true;
+    } elseif (strpos($view['content'], 'text/os-data') !== false || strpos($view['content'], 'text/os-template') !== false) {
+      $domRewrite = true;
+    }
+    if (!$domRewrite) {
+      // Manually generate the html document using basic string concatinations instead of using our DOM based functions
+      $content .= "<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
+      $content .= '<style>'.Config::get('gadget_css')."</style>\n";
+      $scripts = $this->getJavaScripts();
+      if ($scripts['external']) {
+        $content .= "<script type=\"text/javascript\" src=\"{$scripts['external']}\"></script>\n";
+      }
+      if (!empty($scripts['inline'])) {
+        $content .= "<script type=\"text/javascript\">{$scripts['inline']}</script>\n";
+      }
+      $content .= "</head>\n<body>\n";
+      $content .= $gadget->substitutions->substitute($view['content']);
+      $content .= '<script type="text/javascript">'.$this->getBodyScript()."</script>\n";
+      $content .= "\n</body>\n</html>\n";
+    } else {
+      // Use the (libxml2 based) DOM rewriter
+      $content .= "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>\n";
+      // Append the content for the selected view
+      $content .= $gadget->substitutions->substitute($view['content']);
+      $content .= "\n</body>\n</html>";
+      $content = $this->parseTemplates($content);
+      $content = $this->rewriteContent($content);
+      $content = $this->addTemplates($content);
+    }
     echo $content;
   }
 }
