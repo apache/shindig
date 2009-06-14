@@ -23,7 +23,7 @@ class DataServiceServlet extends ApiServlet {
 
   protected static $FORMAT_PARAM = "format";
   protected static $ATOM_FORMAT = "atom";
-  protected static $XML_FORMAT = "atom";
+  protected static $XML_FORMAT = "xml";
 
   public static $PEOPLE_ROUTE = "people";
   public static $ACTIVITY_ROUTE = "activities";
@@ -114,7 +114,7 @@ class DataServiceServlet extends ApiServlet {
     if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       $tmp = file_get_contents('php://input');
       if (!empty($tmp)) {
-        $GLOBALS['HTTP_RAW_POST_DATA'] = $tmp;  
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $tmp;
       }
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {

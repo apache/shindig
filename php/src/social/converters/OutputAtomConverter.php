@@ -29,8 +29,8 @@ class OutputAtomConverter extends OutputConverter {
   private static $charSet = 'UTF-8';
   private static $formatOutput = true;
   // this maps the REST url to the atom content type
-  private static $entryTypes = array('people' => 'person', 'appdata' => 'appdata',
-      'activities' => 'activity', 'messages' => 'messages');
+  private static $entryTypes = array('people' => 'entry', 'appdata' => 'entry',
+      'activities' => 'entry', 'messages' => 'entry');
   private $doc;
 
   function outputResponse(ResponseItem $responseItem, RestRequestItem $requestItem) {
@@ -45,8 +45,8 @@ class OutputAtomConverter extends OutputConverter {
 
     // Check to see if this is a single entry, or a collection, and construct either an atom
     // feed (collection) or an entry (single)
-    if ($responseItem->getResponse() instanceof RestfulCollection) {
-      $totalResults = $responseItem->getResponse()->getTotalResults();
+    if ($data instanceof RestfulCollection) {
+      $totalResults = $data->getTotalResults();
       $itemsPerPage = $requestItem->getCount();
       $startIndex = $requestItem->getStartIndex();
 
@@ -66,7 +66,7 @@ class OutputAtomConverter extends OutputConverter {
       // Add osearch & next link to the entry
       $this->addPagingFields($entry, $startIndex, $itemsPerPage, $totalResults);
       // Add response entries to feed
-      $responses = $responseItem->getResponse()->getEntry();
+      $responses = $data->getEntry();
       foreach ($responses as $response) {
         // Attempt to have a real ID field, otherwise we fall back on the idSpec id
         $idField = is_object($response) && isset($response->id) ? $response->id : (is_array($response) && isset($response['id']) ? $response['id'] : $requestItem->getUser()->getUserId($requestItem->getToken()));
@@ -113,7 +113,7 @@ class OutputAtomConverter extends OutputConverter {
       $this->addNode($entry, 'updated', $updatedAtom);
       $content = $this->addNode($entry, 'content', '', array('type' => 'application/xml'));
       // addData loops through the responseItem data recursively creating a matching XML structure
-      $this->addData($content, $requestType, $data->entry, self::$osNameSpace);
+      $this->addData($content, $requestType, $data['entry'], self::$osNameSpace);
     }
     $xml = $doc->saveXML();
     if ($responseItem->getResponse() instanceof RestfulCollection) {

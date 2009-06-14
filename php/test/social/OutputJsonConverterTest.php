@@ -62,14 +62,16 @@ class OutputJsonConverterTest extends PHPUnit_Framework_TestCase {
     $outputConverter->outputResponse($responseItem, $requestItem);
     $output = ob_get_clean();
     $expected = '{
-  "entry": {
-    "isOwner": false,
-    "isViewer": false,
-    "displayName": "1 1",
-    "id": "1"
-  }
-}';
-    $this->assertEquals($expected, $output);
+        "entry": {
+          "isOwner": false,
+          "isViewer": false,
+          "displayName": "1 1",
+          "id": "1"
+        }
+    }';
+    $outputJson = json_decode($output);
+    $expectedJson = json_decode($expected);
+    $this->assertEquals($expectedJson, $outputJson);
   }
 
 }

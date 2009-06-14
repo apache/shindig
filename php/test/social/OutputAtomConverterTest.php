@@ -56,7 +56,7 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
     $entry = array('isOwner' => false, 'isViewer' => false,
                    'displayName' => '1 1', 'id' => '1');
-    $response = new DataCollection($entry);
+    $response = array('entry' => $entry);
     $responseItem = new ResponseItem(null, null, $response);
     ob_start();
     $outputConverter->outputResponse($responseItem, $requestItem);
@@ -70,7 +70,7 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
   <id>urn:guid:1</id>
   <updated>2008-12-11T19:58:31+01:00</updated>
   <content type="application/xml">
-    <person xmlns="http://ns.opensocial.org/2008/opensocial">
+    <entry xmlns="http://ns.opensocial.org/2008/opensocial">
       <isOwner></isOwner>
       <isViewer></isViewer>
       <displayName>1 1</displayName>

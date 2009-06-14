@@ -56,7 +56,7 @@ class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
     $entry = array('isOwner' => false, 'isViewer' => false,
                    'displayName' => '1 1', 'id' => '1');
-    $response = new DataCollection($entry);
+    $response = array('entry' => $entry);
     $responseItem = new ResponseItem(null, null, $response);
     ob_start();
     $outputConverter->outputResponse($responseItem, $requestItem);
@@ -71,7 +71,9 @@ class OutputXmlConverterTest extends PHPUnit_Framework_TestCase {
   </entry>
 </response>
 ';
-    $this->assertEquals($expected, $output);
+    $outputXml = simplexml_load_string($output);
+    $expectedXml = simplexml_load_string($expected);
+    $this->assertEquals($expectedXml, $outputXml);
   }
 
 }

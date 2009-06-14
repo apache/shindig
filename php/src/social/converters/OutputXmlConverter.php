@@ -39,8 +39,8 @@ class OutputXmlConverter extends OutputConverter {
     
     // Check to see if this is a single entry, or a collection, and construct either an xml 
     // feed (collection) or an entry (single)		
-    if ($responseItem->getResponse() instanceof RestfulCollection) {
-      $totalResults = $responseItem->getResponse()->getTotalResults();
+    if ($data instanceof RestfulCollection) {
+      $totalResults = $data->getTotalResults();
       $itemsPerPage = $requestItem->getCount();
       $startIndex = $requestItem->getStartIndex();
       
@@ -51,7 +51,7 @@ class OutputXmlConverter extends OutputConverter {
       $this->addNode($entry, 'startIndex', $startIndex);
       $this->addNode($entry, 'itemsPerPage', $itemsPerPage);
       $this->addNode($entry, 'totalResults', $totalResults);
-      $responses = $responseItem->getResponse()->getEntry();
+      $responses = $data->getEntry();
       foreach ($responses as $response) {
         // recursively add responseItem data to the xml structure
         $this->addData($entry, $requestType, $response);
@@ -60,7 +60,7 @@ class OutputXmlConverter extends OutputConverter {
       // Single entry = Xml:Entry	
       $entry = $this->addNode($doc, 'response', '');
       // addData loops through the responseItem data recursively creating a matching XML structure
-      $this->addData($entry, 'entry', $data->entry);
+      $this->addData($entry, 'entry', $data['entry']);
     }
     $xml = $doc->saveXML();
     echo $xml;
