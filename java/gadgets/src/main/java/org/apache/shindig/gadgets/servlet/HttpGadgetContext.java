@@ -229,12 +229,17 @@ public class HttpGadgetContext extends GadgetContext {
    * @return module id, if specified
    */
   @SuppressWarnings("boxing")
-private static Integer getModuleId(HttpServletRequest req) {
+  private static Integer getModuleId(HttpServletRequest req) {
     String mid = req.getParameter("mid");
     if (mid == null) {
       return null;
     }
-    return Integer.parseInt(mid);
+    
+    try {
+      return Integer.parseInt(mid);
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   /**
