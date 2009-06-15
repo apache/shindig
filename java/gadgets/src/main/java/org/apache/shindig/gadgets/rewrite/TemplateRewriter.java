@@ -52,6 +52,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,13 +83,13 @@ public class TemplateRewriter implements GadgetRewriter {
   public final static Set<String> TAGS = ImmutableSet.of("script");
 
   /** Set to true to block auto-processing of templates */
-  static final Object DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
+  static final String DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
   
   /** Specifies what template libraries to load */
-  static final Object REQUIRE_LIBRARY_PARAM = "requireLibrary";
+  static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
   
   /** Enable client support? **/
-  static final Object CLIENT_SUPPORT_PARAM = "client";  
+  static final String CLIENT_SUPPORT_PARAM = "client";  
 
   static private final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
   
@@ -171,7 +172,7 @@ public class TemplateRewriter implements GadgetRewriter {
    * </pre>
    */
   private boolean isServerTemplatingEnabled(Feature f) {
-    return (!"true".equalsIgnoreCase(f.getParams().get(DISABLE_AUTO_PROCESSING_PARAM)));
+    return (!"true".equalsIgnoreCase(f.getParam(DISABLE_AUTO_PROCESSING_PARAM)));
   }
 
   private void rewriteImpl(Gadget gadget, Feature f, MutableContent content)
@@ -211,7 +212,7 @@ public class TemplateRewriter implements GadgetRewriter {
 
     // Check if a feature param overrides  our guess at whether the client-side    
     // feature is needed.                                                  
-    String clientOverride = f.getParams().get(CLIENT_SUPPORT_PARAM);            
+    String clientOverride = f.getParam(CLIENT_SUPPORT_PARAM);            
     if ("true".equalsIgnoreCase(clientOverride)) {                              
       needsFeature = true;                                                      
     } else if ("false".equalsIgnoreCase(clientOverride)) {                      
@@ -264,19 +265,20 @@ public class TemplateRewriter implements GadgetRewriter {
 
   private void loadTemplateLibraries(GadgetContext context,
       Feature f, List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
-    // TODO: Support multiple values when Shindig does
-    String url = f.getParams().get(REQUIRE_LIBRARY_PARAM);
-    if (url != null) {
-      Uri uri = Uri.parse(url.trim());
-      uri = context.getUrl().resolve(uri);
-      
-      try {
-        TemplateLibrary library = libraryFactory.loadTemplateLibrary(context, uri);
-        registries.add(library.getTagRegistry());
-        libraries.add(library);
-      } catch (TemplateParserException te) {
-        // Suppress exceptions due to malformed template libraries
-        logger.log(Level.WARNING, null, te);
+    Collection<String> urls = f.getParams().get(REQUIRE_LIBRARY_PARAM); 
+    if (urls != null) {
+      for (String url : urls) {
+        Uri uri = Uri.parse(url.trim());
+        uri = context.getUrl().resolve(uri);
+        
+        try {
+          TemplateLibrary library = libraryFactory.loadTemplateLibrary(context, uri);
+          registries.add(library.getTagRegistry());
+          libraries.add(library);
+        } catch (TemplateParserException te) {
+          // Suppress exceptions due to malformed template libraries
+          logger.log(Level.WARNING, null, te);
+        }
       }
     }
   }

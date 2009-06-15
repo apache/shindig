@@ -33,7 +33,6 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;

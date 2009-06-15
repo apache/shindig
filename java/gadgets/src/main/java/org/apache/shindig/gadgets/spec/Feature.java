@@ -17,15 +17,15 @@
  */
 package org.apache.shindig.gadgets.spec;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.apache.shindig.common.xml.XmlUtil;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Represents a Require or Optional tag.
@@ -48,9 +48,22 @@ public class Feature {
    * Flattened into a map where Param@name is the key and Param content is
    * the value.
    */
-  private final Map<String, String> params;
-  public Map<String, String> getParams() {
+  private final Multimap<String, String> params;
+  public Multimap<String, String> getParams() {
     return params;
+  }
+  
+  /**
+   * Returns the first value for any feature parameter, or null
+   * if the parameter does not exist.
+   */
+  public String getParam(String key) {
+    Collection<String> values = params.get(key);
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+    
+    return values.iterator().next();
   }
 
   /**
@@ -71,7 +84,7 @@ public class Feature {
        .append(" feature=\"")
        .append(name)
        .append("\">");
-    for (Map.Entry<String, String> entry : params.entrySet()) {
+    for (Map.Entry<String, Collection<String>> entry : params.asMap().entrySet()) {
       buf.append("\n<Param name=\"")
          .append(entry.getKey())
          .append("\">")
@@ -98,7 +111,7 @@ public class Feature {
     this.name = name;
     NodeList children = feature.getElementsByTagName("Param");
     if (children.getLength() > 0) {
-      ImmutableMap.Builder<String, String> params = ImmutableMap.builder();
+      ImmutableMultimap.Builder<String, String> params = ImmutableMultimap.builder();
 
       for (int i = 0, j = children.getLength(); i < j; ++i) {
         Element param = (Element)children.item(i);
@@ -110,7 +123,7 @@ public class Feature {
       }
       this.params = params.build();
     } else {
-      this.params = Collections.emptyMap();
+      this.params = ImmutableMultimap.of();
     }
   }
 }

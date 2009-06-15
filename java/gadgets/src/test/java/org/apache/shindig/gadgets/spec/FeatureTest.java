@@ -23,7 +23,8 @@ import org.apache.shindig.common.xml.XmlUtil;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 
 public class FeatureTest extends TestCase {
   public void testRequire() throws Exception {
@@ -47,9 +48,33 @@ public class FeatureTest extends TestCase {
                  "  <Param name=\"" + key + "\">" + value + "</Param>" +
                  "</Require>";
     Feature feature = new Feature(XmlUtil.parse(xml));
-    Map<String, String> params = feature.getParams();
+    Multimap<String, String> params = feature.getParams();
     assertEquals(1, params.size());
-    assertEquals(value, params.get(key));
+    assertEquals(ImmutableList.of(value), params.get(key));
+  }
+
+  public void testMultiParams() throws Exception {
+    String key = "bar";
+    String key2 = "bar2";
+    String value = "Hello, World!";
+    String value2 = "Goodbye, World!";
+    // Verify that multiple parameters are supported, and are returned in-order
+    String xml = "<Require feature=\"foo\">" +
+                 "  <Param name=\"" + key + "\">" + value + "</Param>" +
+                 "  <Param name=\"" + key + "\">" + value2 + "</Param>" +
+                 "  <Param name=\"" + key2 + "\">" + value2 + "</Param>" +
+                 "  <Param name=\"" + key2 + "\">" + value + "</Param>" +
+                 "</Require>";
+    Feature feature = new Feature(XmlUtil.parse(xml));
+    Multimap<String, String> params = feature.getParams();
+    assertEquals(2, params.keySet().size());
+    assertEquals(ImmutableList.of(value, value2), params.get(key));
+    assertEquals(value, feature.getParam(key));
+    assertEquals(ImmutableList.of(value2, value), params.get(key2));
+    assertEquals(value2, feature.getParam(key2));
+    
+    assertEquals(ImmutableList.of(), params.get("foobar"));
+    assertNull(feature.getParam("foobar"));
   }
 
   public void testDoesNotLikeUnnamedFeatures() throws Exception {

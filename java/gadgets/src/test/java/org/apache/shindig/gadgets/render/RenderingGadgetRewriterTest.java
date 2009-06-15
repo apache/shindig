@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -497,6 +498,10 @@ public class RenderingGadgetRewriterTest {
       "  <Require feature='foo'>" +
       "    <Param name='bar'>baz</Param>" +
       "  </Require>" +
+      "  <Require feature='foo2'>" +
+      "    <Param name='bar'>baz</Param>" +
+      "    <Param name='bar'>bop</Param>" +
+      "  </Require>" +
       "</ModulePrefs>" +
       "<Content type='html'/>" +
       "</Module>";
@@ -504,6 +509,7 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
     featureRegistry.addInline("foo", "");
+    featureRegistry.addInline("foo2", "");
     config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
@@ -514,6 +520,9 @@ public class RenderingGadgetRewriterTest {
     JSONObject util = json.getJSONObject("core.util");
     JSONObject foo = util.getJSONObject("foo");
     assertEquals("baz", foo.get("bar"));
+    JSONObject foo2 = util.getJSONObject("foo2");
+    JsonAssert.assertObjectEquals(ImmutableList.of("baz", "bop"),
+        foo2.get("bar"));
   }
 
   // TODO: Test for auth token stuff.

@@ -397,9 +397,22 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // Add gadgets.util support. This is calculated dynamically based on request inputs.
     ModulePrefs prefs = gadget.getSpec().getModulePrefs();
     Collection<Feature> features = prefs.getFeatures().values();
-    Map<String, Map<String, String>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
+    Map<String, Map<String, Object>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
     for (Feature feature : features) {
-      featureMap.put(feature.getName(), feature.getParams());
+      
+      // Flatten out the multimap a bit for backwards compatibility:  map keys
+      // with just 1 value into the string, treat others as arrays
+      Map<String, Object> paramFeaturesInConfig = Maps.newHashMap();
+      for (String paramName : feature.getParams().keySet()) {
+        Collection<String> paramValues = feature.getParams().get(paramName);
+        if (paramValues.size() == 1) {
+          paramFeaturesInConfig.put(paramName, paramValues.iterator().next());
+        } else {
+          paramFeaturesInConfig.put(paramName, paramValues);
+        }
+      }
+      
+      featureMap.put(feature.getName(), paramFeaturesInConfig);
     }
     config.put("core.util", featureMap);
   }

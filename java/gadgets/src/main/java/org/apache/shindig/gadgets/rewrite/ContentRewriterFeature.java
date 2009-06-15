@@ -84,15 +84,15 @@ public class ContentRewriterFeature {
     List<String> expiresOptions = Lists.newArrayListWithCapacity(3);
     if (f != null) {
       if (f.getParams().containsKey(INCLUDE_URLS)) {
-        includeRegex = normalizeParam(f.getParams().get(INCLUDE_URLS), includeRegex);
+        includeRegex = normalizeParam(f.getParam(INCLUDE_URLS), includeRegex);
       }
 
       // Note use of default for exclude as null here to allow clearing value in the
       // presence of a container default.
       if (f.getParams().containsKey(EXCLUDE_URLS)) {
-        excludeRegex = normalizeParam(f.getParams().get(EXCLUDE_URLS), null);
+        excludeRegex = normalizeParam(f.getParam(EXCLUDE_URLS), null);
       }
-      String includeTagList = f.getParams().get(INCLUDE_TAGS);
+      String includeTagList = f.getParam(INCLUDE_TAGS);
       if (includeTagList != null) {
         Set<String> tags = Sets.newTreeSet();
         for (String tag : includeTagList.split(",")) {
@@ -104,7 +104,7 @@ public class ContentRewriterFeature {
       }
 
       if (f.getParams().containsKey(EXPIRES)) {
-        expiresOptions.add(normalizeParam(f.getParams().get(EXPIRES), null));
+        expiresOptions.add(normalizeParam(f.getParam(EXPIRES), null));
       }
     }
 
