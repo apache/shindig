@@ -72,6 +72,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public final static String APPROVAL_URL = SP_HOST + "/authorize";
   public final static String RESOURCE_URL = SP_HOST + "/data";
   public final static String NOT_FOUND_URL = SP_HOST + "/404";
+  public final static String ERROR_400 = SP_HOST + "/400";
   public final static String ECHO_URL = SP_HOST + "/echo";
 
   public final static String CONSUMER_KEY = "consumer";
@@ -280,6 +281,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         return handleResourceUrl(request);
       } else if (url.startsWith(NOT_FOUND_URL)) {
         return handleNotFoundUrl(request);
+      } else if (url.startsWith(ERROR_400)) {
+        return handleError400Url(request);
       } else if (url.startsWith(ECHO_URL)) {
         return handleEchoUrl(request);
       }
@@ -723,6 +726,13 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         .create();
   }
 
+  private HttpResponse handleError400Url(HttpRequest request) throws Exception {
+    return new HttpResponseBuilder()
+        .setHttpStatusCode(HttpResponse.SC_BAD_REQUEST)
+        .setResponseString("bad request")
+        .create();
+  }
+  
   private HttpResponse handleEchoUrl(HttpRequest request) throws Exception {
     String query = request.getUri().getQuery();
     if (query.contains("add_oauth_token")) {

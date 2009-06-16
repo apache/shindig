@@ -854,9 +854,9 @@ public class OAuthRequest {
    * and/or access tokens.
    */
   private boolean isFullOAuthError(HttpResponse response) {
-    // 400, 401 and 403 are likely to be authentication errors.
-    if (response.getHttpStatusCode() != 400 && response.getHttpStatusCode() != 401 &&
-        response.getHttpStatusCode() != 403) {
+    // 401 and 403 are likely to be authentication errors.
+    if (response.getHttpStatusCode() != HttpResponse.SC_UNAUTHORIZED
+        && response.getHttpStatusCode() != HttpResponse.SC_FORBIDDEN) {
       return false;
     }
     // If the client forced us to use full OAuth, this might be OAuth related.

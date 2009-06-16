@@ -899,6 +899,26 @@ public class OAuthRequestTest {
   }
 
   @Test
+  public void testError400() throws Exception {
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    response = client.sendGet(FakeOAuthServiceProvider.ERROR_400);
+    assertEquals("bad request", response.getResponseAsString());
+    assertEquals(400, response.getHttpStatusCode());
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=3");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+  }
+
+  
+  @Test
   public void testConsumerThrottled() throws Exception {
     assertEquals(0, serviceProvider.getRequestTokenCount());
     assertEquals(0, serviceProvider.getAccessTokenCount());
