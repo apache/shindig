@@ -161,6 +161,6 @@
   "osml": {
     // OSML library resource.  Can be set to null or the empty string to disable OSML
     // for a container.
-    "library": "org/apache/shindig/gadgets/templates/OSML_library.xml"
+    "library": "config/OSML_library.xml"
   }
 }}

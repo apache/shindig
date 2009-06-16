@@ -79,6 +79,7 @@
         <directory>${basedir}/../../config</directory>
         <includes>
           <include>oauth.json</include>
+          <include>OSML_library.xml</include>
         </includes>
       </resource>
 
