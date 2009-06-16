@@ -200,11 +200,3 @@ gadgets.oauth.Popup.prototype.createApprovedOnClick = function() {
     self.handleApproval_();
   };
 };
-
-gadgets.oauth.Popup.setReceivedCallbackUrl = function(url) {
-  gadgets.oauth.Popup.receivedCallbackUrl_ = url;
-};
-
-gadgets.oauth.Popup.getReceivedCallbackUrl = function() {
-  return gadgets.oauth.Popup.receivedCallbackUrl_;
-};

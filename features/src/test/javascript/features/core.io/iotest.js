@@ -529,6 +529,7 @@ IoTest.prototype.testOAuth = function() {
   this.assertEquals("http://sp.example.com/authz?oauth_token=foo",
       resp.oauthApprovalUrl);
 
+  gadgets.io.oauthReceivedCallbackUrl_ = "http://shindig?oauth_verifier=12345";
   var req = new fakeXhr.Expectation("POST", "http://example.com/json");
   this.setStandardArgs(req, true);
   req.setBodyArg("url", "http://target.example.com/somepage");
@@ -536,6 +537,8 @@ IoTest.prototype.testOAuth = function() {
   req.setBodyArg("st", "authtoken");
   req.setBodyArg("oauthState", "newState");
   req.setBodyArg("refresh", null);
+  req.setBodyArg("OAUTH_RECEIVED_CALLBACK",
+      "http://shindig?oauth_verifier=12345");
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
@@ -553,6 +556,7 @@ IoTest.prototype.testOAuth = function() {
       },
       params);
   this.assertEquals("personal data", resp.text);
+  this.assertEquals(null, gadgets.io.oauthReceivedCallbackUrl_);
 };
 
 IoTest.prototype.testSignedEquivalentToOAuth = function() {

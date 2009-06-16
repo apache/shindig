@@ -56,8 +56,7 @@ public class OAuthCallbackServlet extends InjectedServlet {
   
   private static final int ONE_HOUR_IN_SECONDS = 3600;
   
-  // This bit of magic will check to see whether the gadget is using the oauthpopup library,
-  // and if it does passes the entire callback URL into the library for later use.
+  // This bit of magic passes the entire callback URL into the opening gadget for later use.
   // gadgets.io.makeRequest (or osapi.oauth) will then pick up the callback URL to complete the
   // oauth dance.
   private static final String RESP_BODY =
@@ -70,10 +69,7 @@ public class OAuthCallbackServlet extends InjectedServlet {
     "<body>\n" +
     "<script type='text/javascript'>\n" +
     "try {\n" +
-    "  if (window.opener && window.opener.gadgets && window.opener.gadgets.oauth\n" +
-    "      && window.opener.gadgets.oauth.Popup) {\n" +
-    "    window.opener.gadgets.oauth.Popup.setReceivedCallbackUrl(document.location.href);\n" +
-    "  }\n" +
+    "  window.opener.gadgets.io.oauthReceivedCallbackUrl_ = document.location.href;\n" +
     "} catch (e) {\n" +
     "}\n" +
     "window.close();\n" +

@@ -364,12 +364,9 @@ gadgets.io = function() {
 
       // OAuth goodies
       if (auth === "oauth" || auth === "signed") {
-        if (gadgets.oauth && gadgets.oauth.Popup && gadgets.oauth.Popup.getReceivedCallbackUrl) {
-          var callbackResponse = gadgets.oauth.Popup.getReceivedCallbackUrl();
-          if (callbackResponse) {
-            paramData.OAUTH_RECEIVED_CALLBACK = callbackResponse;
-            gadgets.oauth.Popup.setReceivedCallbackUrl(null);
-          }
+        if (gadgets.io.oauthReceivedCallbackUrl_) {
+          paramData.OAUTH_RECEIVED_CALLBACK = gadgets.io.oauthReceivedCallbackUrl_;
+          gadgets.io.oauthReceivedCallbackUrl_ = null;
         }
         paramData.oauthState = oauthState || "";
         // Just copy the OAuth parameters into the req to the server
