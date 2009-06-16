@@ -111,7 +111,7 @@ public class GadgetOAuthTokenStore {
     // if owner == viewer.
     if (arguments.mayUseToken()
         && securityToken.getOwnerId() != null
-        && securityToken.getViewerId().equals(securityToken.getOwnerId())) {
+        && securityToken.getOwnerId().equals(securityToken.getViewerId())) {
       lookupToken(securityToken, consumer, arguments, clientState, accessorBuilder, responseParams);
     }
 

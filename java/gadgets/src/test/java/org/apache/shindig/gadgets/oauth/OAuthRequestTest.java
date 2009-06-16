@@ -401,6 +401,17 @@ public class OAuthRequestTest {
   }
 
   @Test
+  public void testOAuthFlow_noViewer() throws Exception {
+    MakeRequestClient client = makeNonSocialClient("owner", null, GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    assertEquals(403, response.getHttpStatusCode());
+    assertEquals(-1, response.getCacheTtl());
+    assertEquals(OAuthError.NOT_OWNER.toString(), response.getMetadata().get("oauthError"));
+  }
+
+  @Test
   public void testOAuthFlow_noSpec() throws Exception {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
