@@ -571,24 +571,24 @@ var taming = {
       message = html_sanitize(message);
       return this.mm_.createDismissibleMessage(message,
 					       tameCallback($vs, opt_callback));
-    }
+    };
     tamedMiniMessage.prototype.createStaticMessage = function(message,
 							      opt_callback) {
       message = html_sanitize(message);
       return this.mm_.createStaticMessage(message,
 					  tameCallback($vs, opt_callback));
-    }
+    };
     tamedMiniMessage.prototype.createTimerMessage = function(message, seconds,
 							     opt_callback) {
       message = html_sanitize(message);
       return this.mm_.createTimerMessage(message, seconds,
 					 tameCallback($vs, opt_callback));
-    }
+    };
     // FIXME: message should be a DOM element within our tree, other
     // than the root (dismissMessage deletes it).
     tamedMiniMessage.prototype.dismissMessage = function(message) {
       return this.mm_.dismissMessage(message);
-    }
+    };
     return tamedMiniMessage;
   },
 
@@ -617,13 +617,13 @@ var taming = {
 	})
       };
       return dr;
-    }
+    };
   },
 
   TabSet: function($v, orig) {
     var tamedTabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
       this.ts_ = new orig(opt_moduleId, opt_defaultTab, opt_container);
-    }
+    };
 
     tamedTabSet.prototype.addTab = function(tabName, opt_params) {
       // TODO(benl): tame the rest of opt_params
@@ -632,15 +632,15 @@ var taming = {
 	  undefined : ___.guard(blah) && opt_params.contentContainer.node___;
       }
       this.ts_.addTab(html_sanitize(tabName), opt_params);
-    }
+    };
 
     tamedTabSet.prototype.alignTabs = function(align, opt_offset) {
       this.ts_.alignTabs(String(align), Number(opt_offset));
-    }
+    };
 
     tamedTabSet.prototype.displayTabs = function(display) {
       this.ts_.displayTabs(Boolean(display));
-    }
+    };
 
     return tamedTabSet;
   },
@@ -662,7 +662,7 @@ var taming = {
 	___.grantGeneric(view, 'getName');
 	___.grantGeneric(view, 'isOnlyVisibleGadget');
 	return view;
-      }
+      };
     }
   }
 };

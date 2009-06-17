@@ -31,7 +31,7 @@ JsonMessageCollection.inherits(opensocial.MessageCollection);
 
 JsonMessageCollection.prototype.toJsonObject = function() {
   return JsonMessageCollection.copyFields(this.fields_);
-}
+};
 
 // TODO: Pull this method into a common class, it is from jsonperson.js
 //JsonMessage.constructArrayObject = function(map, fieldName, className) {
@@ -50,6 +50,6 @@ JsonMessageCollection.copyFields = function(oldObject) {
     newObject[field] = oldObject[field];
   }
   return newObject;
-}
+};
 
 

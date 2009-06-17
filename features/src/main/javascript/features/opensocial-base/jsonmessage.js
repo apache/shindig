@@ -31,7 +31,7 @@ JsonMessage.inherits(opensocial.Message);
 
 JsonMessage.prototype.toJsonObject = function() {
   return JsonMessage.copyFields(this.fields_);
-}
+};
 
 // TODO: Pull into common class as well
 JsonMessage.copyFields = function(oldObject) {
@@ -40,6 +40,6 @@ JsonMessage.copyFields = function(oldObject) {
     newObject[field] = oldObject[field];
   }
   return newObject;
-}
+};
 
 

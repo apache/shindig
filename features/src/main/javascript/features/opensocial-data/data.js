@@ -169,7 +169,7 @@ opensocial.data.RequestDescriptor.prototype.getSendRequestClosure = function() {
   var self = this;
   return function() {
     self.sendRequest();
-  }
+  };
 };
 
 
@@ -329,7 +329,7 @@ opensocial.data.createSharedRequestCallback_ = function() {
   var callbacks = opensocial.data.currentAPIRequestCallbacks_;
   return function(data) {
     opensocial.data.onAPIResponse(data, keys, callbacks);
-  }
+  };
 };
 
 

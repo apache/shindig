@@ -50,7 +50,7 @@ var NumberFormatConstants_en = {
 NumberFormatTest.prototype.setUp = function() {
     gadgets.i18n.numFormatter_
             = new gadgets.i18n.NumberFormat(NumberFormatConstants_en);
-}
+};
 
 NumberFormatTest.prototype.testStandardFormat = function() {
     var str;

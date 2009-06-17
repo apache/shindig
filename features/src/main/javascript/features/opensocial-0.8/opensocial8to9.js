@@ -28,7 +28,7 @@ opensocial.DataRequest.prototype.newUpdatePersonAppDataRequest = function(id,
     throw Error("Cannot update app data for person "  + id);
   }
   return this.newUpdatePersonAppDataRequest_09(key, value);
-}
+};
 
 opensocial.DataRequest.prototype.newRemovePersonAppDataRequest_09 =
     opensocial.DataRequest.prototype.newRemovePersonAppDataRequest;
@@ -42,5 +42,5 @@ opensocial.DataRequest.prototype.newRemovePersonAppDataRequest = function(id,
   }
 
   return this.newRemovePersonAppDataRequest_09(keys);
-}
+};
     
