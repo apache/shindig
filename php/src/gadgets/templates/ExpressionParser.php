@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,7 +29,6 @@
 
 //TODO == seems to not be working correctly
 //TODO support unary expressions, ie: ${Foo * -Bar}, or simpler: ${!Foo}
-//TODO support string variables, ie 'Red' and it's variants like 'Red\'' and '"Red"', etc
 
 class ExpressionException extends Exception {
 }
@@ -83,11 +81,23 @@ class ExpressionParser {
    * @return mixed value
    */
   static public function evaluateVar($var, $dataContext) {
+    if (empty($var)) {
+      throw new ExpressionException("Invalid variable statement");
+    }
+    if (strtolower($var) == 'null') {
+      return null;
+    }
+    if (strtolower($var) == 'false') {
+      return false;
+    }
+    if (strtolower($var) == 'true') {
+      return true;
+    }
     if ($var === null || $var === false) {
       return $var;
     }
-    if (empty($var)) {
-      throw new ExpressionException("Invalid variable statement");
+    if ($var[0] == '"' || $var[0] == "'") {
+      return substr($var, 1, strlen($var) - 2);
     }
     if (in_array($var, self::$reservedWords)) {
       throw new ExpressionException("Variable name  " . htmlentities($var) . " is reserved word");
@@ -138,16 +148,16 @@ class ExpressionParser {
     // that expression would result in: Array ( [0] => Cur.id == 1 [1] => Cur.id == 2 ? 12 : 1 [2] => 2 ), which will case self::evaluate()
     // to recurse on the the array element that contains a nested ternary expression
     $nestCounter = 0;
-    for ($i = 0 ; $i < strlen($expression) ; $i++) {
+    for ($i = 0; $i < strlen($expression); $i ++) {
       $char = $expression[$i];
       if ($char == '?') {
-        $nestCounter++;
+        $nestCounter ++;
       } elseif ($char == ':') {
         if ($nestCounter == 0) {
           $result[1] = trim(substr($expression, 0, $i - 1));
           $result[2] = trim(substr($expression, $i + 1));
         } else {
-          $nestCounter--;
+          $nestCounter --;
         }
       }
     }
@@ -159,14 +169,31 @@ class ExpressionParser {
   }
 
   /**
+   * Misc function to convert an array to string, the reason a plain implode() doesn't
+   * always work is because it'll complain about array to string conversions if
+   * the array contains array's as entries
+   *
+   * @param $array
+   * @return string
+   */
+  static private function arrayToString($array) {
+    foreach ($array as $key => $entry) {
+      if (is_array($entry)) {
+        $array[$key] = self::arrayToString($entry);
+      }
+    }
+    return implode(',', $array);
+  }
+
+  /**
    * Returns the string value of the (mixed) $val, ie:
    * on array, return "1, 2, 3, 4"
    * on int, return "1"
    * on string, return as is
    */
   static public function stringValue($val) {
-    if (is_array($val)) {
-      return implode(',', $val);
+    if (@is_array($val)) {
+      return self::arrayToString($val);
     } elseif (is_numeric($val)) {
       return (string)$val;
     } else {
@@ -175,9 +202,12 @@ class ExpressionParser {
   }
 
   static private function isOperand($string, $index = 0) {
+
     if (is_array($string)) {
       // complex types are always operands
       return true;
+    } elseif (!isset($string[$index])) {
+      return false;
     } else {
       return ((! self::isOperator($string, $index) && ($string[$index] != "(") && ($string[$index] != ")")) ? true : false);
     }
@@ -226,7 +256,7 @@ class ExpressionParser {
   }
 
   static private function top($stack) {
-    return ($stack[count($stack) - 1]);
+    return isset($stack[count($stack) - 1]) ? ($stack[count($stack) - 1]) : null;
   }
 
   static private function precedence($operator) {
@@ -306,14 +336,14 @@ class ExpressionParser {
       if ($str[$i] == '[') {
         if (! empty($temp)) {
           $tokens[$tokensIndex] = $temp;
-          $tokensIndex++;
+          $tokensIndex ++;
         }
         $tokenOperand = array_pop($tokens);
-        if (!self::isOperand($tokenOperand)) {
+        if (! self::isOperand($tokenOperand)) {
           throw new ExpressionException("Trying to reference an index on an operator");
         }
         $tokenOperand = self::evaluateVar($tokenOperand, self::$dataContext);
-        if (!is_array($tokenOperand)) {
+        if (! is_array($tokenOperand)) {
           throw new ExpressionException("Trying to reference an index on a non-array value");
         }
         $resolved = false;
@@ -328,7 +358,7 @@ class ExpressionParser {
           } elseif ($char == ']') {
             if ($nestCounter == 0) {
               $indexResult = self::evaluate($indexExpression, self::$dataContext);
-              if (!isset($tokenOperand[$indexResult])) {
+              if (! isset($tokenOperand[$indexResult])) {
                 $resolved = null;
               } else {
                 $resolved = $tokenOperand[$indexResult];
@@ -346,7 +376,7 @@ class ExpressionParser {
         $i += $expressionLength + 1;
         if ($resolved === null && $i < (strlen($str) - 1)) {
           // a null value is ok for a Foo[Bar] expression, but an "property not found" exception on Foo[Bar].id
-          if ($str[$i] != ' ' && !self::isOperator($str, $i)) {
+          if ($str[$i] != ' ' && ! self::isOperator($str, $i)) {
             throw new ExpressionException("Trying to get a property on a null value");
           }
         }
@@ -355,7 +385,35 @@ class ExpressionParser {
         continue;
       }
 
-      // Regular operant/operator token parsing
+      if ($str[$i] == '"' || $str[$i] == "'") {
+        // properly parse strings as one token so that operators and spaces aren't seen as seperators
+        if (! empty($temp)) {
+          $tokens[$tokensIndex] = $temp;
+          $tokensIndex ++;
+        }
+        $quote = $str[$i];
+        $foundEndQuote = false;
+        $string = $quote;
+        for ($y = $i + 1; $y < strlen($str) ; $y++) {
+          $i ++;
+          $string .= $str[$y];
+          if ($str[$y] == $quote) {
+            if ($y > 1 && $str[$y - 1] != '\\') {
+              // + and previous char wasn't a \
+              $foundEndQuote = true;
+              break;
+            }
+          }
+        }
+        if (!$foundEndQuote) {
+          throw new ExpressionException("Unterminated string");
+        }
+        $tokens[$tokensIndex] = $string;
+        $tokensIndex ++;
+        continue;
+      }
+
+      // Regular operant/operator token
       if ($str[$i] == ' ' || $str[$i] == "\t" || $str[$i] == "\n" || $str == "\r") {
         if (! empty($temp)) {
           $tokens[$tokensIndex] = $temp;
@@ -401,7 +459,7 @@ class ExpressionParser {
     $returnVal = 0;
     // JSP EL doesn't allow $A = 'foo'; $b = 1; $C = $A + $B, so make sure that both variables are numberic when doing arithmatic or boolean operations
     if ($sym != 'empty' && (! is_numeric($var1) || ! is_numeric($var2))) {
-      throw new ExpressionException("Can't perform arithmatic or boolean operation (" . htmlentities($sym) . "on non numeric values: " . htmlentities($var1) . ", " . htmlentities($var2) . ")");
+      throw new ExpressionException("Can't perform arithmatic or boolean operation (" . htmlentities($sym) . ") on non numeric values: " . htmlentities($var1) . ", " . htmlentities($var2) . ")");
     }
     //TODO variable type coercion in JSP EL is different from PHP, it might be prudent to code out the same behavior
     switch ($sym) {

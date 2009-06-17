@@ -22,10 +22,13 @@
  * A JSON-RPC specific implementation of RequestItem
  */
 class RpcRequestItem extends RequestItem {
-  
+
   private $data;
 
   public function __construct($rpc, SecurityToken $token) {
+    if (empty($rpc['method'])) {
+      throw new SocialSpiException("Missing method in RPC call");
+    }
     parent::__construct($rpc['method'], $rpc['method'], $token);
     if (isset($rpc->params)) {
       $this->data = $rpc['params'];
