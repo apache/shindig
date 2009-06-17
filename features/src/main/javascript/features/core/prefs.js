@@ -150,6 +150,7 @@ gadgets.Prefs.setDefaultPrefs_ = function(defprefs) {
  * @return {String} The preference; if not set, an empty string
  */
 gadgets.Prefs.prototype.getString = function(key) {
+  if (key === ".lang") { key = "lang"; }
   return prefs[key] ? esc(prefs[key]) : "";
 };
 
