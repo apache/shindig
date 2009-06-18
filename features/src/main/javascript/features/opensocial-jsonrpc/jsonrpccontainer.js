@@ -206,7 +206,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
       "POST_DATA" : gadgets.json.stringify(jsonBatchData)
     };
 
-    var url = [this.baseUrl_, "/rpc"];
+    var url = [this.baseUrl_, "/social/rpc"];
     var token = shindig.auth.getSecurityToken();
     if (token) {
       url.push("?st=", encodeURIComponent(token));
@@ -426,6 +426,29 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
 
     return new JsonRpcRequestItem(rpc);
   };
+
+  JsonRpcContainer.prototype.invalidateCache = function() {
+    var rpc = { method : "cache.invalidate" };
+    var invalidationKeys = { invalidationKeys : ["@viewer"] };
+    rpc.params = invalidationKeys;
+
+    var makeRequestParams = {
+      "CONTENT_TYPE" : "JSON",
+      "METHOD" : "POST",
+      "AUTHORIZATION" : "SIGNED",
+      "POST_DATA" : gadgets.json.stringify(rpc)
+    };
+
+    var url = [this.baseUrl_, "/gadgets/api/rpc"];
+    var token = shindig.auth.getSecurityToken();
+    if (token) {
+      url.push("?st=", encodeURIComponent(token));
+    }
+
+    this.sendRequest(url.join(''), null, makeRequestParams,
+        "application/json");
+  };
+
 })();
 
 JsonRpcContainer.prototype.newMessage = function(body, opt_params) {

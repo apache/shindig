@@ -448,6 +448,14 @@ opensocial.newNavigationParameters = function(params) {
 };
 
 
+/**
+ * Invalidates all resources cached for the current viewer.
+ */
+opensocial.invalidateCache = function() {
+  opensocial.Container.get().invalidateCache();
+};
+
+
 // TODO(doll): Util function - pull up the gadgets inherits in shindig so that
 // opensocial and gadgets use the same one
 /** @private */

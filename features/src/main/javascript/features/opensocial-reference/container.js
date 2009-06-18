@@ -467,6 +467,11 @@ opensocial.Container.prototype.newEnvironment = function(domain,
   return new opensocial.Environment(domain, supportedFields);
 };
 
+/**
+ * Invalidates all resources cached for the current viewer.
+ */
+opensocial.Container.prototype.invalidateCache = function() {
+};
 
 /**
  * Returns true if the specified value is an array
@@ -523,7 +528,7 @@ var uriCallback = {
       return encodeURI(decodeURI(uri));
     }
     // This callback can be replaced with one that passes the URL through
-    // a proxy that checks the mimetype.    
+    // a proxy that checks the mimetype.
     return null;
   }
 };

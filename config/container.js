@@ -20,16 +20,16 @@
 // Default container configuration. To change the configuration, you have two options:
 //
 // A. If you run the Java server: Create your own "myContainer.js" file and
-// modify the value in web.xml. 
+// modify the value in web.xml.
 //
 //  B. If you run the PHP server: Create a myContainer.js, copy the contents of container.js to it,
-//  change 
+//  change
 //		{"gadgets.container" : ["default"],
 //  to
 //		﻿{"gadgets.container" : ["myContainer"],
 // And make your changes that you need to myContainer.js.
-// Just make sure on the iframe URL you specify &container=myContainer 
-// for it to use that config. 
+// Just make sure on the iframe URL you specify &container=myContainer
+// for it to use that config.
 //
 // All configurations will automatically inherit values from this
 // config, so you only need to provide configuration for items
@@ -83,7 +83,7 @@
 "gadgets.osDataUri" : "http://%host%/social/rpc",
 
 // Uncomment these to switch to a secure version
-// 
+//
 //"gadgets.securityTokenType" : "secure",
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
@@ -136,7 +136,7 @@
   "opensocial-0.8" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-    "path" : "http://%host%/social",
+    "path" : "http://%host%",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
