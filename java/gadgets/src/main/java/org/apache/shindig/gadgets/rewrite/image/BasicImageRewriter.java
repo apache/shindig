@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.lang.Math.abs;
-import static java.lang.Math.min;
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -36,9 +38,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageIOOutputter;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageOutputter;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
@@ -269,30 +271,38 @@ public class BasicImageRewriter implements ImageRewriter {
       Integer requestedHeight, int extraWidth, int extraHeight) {
     int widthStretch = requestedWidth - extraWidth;
     int heightStretch = requestedHeight - extraHeight;
+    int imageType = ImageUtils.isOpaque(image)
+        ? BufferedImage.TYPE_3BYTE_BGR
+        : BufferedImage.TYPE_INT_ARGB;
+
     image = ImageUtils.getScaledInstance(image, widthStretch, heightStretch,
-        RenderingHints.VALUE_INTERPOLATION_BICUBIC, true /* higherQuality */);
+        VALUE_INTERPOLATION_BICUBIC, true /* higherQuality */, imageType);
 
     if (image.getWidth() != requestedWidth || image.getHeight() != requestedHeight) {
-      image = stretchImage(image, requestedWidth, requestedHeight);
+      image = stretchImage(image, requestedWidth, requestedHeight, imageType);
     }
     return image;
   }
 
   private BufferedImage stretchImage(BufferedImage image, Integer requestedWidth,
-      Integer requestedHeight) {
-    BufferedImage scaledImage = new BufferedImage(requestedWidth, requestedHeight,
-        BufferedImage.TYPE_INT_ARGB_PRE);
+      Integer requestedHeight, int imageType) {
+    BufferedImage scaledImage = new BufferedImage(requestedWidth, requestedHeight, imageType);
 
     Graphics2D g2d = scaledImage.createGraphics();
-    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-        RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
-    g2d.setColor(COLOR_TRANSPARENT);
-    g2d.fillRect(0, 0, requestedWidth, requestedHeight);
+    g2d.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+    fillWithTransparent(g2d, requestedWidth, requestedHeight);
 
     g2d.drawImage(image, 0, 0, requestedWidth, requestedHeight, null);
     image = scaledImage;
     return image;
+  }
+
+  private void fillWithTransparent(Graphics2D g2d, Integer requestedWidth,
+      Integer requestedHeight) {
+    g2d.setComposite(AlphaComposite.Clear);
+    g2d.setColor(COLOR_TRANSPARENT);
+    g2d.fillRect(0, 0, requestedWidth, requestedHeight);
+    g2d.setComposite(AlphaComposite.SrcOver);
   }
 
   private HttpResponse getOptimizer(HttpResponse response, ImageFormat imageFormat,
@@ -353,8 +363,8 @@ public class BasicImageRewriter implements ImageRewriter {
     return pathExtMatches;
   }
 
-  private boolean isResizeRequired(Integer resize_w, Integer resize_h, ImageInfo imageInfo) {
-    return resize_w != imageInfo.getWidth() || resize_h != imageInfo.getWidth();
+  private boolean isResizeRequired(int resize_w, int resize_h, ImageInfo imageInfo) {
+    return resize_w != imageInfo.getWidth() || resize_h != imageInfo.getHeight();
   }
 
   /**
