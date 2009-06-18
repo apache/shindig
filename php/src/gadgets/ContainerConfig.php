@@ -62,7 +62,7 @@ class ContainerConfig {
       $this->config[$container][$key] = $val;
     }
   }
-  
+
   public static function removeComments($str) {
     // remove /* */ style comments
     $str = preg_replace('@/\\*.*?\\*/@s', '', $str);

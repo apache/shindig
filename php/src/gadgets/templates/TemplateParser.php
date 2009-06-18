@@ -21,7 +21,6 @@
 //TODO for some reason the OSML spec stats you have to <Require feature="osml"> to use the os:Name etc tags yet no such feature exists, and for the code path's here it's not required at all..
 //TODO remove the os-templates javascript if all the templates are rendered on the server (saves many Kb's in gadget size)
 //TODO support for OSML tags (os:name, os:peopleselector, os:badge) and OSML functions (os:render, osx:flash, osx:parsejson, etc)
-//TODO add variable resolving by checking the order of precedence: ${Cur}, ${My} and then ${Top} (top == global data context)
 //TODO support os-template tags on OSML tags, ie this should work: <os:Html if="${Foo}" repeat="${Bar}" />
 
 require_once 'ExpressionParser.php';
