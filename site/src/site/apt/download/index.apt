@@ -40,6 +40,31 @@
 
 ~~ ** Shindig 1.1 (OpenSocial Spec 0.9)
 ~~ ** Shindig 1.0 (OpenSocial Spec 0.8.1)
+
+  {{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/}}
+
+*-------------------------+-----------------+----------+
+||                        || Implementation || Download Link
+*-------------------------+-----------------+----------+
+| Shindig (tar.bz2)       | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.bz2}shindig-1.0-incubating-java.tar.bz2}}
+*-------------------------+-----------------+----------+
+| Shindig (tar.gz)        | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.gz}shindig-1.0-incubating-java.tar.gz}}
+*-------------------------+-----------------+----------+
+| Shindig (zip)           | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.zip}shindig-1.0-incubating-java.zip}}
+*-------------------------+-----------------+----------+
+| Shindig (tar.bz2)       | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.bz2}shindig-1.0-incubating-php.tar.bz2}}
+*-------------------------+-----------------+----------+
+| Shindig (tar.gz)        | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.gz}shindig-1.0-incubating-php.tar.gz}}
+*-------------------------+-----------------+----------+
+| Shindig (zip)           | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.zip}shindig-1.0-incubating-php.zip}}
+*-------------------------+-----------------+----------+
+| Shindig (tar.bz2)       | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.bz2}shindig-1.0-incubating-source.tar.bz2}}
+*-------------------------+-----------------+----------+
+| Shindig (tar.gz)        | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.gz}shindig-1.0-incubating-source.tar.gz}}
+*-------------------------+-----------------+----------+
+| Shindig (zip)           | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.zip}shindig-1.0-incubating-source.zip}}
+*-------------------------+-----------------+----------+
+
 ~~ Java+PHP
 
   You could also download the current documentation, i.e. this website, as a
