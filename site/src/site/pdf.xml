@@ -21,13 +21,22 @@
  */
  -->
 
-<document xmlns="http://maven.apache.org/DOCUMENT/1.0.0"
+<document xmlns="http://maven.apache.org/DOCUMENT/1.0.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.0 http://maven.apache.org/xsd/document-1.0.0.xsd"
+  xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 http://maven.apache.org/xsd/document-1.0.1.xsd"
   outputName="shindig-site">
+
   <meta>
-    <title>Shindig Documentation</title>
+    <title>Apache Incubator Shindig Documentation</title>
     <author>The Apache Shindig Team</author>
+    <keyWords>
+      <keyWord>Open Social</keyWord>
+      <keyWord>Social Network</keyWord>
+      <keyWord>Reference Implementation</keyWord>
+      <keyWord>Java</keyWord>
+      <keyWord>PHP</keyWord>
+      <keyWord>Javascript</keyWord>
+    </keyWords>
   </meta>
 
   <toc name="Table of Contents">
@@ -52,4 +61,14 @@
     <item name="Powered By" ref="powered-by.apt"/>
     <item name="Resources" ref="resources.apt"/>
   </toc>
+
+  <cover>
+    <coverTitle>Apache Incubator Shindig</coverTitle>
+    <coverSubTitle>v. 1.0</coverSubTitle>
+    <coverType>User Guide</coverType>
+    <companyName>The Apache Software Foundation</companyName>
+    <companyLogo>./images/logos/apache-incubator-logo.png</companyLogo>
+    <projectName>Apache Incubator Shindig</projectName>
+    <projectLogo>./images/logos/shindig-logo.png</projectLogo>
+  </cover>
 </document>
