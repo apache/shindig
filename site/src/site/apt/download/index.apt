@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-05-03
+ 2009-06-20
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -36,10 +36,13 @@
 
 * General Availability Releases
 
+** Shindig 1.1 (OpenSocial Spec 0.9)
+
   <No releases exist yet.>
 
-~~ ** Shindig 1.1 (OpenSocial Spec 0.9)
-~~ ** Shindig 1.0 (OpenSocial Spec 0.8.1)
+** Shindig 1.0 (OpenSocial Spec 0.8.1)
+
+  The Shindig 1.0 (OpenSocial Spec 0.8.1) was released the 2009-06-19.
 
   {{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/}}
 
@@ -65,7 +68,7 @@
 | Shindig (zip)           | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.zip}shindig-1.0-incubating-source.zip}}
 *-------------------------+-----------------+----------+
 
-~~ Java+PHP
+** Documentation
 
   You could also download the current documentation, i.e. this website, as a
   {{{../shindig-site-1.1-SNAPSHOT-site.jar}single jar}} file or as {{{../shindig-site.pdf}PDF}} file.
