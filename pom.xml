@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>5</version>
+    <version>6</version>
   </parent>
 
   <groupId>org.apache.shindig</groupId>
@@ -73,16 +73,6 @@
   <!-- D I S T R I B U T I O N  M A N A G E M E N T                           -->
   <!-- ====================================================================== -->
   <distributionManagement>
-    <repository>
-      <id>apache.incubating</id>
-      <name>Apache Incubating Repository</name>
-      <url>scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository</url>
-    </repository>
-    <snapshotRepository>
-      <id>apache.snapshots</id>
-      <name>Apache Development Snapshot Repository</name>
-      <url>scp://people.apache.org/www/people.apache.org/repo/m2-snapshot-repository</url>
-    </snapshotRepository>
     <!-- This is the technical website for Shindig 1.1.x -->
     <site>
       <id>apache.website</id>
@@ -1164,10 +1154,6 @@
     <repository>
       <id>oauth</id>
       <url>http://oauth.googlecode.com/svn/code/maven</url>
-    </repository>
-    <repository>
-      <id>apache-incubator</id>
-      <url>http://people.apache.org/repo/m2-incubating-repository</url>
     </repository>
     <!-- for jstl-1.2 for now.. -->
     <repository>
