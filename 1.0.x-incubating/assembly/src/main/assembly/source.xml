@@ -46,6 +46,9 @@
         <exclude>**/maven-eclipse.xml</exclude>
         <exclude>**/.deployables/**</exclude>
         <exclude>**/.wtpmodules/**</exclude>
+        <exclude>java/samples/create.sql</exclude>
+        <exclude>java/samples/drop.sql</exclude>
+        <exclude>java/samples/derby.log</exclude>
         <!-- maven -->
         <exclude>**/target/**</exclude>
         <exclude>**/pom.xml.releaseBackup</exclude>
