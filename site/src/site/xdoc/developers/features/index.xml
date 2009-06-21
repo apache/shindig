@@ -181,7 +181,7 @@ under the License.
         your gadget will look like the following:</p>
       <macro name="snippet">
         <param name="id" value="TabExample"/>
-        <param name="url" value="file:///D:/java/apache.org/incubator/shindig/trunk/site/src/site/resources/developers/features/simpletab.xml"/>
+        <param name="url" value="http://svn.apache.org/repos/asf/incubator/shindig/trunk/site/src/site/resources/developers/features/simpletab.xml"/>
       </macro>
       <p>You could test your code using the Gadget testing container at:
         <a href="http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html">http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html</a></p>
