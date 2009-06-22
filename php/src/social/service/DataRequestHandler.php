@@ -40,11 +40,11 @@ abstract class DataRequestHandler {
           $response = $this->handleGet($requestItem);
         }
       } elseif (in_array($method, self::$UPDATE_SYNONYMS)) {
-        $response = $this->handlePost($requestItem);
+        $response = $this->handlePut($requestItem);
       } elseif (in_array($method, self::$DELETE_SYNONYMS)) {
         $response = $this->handleDelete($requestItem);
       } elseif (in_array($method, self::$CREATE_SYNONYMS)) {
-        $response = $this->handlePut($requestItem);
+        $response = $this->handlePost($requestItem);
       } else {
         throw new SocialSpiException("Unserviced Http method type", ResponseError::$BAD_REQUEST);
       }

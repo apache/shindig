@@ -37,7 +37,7 @@ class MessagesHandler extends DataRequestHandler {
     $userIds = $requestItem->getUsers();
     HandlerPreconditions::requireSingular($userIds, "UserId can only be singular.");
     $msgCollId = $requestItem->getParameter("msgCollId");
-    HandlerPreconditions::requireNotEmpty($msgCollId, "A message collection is required");
+    HandlerPreconditions::requireNotEmpty($msgCollId, "A message collection id is required");
 
     $token = $requestItem->getToken();
     $messageIds = $requestItem->getListParameter("messageId");
@@ -90,10 +90,18 @@ class MessagesHandler extends DataRequestHandler {
     HandlerPreconditions::requireSingular($userIds, "UserId is not singular.");
 
     $msgCollId = $requestItem->getParameter("msgCollId");
+    $entity = $requestItem->getParameter("entity");
+    
+    // If the parameters contain 'message' the request is from the old api(< 0.9).
+    if ($requestItem->getParameter("message")) {
+      $entity = $requestItem->getParameter("message");
+      $msgCollId = "@outbox";
+    }
+
     if (empty($msgCollId)) {
       // Creates a message collection.
-      $messageCollection = $requestItem->getParameter("entity");
-      HandlerPreconditions::requireNotEmpty($messageCollection, "Can't parse message collection.");
+      $messageCollection = $entity;
+      HandlerPreconditions::requireNotEmpty($messageCollection, "Filed entity not specified.");
       $title = isset($messageCollection['title']) ? trim($messageCollection['title']) : '';
       HandlerPreconditions::requireCondition(strlen($title) > 0, "Title must be specified.");
       return $this->service->createMessageCollection($userIds[0], $messageCollection, $requestItem->getToken());
@@ -101,8 +109,8 @@ class MessagesHandler extends DataRequestHandler {
       // Creates a message.
       $messageIds = $requestItem->getListParameter("messageId");
       HandlerPreconditions::requireEmpty($messageIds, "messageId cannot be specified in create method.");
-      $message = $requestItem->getParameter("entity");
-      HandlerPreconditions::requireNotEmpty($message, "Can't parse message.");
+      $message = $entity;
+      HandlerPreconditions::requireNotEmpty($message, "Filed entity not specified.");
       HandlerPreconditions::requireEmpty($messageIds, "messageId cannot be specified in create method.");
 
       // Message fields validation.
