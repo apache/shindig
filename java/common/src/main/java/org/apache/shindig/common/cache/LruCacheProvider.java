@@ -19,6 +19,7 @@
 package org.apache.shindig.common.cache;
 
 import com.google.common.collect.MapMaker;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -61,15 +62,19 @@ public class LruCacheProvider implements CacheProvider {
     if (injector != null && name != null) {
       String key = "shindig.cache.lru." + name + ".capacity";
       Key<String> guiceKey = Key.get(String.class, Names.named(key));
-      if (injector.getBinding(guiceKey) == null) {
-        LOG.warning("No LRU capacity configured for " + name);
-      } else {
-        String value = injector.getInstance(guiceKey);
-        try {
-          return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-          LOG.warning("Invalid LRU capacity configured for " + name);
+      try {
+        if (injector.getBinding(guiceKey) == null) {
+          LOG.warning("No LRU capacity configured for " + name);
+        } else {
+          String value = injector.getInstance(guiceKey);
+          try {
+            return Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            LOG.warning("Invalid LRU capacity configured for " + name);
+          }
         }
+      } catch ( ConfigurationException e ) {
+        return defaultCapacity;
       }
     }
     return defaultCapacity;

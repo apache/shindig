@@ -43,7 +43,6 @@ public class JsonLibTestsGuiceModule extends AbstractModule {
 
     bind(Map.class).to(HashMap.class);
     bind(List.class).to(ArrayList.class);
-    bind(Map[].class).to(HashMap[].class);
     bind(JsonConfig.class).annotatedWith(Names.named("ShindigJsonConfig")).to(
         TestJsonLibConfig.class);
   }
