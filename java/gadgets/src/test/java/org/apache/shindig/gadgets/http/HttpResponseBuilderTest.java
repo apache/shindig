@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -24,9 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -61,7 +62,7 @@ public class HttpResponseBuilderTest {
 
   @Test
   public void addHeadersMap() {
-    Map<String, String> headers = ImmutableMap.of("foo", "bar", "blah", "blah");    
+    Map<String, String> headers = ImmutableMap.of("foo", "bar", "blah", "blah");
 
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeaders(headers);
@@ -105,6 +106,7 @@ public class HttpResponseBuilderTest {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Pragma", "no-cache")
         .addHeader("Expires", "some time stamp normally goes here")
+        .addHeader("Cache-Control", "no-cache")
         .setCacheTtl(100);
 
     Multimap<String, String> headers = builder.getHeaders();

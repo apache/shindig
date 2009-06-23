@@ -17,13 +17,15 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.DateUtil;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.shindig.common.util.CharsetUtil;
-import org.apache.shindig.common.util.DateUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,9 +37,9 @@ import java.util.Map;
  */
 public class HttpResponseBuilder {
   private int httpStatusCode = HttpResponse.SC_OK;
-  private Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
+  private final Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
   private byte[] responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
-  private Map<String, String> metadata = Maps.newHashMap();
+  private final Map<String, String> metadata = Maps.newHashMap();
 
   public HttpResponseBuilder() {}
 
@@ -72,7 +74,7 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**   
+  /**
    * @param responseBytes The response body. Copied when set.
    */
   public HttpResponseBuilder setResponse(byte[] responseBytes) {
@@ -149,7 +151,7 @@ public class HttpResponseBuilder {
   public HttpResponseBuilder setCacheTtl(int cacheTtl) {
     headers.removeAll("Pragma");
     headers.removeAll("Expires");
-    headers.put("Cache-Control", "public,max-age=" + cacheTtl);
+    headers.replaceValues("Cache-Control", ImmutableList.of("public,max-age=" + cacheTtl));
     return this;
   }
 
@@ -167,7 +169,7 @@ public class HttpResponseBuilder {
   /**
    * Sets cache-control headers indicating the response is not cacheable.
    */
-  private List<String> NO_CACHE_HEADER = ImmutableList.of("no-cache");
+  private final List<String> NO_CACHE_HEADER = ImmutableList.of("no-cache");
   public HttpResponseBuilder setStrictNoCache() {
     headers.replaceValues("Cache-Control", NO_CACHE_HEADER);
     headers.replaceValues("Pragma", NO_CACHE_HEADER);

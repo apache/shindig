@@ -21,11 +21,11 @@ import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
+
+import com.google.inject.Inject;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
@@ -64,7 +64,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   public boolean addResponse(HttpRequest request, HttpResponse response) {
-    if (isCacheable(request) && isCacheable(response)) {
+    if (isCacheable(request, response)) {
       // Both are cacheable. Check for forced cache TTL overrides.
       HttpResponseBuilder responseBuilder = new HttpResponseBuilder(response);
       int forcedTtl = request.getCacheTtl();
@@ -91,16 +91,26 @@ public abstract class AbstractHttpCache implements HttpCache {
     return null;
   }
 
-  protected boolean isCacheable(HttpResponse response) {
-    return !response.isStrictNoCache();
-  }
-
   protected boolean isCacheable(HttpRequest request) {
     if (request.getIgnoreCache()) {
       return false;
     }
     return !(!"GET".equals(request.getMethod()) &&
         !"GET".equals(request.getHeader("X-Method-Override")));
+  }
+
+  protected boolean isCacheable(HttpRequest request, HttpResponse response) {
+    if (!isCacheable(request)) {
+      return false;
+    }
+
+    if (request.getCacheTtl() != -1) {
+      // Caching was forced. Ignore what the response wants.
+      return true;
+    }
+
+    // If the HTTP response allows for it, we can cache.
+    return !response.isStrictNoCache();
   }
 
   /**

@@ -24,9 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -35,6 +32,10 @@ import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
@@ -297,6 +298,34 @@ public class AbstractHttpCacheTest {
     assertTrue(cache.addResponse(request, response));
 
     assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
+  }
+
+  @Test
+  public void addResponseWithForcedTtlAndStrictNoCache() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setCacheTtl(10);
+
+    String key = cache.createKey(request);
+    HttpResponse response = new HttpResponseBuilder()
+        .setResponseString("result")
+        .setStrictNoCache()
+        .create();
+
+    assertTrue(cache.addResponse(request, response));
+
+    assertEquals("public,max-age=10", cache.map.get(key).getHeader("Cache-Control"));
+  }
+
+  @Test
+  public void addResponseWithNoCachingHeaders() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI);
+
+    String key = cache.createKey(request);
+    HttpResponse response = new HttpResponse("no headers");
+
+    assertTrue(cache.addResponse(request, response));
+
+    assertEquals("no headers", cache.map.get(key).getResponseAsString());
   }
 
   @Test
