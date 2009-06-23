@@ -1,15 +1,94 @@
-There are four parts to the java gadget servers:
+                          Apache Shindig Java
 
-* java/common The common java code that both the social data server and the
-  gadget rendering server rely on.
+  What is it?
+  -----------
 
-* java/gadgets This server is used for rendering gadgets.
+  Shindig is a JavaScript container and implementations of the backend APIs
+  and proxy required for hosting OpenSocial applications.
 
-* java/social-api This server is used to provide social data for gadgets. Long
-  term, it will implement the OpenSocial RESTful apis.
+  This is the Java implementation of Shindig. If you are looking to the PHP 
+  implementation, please visit our website.
 
-* java/server This directory only contains a pom and a web.xml file. It is used
-  to run both the gadget rendering code and the social data code at once. In
-  order to use the samplecontainer you must run this server.
+  Documentation
+  -------------
 
-For more information, see http://incubator.apache.org/projects/shindig.html
+  The most up-to-date documentation can be found at http://incubator.apache.org/shindig/
+  and at http://incubator.apache.org/shindig/developers/java/index.html for specific 
+  Java documentation.
+
+  Release Notes
+  -------------
+
+  The full list of changes can be found at https://issues.apache.org/jira/browse/SHINDIG.
+
+  System Requirements
+  -------------------
+
+  Java:
+    1.5 or above.
+  Servlet container:
+    Apache Tomcat or other compatible Java Servlet containers.
+  Memory:
+    128MB minimum requirement.
+  Disk:
+    32MB minimum requirement. 
+  Operating System:
+    No minimum requirement. On Windows, Windows NT and above or Cygwin is 
+    required for the startup scripts. Tested on Windows XP, Fedora Core 
+    and Mac OS X.
+
+  Installing Shindig Java
+  -----------------------
+
+  Unzip the distribution archive, i.e. shindig-1.0-incubating-java.zip to 
+  the directory you wish to install Shindig. 
+
+  The following explains how to deploy the Shindig war file to Apache 
+  Tomcat. If you are using an other container, please read its documentation
+  on how to proceed.
+
+  The easiest way to deploy Shindig on Apache Tomcat is to rename the 
+  shindig-server-1.0-incubating.war file to ROOT.war and drop it in the 
+  Tomcat webapps.
+  Be sure to delete $TOMCAT_HOME/webapps/ROOT dir before starting Tomcat.
+
+  Licensing
+  ---------
+
+  Please see the file called LICENSE.
+
+  Shindig URLS
+  ------------
+
+  Home Page:          http://incubator.apache.org/shindig/
+  Downloads:          http://incubator.apache.org/shindig/download/index.html
+  Mailing Lists:      http://incubator.apache.org/shindig/mail-lists.html
+  Source Code:        http://svn.apache.org/repos/asf/incubator/shindig/
+  Issue Tracking:     https://issues.apache.org/jira/browse/SHINDIG
+  Wiki:               http://cwiki.apache.org/confluence/display/SHINDIG/
+
+This distribution includes cryptographic software.  The country in
+which you currently reside may have restrictions on the import,
+possession, use, and/or re-export to another country, of
+encryption software.  BEFORE using any encryption software, please
+check your country's laws, regulations and policies concerning the
+import, possession, or use, and re-export of encryption software, to
+see if this is permitted.  See <http://www.wassenaar.org/> for more
+information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and
+Security (BIS), has classified this software as Export Commodity
+Control Number (ECCN) 5D002.C.1, which includes information security
+software using or performing cryptographic functions with asymmetric
+algorithms.  The form and manner of this Apache Software Foundation
+distribution makes it eligible for export under the License Exception
+ENC Technology Software Unrestricted (TSU) exception (see the BIS
+Export Administration Regulations, Section 740.13) for both object
+code and source code.
+
+The following provides more details on the included cryptographic
+software:
+
+    Apache Shindig interfaces with the Java JCE APIs to provide
+    encryption of messages using the AES standard.
+
