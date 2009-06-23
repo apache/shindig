@@ -25,7 +25,7 @@ features/core.io/feature.xml
 features/core/feature.xml
 features/dynamic-height/feature.xml
 features/flash/feature.xml
-+features/i18n/feature.xml
+features/i18n/feature.xml
 features/locked-domain/feature.xml
 features/minimessage/feature.xml
 features/oauthpopup/feature.xml
