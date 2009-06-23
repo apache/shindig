@@ -22,7 +22,7 @@ under the License.
 
   <!--
     Mandatory Default Cache configuration. These settings will be applied to caches
-    created programmtically using CacheManager.add(String cacheName).
+    created programmatically using CacheManager.add(String cacheName).
     
     The defaultCache has an implicit name "default" which is a reserved cache name.
   -->
@@ -75,6 +75,14 @@ under the License.
   -->
   <cache name="httpResponses"
     maxElementsInMemory="10000"
+    eternal="true"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache parsed expressions based on their content -->
+  <cache name="expressions"
+    maxElementsInMemory="1000"
     eternal="true"
     overflowToDisk="false"
     diskPersistent="false"

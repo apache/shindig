@@ -114,11 +114,11 @@ public class TemplateRewriterTest {
     rewriter = new TemplateRewriter(
         new Provider<TemplateProcessor>() {
           public TemplateProcessor get() {
-            return new DefaultTemplateProcessor(new Expressions());
+            return new DefaultTemplateProcessor(Expressions.forTesting());
           }
         },
         new FakeMessageBundleFactory(),
-        new Expressions(),
+        Expressions.forTesting(),
         new DefaultTagRegistry(handlers), 
         new FakeTemplateLibraryFactory(),
         new FakeContainerConfig());

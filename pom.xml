@@ -1203,6 +1203,16 @@
       <id>jboss</id>
       <url>http://repository.jboss.com/maven2</url>
     </repository>
+    <repository>
+      <id>sakai repo temp for Juel</id>
+      <url>http://source.sakaiproject.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <!-- ====================================================================== -->
@@ -1440,20 +1450,15 @@
         <artifactId>sanselan</artifactId>
         <version>0.97-incubator</version>
       </dependency>
-      <!--
-          Intentionally not using the juel-impl RC build because we care about
-          stability of that code.  juel-api only has an RC build available,
-          but is also simple enough I'm not too concerned about bugs.
-      -->
       <dependency>
-        <groupId>juel</groupId>
+        <groupId>de.odysseus.juel</groupId>
         <artifactId>juel-api</artifactId>
-        <version>2.1.1.RC2</version>
+        <version>2.1.2</version>
       </dependency>
       <dependency>
-        <groupId>juel</groupId>
+        <groupId>de.odysseus.juel</groupId>
         <artifactId>juel-impl</artifactId>
-        <version>2.1.0</version>
+        <version>2.1.2</version>
       </dependency>
       <dependency>
         <groupId>net.sf.ezmorph</groupId>

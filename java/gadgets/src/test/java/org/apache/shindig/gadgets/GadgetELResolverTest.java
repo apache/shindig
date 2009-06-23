@@ -58,7 +58,7 @@ public class GadgetELResolverTest {
     };
     
     resolver = new GadgetELResolver(gadgetContext);
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
     
     context = expressions.newELContext(resolver);
   }

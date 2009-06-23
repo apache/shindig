@@ -200,11 +200,11 @@
       <artifactId>xml-apis</artifactId>
     </dependency>
     <dependency>
-      <groupId>juel</groupId>
+      <groupId>de.odysseus.juel</groupId>
       <artifactId>juel-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>juel</groupId>
+      <groupId>de.odysseus.juel</groupId>
       <artifactId>juel-api</artifactId>
       <scope>provided</scope>
     </dependency>

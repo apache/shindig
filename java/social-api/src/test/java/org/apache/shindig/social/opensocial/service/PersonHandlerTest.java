@@ -89,7 +89,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
                "{supportedFields: {person: ['id', {name: 'familyName'}]}}" +
              "}}}");
 
-    containerConfig = new JsonContainerConfig(config, new Expressions());
+    containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     handler = new PersonHandler(personService, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());

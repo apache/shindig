@@ -19,7 +19,9 @@
 package org.apache.shindig.expressions;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -43,7 +45,7 @@ public class ExpressionsTest {
   
   @Before
   public void setUp() {
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
     variables = Maps.newHashMap();
     context = expressions.newELContext(new RootELResolver(variables));
   }
@@ -118,6 +120,105 @@ public class ExpressionsTest {
     assertNull(evaluate("${map.bar.baz}", Object.class));
   }
 
+  @Test
+  public void booleanCoercionOfBooleans() throws Exception{
+    addVariable("bool", false);
+    assertFalse(evaluate("${bool}", Boolean.class));
+    assertTrue(evaluate("${!bool}", Boolean.class));
+
+    addVariable("bool", true);
+    assertTrue(evaluate("${bool}", Boolean.class));
+    assertFalse(evaluate("${!bool}", Boolean.class));
+  }
+  
+  @Test
+  public void booleanCoercionOfNumbers() throws Exception{
+    addVariable("bool", 0);
+    assertFalse(evaluate("${bool}", Boolean.class));
+    assertTrue(evaluate("${!bool}", Boolean.class));
+
+    addVariable("bool", 1);
+    assertTrue(evaluate("${bool}", Boolean.class));
+    assertFalse(evaluate("${!bool}", Boolean.class));
+  }
+  
+  @Test
+  public void booleanCoercionOfNull() throws Exception{
+    addVariable("bool", null);
+    assertFalse(evaluate("${bool}", Boolean.class));
+    assertTrue(evaluate("${!bool}", Boolean.class));
+  }
+  
+  @Test
+  public void booleanCoercionOfStrings() throws Exception{
+    addVariable("bool", "");
+    assertFalse(evaluate("${bool}", Boolean.class));
+    assertTrue(evaluate("${!bool}", Boolean.class));
+
+    addVariable("bool", "false");
+    assertFalse(evaluate("${bool}", Boolean.class));
+    assertTrue(evaluate("${!bool}", Boolean.class));
+
+    // Case-sensitive coercion:  FALSE is true
+    addVariable("bool", "FALSE");
+    assertTrue(evaluate("${bool}", Boolean.class));
+    assertFalse(evaluate("${!bool}", Boolean.class));
+
+    addVariable("bool", "true");
+    assertTrue(evaluate("${bool}", Boolean.class));
+    assertFalse(evaluate("${!bool}", Boolean.class));
+    
+    addVariable("bool", "booga");
+    assertTrue(evaluate("${bool}", Boolean.class));
+    assertFalse(evaluate("${!bool}", Boolean.class));
+  }
+  
+  @Test
+  public void iterableCoercionOfScalar() throws Exception {
+    addVariable("iter", "foo");
+    assertEquals(ImmutableList.of("foo"),
+        evaluate("${iter}", Iterable.class));
+  }
+  
+  @Test
+  public void iterableCoercionOfNull() throws Exception {
+    addVariable("iter", null);
+    assertEquals(ImmutableList.of(),
+        evaluate("${iter}", Iterable.class));
+  }
+  
+  @Test
+  public void iterableCoercionOfCollection() throws Exception {
+    addVariable("iter", ImmutableList.of(1, 2, 3));
+    assertEquals(ImmutableList.of(1, 2, 3),
+        evaluate("${iter}", Iterable.class));
+  }
+  
+  @Test
+  @SuppressWarnings("unchecked")
+  public void iterableCoercionOfJSONArray() throws Exception {
+    addVariable("iter", new JSONArray("[1,2,3]"));
+    assertEquals(ImmutableList.of(1, 2, 3),
+        ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
+  }
+  
+  @Test
+  @SuppressWarnings("unchecked")
+  public void iterableCoercionOfJSONObjectWithListProperty() throws Exception {
+    addVariable("iter", new JSONObject("{list: [1,2,3]}"));
+    assertEquals(ImmutableList.of(1, 2, 3),
+        ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
+  }
+  
+  @Test
+  @SuppressWarnings("unchecked")
+  public void iterableCoercionOfJSONObjectWithoutListProperty() throws Exception {
+    JSONObject json = new JSONObject("{foo: [1,2,3]}");
+    addVariable("iter", json);
+    assertEquals(ImmutableList.of(json),
+        ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
+  }
+  
   private <T> T evaluate(String expression, Class<T> type) {
     ValueExpression expr = expressions.parse(expression, type);
     return type.cast(expr.getValue(context));

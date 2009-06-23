@@ -50,7 +50,7 @@ public class MessageELResolverTest {
   @Before
   public void setUp() throws Exception {
     messageBundle = new MessageBundle(XmlUtil.parse(MESSAGE_BUNDLE));
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
     context = expressions.newELContext(new MessageELResolver(expressions, messageBundle));
   }
 

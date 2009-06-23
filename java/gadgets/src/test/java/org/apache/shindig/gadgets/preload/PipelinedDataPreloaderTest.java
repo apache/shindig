@@ -55,7 +55,7 @@ import com.google.common.collect.Maps;
  */
 public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   private ContainerConfig containerConfig;
-  private final Expressions expressions = new Expressions();
+  private final Expressions expressions = Expressions.forTesting();
 
   private static final String XML = "<Module xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE
       + "\">" + "<ModulePrefs title=\"Title\"/>"

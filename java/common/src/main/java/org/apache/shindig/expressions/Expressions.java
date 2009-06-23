@@ -18,22 +18,20 @@
  */
 package org.apache.shindig.expressions;
 
-import org.json.JSONArray;
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.cache.NullCache;
 
 import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
 
 import javax.el.ArrayELResolver;
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
-import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.el.FunctionMapper;
 import javax.el.ListELResolver;
 import javax.el.MapELResolver;
-import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
@@ -42,28 +40,35 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.odysseus.el.ExpressionFactoryImpl;
+import de.odysseus.el.tree.Tree;
+import de.odysseus.el.tree.TreeCache;
+import de.odysseus.el.tree.TreeStore;
+import de.odysseus.el.tree.impl.Builder;
 
 /**
  * A facade to the expressions functionality.
  */
 @Singleton
 public class Expressions {
+  private static final String EXPRESSION_CACHE = "expressions";
+  
   private final ExpressionFactory factory;
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
   private final Functions functions;
 
-  /**
-   * Convenience constructor that doesn't require any Functions.
+  /** 
+   * Returns an instance of Expressions that doesn't require
+   * any functions or perform any caching.  Use only for testing.
    */
-  public Expressions() {
-    this(null);
+  public static Expressions forTesting() {
+    return new Expressions(null, null);
   }
   
   @Inject
-  public Expressions(Functions functions) {
+  public Expressions(Functions functions, CacheProvider cacheProvider) {
     this.functions = functions;
-    factory = newExpressionFactory();
+    factory = newExpressionFactory(cacheProvider);
     // Stub context with no FunctionMapper, used only to parse expressions
     parseContext = new Context(null);
     defaultELResolver = createDefaultELResolver();
@@ -91,11 +96,6 @@ public class Expressions {
    * @return a ValueExpression corresponding to the expression
    */
   public ValueExpression parse(String expression, Class<?> type) {
-    if (type == JSONArray.class) {
-      // TODO: the coming version of JUEL offers support for custom type converters.  Use it!
-      return new CustomCoerce(factory.createValueExpression(parseContext, expression, String.class),
-          type);
-    }
     return factory.createValueExpression(parseContext, expression, type);
   }
   
@@ -103,10 +103,33 @@ public class Expressions {
     return factory.createValueExpression(value, type);
   }
   
-  private ExpressionFactory newExpressionFactory() {
-    Properties properties = new Properties();
-    // TODO: configure cache size?
-    return new ExpressionFactoryImpl(properties);
+  /**
+   * Create a JUEL cache of expressions.
+   */
+  private TreeCache createTreeCache(CacheProvider cacheProvider) {
+    Cache<String, Tree> treeCache;
+    if (cacheProvider == null) {
+      treeCache = new NullCache<String, Tree>();
+    } else {
+      treeCache = cacheProvider.createCache(EXPRESSION_CACHE);
+    }
+
+    final Cache<String, Tree> resolvedTreeCache = treeCache;
+    return new TreeCache() {
+      public Tree get(String expression) {
+        return resolvedTreeCache.getElement(expression);
+      }
+
+      public void put(String expression, Tree tree) {
+        resolvedTreeCache.addElement(expression, tree);
+      }
+    };
+  }
+  
+  
+  private ExpressionFactory newExpressionFactory(CacheProvider cacheProvider) {
+    TreeStore store = new TreeStore(new Builder(), createTreeCache(cacheProvider));
+    return new ExpressionFactoryImpl(store, new ShindigTypeConverter());
   }
   
   /**
@@ -171,91 +194,6 @@ public class Expressions {
     @Override
     public ValueExpression setVariable(String var, ValueExpression expression) {
       return variables.put(var, expression);
-    }
-    
-  }
-  
-  /** 
-   * Class providing custom type coercion for getValue() where needed.
-   * This will be obsolete with JUEL 2.1.1.
-   */
-  static private class CustomCoerce extends ValueExpression {
-
-    private final ValueExpression base;
-    private final Class<?> type;
-
-    public CustomCoerce(ValueExpression base, Class<?> type) {
-      this.base = base;
-      this.type = type;
-    }
-
-    @Override
-    public Class<?> getExpectedType() {
-      return type;
-    }
-
-    @Override
-    public Class<?> getType(ELContext context) {
-      return type;
-    }
-
-    @Override
-    public Object getValue(ELContext context) {
-      Object value = base.getValue(context);
-      if (value == null) {
-        return null;
-      }
-      
-      if (type == JSONArray.class) {
-        JSONArray array = new JSONArray();
-        StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
-        while (tokenizer.hasMoreTokens()) {
-          array.put(tokenizer.nextToken());
-        }
-
-        return array;
-      } else {
-        throw new ELException("Can't coerce to type " + type.getName());
-      }
-    }
-
-    @Override
-    public boolean isReadOnly(ELContext context) {
-      return true;
-    }
-
-    @Override
-    public void setValue(ELContext context, Object value) {
-      throw new PropertyNotWritableException();
-    }
-
-    @Override
-    public String getExpressionString() {
-      return base.getExpressionString();
-    }
-
-    @Override
-    public boolean isLiteralText() {
-      return base.isLiteralText();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      
-      if (!(o instanceof CustomCoerce)) {
-        return false;
-      }
-      
-      CustomCoerce that = (CustomCoerce) o;
-      return that.base.equals(this.base) && that.type.equals(this.type);
-    }
-
-    @Override
-    public int hashCode() {
-      return base.hashCode();
     }
     
   }

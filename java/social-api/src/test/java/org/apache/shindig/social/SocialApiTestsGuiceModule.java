@@ -75,5 +75,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         Names.named("shindig.containers.default"))
         .toInstance("res://containers/default/container.js");
     bind(ContainerConfig.class).to(JsonContainerConfig.class);
+    
+    bind(Integer.class).annotatedWith(
+        Names.named("shindig.cache.lru.default.capacity"))
+        .toInstance(10);
   }
 }

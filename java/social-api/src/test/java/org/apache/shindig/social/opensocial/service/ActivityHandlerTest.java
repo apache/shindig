@@ -80,7 +80,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
                "{supportedFields: {activity: ['id', 'title']}}" +
              "}}}");
 
-    containerConfig = new JsonContainerConfig(config, new Expressions());
+    containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     handler = new ActivityHandler(activityService, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());

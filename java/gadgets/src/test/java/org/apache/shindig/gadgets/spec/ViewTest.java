@@ -224,7 +224,7 @@ public class ViewTest {
         + "/></Content>";
     View view = new View("test", Arrays.asList(XmlUtil.parse(xml)), SPEC_URL);
     PipelinedData.Batch batch = view.getPipelinedData().getBatch(
-        new Expressions(), new RootELResolver());
+        Expressions.forTesting(), new RootELResolver());
     
     assertEquals(1, batch.getSocialPreloads().size());
     assertTrue(batch.getSocialPreloads().containsKey("key"));

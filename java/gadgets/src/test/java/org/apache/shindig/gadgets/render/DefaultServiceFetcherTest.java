@@ -51,7 +51,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     JSONObject config = createConfig();
 
     JsonContainerConfig containerConfig =
-        new JsonContainerConfig(config, new Expressions(new Functions()));
+        new JsonContainerConfig(config, new Expressions(new Functions(), null));
     mockFetcher = mock(HttpFetcher.class);
     fetcher = new DefaultServiceFetcher(containerConfig, mockFetcher);
   }
@@ -88,7 +88,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
         getJSONObject(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG)
         .remove(DefaultServiceFetcher.OSAPI_FEATURE_CONFIG);
     JsonContainerConfig containerConfig =
-        new JsonContainerConfig(config, new Expressions(new Functions()));
+        new JsonContainerConfig(config, new Expressions(new Functions(), null));
     fetcher = new DefaultServiceFetcher(containerConfig, mockFetcher);
 
     EasyMock.expect(mockFetcher.fetch(EasyMock.isA(HttpRequest.class))).andReturn(

@@ -63,7 +63,7 @@ public class RenderTagHandlerTest {
   
   @Before
   public void setUp() throws Exception {
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
     variables = Maps.newHashMap();
     Set<TagHandler> handlers = ImmutableSet.of((TagHandler) new RenderTagHandler());
     registry = new DefaultTagRegistry(handlers);

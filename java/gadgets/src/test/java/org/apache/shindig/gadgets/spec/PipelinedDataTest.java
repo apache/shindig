@@ -54,7 +54,7 @@ public class PipelinedDataTest {
   public void setUp() {
     elValues = Maps.newHashMap();
     elResolver = new RootELResolver(elValues);
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
   }
   
   @Test

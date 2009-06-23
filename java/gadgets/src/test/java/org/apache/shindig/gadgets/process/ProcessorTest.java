@@ -63,7 +63,7 @@ public class ProcessorTest {
            "{aliased: {aliases: ['some-alias', 'alias']}}" +
          "}}}");
 
-    containerConfig = new JsonContainerConfig(config, new Expressions());
+    containerConfig = new JsonContainerConfig(config, Expressions.forTesting());
     processor = new Processor(gadgetSpecFactory, substituter, containerConfig, blacklist, null);
   }
 

@@ -86,7 +86,7 @@ public class XmlTemplateLibraryTest {
   @Test
   public void testAddedResources() {
     final TemplateContext context = new TemplateContext(null, ImmutableMap.<String, Object>of());
-    TemplateProcessor processor = new DefaultTemplateProcessor(new Expressions()) {
+    TemplateProcessor processor = new DefaultTemplateProcessor(Expressions.forTesting()) {
       @Override
       public TemplateContext getTemplateContext() {
         return context;

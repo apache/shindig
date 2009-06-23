@@ -83,7 +83,7 @@ public class JsonContainerConfigTest {
   @Test
   public void parseBasicConfig() throws Exception {
     ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(),
-        new Expressions());
+        Expressions.forTesting());
 
     assertEquals(1, config.getContainers().size());
     for (String container : config.getContainers()) {
@@ -108,7 +108,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
 
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_A, NESTED_KEY));
     assertEquals(NESTED_VALUE, config.getString(CONTAINER_B, NESTED_KEY));
@@ -130,7 +130,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     String value = config.getString(CHILD_CONTAINER, TOP_LEVEL_NAME);
     assertEquals(TOP_LEVEL_VALUE, value);
@@ -157,7 +157,7 @@ public class JsonContainerConfigTest {
   @Test
   public void invalidContainerReturnsNull() throws Exception {
     ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(),
-        new Expressions());
+        Expressions.forTesting());
     assertNull("Did not return null for invalid container.", config.getString("fake", PARENT_KEY));
   }
 
@@ -168,12 +168,12 @@ public class JsonContainerConfigTest {
     json.put(PARENT_KEY, "bad bad bad parent!");
     json.put(ARRAY_NAME, ARRAY_ALT_VALUE);
 
-    new JsonContainerConfig(createContainer(json).getAbsolutePath(), new Expressions());
+    new JsonContainerConfig(createContainer(json).getAbsolutePath(), Expressions.forTesting());
   }
 
   @Test
   public void pathQuery() throws Exception {
-    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(), new Expressions());
+    ContainerConfig config = new JsonContainerConfig(createDefaultContainer().getAbsolutePath(), Expressions.forTesting());
     String path = "${" + NESTED_KEY + "['" + NESTED_NAME + "']}";
     String data = config.getString(DEFAULT_CONTAINER, path);
     assertEquals(NESTED_VALUE, data);
@@ -187,7 +187,7 @@ public class JsonContainerConfigTest {
     json.put("expression", "Hello, ${world}!");
     json.put("world", "Earth");
 
-    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(), new Expressions());
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(), Expressions.forTesting());
 
     assertEquals("Hello, Earth!", config.getString(DEFAULT_CONTAINER, "expression"));
   }
@@ -203,7 +203,7 @@ public class JsonContainerConfigTest {
     File childFile = createContainer(json);
     File parentFile = createDefaultContainer();
     ContainerConfig config = new JsonContainerConfig(childFile.getAbsolutePath() +
-        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), new Expressions());
+        JsonContainerConfig.FILE_SEPARATOR + parentFile.getAbsolutePath(), Expressions.forTesting());
 
     assertEquals(TOP_LEVEL_VALUE, config.getString(CHILD_CONTAINER, "parentExpression"));
   }

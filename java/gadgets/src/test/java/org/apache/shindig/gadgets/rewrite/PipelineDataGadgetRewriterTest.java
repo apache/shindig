@@ -99,7 +99,7 @@ public class PipelineDataGadgetRewriterTest {
     preloader = control.createMock(PipelinedDataPreloader.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
     rewriter = new PipelineDataGadgetRewriter(new PipelineExecutor(preloader, preloaderService,
-        new Expressions()));
+        Expressions.forTesting()));
   }
 
   private void setupGadget(String gadgetXml) throws SpecParserException {
@@ -239,7 +239,7 @@ public class PipelineDataGadgetRewriterTest {
         rewriter.parsePipelinedData(gadget, content.getDocument());
     assertEquals(1, pipelines.size());
     PipelinedData pipeline = pipelines.keySet().iterator().next();
-    PipelinedData.Batch batch = pipeline.getBatch(new Expressions(), new RootELResolver());
+    PipelinedData.Batch batch = pipeline.getBatch(Expressions.forTesting(), new RootELResolver());
     Map<String, Object> preloads = batch.getSocialPreloads();
     
     JsonAssert.assertObjectEquals(

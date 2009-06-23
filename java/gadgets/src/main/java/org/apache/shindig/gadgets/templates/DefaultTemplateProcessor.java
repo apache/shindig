@@ -21,22 +21,6 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
-import javax.el.ValueExpression;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -45,7 +29,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.ValueExpression;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -481,17 +475,8 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
    */
   public <T> T evaluate(String expression, Class<T> type, T defaultValue) {
     try {
-      Object result;
-      // Coerce iterables specially
-      if (type == Iterable.class) {
-        ValueExpression expr = expressions.parse(expression, Object.class);
-        Object value = expr.getValue(elContext);
-        result = coerceToIterable(value);
-      } else {
-        ValueExpression expr = expressions.parse(expression, type);
-        result = expr.getValue(elContext);
-      }
-      
+      ValueExpression expr = expressions.parse(expression, type);
+      Object result = expr.getValue(elContext);
       return type.cast(result);
     } catch (ELException e) {
       logger.warning(e.getMessage());
@@ -499,69 +484,6 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
     }
   }
 
-  /**
-   * Coerce objects to iterables.  Iterables and JSONArrays have the obvious
-   * coercion.  JSONObjects are coerced to single-element lists, unless
-   * they have a "list" property that is in array, in which case that's used.
-   */
-  private Iterable<?> coerceToIterable(Object value) {
-    if (value == null) {
-      return ImmutableList.of();
-    }
-    
-    if (value instanceof Iterable) {
-      return ((Iterable<?>) value);
-    }
-    
-    if (value instanceof JSONArray) {
-      final JSONArray array = (JSONArray) value;
-      // TODO: Extract JSONArrayIterator class?
-      return new Iterable<Object>() {
-        public Iterator<Object> iterator() {
-          return new Iterator<Object>() {
-            private int i = 0;
-            
-            public boolean hasNext() {
-              return i < array.length();
-            }
-          
-            public Object next() {
-              if (i >= array.length()) {
-                throw new NoSuchElementException();
-              }
-              
-              try {
-                return array.get(i++);
-              } catch (Exception e) {
-                throw new ELException(e);
-              }
-            }
-          
-            public void remove() {
-              throw new UnsupportedOperationException();
-            }
-          };
-        }
-      };
-    }
-    
-    if (value instanceof JSONObject) {
-      JSONObject json = (JSONObject) value;
-      
-      // Does this object have a "list" property that is an array?
-      // TODO: add to specification
-      Object childList = json.opt("list");
-      if (childList != null && childList instanceof JSONArray) {
-        return coerceToIterable(childList);
-      }
-      
-      // A scalar JSON value is treated as a single element list.
-      return ImmutableList.of(json);
-    }
-    
-    return ImmutableList.of(value);
-  }
-  
   private String getUniqueId() {
     return "ostid" + (uniqueIdCounter++);
   }

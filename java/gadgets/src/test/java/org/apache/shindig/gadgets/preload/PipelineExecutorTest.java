@@ -88,7 +88,7 @@ public class PipelineExecutorTest {
     control = EasyMock.createStrictControl();
     preloader = control.createMock(PipelinedDataPreloader.class);
     preloaderService = new ConcurrentPreloaderService(Executors.newSingleThreadExecutor(), null);
-    executor = new PipelineExecutor(preloader, preloaderService, new Expressions());
+    executor = new PipelineExecutor(preloader, preloaderService, Expressions.forTesting());
     
     context = new GadgetContext(){};
   }

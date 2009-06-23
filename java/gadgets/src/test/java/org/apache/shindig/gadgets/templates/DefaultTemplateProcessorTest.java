@@ -75,7 +75,7 @@ public class DefaultTemplateProcessorTest {
 
   @Before
   public void setUp() throws Exception {
-    expressions = new Expressions();
+    expressions = Expressions.forTesting();
     variables = Maps.newHashMap();
     singletonElementHandler = new SingletonElementHandler();
     Set<TagHandler> handlers = ImmutableSet.<TagHandler>of(
