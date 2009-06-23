@@ -16,7 +16,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
---->
+-->
 <xs:schema xmlns:tns="http://ns.opensocial.org/2008/opensocial"
   elementFormDefault="qualified"
   targetNamespace="http://ns.opensocial.org/2008/opensocial"
