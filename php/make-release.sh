@@ -2,8 +2,8 @@
 
 #### Settings, feel free to adjust these as required ####
 
-VERSION=SNAPSHOT
-NAME="shindig-${VERSION}"
+VERSION=1.0.0
+NAME="php-shindig-${VERSION}"
 OPWD=`pwd`
 
 #### Build a clean php-shindig tarball
