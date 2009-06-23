@@ -26,17 +26,15 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-src</outputDirectory>
-      <directory>../</directory>
+      <outputDirectory>shindig-${pom.version}-source</outputDirectory>
+      <directory>${project.basedir}/../</directory>
       <includes>
-        <include>*/**</include>
+        <include>**</include>
       </includes>
       <excludes>
         <!-- scm -->
         <exclude>**/.git/**</exclude>
         <exclude>**/.svn/**</exclude>
-        <!-- maven -->
-        <exclude>**/target/**</exclude>
         <!-- IDE -->
         <exclude>**/*.iws</exclude>
         <exclude>**/*.ipr</exclude>
@@ -48,6 +46,11 @@
         <exclude>**/.wtpmodules/**</exclude>
         <exclude>**/.externalToolBuilders/**</exclude>
         <exclude>**/maven-eclipse.xml</exclude>
+        <!-- maven -->
+        <exclude>**/target/**</exclude>
+        <exclude>**/pom.xml.releaseBackup</exclude>
+        <exclude>**/release.properties</exclude>
+
         <!-- misc -->
         <exclude>**/*.patch</exclude>
         <exclude>**/*.diff</exclude>

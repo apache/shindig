@@ -484,6 +484,13 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <configuration>
+              <stagingSiteURL>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.1.x/${pom.version}</stagingSiteURL>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
       <reporting>
@@ -859,6 +866,10 @@
           <groupId>org.apache.maven.plugins </groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
           <version>2.5.1</version>
+          <configuration>
+            <addVersionToProjectName>true</addVersionToProjectName>
+          </configuration>
+
 <!--          <configuration>-->
 <!--            <projectNameTemplate>${project.groupId}-${project.artifactId}</projectNameTemplate>-->
 <!--          </configuration>-->
@@ -930,6 +941,16 @@
           </configuration>
         </plugin>
         <!-- We want to package up license resources in the JARs produced -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.0-beta-9</version>
+          <configuration>
+            <useReleaseProfile>false</useReleaseProfile>
+            <goals>deploy</goals>
+            <arguments>-Prelease</arguments>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-remote-resources-plugin</artifactId>
@@ -1099,6 +1120,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludeResources>false</excludeResources>
+          <attach>true</attach>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

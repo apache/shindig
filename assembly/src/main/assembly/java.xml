@@ -43,19 +43,21 @@
       <outputDirectory>shindig-${pom.version}-java</outputDirectory>
       <directory>../</directory>
       <includes>
-        <include>COMMITTERS</include>
-        <include>COPYING</include>
         <include>DISCLAIMER</include>
-        <include>LICENSE</include>
-        <include>NOTICE</include>
       </includes>
-    </fileSet>
+      <excludes>
+        <exclude>LICENSE</exclude>
+        <exclude>NOTICE</exclude>
+        <exclude>README</exclude>
+      </excludes>
+   </fileSet>
     <fileSet>
       <outputDirectory>shindig-${pom.version}-java</outputDirectory>
-      <directory>src/main/assembly/binary-src/</directory>
-      <filtered>true</filtered>
+      <directory>../java</directory>
       <includes>
-        <include>**/*</include>
+        <include>LICENSE</include>
+        <include>NOTICE</include>
+        <include>README</include>
       </includes>
     </fileSet>
   </fileSets>

@@ -47,6 +47,13 @@
         <targetPath>features</targetPath>
         <directory>${basedir}/src/main/javascript/features</directory>
       </resource>
+      <resource>
+        <targetPath>META-INF</targetPath>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
     </resources>
     <testResources>
       <testResource>
@@ -158,6 +165,17 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
       <plugin>
         <!-- TODO: Replace this with the more generic javascript plugin that

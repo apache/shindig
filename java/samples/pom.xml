@@ -59,6 +59,25 @@
         </includes>
       </resource>
     </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${basedir}</directory>
+              <includes>
+                <include>create.sql</include>
+                <include>derby.log</include>
+                <include>drop.sql</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
   <dependencies>
     <!-- project dependencies -->

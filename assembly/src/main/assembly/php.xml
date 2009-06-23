@@ -32,11 +32,7 @@
         <include>features/**</include>
         <include>javascript/**</include>
         <include>config/**</include>
-        <include>COMMITTERS</include>
-        <include>COPYING</include>
         <include>DISCLAIMER</include>
-        <include>LICENSE</include>
-        <include>NOTICE</include>
       </includes>
       <excludes>
         <exclude>site/**</exclude>
@@ -64,6 +60,8 @@
         <!-- misc -->
         <exclude>*.patch</exclude>
         <exclude>*.diff</exclude>
+        <exclude>LICENSE</exclude>
+        <exclude>NOTICE</exclude>
         <exclude>README</exclude>
       </excludes>
     </fileSet>
