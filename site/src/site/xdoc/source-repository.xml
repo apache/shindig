@@ -25,18 +25,18 @@ under the License.
   <properties>
     <title>Source Repository</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
     <section name="Source Repository">
       <p>
-        Shindig projects use <a href="http://subversion.tigris.org/">Subversion</a> to manage their source code.
+        Apache Shindig projects use <a href="http://subversion.tigris.org/">Subversion</a> to manage their source code.
         Instructions on Subversion use can be found in the online book
         <a href="http://svnbook.red-bean.com/">Version Control with Subversion</a>.
       </p>
       <subsection name="Web Access">
         <p>
-          The following list shows the links to the online source repositories for the various versions of Shindig:
+          The following list shows the links to the online source repositories for the various versions of Apache Shindig:
         </p>
         <source>
 <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/">https://svn.apache.org/repos/asf/incubator/shindig/trunk/</a>

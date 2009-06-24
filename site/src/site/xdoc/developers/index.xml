@@ -25,13 +25,13 @@ under the License.
   <properties>
     <title>Documentation Centre</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
     <section name="Documentation Centre">
-      <p>This documentation centre is for developer who wants to use Shindig. Shindig is developped in two languages:
+      <p>This documentation centre is for developer who wants to use Apache Shindig. Apache Shindig is developped in two languages:
       Java and PHP and you need to read the specific documentation depending the language wanted. Also, you could read
-      about which features Shindig uses.</p>
+      about which features Apache Shindig uses.</p>
       <ul>
         <li><a href="./java/index.html">Java</a></li>
         <li><a href="./php/index.html">PHP</a></li>
@@ -48,7 +48,7 @@ under the License.
 
     <section name="Resources">
       <ul>
-        <li><a href="../resources.html">Shindig resources</a></li>
+        <li><a href="../resources.html">Apache Shindig resources</a></li>
         <li><a href="http://wiki.opensocial.org/index.php?title=Articles_%26_Tutorials#Tools_and_Utilities">Articles &amp; Tutorials</a> from OpenSocial Foundation Wiki</li>
       </ul>
     </section>

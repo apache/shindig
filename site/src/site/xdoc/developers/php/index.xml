@@ -25,13 +25,13 @@ under the License.
   <properties>
     <title>PHP Documentation</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
-    <section name="Documentation Centre for PHP Shindig">
-      <p>This documentation centre is for developer who wants to work with the PHP version of Shindig.</p>
+    <section name="Documentation Centre for PHP Apache Shindig">
+      <p>This documentation centre is for developer who wants to work with the PHP version of Apache Shindig.</p>
       <ul>
-        <li><a href="./build.html">Building PHP Shindig</a></li>
+        <li><a href="./build.html">Building PHP Apache Shindig</a></li>
       </ul>
     </section>
 

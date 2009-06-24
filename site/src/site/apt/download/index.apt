@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-06-20
+ 2009-06-28
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -28,50 +28,58 @@
 
 {Download Apache Shindig}
 
-  Apache Shindig is distributed under the {{{license.html} Apache License, version 2.0}}.
+  Apache Shindig is distributed under the {{{./license.html} Apache License, version 2.0}}.
 
-  <Shindig is a distributed as API and as a Web application. You must have a Servlet container for the Java version
+  <Apache Shindig is a distributed as API and as a Web application. You must have a Servlet container for the Java version
   or a Web server for the PHP version installed in order to proceed. Shindig was successfully tested on Jetty (Java),
   Tomcat (Java), Apache (PHP).>
 
+* Disclaimers
+
+  <Apache Shindig is an effort undergoing incubation at The Apache Software Foundation (ASF), sponsored by the name
+  of sponsor. Incubation is required of all newly accepted projects until a further review indicates that the
+  infrastructure, communications, and decision making process have stabilized in a manner consistent with other
+  successful ASF projects. While incubation status is not necessarily a reflection of the completeness or stability
+  of the code, it does indicate that the project has yet to be fully endorsed by the ASF.>
+
 * General Availability Releases
 
-** Shindig 1.1 (OpenSocial Spec 0.9)
+** Apache Shindig 1.1 (OpenSocial Spec 0.9)
 
   <No releases exist yet.>
 
-** Shindig 1.0 (OpenSocial Spec 0.8.1)
+** Apache Shindig 1.0 (OpenSocial Spec 0.8.1)
 
-  The Shindig 1.0 (OpenSocial Spec 0.8.1) was released the 2009-06-19.
+  The Apache Shindig 1.0 (OpenSocial Spec 0.8.1) was released the 2009-06-19.
 
   {{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/}}
 
-*-------------------------+-----------------+----------+
-||                        || Implementation || Download Link
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.bz2}shindig-1.0-incubating-java.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.gz}shindig-1.0-incubating-java.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.zip}shindig-1.0-incubating-java.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.bz2}shindig-1.0-incubating-php.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.gz}shindig-1.0-incubating-php.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.zip}shindig-1.0-incubating-php.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.bz2}shindig-1.0-incubating-source.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.gz}shindig-1.0-incubating-source.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.zip}shindig-1.0-incubating-source.zip}}
-*-------------------------+-----------------+----------+
+*--------------------------+-----------------+----------+
+||                         || Implementation || Download Link
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.bz2}shindig-1.0-incubating-java.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.tar.gz}shindig-1.0-incubating-java.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Java            | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-java.zip}shindig-1.0-incubating-java.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.bz2}shindig-1.0-incubating-php.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.tar.gz}shindig-1.0-incubating-php.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | PHP             | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-php.zip}shindig-1.0-incubating-php.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.bz2}shindig-1.0-incubating-source.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.tar.gz}shindig-1.0-incubating-source.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Source          | {{{https://repository.apache.org/content/groups/public/org/apache/shindig/shindig/1.0-incubating/shindig-1.0-incubating-source.zip}shindig-1.0-incubating-source.zip}}
+*--------------------------+-----------------+----------+
 
 ** Documentation
 
   You could also download the current documentation, i.e. this website, as a
-  {{{../shindig-site-1.1-SNAPSHOT-site.jar}single jar}} file or as {{{../shindig-site.pdf}PDF}} file.
+  {{{../shindig-site-1.1-SNAPSHOT-site.jar}single jar}} file or as {{{../apache-shindig.pdf}PDF}} file.
 
 * Integration Builds
 
@@ -83,53 +91,53 @@
 
   {{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/}}
 
-*-------------------------+-----------------+----------+
-||                        || Implementation || Download Link
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.bz2}shindig-1.1-SNAPSHOT-java.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.gz}shindig-1.1-SNAPSHOT-java.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.zip}shindig-1.1-SNAPSHOT-java.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.tar.bz2}shindig-1.1-SNAPSHOT-php.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.tar.gz}shindig-1.1-SNAPSHOT-php.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.zip}shindig-1.1-SNAPSHOT-php.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.zip}}
-*-------------------------+-----------------+----------+
+*--------------------------+-----------------+----------+
+||                         || Implementation || Download Link
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.bz2}shindig-1.1-SNAPSHOT-java.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.tar.gz}shindig-1.1-SNAPSHOT-java.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-java.zip}shindig-1.1-SNAPSHOT-java.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.tar.bz2}shindig-1.1-SNAPSHOT-php.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.tar.gz}shindig-1.1-SNAPSHOT-php.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-php.zip}shindig-1.1-SNAPSHOT-php.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.1-SNAPSHOT/shindig-1.1-SNAPSHOT-source.zip}shindig-1.1-SNAPSHOT-source.zip}}
+*--------------------------+-----------------+----------+
 
 ** Branch 1.0.x (0.8.1 spec)
 
   {{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/}}
 
-*-------------------------+-----------------+----------+
-||                        || Implementation || Download Link
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.tar.bz2}shindig-1.0-incubating-SNAPSHOT-java.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.tar.gz}shindig-1.0-incubating-SNAPSHOT-java.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.zip}shindig-1.0-incubating-SNAPSHOT-java.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.tar.bz2}shindig-1.0-incubating-SNAPSHOT-php.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.tar.gz}shindig-1.0-incubating-SNAPSHOT-php.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.zip}shindig-1.0-incubating-SNAPSHOT-php.zip}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.bz2)       | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.tar.bz2}}
-*-------------------------+-----------------+----------+
-| Shindig (tar.gz)        | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.tar.gz}}
-*-------------------------+-----------------+----------+
-| Shindig (zip)           | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.zip}}
-*-------------------------+-----------------+----------+
+*--------------------------+-----------------+----------+
+||                         || Implementation || Download Link
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.tar.bz2}shindig-1.0-incubating-SNAPSHOT-java.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.tar.gz}shindig-1.0-incubating-SNAPSHOT-java.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Java            | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-java.zip}shindig-1.0-incubating-SNAPSHOT-java.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.tar.bz2}shindig-1.0-incubating-SNAPSHOT-php.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.tar.gz}shindig-1.0-incubating-SNAPSHOT-php.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | PHP             | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-php.zip}shindig-1.0-incubating-SNAPSHOT-php.zip}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.bz2) | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.tar.bz2}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (tar.gz)  | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.tar.gz}}
+*--------------------------+-----------------+----------+
+| Apache Shindig (zip)     | Source          | {{{http://hudson.zones.apache.org/hudson/job/Shindig%201.0.x%20branch%20Assembly/lastBuild/org.apache.shindig$shindig/artifact/org.apache.shindig/shindig/1.0-incubating-SNAPSHOT/shindig-1.0-incubating-SNAPSHOT-source.zip}shindig-1.0-incubating-SNAPSHOT-source.zip}}
+*--------------------------+-----------------+----------+
 
 {System Requirements}
 
@@ -144,12 +152,12 @@
 
   <<Note>>: Read the README files inside the distributions for detailed instructions.
 
-  [[1]] Unzip the distribution archive to the directory you wish to install Shindig.
+  [[1]] Unzip the distribution archive to the directory you wish to install Apache Shindig.
 
-  [[2]] Install Shindig in your Servlet container or in your Web server depending the wanted implementations. Have a glance
+  [[2]] Install Apache Shindig in your Servlet container or in your Web server depending the wanted implementations. Have a glance
   to your server documentation before processing. For instance, you could do:
 
-    [[A]] Java version: copy the Shindig WAR file to <$TOMCAT_HOME/webapps> for Tomcat.
+    [[A]] Java version: copy the Apache Shindig WAR file to <$TOMCAT_HOME/webapps> for Tomcat.
 
     [[B]] PHP version: copy shindig-php into </var/www/html/shindig> for Apache.
 

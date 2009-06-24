@@ -24,12 +24,13 @@
 <document xmlns="http://maven.apache.org/DOCUMENT/1.0.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 http://maven.apache.org/xsd/document-1.0.1.xsd"
-  outputName="shindig-site">
+  outputName="apache-shindig">
 
   <meta>
-    <title>Apache Incubator Shindig Documentation</title>
+    <title>Apache Shindig Documentation</title>
     <author>The Apache Shindig Team</author>
     <keyWords>
+      <keyWord>incubation</keyWord>
       <keyWord>Open Social</keyWord>
       <keyWord>Social Network</keyWord>
       <keyWord>Reference Implementation</keyWord>
@@ -37,6 +38,7 @@
       <keyWord>PHP</keyWord>
       <keyWord>Javascript</keyWord>
     </keyWords>
+    <description>Apache Shindig is currently undergoing Incubation at the Apache Software Foundation.</description>
   </meta>
 
   <toc name="Table of Contents">
@@ -63,12 +65,12 @@
   </toc>
 
   <cover>
-    <coverTitle>Apache Incubator Shindig</coverTitle>
+    <coverTitle>Apache Shindig</coverTitle>
     <coverSubTitle>v. 1.0</coverSubTitle>
     <coverType>User Guide</coverType>
     <companyName>The Apache Software Foundation</companyName>
     <companyLogo>./images/logos/apache-incubator-logo.png</companyLogo>
-    <projectName>Apache Incubator Shindig</projectName>
+    <projectName>Apache Shindig</projectName>
     <projectLogo>./images/logos/shindig-logo.png</projectLogo>
   </cover>
 </document>

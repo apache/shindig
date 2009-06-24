@@ -23,17 +23,17 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Building Java Shindig</title>
+    <title>Building Java Apache Shindig</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
-    <section name="Building and running Shindig for Java">
-      <p>This is the Java steps on how to build and run Shindig.</p>
+    <section name="Building and running Apache Shindig for Java">
+      <p>This is the Java steps on how to build and run Apache Shindig.</p>
 
       <ul>
         <li>
-          <a href="#Prequisites_before_building_Shindig">Prequisites</a>
+          <a href="#Prequisites_before_building_Apache_Shindig">Prequisites</a>
         </li>
         <li>
           <a href="#Getting_the_code">Get the code</a>
@@ -43,7 +43,7 @@ under the License.
             Maven)</a>
         </li>
         <li>
-          <a href="#Setting_up_an_Eclipse_project_to_build_Shindig">Setting up an Eclipse
+          <a href="#Setting_up_an_Eclipse_project_to_build_Apache_Shindig">Setting up an Eclipse
             project</a>
         </li>
         <li>
@@ -58,8 +58,8 @@ under the License.
         </li>
       </ul>
 
-      <subsection name="Prequisites before building Shindig">
-        <p>In order to build Shindig, you must have the following:</p>
+      <subsection name="Prequisites before building Apache Shindig">
+        <p>In order to build Apache Shindig, you must have the following:</p>
         <ul>
           <li>Java (JDK/JRE) 1.5 or later installed on your system and the JAVA_HOME
             environment variable set. <ul>
@@ -83,7 +83,7 @@ under the License.
       </subsection>
 
       <subsection name="Getting the code">
-        <p>Create a subdirectory and checkout the Shindig code from its Subversion
+        <p>Create a subdirectory and checkout the Apache Shindig code from its Subversion
           repository</p>
         <ol>
           <li><code>mkdir ~/src/shindig</code> (or wherever you'd like to put it)</li>
@@ -142,7 +142,7 @@ under the License.
         <p><img src="../../images/samples/task.png" alt="Sample Container"/></p>
       </subsection>
 
-      <subsection name="Setting up an Eclipse project to build Shindig">
+      <subsection name="Setting up an Eclipse project to build Apache Shindig">
         <p>These steps, after completing the previous section, will allow you to build from
           within Eclipse using the Maven2 plugin. You should first install the Maven
           plugin, then create the new Java project.</p>
@@ -175,7 +175,7 @@ under the License.
             code. <ol>
               <li>File -&gt; Switch Workspace -&gt; Other...</li>
               <li>Select directory to store workspace <ul>
-                  <li>Do not select a parent directory of the shindig source (e.g.
+                <li>Do not select a parent directory of the Apache Shindig source (e.g.
                     ~/src/shindig) as Eclipse won't allow you to create the Java
                     project.</li>
                   <li>Something like <code>~/eclipse/workspaces/shindig</code>
@@ -277,7 +277,7 @@ under the License.
           java shindig servers.</p>
         <p>Read <a
             href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/javascript/README"
-            >javascript/README</a> for instructions for using the Shindig Gadget
+          >javascript/README</a> for instructions for using the Apache Shindig Gadget
           Container JavaScript to enable your page to render Gadgets using gmodules.com or
           a server started up as described above.</p>
       </subsection>

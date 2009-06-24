@@ -1,9 +1,9 @@
  -----
- Shindig Code Style And Code Conventions
+ Apache Shindig Code Style And Code Conventions
  -----
  Vincent Siveton
  ------
- 2009-03-25
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,7 +26,7 @@
 ~~ NOTE: For help with the syntax of this file, see:
 ~~ http://maven.apache.org/doxia/references/apt-format.html
 
-Shindig Code Style And Code Conventions
+Apache Shindig Code Style And Code Conventions
 
   This document describes how developers and contributors should write code. The reasoning of these styles and
   conventions is mainly for consistency, readability and maintainability reasons.
@@ -57,7 +57,7 @@ Shindig Code Style And Code Conventions
 
 ** {Java Code Style}
 
-  The full Shindig for Java is described in our {{{http://cwiki.apache.org/SHINDIGxSITE/java-style.html}Wiki}}.
+  The full Apache Shindig for Java is described in our {{{http://cwiki.apache.org/SHINDIGxSITE/java-style.html}Wiki}}.
 
 ** {Java Code Convention}
 

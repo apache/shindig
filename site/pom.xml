@@ -24,13 +24,15 @@
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
     <version>1.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-site</artifactId>
   <packaging>pom</packaging>
 
-  <name>Shindig Documentation</name>
+  <name>Apache Shindig Website</name>
+  <description>The Apache Shindig documentation.</description>
   <url>http://incubator.apache.org/shindig</url>
 
   <scm>

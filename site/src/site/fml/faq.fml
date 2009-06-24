@@ -23,7 +23,7 @@ under the License.
   xsi:schemaLocation="http://maven.apache.org/FML/1.0 http://maven.apache.org/xsd/fml-1.0.xsd"
   title="Frequently Asked Questions">
   <part id="General">
-    <faq id="What is OpenSocial">
+    <faq id="What_is_OpenSocial">
       <question>What is OpenSocial?</question>
       <answer>
         <p> OpenSocial is a set of common Application Programming Interfaces (APIs) for
@@ -35,24 +35,24 @@ under the License.
           information. </p>
       </answer>
     </faq>
-    <faq id="Which OpenSocial spec versions Shindig implements">
-      <question>Which OpenSocial spec versions Shindig implements?</question>
+    <faq id="Which_OpenSocial_spec_versions_Apache_Shindig_implements">
+      <question>Which OpenSocial spec versions Apache Shindig implements?</question>
       <answer>
-        <p> Shindig implements OpenSocial API spec. <a
+        <p> Apache Shindig implements OpenSocial API spec. <a
             href="http://code.google.com/apis/opensocial/docs/0.8/spec.html">0.8.1</a>
           and <a href="http://spreadsheets.google.com/ccc?key=pLSOqcf1mK9XQ-OmytqL3Qw"
           >0.9</a>. </p>
       </answer>
     </faq>
-    <faq id="Does Shindig plan to start a new language implementation">
-      <question>Does Shindig plan to start a new language implementation?</question>
+    <faq id="Does_Apache_Shindig_plan_to_start_a_new_language_implementation">
+      <question>Does Apache Shindig plan to start a new language implementation?</question>
       <answer>
-        <p> Shindig project actually supports both Java and PHP version. Other <a
+        <p> Apache Shindig project actually supports both Java and PHP version. Other <a
             href="http://cwiki.apache.org/confluence/display/SHINDIG/Index#Index-OtherOpenSocialimplementations"
             > Opensocial container implementations</a> exist. </p>
       </answer>
     </faq>
-    <faq id="OpenSocial Jargon">
+    <faq id="OpenSocial_Jargon">
       <question>OpenSocial Jargon</question>
       <answer>
         <dl>
@@ -73,7 +73,7 @@ under the License.
         </dl>
       </answer>
     </faq>
-    <faq id="Where are the opensocial/gadget XSDs">
+    <faq id="Where_are_the_opensocial_gadget_XSDs">
       <question>Where are the opensocial/gadget XSDs?</question>
       <answer>
         <p>No official XSDs exist yet but you could find unofficial XSDs in the Opensocial
@@ -100,7 +100,7 @@ under the License.
               >OpenSocial RESTful Protocol Specification v0.9</a>
           </li>
         </ul>
-        <p><b>Note</b>: for performance reasons, Shindig will not validate files against these XSDs at runtime.</p>
+        <p><b>Note</b>: for performance reasons, Apache Shindig will not validate files against these XSDs at runtime.</p>
       </answer>
     </faq>
   </part>

@@ -23,33 +23,35 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Welcome To Shindig!</title>
+    <title>Welcome To Apache Shindig!</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
     <!-- TODO Add a Google CSE Search Box -->
     <!-- TODO Add Stay Connected with Ning, Twitter... -->
 
-    <section name="Welcome To Shindig !">
+    <section name="Welcome To Apache Shindig !">
       <div class="logo">
         <a href="http://www.opensocial.org/">
           <img src="./images/logos/opensocialsite-logo.png" alt="OpsenSocial Logo"/>
         </a>
       </div>
-      <p> Shindig is an OpenSocial container and helps you to start hosting OpenSocial apps
+      <p>Apache Shindig is an OpenSocial container and helps you to start hosting OpenSocial apps
         quickly by providing the code to render gadgets, proxy requests, and handle REST and
         RPC requests.</p>
 
-      <p> Shindig's goal is to allow new sites to start hosting social apps in under an hour's
-        worth of work.</p>
+      <p>Apache Shindig's goal is to allow new sites to start hosting social apps in under an hour's
+      worth of work.</p>
+
+      <p><b>Apache Shindig is currently undergoing Incubation at the Apache Software Foundation.</b></p>
     </section>
 
-    <section name="What is Shindig?">
+    <section name="What is Apache Shindig?">
       <div class="logo">
         <img src="./images/gadget-server.png" alt="Gadget Server"/>
       </div>
-      <p>Shindig is a container for hosting social application consisting of four parts:</p>
+      <p>Apache Shindig is a container for hosting social application consisting of four parts:</p>
       <ul>
         <li><b>Gadget Container JavaScript</b>: core JavaScript foundation for general
           gadget functionality (<a
@@ -65,7 +67,7 @@ under the License.
           container-specific information, including the OpenSocial REST APIs, with clear
           extension points so others can connect it to their own backends.</li>
       </ul>
-      <p>Shindig is the reference implementation of <a
+      <p>Apache Shindig is the reference implementation of <a
           href="http://www.opensocial.org/page/specs-1"> OpenSocial API
         specifications</a>, a standard set of Social Network APIs which includes:</p>
       <ul>

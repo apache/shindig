@@ -23,23 +23,23 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Shindig Features Documentation</title>
+    <title>Apache Shindig Features Documentation</title>
     <author>Vincent Siveton</author>
-    <date>2009-04-04</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
-    <section name="Documentation Centre for the Shindig's Features">
-      <p>This documentation centre is for developer who wants to use the Shindig's features.</p>
+    <section name="Documentation Centre for the Apache Shindig's Features">
+      <p>This documentation centre is for developer who wants to use the Apache Shindig's features.</p>
       <ul>
-        <li><a href="#Shindig_Features">Features List</a></li>
+        <li><a href="#Apache_Shindig_Features">Features List</a></li>
         <li><a href="#Using_Features">Using Features</a></li>
         <li><a href="#Create_Your_Own_Feature">Create Your Own Feature</a></li>
         <li><a href="../../shindig-1.1.x/shindig-features/jsdoc/index.html">JavascriptDoc for 1.1.x</a></li>
       </ul>
     </section>
 
-    <section name="Shindig Features">
-      <p>Shindig 1.1.x supports several features.</p>
+    <section name="Apache Shindig Features">
+      <p>Apache Shindig 1.1.x supports several features.</p>
       <table>
         <thead>
           <tr>

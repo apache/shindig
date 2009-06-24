@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-04-06
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -29,15 +29,15 @@
 Getting Started
 
   So, you correctly {{{./download/index.html#Download_Apache_Shindig}downloaded}} and
-  {{{./download/index.html#Installation_Instructions}installed}} Shindig, what's next?
+  {{{./download/index.html#Installation_Instructions}installed}} Apache Shindig, what's next?
 
-Discovering Shindig Samples
+Discovering Apache Shindig Samples
 
   The sample container should be your first starting point:
 
   {{http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html}}
 
-  The page displayed in the figure bellow is the Shindig sample container. Its goal is to help you to deploy
+  The page displayed in the figure bellow is the Apache Shindig sample container. Its goal is to help you to deploy
   and test your applications. You could also change the application state: changing the number and kind of friends,
   application data, or changing the viewer (i.e. the user accessing the application).
 
@@ -89,13 +89,13 @@ Discovering Shindig Samples
 
  []
 
-Playing With Shindig
+Playing With Apache Shindig
 
   This part is mainly to play with OpenSocial APIs.
 
 * OpenSocial REST
 
-  Shindig implements the {{{http://docs.google.com/View?docid=dcc2jvzt_37hdzwkmf8}OpenSocial Restful Protocol}} based
+  Apache Shindig implements the {{{http://docs.google.com/View?docid=dcc2jvzt_37hdzwkmf8}OpenSocial Restful Protocol}} based
   on {{{http://bitworking.org/projects/atom/rfc5023.html}AtomPub}}. It supports XML and JSON formats in addition to
   Atom format XML. The following REST samples will focus on the Read only operation (GET). All sample data are
   located in {{http://localhost:8080/gadgets/files/sampledata/canonicaldb.json}}.
@@ -169,7 +169,7 @@ Playing With Shindig
 
 * OpenSocial JSON-RPC
 
-  Shindig also implements {{{http://docs.google.com/View?docid=dhjrqr8t_4cwzqq7gh}OpenSocial RPC Protocol}}. The
+  Apache Shindig also implements {{{http://docs.google.com/View?docid=dhjrqr8t_4cwzqq7gh}OpenSocial RPC Protocol}}. The
   following RPC samples are similar to the REST samples.
 
   * Getting the profile of <john.doe>:
@@ -209,7 +209,7 @@ Go Further: Building a Container Supporting OpenSocial
 
 * Create Your First OpenSocial Gadget
 
-  Shindig implements
+  Apache Shindig implements
   {{{http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadget-spec.html}Gadgets Specification}}.
   Gadgets are web-based software components based on HTML, CSS, and JavaScript. Please read
   {{{http://code.google.com/apis/gadgets/docs/gs.html}Getting Started: gadgets.* API}} to learn more.
@@ -241,7 +241,7 @@ Go Further: Building a Container Supporting OpenSocial
 
   * The <ModulePrefs> section contains application metadata, such as title and required libraries. Also, you would
   notice the <require> element which includes the OpenSocial APIs as feature. Always declaring this requirement make
-  your applications as an OpenSocial application. Others features supported by Shindig are described
+  your applications as an OpenSocial application. Others features supported by Apache Shindig are described
   {{{./developers/features/index.html}here}}.
 
   * The application contents live within the <Content> section. You should include additional JavaScript that contains
@@ -250,7 +250,7 @@ Go Further: Building a Container Supporting OpenSocial
 
   []
 
-  To access data from the Shindig, you have to create a <DataRequest> object using the <opensocial.newDataRequest()>
+  To access data from the Apache Shindig, you have to create a <DataRequest> object using the <opensocial.newDataRequest()>
   call.
 
   Your first application will enumerate the friends currently belonging to the network of the user accessing the
@@ -320,7 +320,7 @@ Go Further: Building a Container Supporting OpenSocial
 
 * Create Your Own OpenSocial Back-end
 
-  Shindig implements
+  Apache Shindig implements
   {{{http://www.opensocial.org/Technical-Resources/opensocial-spec-v081.html}Opensocial Specification}}.
 
   Typically, you need to implement some classes:
@@ -328,7 +328,7 @@ Go Further: Building a Container Supporting OpenSocial
 
   In Java, theses classes are located in the
   {{{./shindig-1.1.x/apidocs/org/apache/shindig/social/opensocial/spi/package-summary.html}org.apache.shindig.social.opensocial.spi}} package.
-  Shindig proposes a sample JPA implementation. Read {{{./developers/java/samples.html}Samples for Java}} for more
+  Apache Shindig proposes a sample JPA implementation. Read {{{./developers/java/samples.html}Samples for Java}} for more
   information.
 
   In PHP, theses classes are located in the

@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-03-25
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,7 +26,7 @@
 ~~ NOTE: For help with the syntax of this file, see:
 ~~ http://maven.apache.org/doxia/references/apt-format.html
 
-Powered by Shindig
+Powered by Apache Shindig
 
   The following is the list of Opensocial sites or projects using Apache Shindig:
 
@@ -34,9 +34,9 @@ Powered by Shindig
 
   * {{{http://www.hi5.com}hi5}}
 
-  * {{{http://code.google.com/p/partuza/}Partuza}} based on PHP Shindig
+  * {{{http://code.google.com/p/partuza/}Partuza}} based on PHP Apache Shindig
 
-  * {{{https://socialsite.dev.java.net/}SocialSite}} based on Java Shindig
+  * {{{https://socialsite.dev.java.net/}SocialSite}} based on Java Apache Shindig
 
   * {{{http://code.google.com/p/zing/}Zing}}
 

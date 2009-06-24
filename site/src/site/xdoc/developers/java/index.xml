@@ -25,13 +25,13 @@ under the License.
   <properties>
     <title>Java Documentation</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
-    <section name="Documentation Centre for Java Shindig">
-      <p>This documentation centre is for developer who wants to work with the Java version of Shindig.</p>
+    <section name="Documentation Centre for Java Apache Shindig">
+      <p>This documentation centre is for developer who wants to work with the Java version of Apache Shindig.</p>
       <ul>
-        <li><a href="./build.html">Building Java Shindig</a></li>
+        <li><a href="./build.html">Building Java Apache Shindig</a></li>
         <li><a href="./samples.html">Using samples</a></li>
         <li><a href="../../shindig-1.1.x/apidocs/index.html">Javadoc for 1.1.x</a></li>
         <li><a href="../../shindig-1.1.x/index.html">Documentation for 1.1.x</a></li>

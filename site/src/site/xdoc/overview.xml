@@ -23,50 +23,50 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Overview Of Shindig</title>
+    <title>Overview Of Apache Shindig</title>
     <author>Vincent Siveton</author>
-    <date>2009-04-06</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
     <section name="Introduction">
-      <p>Shindig, a word meaning party, was originally started by Google in 2007 as a
+      <p>Apache Shindig, a word meaning party, was originally started by Google in 2007 as a
         reference container for hosting OpenSocial compatible widgets in any website.
         Originally a port of Google's iGoogle gadget container, with Brain McCallister's PHP
-        code, Shindig through off it's egg shell, and showed that Google was serious about
+        code, Apache Shindig through off it's egg shell, and showed that Google was serious about
         making OpenSocial accessible to a larger number of sites. Since December 2007,
-        Shindig is now an Apache project.</p>
+        Apache Shindig is now an Apache project.</p>
     </section>
-    <section name="Shindig's objectives">
+    <section name="Apache Shindig's objectives">
       <div class="logo">
         <img src="./images/logos/java-logo.png" alt="Java"/>
         <img src="./images/logos/php-logo.gif" alt="PHP"/>
       </div>
-      <p> Shindig's primary goal is to provide infrastructure for those wishing to host
-        OpenSocial apps on their websites. Another goal of Shindig is to be language neutral
+      <p> Apache Shindig's primary goal is to provide infrastructure for those wishing to host
+        OpenSocial apps on their websites. Another goal of Apache Shindig is to be language neutral
         and cover multiple languages.</p>
 
       <p>Currently, Java and PHP versions are availables and supported.</p>
     </section>
-    <section name="Shindig Components">
+    <section name="Apache Shindig Components">
       <subsection name="Server Side">
-        <p>The Java and PHP version of Shindig have 3 major server side components:</p>
+        <p>The Java and PHP version of Apache Shindig have 3 major server side components:</p>
         <ol>
           <li>Persistent Data Loading Mechanism;</li>
           <li>Gadget Rendering Infrastructure;</li>
           <li>OpenSocial server side implementation.</li>
         </ol>
         <p>
-          <img src="./images/shindig-server-java.jpg" alt="Shindig Java Components"/>
+          <img src="./images/shindig-server-java.jpg" alt="Apache Shindig Java Components"/>
         </p>
         <p>
-          <i>Components of Shindig Java Server Side container</i>
+          <i>Components of Apache Shindig Java Server Side container</i>
         </p>
 
         <p>
-          <img src="./images/shindig-server-php.jpg" alt="Shindig PHP Components"/>
+          <img src="./images/shindig-server-php.jpg" alt="Apache Shindig PHP Components"/>
         </p>
         <p>
-          <i>Components of Shindig PHP Server Side container</i>
+          <i>Components of Apache Shindig PHP Server Side container</i>
         </p>
       </subsection>
       <subsection name="Client Side">
@@ -78,7 +78,7 @@ under the License.
               href="http://code.google.com/p/google-caja/">Caja</a> support.</li>
         </ul>
         <p>
-          <img src="./images/shindig-client.jpg" alt="Shindig Client Flow"/>
+          <img src="./images/shindig-client.jpg" alt="Apache Shindig Client Flow"/>
         </p>
       </subsection>
 
@@ -113,7 +113,7 @@ under the License.
     </section>
 
     <section name="OpenSocial APIs">
-      <p>Shindig implements several OpenSocial APIs:</p>
+      <p>Apache Shindig implements several OpenSocial APIs:</p>
       <ul>
         <li><b>OpenSocial REST</b>: for server to server communication</li>
         <li><b>OpenSocial JSON-RPC</b>: for gadget to server communication</li>
@@ -121,7 +121,7 @@ under the License.
       </ul>
 
       <subsection name="OpenSocial REST">
-        <p>There are four types of REST services which can be exposed by Shindig:
+        <p>There are four types of REST services which can be exposed by Apache Shindig:
           <i>people</i>, <i>activities</i>, <i>appdata</i> and <i>groups</i>.There are URI
           Templates defined for each type of service.</p>
         <p>For instance, <a href="http://localhost:8080/social/rest/people/john.doe"
@@ -232,9 +232,9 @@ under the License.
       </subsection>
 
       <subsection name="OpenSocial JSON-RPC">
-        <p>Shindig implements all required RPC services: <i>People</i>, <i>Activities</i>,
+        <p>Apache Shindig implements all required RPC services: <i>People</i>, <i>Activities</i>,
             <i>Appdata</i>, <i>Messages</i> and <i>System</i>.</p>
-        <p><b>Note</b>: Shindig doesn't implement all methods defined in <a
+        <p><b>Note</b>: Apache Shindig doesn't implement all methods defined in <a
             href="http://docs.google.com/View?docid=dhjrqr8t_4cwzqq7gh#tqgg1">OpenSocial
             RPC Protocol, Section 8, Services</a> but these missing methods are not
           required to be OpenSocial compliant.</p>
@@ -368,26 +368,26 @@ under the License.
       </subsection>
 
       <subsection name="OpenSocial JavaScript">
-        <p>Shindig includes all JavaScript APIs as described in <a
+        <p>Apache Shindig includes all JavaScript APIs as described in <a
             href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/opensocial-reference08"
             >OpenSocial API Reference</a> and <a
             href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadgets-reference08"
             >Gadgets API Reference</a>.</p>
         <p>See also the <a href="./shindig-1.1.x/shindig-features/jsdoc/index.html"
-            >JavascriptDoc for Shindig 1.1.x.</a></p>
+          >JavascriptDoc for Apache Shindig 1.1.x.</a></p>
       </subsection>
     </section>
 
     <section name="Resources">
       <ul>
         <li><a href="http://rajdeep.dua.googlepages.com/shindigPHP-overview-tidy_img.html">
-            Shindig : An Architectural Overview (PHP Version)</a> by Rajdeep Dua. </li>
+          Apache Shindig : An Architectural Overview (PHP Version)</a> by Rajdeep Dua. </li>
         <li><a
             href="http://chrisschalk.com/shindig_docs/rajdeep/shindig-overview/onjava-shindig-overview-tidy.html"
-            > Architectural Overview of Shindig , an OpenSocial Reference
+          > Architectural Overview of Apache Shindig , an OpenSocial Reference
           Implementation</a> by Rajdeep Dua. </li>
         <li><a href="http://sites.google.com/site/opensocialarticles/Home/shindig-rest-java"
-            >Overview of REST Implementation in Shindig - Java Version</a> by Rajdeep
+          >Overview of REST Implementation in Apache Shindig - Java Version</a> by Rajdeep
           Dua. </li>
         <li>
           <a href="http://www.opensocial.org/page/specs-1">OpenSocial specifications</a>

@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-04-04
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,11 +26,11 @@
 ~~ NOTE: For help with the syntax of this file, see:
 ~~ http://maven.apache.org/doxia/references/apt-format.html
 
-Articles on Shindig
+Articles on Apache Shindig
 
-  All articles on Shindig are listed on our {{{http://cwiki.apache.org/confluence/display/SHINDIG/Index#Index-ArticlesonShindig}Wiki}}.
+  All articles on Apache Shindig are listed on our {{{http://cwiki.apache.org/confluence/display/SHINDIG/Index#Index-ArticlesonShindig}Wiki}}.
 
-  If you are writing an article on Shindig we suggest contacting the developers on the
+  If you are writing an article on Apache Shindig we suggest contacting the developers on the
   mailing list as we would be happy to provide feedback to help ensure accuracy in
   your article. Just ping us on the {{{./mail-lists.html}dev mailing list}} to
   get in touch.

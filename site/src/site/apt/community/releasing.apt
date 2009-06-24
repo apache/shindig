@@ -1,9 +1,9 @@
  -----
- Releasing Shindig
+ Releasing Apache Shindig
  -----
  Vincent Siveton
  ------
- 2009-04-18
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,9 +26,9 @@
 ~~ NOTE: For help with the syntax of this file, see:
 ~~ http://maven.apache.org/doxia/references/apt-format.html
 
-Shindig Release Process
+Apache Shindig Release Process
 
-  This document describes how Shindig's committers will make a release.
+  This document describes how Apache Shindig's committers will make a release.
 
 %{toc}
 
@@ -64,7 +64,7 @@ Shindig Release Process
       Any other changes, you must backport yourself to the original pom.xml file and commit before proceeding with the
       release.
 
-    [[C]] Verify that all Shindig modules will be touched, including <<<assembly>>> and <<<samples>>>.
+    [[C]] Verify that all Apache Shindig modules will be touched, including <<<assembly>>> and <<<samples>>>.
 
     []
 
@@ -164,7 +164,7 @@ Vote open for 72 hours.
 * {6. Ask Incubator PMC}
 
   After a successful release vote on the Dev list, the release needs to be approved by the Incubator PMC. This is
-  necessary since Shindig is still in the Apache Incubator. For details about this approval look at the
+  necessary since Apache Shindig is still in the Apache Incubator. For details about this approval look at the
   {{{http://incubator.apache.org/incubation/Incubation_Policy.html#Podling+Constraints}Incubation Podling Constraints}}.
   The vote for the Incubator PMC must be started on the
   {{{http://incubator.apache.org/guides/lists.html}General Incubator list}}. The vote mail must contain SVN and deploy

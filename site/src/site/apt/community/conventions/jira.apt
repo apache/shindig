@@ -1,9 +1,9 @@
  ------
- Shindig JIRA Conventions
+ Apache Shindig JIRA Conventions
  ------
  Vincent Siveton
  ------
- 2009-03-25
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,9 +26,9 @@
 ~~ NOTE: For help with the syntax of this file, see:
 ~~ http://maven.apache.org/doxia/references/apt-format.html
 
-Shindig JIRA Conventions
+Apache Shindig JIRA Conventions
 
- This document describes how Shindig developers should use JIRA, our issue tracking.
+ This document describes how Apache Shindig developers should use JIRA, our issue tracking.
 
 * When To Create a JIRA Issue?
 
@@ -79,7 +79,7 @@ Shindig JIRA Conventions
 
 ** Time Tracking
 
- The Shindig team never uses it. Committers could do it, but like said, it will never be used.
+ The Apache Shindig team never uses it. Committers could do it, but like said, it will never be used.
 
 * Further Links
 

@@ -3,7 +3,7 @@
  -----
  Vincent Siveton
  ------
- 2009-03-25
+ 2009-06-24
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -28,7 +28,7 @@
 
 Getting Help
 
-  So something didn't work as you expected it to? You think that <Shindig is broken>. What should you do?
+  So something didn't work as you expected it to? You think that <Apache Shindig is broken>. What should you do?
 
   Here's a list of actions that you can take:
 
@@ -45,7 +45,7 @@ Getting Help
 
 *Submit an issue
 
-  If it turns out that there is indeed something wrong with Shindig, you should report it to our issue management
+  If it turns out that there is indeed something wrong with Apache Shindig, you should report it to our issue management
   system {{{../issue-tracking.html}JIRA}}.
 
   First of all you need to create an account in JIRA. This is so that we can communicate with you while we work

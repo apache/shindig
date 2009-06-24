@@ -23,31 +23,31 @@ under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Building Shindig for PHP</title>
+    <title>Building Apache Shindig for PHP</title>
     <author>Vincent Siveton</author>
-    <date>2009-03-25</date>
+    <date>2009-06-24</date>
   </properties>
   <body>
-    <section name="Building and running Shindig for PHP">
-      <p>This is the PHP steps on how to build and run Shindig.</p>
+    <section name="Building and running Apache Shindig for PHP">
+      <p>This is the PHP steps on how to build and run Apache Shindig.</p>
 
       <ul>
         <li>
-          <a href="#Prequisites_before_building_Shindig_for_PHP">Prequisites</a>
+          <a href="#Prequisites_before_building_Apache_Shindig_for_PHP">Prequisites</a>
         </li>
         <li>
           <a href="#Getting_the_code">Get the code</a>
         </li>
         <li>
-          <a href="#Running_Shindig">Running Shindig</a>
+          <a href="#Running_Apache_Shindig">Running Apache Shindig</a>
         </li>
         <li>
           <a href="#Additional_reading">Additonal reading</a>
         </li>
       </ul>
 
-      <subsection name="Prequisites before building Shindig for PHP">
-        <p> In order to build and run Shindig for PHP, you must have the following: </p>
+      <subsection name="Prequisites before building Apache Shindig for PHP">
+        <p> In order to build and run Apache Shindig for PHP, you must have the following: </p>
         <ul>
           <li>A Subversion client installed in order to checkout the code. <ul>
               <li>Instructions for downloading and installing Subversion can be found
@@ -65,7 +65,7 @@ under the License.
 
       <subsection name="Getting the code">
         <p> Create a subdirectory in your web document root, e.g. /var/www/html and checkout
-          the Shindig code from its Subversion repository</p>
+          the Apache Shindig code from its Subversion repository</p>
         <ol>
           <li>
             <code>mkdir /var/www/html/shindig</code>
@@ -80,7 +80,7 @@ under the License.
         </ol>
       </subsection>
 
-      <subsection name="Running Shindig">
+      <subsection name="Running Apache Shindig">
         <p>With PHP There is no need to build anything - the source code is already built.</p>
         <p>To run the code, you have several options:</p>
 
@@ -110,7 +110,7 @@ under the License.
 
       <subsection name="Additional reading">
         <p>Read <a href="http://svn.apache.org/repos/asf/incubator/shindig/trunk/php/README"
-            >php/README</a> for original instructions on how to start up the php shindig
+          >php/README</a> for original instructions on how to start up the php Apache Shindig
           server. </p>
       </subsection>
     </section>
