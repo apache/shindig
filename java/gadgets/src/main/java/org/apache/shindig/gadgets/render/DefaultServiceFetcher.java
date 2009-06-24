@@ -143,13 +143,13 @@ public class DefaultServiceFetcher {
 
   private Set<String> getServicesFromJsonResponse(String content)
       throws JSONException {
-    Set<String> services = Sets.newHashSet();
+    ImmutableSet.Builder<String> services = ImmutableSet.builder();
     JSONObject js = new JSONObject(content);
     JSONArray json = js.getJSONArray(JSON_RESPONSE_WRAPPER_ELEMENT);
     for (int i = 0; i < json.length(); i++) {
       String o = json.getString(i);
       services.add(o);
     }
-    return services;
+    return services.build();
   }
 }

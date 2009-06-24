@@ -87,7 +87,7 @@ public class PersonHandler {
         }
       } else if (optionalPersonId.size() == 1) {
         // TODO: Add some crazy concept to handle the userId?
-        Set<UserId> optionalUserIds = Sets.newHashSet(
+        Set<UserId> optionalUserIds = ImmutableSet.of(
             new UserId(UserId.Type.userId, optionalPersonId.iterator().next()));
 
         Future<RestfulCollection<Person>> people = personService.getPeople(

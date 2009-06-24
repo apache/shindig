@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,12 +58,14 @@ public class ContentRewriterFeatureFactory {
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;
     this.expires = expires;
-    this.includeTags = Sets.newHashSet();
-    for (String s : includeTags.split(",")) {
-      if (s != null && s.trim().length() > 0) {
-        this.includeTags.add(s.trim().toLowerCase());
+
+    ImmutableSet.Builder<String> includeTagsBuilder = ImmutableSet.builder();
+    for (String s : includeTags.trim().toLowerCase().split("\\s*,\\s*")) {
+      if (s != null && s.length() > 0) {
+        includeTagsBuilder.add(s);
       }
     }
+    this.includeTags = includeTagsBuilder.build();
     defaultFeature = new ContentRewriterFeature(null, includeUrls, excludeUrls, expires,
         this.includeTags);
   }
