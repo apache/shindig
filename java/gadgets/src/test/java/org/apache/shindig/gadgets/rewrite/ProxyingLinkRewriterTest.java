@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Test of proxying rewriter
@@ -64,7 +64,7 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
   public void testWithRefresh() throws Exception {
     ContentRewriterFeature contentRewriterFeature = new ContentRewriterFeature(
         createSpecWithoutRewrite(), ".*", "", "86400",
-        Sets.newHashSet("embed", "img", "script", "link", "style"));
+        ImmutableSet.of("embed", "img", "script", "link", "style"));
     ProxyingLinkRewriter rewriter = new ProxyingLinkRewriter(
       SPEC_URL,
       contentRewriterFeature,

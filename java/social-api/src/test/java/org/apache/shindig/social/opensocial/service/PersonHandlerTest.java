@@ -39,6 +39,7 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -59,12 +60,12 @@ public class PersonHandlerTest extends EasyMockTestCase {
   protected HandlerRegistry registry;
   private BeanJsonConverter converter;
 
-  private static final Set<String> DEFAULT_FIELDS = Sets.newHashSet(Person.Field.ID.toString(),
+  private static final Set<String> DEFAULT_FIELDS = ImmutableSet.of(Person.Field.ID.toString(),
       Person.Field.NAME.toString(),
       Person.Field.THUMBNAIL_URL.toString());
 
-  private static final Set<UserId> JOHN_DOE = Sets
-      .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
+  private static final Set<UserId> JOHN_DOE = 
+      ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe"));
 
   private static CollectionOptions DEFAULT_OPTIONS = new CollectionOptions();
   protected ContainerConfig containerConfig;
@@ -93,7 +94,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     handler = new PersonHandler(personService, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(Sets.<Object>newHashSet(handler));
+    registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
   public void testHandleGetAllNoParams() throws Exception {
@@ -183,7 +184,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     RestfulCollection<Person> data = new RestfulCollection<Person>(people);
     // TODO: We aren't passing john.doe to the service yet.
     expect(personService.getPeople(
-        eq(Sets.newHashSet(new UserId(UserId.Type.userId, "jane.doe"))),
+        eq(ImmutableSet.of(new UserId(UserId.Type.userId, "jane.doe"))),
         eq(new GroupId(GroupId.Type.self, null)), eq(DEFAULT_OPTIONS),
         eq(DEFAULT_FIELDS), eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));

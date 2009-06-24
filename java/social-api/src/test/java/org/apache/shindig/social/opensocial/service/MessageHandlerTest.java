@@ -40,7 +40,7 @@ import junit.framework.TestCase;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 public class MessageHandlerTest extends TestCase {
 
@@ -65,7 +65,7 @@ public class MessageHandlerTest extends TestCase {
     handler = new MessageHandler(messageService);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(Sets.<Object>newHashSet(handler));
+    registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
   public void testPostMessage() 

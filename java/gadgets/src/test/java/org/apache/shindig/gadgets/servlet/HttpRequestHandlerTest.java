@@ -56,6 +56,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -93,7 +94,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
     HttpRequestHandler handler = new HttpRequestHandler(pipeline, rewriterRegistry);
     registry = new DefaultHandlerRegistry(injector, converter,
         new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(Sets.<Object>newHashSet(handler));
+    registry.addHandlers(ImmutableSet.<Object>of(handler));
     builder = new HttpResponseBuilder().setResponseString("CONTENT");
     emptyFormItems = Collections.emptyMap();
   }

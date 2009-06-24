@@ -208,7 +208,7 @@ public class SpiTestUtil {
    */
   public static Set<UserId> buildUserIds(String... userIds) {
     // Set user id list
-    Set<UserId> userIdSet = new HashSet<UserId>();
+    Set<UserId> userIdSet = Sets.newHashSet();
     for (String userId: userIds) {
       userIdSet.add(new UserId(Type.userId, userId));
     }
@@ -389,7 +389,7 @@ public class SpiTestUtil {
   }
   
   public static Set<String> asSet(String... items) {
-    return new HashSet<String>(Arrays.asList(items));
+    return new Sets.newHashSet(Arrays.asList(items));
   }
   
 }

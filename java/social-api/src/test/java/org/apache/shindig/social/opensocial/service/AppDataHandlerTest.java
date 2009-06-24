@@ -44,8 +44,9 @@ import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 
 public class AppDataHandlerTest extends EasyMockTestCase {
 
@@ -58,8 +59,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
   protected HandlerRegistry registry;
 
 
-  private static final Set<UserId> JOHN_DOE = Collections.unmodifiableSet(Sets
-      .newHashSet(new UserId(UserId.Type.userId, "john.doe")));
+  private static final Set<UserId> JOHN_DOE = Collections.unmodifiableSet(
+      ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe")));
 
 
   @Override
@@ -71,7 +72,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     AppDataHandler handler = new AppDataHandler(appDataService);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(Sets.<Object>newHashSet(handler));
+    registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
@@ -81,7 +82,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     DataCollection data = new DataCollection(null);
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
         eq(new GroupId(group, null)),
-        eq("appId"), eq(Sets.<String>newHashSet()), eq(token)))
+        eq("appId"), eq(ImmutableSet.<String>of()), eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
@@ -111,7 +112,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(userIdSet),
         eq(new GroupId(GroupId.Type.self, null)),
-        eq("appId"), eq(Sets.<String>newHashSet()), eq(token)))
+        eq("appId"), eq(ImmutableSet.<String>of()), eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
@@ -130,7 +131,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     DataCollection data = new DataCollection(null);
     org.easymock.EasyMock.expect(appDataService.getPersonData(eq(JOHN_DOE),
         eq(new GroupId(GroupId.Type.friends, null)),
-        eq("appId"), eq(Sets.newHashSet("pandas")), eq(token)))
+        eq("appId"), eq(ImmutableSet.of("pandas")), eq(token)))
         .andReturn(ImmediateFuture.newInstance(data));
 
     replay();
@@ -153,7 +154,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
     org.easymock.EasyMock.expect(appDataService.updatePersonData(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)),
-        eq("appId"), eq(Sets.newHashSet("pandas")), eq(values), eq(token)))
+        eq("appId"), eq(ImmutableSet.of("pandas")), eq(values), eq(token)))
         .andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
     return operation.execute(params, new StringReader(jsonAppData), token, converter);
@@ -238,7 +239,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
 
     EasyMock.expect(appDataService.deletePersonData(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.self, null)),
-        eq("appId"), eq(Sets.newHashSet("pandas")), eq(token)))
+        eq("appId"), eq(ImmutableSet.of("pandas")), eq(token)))
         .andReturn(ImmediateFuture.newInstance((Void) null));
 
     replay();

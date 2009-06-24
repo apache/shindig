@@ -38,6 +38,7 @@ import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -60,8 +61,8 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
   private FakeGadgetToken token;
 
-  private static final Set<UserId> JOHN_DOE = Sets
-      .newHashSet(new UserId(UserId.Type.userId, "john.doe"));
+  private static final Set<UserId> JOHN_DOE = 
+      ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe"));
 
   protected HandlerRegistry registry;
   protected ContainerConfig containerConfig;
@@ -84,7 +85,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     handler = new ActivityHandler(activityService, containerConfig);
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(Sets.<Object>newHashSet(handler));
+    registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
   private void assertHandleGetForGroup(GroupId.Type group) throws Exception {
@@ -94,7 +95,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     List<Activity> activityList = ImmutableList.of();
     RestfulCollection<Activity> data = new RestfulCollection<Activity>(activityList);
     org.easymock.EasyMock.expect(activityService.getActivities(eq(JOHN_DOE),
-       eq(new GroupId(group, null)), (String)isNull(), eq(Sets.<String>newHashSet()),
+       eq(new GroupId(group, null)), (String)isNull(), eq(ImmutableSet.<String>of()),
         org.easymock.EasyMock.isA(CollectionOptions.class), eq(token))).
         andReturn(ImmediateFuture.newInstance(data));
 
@@ -126,7 +127,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     Set<UserId> userIdSet = Sets.newLinkedHashSet(JOHN_DOE);
     userIdSet.add(new UserId(UserId.Type.userId, "jane.doe"));
     org.easymock.EasyMock.expect(activityService.getActivities(eq(userIdSet),
-        eq(new GroupId(GroupId.Type.self, null)), eq("appId"),eq(Sets.<String>newHashSet()),
+        eq(new GroupId(GroupId.Type.self, null)), eq("appId"),eq(ImmutableSet.<String>of()),
         org.easymock.EasyMock.isA((CollectionOptions.class)), eq(token))).andReturn(
           ImmediateFuture.newInstance(data));
 
@@ -144,7 +145,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     Activity activity = new ActivityImpl();
     org.easymock.EasyMock.expect(activityService.getActivity(eq(JOHN_DOE.iterator().next()),
         eq(new GroupId(GroupId.Type.friends, null)),
-        eq("appId"), eq(Sets.<String>newHashSet()), eq("1"), eq(token))).andReturn(
+        eq("appId"), eq(ImmutableSet.<String>of()), eq("1"), eq(token))).andReturn(
         ImmediateFuture.newInstance(activity));
 
     replay();
@@ -165,7 +166,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         .andReturn(activity);
 
     org.easymock.EasyMock.expect(activityService.createActivity(eq(JOHN_DOE.iterator().next()),
-        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(Sets.<String>newHashSet()),
+        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.<String>of()),
         eq(activity), eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
     replay();
 
@@ -193,7 +194,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
 
 
     org.easymock.EasyMock.expect(activityService.deleteActivities(eq(JOHN_DOE.iterator().next()),
-        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(Sets.newHashSet("1")),
+        eq(new GroupId(GroupId.Type.self, null)), eq("appId"), eq(ImmutableSet.of("1")),
         eq(token))).andReturn(ImmediateFuture.newInstance((Void) null));
 
     replay();

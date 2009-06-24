@@ -128,7 +128,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     options.setMax(20);
 
     RestfulCollection<Person> responseItem = db.getPeople(
-        Sets.newHashSet(CANON_USER), new GroupId(GroupId.Type.friends, null),
+        ImmutableSet.of(CANON_USER), new GroupId(GroupId.Type.friends, null),
         options, Collections.<String>emptySet(), token).get();
     assertNotNull(responseItem);
     assertEquals(4, responseItem.getTotalResults());
@@ -159,14 +159,14 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedActivities() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
-        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
+        ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
     assertSame(2, responseItem.getTotalResults());
   }
 
   public void testGetExpectedActivitiesForPlural() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
-        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
+        ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
         new FakeGadgetToken()).get();
     assertSame(3, responseItem.getTotalResults());
   }
@@ -174,7 +174,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testGetExpectedActivity() throws Exception {
     Activity activity = db.getActivity(
         CANON_USER, SELF_GROUP, APP_ID,
-        Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
+        ImmutableSet.of("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
     assertNotNull(activity);
     // Check that some fields are fetched and others are not
     assertNotNull(activity.getBody());
@@ -182,14 +182,14 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   }
 
   public void testDeleteExpectedActivity() throws Exception {
-    db.deleteActivities(CANON_USER, SELF_GROUP, APP_ID, Sets.newHashSet(APP_ID),
+    db.deleteActivities(CANON_USER, SELF_GROUP, APP_ID, ImmutableSet.of(APP_ID),
         new FakeGadgetToken());
 
     // Try to fetch the activity
     try {
       db.getActivity(
           CANON_USER, SELF_GROUP, APP_ID,
-          Sets.newHashSet("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
+          ImmutableSet.of("appId", "body", "mediaItems"), APP_ID, new FakeGadgetToken()).get();
       fail();
     } catch (ProtocolException sse) {
       assertEquals(HttpServletResponse.SC_BAD_REQUEST, sse.getCode());
@@ -198,7 +198,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedAppData() throws Exception {
     DataCollection responseItem = db.getPersonData(
-        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
         new FakeGadgetToken()).get();
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
@@ -210,7 +210,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   public void testGetExpectedAppDataForPlural() throws Exception {
     DataCollection responseItem = db.getPersonData(
-        Sets.newHashSet(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
         new FakeGadgetToken()).get();
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
@@ -227,11 +227,11 @@ public class JsonDbOpensocialServiceTest extends TestCase {
   public void testDeleteExpectedAppData() throws Exception {
     // Delete the data
     db.deletePersonData(CANON_USER, SELF_GROUP, APP_ID,
-        Sets.newHashSet("count"), new FakeGadgetToken());
+        ImmutableSet.of("count"), new FakeGadgetToken());
 
     // Fetch the remaining and test
     DataCollection responseItem = db.getPersonData(
-        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
         new FakeGadgetToken()).get();
     assertFalse(responseItem.getEntry().isEmpty());
     assertFalse(responseItem.getEntry().get(CANONICAL_USER_ID).isEmpty());
@@ -248,7 +248,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
     // Fetch the remaining and test
     DataCollection responseItem = db.getPersonData(
-        Sets.newHashSet(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
+        ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
         new FakeGadgetToken()).get();
 
     assertFalse(responseItem.getEntry().isEmpty());
