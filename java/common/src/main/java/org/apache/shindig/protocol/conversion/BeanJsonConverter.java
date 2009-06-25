@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.protocol.conversion;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
+import com.google.common.collect.Lists;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -137,7 +140,7 @@ public class BeanJsonConverter implements BeanConverter {
       if (value instanceof JSONObject) {
         return convertToMap((JSONObject) value, null);
       } else if (value instanceof JSONArray) {
-        return convertToCollection((JSONArray) value, new ArrayList<Object>(), null);
+        return convertToList((JSONArray) value, null);
       }
       return value;
     } else if (type instanceof ParameterizedType) {
@@ -161,9 +164,9 @@ public class BeanJsonConverter implements BeanConverter {
     } else if (type.equals(Map.class)) {
       return convertToMap((JSONObject) value, null);
     } else if (type.equals(List.class) || type.equals(Collection.class)) {
-      return convertToCollection((JSONArray) value, new ArrayList<Object>(), null);
+      return convertToList((JSONArray) value, null);
     } else if (type.equals(Set.class)) {
-      return convertToCollection((JSONArray) value, new HashSet<Object>(), null);
+      return convertToSet((JSONArray) value, null);
     }
 
     Class<?> clazz = (Class<?>) type;
@@ -180,9 +183,9 @@ public class BeanJsonConverter implements BeanConverter {
     Class<?> clazz = (Class<?>) type.getRawType();
 
     if (Set.class.isAssignableFrom(clazz)) {
-      return convertToCollection((JSONArray) value, new HashSet<Object>(), typeArgs[0]);
+      return convertToSet((JSONArray) value, typeArgs[0]);
     } else if (Collection.class.isAssignableFrom(clazz)) {
-      return convertToCollection((JSONArray) value, new ArrayList<Object>(), typeArgs[0]);
+      return convertToList((JSONArray) value, typeArgs[0]);
     } else if (Map.class.isAssignableFrom(clazz)) {
       return convertToMap((JSONObject) value, typeArgs[1]);
     } else if (org.apache.shindig.protocol.model.Enum.class.isAssignableFrom(clazz)) {
@@ -241,11 +244,17 @@ public class BeanJsonConverter implements BeanConverter {
     return out;
   }
 
-  private Collection<Object> convertToCollection(JSONArray in, Collection<Object> out, Type type) {
+  private List<Object> convertToList(JSONArray in, Type type) {
+    ArrayList<Object> out = Lists.newArrayListWithExpectedSize(in.length());
+
     for (int i = 0, j = in.length(); i < j; ++i) {
       out.add(convertToObject(in.opt(i), type));
     }
     return out;
+  }
+
+  private Set<Object> convertToSet(JSONArray in, Type type) {
+    return ImmutableSet.copyOf(convertToList(in, type));
   }
 
   private Object convertToClass(JSONObject in, Class<?> type) {

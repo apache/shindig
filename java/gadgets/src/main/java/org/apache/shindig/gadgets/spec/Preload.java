@@ -59,15 +59,12 @@ public class Preload implements RequestAuthenticationInfo {
     }
 
     // Record all the associated views
-    String viewNames = XmlUtil.getAttribute(preload, "views", "");
-    Set<String> views = Sets.newHashSet();
-    for (String s : viewNames.split(",")) {
-      s = s.trim();
-      if (s.length() > 0) {
-        views.add(s.trim());
-      }
+    String viewNames = XmlUtil.getAttribute(preload, "views", "").trim();
+    if (viewNames.length() == 0) {
+      this.views = ImmutableSet.of();
+    } else {
+      this.views = ImmutableSet.of(viewNames.trim().split("\\s*,+\\s*"));
     }
-    this.views = Collections.unmodifiableSet(views);
 
     auth = AuthType.parse(XmlUtil.getAttribute(preload, "authz"));
     signOwner = XmlUtil.getBoolAttribute(preload, "sign_owner", true);
