@@ -38,6 +38,41 @@ gadgets.window = gadgets.window || {};
   var oldHeight;
 
   /**
+   * Parse out the value (specified in px) for a CSS attribute of an element.
+   * @param {Object} elem the element with the attribute to look for.
+   * @param {String} attr the CSS attribute name of interest.
+   * @returns {int} the value of the px attr of the elem.
+   */
+  function parseIntFromElemPxAttribute(elem, attr) {
+    var style = window.getComputedStyle(elem, "");
+    var value = style.getPropertyValue(attr);
+    value.match(/^([0-9]+)/);
+    return parseInt(RegExp.$1, 10);
+  }
+
+  /**
+   * Calculate the height of the gadget iframe by iterating through the
+   * elements in the gadget body for Webkit.
+   * @returns {int} the height of the gadget.
+   */
+  function getHeightForWebkit() {
+    var result = 0;
+    var children = document.body.childNodes;
+    for (var i = 0; i < children.length; i++) {
+      if (children[i].offsetTop && children[i].offsetHeight) {
+        var bottom = children[i].offsetTop + children[i].scrollHeight
+            + parseIntFromElemPxAttribute(children[i], "margin-bottom")
+            + parseIntFromElemPxAttribute(children[i], "padding-bottom");
+        result = Math.max(result, bottom);
+      }
+    }
+    // Add margin and padding height specificed in the body (if any).
+    return result
+        + parseIntFromElemPxAttribute(document.body, "margin-bottom")
+        + parseIntFromElemPxAttribute(document.body, "padding-bottom");
+  }
+
+  /**
    * Detects the inner dimensions of a frame.
    * See: http://www.quirksmode.org/viewport/compatibility.html for more
    * information.
@@ -100,6 +135,13 @@ gadgets.window = gadgets.window || {};
         // use the value that's NOT equal to the viewport height found above.
         newHeight = docEl.scrollHeight !== vh ?
                      docEl.scrollHeight : docEl.offsetHeight;
+      } else if (navigator.userAgent.indexOf('AppleWebKit') >= 0) {
+        // In Webkit:
+        // Property scrollHeight and offsetHeight will only increase in value.
+        // This will incorrectly calculate reduced height of a gadget
+        // (ie: made smaller). These properties also do not account margin and
+        // padding size of an element.
+        newHeight = getHeightForWebkit();
       } else {
         // In Quirks mode:
         // documentElement.clientHeight is equal to documentElement.offsetHeight
