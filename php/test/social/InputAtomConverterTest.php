@@ -26,21 +26,21 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
   /**
    * @var InputAtomConverter
    */
-  private $InputAtomConverter;
+  private $inputAtomConverter;
 
   /**
    * Prepares the environment before running a test.
    */
   protected function setUp() {
     parent::setUp();
-    $this->InputAtomConverter = new InputAtomConverter(/* parameters */);
+    $this->inputAtomConverter = new InputAtomConverter(/* parameters */);
   }
 
   /**
    * Cleans up the environment after running a test.
    */
   protected function tearDown() {
-    $this->InputAtomConverter = null;
+    $this->inputAtomConverter = null;
     parent::tearDown();
   }
 
@@ -80,7 +80,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
   <summary>example summary</summary>
 </entry>
 ';
-    $activity = $this->InputAtomConverter->convertActivities($xml);
+    $activity = $this->inputAtomConverter->convertActivities($xml);
     $this->assertEquals('urn:guid:220', $activity['id']);
     $this->assertEquals('example title', $activity['title']);
     $this->assertEquals('example summary', $activity['body']);
@@ -111,7 +111,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
     <title>appdata id 1</title>
     <updated>2008-08-06T22:36:20+02:00</updated>
   </entry>';
-    $appdata = $this->InputAtomConverter->convertAppData($xml);
+    $appdata = $this->inputAtomConverter->convertAppData($xml);
     $expect = array('sign' => 'Virgo');
     $this->assertEquals($expect, $appdata);
   }
@@ -130,7 +130,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
   <link rel="alternate" href="http://app.example.org/invites/{msgid}"/>
   <content>Click &lt;a href="http://app.example.org/invites/{msgid}"&gt;here&lt;/a&gt; to review your invitation.</content>
 </entry>';
-    $message = $this->InputAtomConverter->convertMessages($xml);
+    $message = $this->inputAtomConverter->convertMessages($xml);
     $this->assertEquals('{msgid}', $message['id']);
     $this->assertEquals('You have an invitation from Joe', $message['title']);
     $this->assertEquals('Click <a href="http://app.example.org/invites/{msgid}">here</a> to review your invitation.', $message['body']);
@@ -143,6 +143,62 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
    */
   public function testConvertPeople() {
     $this->setExpectedException('Exception');
-    $this->InputAtomConverter->convertPeople('');
+    $this->inputAtomConverter->convertPeople('');
+  }
+  
+  public function testConvertAlbums() {
+    $xml = '<entry xmlns="http://www.w3.org/2005/Atom">
+            <content type="application/xml">
+              <album xmlns="http://ns.opensocial.org/2008/opensocial">
+                <id>44332211</id>
+                <thumbnailUrl>http://pages.example.org/albums/4433221-tn.png</thumbnailUrl>
+                <caption>Example Album</caption>
+                <description>This is an example album, and this text is an example description</description>
+                <location>
+                  <latitude>0</latitude>
+                  <longitude>0</longitude>
+                </location>
+                <ownerId>example.org:55443322</ownerId>
+              </album>
+            </content>
+            <title/>
+            <updated>2003-12-13T18:30:02Z</updated>
+            <author><url>example.org:55443322</url></author>
+            <id>urn:guid:example.org:44332211</id>
+            </entry>';
+    $album = $this->inputAtomConverter->convertAlbums($xml);
+    $this->assertEquals('44332211', $album['id']);
+    $this->assertEquals('http://pages.example.org/albums/4433221-tn.png', $album['thumbnailUrl']);
+    $this->assertEquals('This is an example album, and this text is an example description', $album['description']);
+    $this->assertEquals('Example Album', $album['title']);
+    $this->assertEquals('example.org:55443322', $album['ownerId']);
+    $this->assertFalse(empty($album['location']));
+    $this->assertEquals(0, $album['location']['latitude']);
+    $this->assertEquals(0, $album['location']['longitude']);
+  }
+  
+  public function testConvertMediaItems() {
+    $xml = '<entry xmlns="http://www.w3.org/2005/Atom">
+              <content type="application/xml">
+                <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
+                  <id>11223344</id>
+                  <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
+                  <mimeType>image/png</mimeType>
+                  <type>image</type>
+                  <url>http://pages.example.org/images/11223344.png</url>
+                  <albumId>44332211</albumId>
+                </mediaItem>
+              </content>
+              <title/>
+              <updated>2003-12-13T18:30:02Z</updated>
+              <author><url>example.org:55443322</url></author>
+              <id>urn:guid:example.org:11223344</id>
+            </entry>';
+    $mediaItem = $this->inputAtomConverter->convertMediaItems($xml);
+    $this->assertEquals('11223344', $mediaItem['id']);
+    $this->assertEquals('http://pages.example.org/images/11223344-tn.png', $mediaItem['thumbnailUrl']);
+    $this->assertEquals('44332211', $mediaItem['albumId']);
+    $this->assertEquals('http://pages.example.org/images/11223344.png', $mediaItem['url']);
+    $this->assertEquals('image/png', $mediaItem['mimeType']);
   }
 }

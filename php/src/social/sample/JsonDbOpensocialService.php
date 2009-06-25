@@ -21,7 +21,7 @@
 /**
  * Implementation of supported services backed by a JSON DB
  */
-class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, MessagesService {
+class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, MessagesService, AlbumService, MediaItemService {
 
   /**
    * The DB
@@ -42,6 +42,16 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
    * db["messages"] : Map<Person.Id, MessageCollection>
    */
   private static $MESSAGES_TABLE = "messages";
+  
+  /**
+   * db["albums"] -> Map<Person.Id, Map<Album.Id, Album>>
+   */
+  private static $ALBUMS_TABLE = "albums";
+  
+  /**
+   * db["mediaItems"] -> Map<Album.Id, Map<MediaItem.Id, MediaItem>>
+   */
+  private static $MEDIA_ITEMS_TABLE = "mediaItems";
 
   /**
    * db["data"] -> Map<Person.Id, Map<String, String>>
@@ -145,7 +155,27 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $db[self::$MESSAGES_TABLE] = $this->allMessageCollections;
     return $this->allMessageCollections;
   }
-
+  
+  private function getAllAlbums() {
+    $db = $this->getDb();
+    $albumTable = $db[self::$ALBUMS_TABLE] ? $db[self::$ALBUMS_TABLE] : array();
+    $allAlbums = array();
+    foreach ($albumTable as $key => $value) {
+      $allAlbums[$key] = $value;
+    }
+    return $allAlbums;
+  }
+  
+  private function getAllMediaItems() {
+    $db = $this->getDb();
+    $mediaItemsTable = $db[self::$MEDIA_ITEMS_TABLE] ? $db[self::$MEDIA_ITEMS_TABLE] : array();
+    $allMediaItems = array();
+    foreach ($mediaItemsTable as $key => $value) {
+      $allMediaItems[$key] = $value;
+    }
+    return $allMediaItems;
+  }
+  
   private function getPeopleWithApp($appId) {
     $peopleWithApp = array();
     $db = $this->getDb();
@@ -654,7 +684,177 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return self::paginateResults($results, $options);
   }
-
+  
+  public function getAlbums($userId, $groupId, $albumIds, $options, $fields, $token) {
+    $all = $this->getAllAlbums();
+    $allMediaItems = $this->getAllMediaItems();
+    $results = array();
+    if (!isset($all[$userId->getUserId($token)])) {
+      return RestfulCollection::createFromEntry(array());
+    }
+    $albumIds = array_unique($albumIds);
+    foreach ($all[$userId->getUserId($token)] as $id => $album) {
+      if (empty($albumIds) || in_array($id, $albumIds)) {
+        $results[] = $album;
+        $album['mediaItemCount'] = count($allMediaItems[$id]);
+      }
+    }
+    if ($options) {
+      $results = $this->filterResults($results, $options);
+    }
+    if ($fields) {
+      $results = self::adjustFields($results, $fields);
+    }
+    return self::paginateResults($results, $options);
+  }
+  
+  public function createAlbum($userId, $groupId, $album, $token) {
+    $all = $this->getAllAlbums();
+    $cnt = 0;
+    foreach ($all as $key => $value) {
+      $cnt += count($value);
+    }
+    $id = 'testIdPrefix' . $cnt;
+    $album['id'] = $id;
+    $album['ownerId'] = $userId->getUserId($token);
+    if (isset($album['mediaType'])) {
+      $album['mediaType'] = strtoupper($album['mediaType']);
+      if (!in_array($album['mediaType'], MediaItem::$TYPES)) {
+        unset($album['mediaType']);
+      }
+    }
+    if (!isset($all[$userId->getUserId($token)])) {
+      $all[$userId->getUserId($token)] = array();  
+    }
+    $all[$userId->getUserId($token)][$id] = $album;
+    $db = $this->getDb();
+    $db[self::$ALBUMS_TABLE] = $all;
+    $this->saveDb($db);
+    return $album;
+  }
+  
+  public function updateAlbum($userId, $groupId, $album, $token) {
+    $all = $this->getAllAlbums();
+    if (!$all[$userId->getUserId($token)] || !$all[$userId->getUserId($token)][$album['id']]) {
+      throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
+    }
+    $origin =  $all[$userId->getUserId($token)][$album['id']];
+    if ($origin['ownerId'] != $userId->getUserId($token)) {
+      throw new SocialSpiException("Not the owner.", ResponseError::$UNAUTHORIZED);
+    }
+    $album['ownerId'] = $origin['ownerId'];
+    if (isset($album['mediaType'])) {
+      $album['mediaType'] = strtoupper($album['mediaType']);  
+      if (!in_array($album['mediaType'], MediaItem::$TYPES)) {
+        unset($album['mediaType']);
+      }
+    }
+    $all[$userId->getUserId($token)][$album['id']] = $album;
+    
+    $db = $this->getDb();
+    $db[self::$ALBUMS_TABLE] = $all;
+    $this->saveDb($db);
+  }
+  
+  public function deleteAlbum($userId, $groupId, $albumId, $token) {
+    $all = $this->getAllAlbums();
+    if (!$all[$userId->getUserId($token)] || !$all[$userId->getUserId($token)][$albumId]) {
+      throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
+    }
+    if ($all[$userId->getUserId($token)][$albumId]['ownerId'] != $userId->getUserId($token)) {
+      throw new SocialSpiException("Not the owner.", ResponseError::$UNAUTHORIZED);
+    }
+    unset($all[$userId->getUserId($token)][$albumId]);
+    $db = $this->getDb();
+    $db[self::$ALBUMS_TABLE] = $all;
+    $this->saveDb($db);
+  }
+  
+  public function getMediaItems($userId, $groupId, $albumId, $mediaItemIds, $options, $fields, $token) {
+    $all = $this->getAllMediaItems();
+    $results = array();
+    if (!isset($all[$albumId])) {
+      return RestfulCollection::createFromEntry(array());
+    }
+    $mediaItemIds = array_unique($mediaItemIds);
+    foreach ($all[$albumId] as $id => $mediaItem) {
+      if (empty($mediaItemIds) || in_array($id, $mediaItemIds)) {
+        $results[] = $mediaItem;
+      }
+    }
+    if ($options) {
+      $results = $this->filterResults($results, $options);
+    }
+    if ($fields) {
+      $results = self::adjustFields($results, $fields);
+    }
+    return self::paginateResults($results, $options);
+  }
+  
+  public function createMediaItem($userId, $groupId, $mediaItem, $data, $token) {
+    $all = $this->getAllMediaItems();
+    $albumId = $mediaItem['albumId'];
+    $id = count($all[$albumId]) + 1;
+    $mediaItem['id'] = $id;
+    $mediaItem['lastUpdated'] = time();
+    if (isset($mediaItem['type'])) {
+      $mediaItem['type'] = strtoupper($mediaItem['type']);
+      if (!in_array($mediaItem['type'], MediaItem::$TYPES)) {
+        unset($mediaItem['type']);
+      }
+    }
+    if (!$all[$albumId]) {
+      $all[$albumId] = array();
+    }
+    $all[$albumId][$id] = $mediaItem;
+    $db = $this->getDb();
+    $db[self::$MEDIA_ITEMS_TABLE] = $all;
+    $this->saveDb($db);
+    return $mediaItem;
+  }
+  
+  public function updateMediaItem($userId, $groupId, $mediaItem, $data, $token) {
+    $all = $this->getAllMediaItems();
+    if (!$all[$mediaItem['albumId']] || !$all[$mediaItem['albumId']][$mediaItem['id']]) {
+      throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
+    }
+    
+    $origin = $all[$mediaItem['albumId']][$mediaItem['id']];
+    $mediaItem['lastUpdated'] = time();
+    $mediaItem['created'] = $origin['created'];
+    $mediaItem['fileSize'] = $orgin['fileSize'];
+    $mediaItem['numComments'] = $origin['numComments'];
+    if (isset($mediaItem['type'])) {
+      $mediaItem['type'] = strtoupper($mediaItem['type']);
+      if (!in_array($mediaItem['type'], MediaItem::$TYPES)) {
+        unset($mediaItem['type']);
+      }
+    }
+    
+    $all[$mediaItem['albumId']][$mediaItem['id']] = $mediaItem;
+    $db = $this->getDb();
+    $db[self::$MEDIA_ITEMS_TABLE] = $all;
+    $this->saveDb($db);
+  }
+  
+  public function deleteMediaItems($userId, $groupId, $albumId, $mediaItemIds, $token) {
+    $all = $this->getAllMediaItems();
+    if (!$all[$albumId]) {
+      throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
+    }
+    foreach ($mediaItemIds as $id) {
+      if (!$all[$albumId][$id]) {
+        throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
+      }
+    }
+    foreach ($mediaItemIds as $id) {
+      unset($all[$albumId][$id]);
+    } 
+    $db = $this->getDb();
+    $db[self::$MEDIA_ITEMS_TABLE] = $all;
+    $this->saveDb($db);
+  }
+  
   /**
    * Paginates the results set according to the critera specified by the options.
    */

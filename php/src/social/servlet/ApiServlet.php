@@ -64,6 +64,8 @@ abstract class ApiServlet extends HttpServlet {
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
   public static $INVALIDATE_ROUTE = "cache";
+  public static $ALBUM_ROUTE = "albums";
+  public static $MEDIA_ITEM_ROUTE = "mediaitems";
 
   public function __construct() {
     parent::__construct();
@@ -73,6 +75,8 @@ abstract class ApiServlet extends HttpServlet {
     $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
     $this->handlers[self::$MESSAGE_ROUTE] = new MessagesHandler();
     $this->handlers[self::$INVALIDATE_ROUTE] = new InvalidateHandler();
+    $this->handlers[self::$ALBUM_ROUTE] = new AlbumHandler();
+    $this->handlers[self::$MEDIA_ITEM_ROUTE] = new MediaItemHandler();
     if (isset($_SERVER['CONTENT_TYPE']) && (strtolower($_SERVER['CONTENT_TYPE']) != $_SERVER['CONTENT_TYPE'])) {
       // make sure the content type is in all lower case since that's what we'll check for in the handlers
       $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);

@@ -34,4 +34,8 @@ abstract class InputConverter {
   abstract public function convertAppData($requestParam);
 
   abstract public function convertMessages($requestParam);
+  
+  abstract public function convertAlbums($requestParam);
+  
+  abstract public function convertMediaItems($requestParam);
 }

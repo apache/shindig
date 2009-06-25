@@ -55,7 +55,7 @@ class MediaItemTest extends PHPUnit_Framework_TestCase {
    * Tests MediaItem->getType()
    */
   public function testGetType() {
-    $this->assertEquals('audio', $this->MediaItem->getType());
+    $this->assertEquals('AUDIO', $this->MediaItem->getType());
   }
 
   /**
@@ -78,7 +78,7 @@ class MediaItemTest extends PHPUnit_Framework_TestCase {
    */
   public function testSetType() {
     $this->MediaItem->setType('VIDEO');
-    $this->assertEquals('video', $this->MediaItem->type);
+    $this->assertEquals('VIDEO', $this->MediaItem->type);
   }
 
   /**

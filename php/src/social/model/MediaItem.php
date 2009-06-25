@@ -19,15 +19,33 @@
  */
 
 /**
- * see
- * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.MediaItem
+ * http://opensocial-resources.googlecode.com/svn/spec/0.9/OpenSocial-Specification.xml#opensocial.MediaItem
  */
 class MediaItem {
+  
+  public $albumId;
+  public $created;
+  public $description;
+  public $duration;
+  public $fileSize;
+  public $id;
+  public $language;
+  public $lastUpdated;
+  public $location;
   public $mimeType;
+  public $numComments;
+  public $numViews;
+  public $numVotes;
+  public $rating;
+  public $startTime;
+  public $taggedPeople;
+  public $tags;
+  public $thumbnailUrl;
+  public $title;
   public $type;
   public $url;
-
-  public $types = array('AUDIO' => 'audio', 'VIDEO' => 'video', 'IMAGE' => 'image');
+  
+  public static $TYPES = array('AUDIO', 'VIDEO', 'IMAGE');
 
   public function __construct($mimeType, $type, $url) {
     $this->setMimeType($mimeType);
@@ -35,6 +53,150 @@ class MediaItem {
     $this->setUrl($url);
   }
 
+  public function getId() {
+    return $this->id;
+  }
+
+  public function setId($id) {
+    $this->id = $id;
+  }
+  
+  public function getAlbumId() {
+    return $this->albumId;
+  }
+
+  public function setAlbumId($albumId) {
+    $this->albumId = $albumId;
+  }
+  
+  public function getCreated() {
+    return $this->created;
+  }
+
+  public function setCreated($created) {
+    $this->created = $created;
+  }
+
+  public function getDescription() {
+    return $this->$description;
+  }
+
+  public function setDescription($description) {
+    $this->description = $description;
+  }
+  
+  public function getDuration() {
+    return $this->duration;
+  }
+
+  public function setDuration($duration) {
+    $this->duration = $duration;
+  }
+  
+  public function getFileSize() {
+    return $this->fileSize;
+  }
+
+  public function setFileSize($fileSize) {
+    $this->fileSize = $fileSize;
+  }
+  
+  public function getLanguage() {
+    return $this->language;
+  }
+
+  public function setLanguage($language) {
+    $this->language = $language;
+  }
+  
+  public function getLastUpdated() {
+    return $this->lastUpdated;
+  }
+
+  public function setLastUpdated($lastUpdated) {
+    $this->lastUpdated = $lastUpdated;
+  }
+  
+  public function getLocation() {
+    return $this->location;
+  }
+
+  public function setLocation($location) {
+    $this->location = $location;
+  }
+  
+  public function getNumComments() {
+    return $this->numComments;
+  }
+
+  public function setNumComments($numComments) {
+    $this->numComments = $numComments;
+  }
+  
+  public function getNumViews() {
+    return $this->numViews;
+  }
+
+  public function setNumViews($numViews) {
+    $this->numViews = $numViews;
+  }
+  
+  public function getNumVotes() {
+    return $this->numVotes;
+  }
+
+  public function setNumVotes($numVotes) {
+    $this->numVotes = $numVotes;
+  }
+  
+  public function getRating() {
+    return $this->rating;
+  }
+
+  public function setRating($rating) {
+    $this->rating = $rating;
+  }
+  
+  public function getStartTime() {
+    return $this->startTime;
+  }
+
+  public function setStartTime($startTime) {
+    $this->startTime = $startTime;
+  }
+  
+  public function getTaggedPeople() {
+    return $this->taggedPeople;
+  }
+
+  public function setTaggedPeople($taggedPeople) {
+    $this->taggedPeople = $taggedPeople;
+  }
+  
+  public function getTags() {
+    return $this->tags;
+  }
+
+  public function setTags($tags) {
+    $this->tags = $tags;
+  }
+  
+  public function getThumbnailUrl() {
+    return $this->thumbnailUrl;
+  }
+
+  public function setThumbnailUrl($thumbnailUrl) {
+    $this->thumbnailUrl = $thumbnailUrl;
+  }
+  
+  public function getTitle() {
+    return $this->title;
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
+  }
+  
   public function getMimeType() {
     return $this->mimeType;
   }
@@ -48,10 +210,10 @@ class MediaItem {
   }
 
   public function setType($type) {
-    if (! array_key_exists($type, $this->types)) {
+    if (! in_array($type, self::$TYPES)) {
       throw new Exception("Invalid Media type");
     }
-    $this->type = $this->types[$type];
+    $this->type = $type;
   }
 
   public function getUrl() {

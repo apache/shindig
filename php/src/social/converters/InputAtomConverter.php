@@ -48,4 +48,14 @@ class InputAtomConverter extends InputConverter {
     $xml = InputBasicXmlConverter::loadString($requestParam);
     return InputBasicXmlConverter::convertMessages($requestParam, $xml, $xml->content);
   }
+  
+  public function convertAlbums($requestParam) {
+    $xml = InputBasicXmlConverter::loadString($requestParam);
+    return InputBasicXmlConverter::convertAlbums($xml, $xml->content->album);
+  }
+  
+  public function convertMediaItems($requestParam) {
+    $xml = InputBasicXmlConverter::loadString($requestParam);
+    return InputBasicXmlConverter::convertMediaItems($xml, $xml->content->mediaItem);
+  }
 }

@@ -97,13 +97,21 @@ class RestRequestItem extends RequestItem {
       case DataServiceServlet::$INVALIDATE_ROUTE:
         $this->params = json_decode($this->postData, true);
         break;
+      case DataServiceServlet::$ALBUM_ROUTE:
+        $data = $this->inputConverter->convertAlbums($this->postData);
+        $this->params['album'] = $data;
+        break;
+      case DataServiceServlet::$MEDIA_ITEM_ROUTE:
+        $data = $this->inputConverter->convertMediaItems($this->postData);
+        $this->params['mediaItem'] = $data;
+        break;
       default:
         throw new Exception("Invalid or unknown service endpoint: $service");
         break;
     }
   
   }
-
+  
   /**
    * '/people/@me/@self' => 'people'
    * '/invalidate?invalidationKey=1' => 'invalidate'

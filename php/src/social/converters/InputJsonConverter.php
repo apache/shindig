@@ -58,4 +58,20 @@ class InputJsonConverter extends InputConverter {
     }
     return $ret;
   }
+  
+  public function convertAlbums($requestParam) {
+    $ret = json_decode($requestParam, true);
+    if ($ret == $requestParam) {
+      throw new Exception("Mallformed album json string. " . $requestParam);
+    }
+    return $ret;
+  }
+  
+  public function convertMediaItems($requestParam) {
+    $ret = json_decode($requestParam, true);
+    if ($ret == $requestParam) {
+      throw new Exception("Mallformed album json string. " . $requestParam);
+    }
+    return $ret;
+  }
 }

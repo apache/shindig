@@ -75,7 +75,7 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
       <isViewer></isViewer>
       <displayName>1 1</displayName>
       <id>1</id>
-    </person>
+    </entry>
   </content>
 </entry>
 ';

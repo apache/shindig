@@ -56,7 +56,68 @@ class InputBasicXmlConverter {
     }
     return $activity;
   }
-
+  
+  public static function convertAlbums($xml, $albumXml) {
+    $fields = array('id', 'description', 'mediaItemCount', 'thumbnailUrl', 'ownerId', 'mediaMimeType');
+    $album = self::copyFields($albumXml, $fields);
+    if (isset($xml->title) && !empty($xml->title)) {
+      $album['title'] = trim($xml->title);
+    } else if (isset($albumXml->caption)) {
+      $album['title'] = trim($albumXml->caption); 
+    }
+    if (isset($albumXml->mediaType) && in_array(strtoupper(trim($albumXml->mediaType)), MediaItem::$TYPES)) {
+      $album['mediaType'] = strtoupper(trim($albumXml->mediaType));
+    }
+    if (isset($albumXml->location)) {
+      $address = self::convertAddresses($albumXml->location);      
+      if ($address) {
+        $album['location'] = $address;
+      }
+    }
+    return $album;
+  }
+  
+  public static function convertMediaItems($xml, $mediaItemXml) {
+    $fields = array('albumId', 'created', 'description', 'duration', 'fileSize', 'id', 'language',
+      'lastUpdated', 'mimeType', 'numComments', 'numViews', 'numVotes', 'rating',
+      'startTime', 'taggedPeople', 'tags', 'thumbnailUrl', 'url');
+    $mediaItem = self::copyFields($mediaItemXml, $fields);
+    if (isset($xml->title) && !empty($xml->title)) {
+      $mediaItem['title'] = trim($xml->title);
+    } else if (isset($mediaItemXml->caption)) {
+      $mediaItem['title'] = trim($mediaItemXml->caption);
+    }
+    if (isset($mediaItemXml->type) && in_array(strtoupper(trim($mediaItemXml->type)), MediaItem::$TYPES)) {
+      $mediaItem['type'] = strtoupper(trim($mediaItemXml->type));
+    }
+    if (isset($mediaItemXml->location)) {
+      $address = self::convertAddresses($mediaItemXml->location);      
+      if ($address) {
+        $mediaItem['location'] = $address;
+      }
+    }
+    return $mediaItem;
+  }
+  
+  public static function convertAddresses($xml) {
+    $fields = array('country', 'extendedAddress', 'latitude', 'locality', 'longitude', 'poBox',
+      'postalCode', 'region', 'streetAddress', 'type', 'unstructuredAddress', 'formatted');
+    return self::copyFields($xml, $fields);
+  }
+  
+  public static function copyFields($xml, $fields) {
+    $object = array();
+    if (!is_array($fields)) {
+      $fields = array($fields);
+    }
+    foreach ($fields as $field) {
+      if ($xml && isset($xml->$field)) {
+        $object[$field] = trim($xml->$field);
+      }
+    }
+    return $object;
+  }
+  
   public static function convertMessages($requestParam, $xml, $content) {
     // As only message handler has the context to know whether it's a message or a message
     // collection request. All the fields for both the Message and the MessageCollection

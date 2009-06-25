@@ -50,4 +50,14 @@ class InputXmlConverter extends InputConverter {
     $xml = InputBasicXmlConverter::loadString($requestParam);
     return InputBasicXmlConverter::convertMessages($requestParam, $xml, $xml->body);
   }
+  
+  public function convertAlbums($requestParam) {
+    $xml = InputBasicXmlConverter::loadString($requestParam);
+    return InputBasicXmlConverter::convertAlbums($xml, $xml);
+  }
+  
+  public function convertMediaItems($requestParam) {
+    $xml = InputBasicXmlConverter::loadString($requestParam);
+    return InputBasicXmlConverter::convertMediaItems($xml, $xml);
+  }
 }
