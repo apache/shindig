@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -42,12 +43,12 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
    * db["messages"] : Map<Person.Id, MessageCollection>
    */
   private static $MESSAGES_TABLE = "messages";
-  
+
   /**
    * db["albums"] -> Map<Person.Id, Map<Album.Id, Album>>
    */
   private static $ALBUMS_TABLE = "albums";
-  
+
   /**
    * db["mediaItems"] -> Map<Album.Id, Map<MediaItem.Id, MediaItem>>
    */
@@ -155,7 +156,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $db[self::$MESSAGES_TABLE] = $this->allMessageCollections;
     return $this->allMessageCollections;
   }
-  
+
   private function getAllAlbums() {
     $db = $this->getDb();
     $albumTable = $db[self::$ALBUMS_TABLE] ? $db[self::$ALBUMS_TABLE] : array();
@@ -165,7 +166,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return $allAlbums;
   }
-  
+
   private function getAllMediaItems() {
     $db = $this->getDb();
     $mediaItemsTable = $db[self::$MEDIA_ITEMS_TABLE] ? $db[self::$MEDIA_ITEMS_TABLE] : array();
@@ -175,7 +176,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return $allMediaItems;
   }
-  
+
   private function getPeopleWithApp($appId) {
     $peopleWithApp = array();
     $db = $this->getDb();
@@ -202,15 +203,34 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     throw new SocialSpiException("Person not found", ResponseError::$BAD_REQUEST);
   }
 
-  public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token) {
+  private function getMutualFriends($ids, $friendId) {
+    $db = $this->getDb();
+    $friendsTable = $db[self::$FRIEND_LINK_TABLE];
+    if (is_array($friendsTable) && count($friendsTable) && isset($friendsTable[$friendId])) {
+      $friendIds = $friendsTable[$friendId];
+      $mutualFriends = array_intersect($ids, $friendIds);
+    }
+    return $mutualFriends;
+  }
 
+  public function getPeople($userId, $groupId, CollectionOptions $options, $fields, SecurityToken $token) {
     $sortOrder = $options->getSortOrder();
     $filter = $options->getFilterBy();
+    $filterOp = $options->getFilterOperation();
+    $filterValue = $options->getFilterValue();
     $first = $options->getStartIndex();
     $max = $options->getCount();
     $networkDistance = $options->getNetworkDistance();
     $ids = $this->getIdSet($userId, $groupId, $token);
     $allPeople = $this->getAllPeople();
+    if ($filter == "@friends" && $filterOp == "contains" && isset($filterValue)) {
+      if ($options->getFilterValue() == '@viewer') {
+        $filterValue = $token->getViewerId();
+      } elseif ($options->getFilterValue() == '@owner') {
+        $filterValue = $token->getOwnerId();
+      }
+      $ids = $this->getMutualFriends($ids, $filterValue);
+    }
     if (! $token->isAnonymous() && $filter == "hasApp") {
       $appId = $token->getAppId();
       $peopleWithApp = $this->getPeopleWithApp($appId);
@@ -392,7 +412,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token) {
-    $activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, array($activityId), $token);
+    $activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, array(
+        $activityId), $token);
     if ($activities instanceof RestfulCollection) {
       $activities = $activities->getEntry();
       foreach ($activities as $activity) {
@@ -684,12 +705,12 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return self::paginateResults($results, $options);
   }
-  
+
   public function getAlbums($userId, $groupId, $albumIds, $options, $fields, $token) {
     $all = $this->getAllAlbums();
     $allMediaItems = $this->getAllMediaItems();
     $results = array();
-    if (!isset($all[$userId->getUserId($token)])) {
+    if (! isset($all[$userId->getUserId($token)])) {
       return RestfulCollection::createFromEntry(array());
     }
     $albumIds = array_unique($albumIds);
@@ -707,7 +728,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return self::paginateResults($results, $options);
   }
-  
+
   public function createAlbum($userId, $groupId, $album, $token) {
     $all = $this->getAllAlbums();
     $cnt = 0;
@@ -719,12 +740,12 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $album['ownerId'] = $userId->getUserId($token);
     if (isset($album['mediaType'])) {
       $album['mediaType'] = strtoupper($album['mediaType']);
-      if (!in_array($album['mediaType'], MediaItem::$TYPES)) {
+      if (! in_array($album['mediaType'], MediaItem::$TYPES)) {
         unset($album['mediaType']);
       }
     }
-    if (!isset($all[$userId->getUserId($token)])) {
-      $all[$userId->getUserId($token)] = array();  
+    if (! isset($all[$userId->getUserId($token)])) {
+      $all[$userId->getUserId($token)] = array();
     }
     $all[$userId->getUserId($token)][$id] = $album;
     $db = $this->getDb();
@@ -732,33 +753,33 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $this->saveDb($db);
     return $album;
   }
-  
+
   public function updateAlbum($userId, $groupId, $album, $token) {
     $all = $this->getAllAlbums();
-    if (!$all[$userId->getUserId($token)] || !$all[$userId->getUserId($token)][$album['id']]) {
+    if (! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$album['id']]) {
       throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
     }
-    $origin =  $all[$userId->getUserId($token)][$album['id']];
+    $origin = $all[$userId->getUserId($token)][$album['id']];
     if ($origin['ownerId'] != $userId->getUserId($token)) {
       throw new SocialSpiException("Not the owner.", ResponseError::$UNAUTHORIZED);
     }
     $album['ownerId'] = $origin['ownerId'];
     if (isset($album['mediaType'])) {
-      $album['mediaType'] = strtoupper($album['mediaType']);  
-      if (!in_array($album['mediaType'], MediaItem::$TYPES)) {
+      $album['mediaType'] = strtoupper($album['mediaType']);
+      if (! in_array($album['mediaType'], MediaItem::$TYPES)) {
         unset($album['mediaType']);
       }
     }
     $all[$userId->getUserId($token)][$album['id']] = $album;
-    
+
     $db = $this->getDb();
     $db[self::$ALBUMS_TABLE] = $all;
     $this->saveDb($db);
   }
-  
+
   public function deleteAlbum($userId, $groupId, $albumId, $token) {
     $all = $this->getAllAlbums();
-    if (!$all[$userId->getUserId($token)] || !$all[$userId->getUserId($token)][$albumId]) {
+    if (! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$albumId]) {
       throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
     }
     if ($all[$userId->getUserId($token)][$albumId]['ownerId'] != $userId->getUserId($token)) {
@@ -769,11 +790,11 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $db[self::$ALBUMS_TABLE] = $all;
     $this->saveDb($db);
   }
-  
+
   public function getMediaItems($userId, $groupId, $albumId, $mediaItemIds, $options, $fields, $token) {
     $all = $this->getAllMediaItems();
     $results = array();
-    if (!isset($all[$albumId])) {
+    if (! isset($all[$albumId])) {
       return RestfulCollection::createFromEntry(array());
     }
     $mediaItemIds = array_unique($mediaItemIds);
@@ -790,7 +811,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return self::paginateResults($results, $options);
   }
-  
+
   public function createMediaItem($userId, $groupId, $mediaItem, $data, $token) {
     $all = $this->getAllMediaItems();
     $albumId = $mediaItem['albumId'];
@@ -799,11 +820,11 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $mediaItem['lastUpdated'] = time();
     if (isset($mediaItem['type'])) {
       $mediaItem['type'] = strtoupper($mediaItem['type']);
-      if (!in_array($mediaItem['type'], MediaItem::$TYPES)) {
+      if (! in_array($mediaItem['type'], MediaItem::$TYPES)) {
         unset($mediaItem['type']);
       }
     }
-    if (!$all[$albumId]) {
+    if (! $all[$albumId]) {
       $all[$albumId] = array();
     }
     $all[$albumId][$id] = $mediaItem;
@@ -812,13 +833,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $this->saveDb($db);
     return $mediaItem;
   }
-  
+
   public function updateMediaItem($userId, $groupId, $mediaItem, $data, $token) {
     $all = $this->getAllMediaItems();
-    if (!$all[$mediaItem['albumId']] || !$all[$mediaItem['albumId']][$mediaItem['id']]) {
+    if (! $all[$mediaItem['albumId']] || ! $all[$mediaItem['albumId']][$mediaItem['id']]) {
       throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
     }
-    
+
     $origin = $all[$mediaItem['albumId']][$mediaItem['id']];
     $mediaItem['lastUpdated'] = time();
     $mediaItem['created'] = $origin['created'];
@@ -826,35 +847,35 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $mediaItem['numComments'] = $origin['numComments'];
     if (isset($mediaItem['type'])) {
       $mediaItem['type'] = strtoupper($mediaItem['type']);
-      if (!in_array($mediaItem['type'], MediaItem::$TYPES)) {
+      if (! in_array($mediaItem['type'], MediaItem::$TYPES)) {
         unset($mediaItem['type']);
       }
     }
-    
+
     $all[$mediaItem['albumId']][$mediaItem['id']] = $mediaItem;
     $db = $this->getDb();
     $db[self::$MEDIA_ITEMS_TABLE] = $all;
     $this->saveDb($db);
   }
-  
+
   public function deleteMediaItems($userId, $groupId, $albumId, $mediaItemIds, $token) {
     $all = $this->getAllMediaItems();
-    if (!$all[$albumId]) {
+    if (! $all[$albumId]) {
       throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
     }
     foreach ($mediaItemIds as $id) {
-      if (!$all[$albumId][$id]) {
+      if (! $all[$albumId][$id]) {
         throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);
       }
     }
     foreach ($mediaItemIds as $id) {
       unset($all[$albumId][$id]);
-    } 
+    }
     $db = $this->getDb();
     $db[self::$MEDIA_ITEMS_TABLE] = $all;
     $this->saveDb($db);
   }
-  
+
   /**
    * Paginates the results set according to the critera specified by the options.
    */
