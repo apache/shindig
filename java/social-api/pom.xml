@@ -113,9 +113,18 @@
       <groupId>commons-collections</groupId>
     </dependency>
     <dependency>
-      <groupId>net.oauth</groupId>
-      <artifactId>oauth-core</artifactId>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-provider</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-consumer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-httpclient3</artifactId>
+    </dependency>
+
     <!-- may only be needed for JDK < 1.6 -->
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>

@@ -144,8 +144,12 @@
       <artifactId>json_simple</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.oauth</groupId>
-      <artifactId>oauth-core</artifactId>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-consumer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-httpclient3</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.collections</groupId>
