@@ -21,6 +21,7 @@
 features/analytics/feature.xml
 features/auth-refresh/feature.xml
 features/caja/feature.xml
+features/content-rewrite/feature.xml
 features/core.io/feature.xml
 features/core/feature.xml
 features/dynamic-height/feature.xml
