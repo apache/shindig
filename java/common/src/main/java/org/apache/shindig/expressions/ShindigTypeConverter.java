@@ -28,6 +28,7 @@ import java.util.StringTokenizer;
 import javax.el.ELException;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 
 import de.odysseus.el.misc.TypeConverter;
 
@@ -36,8 +37,12 @@ import de.odysseus.el.misc.TypeConverter;
  * where necessary.  Specifically, Booleans are handled differently,
  * and JSONArray is supported.
  */
-class ShindigTypeConverter implements TypeConverter {
+public class ShindigTypeConverter implements TypeConverter {
 
+  @Inject
+  public ShindigTypeConverter() {  
+  }
+  
   @SuppressWarnings("unchecked")
   public <T> T convert(Object obj, Class<T> type) throws ELException {
     // Handle boolean specially

@@ -64,7 +64,7 @@ public class FunctionsTest extends TestCase {
   }
   
   public void testExpressionEvaluation() {
-    Expressions expressions = new Expressions(functions, null);
+    Expressions expressions = new Expressions(functions, null, new ShindigTypeConverter());
     ELContext context = expressions.newELContext();
     ValueExpression expression = expressions.parse("${other:bonjour()}", String.class);
     

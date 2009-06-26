@@ -40,6 +40,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.odysseus.el.ExpressionFactoryImpl;
+import de.odysseus.el.misc.TypeConverter;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeCache;
 import de.odysseus.el.tree.TreeStore;
@@ -56,18 +57,21 @@ public class Expressions {
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
   private final Functions functions;
+  private final TypeConverter typeConverter;
 
   /** 
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
   public static Expressions forTesting() {
-    return new Expressions(null, null);
+    return new Expressions(null, null, new ShindigTypeConverter());
   }
   
   @Inject
-  public Expressions(Functions functions, CacheProvider cacheProvider) {
+  public Expressions(Functions functions, CacheProvider cacheProvider,
+      ShindigTypeConverter typeConverter) {
     this.functions = functions;
+    this.typeConverter = typeConverter;
     factory = newExpressionFactory(cacheProvider);
     // Stub context with no FunctionMapper, used only to parse expressions
     parseContext = new Context(null);
@@ -129,7 +133,7 @@ public class Expressions {
   
   private ExpressionFactory newExpressionFactory(CacheProvider cacheProvider) {
     TreeStore store = new TreeStore(new Builder(), createTreeCache(cacheProvider));
-    return new ExpressionFactoryImpl(store, new ShindigTypeConverter());
+    return new ExpressionFactoryImpl(store, typeConverter);
   }
   
   /**
@@ -151,9 +155,8 @@ public class Expressions {
   }
 
   /**
-   * ELContext implementation.  SimpleContext from JUEL would be
-   * sufficient if not for:
-   * https://sourceforge.net/tracker2/?func=detail&aid=2590830&group_id=165179&atid=834616
+   * ELContext implementation, like SimpleContext but using an injected
+   * FunctionMapper.
    */
   private class Context extends ELContext {
     private final ELResolver resolver;

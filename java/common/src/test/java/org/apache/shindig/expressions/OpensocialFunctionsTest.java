@@ -36,7 +36,7 @@ public class OpensocialFunctionsTest extends TestCase {
   @Override
   protected void setUp() {
     Functions functions = new Functions(OpensocialFunctions.class);
-    expressions = new Expressions(functions, null);
+    expressions = new Expressions(functions, null, new ShindigTypeConverter());
     context = expressions.newELContext(new RootELResolver(vars));
   }
   

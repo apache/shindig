@@ -22,6 +22,7 @@ import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.Functions;
+import org.apache.shindig.expressions.ShindigTypeConverter;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -51,7 +52,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     JSONObject config = createConfig();
 
     JsonContainerConfig containerConfig =
-        new JsonContainerConfig(config, new Expressions(new Functions(), null));
+        new JsonContainerConfig(config, new Expressions(new Functions(), null, new ShindigTypeConverter()));
     mockFetcher = mock(HttpFetcher.class);
     fetcher = new DefaultServiceFetcher(containerConfig, mockFetcher);
   }
@@ -88,7 +89,8 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
         getJSONObject(DefaultServiceFetcher.GADGETS_FEATURES_CONFIG)
         .remove(DefaultServiceFetcher.OSAPI_FEATURE_CONFIG);
     JsonContainerConfig containerConfig =
-        new JsonContainerConfig(config, new Expressions(new Functions(), null));
+        new JsonContainerConfig(config,
+            new Expressions(new Functions(), null, new ShindigTypeConverter()));
     fetcher = new DefaultServiceFetcher(containerConfig, mockFetcher);
 
     EasyMock.expect(mockFetcher.fetch(EasyMock.isA(HttpRequest.class))).andReturn(
