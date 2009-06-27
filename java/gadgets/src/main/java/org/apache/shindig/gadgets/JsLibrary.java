@@ -277,9 +277,19 @@ public class JsLibrary {
    */
   protected JsLibrary(String feature, Type type, String content,
       String debugContent) {
+    if (content == null) { 
+      content = debugContent; 
+    } else if (content.equalsIgnoreCase("null")) { 
+      // this is because null was returned as a String 
+      content = debugContent; 
+    } else if (content.length() == 0) { 
+      content = debugContent; 
+    }  
+
     this.feature = feature;
     this.type = type;
     this.content = content;
     this.debugContent = debugContent;
+
   }
 }

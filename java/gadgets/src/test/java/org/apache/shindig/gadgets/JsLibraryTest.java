@@ -64,6 +64,12 @@ public class JsLibraryTest extends EasyMockTestCase {
     out.write(UNCOMPRESSED_FILE_JS);
     out.close();
 
+    // Test situation when we have no optimized file
+    JsLibrary lib = JsLibrary.create(JsLibrary.Type.FILE, uncompressed.getPath(), null, null);
+    assertEquals(JsLibrary.Type.FILE, lib.getType());
+    assertEquals(UNCOMPRESSED_FILE_JS, lib.getContent());
+    assertEquals(UNCOMPRESSED_FILE_JS, lib.getDebugContent());
+
     File compressed = new File(uncompressed.getPath().replace(".js", ".opt.js"));
     // This might fail, but it shouldn't fail if the temp creation worked.
     compressed.createNewFile();
@@ -72,7 +78,8 @@ public class JsLibraryTest extends EasyMockTestCase {
     out.write(FILE_JS);
     out.close();
 
-    JsLibrary lib = JsLibrary.create(JsLibrary.Type.FILE, uncompressed.getPath(), null, null);
+    // Now test situation with compressed and uncompressed 
+    lib = JsLibrary.create(JsLibrary.Type.FILE, uncompressed.getPath(), null, null);
     assertEquals(JsLibrary.Type.FILE, lib.getType());
     assertEquals(FILE_JS, lib.getContent());
     assertEquals(UNCOMPRESSED_FILE_JS, lib.getDebugContent());
