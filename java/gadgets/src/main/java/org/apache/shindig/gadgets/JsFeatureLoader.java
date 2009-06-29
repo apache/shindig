@@ -94,7 +94,7 @@ public class JsFeatureLoader {
           logger.info("Loading resources from: " + location);
           if (location.endsWith(".txt")) {
             List<String> resources = Lists.newArrayList();
-            for(String resource : StringUtils.split(ResourceLoader.getContent(location), "[\r\n]+")) {
+            for (String resource : ResourceLoader.getContent(location).split("[\r\n]+")) {
               // Skip blank/commented lines
               if (StringUtils.trim(resource).length() > 0 && resource.charAt(0) != '#') {
                 resources.add(StringUtils.trim(resource));
