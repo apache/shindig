@@ -152,14 +152,22 @@ public class JsLibrary {
    */
   protected static void loadOptimizedAndDebugData(String content, Type type, StringBuffer opt,
       StringBuffer dbg) {
+    String opt_data = null;
+
     if (content.endsWith(".js")) {
-      opt.append(loadData(
-          content.substring(0, content.length() - 3) + ".opt.js", type));
+      opt_data =loadData(content.substring(0, content.length() - 3) + ".opt.js", type);
     }
-    dbg.append(loadData(content, type));
-    if (opt.length() == 0) {
-      opt.append(dbg.toString());
+    String dbg_data = loadData(content, type);
+
+    if (dbg_data == null && opt_data == null) {
+      throw new IllegalArgumentException("Problems reading resource " + content);
+    } else if (dbg_data == null) {
+      dbg_data = opt_data;
+    } else if (opt_data == null) {
+      opt_data = dbg_data;
     }
+    dbg.append(dbg_data);
+    opt.append(opt_data);
   }
 
   /**
@@ -279,8 +287,7 @@ public class JsLibrary {
       String debugContent) {
 
     // Validate that we have something here.
-    if ((content == null && debugContent == null) || 
-        ("null".equals(content) && "null".equals(debugContent))) {
+    if (content == null && debugContent == null) {
       throw new IllegalArgumentException("no content for feature " + feature);
     }
 
