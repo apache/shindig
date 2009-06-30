@@ -66,12 +66,14 @@ public class CajaCssSanitizer {
    * Sanitize the CSS content of a style tag.
    * @param content to sanitize
    * @param linkContext url of containing content
-   * @param importRewriter to rewrite links to sanitizing proxy
+   * @param importRewriter to rewrite @imports to sanitizing proxy
+   * @param importRewriter to rewrite images to sanitizing proxy
    */
-  public String sanitize(String content, Uri linkContext, LinkRewriter importRewriter) {
+  public String sanitize(String content, Uri linkContext, LinkRewriter importRewriter,
+      LinkRewriter imageRewriter) {
     try {
       CssTree.StyleSheet stylesheet = parser.parseDom(content);
-      sanitize(stylesheet, linkContext, importRewriter);
+      sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       return parser.serialize(stylesheet);
     } catch (GadgetException ge) {
@@ -85,13 +87,15 @@ public class CajaCssSanitizer {
    * Sanitize the CSS content of a style tag.
    * @param styleElem to sanitize
    * @param linkContext url of containing content
-   * @param importRewriter to rewrite links to sanitizing proxy
+   * @param importRewriter to rewrite @imports to sanitizing proxy
+   * @param importRewriter to rewrite images to sanitizing proxy
    */
-  public void sanitize(Element styleElem, Uri linkContext, LinkRewriter importRewriter) {
+  public void sanitize(Element styleElem, Uri linkContext, LinkRewriter importRewriter,
+      LinkRewriter imageRewriter) {
     String content = null;
     try {
       CssTree.StyleSheet stylesheet = parser.parseDom(styleElem.getTextContent());
-      sanitize(stylesheet, linkContext, importRewriter);
+      sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       content = parser.serialize(stylesheet);
     } catch (GadgetException ge) {
@@ -111,8 +115,10 @@ public class CajaCssSanitizer {
    * @param css DOM root
    * @param linkContext url of containing content
    * @param importRewriter to rewrite links to sanitizing proxy
+   * @param imageRewriter to rewrite links to the sanitizing proxy
    */
-  public void sanitize(CssTree css, final Uri linkContext, final LinkRewriter importRewriter) {
+  public void sanitize(CssTree css, final Uri linkContext, final LinkRewriter importRewriter,
+      final LinkRewriter imageRewriter) {
     css.acceptPreOrder(new Visitor() {
       public boolean visit(AncestorChain<?> ancestorChain) {
         if (ancestorChain.node instanceof CssTree.Property) {
@@ -134,7 +140,8 @@ public class CajaCssSanitizer {
             }
             clean(ancestorChain);
           }
-        } else if (ancestorChain.node instanceof CssTree.UriLiteral) {
+        } else if (ancestorChain.node instanceof CssTree.UriLiteral &&
+            !(ancestorChain.getParentNode() instanceof CssTree.Import)) {
           boolean validUri = false;
           String uri = ((CssTree.UriLiteral)ancestorChain.node).getValue();
           try {
@@ -153,6 +160,10 @@ public class CajaCssSanitizer {
                   + ((CssTree.UriLiteral) ancestorChain.node).getValue());
             }
             clean(ancestorChain);
+          } else {
+            // Assume the URI is for an image. Rewrite it using the image link rewriter
+            ((CssTree.UriLiteral)ancestorChain.node).setValue(
+                imageRewriter.rewrite(uri, linkContext));
           }
         } else if (ancestorChain.node instanceof CssTree.Import) {
           CssTree.Import importDecl = (CssTree.Import) ancestorChain.node;

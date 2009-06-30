@@ -129,9 +129,12 @@ public class SanitizingRequestRewriter implements RequestRewriter {
       String contentType = response.getHeader("Content-Type");
       if (contentType == null || contentType.toLowerCase().startsWith("text/")) {
         String proxyBaseNoGadget = rewriterUris.getProxyBase(request.getContainer());
-        SanitizingProxyingLinkRewriter cssLinkRewriter = new SanitizingProxyingLinkRewriter(
+        SanitizingProxyingLinkRewriter cssImportRewriter = new SanitizingProxyingLinkRewriter(
             request.getGadget(), rewriterFeature, proxyBaseNoGadget, "text/css");
-        sanitized = cssSanitizer.sanitize(content.getContent(), request.getUri(), cssLinkRewriter);
+        SanitizingProxyingLinkRewriter cssImageRewriter = new SanitizingProxyingLinkRewriter(
+            request.getGadget(), rewriterFeature, proxyBaseNoGadget, "image/*");
+        sanitized = cssSanitizer.sanitize(content.getContent(), request.getUri(), cssImportRewriter,
+            cssImageRewriter);
       }
       
       return true;

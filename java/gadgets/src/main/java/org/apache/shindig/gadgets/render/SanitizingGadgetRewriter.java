@@ -148,7 +148,7 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
           rewriterFeatureFactory.createRewriteAllFeature(expires == null ? -1 : expires);
 
       String proxyBaseNoGadget = rewriterUris.getProxyBase(gadget.getContext().getContainer());
-      LinkRewriter cssRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
+      LinkRewriter cssImportRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
           rewriterFeature, proxyBaseNoGadget, "text/css");
       LinkRewriter imageRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
           rewriterFeature, proxyBaseNoGadget, "image/*");
@@ -157,8 +157,8 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
       filters = ImmutableList.of(
         new BasicElementFilter(allowedTags, allowedAttributes),
         new LinkSchemeCheckFilter(),
-        new StyleFilter(cssSanitizer, cssRewriter),
-        new LinkFilter(cssRewriter),
+        new StyleFilter(cssSanitizer, cssImportRewriter, imageRewriter),
+        new LinkFilter(cssImportRewriter),
         new ImageFilter(imageRewriter),
         new TargetFilter()
       );
@@ -354,16 +354,19 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
    */
   static class StyleFilter implements DomFilter {
     final CajaCssSanitizer sanitizer;
-    final LinkRewriter rewriter;
+    final LinkRewriter importRewriter;
+    final LinkRewriter imageRewriter;
 
-    StyleFilter(CajaCssSanitizer sanitizer, LinkRewriter rewriter) {
+    StyleFilter(CajaCssSanitizer sanitizer, LinkRewriter importRewriter,
+        LinkRewriter imageRewriter) {
       this.sanitizer = sanitizer;
-      this.rewriter = rewriter;
+      this.importRewriter = importRewriter;
+      this.imageRewriter = imageRewriter;
     }
 
     public Result filterTag(Element elem, Uri context) {
       if ("style".equalsIgnoreCase(elem.getNodeName())) {
-        sanitizer.sanitize(elem, context, rewriter);
+        sanitizer.sanitize(elem, context, importRewriter, imageRewriter);
       }
       return Result.PASS;
     }
