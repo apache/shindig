@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -389,7 +390,7 @@ public class SpiTestUtil {
   }
   
   public static Set<String> asSet(String... items) {
-    return new Sets.newHashSet(Arrays.asList(items));
+    return Sets.newHashSet(Arrays.asList(items));
   }
   
 }
