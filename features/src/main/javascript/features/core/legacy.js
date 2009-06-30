@@ -259,7 +259,7 @@ function _trim(str) {
  * @param {String | HTMLElement} el The element to toggle.
  */
 function _toggle(el) {
-  el = _gel(el);
+  el = (typeof el === "string") ? _gel(el) : el;
   if (el !== null) {
     if (el.style.display.length === 0 || el.style.display === "block") {
       el.style.display = "none";
