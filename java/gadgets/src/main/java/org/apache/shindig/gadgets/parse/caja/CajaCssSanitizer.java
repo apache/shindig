@@ -142,37 +142,46 @@ public class CajaCssSanitizer {
           }
         } else if (ancestorChain.node instanceof CssTree.UriLiteral &&
             !(ancestorChain.getParentNode() instanceof CssTree.Import)) {
-          boolean validUri = false;
           String uri = ((CssTree.UriLiteral)ancestorChain.node).getValue();
-          try {
-            String scheme = Uri.parse(uri).getScheme();
-            validUri = StringUtils.isEmpty(scheme) ||
-                ALLOWED_URI_SCHEMES.contains(scheme.toLowerCase());
-          } catch (RuntimeException re) {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Failed to parse URI in CSS " + uri, re);
-            }
-          }
-          if (!validUri) {
-            // Remove offending node
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Removing invalid URI "
-                  + ((CssTree.UriLiteral) ancestorChain.node).getValue());
-            }
-            clean(ancestorChain);
-          } else {
+          if (isValidUri(uri)) {
             // Assume the URI is for an image. Rewrite it using the image link rewriter
             ((CssTree.UriLiteral)ancestorChain.node).setValue(
                 imageRewriter.rewrite(uri, linkContext));
+          } else {
+            // Remove offending node
+            if (logger.isLoggable(Level.FINE)) {
+              logger.log(Level.FINE, "Removing invalid URI " + uri);
+            }
+            clean(ancestorChain);
           }
         } else if (ancestorChain.node instanceof CssTree.Import) {
           CssTree.Import importDecl = (CssTree.Import) ancestorChain.node;
-          importDecl.getUri()
-              .setValue(importRewriter.rewrite(importDecl.getUri().getValue(), linkContext));
+          String uri = importDecl.getUri().getValue();
+          if (isValidUri(uri)) {
+            importDecl.getUri().setValue(importRewriter.rewrite(uri, linkContext));
+          } else {
+            if (logger.isLoggable(Level.FINE)) {
+              logger.log(Level.FINE, "Removing invalid URI " + uri);
+            }
+            clean(ancestorChain);
+          }
         }
         return true;
       }
     }, null);
+  }
+
+  private boolean isValidUri(String uri) {
+    try {
+      String scheme = Uri.parse(uri).getScheme();
+      return StringUtils.isEmpty(scheme) ||
+          ALLOWED_URI_SCHEMES.contains(scheme.toLowerCase());
+    } catch (RuntimeException re) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.log(Level.FINE, "Failed to parse URI in CSS " + uri, re);
+      }
+    }
+    return false;
   }
 
   /**
