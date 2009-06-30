@@ -165,7 +165,9 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    * Convert a JSON value to a configuration value.
    */
   private static Object jsonToConfig(Object json, Expressions expressions, ELContext context) {
-    if (json instanceof CharSequence) {
+    if (JSONObject.NULL.equals(json)) {
+      return null;
+    } else if (json instanceof CharSequence) {
       return new DynamicConfigProperty(json.toString(), expressions, context);
     } else if (json instanceof JSONArray) {
       JSONArray jsonArray = (JSONArray) json;
@@ -185,7 +187,10 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   private static Map<String, Object> jsonToMap(JSONObject json, Expressions expressions, ELContext context) {
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
     for (String key : JSONObject.getNames(json)) {
-      values.put(key, jsonToConfig(json.opt(key), expressions, context));
+      Object val = jsonToConfig(json.opt(key), expressions, context);
+      if (val != null) {
+        values.put(key, val);
+      }
     }
     return Collections.unmodifiableMap(values);
   }
@@ -257,7 +262,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
     for (String field : fields) {
       Object existing = clone.opt(field);
       Object update = merge.get(field);
-      if (existing == null || update == null) {
+      if (JSONObject.NULL.equals(existing) || JSONObject.NULL.equals(update)) {
         // It's new custom config, not referenced in the prototype, or
         // it's removing a pre-configured value.
         clone.put(field, update);

@@ -207,4 +207,13 @@ public class JsonContainerConfigTest {
 
     assertEquals(TOP_LEVEL_VALUE, config.getString(CHILD_CONTAINER, "parentExpression"));
   }
+
+  @Test
+  public void nullEntryEvaluation() throws Exception {
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject("{ 'gadgets.container' : ['default'], features : { osapi : null }}");
+    JsonContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(),
+        Expressions.forTesting());
+    assertNull(config.getMap("default", "features").get("osapi"));
+  }
 }
