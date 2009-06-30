@@ -287,7 +287,7 @@ public class JsLibrary {
     if (content == null || "null".equals(content) || content.length() == 0) { 
       content = debugContent; 
     }
-    if (debugContent == null || "null".equasl(debugContent) || debugContent.length() == 0) { 
+    if (debugContent == null || "null".equals(debugContent) || debugContent.length() == 0) { 
       debugContent = content;
     }  
 
