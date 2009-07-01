@@ -488,14 +488,17 @@ os.Container.registerTemplateElement_ = function(element, opt_id) {
  * @private
  */
 os.Container.registerTagElement_ = function(element, name) {
-  var template = os.Container.registerTemplateElement_(element);
+  var template = os.Container.registerTemplateElement_(element, name);
   if (template) {
     var tagParts = name.split(':');
-    var nsObj = os.getNamespace(tagParts[0]);
-    if (!nsObj) {
-      // Auto Create a namespace for lazy registration.
-      nsObj = os.createNamespace(tagParts[0], null);
+    // Only register custom tags of the "ns:Tag" format.
+    if (tagParts.length == 2) {
+      var nsObj = os.getNamespace(tagParts[0]);
+      if (!nsObj) {
+        // Auto Create a namespace for lazy registration.
+        nsObj = os.createNamespace(tagParts[0], null);
+      }    
+      nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
     }
-    nsObj[tagParts[1]] = os.createTemplateCustomTag(template);
   }
 };
