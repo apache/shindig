@@ -80,7 +80,7 @@ gadgets.rpctx.wpm = function() {
       if (relay) {
         targetWin.postMessage(gadgets.json.stringify(rpc), relay);
       } else {
-        throw new Error("No relay set, cannot send cross-domain message");
+        gadgets.error("No relay set, cannot send cross-domain message");
       }
       return true;
     }
