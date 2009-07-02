@@ -52,9 +52,25 @@ public abstract class AbstractTagHandler implements TagHandler {
     return namespaceUri;
   }
 
+  /**
+   * Returns the value of a tag attribute, evaluating any contained EL
+   * expressions if necessary.
+   * 
+   * @param <T> the type of the value
+   * @param tag the element
+   * @param name the attribute name
+   * @param processor the template processor
+   * @param type the type of the value
+   * @return the value of the attribute, or null if the attribute is not
+   *     present.
+   */
   protected final <T> T getValueFromTag(Element tag, String name,
       TemplateProcessor processor, Class<T> type) {
-    return processor.evaluate(tag.getAttribute(name), type, null);
+    if (tag.hasAttribute(name)) {
+      return processor.evaluate(tag.getAttribute(name), type, null);
+    } else {
+      return null;
+    }
   }
 
   protected final DocumentFragment processChildren(Element tag,

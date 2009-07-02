@@ -40,19 +40,21 @@ public class RepeatTagHandler extends AbstractTagHandler {
 
   public void process(final Node result, final Element tag, final TemplateProcessor processor) {
     Iterable<?> repeat = getValueFromTag(tag, EXPRESSION_ATTR, processor, Iterable.class);
-    final Attr ifAttribute = tag.getAttributeNode(IF_ATTR);
+    if (repeat != null) {
+      final Attr ifAttribute = tag.getAttributeNode(IF_ATTR);
     
-    // On each iteration, process child nodes, after checking the value of the "if" attribute
-    processor.processRepeat(result, tag, repeat, new Runnable() {
-      public void run() {
-        if (ifAttribute != null) {
-          if (!processor.evaluate(ifAttribute.getValue(), Boolean.class, false)) {
-            return;
+      // On each iteration, process child nodes, after checking the value of the "if" attribute
+      processor.processRepeat(result, tag, repeat, new Runnable() {
+        public void run() {
+          if (ifAttribute != null) {
+            if (!processor.evaluate(ifAttribute.getValue(), Boolean.class, false)) {
+              return;
+            }
           }
-        }
 
-        processor.processChildNodes(result, tag);
-      }
-    });
+          processor.processChildNodes(result, tag);
+        }
+      });
+    }
   }
 }

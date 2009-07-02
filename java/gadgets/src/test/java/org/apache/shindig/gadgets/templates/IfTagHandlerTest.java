@@ -74,4 +74,16 @@ public class IfTagHandlerTest {
     handler.process(null, tag, processor);
     verify(processor);
   }
+
+  @Test
+  public void conditionIsMissing() throws Exception {
+    Document doc = documentProvider.createDocument(null, null, null);
+    // Create a mock tag;  the name doesn't truly matter
+    Element tag = doc.createElement("if");
+    
+    replay(processor);
+    handler.process(null, tag, processor);
+    verify(processor);
+  }
+
 }

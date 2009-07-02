@@ -66,6 +66,17 @@ public class RepeatTagHandlerTest {
   }
 
   @Test
+  public void repeatWithoutExpression() throws Exception {
+    Document doc = documentProvider.createDocument(null, null, null);
+    // Create a mock tag;  the name doesn't truly matter
+    Element tag = doc.createElement("repeat");
+    
+    replay(processor);
+    handler.process(null, tag, processor);
+    verify(processor);
+  }
+
+  @Test
   public void repeatWithIf() throws Exception {
     Document doc = documentProvider.createDocument(null, null, null);
     // Create a mock tag;  the name doesn't truly matter
