@@ -30,3 +30,31 @@ function testRegisterTemplates() {
   assertNotNull(el);
   assertEquals('tag template', domutil.getVisibleText(el));
 }
+
+function testRequireLibrary() {
+  var params = {};
+  var oldGadgets = window.gadgets;
+  
+  window.gadgets = {};
+  window.gadgets.io = {};
+  window.gadgets.io.makeRequest = function() {};
+  window.gadgets.io.RequestParameters = { CONTENT_TYPE: 1 };
+  window.gadgets.io.ContentType = { TEXT: 1 };
+  window.gadgets.util = {};  
+  window.gadgets.util.getFeatureParameters = function() {
+    return params;
+  };
+  
+  params.requireLibrary = "foo";
+  os.Container.requiredLibraries_ = 0;
+  os.Container.processGadget();
+  assertEquals(1, os.Container.requiredLibraries_);
+
+  params.requireLibrary = [ "baz", "bing" ];
+  os.Container.requiredLibraries_ = 0;
+  os.Container.processGadget();
+  assertEquals(2, os.Container.requiredLibraries_);
+
+  
+  window.gadgets = oldGadgets;
+}

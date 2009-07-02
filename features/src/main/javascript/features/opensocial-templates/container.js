@@ -373,10 +373,15 @@ os.Container.processGadget = function() {
     os.Container.autoProcess_ = false;
   }
   
-  // Honor the "requireLibrary" feature param.
-  // TODO: Support multiple params when Shindig does.
+  // Honor the "requireLibrary" feature param(s).
   if (params.requireLibrary) {
-    os.Container.addRequiredLibrary(params.requireLibrary);
+    if (typeof params.requireLibrary == "string") {
+      os.Container.addRequiredLibrary(params.requireLibrary);
+    } else {
+      for (var i = 0; i < params.requireLibrary.length; i++) {
+        os.Container.addRequiredLibrary(params.requireLibrary[i]);
+      }
+    }
   }  
 };
 
