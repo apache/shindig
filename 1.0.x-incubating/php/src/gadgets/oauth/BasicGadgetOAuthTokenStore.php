@@ -21,13 +21,14 @@
 class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
 
   /** default location for consumer keys and secrets */
-  private $OAUTH_CONFIG = "../config/oauth.json";
+  private $OAUTH_CONFIG = "oauth.json";
   private $CONSUMER_SECRET_KEY = "consumer_secret";
   private $CONSUMER_KEY_KEY = "consumer_key";
   private $KEY_TYPE_KEY = "key_type";
 
   public function __construct($store, $fetcher) {
     parent::__construct($store, $fetcher);
+    $this->OAUTH_CONFIG = Config::get('container_path') . $this->OAUTH_CONFIG;
   }
 
   public function initFromConfigFile($fetcher) {
