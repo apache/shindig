@@ -29,10 +29,10 @@ require_once realpath('../') . "/test/TestContext.php";
 
 function __autoload($className) {
   $basePath = realpath('../');
-  $locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/http', 'src/gadgets/oauth', 
-      'src/gadgets/render', 'src/gadgets/rewrite', 'src/gadgets/sample', 'src/social', 'src/social/http', 'src/social/service', 
-      'src/social/converters', 'src/social/opensocial', 'src/social/spi', 'src/social/model', 
-      'src/social/sample', 'src/social/oauth');
+  $locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/http', 'src/gadgets/oauth',
+      'src/gadgets/render', 'src/gadgets/rewrite', 'src/gadgets/sample', 'src/social',
+      'src/social/http', 'src/social/service', 'src/social/converters', 'src/social/opensocial',
+      'src/social/spi', 'src/social/model', 'src/social/sample', 'src/social/oauth');
   $extension_class_paths = Config::get('extension_class_paths');
   if (! empty($extension_class_paths)) {
     $locations = array_merge(explode(',', $extension_class_paths), $locations);
@@ -59,11 +59,20 @@ class AllTests {
     $path = dirname($_SERVER['SCRIPT_FILENAME']);
     $testTypes = array('common', 'gadgets', 'social');
     foreach ($testTypes as $type) {
-      foreach (glob("$path/{$type}/*Test.php") as $file) {
-        if (is_readable($file)) {
-          require_once $file;
-          $className = str_replace('.php', '', basename($file));
+      if (isset($_GET['test'])) {
+        $file_array = glob("$path/{$type}/{$_GET['test']}.php");
+        if (isset($file_array[0]) && is_readable($file_array[0])) {
+          require_once $file_array[0];
+          $className = $_GET['test'];
           $suite->addTestSuite($className);
+        }
+      } else {
+        foreach (glob("$path/{$type}/*Test.php") as $file) {
+          if (is_readable($file)) {
+            require_once $file;
+            $className = str_replace('.php', '', basename($file));
+            $suite->addTestSuite($className);
+          }
         }
       }
     }
@@ -71,7 +80,7 @@ class AllTests {
   }
 }
 
-ob_start();    
+ob_start();
 echo "<html><body><pre>";
 AllTests::main();
 echo "</pre></body></html>";
