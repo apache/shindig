@@ -31,7 +31,7 @@ This should not be used in a production setting.
 -->
 <feature>
   <name>opensocial-templates</name>
-  <dependency>opensocial-0.8</dependency>
+  <dependency>opensocial-data-context</dependency>
   <dependency>xmlutil</dependency>
   <gadget>
     <script src="jsTemplate/util.js"></script>
