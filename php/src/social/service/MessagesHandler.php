@@ -21,17 +21,16 @@
 class MessagesHandler extends DataRequestHandler {
 
   private static $MESSAGES_PATH = "/messages/{userId}/msgCollId/{messageId}";
-  private $service;
 
   public function __construct() {
-    $service = Config::get('messages_service');
-    $this->service = new $service();
+    parent::__construct('messages_service');
   }
 
   /**
    * Deletes the message collection or the messages.
    */
   public function handleDelete(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
     $userIds = $requestItem->getUsers();
@@ -56,6 +55,7 @@ class MessagesHandler extends DataRequestHandler {
    * /messages/john.doe/notification/1,2,3
    */
   public function handleGet(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
     $userIds = $requestItem->getUsers();
@@ -84,6 +84,7 @@ class MessagesHandler extends DataRequestHandler {
    * /messages/john.doe/notification
    */
   public function handlePost(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
     $userIds = $requestItem->getUsers();
@@ -127,6 +128,7 @@ class MessagesHandler extends DataRequestHandler {
    * Updates a message or a message collection.
    */
   public function handlePut(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$MESSAGES_PATH);
 
     $userIds = $requestItem->getUsers();

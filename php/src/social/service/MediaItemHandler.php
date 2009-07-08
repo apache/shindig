@@ -22,15 +22,7 @@ class MediaItemHandler extends DataRequestHandler {
   private static $MEDIA_ITEM_PATH = "/mediaitems/{userId}/{groupId}/{albumId}/{mediaItemId}";
   
   public function __construct() {
-    try {
-      $service = Config::get('media_item_service');
-    } catch (ConfigException $e) {
-      // Do nothing. If album_service is not specified in the config file.
-      // All the requests to album handler will throw not implemented exception.
-    }
-    if ($service) {
-      $this->service = new $service();
-    }
+    parent::__construct('media_item_service');
   }
   
   /**
@@ -118,11 +110,5 @@ class MediaItemHandler extends DataRequestHandler {
     $mediaItem['albumId'] = $albumIds[0];
     // The null param is the content data(image, video and audio binaries) uploaded by the user.
     return $this->service->updateMediaItem($userIds[0], $groupId, $mediaItem, null, $requestItem->getToken());
-  }
-  
-  private function checkService() {
-    if (!$this->service) {
-      throw new SocialSpiException("Not Implemented.", ResponseError::$NOT_IMPLEMENTED);
-    }
   }
 }

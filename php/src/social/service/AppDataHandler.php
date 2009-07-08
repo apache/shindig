@@ -20,11 +20,9 @@
 
 class AppDataHandler extends DataRequestHandler {
   private static $APP_DATA_PATH = "/appdata/{userId}/{groupId}/appId";
-  private $service;
 
   public function __construct() {
-    $service = Config::get('app_data_service');
-    $this->service = new $service();
+    parent::__construct('app_data_service');
   }
 
   /**
@@ -37,6 +35,7 @@ class AppDataHandler extends DataRequestHandler {
    *
    */
   public function handleDelete(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
     $userIds = $requestItem->getUsers();
     if (count($userIds) < 1) {
@@ -56,6 +55,7 @@ class AppDataHandler extends DataRequestHandler {
    * /appdata/john.doe/@self/app
    */
   public function handleGet(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
     $userIds = $requestItem->getUsers();
     if (count($userIds) < 1) {
@@ -77,6 +77,7 @@ class AppDataHandler extends DataRequestHandler {
    * fields vars then all of the data will be overridden.
    */
   public function handlePost(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$APP_DATA_PATH);
     $userIds = $requestItem->getUsers();
     if (count($userIds) < 1) {

@@ -19,7 +19,21 @@
  */
 
 abstract class DataRequestHandler {
-
+  protected $service;
+  
+  public function __construct($serviceName) {
+    try {
+      $service = trim(Config::get($serviceName));
+      if (!empty($service)) {
+        $this->service = new $service();
+      }
+    } catch (ConfigException $e) {
+      // Do nothing. If service name is not specified in the config file.
+      // All the requests to the handler will throw not implemented exception.
+      // The handler function should invoke checkService method before serving. 
+    }
+  }
+  
   private static $GET_SYNONYMS = array("get");
   private static $CREATE_SYNONYMS = array("post", "create");
   private static $UPDATE_SYNONYMS = array("put", "update");
@@ -109,6 +123,15 @@ abstract class DataRequestHandler {
     }
     rsort($version);
     return $version[0];
+  }
+  
+  /**
+   * Checks whether the service is initialized.
+   */
+  protected function checkService() {
+    if (!$this->service) {
+      throw new SocialSpiException("Not Implemented.", ResponseError::$NOT_IMPLEMENTED);
+    }
   }
 
   abstract public function handleDelete(RequestItem $requestItem);

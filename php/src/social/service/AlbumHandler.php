@@ -23,18 +23,9 @@
  */
 class AlbumHandler extends DataRequestHandler {
   private static $ALBUM_PATH = "/albums/{userId}/{groupId}/{albumId}";
-  private $service;
 
   public function __construct() {
-    try {
-      $service = Config::get('album_service');
-    } catch (ConfigException $e) {
-      // Do nothing. If album_service is not specified in the config file.
-      // All the requests to album handler will throw not implemented exception.
-    }
-    if ($service) {
-      $this->service = new $service();
-    }
+    parent::__construct('album_service');
   }
 
   /**
@@ -113,14 +104,5 @@ class AlbumHandler extends DataRequestHandler {
     $album['id'] = $albumIds[0];
 
     return $this->service->updateAlbum($userIds[0], $groupId, $album, $requestItem->getToken());
-  }
-
-  /**
-   * Checks whether the service is initialized.
-   */
-  private function checkService() {
-    if (!$this->service) {
-      throw new SocialSpiException("Not Implemented.", ResponseError::$NOT_IMPLEMENTED);
-    }
   }
 }

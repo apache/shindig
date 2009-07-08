@@ -19,16 +19,15 @@
  */
 
 class ActivityHandler extends DataRequestHandler {
-  private $service;
-
+  
   private static $ACTIVITY_ID_PATH = "/activities/{userId}/{groupId}/appId/{activityId}";
 
   public function __construct() {
-    $service = Config::get('activity_service');
-    $this->service = new $service();
+    parent::__construct('activity_service');
   }
 
   public function handleDelete(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$ACTIVITY_ID_PATH);
     $userIds = $requestItem->getUsers();
     $activityIds = $requestItem->getListParameter("activityId");
@@ -49,6 +48,7 @@ class ActivityHandler extends DataRequestHandler {
    * /activities/john.doe/@friends
    */
   public function handleGet(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$ACTIVITY_ID_PATH);
     $userIds = $requestItem->getUsers();
     $optionalActivityIds = $requestItem->getListParameter("activityId");
@@ -77,6 +77,7 @@ class ActivityHandler extends DataRequestHandler {
    * - postBody is an activity object
    */
   public function handlePost(RequestItem $requestItem) {
+    $this->checkService();
     $requestItem->applyUrlTemplate(self::$ACTIVITY_ID_PATH);
     $userIds = $requestItem->getUsers();
     $activityIds = $requestItem->getListParameter("activityId");

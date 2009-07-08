@@ -22,7 +22,9 @@
  * The default configuration settings
  *
  * Put any site specific configuration in a config/local.php file, this way
- * your configuration won't be lost when upgrading shindig.
+ * your configuration won't be lost when upgrading shindig. If your site don't
+ * support any services just use empty string as the service name. i.e.
+ *  'messages_service' => ''
  *
  * in local.php you only have to specificy the fields you want to overwrite
  * with other values, for example on a production system you would probably have:

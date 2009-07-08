@@ -20,19 +20,21 @@
 
 class InvalidateHandler extends DataRequestHandler {
   
-  /**
-   * @var InvalidateService
-   */
-  private $invalidateService;
-  
   private static $INVALIDATE_PATH = "/cache/invalidate";
   
   private static $KEYS_PARAM = "invalidationKeys";
 
   public function __construct() {
-    $service = Config::get('invalidate_service');
-    $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
-    $this->invalidateService = new $service($cache);
+    try {
+      $service = trim(Config::get('invalidate_service'));
+      if (!empty($service)) {
+        $cache = Cache::createCache(Config::get('data_cache'), 'RemoteContent');
+        $this->service = new $service($cache);
+      }
+    } catch (ConfigException $e) {
+      // Do nothing. If invalidate service is not specified in the config file.
+      // All the requests to the handler will throw not implemented exception.
+    }
   }
 
   public function handleItem(RequestItem $requestItem) {
@@ -64,6 +66,7 @@ class InvalidateHandler extends DataRequestHandler {
   }
 
   public function handleInvalidate(RequestItem $request) {
+    $this->checkService();
     if (!$request->getToken()->getAppId() && !$request->getToken()->getAppUrl()) {
       throw new SocialSpiException("Can't invalidate content without specifying application", ResponseError::$BAD_REQUEST);
     }
@@ -91,7 +94,7 @@ class InvalidateHandler extends DataRequestHandler {
         $userIds[] = $key;
       }
     }
-    $this->invalidateService->invalidateApplicationResources($resources, $request->getToken());
-    $this->invalidateService->invalidateUserResources($userIds, $request->getToken());
+    $this->service->invalidateApplicationResources($resources, $request->getToken());
+    $this->service->invalidateUserResources($userIds, $request->getToken());
   }
 }

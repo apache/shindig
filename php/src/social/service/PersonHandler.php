@@ -20,14 +20,11 @@
 
 class PersonHandler extends DataRequestHandler {
   
-  private $personService;
-  
   private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
   private static $DEFAULT_FIELDS = array('ID', 'NAME', 'GENDER', 'THUMBNAIL_URL');
 
   public function __construct() {
-    $service = Config::get('person_service');
-    $this->personService = new $service();
+    parent::__construct('person_service');
   }
 
   public function handleDelete(RequestItem $request) {
@@ -48,6 +45,7 @@ class PersonHandler extends DataRequestHandler {
    * examples: /people/john.doe/@all /people/john.doe/@friends /people/john.doe/@self
    */
   public function handleGet(RequestItem $request) {
+    $this->checkService();
     $request->applyUrlTemplate(self::$PEOPLE_PATH);
     
     $groupId = $request->getGroup();
@@ -74,22 +72,22 @@ class PersonHandler extends DataRequestHandler {
     if (count($userIds) == 1) {
       if (count($optionalPersonId) == 0) {
         if ($groupId->getType() == 'self') {
-          return $this->personService->getPerson($userIds[0], $groupId, $fields, $request->getToken());
+          return $this->service->getPerson($userIds[0], $groupId, $fields, $request->getToken());
         } else {
-          return $this->personService->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
+          return $this->service->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
         }
       } elseif (count($optionalPersonId) == 1) {
-        return $this->personService->getPerson($optionalPersonId[0], $groupId, $fields, $request->getToken());
+        return $this->service->getPerson($optionalPersonId[0], $groupId, $fields, $request->getToken());
       } else {
         $personIds = array();
         foreach ($optionalPersonId as $pid) {
           $personIds[] = new UserId('userId', $pid);
         }
         // Every other case is a collection response of optional person ids
-        return $this->personService->getPeople($personIds, new GroupId('self', null), $options, $fields, $request->getToken());
+        return $this->service->getPeople($personIds, new GroupId('self', null), $options, $fields, $request->getToken());
       }
     }
     // Every other case is a collection response.
-    return $this->personService->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
+    return $this->service->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
   }
 }
