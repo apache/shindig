@@ -1344,12 +1344,6 @@
       </dependency>
       <dependency>
         <groupId>net.oauth.core</groupId>
-        <artifactId>oauth-consumer</artifactId>
-        <version>20090531</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>net.oauth.core</groupId>
         <artifactId>oauth-provider</artifactId>
         <version>20090531</version>
         <scope>compile</scope>
