@@ -97,12 +97,9 @@ class GadgetRewriterTest extends PHPUnit_Framework_TestCase {
    * Tests GadgetHtmlRenderer->renderGadget()
    */
   public function testRewrite() {
-    return true;
-    $desc_string = $this->gadgetRewriter->rewrite($this->view["content"], $this->gadget);
-    $source_string = <<<EOD
-    <script>var test='<b>BIG WORDS</b>'</script>
-    <h1>Hello, world!</h1>
-EOD;
+    preg_match_all('|<script>(.*?)</script>|', $this->gadgetRewriter->rewrite($this->view["content"], $this->gadget), $tmp, PREG_SET_ORDER);
+    $desc_string = $tmp[0][1];
+    $source_string = "var test='<b>BIG WORDS</b>'";
     $this->assertEquals($source_string, $desc_string);
   }
 }
