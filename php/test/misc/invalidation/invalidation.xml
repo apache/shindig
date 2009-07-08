@@ -7,9 +7,9 @@
     <![CDATA[
       <script type="text/javascript">
 
-
 function pre_rest() {
   var content = {}
+  content.type = 'invalidation';
   content.url = document.getElementById("restUrl").value;
   content.postdata = stringify();
   content.key = document.getElementById("consumerKey").value;
@@ -19,7 +19,7 @@ function pre_rest() {
   params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
   signUrl = document.getElementById("signUrl").value;
   gadgets.io.makeRequest(signUrl, rest, params);
-}  
+}
 
 function rest(obj) {
   var postdata = stringify();
@@ -87,7 +87,7 @@ gadgets.util.registerOnLoadHandler(init);
     invalidationKeys: <br>
     <textarea style="width:600px;" id="invalidationKeys"></textarea><br>
     sign url: <br>
-    <textarea style="width:600px;" id="signUrl">http://shindig/test/misc/invalidation/sign.php</textarea><br>
+    <textarea style="width:600px;" id="signUrl">http://shindig/test/misc/sign.php</textarea><br>
     oauth consumer key: <br>
     <textarea style="width:600px;" id="consumerKey"></textarea><br>
     oauth consumer secret: <br>
