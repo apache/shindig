@@ -34,12 +34,39 @@ class Address implements ComplexField {
   public $type;
   public $formatted;
   public $primary;
+  public $poBox;
+  public $extendedAddress;
+  public $unstructuredAddress;
 
   public function __construct($formatted, $primary = null) {
     $this->formatted = $formatted;
     $this->primary = $primary;
   }
 
+  public function getPoBox() {
+    return $this->poBox;
+  }
+  
+  public function setPoBox($poBox) {
+    $this->poBox = $poBox;
+  }
+  
+  public function getExtendedAddress() {
+    return $this->extendedAddress;
+  }
+  
+  public function setExtendedAddress($extendedAddress) {
+    $this->extendedAddress = $extendedAddress;
+  }
+  
+  public function getUnstructuredAddress() {
+    return $this->unstructuredAddress;
+  }
+  
+  public function setUnstructuredAddress($unstructuredAddress) {
+    $this->unstructuredAddress = $unstructuredAddress;
+  }
+  
   public function getCountry() {
     return $this->country;
   }
