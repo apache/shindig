@@ -129,7 +129,7 @@ abstract class ApiServlet extends HttpServlet {
         // accessable to anoymous users! Anonymous == owner = viewer = appId = modId = 0
         // create token with 0 values, no gadget url, no domain and 0 duration
         $gadgetSigner = Config::get('security_token');
-        return new $gadgetSigner(null, 0, 0, 0, 0, '', '', 0, Config::get('container_id'));
+        return new $gadgetSigner(null, 0, SecurityToken::$ANONYMOUS, SecurityToken::$ANONYMOUS, 0, '', '', 0, Config::get('container_id'));
       } else {
         return null;
       }

@@ -264,6 +264,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
           $person = $newPerson;
         }
         $people[$id] = $person;
+      } else if ($id === SecurityToken::$ANONYMOUS) {
+        $person = array();
+        $person['isOwner'] = $token->isAnonymous() ? true : false;
+        $person['isViewer'] = $token->isAnonymous() ? true : false;
+        $person['name'] = 'anonymous_user';
+        $person['displayName'] = 'Guest';
+        $people[$id] = $person;
       }
     }
     if ($sortOrder == 'name') {

@@ -29,6 +29,8 @@ abstract class SecurityToken {
 
   static public function createFromValues($owner, $viewer, $app, $domain, $appUrl, $moduleId, $containerId) {}
 
+  static public $ANONYMOUS = '-1';
+
   /**
    * is this an anonymous token? Always check this before using the owner/viewer/etc
    *

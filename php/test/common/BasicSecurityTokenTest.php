@@ -43,7 +43,7 @@ class BasicSecurityTokenTest extends PHPUnit_Framework_TestCase {
   protected function setUp() {
     parent::setUp();
     $this->BasicSecurityToken = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
-    $this->anonymousToken = BasicSecurityToken::createFromValues(0, 0, 'app', 'domain', 'appUrl', '1', 'default');
+    $this->anonymousToken = BasicSecurityToken::createFromValues(SecurityToken::$ANONYMOUS, SecurityToken::$ANONYMOUS, 'app', 'domain', 'appUrl', '1', 'default');
   }
 
   /**
