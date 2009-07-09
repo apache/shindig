@@ -119,6 +119,7 @@ gadgets.rpc = function() {
    */
   function getTransport() {
     return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
+           typeof window.postMessage === 'object' ? gadgets.rpctx.wpm :
            window.ActiveXObject ? gadgets.rpctx.nix :
            navigator.userAgent.indexOf('WebKit') > 0 ? gadgets.rpctx.rmr :
            navigator.product === 'Gecko' ? gadgets.rpctx.frameElement :

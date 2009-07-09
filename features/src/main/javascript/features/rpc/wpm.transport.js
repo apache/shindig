@@ -56,11 +56,17 @@ gadgets.rpctx.wpm = function() {
 
     init: function(processFn, readyFn) {
       ready = readyFn;
-      // Set up native postMessage handler.
-      window.addEventListener('message', function(packet) {
+      var onmessage = function(packet) {
         // TODO validate packet.domain for security reasons
         processFn(gadgets.json.parse(packet.data));
-      }, false);
+      };
+ 
+      // Set up native postMessage handler.
+      if (typeof window.addEventListener != 'undefined') { 
+          window.addEventListener('message', onmessage, false); 
+      } else if (typeof window.attachEvent != 'undefined') { 
+          window.attachEvent('onmessage', onmessage); 
+      }
       ready('..', true);  // Immediately ready to send to parent.
       return true;
     },
