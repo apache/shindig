@@ -87,6 +87,17 @@ public class HttpResponseBuilder {
   }
 
   /**
+   * @param responseBytes The response body. Not copied when set.
+   */
+  public HttpResponseBuilder setResponseNoCopy(byte[] responseBytes) {
+    if (responseBytes == null) {
+      responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
+    }
+    this.responseBytes = responseBytes;
+    return this;
+  }
+
+  /**
    * @param httpStatusCode The HTTP response status, defined on HttpResponse.
    */
   public HttpResponseBuilder setHttpStatusCode(int httpStatusCode) {

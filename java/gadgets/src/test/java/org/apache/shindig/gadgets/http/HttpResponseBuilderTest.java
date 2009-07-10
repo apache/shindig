@@ -17,8 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Joiner;
@@ -135,6 +138,27 @@ public class HttpResponseBuilderTest {
         .setResponseString("foo")
         .create();
     assertEquals("foo", resp.getResponseAsString());
+  }
+
+  @Test
+  public void setResponse() {
+    byte[] someData = "some data".getBytes();
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(someData)
+        .create();
+
+    assertNotSame(someData, resp.getResponseAsBytes());
+    assertArrayEquals(someData, resp.getResponseAsBytes());
+  }
+
+  @Test
+  public void setResponseNoCopy() {
+    byte[] someData = "some data".getBytes();
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseNoCopy(someData)
+        .create();
+
+    assertSame(someData, resp.getResponseAsBytes());
   }
 
   @Test
