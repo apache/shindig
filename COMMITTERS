@@ -13,14 +13,14 @@ Blanket commit access:
 	   chabotc	Chris Chabot        chabotc@apache.org       PMC Member
 	  dbentley	Daniel Bentley      dbentley@apache.org      PMC Member
 	      doll	Cassie Doll         doll@apache.org          PMC Member
-         dpeterson      Dan Peterson        dpeterson@apache.org     PMC Member
+	 dpeterson	Dan Peterson        dpeterson@apache.org     PMC Member
 	      etnu	Kevin Brown         etnu@apache.org          PMC Member
-	      evan	Evan Gilbert        evan@apache.org          PMC Member
 	       ieb	Ian Boston          ieb@apache.org           PMC Member
+	      evan	Evan Gilbert        evan@apache.org          PMC Member
 	     johnh	John Hjelmstad      johnh@apache.org         PMC Member
 	     jyang	Jun Yang            jyang@apache.org         PMC Member
 	   lindner	Paul Lindner        lindner@apache.org       PMC Member
-	     sgala	Santiago Gala       sgala@hisitech.com       PMC Member Mentor
+	     sgala	Santiago Gala       sgala@hisitech.com       Emeritus Mentor
 	     lryan	Louis Ryan          lryan@apache.org         PMC Member
 	   martint	Martin Traverso     martint@apache.org       PMC Member
 	  vsiveton	Vincent Siveton     vsiveton@apache.org      PMC Member
@@ -28,7 +28,7 @@ Blanket commit access:
 	    awiner	Adam Winer          awiner@apache.org        PMC Member
 	     chico	Chico Charlesworth  chico@apache.org         PMC Member
 	      fitz	Brian Fitzpatrick   fitz@apache.org          Mentor    
-	    gstein	Greg Stein          gstein@apache.org        Mentor    
+	    gstein	Greg Stein          gstein@apache.org        Emeritus Mentor
 	   sylvain	Sylvain Wallez      sylvain@apache.org       Mentor    
 	     tomdz	Thomas Dudziak      tomdz@apache.org         Mentor    
 	 upayavira	Upayavira           upayavira@apache.org     Mentor    
