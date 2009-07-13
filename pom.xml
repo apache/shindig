@@ -153,6 +153,15 @@
       </roles>
     </developer>
     <developer>
+      <id>dpeterson</id>
+      <name>Dan Peterson</name>
+      <email>dpeterson@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>etnu</id>
       <name>Kevin Brown</name>
       <email>etnu@apache.org</email>
@@ -212,8 +221,7 @@
       <email>sgala@hisitech.com</email>
       <organization>ASF</organization>
       <roles>
-       <role>PMC Member</role>
-       <role>Mentor</role>
+       <role>Emeritus Mentor</role>
       </roles>
     </developer>
     <developer>
@@ -286,7 +294,7 @@
       <email>gstein@apache.org</email>
       <organization>ASF</organization>
       <roles>
-        <role>Mentor</role>
+        <role>Emeritus Mentor</role>
       </roles>
     </developer>
     <developer>
