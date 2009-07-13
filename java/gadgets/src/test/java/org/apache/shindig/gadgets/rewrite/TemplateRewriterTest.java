@@ -35,6 +35,7 @@ import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.apache.shindig.gadgets.templates.AbstractTagHandler;
+import org.apache.shindig.gadgets.templates.ContainerTagLibraryFactory;
 import org.apache.shindig.gadgets.templates.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
 import org.apache.shindig.gadgets.templates.TagHandler;
@@ -121,7 +122,7 @@ public class TemplateRewriterTest {
         Expressions.forTesting(),
         new DefaultTagRegistry(handlers), 
         new FakeTemplateLibraryFactory(),
-        new FakeContainerConfig());
+        new ContainerTagLibraryFactory(new FakeContainerConfig()));
   }
   
  private static TagHandler testTagHandler(String name, final String content) {

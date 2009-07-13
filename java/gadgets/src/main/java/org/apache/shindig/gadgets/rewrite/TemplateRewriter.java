@@ -20,11 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.common.xml.XmlException;
-import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -34,9 +30,9 @@ import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.templates.CompositeTagRegistry;
+import org.apache.shindig.gadgets.templates.ContainerTagLibraryFactory;
 import org.apache.shindig.gadgets.templates.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.MessageELResolver;
-import org.apache.shindig.gadgets.templates.NullTemplateLibrary;
 import org.apache.shindig.gadgets.templates.TagHandler;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateBasedTagHandler;
@@ -46,7 +42,6 @@ import org.apache.shindig.gadgets.templates.TemplateLibraryFactory;
 import org.apache.shindig.gadgets.templates.TemplateParserException;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.apache.shindig.gadgets.templates.TemplateResource;
-import org.apache.shindig.gadgets.templates.XmlTemplateLibrary;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -57,17 +52,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -91,7 +83,7 @@ public class TemplateRewriter implements GadgetRewriter {
   /** Enable client support? **/
   static final String CLIENT_SUPPORT_PARAM = "client";  
 
-  static private final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
+  private static final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
   
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
@@ -102,55 +94,21 @@ public class TemplateRewriter implements GadgetRewriter {
   private final Expressions expressions;
   private final TagRegistry baseTagRegistry;
   private final TemplateLibraryFactory libraryFactory;
-  private final ContainerConfig config;
-  
-  private final ConcurrentMap<String, TemplateLibrary> osmlLibraryCache = 
-    new MapMaker().makeComputingMap(
-        new Function<String, TemplateLibrary>() {
-          public TemplateLibrary apply(String resourceName) {
-            return loadTrustedLibrary(resourceName);
-          }
-        });
+  private final ContainerTagLibraryFactory containerTags;
 
   @Inject
   public TemplateRewriter(Provider<TemplateProcessor> processor,
       MessageBundleFactory messageBundleFactory, Expressions expressions, 
       TagRegistry baseTagRegistry, TemplateLibraryFactory libraryFactory,
-      ContainerConfig config) {
+      ContainerTagLibraryFactory containerTags) {
     this.processor = processor;
     this.messageBundleFactory = messageBundleFactory;
     this.expressions = expressions;
     this.baseTagRegistry = baseTagRegistry;
     this.libraryFactory = libraryFactory;
-    this.config = config;
+    this.containerTags = containerTags;
   }
 
-  private TemplateLibrary getOsmlLibrary(Gadget gadget) {
-    String library = config.getString(gadget.getContext().getContainer(),
-        "${Cur['gadgets.features'].osml.library}");
-    if (StringUtils.isEmpty(library)) {
-      return NullTemplateLibrary.INSTANCE;
-    }
-    
-    return osmlLibraryCache.get(library);
-  }
-  
-  static private TemplateLibrary loadTrustedLibrary(String resource) {
-    try {
-      String content = ResourceLoader.getContent(resource);
-      return new XmlTemplateLibrary(Uri.parse("#OSML"), XmlUtil.parse(content), 
-          content, true);
-    } catch (IOException ioe) {
-      logger.log(Level.WARNING, null, ioe);
-    } catch (XmlException xe) {
-      logger.log(Level.WARNING, null, xe);
-    } catch (GadgetException tpe) {
-      logger.log(Level.WARNING, null, tpe);
-    }
-
-    return NullTemplateLibrary.INSTANCE;
-  }
-  
   public void rewrite(Gadget gadget, MutableContent content) {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
@@ -185,7 +143,8 @@ public class TemplateRewriter implements GadgetRewriter {
     // Built-in Java-based tags - Priority 1
     registries.add(baseTagRegistry);
     
-    TemplateLibrary osmlLibrary = getOsmlLibrary(gadget);
+    TemplateLibrary osmlLibrary = containerTags.getLibrary(gadget.getContext().getContainer());    
+    
     // OSML Built-in tags - Priority 2
     registries.add(osmlLibrary.getTagRegistry());
     libraries.add(osmlLibrary);

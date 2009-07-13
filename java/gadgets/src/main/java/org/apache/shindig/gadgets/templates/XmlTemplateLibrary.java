@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -111,6 +112,16 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    */
   public String serialize() {
     return source;
+  }
+  
+  /**
+   * Creates a tag handler wrapping an element.  By default, creates
+   * a {@link TemplateBasedTagHandler}.  Override this to create custom
+   * tag handlers.
+   */
+  protected TagHandler createTagHandler(Element template, String namespaceUri,
+      String localName) {
+    return new TemplateBasedTagHandler(template, namespaceUri, localName);
   }
   
   private Set<TagHandler> parseLibraryDocument(Element root)
@@ -228,11 +239,32 @@ public class XmlTemplateLibrary implements TemplateLibrary {
           "Can't create tags in undeclared namespace: " + nameParts[0]);
     }
     
+    if (isSafe()) {
+      bypassTemplateSanitization(template);
+    }
+    
     return new LibraryTagHandler(
-        new TemplateBasedTagHandler(template, namespaceUri, nameParts[1]),
+        createTagHandler(template, namespaceUri, nameParts[1]),
         resources);
   }
   
+  /**
+   * For "safe" libraries, bypass sanitization.  Sanitization should
+   * be bypassed on each element in the tree, but not on the whole
+   * tree (false, not true, in the call to bypassSanitization() below),
+   * since os:Render elements will insert unsafe content.
+   */
+  private void bypassTemplateSanitization(Element template) {
+    SanitizingGadgetRewriter.bypassSanitization(template, false);
+    NodeList children = template.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node node = children.item(i);
+      if (node instanceof Element) {
+        bypassTemplateSanitization((Element) node);
+      }
+    }
+  }
+
   /**
    * TagHandler delegate reponsible for adding necessary tag resources
    * as each tag gets processed. 

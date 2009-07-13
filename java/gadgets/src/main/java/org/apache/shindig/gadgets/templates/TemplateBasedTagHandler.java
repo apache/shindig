@@ -65,8 +65,8 @@ public class TemplateBasedTagHandler extends AbstractTagHandler {
   /** Process the template content in the new EL state */
   protected void processTemplate(Node result, Element tagInstance, TemplateProcessor processor) {
     processor.processChildNodes(result, templateDefinition);
-    
   }
+  
   /**
    * Compute the value of ${My} for this tag execution.
    */
