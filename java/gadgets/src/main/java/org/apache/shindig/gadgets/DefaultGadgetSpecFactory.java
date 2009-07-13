@@ -39,6 +39,7 @@ import com.google.inject.name.Named;
 import org.w3c.dom.Element;
 
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -214,10 +215,10 @@ public class DefaultGadgetSpecFactory implements GadgetSpecFactory {
         cache.addElement(uri, newObject, refresh);
       } catch (GadgetException e) {
         if (old != null) {
-          logger.info("Failed to update " + uri + ". Using cached version.");
+          logger.log(Level.INFO, "Failed to update {0}. Using cached version.", uri);
           cache.addElement(uri, old, refresh);
         } else {
-          logger.info("Failed to update " + uri + ". Applying negative cache.");
+          logger.log(Level.INFO, "Failed to update {0}. Applying negative cache.", uri);
           cache.addElement(uri, e, refresh);
         }
       }

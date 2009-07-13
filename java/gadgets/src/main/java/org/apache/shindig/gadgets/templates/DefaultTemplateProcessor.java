@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.el.ELContext;
@@ -479,7 +480,9 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       Object result = expr.getValue(elContext);
       return type.cast(result);
     } catch (ELException e) {
-      logger.warning(e.getMessage());
+      logger.log(Level.WARNING, "EL failure for gadget {0}: {1}",
+          new Object[]{getTemplateContext().getGadget().getContext().getUrl(),
+              e.getMessage()});
       return defaultValue;
     }
   }
