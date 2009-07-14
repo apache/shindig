@@ -158,6 +158,11 @@ $shindigConfig = array(
   // If your development server is behind a proxy, enter the proxy details here in 'proxy.host.com:port' format.
   'proxy' => '',
 
+
+  // If your server is behind a reverse proxy, set the real hostname here so that OAuth signatures match up, for example:
+  // 'http_host' => 'modules.partuza.nl'
+  'http_host' => false,
+
   // Container id, used for security token
   'container_id' => 'default'
 );

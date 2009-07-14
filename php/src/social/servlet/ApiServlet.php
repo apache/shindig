@@ -100,8 +100,11 @@ abstract class ApiServlet extends HttpServlet {
   }
 
   public function getSecurityToken() {
+    // Support a configurable host name ('http_host' key) so that OAuth signatures don't fail in reverse-proxy type situations
+    $scheme = (! isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http' : 'https';
+    $http_url = $scheme . '://' . (Config::get('http_host') ? Config::get('http_host') : $_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
     // see if we have an OAuth request
-    $request = OAuthRequest::from_request();
+    $request = OAuthRequest::from_request(null, $http_url, null);
     $appUrl = $request->get_parameter('oauth_consumer_key');
     $userId = $request->get_parameter('xoauth_requestor_id'); // from Consumer Request extension (2-legged OAuth)
     $signature = $request->get_parameter('oauth_signature');
