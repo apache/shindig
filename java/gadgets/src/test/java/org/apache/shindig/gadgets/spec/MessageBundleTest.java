@@ -84,6 +84,16 @@ public class MessageBundleTest {
     assertEquals(ImmutableMap.of("key", "value"), bundle.getMessages());
   }
   
+  @Test
+  public void containsCdataSection() throws Exception {
+    String cdataXml =
+       "<messagebundle>" +
+       "  <msg name='key'><![CDATA[<span id='foo'>data</span>]]></msg>" +
+       "</messagebundle>";
+    MessageBundle bundle = new MessageBundle(locale, cdataXml);
+    assertEquals(ImmutableMap.of("key", "<span id='foo'>data</span>"), bundle.getMessages());
+  }
+  
   @Test(expected = SpecParserException.class)
   public void missingNameThrows() throws SpecParserException {
     String xml = "<messagebundle><msg>foo</msg></messagebundle>";

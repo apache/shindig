@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONObject;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.IOException;
@@ -164,7 +165,12 @@ public class MessageBundle {
       NodeList msgChildren = msg.getChildNodes();
       for (int child = 0; child < msgChildren.getLength(); ++child) {
         try {
-          htmlSerializer.serialize(msgChildren.item(child), sw);
+          if (msgChildren.item(child).getNodeType() == Node.CDATA_SECTION_NODE) {
+            // Workaround to treat CDATA as text.
+            sw.append(msgChildren.item(child).getTextContent());
+          } else {
+            htmlSerializer.serialize(msgChildren.item(child), sw);
+          }
         } catch (IOException e) {
           throw new SpecParserException("Unexpected error getting value of msg node", 
                                         new XmlException(e));
