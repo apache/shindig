@@ -151,7 +151,7 @@ class BasicRemoteContent extends RemoteContent {
     $ignoreCache = $originalRequest->getOptions()->ignoreCache;
     if (($this->cachePostRequest || ! $request->isPost()) && ! $ignoreCache) {
       $ttl = Config::get('cache_time');
-      if ($request->getHttpCode() == '200') {
+      if ((int)$request->getHttpCode() == 200) {
         // Got a 200 OK response, calculate the TTL to use for caching it
         if (($expires = $request->getResponseHeader('Expires')) != null) {
           // prefer to use the servers notion of the time since there could be a clock-skew, but otherwise use our own

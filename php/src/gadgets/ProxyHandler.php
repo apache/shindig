@@ -76,6 +76,7 @@ class ProxyHandler extends ProxyBase {
       header('HTTP/1.0 304 Not Modified', true);
       header('Content-Length: 0', true);
     } else {
+      header("HTTP/1.1 $httpCode ".$result->getHttpCodeMsg());
       // then echo the content
       echo $result->getResponseContent();
     }

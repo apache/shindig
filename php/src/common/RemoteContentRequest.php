@@ -32,6 +32,7 @@ class RemoteContentRequest {
   private $responseHeaders = array();
   private $metadata = array();
   private $httpCode = false;
+  private $httpCodeMsg = '';
   private $contentType = null;
   private $created;
   private $refreshInterval;
@@ -146,6 +147,10 @@ class RemoteContentRequest {
     return $this->httpCode;
   }
 
+  public function getHttpCodeMsg() {
+    return $this->httpCodeMsg;
+  }
+
   public function getResponseContent() {
     return $this->responseContent;
   }
@@ -213,6 +218,10 @@ class RemoteContentRequest {
 
   public function setHttpCode($code) {
     $this->httpCode = intval($code);
+  }
+
+  public function setHttpCodeMsg($msg) {
+    $this->httpCodeMsg = $msg;
   }
 
   public function setResponseContent($content) {
