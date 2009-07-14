@@ -76,7 +76,7 @@ class ProxyBase {
       $request->setToken($token);
     }
     if (isset($_POST['headers'])) {
-      $request->setHeaders($_POST['headers']);
+      $request->setHeaders(urldecode(str_replace("&", "\n", str_replace("=", ": ", $_POST['headers']))));
     }
     return $request;
   }
