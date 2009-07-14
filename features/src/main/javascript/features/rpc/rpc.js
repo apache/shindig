@@ -85,7 +85,7 @@ gadgets.rpc = function() {
 
   // isGadget =~ isChild for the purposes of rpc (used only in setup).
   var isGadget = (window.top !== window.self);
-  var fallbackTransport = gadgets.rpctx.Ifpc;
+  var fallbackTransport = gadgets.rpctx.ifpc;
 
   // Load the authentication token for speaking to the container
   // from the gadget's parameters, or default to '0' if not found.
@@ -399,7 +399,7 @@ gadgets.rpc = function() {
       var useLegacy = !!configRpc.useLegacyProtocol;
       useLegacyProtocol['..'] = useLegacy;
       if (useLegacy) {
-        transport = gadgets.rpctx.Ifpc;
+        transport = gadgets.rpctx.ifpc;
         transport.init(process, transportReady);
       }
 
@@ -486,7 +486,7 @@ gadgets.rpc = function() {
      */
     forceParentVerifiable: function() {
       if (!transport.isParentVerifiable()) {
-        transport = gadgets.rpctx.Ifpc;
+        transport = gadgets.rpctx.ifpc;
       }
     },
 
@@ -545,7 +545,7 @@ gadgets.rpc = function() {
       // If we are told to use the legacy format, then we must
       // default to IFPC.
       if (useLegacyProtocol[targetId]) {
-        channel = gadgets.rpctx.Ifpc;
+        channel = gadgets.rpctx.ifpc;
       }
 
       if (channel.call(targetId, from, rpc) === false) {
