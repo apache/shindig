@@ -85,7 +85,31 @@ gadgets.rpc = function() {
 
   // isGadget =~ isChild for the purposes of rpc (used only in setup).
   var isGadget = (window.top !== window.self);
-  var fallbackTransport = gadgets.rpctx.ifpc;
+
+  // Fallback transport is simply a dummy impl that emits no errors
+  // and logs info on calls it receives, to avoid undesired side-effects
+  // from falling back to IFPC or some other transport.
+  var fallbackTransport = (function() {
+    function logFn(name) {
+      return function() {
+        gadgets.info("gadgets.rpc." + name + "(" +
+                     gadgets.json.stringify(arguments) +
+                     "): call ignored. [caller: " + document.location +
+                     ", isGadget: " + isGadget + "]");
+      }
+    }
+    return {
+      getCode: function() {
+        return "noop";
+      },
+      isParentVerifiable: function() {
+        return true;  // Not really, but prevents transport assignment to IFPC.
+      },
+      init: logFn("init"),
+      setup: logFn("setup"),
+      call: logFn("call")
+    }
+  })();
 
   // Load the authentication token for speaking to the container
   // from the gadget's parameters, or default to '0' if not found.
