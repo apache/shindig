@@ -43,8 +43,8 @@
 
       function appendChildGadget() {
         var childgadgetdiv = document.getElementById('childgadgetdiv');
-        var parentDomain = gadgets.rpc.getDomainRoot(gadgets.util.getUrlParameters().parent);
-        var myDomain = gadgets.rpc.getDomainRoot(window.location.href);
+        var parentDomain = gadgets.rpc.getOrigin(gadgets.util.getUrlParameters().parent);
+        var myDomain = gadgets.rpc.getOrigin(window.location.href);
         var rpctoken = Math.round(Math.random() * 10000000);
         var childGadgetUrl = parentDomain + '/gadgets/ifr?url=' + parentDomain + '/gadgets/files/container/rpctest_childgadget.xml&parent=' + myDomain + '#rpctoken=' + rpctoken;
         childgadgetdiv.innerHTML = '<div><input type="button" value="Ping Parent (Container)" onclick="callGadgetServicePing();"/><hr/>' +
