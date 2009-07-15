@@ -136,7 +136,9 @@
   "opensocial-0.8" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-    "path" : "http://%host%",
+    "path" : "http://%host%/social/rpc",
+    // Path to issue invalidate calls
+    "invalidatePath" : "http://%host%/gadgets/api/rpc",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {

@@ -23,9 +23,19 @@
  * @fileoverview JSON-RPC based opensocial container.
  */
 
-var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
+var JsonRpcContainer = function(configParams) {
   opensocial.Container.call(this);
 
+  var path = configParams.path;
+  // Path for social API calls
+  this.path_ = path.replace("%host%", document.location.host);
+
+  // Path for calls to invalidate
+  var invalidatePath = configParams.invalidatePath;
+  this.invalidatePath_ = invalidatePath.replace("%host%",
+      document.location.host);
+
+  var supportedFieldsArray = configParams.supportedFields;
   var supportedFieldsMap = {};
   for (var objectType in supportedFieldsArray) {
     if (supportedFieldsArray.hasOwnProperty(objectType)) {
@@ -37,8 +47,8 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
     }
   }
 
-  this.environment_ = new opensocial.Environment(domain, supportedFieldsMap);
-  this.baseUrl_ = baseUrl;
+  this.environment_ = new opensocial.Environment(configParams.domain,
+      supportedFieldsMap);
 
   this.securityToken_ = shindig.auth.getSecurityToken();
 
@@ -206,7 +216,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
       "POST_DATA" : gadgets.json.stringify(jsonBatchData)
     };
 
-    var url = [this.baseUrl_, "/social/rpc"];
+    var url = [this.path_];
     var token = shindig.auth.getSecurityToken();
     if (token) {
       url.push("?st=", encodeURIComponent(token));
@@ -439,7 +449,7 @@ var JsonRpcContainer = function(baseUrl, domain, supportedFieldsArray) {
       "POST_DATA" : gadgets.json.stringify(rpc)
     };
 
-    var url = [this.baseUrl_, "/gadgets/api/rpc"];
+    var url = [this.invalidatePath_];
     var token = shindig.auth.getSecurityToken();
     if (token) {
       url.push("?st=", encodeURIComponent(token));
