@@ -19,9 +19,9 @@
  */
 
 class InvalidateHandler extends DataRequestHandler {
-  
+
   private static $INVALIDATE_PATH = "/cache/invalidate";
-  
+
   private static $KEYS_PARAM = "invalidationKeys";
 
   public function __construct() {
@@ -41,7 +41,7 @@ class InvalidateHandler extends DataRequestHandler {
     try {
       $method = strtolower($requestItem->getMethod());
       $method = 'handle' . ucfirst($method);
-      $response = $this->$method($requestItem);
+      $this->$method($requestItem);
     } catch (SocialSpiException $e) {
       $response = new ResponseItem($e->getCode(), $e->getMessage());
     } catch (Exception $e) {
@@ -49,6 +49,7 @@ class InvalidateHandler extends DataRequestHandler {
     }
     return $response;
   }
+
   public function handleDelete(RequestItem $request) {
     throw new SocialSpiException("Http delete not allowed for invalidation service", ResponseError::$BAD_REQUEST);
   }
@@ -60,7 +61,7 @@ class InvalidateHandler extends DataRequestHandler {
   public function handlePost(RequestItem $request) {
     $this->handleInvalidate($request);
   }
-  
+
   public function handleGet(RequestItem $request) {
     $this->handleInvalidate($request);
   }
@@ -70,7 +71,7 @@ class InvalidateHandler extends DataRequestHandler {
     if (!$request->getToken()->getAppId() && !$request->getToken()->getAppUrl()) {
       throw new SocialSpiException("Can't invalidate content without specifying application", ResponseError::$BAD_REQUEST);
     }
-    
+
     $isBackendInvalidation = AuthenticationMode::$OAUTH_CONSUMER_REQUEST == $request->getToken()->getAuthenticationMode();
     $invalidationKeys = $request->getListParameter('invalidationKeys');
     $resources = array();
@@ -81,7 +82,7 @@ class InvalidateHandler extends DataRequestHandler {
     foreach($invalidationKeys as $key) {
       if (strpos($key, 'http') !== false) {
         if (!$isBackendInvalidation) {
-          throw new SocialSpiException('Cannot flush application resources from a gadget. Must use OAuth consumer request'); 
+          throw new SocialSpiException('Cannot flush application resources from a gadget. Must use OAuth consumer request');
         }
         $resources[] = $key;
       } else {

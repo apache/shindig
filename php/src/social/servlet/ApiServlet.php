@@ -19,14 +19,6 @@
  */
 
 require 'src/social/service/DataRequestHandler.php';
-require 'src/social/service/PersonHandler.php';
-require 'src/social/spi/ActivityService.php';
-require 'src/social/spi/PersonService.php';
-require 'src/social/spi/AppDataService.php';
-require 'src/social/spi/MessagesService.php';
-require 'src/social/service/ActivityHandler.php';
-require 'src/social/service/AppDataHandler.php';
-require 'src/social/service/MessagesHandler.php';
 require 'src/common/SecurityToken.php';
 require 'src/common/BlobCrypter.php';
 require 'src/social/converters/InputConverter.php';
@@ -55,7 +47,7 @@ require 'src/social/oauth/OAuth.php';
  * Common base class for API servlets.
  */
 abstract class ApiServlet extends HttpServlet {
-  protected $handlers = array();
+  public $handlers = array();
 
   protected static $DEFAULT_ENCODING = "UTF-8";
 
@@ -64,19 +56,13 @@ abstract class ApiServlet extends HttpServlet {
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
   public static $INVALIDATE_ROUTE = "cache";
+  public static $SYSTEM_ROUTE = "system";
   public static $ALBUM_ROUTE = "albums";
   public static $MEDIA_ITEM_ROUTE = "mediaitems";
 
   public function __construct() {
     parent::__construct();
     $this->setNoCache(true);
-    $this->handlers[self::$PEOPLE_ROUTE] = new PersonHandler();
-    $this->handlers[self::$ACTIVITY_ROUTE] = new ActivityHandler();
-    $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
-    $this->handlers[self::$MESSAGE_ROUTE] = new MessagesHandler();
-    $this->handlers[self::$INVALIDATE_ROUTE] = new InvalidateHandler();
-    $this->handlers[self::$ALBUM_ROUTE] = new AlbumHandler();
-    $this->handlers[self::$MEDIA_ITEM_ROUTE] = new MediaItemHandler();
     if (isset($_SERVER['CONTENT_TYPE']) && (strtolower($_SERVER['CONTENT_TYPE']) != $_SERVER['CONTENT_TYPE'])) {
       // make sure the content type is in all lower case since that's what we'll check for in the handlers
       $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);
@@ -155,8 +141,52 @@ abstract class ApiServlet extends HttpServlet {
    * Delivers a request item to the appropriate DataRequestHandler.
    */
   protected function handleRequestItem(RequestItem $requestItem) {
+    // lazy initialization of the service handlers, no need to instance them all for each request
     if (! isset($this->handlers[$requestItem->getService()])) {
-      throw new SocialSpiException("The service " . $requestItem->getService() . " is not implemented", ResponseError::$NOT_IMPLEMENTED);
+      switch ($requestItem->getService()) {
+        case self::$PEOPLE_ROUTE:
+          require_once 'src/social/spi/PersonService.php';
+          require_once 'src/social/service/PersonHandler.php';
+          $this->handlers[self::$PEOPLE_ROUTE] = new PersonHandler();
+          break;
+        case self::$ACTIVITY_ROUTE:
+          require_once 'src/social/spi/ActivityService.php';
+          require_once 'src/social/service/ActivityHandler.php';
+          $this->handlers[self::$ACTIVITY_ROUTE] = new ActivityHandler();
+          break;
+        case self::$APPDATA_ROUTE:
+          require_once 'src/social/spi/AppDataService.php';
+          require_once 'src/social/service/AppDataHandler.php';
+          $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
+          break;
+        case self::$MESSAGE_ROUTE:
+          require_once 'src/social/spi/MessagesService.php';
+          require_once 'src/social/service/MessagesHandler.php';
+          $this->handlers[self::$MESSAGE_ROUTE] = new MessagesHandler();
+          break;
+        case self::$INVALIDATE_ROUTE:
+          require_once 'src/social/spi/InvalidateService.php';
+          require_once 'src/social/service/InvalidateHandler.php';
+          $this->handlers[self::$INVALIDATE_ROUTE] = new InvalidateHandler();
+          break;
+        case self::$SYSTEM_ROUTE:
+          require_once 'src/social/service/SystemHandler.php';
+          $this->handlers[self::$SYSTEM_ROUTE] = new SystemHandler();
+          break;
+        case self::$ALBUM_ROUTE:
+          require_once 'src/social/spi/AlbumService.php';
+          require_once 'src/social/service/AlbumHandler.php';
+          $this->handlers[self::$ALBUM_ROUTE] = new AlbumHandler();
+          break;
+        case self::$MEDIA_ITEM_ROUTE:
+          require_once 'src/social/spi/MediaItemService.php';
+          require_once 'src/social/service/MediaItemHandler.php';
+          $this->handlers[self::$MEDIA_ITEM_ROUTE] = new MediaItemHandler();
+          break;
+        default:
+          throw new SocialSpiException("The service " . $requestItem->getService() . " is not implemented", ResponseError::$NOT_IMPLEMENTED);
+          break;
+      }
     }
     $handler = $this->handlers[$requestItem->getService()];
     return $handler->handleItem($requestItem);

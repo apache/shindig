@@ -379,13 +379,24 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (isset($gadgetConfig['osml'])) {
       unset($gadgetConfig['osml']);
     }
-    if (!isset($gadgetConfig['osapi.services']) || count($gadgetConfig['osapi.services']) == 1) {
+    if (! isset($gadgetConfig['osapi.services']) || count($gadgetConfig['osapi.services']) == 1) {
       // this should really be set in config/container.js, but if not, we build a complete default set so at least most of it works out-of-the-box
       $gadgetConfig['osapi.services'] = array(
-        'gadgets.rpc' => array('container.listMethods'),
-        'http://%host%/social/rpc' => array("messages.update","albums.update","activities.delete","activities.update","activities.supportedFields","albums.get","activities.get","mediaitems.update","messages.get","appdata.get","system.listMethods","people.supportedFields","messages.create","mediaitems.delete","mediaitems.create","people.get","people.create","albums.delete","messages.delete","appdata.update","activities.create","mediaitems.get","albums.create","appdata.delete","people.update","appdata.create"),
-        'http://%host%/gadgets/api/rpc' => array('cache.invalidate', 'system.listMethods')
-      );
+          'gadgets.rpc' => array('container.listMethods'),
+          'http://%host%/social/rpc' => array("messages.update", "albums.update",
+              "activities.delete", "activities.update",
+              "activities.supportedFields", "albums.get",
+              "activities.get", "mediaitems.update",
+              "messages.get", "appdata.get",
+              "system.listMethods", "people.supportedFields",
+              "messages.create", "mediaitems.delete",
+              "mediaitems.create", "people.get", "people.create",
+              "albums.delete", "messages.delete",
+              "appdata.update", "activities.create",
+              "mediaitems.get", "albums.create",
+              "appdata.delete", "people.update",
+              "appdata.create"),
+          'http://%host%/gadgets/api/rpc' => array('cache.invalidate'));
     }
     return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
   }

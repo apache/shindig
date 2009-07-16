@@ -30,9 +30,10 @@ class DataServiceServlet extends ApiServlet {
   public static $APPDATA_ROUTE = "appdata";
   public static $MESSAGE_ROUTE = "messages";
   public static $INVALIDATE_ROUTE = "cache";
+  public static $SYSTEM_ROUTE = "system";
   public static $ALBUM_ROUTE = "albums";
   public static $MEDIA_ITEM_ROUTE = "mediaitems";
-    
+
 
   public function doGet() {
     $this->doPost();
