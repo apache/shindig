@@ -21,6 +21,7 @@ import org.apache.shindig.common.xml.XmlUtil;
 
 import org.w3c.dom.Element;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -33,6 +34,10 @@ import java.util.Map;
  * No user pref substitution.
  */
 public class LocaleSpec {
+  private final Locale locale;
+  private final String languageDirection;
+  private final Uri messages;
+  private final MessageBundle messageBundle;
 
   /**
    * @param specUrl The url that the spec is loaded from. messages is assumed
@@ -40,18 +45,20 @@ public class LocaleSpec {
    * @throws SpecParserException If language_direction is not valid
    */
   public LocaleSpec(Element element, Uri specUrl) throws SpecParserException {
-    language = XmlUtil.getAttribute(element, "lang", "all").toLowerCase();
-    country = XmlUtil.getAttribute(element, "country", "ALL").toUpperCase();
+    String language = XmlUtil.getAttribute(element, "lang", "all").toLowerCase();
+    String country = XmlUtil.getAttribute(element, "country", "ALL").toUpperCase();
+    this.locale = new Locale(language, country);
+
     languageDirection = XmlUtil.getAttribute(element, "language_direction", "ltr");
     if (!("ltr".equals(languageDirection) || "rtl".equals(languageDirection))) {
       throw new SpecParserException("Locale/@language_direction must be ltr or rtl");
     }
-    String messages = XmlUtil.getAttribute(element, "messages");
-    if (messages == null) {
+    String messagesString = XmlUtil.getAttribute(element, "messages");
+    if (messagesString == null) {
       this.messages = Uri.parse("");
     } else {
       try {
-        this.messages = specUrl.resolve(Uri.parse(messages));
+        this.messages = specUrl.resolve(Uri.parse(messagesString));
       } catch (IllegalArgumentException e) {
         throw new SpecParserException("Locale@messages url is invalid.");
       }
@@ -59,26 +66,27 @@ public class LocaleSpec {
     messageBundle = new MessageBundle(element);
   }
 
+  public Locale getLocale() {
+    return locale;
+  }
+
   /**
    * Locale@lang
    */
-  private final String language;
   public String getLanguage() {
-    return language;
+    return locale.getLanguage();
   }
 
   /**
    * Locale@country
    */
-  private final String country;
   public String getCountry() {
-    return country;
+    return locale.getCountry();
   }
 
   /**
    * Locale@language_direction
    */
-  private final String languageDirection;
   public String getLanguageDirection() {
     return languageDirection;
   }
@@ -86,7 +94,6 @@ public class LocaleSpec {
   /**
    * Locale@messages
    */
-  private final Uri messages;
   public Uri getMessages() {
     return messages;
   }
@@ -94,7 +101,6 @@ public class LocaleSpec {
   /**
    * Locale/msg
    */
-  private final MessageBundle messageBundle;
   public MessageBundle getMessageBundle() {
     return messageBundle;
   }
@@ -103,8 +109,8 @@ public class LocaleSpec {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("<Locale")
-       .append(" lang='").append(language).append('\'')
-       .append(" country='").append(country).append('\'')
+       .append(" lang='").append(getLanguage()).append('\'')
+       .append(" country='").append(getCountry()).append('\'')
        .append(" language_direction='").append(languageDirection).append('\'')
        .append(" messages='").append(messages).append("'>\n");
     for (Map.Entry<String, String> entry : messageBundle.getMessages().entrySet()) {

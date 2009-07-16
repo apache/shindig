@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets;
 
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -29,13 +28,11 @@ import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.cache.SoftExpiringCache;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.spec.ApplicationManifest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 
@@ -48,24 +45,9 @@ import org.junit.Test;
  */
 public class DefaultGadgetSpecFactoryTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
-  private static final Uri ALT_SPEC_URL = Uri.parse("http://example.org/gadget2.xml");
-  private static final Uri MANIFEST_URI = Uri.parse("http://example.org/manifest.xml");
   private static final String LOCAL_CONTENT = "Hello, local content!";
   private static final String ALT_LOCAL_CONTENT = "Hello, local content!";
   private static final String RAWXML_CONTENT = "Hello, rawxml content!";
-  private static final String MANIFEST_XML
-      = "<app xmlns='" + ApplicationManifest.NAMESPACE + "'>" +
-        "<gadget>" +
-        "  <label>production</label>" +
-        "  <version>1.0</version>" +
-        "  <spec>" + SPEC_URL + "</spec>" +
-        "</gadget>" +
-        "<gadget>" +
-        "  <label>development</label>" +
-        "  <version>2.0</version>" +
-        "  <spec>" + ALT_SPEC_URL + "</spec>" +
-        "</gadget>" +
-        "</app>";
   private static final String LOCAL_SPEC_XML
       = "<Module>" +
         "  <ModulePrefs title='GadgetSpecFactoryTest'/>" +
@@ -153,75 +135,7 @@ public class DefaultGadgetSpecFactoryTest {
     assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
-  @Test
-  public void specFetchedFromManifest() throws Exception {
-    HttpRequest gadgetRequest = createIgnoreCacheRequest();
-    HttpResponse gadgetResponse = new HttpResponse(LOCAL_SPEC_XML);
-    expect(pipeline.execute(gadgetRequest)).andReturn(gadgetResponse);
-
-    HttpRequest manifestRequest = createIgnoreCacheRequest();
-    manifestRequest.setUri(MANIFEST_URI);
-    HttpResponse manifestResponse = new HttpResponse(MANIFEST_XML);
-    expect(pipeline.execute(manifestRequest)).andReturn(manifestResponse);
-
-    replay(pipeline);
-
-    GadgetSpec spec = specFactory.getGadgetSpec(createContext(MANIFEST_URI, true));
-
-    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-  }
-
-  @Test(expected = SpecParserException.class)
-  public void nestedManifestThrows() throws Exception {
-    HttpResponse manifestResponse = new HttpResponse(MANIFEST_XML);
-    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(manifestResponse).anyTimes();
-
-    replay(pipeline);
-
-    specFactory.getGadgetSpec(createContext(MANIFEST_URI, true));
-  }
-
-  @Test
-  public void manifestFetchedWithDefaults() throws Exception {
-    ApplicationManifest manifest
-        = new ApplicationManifest(MANIFEST_URI, XmlUtil.parse(MANIFEST_XML));
-    specFactory.cache.addElement(MANIFEST_URI, manifest, 1000);
-
-    GadgetSpec cachedSpec = new GadgetSpec(SPEC_URL, LOCAL_SPEC_XML);
-    specFactory.cache.addElement(SPEC_URL, cachedSpec, 1000);
-
-    GadgetSpec spec = specFactory.getGadgetSpec(createContext(MANIFEST_URI, false));
-
-    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-  }
-
-  @Test
-  public void manifestFetchedByVersion() throws Exception {
-    ApplicationManifest manifest
-        = new ApplicationManifest(MANIFEST_URI, XmlUtil.parse(MANIFEST_XML));
-    specFactory.cache.addElement(MANIFEST_URI, manifest, 1000);
-
-    GadgetSpec cachedSpec = new GadgetSpec(ALT_SPEC_URL, ALT_LOCAL_SPEC_XML);
-    specFactory.cache.addElement(ALT_SPEC_URL, cachedSpec, 1000);
-
-    GadgetSpec spec = specFactory.getGadgetSpec(new GadgetContext() {
-      @Override
-      public Uri getUrl() {
-        return MANIFEST_URI;
-      }
-
-      @Override
-      public String getParameter(String name) {
-        if (name.equals(DefaultGadgetSpecFactory.VERSION_PARAM)) {
-          return "2.0";
-        }
-        return null;
-      }
-    });
-
-    assertEquals(ALT_LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
-  }
-
+  // TODO: Move these tests into AbstractSpecFactoryTest
   @Test
   public void specRefetchedAsync() throws Exception {
     HttpRequest request = createCacheableRequest();

@@ -17,15 +17,14 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
-
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
-import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -38,13 +37,14 @@ import java.util.Map;
  * Represents a messagebundle structure.
  */
 public class MessageBundle {
-
   public static final MessageBundle EMPTY = new MessageBundle();
 
   private static final DefaultHtmlSerializer htmlSerializer = new DefaultHtmlSerializer();
   private final ImmutableMap<String, String> messages;
   private final String languageDirection;
-  private final String jsonString;
+
+  /* lazily created cache of the json-encoded form of the bundle */
+  private String jsonString;
 
    /**
    * Constructs a message bundle from input xml (fetched from an external file).
@@ -62,7 +62,6 @@ public class MessageBundle {
           + ": " + e.getMessage());
     }
     messages = parseMessages(doc);
-    jsonString = new JSONObject(messages).toString();
     languageDirection = locale.getLanguageDirection();
   }
 
@@ -75,7 +74,6 @@ public class MessageBundle {
   public MessageBundle(LocaleSpec locale, Map<String, String> map) {
      messages = ImmutableMap.copyOf(map);
      languageDirection = locale.getLanguageDirection();
-     jsonString = new JSONObject(messages).toString();
    }
 
   /**
@@ -85,30 +83,22 @@ public class MessageBundle {
    */
   public MessageBundle(Element element) throws SpecParserException {
     messages = parseMessages(element);
-    jsonString = new JSONObject(messages).toString();
     languageDirection = XmlUtil.getAttribute(element, "language_direction", "ltr");
   }
 
   /**
-   * Create a MessageBundle by merging child messages into the parent.
+   * Create a MessageBundle by merging multiple bundles together.
    *
-   * @param parent The base bundle.
-   * @param child The bundle containing overriding messages.
+   * @param bundles the bundles to merge, in order
    */
-  public MessageBundle(MessageBundle parent, MessageBundle child) {
+  public MessageBundle(MessageBundle... bundles) {
     Map<String, String> merged = Maps.newHashMap();
     String dir = null;
-
-    if (parent != null) {
-      merged.putAll(parent.messages);
-      dir = parent.languageDirection;
-    }
-    if (child != null) {
-      merged.putAll(child.messages);
-      dir = child.languageDirection;
+    for (MessageBundle bundle : bundles) {
+      merged.putAll(bundle.messages);
+      dir = bundle.languageDirection;
     }
     messages = ImmutableMap.copyOf(merged);
-    jsonString = new JSONObject(messages).toString();
     languageDirection = dir;
   }
 
@@ -139,6 +129,9 @@ public class MessageBundle {
    * @return json representation of the message bundler
    */
   public String toJSONString() {
+    if (jsonString == null) {
+      jsonString = JsonSerializer.serialize(messages);
+    }
     return jsonString;
   }
 
@@ -172,7 +165,7 @@ public class MessageBundle {
             htmlSerializer.serialize(msgChildren.item(child), sw);
           }
         } catch (IOException e) {
-          throw new SpecParserException("Unexpected error getting value of msg node", 
+          throw new SpecParserException("Unexpected error getting value of msg node",
                                         new XmlException(e));
         }
       }

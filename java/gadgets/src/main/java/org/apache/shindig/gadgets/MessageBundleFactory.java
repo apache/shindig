@@ -18,9 +18,10 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.ImplementedBy;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
+
+import com.google.inject.ImplementedBy;
 
 import java.util.Locale;
 
@@ -31,9 +32,10 @@ import java.util.Locale;
 public interface MessageBundleFactory {
   /**
    * Retrieves a messagMessageBundle for the provided GadgetSpec and Locale. Implementations must be
-   * sure to perform proper merging of message bundles of lower specifity with exact matches.
+   * sure to perform proper merging of message bundles of lower specifity with exact matches
+   * (exact > lang only > country only > all / all)
    *
-   * @param spec The gadet to inspect for Locales.
+   * @param spec The gadget to inspect for Locales.
    * @param locale The language and country to get a message bundle for.
    * @param ignoreCache  True to bypass any caching of message bundles for debugging purposes.
    * @return The newly created MesageBundle.
