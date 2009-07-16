@@ -120,7 +120,8 @@ public class OAuthCommandLine {
     } else if (bodySigningEnum == BodySigning.hash) {
       oauthParams.add(
             new OAuth.Parameter(OAuthConstants.OAUTH_BODY_HASH,
-                new String(Base64.encodeBase64(DigestUtils.sha(postBody.getBytes())), "UTF-8")));
+                new String(Base64.encodeBase64(
+                    DigestUtils.sha(request.getPostBodyAsString().getBytes())), "UTF-8")));
     }
 
     if (consumerKey != null) {
