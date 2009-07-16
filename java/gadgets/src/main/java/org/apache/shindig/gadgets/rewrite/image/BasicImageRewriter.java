@@ -157,7 +157,7 @@ public class BasicImageRewriter implements ImageRewriter {
       }
       int originalContentSize = response.getContentLength();
       totalSourceImageSize.addAndGet(originalContentSize);
-      BufferedImage image = ImageIO.read(response.getResponse());
+      BufferedImage image = readImage(imageFormat, response);
 
       if (isResizeRequested) {
 
@@ -409,6 +409,21 @@ public class BasicImageRewriter implements ImageRewriter {
   public long getRewrittenImageBytes() {
     // Thread-safe?
     return totalRewrittenImageBytes.get();
+  }
+
+  protected BufferedImage readImage(ImageFormat imageFormat, HttpResponse response)
+      throws ImageReadException, IOException{
+    if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
+      return readGif(response);
+    } else if (imageFormat == ImageFormat.IMAGE_FORMAT_PNG) {
+      return readPng(response);
+    } else if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
+      return readJpeg(response);
+    } else if (imageFormat == ImageFormat.IMAGE_FORMAT_BMP) {
+      return readBmp(response);
+    } else {
+      throw new ImageReadException("Unsupported format " + imageFormat.name);
+    }
   }
 
   // The following methods are intended to be overridden by implementors if they need to
