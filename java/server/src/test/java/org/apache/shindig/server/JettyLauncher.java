@@ -117,7 +117,7 @@ public class JettyLauncher {
 
     // Attach the gadgets rest servlet
     ServletHolder gadgetsRestServletHolder = new ServletHolder(new DataServiceServlet());
-    gadgetsRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
+    gadgetsRestServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
     context.addServlet(gadgetsRestServletHolder, GADGETS_REST_BASE);
     context.addFilter(AuthenticationServletFilter.class, GADGETS_REST_BASE, 0);
     
