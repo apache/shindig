@@ -191,8 +191,12 @@ public class CajaCssSanitizer {
   private static void clean(AncestorChain<?> chain) {
     if (chain.node instanceof CssTree.Declaration ||
         chain.node instanceof CssTree.Import) {
-      // Remove the entire subtree
-      ((AbstractParseTreeNode)chain.getParentNode()).removeChild(chain.node);
+      if (chain.getParentNode() instanceof CssTree.UserAgentHack) {
+        clean(chain.parent);
+      } else {
+        // Remove the entire subtree
+        ((AbstractParseTreeNode)chain.getParentNode()).removeChild(chain.node);
+      }
     } else {
       clean(chain.parent);
     }

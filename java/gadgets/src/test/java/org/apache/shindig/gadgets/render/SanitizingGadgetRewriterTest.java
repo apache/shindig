@@ -154,10 +154,10 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
     String sanitized = 
-        "<style>" 
+        "<style>"
       + "@import url('http://www.test.com/dir/proxy?url=www.example.org%2F"
-      +	"www.evil.com%2Fx.js\\26gadget=www.example.org%2Fgadget.xml\\26 "
-      +	"fp=45508\\26sanitize=1\\26rewriteMime=text/css');" 
+      +	"www.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&"
+      +	"fp=45508&sanitize=1&rewriteMime=text%2Fcss');"
       + "</style>";
     String rewritten = rewrite(gadget, markup, set("style"), set());
     assertEquals(sanitized, rewritten);

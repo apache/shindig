@@ -32,8 +32,8 @@ import com.google.caja.lexer.TokenQueue;
 import com.google.caja.lexer.TokenStream;
 import com.google.caja.parser.css.CssParser;
 import com.google.caja.parser.css.CssTree;
+import com.google.caja.render.Concatenator;
 import com.google.caja.render.CssPrettyPrinter;
-import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
 import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.RenderContext;
@@ -94,18 +94,7 @@ public class CajaCssParser {
       }
     }
     if (shouldCache) {
-      try {
-        return (CssTree.StyleSheet)parsedCss.clone();
-      } catch (RuntimeException re) {
-        // TODO - FIXME ASAP!
-        log.log(Level.INFO,
-            "Workaround for Caja bug http://code.google.com/p/google-caja/issues/detail?id=985&start=200\n" + re.getMessage());
-        try {
-          return parseImpl(content);
-        } catch (ParseException pe) {
-          throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe); 
-        }
-      }
+      return (CssTree.StyleSheet)parsedCss.clone();
     }
     return parsedCss;
   }
@@ -140,8 +129,8 @@ public class CajaCssParser {
 
   /** Serialize a stylesheet to a Writer. */
   public void serialize(CssTree.StyleSheet styleSheet, Writer writer) {
-    CssPrettyPrinter cssPrinter = new CssPrettyPrinter(writer, null);
-    styleSheet.render(new RenderContext(new MessageContext(), cssPrinter));
+    CssPrettyPrinter cssPrinter = new CssPrettyPrinter(new Concatenator(writer, null));
+    styleSheet.render(new RenderContext(cssPrinter));
     cssPrinter.noMoreTokens();
   }
 

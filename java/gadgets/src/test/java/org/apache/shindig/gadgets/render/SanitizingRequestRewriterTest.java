@@ -79,7 +79,7 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
     String sanitized = 
       "@import url('http://www.test.com/dir/proxy?"
         + "url=http%3A%2F%2Fwww.evil.com%2Fmore.css"
-        + "\\26 fp=45508\\26sanitize=1\\26rewriteMime=text/css');\n"
+        + "&fp=45508&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + "}";

@@ -39,7 +39,6 @@ import com.google.caja.opensocial.DefaultGadgetRewriter;
 import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
-import com.google.caja.opensocial.UriCallbackOption;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
@@ -58,10 +57,6 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
 
       final URI retrievedUri = gadget.getContext().getUrl().toJavaUri();
       UriCallback cb = new UriCallback() {
-        public UriCallbackOption getOption(ExternalReference externalReference, String string) {
-          return UriCallbackOption.REWRITE;
-        }
-
         public Reader retrieve(ExternalReference externalReference, String string)
             throws UriCallbackException {
           logger.info("Retrieving " + externalReference.toString());
