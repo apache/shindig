@@ -124,11 +124,9 @@ class BasicSecurityToken extends SecurityToken {
    * {@inheritDoc}
    */
   public function getOwnerId() {
-    /*
     if ($this->isAnonymous()) {
       throw new Exception("Can't get ownerId from an anonymous token");
     }
-    */
     return $this->tokenData[$this->OWNER_KEY];
   }
 
@@ -136,11 +134,9 @@ class BasicSecurityToken extends SecurityToken {
    * {@inheritDoc}
    */
   public function getViewerId() {
-    /*
     if ($this->isAnonymous()) {
       throw new Exception("Can't get viewerId from an anonymous token");
     }
-    */
     return $this->tokenData[$this->VIEWER_KEY];
   }
 

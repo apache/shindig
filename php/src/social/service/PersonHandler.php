@@ -23,6 +23,14 @@ class PersonHandler extends DataRequestHandler {
   private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
   private static $DEFAULT_FIELDS = array('ID', 'NAME', 'GENDER', 'THUMBNAIL_URL');
 
+  private static $ANONYMOUS_ID_TYPE = array('viewer', 'me');
+  private static $ANONYMOUS_VIEWER = array(
+      'isOwner' => false,
+      'isViewer' => true,
+      'name' => 'anonymous_user',
+      'displayName' => 'Guest'
+  );
+
   public function __construct() {
     parent::__construct('person_service');
   }
@@ -68,26 +76,59 @@ class PersonHandler extends DataRequestHandler {
     $options->setFilterValue($request->getFilterValue());
     $options->setStartIndex($request->getStartIndex());
     $options->setCount($request->getCount());
-    // personId: Array (     [0] => 8 ) 
+
+    $token = $request->getToken();
+    $groupType = $groupId->getType();
+    // handle Anonymous Viewer exceptions
+    $containAnonymousUser = false;
+    if ($token->isAnonymous()) {
+      // Find out whether userIds contains
+      // a) @viewer, b) @me, c) SecurityToken::$ANONYMOUS
+      foreach ($userIds as $key=>$id) {
+        if (in_array($id->getType(), self::$ANONYMOUS_ID_TYPE) ||
+            (($id->getType() == 'userId') && ($id->getUserId($token) == SecurityToken::$ANONYMOUS))) {
+          $containAnonymousUser = true;
+          unset($userIds[$key]);
+        }
+      }
+      // Skip any requests if groupId is not @self or @all, since anonymous viewer won't have friends.
+      if (($containAnonymousUser) && ($groupType != 'self') && ($groupType != 'all')) {
+        throw new Exception("Can't get friend from an anonymous viewer.");
+      }
+    }
+    if ($containAnonymousUser && (count($userIds) == 0)) {
+      $people = array(SecurityToken::$ANONYMOUS => self::$ANONYMOUS_VIEWER);
+      $collection = new RestfulCollection($people, $options->getStartIndex(), 1);
+      $collection->setItemsPerPage($options->getCount());
+      return $collection;
+    }
+    $service = $this->service;
+    $ret = null;
     if (count($userIds) == 1) {
       if (count($optionalPersonId) == 0) {
-        if ($groupId->getType() == 'self') {
-          return $this->service->getPerson($userIds[0], $groupId, $fields, $request->getToken());
+        if ($groupType == 'self') {
+          $ret = $service->getPerson($userIds[0], $groupId, $fields, $token);
         } else {
-          return $this->service->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
+          $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
         }
       } elseif (count($optionalPersonId) == 1) {
-        return $this->service->getPerson($optionalPersonId[0], $groupId, $fields, $request->getToken());
+        $ret = $service->getPerson($optionalPersonId[0], $groupId, $fields, $token);
       } else {
         $personIds = array();
         foreach ($optionalPersonId as $pid) {
           $personIds[] = new UserId('userId', $pid);
         }
         // Every other case is a collection response of optional person ids
-        return $this->service->getPeople($personIds, new GroupId('self', null), $options, $fields, $request->getToken());
+        $ret = $service->getPeople($personIds, new GroupId('self', null), $options, $fields, $token);
       }
     }
     // Every other case is a collection response.
-    return $this->service->getPeople($userIds, $groupId, $options, $fields, $request->getToken());
+    $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
+    // Append anonymous viewer
+    if ($containAnonymousUser) {
+      $ret->entry[SecurityToken::$ANONYMOUS] = self::$ANONYMOUS_VIEWER;
+      $ret->totalResults += 1;
+    }
+    return $ret;
   }
 }
