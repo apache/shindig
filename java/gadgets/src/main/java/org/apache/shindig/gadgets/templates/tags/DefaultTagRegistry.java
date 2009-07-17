@@ -16,28 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
-import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 /**
- * Tag registry that supports multiple tags.
+ * A registry of custom tag handlers, keyed by a combination of namespace URL
+ * and tag name.
  */
-public class CompositeTagRegistry extends AbstractTagRegistry {
-  private final Collection<? extends TagRegistry> registries;
-  
-  public CompositeTagRegistry(Collection<? extends TagRegistry> registries) {
-    this.registries = registries;
+public class DefaultTagRegistry extends AbstractTagRegistry {
+
+  private final Map<NSName, TagHandler> handlers = Maps.newHashMap();
+
+  @Inject
+  public DefaultTagRegistry(Set<TagHandler> handlers) {
+    for (TagHandler handler : handlers) {
+      this.handlers.put(new NSName(handler.getNamespaceUri(), handler.getTagName()), handler);
+    }    
   }
     
   public TagHandler getHandlerFor(NSName name) {
-    TagHandler handler = null;
-    for (TagRegistry registry : registries) {
-      handler = registry.getHandlerFor(name);
-      if (handler != null) {
-        return handler;
-      }
-    }
-    return null;
+    return handlers.get(name);
   }
 }

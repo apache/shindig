@@ -138,8 +138,8 @@ public class PipelineDataGadgetRewriterTest {
     assertFalse("os-data wasn't deleted",
         content.getContent().contains("type=\"text/os-data\""));
 
-    assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
-    assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
     
     assertEquals(ImmutableSet.of("opensocial-data"), gadget.getRemovedFeatures());
     assertEquals(ImmutableSet.of("opensocial-data-context"), gadget.getAddedFeatures());
@@ -197,8 +197,17 @@ public class PipelineDataGadgetRewriterTest {
       }
       
       PipelinedData.Batch batch = (PipelinedData.Batch) obj;
-      return (socialCount == batch.getSocialPreloads().size() 
-          && httpCount == batch.getHttpPreloads().size());
+      int actualSocialCount = 0;
+      int actualHttpCount = 0;
+      for (PipelinedData.BatchItem item : batch.getPreloads().values()) {
+        if (item.getType() == PipelinedData.BatchType.HTTP) {
+          actualHttpCount++;
+        } else if (item.getType() == PipelinedData.BatchType.SOCIAL) {
+          actualSocialCount++;
+        }
+      }
+      
+      return socialCount == actualSocialCount && httpCount == actualHttpCount;
     }
     
   }
@@ -240,11 +249,13 @@ public class PipelineDataGadgetRewriterTest {
     assertEquals(1, pipelines.size());
     PipelinedData pipeline = pipelines.keySet().iterator().next();
     PipelinedData.Batch batch = pipeline.getBatch(Expressions.forTesting(), new RootELResolver());
-    Map<String, Object> preloads = batch.getSocialPreloads();
-    
+    Map<String, PipelinedData.BatchItem> preloads = batch.getPreloads();
+    assertTrue(preloads.containsKey("me"));
+    assertEquals(PipelinedData.BatchType.SOCIAL, preloads.get("me").getType());
+        
     JsonAssert.assertObjectEquals(
-        "{me: {params: {userId: 'canonical'}, method: 'people.get', id: 'me'}}",
-        preloads);
+        "{params: {userId: 'canonical'}, method: 'people.get', id: 'me'}",
+        preloads.get("me").getData());
   }
 
   /** Create a mock Callable for a single preload task */

@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.templates.FakeTemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.HtmlTagHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;

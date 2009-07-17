@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

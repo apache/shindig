@@ -74,6 +74,13 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       + "  <os:HttpRequest key=\"p\" href=\"" + HTTP_REQUEST_URL + "\" "
       + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
+  private static final String XML_WITH_VARIABLE = "<Module " +
+  		"xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" " +
+        "xmlns:osx=\"" + PipelinedData.EXTENSION_NAMESPACE + "\">"
+    + "<ModulePrefs title=\"Title\"/>"
+    + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"
+    + "  <osx:Variable key=\"p\" value=\"${1+1}\"/>" + "</Content></Module>";
+
   private static final String XML_WITH_HTTP_REQUEST_FOR_TEXT = "<Module xmlns:os=\""
     + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
     + "<ModulePrefs title=\"Title\"/>"
@@ -455,6 +462,34 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
         context, batch);
     assertEquals(1, tasks.size());
+  }
+
+  @Test
+  public void testVariablePreload() throws Exception {
+    GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_WITH_VARIABLE);
+
+    RecordingRequestPipeline pipeline = new RecordingRequestPipeline("");
+    PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
+
+    view = "profile";
+    contextParams.put("st", "token");
+
+    Gadget gadget = new Gadget()
+        .setContext(context)
+        .setSpec(spec)
+        .setCurrentView(spec.getView("profile"));
+
+    PipelinedData.Batch batch = getBatch(gadget);
+    Collection<Callable<PreloadedData>> tasks = preloader.createPreloadTasks(
+        context, batch);
+    assertEquals(1, tasks.size());
+    // Nothing fetched yet
+    assertEquals(0, pipeline.requests.size());
+
+    Collection<Object> result = tasks.iterator().next().call().toJson();
+    assertEquals(1, result.size());
+
+    JsonAssert.assertObjectEquals("{id: 'p', data: 2}", result.iterator().next());
   }
 
   private static class RecordingRequestPipeline implements RequestPipeline {

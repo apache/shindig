@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import static org.easymock.classextension.EasyMock.replay;
 import static org.easymock.classextension.EasyMock.verify;
 
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.templates.FakeTemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;

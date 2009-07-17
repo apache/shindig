@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.ElementELResolver.ElementWrapper;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
-import org.apache.shindig.gadgets.templates.ElementELResolver.ElementWrapper;
 
 /**
  * Tag Handler for <os:Render/> tag.

@@ -28,9 +28,10 @@
         <os:PeopleRequest key="friends" userId="@viewer" groupId="@friends"/>
         <os:HttpRequest key="json" href="test.json"/>
         <os:HttpRequest key="text" href="test.json" format="text"/>
-    </script>
+      </script>
 
-      <script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup">
+      <script type="text/os-template" xmlns:os="http://ns.opensocial.org/2008/markup"
+          xmlns:osx="http://ns.opensocial.org/2009/extensions">
         <ul id="attrs">
           <li repeat="${friends}">
             <span id="id${Context.Index}">${name.givenName}</span>
@@ -54,6 +55,15 @@
         <span id="json">${json.content.key}</span>
         <span id="text">${text.content}</span>
         <span id="mutate" oncreate="this.innerHTML='mutated'"></span>
+        
+        <osx:Variable key="sum" value="0"/>
+        <osx:Variable key="max" value="0"/>
+        <os:Repeat expression="${osx:parseJson('[10,15,-5,25]')}">
+          <osx:Variable key="max" value="${Cur > max ? Cur : max}"/>
+          <osx:Variable key="sum" value="${sum + Cur}"/>
+        </os:Repeat>
+        <span id="sum">${sum}</span>
+        <span id="max">${max}</span>
       </script>
     ]]>
   </Content>

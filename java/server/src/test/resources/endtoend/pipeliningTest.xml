@@ -17,7 +17,8 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<Module xmlns:os="http://ns.opensocial.org/2008/markup">
+<Module xmlns:os="http://ns.opensocial.org/2008/markup"
+        xmlns:osx="http://ns.opensocial.org/2009/extensions">
   <ModulePrefs title="EndToEndTest">
     <Require feature="views" />
     <Optional feature="content-rewrite">
@@ -29,5 +30,7 @@
     <os:PeopleRequest key="me" userId="canonical"/>
     <!--  Load a JSON file -->
     <os:HttpRequest key="json" href="test.json"/>
+    <!--  Process a variable -->
+    <osx:Variable key="var" value="${json.content.key}"/>
   </Content>
 </Module>

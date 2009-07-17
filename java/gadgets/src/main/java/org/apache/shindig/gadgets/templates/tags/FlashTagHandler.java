@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSet;
@@ -30,6 +30,7 @@ import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetFeature;

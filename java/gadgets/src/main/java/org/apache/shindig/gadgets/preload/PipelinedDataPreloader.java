@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -72,22 +73,32 @@ public class PipelinedDataPreloader {
   public Collection<Callable<PreloadedData>> createPreloadTasks(GadgetContext context,
       PipelinedData.Batch batch) {
     List<Callable<PreloadedData>> preloadList = Lists.newArrayList();
-
-    // Load any social preloads into a JSONArray for delivery to
-    // JsonRpcServlet
-    if (!batch.getSocialPreloads().isEmpty()) {
-      Callable<PreloadedData> preloader = new SocialPreloadTask(context,
-          batch.getSocialPreloads().values());
-      preloadList.add(preloader);
-    }
-
-    if (!batch.getHttpPreloads().isEmpty()) {
-      for (Map.Entry<String, RequestAuthenticationInfo> httpPreloadEntry
-          : batch.getHttpPreloads().entrySet()) {
-        preloadList.add(new HttpPreloadTask(context,  httpPreloadEntry.getValue(),
-            httpPreloadEntry.getKey()));
+    
+    Collection<Object> socialRequest = Lists.newArrayList();
+    // Gather all the preload entries;  all social requests in one batch, each HTTP
+    // in its own
+    for (Map.Entry<String, PipelinedData.BatchItem> preloadEntry : batch.getPreloads().entrySet()) {
+      PipelinedData.BatchItem preloadItem = preloadEntry.getValue();
+      switch (preloadItem.getType()) {
+        case HTTP:
+          preloadList.add(new HttpPreloadTask(context, (RequestAuthenticationInfo) preloadItem.getData(),
+              preloadEntry.getKey()));
+          break;
+        case SOCIAL:
+          socialRequest.add(preloadItem.getData());
+          break;
+        case VARIABLE:
+          // TODO: this is rather crazy: these tasks don't need to execute on
+          // another thread.
+          preloadList.add(new VariableTask(preloadEntry.getKey(), preloadItem.getData()));
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown pipeline type");
       }
-
+    }
+    
+    if (!socialRequest.isEmpty()) {
+      preloadList.add(new SocialPreloadTask(context, socialRequest));
     }
 
     return preloadList;
@@ -105,6 +116,23 @@ public class PipelinedDataPreloader {
     return response;
   }
 
+  private static class VariableTask implements Callable<PreloadedData> {
+    private ImmutableMap<String, Object> result;
+
+    public VariableTask(String key, Object data) {
+      this.result = (data == null) ? ImmutableMap.of("id", (Object) key)
+          : ImmutableMap.of("id", key, "data", data); 
+    }
+
+    public PreloadedData call() throws Exception {
+      return new PreloadedData() {
+        public Collection<Object> toJson() throws PreloadException {
+          return ImmutableList.<Object>of(result);
+        }
+      };
+    }
+  }
+  
   /**
    * Callable for issuing HttpRequests to JsonRpcServlet.
    */

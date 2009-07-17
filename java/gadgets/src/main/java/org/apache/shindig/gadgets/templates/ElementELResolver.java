@@ -34,7 +34,7 @@ import com.google.common.collect.Lists;
 /**
  * ELResolver that processes DOM elements.
  */
-class ElementELResolver extends ELResolver {
+public class ElementELResolver extends ELResolver {
   /**
    * A wrapper for a DOM Element that overrides toString().
    * TODO: remove with JUEL 2.1.1.

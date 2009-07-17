@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Element;

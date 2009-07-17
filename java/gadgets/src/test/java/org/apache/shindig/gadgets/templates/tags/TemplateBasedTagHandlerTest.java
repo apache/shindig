@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,6 +27,14 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.templates.TagRegistry;
+import org.apache.shindig.gadgets.templates.TemplateContext;
+import org.apache.shindig.gadgets.templates.TemplateModule;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
+import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
+import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

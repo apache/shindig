@@ -121,8 +121,8 @@ public class PipelineExecutorTest {
         ImmutableList.of(pipeline));
     
     // Verify the data set is injected, and the os-data was deleted
-    assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
-    assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
     
     JsonAssert.assertJsonEquals("[{id: 'key', data: {foo: 'bar'}}]",
         JsonSerializer.serialize(results.results));
@@ -187,11 +187,12 @@ public class PipelineExecutorTest {
     // Verify the data set is injected, and the os-data was deleted
 
     // Check the evaluated HTTP request
-    RequestAuthenticationInfo request = firstBatch.getValue().getHttpPreloads().get("json");
+    RequestAuthenticationInfo request = (RequestAuthenticationInfo)
+        firstBatch.getValue().getPreloads().get("json").getData();
     assertEquals("http://example.org/test.json", request.getHref().toString());
     
     // Check the evaluated person request
-    JSONObject personRequest = (JSONObject) secondBatch.getValue().getSocialPreloads().get("me");
+    JSONObject personRequest = (JSONObject) secondBatch.getValue().getPreloads().get("me").getData();
     assertEquals("canonical", personRequest.getJSONObject("params").getJSONArray("userId").get(0));
   }
 
@@ -239,8 +240,8 @@ public class PipelineExecutorTest {
         ImmutableList.of(pipeline));
     
     // Verify the data set is injected, and the os-data was deleted
-    assertTrue(batchCapture.getValue().getSocialPreloads().containsKey("me"));
-    assertTrue(batchCapture.getValue().getHttpPreloads().containsKey("json"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
+    assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
     
     JsonAssert.assertJsonEquals("[{id: 'key', error: {message: 'NO!', code: 500}}]",
         JsonSerializer.serialize(results.results));
@@ -307,8 +308,17 @@ public class PipelineExecutorTest {
       }
       
       PipelinedData.Batch batch = (PipelinedData.Batch) obj;
-      return (socialCount == batch.getSocialPreloads().size() 
-          && httpCount == batch.getHttpPreloads().size());
+      int actualSocialCount = 0;
+      int actualHttpCount = 0;
+      for (PipelinedData.BatchItem item : batch.getPreloads().values()) {
+        if (item.getType() == PipelinedData.BatchType.HTTP) {
+          actualHttpCount++;
+        } else if (item.getType() == PipelinedData.BatchType.SOCIAL) {
+          actualSocialCount++;
+        }
+      }
+      
+      return socialCount == actualSocialCount && httpCount == actualHttpCount;
     }
     
   }

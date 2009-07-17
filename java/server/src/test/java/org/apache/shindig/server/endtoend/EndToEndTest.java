@@ -168,7 +168,7 @@ public class EndToEndTest {
   public void testPipelining() throws Exception {
     HtmlPage page = executePageTest("pipeliningTest", null);
     JSONArray array = new JSONArray(page.asText());
-    assertEquals(2, array.length());
+    assertEquals(3, array.length());
     Map<String, JSONObject> jsonObjects = Maps.newHashMap();
     for (int i = 0; i < array.length(); i++) {
       JSONObject jsonObj = array.getJSONObject(i);
@@ -183,6 +183,8 @@ public class EndToEndTest {
     JSONObject json = jsonObjects.get("json").getJSONObject("data");
     JSONObject expected = new JSONObject("{content: {key: 'value'}, status: 200}");
     JsonAssert.assertJsonObjectEquals(expected, json);
+    
+    JsonAssert.assertObjectEquals("{id: 'var', data: 'value'}", jsonObjects.get("var"));
   }
 
   @Test
@@ -249,6 +251,9 @@ public class EndToEndTest {
     // Test of oncreate
     Element oncreateSpan = page.getElementById("mutate");
     assertEquals("mutated", oncreateSpan.getTextContent().trim());
+    
+    assertEquals("45", page.getElementById("sum").getTextContent().trim());
+    assertEquals("25", page.getElementById("max").getTextContent().trim());
 }
 
   @Test

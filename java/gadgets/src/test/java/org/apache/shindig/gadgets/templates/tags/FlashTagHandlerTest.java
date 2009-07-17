@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -36,6 +36,10 @@ import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
+import org.apache.shindig.gadgets.templates.TagRegistry;
+import org.apache.shindig.gadgets.templates.TemplateContext;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.FlashTagHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.junit.Before;
 import org.junit.Test;

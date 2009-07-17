@@ -19,6 +19,8 @@
 package org.apache.shindig.gadgets.templates;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 
 import com.google.common.collect.ImmutableSet;
 

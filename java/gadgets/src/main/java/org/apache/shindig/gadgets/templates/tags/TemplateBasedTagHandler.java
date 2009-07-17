@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.ElementELResolver.ElementWrapper;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -29,7 +31,6 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.shindig.gadgets.templates.ElementELResolver.ElementWrapper;
 
 /**
  * TagHandler implemented by an declarative XML definition.

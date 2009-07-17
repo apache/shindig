@@ -226,8 +226,8 @@ public class ViewTest {
     PipelinedData.Batch batch = view.getPipelinedData().getBatch(
         Expressions.forTesting(), new RootELResolver());
     
-    assertEquals(1, batch.getSocialPreloads().size());
-    assertTrue(batch.getSocialPreloads().containsKey("key"));
+    assertEquals(1, batch.getPreloads().size());
+    assertTrue(batch.getPreloads().containsKey("key"));
   }
 
   @Test(expected = SpecParserException.class)

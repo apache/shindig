@@ -16,17 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-public abstract class AbstractTagRegistry implements TagRegistry {
+import com.google.inject.Inject;
 
-  public final TagHandler getHandlerFor(Element element) {
-    if (element.getNamespaceURI() == null) {
-      return null;
-    }  
-    return getHandlerFor(new NSName(element.getNamespaceURI(), element.getLocalName()));
+public class IfTagHandler extends AbstractTagHandler {
+
+  static final String TAG_IF = "If";
+  static final String CONDITION_ATTR = "condition";
+
+  @Inject
+  public IfTagHandler() {
+    super(TagHandler.OPENSOCIAL_NAMESPACE, TAG_IF);
   }
-  
+
+  public void process(Node result, Element tag, TemplateProcessor processor) {
+    Boolean condition = getValueFromTag(tag, CONDITION_ATTR, processor, Boolean.class);
+    if (condition == null || !condition.booleanValue()) {
+      return;
+    }
+
+    // Condition succeeded, process all child nodes 
+    processor.processChildNodes(result, tag);
+  }
 }

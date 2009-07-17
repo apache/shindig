@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.w3c.dom.Element;
 
 import com.google.inject.ImplementedBy;

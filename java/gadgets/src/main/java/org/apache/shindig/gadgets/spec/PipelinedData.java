@@ -52,17 +52,15 @@ import com.google.common.collect.Maps;
  * Parsing code for &lt;os:*&gt; elements.
  */
 public class PipelinedData {
-  private final Map<String, SocialData> socialPreloads;
-  private final Map<String, HttpData> httpPreloads;
-
   private boolean needsViewer;
   private boolean needsOwner;
+  private Map<String, BatchItemData> allPreloads;
 
   public static final String OPENSOCIAL_NAMESPACE = "http://ns.opensocial.org/2008/markup";
+  public static final String EXTENSION_NAMESPACE = "http://ns.opensocial.org/2009/extensions";
 
   public PipelinedData(Element element, Uri base) throws SpecParserException {
-    Map<String, SocialData> socialPreloads = Maps.newHashMap();
-    Map<String, HttpData> httpPreloads = Maps.newHashMap();
+    Map<String, BatchItemData> allPreloads = Maps.newHashMap();
 
     // TODO: extract this loop into XmlUtils.getChildrenWithNamespace
     for (Node node = element.getFirstChild(); node != null; node = node.getNextSibling()) {
@@ -71,62 +69,61 @@ public class PipelinedData {
       }
 
       Element child = (Element) node;
-      // Ignore elements not in the namespace
-      if (!OPENSOCIAL_NAMESPACE.equals(child.getNamespaceURI())) {
-        continue;
-      }
-
-      String elementName = child.getLocalName();
-
-      String key = child.getAttribute("key");
-      if (key == null) {
-        throw new SpecParserException("Missing key attribute on os:" + elementName);
-      }
-
-      try {
-        if ("PeopleRequest".equals(elementName)) {
-          socialPreloads.put(key, createPeopleRequest(child));
-        } else if ("ViewerRequest".equals(elementName)) {
-          socialPreloads.put(key, createViewerRequest(child));
-        } else if ("OwnerRequest".equals(elementName)) {
-          socialPreloads.put(key, createOwnerRequest(child));
-        } else if ("PersonAppDataRequest".equals(elementName)) {
-          // TODO: delete when 0.9 app data retrieval is supported
-          socialPreloads.put(key, createPersonAppDataRequest(child));
-        } else if ("ActivitiesRequest".equals(elementName)) {
-          socialPreloads.put(key, createActivityRequest(child));
-        } else if ("DataRequest".equals(elementName)) {
-          socialPreloads.put(key, createDataRequest(child));
-        } else if ("HttpRequest".equals(elementName)) {
-          httpPreloads.put(key, createHttpRequest(child, base));
-        } else {
-          // TODO: This is wrong - the spec should parse, but should preload
-          // notImplemented
-          throw new SpecParserException("Unknown element <os:" + elementName + '>');
+      
+      if (EXTENSION_NAMESPACE.equals(child.getNamespaceURI())) {
+        if ("Variable".equals(child.getLocalName())) {
+          allPreloads.put(child.getAttribute("key"), createVariableRequest(child));
         }
-      } catch (ELException ele) {
-        throw new SpecParserException(new XmlException(ele));
+        
+      } else if (OPENSOCIAL_NAMESPACE.equals(child.getNamespaceURI())) {
+        String elementName = child.getLocalName();
+  
+        String key = child.getAttribute("key");
+        if (key == null) {
+          throw new SpecParserException("Missing key attribute on os:" + elementName);
+        }
+  
+        try {
+          if ("PeopleRequest".equals(elementName)) {
+            allPreloads.put(key, createPeopleRequest(child));
+          } else if ("ViewerRequest".equals(elementName)) {
+            allPreloads.put(key, createViewerRequest(child));
+          } else if ("OwnerRequest".equals(elementName)) {
+            allPreloads.put(key, createOwnerRequest(child));
+          } else if ("PersonAppDataRequest".equals(elementName)) {
+            // TODO: delete when 0.9 app data retrieval is supported
+            allPreloads.put(key, createPersonAppDataRequest(child));
+          } else if ("ActivitiesRequest".equals(elementName)) {
+            allPreloads.put(key, createActivityRequest(child));
+          } else if ("DataRequest".equals(elementName)) {
+            allPreloads.put(key, createDataRequest(child));
+          } else if ("HttpRequest".equals(elementName)) {
+            allPreloads.put(key, createHttpRequest(child, base));
+          } else {
+            // TODO: This is wrong - the spec should parse, but should preload
+            // notImplemented
+            throw new SpecParserException("Unknown element <os:" + elementName + '>');
+          }
+        } catch (ELException ele) {
+          throw new SpecParserException(new XmlException(ele));
+        }
       }
     }
 
-    this.socialPreloads = Collections.unmodifiableMap(socialPreloads);
-    this.httpPreloads = Collections.unmodifiableMap(httpPreloads);
+    this.allPreloads = Collections.unmodifiableMap(allPreloads);
+  }
+
+  private BatchItemData createVariableRequest(Element child) {
+    return new VariableData(child.getAttribute("value"));
   }
 
   private PipelinedData(PipelinedData socialData, Substitutions substituter) {
-    Map<String, SocialData> socialPreloads = Maps.newHashMap();
-    Map<String, HttpData> httpPreloads = Maps.newHashMap();
-
-    // TODO: support hangman substitutions for social preloads?
-    socialPreloads.putAll(socialData.socialPreloads);
-
-    for (Map.Entry<String, HttpData> httpPreload : socialData.httpPreloads.entrySet()) {
-      httpPreloads.put(httpPreload.getKey(), httpPreload.getValue().substitute(substituter));
+    Map<String, BatchItemData> allPreloads = Maps.newHashMap();
+    for (Map.Entry<String, BatchItemData> preload : socialData.allPreloads.entrySet()) {
+      allPreloads.put(preload.getKey(), preload.getValue().substitute(substituter));
     }
-
-    this.socialPreloads = Collections.unmodifiableMap(socialPreloads);
-    this.httpPreloads = Collections.unmodifiableMap(httpPreloads);
-
+    
+    this.allPreloads = Collections.unmodifiableMap(allPreloads);
   }
 
   /**
@@ -138,11 +135,29 @@ public class PipelinedData {
   }
 
   public interface Batch {
-    Map<String, Object> getSocialPreloads();
-    Map<String, RequestAuthenticationInfo> getHttpPreloads();
+    Map<String, BatchItem> getPreloads();
     Batch getNextBatch(ELResolver rootObjects);
   }
-
+  
+  /** Temporary type until BatchItem is made fully polymorphic */
+  public enum BatchType {
+    SOCIAL,
+    HTTP,
+    VARIABLE
+  }
+  
+  /** Item within a batch */
+  public interface BatchItem {
+    BatchType getType();
+    Object getData();
+  }
+  
+  /** Shared data used to generate BatchItems */
+  interface BatchItemData {
+    BatchItem evaluate(Expressions expressions, ELContext elContext);
+    BatchItemData substitute(Substitutions substituter);
+  }
+  
   /**
    * Gets the first batch of preload requests.  Preloads that require root
    * objects not yet available will not be executed in this batch, but may
@@ -154,7 +169,7 @@ public class PipelinedData {
    * @return a batch, or null if no batch could be created
    */
   public Batch getBatch(Expressions expressions, ELResolver rootObjects) {
-    return getBatch(expressions, rootObjects, socialPreloads, httpPreloads);
+    return getBatch(expressions, rootObjects, allPreloads);
   }
 
   /**
@@ -166,95 +181,64 @@ public class PipelinedData {
    * @param currentHttpPreloads the remaining http preloads
    */
   private Batch getBatch(Expressions expressions, ELResolver rootObjects,
-      Map<String, SocialData> currentSocialPreloads,
-      Map<String, HttpData> currentHttpPreloads) {
+      Map<String, BatchItemData> currentPreloads) {
     ELContext elContext = expressions.newELContext(rootObjects);
 
-    // Evaluate all existing social preloads
-    Map<String, Object> evaluatedSocialPreloads = Maps.newHashMap();
-    Map<String, SocialData> pendingSocialPreloads = null;
-
-    if (currentSocialPreloads != null) {
-      for (Map.Entry<String, SocialData> preload : currentSocialPreloads.entrySet()) {
+    Map<String, BatchItem> evaluatedPreloads = Maps.newHashMap();
+    Map<String, BatchItemData> pendingPreloads = null;
+    
+    if (currentPreloads != null) {
+      for (Map.Entry<String, BatchItemData> preload : currentPreloads.entrySet()) {
         try {
-          Object value = preload.getValue().toJson(expressions, elContext);
-          evaluatedSocialPreloads.put(preload.getKey(), value);
-        } catch (PropertyNotFoundException pnfe) {
-          // Missing top-level property: put it in the pending set
-          if (pendingSocialPreloads == null) {
-            pendingSocialPreloads = Maps.newHashMap();
+          BatchItem value = preload.getValue().evaluate(expressions, elContext);
+          evaluatedPreloads.put(preload.getKey(), value);
+        } catch (PropertyNotFoundException pe) {
+          // Property-not-found: presume that this is because a top-level
+          // variable isn't available yet, which means that this needs to be
+          // postponed to the next batch.
+          if (pendingPreloads == null) {
+            pendingPreloads = Maps.newHashMap();
           }
-          pendingSocialPreloads.put(preload.getKey(), preload.getValue());
+          
+          pendingPreloads.put(preload.getKey(), preload.getValue());
         } catch (ELException e) {
           // TODO: Handle!?!
           throw new RuntimeException(e);
         }
       }
     }
-    // And evaluate all existing HTTP preloads
-    Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads = Maps.newHashMap();
-    Map<String, HttpData> pendingHttpPreloads = null;
-
-    if (currentHttpPreloads != null) {
-      for (Map.Entry<String, HttpData> preload : currentHttpPreloads.entrySet()) {
-        try {
-          RequestAuthenticationInfo value = preload.getValue().evaluate(expressions, elContext);
-          evaluatedHttpPreloads.put(preload.getKey(), value);
-        } catch (PropertyNotFoundException pnfe) {
-          if (pendingHttpPreloads == null) {
-            pendingHttpPreloads = Maps.newHashMap();
-          }
-          pendingHttpPreloads.put(preload.getKey(), preload.getValue());
-        } catch (ELException e) {
-          // TODO: Handle!?!
-          throw new RuntimeException(e);
-        }
-      }
-    }
-
+    
     // Nothing evaluated or pending;  return null for the batch.  Note that
     // there may be multiple PipelinedData objects (e.g., from multiple
     // <script type="text/os-data"> elements), so even if all evaluations
     // fail here, evaluations might succeed elsewhere and free up pending preloads
-    if (evaluatedSocialPreloads.isEmpty() && evaluatedHttpPreloads.isEmpty() &&
-        pendingHttpPreloads == null && pendingSocialPreloads == null) {
+    if (evaluatedPreloads.isEmpty() && pendingPreloads == null) {
       return null;
     }
 
-    return new BatchImpl(expressions, evaluatedSocialPreloads, evaluatedHttpPreloads,
-        pendingSocialPreloads, pendingHttpPreloads);
+    return new BatchImpl(expressions, evaluatedPreloads, pendingPreloads);
   }
 
   /** Batch implementation */
   class BatchImpl implements Batch {
 
     private final Expressions expressions;
-    private final Map<String, Object> evaluatedSocialPreloads;
-    private final Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads;
-    private final Map<String, SocialData> pendingSocialPreloads;
-    private final Map<String, HttpData> pendingHttpPreloads;
+    private final Map<String, BatchItem> evaluatedPreloads;
+    private final Map<String, BatchItemData> pendingPreloads;
 
-    public BatchImpl(Expressions expressions,
-        Map<String, Object> evaluatedSocialPreloads,
-        Map<String, RequestAuthenticationInfo> evaluatedHttpPreloads,
-        Map<String, SocialData> pendingSocialPreloads, Map<String, HttpData> pendingHttpPreloads) {
-      this.expressions = expressions;
-      this.evaluatedSocialPreloads = evaluatedSocialPreloads;
-      this.evaluatedHttpPreloads = evaluatedHttpPreloads;
-      this.pendingSocialPreloads = pendingSocialPreloads;
-      this.pendingHttpPreloads = pendingHttpPreloads;
-    }
-
-    public Map<String, Object> getSocialPreloads() {
-      return evaluatedSocialPreloads;
-    }
-
-    public Map<String, RequestAuthenticationInfo> getHttpPreloads() {
-      return evaluatedHttpPreloads;
+    public BatchImpl(Expressions expressions, Map<String, BatchItem> evaluatedPreloads,
+        Map<String, BatchItemData> pendingPreloads) {
+          this.expressions = expressions;
+          this.evaluatedPreloads = evaluatedPreloads;
+          this.pendingPreloads = pendingPreloads;
     }
 
     public Batch getNextBatch(ELResolver rootObjects) {
-      return getBatch(expressions, rootObjects, pendingSocialPreloads, pendingHttpPreloads);
+      return getBatch(expressions, rootObjects, pendingPreloads);
+    }
+
+    public Map<String, BatchItem> getPreloads() {
+      return evaluatedPreloads;
     }
   }
 
@@ -424,7 +408,7 @@ public class PipelinedData {
   /**
    * A single pipelined HTTP makerequest.
    */
-  private static class HttpData {
+  private static class HttpData implements BatchItemData {
     private final AuthType authz;
     private final Uri base;
     private final String href;
@@ -481,7 +465,7 @@ public class PipelinedData {
      * Evaluate expressions and return a RequestAuthenticationInfo.
      * @throws ELException if expression evaluation fails.
      */
-    public RequestAuthenticationInfo evaluate(Expressions expressions, ELContext context)
+    public BatchItem evaluate(Expressions expressions, ELContext context)
         throws ELException {
       String hrefString = String.valueOf(expressions.parse(href, String.class)
           .getValue(context));
@@ -494,7 +478,7 @@ public class PipelinedData {
             String.valueOf(expression.getValue(context)));
       }
 
-      return new RequestAuthenticationInfo() {
+      final RequestAuthenticationInfo info = new RequestAuthenticationInfo() {
         public Map<String, String> getAttributes() {
           return evaluatedAttributes;
         }
@@ -515,6 +499,16 @@ public class PipelinedData {
           return signViewer;
         }
       };
+      
+      return new BatchItem() {
+        public Object getData() {
+          return info;
+        }
+
+        public BatchType getType() {
+          return BatchType.HTTP;
+        }        
+      };
     }
 
     /** Parse a boolean expression off an XML attribute. */
@@ -531,7 +525,7 @@ public class PipelinedData {
   /**
    * A single social data request.
    */
-  private static class SocialData {
+  private static class SocialData implements BatchItemData {
     private final List<Property> properties = Lists.newArrayList();
     private final String id;
     private final String method;
@@ -546,7 +540,7 @@ public class PipelinedData {
     }
 
     /** Create the JSON request form for the social data */
-    public JSONObject toJson(Expressions expressions, ELContext elContext) throws ELException {
+    private JSONObject toJson(Expressions expressions, ELContext elContext) throws ELException {
       JSONObject object = new JSONObject();
       try {
         object.put("method", method);
@@ -588,6 +582,51 @@ public class PipelinedData {
           throw new ELException("Error parsing property \"" + name + '\"', e);
         }
       }
+    }
+
+    public BatchItem evaluate(Expressions expressions, ELContext elContext) throws ELException {
+      final JSONObject jsonResult = toJson(expressions, elContext);
+      return new BatchItem() {
+        public Object getData() {
+          return jsonResult;
+        }
+
+        public BatchType getType() {
+          return BatchType.SOCIAL;
+        }
+      };
+    }
+
+    public BatchItemData substitute(Substitutions substituter) {
+      // TODO: support hangman substution on social data?
+      return this;
+    }
+  }
+
+  private static class VariableData implements BatchItemData {
+    private final String value;
+
+    public VariableData(String value) {
+      this.value = value;
+    }
+    
+    public BatchItem evaluate(Expressions expressions, ELContext elContext) throws ELException {
+      ValueExpression expression = expressions.parse(value, Object.class);
+      final Object result = expression.getValue(elContext);
+      return new BatchItem() {
+        public Object getData() {
+          return result;
+        }
+
+        public BatchType getType() {
+          return BatchType.VARIABLE;
+        }
+        
+      };
+    }
+
+    public BatchItemData substitute(Substitutions substituter) {
+      return this;
     }
   }
 }

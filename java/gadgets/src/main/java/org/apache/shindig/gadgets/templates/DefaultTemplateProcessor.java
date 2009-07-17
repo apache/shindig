@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.GadgetELResolver;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;

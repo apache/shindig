@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -28,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;

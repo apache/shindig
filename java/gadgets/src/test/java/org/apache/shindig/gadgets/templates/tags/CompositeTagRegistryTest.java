@@ -16,11 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.templates;
+package org.apache.shindig.gadgets.templates.tags;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
+import org.apache.shindig.gadgets.templates.TagRegistry;
+import org.apache.shindig.gadgets.templates.TemplateProcessor;
+import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
+import org.apache.shindig.gadgets.templates.tags.CompositeTagRegistry;
+import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
+import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
