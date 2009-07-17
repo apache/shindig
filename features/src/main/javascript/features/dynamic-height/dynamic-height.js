@@ -59,7 +59,8 @@ gadgets.window = gadgets.window || {};
     var result = 0;
     var children = document.body.childNodes;
     for (var i = 0; i < children.length; i++) {
-      if (children[i].offsetTop && children[i].offsetHeight) {
+      if (typeof children[i].offsetTop !== 'undefined' &&
+          typeof children[i].scrollHeight !== 'undefined') {
         var bottom = children[i].offsetTop + children[i].scrollHeight
             + parseIntFromElemPxAttribute(children[i], "margin-bottom")
             + parseIntFromElemPxAttribute(children[i], "padding-bottom");
