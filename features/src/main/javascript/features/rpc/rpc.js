@@ -415,7 +415,14 @@ gadgets.rpc = function() {
           // Otherwise, relayUrl['..'] will be null, signaling transport
           // code to ignore rpc calls since they cannot work without a
           // relay URL with host qualification.
-          parentRelayUrl = getOrigin(params.parent) + parentRelayUrl;
+          if (parentRelayUrl.substring(0, 1) !== '/') {
+            // Path-relative. Trust that parent is passed in appropriately.
+            var lastSlash = params.parent.lastIndexOf('/');
+            parentRelayUrl = params.parent.substring(0, lastSlash + 1) + parentRelayUrl;
+          } else {
+            // Host-relative.
+            parentRelayUrl = getOrigin(params.parent) + parentRelayUrl;
+          }
         }
       }
       relayUrl['..'] = parentRelayUrl;
