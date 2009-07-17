@@ -19,7 +19,7 @@
  */
 
 class PersonHandler extends DataRequestHandler {
-  
+
   private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
   private static $DEFAULT_FIELDS = array('ID', 'NAME', 'GENDER', 'THUMBNAIL_URL');
 
@@ -55,19 +55,19 @@ class PersonHandler extends DataRequestHandler {
   public function handleGet(RequestItem $request) {
     $this->checkService();
     $request->applyUrlTemplate(self::$PEOPLE_PATH);
-    
+
     $groupId = $request->getGroup();
     $optionalPersonId = $request->getListParameter("personId");
     $fields = $request->getFields(self::$DEFAULT_FIELDS);
     $userIds = $request->getUsers();
-    
+
     // Preconditions
     if (count($userIds) < 1) {
       throw new IllegalArgumentException("No userId specified");
     } elseif (count($userIds) > 1 && count($optionalPersonId) != 0) {
       throw new IllegalArgumentException("Cannot fetch personIds for multiple userIds");
     }
-    
+
     $options = new CollectionOptions();
     $options->setSortBy($request->getSortBy());
     $options->setSortOrder($request->getSortOrder());
@@ -121,9 +121,10 @@ class PersonHandler extends DataRequestHandler {
         // Every other case is a collection response of optional person ids
         $ret = $service->getPeople($personIds, new GroupId('self', null), $options, $fields, $token);
       }
+    } else {
+	    // Every other case is a collection response.
+	    $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
     }
-    // Every other case is a collection response.
-    $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
     // Append anonymous viewer
     if ($containAnonymousUser) {
       $ret->entry[SecurityToken::$ANONYMOUS] = self::$ANONYMOUS_VIEWER;
