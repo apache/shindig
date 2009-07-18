@@ -91,16 +91,16 @@ class PersonHandler extends DataRequestHandler {
           unset($userIds[$key]);
         }
       }
-      // Skip any requests if groupId is not @self or @all, since anonymous viewer won't have friends.
-      if (($containAnonymousUser) && ($groupType != 'self') && ($groupType != 'all')) {
-        throw new Exception("Can't get friend from an anonymous viewer.");
+      if ($containAnonymousUser) {
+        $userIds = array_values($userIds);
+        // Skip any requests if groupId is not @self or @all, since anonymous viewer won't have friends.
+        if (($groupType != 'self') && ($groupType != 'all')) {
+          throw new Exception("Can't get friend from an anonymous viewer.");
+        }
       }
     }
     if ($containAnonymousUser && (count($userIds) == 0)) {
-      $people = array(SecurityToken::$ANONYMOUS => self::$ANONYMOUS_VIEWER);
-      $collection = new RestfulCollection($people, $options->getStartIndex(), 1);
-      $collection->setItemsPerPage($options->getCount());
-      return $collection;
+      return self::$ANONYMOUS_VIEWER;
     }
     $service = $this->service;
     $ret = null;
@@ -122,13 +122,21 @@ class PersonHandler extends DataRequestHandler {
         $ret = $service->getPeople($personIds, new GroupId('self', null), $options, $fields, $token);
       }
     } else {
-	    // Every other case is a collection response.
-	    $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
+      // Every other case is a collection response.
+      $ret = $service->getPeople($userIds, $groupId, $options, $fields, $token);
     }
     // Append anonymous viewer
     if ($containAnonymousUser) {
-      $ret->entry[SecurityToken::$ANONYMOUS] = self::$ANONYMOUS_VIEWER;
-      $ret->totalResults += 1;
+      if (is_array($ret)) {
+        // Single user
+        $people = array($ret, self::$ANONYMOUS_VIEWER);
+        $ret = new RestfulCollection($people, $options->getStartIndex(), 2);
+        $ret->setItemsPerPage($options->getCount());
+      } else {
+        // Multiple users
+        $ret->entry[] = self::$ANONYMOUS_VIEWER;
+        $ret->totalResults += 1;
+      }
     }
     return $ret;
   }
