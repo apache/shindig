@@ -212,7 +212,7 @@ class SigningFetcher extends RemoteContentFetcher {
     }
     $url = $token->getAppUrl();
     if ($url != null) {
-      $msgParams[SiginingFetcher::$OPENSOCIAL_APPURL] = $url;
+      $msgParams[SigningFetcher::$OPENSOCIAL_APPURL] = $url;
     }
   }
 
