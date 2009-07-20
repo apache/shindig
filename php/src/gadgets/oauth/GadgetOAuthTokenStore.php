@@ -157,13 +157,11 @@ class GadgetOAuthTokenStore {
     }
     $paramLocation = null;
     switch ($service->getRequestUrl()->location) {
-      case "URL":
-        $paramLocation = OAuthStoreVars::$OAuthParamLocation['URI_QUERY'];
+      case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
+      case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
+      case OAUthStoreVars::$OAuthParamLocation['AUTH_HEADER']:
+        $paramLocation = $service->getRequestUrl()->location;
         break;
-      case "BODY":
-        $paramLocation = OAuthStoreVars::$OAuthParamLocation['POST_BODY'];
-        break;
-      case "HEADER":
       default:
         $paramLocation = OAuthStoreVars::$OAuthParamLocation['AUTH_HEADER'];
         break;
