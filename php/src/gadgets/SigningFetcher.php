@@ -32,6 +32,7 @@ class SigningFetcher extends RemoteContentFetcher {
   protected static $OPENSOCIAL_OWNERID = "opensocial_owner_id";
   protected static $OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
   protected static $OPENSOCIAL_APPID = "opensocial_app_id";
+  protected static $OPENSOCIAL_APPURL = "opensocial_app_url";
   protected static $XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
   protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
 
@@ -209,6 +210,10 @@ class SigningFetcher extends RemoteContentFetcher {
     if ($app != null) {
       $msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
     }
+    $url = $token->getAppUrl();
+    if ($url != null) {
+      $msgParams[SiginingFetcher::$OPENSOCIAL_APPURL] = $url;
+    }
   }
 
   private function addOAuthParams(&$msgParams, SecurityToken $token) {
@@ -244,7 +249,7 @@ class SigningFetcher extends RemoteContentFetcher {
     $canonParamName = strtolower($paramName);
     // Exclude the fields which are only used to tell the proxy what to do
     // and the fields which should be added by signing the request later on
-    if ($canonParamName == "output" || $canonParamName == "httpmethod" || $canonParamName == "authz" || $canonParamName == "st" || $canonParamName == "headers" || $canonParamName == "url" || $canonParamName == "contenttype" || $canonParamName == "postdata" || $canonParamName == "numentries" || $canonParamName == "getsummaries" || $canonParamName == "signowner" || $canonParamName == "signviewer" || $canonParamName == "gadget" || $canonParamName == "bypassspeccache" || substr($canonParamName, 0, 5) == "oauth" || substr($canonParamName, 0, 6) == "xoauth" || substr($canonParamName, 0, 9) == "opensocial") {
+    if ($canonParamName == "output" || $canonParamName == "httpmethod" || $canonParamName == "authz" || $canonParamName == "st" || $canonParamName == "headers" || $canonParamName == "url" || $canonParamName == "contenttype" || $canonParamName == "postdata" || $canonParamName == "numentries" || $canonParamName == "getsummaries" || $canonParamName == "signowner" || $canonParamName == "signviewer" || $canonParamName == "gadget" || $canonParamName == "bypassspeccache" || substr($canonParamName, 0, 5) == "oauth" || substr($canonParamName, 0, 6) == "xoauth" || substr($canonParamName, 0, 9) == "opensocial" || $canonParamName == "container") {
       return false;
     }
     return true;
