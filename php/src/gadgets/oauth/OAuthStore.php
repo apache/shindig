@@ -53,11 +53,11 @@ interface OAuthStore {
 
 class OAuthStoreVars {
   public static $HttpMethod = array('GET' => 'GET', 'POST' => 'POST');
-  public static $SignatureType = array('HMAC_SHA1' => 'HMAC_SHA1', 'RSA_SHA1' => 'RSA_SHA1', 
+  public static $SignatureType = array('HMAC_SHA1' => 'HMAC_SHA1', 'RSA_SHA1' => 'RSA_SHA1',
       'PLAINTEXT' => 'PLAINTEXT');
   public static $KeyType = array('HMAC_SYMMETRIC' => 'HMAC_SYMMETRIC', 'RSA_PRIVATE' => 'RSA_PRIVATE');
-  public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth_header', 'POST_BODY' => 'post_body', 
-      'URI_QUERY' => 'uri_query');
+  public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth-header', 'POST_BODY' => 'post-body',-
+      'URI_QUERY' => 'uri-query');
 }
 
 class AccesorInfo {
@@ -155,7 +155,7 @@ class ProviderInfo {
   private $httpMethod;
   private $signatureType;
   private $paramLocation;
-  
+
   // this can be null if we have not negotiated a consumer key and secret
   // yet with the provider, or if we decided that we want to use a global
   // public key
