@@ -241,6 +241,7 @@ class GadgetFactory {
       $signedRequests[$key] = $request;
     }
     if (count($signedRequests)) {
+    	$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
       $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
       $resps = $remoteContent->multiFetch($signedRequests);
       foreach ($resps as $response) {
