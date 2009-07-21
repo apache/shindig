@@ -107,8 +107,8 @@ class GadgetFactory {
       }
     }
     // Apply substitutions to the preloads
-    foreach ($gadget->gadgetSpec->preloads as $url => $preload) {
-      $gadget->gadgetSpec->preloads[$url]['body'] = $gadget->substitutions->substitute($preload['body']);
+    foreach ($gadget->gadgetSpec->preloads as $key  => $preload) {
+      $gadget->gadgetSpec->preloads[$key]['body'] = $gadget->substitutions->substitute($preload['body']);
     }
   }
 
@@ -260,7 +260,7 @@ class GadgetFactory {
     $preloads = array();
     foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
       if (!empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
-        $preloads[$preload['href']] = $responses[$preload['href']];
+        $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
       }
     }
     $gadget->gadgetSpec->preloads = $preloads;
