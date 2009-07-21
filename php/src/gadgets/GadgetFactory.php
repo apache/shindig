@@ -237,6 +237,7 @@ class GadgetFactory {
       $request = new RemoteContentRequest($requestUrl);
       $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
       $request->setNotSignedUri($requestUrl);
+      $request->setToken($this->token);
       $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
       $signedRequests[$key] = $request;
     }
