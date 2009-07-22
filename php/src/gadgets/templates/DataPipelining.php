@@ -18,6 +18,8 @@
  * under the License.
  */
 
+//TODO verify os:HttpRequest
+
 class DataPipelining {
 
   /**
@@ -30,6 +32,7 @@ class DataPipelining {
     $dataTags = $viewNode->getElementsByTagName('*');
     if ($dataTags->length > 0) {
       $dataPipeliningTags = array();
+      $namespaceErrorTags = array('httprequest', 'datarequest', 'peoplerequest', 'viewerrequest', 'ownerrequest', 'activitiesrequest');
       foreach ($dataTags as $dataTag) {
         $tag = array();
         $tag['type'] = $dataTag->tagName;
@@ -40,6 +43,12 @@ class DataPipelining {
             $tag[$dataAttribute] = $val;
           }
         }
+
+        // Make sure the proper name space decleration was used, either parsing would fail miserably
+        if (in_array(strtolower($tag['type']), $namespaceErrorTags)) {
+        	throw new ExpressionException("Invalid os-data namespace, please use xmlns:os=\"http://ns.opensocial.org/2008/markup\" in the script tag");
+        }
+
         // normalize the methods so that os:PeopleRequest becomes a os:DataRequest with a people.get method, and os:ViewerRequest becomes a people.get with a userId = @viewer & groupId = @self, this
         // makes it a whole lot simpler to implement the actual data fetching in the renderer
         switch ($tag['type']) {
@@ -137,6 +146,9 @@ class DataPipelining {
     $httpRequests = array();
     $decodedResponse = array();
     // Using the same gadget security token for all social & http requests so everything happens in the right context
+    if (!isset($_GET['st'])) {
+    	throw new ExpressionException("No security token set, required for data-pipeling");
+    }
     $securityToken = $_GET['st'];
     foreach ($requests as $request) {
       switch ($request['type']) {
