@@ -110,7 +110,10 @@ gadgets.window = gadgets.window || {};
    */
   gadgets.window.adjustHeight = function(opt_height) {
     var newHeight = parseInt(opt_height, 10);
+    var heightAutoCalculated = false;
     if (isNaN(newHeight)) {
+      heightAutoCalculated = true;
+
       // Resize the gadget to fit its content.
 
       // Calculating inner content height is hard and different between
@@ -143,7 +146,7 @@ gadgets.window = gadgets.window || {};
         // (ie: made smaller). These properties also do not account margin and
         // padding size of an element.
         newHeight = getHeightForWebkit();
-      } else {
+      } else if (body && docEl) {
         // In Quirks mode:
         // documentElement.clientHeight is equal to documentElement.offsetHeight
         // except in IE.  In most browsers, document.documentElement can be used
@@ -173,7 +176,9 @@ gadgets.window = gadgets.window || {};
     }
 
     // Only make the IFPC call if height has changed
-    if (newHeight !== oldHeight) {
+    if (newHeight !== oldHeight &&
+        !isNaN(newHeight) &&
+        !(heightAutoCalculated && newHeight === 0)) {
       oldHeight = newHeight;
       gadgets.rpc.call(null, "resize_iframe", null, newHeight);
     }
