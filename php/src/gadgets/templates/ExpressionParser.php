@@ -202,7 +202,6 @@ class ExpressionParser {
   }
 
   static private function isOperand($string, $index = 0) {
-
     if (is_array($string)) {
       // complex types are always operands
       return true;
@@ -422,10 +421,10 @@ class ExpressionParser {
         $temp = '';
         continue;
       }
-      if (self::isOperand($str, $i)) {
+      if (!empty($temp) || self::isOperand($str, $i)) {
         $temp = $temp . $str[$i];
       }
-      $tokenLen = self::isOperator($str, $i);
+      $tokenLen = empty($temp) ? self::isOperator($str, $i) : false;
       if ($tokenLen || $str[$i] == ")" || $str[$i] == "(") {
         $token = substr($str, $i, $tokenLen);
         if ($tokenLen > 1) {
@@ -445,7 +444,6 @@ class ExpressionParser {
         }
       }
     }
-
     // Resolve all named variables to their actual value
     foreach ($tokens as $key => $val) {
       if (self::isOperand($val) && ! is_numeric($val) && $val !== false && $val !== null) {
