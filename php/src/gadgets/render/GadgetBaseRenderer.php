@@ -19,10 +19,10 @@
  */
 
 require_once 'src/gadgets/templates/DataPipelining.php';
-require_once 'src/gadgets/templates/TemplateParser.php';
+
 
 //TODO check if the opensocial-templates feature has disableAutoProcessing = true as param, if so don't
-
+//TODO if all templates were processed server side, also remove the templates with tag="foo" params to clean up the output
 
 class EmptyClass {
 }
@@ -36,6 +36,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   public $dataContext = array();
   public $unparsedTemplates = array();
   public $dataInserts = array();
+  public $templateLibraries = array();
 
   /**
    * Sets the $this->gadget property, and populates Msg, UserPref and ViewParams dataContext
@@ -103,8 +104,15 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
       $this->performDataRequests($osDataRequestsCombined);
     }
     preg_match_all('/(<script.*type="text\/(os-template)".*>)(.*)(<\/script>)/imxsU', $content, $osTemplates);
+    $templateLibrary = false;
+    if (count($osTemplates[0])) {
+    	// only load the template parser if there's any templates in the gadget content
+    	require_once 'src/gadgets/templates/TemplateParser.php';
+      require_once 'src/gadgets/templates/TemplateLibrary.php';
+    	$templateLibrary = new TemplateLibrary();
+    }
     foreach ($osTemplates[0] as $match) {
-      if (($renderedTemplate = $this->renderTemplate($match)) !== false) {
+      if (($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {
         // Template was rendered, insert the rendered html into the document
         $content = str_replace($match, $renderedTemplate, $content);
       } else {
@@ -186,7 +194,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @param string $template
    * @return string
    */
-  private function renderTemplate($template) {
+  private function renderTemplate($template, $templateLibrary) {
     libxml_use_internal_errors(true);
     $this->doc = new DOMDocument(null, 'utf-8');
     $this->doc->preserveWhiteSpace = true;
@@ -212,19 +220,28 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
           }
         }
       }
-      // Everything checked out, proceeding to render the template
-      $parser = new TemplateParser();
-      $parser->process($childNode, $this->dataContext);
-      // unwrap the output, ie we only want the script block's content and not the main <script></script> node
-      $output = new DOMDocument(null, 'utf-8');
-      foreach ($childNode->childNodes as $node) {
-        $outNode = $output->importNode($node, true);
-        $output->appendChild($outNode);
+      // if $childNode->tag exists, add to global $templateLibraries array, else parse normally
+      $childNodeTag = $childNode->getAttribute('tag');
+      if (!empty($childNodeTag)) {
+      	if (isset($this->templateLibraries[$childNode->getAttribute('tag')])) {
+      		throw new ExpressionException("Template ".htmlentities($childNode->getAttribute('tag'))." was already defined");
+      	}
+      	$templateLibrary->addTemplateByNode($childNode);
+      } else {
+	      // Everything checked out, proceeding to render the template
+	      $parser = new TemplateParser();
+	      $parser->process($childNode, $this->dataContext, $templateLibrary);
+	      // unwrap the output, ie we only want the script block's content and not the main <script></script> node
+	      $output = new DOMDocument(null, 'utf-8');
+	      foreach ($childNode->childNodes as $node) {
+	        $outNode = $output->importNode($node, true);
+	        $output->appendChild($outNode);
+	      }
+	      // Restore single tags to their html variant, and remove the xml header
+	      $ret = str_replace(array(
+	          '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', '<br>'), $output->saveXML());
+	      return $ret;
       }
-      // Restore single tags to their html variant, and remove the xml header
-      $ret = str_replace(array(
-          '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', '<br>'), $output->saveXML());
-      return $ret;
     }
     return false;
   }
@@ -252,11 +269,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @return string script
    */
   public function getBodyScript() {
-    $script = "gadgets.util.runOnLoadHandlers();";
     if ($this instanceof GadgetHrefRenderer) {
-      $script .= " window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
+      return " window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
+    } else {
+      return "gadgets.util.runOnLoadHandlers();";
     }
-    return $script;
   }
 
   /**
@@ -269,6 +286,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $script = $this->getBodyScript();
     $scriptNode = $doc->createElement('script');
     $scriptNode->setAttribute('type', 'text/javascript');
+    $scriptNode->appendChild($doc->createTextNode($script));
     $scriptNode->nodeValue = str_replace('&', '&amp;', $script);
     $node->appendChild($scriptNode);
   }

@@ -18,23 +18,27 @@
  * under the License.
  */
 
+//TODO os:repeat (and <foo repeat="" var="">) has a var="foo" param that hasn't been implmemented yet
 //TODO for some reason the OSML spec stats you have to <Require feature="osml"> to use the os:Name etc tags yet no such feature exists, and for the code path's here it's not required at all..
 //TODO remove the os-templates javascript if all the templates are rendered on the server (saves many Kb's in gadget size)
 //TODO support for OSML tags (os:name, os:peopleselector, os:badge) and OSML functions (os:render, osx:flash, osx:parsejson, etc)
 //TODO support os-template tags on OSML tags, ie this should work: <os:Html if="${Foo}" repeat="${Bar}" />
 
+
 require_once 'ExpressionParser.php';
 
 class TemplateParser {
   private $dataContext;
+  private $templateLibrary;
 
   /**
    * Processes an os-template
    *
    * @param string $template
    */
-  public function process(DOMnode &$osTemplate, $dataContext) {
+  public function process(DOMnode &$osTemplate, $dataContext, $templateLibrary) {
     $this->setDataContext($dataContext);
+    $this->templateLibrary = $templateLibrary;
     if ($osTemplate instanceof DOMElement) {
       $this->parseNode($osTemplate);
     }
@@ -53,18 +57,60 @@ class TemplateParser {
     $this->dataContext['Context'] = array('UniqueId' => uniqid());
   }
 
-  private function parseNode(DOMNode &$node) {
+  public function parseNode(DOMNode &$node) {
     if ($node instanceof DOMText) {
       if (! $node->isWhitespaceInElementContent() && ! empty($node->wholeText)) {
         $this->parseNodeText($node);
       }
     } else {
-      $tagName = $node->tagName;
+      $tagName = isset($node->tagName) ? $node->tagName : '';
       if (substr($tagName, 0, 3) == 'os:' || substr($tagName, 0, 4) == 'osx:') {
         $this->parseOsmlNode($node);
+      } elseif ($this->templateLibrary->hasTemplate($tagName)) {
+        // the tag name refers to an existing template (myapp:EmployeeCard type naming)
+        // the extra check on the : character is to make sure this is a name spaced custom tag and not some one trying to override basic html tags (br, img, etc)
+        $this->parseLibrary($tagName, $node);
       } else {
         $this->parseNodeAttributes($node);
       }
+    }
+  }
+
+  private function parseLibrary($tagName, DOMNode &$node) {
+    // loop through attributes and assign vars to the context
+    $myContext = array();
+    if ($node->hasAttributes()) {
+      foreach ($node->attributes as $attr) {
+        if (strpos($attr->value, '${') !== false) {
+          // attribute value contains an expression
+          $expressions = array();
+          preg_match_all('/(\$\{)(.*)(\})/imsxU', $attr->value, $expressions);
+          for ($i = 0; $i < count($expressions[0]); $i ++) {
+            $expression = $expressions[2][$i];
+            $myContext[$attr->name] = ExpressionParser::evaluate($expression, $this->dataContext);
+          }
+        } else {
+          // plain old string
+          $myContext[$attr->name] = trim($attr->value);
+        }
+      }
+    }
+
+    // Parse the template library
+    $this->dataContext['My'] = $myContext;
+    $ret = $this->templateLibrary->parseTemplate($tagName, $this);
+    $this->dataContext['My'] = array();
+
+    if ($ret) {
+	    // And replace the node with the parsed output
+	    $ownerDocument = $node->ownerDocument;
+	    foreach ($ret->childNodes as $childNode) {
+	    	if ($childNode instanceOf DOMElement) {
+	        $importedNode = $ownerDocument->importNode($childNode, true);
+	        $node->parentNode->insertBefore($importedNode, $node);
+	    	}
+	    }
+      $node->parentNode->removeChild($node);
     }
   }
 
@@ -93,6 +139,7 @@ class TemplateParser {
             $expression = $expressions[2][$i];
             $expressionResult = ExpressionParser::evaluate($expression, $this->dataContext);
             switch (strtolower($attr->name)) {
+
               case 'repeat':
                 // Can only loop if the result of the expression was an array
                 if (! is_array($expressionResult)) {
@@ -154,7 +201,8 @@ class TemplateParser {
                 break;
 
               case 'disabled':
-                $disabledTags = array('input', 'button', 'select', 'textarea');
+                $disabledTags = array('input', 'button',
+                    'select', 'textarea');
                 if (in_array($node->tagName, $disabledTags)) {
                   if ($expressionResult) {
                     $node->setAttribute('disabled', 'disabled');
@@ -198,7 +246,7 @@ class TemplateParser {
       // Control statements
 
       case 'os:repeat':
-        if (!$node->getAttribute('expression')) {
+        if (! $node->getAttribute('expression')) {
           throw new ExpressionException("Invalid os:Repeat tag, missing expression attribute");
         }
         $expressions = array();
@@ -227,7 +275,7 @@ class TemplateParser {
 
       case 'os:if':
         $expressions = array();
-        if (!$node->getAttribute('condition')) {
+        if (! $node->getAttribute('condition')) {
           throw new ExpressionException("Invalid os:If tag, missing condition attribute");
         }
         preg_match_all('/(\$\{)(.*)(\})/imsxU', $node->getAttribute('condition'), $expressions);
@@ -255,7 +303,7 @@ class TemplateParser {
         break;
 
       case 'os:html':
-         if (!$node->getAttribute('code')) {
+        if (! $node->getAttribute('code')) {
           throw new ExpressionException("Invalid os:Html tag, missing code attribute");
         }
         //FIXME this seems to not work out to well, probably need to use the original domdocument to $doc->createTextNode() to make this work
