@@ -31,10 +31,14 @@ class TemplateLibrary {
   private $osmlTags = array('os:Name', 'os:PeopleSelector', 'os:badge');
   private $templates = array();
   private $osmlLoaded = false;
+  private $gadgetContext;
+
+  public function __construct($gadgetContext) {
+    $this->gadgetContext = $gadgetContext;
+  }
 
   public function parseTemplate($tag, $caller) {
     $template = $this->getTemplate($tag);
-    $ret = '';
     if ($template->dom instanceof DOMElement) {
       $templateDomCopy = new DOMDocument(null, 'utf-8');
       // If this template pulls in any new style and/or javascript, add those to the document
@@ -68,18 +72,98 @@ class TemplateLibrary {
    *
    * @param DOMElement $node
    */
-  public function addTemplateByNode(DOMElement &$node) {
+  public function addTemplateByNode(DOMElement &$node, $scripts = false, $styles = false) {
     $tag = $node->getAttribute('tag');
-    $this->templates[$tag] = new TemplateLibraryEntry($node);
+    $template = new TemplateLibraryEntry($node);
+    if ($scripts) {
+      foreach ($scripts as $script) {
+        $template->addScript($script);
+      }
+    }
+    if ($styles) {
+      foreach ($styles as $style) {
+        $template->addstyle($style);
+      }
+    }
+    $this->templates[$tag] = $template;
+  }
+
+  private function addTemplateDef(DOMElement &$node, $globalScript, $globalStyle) {
+    $tag = $node->getAttribute('tag');
+    if (empty($tag)) {
+      throw new ExpressionException("Missing tag attribute on TemplateDef element");
+    }
+    $templateNodes = array();
+    foreach ($node->childNodes as $childNode) {
+      if (isset($childNode->tagName)) {
+        switch ($childNode->tagName) {
+          case 'Template':
+            $templateNodes[] = $childNode;
+            break;
+          case 'JavaScript':
+            $globalScript[] = new TemplateLibraryContent($childNode->nodeValue);
+            break;
+          case 'Style':
+            $globalStyle[] = new TemplateLibraryContent($childNode->nodeValue);
+            break;
+        }
+      }
+    }
+    // Initialize the templates after scanning the entire structure so that all scripts and styles will be included with each template
+    foreach ($templateNodes as $templateNode) {
+    	$templateNode->setAttribute('tag', $tag);
+      $this->addTemplateByNode($templateNode, $globalScript, $globalStyle);
+    }
   }
 
   /**
-   * Add an external template library by URL
+   * Add a template library set, for details see:
+   * http://opensocial-resources.googlecode.com/svn/spec/0.9/OpenSocial-Templating.xml#rfc.section.13
    *
-   * @param string $libraryUrl (ie: 'http://www.example.com/templates.xml')
+   * @param string $library
    */
-  public function addTemplateLibrary($libraryUrl) {// add library by external URL and addTemplate for each entry contained in it
-}
+  public function addTemplateLibrary($library) {
+    libxml_use_internal_errors(true);
+    $doc = new DOMDocument(null, 'utf-8');
+    $doc->preserveWhiteSpace = true;
+    $doc->formatOutput = false;
+    $doc->strictErrorChecking = false;
+    $doc->recover = false;
+    $doc->resolveExternals = false;
+    if (! $doc->loadXML($library)) {
+      throw new ExpressionException("Error parsing template library:\n" . XmlError::getErrors($library));
+    }
+    // Theoretically this could support multiple <Templates> root nodes, which isn't quite spec, but owell
+    foreach ($doc->childNodes as $rootNode) {
+      $templateNodes = array();
+	    $globalScript = array();
+	    $globalStyle = array();
+      if (isset($rootNode->tagName) && $rootNode->tagName == 'Templates') {
+        foreach ($rootNode->childNodes as $childNode) {
+          if (isset($childNode->tagName)) {
+            switch ($childNode->tagName) {
+              case 'TemplateDef':
+                $this->addTemplateDef($childNode, $globalScript, $globalStyle);
+                break;
+              case 'Template':
+                $templateNodes[] = $childNode;
+                break;
+              case 'JavaScript':
+                $globalScript[] = new TemplateLibraryContent($childNode->nodeValue);
+                break;
+              case 'Style':
+                $globalStyle[] = new TemplateLibraryContent($childNode->nodeValue);
+                break;
+            }
+          }
+        }
+      }
+      // Initialize the templates after scanning the entire structure so that all scripts and styles will be included with each template
+      foreach ($templateNodes as $templateNode) {
+        $this->addTemplateByNode($templateNode, $globalScript, $globalStyle);
+      }
+    }
+  }
 
   /**
    * Check to see if a template with name $tag exists
@@ -105,15 +189,20 @@ class TemplateLibrary {
   }
 
   private function loadOsmlLibrary() {
+    $container = $this->gadgetContext->getContainer();
+    $containerConfig = $this->gadgetContext->getContainerConfig();
+    $gadgetsFeatures = $containerConfig->getConfig($container, 'gadgets.features');
+    if (! isset($gadgetsFeatures['osml'])) {
+      throw new ExpressionException("Missing OSML configuration key in config/config.js");
+    } elseif (! isset($gadgetsFeatures['osml']['library'])) {
+      throw new ExpressionException("Missing OSML.Library configuration key in config/config.js");
+    }
+    $osmlLibrary = Config::get('container_path') . str_replace('config/', '', $gadgetsFeatures['osml']['library']);
+    if (! File::exists($osmlLibrary)) {
+      throw new ExpressionException("Missing OSML Library ($osmlLibrary)");
+    }
+    $this->addTemplateLibrary(file_get_contents($osmlLibrary));
     $this->osmlLoaded = true;
-    // preload osml lib, see container config key for location (gadget context->container config->osml->library
-  /*
-    "osml": {
-     // OSML library resource.  Can be set to null or the empty string to disable OSML
-     // for a container.
-     "library": "config/OSML_library.xml"
-   }
-   */
   }
 }
 
@@ -138,8 +227,8 @@ class TemplateLibraryEntry {
    *
    * @param unknown_type $script
    */
-  public function addScript($script) {
-    $this->script[] = new TemplateLibraryContent($script);
+  public function addScript(TemplateLibraryContent $script) {
+    $this->script[] = $script;
   }
 
   /**
@@ -147,7 +236,7 @@ class TemplateLibraryEntry {
    *
    * @param unknown_type $style
    */
-  public function addStyle($style) {
+  public function addStyle(TemplateLibraryContent $style) {
     $this->style[] = new TemplateLibraryContent($style);
   }
 

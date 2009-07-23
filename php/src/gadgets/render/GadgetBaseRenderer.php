@@ -36,7 +36,6 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   public $dataContext = array();
   public $unparsedTemplates = array();
   public $dataInserts = array();
-  public $templateLibraries = array();
 
   /**
    * Sets the $this->gadget property, and populates Msg, UserPref and ViewParams dataContext
@@ -109,7 +108,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     	// only load the template parser if there's any templates in the gadget content
     	require_once 'src/gadgets/templates/TemplateParser.php';
       require_once 'src/gadgets/templates/TemplateLibrary.php';
-    	$templateLibrary = new TemplateLibrary();
+    	$templateLibrary = new TemplateLibrary($this->gadget->gadgetContext);
     }
     foreach ($osTemplates[0] as $match) {
       if (($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {

@@ -456,9 +456,6 @@ class ExpressionParser {
   static private function compute($var1, $var2, $sym) {
     $returnVal = 0;
     // JSP EL doesn't allow $A = 'foo'; $b = 1; $C = $A + $B, so make sure that both variables are numberic when doing arithmatic or boolean operations
-    if ($sym != 'empty' && (! is_numeric($var1) || ! is_numeric($var2))) {
-      throw new ExpressionException("Can't perform arithmatic or boolean operation (" . htmlentities($sym) . ") on non numeric values: " . htmlentities($var1) . ", " . htmlentities($var2) . ")");
-    }
     //TODO variable type coercion in JSP EL is different from PHP, it might be prudent to code out the same behavior
     switch ($sym) {
       // Unhandled operators

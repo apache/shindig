@@ -76,8 +76,14 @@ class TemplateParser {
     }
   }
 
-  private function parseLibrary($tagName, DOMNode &$node) {
-    // loop through attributes and assign vars to the context
+  /**
+   * Misc function that maps the node's attributes to a key => value array
+   * and results any expressions to actual values
+   *
+   * @param DOMElement $node
+   * @return array
+   */
+  private function nodeAttributesToScope(DOMElement &$node) {
     $myContext = array();
     if ($node->hasAttributes()) {
       foreach ($node->attributes as $attr) {
@@ -95,21 +101,32 @@ class TemplateParser {
         }
       }
     }
+    return $myContext;
+  }
 
-    // Parse the template library
+  /**
+   * Parses the specified template library
+   *
+   * @param string $tagName
+   * @param DOMNode $node
+   */
+  private function parseLibrary($tagName, DOMNode &$node) {
+    $myContext = $this->nodeAttributesToScope($node);
+    // Parse the template library (store the My scope since this could be a nested call)
+    $previousMy = $this->dataContext['My'];
     $this->dataContext['My'] = $myContext;
     $ret = $this->templateLibrary->parseTemplate($tagName, $this);
-    $this->dataContext['My'] = array();
+    $this->dataContext['My'] = $previousMy;
 
     if ($ret) {
-	    // And replace the node with the parsed output
-	    $ownerDocument = $node->ownerDocument;
-	    foreach ($ret->childNodes as $childNode) {
-	    	if ($childNode instanceOf DOMElement) {
-	        $importedNode = $ownerDocument->importNode($childNode, true);
-	        $node->parentNode->insertBefore($importedNode, $node);
-	    	}
-	    }
+      // And replace the node with the parsed output
+      $ownerDocument = $node->ownerDocument;
+      foreach ($ret->childNodes as $childNode) {
+        if ($childNode instanceof DOMElement) {
+          $importedNode = $ownerDocument->importNode($childNode, true);
+          $node->parentNode->insertBefore($importedNode, $node);
+        }
+      }
       $node->parentNode->removeChild($node);
     }
   }
@@ -245,6 +262,7 @@ class TemplateParser {
 
       // Control statements
 
+
       case 'os:repeat':
         if (! $node->getAttribute('expression')) {
           throw new ExpressionException("Invalid os:Repeat tag, missing expression attribute");
@@ -293,29 +311,39 @@ class TemplateParser {
 
       // OSML tags (os: name space)
 
-      case 'os:name':
-        break;
 
-      case 'os:peopleselector':
+      case 'os:name':
+        $this->parseLibrary('os:Name', $node);
         break;
 
       case 'os:badge':
+        $myContext = $this->nodeAttributesToScope();
+        $previousMy = $this->dataContext['My'];
+        $this->dataContext['My'] = $myContext;
+        $ret = $this->templateLibrary->parseTemplate('os:Badge', $this);
+        $this->dataContext['My'] = $previousMy;
+        break;
+
+      case 'os:peopleselector':
+        $myContext = $this->nodeAttributesToScope();
+        $previousMy = $this->dataContext['My'];
+        $this->dataContext['My'] = $myContext;
+        $ret = $this->templateLibrary->parseTemplate('os:PeopleSelector', $this);
+        $this->dataContext['My'] = $previousMy;
         break;
 
       case 'os:html':
         if (! $node->getAttribute('code')) {
           throw new ExpressionException("Invalid os:Html tag, missing code attribute");
         }
-        //FIXME this seems to not work out to well, probably need to use the original domdocument to $doc->createTextNode() to make this work
-        $newNode = new DOMText();
-        $newNode->nodeValue = $node->getAttribute('code');
-        $node->parentNode->replaceChild($newNode, $node);
+        $node->parentNode->replaceChild($node->ownerDocument->createTextNode($node->getAttribute('code')), $node);
         break;
 
       case 'os:render':
         break;
 
       // Extension - Tags
+
 
       case 'osx:flash':
         break;
@@ -327,6 +355,7 @@ class TemplateParser {
         break;
 
       // Extension - Functions
+
 
       case 'osx:parsejson':
         break;
