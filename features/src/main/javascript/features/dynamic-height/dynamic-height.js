@@ -74,35 +74,6 @@ gadgets.window = gadgets.window || {};
   }
 
   /**
-   * Detects the inner dimensions of a frame.
-   * See: http://www.quirksmode.org/viewport/compatibility.html for more
-   * information.
-   * @returns {Object} An object with width and height properties.
-   * @member gadgets.window
-   */
-  gadgets.window.getViewportDimensions = function() {
-    var x,y;
-    if (self.innerHeight) {
-      // all except Explorer
-      x = self.innerWidth;
-      y = self.innerHeight;
-    } else if (document.documentElement &&
-               document.documentElement.clientHeight) {
-      // Explorer 6 Strict Mode
-      x = document.documentElement.clientWidth;
-      y = document.documentElement.clientHeight;
-    } else if (document.body) {
-      // other Explorers
-      x = document.body.clientWidth;
-      y = document.body.clientHeight;
-    } else {
-      x = 0;
-      y = 0;
-    }
-    return {width: x, height: y};
-  };
-
-  /**
    * Adjusts the gadget height
    * @param {Number} opt_height An optional preferred height in pixels. If not
    *     specified, will attempt to fit the gadget to its content.

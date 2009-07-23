@@ -17,10 +17,8 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>dynamic-height</name>
-  <dependency>dynamic-height.util</dependency>
-  <dependency>rpc</dependency>
+  <name>dynamic-height.util</name>
   <gadget>
-    <script src="dynamic-height.js"/>
+    <script src="dynamic-height-util.js"/>
   </gadget>
 </feature>
