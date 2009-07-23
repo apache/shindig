@@ -411,7 +411,7 @@ gadgets.rpc = function() {
         // Relative path: we append to the parent.
         // We're relying on the server validating the parent parameter in this
         // case. Because of this, parent may only be passed in the query, not fragment.
-        if (params.parent !== "") {
+        if (typeof params.parent === "string" && params.parent !== "") {
           // Otherwise, relayUrl['..'] will be null, signaling transport
           // code to ignore rpc calls since they cannot work without a
           // relay URL with host qualification.
