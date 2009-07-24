@@ -204,7 +204,7 @@ gadgets.rpctx.rmr = function() {
         return;
       }
 
-      setTimeout(function() {
+      window.setTimeout(function() {
         conductRmrSearch(frameId);
       }, RMR_SEARCH_TIMEOUT);
     }

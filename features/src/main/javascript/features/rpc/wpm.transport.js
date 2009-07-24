@@ -81,7 +81,7 @@ gadgets.rpctx.wpm = function() {
     },
 
     call: function(targetId, from, rpc) {
-      var targetWin = targetId === '..' ? parent : window.frames[targetId];
+      var targetWin = targetId === '..' ? window.parent : window.frames[targetId];
       var relay = gadgets.rpc.getRelayUrl(targetId);
       if (relay) {
         targetWin.postMessage(gadgets.json.stringify(rpc), relay);

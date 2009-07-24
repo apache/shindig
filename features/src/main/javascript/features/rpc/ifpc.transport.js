@@ -95,7 +95,7 @@ gadgets.rpctx.ifpc = function() {
       iframePool.push(iframe);
     }
     iframe.src = src;
-    setTimeout(function() { document.body.appendChild(iframe); }, 0);
+    window.setTimeout(function() { document.body.appendChild(iframe); }, 0);
   }
 
   return {

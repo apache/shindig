@@ -371,9 +371,9 @@ gadgets.rpc = function() {
 
       var targetEl = null;
       if (target === '..') {
-        targetEl = parent;
+        targetEl = window.parent;
       } else {
-        targetEl = frames[target];
+        targetEl = window.frames[target];
       }
       try {
         // If this succeeds, then same-domain policy applied
