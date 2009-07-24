@@ -691,15 +691,11 @@ opensocial.Container.prototype.enableCaja = function() {
   var imports = ___.copy(___.sharedImports);
   imports.outers = imports;
 
-  var gadgetRoot = document.createElement('div');
+  var gadgetRoot = document.getElementById('cajoled-output');
   gadgetRoot.className = 'g___';
   document.body.appendChild(gadgetRoot);
 
   imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
-  imports.getCssContainer___ = function () {
-    return gadgetRoot;
-  };
-
   attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
 
   imports.$v = valijaMaker.CALL___(imports.outers);

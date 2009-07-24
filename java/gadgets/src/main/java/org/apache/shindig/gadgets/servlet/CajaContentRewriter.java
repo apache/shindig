@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,6 +41,7 @@ import com.google.caja.opensocial.DefaultGadgetRewriter;
 import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
+import com.google.caja.parser.html.Nodes;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
@@ -93,25 +96,30 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
           FilePosition.instance(is, 5, 5, 5));
       StringBuilder output = new StringBuilder();
 
-      // Secure default to remove content in case there
-      // are problems cajoling a gadget
-      content.setContent("");
+      Document doc = content.getDocument();
       try {
-        rw.rewriteContent(retrievedUri, input, cb, output);
-      } catch (GadgetRewriteException e) {
-        content.setContent(messagesToHtml(is, origContent, mq));
-        throwCajolingException(e, mq);
-        return;
-      } catch (IOException e) {
-        content.setContent(messagesToHtml(is, origContent, mq));
+        StringBuilder htmlAndJs = new StringBuilder();
+        rw.rewriteContent(retrievedUri, input, cb, htmlAndJs);
+        int splitPoint = htmlAndJs.indexOf("<script");
+        String script = htmlAndJs.substring(splitPoint);
+        String html = htmlAndJs.substring(0, splitPoint);
+        String htmlElement = 
+          "<div id=\"cajoled-output\" class=\"g___\">" +
+          html +
+          "</div>";
+        output.append(htmlElement);
+        output.append(tameCajaClientApi());
+        output.append(script);
+      } catch (Exception e) {
+        content.setContent(messagesToHtml(doc, is, origContent, mq));
         throwCajolingException(e, mq);
         return;
       }
-      content.setContent(tameCajaClientApi() + output);
+      content.setContent(output.toString());
     }
   }
 
-  private String messagesToHtml(InputSource is, CharSequence orig, MessageQueue mq) {
+  private String messagesToHtml(Document doc, InputSource is, CharSequence orig, MessageQueue mq) {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
     originalSrc.put(is, orig);
@@ -119,7 +127,6 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
     SnippetProducer sp = new SnippetProducer(originalSrc, mc);
 
     StringBuilder messageText = new StringBuilder();
-    messageText.append("<pre>");
     for (Message msg : mq.getMessages()) {
       // Ignore LINT messages
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
@@ -133,7 +140,8 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         }
       }
     }
-    messageText.append("</pre>");
+    Element errElement = doc.createElement("pre");
+    errElement.appendChild(doc.createTextNode(messageText.toString()));
     return messageText.toString();
   }
 

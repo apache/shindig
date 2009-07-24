@@ -99,7 +99,7 @@ shindig.samplecontainer = {};
     var params = '';
 
     if (useCaja) {
-      params += "&caja=1&libs=caja";
+      params += "&caja=1";
     }
     if (useDebug) {
       params += "&debug=1";
