@@ -63,9 +63,31 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
   public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
       throws GadgetException {
     MessageBundle exact = getBundleFor(spec, locale, ignoreCache);
-    MessageBundle lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache);
-    MessageBundle country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache);
-    MessageBundle all = getBundleFor(spec, ALL_ALL, ignoreCache);
+
+    // We don't want to fetch the same bundle multiple times, so we verify that the exact match
+    // has not already been fetched.
+    MessageBundle lang, country, all;
+
+    boolean isAllLanguage = locale.getLanguage().equalsIgnoreCase("all");
+    boolean isAllCountry = locale.getCountry().equalsIgnoreCase("ALL");
+
+    if (isAllCountry) {
+      lang = MessageBundle.EMPTY;
+    } else {
+      lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache);
+    }
+
+    if (isAllLanguage) {
+      country = MessageBundle.EMPTY;
+    } else {
+      country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache);
+    }
+
+    if (isAllCountry && isAllLanguage) {
+      all = MessageBundle.EMPTY;
+    } else {
+      all = getBundleFor(spec, ALL_ALL, ignoreCache);
+    }
 
     return new MessageBundle(all, country, lang, exact);
   }

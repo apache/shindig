@@ -94,6 +94,19 @@ public class DefaultMessageBundleFactoryTest {
         "<Content type='html'/>" +
         "</Module>";
 
+  private static final String ALL_EXTERNAL_SPEC
+      = "<Module>" +
+        "<ModulePrefs title='foo'>" +
+        " <Locale lang='all' country='ALL' messages='" + BUNDLE_URI + "'/>" +
+        " <Locale lang='all' country='" + LOCALE.getCountry() + "'" +
+        "  messages='" + BUNDLE_URI + "'/>" +
+        " <Locale lang='" + LOCALE.getLanguage() + "' messages='" + BUNDLE_URI + "'/>" +
+        " <Locale lang='" + LOCALE.getLanguage() + "' country='" + LOCALE.getCountry() + "' " +
+        "  messages='" + BUNDLE_URI + "'/>" +
+        "</ModulePrefs>" +
+        "<Content type='html'/>" +
+        "</Module>";
+
   private static final int MAX_AGE = 10000;
 
   private final RequestPipeline pipeline = EasyMock.createNiceMock(RequestPipeline.class);
@@ -103,15 +116,16 @@ public class DefaultMessageBundleFactoryTest {
   private final DefaultMessageBundleFactory bundleFactory
       = new DefaultMessageBundleFactory(new TestExecutorService(), pipeline, cacheProvider, MAX_AGE);
   private final GadgetSpec gadgetSpec;
+  private final GadgetSpec externalSpec;
 
   public DefaultMessageBundleFactoryTest() {
     try {
       gadgetSpec = new GadgetSpec(SPEC_URI, BASIC_SPEC);
+      externalSpec = new GadgetSpec(SPEC_URI, ALL_EXTERNAL_SPEC);
     } catch (GadgetException e) {
       throw new RuntimeException(e);
     }
   }
-
 
   @Test
   public void getExactBundle() throws Exception {
@@ -154,6 +168,46 @@ public class DefaultMessageBundleFactoryTest {
     assertNull(bundle.getMessages().get(MSG_1_NAME));
     assertNull(bundle.getMessages().get(MSG_2_NAME));
     assertNull(bundle.getMessages().get(MSG_3_NAME));
+  }
+
+  @Test
+  public void getExactBundleAllExternal() throws Exception {
+    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(4);
+
+    replay(pipeline);
+    bundleFactory.getBundle(externalSpec, LOCALE, true);
+    verify(pipeline);
+  }
+
+  @Test
+  public void getLangBundleAllExternal() throws Exception {
+    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(3);
+
+    replay(pipeline);
+    bundleFactory.getBundle(externalSpec, LANG_LOCALE, true);
+    verify(pipeline);
+  }
+
+  @Test
+  public void getCountryBundleAllExternal() throws Exception {
+    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(3);
+
+    replay(pipeline);
+    bundleFactory.getBundle(externalSpec, COUNTRY_LOCALE, true);
+    verify(pipeline);
+  }
+
+  @Test
+  public void getAllAllExternal() throws Exception {
+    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).once();
+
+    replay(pipeline);
+    bundleFactory.getBundle(externalSpec, new Locale("all", "ALL"), true);
+    verify(pipeline);
   }
 
   @Test
