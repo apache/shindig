@@ -85,4 +85,17 @@ class DefaultInvalidateServiceTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($this->service->isValid($request));
   }
 
+  public function testInvalidateUserResourcesWithEmptyAppId() {
+    $token = BasicSecurityToken::createFromValues('owner', 'viewer', null, 'domain', 'appUrl', '1', 'default');
+    $token->setAuthenticationMode(AuthenticationMode::$OAUTH_CONSUMER_REQUEST);
+    $request = new RemoteContentRequest('http://url');
+    $request->setToken($token);
+    $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+    $this->service->markResponse($request);
+    $opensocialIds = array('owner');
+    $this->service->invalidateUserResources($opensocialIds, $token);
+    $this->assertFalse($this->service->isValid($request));
+    $this->service->markResponse($request);
+    $this->assertTrue($this->service->isValid($request));
+  }
 }

@@ -116,6 +116,7 @@ class DefaultInvalidateService implements InvalidateService {
     if ($token->getAppId()) {
       return DefaultInvalidateService::$TOKEN_PREFIX . $token->getAppId() . '_' . $userId;
     }
+    return DefaultInvalidateService::$TOKEN_PREFIX . $token->getAppUrl() . '_' . $userId;
   }
   
   private function getInvalidationMark(RemoteContentRequest $request) {
