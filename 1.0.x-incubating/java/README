@@ -40,15 +40,16 @@
   Installing Shindig Java
   -----------------------
 
-  Unzip the distribution archive, i.e. shindig-1.0-incubating-java.zip to 
+  Unzip the distribution archive, i.e. shindig-${project.version}-java.zip to 
   the directory you wish to install Shindig. 
 
   The following explains how to deploy the Shindig war file to Apache 
   Tomcat. If you are using an other container, please read its documentation
-  on how to proceed.
+  on how to proceed. You could download the war from:
+  http://repo1.maven.org/maven2/org/apache/shindig/shindig-server/${project.version}/shindig-server-${project.version}.war  
 
   The easiest way to deploy Shindig on Apache Tomcat is to rename the 
-  shindig-server-1.0-incubating.war file to ROOT.war and drop it in the 
+  shindig-server-${project.version}.war file to ROOT.war and drop it in the 
   Tomcat webapps.
   Be sure to delete $TOMCAT_HOME/webapps/ROOT dir before starting Tomcat.
 
