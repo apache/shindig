@@ -46,16 +46,21 @@
         <exclude>**/maven-eclipse.xml</exclude>
         <exclude>**/.deployables/**</exclude>
         <exclude>**/.wtpmodules/**</exclude>
-        <exclude>java/samples/create.sql</exclude>
-        <exclude>java/samples/drop.sql</exclude>
-        <exclude>java/samples/derby.log</exclude>
         <!-- maven -->
         <exclude>**/target/**</exclude>
         <exclude>**/pom.xml.releaseBackup</exclude>
         <exclude>**/release.properties</exclude>
         <!-- misc -->
-        <exclude>*.patch</exclude>
-        <exclude>*.diff</exclude>
+        <exclude>**/*.patch</exclude>
+        <exclude>**/*.diff</exclude>
+        <exclude>**/*.log</exclude>
+        <exclude>**/*.bak</exclude>
+        <exclude>**/*~</exclude>
+        <exclude>**/#*#</exclude>
+        <exclude>**/%*%</exclude>
+        <exclude>**/samples/create.sql</exclude>
+        <exclude>**/samples/drop.sql</exclude>
+        <exclude>**/derby.log</exclude>
       </excludes>
     </fileSet>
   </fileSets>
