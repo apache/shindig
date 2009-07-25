@@ -44,10 +44,10 @@
   Installing Shindig
   ------------------
 
-  Unzip the distribution archive, i.e. shindig-1.0-incubating-php.zip to 
+  Unzip the distribution archive, i.e. shindig-${project.version}-php.zip to 
   the web document root, e.g. /var/www/html. 
 
-  Rename the created shindig-1.0-incubating-php dir to shindig. 
+  Rename the created shindig-${project.version}-php dir to shindig. 
 
   a. Create a new virtual host
 

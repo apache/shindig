@@ -59,12 +59,6 @@
         <exclude>**/*~</exclude>
         <exclude>**/#*#</exclude>
         <exclude>**/%*%</exclude>
-        <exclude>**/*.jar</exclude>
-        <exclude>**/*.rar</exclude>
-        <exclude>**/*.tar</exclude>
-        <exclude>**/*.tar.bz2</exclude>
-        <exclude>**/*.tar.gz</exclude>
-        <exclude>**/*.zip</exclude>
         <exclude>**/samples/create.sql</exclude>
         <exclude>**/samples/drop.sql</exclude>
         <exclude>**/derby.log</exclude>

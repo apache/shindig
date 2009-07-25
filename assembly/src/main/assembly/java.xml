@@ -56,9 +56,19 @@
       <directory>../java</directory>
       <includes>
         <include>LICENSE</include>
-        <include>NOTICE</include>
-        <include>README</include>
       </includes>
     </fileSet>
   </fileSets>
+  <files>
+    <file>
+      <source>../java/README</source>
+      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+    <file>
+      <source>../java/NOTICE</source>
+      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+  </files>
 </assembly>

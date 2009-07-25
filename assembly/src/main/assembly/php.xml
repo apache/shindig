@@ -95,6 +95,11 @@
         <exclude>*.tar.bz2</exclude>
         <exclude>*.sh</exclude>
         <exclude>*.bat</exclude>
+        <exclude>**/*.log</exclude>
+        <exclude>**/*.bak</exclude>
+
+        <exclude>NOTICE</exclude>
+        <exclude>README</exclude>
       </excludes>
     </fileSet>
     <!-- Using the temp container.php created by Maven using Antrun plugin to rewrite
@@ -109,4 +114,16 @@
       </excludes>
     </fileSet>
   </fileSets>
+  <files>
+    <file>
+      <source>../php/README</source>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+    <file>
+      <source>../php/NOTICE</source>
+      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+  </files>
 </assembly>

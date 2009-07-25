@@ -55,6 +55,9 @@
             <descriptor>src/main/assembly/source.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
+          <filters>
+            <filter>${project.build.directory}/assemblyFilter.properties</filter>
+          </filters>
         </configuration>
         <executions>
           <execution>
@@ -102,6 +105,13 @@
                   <replacetoken><![CDATA[/../../]]></replacetoken>
                   <replacevalue><![CDATA[/../]]></replacevalue>
                 </replace>
+
+               <tstamp>
+                 <format property="year" pattern="yyyy" />
+               </tstamp>
+               <echo file="${project.build.directory}/assemblyFilter.properties">
+year=${year}
+               </echo>
 
               </tasks>
             </configuration>
