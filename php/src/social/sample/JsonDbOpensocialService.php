@@ -159,7 +159,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   private function getAllAlbums() {
     $db = $this->getDb();
-    $albumTable = $db[self::$ALBUMS_TABLE] ? $db[self::$ALBUMS_TABLE] : array();
+    $albumTable = isset($db[self::$ALBUMS_TABLE]) ? $db[self::$ALBUMS_TABLE] : array();
     $allAlbums = array();
     foreach ($albumTable as $key => $value) {
       $allAlbums[$key] = $value;
@@ -169,7 +169,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   private function getAllMediaItems() {
     $db = $this->getDb();
-    $mediaItemsTable = $db[self::$MEDIA_ITEMS_TABLE] ? $db[self::$MEDIA_ITEMS_TABLE] : array();
+    $mediaItemsTable = isset($db[self::$MEDIA_ITEMS_TABLE]) ? $db[self::$MEDIA_ITEMS_TABLE] : array();
     $allMediaItems = array();
     foreach ($mediaItemsTable as $key => $value) {
       $allMediaItems[$key] = $value;
@@ -251,6 +251,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         }
         if ($fields[0] != '@all') {
           $newPerson = array();
+          $newPerson['id'] = $id;
           $newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
           $newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
           $newPerson['name'] = $person['name'];
@@ -263,7 +264,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
           }
           $person = $newPerson;
         }
-        $people[$id] = $person;
+        $people[] = $person;
       }
     }
     if ($sortOrder == 'name') {
@@ -362,7 +363,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
       }
     }
     $allData = $this->getAllData();
-    $person = $allData[$userId->getUserId($token)];
+    $tmpUserId = $userId->getUserId($token);
+    $person = isset($allData[$tmpUserId]) ? $allData[$tmpUserId] : array();
     switch ($groupId->getType()) {
       case 'self':
         foreach ($fields as $key => $present) {
@@ -383,7 +385,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   public function deletePersonData($userId, GroupId $groupId, $appId, $fields, SecurityToken $token) {
     $db = $this->getDb();
     $allData = $this->getAllData();
-    if ($fields == null || $fields[0] == '*') {
+    if ($fields == null || (isset($fields[0]) && $fields[0] == '*')) {
       $allData[$userId->getUserId($token)] = null;
       $db[self::$DATA_TABLE] = $allData;
       $this->saveDb($db);
@@ -632,7 +634,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     try {
       if (! isset($messagesTable[$userId->getUserId($token)])) {
         $messagesTable[$userId->getUserId($token)] = array();
-      } else if (isset($messagesTable[$userId->getUserId($token)][$msgCollection['id']])) {
+      } else if (isset($msgCollection['id']) && isset($messagesTable[$userId->getUserId($token)][$msgCollection['id']])) {
         throw new SocialSpiException("Message collection already exists.", ResponseError::$BAD_REQUEST);
       }
       $msgCollection['total'] = 0;
@@ -717,7 +719,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     foreach ($all[$userId->getUserId($token)] as $id => $album) {
       if (empty($albumIds) || in_array($id, $albumIds)) {
         $results[] = $album;
-        $album['mediaItemCount'] = count($allMediaItems[$id]);
+        $album['mediaItemCount'] = isset($allMediaItems[$id]) ? count($allMediaItems[$id]) : 0;
       }
     }
     if ($options) {
@@ -815,7 +817,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   public function createMediaItem($userId, $groupId, $mediaItem, $data, $token) {
     $all = $this->getAllMediaItems();
     $albumId = $mediaItem['albumId'];
-    $id = count($all[$albumId]) + 1;
+    $id = isset($all[$albumId]) ? (count($all[$albumId]) + 1) : 0;
     $mediaItem['id'] = $id;
     $mediaItem['lastUpdated'] = time();
     if (isset($mediaItem['type'])) {
@@ -824,7 +826,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         unset($mediaItem['type']);
       }
     }
-    if (! $all[$albumId]) {
+    if (isset($all[$albumId]) && (! $all[$albumId])) {
       $all[$albumId] = array();
     }
     $all[$albumId][$id] = $mediaItem;

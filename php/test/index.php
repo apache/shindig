@@ -21,6 +21,7 @@
 @date_default_timezone_set(@date_default_timezone_get());
 set_include_path(realpath("../") . PATH_SEPARATOR . realpath("../external/"));
 error_reporting(E_ALL | E_STRICT);
+set_time_limit(60);
 
 require_once "PHPUnit/Framework/TestSuite.php";
 require_once "PHPUnit/TextUI/TestRunner.php";

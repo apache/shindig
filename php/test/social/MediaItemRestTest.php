@@ -150,7 +150,7 @@ class MediaItemRestTest extends RestBase {
       "userId" : "example.org:34KJDCSKJN2HHF0DW20394",
       "mediaItems" : [ {
           "id": ' . $mediaItem['id'] . ',
-          "albumId": ' . $mediaItem['albumId'] . '
+          "albumId": "' . $mediaItem['albumId'] . '"
         }
       ]
     }';

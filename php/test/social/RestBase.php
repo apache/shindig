@@ -30,8 +30,12 @@ class RestBase extends PHPUnit_Framework_TestCase {
    */
   private $securityToken = '1:1:1:partuza:test.com:1:0';
   // The server to test against. You may need to add shindig to 127.0.0.1 mapping in /etc/hosts.
-  private $restUrl = 'http://shindig/social/rest';
-  
+  private $restUrl = '';
+
+  public function __construct() {
+    $this->restUrl = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/social/rest';
+  }
+
   protected function curlRest($url, $postData, $contentType, $method = 'POST') {
     $ch = curl_init();
     if (substr($url, 0, 1) != '/') {

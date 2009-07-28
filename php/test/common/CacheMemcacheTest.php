@@ -46,7 +46,12 @@ class CacheMemcacheTest extends PHPUnit_Framework_TestCase {
     }
     parent::setUp();
     $this->time = new MockRequestTime();
-    $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache', $this->time);
+    try {
+      $this->cache = Cache::createCache('CacheStorageMemcache', 'TestCache', $this->time);
+    } catch (Exception $e) {
+      $message = 'memcache server can not connect';
+      throw new PHPUnit_Framework_SkippedTestSuiteError($message);
+    }
     if (! is_resource($this->cache)) {
       $message = 'memcache server can not connect';
       throw new PHPUnit_Framework_SkippedTestSuiteError($message);
