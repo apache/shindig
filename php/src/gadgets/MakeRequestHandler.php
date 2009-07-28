@@ -93,6 +93,12 @@ class MakeRequestHandler extends ProxyBase {
     $basicRemoteContent = new BasicRemoteContent($basicFetcher, $this->signingFetcherFactory, $signer);
     $request = $this->buildRequest($url, $method, $signer);
     $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+    if (! empty($_REQUEST['signViewer']) && $_REQUEST['signViewer'] == 'false') {
+      $request->getOptions()->viewerSigned = false;
+    }
+    if (! empty($_REQUEST['signOwner']) && $_REQUEST['signOwner'] == 'false') {
+      $request->getOptions()->ownerSigned = false;
+    }
     return $basicRemoteContent->fetch($request);
   }
 

@@ -80,6 +80,8 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
       $token = $gadget->gadgetContext->extractAndValidateToken($gadgetSigner);
       $request->setToken($token);
       $request->setAuthType($authz);
+      $request->getOptions()->ownerSigned = $this->getSignOwner($view);
+      $request->getOptions()->viewerSigned = $this->getSignViewer($view);
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
     }
     $basicFetcher = new BasicRemoteContentFetcher();
@@ -152,4 +154,26 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
   private function getAuthz($view) {
     return ! empty($view['authz']) ? strtolower($view['authz']) : 'none';
   }
+
+
+  /**
+   * Returns the signOwner attribute of the view (true or false, default is true)
+   *
+   * @param array $view
+   * @return string signOwner attribute
+   */
+  private function getSignOwner($view) {
+    return ! empty($view['signOwner']) && strcasecmp($view['signOwner'], 'false') == 0 ? false : true;
+  }
+
+  /**
+   * Returns the signViewer attribute of the view (true or false, default is true)
+   *
+   * @param array $view
+   * @return string signViewer attribute
+   */
+  private function getSignViewer($view) {
+    return ! empty($view['signViewer']) && strcasecmp($view['signViewer'], 'false') == 0 ? false : true;
+  }
+
 }

@@ -145,7 +145,7 @@ class SigningFetcher extends RemoteContentFetcher {
       if ($signBody && isset($postParams)) {
         $msgParams = array_merge($msgParams, $postParams);
       }
-      $this->addOpenSocialParams($msgParams, $request->getToken());
+      $this->addOpenSocialParams($msgParams, $request->getToken(), $request->getOptions()->ownerSigned, $request->getOptions()->viewerSigned);
       $this->addOAuthParams($msgParams, $request->getToken());
       $consumer = new OAuthConsumer(NULL, NULL, NULL);
       $consumer->setProperty(OAuthSignatureMethod_RSA_SHA1::$PRIVATE_KEY, $this->privateKeyObject);
@@ -197,22 +197,28 @@ class SigningFetcher extends RemoteContentFetcher {
     }
   }
 
-  private function addOpenSocialParams(&$msgParams, SecurityToken $token) {
-    $owner = $token->getOwnerId();
-    if ($owner != null) {
-      $msgParams[SigningFetcher::$OPENSOCIAL_OWNERID] = $owner;
+  private function addOpenSocialParams(&$msgParams, SecurityToken $token, $signOwner, $signViewer) {
+    if ($signOwner) {
+      $owner = $token->getOwnerId();
+      if ($owner != null) {
+	$msgParams[SigningFetcher::$OPENSOCIAL_OWNERID] = $owner;
+      }
     }
-    $viewer = $token->getViewerId();
-    if ($viewer != null) {
-      $msgParams[SigningFetcher::$OPENSOCIAL_VIEWERID] = $viewer;
+    if ($signViewer) {
+      $viewer = $token->getViewerId();
+      if ($viewer != null) {
+	$msgParams[SigningFetcher::$OPENSOCIAL_VIEWERID] = $viewer;
+      }
     }
-    $app = $token->getAppId();
-    if ($app != null) {
-      $msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
-    }
-    $url = $token->getAppUrl();
-    if ($url != null) {
-      $msgParams[SigningFetcher::$OPENSOCIAL_APPURL] = $url;
+    if ($signOwner || $signViewer) {
+      $app = $token->getAppId();
+      if ($app != null) {
+	$msgParams[SigningFetcher::$OPENSOCIAL_APPID] = $app;
+      }
+      $url = $token->getAppUrl();
+      if ($url != null) {
+	$msgParams[SigningFetcher::$OPENSOCIAL_APPURL] = $url;
+      }
     }
   }
 

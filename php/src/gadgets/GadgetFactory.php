@@ -195,33 +195,46 @@ class GadgetFactory {
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
         if (!empty($locale['messages'])) {
           // locale matches the current context, add it to the requests queue
-          $unsignedRequests[] = $locale['messages'];
+	  $request = new RemoteContentRequest($locale['messages']);
+	  $request->createRemoteContentRequestWithUri($locale['messages']);
+	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+          $unsignedRequests[] = $request;
         }
       } else {
         // remove any locales that are not applicable to this context
         unset($gadget->gadgetSpec->locales[$key]);
       }
     }
+
     // Add preloads to the request queue
     foreach ($gadget->getPreloads() as $preload) {
       if (!empty($preload['href'])) {
-        if (!empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
-          if ($this->token == '') {
-            throw new GadgetException("Signed preloading requested, but no valid security token set");
-          }
-          $signedRequests[] = $preload['href'];
-        } else {
-          $unsignedRequests[] = $preload['href'];
-        }
+	$request = new RemoteContentRequest($preload['href']);
+	if (!empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
+	  if ($this->token == '') {
+	    throw new GadgetException("Signed preloading requested, but no valid security token set");
+	  }
+	  $request = new RemoteContentRequest($preload['href']);
+	  $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+	  $request->setNotSignedUri($preload['href']);
+	  $request->setToken($this->token);
+	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+	  if (strcasecmp($preload['signViewer'], 'false') == 0) {
+	    $request->getOptions()->viewerSigned = false;
+	  }
+	  if (strcasecmp($preload['signOwner'], 'false') == 0) {
+	    $request->getOptions()->ownerSigned = false;
+	  }
+	  $signedRequests[] = $request;
+	} else {
+	  $request->createRemoteContentRequestWithUri($preload['href']);
+	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+	  $unsignedRequests[] = $request;
+	}
       }
     }
+
     // Perform the non-signed requests
-    foreach ($unsignedRequests as $key => $requestUrl) {
-      $request = new RemoteContentRequest($requestUrl);
-      $request->createRemoteContentRequestWithUri($requestUrl);
-      $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
-      $unsignedRequests[$key] = $request;
-    }
     $responses = array();
     if (count($unsignedRequests)) {
       $brc = new BasicRemoteContent();
@@ -233,14 +246,6 @@ class GadgetFactory {
       }
     }
     // Perform the signed requests
-    foreach ($signedRequests as $key => $requestUrl) {
-      $request = new RemoteContentRequest($requestUrl);
-      $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
-      $request->setNotSignedUri($requestUrl);
-      $request->setToken($this->token);
-      $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
-      $signedRequests[$key] = $request;
-    }
     if (count($signedRequests)) {
     	$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
       $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
