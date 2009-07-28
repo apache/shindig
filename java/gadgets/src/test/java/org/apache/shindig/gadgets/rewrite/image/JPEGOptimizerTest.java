@@ -97,6 +97,8 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
       fail("Should have failed with OutOfMemory exception");
     } catch (OutOfMemoryError oome) {
       // Currently we expect an OutOfMemory error. Working on this with Sanselan
+    } catch (NullPointerException npe) {
+      // For IBM JVM, NPE is thrown, bug: SANSELAN-23
     }
   }
 

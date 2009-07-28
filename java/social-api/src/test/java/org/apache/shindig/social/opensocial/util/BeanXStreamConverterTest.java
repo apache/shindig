@@ -34,6 +34,8 @@ import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
+import org.custommonkey.xmlunit.XMLAssert;
+import org.custommonkey.xmlunit.XMLUnit;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -190,7 +192,7 @@ public class BeanXStreamConverterTest extends TestCase {
         .deleteWhitespace(xml));
   }
 
-  public void testElementNamesInList() throws XmlException {
+  public void testElementNamesInList() throws Exception {
 
     List<Activity> activities = Lists.newArrayList();
     activities.add(activity);
@@ -235,8 +237,8 @@ public class BeanXStreamConverterTest extends TestCase {
         + "</list.container>"
         + "</response>";
     expectedXml = XSDValidator.insertSchema(expectedXml, XMLSCHEMA, true);
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
   public void testPerson1() throws XmlException, IOException {

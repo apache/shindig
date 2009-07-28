@@ -20,6 +20,10 @@ package org.apache.shindig.protocol.conversion;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.protocol.model.TestModel;
+import org.custommonkey.xmlunit.Diff;
+import org.custommonkey.xmlunit.XMLAssert;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.custommonkey.xmlunit.examples.RecursiveElementNameAndTextQualifier;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -43,7 +47,11 @@ public class BeanXmlConverterTest extends TestCase {
 
   public void testCarToXml() throws Exception {
     String xml = beanXmlConverter.convertToXml(car);
-    assertEquals(xml, TestModel.Car.DEFAULT_XML);
+    XMLUnit.setIgnoreWhitespace(true);
+    Diff diff;
+    diff = new Diff(TestModel.Car.DEFAULT_XML, xml);
+    diff.overrideElementQualifier(new RecursiveElementNameAndTextQualifier());
+    XMLAssert.assertXMLEqual(diff, true);
   }
 
   public void xxxtestMapsToXml() throws Exception {

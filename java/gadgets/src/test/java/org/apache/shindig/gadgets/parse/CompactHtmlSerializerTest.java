@@ -54,6 +54,7 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments.html");
     String expected = loadFile(
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments-expected.html");
+    expected = removeDoctypeForXml4j(expected);
     parseAndCompareBalanced(content, expected, full);
   }
 

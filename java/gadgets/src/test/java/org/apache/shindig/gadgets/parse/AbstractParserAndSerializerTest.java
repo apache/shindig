@@ -22,6 +22,7 @@ package org.apache.shindig.gadgets.parse;
 import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.cyberneko.html.xercesbridge.XercesBridge;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -44,5 +45,11 @@ public abstract class AbstractParserAndSerializerTest extends TestCase {
     Document document = parser.parseDom(content);
     expected = StringUtils.replace(expected, EOL, "\n");
     assertEquals(expected, HtmlSerialization.serialize(document));
+  }
+  
+  protected String removeDoctypeForXml4j(String content) {
+    String VERSION = XercesBridge.getInstance().getVersion();
+    return VERSION.startsWith("XML4J") ? content.replaceFirst("[^\n]*\n", "")
+        : content;
   }
 }

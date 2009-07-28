@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 
 import junit.framework.TestCase;
 
-import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
@@ -42,7 +41,8 @@ import org.apache.shindig.social.opensocial.model.ListField;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Person;
 
-import org.apache.commons.lang.StringUtils;
+import org.custommonkey.xmlunit.XMLAssert;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -153,11 +153,11 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + " <osearch:startIndex>0</osearch:startIndex> "
         + " <osearch:totalResults>2</osearch:totalResults> "
         + " <osearch:itemsPerPage>2</osearch:itemsPerPage></feed> ";
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
-  public void testMapToXml() throws XmlException {
+  public void testMapToXml() throws Exception {
     Map<String, String> m = Maps.newLinkedHashMap();
     m.put("key1", "value1");
     m.put("key2", "value2");
@@ -174,12 +174,11 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "  <osearch:startIndex>0</osearch:startIndex>"
         + "  <osearch:totalResults>2</osearch:totalResults>"
         + "  <osearch:itemsPerPage>2</osearch:itemsPerPage></feed>";
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
-
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
-  public void testEmptyList() throws XmlException {
+  public void testEmptyList() throws Exception {
     List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
     XmlUtil.parse(xml);
@@ -189,8 +188,8 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
 
     List<List<String>> emptyLists = Lists.newArrayList();
     List<String> emptyList = Lists.newArrayList();
@@ -205,12 +204,11 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
-
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
-  public void testElementNamesInList() throws XmlException {
+  public void testElementNamesInList() throws Exception {
     List<Activity> activities = Lists.newArrayList();
     activities.add(activity);
     activities.add(activity);
@@ -253,9 +251,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage>" + "</feed>";
-    assertEquals(StringUtils.deleteWhitespace(expectedXml), StringUtils
-        .deleteWhitespace(xml));
-
+	XMLUnit.setIgnoreWhitespace(true);
+	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
-
 }

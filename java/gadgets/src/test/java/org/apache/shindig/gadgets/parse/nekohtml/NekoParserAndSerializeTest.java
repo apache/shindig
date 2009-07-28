@@ -34,7 +34,8 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     // Note that doctype is properly retained
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-expected.html");
-    parseAndCompareBalanced(content, expected, full);
+    String expected_full = removeDoctypeForXml4j(expected);
+    parseAndCompareBalanced(content, expected_full, full);
     parseAndCompareBalanced(content, expected, simple);
   }
 

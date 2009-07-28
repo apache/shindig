@@ -52,9 +52,11 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   private static final String SPEC_URL = "http://example.org/gadget.xml";
   private static final String TYPE_URL_HREF_HOST = "opensocial.org";
   private static final String TYPE_URL_HREF_PATH = "/app/foo";
-  private static final String TYPE_URL_HREF_QUERY = "foo=bar&bar=baz";
-  private static final String TYPE_URL_HREF
-      = "http://" + TYPE_URL_HREF_HOST + TYPE_URL_HREF_PATH + '?' + TYPE_URL_HREF_QUERY;
+  private static final String TYPE_URL_HREF_QUERY_FOO = "foo=bar";
+  private static final String TYPE_URL_HREF_QUERY_BAR = "bar=baz";
+  private static final String TYPE_URL_HREF = "http://" + TYPE_URL_HREF_HOST
+      + TYPE_URL_HREF_PATH + '?' + TYPE_URL_HREF_QUERY_FOO + '&'
+      + TYPE_URL_HREF_QUERY_BAR;
   private static final String UP_NAME = "user-pref-name";
   private static final String UP_VALUE = "user-pref-value";
   private static final String CONTAINER = "shindig";
@@ -219,7 +221,9 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
 
     assertEquals(TYPE_URL_HREF_HOST, iframeUrl.getAuthority());
     assertEquals(TYPE_URL_HREF_PATH, iframeUrl.getPath());
-    StringAssert.assertContains(TYPE_URL_HREF_QUERY, iframeUrl.getQuery());
+    String query = iframeUrl.getQuery();
+    StringAssert.assertContains(TYPE_URL_HREF_QUERY_FOO, query);
+    StringAssert.assertContains(TYPE_URL_HREF_QUERY_BAR, query);
     StringAssert.assertContains("container=" + CONTAINER, iframeUrl.getQuery());
     StringAssert.assertContains("up_" + UP_NAME + '=' + UP_VALUE, iframeUrl.getQuery());
     StringAssert.assertContains("mid=" + MODULE_ID, iframeUrl.getQuery());

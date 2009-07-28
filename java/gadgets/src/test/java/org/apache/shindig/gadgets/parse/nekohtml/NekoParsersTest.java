@@ -23,6 +23,7 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.cyberneko.html.xercesbridge.XercesBridge;
 import org.w3c.dom.Document;
 
 import junit.framework.TestCase;
@@ -46,7 +47,8 @@ public class NekoParsersTest extends TestCase {
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test.html"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-expected.html"));
-    parseAndCompareBalanced(content, expected, full);
+    String expected_full = removeDoctypeForXml4j(expected);
+    parseAndCompareBalanced(content, expected_full, full);
     parseAndCompareBalanced(content, expected, simple);
   }
 
@@ -86,7 +88,8 @@ public class NekoParsersTest extends TestCase {
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream(
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands-expected.html"));
-    parseAndCompareBalanced(content, expected, full);
+    String expected_full = removeDoctypeForXml4j(expected);
+    parseAndCompareBalanced(content, expected_full, full);
     parseAndCompareBalanced(content, expected, simple);
   }
 
@@ -95,5 +98,11 @@ public class NekoParsersTest extends TestCase {
     Document document = parser.parseDom(content);
     expected = StringUtils.replace(expected, EOL, "\n");
     assertEquals(expected, HtmlSerialization.serialize(document));
+  }
+
+  protected String removeDoctypeForXml4j(String content) {
+    String VERSION = XercesBridge.getInstance().getVersion();
+    return VERSION.startsWith("XML4J") ? content.replaceFirst("[^\n]*\n", "")
+        : content;
   }
 }
