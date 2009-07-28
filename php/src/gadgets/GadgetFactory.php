@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -69,7 +70,7 @@ class GadgetFactory {
    */
   private function parseFeatures(Gadget &$gadget) {
     $found = $missing = array();
-    if (!$this->context->getRegistry()->resolveFeatures(array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures), $found, $missing)) {
+    if (! $this->context->getRegistry()->resolveFeatures(array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures), $found, $missing)) {
       $requiredMissing = false;
       foreach ($missing as $featureName) {
         if (in_array($featureName, $gadget->gadgetSpec->requiredFeatures)) {
@@ -78,7 +79,7 @@ class GadgetFactory {
         }
       }
       if ($requiredMissing) {
-        throw new GadgetException("Unknown features: ".implode(',', $missing));
+        throw new GadgetException("Unknown features: " . implode(',', $missing));
       }
     }
     unset($gadget->gadgetSpec->optionalFeatures);
@@ -107,7 +108,7 @@ class GadgetFactory {
       }
     }
     // Apply substitutions to the preloads
-    foreach ($gadget->gadgetSpec->preloads as $key  => $preload) {
+    foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
       $gadget->gadgetSpec->preloads[$key]['body'] = $gadget->substitutions->substitute($preload['body']);
     }
   }
@@ -133,6 +134,7 @@ class GadgetFactory {
       $gadget->substitutions->addSubstitution('UP', $gadget->substitutions->substitute($pref['name']), $gadget->substitutions->substitute($pref['value']));
     }
   }
+
   /**
    * Process the UserPrefs values based on the current context
    *
@@ -140,7 +142,7 @@ class GadgetFactory {
    */
   private function parseUserPrefs(Gadget &$gadget) {
     foreach ($gadget->gadgetSpec->userPrefs as $key => $pref) {
-      $queryKey = 'up_'.$pref['name'];
+      $queryKey = 'up_' . $pref['name'];
       $gadget->gadgetSpec->userPrefs[$key]['value'] = isset($_GET[$queryKey]) ? trim(urldecode($_GET[$queryKey])) : $pref['defaultValue'];
     }
   }
@@ -158,7 +160,7 @@ class GadgetFactory {
     if (count($gadget->gadgetSpec->locales)) {
       $contextLocale = $this->context->getLocale();
       $locales = $gadget->gadgetSpec->locales;
-      $gadget->rightToLeft  = false;
+      $gadget->rightToLeft = false;
       $full = $partial = $all = null;
       foreach ($locales as $locale) {
         if ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country']) {
@@ -193,11 +195,11 @@ class GadgetFactory {
     foreach ($gadget->getLocales() as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
-        if (!empty($locale['messages'])) {
+        if (! empty($locale['messages'])) {
           // locale matches the current context, add it to the requests queue
-	  $request = new RemoteContentRequest($locale['messages']);
-	  $request->createRemoteContentRequestWithUri($locale['messages']);
-	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+          $request = new RemoteContentRequest($locale['messages']);
+          $request->createRemoteContentRequestWithUri($locale['messages']);
+          $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
           $unsignedRequests[] = $request;
         }
       } else {
@@ -205,35 +207,35 @@ class GadgetFactory {
         unset($gadget->gadgetSpec->locales[$key]);
       }
     }
-
-    // Add preloads to the request queue
-    foreach ($gadget->getPreloads() as $preload) {
-      if (!empty($preload['href'])) {
-	$request = new RemoteContentRequest($preload['href']);
-	if (!empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
-	  if ($this->token == '') {
-	    throw new GadgetException("Signed preloading requested, but no valid security token set");
-	  }
-	  $request = new RemoteContentRequest($preload['href']);
-	  $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
-	  $request->setNotSignedUri($preload['href']);
-	  $request->setToken($this->token);
-	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
-	  if (strcasecmp($preload['signViewer'], 'false') == 0) {
-	    $request->getOptions()->viewerSigned = false;
-	  }
-	  if (strcasecmp($preload['signOwner'], 'false') == 0) {
-	    $request->getOptions()->ownerSigned = false;
-	  }
-	  $signedRequests[] = $request;
-	} else {
-	  $request->createRemoteContentRequestWithUri($preload['href']);
-	  $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
-	  $unsignedRequests[] = $request;
-	}
+    if (! $gadget->gadgetContext instanceof MetadataGadgetContext) {
+      // Add preloads to the request queue
+      foreach ($gadget->getPreloads() as $preload) {
+        if (! empty($preload['href'])) {
+          $request = new RemoteContentRequest($preload['href']);
+          if (! empty($preload['authz']) && $preload['authz'] == 'SIGNED') {
+            if ($this->token == '') {
+              throw new GadgetException("Signed preloading requested, but no valid security token set");
+            }
+            $request = new RemoteContentRequest($preload['href']);
+            $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
+            $request->setNotSignedUri($preload['href']);
+            $request->setToken($this->token);
+            $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+            if (strcasecmp($preload['signViewer'], 'false') == 0) {
+              $request->getOptions()->viewerSigned = false;
+            }
+            if (strcasecmp($preload['signOwner'], 'false') == 0) {
+              $request->getOptions()->ownerSigned = false;
+            }
+            $signedRequests[] = $request;
+          } else {
+            $request->createRemoteContentRequestWithUri($preload['href']);
+            $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+            $unsignedRequests[] = $request;
+          }
+        }
       }
     }
-
     // Perform the non-signed requests
     $responses = array();
     if (count($unsignedRequests)) {
@@ -247,7 +249,7 @@ class GadgetFactory {
     }
     // Perform the signed requests
     if (count($signedRequests)) {
-    	$signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
+      $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
       $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
       $resps = $remoteContent->multiFetch($signedRequests);
       foreach ($resps as $response) {
@@ -258,13 +260,13 @@ class GadgetFactory {
     }
     // assign the results to the gadget locales and preloads (using the url as the key)
     foreach ($gadget->gadgetSpec->locales as $key => $locale) {
-      if (!empty($locale['messages']) && isset($responses[$locale['messages']]) && $responses[$locale['messages']]['rc'] == 200) {
+      if (! empty($locale['messages']) && isset($responses[$locale['messages']]) && $responses[$locale['messages']]['rc'] == 200) {
         $gadget->gadgetSpec->locales[$key]['messageBundle'] = $this->parseMessageBundle($responses[$locale['messages']]['body']);
       }
     }
     $preloads = array();
     foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
-      if (!empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
+      if (! empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
         $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
       }
     }
@@ -281,7 +283,7 @@ class GadgetFactory {
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($messageBundleData, LIBXML_NOCDATA)) {
-      throw new GadgetSpecException("Error parsing gadget xml:\n".XmlError::getErrors($messageBundleData));
+      throw new GadgetSpecException("Error parsing gadget xml:\n" . XmlError::getErrors($messageBundleData));
     }
     $messageBundle = array();
     if (($messageBundleNode = $doc->getElementsByTagName('messagebundle')) != null && $messageBundleNode->length > 0) {
