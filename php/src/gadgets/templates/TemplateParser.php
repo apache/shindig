@@ -21,15 +21,29 @@
 //TODO os:repeat (and <foo repeat="" var="">) has a var="foo" param that hasn't been implmemented yet
 //TODO for some reason the OSML spec stats you have to <Require feature="osml"> to use the os:Name etc tags yet no such feature exists, and for the code path's here it's not required at all..
 //TODO remove the os-templates javascript if all the templates are rendered on the server (saves many Kb's in gadget size)
-//TODO support for OSML tags (os:name, os:peopleselector, os:badge) and OSML functions (os:render, osx:flash, osx:parsejson, etc)
+//TODO support for OSML tag functions and extensions (os:render, osx:flash, osx:parsejson, etc)
 //TODO support os-template tags on OSML tags, ie this should work: <os:Html if="${Foo}" repeat="${Bar}" />
-
 
 require_once 'ExpressionParser.php';
 
 class TemplateParser {
   private $dataContext;
   private $templateLibrary;
+
+  public function dumpNode($node, $function) {
+    $doc = new DOMDocument(null, 'utf-8');
+    $doc->preserveWhiteSpace = true;
+    $doc->formatOutput = false;
+    $doc->strictErrorChecking = false;
+    $doc->recover = false;
+    $doc->resolveExternals = false;
+    if (! $newNode = @$doc->importNode($node, false)) {
+      echo "[Invalid node, dump failed]<br><br>";
+      return;
+    }
+    $doc->appendChild($newNode);
+    echo "<b>$function (" . get_class($node) . "):</b><br>" . htmlentities(str_replace('<?xml version="" encoding="utf-8"?>', '', $doc->saveXML()) . "\n") . "<br><br>";
+  }
 
   /**
    * Processes an os-template
@@ -40,7 +54,9 @@ class TemplateParser {
     $this->setDataContext($dataContext);
     $this->templateLibrary = $templateLibrary;
     if ($osTemplate instanceof DOMElement) {
-      $this->parseNode($osTemplate);
+      if (($removeNode = $this->parseNode($osTemplate)) !== false) {
+        $removeNode->parentNode->removeChild($removeNode);
+      }
     }
   }
 
@@ -58,22 +74,24 @@ class TemplateParser {
   }
 
   public function parseNode(DOMNode &$node) {
+    $removeNode = false;
     if ($node instanceof DOMText) {
-      if (! $node->isWhitespaceInElementContent() && ! empty($node->wholeText)) {
+      if (! $node->isWhitespaceInElementContent() && ! empty($node->nodeValue)) {
         $this->parseNodeText($node);
       }
     } else {
       $tagName = isset($node->tagName) ? $node->tagName : '';
       if (substr($tagName, 0, 3) == 'os:' || substr($tagName, 0, 4) == 'osx:') {
-        $this->parseOsmlNode($node);
+        $removeNode = $this->parseOsmlNode($node);
       } elseif ($this->templateLibrary->hasTemplate($tagName)) {
         // the tag name refers to an existing template (myapp:EmployeeCard type naming)
         // the extra check on the : character is to make sure this is a name spaced custom tag and not some one trying to override basic html tags (br, img, etc)
         $this->parseLibrary($tagName, $node);
       } else {
-        $this->parseNodeAttributes($node);
+        $removeNode = $this->parseNodeAttributes($node);
       }
     }
+    return is_object($removeNode) ? $removeNode : false;
   }
 
   /**
@@ -117,12 +135,11 @@ class TemplateParser {
     $this->dataContext['My'] = $myContext;
     $ret = $this->templateLibrary->parseTemplate($tagName, $this);
     $this->dataContext['My'] = $previousMy;
-
     if ($ret) {
       // And replace the node with the parsed output
       $ownerDocument = $node->ownerDocument;
       foreach ($ret->childNodes as $childNode) {
-        if ($childNode instanceof DOMElement) {
+        if ($childNode) {
           $importedNode = $ownerDocument->importNode($childNode, true);
           $node->parentNode->insertBefore($importedNode, $node);
         }
@@ -132,7 +149,7 @@ class TemplateParser {
   }
 
   private function parseNodeText(DOMText &$node) {
-    if (strpos($node->wholeText, '${') !== false) {
+    if (strpos($node->nodeValue, '${') !== false) {
       $expressions = array();
       preg_match_all('/(\$\{)(.*)(\})/imsxU', $node->wholeText, $expressions);
       for ($i = 0; $i < count($expressions[0]); $i ++) {
@@ -140,7 +157,7 @@ class TemplateParser {
         $expression = $expressions[2][$i];
         $expressionResult = ExpressionParser::evaluate($expression, $this->dataContext);
         $stringVal = htmlentities(ExpressionParser::stringValue($expressionResult), ENT_QUOTES, 'UTF-8');
-        $node->nodeValue = str_replace($toReplace, $stringVal, $node->wholeText);
+        $node->nodeValue = str_replace($toReplace, $stringVal, $node->nodeValue);
       }
     }
   }
@@ -177,18 +194,18 @@ class TemplateParser {
                   $this->parseNode($newNode, true);
                 }
                 // Remove the original (unparsed) node
-                $node->parentNode->removeChild($node);
                 // And remove the loop data context entries
                 $this->dataContext['Cur'] = array();
                 unset($this->dataContext['Context']['Index']);
                 unset($this->dataContext['Context']['Count']);
-                return;
+                return $node;
                 break;
 
               case 'if':
                 if (! $expressionResult) {
-                  $node->parentNode->removeChild($node);
-                  return; // Since this node is removed, no sense in evaluating it's other attributes and/or child nodes
+                  return $node;
+                } else {
+                  $node->removeAttribute('if');
                 }
                 break;
 
@@ -244,11 +261,21 @@ class TemplateParser {
     }
     // if a repeat attribute was found, don't recurse on it's child nodes, the repeat handling already did that
     if (isset($node->childNodes) && $node->childNodes->length > 0) {
+      $removeNodes = array();
       // recursive loop to all this node's children
       foreach ($node->childNodes as $childNode) {
-        $this->parseNode($childNode);
+        if (($removeNode = $this->parseNode($childNode)) !== false) {
+          $removeNodes[] = $removeNode;
+        }
       }
+      if (count($removeNodes)) {
+        foreach ($removeNodes as $removeNode) {
+          $removeNode->parentNode->removeChild($removeNode);
+        }
+      }
+
     }
+    return false;
   }
 
   /**
@@ -260,8 +287,7 @@ class TemplateParser {
     $tagName = strtolower($node->tagName);
     switch ($tagName) {
 
-      // Control statements
-
+      /****** Control statements ******/
 
       case 'os:repeat':
         if (! $node->getAttribute('expression')) {
@@ -281,8 +307,8 @@ class TemplateParser {
           $this->dataContext['Context']['Index'] = $index;
           foreach ($node->childNodes as $childNode) {
             $newNode = $childNode->cloneNode(true);
+            $newNode = $node->parentNode->insertBefore($newNode, $node);
             $this->parseNode($newNode);
-            $node->parentNode->insertBefore($newNode, $node);
           }
         }
         $node->parentNode->removeChild($node);
@@ -297,39 +323,34 @@ class TemplateParser {
           throw new ExpressionException("Invalid os:If tag, missing condition attribute");
         }
         preg_match_all('/(\$\{)(.*)(\})/imsxU', $node->getAttribute('condition'), $expressions);
+        if (! count($expressions[2])) {
+          throw new ExpressionException("Invalid os:If tag, missing condition expression");
+        }
         $expression = $expressions[2][0];
         $expressionResult = ExpressionParser::evaluate($expression, $this->dataContext);
         if ($expressionResult) {
           foreach ($node->childNodes as $childNode) {
             $newNode = $childNode->cloneNode(true);
             $this->parseNode($newNode);
-            $node->insertBefore($newNode);
+            $newNode = $node->parentNode->insertBefore($newNode, $node);
           }
         }
-        $node->parentNode->removeChild($node);
+        return $node;
         break;
 
-      // OSML tags (os: name space)
-
+      /****** OSML tags (os: name space) ******/
 
       case 'os:name':
         $this->parseLibrary('os:Name', $node);
         break;
 
       case 'os:badge':
-        $myContext = $this->nodeAttributesToScope();
-        $previousMy = $this->dataContext['My'];
-        $this->dataContext['My'] = $myContext;
-        $ret = $this->templateLibrary->parseTemplate('os:Badge', $this);
-        $this->dataContext['My'] = $previousMy;
+        $this->parseLibrary('os:Badge', $node);
         break;
 
       case 'os:peopleselector':
-        $myContext = $this->nodeAttributesToScope();
-        $previousMy = $this->dataContext['My'];
-        $this->dataContext['My'] = $myContext;
-        $ret = $this->templateLibrary->parseTemplate('os:PeopleSelector', $this);
-        $this->dataContext['My'] = $previousMy;
+        $this->parseLibrary('os:PeopleSelector', $node);
+
         break;
 
       case 'os:html':
@@ -342,8 +363,7 @@ class TemplateParser {
       case 'os:render':
         break;
 
-      // Extension - Tags
-
+      /****** Extension - Tags ******/
 
       case 'osx:flash':
         break;
@@ -354,8 +374,7 @@ class TemplateParser {
       case 'osx:navigatetoperson':
         break;
 
-      // Extension - Functions
-
+      /****** Extension - Functions ******/
 
       case 'osx:parsejson':
         break;
@@ -368,8 +387,7 @@ class TemplateParser {
 
       case 'osx:urldecode':
         break;
-
     }
+    return false;
   }
-
 }

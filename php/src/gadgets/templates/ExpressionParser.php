@@ -127,7 +127,10 @@ class ExpressionParser {
     }
     if (! $found) {
       // variable wasn't found in Cur, My and Top scope, throw an error
-      throw new ExpressionException("Unknown variable: " . htmlentities($var) . ($var != $key ? " ($key)" : ''));
+      // throw new ExpressionException("Unknown variable: " . htmlentities($var) . ($var != $key ? " ($key)" : ''));
+
+      //FIXME: OSML templates seem to be build on the assumption that an non-existing var returns NULL, double check if that's how it should be
+      return null;
     }
     return $context;
   }

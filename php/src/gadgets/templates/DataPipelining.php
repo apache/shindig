@@ -18,6 +18,8 @@
  * under the License.
  */
 
+require_once 'ExpressionParser.php';
+
 //TODO verify os:HttpRequest
 
 class DataPipelining {
@@ -160,6 +162,9 @@ class DataPipelining {
           unset($request['key']);
           unset($request['method']);
           unset($request['type']);
+          if (isset($request['fields'])) {
+          	$request['fields'] = explode(',', $request['fields']);
+          }
           $jsonRequests[] = array('method' => $method, 'id' => $id, 'params' => $request);
           break;
         case 'os:HttpRequest':

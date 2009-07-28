@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,7 +27,7 @@
  * </Require>
  */
 class TemplateLibrary {
-  private $osmlTags = array('os:Name', 'os:PeopleSelector', 'os:badge');
+  private $osmlTags = array('os:Name', 'os:PeopleSelector', 'os:Badge');
   private $templates = array();
   private $osmlLoaded = false;
   private $gadgetContext;
@@ -39,8 +38,13 @@ class TemplateLibrary {
 
   public function parseTemplate($tag, $caller) {
     $template = $this->getTemplate($tag);
-    if ($template->dom instanceof DOMElement) {
+    if ($template->dom) {
       $templateDomCopy = new DOMDocument(null, 'utf-8');
+      $templateDomCopy->preserveWhiteSpace = true;
+      $templateDomCopy->formatOutput = false;
+      $templateDomCopy->strictErrorChecking = false;
+      $templateDomCopy->recover = false;
+      $templateDomCopy->resolveExternals = false;
       // If this template pulls in any new style and/or javascript, add those to the document
       if ($style = $template->getStyle()) {
         $styleNode = $templateDomCopy->createElement('style');
@@ -54,12 +58,18 @@ class TemplateLibrary {
         $templateDomCopy->appendChild($scriptNode);
       }
       // Copy the DOM structure since parseNode() modifies the DOM structure directly
+      $removeNodes = array();
       foreach ($template->dom->childNodes as $node) {
-        $importedNode = $templateDomCopy->importNode($node, true);
-        $templateDomCopy->appendChild($importedNode);
+        $newNode = $templateDomCopy->importNode($node, true);
+        $newNode = $templateDomCopy->appendChild($newNode);
+        // Parse the template's DOM using our current data context (which includes the My context for templates)
+        if (($removeNode = $caller->parseNode($newNode)) !== false) {
+        	$removeNodes[] = $removeNode;
+        }
       }
-      // Parse the template's DOM using our current data context (which includes the My context for templates)
-      $caller->parseNode($templateDomCopy);
+     	foreach ($removeNodes as $removeNode) {
+     		$removeNode->parentNode->removeChild($removeNode);
+     	}
       return $templateDomCopy;
     }
     return false;
@@ -111,7 +121,7 @@ class TemplateLibrary {
     }
     // Initialize the templates after scanning the entire structure so that all scripts and styles will be included with each template
     foreach ($templateNodes as $templateNode) {
-    	$templateNode->setAttribute('tag', $tag);
+      $templateNode->setAttribute('tag', $tag);
       $this->addTemplateByNode($templateNode, $globalScript, $globalStyle);
     }
   }
@@ -136,8 +146,8 @@ class TemplateLibrary {
     // Theoretically this could support multiple <Templates> root nodes, which isn't quite spec, but owell
     foreach ($doc->childNodes as $rootNode) {
       $templateNodes = array();
-	    $globalScript = array();
-	    $globalStyle = array();
+      $globalScript = array();
+      $globalStyle = array();
       if (isset($rootNode->tagName) && $rootNode->tagName == 'Templates') {
         foreach ($rootNode->childNodes as $childNode) {
           if (isset($childNode->tagName)) {
