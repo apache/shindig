@@ -62,7 +62,7 @@ class MakeRequestHandler extends ProxyBase {
     header("Content-Type: application/json; charset=utf-8", true);
     $output = '';
     if (isset($_REQUEST['contentType']) && $_REQUEST['contentType'] == 'FEED' && $status == 200) {
-      $this->parseFeed($result, $url);
+      $body = $this->parseFeed($result, $url);
     } else {
       $body = $result->getResponseContent();
     }
