@@ -43,7 +43,7 @@ class GadgetHtmlRenderer extends GadgetBaseRenderer {
     $domRewrite = false;
     if (isset($gadget->gadgetSpec->rewrite) || Config::get('rewrite_by_default')) {
       $domRewrite = true;
-    } elseif (strpos($view['content'], 'text/os-data') !== false || strpos($view['content'], 'text/os-template') !== false) {
+    } elseif ((strpos($view['content'], 'text/os-data') !== false || strpos($view['content'], 'text/os-template') !== false) && ($gadget->gadgetSpec->templatesDisableAutoProcessing == false)) {
       $domRewrite = true;
     }
     if (!$domRewrite) {

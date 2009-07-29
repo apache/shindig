@@ -235,6 +235,15 @@ class GadgetFactory {
           }
         }
       }
+      // Add template libraries to the request queue
+      if ($gadget->gadgetSpec->templatesRequireLibraries) {
+        foreach ($gadget->gadgetSpec->templatesRequireLibraries as $libraryUrl) {
+        	$request = new RemoteContentRequest($libraryUrl);
+          $request->createRemoteContentRequestWithUri($libraryUrl);
+          $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
+          $unsignedRequests[] = $request;
+        }
+      }
     }
     // Perform the non-signed requests
     $responses = array();
@@ -264,13 +273,24 @@ class GadgetFactory {
         $gadget->gadgetSpec->locales[$key]['messageBundle'] = $this->parseMessageBundle($responses[$locale['messages']]['body']);
       }
     }
-    $preloads = array();
-    foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
-      if (! empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
-        $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
-      }
+    if (! $gadget->gadgetContext instanceof MetadataGadgetContext) {
+	    $preloads = array();
+	    foreach ($gadget->gadgetSpec->preloads as $key => $preload) {
+	      if (! empty($preload['href']) && isset($responses[$preload['href']]) && $responses[$preload['href']]['rc'] == 200) {
+	        $preloads[] = array_merge(array('id' => $preload['href']), $responses[$preload['href']]);
+	      }
+	    }
+	    $gadget->gadgetSpec->preloads = $preloads;
+	    if ($gadget->gadgetSpec->templatesRequireLibraries) {
+	    	 $requiredLibraries = array();
+		    foreach ($gadget->gadgetSpec->templatesRequireLibraries as $key => $libraryUrl) {
+		    	if (isset($responses[$libraryUrl]) && $responses[$libraryUrl]['rc'] == 200) {
+		    		$requiredLibraries[$libraryUrl] = $responses[$libraryUrl]['body'];
+		    	}
+		    }
+		    $gadget->gadgetSpec->templatesRequireLibraries = $requiredLibraries;
+	    }
     }
-    $gadget->gadgetSpec->preloads = $preloads;
   }
 
   /**

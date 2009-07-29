@@ -64,4 +64,8 @@ class GadgetSpec {
   public $userPrefs;
   public $rewrite = null;
   public $oauth = null;
+
+  // used to track os-templating
+  public $templatesRequireLibraries = false;
+  public $templatesDisableAutoProcessing = false;
 }

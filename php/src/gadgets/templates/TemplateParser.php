@@ -18,11 +18,9 @@
  * under the License.
  */
 
-//TODO os:repeat (and <foo repeat="" var="">) has a var="foo" param that hasn't been implmemented yet
-//TODO for some reason the OSML spec stats you have to <Require feature="osml"> to use the os:Name etc tags yet no such feature exists, and for the code path's here it's not required at all..
+//TODO support repeat tags on OSML tags, ie this should work: <os:Html repeat="${Bar}" />
+//TODO support os:render
 //TODO remove the os-templates javascript if all the templates are rendered on the server (saves many Kb's in gadget size)
-//TODO support for OSML tag functions and extensions (os:render, osx:flash, osx:parsejson, etc)
-//TODO support os-template tags on OSML tags, ie this should work: <os:Html if="${Foo}" repeat="${Bar}" />
 
 require_once 'ExpressionParser.php';
 
@@ -181,9 +179,19 @@ class TemplateParser {
                 }
                 // Make sure the repeat variable doesn't show up in the cloned nodes (otherwise it would infinit recurse on this->parseNode())
                 $node->removeAttribute('repeat');
+                // Is a named var requested?
+                $variableName = $node->getAttribute('var') ? trim($node->getAttribute('var')) : false;
+                // Store the current 'Cur', index and count state, we might be in a nested repeat loop
+                $previousCount = isset($this->dataContext['Context']['Count']) ? $this->dataContext['Context']['Count'] : null;
+                $previousIndex = isset($this->dataContext['Context']['Index']) ? $this->dataContext['Context']['Index'] : null;
+                $previousCur = $this->dataContext['Cur'];
                 // For information on the loop context, see http://opensocial-resources.googlecode.com/svn/spec/0.9/OpenSocial-Templating.xml#rfc.section.10.1
                 $this->dataContext['Context']['Count'] = count($expressionResult);
                 foreach ($expressionResult as $index => $entry) {
+                  if ($variableName) {
+                    // this is cheating a little since we're not putting it on the top level scope, the variable resolver will check 'Cur' first though so myVar.Something will still resolve correctly
+                    $this->dataContext['Cur'][$variableName] = $entry;
+                  }
                   $this->dataContext['Cur'] = $entry;
                   $this->dataContext['Context']['Index'] = $index;
                   // Clone this node and it's children
@@ -193,11 +201,18 @@ class TemplateParser {
                   // And parse it (using the global + loop context)
                   $this->parseNode($newNode, true);
                 }
-                // Remove the original (unparsed) node
-                // And remove the loop data context entries
-                $this->dataContext['Cur'] = array();
-                unset($this->dataContext['Context']['Index']);
-                unset($this->dataContext['Context']['Count']);
+                // Restore our previous data context state
+                $this->dataContext['Cur'] = $previousCur;
+                if ($previousCount) {
+                  $this->dataContext['Context']['Count'] = $previousCount;
+                } else {
+                  unset($this->dataContext['Context']['Count']);
+                }
+                if ($previousIndex) {
+                  $this->dataContext['Context']['Index'] = $previousIndex;
+                } else {
+                  unset($this->dataContext['Context']['Index']);
+                }
                 return $node;
                 break;
 
@@ -285,6 +300,12 @@ class TemplateParser {
    */
   private function parseOsmlNode(DOMNode &$node) {
     $tagName = strtolower($node->tagName);
+    if (!$this->checkIf($node)) {
+    	// If the OSML tag contains an if attribute and the expression evaluates to false
+    	// flag it for removal and don't process it
+    	return $node;
+    }
+
     switch ($tagName) {
 
       /****** Control statements ******/
@@ -300,9 +321,19 @@ class TemplateParser {
         if (! is_array($expressionResult)) {
           throw new ExpressionException("Can't repeat on a singular var");
         }
+        // Store the current 'Cur', index and count state, we might be in a nested repeat loop
+        $previousCount = isset($this->dataContext['Context']['Count']) ? $this->dataContext['Context']['Count'] : null;
+        $previousIndex = isset($this->dataContext['Context']['Index']) ? $this->dataContext['Context']['Index'] : null;
+        $previousCur = $this->dataContext['Cur'];
+        // Is a named var requested?
+        $variableName = $node->getAttribute('var') ? trim($node->getAttribute('var')) : false;
         // For information on the loop context, see http://opensocial-resources.googlecode.com/svn/spec/0.9/OpenSocial-Templating.xml#rfc.section.10.1
         $this->dataContext['Context']['Count'] = count($expressionResult);
         foreach ($expressionResult as $index => $entry) {
+          if ($variableName) {
+            // this is cheating a little since we're not putting it on the top level scope, the variable resolver will check 'Cur' first though so myVar.Something will still resolve correctly
+            $this->dataContext['Cur'][$variableName] = $entry;
+          }
           $this->dataContext['Cur'] = $entry;
           $this->dataContext['Context']['Index'] = $index;
           foreach ($node->childNodes as $childNode) {
@@ -311,10 +342,19 @@ class TemplateParser {
             $this->parseNode($newNode);
           }
         }
-        $node->parentNode->removeChild($node);
-        $this->dataContext['Cur'] = array();
-        unset($this->dataContext['Context']['Index']);
-        unset($this->dataContext['Context']['Count']);
+        // Restore our previous data context state
+        $this->dataContext['Cur'] = $previousCur;
+        if ($previousCount) {
+          $this->dataContext['Context']['Count'] = $previousCount;
+        } else {
+          unset($this->dataContext['Context']['Count']);
+        }
+        if ($previousIndex) {
+          $this->dataContext['Context']['Index'] = $previousIndex;
+        } else {
+          unset($this->dataContext['Context']['Index']);
+        }
+        return $node;
         break;
 
       case 'os:if':
@@ -350,14 +390,14 @@ class TemplateParser {
 
       case 'os:peopleselector':
         $this->parseLibrary('os:PeopleSelector', $node);
-
         break;
 
       case 'os:html':
         if (! $node->getAttribute('code')) {
           throw new ExpressionException("Invalid os:Html tag, missing code attribute");
         }
-        $node->parentNode->replaceChild($node->ownerDocument->createTextNode($node->getAttribute('code')), $node);
+        $node->parentNode->insertBefore($node->ownerDocument->createTextNode($node->getAttribute('code')), $node);
+        return $node;
         break;
 
       case 'os:render':
@@ -389,5 +429,25 @@ class TemplateParser {
         break;
     }
     return false;
+  }
+
+  /**
+   * Misc function that checks if the OSML tag $node has an if attribute, returns
+   * true if the expression is true or no if attribute is set
+   *
+   * @param DOMElement $node
+   */
+  private function checkIf(DOMElement &$node) {
+    if (($if = $node->getAttribute('if'))) {
+      $expressions = array();
+      preg_match_all('/(\$\{)(.*)(\})/imsxU', $if, $expressions);
+      if (! count($expressions[2])) {
+        throw new ExpressionException("Invalid os:If tag, missing condition expression");
+      }
+      $expression = $expressions[2][0];
+      $expressionResult = ExpressionParser::evaluate($expression, $this->dataContext);
+      return $expressionResult ? true : false;
+    }
+    return true;
   }
 }

@@ -20,10 +20,6 @@
 
 require_once 'src/gadgets/templates/DataPipelining.php';
 
-
-//TODO check if the opensocial-templates feature has disableAutoProcessing = true as param, if so don't
-//TODO if all templates were processed server side, also remove the templates with tag="foo" params to clean up the output
-
 class EmptyClass {
 }
 
@@ -70,6 +66,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * so javascript can take care of them
    */
   public function addTemplates($content) {
+  	// If $this->gadget->gadgetSpec->templatesDisableAutoProcessing == true, unparsedTemplates will be empty, so the setting is ignored here
     if (count($this->unparsedTemplates)) {
       foreach ($this->unparsedTemplates as $key => $val) {
         $content = str_replace("<template_$key></template_$key>", $val . "\n", $content);
@@ -88,6 +85,10 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @param string $content html to parse
    */
   public function parseTemplates($content) {
+  	if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {
+  		// The only code path to this location is if content-rewriting is enabled but disableAutoProcessing = true
+  		return null;
+  	}
     $osTemplates = array();
     $osDataRequests = array();
     // First extract all the os-data tags, and execute those in a single combined request, saves latency
@@ -105,27 +106,31 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     preg_match_all('/(<script.*type="text\/(os-template)".*>)(.*)(<\/script>)/imxsU', $content, $osTemplates);
     $templateLibrary = false;
     if (count($osTemplates[0])) {
-    	// only load the template parser if there's any templates in the gadget content
-    	require_once 'src/gadgets/templates/TemplateParser.php';
+      // only load the template parser if there's any templates in the gadget content
+      require_once 'src/gadgets/templates/TemplateParser.php';
       require_once 'src/gadgets/templates/TemplateLibrary.php';
-    	$templateLibrary = new TemplateLibrary($this->gadget->gadgetContext);
-    }
-    foreach ($osTemplates[0] as $match) {
-      if (($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {
-        // Template was rendered, insert the rendered html into the document
-        $content = str_replace($match, $renderedTemplate, $content);
-      } else {
+      $templateLibrary = new TemplateLibrary($this->gadget->gadgetContext);
+      if ($this->gadget->gadgetSpec->templatesRequireLibraries) {
+      	foreach ($this->gadget->gadgetSpec->templatesRequireLibraries as $library) {
+      		$templateLibrary->addTemplateLibrary($library);
+      	}
+      }
+      foreach ($osTemplates[0] as $match) {
+        if (($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {
+          // Template was rendered, insert the rendered html into the document
+          $content = str_replace($match, $renderedTemplate, $content);
+        } else {
         /*
          * The template could not be rendered, this could happen because:
          * - @require is present, and at least one of the required pieces of data is unavailable
          * - @name is present
          * - @autoUpdate == true
-         * - disableAutoProcessing param on the opensocial-templates feature is true
          * So set a magic marker (<template_$index>) that after the dom document parsing will be replaced with the original script content
          */
-        $index = count($this->unparsedTemplates);
-        $this->unparsedTemplates[$index] = $match;
-        $content = str_replace($match, "<template_$index></template_$index>", $content);
+          $index = count($this->unparsedTemplates);
+          $this->unparsedTemplates[$index] = $match;
+          $content = str_replace($match, "<template_$index></template_$index>", $content);
+        }
       }
     }
     return $content;
@@ -221,25 +226,26 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
       }
       // if $childNode->tag exists, add to global $templateLibraries array, else parse normally
       $childNodeTag = $childNode->getAttribute('tag');
-      if (!empty($childNodeTag)) {
-      	if (isset($this->templateLibraries[$childNode->getAttribute('tag')])) {
-      		throw new ExpressionException("Template ".htmlentities($childNode->getAttribute('tag'))." was already defined");
-      	}
-      	$templateLibrary->addTemplateByNode($childNode);
+      if (! empty($childNodeTag)) {
+        if (isset($this->templateLibraries[$childNode->getAttribute('tag')])) {
+          throw new ExpressionException("Template " . htmlentities($childNode->getAttribute('tag')) . " was already defined");
+        }
+        $templateLibrary->addTemplateByNode($childNode);
       } else {
-	      // Everything checked out, proceeding to render the template
-	      $parser = new TemplateParser();
-	      $parser->process($childNode, $this->dataContext, $templateLibrary);
-	      // unwrap the output, ie we only want the script block's content and not the main <script></script> node
-	      $output = new DOMDocument(null, 'utf-8');
-	      foreach ($childNode->childNodes as $node) {
-	        $outNode = $output->importNode($node, true);
-	        $output->appendChild($outNode);
-	      }
-	      // Restore single tags to their html variant, and remove the xml header
-	      $ret = str_replace(array(
-	          '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', '<br>'), $output->saveXML());
-	      return $ret;
+        // Everything checked out, proceeding to render the template
+        $parser = new TemplateParser();
+        $parser->process($childNode, $this->dataContext, $templateLibrary);
+        // unwrap the output, ie we only want the script block's content and not the main <script></script> node
+        $output = new DOMDocument(null, 'utf-8');
+        foreach ($childNode->childNodes as $node) {
+          $outNode = $output->importNode($node, true);
+          $output->appendChild($outNode);
+        }
+        // Restore single tags to their html variant, and remove the xml header
+        $ret = str_replace(array(
+            '<?xml version="" encoding="utf-8"?>', '<br/>'), array('',
+            '<br>'), $output->saveXML());
+        return $ret;
       }
     }
     return false;

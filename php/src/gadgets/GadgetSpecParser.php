@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,7 +36,7 @@ class GadgetSpecParser {
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($xmlContent, LIBXML_NOCDATA)) {
-      throw new GadgetSpecException("Error parsing gadget xml:\n".XmlError::getErrors($xmlContent));
+      throw new GadgetSpecException("Error parsing gadget xml:\n" . XmlError::getErrors($xmlContent));
     }
     //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have some form of schema
     // violatons, so it's not really practical yet (and slow)
@@ -79,10 +80,21 @@ class GadgetSpecParser {
         if (isset($gadget->views[$view])) {
           $gadget->views[$view]['content'] .= $viewNode->nodeValue;
         } else {
-          $gadget->views[$view] = array('view' => $view, 'type' => $type, 'href' => $href, 'preferedHeight' => $viewNode->getAttribute('prefered_height'), 'preferedWidth' => $viewNode->getAttribute('prefered_width'),
-              'quirks' => $viewNode->getAttribute('quirks'), 'content' => $viewNode->nodeValue, 'authz' => $viewNode->getAttribute('authz'), 'oauthServiceName' => $viewNode->getAttribute('oauth_service_name'),
-              'oauthTokenName' => $viewNode->getAttribute('oauth_token_name'), 'oauthRequestToken' => $viewNode->getAttribute('oauth_request_token'), 'oauthRequestTokenSecret' => $viewNode->getAttribute('oauth_request_token_secret'),
-              'signOwner' => $viewNode->getAttribute('sign_owner'), 'signViewer' => $viewNode->getAttribute('sign_viewer'), 'refreshInterval' => $viewNode->getAttribute('refresh_interval'), 'dataPipelining' => $dataPipeliningRequests);
+          $gadget->views[$view] = array('view' => $view, 'type' => $type,
+              'href' => $href,
+              'preferedHeight' => $viewNode->getAttribute('prefered_height'),
+              'preferedWidth' => $viewNode->getAttribute('prefered_width'),
+              'quirks' => $viewNode->getAttribute('quirks'),
+              'content' => $viewNode->nodeValue,
+              'authz' => $viewNode->getAttribute('authz'),
+              'oauthServiceName' => $viewNode->getAttribute('oauth_service_name'),
+              'oauthTokenName' => $viewNode->getAttribute('oauth_token_name'),
+              'oauthRequestToken' => $viewNode->getAttribute('oauth_request_token'),
+              'oauthRequestTokenSecret' => $viewNode->getAttribute('oauth_request_token_secret'),
+              'signOwner' => $viewNode->getAttribute('sign_owner'),
+              'signViewer' => $viewNode->getAttribute('sign_viewer'),
+              'refreshInterval' => $viewNode->getAttribute('refresh_interval'),
+              'dataPipelining' => $dataPipeliningRequests);
         }
       }
     }
@@ -98,13 +110,18 @@ class GadgetSpecParser {
     $gadget->userPrefs = array();
     if (($userPrefs = $doc->getElementsByTagName('UserPref')) != null) {
       foreach ($userPrefs as $prefNode) {
-        $pref = array('name' => $prefNode->getAttribute('name'), 'displayName' => $prefNode->getAttribute('display_name'), 'datatype' => strtoupper($prefNode->getAttribute('datatype')), 'defaultValue' => $prefNode->getAttribute('default_value'),
+        $pref = array('name' => $prefNode->getAttribute('name'),
+            'displayName' => $prefNode->getAttribute('display_name'),
+            'datatype' => strtoupper($prefNode->getAttribute('datatype')),
+            'defaultValue' => $prefNode->getAttribute('default_value'),
             'required' => $prefNode->getAttribute('required'));
         if ($pref['datatype'] == 'ENUM') {
           if (($enumValues = $prefNode->getElementsByTagName('EnumValue')) != null) {
             $enumVals = array();
             foreach ($enumValues as $enumNode) {
-              $enumVals[] = array('value' => $enumNode->getAttribute('value'), 'displayValue' => $enumNode->getAttribute('display_value'));
+              $enumVals[] = array(
+                  'value' => $enumNode->getAttribute('value'),
+                  'displayValue' => $enumNode->getAttribute('display_value'));
             }
           }
           $pref['enumValues'] = $enumVals;
@@ -124,7 +141,9 @@ class GadgetSpecParser {
     $gadget->links = array();
     if (($links = $doc->getElementsByTagName('link')) != null) {
       foreach ($links as $linkNode) {
-        $gadget->links[] = array('rel' => $linkNode->getAttribute('rel'), 'href' => $linkNode->getAttribute('href'), 'method' => strtoupper($linkNode->getAttribute('method')));
+        $gadget->links[] = array('rel' => $linkNode->getAttribute('rel'),
+            'href' => $linkNode->getAttribute('href'),
+            'method' => strtoupper($linkNode->getAttribute('method')));
       }
     }
   }
@@ -146,8 +165,11 @@ class GadgetSpecParser {
     }
     $modulePrefs = $modulePrefs->item(0);
     // parse the ModulePrefs attributes
-    $knownAttributes = array('title', 'author', 'authorEmail', 'description', 'directoryTitle', 'screenshot', 'thumbnail', 'titleUrl', 'authorAffiliation', 'authorLocation', 'authorPhoto', 'authorAboutme', 'authorQuote', 'authorLink', 'showStats',
-        'showInDirectory', 'string', 'width', 'height', 'category', 'category2', 'singleton', 'renderInline', 'scaling', 'scrolling');
+    $knownAttributes = array('title', 'author', 'authorEmail', 'description',
+        'directoryTitle', 'screenshot', 'thumbnail', 'titleUrl', 'authorAffiliation',
+        'authorLocation', 'authorPhoto', 'authorAboutme', 'authorQuote', 'authorLink',
+        'showStats', 'showInDirectory', 'string', 'width', 'height', 'category',
+        'category2', 'singleton', 'renderInline', 'scaling', 'scrolling');
     foreach ($modulePrefs->attributes as $key => $attribute) {
       $attrValue = trim($attribute->value);
       // var format conversion from directory_title => directoryTitle
@@ -193,6 +215,11 @@ class GadgetSpecParser {
     if (($requiredNodes = $modulePrefs->getElementsByTagName('Require')) != null) {
       foreach ($requiredNodes as $requiredFeature) {
         $gadget->requiredFeatures[] = $requiredFeature->getAttribute('feature');
+        if ($requiredFeature->getAttribute('feature') == 'content-rewrite') {
+          $this->parseContentRewrite($requiredFeature, $gadget);
+        } elseif ($requiredFeature->getAttribute('feature') == 'opensocial-templates') {
+          $this->parseOpenSocialTemplates($requiredFeature, $gadget);
+        }
       }
     }
     if (($optionalNodes = $modulePrefs->getElementsByTagName('Optional')) != null) {
@@ -201,6 +228,8 @@ class GadgetSpecParser {
         // Content-rewrite is a special case since it has Params as child nodes
         if ($optionalFeature->getAttribute('feature') == 'content-rewrite') {
           $this->parseContentRewrite($optionalFeature, $gadget);
+        } elseif ($optionalFeature->getAttribute('feature') == 'opensocial-templates') {
+          $this->parseOpenSocialTemplates($optionalFeature, $gadget);
         }
       }
     }
@@ -252,6 +281,33 @@ class GadgetSpecParser {
         }
         $gadget->oauth = $oauth;
       }
+    }
+  }
+
+  /**
+   * Parses the opensocial-template params (if any), supported params are:
+   * <Require feature="opensocial-templates">
+   *   <Param name="requireLibrary">http://www.example.com/templates.xml</Param>
+   *   <Param name="disableAutoProcessing">false</Param>
+   * </Require>
+   * @param DOMElement $feature
+   * @param GadgetSpec $gadget
+   */
+  private function parseOpenSocialTemplates(DOMElement $feature, GadgetSpec &$gadget) {
+    $requireLibraries = array();
+    if (($paramNodes = $feature->getElementsByTagName('Param')) != null) {
+    	foreach ($paramNodes as $param) {
+	      $paramName = $param->getAttribute('name');
+	      $paramValue = trim($param->nodeValue);
+	      if ($paramName == 'disableAutoProcessing') {
+	      	$gadget->templatesDisableAutoProcessing = $paramValue != 'false';
+	      } elseif ($paramName == 'requireLibrary') {
+	      	$requireLibraries[] = $paramValue;
+	      }
+    	}
+    }
+    if (count($requireLibraries)) {
+    	$gadget->templatesRequireLibraries = $requireLibraries;
     }
   }
 
@@ -311,7 +367,10 @@ class GadgetSpecParser {
     $gadget->preloads = array();
     if (($preloadNodes = $modulePrefs->getElementsByTagName('Preload')) != null) {
       foreach ($preloadNodes as $node) {
-        $gadget->preloads[] = array('href' => $node->getAttribute('href'), 'authz' => strtoupper($node->getAttribute('authz')), 'signViewer' => $node->getAttribute('sign_viewer'), 'signOwner' => $node->getAttribute('sign_owner'));
+        $gadget->preloads[] = array('href' => $node->getAttribute('href'),
+            'authz' => strtoupper($node->getAttribute('authz')),
+            'signViewer' => $node->getAttribute('sign_viewer'),
+            'signOwner' => $node->getAttribute('sign_owner'));
       }
     }
   }
@@ -337,7 +396,10 @@ class GadgetSpecParser {
         }
         $lang = $node->getAttribute('lang') == '' ? 'all' : strtolower($node->getAttribute('lang'));
         $country = $node->getAttribute('country') == '' ? 'all' : strtoupper($node->getAttribute('country'));
-        $gadget->locales[] = array('lang' => $lang, 'country' => $country, 'messages' => $node->getAttribute('messages'), 'languageDirection' => $node->getAttribute('language_direction'), 'messageBundle' => $messageBundle);
+        $gadget->locales[] = array('lang' => $lang, 'country' => $country,
+            'messages' => $node->getAttribute('messages'),
+            'languageDirection' => $node->getAttribute('language_direction'),
+            'messageBundle' => $messageBundle);
       }
     }
   }
