@@ -152,9 +152,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
   }
 
   private String tameCajaClientApi() {
-    return "<script>" +
-      "opensocial.Container.get().enableCaja();" +
-      "</script>";
+    return "<script>___.enableCaja()</script>";
   }
 
     private void throwCajolingException(Exception cause, MessageQueue mq) {

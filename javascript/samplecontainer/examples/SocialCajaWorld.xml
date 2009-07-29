@@ -5,7 +5,7 @@
     height="200" 
     author="Jasvir Nagra" 
     author_email="jasvir@gmail.com"> 
-   <Require feature="opensocial-0.8"></Require>
+   <Require feature="caja"></Require>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">
