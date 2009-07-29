@@ -298,6 +298,8 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.addFeature("foo");
+    // add non existing feature,
+    gadget.addFeature("do-not-exists");
 
     featureRegistry.addInline("foo", "foo_content();");
 

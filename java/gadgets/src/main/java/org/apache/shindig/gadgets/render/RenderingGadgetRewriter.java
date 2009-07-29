@@ -325,7 +325,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       Iterator<String> missingIter = unsupported.iterator();
       while (missingIter.hasNext()) {
         String missing = missingIter.next();
-        if (!features.get(missing).getRequired()) {
+        Feature feature = features.get(missing);
+        if (feature == null || !feature.getRequired()) {
           missingIter.remove();
         }
       }
