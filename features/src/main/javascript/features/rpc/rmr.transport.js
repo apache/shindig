@@ -179,12 +179,18 @@ gadgets.rpctx.rmr = function() {
     // Increment the search counter.
     rmr_channels[frameId].searchCounter++;
 
-    if (frameId === '..') {
-      // We are a gadget.
-      channelWindow = window.parent.frames['rmrtransport-' + window.name];
-    } else {
-      // We are a container.
-      channelWindow = window.frames[frameId].frames['rmrtransport-..'];
+    try {
+      if (frameId === '..') {
+        // We are a gadget.
+        channelWindow = window.parent.frames['rmrtransport-' + window.name];
+      } else {
+        // We are a container.
+        channelWindow = window.frames[frameId].frames['rmrtransport-..'];
+      }
+    } catch (e) {
+      // Just in case; may happen when relay is set to about:blank or unset.
+      // Catching exceptions here ensures that the timeout to continue the
+      // search below continues to work.
     }
 
     var status = false;
@@ -425,9 +431,15 @@ gadgets.rpctx.rmr = function() {
     channel.receiveWindow = channelWindow;
 
     // Register the onresize handler.
-    channelWindow.onresize = function() {
+    function onresize() {
       processRmrData(frameId);
     };
+
+    if (typeof channelWindow.attachEvent === "undefined") {
+      channelWindow.onresize = onresize;
+    } else {
+      channelWindow.attachEvent("onresize", onresize);
+    }
 
     if (frameId === '..') {
       // Gadget to container. Signal to the container that the gadget
