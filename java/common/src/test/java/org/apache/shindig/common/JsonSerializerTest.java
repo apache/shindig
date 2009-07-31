@@ -136,6 +136,22 @@ public class JsonSerializerTest {
     public Object getNullValue() {
       return null;
     }
+    @JsonProperty("simple!")
+    public void setSimpleName(int foo) {
+      
+    }
+    @JsonProperty("invalid-setter-two-args")
+    public void setInvalidSetterTwoArgs(String foo, String bar) {
+    }
+
+    @JsonProperty("invalid-setter-no-args")
+    public void setInvalidSetterNoArgs() {
+    }
+
+    @JsonProperty("invalid-getter-args")
+    public String getInvalidGetterWithArgs(String foo) {
+       return "invalid";
+    }
   }
 
   @Test

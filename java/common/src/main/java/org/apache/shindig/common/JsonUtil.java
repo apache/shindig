@@ -84,9 +84,11 @@ public class JsonUtil {
     methods = Maps.newHashMap();
 
     for (Method method : clazz.getMethods()) {
-      String name = getPropertyName(method);
-      if (name != null) {
-        methods.put(name, method);
+      if (method.getParameterTypes().length == 0) {
+        String name = getPropertyName(method);
+        if (name != null) {
+          methods.put(name, method);
+        }
       }
     }
 

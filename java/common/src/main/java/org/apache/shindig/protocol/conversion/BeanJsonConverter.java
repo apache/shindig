@@ -96,9 +96,11 @@ public class BeanJsonConverter implements BeanConverter {
     methods = new HashMap<String, Method>();
 
     for (Method method : type.getMethods()) {
-      String name = getPropertyName(method);
-      if (name != null) {
-        methods.put(name, method);
+      if (method.getParameterTypes().length == 1) {
+        String name = getPropertyName(method);
+        if (name != null) {
+          methods.put(name, method);
+        }
       }
     }
 
