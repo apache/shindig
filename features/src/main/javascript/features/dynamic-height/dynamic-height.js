@@ -61,14 +61,15 @@ gadgets.window = gadgets.window || {};
     for (var i = 0; i < children.length; i++) {
       if (typeof children[i].offsetTop !== 'undefined' &&
           typeof children[i].scrollHeight !== 'undefined') {
+        // scrollHeight already accounts for border-bottom and padding-bottom. 
         var bottom = children[i].offsetTop + children[i].scrollHeight
-            + parseIntFromElemPxAttribute(children[i], "margin-bottom")
-            + parseIntFromElemPxAttribute(children[i], "padding-bottom");
+            + parseIntFromElemPxAttribute(children[i], "margin-bottom");
         result = Math.max(result, bottom);
       }
     }
-    // Add margin and padding height specificed in the body (if any).
+    // Add border, padding and margin of the containing body.
     return result
+        + parseIntFromElemPxAttribute(document.body, "border-bottom")
         + parseIntFromElemPxAttribute(document.body, "margin-bottom")
         + parseIntFromElemPxAttribute(document.body, "padding-bottom");
   }
@@ -114,8 +115,7 @@ gadgets.window = gadgets.window || {};
         // In Webkit:
         // Property scrollHeight and offsetHeight will only increase in value.
         // This will incorrectly calculate reduced height of a gadget
-        // (ie: made smaller). These properties also do not account margin and
-        // padding size of an element.
+        // (ie: made smaller).
         newHeight = getHeightForWebkit();
       } else if (body && docEl) {
         // In Quirks mode:
