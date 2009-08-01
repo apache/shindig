@@ -326,6 +326,9 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
       }
     }
+    if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {
+      $script .= "opensocial.template.Container.disableAutoProcessing();\n";
+    }
     return array('inline' => $script, 'external' => $externalScript);
   }
 
