@@ -33,7 +33,8 @@ class SigningFetcher extends RemoteContentFetcher {
   protected static $OPENSOCIAL_VIEWERID = "opensocial_viewer_id";
   protected static $OPENSOCIAL_APPID = "opensocial_app_id";
   protected static $OPENSOCIAL_APPURL = "opensocial_app_url";
-  protected static $XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
+  protected static $XOAUTH_PUBLIC_KEY_OLD = "xoauth_signature_publickey";
+  protected static $XOAUTH_PUBLIC_KEY_NEW = "xoauth_public_key";
   protected static $ALLOWED_PARAM_NAME = '^[-_[:alnum:]]+$';
 
   /**
@@ -229,7 +230,8 @@ class SigningFetcher extends RemoteContentFetcher {
       $msgParams[OAuth::$OAUTH_CONSUMER_KEY] = $domain;
     }
     if ($this->keyName != null) {
-      $msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY] = $this->keyName;
+      $msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY_OLD] = $this->keyName;
+      $msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY_NEW] = $this->keyName;
     }
     $nonce = OAuthRequest::generate_nonce();
     $msgParams[OAuth::$OAUTH_NONCE] = $nonce;
