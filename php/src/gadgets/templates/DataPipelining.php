@@ -170,10 +170,11 @@ class DataPipelining {
         case 'os:HttpRequest':
           $id = $request['key'];
           $url = $request['href'];
+          $format = isset($request['format']) ? $request['format'] : 'json';
           unset($request['key']);
           unset($request['type']);
           unset($request['href']);
-          $httpRequests[] = array('id' => $id, 'url' => $url, 'queryStr' => implode('&', $request));
+          $httpRequests[$url] = array('id' => $id, 'url' => $url, 'format' => $format, 'queryStr' => implode('&', $request));
           break;
       }
     }
@@ -198,10 +199,12 @@ class DataPipelining {
       $resps = $basicRemoteContent->multiFetch($requestQueue);
       foreach ($resps as $response) {
         // strip out the UNPARSEABLE_CRUFT (see makeRequestHandler.php) on assigning the body
+        $url = $response->getNotSignedUrl();
+        $id = $httpRequests[$url]['id'];
         $resp = json_decode(str_replace("throw 1; < don't be evil' >", '', $response->getResponseContent()), true);
         if (is_array($resp)) {
-          //FIXME: make sure that this is the format that java-shindig produces as well, the spec doesn't really state
-          $decodedResponse = array_merge($resp, $decodedResponse);
+          $toAdd[$id] = array('id' => $id, 'data' => $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body']);
+          $decodedResponse = array_merge($toAdd, $decodedResponse);
         }
       }
     }
