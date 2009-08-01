@@ -66,7 +66,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * so javascript can take care of them
    */
   public function addTemplates($content) {
-  	// If $this->gadget->gadgetSpec->templatesDisableAutoProcessing == true, unparsedTemplates will be empty, so the setting is ignored here
+    // If $this->gadget->gadgetSpec->templatesDisableAutoProcessing == true, unparsedTemplates will be empty, so the setting is ignored here
     if (count($this->unparsedTemplates)) {
       foreach ($this->unparsedTemplates as $key => $val) {
         $content = str_replace("<template_$key></template_$key>", $val . "\n", $content);
@@ -85,10 +85,6 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @param string $content html to parse
    */
   public function parseTemplates($content) {
-  	if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {
-  		// The only code path to this location is if content-rewriting is enabled but disableAutoProcessing = true
-  		return null;
-  	}
     $osTemplates = array();
     $osDataRequests = array();
     // First extract all the os-data tags, and execute those in a single combined request, saves latency
@@ -111,20 +107,21 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
       require_once 'src/gadgets/templates/TemplateLibrary.php';
       $templateLibrary = new TemplateLibrary($this->gadget->gadgetContext);
       if ($this->gadget->gadgetSpec->templatesRequireLibraries) {
-      	foreach ($this->gadget->gadgetSpec->templatesRequireLibraries as $library) {
-      		$templateLibrary->addTemplateLibrary($library);
-      	}
+        foreach ($this->gadget->gadgetSpec->templatesRequireLibraries as $library) {
+          $templateLibrary->addTemplateLibrary($library);
+        }
       }
       foreach ($osTemplates[0] as $match) {
-        if (($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {
+        if (! $this->gadget->gadgetSpec->templatesDisableAutoProcessing && ($renderedTemplate = $this->renderTemplate($match, $templateLibrary)) !== false) {
           // Template was rendered, insert the rendered html into the document
           $content = str_replace($match, $renderedTemplate, $content);
         } else {
-        /*
+          /*
          * The template could not be rendered, this could happen because:
          * - @require is present, and at least one of the required pieces of data is unavailable
          * - @name is present
          * - @autoUpdate == true
+         * - $this->gadget->gadgetSpec->templatesDisableAutoProcessing is set to true
          * So set a magic marker (<template_$index>) that after the dom document parsing will be replaced with the original script content
          */
           $index = count($this->unparsedTemplates);
@@ -153,6 +150,8 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
           $this->dataContext[$key] = $val['data']['entry'];
         } elseif (isset($val['data'])) {
           $this->dataContext[$key] = $val['data'];
+        } else {
+          $this->dataContext[$key] = $val;
         }
       }
     }
@@ -164,7 +163,8 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @param string $osDataRequests
    */
   private function performDataRequests($osDataRequests) {
-    //TODO check with the java implementation guys if they do a caching strategy here (same as with data-pipelining), would mean a much higher render performance..
+    //TODO check with the java implementation guys if they do a caching strategy here (same as with data-pipelining),
+    // would result in a much higher render performance..
     libxml_use_internal_errors(true);
     $this->doc = new DOMDocument(null, 'utf-8');
     $this->doc->preserveWhiteSpace = true;
@@ -243,7 +243,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         }
         // Restore single tags to their html variant, and remove the xml header
         $ret = str_replace(array(
-            '<?xml version="" encoding="utf-8"?>', '<br/>'), array('',
+            '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', 
             '<br>'), $output->saveXML());
         return $ret;
       }
@@ -405,20 +405,20 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (! isset($gadgetConfig['osapi.services']) || count($gadgetConfig['osapi.services']) == 1) {
       // this should really be set in config/container.js, but if not, we build a complete default set so at least most of it works out-of-the-box
       $gadgetConfig['osapi.services'] = array(
-          'gadgets.rpc' => array('container.listMethods'),
-          'http://%host%/social/rpc' => array("messages.update", "albums.update",
-              "activities.delete", "activities.update",
-              "activities.supportedFields", "albums.get",
-              "activities.get", "mediaitems.update",
-              "messages.get", "appdata.get",
-              "system.listMethods", "people.supportedFields",
-              "messages.create", "mediaitems.delete",
-              "mediaitems.create", "people.get", "people.create",
-              "albums.delete", "messages.delete",
-              "appdata.update", "activities.create",
-              "mediaitems.get", "albums.create",
-              "appdata.delete", "people.update",
-              "appdata.create"),
+          'gadgets.rpc' => array('container.listMethods'), 
+          'http://%host%/social/rpc' => array("messages.update", "albums.update", 
+              "activities.delete", "activities.update", 
+              "activities.supportedFields", "albums.get", 
+              "activities.get", "mediaitems.update", 
+              "messages.get", "appdata.get", 
+              "system.listMethods", "people.supportedFields", 
+              "messages.create", "mediaitems.delete", 
+              "mediaitems.create", "people.get", "people.create", 
+              "albums.delete", "messages.delete", 
+              "appdata.update", "activities.create", 
+              "mediaitems.get", "albums.create", 
+              "appdata.delete", "people.update", 
+              "appdata.create"), 
           'http://%host%/gadgets/api/rpc' => array('cache.invalidate'));
     }
     return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
