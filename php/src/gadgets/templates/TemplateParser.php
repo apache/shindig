@@ -396,7 +396,15 @@ class TemplateParser {
         if (! $node->getAttribute('code')) {
           throw new ExpressionException("Invalid os:Html tag, missing code attribute");
         }
-        $node->parentNode->insertBefore($node->ownerDocument->createTextNode($node->getAttribute('code')), $node);
+        preg_match_all('/(\$\{)(.*)(\})/imsxU', $node->getAttribute('code'), $expressions);
+        if (count($expressions[2])) {
+          $expression = $expressions[2][0];
+          $code = ExpressionParser::evaluate($expression, $this->dataContext);
+        } else {
+          $code = $node->getAttribute('code');
+        }
+        $node->parentNode->insertBefore($node->ownerDocument->createTextNode($code), $node);
+        
         return $node;
         break;
 
@@ -412,20 +420,6 @@ class TemplateParser {
         break;
 
       case 'osx:navigatetoperson':
-        break;
-
-      /****** Extension - Functions ******/
-
-      case 'osx:parsejson':
-        break;
-
-      case 'osx:decodebase64':
-        break;
-
-      case 'osx:urlencode':
-        break;
-
-      case 'osx:urldecode':
         break;
     }
     return false;
