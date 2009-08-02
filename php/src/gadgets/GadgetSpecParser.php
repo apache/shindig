@@ -70,7 +70,10 @@ class GadgetSpecParser {
       foreach (explode(',', $viewNode->getAttribute('view')) as $view) {
         $view = trim($view);
         $href = trim($viewNode->getAttribute('href'));
-        $type = !empty($viewNode->getAttribute('type')) ? trim(strtoupper($viewNode->getAttribute('type'))) : 'html';
+        $type = trim(strtoupper($viewNode->getAttribute('type')));
+        if (empty($type)) {
+          $type = 'html';
+        }
         $dataPipeliningRequests = array();
         if (! empty($href) && $type == 'HTML') {
           require_once 'src/gadgets/templates/DataPipelining.php';
