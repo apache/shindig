@@ -46,23 +46,10 @@ if (Config::get('debug')) {
 // All configurable classes are autoloaded (see config.php for the configurable classes)
 // To load these, we scan our entire directory structure
 function __autoload($className) {
-  $locations = array(
-    'src/common',
-    'src/common/sample',
-    'src/gadgets',
-    'src/gadgets/servlet',
-    'src/gadgets/oauth',
-    'src/gadgets/sample',
-    'src/social',
-    'src/social/servlet',
-    'src/social/service',
-    'src/social/opensocial',
-    'src/social/model',
-    'src/social/spi',
-    'src/social/converters',
-    'src/social/oauth',
-    'src/social/sample'
-  );
+  $locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/servlet', 
+      'src/gadgets/oauth', 'src/gadgets/sample', 'src/social', 'src/social/servlet', 
+      'src/social/service', 'src/social/opensocial', 'src/social/model', 'src/social/spi', 
+      'src/social/converters', 'src/social/oauth', 'src/social/sample');
   $extension_class_paths = Config::get('extension_class_paths');
   if (! empty($extension_class_paths)) {
     $locations = array_merge(explode(',', $extension_class_paths), $locations);
@@ -71,27 +58,28 @@ function __autoload($className) {
   $fileName = $className . '.php';
   foreach ($locations as $path) {
     if (file_exists("{$path}/$fileName")) {
-      require $path.'/'.$fileName;
-      break;
+      require $path . '/' . $fileName;
+      return;
     }
+  }
+  if (($loader = Config::get('extension_autoloader')) && function_exists($loader)) {
+    call_user_func($loader, $className);
   }
 }
 
-$servletMap = array(
-    Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet',
-    Config::get('web_prefix') . '/gadgets/js' => 'JsServlet',
-    Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet',
-    Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet',
-    Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet',
-    Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet',
-    Config::get('web_prefix') . '/gadgets/oauthcallback' => 'OAuthCallbackServlet',
-    Config::get('web_prefix') . '/gadgets/api/rpc' => 'JsonRpcServlet',
-    Config::get('web_prefix') . '/gadgets/api/rest' => 'DataServiceServlet',
-    Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet',
-    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet',
-    Config::get('web_prefix') . '/public.crt' => 'CertServlet',
-    Config::get('web_prefix') . '/public.cer' => 'CertServlet'
-);
+$servletMap = array(Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet', 
+    Config::get('web_prefix') . '/gadgets/js' => 'JsServlet', 
+    Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
+    Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet', 
+    Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
+    Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet', 
+    Config::get('web_prefix') . '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
+    Config::get('web_prefix') . '/gadgets/api/rpc' => 'JsonRpcServlet', 
+    Config::get('web_prefix') . '/gadgets/api/rest' => 'DataServiceServlet', 
+    Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet', 
+    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet', 
+    Config::get('web_prefix') . '/public.crt' => 'CertServlet', 
+    Config::get('web_prefix') . '/public.cer' => 'CertServlet');
 
 // Try to match the request url to our servlet mapping
 $servlet = false;
