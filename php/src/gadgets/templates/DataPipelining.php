@@ -95,7 +95,7 @@ class DataPipelining {
           if (($resolved = self::resolveRequest($request, $result)) !== false) {
             $requestQueue[] = $resolved;
             unset($dataPipeliningRequests[$key]);
-          }
+          } 
         }
         if (count($requestQueue)) {
           $returnedResults = self::performRequests($requestQueue, $context);
@@ -198,13 +198,41 @@ class DataPipelining {
       $basicRemoteContent = new BasicRemoteContent();
       $resps = $basicRemoteContent->multiFetch($requestQueue);
       foreach ($resps as $response) {
-        // strip out the UNPARSEABLE_CRUFT (see makeRequestHandler.php) on assigning the body
+        //FIXME: this isn't completely correct yet since this picks up the status code and headers
+        // as they are returned by the makeRequest handler and not the ones from the original request
+        
         $url = $response->getNotSignedUrl();
         $id = $httpRequests[$url]['id'];
+        // strip out the UNPARSEABLE_CRUFT (see makeRequestHandler.php) on assigning the body
         $resp = json_decode(str_replace("throw 1; < don't be evil' >", '', $response->getResponseContent()), true);
         if (is_array($resp)) {
-          $toAdd[$id] = array('id' => $id, 'data' => $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body']);
-          $decodedResponse = array_merge($toAdd, $decodedResponse);
+          $statusCode = $response->getHttpCode();
+          $statusCodeMessage = $response->getHttpCodeMsg();
+          $headers = $response->getHeaders();
+          if (intval($statusCode) == 200) {
+            $content = $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body'];
+            $toAdd = array(
+              'result' => array(
+                'content' => $content,
+                'status' => $statusCode,
+                'headers' => $headers
+              )
+            );
+          } else {
+            $content = $resp[$url]['body'];
+            $toAdd = array(
+              'error' => array(
+                'code' => $statusCode,
+                'message' => $statusCodeMessage,
+                'data' => array(
+                  'content' => $content,
+                  'headers' => $headers
+                )
+              )
+            );
+          }
+          //$toAdd[$id] = array('id' => $id, 'data' => $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body']);
+          $decodedResponse[] = array('id' => $id, 'data' => $toAdd);
         }
       }
     }
@@ -231,7 +259,7 @@ class DataPipelining {
           try {
             $expressionResult = ExpressionParser::evaluate($expression, $dataContext);
             $request[$key] = str_replace($toReplace, $expressionResult, $request[$key]);
-          } catch (ExpressionException $e) {
+          } catch (Exception  $e) {
             // ignore, maybe on the next pass we can resolve this
             return false;
           }
