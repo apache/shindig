@@ -27,8 +27,8 @@ gadgets.error.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
 gadgets.error.TO_BE_DONE = 'to be done';
 
 gadgets.log = function(message) {
-  if (window.console && console.log) {
-    console.log(message);
+  if (window.console && window.console.log) {
+    window.console.log(message);
   } else {
     var logEntry = document.createElement('div');
     logEntry.className = 'gadgets-log-entry';
@@ -226,7 +226,7 @@ gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
 
 /**
  * Requests the container to send a specific message to the specified users.
- * @param {Array.<String>, String} An ID, array of IDs, or a group reference;
+ * @param {Array.<String>, String} recipients An ID, array of IDs, or a group reference;
  * the supported keys are VIEWER, OWNER, VIEWER_FRIENDS, OWNER_FRIENDS, or a
  * single ID within one of those groups
  * @param {opensocial.Message} message The message to send to the specified users
