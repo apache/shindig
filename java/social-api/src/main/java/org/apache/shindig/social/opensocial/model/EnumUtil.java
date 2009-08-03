@@ -18,8 +18,7 @@
 
 package org.apache.shindig.social.opensocial.model;
 
-
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Collections;
 import java.util.Set;
@@ -42,13 +41,16 @@ public final class EnumUtil {
    */
   // TODO: Because we have a Enum interface in this package we have to explicitly state the java.lang.Enum (bad ?)
   public static Set<String> getEnumStrings(java.lang.Enum<?>... vals) {
-    Set<String> result = Sets.newHashSet();
+    ImmutableSet.Builder<String> builder = ImmutableSet.builder();
     for (java.lang.Enum<?> v : vals) {
-      result.add(v.toString());
+      builder.add(v.toString());
     }
+    Set<String> result = builder.build();
+
     if (result.size() != vals.length) {
       throw new IllegalArgumentException("Enum names are not disjoint set");
     }
-    return Collections.unmodifiableSet(result);
+
+    return result;
   }
 }

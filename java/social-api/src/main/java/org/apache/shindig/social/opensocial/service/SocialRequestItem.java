@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -57,16 +58,16 @@ public class SocialRequestItem extends BaseRequestItem {
     if (ids.isEmpty()) {
       if (token.getViewerId() != null) {
         // Assume @me
-        ids = Lists.newArrayList("@me");
+        return ImmutableSet.of(UserId.fromJson("@me"));
       } else {
         throw new IllegalArgumentException("No userId provided and viewer not available");
       }
     }
-    Set<UserId> userIds = Sets.newLinkedHashSet();
+    ImmutableSet.Builder<UserId> userIds = ImmutableSet.builder();
     for (String id : ids) {
       userIds.add(UserId.fromJson(id));
     }
-    return userIds;
+    return userIds.build();
   }
 
   public GroupId getGroup() {

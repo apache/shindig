@@ -95,12 +95,12 @@ public class PersonHandler {
             options, fields, request.getToken());
         return FutureUtil.getFirstFromCollection(people);
       } else {
-        Set<UserId> personIds = Sets.newLinkedHashSet();
+        ImmutableSet.Builder<UserId> personIds = ImmutableSet.builder();
         for (String pid : optionalPersonId) {
           personIds.add(new UserId(UserId.Type.userId, pid));
         }
         // Every other case is a collection response of optional person ids
-        return personService.getPeople(personIds, new GroupId(GroupId.Type.self, null),
+        return personService.getPeople(personIds.build(), new GroupId(GroupId.Type.self, null),
             options, fields, request.getToken());
       }
     }
