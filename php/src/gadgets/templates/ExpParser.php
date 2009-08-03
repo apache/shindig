@@ -28,7 +28,7 @@
  * This parser accepts the output token stream produced by ExpLexer.
  */
 
-require_once ('ExpType.php');
+require_once 'ExpType.php';
 
 class ExpParserException extends Exception {
 }
@@ -65,9 +65,9 @@ class PrimitiveExp {
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
     $OPERAND_TYPES = array_merge($PRIMITIVE_TYPES, $COMPOSITE_TYPES, array(ExpType::$IDENTITY));
 
-    $OPERATOR_PRECEDENCE = array('||' => 0, '&&' => 1, '==' => 2, '!=' => 2, '>' => 3, '<' => 3,
-        '>=' => 3, '<=' => 3, '+' => 4, ' - ' => 4, '*' => 5, '/' => 5, '%' => 5,
-        ' -' => 6, '!' => 6, 'empty' => 6, '.' => 7);
+    $OPERATOR_PRECEDENCE = array('||' => 0, '&&' => 1, '==' => 2, '!=' => 2, '>' => 3,
+        '<' => 3, '>=' => 3, '<=' => 3, '+' => 4, ' - ' => 4, '*' => 5, '/' => 5, '%'  => 5,
+        ' -' => 6, '!' => 6, 'empty' => 6, '.'  => 7);
 
     $operatorStack = array();
     $operandStack = array();
@@ -104,7 +104,6 @@ class PrimitiveExp {
     $RELATIONAL_OPS = array('==', '!=', '<', '>', '<=', '>=');
     $LOGICAL_OPS = array('&&', '||'); // without '!'
 
-
     $sym = $operator->value;
     if ($operator->type == ExpType::$UNARY_OP) {
       $operand = $this->evaluateIdentity(array_pop($operandStack));
@@ -114,7 +113,7 @@ class PrimitiveExp {
       $lhs = $this->evaluateIdentity(array_pop($operandStack));
     }
     if ($sym == '.') {
-      if ($lhs->type == ExpType::$NULL || $rhs->type == ExpType::$NULL) { // Dealing with null type
+      if ($lhs->type == ExpType::$NULL || $rhs->type == ExpType::$NULL) {  // Dealing with null type
         $result = new Token(ExpType::$NULL, null);
       } else {
         if ($lhs->type == ExpType::$ARRAY) {
@@ -135,14 +134,13 @@ class PrimitiveExp {
       $rhs = ExpType::coerceToNumber($rhs);
       eval('$resval = $lhs->value ' . $sym . '$rhs->value;');
       $result = new Token(ExpType::detectType($resval), $resval);
-    } elseif ($sym == ' -') { // Unary operator '-'
+    } elseif ($sym == ' -') {  // Unary operator '-'
       $result = ExpType::coerceToNumber($operand);
-      $result = new Token($result->type, - ($result->value));
+      $result = new Token($result->type, -($result->value));
     } elseif (in_array($sym, $RELATIONAL_OPS)) {
       $result = new Token(ExpType::$BOOL);
       // special case: one of the operator is null
-      if ($lhs->type == ExpType::$NULL && $rhs->type != ExpType::$NULL || $lhs->type != ExpType::$NULL && $rhs->type == ExpType::$NULL) $result->value = in_array($sym, array(
-          '<', '>', '<=', '>=', '==')) ? false : true;
+      if ($lhs->type == ExpType::$NULL && $rhs->type != ExpType::$NULL || $lhs->type != ExpType::$NULL && $rhs->type == ExpType::$NULL) $result->value = in_array($sym, array('<', '>', '<=', '>=', '==')) ? false : true;
       eval('$result->value = $lhs->value ' . $sym . ' $rhs->value;');
     } elseif (in_array($sym, $LOGICAL_OPS)) {
       $result = new Token(ExpType::$BOOL);
@@ -171,7 +169,7 @@ class PrimitiveExp {
     }
     throw new ExpParserException("Un-recogonized identity name in the data context: " . $token->value);
   }
-
+  
   private function evaluateFunction() {
     $FUNCTION_TRANS = array('osx:parseJson' => 'json_decode', 'osx:decodeBase64' => 'base64_decode',
         'osx:urlEncode' => 'rawurlencode', 'osx:urlDecode' => 'rawurldecode');
@@ -200,13 +198,14 @@ class ExpParser {
   public static function parse($tokenStream, $dataContext) {
     $scopes = array();
     $expression = new PrimitiveExp(new Token('final'));
+
     while ($token = array_shift($tokenStream)) {
       // split non-primitive expression into primitive ones
       switch ($token->type) {
         case ExpType::$PAREN:
           switch ($token->value) {
             case '[':
-              $expression->append(new Token(ExpType::$DOT, '.')); // drop through
+              $expression->append(new Token(ExpType::$DOT, '.'));  // drop through
             case '(':
               ExpParser::scopePush($expression, $scopes, $token);
               break;

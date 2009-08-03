@@ -28,7 +28,7 @@
  * This lexer could handle special formats like floating 12.3e-10 and string 'tell "me" \'yes\\\'' correctly.
  */
 
-require_once ('ExpType.php');
+require_once 'ExpType.php';
 
 class ExpLexerException extends Exception {
 }
@@ -40,7 +40,7 @@ class ExpLexer {
   private static $TERNARY_PATTERN = "/[\?\:]/";
   private static $PAREN_PATTERN = "/[\[\]\(\)]/";
   private static $COMMA_PATTERN = "/[\,]/";
-  private static $OPERATOR_PATTERN = "/\>\=|\<\=|\=\=|\!\=|\&\&|\|\||\*|\/|\%|\>|\<|\!/"; // No +/-: conflict with floating
+  private static $OPERATOR_PATTERN = "/\>\=|\<\=|\=\=|\!\=|\&\&|\|\||\*|\/|\%|\>|\<|\!/";  // No +/-: conflict with floating
   private static $OPERATOR_PATTERN2 = "/^(and|or|div|mod|gt|lt|ge|le|eq|ne|not|empty)$/";
   private static $NUMBER_PATTERN = "/^(([0-9]+\.[0-9]*)|(\.[0-9]+)|([0-9]+))([eE][\+\-]?[0-9]+)?$/";
   private static $IDENTITY_PATTERN = "/^[a-zA-Z][a-zA-Z0-9_]*$/";
@@ -114,7 +114,7 @@ class ExpLexer {
           $pos = $i + 1;
         } elseif ($state == $targetState) {
           // test whether it has been escaped
-          if (ExpLexer::isEscaped($str, $i)) continue; // bypass the escaped ones
+          if (ExpLexer::isEscaped($str, $i)) continue;  // bypass the escaped ones
           // output the string segment
           $string = ExpType::coerceToString(new Token(ExpType::$RAW, substr($str, $pos, $i - $pos)));
           array_push($newTokenStream, $string);
@@ -319,7 +319,7 @@ class ExpLexer {
       }
     }
   }
-
+  
   private static function hasUnaryLeft($tokenStream, $i) {
     $OPERATOR_LEFT_TYPE = array(ExpType::$BINARY_OP, ExpType::$UNARY_OP, ExpType::$TERNARY,
         ExpType::$COMMA);
@@ -375,21 +375,20 @@ class ExpLexer {
             array_push($stack, $node->value);
           }
           break;
-        case ExpType::$UNARY_OP: // Check unary operator gramma
+        case ExpType::$UNARY_OP:  // Check unary operator gramma
           if (! ExpLexer::hasUnaryLeft($tokenStream, $i)) throw new ExpLexerException("Mal-format unary operator");
           break;
-        case ExpType::$BINARY_OP: // Check binary operator gramma
+        case ExpType::$BINARY_OP:  // Check binary operator gramma
           if (ExpLexer::hasUnaryLeft($tokenStream, $i) || ! ExpLexer::hasBinaryRight($tokenStream, $i)) throw new ExpLexerException("Mal-format binary operator");
           break;
-        case ExpType::$DOT: // Check dot gramma
+        case ExpType::$DOT:  // Check dot gramma
           if ($i == count($tokenStream) - 1 || $tokenStream[$i + 1]->type != ExpType::$IDENTITY) throw new ExpLexerException("Mal-format dot");
           break;
-        case ExpType::$FUNCTION: // Check function gramma
+        case ExpType::$FUNCTION:  // Check function gramma
           if ($i == count($tokenStream) - 1 || $tokenStream[$i + 1]->value != '(') throw new ExpLexerException("Mal-format function");
           break;
       }
     }
     if (count($stack) != 0) throw new ExpLexerException("Unbalanced expression");
   }
-
 }

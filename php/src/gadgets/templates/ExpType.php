@@ -90,20 +90,19 @@ class ExpType {
     $INTEGER_PATTERN = "/^[0-9]+$/";
     $type = $token->type;
     if (in_array($type, array(ExpType::$INT, ExpType::$FLOAT))) return $token;
-    if ($type == ExpType::$BOOL || ($type == ExpType::$RAW || $type == ExpType::$STRING) && preg_match($INTEGER_PATTERN, $token->value) == 1) {
+    if (in_array($type, array(ExpType::$BOOL, ExpType::$NULL)) || in_array($type, array(ExpType::$RAW, ExpType::$STRING)) && preg_match($INTEGER_PATTERN, $token->value) == 1) {
       $int = new Token(ExpType::$INT, (int)($token->value));
       return $int;
     }
-    if (in_array($type, array(ExpType::$NULL, ExpType::$RAW, ExpType::$STRING))) {
+    if (in_array($type, array(ExpType::$RAW, ExpType::$STRING))) {
       $float = new Token(ExpType::$FLOAT, (float)($token->value));
       return $float;
     }
-    throw new ExpTypeException("Unable to coerce token " . print_r($token) . " to number");
+    throw new ExpTypeException("Unable to coerce token " . print_r($token, true) . " to number");
   }
 
   public static function coerceToString($token) {
-    $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL,
-        ExpType::$NULL);
+    $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL, ExpType::$NULL);
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
     $type = $token->type;
     if ($type == ExpType::$STRING) return $token;
@@ -112,19 +111,20 @@ class ExpType {
       $string->value = strtr($token->value, ExpType::$ESCAPE_CHARS);
     } elseif ($type == ExpType::$BOOL) {
       $string->value = ($token->value) ? 'true' : 'false';
+    } elseif ($type == ExpType::$NULL) {
+      $string->value = 'null';
     } elseif (in_array($type, $PRIMITIVE_TYPES)) {
       $string->value = (string)($token->value);
     } elseif (in_array($type, $COMPOSITE_TYPES)) {
-      $string->value = print_r($token->value); // maybe call .toString()?
+      $string->value = print_r($token->value, true); // maybe call .toString()?
     } else {
-      throw new ExpTypeException("Unable to coerce token" . print_r($token) . " to string");
+      throw new ExpTypeException("Unable to coerce token" . print_r($token, true) . " to string");
     }
     return $string;
   }
 
   public static function coerceToBool($token) {
-    $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL,
-        ExpType::$NULL);
+    $PRIMITIVE_TYPES = array(ExpType::$INT, ExpType::$FLOAT, ExpType::$STRING, ExpType::$BOOL, ExpType::$NULL);
     $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
     $type = $token->type;
     if ($type == ExpType::$BOOL) return $token;
@@ -136,19 +136,21 @@ class ExpType {
     } elseif (in_array($type, $COMPOSITE_TYPES)) {
       $bool->value = $token->value != null ? true : false;
     } else {
-      throw new ExpTypeException("Unable to coerce token" . print_r($token) . " to bool");
+      throw new ExpTypeException("Unable to coerce token" . print_r($token, true) . " to bool");
     }
     return $bool;
   }
 
   public static function coerceToNull($token) {
+    $COMPOSITE_TYPES = array(ExpType::$ARRAY, ExpType::$OBJECT);
     $type = $token->type;
-    $value = $token->value;
+    if ($type == ExpType::$NULL) return $token;
     $null = new Token(ExpType::$NULL);
-    if (($type == ExpType::$RAW) && (strtolower($value) == 'null')) {
+    $value = $token->value;
+    if ($type == ExpType::$RAW && strtolower($value) == 'null' || in_array($type, $COMPOSITE_TYPES) && $token->value == null) {
       $null->value = null;
     } else {
-      throw new ExpTypeException("Unable to coerce token" . print_r($token) . " to null");
+      throw new ExpTypeException("Unable to coerce token" . print_r($token, true) . " to null");
     }
     return $null;
   }
