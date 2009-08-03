@@ -21,6 +21,7 @@
 //TODO support repeat tags on OSML tags, ie this should work: <os:Html repeat="${Bar}" />
 //TODO remove the os-templates javascript if all the templates are rendered on the server (saves many Kb's in gadget size)
 
+
 require_once 'ExpressionParser.php';
 
 class TemplateParser {
@@ -128,7 +129,7 @@ class TemplateParser {
   private function parseLibrary($tagName, DOMNode &$node) {
     // Set the My context based on the node's attributes
     $myContext = $this->nodeAttributesToScope($node);
-    
+
     // Template call has child nodes, those are params that can be used in a os:Render call, store them
     $oldNodeContext = isset($this->dataContext['_os_render_nodes']) ? $this->dataContext['_os_render_nodes'] : array();
     $this->dataContext['_os_render_nodes'] = array();
@@ -184,7 +185,7 @@ class TemplateParser {
             $expression = $expressions[2][$i];
             $expressionResult = ExpressionParser::evaluate($expression, $this->dataContext);
             switch (strtolower($attr->name)) {
-              
+
               case 'repeat':
                 // Can only loop if the result of the expression was an array
                 if (! is_array($expressionResult)) {
@@ -228,7 +229,7 @@ class TemplateParser {
                 }
                 return $node;
                 break;
-              
+
               case 'if':
                 if (! $expressionResult) {
                   return $node;
@@ -236,7 +237,7 @@ class TemplateParser {
                   $node->removeAttribute('if');
                 }
                 break;
-              
+
               // These special cases that only apply for certain tag types
               case 'selected':
                 if ($node->tagName == 'option') {
@@ -249,7 +250,7 @@ class TemplateParser {
                   throw new ExpressionException("Can only use selected on an option tag");
                 }
                 break;
-              
+
               case 'checked':
                 if ($node->tagName == 'input') {
                   if ($expressionResult) {
@@ -261,9 +262,9 @@ class TemplateParser {
                   throw new ExpressionException("Can only use checked on an input tag");
                 }
                 break;
-              
+
               case 'disabled':
-                $disabledTags = array('input', 'button', 
+                $disabledTags = array('input', 'button',
                     'select', 'textarea');
                 if (in_array($node->tagName, $disabledTags)) {
                   if ($expressionResult) {
@@ -275,7 +276,7 @@ class TemplateParser {
                   throw new ExpressionException("Can only use disabled on input, button, select and textarea tags");
                 }
                 break;
-              
+
               default:
                 // On non os-template spec attributes, do a simple str_replace with the evaluated value
                 $stringVal = htmlentities(ExpressionParser::stringValue($expressionResult), ENT_QUOTES, 'UTF-8');
@@ -318,9 +319,9 @@ class TemplateParser {
       return $node;
     }
     switch ($tagName) {
-      
+
       /****** Control statements ******/
-      
+
       case 'os:repeat':
         if (! $node->getAttribute('expression')) {
           throw new ExpressionException("Invalid os:Repeat tag, missing expression attribute");
@@ -367,7 +368,7 @@ class TemplateParser {
         }
         return $node;
         break;
-      
+
       case 'os:if':
         $expressions = array();
         if (! $node->getAttribute('condition')) {
@@ -388,21 +389,21 @@ class TemplateParser {
         }
         return $node;
         break;
-      
+
       /****** OSML tags (os: name space) ******/
-      
+
       case 'os:name':
         $this->parseLibrary('os:Name', $node);
         break;
-      
+
       case 'os:badge':
         $this->parseLibrary('os:Badge', $node);
         break;
-      
+
       case 'os:peopleselector':
         $this->parseLibrary('os:PeopleSelector', $node);
         break;
-      
+
       case 'os:html':
         if (! $node->getAttribute('code')) {
           throw new ExpressionException("Invalid os:Html tag, missing code attribute");
@@ -415,10 +416,10 @@ class TemplateParser {
           $code = $node->getAttribute('code');
         }
         $node->parentNode->insertBefore($node->ownerDocument->createTextNode($code), $node);
-        
+
         return $node;
         break;
-      
+
       case 'os:render':
         if (! ($content = $node->getAttribute('content'))) {
           throw new ExpressionException("os:Render missing attribute: content");
@@ -437,15 +438,15 @@ class TemplateParser {
         }
         return $node;
         break;
-      
+
       /****** Extension - Tags ******/
-      
+
       case 'osx:flash':
         break;
-      
+
       case 'osx:navigatetoapp':
         break;
-      
+
       case 'osx:navigatetoperson':
         break;
     }

@@ -64,12 +64,12 @@ class TemplateLibrary {
         $newNode = $templateDomCopy->appendChild($newNode);
         // Parse the template's DOM using our current data context (which includes the My context for templates)
         if (($removeNode = $caller->parseNode($newNode)) !== false) {
-        	$removeNodes[] = $removeNode;
+          $removeNodes[] = $removeNode;
         }
       }
-     	foreach ($removeNodes as $removeNode) {
-     		$removeNode->parentNode->removeChild($removeNode);
-     	}
+      foreach ($removeNodes as $removeNode) {
+        $removeNode->parentNode->removeChild($removeNode);
+      }
       return $templateDomCopy;
     }
     return false;
