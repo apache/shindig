@@ -1096,6 +1096,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
     assertFalse(contains(queryParams, "opensocial_proxied_content", "1"));
   }
   
@@ -1124,6 +1125,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
     assertTrue(contains(queryParams, "opensocial_proxied_content", "1"));
   }
   
@@ -1320,6 +1322,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "container.com"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
   }
 
   @Test
@@ -1332,6 +1335,7 @@ public class OAuthRequestTest {
     assertTrue(contains(queryParams, "opensocial_app_id", "app"));
     assertTrue(contains(queryParams, OAuth.OAUTH_CONSUMER_KEY, "signedfetch"));
     assertTrue(contains(queryParams, "xoauth_signature_publickey", "foo"));
+    assertTrue(contains(queryParams, "xoauth_public_key", "foo"));
   }
 
   @Test

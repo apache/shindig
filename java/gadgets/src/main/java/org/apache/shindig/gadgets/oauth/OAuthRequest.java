@@ -90,7 +90,10 @@ public class OAuthRequest {
 
   protected static final String OPENSOCIAL_PROXIED_CONTENT = "opensocial_proxied_content";
 
-  protected static final String XOAUTH_PUBLIC_KEY = "xoauth_signature_publickey";
+  // old and new parameters for the public key
+  // TODO remove OLD in a far future release
+  protected static final String XOAUTH_PUBLIC_KEY_OLD = "xoauth_signature_publickey";
+  protected static final String XOAUTH_PUBLIC_KEY_NEW = "xoauth_public_key";
 
   protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
 
@@ -446,7 +449,8 @@ public class OAuthRequest {
           new Parameter(OAuth.OAUTH_CONSUMER_KEY, realRequest.getSecurityToken().getDomain()));
     }
     if (accessorInfo.getConsumer().getKeyName() != null) {
-      params.add(new Parameter(XOAUTH_PUBLIC_KEY, accessorInfo.getConsumer().getKeyName()));
+      params.add(new Parameter(XOAUTH_PUBLIC_KEY_OLD, accessorInfo.getConsumer().getKeyName()));
+      params.add(new Parameter(XOAUTH_PUBLIC_KEY_NEW, accessorInfo.getConsumer().getKeyName()));
     }
     params.add(new Parameter(OAuth.OAUTH_VERSION, OAuth.VERSION_1_0));
     params.add(new Parameter(OAuth.OAUTH_TIMESTAMP,
