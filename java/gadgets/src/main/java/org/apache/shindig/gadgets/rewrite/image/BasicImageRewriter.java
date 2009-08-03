@@ -201,13 +201,13 @@ public class BasicImageRewriter implements ImageRewriter {
       response = getOptimizer(response, imageFormat, image);
       totalRewrittenImageBytes.addAndGet(response.getContentLength());
     } catch (IOException ioe) {
-      log.log(Level.WARNING, "IO Error rewriting image " + request.toString(), ioe);
+      log.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
     } catch (RuntimeException re) {
       // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
       // throw a very wide variety of exceptions
       log.log(Level.INFO, "Unknown error rewriting image " + request.toString(), re);
     } catch (ImageReadException ire) {
-      log.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire);
+      log.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire.getMessage());
     }
     return response;
   }
