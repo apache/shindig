@@ -32,11 +32,13 @@ class ResponseError {
   public static $BAD_REQUEST = 400;
   /** value representing NOT FOUND. */
   public static $NOT_FOUND = 404;
+  /** value representing content uploading exceeds the quota.*/
+  public static $REQUEST_TOO_LARGE = 413;
   /** value representing INTERNAL SERVER ERROR. */
   public static $INTERNAL_ERROR = 500;
   /** value representing EXPECTATION FAILED. */
   public static $LIMIT_EXCEEDED = 409;
-  
+
   /**
    * The json value of the error.
    */
@@ -45,7 +47,7 @@ class ResponseError {
    * The http error code associated with the error.
    */
   private $httpErrorCode;
-  
+
   /**
    * The HTTP response header
    */

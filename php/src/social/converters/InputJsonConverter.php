@@ -70,7 +70,9 @@ class InputJsonConverter extends InputConverter {
   public function convertMediaItems($requestParam) {
     $ret = json_decode($requestParam, true);
     if ($ret == $requestParam) {
-      throw new Exception("Mallformed album json string. " . $requestParam);
+    	// The content upload specification allows the content-type in the post
+    	// body to be the binary data of the content.
+    	return null;
     }
     return $ret;
   }

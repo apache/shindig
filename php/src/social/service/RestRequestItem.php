@@ -103,7 +103,9 @@ class RestRequestItem extends RequestItem {
         break;
       case DataServiceServlet::$MEDIA_ITEM_ROUTE:
         $data = $this->inputConverter->convertMediaItems($this->postData);
-        $this->params['mediaItem'] = $data;
+        if (isset($data)) {
+          $this->params['mediaItem'] = $data;
+        }
         break;
       default:
         throw new Exception("Invalid or unknown service endpoint: $service");

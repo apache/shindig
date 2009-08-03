@@ -91,7 +91,7 @@ class MediaItemRestTest extends RestBase {
     $this->verifyLifeCycle($postData, 'application/json');
   }
   
-  public function xxtestLifeCycleInXml() {
+  public function testLifeCycleInXml() {
     $postData = '<?xml version="1.0" encoding="UTF-8"?>
                  <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
                    <id>11223344</id>
@@ -104,7 +104,7 @@ class MediaItemRestTest extends RestBase {
     $this->verifyLifeCycle($postData, 'application/xml');
   }
   
-  public function xxtestLifeCycleInAtom() {
+  public function testLifeCycleInAtom() {
     $postData = '<entry xmlns="http://www.w3.org/2005/Atom">
                    <content type="application/xml">
                      <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">

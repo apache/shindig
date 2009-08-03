@@ -44,11 +44,10 @@ interface MediaItemService {
    * @param userId id of the user for whom a media item is to be created
    * @param groupId group id
    * @param mediaItem specifies album-id and media item fields
-   * @param data the image binary data to be uploaded
    * @param token security token to authorize this request
    * @return the created media item
    */
-  public function createMediaItem($userId, $groupId, $mediaItem, $data, $token);
+  public function createMediaItem($userId, $groupId, $mediaItem, $token);
 
   /**
    * Updates a media item in an album. Album id and media item id is taken in
@@ -60,7 +59,7 @@ interface MediaItemService {
    * @param token security token
    * @return updated album media item
    */
-  public function updateMediaItem($userId, $groupId, $mediaItem, $data, $token);
+  public function updateMediaItem($userId, $groupId, $mediaItem, $token);
 
   /**
    * Deletes an album media item.

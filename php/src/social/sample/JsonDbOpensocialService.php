@@ -814,7 +814,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     return self::paginateResults($results, $options);
   }
 
-  public function createMediaItem($userId, $groupId, $mediaItem, $data, $token) {
+  public function createMediaItem($userId, $groupId, $mediaItem, $token) {
     $all = $this->getAllMediaItems();
     $albumId = $mediaItem['albumId'];
     $id = isset($all[$albumId]) ? (count($all[$albumId]) + 1) : 0;
@@ -836,7 +836,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     return $mediaItem;
   }
 
-  public function updateMediaItem($userId, $groupId, $mediaItem, $data, $token) {
+  public function updateMediaItem($userId, $groupId, $mediaItem, $token) {
     $all = $this->getAllMediaItems();
     if (! $all[$mediaItem['albumId']] || ! $all[$mediaItem['albumId']][$mediaItem['id']]) {
       throw new SocialSpiException("MediaItem not found.", ResponseError::$BAD_REQUEST);

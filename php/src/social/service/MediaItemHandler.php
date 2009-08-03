@@ -20,18 +20,18 @@
 
 class MediaItemHandler extends DataRequestHandler {
   private static $MEDIA_ITEM_PATH = "/mediaitems/{userId}/{groupId}/{albumId}/{mediaItemId}";
-  
+
   public function __construct() {
     parent::__construct('media_item_service');
   }
-  
+
   /**
    * Deletes the media items. The URI structure: /{userId}/{groupId}/{albumId}/{mediaItemId}+
    */
   public function handleDelete(RequestItem $requestItem) {
     $this->checkService();
     $requestItem->applyUrlTemplate(self::$MEDIA_ITEM_PATH);
-    
+
     $userIds = $requestItem->getUsers();
     $groupId = $requestItem->getGroup();
     $albumIds = $requestItem->getListParameter('albumId');
@@ -50,12 +50,12 @@ class MediaItemHandler extends DataRequestHandler {
   public function handleGet(RequestItem $requestItem) {
     $this->checkService();
     $requestItem->applyUrlTemplate(self::$MEDIA_ITEM_PATH);
-    
+
     $userIds = $requestItem->getUsers();
     $groupId = $requestItem->getGroup();
     $albumIds = $requestItem->getListParameter("albumId");
     $mediaItemIds = $requestItem->getListParameter("mediaItemId");
-        
+
     HandlerPreconditions::requireSingular($userIds, "userId must be singular value.");
     HandlerPreconditions::requireNotEmpty($groupId, "groupId must be specified.");
     HandlerPreconditions::requireSingular($albumIds, "albumId must be singular value.");
@@ -72,19 +72,33 @@ class MediaItemHandler extends DataRequestHandler {
   public function handlePost(RequestItem $requestItem) {
     $this->checkService();
     $requestItem->applyUrlTemplate(self::$MEDIA_ITEM_PATH);
-    
+
     $userIds = $requestItem->getUsers();
     $groupId = $requestItem->getGroup();
     $albumIds = $requestItem->getListParameter('albumId');
     $mediaItem = $requestItem->getParameter('mediaItem');
+    if (! isset($mediaItem)) {
+      // For the content upload REST api. The param is mediaType in the spec now. As there is no mediaType
+      // field in MediaItem. It should be 'type'.
+      $type = $requestItem->getParameter('mediaType');
+      if (! isset($type)) {
+        $type = $requestItem->getParameter('type');
+      }
+      if (in_array($type, MediaItem::$TYPES)) {
+        $mediaItem = array('type' => $type);
+        // Only support title and description for now.
+        $mediaItem['title'] = $requestItem->getParameter('title');
+        $mediaItem['description'] = $requestItem->getParameter('description');
+      }
+    }
 
     HandlerPreconditions::requireSingular($userIds, "userId must be of singular value");
     HandlerPreconditions::requireNotEmpty($groupId, "groupId must be specified.");
     HandlerPreconditions::requireSingular($albumIds, "albumId must be sigular value.");
     HandlerPreconditions::requireNotEmpty($mediaItem, "mediaItem must be specified.");
-    
-    // The null param is the content data(image, video and audio binaries) uploaded by the user.
-    return $this->service->createMediaItem($userIds[0], $groupId, $mediaItem, null, $requestItem->getToken());
+    $mediaItem['albumId'] = $albumIds[0];
+
+    return $this->service->createMediaItem($userIds[0], $groupId, $mediaItem, $requestItem->getToken());
   }
 
   /**
@@ -93,22 +107,21 @@ class MediaItemHandler extends DataRequestHandler {
   public function handlePut(RequestItem $requestItem) {
     $this->checkService();
     $requestItem->applyUrlTemplate(self::$MEDIA_ITEM_PATH);
-    
+
     $userIds = $requestItem->getUsers();
     $groupId = $requestItem->getGroup();
     $albumIds = $requestItem->getListParameter('albumId');
     $mediaItemIds = $requestItem->getListParameter('mediaItemId');
     $mediaItem = $requestItem->getParameter('mediaItem');
-    
+
     HandlerPreconditions::requireSingular($userIds, "userId must be singular value.");
     HandlerPreconditions::requireNotEmpty($groupId, "groupId must be specified.");
     HandlerPreconditions::requireSingular($albumIds, "albumId must be sigular value.");
     HandlerPreconditions::requireSingular($mediaItemIds, "mediaItemId must be sigular value.");
     HandlerPreconditions::requireNotEmpty($mediaItem, "mediaItem must be specified.");
-    
+
     $mediaItem['id'] = $mediaItemIds[0];
     $mediaItem['albumId'] = $albumIds[0];
-    // The null param is the content data(image, video and audio binaries) uploaded by the user.
-    return $this->service->updateMediaItem($userIds[0], $groupId, $mediaItem, null, $requestItem->getToken());
+    return $this->service->updateMediaItem($userIds[0], $groupId, $mediaItem, $requestItem->getToken());
   }
 }
