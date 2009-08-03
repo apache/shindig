@@ -33,7 +33,7 @@ public interface MessageBundleFactory {
   /**
    * Retrieves a messagMessageBundle for the provided GadgetSpec and Locale. Implementations must be
    * sure to perform proper merging of message bundles of lower specifity with exact matches
-   * (exact > lang only > country only > all / all)
+   * (exact &gt; lang only &gt; country only &gt; all / all)
    *
    * @param spec The gadget to inspect for Locales.
    * @param locale The language and country to get a message bundle for.
