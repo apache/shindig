@@ -471,7 +471,7 @@ gadgets.io = function() {
       var urlParams = gadgets.util.getUrlParameters();
 
       var rewriteMimeParam =
-          params.rewriteMime ? "rewriteMime=" + encodeURIComponent(params.rewriteMime) : "";
+          params.rewriteMime ? "&rewriteMime=" + encodeURIComponent(params.rewriteMime) : "";
       return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
           replace("%host%", document.location.host).
           replace("%rawurl%", url).
