@@ -131,12 +131,6 @@ public abstract class ProxyBase {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval);
-    // We're skipping the content disposition header for flash due to an issue with Flash player 10
-    // This does make some sites a higher value phishing target, but this can be mitigated by
-    // additional referer checks.
-    if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type"))) {
-      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-    }
   }
 
   /**

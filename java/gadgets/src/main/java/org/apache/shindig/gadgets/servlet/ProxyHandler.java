@@ -153,19 +153,28 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
+    String responseType = results.getHeader("Content-Type");
     if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
       String requiredType = rcr.getRewriteMimeType();
-      String responseType = results.getHeader("Content-Type");
       // Use a 'Vary' style check on the response
       if (requiredType.endsWith("/*") &&
           !StringUtils.isEmpty(responseType)) {
         requiredType = requiredType.substring(0, requiredType.length() - 2);
         if (!responseType.toLowerCase().startsWith(requiredType.toLowerCase())) {
           response.setContentType(requiredType);
+          responseType = requiredType;
         }
       } else {
         response.setContentType(requiredType);
+        responseType = requiredType;
       }
+    }
+
+    // We're skipping the content disposition header for flash due to an issue with Flash player 10
+    // This does make some sites a higher value phishing target, but this can be mitigated by
+    // additional referer checks.
+    if (!"application/x-shockwave-flash".equalsIgnoreCase(responseType)) {
+      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     }
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {

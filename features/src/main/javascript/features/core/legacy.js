@@ -124,9 +124,10 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
 }
 
 function _IG_GetCachedUrl(url, opt_params) {
-  var params = { 'REFRESH_INTERVAL': 3600 };
-  if (opt_params && opt_params.refreshInterval) {
-    params['REFRESH_INTERVAL'] = opt_params.refreshInterval;
+  var params = opt_params || {};
+  params['REFRESH_INTERVAL'] = 3600;
+  if (params.refreshInterval) {
+    params['REFRESH_INTERVAL'] = params.refreshInterval;
   }
   return gadgets.io.getProxyUrl(url, params);
 }

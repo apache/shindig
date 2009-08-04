@@ -190,7 +190,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
  */
 gadgets.flash.embedCachedFlash = function() {
   var args = Array.prototype.slice.call(arguments);
-  args[0] = gadgets.io.getProxyUrl(args[0]);
+  args[0] = gadgets.io.getProxyUrl(args[0], { rewriteMime: "application/x-shockwave-flash" });
   return gadgets.flash.embedFlash.apply(this, args);
 };
 

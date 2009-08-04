@@ -87,6 +87,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
 
     assertEquals(DATA_ONE, recorder.getResponseAsString());
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }
 
@@ -108,6 +109,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertEquals(Uri.parse(URL_ONE), httpRequest.getValue().getUri());
 
     assertEquals(DATA_ONE, recorder.getResponseAsString());
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }
 
@@ -143,6 +145,26 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     assertEquals(contentType, recorder.getHeader("Content-Type"));
     assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  public void testFlashGetsNoContentDisposition() throws Exception {
+    String url = "http://example.org/swiff.swf";
+    String domain = "example.org";
+    String contentType = "application/x-shockwave-flash";
+    Map<String, List<String>> headers = Maps.newHashMap();
+    headers.put("Content-Type", Arrays.asList(contentType));
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expectGetAndReturnHeaders(url, headers);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+    assertEquals(contentType, recorder.getHeader("Content-Type"));
+    assertNull("Content-disposition set for flash", recorder.getHeader("Content-Disposition"));
     assertTrue(rewriter.responseWasRewritten());
   }
 

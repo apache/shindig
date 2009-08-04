@@ -146,7 +146,6 @@ public class ProxyBaseTest extends ServletTestFixture {
     // Just verify that they were set. Specific values are configurable.
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
     assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
   public void testSetResponseHeadersForFlash() throws Exception {
@@ -161,8 +160,6 @@ public class ProxyBaseTest extends ServletTestFixture {
     // Just verify that they were set. Specific values are configurable.
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
     assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
-    assertNull("Content-Disposition header set for flash",
-        recorder.getHeader("Content-Disposition"));
   }
 
   public void testSetResponseHeadersNoCache() throws Exception {
@@ -179,7 +176,6 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNotNull("Expires header not set", recorder.getHeader("Expires"));
     assertEquals("no-cache", recorder.getHeader("Pragma"));
     assertEquals("no-cache", recorder.getHeader("Cache-Control"));
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
   public void testSetResponseHeadersForceParam() throws Exception {
@@ -190,7 +186,6 @@ public class ProxyBaseTest extends ServletTestFixture {
     proxy.setResponseHeaders(request, recorder, results);
 
     HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
-    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
   public void testSetResponseHeadersForceParamInvalid() throws Exception {
