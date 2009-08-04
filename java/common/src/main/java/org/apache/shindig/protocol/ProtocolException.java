@@ -28,7 +28,7 @@ public class ProtocolException extends RuntimeException {
   private final int errorCode;
 
   /**
-   * The applicatin specific response value associated with this exception.
+   * The application specific response value associated with this exception.
    */
   private final Object response;
 
