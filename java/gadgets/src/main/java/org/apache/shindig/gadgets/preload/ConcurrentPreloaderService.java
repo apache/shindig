@@ -51,7 +51,7 @@ public class ConcurrentPreloaderService implements PreloaderService {
   }
 
   public Collection<PreloadedData> preload(Collection<Callable<PreloadedData>> tasks) {
-    ConcurrentPreloads preloads = new ConcurrentPreloads();
+    ConcurrentPreloads preloads = new ConcurrentPreloads(tasks.size());
     int processed = tasks.size();
     for (Callable<PreloadedData> task : tasks) {
       processed -= 1;
