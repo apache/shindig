@@ -53,4 +53,20 @@ class Config {
       throw new ConfigException("Invalid Config Key");
     }
   }
+
+  /**
+   * Overrides a config value for as long as this object is loaded in memory.
+   * This allows for overriding certain configuration values for the purposes
+   * of unit tests.  Note that this does not commit a permanent change to the
+   * configuration files.
+   *
+   * @param $key string Configuration key to set the value of.
+   * @param $value string Value to assign to the specified key.
+   */
+  static function set($key, $value) {
+    if (! self::$config) {
+      self::loadConfig();
+    }
+    self::$config[$key] = $value;
+  }
 }
