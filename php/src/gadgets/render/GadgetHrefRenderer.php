@@ -84,8 +84,9 @@ class GadgetHrefRenderer extends GadgetBaseRenderer {
       $request->getOptions()->viewerSigned = $this->getSignViewer($view);
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
     }
-    $basicFetcher = new BasicRemoteContentFetcher();
-    $basicRemoteContent = new BasicRemoteContent($basicFetcher, $signingFetcherFactory, $gadgetSigner);
+    $remoteFetcherClass = Config::get('remote_content_fetcher');
+    $remoteFetcher = new $remoteFetcherClass();
+    $basicRemoteContent = new BasicRemoteContent($remoteFetcher, $signingFetcherFactory, $gadgetSigner);
     // Cache POST's as if they were GET's, since we don't want to re-fetch and repost the social data for each view
     $basicRemoteContent->setCachePostRequest(true);
     if (($response = $basicRemoteContent->getCachedRequest($request)) == false) {
