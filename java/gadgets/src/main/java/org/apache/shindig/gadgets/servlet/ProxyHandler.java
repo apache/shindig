@@ -144,8 +144,6 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    setResponseHeaders(request, response, results);
-
     for (Map.Entry<String, String> entry : results.getHeaders().entries()) {
       String name = entry.getKey();
       if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
@@ -170,12 +168,7 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    // We're skipping the content disposition header for flash due to an issue with Flash player 10
-    // This does make some sites a higher value phishing target, but this can be mitigated by
-    // additional referer checks.
-    if (!"application/x-shockwave-flash".equalsIgnoreCase(responseType)) {
-      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-    }
+    setResponseHeaders(request, response, results);
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {
       response.sendError(results.getHttpStatusCode());
