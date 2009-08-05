@@ -77,7 +77,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     activityService = mock(ActivityService.class);
 
     JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
-            "{'gadgets.features':{'opensocial-0.8':" +
+            "{'gadgets.features':{opensocial:" +
                "{supportedFields: {activity: ['id', 'title']}}" +
              "}}}");
 

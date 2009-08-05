@@ -144,7 +144,7 @@ public class ActivityHandler  {
     // TODO: Would be nice if name in config matched name of service.
     String container = firstNonNull(request.getToken().getContainer(), ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
-        "${Cur['gadgets.features']['opensocial-0.8'].supportedFields.activity}");
+        "${Cur['gadgets.features'].opensocial.supportedFields.activity}");
   }
 
   private static <T> T firstNonNull(T first, T second) {

@@ -47,8 +47,8 @@ class ContainerConfigTest extends PHPUnit_Framework_TestCase {
     $this->assertArrayHasKey('views', $config);
     $this->assertArrayHasKey('rpc', $config);
     $this->assertArrayHasKey('skins', $config);
-    $this->assertArrayHasKey('opensocial-0.8', $config);
-    $this->assertArrayHasKey('path', $config['opensocial-0.8']);
+    $this->assertArrayHasKey('opensocial', $config);
+    $this->assertArrayHasKey('path', $config['opensocial']);
   }
   
   /**
