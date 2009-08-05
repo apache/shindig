@@ -33,11 +33,13 @@ public class ContentTypes {
   private static final Logger logger = Logger.getLogger(ContentTypes.class.getName());
 
   /**
-   * Allowed alternatives to application/json
+   * Allowed alternatives to application/json, including types listed
+   * in JSON-RPC spec.
    */
   public static final Set<String> ALLOWED_JSON_CONTENT_TYPES =
       ImmutableSet.of("application/json", "text/x-json", "application/javascript",
-          "application/x-javascript", "text/javascript", "text/ecmascript");
+          "application/x-javascript", "text/javascript", "text/ecmascript",
+          "application/json-rpc", "application/jsonrequest");
 
   /**
    * Allowed alternatives to application/xml
