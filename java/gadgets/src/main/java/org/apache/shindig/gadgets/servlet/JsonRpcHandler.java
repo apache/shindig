@@ -74,7 +74,7 @@ public class JsonRpcHandler {
 
     // Process all JSON first so that we don't wind up with hanging threads if
     // a JSONException is thrown.
-    gadgets = Lists.newArrayListWithExpectedSize(requestedGadgets.length());
+    gadgets = Lists.newArrayListWithCapacity(requestedGadgets.length());
     
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
       GadgetContext context = new JsonRpcGadgetContext(
@@ -220,7 +220,7 @@ public class JsonRpcHandler {
 
     private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
       List<UserPref.EnumValuePair> orderedEnums = pref.getOrderedEnumValues();
-      List<JSONObject> jsonEnums = Lists.newArrayListWithExpectedSize(orderedEnums.size());
+      List<JSONObject> jsonEnums = Lists.newArrayListWithCapacity(orderedEnums.size());
       for (UserPref.EnumValuePair evp : orderedEnums) {
         JSONObject curEnum = new JSONObject();
         curEnum.put("value", evp.getValue());

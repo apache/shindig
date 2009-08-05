@@ -223,7 +223,7 @@ public class GadgetSpec {
     if (userPrefs.isEmpty()) {
       spec.userPrefs = Collections.emptyList();
     } else {
-      List<UserPref> prefs = Lists.newArrayListWithExpectedSize(userPrefs.size());
+      List<UserPref> prefs = Lists.newArrayListWithCapacity(userPrefs.size());
       for (UserPref pref : userPrefs) {
         prefs.add(pref.substitute(substituter));
       }

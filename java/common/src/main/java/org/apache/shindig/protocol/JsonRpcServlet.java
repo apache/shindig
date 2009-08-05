@@ -150,7 +150,7 @@ public class JsonRpcServlet extends ApiServlet {
       HttpServletRequest servletRequest, HttpServletResponse servletResponse,
       SecurityToken token) throws JSONException, IOException {
     // Use linked hash map to preserve order
-    List<Future<?>> responses = Lists.newArrayListWithExpectedSize(batch.length());
+    List<Future<?>> responses = Lists.newArrayListWithCapacity(batch.length());
 
     // Gather all Futures.  We do this up front so that
     // the first call to get() comes after all futures are created,

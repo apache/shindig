@@ -247,7 +247,7 @@ public class BeanJsonConverter implements BeanConverter {
   }
 
   private List<Object> convertToList(JSONArray in, Type type) {
-    ArrayList<Object> out = Lists.newArrayListWithExpectedSize(in.length());
+    ArrayList<Object> out = Lists.newArrayListWithCapacity(in.length());
 
     for (int i = 0, j = in.length(); i < j; ++i) {
       out.add(convertToObject(in.opt(i), type));
