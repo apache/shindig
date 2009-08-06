@@ -30,7 +30,7 @@
   <packaging>pom</packaging>
 
   <name>Apache Shindig Distribution assembly</name>
-  <description>Assembles the PHP code base into a deployment package.</description>
+  <description>Assembles the Java/PHP code base into a deployment package.</description>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/assembly
