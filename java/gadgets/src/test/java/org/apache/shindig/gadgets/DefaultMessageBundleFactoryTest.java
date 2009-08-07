@@ -49,6 +49,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DefaultMessageBundleFactoryTest {
   private static final Uri BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
+  private static final Uri LANG_BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
+  private static final Uri COUNTRY_BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
+  private static final Uri ALL_BUNDLE_URI = Uri.parse("http://example.org/messagex.xml");
   private static final Uri SPEC_URI = Uri.parse("http://example.org/gadget.xml");
 
   private static final String MSG_0_NAME = "messageZero";
@@ -73,13 +76,31 @@ public class DefaultMessageBundleFactoryTest {
         "  <msg name='" + MSG_1_NAME + "'>" + MSG_1_VALUE + "</msg>" +
         "</messagebundle>";
 
+  private static final String LANG_BUNDLE
+      = "<messagebundle>" +
+        "  <msg name='" + MSG_0_NAME + "'>" + MSG_0_LANG_VALUE + "</msg>" +
+        "  <msg name='lang'>true</msg>" +
+        "</messagebundle>";
+
+  private static final String COUNTRY_BUNDLE
+      = "<messagebundle>" +
+        "  <msg name='" + MSG_0_NAME + "'>" + MSG_0_COUNTRY_VALUE + "</msg>" +
+        "  <msg name='country'>true</msg>" +
+        "</messagebundle>";
+
+  private static final String ALL_ALL_BUNDLE
+      = "<messagebundle>" +
+        "  <msg name='" + MSG_0_NAME + "'>" + MSG_0_ALL_VALUE + "</msg>" +
+        "  <msg name='all'>true</msg>" +
+        "</messagebundle>";
+
   private static final String BASIC_SPEC
       = "<Module>" +
         "<ModulePrefs title='foo'>" +
-        " <Locale lang='all' country='ALL'>" +
+        " <Locale>" +
         "  <msg name='" + MSG_0_NAME + "'>" + MSG_0_ALL_VALUE + "</msg>" +
         " </Locale>" +
-        " <Locale lang='all' country='" + LOCALE.getCountry() + "'>" +
+        " <Locale country='" + LOCALE.getCountry() + "'>" +
         "  <msg name='" + MSG_0_NAME + "'>" + MSG_0_COUNTRY_VALUE + "</msg>" +
         "  <msg name='" + MSG_3_NAME + "'>" + MSG_3_VALUE + "</msg>" +
         " </Locale>" +
@@ -97,12 +118,12 @@ public class DefaultMessageBundleFactoryTest {
   private static final String ALL_EXTERNAL_SPEC
       = "<Module>" +
         "<ModulePrefs title='foo'>" +
-        " <Locale lang='all' country='ALL' messages='" + BUNDLE_URI + "'/>" +
-        " <Locale lang='all' country='" + LOCALE.getCountry() + "'" +
-        "  messages='" + BUNDLE_URI + "'/>" +
-        " <Locale lang='" + LOCALE.getLanguage() + "' messages='" + BUNDLE_URI + "'/>" +
+        " <Locale messages='" + BUNDLE_URI + "'/>" +
+        " <Locale country='" + LOCALE.getCountry() + "'" +
+        "  messages='" + COUNTRY_BUNDLE_URI + "'/>" +
+        " <Locale lang='" + LOCALE.getLanguage() + "' messages='" + LANG_BUNDLE_URI + "'/>" +
         " <Locale lang='" + LOCALE.getLanguage() + "' country='" + LOCALE.getCountry() + "' " +
-        "  messages='" + BUNDLE_URI + "'/>" +
+        "  messages='" + ALL_BUNDLE_URI + "'/>" +
         "</ModulePrefs>" +
         "<Content type='html'/>" +
         "</Module>";
@@ -173,41 +194,67 @@ public class DefaultMessageBundleFactoryTest {
   @Test
   public void getExactBundleAllExternal() throws Exception {
     HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(4);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response);
+    HttpResponse langResponse = new HttpResponse(LANG_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(langResponse);
+    HttpResponse countryResponse = new HttpResponse(COUNTRY_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(countryResponse);
+    HttpResponse allAllResponse = new HttpResponse(ALL_ALL_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    bundleFactory.getBundle(externalSpec, LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LOCALE, true);
     verify(pipeline);
+
+    assertEquals("true", bundle.getMessages().get("lang"));
+    assertEquals("true", bundle.getMessages().get("country"));
+    assertEquals("true", bundle.getMessages().get("all"));
+    assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
   }
 
   @Test
   public void getLangBundleAllExternal() throws Exception {
-    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(3);
+    HttpResponse langResponse = new HttpResponse(LANG_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(langResponse);
+    HttpResponse allAllResponse = new HttpResponse(ALL_ALL_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    bundleFactory.getBundle(externalSpec, LANG_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LANG_LOCALE, true);
     verify(pipeline);
+
+    assertEquals("true", bundle.getMessages().get("lang"));
+    assertEquals("true", bundle.getMessages().get("all"));
+    assertEquals(MSG_0_LANG_VALUE, bundle.getMessages().get(MSG_0_NAME));
   }
 
   @Test
   public void getCountryBundleAllExternal() throws Exception {
-    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).times(3);
+    HttpResponse countryResponse = new HttpResponse(COUNTRY_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(countryResponse);
+    HttpResponse allAllResponse = new HttpResponse(ALL_ALL_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    bundleFactory.getBundle(externalSpec, COUNTRY_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, COUNTRY_LOCALE, true);
     verify(pipeline);
+
+    assertEquals("true", bundle.getMessages().get("country"));
+    assertEquals("true", bundle.getMessages().get("all"));
+    assertEquals(MSG_0_COUNTRY_VALUE, bundle.getMessages().get(MSG_0_NAME));
   }
 
   @Test
   public void getAllAllExternal() throws Exception {
-    HttpResponse response = new HttpResponse(BASIC_BUNDLE);
-    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).once();
+    HttpResponse allAllResponse = new HttpResponse(ALL_ALL_BUNDLE);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    bundleFactory.getBundle(externalSpec, new Locale("all", "ALL"), true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, new Locale("all", "ALL"), true);
     verify(pipeline);
+
+    assertEquals("true", bundle.getMessages().get("all"));
+    assertEquals(MSG_0_ALL_VALUE, bundle.getMessages().get(MSG_0_NAME));
   }
 
   @Test
