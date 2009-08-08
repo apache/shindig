@@ -239,12 +239,13 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $output = new DOMDocument(null, 'utf-8');
         foreach ($childNode->childNodes as $node) {
           $outNode = $output->importNode($node, true);
-          $output->appendChild($outNode);
+          $outNode = $output->appendChild($outNode);
         }
         // Restore single tags to their html variant, and remove the xml header
-        $ret = str_replace(array(
-            '<?xml version="" encoding="utf-8"?>', '<br/>'), array('', 
-            '<br>'), $output->saveXML());
+        $ret = str_replace(
+            array('<?xml version="" encoding="utf-8"?>', '<br/>', '<script type="text/javascript"><![CDATA[', ']]></script>'),
+            array('', '<br>', '<script type="text/javascript">', '</script>'),
+            $output->saveXML());
         return $ret;
       }
     }
@@ -274,11 +275,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @return string script
    */
   public function getBodyScript() {
+    $script = "gadgets.util.runOnLoadHandlers();";
     if ($this instanceof GadgetHrefRenderer) {
-      return " window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
-    } else {
-      return "gadgets.util.runOnLoadHandlers();";
+      $script .= "window.setTimeout(function(){gadgets.window.adjustHeight()}, 10);";
     }
+    return $script;
   }
 
   /**
@@ -408,20 +409,20 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (! isset($gadgetConfig['osapi.services']) || count($gadgetConfig['osapi.services']) == 1) {
       // this should really be set in config/container.js, but if not, we build a complete default set so at least most of it works out-of-the-box
       $gadgetConfig['osapi.services'] = array(
-          'gadgets.rpc' => array('container.listMethods'), 
-          'http://%host%/social/rpc' => array("messages.update", "albums.update", 
-              "activities.delete", "activities.update", 
-              "activities.supportedFields", "albums.get", 
-              "activities.get", "mediaitems.update", 
-              "messages.get", "appdata.get", 
-              "system.listMethods", "people.supportedFields", 
-              "messages.create", "mediaitems.delete", 
-              "mediaitems.create", "people.get", "people.create", 
-              "albums.delete", "messages.delete", 
-              "appdata.update", "activities.create", 
-              "mediaitems.get", "albums.create", 
-              "appdata.delete", "people.update", 
-              "appdata.create"), 
+          'gadgets.rpc' => array('container.listMethods'),
+          'http://%host%/social/rpc' => array("messages.update", "albums.update",
+              "activities.delete", "activities.update",
+              "activities.supportedFields", "albums.get",
+              "activities.get", "mediaitems.update",
+              "messages.get", "appdata.get",
+              "system.listMethods", "people.supportedFields",
+              "messages.create", "mediaitems.delete",
+              "mediaitems.create", "people.get", "people.create",
+              "albums.delete", "messages.delete",
+              "appdata.update", "activities.create",
+              "mediaitems.get", "albums.create",
+              "appdata.delete", "people.update",
+              "appdata.create"),
           'http://%host%/gadgets/api/rpc' => array('cache.invalidate'));
     }
     return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
