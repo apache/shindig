@@ -34,10 +34,11 @@ class Config {
       // load default configuration
       include_once 'config/container.php';
       self::$config = $shindigConfig;
-      if (file_exists('config/local.php')) {
+      $localConfigPath = realpath(dirname(__FILE__) . "/../../config/local.php");
+      if (file_exists($localConfigPath)) {
         // include local.php if it exists and merge the config arrays.
         // the second array values overwrites the first one's
-        include_once 'config/local.php';
+        include_once $localConfigPath;
         self::$config = array_merge(self::$config, $shindigConfig);
       }
     }

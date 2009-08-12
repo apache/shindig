@@ -43,9 +43,9 @@ class MockSigningFetcherFactory {
    */
   public function __construct() {
     $privkey = openssl_pkey_new();
-    openssl_pkey_export($privkey, $rsa_private_key, "partuza"); //the string must be same as shindig container private_key_phrase
-    
     $phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
+    openssl_pkey_export($privkey, $rsa_private_key, $phrase);
+    
     if (! $rsa_private_key = @openssl_pkey_get_private($rsa_private_key, $phrase)) {
       throw new Exception("Could not create the key");
     }
