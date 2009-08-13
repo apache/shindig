@@ -41,9 +41,9 @@ class AlbumHandler extends DataRequestHandler {
 
     HandlerPreconditions::requireSingular($userIds, "userId must be singular value.");
     HandlerPreconditions::requireNotEmpty($groupId, "groupId must be specified.");
-    HandlerPreconditions::requireSingular($albumIds, "albumId must singular value.");
+    HandlerPreconditions::requireNotEmpty($albumIds, "albumId must be specified.");
 
-    $this->service->deleteAlbum($userIds[0], $groupId, $albumIds[0], $requestItem->getToken());
+    $this->service->deleteAlbum($userIds[0], $groupId, $albumIds, $requestItem->getToken());
   }
 
   /**

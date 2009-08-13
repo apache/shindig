@@ -38,16 +38,24 @@ interface MediaItemService {
   public function getMediaItems($userId, $groupId, $albumId, $mediaItemIds, $collectionOptions, $fields, $token);
 
   /**
-   * Creates a media item in a specified album. The album-id is taken from the
-   * albumMediaItem object. id of the media item object should not be set.
+   * Creates a media item in a specified album. The albumId is taken from the
+   * mediaItem object. id of the media item object should not be set. A file may
+   * be uploaded with the content type 'multipart/form-data', 'image/*', 'video/*'
+   * or 'audio/*'. The uploaded file is moved to a temporary location. The file info
+   * is stored in the 'file' param. After this method is invoked the file is deleted.
    *
    * @param userId id of the user for whom a media item is to be created
    * @param groupId group id
    * @param mediaItem specifies album-id and media item fields
+   * @param An associative array that describes the uploaded file. The array is empty if
+   *     there is no uploaded file. It has 'name', 'tmp_name', 'type' and 'size' fields.
+   *     i.e. [tmp_name] => /tmp/upload//tmp/php/php1h4j1o, [type] => image/png,
+   *     [size] => 123, [name] = user_file_name.png.  
+   *     The file is a regular file and should not be moved by the move_uploaded_file method.
    * @param token security token to authorize this request
    * @return the created media item
    */
-  public function createMediaItem($userId, $groupId, $mediaItem, $token);
+  public function createMediaItem($userId, $groupId, $mediaItem, $file, $token);
 
   /**
    * Updates a media item in an album. Album id and media item id is taken in

@@ -80,7 +80,13 @@ abstract class ApiServlet extends HttpServlet {
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       if (! isset($_SERVER['CONTENT_TYPE']) || ! in_array($_SERVER['CONTENT_TYPE'], $acceptedContentTypes)) {
-        throw new Exception("When posting to the social end-point you have to specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
+        $prefix = substr($_SERVER['CONTENT_TYPE'], 0, strpos($_SERVER['CONTENT_TYPE'], '/'));
+        $acceptedMediaPrefixes = array('image', 'video', 'audio');
+        if (! in_array($prefix, $acceptedMediaPrefixes)) {
+          throw new Exception("When posting to the social end-point you have to specify a content type,
+              supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'.
+              For content upload, content type can be 'image/*', 'audio/*' and 'video/*'");
+        }
       }
     }
   }

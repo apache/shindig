@@ -814,7 +814,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     return self::paginateResults($results, $options);
   }
 
-  public function createMediaItem($userId, $groupId, $mediaItem, $token) {
+  public function createMediaItem($userId, $groupId, $mediaItem, $file, $token) {
     $all = $this->getAllMediaItems();
     $albumId = $mediaItem['albumId'];
     $id = isset($all[$albumId]) ? (count($all[$albumId]) + 1) : 0;

@@ -45,6 +45,16 @@ class MediaItemRestTest extends RestBase {
 //    $this->assertTrue(empty($ret), "Delete the created album failed. Response: $ret");
   }
   
+  private function curlGet($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $ret = curl_exec($ch);
+    curl_close($ch);
+    return $ret;
+  }
+  
   private function verifyLifeCycle($postData, $postDataFormat) {
     $url = '/mediaitems/1/@self/' . $this->album['id'];
     $ret = $this->curlRest($url, $postData, $postDataFormat);
@@ -55,20 +65,19 @@ class MediaItemRestTest extends RestBase {
     $this->assertFalse(empty($ret));
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'][0];
-    $this->assertEquals('http://pages.example.org/images/11223344.png', $fetched['url'], "url should be same.");
+    $data = $this->curlGet($fetched['url']);
+    $this->assertTrue(substr($data, 0, strlen('GIF')) == 'GIF');
     $this->assertEquals('http://pages.example.org/images/11223344-tn.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
-    $this->assertEquals('image/png', $fetched['mimeType'], "mimeType should be same.");
+    $this->assertEquals('image/gif', $fetched['mimeType'], "mimeType should be same.");
     $this->assertEquals('IMAGE', $fetched['type'], "type should be same.");
-    
     $fetched['thumbnailUrl'] = 'http://changed.com/tn.png';
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), json_encode($fetched), 'application/json', 'PUT');
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'GET');
     $this->assertFalse(empty($ret));
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'][0];
-    $this->assertEquals('http://pages.example.org/images/11223344.png', $fetched['url'], "url should be same.");
     $this->assertEquals('http://changed.com/tn.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
-    $this->assertEquals('image/png', $fetched['mimeType'], "mimeType should be same.");
+    $this->assertEquals('image/gif', $fetched['mimeType'], "mimeType should be same.");
     $this->assertEquals('IMAGE', $fetched['type'], "type should be same.");
     
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'DELETE');
@@ -85,7 +94,7 @@ class MediaItemRestTest extends RestBase {
                    "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png",
                    "mimeType" : "image/png",
                    "type" : "image",
-                   "url" : "http://pages.example.org/images/11223344.png",
+                   "url" : "http://www.google.com/intl/en_ALL/images/logo.gif",
                    "albumId" : "' . $this->album['id'] . '"
                  }';
     $this->verifyLifeCycle($postData, 'application/json');
@@ -98,7 +107,7 @@ class MediaItemRestTest extends RestBase {
                    <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
                    <mimeType>image/png</mimeType>
                    <type>image</type>
-                   <url>http://pages.example.org/images/11223344.png</url>
+                   <url>http://www.google.com/intl/en_ALL/images/logo.gif</url>
                    <albumId>' . $this->album['id'] . '</albumId>
                  </mediaItem>';
     $this->verifyLifeCycle($postData, 'application/xml');
@@ -112,7 +121,7 @@ class MediaItemRestTest extends RestBase {
                        <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
                        <mimeType>image/png</mimeType>
                        <type>image</type>
-                       <url>http://pages.example.org/images/11223344.png</url>
+                       <url>http://www.google.com/intl/en_ALL/images/logo.gif</url>
                        <albumId>' . $this->album['id'] . '</albumId>
                      </mediaItem>
                    </content>
