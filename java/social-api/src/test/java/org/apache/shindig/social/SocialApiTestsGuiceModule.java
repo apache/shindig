@@ -33,15 +33,22 @@ import org.apache.shindig.social.opensocial.service.PersonHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
+
+import org.easymock.EasyMock;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.Provider;
 import com.google.inject.name.Names;
 
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRequest;
 
 /**
  * Provides social api component injection for all large tests
@@ -55,6 +62,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
 
     bind(ActivityService.class).to(JsonDbOpensocialService.class);
     bind(AppDataService.class).to(JsonDbOpensocialService.class);
+    bind(MessageService.class).to(JsonDbOpensocialService.class);
     bind(PersonService.class).to(JsonDbOpensocialService.class);
 
     bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
