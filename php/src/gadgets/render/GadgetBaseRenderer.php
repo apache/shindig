@@ -266,7 +266,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $rewriter = new GadgetRewriter($this->context);
     $rewriter->addObserver('head', $this, 'addHeadTags');
     $rewriter->addObserver('body', $this, 'addBodyTags');
-    return $rewriter->rewrite($content, $this->gadget);
+    return $rewriter->rewrite($content, $this->gadget, true);
   }
 
   /**
