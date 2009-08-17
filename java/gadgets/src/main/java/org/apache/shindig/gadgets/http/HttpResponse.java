@@ -432,7 +432,7 @@ public final class HttpResponse implements Externalizable {
         return DEFAULT_ENCODING;
       }
       if (parts.length == 2) {
-        int offset = parts[1].indexOf("charset=");
+        int offset = parts[1].toLowerCase().indexOf("charset=");
         if (offset != -1) {
           String charset = parts[1].substring(offset + 8).toUpperCase();
           // Some servers include quotes around the charset:
