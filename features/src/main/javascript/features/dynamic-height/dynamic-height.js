@@ -39,6 +39,7 @@ gadgets.window = gadgets.window || {};
 
   /**
    * Parse out the value (specified in px) for a CSS attribute of an element.
+   *
    * @param {Object} elem the element with the attribute to look for.
    * @param {String} attr the CSS attribute name of interest.
    * @returns {int} the value of the px attr of the elem.
@@ -51,22 +52,36 @@ gadgets.window = gadgets.window || {};
   }
 
   /**
-   * Calculate the height of the gadget iframe by iterating through the
-   * elements in the gadget body for Webkit.
+   * For Webkit-based browsers, calculate the height of the gadget iframe by
+   * iterating through all elements in the gadget, starting with the body tag.
+   * It is not sufficient to only account body children elements, because
+   * CSS style position "float" may place a child element outside of the
+   * containing parent element. Not counting "float" elements may lead to
+   * undercounting.
+   *
    * @returns {int} the height of the gadget.
    */
   function getHeightForWebkit() {
     var result = 0;
-    var children = document.body.childNodes;
-    for (var i = 0; i < children.length; i++) {
-      if (typeof children[i].offsetTop !== 'undefined' &&
-          typeof children[i].scrollHeight !== 'undefined') {
-        // scrollHeight already accounts for border-bottom and padding-bottom. 
-        var bottom = children[i].offsetTop + children[i].scrollHeight
-            + parseIntFromElemPxAttribute(children[i], "margin-bottom");
-        result = Math.max(result, bottom);
+    var queue = [ document.body ];
+
+    while (queue.length > 0) {
+      var elem = queue.shift();
+      var children = elem.childNodes;
+
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (typeof child.offsetTop !== 'undefined' &&
+            typeof child.scrollHeight !== 'undefined') {
+          // scrollHeight already accounts for border-bottom, padding-bottom.
+          var bottom = child.offsetTop + child.scrollHeight +
+              parseIntFromElemPxAttribute(child, "margin-bottom");
+          result = Math.max(result, bottom);
+        }
+        queue.push(child);
       }
-    }
+    } 
+
     // Add border, padding and margin of the containing body.
     return result
         + parseIntFromElemPxAttribute(document.body, "border-bottom")
