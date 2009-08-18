@@ -201,6 +201,8 @@ ___.enableCaja = (function() {
     if (gadgets.views)
       gadgets.views.getCurrentView
           = taming.views.getCurrentView(gadgets.views.getCurrentView);
+    
+    if (opensocial)
       opensocial.newDataRequest = taming.newDataRequest(imports.$v,
                                                         opensocial.newDataRequest);
       if (gadgets.MiniMessage)
