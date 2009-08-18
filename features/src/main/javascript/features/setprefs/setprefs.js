@@ -30,6 +30,7 @@
  * @private This feature is documented in prefs.js
  */
 gadgets.Prefs.prototype.set = function(key, value) {
+  var needUpdate = false;
   if (arguments.length > 2) {
     // For backwards compatibility. This can take the form:
     // prefs.set(key0, value0, key1, value1, key2, value2);
@@ -39,9 +40,12 @@ gadgets.Prefs.prototype.set = function(key, value) {
     for (var i = 0, j = arguments.length; i < j; i += 2) {
       obj[arguments[i]] = arguments[i + 1];
     }
-    gadgets.Prefs.setInternal_(obj);
+    needUpdate = gadgets.Prefs.setInternal_(obj);
   } else {
-    gadgets.Prefs.setInternal_(key, value);
+    needUpdate = gadgets.Prefs.setInternal_(key, value);
+  }
+  if (!needUpdate) {
+    return;
   }
 
   var args = [

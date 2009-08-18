@@ -115,17 +115,27 @@ gadgets.Prefs = function() {
 
 /**
  * Sets internal values
+ * @return {Boolean} True if the prefs is modified.
  */
 gadgets.Prefs.setInternal_ = function(key, value) {
+  var wasModified = false;
   if (typeof key === "string") {
+    if (!prefs.hasOwnProperty(key) || prefs[key] !== value) {
+      wasModified = true;
+    }
     prefs[key] = value;
   } else {
     for (var k in key) {
       if (key.hasOwnProperty(k)) {
-        prefs[k] = key[k];
+        var v = key[k];
+        if (!prefs.hasOwnProperty(k) || prefs[k] !== v) {
+          wasModified = true;
+        }
+        prefs[k] = v;
       }
     }
   }
+  return wasModified;
 };
 
 /**
