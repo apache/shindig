@@ -107,7 +107,10 @@ public class SanitizingRequestRewriter implements RequestRewriter {
         } catch (IOException ioe) {
           throw new RuntimeException(ioe);
         } catch (ImageReadException ire) {
-          throw new RuntimeException(ire);
+          // Unable to read the image so its not safe
+          logger.log(Level.INFO, "Unable to detect image type for " +request.getUri().toString() +
+              " for sanitized content", ire);
+          return true;
         }
       } else {
         return true;
