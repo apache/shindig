@@ -92,10 +92,10 @@ gadgets.rpc = function() {
   var fallbackTransport = (function() {
     function logFn(name) {
       return function() {
-        gadgets.info("gadgets.rpc." + name + "(" +
-                     gadgets.json.stringify(arguments) +
-                     "): call ignored. [caller: " + document.location +
-                     ", isGadget: " + isGadget + "]");
+        gadgets.log("gadgets.rpc." + name + "(" +
+                    gadgets.json.stringify(arguments) +
+                    "): call ignored. [caller: " + document.location +
+                    ", isGadget: " + isGadget + "]");
       }
     }
     return {
