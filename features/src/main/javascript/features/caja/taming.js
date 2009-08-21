@@ -21,8 +21,7 @@
  * This file tames the APIs that are exposed to a gadget
  */
 
-___.enableCaja = (function() {
-
+var caja___ = (function() {
     // URI policy: Rewrites all uris in a cajoled gadget
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
@@ -50,6 +49,87 @@ ___.enableCaja = (function() {
       return $v.cf(callback, Array.slice(arguments, 0));
     };
   };
+  var tamingFunctions = [];
+  // Registered a function to be called during taming
+  var register = function(tamer) {
+    tamingFunctions.push(tamer);
+  }
+  var fire = function(globalScope) {
+    for (var tamer in tamingFunctions) {
+      if (tamingFunctions.hasOwnProperty(tamer)) {
+        // This is just tamingFunctions[tamer](globalScope)
+        // but in a way that does not leak a potent "this"
+        // to the taming functions
+        (1, tamingFunctions[tamer])(globalScope);
+      }
+    }
+  }
+  function whitelist(schema, obj) {
+      if (!obj) { return; }  // Occurs for optional features
+      for (var k in schema) {
+        if (schema.hasOwnProperty(k)) {
+          var m = k.match(/^([mcsa])_(\w+)$/);
+          var type = m[1], name = m[2];
+          switch (type) {
+            case 'c':
+              ___.grantRead(obj, name);
+              whitelist(schema[k], obj[name]);
+              break;
+              // grant access to a function that uses "this"
+            case 'm':
+              ___.grantGeneric(obj.prototype, name);
+              break;
+            case 'f':
+              ___.grantRead(obj.prototype, name);
+              break;
+            case 'a': // attenuate function
+              if ('function' === typeof obj[name] && schema[k]) {
+                ___.handleGeneric(obj, name, schema[k](obj[name]));
+              }
+              break;
+              // grant access to a variable or an instance
+              // of a function that does not use "this"
+            case 's':
+              if ('function' === typeof obj[name]) {
+                ___.grantFunc(obj, name);
+              } else {
+                ___.grantRead(obj, name);
+              }
+              break;
+          }
+        }
+      }
+    }
+
+  function enable() {
+    var imports = ___.copy(___.sharedImports);
+    imports.outers = imports;
+    
+    var gadgetRoot = document.getElementById('cajoled-output');
+    gadgetRoot.className = 'g___';
+    document.body.appendChild(gadgetRoot);
+    
+    imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
+    attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
+    
+    imports.$v = valijaMaker.CALL___(imports.outers);
+    
+    ___.getNewModuleHandler().setImports(imports);
+    
+    fire(imports);
+  }
+  return {
+    enable: enable,
+    register: register,
+    whitelist: whitelist
+  };
+})();
+
+// Tame opensocial
+// TODO(jasvir): Break this into smaller pieces and move to relavent
+// features such the taming is only included if the feature is.
+// TODO(jasvir): Express taming callbacks more succinctly
+caja___.register(function(imports) {
   
   // Warning: multiple taming styles ahead...
   var taming = {
@@ -98,31 +178,31 @@ ___.enableCaja = (function() {
     newDataRequest: function($v, orig) {
       return function tamedNewDataRequest() {
         var dr = {
-          super_: orig(),
+          super___: orig(),
 
           add: ___.frozenFunc(
               function(thing, str) {
-                return this.super_.add(thing, str);
+                return this.super___.add(thing, str);
               }),
           newFetchPersonAppDataRequest: ___.frozenFunc(
               function(person, what) {
-                return this.super_.newFetchPersonAppDataRequest(person, what);
+                return this.super___.newFetchPersonAppDataRequest(person, what);
               }),
           newFetchPersonRequest: ___.frozenFunc(
               function(person, opts) {
-                return this.super_.newFetchPersonRequest(person, opts);
+                return this.super___.newFetchPersonRequest(person, opts);
               }),
           newFetchPeopleRequest: ___.frozenFunc(
               function(person, opts) {
-                return this.super_.newFetchPeopleRequest(person, opts);
+                return this.super___.newFetchPeopleRequest(person, opts);
               }),
           newUpdatePersonAppDataRequest: ___.frozenFunc(
               function(person, opts) {
-                return this.super_.newUpdatePersonAppDataRequest(person, opts);
+                return this.super___.newUpdatePersonAppDataRequest(person, opts);
               }),
           send: ___.frozenFunc(
               function(callback) {
-                return this.super_.send(tameCallback($v, callback));
+                return this.super___.send(tameCallback($v, callback));
               })
         };
         return dr;
@@ -140,15 +220,15 @@ ___.enableCaja = (function() {
           opt_params.contentContainer = opt_params.contentContainer ?
           undefined : ___.guard(blah) && opt_params.contentContainer.node___;
         }
-        this.ts_.addTab(html_sanitize(tabName), opt_params);
+        this.ts___.addTab(html_sanitize(tabName), opt_params);
       };
       
       tamedTabSet.prototype.alignTabs = function(align, opt_offset) {
-        this.ts_.alignTabs(String(align), Number(opt_offset));
+        this.ts___.alignTabs(String(align), Number(opt_offset));
       };
       
       tamedTabSet.prototype.displayTabs = function(display) {
-        this.ts_.displayTabs(Boolean(display));
+        this.ts___.displayTabs(Boolean(display));
       };
       
       return tamedTabSet;
@@ -166,7 +246,7 @@ ___.enableCaja = (function() {
       // note, we are going to monkey-patch just this function instead of wrapping the whole of views...
       getCurrentView: function(orig) {
         return function tamedGetCurrentView() {
-          // Note, taming decision was s_, so maybe we don't need this?
+          // Note, taming decision was s___, so maybe we don't need this?
           var view = orig.call(this);
           ___.grantGeneric(view, 'getName');
           ___.grantGeneric(view, 'isOnlyVisibleGadget');
@@ -175,44 +255,6 @@ ___.enableCaja = (function() {
       }
     }
   };
-  
-  return function() {
-    var imports = ___.copy(___.sharedImports);
-    imports.outers = imports;
-    
-    var gadgetRoot = document.getElementById('cajoled-output');
-    gadgetRoot.className = 'g___';
-    document.body.appendChild(gadgetRoot);
-    
-    imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
-    attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
-    
-    imports.$v = valijaMaker.CALL___(imports.outers);
-    
-    ___.getNewModuleHandler().setImports(imports);
-    
-    // Taming
-    if (gadgets.flash)
-      gadgets.flash.embedFlash
-          = taming.flash.embedFlash(gadgets.flash.embedFlash);
-    gadgets.util.registerOnLoadHandler
-      = taming.util.registerOnLoadHandler(imports.$v,
-                                          gadgets.util.registerOnLoadHandler);
-    if (gadgets.views)
-      gadgets.views.getCurrentView
-          = taming.views.getCurrentView(gadgets.views.getCurrentView);
-    
-    if (opensocial)
-      opensocial.newDataRequest = taming.newDataRequest(imports.$v,
-                                                        opensocial.newDataRequest);
-      if (gadgets.MiniMessage)
-        gadgets.MiniMessage = taming.MiniMessage(imports.$v);
-      if (gadgets.TabSet)
-        gadgets.TabSet = taming.TabSet(imports.$v, gadgets.TabSet);
-      
-      // Add the opensocial APIs and mark them callable and readable.
-      imports.outers.gadgets = gadgets;
-      imports.outers.opensocial = opensocial;
       
       // The below described the opensocial reference APIs.
       // A prefix of "c_" specifies a class, "m_" a method, "f_" a field,
@@ -720,46 +762,25 @@ ___.enableCaja = (function() {
         }
       };
       
-      function whitelist(schema, obj) {
-        if (!obj) { return; }  // Occurs for optional features
-        for (var k in schema) {
-          if (schema.hasOwnProperty(k)) {
-            var m = k.match(/^([mcsa])_(\w+)$/);
-            var type = m[1], name = m[2];
-            switch (type) {
-              case 'c':
-                ___.grantRead(obj, name);
-                whitelist(schema[k], obj[name]);
-                break;
-                // grant access to a function that uses "this"
-              case 'm':
-                ___.grantGeneric(obj.prototype, name);
-                break;
-              case 'f':
-                ___.grantRead(obj.prototype, name);
-                break;
-              case 'a': // attenuate function
-                if ('function' === typeof obj[name] && schema[k]) {
-                  ___.handleGeneric(obj, name, schema[k](obj[name]));
-                }
-                break;
-                // grant access to a variable or an instance
-                // of a function that does not use "this"
-              case 's':
-                if ('function' === typeof obj[name]) {
-                  ___.grantFunc(obj, name);
-                } else {
-                  ___.grantRead(obj, name);
-                }
-                break;
-            }
-          }
-        }
-      }
-      whitelist(opensocialSchema, imports.outers);
+      if (window.gadgets) 
+        imports.outers.gadgets = gadgets;
+      if (window.opensocial)
+        imports.outers.opensocial = opensocial; 
+      caja___.whitelist(opensocialSchema, imports.outers);
       if (gadgets.MiniMessage)
         ___.ctor(gadgets.MiniMessage, Object, 'MiniMessage');
       if (gadgets.TabSet)
         ___.ctor(gadgets.TabSet, Object, 'TabSet');
-  };
-})();
+});
+
+// Expose alert and console.log to cajoled programs
+caja___.register(function(imports) {
+  imports.outers.alert = function(msg) { alert(msg); };
+  ___.grantFunc(imports.outers, 'alert');
+
+  if (console && console.log) {
+    imports.outers.console = console;
+    ___.grantRead(imports.outers, 'console');
+    ___.grantFunc(imports.outers.console, 'log');
+  }
+});

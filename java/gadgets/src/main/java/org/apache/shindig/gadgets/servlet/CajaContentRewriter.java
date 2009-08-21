@@ -80,8 +80,16 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
           }
         }
 
-        public URI rewrite(ExternalReference externalReference, String string) {
-          return retrievedUri.resolve(externalReference.getUri());
+        public URI rewrite(ExternalReference externalReference, String mimeType) {
+          URI uri = externalReference.getUri();
+          if (uri.getScheme().equalsIgnoreCase("https")) {
+            return retrievedUri.resolve(uri);
+          } else if ("javascript".equalsIgnoreCase(uri.getScheme())) {
+              // Commonly used javascript url for links with onclick handlers
+              return uri.toString().equals("javascript:void(0)") ? uri : null;
+          } else {
+            return null;
+          }
         }
       };
 
@@ -170,7 +178,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
   private Element tameCajaClientApi(Document doc) {
     Element scriptElement = doc.createElement("script");
     scriptElement.setAttribute("type", "text/javascript");
-    scriptElement.appendChild(doc.createTextNode("___.enableCaja()"));
+    scriptElement.appendChild(doc.createTextNode("caja___.enable()"));
     return scriptElement;
   }
 

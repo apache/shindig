@@ -144,6 +144,8 @@ if (window.JSON) {
         }
         // Otherwise, iterate through all of the keys in the object.
         for (k in value) {
+          if (k.match('___$'))
+            continue;
           if (value.hasOwnProperty(k)) {
             if (typeof k === 'string') {
               v = stringify(value[k]);
