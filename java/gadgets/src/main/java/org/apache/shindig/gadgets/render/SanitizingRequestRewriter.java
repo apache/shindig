@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -64,14 +65,19 @@ public class SanitizingRequestRewriter implements RequestRewriter {
     if (request.isSanitizationRequested()) {
       ContentRewriterFeature rewriterFeature =
         rewriterFeatureFactory.createRewriteAllFeature(request.getCacheTtl());
-      if (request.getRewriteMimeType().equalsIgnoreCase("text/css")) {
+      if (StringUtils.isEmpty(request.getRewriteMimeType())) {
+        logger.log(Level.WARNING, "Request to sanitize without content type for "
+            + request.getUri());
+        content.setContent("");
+        return true;
+      } else if (request.getRewriteMimeType().equalsIgnoreCase("text/css")) {
         return rewriteProxiedCss(request, resp, content, rewriterFeature);
       } else if (request.getRewriteMimeType().toLowerCase().startsWith("image/")) {
         return rewriteProxiedImage(request, resp, content);
       } else {
         logger.log(Level.WARNING, "Request to sanitize unknown content type "
             + request.getRewriteMimeType()
-            + " for " + request.getUri().toString());
+            + " for " + request.getUri());
         content.setContent("");
         return true;
       }

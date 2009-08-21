@@ -105,4 +105,23 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
             "org/apache/shindig/gadgets/rewrite/image/inefficient.png"))).create();
     assertNull(rewrite(req, response));
   }
+
+  @Test
+  public void enforceUnknownMimeTypeRejected() throws Exception {
+    HttpRequest req = new HttpRequest(CONTENT_URI);
+    req.setRewriteMimeType("text/foo");
+    HttpResponse response = new HttpResponseBuilder().setResponseString("doEvil()").create();
+    String sanitized = "";
+    assertEquals(sanitized, rewrite(req, response));
+  }
+
+  @Test
+  public void enforceMissingMimeTypeRejected() throws Exception {
+    HttpRequest req = new HttpRequest(CONTENT_URI);
+    // A request without a mime type, but requesting sanitization, should be rejected
+    req.setRewriteMimeType(null);
+    HttpResponse response = new HttpResponseBuilder().setResponseString("doEvil()").create();
+    String sanitized = "";
+    assertEquals(sanitized, rewrite(req, response));
+  }
 }
