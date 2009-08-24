@@ -82,7 +82,8 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
 
         public URI rewrite(ExternalReference externalReference, String mimeType) {
           URI uri = externalReference.getUri();
-          if (uri.getScheme().equalsIgnoreCase("https")) {
+          if (uri.getScheme().equalsIgnoreCase("https") ||
+              uri.getScheme().equalsIgnoreCase("http")) {
             return retrievedUri.resolve(uri);
           } else if ("javascript".equalsIgnoreCase(uri.getScheme())) {
               // Commonly used javascript url for links with onclick handlers
