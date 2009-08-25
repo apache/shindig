@@ -117,7 +117,7 @@ gadgets.rpc = function() {
     params = gadgets.util.getUrlParameters();
   }
 
-  authToken['..'] = params.rpctoken || params.ifpctok || 0;
+  authToken['..'] = params.rpctoken || params.ifpctok || "";
 
   // Indicates whether to support early-message queueing, which is designed
   // to ensure that all messages sent by gadgets.rpc.call, irrespective
