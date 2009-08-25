@@ -63,8 +63,9 @@ gadgets.rpctx.rmr = function() {
    * @param {object} channelFrame Relay frame to add to the DOM body.
    * @param {string} relayUri Base URI for the frame.
    * @param {string} Data to pass along to the frame.
+   * @param {string} opt_frameId ID of frame for which relay is being appended.
    */
-  function appendRmrFrame(channelFrame, relayUri, data) {
+  function appendRmrFrame(channelFrame, relayUri, data, opt_frameId) {
     var appendFn = function() {
       // Append the iframe.
       document.body.appendChild(channelFrame);
@@ -75,6 +76,16 @@ gadgets.rpctx.rmr = function() {
       // In other words, this fixes the bfcache issue that causes the iframe's
       // src property to not be updated despite us assigning it a new value here.
       channelFrame.src = 'about:blank';
+      if (opt_frameId) {
+        // Process the initial sent payload (typically sent by container to
+        // child/gadget) only when the relay frame has finished loading. We
+        // do this to ensure that, in processRmrData(...), the ACK sent due
+        // to processing can actually be sent. Before this time, the frame's
+        // contentWindow is null, making it impossible to do so.
+        channelFrame.onload = function() {
+          processRmrData(opt_frameId);
+        }
+      }
       channelFrame.src = relayUri + '#' + data;
     }
 
@@ -448,17 +459,18 @@ gadgets.rpctx.rmr = function() {
       // queued messages that have backed up since then. ACK is enqueued in
       // getRmrData to ensure that the container's waiting flag is set to false
       // (this happens in the below code run on the container side).
-      appendRmrFrame(channel.frame, channel.relayUri, getRmrData(frameId));
+      appendRmrFrame(channel.frame, channel.relayUri, getRmrData(frameId), frameId);
+    } else {
+      // Process messages that the gadget sent in its initial relay payload.
+      // We can do this immediately because the container has already appended
+      // and loaded a relay frame that can be used to ACK the messages the gadget
+      // sent. In the preceding if-block, however, the processRmrData(...) call
+      // must wait. That's because appendRmrFrame may not actually append the
+      // frame - in the context of a gadget, this code may be running in the
+      // head element, so it cannot be appended to body. As a result, the
+      // gadget cannot ACK the container for messages it received.
+      processRmrData(frameId);
     }
-
-    // Attempt to process the messages that the other party may have set in
-    // the resize frame's hash. For gadget to container, this is the gadget
-    // finding the container-set IFRAME, which has an ACK attached to it.
-    // For gadget to container, the gadget may have enqueued messages already,
-    // and sent them in the above code. This too will have an ACK message.
-    // The net effect is that both sides of the connection will have their
-    // "waiting" bit set to false, so they're ready to send messages.
-    processRmrData(frameId);
 
     return true;
   }
