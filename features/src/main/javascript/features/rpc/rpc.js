@@ -93,7 +93,7 @@ gadgets.rpc = function() {
     function logFn(name) {
       return function() {
         gadgets.log("gadgets.rpc." + name + "(" +
-                    gadgets.json.stringify(arguments) +
+                    gadgets.json.stringify(Array.prototype.slice.call(arguments)) +
                     "): call ignored. [caller: " + document.location +
                     ", isGadget: " + isGadget + "]");
       }
