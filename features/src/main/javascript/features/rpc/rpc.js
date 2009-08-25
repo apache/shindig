@@ -341,8 +341,8 @@ gadgets.rpc = function() {
       window.setTimeout(function() { setupFrame(frameId, token) },
                         SETUP_FRAME_TIMEOUT);
     } else {
-      // Fail: fall back.
-      transport = fallbackTransport;
+      // Fail: fall back for this gadget.
+      receiverTx[frameId] = fallbackTransport;
       setup[frameId] = true;
     }
   }
@@ -438,7 +438,7 @@ gadgets.rpc = function() {
       // gadget -> container communication. Running here ensures
       // that relayUri info will be available.
       if (transport.setup('..') === false) {
-        transport = fallbackTransport;
+        receiverTx['..'] = fallbackTransport;
       }
     }
 
@@ -561,7 +561,9 @@ gadgets.rpc = function() {
       }
 
       // Attempt to make call via a cross-domain transport.
-      var channel = useEarlyQueueing ? receiverTx[targetId] : transport;
+      // Retrieve the transport for the given target - if one
+      // target is misconfigured, it won't affect the others.
+      var channel = receiverTx[targetId] ? receiverTx[targetId] : transport;
 
       if (!channel) {
         // Not set up yet. Enqueue the rpc for such time as it is.
@@ -581,7 +583,7 @@ gadgets.rpc = function() {
 
       if (channel.call(targetId, from, rpc) === false) {
         // Fall back to IFPC. This behavior may be removed as IFPC is as well.
-        transport = fallbackTransport;
+        receiverTx[targetId] = fallbackTransport;
         transport.call(targetId, from, rpc);
       }
     },
