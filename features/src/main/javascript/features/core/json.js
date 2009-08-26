@@ -40,7 +40,7 @@ var gadgets = gadgets || {};
  * Port of the public domain JSON library by Douglas Crockford.
  * See: http://www.json.org/json2.js
  */
-if (window.JSON) {
+if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   // HTML5 implementation, or already defined.
   // Not a direct alias as the opensocial specification disagrees with the HTML5 JSON spec.
   // JSON says to throw on parse errors and to support filtering functions. OS does not.
