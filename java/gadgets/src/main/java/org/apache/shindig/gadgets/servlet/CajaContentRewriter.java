@@ -18,21 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.InputSource;
@@ -41,15 +30,32 @@ import com.google.caja.opensocial.DefaultGadgetRewriter;
 import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
+import com.google.caja.parser.html.Nodes;
+import com.google.caja.render.Concatenator;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
 import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
 import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
+
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URI;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.GadgetRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
@@ -115,10 +121,11 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         cajoledOutput.appendChild(doc.adoptNode(html));
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
-        
+
         createContainerFor(doc, cajoledOutput);
         content.documentChanged();
         safe = true;
+        HtmlSerialization.attach(doc, new CajaHtmlSerializer(), null);
       } catch (GadgetRewriteException e) {
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
@@ -142,8 +149,8 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
     docEl.appendChild(body);
     body.appendChild(el);
   }
-  
-  private Element formatErrors(Document doc, InputSource is, 
+
+  private Element formatErrors(Document doc, InputSource is,
       CharSequence orig, MessageQueue mq) {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
@@ -193,5 +200,12 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
       errbuilder.append(m.format(mc)).append('\n');
     }
     logger.info("Unable to cajole gadget: " + errbuilder);
+  }
+
+  private static class CajaHtmlSerializer implements HtmlSerializer {
+    public String serialize(Document doc) {
+      StringWriter sw = HtmlSerialization.createWriter(doc);
+      return Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml());
+    }
   }
 }
