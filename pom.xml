@@ -116,6 +116,15 @@
     <!-- PMC Chair -->
     <!-- PMC -->
     <developer>
+      <id>agektmr</id>
+      <name>Eiji Kitamura</name>
+      <email>agektmr@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>brianm</id>
       <name>Brian McCallister</name>
       <email>brianm@apache.org</email>
