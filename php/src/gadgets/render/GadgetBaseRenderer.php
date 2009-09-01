@@ -99,7 +99,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (! empty($osDataRequestsCombined)) {
       $this->performDataRequests($osDataRequestsCombined);
     }
-    preg_match_all('/(<script.*type="text\/(os-template)".*>)(.*)(<\/script>)/imxsU', $content, $osTemplates);
+    preg_match_all('/(<script[^>]*type="text\/(os-template)"[^>]*>)(.*)(<\/script>)/imxsU', $content, $osTemplates);
     $templateLibrary = false;
     if (count($osTemplates[0])) {
       // only load the template parser if there's any templates in the gadget content
