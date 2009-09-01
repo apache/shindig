@@ -46,11 +46,12 @@
         var parentDomain = gadgets.rpc.getOrigin(gadgets.util.getUrlParameters().parent);
         var myDomain = gadgets.rpc.getOrigin(window.location.href);
         var rpctoken = Math.round(Math.random() * 10000000);
-        var childGadgetUrl = parentDomain + '/gadgets/ifr?url=' + parentDomain + '/gadgets/files/container/rpctest_childgadget.xml&parent=' + myDomain + '#rpctoken=' + rpctoken;
+        var childGadgetUrl = parentDomain + '/gadgets/ifr?url=' + parentDomain + '/gadgets/files/container/rpctest_childgadget.xml&parent=' + myDomain + '&libs=rpc&debug=1#rpctoken=' + rpctoken;
         childgadgetdiv.innerHTML = '<div><input type="button" value="Ping Parent (Container)" onclick="callGadgetServicePing();"/><hr/>' +
           '<div>Who-am-I query count: <span id="queryconsole">0</span>, last q from: <span id="whoasked"></span></div>' +
           '<div><iframe id="childgadget" name="childgadget" height=100 width=200 src="about:blank"></iframe></div>';
         document.getElementById("childgadget").src = childGadgetUrl;
+        gadgets.rpc.setRelayUrl('childgadget', parentDomain);
         gadgets.rpc.setAuthToken('childgadget', rpctoken);
       }
 

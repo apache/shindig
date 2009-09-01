@@ -182,8 +182,9 @@ class DataPipelining {
       // perform social api requests
       $request = new RemoteContentRequest('http://'.$_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
       $request->setMethod('POST');
-      $basicFetcher = new BasicRemoteContentFetcher();
-      $basicRemoteContent = new BasicRemoteContent($basicFetcher);
+      $remoteFetcherClass = Config::get('remote_content_fetcher');
+      $remoteFetcher = new $remoteFetcherClass();
+      $basicRemoteContent = new BasicRemoteContent($remoteFetcher);
       $response = $basicRemoteContent->fetch($request);
       $decodedResponse = json_decode($response->getResponseContent(), true);
     }

@@ -35,7 +35,7 @@ SetPrefsTest.prototype.setUp = function() {
   gadgets.rpc = {};
   gadgets.rpc.call = function() {
     that.rpcArguments = Array.prototype.slice.call(arguments);
-  }
+  };
 };
 
 SetPrefsTest.prototype.tearDown = function() {
@@ -46,10 +46,22 @@ SetPrefsTest.prototype.tearDown = function() {
 SetPrefsTest.prototype.testSet = function() {
   var pref = new gadgets.Prefs();
   gadgets.Prefs.setInternal_('key', 100);
+
+  // Clear the RPC call history before pref.set() is called.
+  this.resetRpc();
+
+  // The same group of values, should not invoke a RPC call.
+  pref.set('key', 100);
+  this.assertNoRpcCalled();
+
+  // Value altered, should invoke a RPC call.
   pref.set('key', 200);
   this.assertEquals(200, pref.getInt('key'));
-
   this.assertRpcCalled(null, 'set_pref', null, 0, 'key', 200);
+
+  // Set the same value again, should not invoke a RPC call.
+  pref.set('key', 200);
+  this.assertNoRpcCalled();
 };
 
 SetPrefsTest.prototype.testSetArray = function() {
@@ -85,6 +97,10 @@ SetPrefsTest.prototype.testSetArrayWithNumbers = function() {
   this.assertRpcCalled(null, 'set_pref', null, 0, 'array', '1|2');
 };
 
+/**
+ * Asserts gadgets.rpc.call() is called with the expected arguments given.
+ * Note that it resets this.rpcArguments for next RPC call assertion.
+ */
 SetPrefsTest.prototype.assertRpcCalled = function() {
   this.assertNotUndefined("RPC was not called.", this.rpcArguments);
   this.assertEquals("RPC argument list not valid length.",
@@ -93,5 +109,19 @@ SetPrefsTest.prototype.assertRpcCalled = function() {
   for (var i = 0; i < arguments.length; i++) {
     this.assertEquals(arguments[i], this.rpcArguments[i]);
   }
+  this.resetRpc();
 };
 
+/**
+ * Resets this.rpcArguments.
+ */
+SetPrefsTest.prototype.resetRpc = function() {
+  this.rpcArguments = undefined;
+};
+
+/**
+ * Asserts that no gadgets.rpc.call() is called.
+ */
+SetPrefsTest.prototype.assertNoRpcCalled = function() {
+  this.assertUndefined("RPC was called.", this.rpcArguments);
+};

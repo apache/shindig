@@ -30,13 +30,14 @@ import java.util.Set;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * The MessageService interface defines the service provider interface to post messages to
  * the underlying SNS.
  */
-@ImplementedBy(JsonDbOpensocialService.class)
+@ImplementedBy(MessageService.NotImplementedMessageService.class)
 public interface MessageService {
-
 
   /**
    * Returns a list of message collections corresponding to the given user
@@ -147,4 +148,42 @@ public interface MessageService {
   Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token)
       throws ProtocolException;
 
+  public static class NotImplementedMessageService implements MessageService {
+    public Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
+       Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<MessageCollection> createMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token)  throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId,
+        Set<String> fields, List<String> msgIds, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
+                               SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
+        SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId, Message message, SecurityToken token)
+        throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+  }
 }

@@ -79,7 +79,7 @@ public class CajaCssLexerParser {
     }
 
     if (shouldCache) {
-      List<Object> cloned = Lists.newArrayListWithExpectedSize(parsedCss.size());
+      List<Object> cloned = Lists.newArrayListWithCapacity(parsedCss.size());
       for (Object o : parsedCss) {
         if (o instanceof ImportDecl) {
           cloned.add(new ImportDecl(((ImportDecl) o).getUri()));

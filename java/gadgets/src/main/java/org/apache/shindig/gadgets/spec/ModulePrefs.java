@@ -458,7 +458,7 @@ public class ModulePrefs {
   public OAuthSpec getOAuthSpec() {
     return oauth;
   }
-  
+
   /**
    * Not part of the spec. Indicates whether UserPref-substitutable
    * fields in this prefs require __UP_ substitution.
@@ -468,28 +468,12 @@ public class ModulePrefs {
   }
 
   /**
-   * Attempts to retrieve a valid LocaleSpec for the given Locale.
-   * First tries to find an exact language / country match.
-   * Then tries to find a match for language / all.
-   * Then tries to find a match for all / all.
-   * Finally gives up.
-   * @param locale
+   * Gets the locale spec for the given locale, if any exists.
+   *
    * @return The locale spec, if there is a matching one, or null.
    */
   public LocaleSpec getLocale(Locale locale) {
-    if (locales.isEmpty()) {
-      return null;
-    }
-    LocaleSpec localeSpec = locales.get(locale);
-    if (localeSpec == null) {
-      locale = new Locale(locale.getLanguage(), "ALL");
-      localeSpec = locales.get(locale);
-      if (localeSpec == null) {
-        localeSpec = locales.get(GadgetSpec.DEFAULT_LOCALE);
-      }
-    }
-
-    return localeSpec;
+    return locales.get(locale);
   }
 
   /**
@@ -546,7 +530,7 @@ public class ModulePrefs {
     buf.append("</ModulePrefs>");
     return buf.toString();
   }
-  
+
   /**
    * @param prefs ModulePrefs object
    * @return true if any UserPref-substitutable fields in the given

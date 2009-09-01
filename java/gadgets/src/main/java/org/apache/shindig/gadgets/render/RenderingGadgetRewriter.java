@@ -136,7 +136,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // Remove all the elements currently in head and add them back after we inject content
       NodeList children = head.getChildNodes();
-      List<Node> existingHeadContent = Lists.newArrayListWithCapacity(children.getLength());
+      List<Node> existingHeadContent = Lists.newArrayListWithExpectedSize(children.getLength());
       for (int i = 0; i < children.getLength(); i++) {
         existingHeadContent.add(children.item(i));
       }

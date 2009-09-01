@@ -54,7 +54,7 @@ class TemplateLibrary {
       if ($script = $template->getScript()) {
         $scriptNode = $templateDomCopy->createElement('script');
         $scriptNode->setAttribute('type', 'text/javascript');
-        $scriptNode->appendChild($templateDomCopy->createTextNode($script));
+        $scriptNode->appendChild($templateDomCopy->createCDATASection($script));
         $templateDomCopy->appendChild($scriptNode);
       }
       // Copy the DOM structure since parseNode() modifies the DOM structure directly

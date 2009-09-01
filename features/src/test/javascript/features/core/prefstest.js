@@ -40,6 +40,22 @@ PrefsTest.prototype.tearDown = function() {
   this.params = undefined;
 };
 
+PrefsTest.prototype.testSetInternal_ = function() {
+  var pref = new gadgets.Prefs();
+
+  // First time set the prefs, expect returning true.
+  this.assertTrue(gadgets.Prefs.setInternal_(this.params, 100));
+  this.assertEquals(true, pref.getBool('boolString'));
+
+  // Set the same prefs, expect returning false.
+  this.assertFalse(gadgets.Prefs.setInternal_(this.params, 100));
+  this.assertEquals(true, pref.getBool('boolString'));
+
+  // Modify 'boolString' value, expect returning true.
+  this.assertTrue(gadgets.Prefs.setInternal_('boolString', false));
+  this.assertEquals(false, pref.getBool('boolString'));
+};
+
 PrefsTest.prototype.testGetInt = function() {
     var expectedResults = {myCounter: 100, myString: 15, myUndefined: 0,
         myObject: 0, myFloat: 3};

@@ -259,7 +259,9 @@ class GadgetFactory {
     // Perform the signed requests
     if (count($signedRequests)) {
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
-      $remoteContent = new BasicRemoteContent(new BasicRemoteContentFetcher(), $signingFetcherFactory);
+      $remoteFetcherClass = Config::get('remote_content_fetcher');
+      $remoteFetcher = new $remoteFetcherClass();
+      $remoteContent = new BasicRemoteContent($remoteFetcher, $signingFetcherFactory);
       $resps = $remoteContent->multiFetch($signedRequests);
       foreach ($resps as $response) {
         $responses[$response->getNotSignedUrl()] = array(

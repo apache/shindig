@@ -38,7 +38,7 @@ class GadgetRewriter {
    * @param string $content
    * @param Gadget $gadget
    */
-  public function rewrite($content, Gadget &$gadget) {
+  public function rewrite($content, Gadget &$gadget, $checkDocument = false) {
     // Check to see if the gadget requested rewriting, or if rewriting is forced in the configuration
     if (is_array($gadget->gadgetSpec->rewrite) || Config::get('rewrite_by_default')) {
       require_once "src/gadgets/rewrite/ContentRewriter.php";
@@ -68,6 +68,11 @@ class GadgetRewriter {
         // parsing failed, return the unmodified content
         return $content;
       }
+
+      if ($checkDocument) {
+      	$this->checkDocument();
+      }
+
       // find and parse all nodes in the dom document
       $rootNodes = $this->doc->getElementsByTagName('*');
       $this->parseNodes($rootNodes);
@@ -78,6 +83,32 @@ class GadgetRewriter {
         //TODO : use the caja daemon to cajole the content (experimental patch is available and will be added soon)
       }
       return $html;
+    }
+  }
+
+  /**
+   * Proxied content documents do not always have a head tag which would cause the css & script injection
+   * to fail (since that node listeners would never be called). Do note that the html and body tags will
+   * already be automatically added by the DOMDocument->loadHtml function
+   */
+  private function checkDocument() {
+    foreach ($this->doc->childNodes as $node) {
+    	$htmlNode = false;
+    	if (isset($node->tagName) && strtolower($node->tagName) == 'html') {
+    		$htmlNode = $node;
+    		$hasHeadTag = false;
+    		foreach ($node->childNodes as $htmlChild) {
+    			if (isset($htmlChild->tagName) && $htmlChild->tagName == 'head') {
+    				$hasHeadTag = true;
+    				break;
+    			}
+    		}
+    		// If no <head> tag was found but we do have a <html> node, then add the <head> tag to it
+    		if (!$hasHeadTag && $htmlNode && $htmlNode->childNodes->length > 0) {
+    			$firstChild = $htmlNode->childNodes->item(0);
+          $htmlNode->insertBefore($this->doc->createElement('head'), $firstChild);
+    		}
+    	}
     }
   }
 

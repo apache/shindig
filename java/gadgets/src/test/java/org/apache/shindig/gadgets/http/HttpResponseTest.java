@@ -72,6 +72,16 @@ public class HttpResponseTest {
   }
 
   @Test
+  public void testEncodingDetectionUtf8WithBomCaseInsensitiveKey() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/plain; Charset=utf-8")
+        // Legitimate data, should be ignored in favor of explicit charset.
+        .setResponse(LATIN1_DATA)
+        .create();
+    assertEquals("UTF-8", response.getEncoding());
+  }
+
+  @Test
   public void testEncodingDetectionLatin1() throws Exception {
     // Input is a basic latin-1 string with 1 non-UTF8 compatible char.
     HttpResponse response = new HttpResponseBuilder()

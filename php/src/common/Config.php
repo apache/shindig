@@ -34,10 +34,11 @@ class Config {
       // load default configuration
       include_once 'config/container.php';
       self::$config = $shindigConfig;
-      if (file_exists('config/local.php')) {
+      $localConfigPath = realpath(dirname(__FILE__) . "/../../config/local.php");
+      if (file_exists($localConfigPath)) {
         // include local.php if it exists and merge the config arrays.
         // the second array values overwrites the first one's
-        include_once 'config/local.php';
+        include_once $localConfigPath;
         self::$config = array_merge(self::$config, $shindigConfig);
       }
     }
@@ -52,5 +53,21 @@ class Config {
     } else {
       throw new ConfigException("Invalid Config Key");
     }
+  }
+
+  /**
+   * Overrides a config value for as long as this object is loaded in memory.
+   * This allows for overriding certain configuration values for the purposes
+   * of unit tests.  Note that this does not commit a permanent change to the
+   * configuration files.
+   *
+   * @param $key string Configuration key to set the value of.
+   * @param $value string Value to assign to the specified key.
+   */
+  static function set($key, $value) {
+    if (! self::$config) {
+      self::loadConfig();
+    }
+    self::$config[$key] = $value;
   }
 }

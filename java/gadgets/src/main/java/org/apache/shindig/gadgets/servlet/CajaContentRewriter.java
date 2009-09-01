@@ -18,23 +18,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
-import com.google.caja.lexer.FilePosition;
 import com.google.caja.lexer.InputSource;
 import com.google.caja.lexer.escaping.Escaping;
 import com.google.caja.opensocial.DefaultGadgetRewriter;
@@ -42,14 +31,31 @@ import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.opensocial.UriCallback;
 import com.google.caja.opensocial.UriCallbackException;
 import com.google.caja.parser.html.Nodes;
+import com.google.caja.render.Concatenator;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
 import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
+import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
+
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URI;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.GadgetRewriter {
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
@@ -80,8 +86,17 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
           }
         }
 
-        public URI rewrite(ExternalReference externalReference, String string) {
-          return retrievedUri.resolve(externalReference.getUri());
+        public URI rewrite(ExternalReference externalReference, String mimeType) {
+          URI uri = externalReference.getUri();
+          if (uri.getScheme().equalsIgnoreCase("https") ||
+              uri.getScheme().equalsIgnoreCase("http")) {
+            return retrievedUri.resolve(uri);
+          } else if ("javascript".equalsIgnoreCase(uri.getScheme())) {
+              // Commonly used javascript url for links with onclick handlers
+              return uri.toString().equals("javascript:void(0)") ? uri : null;
+          } else {
+            return null;
+          }
         }
       };
 
@@ -90,36 +105,53 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
       DefaultGadgetRewriter rw = new DefaultGadgetRewriter(bi, mq);
       rw.setValijaMode(true);
       InputSource is = new InputSource(retrievedUri);
-      String origContent = content.getContent();
-      CharProducer input = CharProducer.Factory.create(
-          new StringReader(origContent),
-          FilePosition.instance(is, 5, 5, 5));
-      StringBuilder output = new StringBuilder();
-
       Document doc = content.getDocument();
+      Node root = doc.createDocumentFragment();
+      root.appendChild(doc.getDocumentElement());
+      boolean safe = false;
       try {
-        StringBuilder htmlAndJs = new StringBuilder();
-        rw.rewriteContent(retrievedUri, input, cb, htmlAndJs);
-        int splitPoint = htmlAndJs.indexOf("<script");
-        String script = htmlAndJs.substring(splitPoint);
-        String html = htmlAndJs.substring(0, splitPoint);
-        String htmlElement = 
-          "<div id=\"cajoled-output\" class=\"g___\">" +
-          html +
-          "</div>";
-        output.append(htmlElement);
-        output.append(tameCajaClientApi());
-        output.append(script);
-      } catch (Exception e) {
-        content.setContent(messagesToHtml(doc, is, origContent, mq));
-        throwCajolingException(e, mq);
-        return;
+        Pair<Node, Element> htmlAndJs = rw.rewriteContent(retrievedUri, root,
+            cb);
+        Node html = htmlAndJs.a;
+        Element script = htmlAndJs.b;
+
+        Element cajoledOutput = doc.createElement("div");
+        cajoledOutput.setAttribute("id", "cajoled-output");
+        cajoledOutput.setAttribute("classes", "g___");
+        cajoledOutput.appendChild(doc.adoptNode(html));
+        cajoledOutput.appendChild(tameCajaClientApi(doc));
+        cajoledOutput.appendChild(doc.adoptNode(script));
+
+        createContainerFor(doc, cajoledOutput);
+        content.documentChanged();
+        safe = true;
+        HtmlSerialization.attach(doc, new CajaHtmlSerializer(), null);
+      } catch (GadgetRewriteException e) {
+        // There were cajoling errors
+        // Content is only used to produce useful snippets with error messages
+        createContainerFor(doc, formatErrors(doc, is, content.getContent(), mq));
+        logException(e, mq);
+      } finally {
+        if (!safe) {
+          // Fail safe
+          content.setContent("");
+        }
       }
-      content.setContent(output.toString());
     }
   }
 
-  private String messagesToHtml(Document doc, InputSource is, CharSequence orig, MessageQueue mq) {
+  private void createContainerFor(Document doc, Element el) {
+    Element docEl = doc.createElement("html");
+    Element head = doc.createElement("head");
+    Element body = doc.createElement("body");
+    doc.appendChild(docEl);
+    docEl.appendChild(head);
+    docEl.appendChild(body);
+    body.appendChild(el);
+  }
+
+  private Element formatErrors(Document doc, InputSource is,
+      CharSequence orig, MessageQueue mq) {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
     originalSrc.put(is, orig);
@@ -131,10 +163,10 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
       // Ignore LINT messages
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
         String snippet = sp.getSnippet(msg);
-
         messageText.append(msg.getMessageLevel().name())
                    .append(" ")
                    .append(html(msg.format(mc)));
+
         if (!StringUtils.isEmpty(snippet)) {
           messageText.append("\n").append(snippet);
         }
@@ -142,7 +174,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
     }
     Element errElement = doc.createElement("pre");
     errElement.appendChild(doc.createTextNode(messageText.toString()));
-    return messageText.toString();
+    return errElement;
   }
 
   private static String html(CharSequence s) {
@@ -151,25 +183,29 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
     return sb.toString();
   }
 
-  private String tameCajaClientApi() {
-    return "<script>___.enableCaja()</script>";
+  private Element tameCajaClientApi(Document doc) {
+    Element scriptElement = doc.createElement("script");
+    scriptElement.setAttribute("type", "text/javascript");
+    scriptElement.appendChild(doc.createTextNode("caja___.enable()"));
+    return scriptElement;
   }
 
-    private void throwCajolingException(Exception cause, MessageQueue mq) {
+  private void logException(Exception cause, MessageQueue mq) {
     StringBuilder errbuilder = new StringBuilder();
     MessageContext mc = new MessageContext();
-
     if (cause != null) {
       errbuilder.append(cause).append('\n');
     }
-
     for (Message m : mq.getMessages()) {
       errbuilder.append(m.format(mc)).append('\n');
     }
-
     logger.info("Unable to cajole gadget: " + errbuilder);
+  }
 
-    // throw new GadgetException(
-    //    GadgetException.Code.MALFORMED_FOR_SAFE_INLINING, errbuilder.toString());
+  private static class CajaHtmlSerializer implements HtmlSerializer {
+    public String serialize(Document doc) {
+      StringWriter sw = HtmlSerialization.createWriter(doc);
+      return Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml());
+    }
   }
 }

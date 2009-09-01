@@ -144,8 +144,6 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    setResponseHeaders(request, response, results);
-
     for (Map.Entry<String, String> entry : results.getHeaders().entries()) {
       String name = entry.getKey();
       if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
@@ -153,20 +151,24 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
+    String responseType = results.getHeader("Content-Type");
     if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
       String requiredType = rcr.getRewriteMimeType();
-      String responseType = results.getHeader("Content-Type");
       // Use a 'Vary' style check on the response
       if (requiredType.endsWith("/*") &&
           !StringUtils.isEmpty(responseType)) {
         requiredType = requiredType.substring(0, requiredType.length() - 2);
         if (!responseType.toLowerCase().startsWith(requiredType.toLowerCase())) {
           response.setContentType(requiredType);
+          responseType = requiredType;
         }
       } else {
         response.setContentType(requiredType);
+        responseType = requiredType;
       }
     }
+
+    setResponseHeaders(request, response, results);
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {
       response.sendError(results.getHttpStatusCode());

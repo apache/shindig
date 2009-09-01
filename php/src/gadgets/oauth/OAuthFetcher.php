@@ -422,7 +422,9 @@ class OAuthFetcher extends RemoteContentFetcher {
   private function sendOAuthMessage(OAuthRequest $request) {
     $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
     $rcr->setToken($this->authToken);
-    $fetcher = new BasicRemoteContentFetcher();
+
+    $remoteFetcherClass = Config::get('remote_content_fetcher');
+    $fetcher = new $remoteFetcherClass();
     $content = $fetcher->fetchRequest($rcr);
     $reply = OAuthRequest::from_request();
     $params = OAuthUtil::decodeForm($content->getResponseContent());
@@ -534,7 +536,8 @@ class OAuthFetcher extends RemoteContentFetcher {
       $oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
       $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
       //TODO is there a better way to detect an SP error?
-      $fetcher = new BasicRemoteContentFetcher();
+      $remoteFetcherClass = Config::get('remote_content_fetcher');
+      $fetcher = new $remoteFetcherClass();
       $content = $fetcher->fetchRequest($rcr);
       $statusCode = $content->getHttpCode();
       if ($statusCode >= 400 && $statusCode < 500) {

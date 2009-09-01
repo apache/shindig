@@ -40,6 +40,10 @@ class ConcurrentPreloads extends ForwardingCollection<PreloadedData> {
     tasks = Lists.newArrayList();
   }
 
+  ConcurrentPreloads(int size) {
+    tasks = Lists.newArrayListWithCapacity(size);
+  }
+
   /**
    * Add an active preloading process.
    *

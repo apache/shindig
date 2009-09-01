@@ -119,6 +119,7 @@ $shindigConfig = array(
   // Configurable classes. Change these to the class name to use, and make sure the auto-loader can find them
   'blacklist_class' => 'BasicGadgetBlacklist',
   'remote_content' => 'BasicRemoteContent',
+  'remote_content_fetcher' => 'BasicRemoteContentFetcher',
   'security_token_signer' => 'BasicSecurityTokenDecoder',
   'security_token' => 'BasicSecurityToken',
   'oauth_lookup_service' => 'BasicOAuthLookupService',

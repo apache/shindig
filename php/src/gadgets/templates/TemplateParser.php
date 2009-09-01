@@ -151,10 +151,8 @@ class TemplateParser {
       // And replace the node with the parsed output
       $ownerDocument = $node->ownerDocument;
       foreach ($ret->childNodes as $childNode) {
-        if ($childNode) {
-          $importedNode = $ownerDocument->importNode($childNode, true);
-          $node->parentNode->insertBefore($importedNode, $node);
-        }
+     		$importedNode = $ownerDocument->importNode($childNode, true);
+        $importedNode = $node->parentNode->insertBefore($importedNode, $node);
       }
       $node->parentNode->removeChild($node);
     }

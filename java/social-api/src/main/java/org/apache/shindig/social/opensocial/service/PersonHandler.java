@@ -114,7 +114,7 @@ public class PersonHandler {
     // TODO: Would be nice if name in config matched name of service.
     String container = firstNonNull(request.getToken().getContainer(), "default");
     return config.getList(container,
-        "${Cur['gadgets.features']['opensocial-0.8'].supportedFields.person}");
+        "${Cur['gadgets.features'].opensocial.supportedFields.person}");
   }
 
   private static <T> T firstNonNull(T first, T second) {

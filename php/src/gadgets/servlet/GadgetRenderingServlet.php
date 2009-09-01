@@ -27,8 +27,6 @@ require_once 'src/common/RemoteContentRequest.php';
 require_once 'src/common/RemoteContent.php';
 require_once 'src/common/Cache.php';
 require_once 'src/common/RemoteContentFetcher.php';
-require_once 'src/common/sample/BasicRemoteContent.php';
-require_once 'src/common/sample/BasicRemoteContentFetcher.php';
 require_once 'src/gadgets/GadgetSpecParser.php';
 require_once 'src/gadgets/GadgetBlacklist.php';
 require_once 'src/gadgets/sample/BasicGadgetBlacklist.php';

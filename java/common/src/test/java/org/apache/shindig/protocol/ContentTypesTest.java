@@ -34,6 +34,11 @@ public class ContentTypesTest extends TestCase {
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE, true);
   }
 
+  public void testAllowJsonRpc() throws Exception {
+    ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
+        "application/json-rpc", true);
+  }
+
   public void testAllowAtom() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_ATOM_CONTENT_TYPES,
         ContentTypes.OUTPUT_ATOM_CONTENT_TYPE, true);

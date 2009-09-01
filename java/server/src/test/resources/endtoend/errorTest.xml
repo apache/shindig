@@ -19,7 +19,7 @@
 -->
 <Module>
   <ModulePrefs title="EndToEndTest">
-    <Require feature="opensocial-0.8" />
+    <Require feature="opensocial-0.9" />
     <Require feature="views" />
     <Optional feature="content-rewrite">
       <Param name="exclude-urls">.*</Param>

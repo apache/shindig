@@ -112,7 +112,7 @@ public class GuiceBeanProvider {
     Set<String> names = (propertyNameComparator == null) ? nameMap.keySet() :
       ImmutableSortedSet.orderedBy(propertyNameComparator).addAll(nameMap.keySet()).build();
 
-    List<PropertyDescriptor> result = Lists.newArrayListWithExpectedSize(nameMap.size());
+    List<PropertyDescriptor> result = Lists.newArrayListWithCapacity(nameMap.size());
 
     for (final String name : names) {
       final PropertyDescriptor descriptor = nameMap.get(name);

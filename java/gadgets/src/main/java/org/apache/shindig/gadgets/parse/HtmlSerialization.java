@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.xerces.xni.QName;
 import org.cyberneko.html.HTMLEntities;
 import org.w3c.dom.Document;
@@ -24,8 +26,6 @@ import org.w3c.dom.Document;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Static class with helpers to manage serialization of a Document.
@@ -38,7 +38,7 @@ public class HtmlSerialization {
    * Used to key an instance of HtmlSerializer in
    * document.getUserData
    */
-  private static final String KEY = "serializer";
+  public static final String KEY = "serializer";
 
   /**
    * Used by a parser to record the original length of the content it parsed
@@ -54,7 +54,7 @@ public class HtmlSerialization {
    * @param serializer
    * @param originalContent may be null
    */
-  static void attach(Document doc, HtmlSerializer serializer, String originalContent) {
+  public static void attach(Document doc, HtmlSerializer serializer, String originalContent) {
     doc.setUserData(KEY, serializer, null);
     if (originalContent != null) {
       doc.setUserData(ORIGINAL_LENGTH, originalContent.length(), null);
@@ -87,7 +87,7 @@ public class HtmlSerialization {
    * @param doc
    * @return
    */
-  protected static StringWriter createWriter(Document doc) {
+  public static StringWriter createWriter(Document doc) {
     int originalLength = getOriginalLength(doc);
     if (originalLength == -1) {
       return new StringWriter(8192);

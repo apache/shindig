@@ -67,7 +67,7 @@ abstract class ApiServlet extends HttpServlet {
       // make sure the content type is in all lower case since that's what we'll check for in the handlers
       $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);
     }
-    $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json');
+    $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json', 'application/json-rpc', 'application/jsonrequest');
     if (isset($_SERVER['CONTENT_TYPE'])) {
       // normalize things like "application/json; charset=utf-8" to application/json
       foreach ($acceptedContentTypes as $contentType) {
@@ -80,7 +80,13 @@ abstract class ApiServlet extends HttpServlet {
     }
     if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       if (! isset($_SERVER['CONTENT_TYPE']) || ! in_array($_SERVER['CONTENT_TYPE'], $acceptedContentTypes)) {
-        throw new Exception("When posting to the social end-point you have to specify a content type, supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'");
+        $prefix = substr($_SERVER['CONTENT_TYPE'], 0, strpos($_SERVER['CONTENT_TYPE'], '/'));
+        $acceptedMediaPrefixes = array('image', 'video', 'audio');
+        if (! in_array($prefix, $acceptedMediaPrefixes)) {
+          throw new Exception("When posting to the social end-point you have to specify a content type,
+              supported content types are: 'application/json', 'application/xml' and 'application/atom+xml'.
+              For content upload, content type can be 'image/*', 'audio/*' and 'video/*'");
+        }
       }
     }
   }

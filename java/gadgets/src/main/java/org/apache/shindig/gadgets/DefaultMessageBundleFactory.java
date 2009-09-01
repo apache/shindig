@@ -83,7 +83,8 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
       country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache);
     }
 
-    if (isAllCountry && isAllLanguage) {
+    if (isAllCountry || isAllLanguage) {
+      // If either of these is true, we already picked up both anyway.
       all = MessageBundle.EMPTY;
     } else {
       all = getBundleFor(spec, ALL_ALL, ignoreCache);

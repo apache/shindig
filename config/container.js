@@ -96,7 +96,7 @@
 "gadgets.features" : {
   "core.io" : {
     // Note: /proxy is an open proxy. Be careful how you expose this!
-    "proxyUrl" : "http://%host%/gadgets/proxy?refresh=%refresh%&url=%url%",
+    "proxyUrl" : "http://%host%/gadgets/proxy?refresh=%refresh%&url=%url%%rewriteMime%",
     "jsonProxyUrl" : "http://%host%/gadgets/makeRequest"
   },
   "views" : {
@@ -133,7 +133,7 @@
       "ANCHOR_COLOR": ""
     }
   },
-  "opensocial-0.8" : {
+  "opensocial" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
     "path" : "http://%host%/social/rpc",

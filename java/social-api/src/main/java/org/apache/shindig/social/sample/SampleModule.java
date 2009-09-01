@@ -21,6 +21,7 @@ import org.apache.shindig.social.core.config.SocialApiGuiceModule;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
 import org.apache.shindig.social.sample.oauth.SampleRealm;
@@ -49,6 +50,7 @@ public class SampleModule extends SocialApiGuiceModule {
     bind(ActivityService.class).to(JsonDbOpensocialService.class);
     bind(AppDataService.class).to(JsonDbOpensocialService.class);
     bind(PersonService.class).to(JsonDbOpensocialService.class);
+    bind(MessageService.class).to(JsonDbOpensocialService.class);
     
     bind(OAuthDataStore.class).to(SampleOAuthDataStore.class);
 

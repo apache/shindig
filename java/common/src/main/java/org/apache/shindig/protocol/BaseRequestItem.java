@@ -255,7 +255,7 @@ public class BaseRequestItem implements RequestItem {
     } else if (param instanceof JSONArray) {
       try {
         JSONArray jsonArray = (JSONArray)param;
-        List<String> returnVal = Lists.newArrayListWithExpectedSize(jsonArray.length());
+        List<String> returnVal = Lists.newArrayListWithCapacity(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
           returnVal.add(jsonArray.getString(i));
         }
