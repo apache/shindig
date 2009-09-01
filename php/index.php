@@ -41,6 +41,10 @@ if (Config::get('debug')) {
       die("Shindig requires the {$module} extention, see <a href='http://www.php.net/{$module}'>http://www.php.net/{$module}</a> for more info");
     }
   }
+
+  if (get_magic_quotes_gpc()) {
+    die("Your environment has magic_quotes_gpc enabled which will interfere with Shindig.  Please set 'magic_quotes_gpc' to 'Off' in php.ini");
+  }
 }
 
 // All configurable classes are autoloaded (see config.php for the configurable classes)
