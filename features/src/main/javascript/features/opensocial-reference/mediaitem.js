@@ -41,7 +41,14 @@
  * @private
  */
 opensocial.MediaItem = function(mimeType, url, opt_params) {
-  this.fields_ = opt_params || {};
+  this.fields_ = {};
+  if (opt_params) {
+    for (var k in opt_params) {
+      if (opt_params.hasOwnProperty(k)) {
+        this.fields_[k] = opt_params[k];
+      }
+    }
+  }
   this.fields_[opensocial.MediaItem.Field.MIME_TYPE] = mimeType;
   this.fields_[opensocial.MediaItem.Field.URL] = url;
 };
