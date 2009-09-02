@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingRequestRewriter;
@@ -52,7 +53,8 @@ public class RewriteModule extends AbstractModule {
         CssRequestRewriter cssRewriter,
         CajaContentRewriter cajaRewriter,
         SanitizingGadgetRewriter sanitizedRewriter,
-        RenderingGadgetRewriter renderingRewriter) {
+        RenderingGadgetRewriter renderingRewriter,
+        OpenSocialI18NGadgetRewriter i18nRewriter) {
       rewriters = Lists.newArrayList();
       rewriters.add(pipelineRewriter);
       rewriters.add(templateRewriter);
@@ -60,6 +62,7 @@ public class RewriteModule extends AbstractModule {
       rewriters.add(cajaRewriter);
       rewriters.add(sanitizedRewriter);
       rewriters.add(renderingRewriter);
+      rewriters.add(i18nRewriter);
     }
 
     public List<GadgetRewriter> get() {
