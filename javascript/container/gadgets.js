@@ -22,20 +22,9 @@
 
 var gadgets = gadgets || {};
 
-gadgets.error = {};
-gadgets.error.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
-gadgets.error.TO_BE_DONE = 'to be done';
-
-gadgets.log = function(message) {
-  if (window.console && window.console.log) {
-    window.console.log(message);
-  } else {
-    var logEntry = document.createElement('div');
-    logEntry.className = 'gadgets-log-entry';
-    logEntry.innerHTML = message;
-    document.body.appendChild(logEntry);
-  }
-};
+gadgets.errors = {};
+gadgets.errors.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
+gadgets.errors.TO_BE_DONE = 'to be done';
 
 /**
  * Calls an array of asynchronous functions and calls the continuation
@@ -115,7 +104,7 @@ gadgets.UserPrefStore = function() {
  * @return {Object} All user preference of given gadget
  */
 gadgets.UserPrefStore.prototype.getPrefs = function(gadget) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -124,7 +113,7 @@ gadgets.UserPrefStore.prototype.getPrefs = function(gadget) {
  * @param {Object} prefs User preferences
  */
 gadgets.UserPrefStore.prototype.savePrefs = function(gadget) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 
@@ -158,15 +147,15 @@ gadgets.GadgetService = function() {
 };
 
 gadgets.GadgetService.prototype.setHeight = function(elementId, height) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 gadgets.GadgetService.prototype.setTitle = function(gadget, title) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 gadgets.GadgetService.prototype.setUserPref = function(id) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 
@@ -310,7 +299,7 @@ gadgets.LayoutManager = function() {
  * @return {Object} HTML element that is the chrome for the given gadget
  */
 gadgets.LayoutManager.prototype.getGadgetChrome = function(gadget) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 // -------------------
@@ -453,7 +442,7 @@ gadgets.Gadget.prototype.getContent = function(continuation) {
  *     the one and only argument
  */
 gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -462,7 +451,7 @@ gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
  *     content as the one and only argument
  */
 gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -471,7 +460,7 @@ gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
  *     the one and only argument
  */
 gadgets.Gadget.prototype.getMainContent = function(continuation) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /*
@@ -769,7 +758,7 @@ gadgets.Container.prototype.renderGadgets = function() {
  * @param {Object} gadget Gadget object
  */
 gadgets.Container.prototype.renderGadget = function(gadget) {
-  throw Error(gadgets.error.SUBCLASS_RESPONSIBILITY);
+  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 gadgets.Container.prototype.nextGadgetInstanceId_ = 0;
