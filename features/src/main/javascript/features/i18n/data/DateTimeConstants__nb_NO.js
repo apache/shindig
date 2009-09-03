@@ -31,9 +31,9 @@ gadgets.i18n.DateTimeConstants = {
   NARROWWEEKDAYS:["S","M","T","O","T","F","L"],
   SHORTQUARTERS:["K1","K2","K3","K4"],
   QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
-  AMPMS:["formiddag","ettermiddag"],
-  DATEFORMATS:["EEEE d. MMMM yyyy","d. MMMM yyyy","d. MMM yyyy","dd.MM.yy"],
-  TIMEFORMATS:["'kl'. HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  AMPMS:["AM","PM"],
+  DATEFORMATS:["EEEE d. MMMM y","d. MMMM y","d. MMM y","dd.MM.yy"],
+  TIMEFORMATS:["'kl'. HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3

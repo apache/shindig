@@ -31,12 +31,12 @@ gadgets.i18n.DateTimeConstants = {
   NARROWWEEKDAYS:["\u043d","\u043f","\u0432","\u0441","\u0447","\u043f","\u0441"],
   SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
   QUARTERS:["Q1","Q2","Q3","Q4"],
-  AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, dd MMMM yyyy","dd MMMM yyyy","dd.M.yyyy","dd.M.yy"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  AMPMS:["\u043f\u0440\u0435\u0442\u043f\u043b\u0430\u0434\u043d\u0435","\u043f\u043e\u043f\u043b\u0430\u0434\u043d\u0435"],
+  DATEFORMATS:["EEEE, dd MMMM y","dd MMMM y","dd.M.yyyy","dd.M.yy"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

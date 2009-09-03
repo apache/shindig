@@ -21,19 +21,19 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
-  ERAS:["OK","CE"],
-  ERANAMES:["Ovdal Kristtusa","CE"],
+  ERAS:["o.Kr.","m.Kr."],
+  ERANAMES:["ovdal Kristtusa","ma\u014b\u014bel Kristtusa"],
   NARROWMONTHS:["O","G","N","C","M","G","S","B","\u010c","G","S","J"],
   MONTHS:["o\u0111\u0111ajagem\u00e1nnu","guovvam\u00e1nnu","njuk\u010dam\u00e1nnu","cuo\u014bom\u00e1nnu","miessem\u00e1nnu","geassem\u00e1nnu","suoidnem\u00e1nnu","borgem\u00e1nnu","\u010dak\u010dam\u00e1nnu","golggotm\u00e1nnu","sk\u00e1bmam\u00e1nnu","juovlam\u00e1nnu"],
   SHORTMONTHS:["o\u0111\u0111j","guov","njuk","cuo","mies","geas","suoi","borg","\u010dak\u010d","golg","sk\u00e1b","juov"],
   WEEKDAYS:["sotnabeaivi","vuoss\u00e1rga","ma\u014b\u014beb\u00e1rga","gaskavahkku","duorasdat","bearjadat","l\u00e1vvardat"],
   SHORTWEEKDAYS:["sotn","vuos","ma\u014b","gask","duor","bear","l\u00e1v"],
-  NARROWWEEKDAYS:["s","v","m","g","d","b","l"],
-  SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
+  NARROWWEEKDAYS:["s","v","m","g","d","b","L"],
+  SHORTQUARTERS:["Q1","K2","Q3","Q4"],
   QUARTERS:["Q1","Q2","Q3","Q4"],
   AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, yyyy MMMM dd","yyyy MMMM d","yyyy MMM d","yy/MM/dd"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, y MMMM dd","y MMMM d","y MMM d","yy/MM/dd"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3

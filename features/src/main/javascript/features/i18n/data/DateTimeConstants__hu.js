@@ -23,20 +23,20 @@ gadgets.i18n = gadgets.i18n || {};
 gadgets.i18n.DateTimeConstants = {
   ERAS:["i. e.","i. sz."],
   ERANAMES:["id\u0151sz\u00e1m\u00edt\u00e1sunk el\u0151tt","id\u0151sz\u00e1m\u00edt\u00e1sunk szerint"],
-  NARROWMONTHS:["J","F","M","\u00c1","M","J","J","A","S","O","N","D"],
+  NARROWMONTHS:["J","F","M","\u00c1","M","J","J","A","Sz","O","N","D"],
   MONTHS:["janu\u00e1r","febru\u00e1r","m\u00e1rcius","\u00e1prilis","m\u00e1jus","j\u00fanius","j\u00falius","augusztus","szeptember","okt\u00f3ber","november","december"],
   SHORTMONTHS:["jan.","febr.","m\u00e1rc.","\u00e1pr.","m\u00e1j.","j\u00fan.","j\u00fal.","aug.","szept.","okt.","nov.","dec."],
   WEEKDAYS:["vas\u00e1rnap","h\u00e9tf\u0151","kedd","szerda","cs\u00fct\u00f6rt\u00f6k","p\u00e9ntek","szombat"],
   SHORTWEEKDAYS:["V","H","K","Sze","Cs","P","Szo"],
-  NARROWWEEKDAYS:["V","H","K","S","C","P","S"],
+  NARROWWEEKDAYS:["V","H","K","Sz","Cs","P","Sz"],
   SHORTQUARTERS:["N1","N2","N3","N4"],
   QUARTERS:["I. negyed\u00e9v","II. negyed\u00e9v","III. negyed\u00e9v","IV. negyed\u00e9v"],
   AMPMS:["de.","du."],
-  DATEFORMATS:["yyyy. MMMM d.","yyyy. MMMM d.","yyyy.MM.dd.","yyyy.MM.dd."],
-  TIMEFORMATS:["H:mm:ss v","H:mm:ss z","H:mm:ss","H:mm"],
+  DATEFORMATS:["y. MMMM d., EEEE","y. MMMM d.","yyyy.MM.dd.","yyyy.MM.dd."],
+  TIMEFORMATS:["H:mm:ss zzzz","H:mm:ss z","H:mm:ss","H:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

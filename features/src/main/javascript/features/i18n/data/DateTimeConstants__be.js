@@ -35,11 +35,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["1-\u0448\u044b \u043a\u0432.","2-\u0433\u0456 \u043a\u0432.","3-\u0446\u0456 \u043a\u0432.","4-\u0442\u044b \u043a\u0432."],
   QUARTERS:["1-\u0448\u044b \u043a\u0432\u0430\u0440\u0442\u0430\u043b","2-\u0433\u0456 \u043a\u0432\u0430\u0440\u0442\u0430\u043b","3-\u0446\u0456 \u043a\u0432\u0430\u0440\u0442\u0430\u043b","4-\u0442\u044b \u043a\u0432\u0430\u0440\u0442\u0430\u043b"],
   AMPMS:["\u0434\u0430 \u043f\u0430\u043b\u0443\u0434\u043d\u044f","\u043f\u0430\u0441\u043b\u044f \u043f\u0430\u043b\u0443\u0434\u043d\u044f"],
-  DATEFORMATS:["EEEE, d MMMM yyyy","d MMMM yyyy","d.M.yyyy","d.M.yy"],
-  TIMEFORMATS:["HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  DATEFORMATS:["EEEE, d MMMM y","d MMMM y","d.M.yyyy","d.M.yy"],
+  TIMEFORMATS:["HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONEWEEKDAYS = gadgets.i18n.DateTimeConstants.WEEKDAYS;
 gadgets.i18n.DateTimeConstants.STANDALONESHORTWEEKDAYS = gadgets.i18n.DateTimeConstants.SHORTWEEKDAYS;

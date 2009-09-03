@@ -30,7 +30,7 @@ gadgets.i18n.NumberFormatConstants = {
   EXP_SYMBOL:"E",
   PERMILL:"\u2030",
   INFINITY:"\u221E",
-  NAN:"\u0D38\u0D02\u0D16\u0D4D\u0D2F\u0D2F\u0D32\u0D4D\u0D32",
+  NAN:"NaN",
   DECIMAL_PATTERN:"#,##,##0.###",
   SCIENTIFIC_PATTERN:"#E0",
   PERCENT_PATTERN:"#,##,##0%",

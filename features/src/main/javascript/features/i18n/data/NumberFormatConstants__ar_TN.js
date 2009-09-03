@@ -21,16 +21,16 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.NumberFormatConstants = {
-  DECIMAL_SEP:"\u066B",
-  GROUP_SEP:"\u066C",
-  PERCENT:"\u066A",
+  DECIMAL_SEP:",",
+  GROUP_SEP:".",
+  PERCENT:"%",
   ZERO_DIGIT:"0",
   PLUS_SIGN:"+",
   MINUS_SIGN:"-",
   EXP_SYMBOL:"E",
   PERMILL:"\u2030",
   INFINITY:"\u221E",
-  NAN:"\u0644\u064A\u0633 \u0631\u0642\u0645",
+  NAN:"NaN",
   DECIMAL_PATTERN:"#0.###;#0.###-",
   SCIENTIFIC_PATTERN:"#E0",
   PERCENT_PATTERN:"#,##0%",

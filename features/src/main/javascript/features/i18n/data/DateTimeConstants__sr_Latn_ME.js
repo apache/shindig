@@ -29,14 +29,14 @@ gadgets.i18n.DateTimeConstants = {
   WEEKDAYS:["nedelja","ponedeljak","utorak","sreda","\u010detvrtak","petak","subota"],
   SHORTWEEKDAYS:["ned","pon","uto","sre","\u010det","pet","sub"],
   NARROWWEEKDAYS:["n","p","u","s","\u010d","p","s"],
-  SHORTQUARTERS:["K1","K2","K3","K4"],
-  QUARTERS:["Prvo tromese\u010dje","Drugo tromese\u010dje","Tre\u0107e tromese\u010dje","\u010cetvrto tromese\u010dje"],
-  AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, dd. MMMM yyyy.","d.MM.yyyy.","dd.MM.yyyy.","d.M.yy."],
-  TIMEFORMATS:["HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
+  QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
+  AMPMS:["pre podne","popodne"],
+  DATEFORMATS:["EEEE, dd. MMMM y.","d.MM.yyyy.","dd.MM.y.","d.M.yy."],
+  TIMEFORMATS:["HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

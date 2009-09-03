@@ -21,7 +21,7 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
-  ERAS:["pr.n.\u0161.","po Kr."],
+  ERAS:["pr. n. \u0161t.","po Kr."],
   ERANAMES:["pred na\u0161im \u0161tetjem","na\u0161e \u0161tetje"],
   NARROWMONTHS:["j","f","m","a","m","j","j","a","s","o","n","d"],
   MONTHS:["januar","februar","marec","april","maj","junij","julij","avgust","september","oktober","november","december"],
@@ -29,14 +29,14 @@ gadgets.i18n.DateTimeConstants = {
   WEEKDAYS:["nedelja","ponedeljek","torek","sreda","\u010detrtek","petek","sobota"],
   SHORTWEEKDAYS:["ned","pon","tor","sre","\u010det","pet","sob"],
   NARROWWEEKDAYS:["n","p","t","s","\u010d","p","s"],
-  SHORTQUARTERS:["Q1","K2","Q3","Q4"],
-  QUARTERS:["Prvo \u010detrtletje","Q2","Tretje \u010detrtletje","\u010cetrto \u010detrtletje"],
+  SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
+  QUARTERS:["1. \u010detrtletje","2. \u010detrtletje","3. \u010detrtletje","4. \u010detrtletje"],
   AMPMS:["dop.","pop."],
-  DATEFORMATS:["EEEE, dd. MMMM yyyy","dd. MMMM yyyy","d.M.yyyy","d.M.yy"],
-  TIMEFORMATS:["H:mm:ss v","H:mm:ss z","H:mm:ss","H:mm"],
+  DATEFORMATS:["EEEE, dd. MMMM y","dd. MMMM y","d. MMM. yyyy","d. MM. yy"],
+  TIMEFORMATS:["H:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

@@ -30,10 +30,10 @@ gadgets.i18n.NumberFormatConstants = {
   EXP_SYMBOL:"\u00D710^",
   PERMILL:"\u2030",
   INFINITY:"\u221E",
-  NAN:"NaN",
+  NAN:"\u00A4\u00A4\u00A4",
   DECIMAL_PATTERN:"#,##0.###",
   SCIENTIFIC_PATTERN:"#E0",
-  PERCENT_PATTERN:"#,##0%",
+  PERCENT_PATTERN:"#,##0\u00A0%",
   CURRENCY_PATTERN:"\u00A4#,##0.00;\u00A4-#,##0.00",
   DEF_CURRENCY_CODE:"DKK"
 };

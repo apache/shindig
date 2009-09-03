@@ -22,7 +22,7 @@ gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
   ERAS:["pr. Kr.","po Kr."],
-  ERANAMES:["pr. Kr.","po Kr."],
+  ERANAMES:["prie\u0161 Krist\u0173","po Kristaus"],
   NARROWMONTHS:["S","V","K","B","G","B","L","R","R","S","L","G"],
   MONTHS:["sausio","vasario","kovo","baland\u017eio","gegu\u017e\u0117s","bir\u017eelio","liepos","rugpj\u016b\u010dio","rugs\u0117jo","spalio","lapkri\u010dio","gruod\u017eio"],
   STANDALONEMONTHS:["Sausis","Vasaris","Kovas","Balandis","Gegu\u017e\u0117","Bir\u017eelis","Liepa","Rugpj\u016btis","Rugs\u0117jis","Spalis","Lapkritis","Gruodis"],
@@ -33,8 +33,8 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["K1","K2","K3","K4"],
   QUARTERS:["pirmas ketvirtis","antras ketvirtis","tre\u010dias ketvirtis","ketvirtas ketvirtis"],
   AMPMS:["prie\u0161piet","popiet"],
-  DATEFORMATS:["yyyy 'm'. MMMM d 'd'.,EEEE","yyyy 'm'. MMMM d 'd'.","yyyy.MM.dd","yyyy-MM-dd"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["y 'm'. MMMM d 'd'.,EEEE","y 'm'. MMMM d 'd'.","yyyy.MM.dd","yyyy-MM-dd"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3

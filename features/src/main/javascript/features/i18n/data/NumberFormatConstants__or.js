@@ -24,7 +24,7 @@ gadgets.i18n.NumberFormatConstants = {
   DECIMAL_SEP:".",
   GROUP_SEP:",",
   PERCENT:"%",
-  ZERO_DIGIT:"\u0B66",
+  ZERO_DIGIT:"0",
   PLUS_SIGN:"+",
   MINUS_SIGN:"-",
   EXP_SYMBOL:"E",

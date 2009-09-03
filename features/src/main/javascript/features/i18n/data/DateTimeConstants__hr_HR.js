@@ -23,21 +23,21 @@ gadgets.i18n = gadgets.i18n || {};
 gadgets.i18n.DateTimeConstants = {
   ERAS:["pr.n.e.","AD"],
   ERANAMES:["Prije Krista","Poslije Krista"],
-  NARROWMONTHS:["s","v","o","t","s","l","s","k","r","l","s","p"],
+  NARROWMONTHS:["1.","2.","3.","4.","5.","6.","7.","8.","9.","10.","11.","12."],
   MONTHS:["sije\u010dnja","velja\u010de","o\u017eujka","travnja","svibnja","lipnja","srpnja","kolovoza","rujna","listopada","studenoga","prosinca"],
   STANDALONEMONTHS:["sije\u010danj","velja\u010da","o\u017eujak","travanj","svibanj","lipanj","srpanj","kolovoz","rujan","listopad","studeni","prosinac"],
-  SHORTMONTHS:["sij","vel","o\u017eu","tra","svi","lip","srp","kol","ruj","lis","stu","pro"],
+  SHORTMONTHS:["01.","02.","03.","04.","05.","06.","07.","08.","09.","10.","11.","12."],
   WEEKDAYS:["nedjelja","ponedjeljak","utorak","srijeda","\u010detvrtak","petak","subota"],
   SHORTWEEKDAYS:["ned","pon","uto","sri","\u010det","pet","sub"],
   NARROWWEEKDAYS:["n","p","u","s","\u010d","p","s"],
   SHORTQUARTERS:["1kv","2kv","3kv","4kv"],
   QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
   AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, d. MMMM yyyy.","d. MMMM yyyy.","d. MMM. yyyy.","dd.MM.yyyy."],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, d. MMMM y.","d. MMMM y.","d.M.yyyy.","dd.MM.yyyy."],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONESHORTMONTHS = gadgets.i18n.DateTimeConstants.SHORTMONTHS;

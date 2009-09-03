@@ -21,8 +21,8 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
-  ERAS:["BCE","CE"],
-  ERANAMES:["BCE","CE"],
+  ERAS:["f.Kr.","e.Kr."],
+  ERANAMES:["fyrir Krist","eftir Krist"],
   NARROWMONTHS:["1","2","3","4","5","6","7","8","9","10","11","12"],
   MONTHS:["januar","februar","mars","apr\u00edl","mai","juni","juli","august","september","oktober","november","desember"],
   SHORTMONTHS:["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"],
@@ -32,11 +32,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["K1","K2","K3","K4"],
   QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
   AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE dd MMMM yyyy","d. MMM yyyy","dd-MM-yyyy","dd-MM-yy"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE dd MMMM y","d. MMM y","dd-MM-yyyy","dd-MM-yy"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 6,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 5
+  FIRSTWEEKCUTOFFDAY: 2
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

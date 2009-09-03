@@ -22,7 +22,7 @@ gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.NumberFormatConstants = {
   DECIMAL_SEP:".",
-  GROUP_SEP:"\u12C8",
+  GROUP_SEP:"\u2019",
   PERCENT:"%",
   ZERO_DIGIT:"0",
   PLUS_SIGN:"+",

@@ -34,7 +34,7 @@ gadgets.i18n.NumberFormatConstants = {
   DECIMAL_PATTERN:"#,##0.###",
   SCIENTIFIC_PATTERN:"#E0",
   PERCENT_PATTERN:"#,##0%",
-  CURRENCY_PATTERN:"\u00A4#,##0.00",
+  CURRENCY_PATTERN:"\u00A4#,##0.00;(\u00A4#,##0.00)",
   DEF_CURRENCY_CODE:"SGD"
 };
 

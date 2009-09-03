@@ -24,22 +24,22 @@ gadgets.i18n.DateTimeConstants = {
   ERAS:["pred n.l.","n.l."],
   ERANAMES:["pred n.l.","n.l."],
   NARROWMONTHS:["j","f","m","a","m","j","j","a","s","o","n","d"],
-  MONTHS:["janu\u00e1r","febru\u00e1r","marec","apr\u00edl","m\u00e1j","j\u00fan","j\u00fal","august","september","okt\u00f3ber","november","december"],
+  MONTHS:["janu\u00e1ra","febru\u00e1ra","marca","apr\u00edla","m\u00e1ja","j\u00fana","j\u00fala","augusta","septembra","okt\u00f3bra","novembra","decembra"],
+  STANDALONEMONTHS:["janu\u00e1r","febru\u00e1r","marec","apr\u00edl","m\u00e1j","j\u00fan","j\u00fal","august","september","okt\u00f3ber","november","december"],
   SHORTMONTHS:["jan","feb","mar","apr","m\u00e1j","j\u00fan","j\u00fal","aug","sep","okt","nov","dec"],
-  WEEKDAYS:["Nede\u013ea","Pondelok","Utorok","Streda","\u0160tvrtok","Piatok","Sobota"],
-  SHORTWEEKDAYS:["Ne","Po","Ut","St","\u0160t","Pi","So"],
+  WEEKDAYS:["nede\u013ea","pondelok","utorok","streda","\u0161tvrtok","piatok","sobota"],
+  SHORTWEEKDAYS:["ne","po","ut","st","\u0161t","pi","so"],
   NARROWWEEKDAYS:["N","P","U","S","\u0160","P","S"],
   SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
   QUARTERS:["1. \u0161tvr\u0165rok","2. \u0161tvr\u0165rok","3. \u0161tvr\u0165rok","4. \u0161tvr\u0165rok"],
-  AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, d. MMMM yyyy","d. MMMM yyyy","d.M.yyyy","d.M.yyyy"],
-  TIMEFORMATS:["H:mm:ss v","H:mm:ss z","H:mm:ss","H:mm"],
+  AMPMS:["dopoludnia","popoludn\u00ed"],
+  DATEFORMATS:["EEEE, d. MMMM y","d. MMMM y","d.M.yyyy","d.M.yyyy"],
+  TIMEFORMATS:["H:mm:ss zzzz","H:mm:ss z","H:mm:ss","H:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
-gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONESHORTMONTHS = gadgets.i18n.DateTimeConstants.SHORTMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEWEEKDAYS = gadgets.i18n.DateTimeConstants.WEEKDAYS;
 gadgets.i18n.DateTimeConstants.STANDALONESHORTWEEKDAYS = gadgets.i18n.DateTimeConstants.SHORTWEEKDAYS;

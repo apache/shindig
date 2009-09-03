@@ -27,7 +27,7 @@ gadgets.i18n.NumberFormatConstants = {
   ZERO_DIGIT:"0",
   PLUS_SIGN:"+",
   MINUS_SIGN:"\u2212",
-  EXP_SYMBOL:"\u00D710^",
+  EXP_SYMBOL:"E",
   PERMILL:"\u2030",
   INFINITY:"\u221E",
   NAN:"NaN",

@@ -21,22 +21,22 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
-  ERAS:["\u043f. \u043d. \u0435.","\u043d. \u0435"],
-  ERANAMES:["\u041f\u0440\u0435 \u043d\u043e\u0432\u0435 \u0435\u0440\u0435","\u041d\u043e\u0432\u0435 \u0435\u0440\u0435"],
-  NARROWMONTHS:["\u0458","\u0444","\u043c","\u0430","\u043c","\u0458","\u0458","\u0430","\u0441","\u043e","\u043d","\u0434"],
-  MONTHS:["\u0458\u0430\u043d\u0443\u0430\u0440","\u0444\u0435\u0431\u0440\u0443\u0430\u0440","\u043c\u0430\u0440\u0442","\u0430\u043f\u0440\u0438\u043b","\u043c\u0430\u0458","\u0458\u0443\u043d","\u0458\u0443\u043b","\u0430\u0432\u0433\u0443\u0441\u0442","\u0441\u0435\u043f\u0442\u0435\u043c\u0431\u0430\u0440","\u043e\u043a\u0442\u043e\u0431\u0430\u0440","\u043d\u043e\u0432\u0435\u043c\u0431\u0430\u0440","\u0434\u0435\u0446\u0435\u043c\u0431\u0430\u0440"],
-  SHORTMONTHS:["\u0458\u0430\u043d","\u0444\u0435\u0431","\u043c\u0430\u0440","\u0430\u043f\u0440","\u043c\u0430\u0458","\u0458\u0443\u043d","\u0458\u0443\u043b","\u0430\u0432\u0433","\u0441\u0435\u043f","\u043e\u043a\u0442","\u043d\u043e\u0432","\u0434\u0435\u0446"],
-  WEEKDAYS:["\u043d\u0435\u0434\u0435\u0459\u0430","\u043f\u043e\u043d\u0435\u0434\u0435\u0459\u0430\u043a","\u0443\u0442\u043e\u0440\u0430\u043a","\u0441\u0440\u0435\u0434\u0430","\u0447\u0435\u0442\u0432\u0440\u0442\u0430\u043a","\u043f\u0435\u0442\u0430\u043a","\u0441\u0443\u0431\u043e\u0442\u0430"],
-  SHORTWEEKDAYS:["\u043d\u0435\u0434","\u043f\u043e\u043d","\u0443\u0442\u043e","\u0441\u0440\u0435","\u0447\u0435\u0442","\u043f\u0435\u0442","\u0441\u0443\u0431"],
-  NARROWWEEKDAYS:["\u043d","\u043f","\u0443","\u0441","\u0447","\u043f","\u0441"],
-  SHORTQUARTERS:["\u041a1","\u041a2","\u041a3","\u041a4"],
-  QUARTERS:["\u041f\u0440\u0432\u043e \u0442\u0440\u043e\u043c\u0435\u0441\u0435\u0447\u0458\u0435","\u0414\u0440\u0443\u0433\u043e \u0442\u0440\u043e\u043c\u0435\u0441\u0435\u0447\u0458\u0435","\u0422\u0440\u0435\u045b\u0435 \u0442\u0440\u043e\u043c\u0435\u0441\u0435\u0447\u0458\u0435","\u0427\u0435\u0442\u0432\u0440\u0442\u043e \u0442\u0440\u043e\u043c\u0435\u0441\u0435\u0447\u0458\u0435"],
-  AMPMS:["\u043f\u0440\u0435\u043f\u043e\u0434\u043d\u0435","\u043f\u043e\u043f\u043e\u0434\u043d\u0435"],
-  DATEFORMATS:["EEEE, dd. MMMM yyyy.","dd. MMMM yyyy.","dd.MM.yyyy.","d.M.yy."],
-  TIMEFORMATS:["HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  ERAS:["p. n. e.","n. e"],
+  ERANAMES:["Pre nove ere","Nove ere"],
+  NARROWMONTHS:["j","f","m","a","m","j","j","a","s","o","n","d"],
+  MONTHS:["januar","februar","mart","april","maj","jun","jul","avgust","septembar","oktobar","novembar","decembar"],
+  SHORTMONTHS:["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"],
+  WEEKDAYS:["nedelja","ponedeljak","utorak","sreda","\u010detvrtak","petak","subota"],
+  SHORTWEEKDAYS:["ned","pon","uto","sre","\u010det","pet","sub"],
+  NARROWWEEKDAYS:["n","p","u","s","\u010d","p","s"],
+  SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
+  QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
+  AMPMS:["pre podne","popodne"],
+  DATEFORMATS:["EEEE, dd. MMMM y.","d.MM.yyyy.","dd.MM.y.","d.M.yy."],
+  TIMEFORMATS:["HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

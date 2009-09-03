@@ -26,17 +26,17 @@ gadgets.i18n.DateTimeConstants = {
   NARROWMONTHS:["1","2","3","4","5","6","7","8","9","10","11","12"],
   MONTHS:["1","2","3","4","5","6","7","8","9","10","11","12"],
   SHORTMONTHS:["1","2","3","4","5","6","7","8","9","10","11","12"],
-  WEEKDAYS:["1","2","3","4","5","6","7"],
-  SHORTWEEKDAYS:["1","2","3","4","5","6","7"],
-  NARROWWEEKDAYS:["1","2","3","4","5","6","7"],
+  WEEKDAYS:["\u06cc\u06d5\u06a9\u0634\u06d5\u0645\u0645\u06d5","\u062f\u0648\u0648\u0634\u06d5\u0645\u0645\u06d5","\u0633\u06ce\u0634\u06d5\u0645\u0645\u06d5","\u0686\u0648\u0627\u0631\u0634\u06d5\u0645\u0645\u06d5","5","6","7"],
+  SHORTWEEKDAYS:["\u06cc\u06d5\u06a9\u0634\u06d5\u0645\u0645\u06d5","\u062f\u0648\u0648\u0634\u06d5\u0645\u0645\u06d5","\u0633\u06ce\u0634\u06d5\u0645\u0645\u06d5","\u0686\u0648\u0627\u0631\u0634\u06d5\u0645\u0645\u06d5","5","6","7"],
+  NARROWWEEKDAYS:["\u06cc","\u062f","\u0633","4","5","6","7"],
   SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
   QUARTERS:["Q1","Q2","Q3","Q4"],
   AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, yyyy MMMM dd","yyyy MMMM d","yyyy MMM d","yyyy-MM-dd"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, y MMMM dd","y MMMM d","y MMM d","yyyy-MM-dd"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 5,
   WEEKENDRANGE: [4, 5],
-  FIRSTWEEKCUTOFFDAY: 4
+  FIRSTWEEKCUTOFFDAY: 1
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

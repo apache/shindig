@@ -21,13 +21,13 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.NumberFormatConstants = {
-  DECIMAL_SEP:",",
-  GROUP_SEP:".",
+  DECIMAL_SEP:".",
+  GROUP_SEP:",",
   PERCENT:"%",
   ZERO_DIGIT:"0",
   PLUS_SIGN:"+",
   MINUS_SIGN:"-",
-  EXP_SYMBOL:"\u0435",
+  EXP_SYMBOL:"E",
   PERMILL:"\u2030",
   INFINITY:"\u221E",
   NAN:"NaN",

@@ -32,8 +32,8 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
   QUARTERS:["1. Quartal","2. Quartal","3. Quartal","4. Quartal"],
   AMPMS:["vorm.","nachm."],
-  DATEFORMATS:["EEEE, dd. MMMM yyyy","dd. MMMM yyyy","dd.MM.yyyy","dd.MM.yy"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, dd. MMMM y","dd. MMMM y","dd.MM.yyyy","dd.MM.yy"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3

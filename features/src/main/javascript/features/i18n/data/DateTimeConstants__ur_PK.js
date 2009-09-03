@@ -33,11 +33,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["1\u0633\u06c1 \u0645\u0627\u06c1\u06cc","2\u0633\u06c1 \u0645\u0627\u06c1\u06cc","3\u0633\u06c1 \u0645\u0627\u06c1\u06cc","4\u0633\u06c1 \u0645\u0627\u06c1\u06cc"],
   QUARTERS:["\u067e\u06c1\u0644\u06cc \u0633\u06c1 \u0645\u0627\u06c1\u06cc","\u062f\u0648\u0633\u0631\u06cc \u0633\u06c1 \u0645\u0627\u06c1\u06cc","\u062a\u064a\u0633\u0631\u06cc \u0633\u06c1 \u0645\u0627\u06c1\u06cc","\u0686\u0648\u062a\u0647\u06cc \u0633\u06c1 \u0645\u0627\u06c1\u06cc"],
   AMPMS:["\u0642\u0628\u0644 \u062f\u0648\u067e\u06c1\u0631","\u0628\u0639\u062f \u062f\u0648\u067e\u06c1\u0631"],
-  DATEFORMATS:["EEEE, d, MMMM yyyy","d, MMMM yyyy","d, MMM yyyy","d/M/yy"],
-  TIMEFORMATS:["h:mm:ss a v","h:mm:ss a z","h:mm:ss a","h:mm a"],
+  DATEFORMATS:["EEEE, d, MMMM y","d, MMMM y","d, MMM y","d/M/yy"],
+  TIMEFORMATS:["h:mm:ss a zzzz","h:mm:ss a z","h:mm:ss a","h:mm a"],
   FIRSTDAYOFWEEK: 6,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 5
+  FIRSTWEEKCUTOFFDAY: 2
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

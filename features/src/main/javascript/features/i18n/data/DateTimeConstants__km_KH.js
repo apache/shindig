@@ -32,11 +32,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["\u178f\u17d2\u179a\u17b8\u17e1","\u178f\u17d2\u179a\u17b8\u17e2","\u178f\u17d2\u179a\u17b8\u17e3","\u178f\u17d2\u179a\u17b8\u17e4"],
   QUARTERS:["\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f\u1791\u17b8\u17e1","\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f\u1791\u17b8\u17e2","\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f\u1791\u17b8\u17e3","\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f\u1791\u17b8\u17e4"],
   AMPMS:["\u1796\u17d2\u179a\u17b9\u1780","\u179b\u17d2\u1784\u17b6\u1785"],
-  DATEFORMATS:["EEEE \u1790\u17d2\u1784\u17c3 d \u1781\u17c2 MMMM \u1786\u17d2\u1793\u17b6\u17c6  yyyy","d \u1781\u17c2 MMMM \u1786\u17d2\u1793\u17b6\u17c6  yyyy","d MMM yyyy","d/M/yyyy"],
-  TIMEFORMATS:["H \u1798\u17c9\u17c4\u1784 m \u1793\u17b6\u1791\u17b8 ss \u179c\u17b7\u1793\u17b6\u1791\u17b8\u200b v","H \u1798\u17c9\u17c4\u1784 m \u1793\u17b6\u1791\u17b8 ss \u179c\u17b7\u1793\u17b6\u1791\u17b8\u200bz","H:mm:ss","H:mm"],
+  DATEFORMATS:["EEEE \u1790\u17d2\u1784\u17c3 d \u1781\u17c2 MMMM \u1786\u17d2\u1793\u17b6\u17c6 y","d \u1781\u17c2 MMMM \u1786\u17d2\u1793\u17b6\u17c6 y","d MMM y","d/M/yyyy"],
+  TIMEFORMATS:["H \u1798\u17c9\u17c4\u1784 m \u1793\u17b6\u1791\u17b8 ss \u179c\u17b7\u1793\u17b6\u1791\u17b8\u200b zzzz","H \u1798\u17c9\u17c4\u1784 m \u1793\u17b6\u1791\u17b8 ss \u179c\u17b7\u1793\u17b6\u1791\u17b8\u200bz","H:mm:ss","H:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

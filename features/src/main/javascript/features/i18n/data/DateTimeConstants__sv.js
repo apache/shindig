@@ -32,8 +32,8 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["K1","K2","K3","K4"],
   QUARTERS:["1:a kvartalet","2:a kvartalet","3:e kvartalet","4:e kvartalet"],
   AMPMS:["fm","em"],
-  DATEFORMATS:["EEEE 'den' d MMMM yyyy","d MMMM yyyy","d MMM yyyy","yyyy-MM-dd"],
-  TIMEFORMATS:["'kl'. HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  DATEFORMATS:["EEEE d MMMM y","d MMMM y","d MMM y","yyyy-MM-dd"],
+  TIMEFORMATS:["'kl'. HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3

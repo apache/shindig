@@ -21,22 +21,22 @@ var gadgets = gadgets || {};
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
-  ERAS:["\u00ee.e.n.","e.n."],
+  ERAS:["\u00ee.Hr.","d.Hr."],
   ERANAMES:["\u00eenainte de Hristos","dup\u0103 Hristos"],
   NARROWMONTHS:["I","F","M","A","M","I","I","A","S","O","N","D"],
   MONTHS:["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"],
   SHORTMONTHS:["ian.","feb.","mar.","apr.","mai","iun.","iul.","aug.","sept.","oct.","nov.","dec."],
   WEEKDAYS:["duminic\u0103","luni","mar\u021bi","miercuri","joi","vineri","s\u00e2mb\u0103t\u0103"],
-  SHORTWEEKDAYS:["D","L","Ma","Mi","J","V","S"],
+  SHORTWEEKDAYS:["Du","Lu","Ma","Mi","Jo","Vi","S\u00e2"],
   NARROWWEEKDAYS:["D","L","M","M","J","V","S"],
-  SHORTQUARTERS:["T1","T2","T3","T4"],
-  QUARTERS:["trimestrul 1","trimestrul 2","trimestrul 3","trimestrul 4"],
+  SHORTQUARTERS:["trim. I","trim. II","trim. III","trim. IV"],
+  QUARTERS:["trimestrul I","trimestrul al II-lea","trimestrul al III-lea","trimestrul al IV-lea"],
   AMPMS:["AM","PM"],
-  DATEFORMATS:["EEEE, d MMMM yyyy","d MMMM yyyy","dd.MM.yyyy","dd.MM.yyyy"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, d MMMM y","d MMMM y","dd.MM.yyyy","dd.MM.yyyy"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

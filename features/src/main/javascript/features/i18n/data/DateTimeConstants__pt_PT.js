@@ -22,7 +22,7 @@ gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {
   ERAS:["a.C.","d.C."],
-  ERANAMES:["a.C.","d.C."],
+  ERANAMES:["Antes de Cristo","Ano do Senhor"],
   NARROWMONTHS:["J","F","M","A","M","J","J","A","S","O","N","D"],
   MONTHS:["Janeiro","Fevereiro","Mar\u00e7o","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],
   SHORTMONTHS:["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
@@ -32,11 +32,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["T1","T2","T3","T4"],
   QUARTERS:["1.\u00ba trimestre","2.\u00ba trimestre","3.\u00ba trimestre","4.\u00ba trimestre"],
   AMPMS:["Antes do meio-dia","Depois do meio-dia"],
-  DATEFORMATS:["EEEE, d 'de' MMMM 'de' yyyy","d 'de' MMMM 'de' yyyy","yyyy/MM/dd","yy/MM/dd"],
-  TIMEFORMATS:["HH'H'mm'm'ss's' v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, d 'de' MMMM 'de' y","d 'de' MMMM 'de' y","d 'de' MMM 'de' yyyy","dd/MM/yy"],
+  TIMEFORMATS:["HH'h'mm'min'ss's' zzzz","HH'h'mm'min'ss's' z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;

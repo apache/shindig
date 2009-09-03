@@ -27,14 +27,13 @@ gadgets.i18n.DateTimeConstants = {
   MONTHS:["januar","februar","mars","april","mai","juni","juli","august","september","oktober","november","desember"],
   SHORTMONTHS:["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"],
   WEEKDAYS:["s\u00f8ndag","m\u00e5ndag","tysdag","onsdag","torsdag","fredag","laurdag"],
-  SHORTWEEKDAYS:["s\u00f8.","m\u00e5","ty","on","to","fr","la"],
-  STANDALONESHORTWEEKDAYS:["s\u00f8.","m\u00e5.","ty","on","to","fr","la."],
+  SHORTWEEKDAYS:["s\u00f8.","m\u00e5.","ty.","on.","to.","fr.","la."],
   NARROWWEEKDAYS:["S","M","T","O","T","F","L"],
   SHORTQUARTERS:["K1","K2","K3","K4"],
   QUARTERS:["1. kvartal","2. kvartal","3. kvartal","4. kvartal"],
   AMPMS:["formiddag","ettermiddag"],
-  DATEFORMATS:["EEEE d. MMMM yyyy","d. MMMM yyyy","d. MMM. yyyy","dd.MM.yy"],
-  TIMEFORMATS:["'kl'. HH.mm.ss v","HH.mm.ss z","HH.mm.ss","HH.mm"],
+  DATEFORMATS:["EEEE d. MMMM y","d. MMMM y","d. MMM. y","dd.MM.yy"],
+  TIMEFORMATS:["'kl'. HH.mm.ss zzzz","HH.mm.ss z","HH.mm.ss","HH.mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
   FIRSTWEEKCUTOFFDAY: 3
@@ -43,4 +42,5 @@ gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeCon
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONESHORTMONTHS = gadgets.i18n.DateTimeConstants.SHORTMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEWEEKDAYS = gadgets.i18n.DateTimeConstants.WEEKDAYS;
+gadgets.i18n.DateTimeConstants.STANDALONESHORTWEEKDAYS = gadgets.i18n.DateTimeConstants.SHORTWEEKDAYS;
 gadgets.i18n.DateTimeConstants.STANDALONENARROWWEEKDAYS = gadgets.i18n.DateTimeConstants.NARROWWEEKDAYS;

@@ -32,11 +32,11 @@ gadgets.i18n.DateTimeConstants = {
   SHORTQUARTERS:["Q1","Q2","Q3","Q4"],
   QUARTERS:["Q1","Q2","Q3","Q4"],
   AMPMS:["SA","CH"],
-  DATEFORMATS:["EEEE, 'ng\u00e0y' dd MMMM 'n\u0103m' yyyy","'Ng\u00e0y' dd 'th\u00e1ng' M 'n\u0103m' yyyy","dd-MM-yyyy","dd/MM/yyyy"],
-  TIMEFORMATS:["HH:mm:ss v","HH:mm:ss z","HH:mm:ss","HH:mm"],
+  DATEFORMATS:["EEEE, 'ng\u00e0y' dd MMMM 'n\u0103m' y","'Ng\u00e0y' dd 'th\u00e1ng' M 'n\u0103m' y","dd-MM-yyyy","dd/MM/yyyy"],
+  TIMEFORMATS:["HH:mm:ss zzzz","HH:mm:ss z","HH:mm:ss","HH:mm"],
   FIRSTDAYOFWEEK: 0,
   WEEKENDRANGE: [5, 6],
-  FIRSTWEEKCUTOFFDAY: 6
+  FIRSTWEEKCUTOFFDAY: 3
 };
 gadgets.i18n.DateTimeConstants.STANDALONENARROWMONTHS = gadgets.i18n.DateTimeConstants.NARROWMONTHS;
 gadgets.i18n.DateTimeConstants.STANDALONEMONTHS = gadgets.i18n.DateTimeConstants.MONTHS;
