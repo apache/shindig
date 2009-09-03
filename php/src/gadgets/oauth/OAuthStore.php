@@ -56,7 +56,7 @@ class OAuthStoreVars {
   public static $SignatureType = array('HMAC_SHA1' => 'HMAC_SHA1', 'RSA_SHA1' => 'RSA_SHA1',
       'PLAINTEXT' => 'PLAINTEXT');
   public static $KeyType = array('HMAC_SYMMETRIC' => 'HMAC_SYMMETRIC', 'RSA_PRIVATE' => 'RSA_PRIVATE');
-  public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth-header', 'POST_BODY' => 'post-body',-
+  public static $OAuthParamLocation = array('AUTH_HEADER' => 'auth-header', 'POST_BODY' => 'post-body',
       'URI_QUERY' => 'uri-query');
 }
 

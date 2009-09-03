@@ -69,7 +69,7 @@ class ProxyBase {
           break;
         case 'OAUTH':
           $request->setAuthType(RemoteContentRequest::$AUTH_OAUTH);
-          $request->setOAuthRequestParams(new OAuthRequestParams($_POST));
+          $request->setOAuthRequestParams(new OAuthRequestParams($_REQUEST));
           break;
       }
       $token = $this->context->extractAndValidateToken($signer);

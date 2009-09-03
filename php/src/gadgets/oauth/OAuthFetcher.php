@@ -235,9 +235,9 @@ class OAuthFetcher extends RemoteContentFetcher {
    * @return RemoteContentRequest
    */
   public function fetchRequest(RemoteContentRequest $request) {
+    $this->checkCanApprove();
     if ($this->needApproval()) {
       // This is section 6.1 of the OAuth spec.
-      $this->checkCanApprove();
       $this->fetchRequestToken($request);
       // This is section 6.2 of the OAuth spec.
       $this->buildClientApprovalState();
@@ -247,7 +247,6 @@ class OAuthFetcher extends RemoteContentFetcher {
       return $this->buildOAuthApprovalResponse();
     } elseif ($this->needAccessToken()) {
       // This is section 6.3 of the OAuth spec
-      $this->checkCanApprove();
       $this->exchangeRequestToken($request);
       $this->saveAccessToken();
       $this->buildClientAccessState();
@@ -286,7 +285,7 @@ class OAuthFetcher extends RemoteContentFetcher {
     if ($pageOwner != $pageViewer) {
       throw new GadgetException("Only page owners can grant OAuth approval");
     }
-    if ($stateOwner != null && ! $stateOwner == $pageOwner) {
+    if ($stateOwner != null && $stateOwner != $pageOwner) {
       throw new GadgetException("Client state belongs to a different person.");
     }
   }
