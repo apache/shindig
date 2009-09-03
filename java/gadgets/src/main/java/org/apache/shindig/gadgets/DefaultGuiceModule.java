@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Creates a module to supply all of the core gadget classes.
@@ -46,9 +47,14 @@ public class DefaultGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
 
-    ExecutorService service = Executors.newCachedThreadPool();
+    final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
     bind(Executor.class).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+            service.shutdownNow();
+        }
+    });
 
     install(new ParseModule());
     install(new PreloadModule());
@@ -66,4 +72,15 @@ public class DefaultGuiceModule extends AbstractModule {
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
   }
+
+
+  public static ThreadFactory DAEMON_THREAD_FACTORY =
+    new ThreadFactory() {
+        public Thread newThread(Runnable r) {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
+        }
+    };
+
 }
