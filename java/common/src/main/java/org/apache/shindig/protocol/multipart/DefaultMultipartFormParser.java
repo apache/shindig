@@ -72,9 +72,6 @@ public class DefaultMultipartFormParser implements MultipartFormParser {
     if (contentType == null) {
       return false;
     }
-    if (contentType.toLowerCase().startsWith(MULTIPART)) {
-      return true;
-    }
-    return false;
+    return contentType.toLowerCase().startsWith(MULTIPART);
   }
 }
