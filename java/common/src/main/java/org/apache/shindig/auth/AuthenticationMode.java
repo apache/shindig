@@ -48,5 +48,5 @@ public enum AuthenticationMode {
   /**
    * The request is from a logged in user of the receiving domain
    */
-  COOKIE;
+  COOKIE
 }
