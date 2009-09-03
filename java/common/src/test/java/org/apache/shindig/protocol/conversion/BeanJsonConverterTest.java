@@ -66,7 +66,7 @@ public class BeanJsonConverterTest extends TestCase {
     }
 
     public enum TestEnum {
-      foo, bar, baz;
+      foo, bar, baz
     }
 
     public void setTestEnum(TestEnum testEnum) {
