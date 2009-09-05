@@ -18,6 +18,8 @@
  * under the License.
  */
 
+require_once 'src/gadgets/MakeRequest.php';
+
 /**
  * This class contains the shared methods between the Proxy and makeRequest handlers
  */
@@ -27,10 +29,13 @@ class ProxyBase {
    */
   public $context;
 
-  protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie', 'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary', 'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
+  protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie',
+      'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary',
+      'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
 
   public function __construct($context) {
     $this->context = $context;
+    $this->makeRequest = new MakeRequest();
   }
 
   /**
@@ -42,43 +47,18 @@ class ProxyBase {
    * @return RemoteContentRequest the filled in request (RemoteContentRequest)
    */
   protected function buildRequest($url, $method = 'GET', $signer = null) {
-    // Check the protocol requested - curl doesn't really support file://
-    // requests but the 'error' should be handled properly
-    $protocolSplit = explode('://', $url, 2);
-    if (count($protocolSplit) < 2) {
-      throw new Exception("Invalid protocol specified");
-    } else {
-      $protocol = strtoupper($protocolSplit[0]);
-      if ($protocol != "HTTP" && $protocol != "HTTPS") {
-        throw new Exception("Invalid protocol specified in url: " . htmlentities($protocol));
-      }
-    }
-    if ($method == 'POST') {
-      $postData = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
-      // even if postData is an empty string, it will still post (since RemoteContentRquest checks if its false)
-      // so the request to POST is still honored
-      $request = new RemoteContentRequest($url, null, $postData);
-    } else {
-      $request = new RemoteContentRequest($url);
-    }
-    if ($signer) {
-      $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
-      switch (strtoupper($authz)) {
-        case 'SIGNED':
-          $request->setAuthType(RemoteContentRequest::$AUTH_SIGNED);
-          break;
-        case 'OAUTH':
-          $request->setAuthType(RemoteContentRequest::$AUTH_OAUTH);
-          $request->setOAuthRequestParams(new OAuthRequestParams($_REQUEST));
-          break;
-      }
-      $token = $this->context->extractAndValidateToken($signer);
-      $request->setToken($token);
-    }
-    if (isset($_POST['headers'])) {
-      $request->setHeaders(urldecode(str_replace("&", "\n", str_replace("=", ": ", $_POST['headers']))));
-    }
-    return $request;
+    // TODO: Check to see if we can just use MakeRequestOptions::fromCurrentRequest
+    $st = isset($_GET['st']) ? $_GET['st'] : (isset($_POST['st']) ? $_POST['st'] : false);
+    $body = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
+    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
+    $headers = isset($_GET['headers']) ? $_GET['headers'] : (isset($_POST['headers']) ? $_POST['headers'] : '');
+    $params = new MakeRequestOptions($url);
+    $params->setSecurityTokenString($st)
+      ->setAuthz($authz)
+      ->setRequestBody($body)
+      ->setHttpMethod($method)
+      ->setFormEncodedRequestHeaders($headers);
+    return $this->makeRequest->buildRequest($this->context, $params, $signer);
   }
 
   /**
@@ -111,11 +91,7 @@ class ProxyBase {
    * @return string the 'validated' url
    */
   protected function validateUrl($url) {
-    if (! @parse_url($url)) {
-      throw new Exception("Invalid Url");
-    } else {
-      return $url;
-    }
+    return MakeRequestOptions::validateUrl($url);
   }
 
   /**

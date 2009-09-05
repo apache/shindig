@@ -35,24 +35,17 @@ class MakeRequestServlet extends HttpServlet {
     try {
       $this->noHeaders = true;
       $context = new GadgetContext('GADGET');
-      $url = isset($_GET['url']) ? $_GET['url'] : (isset($_POST['url']) ? $_POST['url'] : false);
-      if (! $url || empty($url)) {
-        header("HTTP/1.0 400 Bad Request", true);
-        echo "<html><body><h1>400 - Missing url parameter</h1></body></html>";
-      }
-      $method = (isset($_GET['httpMethod']) ? $_GET['httpMethod'] : (isset($_POST['httpMethod']) ? $_POST['httpMethod'] : 'GET'));
-      $signingFetcherFactory = $gadgetSigner = false;
-      if (! empty($_GET['authz']) || ! empty($_POST['authz'])) {
-        $gadgetSigner = Config::get('security_token_signer');
-        $gadgetSigner = new $gadgetSigner();
-        $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
-      }
-      $makeRequestHandler = new MakeRequestHandler($context, $signingFetcherFactory);
-      $makeRequestHandler->fetchJson($url, $gadgetSigner, $method);
+      $makeRequestParams = MakeRequestOptions::fromCurrentRequest();
+      $makeRequestHandler = new MakeRequestHandler($context);
+      $makeRequestHandler->fetchJson($makeRequestParams);
+    } catch (MakeRequestParameterException $e) {
+      // Something was misconfigured in the request
+      header("HTTP/1.0 400 Bad Request", true);
+      echo "<html><body><h1>400 - Bad request</h1><p>" . $e->getMessage() . "</body></html>";
     } catch (Exception $e) {
       // catch all exceptions and give a 500 server error
       header("HTTP/1.0 500 Internal Server Error");
-      echo "<h1>Internal server error</h1><p>" . $e->getMessage() . "</p>";
+      echo "<html><body><h1>Internal server error</h1><p>" . $e->getMessage() . "</p></body></html>";
     }
   }
 

@@ -263,7 +263,7 @@ class GadgetContext {
    * signer to validate the token
    *
    * @param SecurityTokenDecoder $signer the signer to use (configured in config.php)
-   * @return string the token to use in the signed url
+   * @return SecurityToken An object representation of the token data.
    */
   public function extractAndValidateToken($signer) {
     if ($signer == null) {
@@ -273,6 +273,17 @@ class GadgetContext {
     if (! isset($token) || $token == '') {
       $token = isset($_POST['st']) ? $_POST['st'] : '';
     }
+    return $this->validateToken($token, $signer);
+  }
+
+  /**
+   * Validates a passed-in token.
+   * 
+   * @param string $token A urlencoded base64 encoded security token.
+   * @param SecurityTokenDecoder $signer The signer to use (configured in config.php)
+   * @return SecurityToken An object representation of the token data.
+   */
+  public function validateToken($token, $signer) {
     if (count(explode(':', $token)) != 7) {
       $token = urldecode(base64_decode($token));
     }
