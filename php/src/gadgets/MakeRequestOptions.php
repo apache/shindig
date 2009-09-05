@@ -102,11 +102,14 @@ class MakeRequestOptions {
    *     array.
    */
   private function assertParameterIsOneOf($param, $values) {
+  	if (empty($param)) {
+  		return;
+  	}
     if (is_string($param)) {
       $param = strtoupper($param);
     }
     if (!in_array($param, $values)) {
-      throw new MakeRequestParameterException($name . " parameter must be one of " . implode(', ', $values));
+      throw new MakeRequestParameterException($param . " parameter must be one of " . implode(', ', $values));
     }
     return $param;
   }
@@ -201,7 +204,7 @@ class MakeRequestOptions {
             ->setOAuthUseToken(MakeRequestOptions::getRequestParam('OAUTH_USE_TOKEN'))
             ->setOAuthClientState(MakeRequestOptions::getRequestParam('oauthState'))
             ->setSecurityTokenString(MakeRequestOptions::getRequestParam('st'));
-            
+
     return $options;
   }
 
@@ -348,7 +351,7 @@ class MakeRequestOptions {
   /**
    * Sets the authorization type of the request.  Must be one of
    * {@link MakeRequestOptions::$VALID_AUTHZ}.
-   * 
+   *
    * @param string $authz The value to use.
    * @return MakeRequestOptions This object (for chaining purporses).
    */

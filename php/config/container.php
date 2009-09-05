@@ -112,7 +112,7 @@ $shindigConfig = array(
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
   'focedJsLibs' => '',
 
-  // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an 
+  // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an
   // unknown custom class, this is particuarly useful for when intergrating shindig into an existing framework that also depends on autoloading
   'extension_autoloader' => false,
 
@@ -123,6 +123,8 @@ $shindigConfig = array(
   'security_token_signer' => 'BasicSecurityTokenDecoder',
   'security_token' => 'BasicSecurityToken',
   'oauth_lookup_service' => 'BasicOAuthLookupService',
+  // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
+  'oauth_store' => 'BasicOAuthStore',
 
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)

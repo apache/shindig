@@ -22,10 +22,10 @@
  * Produces OAuth content fetchers for input tokens.
  */
 class OAuthFetcherFactory {
-  
+
   /** used to encrypt state stored on the client */
   protected $oauthCrypter;
-  
+
   /** persistent storage for OAuth tokens */
   protected $tokenStore;
 
@@ -48,7 +48,8 @@ class OAuthFetcherFactory {
       $BBC = new BasicBlobCrypter();
       $this->oauthCrypter = new BasicBlobCrypter(srand($BBC->MASTER_KEY_MIN_LEN));
       $specFactory = new BasicGadgetSpecFactory();
-      $basicStore = new BasicGadgetOAuthTokenStore(new BasicOAuthStore(), $specFactory);
+      $OAuthStore = Config::get('oauth_store');
+      $basicStore = new BasicGadgetOAuthTokenStore(new $OAuthStore, $specFactory);
       $basicStore->initFromConfigFile($fetcher);
       $this->tokenStore = $basicStore;
     } catch (Exeption $e) {}
