@@ -89,7 +89,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $osDataRequests = array();
     // First extract all the os-data tags, and execute those in a single combined request, saves latency
     // and is consistent with other server implementations
-    preg_match_all('/(<script.*type="text\/(os-data)".*>)(.*)(<\/script>)/imsxU', $content, $osDataRequests);
+    preg_match_all('/(<script[^>]*type="text\/(os-data)"[^>]*>)(.*)(<\/script>)/imsxU', $content, $osDataRequests);
     $osDataRequestsCombined = '';
     foreach ($osDataRequests[0] as $match) {
       $osDataRequestsCombined .= $match . "\n";
