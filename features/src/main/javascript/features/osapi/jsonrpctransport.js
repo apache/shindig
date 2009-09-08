@@ -74,7 +74,8 @@
       // Iterate over the defined services, extract the http endpoints and
       // create a transport per-endpoint
       for (var endpointName in services) if (services.hasOwnProperty(endpointName)) {
-        if (endpointName.indexOf("http") == 0) {
+        if (endpointName.indexOf("http") == 0 ||
+            endpointName.indexOf("//") == 0) {
           // Expand the host & append the security token
           var endpointUrl = endpointName.replace("%host%", document.location.host);
           var transport = { name : endpointUrl, "execute" : execute };
