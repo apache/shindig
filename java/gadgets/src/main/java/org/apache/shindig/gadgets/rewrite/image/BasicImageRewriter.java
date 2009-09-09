@@ -73,6 +73,8 @@ public class BasicImageRewriter implements ImageRewriter {
   public static final String PARAM_RESIZE_WIDTH = "resize_w";
   /** Parameter used to request image height change */
   public static final String PARAM_RESIZE_HEIGHT = "resize_h";
+  /** Parameter used to request resizing will not expand image */
+  public static final String PARAM_NO_EXPAND = "no_expand";
 
   public static final String
       CONTENT_TYPE_AND_EXTENSION_MISMATCH =
@@ -120,8 +122,8 @@ public class BasicImageRewriter implements ImageRewriter {
       if (!isSupportedContent(response) && !isImage(uri)) {
         return response;
       }
-      if (!isUsableParameter(requestedWidth) || !isUsableParameter(requestedHeight)
-          || !isUsableParameter(resizeQuality)) {
+      if (!isUsableParameter(requestedWidth) || !isUsableParameter(requestedHeight) ||
+          !isUsableParameter(resizeQuality)) {
         return response;
       }
 
@@ -140,6 +142,13 @@ public class BasicImageRewriter implements ImageRewriter {
       }
 
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
+      
+      if ("true".equals(request.getParam(PARAM_NO_EXPAND)) &&
+          imageInfo.getHeight() <= requestedHeight &&
+          imageInfo.getWidth() <= requestedWidth) {
+        // Don't do anything, since the current image fits within the bounding area.
+        isResizeRequested = false;
+      }
 
       boolean isOversizedImage = isImageTooLarge(imageInfo);
       if (isResizeRequested && isOversizedImage) {
@@ -160,7 +169,6 @@ public class BasicImageRewriter implements ImageRewriter {
       BufferedImage image = readImage(imageFormat, response);
 
       if (isResizeRequested) {
-
         int origWidth = imageInfo.getWidth();
         int origHeight = imageInfo.getHeight();
         int widthDelta = 0;

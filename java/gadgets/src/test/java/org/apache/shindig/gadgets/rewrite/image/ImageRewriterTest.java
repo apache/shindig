@@ -24,6 +24,7 @@ import static
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.createControl;
 
@@ -94,12 +95,20 @@ public class ImageRewriterTest extends TestCase {
     assertNotNull(imageBytes);
     return imageBytes;
   }
-
+  
   private BufferedImage getResizedHttpResponseContent(String sourceContentType,
       String targetContentType, String imageName, Integer width, Integer height, Integer quality)
       throws Exception {
+    return getResizedHttpResponseContent(
+        sourceContentType, targetContentType, imageName, width, height, quality, false);
+  }
+
+  private BufferedImage getResizedHttpResponseContent(String sourceContentType,
+      String targetContentType, String imageName, Integer width, Integer height, Integer quality,
+      boolean noExpand)
+      throws Exception {
     HttpResponse originalResponse = getImageResponse(sourceContentType, getImageBytes(imageName));
-    HttpRequest request = getMockRequest(width, height, quality);
+    HttpRequest request = getMockRequest(width, height, quality, noExpand);
 
     mockControl.replay();
     HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
@@ -109,12 +118,13 @@ public class ImageRewriterTest extends TestCase {
     return ImageIO.read(rewrittenResponse.getResponse());
   }
 
-  private HttpRequest getMockRequest(Integer width, Integer height, Integer quality) {
+  private HttpRequest getMockRequest(Integer width, Integer height, Integer quality, boolean noExpand) {
     HttpRequest request = mockControl.createMock(HttpRequest.class);
     expect(request.getUri()).andReturn(IMAGE_URL);
     expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
     expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
     expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
+    expect(request.getParam(PARAM_NO_EXPAND)).andReturn(noExpand ? "true" : null).anyTimes();
     return request;
   }
 
@@ -235,10 +245,18 @@ public class ImageRewriterTest extends TestCase {
     assertEquals(120, image.getWidth());
     assertEquals(60, image.getHeight());
   }
+  
+  public void testResize_noExpandImage() throws Exception {
+    BufferedImage image = getResizedHttpResponseContent(
+        CONTENT_TYPE_GIF, CONTENT_TYPE_PNG /* still optimized */,
+        EXPAND_IMAGE, 120, 60, null, true /* no expand */);
+    assertEquals(60, image.getWidth());
+    assertEquals(30, image.getHeight());
+  }
 
   public void testResize_refuseHugeInputImages() throws Exception {
     HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, getImageBytes(HUGE_IMAGE));
-    HttpRequest request = getMockRequest(120, 60, null);
+    HttpRequest request = getMockRequest(120, 60, null, false);
     mockControl.replay();
     HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
     mockControl.verify();
@@ -248,7 +266,7 @@ public class ImageRewriterTest extends TestCase {
   public void testResize_acceptServeHugeImages() throws Exception {
     byte[] imageBytes = getImageBytes(HUGE_IMAGE);
     HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, imageBytes);
-    HttpRequest request = getMockRequest(null, null, null);
+    HttpRequest request = getMockRequest(null, null, null, false);
     mockControl.replay();
     HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
     mockControl.verify();
