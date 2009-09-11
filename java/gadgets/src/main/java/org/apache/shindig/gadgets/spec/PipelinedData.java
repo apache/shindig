@@ -177,8 +177,7 @@ public class PipelinedData {
    * @param expressions expressions instance for parsing expressions
    * @param rootObjects an ELResolver that can evaluate currently available
    *     root objects.
-   * @param currentSocialPreloads the remaining social preloads
-   * @param currentHttpPreloads the remaining http preloads
+   * @param currentPreloads the remaining social/http preloads
    */
   private Batch getBatch(Expressions expressions, ELResolver rootObjects,
       Map<String, BatchItemData> currentPreloads) {
