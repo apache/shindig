@@ -86,6 +86,10 @@ gadgets.rpc = function() {
   // isGadget =~ isChild for the purposes of rpc (used only in setup).
   var isGadget = (window.top !== window.self);
 
+  // Set the current rpc ID from window.name immediately, to prevent
+  // shadowing of window.name by a "var name" declaration, or similar.
+  var rpcId = window.name;
+
   // Fallback transport is simply a dummy impl that emits no errors
   // and logs info on calls it receives, to avoid undesired side-effects
   // from falling back to IFPC or some other transport.
@@ -538,7 +542,7 @@ gadgets.rpc = function() {
       var from = '..';
 
       if (targetId === '..') {
-        from = window.name;
+        from = rpcId;
       }
 
       ++callId;
@@ -704,7 +708,9 @@ gadgets.rpc = function() {
     },
 
     /** Exported constant, for use by transports only. */
-    ACK: ACK
+    ACK: ACK,
+
+    RPC_ID: rpcId
   };
 }();
 

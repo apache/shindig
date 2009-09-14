@@ -193,7 +193,7 @@ gadgets.rpctx.rmr = function() {
     try {
       if (frameId === '..') {
         // We are a gadget.
-        channelWindow = window.parent.frames['rmrtransport-' + window.name];
+        channelWindow = window.parent.frames['rmrtransport-' + gadgets.rpc.RPC_ID];
       } else {
         // We are a container.
         channelWindow = window.frames[frameId].frames['rmrtransport-..'];
@@ -373,7 +373,7 @@ gadgets.rpctx.rmr = function() {
     // messages to be sent.
     if (nonAckReceived ||
         (noLongerWaiting && channel.queue.length > 0)) {
-      var from = (fromFrameId === '..') ? window.name : '..';
+      var from = (fromFrameId === '..') ? gadgets.rpc.RPC_ID : '..';
       callRmr(fromFrameId, gadgets.rpc.ACK, from, {ackAlone: nonAckReceived});
     }
   }
