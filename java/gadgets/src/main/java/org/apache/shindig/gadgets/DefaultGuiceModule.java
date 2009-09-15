@@ -74,7 +74,7 @@ public class DefaultGuiceModule extends AbstractModule {
   }
 
 
-  public static ThreadFactory DAEMON_THREAD_FACTORY =
+  public static final ThreadFactory DAEMON_THREAD_FACTORY =
     new ThreadFactory() {
         public Thread newThread(Runnable r) {
             Thread t = Executors.defaultThreadFactory().newThread(r);
