@@ -53,8 +53,7 @@ public class TemplateLibraryFactory {
     }
   }
   
-  public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri) throws GadgetException,
-      TemplateParserException {
+  public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri) throws GadgetException {
     HttpRequest request = new HttpRequest(uri);
     // 5 minute TTL.
     request.setCacheTtl(300);

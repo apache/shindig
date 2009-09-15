@@ -62,7 +62,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    * @param root Element representing the Templates tag of this library
    */
   public XmlTemplateLibrary(Uri uri, Element root, String source) 
-      throws GadgetException, TemplateParserException {
+      throws GadgetException {
     this(uri, root, source, false);
   }
 
@@ -72,7 +72,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
    * @param safe Is this library exempt from being sanitized?
    */
   public XmlTemplateLibrary(Uri uri, Element root, String source, boolean safe) 
-      throws GadgetException, TemplateParserException {
+      throws GadgetException {
     this.libraryUri = uri;
     this.source = source;
     this.registry = new DefaultTagRegistry(parseLibraryDocument(root));
@@ -127,8 +127,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     return new TemplateBasedTagHandler(template, namespaceUri, localName);
   }
   
-  private Set<TagHandler> parseLibraryDocument(Element root)
-      throws GadgetException, TemplateParserException {
+  private Set<TagHandler> parseLibraryDocument(Element root) throws GadgetException {
     ImmutableSet.Builder<TagHandler> handlers = ImmutableSet.builder();
     
     NodeList nodes = root.getChildNodes();
