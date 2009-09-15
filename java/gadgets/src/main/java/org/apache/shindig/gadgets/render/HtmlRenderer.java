@@ -43,12 +43,6 @@ public class HtmlRenderer {
   private final List<GadgetRewriter> gadgetRewriters;
   private final GadgetHtmlParser htmlParser;
 
-  /**
-   * @param requestPipeline Used for performing the proxy request. Always ignores caching because
-   *                        we want to skip preloading when the object is in the cache.
-   * @param httpCache The shared http cache. Used before checking the request pipeline to determine
-   *                  whether to perform the preload / fetch cycle.
-   */
   @Inject
   public HtmlRenderer(PreloaderService preloader,
                       ProxyRenderer proxyRenderer,
