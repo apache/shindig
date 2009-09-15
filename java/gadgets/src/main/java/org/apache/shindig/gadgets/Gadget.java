@@ -155,7 +155,7 @@ public class Gadget {
   
   public Set<String> getAddedFeatures() {
     if (addedFeatures == null) {
-      return Collections.<String>emptySet();
+      return Collections.emptySet();
     }
     
     return addedFeatures;
@@ -163,7 +163,7 @@ public class Gadget {
 
   public Set<String> getRemovedFeatures() {
     if (removedFeatures == null) {
-      return Collections.<String>emptySet();
+      return Collections.emptySet();
     }
     
     return removedFeatures;
