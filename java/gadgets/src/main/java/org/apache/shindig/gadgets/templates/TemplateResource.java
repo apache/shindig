@@ -27,9 +27,9 @@ public final class TemplateResource {
   private final Type type;
   private final boolean isSafe;
 
-  public enum Type { JAVASCRIPT, STYLE };
-  
-  /**
+  public enum Type { JAVASCRIPT, STYLE }
+
+    /**
    * Create a Javascript resource.
    * @param javascript the script content
    * @param library the library that is the source of the script

@@ -218,8 +218,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JSONObject feed = (JSONObject) httpApiResponse.getContent();;
-    JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
+    JSONObject feed = (JSONObject) httpApiResponse.getContent();
+      JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
 
     assertEquals(entryTitle, entry.getString("Title"));
     assertEquals(entryLink, entry.getString("Link"));

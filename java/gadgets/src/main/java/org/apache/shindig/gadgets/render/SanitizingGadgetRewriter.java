@@ -89,8 +89,9 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
         includingChildren ? Bypass.ALL : Bypass.ONLY_SELF, copyOnClone);
   }
   
-  private static enum Bypass { ALL, ONLY_SELF, NONE };
-  private static UserDataHandler copyOnClone = new UserDataHandler() {
+  private static enum Bypass { ALL, ONLY_SELF, NONE }
+
+    private static UserDataHandler copyOnClone = new UserDataHandler() {
     public void handle(short operation, String key, Object data, Node src, Node dst) {
       if (operation == NODE_IMPORTED || operation == NODE_CLONED) {
         dst.setUserData(key, data, copyOnClone);
@@ -256,9 +257,9 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
       PASS,  // Check passed, do not process further checks on this filter
       CONTINUE, // Check passed, process further checks on this filter
       REMOVE // Check failed, remove item
-    };
+    }
 
-    /**
+      /**
      * Filter the element and possibly transform it.
      */
     Result filterTag(Element elem, Uri context);
