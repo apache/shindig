@@ -27,7 +27,7 @@ public class UserPrefs {
    * Convenience representation of an empty pref set.
    */
   public static final UserPrefs EMPTY = new UserPrefs();
-  private Map<String, String> prefs;
+  private final Map<String, String> prefs;
 
   /**
    * @return An immutable reference to all prefs.
