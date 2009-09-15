@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.spec;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -128,15 +129,8 @@ public class OAuthService {
   public enum Method {
     GET, POST;
 
-    private static Map<String, Method> METHODS = Maps.newHashMap();
-
-    static {
-      for (Method m : Method.values()) {
-        METHODS.put(m.toString(), m);
-      }
-      // Default
-      METHODS.put("", Method.GET);
-    }
+    private static final Map<String, Method> METHODS =
+            ImmutableMap.of(GET.toString(), GET, POST.toString(), POST, "", GET);
 
     public static Method parse(String value) throws SpecParserException {
       value = value.trim();
