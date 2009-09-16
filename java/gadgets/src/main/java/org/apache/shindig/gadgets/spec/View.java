@@ -41,7 +41,7 @@ import java.util.Set;
 public class View implements RequestAuthenticationInfo {
   private static final Set<String> KNOWN_ATTRIBUTES = ImmutableSet.of(
       "type", "view", "href", "preferred_height", "preferred_width", "authz", "quirks",
-      "sign_owner", "sign_viwer"
+      "sign_owner", "sign_viewer"
   );
 
   private final Uri base;
