@@ -562,12 +562,12 @@ class MakeRequestOptions {
    */
   public function getOAuthRequestParameters() {
     return new OAuthRequestParams(array(
-        OAuthRequestParams::SERVICE_PARAM => $this->getOAuthServiceName(),
-        OAuthRequestParams::TOKEN_PARAM => $this->getOAuthTokenName(),
-        OAuthRequestParams::REQUEST_TOKEN_PARAM => $this->getOAuthRequestToken(),
-        OAuthRequestParams::REQUEST_TOKEN_SECRET_PARAM => $this->getOAuthRequestTokenSecret(),
-        OAuthRequestParams::BYPASS_SPEC_CACHE_PARAM => $this->getNoCache(),
-        OAuthRequestParams::CLIENT_STATE_PARAM => $this->getOAuthClientState()
+        OAuthRequestParams::$SERVICE_PARAM => $this->getOAuthServiceName(),
+        OAuthRequestParams::$TOKEN_PARAM => $this->getOAuthTokenName(),
+        OAuthRequestParams::$REQUEST_TOKEN_PARAM => $this->getOAuthRequestToken(),
+        OAuthRequestParams::$REQUEST_TOKEN_SECRET_PARAM => $this->getOAuthRequestTokenSecret(),
+        OAuthRequestParams::$BYPASS_SPEC_CACHE_PARAM => $this->getNoCache(),
+        OAuthRequestParams::$CLIENT_STATE_PARAM => $this->getOAuthClientState()
     ));
   }
 

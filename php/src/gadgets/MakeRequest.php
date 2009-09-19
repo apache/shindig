@@ -77,7 +77,7 @@ class MakeRequest {
   public function fetch(GadgetContext $context, MakeRequestOptions $params) {
 
     $signingFetcherFactory = $gadgetSigner = null;
-    if ($params->getAuthz() == "SIGNED") {
+    if ($params->getAuthz() == "SIGNED" || $params->getAuthz() == "OAUTH") {
       $gadgetSigner = Config::get('security_token_signer');
       $gadgetSigner = new $gadgetSigner();
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));

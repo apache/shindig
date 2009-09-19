@@ -52,7 +52,7 @@ class MakeRequestHandler extends ProxyBase {
       'headers' => $result->getResponseHeaders()
     );
     
-    array_merge($responseArray, $result->getMetadatas());
+    $responseArray = array_merge($responseArray, $result->getMetadatas());
 
     $json = array($params->getHref() => $responseArray);
     $json = json_encode($json);
