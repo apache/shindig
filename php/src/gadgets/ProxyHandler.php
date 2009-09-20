@@ -53,7 +53,7 @@ class ProxyHandler extends ProxyBase {
         $isShockwaveFlash = true;
       }
     }
-    if (! $isShockwaveFlash) {
+    if (! $isShockwaveFlash && !Config::get('debug')) {
       header('Content-Disposition: attachment;filename=p.txt');
     }
     $lastModified = $result->getResponseHeader('Last-Modified') != null ? $result->getResponseHeader('Last-Modified') : gmdate('D, d M Y H:i:s', $result->getCreated()) . ' GMT';

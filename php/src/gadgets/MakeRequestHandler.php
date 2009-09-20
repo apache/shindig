@@ -62,6 +62,10 @@ class MakeRequestHandler extends ProxyBase {
       // only set caching headers if the result was 'OK'
       $this->setCachingHeaders();
     }
+    if (!Config::get('debug')) {
+      header('Content-Type: application/json; charset="UTF-8"');
+      header('Content-Disposition: attachment;filename=p.txt');
+    }
     echo $output;
   }
 }
