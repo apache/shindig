@@ -37,25 +37,26 @@ class MakeRequestHandler extends ProxyBase {
     $this->context = $context;
     $this->makeRequest = new MakeRequest();
   }
-  
+
   /**
    * Fetches content and echoes it in JSON format
-   * 
+   *
    * @param MakeRequestOptions $params  The request configuration.
    */
   public function fetchJson(MakeRequestOptions $params) {
     $result = $this->makeRequest->fetch($this->context, $params);
-
     $responseArray = array(
-      'body' => $result->getResponseContent(),
       'rc' => (int)$result->getHttpCode(),
-      'headers' => $result->getResponseHeaders()
+      'body' => $result->getResponseContent()
+      //FIXME: the spec seems to state the response should contain the headers, however java shindig doesn't (and it's a waste of bandwidth 99% of the time), check to see what is correct
+      //'headers' => $result->getResponseHeaders()
     );
-    
     $responseArray = array_merge($responseArray, $result->getMetadatas());
-
     $json = array($params->getHref() => $responseArray);
     $json = json_encode($json);
+    if (strpos($json, '\u')) {
+      $json = $this->makeRequest->decodeUtf8($json);
+    }
     $output = UNPARSEABLE_CRUFT . $json;
     if ($responseArray['rc'] == 200) {
       // only set caching headers if the result was 'OK'

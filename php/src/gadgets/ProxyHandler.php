@@ -25,6 +25,9 @@
  *
  */
 class ProxyHandler extends ProxyBase {
+  protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie',
+      'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary',
+      'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
 
   /**
    * Fetches the content and returns it as-is using the headers as returned

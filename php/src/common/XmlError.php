@@ -57,4 +57,25 @@ class XmlError {
     $ret .= trim($error->message) . "\n  Line: $error->line" . "\n  Column: $error->column\n\n";
     return $ret;
   }
+
+  /**
+   * Generic misc debugging function to dump a node's structure as plain text xml
+   *
+   * @param DOMElement $node
+   * @param string $function
+   */
+  public function dumpNode($node, $function) {
+    $doc = new DOMDocument(null, 'utf-8');
+    $doc->preserveWhiteSpace = true;
+    $doc->formatOutput = false;
+    $doc->strictErrorChecking = false;
+    $doc->recover = false;
+    $doc->resolveExternals = false;
+    if (! $newNode = @$doc->importNode($node, false)) {
+      echo "[Invalid node, dump failed]<br><br>";
+      return;
+    }
+    $doc->appendChild($newNode);
+    echo "<b>$function (" . get_class($node) . "):</b><br>" . htmlentities(str_replace('<?xml version="" encoding="utf-8"?>', '', $doc->saveXML()) . "\n") . "<br><br>";
+  }
 }

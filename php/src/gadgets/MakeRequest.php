@@ -49,7 +49,7 @@ class MakeRequest {
    *     to override the default fetcher which will be loaded from the config
    *     file.  This allows for injecting a mock into this class for testing.
    */
-  public function __construct($remoteFetcher = null){
+  public function __construct($remoteFetcher = null) {
     if (isset($remoteFetcher)) {
       $this->remoteFetcher = $remoteFetcher;
     } else {
@@ -82,15 +82,12 @@ class MakeRequest {
       $gadgetSigner = new $gadgetSigner();
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
     }
-
     $basicRemoteContent = new BasicRemoteContent($this->remoteFetcher, $signingFetcherFactory, $gadgetSigner);
-
     $request = $this->buildRequest($context, $params, $gadgetSigner);
     $request->getOptions()->ignoreCache = $params->getNoCache();
     $request->getOptions()->viewerSigned = $params->getSignViewer();
-    $request->getOptions()->ownerSigned = $params->getSignOwner(); 
+    $request->getOptions()->ownerSigned = $params->getSignOwner();
     $result = $basicRemoteContent->fetch($request);
-
     $status = (int)$result->getHttpCode();
     if ($status == 200) {
       switch ($params->getResponseFormat()) {
@@ -100,7 +97,9 @@ class MakeRequest {
           break;
       }
     }
-
+    if (strpos($result->getResponseContent(), '\u')) {
+    	$result->setResponseContent($this->decodeUtf8($result->getResponseContent()));
+    }
     return $result;
   }
 
@@ -118,23 +117,20 @@ class MakeRequest {
     $protocolSplit = explode('://', $params->getHref(), 2);
     if (count($protocolSplit) < 2) {
       throw new Exception("Invalid protocol specified");
-    } 
-
+    }
     $protocol = strtoupper($protocolSplit[0]);
     if ($protocol != "HTTP" && $protocol != "HTTPS") {
       throw new Exception("Invalid protocol specified in url: " . htmlentities($protocol));
     }
-
     $method = $params->getHttpMethod();
     if ($method == 'POST' || $method == 'PUT') {
-       // even if postData is an empty string, it will still post
-       // (since RemoteContentRquest checks if its false)
-       // so the request to POST is still honored
-       $request = new RemoteContentRequest($params->getHref(), null, $params->getRequestBody());
+      // even if postData is an empty string, it will still post
+      // (since RemoteContentRquest checks if its false)
+      // so the request to POST is still honored
+      $request = new RemoteContentRequest($params->getHref(), null, $params->getRequestBody());
     } else {
-       $request = new RemoteContentRequest($params->getHref());
+      $request = new RemoteContentRequest($params->getHref());
     }
-
     if ($signer) {
       switch ($params->getAuthz()) {
         case 'SIGNED':
@@ -145,7 +141,6 @@ class MakeRequest {
           $request->setOAuthRequestParams($params->getOAuthRequestParameters());
           break;
       }
-      
       $st = $params->getSecurityTokenString();
       if ($st === false) {
         throw new Exception("A security token is required for signed requests");
@@ -153,7 +148,6 @@ class MakeRequest {
       $token = $context->validateToken($st, $signer);
       $request->setToken($token);
     }
-
     $headers = $params->getFormattedRequestHeaders();
     if ($headers !== false) {
       // The request expects headers to be stored as a normal header text blob.
@@ -161,10 +155,18 @@ class MakeRequest {
       //     Accept-Language: en-us
       $request->setHeaders($headers);
     }
-    
     return $request;
   }
 
+  public function decodeUtf8($content) {
+    if (preg_match("/&#[xX][0-9a-zA-Z]{2,8};/", $content)) {
+      $content = preg_replace("/&#[xX]([0-9a-zA-Z]{2,8});/e", "'&#'.hexdec('$1').';'", $content);
+    }
+    if (preg_match("/\\\\[uU][0-9a-zA-Z]{2,8}/", $content)) {
+      $content = preg_replace("/\\\\[uU]([0-9a-zA-Z]{2,8})/e", "'&#'.hexdec('$1').';'", $content);
+    }
+    return mb_decode_numericentity($content, array(0x0, 0xFFFF, 0, 0xFFFF), 'UTF-8');
+  }
 
   /**
    * Handles (RSS & Atom) Type.FEED parsing using Zend's feed parser
@@ -199,6 +201,9 @@ class MakeRequest {
             $_entry = array();
             $_entry['Title'] = $item->title();
             $_entry['Link'] = $item->link();
+            if (!is_string($_entry['Link']) && isset($_entry['Link'][1]) && $_entry['Link'][1] instanceof DOMElement) {
+            	$_entry['Link'] = $_entry['Link'][1]->getAttribute('href');
+            }
             if ($getSummaries && $item->description()) {
               $_entry['Summary'] = $item->description();
             }

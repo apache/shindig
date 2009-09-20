@@ -207,6 +207,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     $handle = curl_init();
     curl_setopt($handle, CURLOPT_URL, $url);
     curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($handle, CURLOPT_BINARYTRANSFER, 1);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($handle, CURLOPT_AUTOREFERER, 1);
     curl_setopt($handle, CURLOPT_MAXREDIRS, 10);

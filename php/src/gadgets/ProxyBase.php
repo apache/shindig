@@ -29,10 +29,6 @@ class ProxyBase {
    */
   public $context;
 
-  protected $disallowedHeaders = array('User-Agent', 'Keep-Alive', 'Host', 'Accept-Encoding', 'Set-Cookie',
-      'Content-Length', 'Content-Encoding', 'ETag', 'Last-Modified', 'Accept-Ranges', 'Vary',
-      'Expires', 'Date', 'Pragma', 'Cache-Control', 'Transfer-Encoding', 'If-Modified-Since');
-
   public function __construct($context) {
     $this->context = $context;
     $this->makeRequest = new MakeRequest();
