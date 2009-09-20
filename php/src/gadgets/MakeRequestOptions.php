@@ -57,7 +57,7 @@ class MakeRequestOptions {
   const DEFAULT_GET_SUMMARIES = false;
 
   static $VALID_HTTP_METHODS = array('GET', 'PUT', 'POST', 'HEAD', 'DELETE');
-  static $VALID_OUTPUT_FORMATS = array('TEXT', 'JSON', 'FEED');
+  static $VALID_OUTPUT_FORMATS = array('TEXT', 'JSON', 'FEED', 'DOM');
   static $VALID_AUTHZ = array('OAUTH', 'NONE', 'SIGNED');
   static $VALID_OAUTH_USE_TOKEN = array('NEVER', 'IF_AVAILABLE', 'ALWAYS');
 
