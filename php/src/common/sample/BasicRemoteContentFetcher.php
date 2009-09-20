@@ -86,6 +86,29 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
   private function parseResult(RemoteContentRequest $request, $content) {
     $headers = '';
     $body = '';
+    $httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($request->handle, CURLINFO_CONTENT_TYPE);
+    // Attempt to magically convert all text'ish responses to UTF8, especially the xml and json parsers get upset if invalid UTF8 is encountered
+    $textTypes = array('text', 'html', 'json', 'xml', 'atom');
+    $isTextType = false;
+    foreach ($textTypes as $textType) {
+    	if (strpos($contentType, $textType) !== false) {
+    		$isTextType = true;
+    		break;
+    	}
+    }
+    if ($isTextType && function_exists('mb_convert_encoding')) {
+      $charset = 'UTF-8';
+   		preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $charset);
+   		if (isset($charset[1])) {
+   			$charset = trim($charset[1]);
+   			if (($pos = strpos($charset, "\n")) !== false) {
+   			  $charset = trim(substr($charset, 0, $pos));
+   			}
+   		}
+   		// the xml and json parsers get very upset if there are invalid UTF8 sequences in the string, by recoding it any bad chars will be filtered out
+      $content = mb_convert_encoding($content, 'UTF-8', $charset);
+  	}
     // on redirects and such we get multiple headers back from curl it seems, we really only want the last one
     while (substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false) {
       $headers = substr($content, 0, strpos($content, "\r\n\r\n"));
@@ -101,8 +124,6 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
         $parsedHeaders[$key] = $val;
       }
     }
-    $httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
-    $contentType = curl_getinfo($request->handle, CURLINFO_CONTENT_TYPE);
     if (! $httpCode) {
       $httpCode = '404';
     }
