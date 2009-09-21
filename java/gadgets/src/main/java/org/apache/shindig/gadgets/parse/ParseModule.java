@@ -30,7 +30,7 @@ import com.google.inject.Provider;
 public class ParseModule extends AbstractModule {
 
   /**
-   * {@InheritDoc}
+   * {@inheritDoc}
    */
   @Override
   protected void configure() {

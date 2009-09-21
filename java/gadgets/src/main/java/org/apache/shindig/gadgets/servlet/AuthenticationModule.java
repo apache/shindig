@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class AuthenticationModule extends AbstractModule {
 
-  /** {@InheritDoc} */
+  /** {@inheritDoc} */
   @Override
   protected void configure() {
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(AuthProvider.class);
