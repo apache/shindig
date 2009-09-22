@@ -45,6 +45,11 @@ if (Config::get('debug')) {
   if (get_magic_quotes_gpc()) {
     die("Your environment has magic_quotes_gpc enabled which will interfere with Shindig.  Please set 'magic_quotes_gpc' to 'Off' in php.ini");
   }
+
+  $populate_raw_post = strtolower(ini_get("always_populate_raw_post_data"));
+  if (!isset($populate_raw_post) || $populate_raw_post === "0" || $populate_raw_post === "Off") {
+    die("Your environment does not have always_populate_raw_post_data enabled which will interfere with Shindig.  Please set 'always_populate_raw_post_data' to 'On' in php.ini");
+  }
 }
 
 // All configurable classes are autoloaded (see config.php for the configurable classes)
