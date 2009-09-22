@@ -29,9 +29,13 @@ class ProxyBase {
    */
   public $context;
 
-  public function __construct($context) {
+  public function __construct($context, MakeRequest $makeRequest = null) {
     $this->context = $context;
-    $this->makeRequest = new MakeRequest();
+    if (isset($makeRequest)) {
+      $this->makeRequest = $makeRequest;
+    } else {
+      $this->makeRequest = new MakeRequest();
+    }
   }
 
   /**
@@ -46,8 +50,8 @@ class ProxyBase {
     // TODO: Check to see if we can just use MakeRequestOptions::fromCurrentRequest
     $st = isset($_GET['st']) ? $_GET['st'] : (isset($_POST['st']) ? $_POST['st'] : false);
     $body = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
-    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : '');
-    $headers = isset($_GET['headers']) ? $_GET['headers'] : (isset($_POST['headers']) ? $_POST['headers'] : '');
+    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : null);
+    $headers = isset($_GET['headers']) ? $_GET['headers'] : (isset($_POST['headers']) ? $_POST['headers'] : null);
     $params = new MakeRequestOptions($url);
     $params->setSecurityTokenString($st)
       ->setAuthz($authz)

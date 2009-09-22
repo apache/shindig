@@ -102,14 +102,11 @@ class MakeRequestOptions {
    *     array.
    */
   private function assertParameterIsOneOf($param, $values) {
-  	if (empty($param)) {
-  		return;
-  	}
     if (is_string($param)) {
       $param = strtoupper($param);
     }
     if (!in_array($param, $values)) {
-      throw new MakeRequestParameterException($param . " parameter must be one of " . implode(', ', $values));
+      throw new MakeRequestParameterException("Got an invalid value, was expecting one of " . implode(', ', $values));
     }
     return $param;
   }
