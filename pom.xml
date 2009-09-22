@@ -508,8 +508,13 @@
               <stagingSiteURL>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.1.x/${pom.version}</stagingSiteURL>
             </configuration>
           </plugin>
+         <plugin>
+           <groupId>org.apache.rat</groupId>
+           <artifactId>apache-rat-plugin</artifactId>
+         </plugin>
         </plugins>
       </build>
+
       <reporting>
         <!-- ordered alphabetically by owner -->
         <plugins>
@@ -624,6 +629,43 @@
             </reportSets>
           </plugin>
 
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <version>0.6</version>
+            <configuration>
+              <excludeSubProjects>false</excludeSubProjects>
+              <excludes>
+                <exclude>**/*.iml</exclude>
+                <exclude>.gitignore</exclude>
+                <exclude>**/.git/**/*</exclude>
+                <exclude>**/README*</exclude>
+                <exclude>**/target/**</exclude>
+                <exclude>**/php/external/**</exclude>
+                <exclude>**/features/swfobject/swfobject.js</exclude>
+                <exclude>**/features/swfobject/swfobject.opt.js</exclude>
+                <exclude>etc/svn-ignores</exclude>
+                <exclude>etc/svn-props</exclude>
+                <exclude>etc/eclipse/shindig.importorder</exclude>
+                <exclude>php/src/common/JsMin.php</exclude>
+                <exclude>php/test/misc/rewriter*.css</exclude>
+                <exclude>php/test/misc/rewriter*.js</exclude>
+                <exclude>php/test/misc/*.html</exclude>
+                <exclude>php/test/misc/*.xml</exclude>
+                <exclude>BUILD-JAVA</exclude>
+                <exclude>COMMITTERS</exclude>
+                <exclude>**/MANIFEST.MF</exclude>
+                <exclude>**/src/test/resources/**/*.html</exclude>
+                <exclude>**/src/test/resources/**/*.css</exclude>
+                <exclude>**/src/test/resources/**/*.json</exclude>
+                <exclude>**/src/test/resources/**/*.xml</exclude>
+                <exclude>**/create.sql</exclude>
+                <exclude>**/drop.sql</exclude>
+                <exclude>**/derby.log</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+
           <!-- Mojo -->
           <!--plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -644,19 +686,6 @@
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>jdepend-maven-plugin</artifactId>
             <version>2.0-beta-2</version>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>rat-maven-plugin</artifactId>
-            <version>1.0-alpha-3</version>
-            <configuration>
-              <includes>
-                <include>**/*.java</include>
-              </includes>
-              <excludes>
-                <exclude>**/jsunit/**/*</exclude>
-              </excludes>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -732,6 +761,18 @@
                 <goals>
                   <goal>jar</goal>
                   <goal>test-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.rat</groupId>
+            <artifactId>apache-rat-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
                 </goals>
               </execution>
             </executions>
@@ -963,27 +1004,6 @@
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
-          <artifactId>rat-maven-plugin</artifactId>
-          <version>1.0-alpha-3</version>
-          <executions>
-            <execution>
-              <phase>verify</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <includes>
-              <include>**/*.java</include>
-            </includes>
-            <excludes>
-              <exclude>**/jsunit/**/*</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
           <artifactId>taglist-maven-plugin</artifactId>
           <version>2.4</version>
         </plugin>
@@ -1015,6 +1035,42 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>0.6</version>
+          <configuration>
+            <excludeSubProjects>false</excludeSubProjects>
+            <excludes>
+              <exclude>**/*.iml</exclude>
+              <exclude>.gitignore</exclude>
+              <exclude>**/.git/**/*</exclude>
+              <exclude>**/README*</exclude>
+              <exclude>**/target/**</exclude>
+              <exclude>**/php/external/**</exclude>
+              <exclude>**/features/swfobject/swfobject.js</exclude>
+              <exclude>**/features/swfobject/swfobject.opt.js</exclude>
+              <exclude>etc/svn-ignores</exclude>
+              <exclude>etc/svn-props</exclude>
+              <exclude>etc/eclipse/shindig.importorder</exclude>
+              <exclude>php/src/common/JsMin.php</exclude>
+              <exclude>php/test/misc/rewriter*.css</exclude>
+              <exclude>php/test/misc/rewriter*.js</exclude>
+              <exclude>php/test/misc/*.html</exclude>
+              <exclude>php/test/misc/*.xml</exclude>
+              <exclude>BUILD-JAVA</exclude>
+              <exclude>COMMITTERS</exclude>
+              <exclude>**/MANIFEST.MF</exclude>
+              <exclude>**/src/test/resources/**/*.html</exclude>
+              <exclude>**/src/test/resources/**/*.css</exclude>
+              <exclude>**/src/test/resources/**/*.json</exclude>
+              <exclude>**/src/test/resources/**/*.xml</exclude>
+              <exclude>**/create.sql</exclude>
+              <exclude>**/drop.sql</exclude>
+              <exclude>**/derby.log</exclude>
+            </excludes>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1085,10 +1141,9 @@
         <artifactId>maven-site-plugin</artifactId>
       </plugin>
 
-      <!-- Mojo -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
       </plugin>
 
       <!-- Misc -->
