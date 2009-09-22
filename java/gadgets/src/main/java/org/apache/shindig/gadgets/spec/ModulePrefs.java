@@ -17,24 +17,21 @@
  */
 package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import java.util.*;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Represents the ModulePrefs element of a gadget spec.
@@ -87,40 +84,33 @@ public class ModulePrefs {
       throw new SpecParserException("ModulePrefs@title is required.");
     }
 
-    categories = Arrays.asList(
-        getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
+    categories = ImmutableList.of(getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
 
-    // Child elements
-    PreloadVisitor preloadVisitor = new PreloadVisitor();
-    FeatureVisitor featureVisitor = new FeatureVisitor();
-    OAuthVisitor oauthVisitor = new OAuthVisitor();
-    IconVisitor iconVisitor = new IconVisitor();
-    LocaleVisitor localeVisitor = new LocaleVisitor();
-    LinkVisitor linkVisitor = new LinkVisitor();
-
-    Map<String, ElementVisitor> visitors = new ImmutableMap.Builder<String,ElementVisitor>()
-        .put("Preload", preloadVisitor)
-        .put("Optional", featureVisitor)
-        .put("Require", featureVisitor)
-        .put("OAuth", oauthVisitor)
-        .put("Icon", iconVisitor)
-        .put("Locale", localeVisitor)
-        .put("Link", linkVisitor)
-        .build();
+    // Eventually use a list of classes
+    Set<ElementVisitor> visitors = ImmutableSet.of(
+        new FeatureVisitor(),
+        new PreloadVisitor(),
+        new OAuthVisitor(),
+        new IconVisitor(),
+        new LocaleVisitor(),
+        new LinkVisitor(),
+        new ExtraElementsVisitor() // keep this last since it accepts any tag
+    );
 
     walk(element, visitors);
 
-    preloads = Collections.unmodifiableList(preloadVisitor.preloaded);
-    features = Collections.unmodifiableMap(featureVisitor.features);
-    icons = Collections.unmodifiableList(iconVisitor.icons);
-    locales = Collections.unmodifiableMap(localeVisitor.localeMap);
-    links = Collections.unmodifiableMap(linkVisitor.linkMap);
-    oauth = oauthVisitor.oauthSpec;
+    // Tell the visitors to apply their knowledge
+    for (ElementVisitor ev : visitors) {
+      ev.apply(this);
+    }
+
     needsUserPrefSubstitution = prefsNeedsUserPrefSubstitution(this);
   }
 
   /**
    * Produces a new, substituted ModulePrefs
+   * @param prefs An existing ModulePrefs instance
+   * @param substituter The substituter to apply
    */
   private ModulePrefs(ModulePrefs prefs, Substitutions substituter) {
     base = prefs.base;
@@ -153,6 +143,8 @@ public class ModulePrefs {
       String substituted = substituter.substituteString(attr.getValue());
       attributes.put(attr.getKey(), substituted);
     }
+
+    this.extraElements = ImmutableMultimap.copyOf(prefs.extraElements);
     this.attributes = attributes.build();
     this.needsUserPrefSubstitution = prefs.needsUserPrefSubstitution;
   }
@@ -337,6 +329,7 @@ public class ModulePrefs {
   }
 
   /**
+   * @param name the attribute name
    * @return the value of an ModulePrefs attribute by name, or null if the
    *     attribute doesn't exist
    */
@@ -345,6 +338,8 @@ public class ModulePrefs {
   }
 
   /**
+   * @param name the attribute name
+   * @param defaultValue the default Value
    * @return the value of an ModulePrefs attribute by name, or the default
    *     value if the attribute doesn't exist
    */
@@ -358,6 +353,7 @@ public class ModulePrefs {
   }
 
   /**
+   * @param name the attribute name
    * @return the attribute by name converted to an URI, or the empty URI if the
    *    attribute couldn't be converted
    */
@@ -375,6 +371,7 @@ public class ModulePrefs {
   }
 
   /**
+   * @param name the attribute name
    * @return the attribute by name converted to a boolean (false if the
    *     attribute doesn't exist)
    */
@@ -384,7 +381,8 @@ public class ModulePrefs {
   }
 
   /**
-   * @return the attribute by name converted to an interger, or 0 if the
+   * @param name the attribute name
+   * @return the attribute by name converted to an integer, or 0 if the
    *     attribute doesn't exist or is not a valid number.
    */
   public int getIntAttribute(String name) {
@@ -400,68 +398,78 @@ public class ModulePrefs {
     }
   }
 
+
+  private final List<String> categories;
+  private Map<String, Feature> features;
+  private List<Preload> preloads;
+  private List<Icon> icons;
+  private Map<Locale, LocaleSpec> locales;
+  private Map<String, LinkSpec> links;
+  private OAuthSpec oauth;
+  private Multimap<String,Node> extraElements;
+
   /**
+   * @return Returns a list of flattened attributes for:
    * ModuleSpec@category
    * ModuleSpec@category2
-   * These fields are flattened into a single list.
    */
-  private final List<String> categories;
   public List<String> getCategories() {
     return categories;
   }
 
   /**
-   * ModuleSpec/Require
-   * ModuleSpec/Optional
+   * @return a map of ModuleSpec/Require and ModuleSpec/Optional elements to Feature
    */
-  private final Map<String, Feature> features;
   public Map<String, Feature> getFeatures() {
     return features;
   }
 
   /**
-   * ModuleSpec/Preload
+   * @return a list of Preloads from the ModuleSpec/Preload element
    */
-  private final List<Preload> preloads;
   public List<Preload> getPreloads() {
     return preloads;
   }
 
   /**
-   * ModuleSpec/Icon
+   * @return a list of Icons from the ModuleSpec/Icon element
    */
-  private final List<Icon> icons;
   public List<Icon> getIcons() {
     return icons;
   }
 
   /**
-   * ModuleSpec/Locale
+   * @return a map of Locales to LocalSpec from the ModuleSpec/Locale element
    */
-  private final Map<Locale, LocaleSpec> locales;
   public Map<Locale, LocaleSpec> getLocales() {
     return locales;
   }
 
   /**
-   * ModuleSpec/Link
+   * @return a map of Link names to LinkSpec from the ModuleSpec/Link element
    */
-  private final Map<String, LinkSpec> links;
   public Map<String, LinkSpec> getLinks() {
     return links;
   }
 
   /**
-   * ModuleSpec/OAuthSpec
+   * @return an OAuthSpec built from the ModuleSpec/OAuthSpec element
    */
-  private final OAuthSpec oauth;
   public OAuthSpec getOAuthSpec() {
     return oauth;
   }
 
   /**
-   * Not part of the spec. Indicates whether UserPref-substitutable
-   * fields in this prefs require __UP_ substitution.
+   * @return a Multimap of tagnames to child elements of the ModuleSpec element
+   */
+  public Multimap<String,Node> getExtraElements() {
+    return extraElements;
+  }
+
+  /**
+   * Note: not part of the spec.
+   *
+   * @return true when UserPref-substitutable fields in this prefs require __UP_ substitution.
    */
   public boolean needsUserPrefSubstitution() {
     return needsUserPrefSubstitution;
@@ -481,7 +489,8 @@ public class ModulePrefs {
    * substituter. See comments on individual fields to see what actually
    * has substitutions performed.
    *
-   * @param substituter
+   * @param substituter the substituter to execute
+   * @return a substituted ModulePrefs
    */
   public ModulePrefs substitute(Substitutions substituter) {
     return new ModulePrefs(this, substituter);
@@ -490,17 +499,23 @@ public class ModulePrefs {
 
   /**
    * Walks child nodes of the given node.
-   * @param element
-   * @param visitors Map of tag names to visitors for that tag.
+   * @param element root node to be applied
+   * @param visitors Set of visitors to apply to children of element.
+   * @throws SpecParserException when encountering bad input
    */
-  private static void walk(Element element, Map<String, ElementVisitor> visitors)
+  private static void walk(Element element, Set<ElementVisitor> visitors)
       throws SpecParserException {
     NodeList children = element.getChildNodes();
     for (int i = 0, j = children.getLength(); i < j; ++i) {
       Node child = children.item(i);
-      ElementVisitor visitor = visitors.get(child.getNodeName());
-      if (visitor != null) {
-        visitor.visit((Element)child);
+      String tagName = child.getNodeName();
+
+      if (!(child instanceof Element)) continue;
+
+      // Try our visitors in order until we find a match
+      for (ElementVisitor ev : visitors) {
+        if (ev.visit(tagName, (Element)child))
+          break;
       }
     }
   }
@@ -527,6 +542,22 @@ public class ModulePrefs {
     if (oauth != null) {
       buf.append(oauth).append('\n');
     }
+    
+    if (extraElements != null) {
+      for (Node node : extraElements.values()) {
+        Source source = new DOMSource(node);
+        StringWriter sw = new StringWriter();
+        Result result = new StreamResult(sw);
+        try {
+          Transformer xformer = TransformerFactory.newInstance().newTransformer();
+          xformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+          xformer.transform(source, result);
+        } catch (TransformerConfigurationException e) {
+        } catch (TransformerException e) {
+        }
+        buf.append(sw.toString());
+      }
+    }
     buf.append("</ModulePrefs>");
     return buf.toString();
   }
@@ -546,8 +577,27 @@ public class ModulePrefs {
            prefs.getTitleUrl().toString().contains(UP_SUBST_PREFIX);
   }
 
+  /**
+   * Interface used for parsing specific chunks of the gadget spec
+   */
   interface ElementVisitor {
-    void visit(Element element) throws SpecParserException;
+    /**
+     * Called on each node that matches
+     *
+     * @param tag the name of the tag being parsed
+     * @param element the element to parse
+     * @return true if we handled the tag, false if not
+     * @throws SpecParserException when parsing issues are present
+     */
+    boolean visit(String tag, Element element) throws SpecParserException;
+
+    /**
+     * Called when all elements have been processed.  Any data that is set on the ModulePrefs instance should be
+     * Immutable
+     *
+     * @param moduleprefs The moduleprefs object to mutate
+     */
+    void apply(ModulePrefs moduleprefs);
   }
 
   /**
@@ -556,12 +606,16 @@ public class ModulePrefs {
   private class PreloadVisitor implements ElementVisitor {
     private final List<Preload> preloaded = Lists.newLinkedList();
 
-    protected PreloadVisitor() {
-    }
+    public boolean visit(String tag,Element element) throws SpecParserException {
+      if (!"Preload".equals(tag)) return false;
 
-    public void visit(Element element) throws SpecParserException {
       Preload preload = new Preload(element, base);
       preloaded.add(preload);
+      return true;
+    }
+
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.preloads = ImmutableList.copyOf(preloaded);
     }
   }
 
@@ -569,18 +623,22 @@ public class ModulePrefs {
    * Process ModulePrefs/OAuth
    */
   private class OAuthVisitor implements ElementVisitor {
-    private OAuthSpec oauthSpec;
+    private OAuthSpec oauthSpec = null;
 
-    public OAuthVisitor() {
-      this.oauthSpec = null;
-    }
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      if (!"OAuth".equals(tag)) return false;
 
-    public void visit(Element element) throws SpecParserException {
       if (oauthSpec != null) {
         throw new SpecParserException("ModulePrefs/OAuth may only occur once.");
       }
       oauthSpec = new OAuthSpec(element, base);
+      return true;
     }
+
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.oauth = oauthSpec;
+    }
+
   }
 
   /**
@@ -589,9 +647,18 @@ public class ModulePrefs {
   private static class FeatureVisitor implements ElementVisitor {
     private final Map<String, Feature> features = Maps.newHashMap();
 
-    public void visit (Element element) throws SpecParserException {
+    private static final Set<String> tags = ImmutableSet.of("Require", "Optional");
+    public Set<String> tags() { return tags; }
+
+    public boolean visit (String tag, Element element) throws SpecParserException {
+      if (!"Require".equals(tag) &&  !"Optional".equals(tag)) return false;
+
       Feature feature = new Feature(element);
       features.put(feature.getName(), feature);
+      return true;
+    }
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.features = ImmutableMap.copyOf(features);
     }
   }
 
@@ -601,8 +668,14 @@ public class ModulePrefs {
   private static class IconVisitor implements ElementVisitor {
     private final List<Icon> icons = Lists.newLinkedList();
 
-    public void visit(Element element) throws SpecParserException {
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      if (!"Icon".equals(tag)) return false;
+
       icons.add(new Icon(element));
+      return true;
+    }
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.icons = ImmutableList.copyOf(icons);
     }
   }
 
@@ -612,11 +685,15 @@ public class ModulePrefs {
   private class LocaleVisitor implements ElementVisitor {
     private final Map<Locale, LocaleSpec> localeMap = Maps.newHashMap();
 
-    public void visit(Element element) throws SpecParserException {
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      if (!"Locale".equals(tag)) return false;
       LocaleSpec locale = new LocaleSpec(element, base);
       localeMap.put(new Locale(locale.getLanguage(), locale.getCountry()), locale);
+      return true;
     }
-
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.locales = ImmutableMap.copyOf(localeMap);
+    }
   }
 
   /**
@@ -625,9 +702,27 @@ public class ModulePrefs {
   private class LinkVisitor implements ElementVisitor {
     private final Map<String, LinkSpec> linkMap = Maps.newHashMap();
 
-    public void visit(Element element) throws SpecParserException {
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      if (!"Link".equals(tag)) return false;
       LinkSpec link = new LinkSpec(element, base);
       linkMap.put(link.getRel(), link);
+      return true;
+    }
+
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.links = ImmutableMap.copyOf(linkMap);
+    }
+  }
+
+  private static class ExtraElementsVisitor implements ElementVisitor {
+    private Multimap<String,Node> elements = ArrayListMultimap.create();
+
+    public boolean visit(String tag, Element element) throws SpecParserException {
+      elements.put(tag, element.cloneNode(true));
+      return true;
+    }
+    public void apply(ModulePrefs moduleprefs) {
+      moduleprefs.extraElements = ImmutableMultimap.copyOf(elements);
     }
   }
 }

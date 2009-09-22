@@ -29,8 +29,11 @@ import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import org.junit.Test;
+import org.w3c.dom.Node;
 
 import java.util.Locale;
+
+import com.google.common.collect.Multimap;
 
 public class ModulePrefsTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
@@ -73,6 +76,7 @@ public class ModulePrefsTest {
         "          param_location='auth-header' />" +
         "    </Service>" +
         "  </OAuth>" +
+        "  <NavigationItem title=\"moo\"><AppParameter key=\"test\" value=\"1\"/></NavigationItem>" +
         "</ModulePrefs>";
 
   private void doAsserts(ModulePrefs prefs) {
@@ -118,6 +122,11 @@ public class ModulePrefsTest {
     assertEquals(OAuthService.Method.GET, oauth.getAccessUrl().method);
     assertEquals(OAuthService.Location.HEADER, oauth.getAccessUrl().location);
     assertEquals(Uri.parse("http://www.example.com/authorize"), oauth.getAuthorizationUrl());
+
+    Multimap<String, Node> extra = prefs.getExtraElements();
+
+    assertTrue(extra.containsKey("NavigationItem"));
+    assertEquals(extra.get("NavigationItem").iterator().next().getChildNodes().getLength(), 1);
   }
 
   @Test
