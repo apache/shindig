@@ -21,6 +21,8 @@ import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.AddressImpl;
 
 import com.google.inject.ImplementedBy;
+import com.google.common.collect.Maps;
+import com.google.common.base.Functions;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -62,13 +64,8 @@ public interface Address {
     /** the field name for primary. */
     PRIMARY("primary");
 
-    private static final Map<String, Field> lookup = new HashMap<String, Field>();
-
-    static {
-      for (Field field : EnumSet.allOf(Field.class)) {
-        lookup.put(field.toString(), field);
-      }
-    }
+    private static final Map<String, Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+        Functions.toStringFunction());
 
     /**
      * The json field that the instance represents.
