@@ -111,15 +111,18 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
     }
     if (ver >= swfVer) {
       // Set default size
-      if (!opt_params.width) {
+      if (opt_params.width === void 0) {
         opt_params.width = '100%';
       }
-      if (!opt_params.height) {
+      if (opt_params.height === void 0) {
         opt_params.height = '100%';
       }
       // Set the default "base" attribute
       if (typeof opt_params.base !== 'string') {
-        opt_params.base = swfUrl.match(/^[^?#]+\//)[0];
+        var a = document.createElement('a');
+        a.href = swfUrl;
+        // Get the part up to the last slash
+        opt_params.base = a.href.match(/^(.*\/)[^/]*$/)[1];
       }
       // Set wmode to "opaque" if it's not defined. The default value
       // "window" is undesirable because browsers will render Flash
@@ -133,21 +136,20 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
           opt_params.id = newId;
         }
       }
-      // Prepare html snippet
-      var html;
+      // Prepare flash object
+      var flashObj;
       if (navigator.plugins && navigator.mimeTypes &&
           navigator.mimeTypes.length) {
         // Use <embed> tag for Netscape and Mozilla browsers
         opt_params.type = 'application/x-shockwave-flash';
         opt_params.src = swfUrl;
 
-        html = '<embed';
+        flashObj = document.createElement('embed');
         for (var prop in opt_params) {
-          if (!/^swf_/.test(prop)) {
-            html += ' ' + prop + '="' + opt_params[prop] + '"';
+          if (!/^swf_/.test(prop) && !/___$/.test(prop)) {
+            flashObj.setAttribute(prop, opt_params[prop]);
           }
         }
-        html += ' /></embed>';
       } else {
         // Use <object> tag for IE
         opt_params.movie = swfUrl;
@@ -160,21 +162,27 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
           attr.id = opt_params.id;
         }
 
-        html = '<object';
+        flashObj = document.createElement('object');
+        flashObj.setAttribute('data', swfUrl);
         for (var attrProp in attr) {
-          html += ' ' + attrProp + '="' + attr[attrProp] + '"';
-        }
-        html += '>';
-        for (var paramsProp in opt_params) {
-          if (!/^swf_/.test(paramsProp) && !attr[paramsProp]) {
-            html += '<param name="' + paramsProp +
-              '" value="' + opt_params[paramsProp] + '" />';
+          if (!/___$/.test(attrProp)) {
+            flashObj.setAttribute(attrProp, attr[attrProp]);
           }
         }
-        html += '</object>';
+        for (var paramsProp in opt_params) {
+          var param = document.createElement('param');
+          if (!/^swf_/.test(paramsProp) && 
+              !attr[paramsProp] && 
+              !/___$/.test(paramsProp)) {
+            param.setAttribute('name', paramsProp);
+            param.setAttribute('value', opt_params[paramsProp]);
+            flashObj.appendChild(param);
+          }
+        }
       }
-      // Inject html
-      swfContainer.innerHTML = html;
+      // Inject flash object
+      swfContainer.innerHTML = '';
+      swfContainer.appendChild(flashObj);
       return true;
     }
   }
