@@ -20,6 +20,7 @@ package org.apache.shindig.protocol.conversion.xstream;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
 import com.google.inject.Injector;
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
@@ -42,7 +43,7 @@ public class GuiceBeanProvider {
 
   protected static final Object[] NO_PARAMS = new Object[0];
   private final Comparator<String> propertyNameComparator;
-  private final transient Map<Class<?>, Map<String, PropertyDescriptor>> propertyNameCache = new WeakHashMap<Class<?>, Map<String, PropertyDescriptor>>();
+  private final transient Map<Class<?>, Map<String, PropertyDescriptor>> propertyNameCache = new MapMaker().weakKeys().makeMap();
   private Injector injector;
 
   public GuiceBeanProvider(Injector injector) {
