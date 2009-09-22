@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,12 +60,14 @@ public class SampleContainerHandler {
    * Handles /samplecontainer/setstate and /samplecontainer/setevilness/{doevil}. TODO(doll): These
    * urls aren't very resty. Consider changing the samplecontainer.html calls post.
    */
-  @Operation(httpMethods = "POST")
+  @Operation(httpMethods = "POST", bodyParam = "data")
   public Future<?> create(RequestItem request) throws ProtocolException {
     String type = request.getParameter("type");
     if (type.equals("setstate")) {
       try {
-        String stateFile = request.getParameter("fileurl");
+        @SuppressWarnings("unchecked")
+        Map<String, String> bodyparams = request.getTypedParameter("data", Map.class);
+        String stateFile = bodyparams.get("fileurl");
         service.setDb(new JSONObject(fetchStateDocument(stateFile)));
       } catch (JSONException e) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,

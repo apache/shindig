@@ -115,7 +115,7 @@ shindig.samplecontainer = {};
 
   function reloadStateFile(opt_callback) {
     sendRequestToServer('setstate', 'POST',
-        gadgets.io.encodeValues({"fileurl" : stateFileUrl}),
+        gadgets.json.stringify({"fileurl" : stateFileUrl}),
         opt_callback);
   };
 
@@ -139,7 +139,8 @@ shindig.samplecontainer = {};
             opt_callback(data);
         }
       },
-      makeRequestParams
+      makeRequestParams,
+      "application/javascript"
     );
   };
 
