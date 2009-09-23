@@ -76,32 +76,32 @@ class RestRequestItem extends RequestItem {
     $this->postData = $postData;
     $service = $this->getServiceFromPath($this->url);
     switch ($service) {
-      case DataServiceServlet::$PEOPLE_ROUTE:
+      case ApiServlet::$PEOPLE_ROUTE:
         // in our current implementation this will throw a SocialSPIException since we don't support 
         // adding people/friendships in our API yet, but this might be added some day
         $data = $this->inputConverter->convertPeople($this->postData);
         break;
-      case DataServiceServlet::$ACTIVITY_ROUTE:
+      case ApiServlet::$ACTIVITY_ROUTE:
         $data = $this->inputConverter->convertActivities($this->postData);
         $this->params['activity'] = $data;
         break;
-      case DataServiceServlet::$APPDATA_ROUTE:
+      case ApiServlet::$APPDATA_ROUTE:
         $data = $this->inputConverter->convertAppData($this->postData);
         $this->params['data'] = $data;
         break;
-      case DataServiceServlet::$MESSAGE_ROUTE:
+      case ApiServlet::$MESSAGE_ROUTE:
         $data = $this->inputConverter->convertMessages($this->postData);
         // 'entity' may be a message or a message collection.
         $this->params['entity'] = $data;
         break;
-      case DataServiceServlet::$INVALIDATE_ROUTE:
+      case ApiServlet::$INVALIDATE_ROUTE:
         $this->params = json_decode($this->postData, true);
         break;
-      case DataServiceServlet::$ALBUM_ROUTE:
+      case ApiServlet::$ALBUM_ROUTE:
         $data = $this->inputConverter->convertAlbums($this->postData);
         $this->params['album'] = $data;
         break;
-      case DataServiceServlet::$MEDIA_ITEM_ROUTE:
+      case ApiServlet::$MEDIA_ITEM_ROUTE:
         $data = $this->inputConverter->convertMediaItems($this->postData);
         if (isset($data)) {
           $this->params['mediaItem'] = $data;

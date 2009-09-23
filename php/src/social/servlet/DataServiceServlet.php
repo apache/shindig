@@ -25,16 +25,6 @@ class DataServiceServlet extends ApiServlet {
   protected static $ATOM_FORMAT = "atom";
   protected static $XML_FORMAT = "xml";
 
-  public static $PEOPLE_ROUTE = "people";
-  public static $ACTIVITY_ROUTE = "activities";
-  public static $APPDATA_ROUTE = "appdata";
-  public static $MESSAGE_ROUTE = "messages";
-  public static $INVALIDATE_ROUTE = "cache";
-  public static $SYSTEM_ROUTE = "system";
-  public static $ALBUM_ROUTE = "albums";
-  public static $MEDIA_ITEM_ROUTE = "mediaitems";
-
-
   public function doGet() {
     $this->doPost();
   }
