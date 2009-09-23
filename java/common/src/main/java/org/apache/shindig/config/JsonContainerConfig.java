@@ -204,8 +204,9 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    * @throws ContainerConfigException
    */
   private void loadFiles(File[] files, JSONObject all) throws ContainerConfigException {
-    try {
-      for (File file : files) {
+    for (File file : files) {
+      try {
+        if (file == null) continue;
         LOG.info("Reading container config: " + file.getName());
         if (file.isDirectory()) {
           loadFiles(file.listFiles(), all);
@@ -220,9 +221,9 @@ public class JsonContainerConfig extends AbstractContainerConfig {
           if (LOG.isLoggable(Level.FINEST))
             LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
+      } catch (IOException e) {
+        throw new ContainerConfigException("The file '" + file.getAbsolutePath() + "' has errors", e);
       }
-    } catch (IOException e) {
-      throw new ContainerConfigException(e);
     }
   }
 
@@ -236,6 +237,8 @@ public class JsonContainerConfig extends AbstractContainerConfig {
       for (String entry : files) {
         LOG.info("Reading container config: " + entry);
         String content = ResourceLoader.getContent(entry);
+        if (content == null || content.length() == 0)
+          throw new IOException("The file " + entry + "is empty");
         loadFromString(content, all);
       }
     } catch (IOException e) {
@@ -322,7 +325,8 @@ public class JsonContainerConfig extends AbstractContainerConfig {
         all.put(container, contents);
       }
     } catch (JSONException e) {
-      throw new ContainerConfigException(e);
+System.out.println("Trouble parsing " + json);
+      throw new ContainerConfigException("Trouble parsing " + json, e);
     }
   }
 

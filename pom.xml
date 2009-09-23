@@ -356,7 +356,11 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>java</module>
+        <module>features</module>
+        <module>java/common</module>
+        <module>java/gadgets</module>
+        <module>java/social-api</module>
+        <module>java/server</module>
       </modules>
     </profile>
 
@@ -458,7 +462,12 @@
     <profile>
       <id>reporting</id>
       <modules>
-        <module>java</module>
+        <module>features</module>
+        <module>java/common</module>
+        <module>java/gadgets</module>
+        <module>java/social-api</module>
+        <module>java/server</module>
+        <module>java/samples</module>
       </modules>
       <build>
         <plugins>
@@ -730,10 +739,16 @@
       </reporting>
     </profile>
 
+    <!-- Apache Release Profile -->
+
     <profile>
       <id>apache-release</id>
       <modules>
-        <module>java</module>
+        <module>features</module>
+        <module>java/common</module>
+        <module>java/gadgets</module>
+        <module>java/social-api</module>
+        <module>java/server</module>
         <module>java/samples</module>
         <module>assembly</module>
       </modules>
@@ -813,7 +828,11 @@
         </plugins>
       </build>
       <modules>
-        <module>java</module>
+        <module>features</module>
+        <module>java/common</module>
+        <module>java/gadgets</module>
+        <module>java/social-api</module>
+        <module>java/server</module>
         <module>assembly</module>
       </modules>
     </profile>
