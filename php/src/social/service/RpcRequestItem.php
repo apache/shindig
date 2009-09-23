@@ -38,11 +38,17 @@ class RpcRequestItem extends RequestItem {
   }
 
   public function getService($rpcMethod = null) {
+    $service = null;
     if ($rpcMethod != null) {
-      return substr($rpcMethod, 0, strpos($rpcMethod, '.'));
+      $service = substr($rpcMethod, 0, strpos($rpcMethod, '.'));
     } else {
-      return substr($this->service, 0, strpos($this->service, '.'));
+      $service = substr($this->service, 0, strpos($this->service, '.'));
     }
+    // Accepts both 'mediaItems' and 'mediaitems'.
+    if ($service == 'mediaItems') {
+        $service = 'mediaitems';
+    }
+    return $service;
   }
 
   public function getOperation($rpcMethod = null) {

@@ -48,7 +48,7 @@ abstract class DataRequestHandler {
         throw new SocialSpiException("[$method] not allowed for anonymous users", ResponseError::$BAD_REQUEST);
       } elseif (in_array($method, self::$GET_SYNONYMS)) {
         $parameters = $requestItem->getParameters();
-        if (in_array("@supportedFields", $parameters)) {
+        if (in_array("@supportedFields", $parameters, true)) {
           $response = $this->getSupportedFields($parameters);
         } else {
           $response = $this->handleGet($requestItem);
