@@ -81,7 +81,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     parser = injector.getInstance(SocialMarkupHtmlParser.class);
     featureRegistry = mock(GadgetFeatureRegistry.class);
     handler = new FlashTagHandler(new BeanJsonConverter(injector), featureRegistry,
-        "http://example.org/ns");
+        "http://example.org/ns", "9.0.115");
     result = parser.parseDom("");
 
     EasyMock.expect(gadget.getContext()).andReturn(gadgetContext).anyTimes();

@@ -53,12 +53,12 @@ import java.io.IOException;
  */
 public class FlashTagHandler extends AbstractTagHandler {
 
-  static final String FLASH_MIN_VER = "9.0.115";
   static final String SWFOBJECT = "swfobject";
   static final String TAG_NAME = "Flash";
 
   private final BeanJsonConverter beanConverter;
   private final GadgetFeatureRegistry featureRegistry;
+  private final String flashMinVersion;
 
   /**
    * Used to generate id's for generated tags and functions
@@ -68,10 +68,12 @@ public class FlashTagHandler extends AbstractTagHandler {
 
   @Inject
   public FlashTagHandler(BeanJsonConverter beanConverter, GadgetFeatureRegistry featureRegistry,
-      @Named("shindig.template-rewrite.extension-tag-namespace") String namespace) {
+      @Named("shindig.template-rewrite.extension-tag-namespace") String namespace,
+      @Named("shindig.flash.min-version") String flashMinVersion) {
     super(namespace, TAG_NAME);
     this.beanConverter = beanConverter;
     this.featureRegistry = featureRegistry;
+    this.flashMinVersion = flashMinVersion;
   }
 
   public void process(Node result, Element tag, TemplateProcessor processor) {
@@ -154,7 +156,7 @@ public class FlashTagHandler extends AbstractTagHandler {
       JsonSerializer.appendString(builder, config.width);
       builder.append(",");
       JsonSerializer.appendString(builder, config.height);
-      builder.append(",\"" + FLASH_MIN_VER + "\",");
+      builder.append(",\"" + flashMinVersion + "\",");
       builder.append("null,null,");
       JsonSerializer.appendMap(builder, config.getParams());
       builder.append(",");
