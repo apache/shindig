@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>1.1-BETA3-incubating</version>
+    <version>1.1-BETA4-incubating-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -33,11 +33,11 @@
   <description>Assembles the Java/PHP code base into a deployment package.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA3-incubating/assembly
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/assembly
     </connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA3-incubating/assembly
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/assembly
     </developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/shindig-project-1.1-BETA3-incubating/assembly</url>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/assembly</url>
   </scm>
 
   <build>
