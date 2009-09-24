@@ -39,6 +39,13 @@
             document.appendChild(elDiv);
             assertEquals(document.getElementById('elDiv').innerHTML, "hello world");
             finished();
+          },
+          registerOnLoadHandlerTest: function() {
+            var onLoaded = function () { 
+              // only complete the test successfully if registerOnLoadHandler works
+              finished(); 
+            };
+            gadgets.util.registerOnLoadHandlerTest(onLoaded);
           }
         };
       </script>

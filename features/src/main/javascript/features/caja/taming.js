@@ -38,17 +38,7 @@ var caja___ = (function() {
       return null;
     }
   };
-    
-  // Take a valija function and wrap it in a plain function so uncajoled
-  // code can call it.
-  // TODO(benl): what if we're called from cajita code??? In this case
-  // we want to do callback.CALL__() instead of $v.cf(callback). But how
-  // do we know?
-  function tameCallback($v, callback) {
-    return callback && function tamedCallback() {
-      return $v.cf(callback, Array.slice(arguments, 0));
-    };
-  };
+
   var tamingFunctions = [];
   // Registered a function to be called during taming
   var register = function(tamer) {
@@ -130,6 +120,14 @@ var caja___ = (function() {
 // features such the taming is only included if the feature is.
 // TODO(jasvir): Express taming callbacks more succinctly
 caja___.register(function(imports) {
+    
+  // Take a valija function and wrap it in a plain function so uncajoled
+  // code can call it.
+  function tameCallback($v, callback) {
+    return callback && function tamedCallback() {
+      return $v.cf(callback, Array.slice(arguments, 0));
+    };
+  };
   
   // Warning: multiple taming styles ahead...
   var taming = {
@@ -901,6 +899,33 @@ caja___.register(function(imports) {
     imports.outers.gadgets = gadgets;
   if (window.opensocial)
     imports.outers.opensocial = opensocial; 
+
+  // Temprorary taming for callbacks
+  // TODO(jasvir): Replace with new automatic taming api once its complete
+  if (window.gadgets) {
+    gadgets.util.registerOnLoadHandler
+      = taming.util.registerOnLoadHandler(imports.$v,
+                                          gadgets.util.registerOnLoadHandler);
+    if (gadgets.flash) {
+      gadgets.flash.embedFlash
+        = taming.flash.embedFlash(gadgets.flash.embedFlash);
+    }
+    if (gadgets.views) {
+      gadgets.views.getCurrentView
+        = taming.views.getCurrentView(gadgets.views.getCurrentView);
+    }
+    if (gadgets.MiniMessage) {
+      gadgets.MiniMessage = taming.MiniMessage(imports.$v);
+    }
+    if (gadgets.TabSet) {
+      gadgets.TabSet = taming.TabSet(imports.$v, gadgets.TabSet);
+    }
+  }
+  if (window.opensocial) {
+    opensocial.newDataRequest = taming.newDataRequest(imports.$v,
+                                                      opensocial.newDataRequest);
+  }
+  
   caja___.whitelist(opensocialSchema, imports.outers);
   if (gadgets.MiniMessage)
     ___.ctor(gadgets.MiniMessage, Object, 'MiniMessage');
