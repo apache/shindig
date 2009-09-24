@@ -163,7 +163,7 @@ public class PersonImpl implements Person {
   public Map<String, ? extends Object> getAppData() {
     return this.appData;
   }
-  
+
   public void setAppData(Map<String, ? extends Object> appData) {
     this.appData = appData;
   }
@@ -461,7 +461,7 @@ public class PersonImpl implements Person {
   public void setPoliticalViews(String politicalViews) {
     this.politicalViews = politicalViews;
   }
-  
+
   public String getPreferredUsername() {
     return preferredUsername;
   }
@@ -621,7 +621,7 @@ public class PersonImpl implements Person {
   public void setIsViewer(boolean isViewer) {
     this.isViewer = isViewer;
   }
-  
+
   // Proxied fields
 
   public String getProfileUrl() {

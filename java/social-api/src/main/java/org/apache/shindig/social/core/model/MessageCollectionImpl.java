@@ -32,8 +32,8 @@ public class MessageCollectionImpl implements MessageCollection {
   private Date updated;
   private List<Url> urls;
 
-  public MessageCollectionImpl() {}
-  
+  public MessageCollectionImpl() { }
+
   public String getId() {
     return id;
   }

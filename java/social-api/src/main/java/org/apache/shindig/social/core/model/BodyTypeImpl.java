@@ -22,7 +22,7 @@ import org.apache.shindig.social.opensocial.model.BodyType;
 /**
  * see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType">
- * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType</a>
+ * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType</a>.
  *
  */
 public class BodyTypeImpl implements BodyType {

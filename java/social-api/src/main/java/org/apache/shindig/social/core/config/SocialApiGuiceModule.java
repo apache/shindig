@@ -69,13 +69,13 @@ public class SocialApiGuiceModule extends AbstractModule {
 
     bind(new TypeLiteral<List<AuthenticationHandler>>(){}).toProvider(
         AuthenticationHandlerProvider.class);
-  
+
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(Names.named("org.apache.shindig.social.handlers"))
         .toInstance(getHandlers());
-    
-    bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
+
+    bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60L);
   }
-  
+
   /**
    * Hook to provide a Set of request handlers.  Subclasses may override
    * to add or replace additional handlers.

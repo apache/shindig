@@ -20,9 +20,9 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.Account;
 
 public class AccountImpl implements Account {
-  String domain;
-  String userId;
-  String username;
+  private String domain;
+  private String userId;
+  private String username;
 
   public AccountImpl() { }
 

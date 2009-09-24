@@ -64,6 +64,6 @@ public class MediaItemImpl implements MediaItem {
   public void setUrl(String url) {
     this.url = url;
   }
-  public String getThumbnailUrl() { return this.thumbnailUrl;}
-  public void setThumbnailUrl(String url) { this.thumbnailUrl = url;}
+  public String getThumbnailUrl() { return this.thumbnailUrl; }
+  public void setThumbnailUrl(String url) { this.thumbnailUrl = url; }
 }

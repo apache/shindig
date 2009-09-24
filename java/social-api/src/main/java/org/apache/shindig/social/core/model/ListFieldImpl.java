@@ -20,9 +20,9 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.ListField;
 
 public class ListFieldImpl implements ListField {
-  String type;
-  String value;
-  Boolean primary;
+  private String type;
+  private String value;
+  private Boolean primary;
 
   public ListFieldImpl() { }
 

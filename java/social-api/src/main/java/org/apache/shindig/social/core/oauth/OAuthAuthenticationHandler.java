@@ -48,7 +48,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Handle both 2-legged consumer and full 3-legged OAuth requests
+ * Handle both 2-legged consumer and full 3-legged OAuth requests.
  */
 public class OAuthAuthenticationHandler implements AuthenticationHandler {
 
