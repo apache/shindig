@@ -151,7 +151,7 @@ class TemplateParser {
       // And replace the node with the parsed output
       $ownerDocument = $node->ownerDocument;
       foreach ($ret->childNodes as $childNode) {
-     		$importedNode = $ownerDocument->importNode($childNode, true);
+        $importedNode = $ownerDocument->importNode($childNode, true);
         $importedNode = $node->parentNode->insertBefore($importedNode, $node);
       }
       $node->parentNode->removeChild($node);
@@ -439,7 +439,58 @@ class TemplateParser {
 
       /****** Extension - Tags ******/
 
-      case 'osx:flash':
+      case 'os:flash':
+        // handle expressions
+        $this->parseNodeAttributes($node);
+
+        // read swf config from attributes
+        $swfConfig = array('width' => '100px',
+            'height' => '100px', 'play' => 'immediate');
+        foreach ($node->attributes as $attr) {
+          $swfConfig[$attr->name] = $attr->value;
+        }
+
+        // attach security token in the flash var
+        $st = 'st=' . $_GET['st'];
+        if (array_key_exists('flashvars', $swfConfig)) {
+          $swfConfig['flashvars'] = $swfConfig['flashvars'] . '&' . $st;
+        } else {
+          $swfConfig['flashvars'] = $st;
+        }
+
+        // Restrict the content if sanitization is enabled
+        $sanitizationEnabled = Config::get('sanitize_views');
+        if ($sanitizationEnabled) {
+          $swfConfig['allowscriptaccess'] = 'never';
+          $swfConfig['swliveconnect'] = 'false';
+          $swfConfig['allownetworking'] = 'internal';
+        }
+
+        // Generate unique id for this swf
+        $ALT_CONTENT_PREFIX = 'os_Flash_alt_';
+        $altContentId = uniqid($ALT_CONTENT_PREFIX);
+
+        // Create a div wrapper around the provided alternate content, and add the alternate content to the holder
+        $altHolder = $node->ownerDocument->createElement('div');
+        $altHolder->setAttribute('id', $altContentId);
+        foreach ($node->childNodes as $childNode) {
+          $altHolder->appendChild($childNode);
+        }
+        $node->parentNode->insertBefore($altHolder, $node);
+
+        // Create the call to swfobject in header
+        $scriptCode = SwfConfig::buildSwfObjectCall($swfConfig, $altContentId);
+        $scriptBlock = $node->ownerDocument->createElement('script');
+        $scriptBlock->setAttribute('type', 'text/javascript');
+        $node->parentNode->insertBefore($scriptBlock, $node);
+        if ($swfConfig['play'] != 'immediate') {
+          // Add onclick handler to trigger call to swfobject
+          $scriptCode = "function {$altContentId}()\{{$scriptCode};\}";
+          $altHolder->setAttribute('onclick', "{$altContentId}()");
+        }
+        $scriptCodeNode = $node->ownerDocument->createTextNode($scriptCode);
+        $scriptBlock->appendChild($scriptCodeNode);
+        return $node;
         break;
 
       case 'osx:navigatetoapp':
@@ -469,5 +520,33 @@ class TemplateParser {
       return $expressionResult ? true : false;
     }
     return true;
+  }
+}
+
+class SwfConfig {
+  public static $FLASH_VER = '9.0.115';
+  public static $PARAMS = array('loop', 'menu', 'quality', 'scale', 'salign', 'wmode', 'bgcolor',
+      'swliveconnect', 'flashvars', 'devicefont', 'allowscriptaccess', 'seamlesstabbing',
+      'allowfullscreen', 'allownetworking');
+  public static $ATTRS = array('id', 'name', 'styleclass', 'align');
+
+  public static function buildSwfObjectCall($swfConfig, $altContentId, $flashVars = 'null') {
+    $params = SwfConfig::buildJsObj($swfConfig, SwfConfig::$PARAMS);
+    $attrs = SwfConfig::buildJsObj($swfConfig, SwfConfig::$ATTRS);
+    $flashVersion = SwfConfig::$FLASH_VER;
+    $swfObject = "swfobject.embedSWF(\"{$swfConfig['swf']}\", \"{$altContentId}\", \"{$swfConfig['width']}\", \"{$swfConfig['height']}\", \"{$flashVersion}\", null, {$flashVars}, {$params}, {$attrs});";
+    return $swfObject;
+  }
+
+  private static function buildJsObj($swfConfig, $keymap) {
+    $arr = array();
+    foreach ($swfConfig as $key => $value) {
+      if (in_array($key, $keymap)) {
+        $arr[] = "{$key}:\"{$value}\"";
+      }
+    }
+    $output = implode(",", $arr);
+    $output = '{' . $output . '}';
+    return $output;
   }
 }
