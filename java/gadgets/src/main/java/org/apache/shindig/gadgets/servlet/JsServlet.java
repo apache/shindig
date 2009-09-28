@@ -86,6 +86,7 @@ public class JsServlet extends InjectedServlet {
 
     Collection<GadgetFeature> features = registry.getFeatures(needed);
     StringBuilder jsData = new StringBuilder();
+    boolean isProxyCacheable = true;
     for (GadgetFeature feature : features) {
       for (JsLibrary lib : feature.getJsLibraries(context, container)) {
         if (lib.getType() != JsLibrary.Type.URL) {
@@ -94,6 +95,7 @@ public class JsServlet extends InjectedServlet {
           } else {
             jsData.append(lib.getContent());
           }
+          isProxyCacheable = isProxyCacheable && lib.isProxyCacheable();
           jsData.append(";\n");
         }
       }
@@ -107,10 +109,10 @@ public class JsServlet extends InjectedServlet {
 
     if (req.getParameter("v") != null) {
       // Versioned files get cached indefinitely
-      HttpUtil.setCachingHeaders(resp);
+      HttpUtil.setCachingHeaders(resp, !isProxyCacheable);
     } else {
       // Unversioned files get cached for 1 hour.
-      HttpUtil.setCachingHeaders(resp, 60 * 60);
+      HttpUtil.setCachingHeaders(resp, 60 * 60, !isProxyCacheable);
     }
     resp.setContentType("text/javascript; charset=utf-8");
     byte[] response = jsData.toString().getBytes("UTF-8");

@@ -66,6 +66,13 @@ public class JsLibrary {
   public String getFeature() {
     return feature;
   }
+  
+  /**
+   * Indicates whether this feature is proxy-cacheable.
+   */
+  public boolean isProxyCacheable() {
+    return true;
+  }
 
   private static final Logger logger
       = Logger.getLogger("org.apache.shindig.gadgets");
@@ -124,8 +131,8 @@ public class JsLibrary {
     switch (type) {
       case FILE:
       case RESOURCE:
-        StringBuffer opt = new StringBuffer();
-        StringBuffer dbg = new StringBuffer();
+        StringBuilder opt = new StringBuilder();
+        StringBuilder dbg = new StringBuilder();
         loadOptimizedAndDebugData(content, type, opt, dbg);
         optimizedContent = opt.toString();
         debugContent = dbg.toString();
@@ -150,8 +157,8 @@ public class JsLibrary {
    * Helper method to load debug and optimized content from a path and type.
    * Only supports types FILE and RESOURCE.
    */
-  protected static void loadOptimizedAndDebugData(String content, Type type, StringBuffer opt,
-      StringBuffer dbg) {
+  protected static void loadOptimizedAndDebugData(String content, Type type, StringBuilder opt,
+      StringBuilder dbg) {
     String opt_data = null;
 
     if (content.endsWith(".js")) {

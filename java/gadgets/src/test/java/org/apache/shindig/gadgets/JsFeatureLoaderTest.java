@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 public class JsFeatureLoaderTest extends EasyMockTestCase {
-  private final HttpFetcher fetcher = mock(HttpFetcher.class);
-  private final JsFeatureLoader loader = new JsFeatureLoader(fetcher);
-  private GadgetFeatureRegistry registry;
+  protected final HttpFetcher fetcher = mock(HttpFetcher.class);
+  protected JsFeatureLoader loader = makeJsFeatureLoader();
+  protected GadgetFeatureRegistry registry;
 
   private static final String FEATURE_NAME = "test";
   private static final String ALT_FEATURE_NAME = "test2";
@@ -55,10 +55,29 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
     super.setUp();
     registry = new GadgetFeatureRegistry(null, fetcher, loader);
   }
+  
+  protected JsFeatureLoader makeJsFeatureLoader() {
+    return new JsFeatureLoader(fetcher);
+  }
 
-  private JsLibrary getJsLib(GadgetFeature feature) {
+  protected JsLibrary getJsLib(GadgetFeature feature) {
     return feature.getJsLibraries(
         RenderingContext.GADGET, ContainerConfig.DEFAULT_CONTAINER).get(0);
+  }
+
+  protected File makeFeatureFile(String name, String content) throws Exception {
+    String xml = "<feature>" +
+                 "  <name>" + name + "</name>" +
+                 "  <gadget>" +
+                 "    <script>" + content + "</script>" +
+                 "  </gadget>" +
+                 "</feature>";
+    File file = File.createTempFile(getName(), name + ".xml");
+    file.deleteOnExit();
+    BufferedWriter out = new BufferedWriter(new FileWriter(file));
+    out.write(xml);
+    out.close();
+    return file;
   }
 
   public void testBasicLoading() throws Exception {
@@ -132,21 +151,6 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
     assertEquals(FEATURE_NAME, lib.getFeature());
   }
 
-  private File makeFeatureFile(String name, String content) throws Exception {
-    String xml = "<feature>" +
-                 "  <name>" + name + "</name>" +
-                 "  <gadget>" +
-                 "    <script>" + content + "</script>" +
-                 "  </gadget>" +
-                 "</feature>";
-    File file = File.createTempFile(getName(), name + ".xml");
-    file.deleteOnExit();
-    BufferedWriter out = new BufferedWriter(new FileWriter(file));
-    out.write(xml);
-    out.close();
-    return file;
-  }
-
   public void testMultiplePaths() throws Exception {
     File file1 = makeFeatureFile(FEATURE_NAME, DEF_JS_CONTENT);
     File file2 = makeFeatureFile(ALT_FEATURE_NAME, ALT_JS_CONTENT);
@@ -175,7 +179,7 @@ public class JsFeatureLoaderTest extends EasyMockTestCase {
         loader.loadFeatures(file1.getAbsolutePath() +
                             JsFeatureLoader.FILE_SEPARATOR +
                             file2.getAbsolutePath(), registry);
-    } catch (GadgetException e ) {
+    } catch (GadgetException e) {
         if (e.getCode() != GadgetException.Code.INVALID_PATH) {
             throw e;
         }
