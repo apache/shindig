@@ -27,22 +27,17 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
 
   private NekoSimplifiedHtmlParser simple = new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
-  private NekoHtmlParser full = new NekoHtmlParser(
-        new ParseModule.DOMImplementationProvider().get());
 
   public void testDocWithDoctype() throws Exception {
     // Note that doctype is properly retained
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-expected.html");
-    String expected_full = removeDoctypeForXml4j(expected);
-    parseAndCompareBalanced(content, expected_full, full);
     parseAndCompareBalanced(content, expected, simple);
   }
 
   public void testDocNoDoctype() throws Exception {
     // Note that no doctype is properly created when none specified
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fulldocnodoctype.html");
-    assertNull(full.parseDom(content).getDoctype());
     assertNull(simple.parseDom(content).getDoctype());
   }
 
@@ -50,7 +45,13 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     // Note that no doctype is injected for fragments
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment-expected.html");
-    parseAndCompareBalanced(content, expected, full);
+    parseAndCompareBalanced(content, expected, simple);
+  }
+
+  public void testNotADocument2() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment2.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment2-expected.html");
     parseAndCompareBalanced(content, expected, simple);
   }
 
@@ -58,7 +59,13 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     // Note that no doctype is injected for fragments
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-headnobody.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-headnobody-expected.html");
-    parseAndCompareBalanced(content, expected, full);
+    parseAndCompareBalanced(content, expected, simple);
+  }
+
+  public void testAmpersand() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands-expected.html");
     parseAndCompareBalanced(content, expected, simple);
   }
 

@@ -18,43 +18,42 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
-
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.PropertiesModule;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetFeature;
+import org.apache.shindig.gadgets.GadgetFeatureRegistry;
+import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
-import org.apache.shindig.gadgets.templates.tags.FlashTagHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.easymock.EasyMock;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.DocumentFragment;
-import org.json.JSONObject;
-import org.easymock.EasyMock;
 
 import javax.el.ELResolver;
-import java.util.Collections;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -69,7 +68,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   private GadgetContext gadgetContext = mock(GadgetContext.class);
   private Gadget gadget = mock(Gadget.class);
 
-  private SocialMarkupHtmlParser parser;
+  private NekoSimplifiedHtmlParser parser;
   protected Document result;
 
   @Before
@@ -78,7 +77,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     processor.context = new TemplateContext(gadget, Collections.<String, JSONObject>emptyMap());
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     documentProvider = injector.getInstance(DOMImplementation.class);
-    parser = injector.getInstance(SocialMarkupHtmlParser.class);
+    parser = injector.getInstance(NekoSimplifiedHtmlParser.class);
     featureRegistry = mock(GadgetFeatureRegistry.class);
     handler = new FlashTagHandler(new BeanJsonConverter(injector), featureRegistry,
         "http://example.org/ns", "9.0.115");

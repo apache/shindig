@@ -17,16 +17,18 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.inject.ImplementedBy;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
@@ -44,6 +46,18 @@ public abstract class GadgetHtmlParser {
   private Cache<String, Document> documentCache;
   private Cache<String, DocumentFragment> fragmentCache;
   private Provider<HtmlSerializer> serializerProvider = new DefaultSerializerProvider();
+
+  /**
+   * Allowed tag names for OpenSocial Data and template blocks.
+   */
+  public static final String OSML_DATA_TAG = "OSData";
+  public static final String OSML_TEMPLATE_TAG = "OSTemplate";
+
+  /**
+   * Bi-map of OpenSocial tags to their script type attribute values.
+   */
+  public static final BiMap<String, String> SCRIPT_TYPE_TO_OSML_TAG = ImmutableBiMap.of(
+      "text/os-data", OSML_DATA_TAG, "text/os-template", OSML_TEMPLATE_TAG);
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {

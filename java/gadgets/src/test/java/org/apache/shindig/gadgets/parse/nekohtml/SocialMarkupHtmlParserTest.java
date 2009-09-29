@@ -18,14 +18,16 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.spec.PipelinedData;
+
+import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMException;
@@ -33,25 +35,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.NodeIterator;
 
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 /**
  * Test for the social markup parser.
  */
 public class SocialMarkupHtmlParserTest {
-  private SocialMarkupHtmlParser parser;
+  private GadgetHtmlParser parser;
   private Document document;
 
   @Before
   public void setUp() throws Exception {
-    parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());
-    
+    parser = new NekoSimplifiedHtmlParser(new ParseModule.DOMImplementationProvider().get());
+
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/parse/nekohtml/test-socialmarkup.html"));
     document = parser.parseDom(content);
@@ -60,7 +57,7 @@ public class SocialMarkupHtmlParserTest {
   @Test
   public void testSocialData() {
     // Verify elements are preserved in social data
-    List<Element> scripts = getScripts("text/os-data");
+    List<Element> scripts = getTags(GadgetHtmlParser.OSML_DATA_TAG);
     assertEquals(1, scripts.size());
     
     NodeList viewerRequests = scripts.get(0).getElementsByTagNameNS(
@@ -68,13 +65,13 @@ public class SocialMarkupHtmlParserTest {
     assertEquals(1, viewerRequests.getLength());
     Element viewerRequest = (Element) viewerRequests.item(0);
     assertEquals("viewer", viewerRequest.getAttribute("key"));
-    assertNull(viewerRequest.getFirstChild());
+    assertEmpty(viewerRequest);
   }
 
   @Test
   public void testSocialTemplate() {
     // Verify elements and text content are preserved in social templates
-    List<Element> scripts = getScripts("text/os-template");
+    List<Element> scripts = getTags(GadgetHtmlParser.OSML_TEMPLATE_TAG);
     assertEquals(1, scripts.size());
     
     NodeList boldElements = scripts.get(0).getElementsByTagName("b");
@@ -97,7 +94,7 @@ public class SocialMarkupHtmlParserTest {
   @Test
   public void testJavascript() {
     // Verify text content is unmodified in javascript blocks
-    List<Element> scripts = getScripts("text/javascript");
+    List<Element> scripts = getTags("script");
     assertEquals(1, scripts.size());
     
     NodeList boldElements = scripts.get(0).getElementsByTagName("b");
@@ -141,24 +138,19 @@ public class SocialMarkupHtmlParserTest {
     }
   }
 
-  private List<Element> getScripts(final String type) {
-    NodeIterator nodeIterator = ((DocumentTraversal) document)
-    .createNodeIterator(document, NodeFilter.SHOW_ELEMENT,
-        new NodeFilter() {
-          public short acceptNode(Node n) {
-            if ("script".equalsIgnoreCase(n.getNodeName()) &&
-                type.equals(((Element) n).getAttribute("type"))) {
-              return NodeFilter.FILTER_ACCEPT;
-            }
-            return NodeFilter.FILTER_REJECT;
-          }
-        }, false);
-        
-    List<Element> scripts = Lists.newArrayList();
-    for (Node n = nodeIterator.nextNode(); n != null; n = nodeIterator.nextNode()) {
-      scripts.add((Element) n);
+  private void assertEmpty(Node n) {
+    if (n.getChildNodes().getLength() != 0) {
+      assertTrue(StringUtils.isEmpty(n.getTextContent()) ||
+          StringUtils.isWhitespace(n.getTextContent()));
     }
-    
-    return scripts;
+  }
+
+  private List<Element> getTags(String tagName) {
+    NodeList list = document.getElementsByTagName(tagName);
+    List<Element> elements = Lists.newArrayListWithExpectedSize(list.getLength());
+    for (int i = 0; i < list.getLength(); i++) {
+      elements.add((Element) list.item(i));
+    }
+    return elements;
   }
 }

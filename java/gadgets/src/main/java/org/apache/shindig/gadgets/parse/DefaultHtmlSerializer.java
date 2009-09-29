@@ -70,11 +70,13 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
         break;
       }
       case Node.ELEMENT_NODE: {
-        Element elem = (Element)n;
+        Element elem = (Element) n;
+        NodeList children = elem.getChildNodes();
+        elem = substituteElement(elem);
+
         HTMLElements.Element htmlElement =
             HTMLElements.getElement(elem.getNodeName());
-
-        NodeList children = elem.getChildNodes();
+        
         printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
 
         // Special HTML elements - <script> in particular - will typically
@@ -98,6 +100,20 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
         break;
       }
     }
+  }
+
+  /**
+   * Convert OSData and OSTemplate tags to script tags with the appropriate
+   * type attribute on output
+   */
+  private Element substituteElement(Element elem) {
+    String scriptType = GadgetHtmlParser.SCRIPT_TYPE_TO_OSML_TAG.inverse().get(elem.getNodeName());
+    if (scriptType != null) {
+      Element replacement = elem.getOwnerDocument().createElement("script");
+      replacement.setAttribute("type", scriptType);
+      return replacement;
+    }
+    return elem;
   }
 
   protected void writeText(Node n, Appendable output) throws IOException {

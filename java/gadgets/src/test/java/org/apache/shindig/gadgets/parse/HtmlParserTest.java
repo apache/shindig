@@ -17,11 +17,11 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
-import org.w3c.dom.Document;
 
 import junit.framework.TestCase;
+import org.w3c.dom.Document;
 
 /**
  * Note these tests are of marginal use. Consider removing. More useful tests would exercise
@@ -29,7 +29,7 @@ import junit.framework.TestCase;
  */
 public class HtmlParserTest extends TestCase {
 
-  private final GadgetHtmlParser nekoParser = new NekoHtmlParser(
+  private final GadgetHtmlParser nekoParser = new NekoSimplifiedHtmlParser(
       new ParseModule.DOMImplementationProvider().get());
 
   public void testParseSimpleString() throws Exception {

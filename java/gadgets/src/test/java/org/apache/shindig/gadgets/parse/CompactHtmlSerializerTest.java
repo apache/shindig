@@ -18,19 +18,19 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+
 import com.google.inject.Provider;
 
-import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
-
-import java.io.StringWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 
 /**
  * Test cases for CompactHtmlSerializer.
  */
 public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
 
-  private NekoHtmlParser full = new NekoHtmlParser(
+  private GadgetHtmlParser full = new NekoSimplifiedHtmlParser(
       new ParseModule.DOMImplementationProvider().get());
 
   @Override
@@ -54,7 +54,6 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments.html");
     String expected = loadFile(
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments-expected.html");
-    expected = removeDoctypeForXml4j(expected);
     parseAndCompareBalanced(content, expected, full);
   }
 

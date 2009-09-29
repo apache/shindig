@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -42,9 +43,16 @@ import org.apache.shindig.gadgets.templates.tags.CompositeTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -54,14 +62,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 /**
  * This ContentRewriter uses a TemplateProcessor to replace os-template
@@ -149,15 +149,14 @@ public class TemplateRewriter implements GadgetRewriter {
     registries.add(osmlLibrary.getTagRegistry());
     libraries.add(osmlLibrary);
 
-    List<Element> templates = ImmutableList.copyOf(
-        Iterables.filter(
-            DomUtil.getElementsByTagNameCaseInsensitive(content.getDocument(), TAGS),
-            new Predicate<Element>() {
-              public boolean apply(Element element) {
-                return "text/os-template".equals(element.getAttribute("type"));
-              }
-            }));
-    
+    NodeList templateElements = content.getDocument()
+        .getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG);
+    ImmutableList.Builder<Element> builder = ImmutableList.builder();
+    for (int i = 0; i < templateElements.getLength(); i++) {
+      builder.add((Element) templateElements.item(i));
+    }
+    List<Element> templates = builder.build();
+
     // User-defined custom tags - Priority 3
     registries.add(registerCustomTags(templates));
     

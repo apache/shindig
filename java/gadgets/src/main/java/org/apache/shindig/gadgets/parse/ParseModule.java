@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 /**
  * Provide parse bindings
@@ -34,7 +34,7 @@ public class ParseModule extends AbstractModule {
    */
   @Override
   protected void configure() {
-    bind(GadgetHtmlParser.class).to(SocialMarkupHtmlParser.class);
+    bind(GadgetHtmlParser.class).to(NekoSimplifiedHtmlParser.class);
     bind(DOMImplementation.class).toProvider(DOMImplementationProvider.class);
   }
 

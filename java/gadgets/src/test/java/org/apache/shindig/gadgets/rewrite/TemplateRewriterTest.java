@@ -18,10 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.config.AbstractContainerConfig;
@@ -30,7 +26,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
@@ -43,8 +39,15 @@ import org.apache.shindig.gadgets.templates.XmlTemplateLibrary;
 import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -52,10 +55,6 @@ import org.w3c.dom.Node;
 
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.inject.Provider;
 
 /** 
  * Tests for TemplateRewriter
@@ -292,7 +291,7 @@ public class TemplateRewriterTest {
     });
     gadget.setCurrentView(gadgetSpec.getView("default"));
 
-    content = new MutableContent(new SocialMarkupHtmlParser(
+    content = new MutableContent(new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get()), gadget.getCurrentView().getContent());
     putPipelinedData("user", new JSONObject("{ name: 'John'}"));
   }

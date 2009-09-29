@@ -18,25 +18,24 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateContext;
-import org.apache.shindig.gadgets.templates.tags.CompositeTagRegistry;
-import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
-import org.apache.shindig.gadgets.templates.tags.RenderTagHandler;
-import org.apache.shindig.gadgets.templates.tags.TagHandler;
-import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import org.json.JSONObject;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -45,15 +44,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-
+import javax.el.ELResolver;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-
-import javax.el.ELResolver;
 
 public class RenderTagHandlerTest {
   
@@ -65,7 +59,7 @@ public class RenderTagHandlerTest {
   private ELResolver resolver;
   private TagRegistry registry;
 
-  private SocialMarkupHtmlParser parser;
+  private NekoSimplifiedHtmlParser parser;
   
   private static final String TEST_NS = "http://example.com";
   
@@ -78,7 +72,7 @@ public class RenderTagHandlerTest {
 
     processor = new DefaultTemplateProcessor(expressions);
     resolver = new RootELResolver();
-    parser = new SocialMarkupHtmlParser(new ParseModule.DOMImplementationProvider().get());
+    parser = new NekoSimplifiedHtmlParser(new ParseModule.DOMImplementationProvider().get());
     Gadget gadget = new Gadget();
     gadget.setContext(new GadgetContext());
     context = new TemplateContext(gadget, variables);
@@ -123,7 +117,7 @@ public class RenderTagHandlerTest {
     String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS + 
         "\" xmlns:os=\"" + TagHandler.OPENSOCIAL_NAMESPACE + "\">" + markup + "</script>";
     Document document = parser.parseDom(content);
-    return (Element) document.getElementsByTagName("script").item(0);
+    return (Element) document.getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG).item(0);
   }
   
   private String serialize(Node node) throws IOException {

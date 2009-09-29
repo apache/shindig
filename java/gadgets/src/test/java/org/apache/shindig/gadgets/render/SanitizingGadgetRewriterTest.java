@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -31,6 +29,10 @@ import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -41,12 +43,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-
 public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   private static final Set<String> DEFAULT_TAGS = ImmutableSet.of("html", "head", "body");
-  private static final Pattern BODY_REGEX = Pattern.compile(".*<body>(.*)</body>.*");
+  private static final Pattern BODY_REGEX = Pattern.compile(".*<body>(.+)</body>.*");
 
   private final GadgetContext sanitaryGadgetContext = new GadgetContext() {
     @Override
@@ -131,9 +130,9 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
             + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
             + "fp=45508rewriteMime=text/css\"/>";
     String sanitized = 
-        "<link href=\"http://www.test.com/dir/proxy?"
+        "<html><head><link href=\"http://www.test.com/dir/proxy?"
             + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
-            + "fp=45508&sanitize=1&rewriteMime=text/css\" rel=\"stylesheet\">";
+            + "fp=45508&sanitize=1&rewriteMime=text/css\" rel=\"stylesheet\"></head><body></body></html>";
     String rewritten = rewrite(gadget, markup, set("link"), set("rel", "href"));
     assertEquals(sanitized, rewritten);
   }
@@ -144,7 +143,7 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
         "<link rel=\"script\" "
             + "href=\"www.exmaple.org/evil.js\"/>";
     String rewritten = rewrite(gadget, markup, set("link"), set("rel", "href", "type"));
-    assertEquals("", rewritten);
+    assertEquals("<html><head></head><body></body></html>", rewritten);
   }
 
   @Test
@@ -154,11 +153,11 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     // The caja css sanitizer does *not* remove the initial colon in urls
     // since this does not work in IE
     String sanitized = 
-        "<style>"
+        "<html><head><style>"
       + "@import url('http://www.test.com/dir/proxy?url=www.example.org%2F"
       +	"www.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&"
       +	"fp=45508&sanitize=1&rewriteMime=text%2Fcss');"
-      + "</style>";
+      + "</style></head><body></body></html>";
     String rewritten = rewrite(gadget, markup, set("style"), set());
     assertEquals(sanitized, rewritten);
   }
@@ -167,9 +166,9 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   public void enforceCssImportBadLinkStripped() throws Exception {
     String markup =
         "<style type=\"text/css\">@import url('javascript:doevil()'); A { font : bold }</style>";
-    String sanitized = "<html><head></head><body><style>A {\n"
+    String sanitized = "<html><head><style>A {\n"
         + "  font: bold\n"
-        + "}</style></body></html>";
+        + "}</style></head><body></body></html>";
     assertEquals(sanitized, rewrite(gadget, markup, set("style"), set()));
   }
 

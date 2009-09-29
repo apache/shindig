@@ -18,15 +18,6 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.and;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.reportMatcher;
-import static org.easymock.EasyMock.same;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.expressions.Expressions;
@@ -34,7 +25,7 @@ import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.preload.ConcurrentPreloaderService;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.preload.PipelinedDataPreloader;
@@ -44,12 +35,23 @@ import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.easymock.Capture;
+import static org.easymock.EasyMock.and;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.reportMatcher;
+import static org.easymock.EasyMock.same;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
 import org.easymock.classextension.IMocksControl;
 import org.json.JSONException;
 import org.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,9 +59,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Test of PipelineDataContentRewriter.
@@ -109,7 +108,7 @@ public class PipelineDataGadgetRewriterTest {
     gadget.setContext(new GadgetContext() {});
     gadget.setCurrentView(gadgetSpec.getView("default"));
 
-    content = new MutableContent(new SocialMarkupHtmlParser(
+    content = new MutableContent(new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get()), gadget.getCurrentView().getContent());
   }
 

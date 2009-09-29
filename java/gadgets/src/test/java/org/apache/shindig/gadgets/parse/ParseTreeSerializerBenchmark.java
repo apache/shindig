@@ -19,19 +19,18 @@ package org.apache.shindig.gadgets.parse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.nekohtml.NekoHtmlParser;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-import org.w3c.dom.DOMImplementation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.StringWriter;
+import org.w3c.dom.DOMImplementation;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.StringWriter;
 
 /**
  * Benchmarks for HTML parsing and serialization
@@ -39,9 +38,6 @@ import javax.xml.transform.stream.StreamResult;
 public class ParseTreeSerializerBenchmark {
   private int numRuns;
   private String content;
-
-  private GadgetHtmlParser nekoParser = new NekoHtmlParser(
-      DOCUMENT_PROVIDER);
 
   private GadgetHtmlParser nekoSimpleParser = new NekoSimplifiedHtmlParser(
       DOCUMENT_PROVIDER);
@@ -63,21 +59,13 @@ public class ParseTreeSerializerBenchmark {
     this.numRuns = 10;
     warmup = true;
     //runCaja();
-    runNeko();
     runNekoSimple();
     //Sleep to let JIT kick in
     Thread.sleep(10000L);
     this.numRuns = numRuns;
     warmup = false;
     //runCaja();
-    runNeko();
     runNekoSimple();
-  }
-
-  private void runNeko() throws Exception {
-    output("Neko-----------------");
-    timeParseDom(nekoParser);
-    timeParseDomSerialize(nekoParser);
   }
 
   private void runNekoSimple() throws Exception {

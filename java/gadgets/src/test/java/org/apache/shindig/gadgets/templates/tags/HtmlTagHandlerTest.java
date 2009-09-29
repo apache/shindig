@@ -18,20 +18,18 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.gadgets.parse.ParseModule;
-import org.apache.shindig.gadgets.parse.nekohtml.SocialMarkupHtmlParser;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.templates.FakeTemplateProcessor;
-import org.apache.shindig.gadgets.templates.tags.HtmlTagHandler;
+
+import com.google.common.collect.ImmutableMap;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Test of the <os:Html> tag.
@@ -45,7 +43,7 @@ public class HtmlTagHandlerTest {
   public void setUp() throws Exception {
     processor = new FakeTemplateProcessor();
     documentProvider = new ParseModule.DOMImplementationProvider().get();
-    handler = new HtmlTagHandler(new SocialMarkupHtmlParser(documentProvider));
+    handler = new HtmlTagHandler(new NekoSimplifiedHtmlParser(documentProvider));
   }
   
   @Test

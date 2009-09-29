@@ -21,22 +21,21 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.NodeIterator;
+import org.w3c.dom.NodeList;
 
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 
 /**
  * ContentRewriter that resolves opensocial-data elements on the server.
@@ -115,20 +114,10 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
    * Parses pipelined data out of a Document.
    */
   Map<PipelinedData, Node> parsePipelinedData(Gadget gadget, Document doc) {
-    NodeIterator nodeIterator = ((DocumentTraversal) doc)
-        .createNodeIterator(doc, NodeFilter.SHOW_ELEMENT,
-            new NodeFilter() {
-              public short acceptNode(Node n) {
-                if ("script".equalsIgnoreCase(n.getNodeName()) &&
-                    "text/os-data".equals(((Element) n).getAttribute("type"))) {
-                  return NodeFilter.FILTER_ACCEPT;
-                }
-                return NodeFilter.FILTER_REJECT;
-              }
-            }, false);
-    
+    NodeList dataTags = doc.getElementsByTagName(GadgetHtmlParser.OSML_DATA_TAG);
     Map<PipelinedData, Node> pipelineNodes = Maps.newHashMap();
-    for (Node n = nodeIterator.nextNode(); n != null ; n = nodeIterator.nextNode()) {
+    for (int i = 0; i < dataTags.getLength(); i++) {
+      Node n = dataTags.item(i);
       try {
         PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
         pipelineNodes.put(pipelineData, n);

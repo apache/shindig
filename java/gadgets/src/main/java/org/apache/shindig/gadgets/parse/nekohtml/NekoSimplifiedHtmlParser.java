@@ -1,26 +1,26 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
+ * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
+ * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
@@ -32,7 +32,12 @@ import org.apache.xerces.xni.XMLString;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.apache.xerces.xni.parser.XMLInputSource;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.internal.ImmutableMap;
 import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;
 import org.cyberneko.html.HTMLScanner;
 import org.cyberneko.html.HTMLTagBalancer;
@@ -46,24 +51,40 @@ import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Set;
+import java.util.Map;
 import java.util.Stack;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 /**
- * Neko based DOM parser that concatentates elements which we dont care about into
- * text nodes to keep DOM model simplified. Much of this code is based on
- * org.cyberneko.html.filters.Writer
- *
- * TODO: Create a reusable instance in ThreadLocal
+ * Supports parsing of social markup blocks inside gadget content.
+ * &lt;script&gt; elements with types of either "text/os-template"
+ * or "text/os-data" are parsed inline into contained DOM hierarchies
+ * for subsequent processing by the pipeline and template rewriters.
  */
 @Singleton
 public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
-  private static final Set<String> elements =
-      ImmutableSet.of("html", "body", "head", "link", "img", "style", "script", "embed");
+
+  private static final HTMLElements.Element OSML_TEMPLATE_ELEMENT;
+  private static final HTMLElements.Element OSML_DATA_ELEMENT;
+
+  static {
+    HTMLElements.Element unknown = HTMLElements.getElement(HTMLElements.UNKNOWN);
+    OSML_TEMPLATE_ELEMENT = new HTMLElements.Element(unknown.code, OSML_TEMPLATE_TAG,
+        unknown.flags, HTMLElements.BODY, unknown.closes);
+    // Passing parent in constructor is ignored.
+    // Only allow template tags in BODY
+    OSML_TEMPLATE_ELEMENT.parent =
+        new HTMLElements.Element[]{HTMLElements.getElement(HTMLElements.BODY)};
+
+    // data tags are allowed in HEAD or BODY
+    OSML_DATA_ELEMENT = new HTMLElements.Element(unknown.code, OSML_TEMPLATE_TAG,
+        unknown.flags, HTMLElements.BODY, unknown.closes);
+    OSML_DATA_ELEMENT.parent = new HTMLElements.Element[]{
+        HTMLElements.getElement(HTMLElements.BODY),
+        HTMLElements.getElement(HTMLElements.HEAD)};
+  }
+
+  private static final Map<String, HTMLElements.Element> OSML_ELEMENTS = ImmutableMap.of(
+      OSML_TEMPLATE_TAG, OSML_TEMPLATE_ELEMENT, OSML_DATA_TAG, OSML_DATA_ELEMENT);
 
   private final DOMImplementation documentFactory;
 
@@ -73,11 +94,12 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   }
 
   @Override
-  protected Document parseDomImpl(String source) {
+  protected Document parseDomImpl(String source) throws GadgetException {
     DocumentHandler handler;
 
+    HTMLConfiguration config = newConfiguration();
     try {
-      handler = parseHtmlImpl(source);
+      handler = parseHtmlImpl(source, config, new NormalizingTagBalancer());
     } catch (IOException ioe) {
       return null;
     }
@@ -92,8 +114,15 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
   protected DocumentFragment parseFragmentImpl(String source) throws GadgetException {
     DocumentHandler handler;
 
+    HTMLConfiguration config = newConfiguration();
+    // http://cyberneko.org/html/features/balance-tags/document-fragment
+    // deprecated http://cyberneko.org/html/features/document-fragment
+    config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
+    config.setProperty("http://cyberneko.org/html/properties/balance-tags/fragment-context-stack",
+        new QName[]{new QName(null, "HTML", "HTML", null), new QName(null, "BODY", "BODY", null)});
+
     try {
-      handler = parseHtmlImpl(source);
+      handler = parseHtmlImpl(source, config, new NekoPatchTagBalancer());
     } catch (IOException ioe) {
       return null;
     }
@@ -103,26 +132,25 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
   /**
    * Parse HTML source.
+   *
    * @return a document handler containing the parsed source
    */
-  private DocumentHandler parseHtmlImpl(String source) throws IOException {
-    HTMLConfiguration config = newConfiguration();
+  private DocumentHandler parseHtmlImpl(String source, HTMLConfiguration config,
+      NormalizingTagBalancer tagBalancer)
+      throws IOException {
 
     HTMLScanner htmlScanner = new HTMLScanner();
-    HTMLTagBalancer tagBalancer = new HTMLTagBalancer();
+    tagBalancer.setScanner(htmlScanner);
 
-    DocumentHandler handler = newDocumentHandler(source, htmlScanner);
+    DocumentHandler handler = newDocumentHandler(source);
 
-    if (config.getFeature("http://xml.org/sax/features/namespaces")) {
-      NamespaceBinder namespaceBinder = new NamespaceBinder();
-      namespaceBinder.setDocumentHandler(handler);
-      namespaceBinder.setDocumentSource(tagBalancer);
-      namespaceBinder.reset(config);
-      tagBalancer.setDocumentHandler(namespaceBinder);
-    } else {
-      tagBalancer.setDocumentHandler(handler);
-    }
+    NamespaceBinder namespaceBinder = new NamespaceBinder();
+    namespaceBinder.setDocumentHandler(handler);
+    namespaceBinder.setDocumentSource(tagBalancer);
+    namespaceBinder.reset(config);
+    tagBalancer.setDocumentHandler(namespaceBinder);
 
+    // Order of filter is Scanner -> OSMLFilter -> Tag Balancer
     tagBalancer.setDocumentSource(htmlScanner);
     htmlScanner.setDocumentHandler(tagBalancer);
 
@@ -142,35 +170,29 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     // Maintain original case for elements and attributes
     config.setProperty("http://cyberneko.org/html/properties/names/elems", "match");
     config.setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
-    // Parse as fragment.
-    config.setFeature("http://cyberneko.org/html/features/balance-tags/document-fragment", true);
     // Get notified of entity and character references
     config.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
     config.setFeature("http://cyberneko.org/html/features/scanner/notify-builtin-refs", true);
+    config.setFeature("http://xml.org/sax/features/namespaces", true);
     return config;
   }
 
-  protected DocumentHandler newDocumentHandler(String source, HTMLScanner scanner) {
+  protected DocumentHandler newDocumentHandler(String source) {
     return new DocumentHandler(source);
   }
 
-  /**
-   * Is the given element important enough to preserve in the DOM?
-   */
-  protected boolean isElementImportant(QName qName) {
-    return elements.contains(qName.rawname.toLowerCase());
-  }
-
-  /**
-   * Handler for XNI events from Neko
-   */
+  /** Handler for XNI events from Neko */
   protected class DocumentHandler implements XMLDocumentHandler {
+
     private final Stack<Node> elementStack = new Stack<Node>();
+
     private final StringBuilder builder;
+
     private boolean inEntity = false;
 
 
     private DocumentFragment documentFragment;
+
     private Document document;
 
     public DocumentHandler(String content) {
@@ -186,7 +208,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void startDocument(XMLLocator xmlLocator, String encoding,
-                              NamespaceContext namespaceContext, Augmentations augs)
+        NamespaceContext namespaceContext, Augmentations augs)
         throws XNIException {
       document = documentFactory.createDocument(null, null, null);
       elementStack.clear();
@@ -220,7 +242,12 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void comment(XMLString text, Augmentations augs) throws XNIException {
-      builder.append("<!--").append(text.ch, text.offset, text.length).append("-->");
+      flushTextBuffer();
+
+      // Add comments as comment nodes - needed to support sanitization
+      // of SocialMarkup-parsed content
+      Node comment = getDocument().createComment(new String(text.ch, text.offset, text.length));
+      appendChild(comment);
     }
 
     public void processingInstruction(String s, XMLString xmlString, Augmentations augs)
@@ -230,28 +257,17 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     public void startElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      if (isElementImportant(qName)) {
-        Element element = startImportantElement(qName, xmlAttributes);
-        // Not an empty element, so push on the stack
-        elementStack.push(element);
-      } else {
-        startUnimportantElement(qName, xmlAttributes);
-      }
+      Element element = startElementImpl(qName, xmlAttributes);
+      // Not an empty element, so push on the stack
+      elementStack.push(element);
     }
 
     public void emptyElement(QName qName, XMLAttributes xmlAttributes, Augmentations augs)
         throws XNIException {
-      if (isElementImportant(qName)) {
-        startImportantElement(qName, xmlAttributes);
-      } else {
-        startUnimportantElement(qName, xmlAttributes);
-      }
+      startElementImpl(qName, xmlAttributes);
     }
 
-    /**
-     * Flush any existing text content to the document.  Call this before appending any
-     * nodes.
-     */
+    /** Flush any existing text content to the document.  Call this before appending any nodes. */
     protected void flushTextBuffer() {
       if (builder.length() > 0) {
         appendChild(document.createTextNode(builder.toString()));
@@ -259,21 +275,8 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       }
     }
 
-    /** Write an unimportant element into content as raw text */
-    private void startUnimportantElement(QName qName, XMLAttributes xmlAttributes) {
-      builder.append('<').append(qName.rawname);
-      for (int i = 0; i < xmlAttributes.getLength(); i++) {
-        String attributeName = xmlAttributes.getLocalName(i);
-        builder.append(' ').append(attributeName).append("=\"");
-        appendAttributeValue(xmlAttributes.getValue(i),
-            HtmlSerialization.isUrlAttribute(qName, attributeName));
-        builder.append('\"');
-      }
-      builder.append('>');
-    }
-
-    /** Create an Element in the DOM for an important element */
-    private Element startImportantElement(QName qName, XMLAttributes xmlAttributes) {
+    /** Create an Element in the DOM */
+    private Element startElementImpl(QName qName, XMLAttributes xmlAttributes) {
       flushTextBuffer();
 
       Element element;
@@ -294,46 +297,33 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
                 .getValue(i));
           } catch (DOMException e) {
             switch (e.code) {
-            case DOMException.INVALID_CHARACTER_ERR:
-              StringBuilder sb = new StringBuilder(e.getMessage());
-              sb.append("Around ...<");
-              if (qName.prefix != null) {
-                sb.append(qName.prefix);
-                sb.append(":");
-              }
-              sb.append(qName.localpart);
-              for (int j = 0; j < xmlAttributes.getLength(); j++) {
-                if (StringUtils.isNotBlank(xmlAttributes.getLocalName(j))
-                    && StringUtils.isNotBlank(xmlAttributes.getValue(j))) {
-                  sb.append(' ');
-                  sb.append(xmlAttributes.getLocalName(j));
-                  sb.append("=\"");
-                  sb.append(xmlAttributes.getValue(j)).append('\"');
+              case DOMException.INVALID_CHARACTER_ERR:
+                StringBuilder sb = new StringBuilder(e.getMessage());
+                sb.append("Around ...<");
+                if (qName.prefix != null) {
+                  sb.append(qName.prefix);
+                  sb.append(":");
                 }
-              }
-              sb.append("...");
-              throw new DOMException(DOMException.INVALID_CHARACTER_ERR, sb.toString());
-            default:
-              throw e;
+                sb.append(qName.localpart);
+                for (int j = 0; j < xmlAttributes.getLength(); j++) {
+                  if (StringUtils.isNotBlank(xmlAttributes.getLocalName(j))
+                      && StringUtils.isNotBlank(xmlAttributes.getValue(j))) {
+                    sb.append(' ');
+                    sb.append(xmlAttributes.getLocalName(j));
+                    sb.append("=\"");
+                    sb.append(xmlAttributes.getValue(j)).append('\"');
+                  }
+                }
+                sb.append("...");
+                throw new DOMException(DOMException.INVALID_CHARACTER_ERR, sb.toString());
+              default:
+                throw e;
             }
           }
         }
       }
       appendChild(element);
       return element;
-    }
-
-    private void appendAttributeValue(String text, boolean isUrl) {
-      for (int i = 0; i < text.length(); i++) {
-        char c = text.charAt(i);
-        if (c == '"') {
-          builder.append("&quot;");
-        } else if (c == '&' && !isUrl) {
-          builder.append("&amp;");
-        } else {
-          builder.append(c);
-        }
-      }
     }
 
     public void startGeneralEntity(String name, XMLResourceIdentifier id, String encoding,
@@ -383,12 +373,8 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     public void endElement(QName qName, Augmentations augs) throws XNIException {
-      if (isElementImportant(qName)) {
-        flushTextBuffer();
-        elementStack.pop();
-      } else {
-        builder.append("</").append(qName.rawname).append('>');
-      }
+      flushTextBuffer();
+      elementStack.pop();
     }
 
     public void startCDATA(Augmentations augs) throws XNIException {
@@ -410,9 +396,142 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     public XMLDocumentSource getDocumentSource() {
       return null;
     }
-    
-    protected final void appendChild(Node node) {
+
+    private void appendChild(Node node) {
       elementStack.peek().appendChild(node);
+    }
+  }
+
+  /**
+   * Used when parsing document fragments to correct a bug in Neko 1.9.13. We use the
+   * http://cyberneko.org/html/properties/balance-tags/fragment-context-stack
+   * property of Neko to force the fragment to be parsed as if it were already container in a body
+   * tag. This doesnt quite work together as without this fix it will still introduce head tags
+   * if the first parsed tags are allowed in a head tag.
+   * See https://sourceforge.net/tracker/?func=detail&atid=952178&aid=2870180&group_id=195122
+   */
+  private class NekoPatchTagBalancer extends NormalizingTagBalancer {
+
+    /**
+     * Override the document start to record whether HTML, HEAD or BODY have been seen
+     */
+    @Override
+    public void startDocument(XMLLocator locator, String encoding,
+        NamespaceContext nscontext, Augmentations augs)
+        throws XNIException {
+
+      super.startDocument(locator, encoding, nscontext, augs);
+      for (int i = fElementStack.top - 1; i >= 0; i--) {
+        fSeenAnything = true;
+        if (fElementStack.data[i].element.code == HTMLElements.HTML) {
+          fSeenRootElement = true;
+        }
+        if (fElementStack.data[i].element.code == HTMLElements.HEAD) {
+          fSeenHeadElement = true;
+        }
+        if (fElementStack.data[i].element.code == HTMLElements.BODY) {
+          fSeenBodyElement = true;
+        }
+      }
+    }
+  }
+
+  /**
+   * Subclass of Neko's tag balancer that
+   * - Normalizes the case of forced html, head and body tags when they don't exist in the original
+   * content.
+   * - Convert script tags with type=os/* to OSData and OSTemplate. Record their text content and
+   * force it to be reparsed.
+   * -
+   */
+  private class NormalizingTagBalancer extends HTMLTagBalancer {
+
+    private StringBuilder scriptContent;
+
+    private HTMLScanner scanner;
+
+    private QName currentOsmlTag;
+
+    public NormalizingTagBalancer() {
+    }
+
+    public void setScanner(HTMLScanner scanner) {
+      this.scanner = scanner;
+    }
+
+    @Override
+    public void characters(XMLString text, Augmentations augs) throws XNIException {
+      if (currentOsmlTag != null) {
+        scriptContent.append(text.ch, text.offset, text.length);
+      } else {
+        super.characters(text, augs);
+      }
+    }
+
+    @Override
+    public void startElement(QName elem, XMLAttributes attrs, Augmentations augs)
+        throws XNIException {
+      // Normalize the case of forced-elements to lowercase for backward compatability
+      if (!fSeenRootElement && elem.rawname.equalsIgnoreCase("html")) {
+        elem.localpart = "html";
+        elem.rawname = "html";
+      } else if (!fSeenHeadElement && elem.rawname.equalsIgnoreCase("head")) {
+        elem.localpart = "head";
+        elem.rawname = "head";
+      } else if (!fSeenBodyElement && elem.rawname.equalsIgnoreCase("body")) {
+        elem.localpart = "body";
+        elem.rawname = "body";
+      }
+
+      // Convert script tags of an OSML type to OSTemplate/OSData tags
+      if ("script".equalsIgnoreCase(elem.rawname)) {
+        String value = attrs.getValue("type");
+        String osmlTagName = SCRIPT_TYPE_TO_OSML_TAG.get(value);
+        if (osmlTagName != null) {
+          if (currentOsmlTag != null) {
+            throw new XNIException("Nested OpenSocial script elements");
+          }
+          currentOsmlTag = new QName(null, osmlTagName, osmlTagName, null);
+          if (scriptContent == null) {
+            scriptContent = new StringBuilder();
+          }
+          // Remove the type attribute
+          attrs.removeAttributeAt(attrs.getIndex("type"));
+          super.startElement(currentOsmlTag, attrs, augs);
+          return;
+        }
+      }
+
+      super.startElement(elem, attrs, augs);
+    }
+
+
+    @Override
+    public void endElement(QName element, Augmentations augs) throws XNIException {
+      if (currentOsmlTag != null && "script".equalsIgnoreCase(element.rawname)) {
+        QName endingTag = currentOsmlTag;
+        currentOsmlTag = null;
+
+        XMLInputSource scriptSource = new XMLInputSource(null, null, null);
+        scriptSource.setCharacterStream(new StringReader(scriptContent.toString()));
+        scriptContent.setLength(0);
+
+        // Evaluate the content of the script block immediately
+        scanner.evaluateInputSource(scriptSource);
+
+        super.endElement(endingTag, augs);
+      } else {
+        super.endElement(element, augs);
+      }
+    }
+
+    @Override
+    protected HTMLElements.Element getElement(QName elementName) {
+      HTMLElements.Element osmlElement = OSML_ELEMENTS.get(elementName.localpart);
+      if (osmlElement != null) {
+        return osmlElement;
+      }
+      return super.getElement(elementName);
     }
   }
 }

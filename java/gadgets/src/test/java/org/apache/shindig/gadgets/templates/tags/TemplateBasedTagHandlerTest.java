@@ -18,12 +18,10 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.expressions.RootELResolver;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -31,10 +29,11 @@ import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
-import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
-import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
-import org.apache.shindig.gadgets.templates.tags.TagHandler;
-import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,13 +43,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
-
 import javax.el.ELResolver;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.io.IOException;
 
 /**
  * Tests the behavior of template-based tag handlers.
@@ -173,7 +167,7 @@ public class TemplateBasedTagHandlerTest {
     String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS + 
         "\" xmlns:os=\"" + TagHandler.OPENSOCIAL_NAMESPACE + "\">" + markup + "</script>";
     Document document = parser.parseDom(content);
-    return (Element) document.getElementsByTagName("script").item(0);
+    return (Element) document.getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG).item(0);
   }
   
   private String serialize(Node node) throws IOException {
