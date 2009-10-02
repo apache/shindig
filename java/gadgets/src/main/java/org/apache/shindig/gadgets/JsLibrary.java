@@ -167,7 +167,7 @@ public class JsLibrary {
     String dbg_data = loadData(content, type);
 
     if (dbg_data == null && opt_data == null) {
-      throw new IllegalArgumentException("Problems reading resource " + content);
+      throw new IllegalArgumentException("Problems reading resource " + content + ", type: " + type);
     } else if (dbg_data == null) {
       dbg_data = opt_data;
     } else if (opt_data == null) {

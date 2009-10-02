@@ -77,7 +77,6 @@ public class BrowserSpecificRpcJsFeatureLoader extends JsFeatureLoader {
     
     private static final String RPC_JS_CORE = "rpc.js";
     private static final String WPM_TX = "wpm.transport.js";
-    private static final String DPM_TX = "dpm.transport.js";
     private static final String NIX_TX = "nix.transport.js";
     private static final String FE_TX = "fe.transport.js";
     private static final String RMR_TX = "rmr.transport.js";
@@ -103,10 +102,10 @@ public class BrowserSpecificRpcJsFeatureLoader extends JsFeatureLoader {
       StringBuilder allDbg = new StringBuilder();
       StringBuilder allOpt = new StringBuilder();
       for (String rpcPart :
-           ImmutableList.of(RPC_JS_CORE, WPM_TX, DPM_TX, NIX_TX, FE_TX, RMR_TX, IFPC_TX)) {
+           ImmutableList.of(RPC_JS_CORE, WPM_TX, NIX_TX, FE_TX, RMR_TX, IFPC_TX)) {
         StringBuilder opt = new StringBuilder();
         StringBuilder dbg = new StringBuilder();
-        loadOptimizedAndDebugData(rpcPart, type, opt, dbg);
+        loadOptimizedAndDebugData(filePath + rpcPart, type, opt, dbg);
         rpcJsCode.put(rpcPart + OPTIMIZED_SUFFIX, opt.toString());
         rpcJsCode.put(rpcPart + DEBUG_SUFFIX, dbg.toString());
         if (!rpcPart.equals(RPC_JS_CORE)) {
@@ -176,8 +175,6 @@ public class BrowserSpecificRpcJsFeatureLoader extends JsFeatureLoader {
           case OPERA:
             if (version >= 9) {
               txKey = WPM_TX;
-            } else if (version >= 8) {
-              txKey = DPM_TX;
             }
             break;
           case WEBKIT:
