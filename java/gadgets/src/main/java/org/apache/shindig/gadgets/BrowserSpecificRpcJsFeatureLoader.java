@@ -88,7 +88,7 @@ public class BrowserSpecificRpcJsFeatureLoader extends JsFeatureLoader {
     private static final String DEBUG_SUFFIX = ":dbg";
     
     protected RpcJsLibrary(Provider<UserAgent> uaProvider, Type type, String filePath) {
-      super(RPC_FEATURE_NAME, type, null, null);
+      super(RPC_FEATURE_NAME, type, "", "");
       this.uaProvider = uaProvider;
       
       // Something of a hack: filePath, without the trailing filename, gives the root
