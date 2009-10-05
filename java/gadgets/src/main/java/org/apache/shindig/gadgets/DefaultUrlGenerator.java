@@ -114,6 +114,18 @@ public class DefaultUrlGenerator implements UrlGenerator {
        .append("&debug=").append(context.getDebug() ? "1" : "0");
     return buf.toString();
   }
+  
+  public UrlValidationStatus validateJsUrl(String url) {
+    Uri uri = Uri.parse(url);
+    String checksum = uri.getQueryParameter("v");
+    if (checksum != null) {
+      if (checksum.equals(jsChecksum)) {
+        return UrlValidationStatus.VALID_VERSIONED;
+      }
+      return UrlValidationStatus.INVALID;
+    }
+    return UrlValidationStatus.VALID_UNVERSIONED;
+  }
 
   public String getIframeUrl(Gadget gadget) {
     GadgetContext context = gadget.getContext();
@@ -169,6 +181,15 @@ public class DefaultUrlGenerator implements UrlGenerator {
     }
 
     return uri.toString();
+  }
+  
+  public UrlValidationStatus validateIframeUrl(String url) {
+    // Naive implementation: assume that the URL is valid always; versioned if v= present.
+    Uri uri = Uri.parse(url);
+    if (uri.getQueryParameter("v") != null) {
+      return UrlValidationStatus.VALID_VERSIONED;
+    }
+    return UrlValidationStatus.VALID_UNVERSIONED;
   }
 
   public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {

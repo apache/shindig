@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -269,12 +270,20 @@ public class JsonRpcHandlerTest {
     public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
       throw new UnsupportedOperationException();
     }
+    
+    public UrlValidationStatus validateJsUrl(String jsUrl) {
+      throw new UnsupportedOperationException();
+    }
 
     public String getIframeUrl(Gadget gadget) {
       if (throwRandomFault) {
         throw new RuntimeException("BROKEN");
       }
       return iframeUrl;
+    }
+    
+    public UrlValidationStatus validateIframeUrl(String url) {
+      throw new UnsupportedOperationException();
     }
 
     public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {

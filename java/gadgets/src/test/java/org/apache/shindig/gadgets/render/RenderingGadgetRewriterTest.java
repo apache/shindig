@@ -37,6 +37,7 @@ import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadException;
@@ -751,8 +752,16 @@ public class RenderingGadgetRewriterTest {
     public String getBundledJsParam(Collection<String> features, GadgetContext context) {
       throw new UnsupportedOperationException();
     }
+    
+    public UrlValidationStatus validateJsUrl(String url) {
+      throw new UnsupportedOperationException();
+    }
 
     public String getIframeUrl(Gadget gadget) {
+      throw new UnsupportedOperationException();
+    }
+    
+    public UrlValidationStatus validateIframeUrl(String url) {
       throw new UnsupportedOperationException();
     }
 

@@ -25,12 +25,15 @@ import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
 
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +49,15 @@ public class GadgetRenderingServletTest {
   private final Renderer renderer = control.createMock(Renderer.class);
   public final HttpServletResponseRecorder recorder = new HttpServletResponseRecorder(response);
   private final GadgetRenderingServlet servlet = new GadgetRenderingServlet();
-
+  private final UrlGenerator urlGenerator = control.createMock(UrlGenerator.class);
+  
+  @Before
+  public void setUpUrlGenerator() {
+    expect(urlGenerator.validateIframeUrl(isA(String.class))).andReturn(UrlValidationStatus.VALID_UNVERSIONED);
+    expect(request.getRequestURL()).andReturn(new StringBuffer("http://foo.com"));
+    expect(request.getQueryString()).andReturn("?q=a");
+    servlet.setUrlGenerator(urlGenerator);
+  }
 
   @Test
   public void dosHeaderRejected() throws Exception {

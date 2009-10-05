@@ -26,6 +26,8 @@ import org.apache.shindig.gadgets.GadgetFeature;
 import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.UrlValidationStatus;
 
 import com.google.inject.Inject;
 
@@ -47,6 +49,12 @@ public class JsServlet extends InjectedServlet {
   public void setRegistry(GadgetFeatureRegistry registry) {
     this.registry = registry;
   }
+  
+  private UrlGenerator urlGenerator;
+  @Inject
+  public void setUrlGenerator(UrlGenerator urlGenerator) {
+    this.urlGenerator = urlGenerator;
+  }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -54,8 +62,10 @@ public class JsServlet extends InjectedServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
+    UrlValidationStatus vstatus = urlGenerator.validateJsUrl(
+        req.getRequestURL().append('?').append(req.getQueryString()).toString());
     if (req.getHeader("If-Modified-Since") != null &&
-        req.getParameter("v") != null) {
+        vstatus == UrlValidationStatus.VALID_VERSIONED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
@@ -107,12 +117,20 @@ public class JsServlet extends InjectedServlet {
       return;
     }
 
-    if (req.getParameter("v") != null) {
-      // Versioned files get cached indefinitely
-      HttpUtil.setCachingHeaders(resp, !isProxyCacheable);
-    } else {
-      // Unversioned files get cached for 1 hour.
-      HttpUtil.setCachingHeaders(resp, 60 * 60, !isProxyCacheable);
+    switch (vstatus) {
+      case VALID_VERSIONED:
+        // Versioned files get cached indefinitely
+        HttpUtil.setCachingHeaders(resp, !isProxyCacheable);
+        break;
+      case VALID_UNVERSIONED:
+        // Unversioned files get cached for 1 hour.
+        HttpUtil.setCachingHeaders(resp, 60 * 60, !isProxyCacheable);
+        break;
+      case INVALID:
+        // URL is invalid in some way, likely version mismatch.
+        // Indicate no-cache forcing subsequent requests to regenerate URLs.
+        HttpUtil.setNoCache(resp);
+        break;
     }
     resp.setContentType("text/javascript; charset=utf-8");
     byte[] response = jsData.toString().getBytes("UTF-8");

@@ -18,15 +18,30 @@
  */
 package org.apache.shindig.gadgets;
 
-import com.google.inject.ImplementedBy;
-
 import java.util.Collection;
+
+import com.google.inject.ImplementedBy;
 
 /**
  * Generates urls for various public entrypoints
  */
 @ImplementedBy(DefaultUrlGenerator.class)
 public interface UrlGenerator {
+  /**
+   * Generates iframe urls for meta data service.
+   * Use this rather than generating your own urls by hand.
+   *
+   * @return The generated iframe url.
+   */
+  String getIframeUrl(Gadget gadget);
+  
+  /**
+   * Validate gadget rendering URL.
+   * 
+   * @return Status of the rendered URL.
+   */
+  UrlValidationStatus validateIframeUrl(String url);
+  
   /**
    * @param features The list of features that js is needed for.
    * @return The url for the bundled javascript that includes all referenced feature libraries.
@@ -39,14 +54,15 @@ public interface UrlGenerator {
    * @return The bundled js parameter for type=url gadgets.
    */
   String getBundledJsParam(Collection<String> features, GadgetContext context);
-
+  
   /**
-   * Generates iframe urls for meta data service.
-   * Use this rather than generating your own urls by hand.
-   *
-   * @return The generated iframe url.
+   * Validates the inbound URL, for use by serving code for caching and redirection purposes.
+   * As an example, a JS URL with invalid/stale v= checksum may either be patched up or nullified.
+   * 
+   * @param url JS URL
+   * @return Validated equivalent of the inbound URL, or null if not a valid JS URL.
    */
-  String getIframeUrl(Gadget gadget);
+  UrlValidationStatus validateJsUrl(String url);
   
   /**
    * @return the oauthcallback URL on the gadget domain.  The returned URL may be absolute or

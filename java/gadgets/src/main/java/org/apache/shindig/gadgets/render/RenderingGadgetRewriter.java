@@ -224,7 +224,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // gather the libraries we'll need to generate the forced libs
     if (forcedLibs == null || forcedLibs.length() == 0) {
       // Don't bother making a mutable copy if the list is empty
-      forced = (defaultForcedLibs.isEmpty()) ? defaultForcedLibs :  Sets.newTreeSet(defaultForcedLibs);
+      forced = (defaultForcedLibs.isEmpty()) ? defaultForcedLibs : Sets.newTreeSet(defaultForcedLibs);
     } else {
       forced = Sets.newTreeSet(Arrays.asList(forcedLibs.split(":")));
     }
