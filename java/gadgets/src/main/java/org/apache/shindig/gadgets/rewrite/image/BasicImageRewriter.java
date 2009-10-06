@@ -143,7 +143,7 @@ public class BasicImageRewriter implements ImageRewriter {
 
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
       
-      if ("true".equals(request.getParam(PARAM_NO_EXPAND)) &&
+      if ("1".equals(request.getParam(PARAM_NO_EXPAND)) &&
           imageInfo.getHeight() <= requestedHeight &&
           imageInfo.getWidth() <= requestedWidth) {
         // Don't do anything, since the current image fits within the bounding area.

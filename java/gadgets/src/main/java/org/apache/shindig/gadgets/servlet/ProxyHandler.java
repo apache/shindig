@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
@@ -52,7 +53,7 @@ public class ProxyHandler extends ProxyBase {
   private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
 
   private static final String[] INTEGER_RESIZE_PARAMS = new String[] {
-    PARAM_RESIZE_HEIGHT, PARAM_RESIZE_WIDTH, PARAM_RESIZE_QUALITY
+    PARAM_RESIZE_HEIGHT, PARAM_RESIZE_WIDTH, PARAM_RESIZE_QUALITY, PARAM_NO_EXPAND
   };
 
   private final RequestPipeline requestPipeline;

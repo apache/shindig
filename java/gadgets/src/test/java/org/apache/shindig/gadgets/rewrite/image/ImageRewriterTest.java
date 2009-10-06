@@ -124,7 +124,7 @@ public class ImageRewriterTest extends TestCase {
     expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
     expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
     expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
-    expect(request.getParam(PARAM_NO_EXPAND)).andReturn(noExpand ? "true" : null).anyTimes();
+    expect(request.getParam(PARAM_NO_EXPAND)).andReturn(noExpand ? "1" : null).anyTimes();
     return request;
   }
 
