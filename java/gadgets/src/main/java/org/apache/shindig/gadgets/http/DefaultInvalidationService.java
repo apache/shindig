@@ -118,7 +118,7 @@ public class DefaultInvalidationService implements InvalidationService {
    */
   private String getKey(String userId, SecurityToken token) {
     // Convert the id to the container relative form
-    int colonIndex = userId.lastIndexOf(":");
+    int colonIndex = userId.lastIndexOf(':');
     if (colonIndex != -1) {
       userId = userId.substring(colonIndex + 1);
     }
@@ -126,9 +126,9 @@ public class DefaultInvalidationService implements InvalidationService {
     // Assume the container is consistent in its use of either appId or appUrl.
     // Use appId
     if (!StringUtils.isEmpty(token.getAppId())) {
-      return TOKEN_PREFIX + token.getAppId() + ":" + userId;
+      return TOKEN_PREFIX + token.getAppId() + ':' + userId;
     }
-    return TOKEN_PREFIX + token.getAppUrl() + ":" + userId;
+    return TOKEN_PREFIX + token.getAppUrl() + ':' + userId;
   }
 
   /**
@@ -155,10 +155,10 @@ public class DefaultInvalidationService implements InvalidationService {
       }
     }
     if (ownerStamp != null) {
-      currentInvalidation.append("o=").append(ownerStamp).append(";");
+      currentInvalidation.append("o=").append(ownerStamp).append(';');
     }
     if (viewerStamp != null) {
-      currentInvalidation.append("v=").append(viewerStamp).append(";");
+      currentInvalidation.append("v=").append(viewerStamp).append(';');
     }
     return currentInvalidation.toString();
   }

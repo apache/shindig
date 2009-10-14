@@ -110,10 +110,10 @@ public class PipelinedDataPreloader {
    *
    * @param request the social request
    * @return the response to the request
+   * @throws GadgetException if there are errors processing the gadget spec
    */
   protected HttpResponse executeSocialRequest(HttpRequest request) throws GadgetException {
-    HttpResponse response = requestPipeline.execute(request);
-    return response;
+    return requestPipeline.execute(request);
   }
 
   private static class VariableTask implements Callable<PreloadedData> {

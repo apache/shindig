@@ -60,7 +60,7 @@ public class ProxyServletRequest extends HttpServletRequestWrapper {
 
       String urlParam = chainedMatcher.group(2);
       if (request.getQueryString() != null) {
-        urlParam += "?" + request.getQueryString();
+        urlParam += '?' + request.getQueryString();
       }
       extractedParameters.put(ProxyBase.URL_PARAM, urlParam);
                               

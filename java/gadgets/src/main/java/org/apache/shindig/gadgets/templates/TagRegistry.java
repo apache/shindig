@@ -51,7 +51,7 @@ public interface TagRegistry {
     
     @Override
     public String toString() {
-      return namespaceUri + ":" + localName;
+      return namespaceUri + ':' + localName;
     }
     
     @Override

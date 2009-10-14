@@ -67,6 +67,6 @@ public final class TemplateResource {
   
   @Override
   public String toString() {
-    return "<" + type + ">" + content + "</" + type + ">"; 
+    return "<" + type + '>' + content + "</" + type + '>';
   }
 }

@@ -20,6 +20,7 @@ package org.apache.shindig.protocol.conversion;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -92,16 +93,16 @@ public class BeanJsonConverter implements BeanConverter {
       return methods;
     }
 
-    methods = new HashMap<String, Method>();
-
+    ImmutableMap.Builder<String,Method> builder = ImmutableMap.builder();
     for (Method method : type.getMethods()) {
       if (method.getParameterTypes().length == 1) {
         String name = getPropertyName(method);
         if (name != null) {
-          methods.put(name, method);
+          builder.put(name, method);
         }
       }
     }
+    methods = builder.build();
 
     setters.put(type, methods);
     return methods;

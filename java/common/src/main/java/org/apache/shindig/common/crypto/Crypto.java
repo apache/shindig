@@ -38,7 +38,7 @@ public class Crypto {
    * Use this random number generator instead of creating your own.  This is
    * thread-safe.
    */
-  public static SecureRandom rand = new SecureRandom();
+  public static final SecureRandom rand = new SecureRandom();
   
   /**
    * HMAC algorithm to use

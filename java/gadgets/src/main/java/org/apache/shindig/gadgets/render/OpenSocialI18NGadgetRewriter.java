@@ -80,7 +80,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
           DATA_PATH + "NumberFormatConstants__" + localeName + ".js",
           "opensocial-i18n", null);
       inlineJs.append(dateTimeConstants.getContent())
-        .append("\n").append(numberConstants.getContent()); 
+        .append('\n').append(numberConstants.getContent());
       i18nConstantsCache.put(locale, inlineJs.toString());
     }
     Element inlineTag = headTag.getOwnerDocument().createElement("script");
@@ -102,8 +102,8 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
 
     if (!country.equalsIgnoreCase("ALL")) {
       try {
-        String content = attemptToLoadResource(localeName + "_" + country);
-        localeName += "_" + country; 
+        String content = attemptToLoadResource(localeName + '_' + country);
+        localeName += '_' + country;
       } catch (IOException e) {
       }
     } 
