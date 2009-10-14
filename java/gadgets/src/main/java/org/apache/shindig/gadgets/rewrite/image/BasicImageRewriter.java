@@ -143,7 +143,8 @@ public class BasicImageRewriter implements ImageRewriter {
 
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
       
-      if ("1".equals(request.getParam(PARAM_NO_EXPAND)) &&
+      boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
+      if (noExpand &&
           imageInfo.getHeight() <= requestedHeight &&
           imageInfo.getWidth() <= requestedWidth) {
         // Don't do anything, since the current image fits within the bounding area.
@@ -194,6 +195,18 @@ public class BasicImageRewriter implements ImageRewriter {
 
           int heightAfterStep1 = max(1, (int) (ratio * origHeight));
           heightDelta = requestedHeight - heightAfterStep1;
+          
+          if (noExpand) {
+            // No expansion requested: make sure not to expand the resulting image on either axis,
+            // even if both resize_[w,h] params are specified.
+            if (widthDelta == 0) {
+              requestedHeight = heightAfterStep1;
+              heightDelta = 0;
+            } else if (heightDelta == 0) {
+              requestedWidth = widthAfterStep1;
+              widthDelta = 0;
+            }
+          }
         }
 
         if (resizeQuality == null) {
