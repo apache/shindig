@@ -602,7 +602,7 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
     };
 
     var script = document.createElement('script');
-    script.src = 'http://gmodules.com/ig/gadgetsettings?mid=' + this.id +
+    script.src = 'http://www.gmodules.com/ig/gadgetsettings?mid=' + this.id +
         '&output=js' + this.getUserPrefsParams() +  '&url=' + this.specUrl;
     document.body.appendChild(script);
   }
@@ -636,7 +636,7 @@ gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
       '_numfields').value;
   for (var i = 0; i < numFields; i++) {
     var input = document.getElementById('m_' + this.id + '_' + i);
-    if (input.type != 'hidden') {
+    if (input.type == 'hidden') {
       var userPrefNamePrefix = 'm_' + this.id + '_up_';
       var userPrefName = input.name.substring(userPrefNamePrefix.length);
       var userPrefValue = input.value;
