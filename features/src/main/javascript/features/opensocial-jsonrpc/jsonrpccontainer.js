@@ -69,7 +69,7 @@ var JsonRpcContainer = function(configParams) {
                        };
 
     this.processResponse = function(originalDataRequest, rawJson, error, errorMessage) {
-      var errorCode = error ? JsonRpcContainer.translateHttpError("Error " + error['code']) : null;
+      var errorCode = error ? JsonRpcContainer.translateHttpError(error['code']) : null;
       return new opensocial.ResponseItem(originalDataRequest,
           error ? null : this.processData(rawJson), errorCode, errorMessage);
     };
@@ -233,7 +233,7 @@ var JsonRpcContainer = function(configParams) {
   JsonRpcContainer.generateErrorResponse = function(result, requestObjects,
       callback) {
     var globalErrorCode =
-            JsonRpcContainer.translateHttpError(result.errors[0]
+            JsonRpcContainer.translateHttpError(result.rc
                     || result.data.error)
                     || opensocial.ResponseItem.Error.INTERNAL_ERROR;
 
@@ -246,19 +246,19 @@ var JsonRpcContainer = function(configParams) {
   };
 
   JsonRpcContainer.translateHttpError = function(httpError) {
-    if (httpError === "Error 501") {
+    if (httpError == 501) {
       return opensocial.ResponseItem.Error.NOT_IMPLEMENTED;
-    } else if (httpError === "Error 401") {
+    } else if (httpError == 401) {
       return opensocial.ResponseItem.Error.UNAUTHORIZED;
-    } else if (httpError === "Error 403") {
+    } else if (httpError == 403) {
       return opensocial.ResponseItem.Error.FORBIDDEN;
-    } else if (httpError === "Error 400") {
+    } else if (httpError == 400) {
       return opensocial.ResponseItem.Error.BAD_REQUEST;
-    } else if (httpError === "Error 500") {
+    } else if (httpError == 500) {
       return opensocial.ResponseItem.Error.INTERNAL_ERROR;
-    } else if (httpError === "Error 404") {
+    } else if (httpError == 404) {
       return opensocial.ResponseItem.Error.BAD_REQUEST;
-    } else if (httpError === "Error 417") {
+    } else if (httpError == 417) {
       return opensocial.ResponseItem.Error.LIMIT_EXCEEDED;
     }
   };
@@ -511,7 +511,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   this.processResponse = function(originalDataRequest, rawJson, error,
       errorMessage) {
     var errorCode = error
-      ? JsonRpcContainer.translateHttpError("Error " + error['code'])
+      ? JsonRpcContainer.translateHttpError(error['code'])
       : null;
     return new opensocial.ResponseItem(originalDataRequest,
         error ? null : this.processData(rawJson), errorCode, errorMessage);

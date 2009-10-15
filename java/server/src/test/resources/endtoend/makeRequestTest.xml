@@ -55,7 +55,7 @@
           fetchMakeRequestJson: function() {
             function receivedData(response) {
               assertEquals('Response code not set', 404, response.rc);
-              assertEquals('Errors not an empty array', 0, response.errors.length);
+              assertEquals('Errors not an empty array', 1, response.errors.length);
               finished();
             }
 

@@ -73,9 +73,12 @@ gadgets.io = function() {
     }
     try {
       if (xobj.status !== 200) {
-        // TODO Need to work on standardizing errors
+      	var error = ("" + xobj.status);
+      	if(xobj.responseText) {
+      	  error = error + " " + xobj.responseText;
+      	}
         callback({
-          errors : ["Error " + xobj.status],
+          errors : [error],
           rc : xobj.status,
           text : xobj.responseText
           });
@@ -83,7 +86,7 @@ gadgets.io = function() {
       }
     } catch(e) {
       callback({
-         errors : ["Error not specified"],
+         errors : [e.number + " Error not specified"],
           rc : e.number,
           text : e.description
       });
@@ -143,22 +146,27 @@ gadgets.io = function() {
   }
 
   function transformResponseData(params, data) {
+    // Sometimes rc is not present, generally when used
+    // by jsonrpccontainer, so assume 200 in its absence.
     var resp = {
      text: data.body,
-     rc: data.rc,
+     rc: data.rc || 200,
      headers: data.headers,
      oauthApprovalUrl: data.oauthApprovalUrl,
      oauthError: data.oauthError,
      oauthErrorText: data.oauthErrorText,
      errors: []
     };
-    if (resp.text) {
+    if(resp.rc < 200 || resp.rc > 206){
+    	resp.errors = [resp.rc + " Error"]
+    } else if (resp.text) {
       switch (params.CONTENT_TYPE) {
         case "JSON":
         case "FEED":
           resp.data = gadgets.json.parse(resp.text);
           if (!resp.data) {
-            resp.errors.push("failed to parse JSON");
+            resp.errors.push("500 Failed to parse JSON");
+            resp.rc = 500;
             resp.data = null;
           }
           break;
@@ -170,7 +178,8 @@ gadgets.io = function() {
             dom.validateOnParse = false;
             dom.resolveExternals = false;
             if (!dom.loadXML(resp.text)) {
-              resp.errors.push("failed to parse XML");
+              resp.errors.push("500 Failed to parse XML");
+              resp.rc = 500;
             } else {
               resp.data = dom;
             }
@@ -178,7 +187,8 @@ gadgets.io = function() {
             var parser = new DOMParser();
             dom = parser.parseFromString(resp.text, "text/xml");
             if ("parsererror" === dom.documentElement.nodeName) {
-              resp.errors.push("failed to parse XML");
+              resp.errors.push("500 Failed to parse XML");
+              resp.rc = 500;
             } else {
               resp.data = dom;
             }
@@ -246,7 +256,7 @@ gadgets.io = function() {
           delete gadgets.io.preloaded_[i];
 
           if (preload.rc !== 200) {
-            callback({errors : ["Error " + preload.rc]});
+            callback({rc: preload.rc, errors : [preload.rc + " Error"]});
           } else {
             if (preload.oauthState) {
               oauthState = preload.oauthState;

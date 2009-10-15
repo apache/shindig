@@ -109,8 +109,8 @@ IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "httpMethod", "GET");
 };
 
-IoTest.prototype.makeFakeResponse = function(text) {
-  return new fakeXhr.Response("throw 1; < don't be evil' >" + text, 200);
+IoTest.prototype.makeFakeResponse = function(text, rc) {
+  return new fakeXhr.Response("throw 1; < don't be evil' >" + text, (rc ? rc : 200));
 };
 
 IoTest.prototype.testNoMethod = function() {
@@ -119,7 +119,7 @@ IoTest.prototype.testNoMethod = function() {
   req.setQueryArg("url", "http://target.example.com/somepage");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -138,7 +138,7 @@ IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
   req.setQueryArg("refresh", "1800");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -161,7 +161,7 @@ IoTest.prototype.testNoMethod_disableRefresh = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -184,7 +184,7 @@ IoTest.prototype.testRepeatGet = function() {
   req.setQueryArg("url", "http://target.example.com/somepage");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
   this.fakeXhrs.expect(req, resp);
@@ -215,7 +215,7 @@ IoTest.prototype.testPost = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -243,7 +243,7 @@ IoTest.prototype.testPost_noBody = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -270,7 +270,7 @@ IoTest.prototype.testPost_emptyBody = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -297,7 +297,7 @@ IoTest.prototype.testPut = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -324,7 +324,7 @@ IoTest.prototype.testPut_noBody = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -354,7 +354,7 @@ IoTest.prototype.testSignedGet = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -386,7 +386,7 @@ IoTest.prototype.testSignedPost = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -417,7 +417,7 @@ IoTest.prototype.testSignedGet_noViewerBoolean = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -448,7 +448,7 @@ IoTest.prototype.testSignedGet_noViewerString = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -479,7 +479,7 @@ IoTest.prototype.testSignedGet_withNoOwnerAndViewerString = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -542,7 +542,7 @@ IoTest.prototype.testOAuth = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -677,7 +677,7 @@ IoTest.prototype.testOAuth_serviceAndToken = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -709,7 +709,7 @@ IoTest.prototype.testOAuth_preapprovedToken = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'personal data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -728,6 +728,60 @@ IoTest.prototype.testOAuth_preapprovedToken = function() {
   this.assertEquals("personal data", resp.text);
 };
 
+IoTest.prototype.testServerFailure = function() {
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("contentType", "JSON");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : {
+          'body' : 'Internal Server Failure.',
+          'rc' : 500
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      {
+        "CONTENT_TYPE" : "JSON",
+      });
+  this.assertEquals(500, resp.rc);
+  this.assertEquals(gadgets.json.stringify(["500 Error"]), gadgets.json.stringify(resp.errors));
+  this.assertEquals("Internal Server Failure.", resp.text);
+};
+
+IoTest.prototype.testJsonNonAuthoritative = function() {
+  var req = new fakeXhr.Expectation("GET", "http://example.com/json");
+  this.setStandardArgs(req, false);
+  req.setQueryArg("url", "http://target.example.com/somepage");
+  req.setQueryArg("contentType", "JSON");
+
+  var resp = this.makeFakeResponse(gadgets.json.stringify(
+      { 'http://target.example.com/somepage' : {
+          'body' : '{ "somejsonparam" : 3 }',
+          'rc' : 203
+         }
+      }));
+
+  this.fakeXhrs.expect(req, resp);
+
+  var resp = null;
+  gadgets.io.makeRequest("http://target.example.com/somepage",
+      function(data) {
+        resp = data;
+      },
+      {
+        "CONTENT_TYPE" : "JSON",
+      });
+  this.assertEquals(3, resp.data.somejsonparam);
+};
+
 IoTest.prototype.testJson = function() {
   var req = new fakeXhr.Expectation("GET", "http://example.com/json");
   this.setStandardArgs(req, false);
@@ -737,6 +791,7 @@ IoTest.prototype.testJson = function() {
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : {
           'body' : '{ "somejsonparam" : 3 }',
+          'rc' : 200
          }
       }));
 
@@ -762,6 +817,7 @@ IoTest.prototype.testJson_malformed = function() {
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : {
           'body' : '{ bogus : 3 }',
+          'rc' : 200
          }
       }));
 
@@ -775,7 +831,7 @@ IoTest.prototype.testJson_malformed = function() {
       {
         "CONTENT_TYPE" : "JSON",
       });
-  this.assertEquals("failed to parse JSON", resp.errors[0]);
+  this.assertEquals("500 Failed to parse JSON", resp.errors[0]);
 };
 
 IoTest.prototype.testPreload = function() {
@@ -809,6 +865,7 @@ IoTest.prototype.testPreload = function() {
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : {
           'body' : 'not preloaded',
+          'rc' : 200
          }
       }));
 
@@ -841,7 +898,7 @@ IoTest.prototype.testPreloadMiss_postRequest = function() {
   req.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -872,7 +929,7 @@ IoTest.prototype.testPreloadMiss_wrongUrl = function() {
   req.setQueryArg("url", "http://target.example.com/somepage");
 
   var resp = this.makeFakeResponse(
-      "{ 'http://target.example.com/somepage' : { 'body' : 'some data' }}");
+      "{ 'http://target.example.com/somepage' : { 'body' : 'some data', 'rc' : 200 }}");
 
   this.fakeXhrs.expect(req, resp);
 
@@ -901,7 +958,8 @@ IoTest.prototype.testPreload_error404 = function() {
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : {
-          'body' : 'not preloaded',
+          'body' : 'not preloaded', 
+          'rc' : 200
          }
       }));
 
@@ -912,7 +970,7 @@ IoTest.prototype.testPreload_error404 = function() {
       function(data) {
         resp = data;
       });
-  this.assertEquals("Error 404", resp.errors[0]);
+  this.assertEquals("404 Error", resp.errors[0]);
 
   var resp = null;
   gadgets.io.makeRequest("http://target.example.com/somepage",
@@ -944,7 +1002,8 @@ IoTest.prototype.testPreload_oauthApproval = function() {
 
   var resp = this.makeFakeResponse(gadgets.json.stringify(
       { 'http://target.example.com/somepage' : {
-          'body' : 'not preloaded',
+          'body' : 'not preloaded', 
+          'rc' : 200
          }
       }
       ));
