@@ -254,7 +254,7 @@ public class EndToEndTest {
     
     assertEquals("45", page.getElementById("sum").getTextContent().trim());
     assertEquals("25", page.getElementById("max").getTextContent().trim());
-}
+  }
 
   @Test
   public void testTemplateLibrary() throws Exception {

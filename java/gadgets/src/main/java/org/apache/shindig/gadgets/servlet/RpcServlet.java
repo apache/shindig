@@ -80,31 +80,12 @@ public class RpcServlet extends InjectedServlet {
         ? callbackValue + '(' + result.getOutput() + ')'
         : result.getOutput());
   }
-
+  
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-
-    int length = request.getContentLength();
-    if (length <= 0) {
-      logger.info("No Content-Length specified.");
-      response.setStatus(HttpServletResponse.SC_LENGTH_REQUIRED);
-      return;
-    }
-    if (length > POST_REQUEST_MAX_SIZE) {
-      logger.info("Request size too large: " + length);
-      response.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-      return;
-    }
-
     ServletInputStream is = request.getInputStream();
     byte[] body = IOUtils.toByteArray(is);
-    if (body.length != length) {
-      logger.info("Wrong size. Length: " + length + " real: " + body.length);
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return;
-    }
-
     Result result = process(request, response, body);
     response.getWriter().write(result.getOutput());
   }
