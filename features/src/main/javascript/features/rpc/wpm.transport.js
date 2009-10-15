@@ -88,7 +88,7 @@ gadgets.rpctx.wpm = function() {
         targetWin.postMessage(gadgets.json.stringify(rpc), origin);
       } else {
         gadgets.error("No relay set (used as window.postMessage targetOrigin)" +
-            + ", cannot send cross-domain message");
+            ", cannot send cross-domain message");
       }
       return true;
     }
