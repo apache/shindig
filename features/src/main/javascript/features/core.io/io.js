@@ -48,14 +48,16 @@ gadgets.io = function() {
    * Internal facility to create an xhr request.
    */
   function makeXhr() {
-    if (window.XMLHttpRequest) {
-      return new window.XMLHttpRequest();
-    } else if (window.ActiveXObject) {
-      var x = new ActiveXObject("Msxml2.XMLHTTP");
+    var x; 
+    if (window.ActiveXObject) {
+      x = new ActiveXObject("Msxml2.XMLHTTP");
       if (!x) {
         x = new ActiveXObject("Microsoft.XMLHTTP");
       }
       return x;
+    }
+    else if (window.XMLHttpRequest) {
+      return new window.XMLHttpRequest();
     }
   }
 
