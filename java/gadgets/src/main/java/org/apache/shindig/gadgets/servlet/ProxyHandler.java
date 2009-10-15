@@ -104,7 +104,7 @@ public class ProxyHandler extends ProxyBase {
         // Ignore
       }
     }
-
+    this.setRequestHeaders(request, req);
     return req;
   }
 

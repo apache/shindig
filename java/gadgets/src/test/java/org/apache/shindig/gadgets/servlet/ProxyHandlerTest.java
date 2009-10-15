@@ -165,10 +165,32 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
   }
 
+  public void testXForwardedFor() throws Exception {
+    String url = "http://example.org/";
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    expect(request.getRemoteAddr()).andReturn("127.0.0.1").atLeastOnce();
+    setupProxyRequestMock(domain, url);
+
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    req.setHeader("X-Forwarded-For","127.0.0.1");
+
+    HttpResponse resp = new HttpResponse("Hello");
+
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
+  }
+
   private void expectMime(String expectedMime, String contentMime, String outputMime)
       throws Exception {
     String url = "http://example.org/file.img?" + ProxyHandler.REWRITE_MIME_TYPE_PARAM +
-        "=" + expectedMime;
+        '=' + expectedMime;
     String domain = "example.org";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();

@@ -172,6 +172,8 @@ public class MakeRequestHandler extends ProxyBase {
       req.setSecurityToken(extractAndValidateToken(request));
       req.setOAuthArguments(new OAuthArguments(auth, request));
     }
+
+    this.setRequestHeaders(request, req);
     return req;
   }
 

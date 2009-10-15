@@ -20,12 +20,14 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import java.io.IOException;
@@ -137,6 +139,19 @@ public abstract class ProxyBase {
     // additional referer checks.
     if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type"))) {
       response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    }
+  }
+
+  protected void setRequestHeaders(HttpServletRequest servletRequest, HttpRequest req) {
+    String xff  = servletRequest.getHeader("X-Forwarded-For");
+    String remoteAddr = servletRequest.getRemoteAddr();
+    if (!StringUtils.isEmpty(remoteAddr)) {
+      if (StringUtils.isEmpty(xff)) {
+        xff = servletRequest.getRemoteAddr();
+      } else {
+        xff = servletRequest.getRemoteAddr() + ", " + xff;
+      }
+      req.setHeader("X-Forwarded-For", xff);
     }
   }
 
