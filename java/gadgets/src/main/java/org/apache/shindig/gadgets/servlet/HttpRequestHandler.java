@@ -92,7 +92,7 @@ import com.google.inject.Inject;
 @Service(name = "http")
 public class HttpRequestHandler {
 
-  static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT", "ACCEPT-ENCODING");
+  static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT-ENCODING");
 
   private final RequestPipeline requestPipeline;
   private final RequestRewriterRegistry contentRewriterRegistry;
