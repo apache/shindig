@@ -939,7 +939,9 @@ caja___.register(function(imports) {
   ___.grantFunc(imports.outers, 'alert');
 
   if (console && console.log) {
-    imports.outers.console = console;
+    imports.outers.console = {
+      log: function(msg) { return console.log(msg); }
+    };
     ___.grantRead(imports.outers, 'console');
     ___.grantFunc(imports.outers.console, 'log');
   }
