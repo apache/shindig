@@ -39,29 +39,6 @@ class ProxyBase {
   }
 
   /**
-   * Retrieves the actual content
-   *
-   * @param string $url the url to fetch
-   * @param string $method http method
-   * @param SecurityTokenDecoder $signer
-   * @return RemoteContentRequest the filled in request (RemoteContentRequest)
-   */
-  protected function buildRequest($url, $method = 'GET', $signer = null) {
-    // TODO: Check to see if we can just use MakeRequestOptions::fromCurrentRequest
-    $st = isset($_GET['st']) ? $_GET['st'] : (isset($_POST['st']) ? $_POST['st'] : false);
-    $body = isset($_GET['postData']) ? $_GET['postData'] : (isset($_POST['postData']) ? $_POST['postData'] : false);
-    $authz = isset($_GET['authz']) ? $_GET['authz'] : (isset($_POST['authz']) ? $_POST['authz'] : null);
-    $headers = isset($_GET['headers']) ? $_GET['headers'] : (isset($_POST['headers']) ? $_POST['headers'] : null);
-    $params = new MakeRequestOptions($url);
-    $params->setSecurityTokenString($st)
-      ->setAuthz($authz)
-      ->setRequestBody($body)
-      ->setHttpMethod($method)
-      ->setFormEncodedRequestHeaders($headers);
-    return $this->makeRequest->buildRequest($this->context, $params, $signer);
-  }
-
-  /**
    * Sets the caching (Cache-Control & Expires) with a cache age of $lastModified
    * or if $lastModified === false, sets Pragma: no-cache & Cache-Control: no-cache
    */
@@ -82,16 +59,6 @@ class ProxyBase {
       header("Cache-Control: no-cache", true);
       header("Pragma: no-cache", true);
     }
-  }
-
-  /**
-   * Does a quick-and-dirty url validation
-   *
-   * @param string $url
-   * @return string the 'validated' url
-   */
-  protected function validateUrl($url) {
-    return MakeRequestOptions::validateUrl($url);
   }
 
   /**

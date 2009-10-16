@@ -206,6 +206,50 @@ class MakeRequestOptions {
   }
 
   /**
+   * Builds a MakeRequestOptions object from a RequestItem instance.  This is
+   * a helper for dealing with Handler services which need to call MakeRequest.
+   * The parameter names were taken from the osapi.http spec documents, although
+   * several parameters not in the spec are also supported to allow full
+   * functionality.
+   *
+   * @param RpcRequestItem $request The RpcRequestItem to parse.  The reason
+   *     RpcRequestItem is needed is because of the way getService() and
+   *     getMethod() are overloaded in the RequestItem subclasses.  This
+   *     function needs a reliable way to get the http method.
+   * @return MakeRequestOptions An object initialized from the current request.
+   * @throws MakeRequestParameterException If any of the parameters were
+   *     invalid.
+   */
+  public static function fromRpcRequestItem(RpcRequestItem $request) {
+    $href = $request->getParameter('href');
+    if (!isset($href)) {
+      $href = $request->getParameter('url');
+    }
+
+    $options = new MakeRequestOptions($href);
+    $options->setHttpMethod($request->getMethod())
+            ->setRequestBody($request->getParameter('body'))
+            ->setRequestHeaders($request->getParameter('headers'))
+            ->setResponseFormat($request->getParameter('format'))
+            ->setAuthz($request->getParameter('authz'))
+            ->setSignViewer($request->getParameter('sign_viewer'))     
+            ->setSignOwner($request->getParameter('sign_owner'))
+            ->setNumEntries($request->getParameter('numEntries')) // Not in osapi.http spec, but nice to support
+            ->setGetSummaries($request->getParameter('getSummaries')) // Not in osapi.http spec, but nice to support
+            ->setRefreshInterval($request->getParameter('refreshInterval'))
+            ->setNoCache($request->getParameter('nocache')) // Not in osapi.http spec, but nice to support
+            ->setOAuthServiceName($request->getParameter('oauth_service_name'))
+            ->setOAuthTokenName($request->getParameter('oauth_token_name'))
+            ->setOAuthRequestToken($request->getParameter('oauth_request_token'))
+            ->setOAuthRequestTokenSecret($request->getParameter('oauth_request_token_secret'))
+            ->setOAuthUseToken($request->getParameter('oauth_use_token'))
+            ->setOAuthClientState($request->getParameter('oauth_state')) // Not in osapi.http spec, but nice to support
+            ->setSecurityTokenString(urlencode(base64_encode($request->getToken()->toSerialForm())));
+
+    return $options;
+  }
+
+  /**
    * Gets the configured URL.
    *
    * @return string The value of this parameter.
@@ -317,6 +361,19 @@ class MakeRequestOptions {
     if (isset($this->headers)) {
       $headerString = http_build_query($this->headers);
       return urldecode(str_replace("&", "\n", str_replace("=", ": ", $headerString)));
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Returns the request headers as an array.
+   *
+   * @return array The request header array.
+   */
+  public function getRequestHeadersArray() {
+    if (isset($this->headers)) {
+      return $this->headers;
     } else {
       return false;
     }

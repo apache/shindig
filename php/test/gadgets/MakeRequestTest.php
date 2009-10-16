@@ -233,6 +233,33 @@ class MakeRequestTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
+   * Tests that setting invalid request headers are not passed in the outgoing
+   * request.
+   */
+  public function testInvalidRequestHeaders(){
+    $params = new MakeRequestOptions('http://www.example.com');
+    $params->setRequestHeaders(array(
+      "Content-Type" => "application/json",
+      "Accept-Language" => "en-us",
+      "Host" => "http://www.evil.com",
+      "host" => "http://www.evil.com",
+      "HOST" => "http://www.evil.com",
+      "Accept" => "blah",
+      "Accept-Encoding" => "blah"
+    ));
+    $params->setNoCache(true);
+
+    $request = $this->catchRequest($params, $this->response);
+    $this->assertTrue($request->hasHeaders());
+    $this->assertEquals('application/json', $request->getHeader('Content-Type'));
+    $this->assertEquals('en-us', $request->getHeader('Accept-Language'));
+
+    $this->assertNull($request->getHeader('Host'));
+    $this->assertNull($request->getHeader('Accept'));
+    $this->assertNull($request->getHeader('Accept-Encoding'));
+  }
+
+  /**
    * Tests that setting request headers in a form urlencoded way are passed in the outgoing request.
    */
   public function testFormEncodedRequestHeaders(){
@@ -243,6 +270,58 @@ class MakeRequestTest extends PHPUnit_Framework_TestCase {
     $request = $this->catchRequest($params, $this->response);
     $this->assertTrue($request->hasHeaders());
     $this->assertEquals('application/x-www-form-urlencoded', $request->getHeader('Content-Type'));
+  }
+
+  public function testResponseHeaders() {
+    $params = new MakeRequestOptions('http://www.example.com');
+    $params->setNoCache(true);
+
+    $headers = array(
+      'Content-Type' => 'text/plain'
+    );
+    $this->response->setResponseHeaders($headers);
+    $this->fetcher->enqueueResponse($this->response);
+
+    $result = $this->makeRequest->fetch($this->context, $params);
+    $response_headers = $result->getResponseHeaders();
+
+    $this->assertArrayHasKey('Content-Type', $response_headers);
+    $this->assertEquals('text/plain', $response_headers['Content-Type']);
+  }
+
+  public function testCleanResponseHeaders() {
+    $response_headers = array(
+      'Content-Type' => 'text/plain',
+      'Set-Cookie' => 'blah',
+      'set-cookie' => 'blah',
+      'SET-COOKIE' => 'blah',
+      'sEt-cOoKiE' => 'blah',
+      'Accept-Ranges' => 'blah',
+      'Vary' => 'blah',
+      'Expires' => 'blah',
+      'Date' => 'blah',
+      'Pragma' => 'blah',
+      'Cache-Control' => 'blah',
+      'Transfer-Encoding' => 'blah',
+      'WWW-Authenticate' => 'blah'
+    );
+    
+    $cleaned_headers = $this->makeRequest->cleanResponseHeaders($response_headers);
+
+    $this->assertArrayHasKey('Content-Type', $cleaned_headers);
+    $this->assertEquals('text/plain', $cleaned_headers['Content-Type']);
+    $this->assertArrayNotHasKey('Set-Cookie', $cleaned_headers);
+    $this->assertArrayNotHasKey('set-cookie', $cleaned_headers);
+    $this->assertArrayNotHasKey('SET-COOKIE', $cleaned_headers);
+    $this->assertArrayNotHasKey('sEt-cOoKiE', $cleaned_headers);
+    $this->assertArrayNotHasKey('Accept-Ranges', $cleaned_headers);
+    $this->assertArrayNotHasKey('Vary', $cleaned_headers);
+    $this->assertArrayNotHasKey('Expires', $cleaned_headers);
+    $this->assertArrayNotHasKey('Date', $cleaned_headers);
+    $this->assertArrayNotHasKey('Pragma', $cleaned_headers);
+    $this->assertArrayNotHasKey('Cache-Control', $cleaned_headers);
+    $this->assertArrayNotHasKey('Transfer-Encoding', $cleaned_headers);
+    $this->assertArrayNotHasKey('WWW-Authenticate', $cleaned_headers);
   }
 }
 

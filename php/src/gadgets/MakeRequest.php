@@ -39,7 +39,21 @@ require_once 'src/gadgets/MakeRequestOptions.php';
  */
 
 class MakeRequest {
-
+  /*
+   * List of disallowed request headers taken from
+   * /java/gadgets/src/main/java/org/apache/shindig/gadgets/servlet/HttpRequestHandler.java
+   */
+  static $BAD_REQUEST_HEADERS = array("HOST", "ACCEPT", "ACCEPT-ENCODING");
+  
+  /*
+   * List of disallowed response headers taken from
+   * /java/gadgets/src/main/java/org/apache/shindig/gadgets/servlet/ProxyBase.java
+   */
+  static $BAD_RESPONSE_HEADERS = array(
+    "SET-COOKIE", "CONTENT-LENGTH", "CONTENT-ENCODING", "ETAG", "LAST-MODIFIED",
+    "ACCEPT-RANGES", "VARY", "EXPIRES", "DATE", "PRAGMA", "CACHE-CONTROL",
+    "TRANSFER-ENCODING", "WWW-AUTHENTICATE");
+  
   private $remoteFetcher;
 
   /**
@@ -100,7 +114,24 @@ class MakeRequest {
     if (strpos($result->getResponseContent(), '\u')) {
     	$result->setResponseContent($this->decodeUtf8($result->getResponseContent()));
     }
+
     return $result;
+  }
+
+  /**
+   * Returns a response header array with invalid headers removed.
+   * @param array $headers An associative array of header/value pairs.
+   * The reason this cleaning is not automatic is because some consumers of
+   * MakeRequest may have need to access the stripped headers before
+   * delivering the response to a client.  The reason for removing these headers
+   * is also mostly for performance, rather than security.
+   *
+   * @return array An array with the headers defined in
+   *     MakeRequest::$BAD_RESPONSE_HEADERS removed.  The removal is
+   *     case-insensitive.
+   */
+  public function cleanResponseHeaders($headers) {
+    return $this->stripInvalidArrayKeys($headers, MakeRequest::$BAD_RESPONSE_HEADERS);
   }
 
   /**
@@ -148,16 +179,33 @@ class MakeRequest {
       $token = $context->validateToken($st, $signer);
       $request->setToken($token);
     }
-    $headers = $params->getFormattedRequestHeaders();
+
+    // Strip invalid request headers.  This limits the utility of the
+    // MakeRequest class a little bit, but ensures that none of the invalid
+    // headers are present in any request going through this class.
+    $headers = $params->getRequestHeadersArray();
     if ($headers !== false) {
-      // The request expects headers to be stored as a normal header text blob.
-      // ex: Content-Type: application/atom+xml
-      //     Accept-Language: en-us
-      $request->setHeaders($headers);
+      $headers = $this->stripInvalidArrayKeys($headers, MakeRequest::$BAD_REQUEST_HEADERS);
+      $params->setRequestHeaders($headers);
     }
+
+    // The request expects headers to be stored as a normal header text blob.
+    // ex: Content-Type: application/atom+xml
+    //     Accept-Language: en-us
+    $formattedHeaders = $params->getFormattedRequestHeaders();
+    if ($formattedHeaders !== false) {
+      $request->setHeaders($formattedHeaders);
+    }
+    
     return $request;
   }
 
+  /**
+   * Decodes UTF-8 numeric codes (&#xXXXX, or \uXXXX) from a content string.
+   * @param string $content The content string to decode.
+   * @return string A UTF-8 string where numeric codes have been converted into
+   *     their UTF character representations.
+   */
   public function decodeUtf8($content) {
     if (preg_match("/&#[xX][0-9a-zA-Z]{2,8};/", $content)) {
       $content = preg_replace("/&#[xX]([0-9a-zA-Z]{2,8});/e", "'&#'.hexdec('$1').';'", $content);
@@ -168,6 +216,29 @@ class MakeRequest {
     return mb_decode_numericentity($content, array(0x0, 0xFFFF, 0, 0xFFFF), 'UTF-8');
   }
 
+  /**
+   * Removes any invalid keys from an array in a case insensitive manner.
+   * Used for stripping invalid http headers from a request or response.
+   *
+   * @param array $target The associative array to check for invalid keys.
+   * @param array $invalidKeys An array of keys which are invalid.
+   * @return array A copy of $target with any keys matching a value in
+   *     $invalidKeys removed.
+   */
+  private function stripInvalidArrayKeys($target, $invalidKeys) {
+    $cleaned = array();
+    $upperInvalidKeys = array_map('strtoupper', $invalidKeys);
+
+    foreach ($target as $key => $value) {
+      $upperKey = strtoupper($key);
+      if (in_array($upperKey, $upperInvalidKeys) === FALSE) {
+        $cleaned[$key] = $value;
+      }
+    }
+
+    return $cleaned;
+  }
+  
   /**
    * Handles (RSS & Atom) Type.FEED parsing using Zend's feed parser
    *

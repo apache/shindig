@@ -47,9 +47,8 @@ class MakeRequestHandler extends ProxyBase {
     $result = $this->makeRequest->fetch($this->context, $params);
     $responseArray = array(
       'rc' => (int)$result->getHttpCode(),
-      'body' => $result->getResponseContent()
-      //FIXME: the spec seems to state the response should contain the headers, however java shindig doesn't (and it's a waste of bandwidth 99% of the time), check to see what is correct
-      //'headers' => $result->getResponseHeaders()
+      'body' => $result->getResponseContent(),
+      'headers' => $this->makeRequest->cleanResponseHeaders($result->getResponseHeaders())
     );
     $responseArray = array_merge($responseArray, $result->getMetadatas());
     $json = array($params->getHref() => $responseArray);
