@@ -18,11 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.parse.HtmlSerialization;
-import org.apache.shindig.gadgets.parse.HtmlSerializer;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.InputSource;
 import com.google.caja.lexer.escaping.Escaping;
@@ -42,8 +37,16 @@ import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
 import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -58,7 +61,16 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.GadgetRewriter {
+  public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
+
   private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
+  private Cache<String, Element> cajoledCache;
+
+  @Inject
+  public void setCacheProvider(CacheProvider cacheProvider) {
+    cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
+    System.err.println("Cajoled cache created" + cajoledCache);
+  }
 
   public void rewrite(Gadget gadget, MutableContent content) {
     if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
@@ -99,29 +111,44 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
           }
         }
       };
-
+      String key = HashUtil.rawChecksum(content.getContent().getBytes());
+      Document doc = content.getDocument();
+      Node root = doc.createDocumentFragment();
+      root.appendChild(doc.getDocumentElement());
+      Element cajoledOutput = null;
+      if (null != cajoledCache) {
+        cajoledOutput = cajoledCache.getElement(key);
+        if (null != cajoledOutput) {
+          createContainerFor(doc, doc.adoptNode(cajoledOutput));
+          content.documentChanged();
+          HtmlSerialization.attach(doc, new CajaHtmlSerializer(), null);
+          return;
+        }
+      }
       MessageQueue mq = new SimpleMessageQueue();
       BuildInfo bi = BuildInfo.getInstance();
       DefaultGadgetRewriter rw = new DefaultGadgetRewriter(bi, mq);
       rw.setValijaMode(true);
       InputSource is = new InputSource(retrievedUri);
-      Document doc = content.getDocument();
-      Node root = doc.createDocumentFragment();
-      root.appendChild(doc.getDocumentElement());
       boolean safe = false;
+      
       try {
-        Pair<Node, Element> htmlAndJs = rw.rewriteContent(retrievedUri, root,
-            cb);
+        Pair<Node, Element> htmlAndJs = rw.rewriteContent(retrievedUri, root, cb);
         Node html = htmlAndJs.a;
         Element script = htmlAndJs.b;
 
-        Element cajoledOutput = doc.createElement("div");
+        cajoledOutput = doc.createElement("div");
         cajoledOutput.setAttribute("id", "cajoled-output");
         cajoledOutput.setAttribute("classes", "g___");
+        cajoledOutput.setAttribute("style", "position: relative;");
+        
         cajoledOutput.appendChild(doc.adoptNode(html));
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
-
+        
+        if (cajoledCache != null) {
+          cajoledCache.addElement(key, cajoledOutput);
+        }
         createContainerFor(doc, cajoledOutput);
         content.documentChanged();
         safe = true;
@@ -131,6 +158,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         // Content is only used to produce useful snippets with error messages
         createContainerFor(doc, formatErrors(doc, is, content.getContent(), mq));
         logException(e, mq);
+        safe = true;
       } finally {
         if (!safe) {
           // Fail safe
@@ -140,7 +168,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
     }
   }
 
-  private void createContainerFor(Document doc, Element el) {
+  private void createContainerFor(Document doc, Node el) {
     Element docEl = doc.createElement("html");
     Element head = doc.createElement("head");
     Element body = doc.createElement("body");
