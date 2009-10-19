@@ -28,4 +28,11 @@
     <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>    
   </gadget>
+  <container>
+    <script src="osapi.js"></script>
+    <script src="batch.js"></script>
+    <script src="jsonrpctransport.js"></script>
+    <script src="gadgetsrpctransport.js"></script>
+    <script src="peoplehelpers.js"></script>
+  </container>
 </feature>
