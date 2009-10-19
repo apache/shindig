@@ -55,6 +55,8 @@ public class ProxyHandler extends ProxyBase {
   private static final String[] INTEGER_RESIZE_PARAMS = new String[] {
     PARAM_RESIZE_HEIGHT, PARAM_RESIZE_WIDTH, PARAM_RESIZE_QUALITY, PARAM_NO_EXPAND
   };
+  
+  static final String FALLBACK_URL_PARAM = "fallback_url";
 
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
@@ -72,8 +74,13 @@ public class ProxyHandler extends ProxyBase {
   /**
    * Generate a remote content request based on the parameters sent from the client.
    */
-  private HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    Uri url = validateUrl(request.getParameter(URL_PARAM));
+  private HttpRequest buildHttpRequest(HttpServletRequest request, String urlParam)
+      throws GadgetException {
+    String theUrl = request.getParameter(urlParam);
+    if (theUrl == null) {
+      return null;
+    }
+    Uri url = validateUrl(theUrl);
 
     HttpRequest req = new HttpRequest(url)
         .setContainer(getContainer(request));
@@ -135,8 +142,17 @@ public class ProxyHandler extends ProxyBase {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg);
     }
 
-    HttpRequest rcr = buildHttpRequest(request);
+    HttpRequest rcr = buildHttpRequest(request, URL_PARAM);
     HttpResponse results = requestPipeline.execute(rcr);
+    
+    if (results.isError()) {
+      // Error: try the fallback. Particularly useful for proxied images.
+      HttpRequest fallbackRcr = buildHttpRequest(request, FALLBACK_URL_PARAM);
+      if (fallbackRcr != null) {
+        results = requestPipeline.execute(fallbackRcr);
+      } 
+    }
+    
     if (contentRewriterRegistry != null) {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);

@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 
 import com.google.common.collect.Maps;
 
@@ -144,6 +145,29 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertEquals(contentType, recorder.getHeader("Content-Type"));
     assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
     assertTrue(rewriter.responseWasRewritten());
+  }
+  
+  public void testGetFallback() throws Exception {
+    String url = "http://example.org/file.evil";
+    String domain = "example.org";
+    String fallback_url = "http://fallback.com/fallback.png";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expect(request.getParameter(ProxyBase.IGNORE_CACHE_PARAM)).andReturn("1").atLeastOnce();
+    expect(request.getParameter(ProxyHandler.FALLBACK_URL_PARAM)).andReturn(fallback_url).atLeastOnce();
+
+    HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
+    HttpResponse resp = HttpResponse.error();
+    HttpResponse fallback_resp = new HttpResponse("Fallback");
+    expect(pipeline.execute(req)).andReturn(resp);
+    expect(pipeline.execute(isA(HttpRequest.class))).andReturn(fallback_resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
   }
 
   public void testNoCache() throws Exception {
