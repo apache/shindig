@@ -76,17 +76,15 @@ gadgets.log.logAtLevel = function(level, message) {
   }
 
   var logger;
-  var console = gadgets.log.console;
+  var gadgetconsole = gadgets.log._console;
 
-  if (level == gadgets.log.WARNING && console.warn) {
-    logger = console.warn;
-  } else if (level == gadgets.log.ERROR && console.error) {
-    logger = console.error;
-  } else {
-    logger = console.log;
+  if (level == gadgets.log.WARNING && gadgetconsole.warn) {
+    gadgetconsole.warn(message)
+  } else if (level == gadgets.log.ERROR && gadgetconsole.error) {
+    gadgetconsole.error(message);
+  } else if (gadgetconsole.log) {
+    gadgetconsole.log(message);
   }
-
-  logger(message);
 };
 
 /**
@@ -125,5 +123,5 @@ gadgets.log.logLevelThreshold_ = gadgets.log.INFO;
  * @private
  * @static
  */
-gadgets.log.console = window.console ? window.console :
+gadgets.log._console = window.console ? window.console :
                        window.opera   ? window.opera.postError : undefined;
