@@ -38,7 +38,6 @@ import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
@@ -159,7 +158,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       // This can be one script block.
       Element mainScriptTag = document.createElement("script");
-      injectMessageBundles(gadget, mainScriptTag);
+      GadgetContext context = gadget.getContext();
+      MessageBundle bundle = messageBundleFactory.getBundle(
+          gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
+      injectMessageBundles(bundle, mainScriptTag);
       injectDefaultPrefs(gadget, mainScriptTag);
       injectPreloads(gadget, mainScriptTag);
 
@@ -168,10 +170,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       Element body = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body");
 
-      LocaleSpec localeSpec = gadget.getLocale();
-      if (localeSpec != null) {
-        body.setAttribute("dir", localeSpec.getLanguageDirection());
-      }
+      body.setAttribute("dir", bundle.getLanguageDirection());
 
       // re append head content
       for (Node node : existingHeadContent) {
@@ -430,11 +429,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * Injects message bundles into the gadget output.
    * @throws GadgetException If we are unable to retrieve the message bundle.
    */
-  private void injectMessageBundles(Gadget gadget, Node scriptTag) throws GadgetException {
-    GadgetContext context = gadget.getContext();
-    MessageBundle bundle = messageBundleFactory.getBundle(
-        gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
-
+  private void injectMessageBundles(MessageBundle bundle, Node scriptTag) throws GadgetException {
     String msgs = bundle.toJSONString();
 
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setMessages_(");

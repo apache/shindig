@@ -96,10 +96,10 @@ public class MessageBundle {
     String dir = null;
     for (MessageBundle bundle : bundles) {
       merged.putAll(bundle.messages);
-      dir = bundle.languageDirection;
+      dir = bundle == EMPTY ? dir : bundle.languageDirection;
     }
     messages = ImmutableMap.copyOf(merged);
-    languageDirection = dir;
+    languageDirection = dir != null ? dir : "ltr";
   }
 
   private MessageBundle() {

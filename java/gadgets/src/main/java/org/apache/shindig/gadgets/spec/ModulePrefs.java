@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
 import com.google.common.base.Joiner;
@@ -29,8 +28,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import java.util.*;
-import java.io.File;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
