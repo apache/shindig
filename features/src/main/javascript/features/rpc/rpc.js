@@ -264,12 +264,12 @@ gadgets.rpc = function() {
     }
     url = url.toLowerCase();
     if (url.indexOf("//") == 0) {
-      url = window.location.protocol + ":" + url;
+      url = window.location.protocol + url;
     }
     if (url.indexOf("http://") != 0 &&
         url.indexOf("https://") != 0) {
       // Assumed to be schemaless. Default to current protocol.
-      url = window.location.protocol + "://" + url;
+      url = window.location.protocol + "//" + url;
     }
     // At this point we guarantee that "://" is in the URL and defines
     // current protocol. Skip past this to search for host:port.
