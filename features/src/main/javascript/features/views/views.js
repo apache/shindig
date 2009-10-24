@@ -185,6 +185,18 @@ gadgets.views = function() {
         return j;
       }
 
+      function objectIsEmpty(v) {
+    	if ((typeof v === 'object') || (typeof v === 'function')) {
+    	  for (i in v) {
+    	    if (v.hasOwnProperty(i)) {
+    	      return false;
+    	    }
+    	  }
+	  return true;
+	}
+	return false;
+      }
+
       while ((group = expansionRE.exec(urlTemplate))) {
         result.push(urlTemplate.substring(textStart, group.index));
         textStart = expansionRE.lastIndex;
@@ -203,10 +215,11 @@ gadgets.views = function() {
               flag = 1;
             case 'opt':
               if (matchVars(vars, {flag: flag}, function(j, v) {
-                    if (typeof v !== 'undefined' && (typeof v !== 'object' || v.length)) {
+                    if (typeof v !== 'undefined' && !objectIsEmpty(v)) {
                       j.flag = !j.flag;
                       return 1;
                     }
+                    return 0;
                   }).flag) {
                 result.push(arg);
               }
@@ -215,6 +228,12 @@ gadgets.views = function() {
               result.push(matchVars(vars, [], function(j, v, k) {
                 if (typeof v === 'string') {
                   j.push(k + '=' + v);
+                } else if (typeof v === 'object') {
+                  for (i in v) {
+                    if (v.hasOwnProperty(i)) {
+                      j.push(i + '=' + v[i]);
+		    }
+		  }
                 }
               }).join(arg));
               break;
