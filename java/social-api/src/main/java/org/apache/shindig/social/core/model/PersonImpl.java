@@ -634,7 +634,8 @@ public class PersonImpl implements Person {
     if (url != null) {
       url.setValue(profileUrl);
     } else {
-      setUrls(addListField(new UrlImpl(profileUrl, null, PROFILE_URL_TYPE), getUrls()));
+      if (profileUrl != null)
+        setUrls(addListField(new UrlImpl(profileUrl, null, PROFILE_URL_TYPE), getUrls()));
     }
   }
 
@@ -648,7 +649,8 @@ public class PersonImpl implements Person {
     if (photo != null) {
       photo.setValue(thumbnailUrl);
     } else {
-      setPhotos(addListField(new ListFieldImpl(THUMBNAIL_PHOTO_TYPE, thumbnailUrl), getPhotos()));
+      if (thumbnailUrl != null)
+        setPhotos(addListField(new ListFieldImpl(THUMBNAIL_PHOTO_TYPE, thumbnailUrl), getPhotos()));
     }
   }
 
