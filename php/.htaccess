@@ -24,4 +24,5 @@
         RewriteRule (.*) index.php [L]
 	# for OAuth signatures to work for POSTed data, always_populate_raw_data needs to be turned on
 	php_flag always_populate_raw_post_data On
+        php_flag magic_quotes_gpc Off
 </IfModule>
