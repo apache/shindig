@@ -67,7 +67,7 @@ abstract class ApiServlet extends HttpServlet {
       // make sure the content type is in all lower case since that's what we'll check for in the handlers
       $_SERVER['CONTENT_TYPE'] = strtolower($_SERVER['CONTENT_TYPE']);
     }
-    $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json', 'application/json-rpc', 'application/jsonrequest');
+    $acceptedContentTypes = array('application/atom+xml', 'application/xml', 'application/json', 'application/json-rpc', 'application/jsonrequest', 'application/javascript');
     if (isset($_SERVER['CONTENT_TYPE'])) {
       // normalize things like "application/json; charset=utf-8" to application/json
       foreach ($acceptedContentTypes as $contentType) {
