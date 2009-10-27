@@ -120,7 +120,7 @@ Running with Caja
 
 Caja is an important part of OpenSocial that greatly enhances JavaScript security.
 Caja is managed in a separate open source project hosted by Google code projects.
-For more information on Caja, see: http://code.google.com/p/google-caja/wiki/CajaEasyIntro
+For more information on Caja, see: http://code.google.com/p/google-caja/wiki/GettingStarted
 
    1) Load this page: http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html
    2) Point it to this gadget: http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml
