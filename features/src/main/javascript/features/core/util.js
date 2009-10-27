@@ -34,11 +34,11 @@ gadgets.util = function() {
    * Parses URL parameters into an object.
    * @return {Array.&lt;String&gt;} The parameters
    */
-  function parseUrlParams() {
+  function parseUrlParams(url) {
     // Get settings from url, 'hash' takes precedence over 'search' component
     // don't use document.location.hash due to browser differences.
     var query;
-    var l = document.location.href;
+    var l = url;
     var queryIdx = l.indexOf("?");
     var hashIdx = l.indexOf("#");
     if (hashIdx === -1) {
@@ -108,16 +108,20 @@ gadgets.util = function() {
     /**
      * Gets the URL parameters.
      *
+     * @param {String} opt_url Optional URL whose parameters to parse.
+     *                         Defaults to window's current URL.
      * @return {Object} Parameters passed into the query string
      * @member gadgets.util
      * @private Implementation detail.
      */
-    getUrlParameters : function () {
-      if (parameters !== null) {
+    getUrlParameters : function (opt_url) {
+      if (parameters !== null && typeof opt_url === "undefined") {
+        // "parameters" is a cache of current window params only.
         return parameters;
       }
+      var parsed = {};
       parameters = {};
-      var pairs = parseUrlParams();
+      var pairs = parseUrlParams(opt_url || document.location.href);
       var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
       for (var i = 0, j = pairs.length; i < j; ++i) {
         var pos = pairs[i].indexOf('=');
@@ -130,9 +134,13 @@ gadgets.util = function() {
         // argname. Unclear on if it should do:
         // argname = argname.replace(/\+/g, " ");
         value = value.replace(/\+/g, " ");
-        parameters[argName] = unesc(value);
+        parsed[argName] = unesc(value);
       }
-      return parameters;
+      if (typeof opt_url === "undefined") {
+        // Cache current-window params in parameters var.
+        parameters = parsed;
+      }
+      return parsed;
     },
 
     /**

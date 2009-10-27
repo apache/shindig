@@ -66,8 +66,7 @@ gadgets.rpc = function() {
   // Special service name for acknowledgements.
   var ACK = '__ack';
 
-  // Timeout and number of setup attempts between each
-  // for when setAuthToken is called before the target it specifies exists.
+  // Timeout and number of attempts made to setup a transport receiver.
   var SETUP_FRAME_TIMEOUT = 500;
   var SETUP_FRAME_MAX_TRIES = 10;
 
@@ -84,7 +83,7 @@ gadgets.rpc = function() {
   var earlyRpcQueue = {};
 
   // isGadget =~ isChild for the purposes of rpc (used only in setup).
-  var isGadget = (window.top !== window.self);
+  var isChild = (window.top !== window.self);
 
   // Set the current rpc ID from window.name immediately, to prevent
   // shadowing of window.name by a "var name" declaration, or similar.
@@ -99,7 +98,7 @@ gadgets.rpc = function() {
         gadgets.log("gadgets.rpc." + name + "(" +
                     gadgets.json.stringify(Array.prototype.slice.call(arguments)) +
                     "): call ignored. [caller: " + document.location +
-                    ", isGadget: " + isGadget + "]");
+                    ", isChild: " + isChild + "]");
       }
     }
     return {
@@ -121,11 +120,9 @@ gadgets.rpc = function() {
     params = gadgets.util.getUrlParameters();
   }
 
-  authToken['..'] = params.rpctoken || params.ifpctok || "";
-
   // Indicates whether to support early-message queueing, which is designed
   // to ensure that all messages sent by gadgets.rpc.call, irrespective
-  // when they were made (before/after setAuthToken, before/after transport
+  // when they were made (before/after setupReceiver, before/after transport
   // setup complete), are sent. Hiding behind a query param to allow opt-in
   // for a time while this technique is proven.
   var useEarlyQueueing = (params['rpc_earlyq'] === "1");
@@ -172,7 +169,7 @@ gadgets.rpc = function() {
     for (var i = 0; i < earlyQueue.length; ++i) {
       var rpc = earlyQueue[i];
       // There was no auth/rpc token set before, so set it now.
-      rpc.t = gadgets.rpc.getAuthToken(receiverId);
+      rpc.t = getAuthToken(receiverId);
       tx.call(receiverId, rpc.f, rpc);
     }
 
@@ -200,7 +197,7 @@ gadgets.rpc = function() {
       // Validate auth token.
       if (authToken[rpc.f]) {
         // We don't do type coercion here because all entries in the authToken
-        // object are strings, as are all url params. See setAuthToken(...).
+        // object are strings, as are all url params. See setupReceiver(...).
         if (authToken[rpc.f] !== rpc.t) {
           throw new Error("Invalid auth token. " +
               authToken[rpc.f] + " vs " + rpc.t);
@@ -398,8 +395,27 @@ gadgets.rpc = function() {
     return false;
   }
 
-  // gadgets.config might not be available, such as when serving container js.
-  if (isGadget && gadgets.config) {
+  function setRelayUrl(targetId, url, opt_useLegacy) {
+    relayUrl[targetId] = url;
+    useLegacyProtocol[targetId] = !!opt_useLegacy;
+  }
+
+  function getAuthToken(targetId) {
+    return authToken[targetId];
+  }
+
+  function setAuthToken(targetId, token) {
+    token = token || "";
+
+    // Coerce token to a String, ensuring that all authToken values
+    // are strings. This ensures correct comparison with URL params
+    // in the process(rpc) method.
+    authToken[targetId] = String(token);
+
+    setupFrame(targetId, token);
+  }
+
+  function setupContainerGadgetContext(rpctoken) {
     /**
      * Initializes gadget to container RPC params from the provided configuration.
      */
@@ -429,27 +445,76 @@ gadgets.rpc = function() {
           }
         }
       }
-      relayUrl['..'] = parentRelayUrl;
 
       var useLegacy = !!configRpc.useLegacyProtocol;
-      useLegacyProtocol['..'] = useLegacy;
+      setRelayUrl('..', parentRelayUrl, useLegacy);
+
       if (useLegacy) {
         transport = gadgets.rpctx.ifpc;
         transport.init(process, transportReady);
       }
 
-      // Here, we add a hook for the transport to actively set up
-      // gadget -> container communication. Running here ensures
-      // that relayUri info will be available.
-      if (transport.setup('..') === false) {
-        receiverTx['..'] = fallbackTransport;
-      }
+      // Sets the auth token and signals transport to setup connection to container.
+      setAuthToken('..', rpctoken);
     }
 
     var requiredConfig = {
       parentRelayUrl : gadgets.config.NonEmptyStringValidator
     };
     gadgets.config.register("rpc", requiredConfig, init);
+  }
+
+  function setupContainerGenericIframe(rpctoken, opt_parent) {
+    // Generic child IFRAME setting up connection w/ its container.
+    // Use the opt_parent param if provided, or the "parent" query param
+    // if found -- otherwise, do nothing since this call might be initiated
+    // automatically at first, then actively later in IFRAME code.
+    var parent = opt_parent || params.parent;
+    if (parent) {
+      setRelayUrl('..', parent);
+      setAuthToken('..', rpctoken);
+    }
+  }
+
+  function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken) {
+    if (!gadgets.util) {
+      return;
+    }
+    var childIframe = document.getElementById(gadgetId);
+    if (!childIframe) {
+      throw new Error("Cannot set up gadgets.rpc receiver with ID: " + gadgetId +
+          ", element not found.");
+    }
+
+    // The "relay URL" can either be explicitly specified or is set as
+    // the child IFRAME URL verbatim.
+    var relayUrl = opt_frameurl || childIframe.src;
+    setRelayUrl(gadgetId, relayUrl);
+
+    // The auth token is parsed from child params (rpctoken) or overridden.
+    var childParams = gadgets.util.getUrlParameters(childIframe.src);
+    var rpctoken = opt_authtoken || childParams.rpctoken;
+    setAuthToken(gadgetId, rpctoken);
+  }
+
+  function setupReceiver(targetId, opt_receiverurl, opt_authtoken) {
+    if (targetId === '..') {
+      // Gadget/IFRAME to container.
+      var rpctoken = opt_authtoken || params.rpctoken || params.ifpctok || "";
+      if (gadgets.config) {
+        setupContainerGadgetContext(rpctoken);
+      } else {
+        setupContainerGenericIframe(rpctoken, opt_receiverurl);
+      }
+    } else {
+      // Container to child.
+      setupChildIframe(targetId, opt_receiverurl, opt_authtoken);
+    }
+  }
+
+  // gadgets.config might not be available, such as when serving container js.
+  if (isChild) {
+    setupReceiver('..');
   }
 
   return /** @scope gadgets.rpc */ {
@@ -617,11 +682,9 @@ gadgets.rpc = function() {
      *     wire format.
      *
      * @member gadgets.rpc
+     * @deprecated
      */
-    setRelayUrl: function(targetId, url, opt_useLegacy) {
-      relayUrl[targetId] = url;
-      useLegacyProtocol[targetId] = !!opt_useLegacy;
-    },
+    setRelayUrl: setRelayUrl,
 
     /**
      * Sets the auth token of a target frame.
@@ -630,24 +693,49 @@ gadgets.rpc = function() {
      *     calls to or from this target id.
      *
      * @member gadgets.rpc
+     * @deprecated
      */
-    setAuthToken: function(targetId, token) {
-      token = token || "";
+    setAuthToken: setAuthToken,
 
-      // Coerce token to a String, ensuring that all authToken values
-      // are strings. This ensures correct comparison with URL params
-      // in the process(rpc) method.
-      authToken[targetId] = String(token);
-
-      setupFrame(targetId, token);
-    },
+    /**
+     * Sets up the gadgets.rpc library to communicate with the receiver.
+     * This method replaces setRelayUrl(...) and setAuthToken(...)
+     *
+     * Simplified instructions - highly recommended:
+     * 1. Generate <iframe id="<ID>" url="...#parent=<PARENTURL>&rpctoken=<RANDOM>"/>
+     *    and add to DOM.
+     * 2. Call gadgets.rpc.setupReceiver("<ID>");
+     * --> All parent/child communication initializes automatically from here.
+     *     Naturally, both sides need to include the library.
+     *
+     * Detailed container/parent instructions:
+     * 1. Create the target IFRAME (eg. gadget) with a given <ID> and params
+     *    rpctoken=<token> (eg. #rpctoken=1234), which is a random/unguessbable
+     *    string, and parent=<url>, where <url> is the URL of the container.
+     * 2. Append IFRAME to the document.
+     * 3. Call gadgets.rpc.setupReceiver(<ID>)
+     * [Optional]. Strictly speaking, you may omit rpctoken and parent. This
+     *             practice earns little but is occasionally useful for testing.
+     *             If you omit parent, you MUST pass your container URL as the 2nd
+     *             parameter to this method.
+     *
+     * Detailed gadget/child IFRAME instructions:
+     * 0. If your container/parent passed parent and rpctoken params (query string
+     *    or fragment are both OK), you needn't do anything. The library will self-
+     *    initialize.
+     * 1. If "parent" is omitted, you MUST call this method with targetId '..'
+     *    and the second param set to the parent URL.
+     * 2. If "rpctoken" is omitted, but the container set an authToken manually
+     *    for this frame, you MUST pass that ID (however acquired) as the 2nd param
+     *    to this method.
+     */
+    setupReceiver: setupReceiver,
 
     /**
      * Helper method to retrieve the authToken for a given gadget.
+     * Not to be used directly.
      */
-    getAuthToken: function(targetId) {
-      return authToken[targetId];
-    },
+    getAuthToken: getAuthToken,
 
     /**
      * Gets the RPC relay mechanism.
@@ -669,10 +757,10 @@ gadgets.rpc = function() {
      *        JSON-encoded and URI escaped packet data.
      *
      * @member gadgets.rpc
+     * @deprecated
      */
     receive: function(fragment) {
       if (fragment.length > 4) {
-        // TODO parse fragment[1..3] to merge multi-fragment messages
         process(gadgets.json.parse(
             decodeURIComponent(fragment[fragment.length - 1])));
       }

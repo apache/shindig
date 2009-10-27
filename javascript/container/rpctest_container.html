@@ -112,8 +112,7 @@
           // "correct" way.
           container.innerHTML = iframeHtml;
           document.getElementById('gadget').src = renderUrl;
-          gadgets.rpc.setRelayUrl('gadget', gadgetrelay);
-          gadgets.rpc.setAuthToken('gadget', secret);
+          gadgets.rpc.setupReceiver('gadget'); // use the new init API, which parses out all needed variables.
         }
       }
 
