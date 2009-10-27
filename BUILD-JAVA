@@ -56,9 +56,9 @@ Editing the Shindig code with Eclipse
 1 - Install the Maven Eclipse plugin from
     http://m2eclipse.sonatype.org/update/
   
-  * There is an optional dependancy on Sublipse which you can get from
+  * There is an optional dependency on Sublipse which you can get from
     http://subclipse.tigris.org/
-    If not installing this dependancy then select only the Maven Integration plug-in.
+    If not installing this dependency then select only the Maven Integration plug-in.
 
 2 - Creating and Importing the Eclipse Projects
 
