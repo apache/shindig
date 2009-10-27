@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.XmlException;
@@ -53,6 +54,7 @@ import java.util.logging.Level;
  * loader.loadFeatures("res://features/", registry);
  * loader.loadFeatures("/home/user/my-features/", registry);
  */
+@Singleton
 public class JsFeatureLoader {
 
   public final static char FILE_SEPARATOR = ',';
@@ -316,7 +318,7 @@ public class JsFeatureLoader {
     }
   }
   
-  protected JsLibrary createJsLibrary(JsLibrary.Type type, String content, String feature,
+  public JsLibrary createJsLibrary(JsLibrary.Type type, String content, String feature,
       HttpFetcher fetcher) throws GadgetException {
     return JsLibrary.create(type, content, feature, fetcher);
   }

@@ -22,6 +22,7 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -29,10 +30,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.google.inject.Inject;
+
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Produce data constants that are needed by the opensocial-i18n
@@ -41,8 +44,14 @@ import java.util.Map;
 public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
   private static final String I18N_FEATURE_NAME = "opensocial-i18n";
   private static final String DATA_PATH = "features/i18n/data/";
-  private Map<Locale, String> i18nConstantsCache = new HashMap<Locale, String>();
+  private Map<Locale, String> i18nConstantsCache = new ConcurrentHashMap<Locale, String>();
+  private JsFeatureLoader jsFeatureLoader;
 
+  @Inject
+  public OpenSocialI18NGadgetRewriter(JsFeatureLoader jsFeatureLoader) {
+	  this.jsFeatureLoader = jsFeatureLoader;
+  }
+  
   public void rewrite(Gadget gadget, MutableContent mutableContent) {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
@@ -73,10 +82,10 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     } else {
       // load gadgets.i18n.DateTimeConstants and gadgets.i18n.NumberFormatConstants
       String localeName = getLocaleNameForLoadingI18NConstants(locale);
-      JsLibrary dateTimeConstants = JsLibrary.create(JsLibrary.Type.RESOURCE,
+      JsLibrary dateTimeConstants = jsFeatureLoader.createJsLibrary(JsLibrary.Type.RESOURCE,
           DATA_PATH + "DateTimeConstants__" + localeName + ".js",
           "opensocial-i18n", null);
-      JsLibrary numberConstants = JsLibrary.create(JsLibrary.Type.RESOURCE,
+      JsLibrary numberConstants = jsFeatureLoader.createJsLibrary(JsLibrary.Type.RESOURCE,
           DATA_PATH + "NumberFormatConstants__" + localeName + ".js",
           "opensocial-i18n", null);
       inlineJs.append(dateTimeConstants.getContent())
@@ -94,7 +103,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     String country = locale.getCountry(); 
     if (!language.equalsIgnoreCase("ALL")) {
       try {
-        String content = attemptToLoadResource(language);
+        attemptToLoadResource(language);
         localeName = language; 
       } catch (IOException e) {
       }
@@ -102,7 +111,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
 
     if (!country.equalsIgnoreCase("ALL")) {
       try {
-        String content = attemptToLoadResource(localeName + '_' + country);
+        attemptToLoadResource(localeName + '_' + country);
         localeName += '_' + country;
       } catch (IOException e) {
       }
