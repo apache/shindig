@@ -149,8 +149,8 @@ shindig.samplecontainer = {};
     gadgets.container.view_ = current_view;
     gadgets.container.gadgets_ = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
-      gadget = gadgets.container.createGadget(
-          {'specUrl': metadata.gadgets[i].url, 'title': metadata.gadgets[i].title});
+      gadget = gadgets.container.createGadget({'specUrl': metadata.gadgets[i].url,
+          'title': metadata.gadgets[i].title, 'userPrefs': metadata.gadgets[i].userPrefs});
       // Shindigs rpc code uses direct javascript calls when running on the same domain
       // to simulate cross-domain when running sample container we replace 
       // 'localhost' with '127.0.0.1' 
@@ -170,10 +170,10 @@ shindig.samplecontainer = {};
   function refreshGadgets(metadata) {
     // TODO: The gadget.js file should really have a getGadgets method
     for (var gadget in gadgets.container.gadgets_) {
-      var newtitle = metadata.gadgets[0].title;
-      var specUrl = metadata.gadgets[0].url;
-      gadgets.container.gadgets_[gadget].title = newtitle;
-      gadgets.container.gadgets_[gadget].specUrl = specUrl;
+      var gadgetMetadata = metadata.gadgets[0];
+      gadgets.container.gadgets_[gadget].title = gadgetMetadata.title;
+      gadgets.container.gadgets_[gadget].specUrl = gadgetMetadata.url;
+      gadgets.container.gadgets_[gadget].userPrefs = gadgetMetadata.userPrefs;
       gadgets.container.gadgets_[gadget].secureToken = escape(generateSecureToken());
     }
     reloadStateFile(function() {

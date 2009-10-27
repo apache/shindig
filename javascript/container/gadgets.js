@@ -206,11 +206,10 @@ gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
     value) {
   var id = gadgets.container.gadgetService.getGadgetIdFromModuleId(this.f);
   var gadget = gadgets.container.getGadget(id);
-  var prefs = gadget.getUserPrefs() || {};
   for (var i = 1, j = arguments.length; i < j; i += 2) {
-    prefs[arguments[i]] = arguments[i + 1];
+    this.userPrefs[arguments[i]].value = arguments[i + 1];
   }
-  gadget.setUserPrefs(prefs);
+  gadget.saveUserPrefs();
 };
 
 /**
@@ -373,6 +372,8 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "private": Whether gadget spec is accessible only privately, which means
  *        browser can load it but not gadget server
  *    "spec": Gadget Specification in XML
+ *    "userPrefs": a javascript object containing attribute value pairs of user
+ *        preferences for this gadget with the value being a preference object
  *    "viewParams": a javascript object containing attribute value pairs
  *        for this gadgets
  *    "secureToken": an encoded token that is passed on the URL hash
@@ -386,7 +387,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *        javascript
  */
 gadgets.Gadget = function(params) {
-  this.userPrefs_ = {};
+  this.userPrefs = {};
 
   if (params) {
     for (var name in params)  if (params.hasOwnProperty(name)) {
@@ -401,21 +402,17 @@ gadgets.Gadget = function(params) {
 };
 
 gadgets.Gadget.prototype.getUserPrefs = function() {
-  return this.userPrefs_;
+  return this.userPrefs;
 };
 
-gadgets.Gadget.prototype.setUserPrefs = function(userPrefs) {
-  this.userPrefs_ = userPrefs;
+gadgets.Gadget.prototype.saveUserPrefs = function() {
   gadgets.container.userPrefStore.savePrefs(this);
 };
 
-gadgets.Gadget.prototype.getUserPref = function(name) {
-  return this.userPrefs_[name];
-};
-
-gadgets.Gadget.prototype.setUserPref = function(name, value) {
-  this.userPrefs_[name] = value;
-  gadgets.container.userPrefStore.savePrefs(this);
+gadgets.Gadget.prototype.getUserPrefValue = function(name) {
+  var pref = this.userPrefs[name];
+  return typeof(pref.value) != 'undefined' && pref.value != null ?
+      pref.value : pref['default'];
 };
 
 gadgets.Gadget.prototype.render = function(chrome) {
@@ -423,7 +420,7 @@ gadgets.Gadget.prototype.render = function(chrome) {
     var gadget = this;
     this.getContent(function(content) {
       chrome.innerHTML = content;
-      window.frames[gadget.getIframeId()].location = gadget.getIframeUrl(); 
+      window.frames[gadget.getIframeId()].location = gadget.getIframeUrl();
     });
   }
 };
@@ -501,15 +498,18 @@ gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
 gadgets.IfrGadget.prototype.rpcRelay = 'files/container/rpc_relay.html';
 
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
+  var settingsButton = this.hasViewablePrefs_() ?
+      '<a href="#" onclick="gadgets.container.getGadget(' + this.id +
+          ').handleOpenUserPrefsDialog();return false;" class="' + this.cssClassTitleButton +
+          '">settings</a> '
+      : '';
   continuation('<div id="' + this.cssClassTitleBar + '-' + this.id +
       '" class="' + this.cssClassTitleBar + '"><span id="' +
       this.getIframeId() + '_title" class="' +
       this.cssClassTitle + '">' + (this.title ? this.title : 'Title') + '</span> | <span class="' +
-      this.cssClassTitleButtonBar +
-      '"><a href="#" onclick="gadgets.container.getGadget(' + this.id +
-      ').handleOpenUserPrefsDialog();return false;" class="' + this.cssClassTitleButton +
-      '">settings</a> <a href="#" onclick="gadgets.container.getGadget(' +
-      this.id + ').handleToggle();return false;" class="' + this.cssClassTitleButton +
+      this.cssClassTitleButtonBar + '">' + settingsButton +
+      '<a href="#" onclick="gadgets.container.getGadget(' + this.id +
+      ').handleToggle();return false;" class="' + this.cssClassTitleButton +
       '">toggle</a></span></div>');
 };
 
@@ -570,12 +570,9 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
   var params = '';
-  if (this.getUserPrefs()) {
-    for(var name in this.getUserPrefs()) {
-      var value = this.getUserPref(name);
-      params += '&up_' + encodeURIComponent(name) + '=' +
-          encodeURIComponent(value);
-    }
+  for(var name in this.getUserPrefs()) {
+    params += '&up_' + encodeURIComponent(name) + '=' +
+        encodeURIComponent(this.getUserPrefValue(name));
   }
   return params;
 };
@@ -588,6 +585,18 @@ gadgets.IfrGadget.prototype.handleToggle = function() {
     gadgetContent.style.display = display ? '' : 'none';
   }
 };
+
+
+gadgets.IfrGadget.prototype.hasViewablePrefs_ = function() {
+  for(var name in this.getUserPrefs()) {
+    var pref = this.userPrefs[name];
+    if (pref.type != 'hidden') {
+      return true;
+    }
+  }
+  return false;
+};
+
 
 gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
   if (this.userPrefsDialogContentLoaded) {
@@ -631,20 +640,19 @@ gadgets.IfrGadget.prototype.hideUserPrefsDialog = function() {
 gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
   this.hideUserPrefsDialog();
 
-  var prefs = {};
   var numFields = document.getElementById('m_' + this.id +
       '_numfields').value;
   for (var i = 0; i < numFields; i++) {
     var input = document.getElementById('m_' + this.id + '_' + i);
-    if (input.type == 'hidden') {
+    if (input.type != 'hidden') {
       var userPrefNamePrefix = 'm_' + this.id + '_up_';
       var userPrefName = input.name.substring(userPrefNamePrefix.length);
       var userPrefValue = input.value;
-      prefs[userPrefName] = userPrefValue;
+      this.userPrefs[userPrefName].value = userPrefValue;
     }
   }
 
-  this.setUserPrefs(prefs);
+  this.saveUserPrefs();
   this.refresh();
 };
 
@@ -734,7 +742,6 @@ gadgets.Container.prototype.createGadget = function(opt_params) {
 
 gadgets.Container.prototype.addGadget = function(gadget) {
   gadget.id = this.getNextGadgetInstanceId();
-  gadget.setUserPrefs(this.userPrefStore.getPrefs(gadget));
   this.gadgets_[this.getGadgetKey_(gadget.id)] = gadget;
 };
 
