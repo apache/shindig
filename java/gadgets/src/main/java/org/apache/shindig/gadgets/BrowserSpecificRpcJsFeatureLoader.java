@@ -39,7 +39,7 @@ public class BrowserSpecificRpcJsFeatureLoader extends JsFeatureLoader {
   }
   
   @Override
-  protected JsLibrary createJsLibrary(JsLibrary.Type type, String content, String feature,
+  public JsLibrary createJsLibrary(JsLibrary.Type type, String content, String feature,
       HttpFetcher fetcher) throws GadgetException {
     if (feature.equals(RPC_FEATURE_NAME)) {
       if (rpcLib == null) {
