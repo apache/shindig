@@ -22,5 +22,6 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <gadget>
     <script src="dynamic-height.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

@@ -34,5 +34,6 @@
   <dependency>core</dependency>
   <gadget>
     <script src="io.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

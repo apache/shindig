@@ -27,6 +27,7 @@
     <script src="jsonrpctransport.js"></script>
     <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>    
+    <script src="taming.js"></script>    
   </gadget>
   <container>
     <script src="osapi.js"></script>
@@ -34,5 +35,6 @@
     <script src="jsonrpctransport.js"></script>
     <script src="gadgetsrpctransport.js"></script>
     <script src="peoplehelpers.js"></script>
+    <script src="taming.js"></script>    
   </container>
 </feature>

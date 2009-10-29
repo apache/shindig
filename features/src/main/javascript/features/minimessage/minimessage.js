@@ -195,7 +195,7 @@ gadgets.MiniMessage.prototype.createStaticMessage = function(message) {
     if (typeof message === 'object') {
       td.appendChild(message);
     } else {
-      td.innerHTML = message;
+      td.innerHTML = html_sanitize(message);
     }
     this.container_.appendChild(table);
   }

@@ -21,6 +21,7 @@ specific language governing permissions and limitations under the License.
   <dependency>rpc</dependency>
   <gadget>
     <script src="pubsub.js"/>
+    <script src="taming.js"/>
   </gadget>
   <container>
     <script src="pubsub-router.js"/>

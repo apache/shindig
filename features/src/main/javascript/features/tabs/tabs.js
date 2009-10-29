@@ -579,7 +579,7 @@ gadgets.TabSet.prototype.createTab_ = function(tabName, params) {
   tab.callback_ = params.callback;
   tab.td_ = document.createElement('td');
   tab.td_.title = params.tooltip || '';
-  tab.td_.innerHTML = tabName;
+  tab.td_.innerHTML = html_sanitize(tabName);
   tab.td_.className = this.cascade_('tablib_unselected');
   tab.td_.onclick = this.setSelectedTabGenerator_(tab);
 

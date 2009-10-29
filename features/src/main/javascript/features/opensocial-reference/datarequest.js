@@ -71,7 +71,7 @@ function handleRequestMe(data) {
 
 /**
  * Do not create a DataRequest directly, instead use
- * opensocial.createDataRequest();
+ * opensocial.newDataRequest();
  *
  * @private
  * @constructor

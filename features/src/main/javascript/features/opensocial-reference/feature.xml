@@ -42,5 +42,6 @@
     <script src="phone.js"/>
     <script src="responseitem.js"/>
     <script src="url.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

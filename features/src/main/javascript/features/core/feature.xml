@@ -30,6 +30,7 @@
     <script src="json.js"/>
     <script src="legacy.js"/>
     <script src="log.js"/>
+    <script src="taming.js"/>
   </gadget>
   <container>
     <script src="log.js"/>

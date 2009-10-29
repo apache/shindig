@@ -20,5 +20,6 @@ specific language governing permissions and limitations under the License.
   <name>flash</name>
   <gadget>
     <script src="flash.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

@@ -20,5 +20,6 @@ specific language governing permissions and limitations under the License.
   <name>skins</name>
   <gadget>
     <script src="skins.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

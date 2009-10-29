@@ -56,24 +56,24 @@ var JsonRpcContainer = function(configParams) {
       JsonRpcContainer.requestShareAppCallback_);
 };
 
+var JsonRpcRequestItem = function(rpc, opt_processData) {
+  this.rpc = rpc;
+  this.processData = opt_processData ||
+                     function (rawJson) {
+                       return rawJson;
+                     };
+
+  this.processResponse = function(originalDataRequest, rawJson, error, errorMessage) {
+    var errorCode = error ? JsonRpcContainer.translateHttpError(error['code']) : null;
+    return new opensocial.ResponseItem(originalDataRequest,
+        error ? null : this.processData(rawJson), errorCode, errorMessage);
+  };
+};
+
 (function() {
   var callbackIdStore = {};
 
   JsonRpcContainer.inherits(opensocial.Container);
-
-  var JsonRpcRequestItem = function(rpc, opt_processData) {
-    this.rpc = rpc;
-    this.processData = opt_processData ||
-                       function (rawJson) {
-                         return rawJson;
-                       };
-
-    this.processResponse = function(originalDataRequest, rawJson, error, errorMessage) {
-      var errorCode = error ? JsonRpcContainer.translateHttpError(error['code']) : null;
-      return new opensocial.ResponseItem(originalDataRequest,
-          error ? null : this.processData(rawJson), errorCode, errorMessage);
-    };
-  };
 
   JsonRpcContainer.prototype.getEnvironment = function() {
     return this.environment_;
@@ -498,22 +498,4 @@ JsonRpcContainer.prototype.newFetchMessagesRequest = function(idSpec, msgCollId,
         }
         return new opensocial.Collection(messages);
       });
-};
-
-
-var JsonRpcRequestItem = function(rpc, opt_processData) {
-  this.rpc = rpc;
-  this.processData = opt_processData ||
-                     function (rawJson) {
-                       return rawJson;
-                     };
-
-  this.processResponse = function(originalDataRequest, rawJson, error,
-      errorMessage) {
-    var errorCode = error
-      ? JsonRpcContainer.translateHttpError(error['code'])
-      : null;
-    return new opensocial.ResponseItem(originalDataRequest,
-        error ? null : this.processData(rawJson), errorCode, errorMessage);
-  };
 };

@@ -28,5 +28,6 @@ A map of view names to view attributes. Examples:
   <dependency>rpc</dependency>
   <gadget>
     <script src="views.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

@@ -232,6 +232,7 @@ public class JsFeatureLoader {
     try {
       doc = XmlUtil.parse(xml);
     } catch (XmlException e) {
+      logger.warning("Malformed xml document at: " + path);
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
     }
 

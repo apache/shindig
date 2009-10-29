@@ -103,6 +103,7 @@ gadgets.log.WARNING = 2;
  * Log level for error logging.
  * @static
  */
+gadgets.log.INFO = 3;
 
 /**
  * Log level for no logging

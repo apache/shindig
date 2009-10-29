@@ -1335,7 +1335,7 @@
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r3725</version>
+        <version>RELEASE</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

@@ -17,6 +17,7 @@
  */
 
 var osapi = osapi || {};
+var tamings___ = tamings___ || [];
 (function() {
 
   /**
@@ -60,11 +61,13 @@ var osapi = osapi || {};
 
       return boundCall;
     };
+    if (window.___ && window.___.markInnocent) {
+      ___.markInnocent(apiMethod, method);
+    }
 
     if (last[parts[parts.length - 1]]) {
       gadgets.warn("Duplicate osapi method definition " + method);
     }
     last[parts[parts.length - 1]] = apiMethod;
   }
-
 })();
