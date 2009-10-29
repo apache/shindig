@@ -1,3 +1,20 @@
+This file contains the PGP keys of various Apache developers.
+Please don't use them for email unless you have to. Their main
+purpose is code signing.
+
+Apache users: pgp < KEYS
+Apache developers:
+        (pgpk -ll <your name> && pgpk -xa <your name>) >> this file.
+      or
+        (gpg --fingerprint --list-sigs <your name>
+             && gpg --armor --export <your name>) >> this file.
+
+Apache developers: please ensure that your key is also available via the
+PGP keyservers (such as pgpkeys.mit.edu).
+
+
+----------------------------------------------------------------
+
 pub   1024D/40E47E14 2008-07-19 [expires: 2009-07-18]
 uid                  Ian Boston <ieb@apache.org>
 sig 3        40E47E14 2008-07-19  Ian Boston <ieb@apache.org>
@@ -52,17 +69,28 @@ AhsMBQkB4JNQAAoJELINETlA5H4UgSoAnjmsj20WnZuH7lS96qpoYO7B6yvQAJwJ
 pub   1024D/73F58054 2001-11-30
       Key fingerprint = 5383 6DAC BD1E 18D3 4D15  E98F F859 2852 73F5 8054
 uid                  Paul Lindner <lindner@inuus.com>
+sig 3        73F58054 2009-10-01  Paul Lindner <lindner@inuus.com>
+sig 3        73F58054 2001-11-30  Paul Lindner <lindner@inuus.com>
+sig          29C90CD8 2009-10-16  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
 uid                  Paul Lindner <lindner@apache.org>
+sig 3        73F58054 2009-10-01  Paul Lindner <lindner@inuus.com>
+sig          29C90CD8 2009-10-16  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
 sub   1024g/9F1830C5 2001-11-30
+sig          73F58054 2001-11-30  Paul Lindner <lindner@inuus.com>
 
 pub   4096R/29C90CD8 2009-10-16
       Key fingerprint = 5613 D0E7 F428 DF12 AA79  0C9E 5C91 2E98 29C9 0CD8
 uid                  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
+sig 3        29C90CD8 2009-10-16  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
+sig          F8EA2967 2009-10-29  Brian McCallister <brianm@apache.org>
 uid                  Paul Lindner <lindner@inuus.com>
+sig 3        29C90CD8 2009-10-16  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
+sig          F8EA2967 2009-10-29  Brian McCallister <brianm@apache.org>
 sub   4096R/BE6FEB9B 2009-10-16
+sig          29C90CD8 2009-10-16  Paul Lindner (CODE SIGNING KEY) <lindner@apache.org>
 
 -----BEGIN PGP PUBLIC KEY BLOCK-----
-Version: GnuPG v2.0.12 (GNU/Linux)
+Version: GnuPG v1.4.9 (GNU/Linux)
 
 mQGiBDwHUowRBACNOdhA/O6xXHNOVwtHHHIbleYHowOGQd1Mp3wg/yshK2iX1rin
 m8GwBp62xJ52XslBUMh8Nt9iFJNQ8spiVp7wINK3zb7hqEL3sqK33Oa6HZdcCbOT
@@ -134,20 +162,23 @@ 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
-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
+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
@@ -170,5 +201,5 @@ wiywqyisyQuqkXMUOJpFTX6K36MJqNhFTkzN7oJaTk8lr9tD2QovLl3rrzwOJdGx
 m8UUeaZG+eHRl1slJGfOpmXtfvf5nZVCLSgKODQt+DWpz9Zk5rhjPrNqGhz8O5xd
 w4fHO4B4GPfw4O+S1yomAhx9ieohOSujylp5MrHFla3YV5cjBDdAxElQFqo1mFgw
 kGwvWuAYzrj8X9DQdDOIt/pGejT4IUhy/4nf/PnOyQ==
-=lzCB
+=79yX
 -----END PGP PUBLIC KEY BLOCK-----
