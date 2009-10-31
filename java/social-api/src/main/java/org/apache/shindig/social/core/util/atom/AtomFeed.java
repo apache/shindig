@@ -71,7 +71,7 @@ public class AtomFeed {
       }
       startIndex = r.getStartIndex();
       totalResults = r.getTotalResults();
-      itemsPerPage = entryList.size();
+      itemsPerPage = r.getItemsPerPage();
       author = "?";
       link = new AtomLink("rel", "???");
     } else if ( obj instanceof DataCollection ) {

@@ -23,19 +23,50 @@ public class RestfulCollection<T> {
   private List<T> entry;
   private int startIndex;
   private int totalResults;
+  private int itemsPerPage;
 
-  private boolean filtered = true;
-  private boolean sorted = true;
-  private boolean updatedSince = true;
+  private boolean filtered = false;
+  private boolean sorted = false;
+  private boolean updatedSince = false;
 
+  /**
+   * Creates a new RestfulCollection that includes a complete set of entries.
+   *
+   * Default values for startIndex, totalResults, itemsPerPage and filtering parameters are automatically set.
+   *
+   * @param entry a list of entries
+   */
   public RestfulCollection(List<T> entry) {
-    this(entry, 0, entry.size());
+    this(entry, 0, entry.size(), entry.size());
+    this.filtered=true;
+    this.sorted=true;
+    this.updatedSince=true;
   }
 
+  /**
+   * @deprecated As of 1.1-BETA4 use {@link #RestfulCollection(java.util.List, int, int, int)} with the extra itemsPerPage Argument
+   * This contructor will be removed in 1.1 RC1
+   */
+  @Deprecated
   public RestfulCollection(List<T> entry, int startIndex, int totalResults) {
+    this(entry, startIndex, totalResults, entry.size());
+  }
+
+  /**
+   * Create a paginated collection response.
+   *
+   * @param entry paginated entries
+   * @param startIndex the index corresponding to the first element of {entry}
+   * @param totalResults the total size of the resultset
+   * @param itemsPerPage the size of the pagination, generally set to the user-specified count parameter. Clamped to the totalResults size automatically
+   *
+   * @since 1.1-BETA4
+   */
+  public RestfulCollection(List<T> entry, int startIndex, int totalResults, int itemsPerPage) {
     this.entry = entry;
     this.startIndex = startIndex;
     this.totalResults = totalResults;
+    this.itemsPerPage = Math.min(itemsPerPage, totalResults);
   }
 
   public List<T> getEntry() {
@@ -56,6 +87,14 @@ public class RestfulCollection<T> {
 
   public int getTotalResults() {
     return totalResults;
+  }
+
+  public void setItemsPerPage(int itemsPerPage) {
+    this.itemsPerPage = itemsPerPage;
+  }
+
+  public int getItemsPerPage() {
+    return itemsPerPage;
   }
 
   public void setTotalResults(int totalResults) {

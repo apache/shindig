@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +106,10 @@ public class JsonRpcServlet extends ApiServlet {
       }
 
       String content = null;
-      Map<String, FormDataItem> formItems = new HashMap<String, FormDataItem>();
+      Map<String, FormDataItem> formItems = Collections.emptyMap();  // default for most requests
 
       if (formParser.isMultipartContent(servletRequest)) {
+        formItems = new HashMap<String, FormDataItem>();
         for (FormDataItem item : formParser.parse(servletRequest)) {
           if (item.isFormField() && REQUEST_PARAM.equals(item.getFieldName()) && content == null) {
             // As per spec, in case of a multipart/form-data content, there will be one form field
@@ -218,8 +220,22 @@ public class JsonRpcServlet extends ApiServlet {
       } else if (response instanceof RestfulCollection) {
         Map<String, Object> map = Maps.newHashMap();
         RestfulCollection<?> collection = (RestfulCollection<?>) response;
-        map.put("startIndex", collection.getStartIndex());
-        map.put("totalResults", collection.getTotalResults());
+        // Return sublist info
+        if (collection.getTotalResults() != collection.getEntry().size()) {
+          map.put("totalResults", collection.getTotalResults());
+          map.put("startIndex", collection.getStartIndex());
+          map.put("itemsPerPage", collection.getItemsPerPage());
+        }
+
+        if (!collection.isFiltered())
+          map.put("filtered", collection.isFiltered());
+
+        if (!collection.isUpdatedSince())
+          map.put("updatedSince", collection.isUpdatedSince());
+
+        if (!collection.isSorted())
+          map.put("sorted", collection.isUpdatedSince());
+
         map.put("list", collection.getEntry());
         result.put("data", map);
       } else {

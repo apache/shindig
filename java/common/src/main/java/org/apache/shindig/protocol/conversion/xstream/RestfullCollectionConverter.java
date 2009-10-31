@@ -61,12 +61,19 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
   public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
 
     RestfulCollection<?> collection = (RestfulCollection<?>) source;
+
+    // Required per spec
     writer.startNode("startIndex");
     writer.setValue(String.valueOf(collection.getStartIndex()));
     writer.endNode();
     writer.startNode("totalResults");
     writer.setValue(String.valueOf(collection.getTotalResults()));
     writer.endNode();
+    writer.startNode("itemsPerPage");
+    writer.setValue(String.valueOf(collection.getItemsPerPage()));
+    writer.endNode();
+
+    // Optional
     writer.startNode("isFiltered");
     writer.setValue(String.valueOf(collection.isFiltered()));
     writer.endNode();
@@ -76,6 +83,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
     writer.startNode("isUpdatedSince");
     writer.setValue(String.valueOf(collection.isUpdatedSince()));
     writer.endNode();
+
     // TODO: resolve if entry is the container or the name of the object.
     for (Object o : collection.getEntry()) {
       writer.startNode("entry");

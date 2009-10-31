@@ -49,14 +49,17 @@ public class RestfulCollectionTest extends TestCase {
     assertEquals(entry, collection.getEntry());
     assertEquals(0, collection.getStartIndex());
     assertEquals(entry.size(), collection.getTotalResults());
+    assertEquals(entry.size(), collection.getItemsPerPage());
 
     int startIndex = 9;
     int totalResults = 10;
-    collection = new RestfulCollection<String>(entry, startIndex, totalResults);
+    int resultsPerPage = 1;
+    collection = new RestfulCollection<String>(entry, startIndex, totalResults, resultsPerPage);
 
     assertEquals(entry, collection.getEntry());
     assertEquals(startIndex, collection.getStartIndex());
     assertEquals(totalResults, collection.getTotalResults());
+    assertEquals(resultsPerPage, collection.getItemsPerPage());
   }
 
 }

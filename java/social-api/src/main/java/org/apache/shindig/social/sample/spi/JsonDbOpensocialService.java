@@ -298,8 +298,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       int last = options.getFirst() + options.getMax();
       result = result.subList(options.getFirst(), Math.min(last, totalSize));
 
-      return ImmediateFuture.newInstance(new RestfulCollection<Person>(result, options.getFirst(),
-          totalSize));
+      return ImmediateFuture.newInstance(new RestfulCollection<Person>(result, options.getFirst(), totalSize, options.getMax()));
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
           je);
