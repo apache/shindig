@@ -24,6 +24,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -162,6 +163,10 @@ public class BasicHttpFetcher implements HttpFetcher {
       httpClient.getHostConfiguration().setProxy(address.getHostName(), address.getPort());
     }
 
+
+    // true for non-HEAD requests
+    boolean requestCompressedContent = true;
+
     if ("POST".equals(methodType) || "PUT".equals(methodType)) {
       EntityEnclosingMethod enclosingMethod = ("POST".equals(methodType))
               ? new PostMethod(requestUri)
@@ -175,13 +180,17 @@ public class BasicHttpFetcher implements HttpFetcher {
       httpMethod = enclosingMethod;
     } else if ("DELETE".equals(methodType)) {
       httpMethod = new DeleteMethod(requestUri);
+    } else if ("HEAD".equals(methodType)) {
+      httpMethod = new HeadMethod(requestUri);
     } else {
       httpMethod = new GetMethod(requestUri);
     }
 
     httpMethod.setFollowRedirects(false);
     httpMethod.getParams().setSoTimeout(connectionTimeoutMs);
-    httpMethod.setRequestHeader("Accept-Encoding", "gzip, deflate");
+
+    if (requestCompressedContent)
+      httpMethod.setRequestHeader("Accept-Encoding", "gzip, deflate");
 
     for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
       httpMethod.setRequestHeader(entry.getKey(), StringUtils.join(entry.getValue(), ','));
