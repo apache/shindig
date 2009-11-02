@@ -22,12 +22,12 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.UrlValidationStatus;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 
 import com.google.inject.Inject;
 
@@ -44,9 +44,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JsServlet extends InjectedServlet {
 
-  private GadgetFeatureRegistry registry;
+  private FeatureRegistry registry;
   @Inject
-  public void setRegistry(GadgetFeatureRegistry registry) {
+  public void setRegistry(FeatureRegistry registry) {
     this.registry = registry;
   }
   
@@ -84,31 +84,40 @@ public class JsServlet extends InjectedServlet {
     Set<String> needed = ImmutableSet.of(resourceName.split(":"));
 
     String debugStr = req.getParameter("debug");
-    String container = req.getParameter("container");
+    String containerParam = req.getParameter("container");
     String containerStr = req.getParameter("c");
 
     boolean debug = "1".equals(debugStr);
-    if (container == null) {
-      container = ContainerConfig.DEFAULT_CONTAINER;
-    }
-    RenderingContext context = "1".equals(containerStr) ?
+    final RenderingContext context = "1".equals(containerStr) ?
         RenderingContext.CONTAINER : RenderingContext.GADGET;
+    final String container = 
+        containerParam != null ? containerParam : ContainerConfig.DEFAULT_CONTAINER;
 
-    Collection<GadgetFeature> features = registry.getFeatures(needed);
+    GadgetContext ctx = new GadgetContext() {
+      @Override
+      public RenderingContext getRenderingContext() {
+        return context;
+      }
+      
+      @Override
+      public String getContainer() {
+        return container;
+      }
+    };
+    Collection<? extends FeatureResource> resources =
+        registry.getFeatureResources(ctx, needed, null);
     StringBuilder jsData = new StringBuilder();
     boolean isProxyCacheable = true;
-    for (GadgetFeature feature : features) {
-      for (JsLibrary lib : feature.getJsLibraries(context, container)) {
-        if (lib.getType() != JsLibrary.Type.URL) {
-          if (debug) {
-            jsData.append(lib.getDebugContent());
-          } else {
-            jsData.append(lib.getContent());
-          }
-          isProxyCacheable = isProxyCacheable && lib.isProxyCacheable();
-          jsData.append(";\n");
-        }
+    for (FeatureResource featureResource : resources) {
+      String content = debug ? featureResource.getDebugContent() : featureResource.getContent();
+      if (!featureResource.isExternal()) {
+        jsData.append(content);
+      } else {
+        // Support external/type=url feature serving through document.write()
+        jsData.append("document.write('<script src=\"").append(content).append("\"></script>");
       }
+      isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
+      jsData.append(";\n");
     }
 
 

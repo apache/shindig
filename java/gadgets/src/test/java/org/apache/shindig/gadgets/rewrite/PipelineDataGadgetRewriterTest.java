@@ -37,7 +37,6 @@ import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.easymock.Capture;
 import static org.easymock.EasyMock.and;
 import static org.easymock.EasyMock.capture;
@@ -140,8 +139,8 @@ public class PipelineDataGadgetRewriterTest {
     assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
     
-    assertEquals(ImmutableSet.of("opensocial-data"), gadget.getRemovedFeatures());
-    assertEquals(ImmutableSet.of("opensocial-data-context"), gadget.getAddedFeatures());
+    assertFalse(gadget.getDirectFeatureDeps().contains("opensocial-data"));
+    assertTrue(gadget.getDirectFeatureDeps().contains("opensocial-data-context"));
 
     control.verify();
   }
@@ -166,9 +165,6 @@ public class PipelineDataGadgetRewriterTest {
     // And the os-data elements should be present
     assertTrue("os-data was deleted",
         content.getContent().indexOf("type=\"text/os-data\"") > 0);
-    
-    assertEquals(ImmutableSet.<String>of(), gadget.getRemovedFeatures());
-    assertEquals(ImmutableSet.<String>of(), gadget.getAddedFeatures());
   }
   
   /** Match a batch with the specified count of social and HTTP data items */

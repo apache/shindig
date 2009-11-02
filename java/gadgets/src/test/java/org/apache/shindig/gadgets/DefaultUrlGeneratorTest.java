@@ -25,6 +25,8 @@ import static org.easymock.EasyMock.isA;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.caja.util.Join;
@@ -65,7 +67,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
 
   private final GadgetContext context = mock(GadgetContext.class);
   private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
-  private final GadgetFeatureRegistry registry = mock(GadgetFeatureRegistry.class);
+  private final FeatureRegistry registry = mock(FeatureRegistry.class);
   private final FakeContainerConfig config = new FakeContainerConfig();
   private UrlGenerator urlGenerator;
 
@@ -82,7 +84,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     expect(context.getModuleId()).andReturn(MODULE_ID).anyTimes();
     expect(context.getView()).andReturn(VIEW).anyTimes();
 
-    Collection<GadgetFeature> features = Lists.newArrayList();
+    List<FeatureResource> features = Lists.newArrayList();
 
     expect(registry.getAllFeatures()).andReturn(features);
 

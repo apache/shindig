@@ -23,8 +23,8 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetBlacklist;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.variables.VariableSubstituter;
@@ -44,19 +44,19 @@ public class Processor {
   private final VariableSubstituter substituter;
   private final ContainerConfig containerConfig;
   private final GadgetBlacklist blacklist;
-  private final GadgetFeatureRegistry gadgetFeatureRegistry;
+  private final FeatureRegistry featureRegistry;
 
   @Inject
   public Processor(GadgetSpecFactory gadgetSpecFactory,
                    VariableSubstituter substituter,
                    ContainerConfig containerConfig,
                    GadgetBlacklist blacklist,
-                   GadgetFeatureRegistry gadgetFeatureRegistry) {
+                   FeatureRegistry featureRegistry) {
     this.gadgetSpecFactory = gadgetSpecFactory;
     this.substituter = substituter;
     this.blacklist = blacklist;
     this.containerConfig = containerConfig;
-    this.gadgetFeatureRegistry = gadgetFeatureRegistry;
+    this.featureRegistry = featureRegistry;
   }
 
   /**
@@ -87,7 +87,7 @@ public class Processor {
 
       return new Gadget()
           .setContext(context)
-          .setGadgetFeatureRegistry(gadgetFeatureRegistry)
+          .setGadgetFeatureRegistry(featureRegistry)
           .setSpec(spec)
           .setCurrentView(getView(context, spec));
     } catch (GadgetException e) {

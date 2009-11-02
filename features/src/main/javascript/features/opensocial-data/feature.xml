@@ -19,6 +19,8 @@
 -->
 <feature>
   <name>opensocial-data</name>
+  <dependency>core.io</dependency>
+  <dependency>core.util</dependency>
   <dependency>opensocial-data-context</dependency>
   <dependency>opensocial-0.8</dependency>
   <dependency>xmlutil</dependency>

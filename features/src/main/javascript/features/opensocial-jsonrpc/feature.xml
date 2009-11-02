@@ -19,6 +19,10 @@
 -->
 <feature>
   <name>opensocial-jsonrpc</name>
+  <dependency>core.prefs</dependency>
+  <dependency>core.io</dependency>
+  <dependency>core.json</dependency>
+  <dependency>core.util</dependency>
   <dependency>opensocial-base</dependency>
   <dependency>rpc</dependency>
   <gadget>   

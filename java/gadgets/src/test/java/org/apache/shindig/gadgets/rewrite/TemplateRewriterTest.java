@@ -251,13 +251,13 @@ public class TemplateRewriterTest {
   }
   
   private void testFeatureRemoved() {
-    assertTrue("Feature wasn't removed",
-        gadget.getRemovedFeatures().contains("opensocial-templates"));
+    assertFalse("Feature wasn't removed",
+        gadget.getDirectFeatureDeps().contains("opensocial-templates"));
   }
 
   private void testFeatureNotRemoved() {
-    assertFalse("Feature was removed",
-        gadget.getRemovedFeatures().contains("opensocial-templates"));
+    assertTrue("Feature was removed",
+        gadget.getDirectFeatureDeps().contains("opensocial-templates"));
   }
 
   private void testExpectingTransform(String code, String condition) throws Exception {

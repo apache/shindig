@@ -21,6 +21,13 @@ package org.apache.shindig.gadgets.render;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.DEFAULT_CSS;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.FEATURES_KEY;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.INSERT_BASE_ELEMENT_KEY;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.eq;
+import static org.easymock.classextension.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.getCurrentArguments;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.reset;
+import static org.easymock.classextension.EasyMock.same;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -33,18 +40,19 @@ import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.UrlValidationStatus;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +70,7 @@ import java.util.regex.Pattern;
 import com.google.caja.util.Join;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -89,13 +98,13 @@ public class RenderingGadgetRewriterTest {
   private final UrlGenerator urlGenerator = new FakeUrlGenerator();
   private final MapGadgetContext context = new MapGadgetContext();
 
-  private FakeGadgetFeatureRegistry featureRegistry;
+  private FeatureRegistry featureRegistry;
   private RenderingGadgetRewriter rewriter;
   private GadgetHtmlParser parser;
 
   @Before
   public void setUp() throws Exception {
-    featureRegistry = new FakeGadgetFeatureRegistry();
+    featureRegistry = createMock(FeatureRegistry.class);
     rewriter
         = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, urlGenerator, null);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
@@ -104,10 +113,17 @@ public class RenderingGadgetRewriterTest {
 
   private Gadget makeGadgetWithSpec(String gadgetXml) throws GadgetException {
     GadgetSpec spec = new GadgetSpec(SPEC_URL, gadgetXml);
-    return new Gadget()
+    Gadget gadget = new Gadget()
         .setContext(context)
         .setPreloads(ImmutableList.<PreloadedData>of())
         .setSpec(spec);
+    // Convenience: by default expect no features requested, by gadget or extern.
+    // expectFeatureCalls(...) resets featureRegistry if called again.
+    expectFeatureCalls(gadget,
+        ImmutableList.<FeatureResource>of(),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
+    return gadget;
   }
 
   private Gadget makeDefaultGadget() throws GadgetException {
@@ -115,7 +131,7 @@ public class RenderingGadgetRewriterTest {
     return makeGadgetWithSpec(defaultXml);
   }
 
-  private String rewrite(Gadget gadget, String content) {
+  private String rewrite(Gadget gadget, String content) throws Exception {
     MutableContent mc = new MutableContent(parser, content);
     rewriter.rewrite(gadget, mc);
     return mc.getContent();
@@ -124,7 +140,7 @@ public class RenderingGadgetRewriterTest {
   @Test
   public void defaultOutput() throws Exception {
     Gadget gadget = makeDefaultGadget();
-
+    
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
@@ -169,7 +185,10 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = makeDefaultGadget()
         .setContext(context);
 
-    featureRegistry.addInline("foo", "does-not-matter");
+    expectFeatureCalls(gadget,
+        ImmutableList.<FeatureResource>of(),
+        ImmutableSet.of("foo"),
+        ImmutableList.of(inline("blah", "n/a")));
 
     String rewritten = rewrite(gadget, doc);
 
@@ -228,7 +247,7 @@ public class RenderingGadgetRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    final Collection<String> libs = Arrays.asList("foo", "bar", "baz");
+    final Set<String> libs = ImmutableSortedSet.of("foo", "bar", "baz");
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -241,10 +260,12 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
-    featureRegistry.addInline("foo", "does-not-matter");
-    featureRegistry.addInline("bar", "does-not-matter");
-    featureRegistry.addInline("baz", "does-not-matter");
-
+    FeatureResource fooResource = inline("foo-content", "foo-debug");
+    expectFeatureCalls(gadget,
+        ImmutableList.of(fooResource),
+        libs,
+        ImmutableList.of(fooResource, inline("bar-c", "bar-d"), inline("baz-c", "baz-d")));
+    
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
@@ -263,13 +284,16 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
-    featureRegistry.addInline("foo", "foo_content();");
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo_content();", "foo_content_debug();")),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
 
     String rewritten = rewrite(gadget, "");
 
     assertTrue("Requested scripts not inlined.", rewritten.contains("foo_content();"));
   }
-
+  
   @Test
   public void featuresNotInjectedWhenRemoved() throws Exception {
     String gadgetXml =
@@ -282,7 +306,10 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.removeFeature("foo");
 
-    featureRegistry.addInline("foo", "foo_content();");
+    expectFeatureCalls(gadget,
+        ImmutableList.<FeatureResource>of(),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
 
     String rewritten = rewrite(gadget, "");
 
@@ -302,8 +329,11 @@ public class RenderingGadgetRewriterTest {
     // add non existing feature,
     gadget.addFeature("do-not-exists");
 
-    featureRegistry.addInline("foo", "foo_content();");
-
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo_content();", "foo_content_dbg();")),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
+    
     String rewritten = rewrite(gadget, "");
 
     assertTrue("Added script not inlined.", rewritten.contains("foo_content();"));
@@ -318,7 +348,7 @@ public class RenderingGadgetRewriterTest {
       "<Content type='html'/>" +
       "</Module>";
 
-    final Collection<String> libs = Arrays.asList("bar", "baz");
+    final Set<String> libs = ImmutableSet.of("bar", "baz");
     GadgetContext context = new GadgetContext() {
       @Override
       public String getParameter(String name) {
@@ -331,9 +361,10 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
-    featureRegistry.addInline("foo", "foo_content();");
-    featureRegistry.addInline("bar", "does-not-matter");
-    featureRegistry.addInline("baz", "does-not-matter");
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo_content();", "foo_content_debug();")),
+        libs,
+        ImmutableList.of(inline("bar-c", "bar-d"), inline("baz-c", "baz-d")));
 
     String rewritten = rewrite(gadget, "");
 
@@ -375,8 +406,11 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
 
-    featureRegistry.addInline("foo", "gadgets.Prefs.setMessages_ = function(){};");
-
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo_content();", "foo_content_debug();")),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
+    
     String rewritten = rewrite(gadget, BODY_CONTENT);
 
     Matcher matcher = DOCUMENT_SPLIT_PATTERN.matcher(rewritten);
@@ -386,9 +420,11 @@ public class RenderingGadgetRewriterTest {
 
     // Locate user script.
     int declaredPosition = headContent.indexOf("foo_content();");
+    assertTrue(declaredPosition >= 0);
 
     // Anything else here, we added.
     int usedPosition = headContent.indexOf("gadgets.Prefs.setMessages_");
+    assertTrue(usedPosition >= 0);
 
     assertTrue("Inline JS needs to exist before it is used.", declaredPosition < usedPosition);
   }
@@ -414,11 +450,13 @@ public class RenderingGadgetRewriterTest {
     };
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
-
-    featureRegistry.addInline("foo", "foo_content();");
-    featureRegistry.addExternal("bar", "http://example.org/external.js");
-    featureRegistry.addInline("baz", "does-not-matter");
-
+    
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo_content();", "foo_content_debug();"),
+                         extern("http://example.org/external.js", "dbg")),
+        ImmutableSet.of("baz"),
+        ImmutableList.of(inline("does-not-matter", "dbg")));
+    
     String rewritten = rewrite(gadget, "");
 
     Set<String> actual = getInjectedScript(rewritten);
@@ -447,9 +485,12 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    featureRegistry.addInline("foo", "");
-
+    
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo", "dbg")),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
+    
     config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
@@ -479,9 +520,11 @@ public class RenderingGadgetRewriterTest {
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
 
-    featureRegistry.addInline("foo", "");
-    featureRegistry.addInline("bar", "");
-
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo", "foo-dbg")),
+        ImmutableSet.of("bar"),
+        ImmutableList.of(inline("bar", "bar-dbg")));
+    
     config.data.put(FEATURES_KEY, ImmutableMap.of(
         "foo", "blah",
         "bar", "baz"
@@ -510,9 +553,12 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
-
-    featureRegistry.addInline("foo", "");
-    featureRegistry.addInline("foo2", "");
+    
+    expectFeatureCalls(gadget,
+        ImmutableList.of(inline("foo", "foo-dbg"), inline("foo2", "foo2-dbg")),
+        ImmutableSet.<String>of(),
+        ImmutableList.<FeatureResource>of());
+    
     config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
@@ -566,7 +612,7 @@ public class RenderingGadgetRewriterTest {
     assertEquals("", defaultsJson.get("pref_two"));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = RewritingException.class)
   public void unsupportedFeatureThrows() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
@@ -576,6 +622,19 @@ public class RenderingGadgetRewriterTest {
       "</Module>";
 
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
+    
+    reset(featureRegistry);
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(ImmutableSet.<String>of()), eq(Lists.<String>newArrayList())))
+        .andAnswer(new IAnswer<List<FeatureResource>>() {
+          @SuppressWarnings("unchecked")
+          public List<FeatureResource> answer() throws Throwable {
+            List<String> unsupported = (List<String>)getCurrentArguments()[2];
+            unsupported.add("foo");
+            return Lists.newArrayList();
+          }
+        });
+    replay(featureRegistry);
 
     rewrite(gadget, "");
   }
@@ -726,8 +785,40 @@ public class RenderingGadgetRewriterTest {
     assertFalse("Didn't rewrite when sanitize was '0'.",
         BODY_CONTENT.equals(rewrite(gadget, BODY_CONTENT)));
   }
+  
+  private void expectFeatureCalls(Gadget gadget,
+                                  List<FeatureResource> gadgetResources,
+                                  Set<String> externLibs,
+                                  List<FeatureResource> externResources) {
+    reset(featureRegistry);
+    GadgetContext gadgetContext = gadget.getContext();
+    List<String> gadgetFeatures = Lists.newArrayList(gadget.getDirectFeatureDeps());
+    List<String> allFeatures = Lists.newArrayList(gadgetFeatures);
+    allFeatures.addAll(externLibs);
+    List<String> emptyList = Lists.newArrayList();
+    expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(externLibs), eq(emptyList)))
+        .andReturn(externResources);
+    expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(gadgetFeatures), eq(emptyList)))
+        .andReturn(gadgetResources);
+    expect(featureRegistry.getFeatures(eq(allFeatures)))
+        .andReturn(allFeatures);
+    replay(featureRegistry);
+  }
+  
+  private FeatureResource inline(String content, String debugContent) {
+    return new FeatureResource.Simple(content, debugContent);
+  }
+  
+  private FeatureResource extern(String content, String debugContent) {
+    return new FeatureResource.Simple(content, debugContent) {
+      @Override
+      public boolean isExternal() {
+        return true;
+      }
+    };
+  }
 
-  private static class MapGadgetContext extends GadgetContext {
+  public static class MapGadgetContext extends GadgetContext {
     protected final Map<String, String> params = Maps.newHashMap();
 
     @Override
@@ -771,45 +862,6 @@ public class RenderingGadgetRewriterTest {
 
     public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
       throw new UnsupportedOperationException();
-    }
-  }
-
-  private static class FakeGadgetFeatureRegistry extends GadgetFeatureRegistry {
-    private final Map<String, GadgetFeature> features = Maps.newHashMap();
-
-    public void addInline(String name, String content) throws GadgetException {
-      List<JsLibrary> libs = Lists.newArrayList();
-      libs.add(JsLibrary.create(JsLibrary.Type.INLINE, content, name, null));
-      features.put(name, new GadgetFeature(name, libs, null));
-    }
-
-    public void addExternal(String name, String content) throws GadgetException {
-      List<JsLibrary> libs = Lists.newArrayList();
-      libs.add(JsLibrary.create(JsLibrary.Type.URL, content, name, null));
-      features.put(name, new GadgetFeature(name, libs, null));
-    }
-
-    public FakeGadgetFeatureRegistry() throws GadgetException {
-      super(null, null, null);
-    }
-
-    @Override
-    public Collection<GadgetFeature> getFeatures(Collection<String> needed) {
-      return getFeatures(needed, Sets.<String>newHashSet());
-    }
-
-    @Override
-    public Collection<GadgetFeature> getFeatures(Collection<String> needed,
-        Collection<String> unsupported) {
-      List<GadgetFeature> out = Lists.newArrayList();
-      for (String name : needed) {
-        if (features.containsKey(name)) {
-          out.add(features.get(name));
-        } else {
-          unsupported.add(name);
-        }
-      }
-      return out;
     }
   }
 }

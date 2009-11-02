@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.render;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.shindig.gadgets.JsFeatureLoader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -111,7 +110,6 @@ public class OpenSocialI18NGadgetRewriterTest {
   private static class FakeOpenSocialI18NGadgetRewriter extends OpenSocialI18NGadgetRewriter {
     private Map<String, String> resources = new HashMap<String,String>();
     public FakeOpenSocialI18NGadgetRewriter() {
-      super(new JsFeatureLoader(null));
       resources.put("features/i18n/data/DateTimeConstants__en.js", "content for en");
       resources.put("features/i18n/data/DateTimeConstants__en_US.js", "content for en_US");
       resources.put("features/i18n/data/DateTimeConstants__zh.js", "content for zh");

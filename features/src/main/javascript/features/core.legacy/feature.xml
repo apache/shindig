@@ -17,22 +17,12 @@
   specific language governing permissions and limitations under the License.
 -->
 <feature>
-<!--
-  Required configuration:
-
-  proxyUrl: A url template containing the placeholder "%url%", which will be
-      used for all calls to gadgets.io.getProxyUrl(string), with the value
-      passed in being used as the replacement.
-  jsonProxyUrl: A url pointing to the JSON proxy endpoint, used by
-      gadgets.io.makeRequest. All data passed to this end point will be
-      encoded inside of the POST body.
--->
-  <name>core.io</name>
-  <dependency>core.config</dependency>
+  <name>core.legacy</name>
   <dependency>core.json</dependency>
+  <dependency>core.io</dependency>
+  <dependency>core.prefs</dependency>
   <dependency>core.util</dependency>
   <gadget>
-    <script src="io.js"/>
-    <script src="taming.js"/>
+    <script src="legacy.js"/>
   </gadget>
 </feature>

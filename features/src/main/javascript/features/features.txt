@@ -22,7 +22,14 @@ features/analytics/feature.xml
 features/auth-refresh/feature.xml
 features/caja/feature.xml
 features/content-rewrite/feature.xml
+features/core.auth/feature.xml
+features/core.config/feature.xml
 features/core.io/feature.xml
+features/core.json/feature.xml
+features/core.legacy/feature.xml
+features/core.log/feature.xml
+features/core.prefs/feature.xml
+features/core.util/feature.xml
 features/core/feature.xml
 features/dynamic-height.util/feature.xml
 features/dynamic-height/feature.xml

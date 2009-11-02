@@ -18,6 +18,8 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>skins</name>
+  <dependency>core.config</dependency>
+  <dependency>core.util</dependency>
   <gadget>
     <script src="skins.js"/>
     <script src="taming.js"/>

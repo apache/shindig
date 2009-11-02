@@ -22,6 +22,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
@@ -60,7 +62,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
   @Inject
   public DefaultUrlGenerator(ContainerConfig config,
                              LockedDomainService lockedDomainService,
-                             GadgetFeatureRegistry registry) {
+                             FeatureRegistry registry) {
     iframeBaseUris = Maps.newHashMap();
     jsUriTemplates = Maps.newHashMap();
     oauthCallbackUriTemplates = Maps.newHashMap();
@@ -74,10 +76,8 @@ public class DefaultUrlGenerator implements UrlGenerator {
     this.lockedDomainService = lockedDomainService;
 
     StringBuilder jsBuf = new StringBuilder();
-    for (GadgetFeature feature : registry.getAllFeatures()) {
-      for (JsLibrary library : feature.getJsLibraries(null, null)) {
-        jsBuf.append(library.getContent());
-      }
+    for (FeatureResource resource : registry.getAllFeatures()) {
+      jsBuf.append(resource.getContent());
     }
     jsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
 

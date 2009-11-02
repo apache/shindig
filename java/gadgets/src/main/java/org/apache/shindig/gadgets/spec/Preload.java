@@ -24,7 +24,6 @@ import org.apache.shindig.gadgets.variables.Substitutions;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;

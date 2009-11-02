@@ -76,15 +76,17 @@ gadgets.log.logAtLevel = function(level, message) {
   }
 
   var logger;
-  var gadgetconsole = gadgets.log._console;
+  var console = gadgets.log.console;
 
-  if (level == gadgets.log.WARNING && gadgetconsole.warn) {
-    gadgetconsole.warn(message)
-  } else if (level == gadgets.log.ERROR && gadgetconsole.error) {
-    gadgetconsole.error(message);
-  } else if (gadgetconsole.log) {
-    gadgetconsole.log(message);
+  if (level == gadgets.log.WARNING && console.warn) {
+    logger = console.warn;
+  } else if (level == gadgets.log.ERROR && console.error) {
+    logger = console.error;
+  } else {
+    logger = console.log;
   }
+
+  logger(message);
 };
 
 /**
@@ -103,7 +105,6 @@ gadgets.log.WARNING = 2;
  * Log level for error logging.
  * @static
  */
-gadgets.log.INFO = 3;
 
 /**
  * Log level for no logging
@@ -124,5 +125,5 @@ gadgets.log.logLevelThreshold_ = gadgets.log.INFO;
  * @private
  * @static
  */
-gadgets.log._console = window.console ? window.console :
+gadgets.log.console = window.console ? window.console :
                        window.opera   ? window.opera.postError : undefined;

@@ -23,8 +23,10 @@ A map of view names to view attributes. Examples:
 
 
 -->
-
   <name>views</name>
+  <dependency>core.config</dependency>
+  <dependency>core.json</dependency>
+  <dependency>core.util</dependency>
   <dependency>rpc</dependency>
   <gadget>
     <script src="views.js"/>

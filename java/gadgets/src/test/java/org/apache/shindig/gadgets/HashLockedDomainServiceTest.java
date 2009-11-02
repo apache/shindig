@@ -24,14 +24,15 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
@@ -41,16 +42,16 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   private final ContainerConfig requiredConfig = mock(ContainerConfig.class);
   private final ContainerConfig enabledConfig = mock(ContainerConfig.class);
 
+  @SuppressWarnings("unchecked")
   private Gadget makeGadget(boolean wantsLocked, String url) {
     String gadgetXml;
-    List<GadgetFeature> gadgetFeatures = new ArrayList<GadgetFeature>();
+    List<String> gadgetFeatures = Lists.newArrayList();
     if (wantsLocked) {
       gadgetXml =
           "<Module><ModulePrefs title=''>" +
           "  <Require feature='locked-domain'/>" +
           "</ModulePrefs><Content/></Module>";
-      gadgetFeatures = Arrays.asList(new GadgetFeature("locked-domain",
-          new ArrayList<JsLibrary>(), null));
+      gadgetFeatures.add("locked-domain");
     } else {
       gadgetXml = "<Module><ModulePrefs title=''/><Content/></Module>";
     }
@@ -62,8 +63,8 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
       return null;
     }
 
-    GadgetFeatureRegistry registry = mock(GadgetFeatureRegistry.class);
-    expect(registry.getFeatures(isA(Collection.class))).andReturn(gadgetFeatures).anyTimes();
+    FeatureRegistry registry = mock(FeatureRegistry.class);
+    expect(registry.getFeatures(isA(List.class))).andReturn(gadgetFeatures).anyTimes();
     return new Gadget().setSpec(spec).setGadgetFeatureRegistry(registry);
   }
 

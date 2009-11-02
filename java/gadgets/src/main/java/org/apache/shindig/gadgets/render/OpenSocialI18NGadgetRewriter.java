@@ -22,8 +22,6 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.JsFeatureLoader;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.w3c.dom.Document;
@@ -45,13 +43,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
   private static final String I18N_FEATURE_NAME = "opensocial-i18n";
   private static final String DATA_PATH = "features/i18n/data/";
   private Map<Locale, String> i18nConstantsCache = new ConcurrentHashMap<Locale, String>();
-  private JsFeatureLoader jsFeatureLoader;
 
-  @Inject
-  public OpenSocialI18NGadgetRewriter(JsFeatureLoader jsFeatureLoader) {
-	  this.jsFeatureLoader = jsFeatureLoader;
-  }
-  
   public void rewrite(Gadget gadget, MutableContent mutableContent) {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
@@ -82,15 +74,16 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     } else {
       // load gadgets.i18n.DateTimeConstants and gadgets.i18n.NumberFormatConstants
       String localeName = getLocaleNameForLoadingI18NConstants(locale);
-      JsLibrary dateTimeConstants = jsFeatureLoader.createJsLibrary(JsLibrary.Type.RESOURCE,
-          DATA_PATH + "DateTimeConstants__" + localeName + ".js",
-          "opensocial-i18n", null);
-      JsLibrary numberConstants = jsFeatureLoader.createJsLibrary(JsLibrary.Type.RESOURCE,
-          DATA_PATH + "NumberFormatConstants__" + localeName + ".js",
-          "opensocial-i18n", null);
-      inlineJs.append(dateTimeConstants.getContent())
-        .append('\n').append(numberConstants.getContent());
-      i18nConstantsCache.put(locale, inlineJs.toString());
+      String dateTimeConstantsResource = "DateTimeConstants__" + localeName + ".js";
+      String numberConstantsResource = "NumberFormatConstants__" + localeName + ".js";
+      try {
+        inlineJs.append(ResourceLoader.getContent(dateTimeConstantsResource))
+            .append('\n').append(ResourceLoader.getContent(numberConstantsResource));
+        i18nConstantsCache.put(locale, inlineJs.toString());
+      } catch (IOException e) {
+        throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
+            "Unexpected inability to load i18n data for locale: " + localeName);
+      }
     }
     Element inlineTag = headTag.getOwnerDocument().createElement("script");
     headTag.appendChild(inlineTag);
@@ -105,16 +98,14 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       try {
         attemptToLoadResource(language);
         localeName = language; 
-      } catch (IOException e) {
-      }
+      } catch (IOException e) { }
     }
 
     if (!country.equalsIgnoreCase("ALL")) {
       try {
         attemptToLoadResource(localeName + '_' + country);
         localeName += '_' + country;
-      } catch (IOException e) {
-      }
+      } catch (IOException e) { }
     } 
     return localeName;
   }

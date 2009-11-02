@@ -19,7 +19,11 @@
 -->
 <feature>
   <name>osapi</name>
+  <dependency>core.config</dependency>
   <dependency>core.io</dependency>
+  <dependency>core.json</dependency>
+  <dependency>core.log</dependency>
+  <dependency>core.util</dependency>
   <dependency>rpc</dependency>
   <gadget>
     <script src="osapi.js"></script>

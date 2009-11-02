@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.templates.tags;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.isA;
+
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -25,9 +30,8 @@ import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
@@ -36,7 +40,6 @@ import org.apache.shindig.gadgets.templates.TemplateContext;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -52,9 +55,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.el.ELResolver;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Basic tests for Flash tag
@@ -64,7 +67,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   private MyTemplateProcessor processor;
   private DOMImplementation documentProvider;
   private FlashTagHandler handler;
-  private GadgetFeatureRegistry featureRegistry;
+  private FeatureRegistry featureRegistry;
   private GadgetContext gadgetContext = mock(GadgetContext.class);
   private Gadget gadget = mock(Gadget.class);
 
@@ -78,7 +81,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     documentProvider = injector.getInstance(DOMImplementation.class);
     parser = injector.getInstance(NekoSimplifiedHtmlParser.class);
-    featureRegistry = mock(GadgetFeatureRegistry.class);
+    featureRegistry = mock(FeatureRegistry.class, true);
     handler = new FlashTagHandler(new BeanJsonConverter(injector), featureRegistry,
         "http://example.org/ns", "9.0.115");
     result = parser.parseDom("");
@@ -87,12 +90,21 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
   }
 
   private void expectFeatureLookup() throws GadgetException {
-    EasyMock.expect(featureRegistry.getFeatures(EasyMock.<Collection<String>>anyObject())).andReturn(
-        ImmutableSet.of(new GadgetFeature("swfobject",
-            ImmutableList.of(
-                JsLibrary.create(JsLibrary.Type.INLINE, "swfobject()", "swfobject", null)),
-            Collections.<String>emptySet())));
-    EasyMock.expect(gadgetContext.getContainer()).andReturn("default");
+    List<FeatureResource> swfObjectResources = Lists.newArrayList();
+    swfObjectResources.add(new SwfResource());
+    EasyMock.expect(featureRegistry
+        .getFeatureResources(isA(GadgetContext.class), eq(ImmutableSet.of("swfobject")),
+            EasyMock.<List<String>>isNull())).andReturn(swfObjectResources);
+  }
+  
+  private static class SwfResource extends FeatureResource.Default {
+    public String getContent() {
+      return "swfobject()";
+    }
+
+    public String getDebugContent() {
+      return "swfobject";
+    }
   }
 
   private void expectSecurityToken() {

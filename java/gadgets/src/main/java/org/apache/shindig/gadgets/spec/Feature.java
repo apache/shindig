@@ -32,6 +32,15 @@ import com.google.common.collect.Multimap;
  * No substitutions on any fields.
  */
 public class Feature {
+  public static final Feature CORE_FEATURE = new Feature();
+  
+  // Instantiable only by CORE_FEATURE.
+  private Feature() {
+    this.params = ImmutableMultimap.of();
+    this.required = true;
+    this.name = "core";
+  }
+  
   /**
    * Require@feature
    * Optional@feature

@@ -29,12 +29,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.json.JSONObject;
 import org.w3c.dom.Element;
@@ -44,7 +42,6 @@ import org.w3c.dom.Document;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.io.IOException;
 
@@ -57,7 +54,7 @@ public class FlashTagHandler extends AbstractTagHandler {
   static final String TAG_NAME = "Flash";
 
   private final BeanJsonConverter beanConverter;
-  private final GadgetFeatureRegistry featureRegistry;
+  private final FeatureRegistry featureRegistry;
   private final String flashMinVersion;
 
   /**
@@ -67,7 +64,7 @@ public class FlashTagHandler extends AbstractTagHandler {
   private static final String ALT_CONTENT_PREFIX = "os_xFlash_alt_";
 
   @Inject
-  public FlashTagHandler(BeanJsonConverter beanConverter, GadgetFeatureRegistry featureRegistry,
+  public FlashTagHandler(BeanJsonConverter beanConverter, FeatureRegistry featureRegistry,
       @Named("shindig.template-rewrite.extension-tag-namespace") String namespace,
       @Named("shindig.flash.min-version") String flashMinVersion) {
     super(namespace, TAG_NAME);
@@ -204,14 +201,12 @@ public class FlashTagHandler extends AbstractTagHandler {
     }
     Element swfobject = doc.createElement("script");
     swfobject.setAttribute("type", "text/javascript");
-    Collection<GadgetFeature> features = featureRegistry.getFeatures(ImmutableSet.of(SWFOBJECT));
-    for (GadgetFeature feature : features) {
-      if (feature.getName().equals(SWFOBJECT)) {
-        List<JsLibrary> libraries = feature.getJsLibraries(RenderingContext.GADGET,
-            processor.getTemplateContext().getGadget().getContext().getContainer());
-        swfobject.setTextContent(libraries.get(0).getContent());
-        break;
-      }
+    List<FeatureResource> resources =
+        featureRegistry.getFeatureResources(processor.getTemplateContext().getGadget().getContext(),
+          ImmutableSet.of(SWFOBJECT), null);
+    for (FeatureResource resource : resources) {
+      // Emits all content for feature SWFOBJECT, which has no downstream dependencies.
+      swfobject.setTextContent(resource.getContent());
     }
     swfobject.setUserData(SWFOBJECT, SWFOBJECT, null);
     head.appendChild(swfobject);

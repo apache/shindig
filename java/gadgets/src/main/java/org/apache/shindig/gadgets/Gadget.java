@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -36,13 +37,12 @@ import java.util.Set;
  * of a single gadget request.
  */
 public class Gadget {
-  private GadgetFeatureRegistry gadgetFeatureRegistry;
+  private FeatureRegistry featureRegistry;
   private GadgetContext context;
   private GadgetSpec spec;
   private Collection<PreloadedData> preloads;
   private View currentView;
-  private Set<String> addedFeatures;
-  private Set<String> removedFeatures;
+  private Set<String> directFeatureDeps;
 
   /**
    * @param context The request that the gadget is being processed for.
@@ -60,8 +60,8 @@ public class Gadget {
    * @param registry The gadget feature registry to use to find dependent
    *                 features.
    */
-  public Gadget setGadgetFeatureRegistry(GadgetFeatureRegistry registry) {
-    this.gadgetFeatureRegistry = registry;
+  public Gadget setGadgetFeatureRegistry(FeatureRegistry registry) {
+    this.featureRegistry = registry;
     return this;
   }
 
@@ -70,6 +70,7 @@ public class Gadget {
    */
   public Gadget setSpec(GadgetSpec spec) {
     this.spec = spec;
+    this.directFeatureDeps = Sets.newHashSet(spec.getModulePrefs().getFeatures().keySet());
     return this;
   }
 
@@ -96,15 +97,9 @@ public class Gadget {
   private List<String> allGadgetFeatures;
   public synchronized List<String> getAllFeatures() {
     if (allGadgetFeatures == null) {
-      if (gadgetFeatureRegistry != null) {
-        allGadgetFeatures = Lists.newArrayList();
-        for (GadgetFeature gadgetFeature :
-               gadgetFeatureRegistry.getFeatures(
-                   this.spec.getModulePrefs().getFeatures().keySet())) {
-          allGadgetFeatures.add(gadgetFeature.getName());
-        }
-        // now all features are in reverse order of dependency. So reverse the list.
-        Collections.reverse(allGadgetFeatures);
+      if (featureRegistry != null) {
+        allGadgetFeatures = featureRegistry.getFeatures(
+            Lists.newArrayList(this.spec.getModulePrefs().getFeatures().keySet()));
       } else {
         throw new IllegalStateException(
             "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");
@@ -135,38 +130,17 @@ public class Gadget {
   public LocaleSpec getLocale() {
     return spec.getModulePrefs().getLocale(context.getLocale());
   }
-
   
   public void addFeature(String name) {
-    if (addedFeatures == null) {
-      addedFeatures = Sets.newHashSet();
-    }
-    
-    addedFeatures.add(name);
+    directFeatureDeps.add(name);
   }
   
   public void removeFeature(String name) {
-    if (removedFeatures == null) {
-      removedFeatures = Sets.newHashSet();
-    }
-    
-    removedFeatures.add(name);
+    directFeatureDeps.remove(name);
   }
   
-  public Set<String> getAddedFeatures() {
-    if (addedFeatures == null) {
-      return Collections.emptySet();
-    }
-    
-    return addedFeatures;
-  }
-
-  public Set<String> getRemovedFeatures() {
-    if (removedFeatures == null) {
-      return Collections.emptySet();
-    }
-    
-    return removedFeatures;
+  public Set<String> getDirectFeatureDeps() {
+    return Collections.unmodifiableSet(directFeatureDeps);
   }
 
   /**

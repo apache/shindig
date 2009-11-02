@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>opensocial</name>
+  <dependency>core.config</dependency>
   <dependency>opensocial-jsonrpc</dependency>
   <!-- <dependency>caja</dependency> -->
   <!-- Must include the "caja" feature to display samplecontainer -->

@@ -26,17 +26,16 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetFeature;
-import org.apache.shindig.gadgets.GadgetFeatureRegistry;
-import org.apache.shindig.gadgets.JsLibrary;
 import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
+import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
@@ -50,7 +49,6 @@ import org.w3c.dom.Text;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +81,8 @@ import com.google.inject.name.Named;
  */
 public class RenderingGadgetRewriter implements GadgetRewriter {
   private static final Logger LOG = Logger.getLogger(RenderingGadgetRewriter.class.getName());
+  
+  private static final int INLINE_JS_BUFFER = 50;
 
   static final String DEFAULT_CSS =
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
@@ -92,22 +92,22 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
   static final String FEATURES_KEY = "gadgets.features";
 
-  private final MessageBundleFactory messageBundleFactory;
-  private final ContainerConfig containerConfig;
-  private final GadgetFeatureRegistry featureRegistry;
-  private final UrlGenerator urlGenerator;
-  private final RpcServiceLookup rpcServiceLookup;
-  private Set<String> defaultForcedLibs = ImmutableSet.of();
+  protected final MessageBundleFactory messageBundleFactory;
+  protected final ContainerConfig containerConfig;
+  protected final FeatureRegistry featureRegistry;
+  protected final UrlGenerator urlGenerator;
+  protected final RpcServiceLookup rpcServiceLookup;
+  protected Set<String> defaultExternLibs = ImmutableSet.of();
 
   /**
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
    */
   @Inject
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
-                                  ContainerConfig containerConfig,
-                                  GadgetFeatureRegistry featureRegistry,
-                                  UrlGenerator urlGenerator,
-                                  RpcServiceLookup rpcServiceLookup) {
+                                 ContainerConfig containerConfig,
+                                 FeatureRegistry featureRegistry,
+                                 UrlGenerator urlGenerator,
+                                 RpcServiceLookup rpcServiceLookup) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
@@ -118,11 +118,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
     if (forcedLibs != null && forcedLibs.length() > 0) {
-      defaultForcedLibs = ImmutableSortedSet.copyOf(Arrays.asList(forcedLibs.split(":")));
+      defaultExternLibs = ImmutableSortedSet.copyOf(Arrays.asList(forcedLibs.split(":")));
     }
   }
 
-  public void rewrite(Gadget gadget, MutableContent mutableContent) {
+  public void rewrite(Gadget gadget, MutableContent mutableContent) throws RewritingException {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
       return;
@@ -183,11 +183,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     } catch (GadgetException e) {
       // TODO: Rewriter interface needs to be modified to handle GadgetException or
       // RewriterException or something along those lines.
-      throw new RuntimeException(e);
+      throw new RewritingException(e.getLocalizedMessage(), e);
     }
   }
 
-  private void injectBaseTag(Gadget gadget, Node headTag) {
+  protected void injectBaseTag(Gadget gadget, Node headTag) {
     GadgetContext context = gadget.getContext();
     if (containerConfig.getBool(context.getContainer(), INSERT_BASE_ELEMENT_KEY)) {
       Uri base = gadget.getSpec().getUrl();
@@ -201,7 +201,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
   }
 
-  private void injectOnLoadHandlers(Node bodyTag) {
+  protected void injectOnLoadHandlers(Node bodyTag) {
     Element onloadScript = bodyTag.getOwnerDocument().createElement("script");
     bodyTag.appendChild(onloadScript);
     onloadScript.appendChild(bodyTag.getOwnerDocument().createTextNode(
@@ -211,131 +211,108 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   /**
    * Injects javascript libraries needed to satisfy feature dependencies.
    */
-  private void injectFeatureLibraries(Gadget gadget, Node headTag) throws GadgetException {
+  protected void injectFeatureLibraries(Gadget gadget, Node headTag) throws GadgetException {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
-    String forcedLibs = context.getParameter("libs");
+    String externParam = context.getParameter("libs");
 
-    // List of forced libraries we need
-    Set<String> forced;
+    // List of extern libraries we need
+    Set<String> extern;
 
-    // gather the libraries we'll need to generate the forced libs
-    if (forcedLibs == null || forcedLibs.length() == 0) {
+    // gather the libraries we'll need to generate the extern libs
+    if (externParam == null || externParam.length() == 0) {
       // Don't bother making a mutable copy if the list is empty
-      forced = (defaultForcedLibs.isEmpty()) ? defaultForcedLibs : Sets.newTreeSet(defaultForcedLibs);
+      extern = (defaultExternLibs.isEmpty()) ? defaultExternLibs :
+          Sets.newTreeSet(defaultExternLibs);
     } else {
-      forced = Sets.newTreeSet(Arrays.asList(forcedLibs.split(":")));
+      extern = Sets.newTreeSet(Arrays.asList(externParam.split(":")));
     }
-    if (!forced.isEmpty()) {
-      String jsUrl = urlGenerator.getBundledJsUrl(forced, context);
+    
+    if (!extern.isEmpty()) {
+      String jsUrl = urlGenerator.getBundledJsUrl(extern, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", jsUrl);
       headTag.appendChild(libsTag);
-
-      // Forced transitive deps need to be added as well so that they don't get pulled in twice.
-      // Without this, a shared dependency between forced and non-forced libs would get pulled into
-      // both the external forced script and the inlined script.
-      // TODO: Figure out a clean way to avoid having to call getFeatures twice.
-      for (GadgetFeature dep : featureRegistry.getFeatures(forced)) {
-        forced.add(dep.getName());
+    }
+    
+    List<String> unsupported = Lists.newLinkedList();
+    List<FeatureResource> externResources =
+        featureRegistry.getFeatureResources(gadget.getContext(), extern, unsupported);
+    if (!unsupported.isEmpty()) {
+      throw new UnsupportedFeatureException("In extern &libs=: " + unsupported.toString());
+    }
+    
+    // Get all resources requested by the gadget's requires/optional features.
+    Map<String, Feature> featureMap = gadget.getSpec().getModulePrefs().getFeatures();
+    List<String> gadgetFeatureKeys = Lists.newArrayList(gadget.getDirectFeatureDeps());
+    List<FeatureResource> gadgetResources =
+        featureRegistry.getFeatureResources(gadget.getContext(), gadgetFeatureKeys, unsupported);
+    if (!unsupported.isEmpty()) {
+      List<String> requiredUnsupported = Lists.newLinkedList();
+      for (String notThere : unsupported) {
+        if (!featureMap.containsKey(notThere) || featureMap.get(notThere).getRequired()) {
+          // if !containsKey, the lib was forced with Gadget.addFeature(...) so implicitly req'd.
+          requiredUnsupported.add(notThere);
+        }
+      }
+      if (!requiredUnsupported.isEmpty()) {
+        throw new UnsupportedFeatureException(requiredUnsupported.toString());
       }
     }
-    // Make this read-only
-    forced = ImmutableSet.copyOf(forced);
-
-    // Inline any libs that weren't forced. The ugly context switch between inline and external
-    // Js is needed to allow both inline and external scripts declared in feature.xml.
-    String container = context.getContainer();
-    Collection<GadgetFeature> features = getFeatures(gadget, forced);
+    
+    // Calculate inlineResources as all resources that are needed by the gadget to
+    // render, minus all those included through externResources.
+    // TODO: profile and if needed, optimize this a bit.
+    List<FeatureResource> inlineResources = Lists.newArrayList(gadgetResources);
+    inlineResources.removeAll(externResources);
 
     // Precalculate the maximum length in order to avoid excessive garbage generation.
     int size = 0;
-    for (GadgetFeature feature : features) {
-      for (JsLibrary library : feature.getJsLibraries(RenderingContext.GADGET, container)) {
-        if (library.getType().equals(JsLibrary.Type.URL)) {
-          size += library.getContent().length();
-        }
-      }
-    }
-
-    // Really inexact.
-    StringBuilder inlineJs = new StringBuilder(size);
-
-    for (GadgetFeature feature : features) {
-      for (JsLibrary library : feature.getJsLibraries(RenderingContext.GADGET, container)) {
-        if (library.getType().equals(JsLibrary.Type.URL)) {
-          if (inlineJs.length() > 0) {
-            Element inlineTag = headTag.getOwnerDocument().createElement("script");
-            headTag.appendChild(inlineTag);
-            inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
-            inlineJs.setLength(0);
-          }
-          Element referenceTag = headTag.getOwnerDocument().createElement("script");
-          referenceTag.setAttribute("src", library.getContent());
-          headTag.appendChild(referenceTag);
+    for (FeatureResource resource : inlineResources) {
+      if (!resource.isExternal()) {
+        if (context.getDebug()) {
+          size += resource.getDebugContent().length();
         } else {
-          if (!forced.contains(feature.getName())) {
-            // already pulled this file in from the shared contents.
-            if (context.getDebug()) {
-              inlineJs.append(library.getDebugContent());
-            } else {
-              inlineJs.append(library.getContent());
-            }
-            inlineJs.append(";\n");
-          }
+          size += resource.getContent().length();
         }
       }
     }
 
-    inlineJs.append(getLibraryConfig(gadget, features));
+    List<String> allRequested = Lists.newArrayList(gadgetFeatureKeys);
+    allRequested.addAll(extern);
+    String libraryConfig =
+        getLibraryConfig(gadget, featureRegistry.getFeatures(allRequested));
+    
+    // Size has a small fudge factor added to it for delimiters and such.
+    StringBuilder inlineJs = new StringBuilder(size + libraryConfig.length() + INLINE_JS_BUFFER);
+
+    // Inline any libs that weren't extern. The ugly context switch between inline and external
+    // Js is needed to allow both inline and external scripts declared in feature.xml.
+    for (FeatureResource resource : inlineResources) {
+      String theContent = context.getDebug() ? resource.getDebugContent() : resource.getContent();
+      if (resource.isExternal()) {
+        if (inlineJs.length() > 0) {
+          Element inlineTag = headTag.getOwnerDocument().createElement("script");
+          headTag.appendChild(inlineTag);
+          inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
+          inlineJs.setLength(0);
+        }
+        Element referenceTag = headTag.getOwnerDocument().createElement("script");
+        referenceTag.setAttribute("src", theContent);
+        headTag.appendChild(referenceTag);
+      } else {
+        inlineJs.append(theContent).append(";\n");
+      }
+    }
+
+    inlineJs.append(libraryConfig);
 
     if (inlineJs.length() > 0) {
       Element inlineTag = headTag.getOwnerDocument().createElement("script");
       headTag.appendChild(inlineTag);
       inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
     }
-  }
-
-  /**
-   * Get all features needed to satisfy this rendering request.
-   *
-   * @param forced Forced libraries; added in addition to those found in the spec. Defaults to
-   * "core".
-   */
-  private Collection<GadgetFeature> getFeatures(Gadget gadget, Collection<String> forced)
-      throws GadgetException {
-    Map<String, Feature> features = gadget.getSpec().getModulePrefs().getFeatures();
-    Set<String> libs = Sets.newHashSet(features.keySet());
-    if (!forced.isEmpty()) {
-      libs.addAll(forced);
-    }
-    
-    libs.removeAll(gadget.getRemovedFeatures());
-    libs.addAll(gadget.getAddedFeatures());
-
-    Set<String> unsupported = Sets.newHashSet();
-    Collection<GadgetFeature> feats = featureRegistry.getFeatures(libs, unsupported);
-
-    unsupported.removeAll(forced);
-
-    if (!unsupported.isEmpty()) {
-      // Remove non-required libs
-      Iterator<String> missingIter = unsupported.iterator();
-      while (missingIter.hasNext()) {
-        String missing = missingIter.next();
-        Feature feature = features.get(missing);
-        if (feature == null || !feature.getRequired()) {
-          missingIter.remove();
-        }
-      }
-
-      // Throw error with full list of unsupported libraries
-      if (!unsupported.isEmpty()) {
-        throw new UnsupportedFeatureException(unsupported.toString());
-      }
-    }
-    return feats;
   }
 
   /**
@@ -350,7 +327,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * @param reqs The features needed to satisfy the request.
    * @throws GadgetException If there is a problem with the gadget auth token
    */
-  private String getLibraryConfig(Gadget gadget, Collection<GadgetFeature> reqs)
+  private String getLibraryConfig(Gadget gadget, List<String> reqs)
       throws GadgetException {
     GadgetContext context = gadget.getContext();
 
@@ -361,8 +338,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
     if (features != null) {
       // Discard what we don't care about.
-      for (GadgetFeature feature : reqs) {
-        String name = feature.getName();
+      for (String name : reqs) {
         Object conf = features.get(name);
         if (conf != null) {
           config.put(name, conf);
@@ -429,7 +405,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * Injects message bundles into the gadget output.
    * @throws GadgetException If we are unable to retrieve the message bundle.
    */
-  private void injectMessageBundles(MessageBundle bundle, Node scriptTag) throws GadgetException {
+  protected void injectMessageBundles(MessageBundle bundle, Node scriptTag) throws GadgetException {
     String msgs = bundle.toJSONString();
 
     Text text = scriptTag.getOwnerDocument().createTextNode("gadgets.Prefs.setMessages_(");
@@ -441,7 +417,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   /**
    * Injects default values for user prefs into the gadget output.
    */
-  private void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
+  protected void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
     List<UserPref> prefs = gadget.getSpec().getUserPrefs();
     Map<String, String> defaultPrefs = Maps.newHashMapWithExpectedSize(prefs.size());
     for (UserPref up : prefs) {
@@ -458,7 +434,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    *
    * If preloading fails for any reason, we just output an empty object.
    */
-  private void injectPreloads(Gadget gadget, Node scriptTag) {
+  protected void injectPreloads(Gadget gadget, Node scriptTag) {
     List<Object> preload = Lists.newArrayList();
     for (PreloadedData preloaded : gadget.getPreloads()) {
       try {

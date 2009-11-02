@@ -643,18 +643,23 @@ public class ModulePrefs {
    */
   private static class FeatureVisitor implements ElementVisitor {
     private final Map<String, Feature> features = Maps.newHashMap();
+    private boolean coreIncluded = false;
 
     private static final Set<String> tags = ImmutableSet.of("Require", "Optional");
-    public Set<String> tags() { return tags; }
 
     public boolean visit (String tag, Element element) throws SpecParserException {
-      if (!"Require".equals(tag) &&  !"Optional".equals(tag)) return false;
+      if (!tags.contains(tag)) return false;
 
       Feature feature = new Feature(element);
+      coreIncluded = coreIncluded || feature.getName().startsWith("core");
       features.put(feature.getName(), feature);
       return true;
     }
     public void apply(ModulePrefs moduleprefs) {
+      if (!coreIncluded) {
+        // No library was explicitly included from core - add it as an implicit dependency.
+        features.put(Feature.CORE_FEATURE.getName(), Feature.CORE_FEATURE);
+      }
       moduleprefs.features = ImmutableMap.copyOf(features);
     }
   }

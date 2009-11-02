@@ -99,12 +99,12 @@
                 <source>../../../../src/test/javascript/features/mocks/env.js</source>
                 <source>../../../../src/test/javascript/features/mocks/window.js</source>
                 <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
-                <source>core/config.js</source>
-                <source>core/json.js</source>
-                <source>core/auth.js</source>
-                <source>core/util.js</source>
-                <source>core/prefs.js</source>
-                <source>core/log.js</source>
+                <source>core.config/config.js</source>
+                <source>core.json/json.js</source>
+                <source>core.auth/auth.js</source>
+                <source>core.util/util.js</source>
+                <source>core.prefs/prefs.js</source>
+                <source>core.log/log.js</source>
                 <source>core.io/io.js</source>
                 <source>i18n/currencycodemap.js</source>
                 <source>i18n/datetimeformat.js</source>
