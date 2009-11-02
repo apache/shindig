@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.inject.internal.Preconditions;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -31,10 +32,12 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -59,38 +62,52 @@ import java.util.zip.InflaterInputStream;
 @Singleton
 public class BasicHttpFetcher implements HttpFetcher {
   private static final int DEFAULT_CONNECT_TIMEOUT_MS = 5000;
-  private static final int DEFAULT_MAX_OBJECT_SIZE = 1024 * 1024;
+  private static final int DEFAULT_MAX_OBJECT_SIZE = 0;  // no limit
+  private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
+  // mutable fields must be volatile
+  private volatile int maxObjSize; 
   private volatile int connectionTimeoutMs;
 
   /**
    * Creates a new fetcher for fetching HTTP objects.  Not really suitable
-   * for production use.  Someone should probably go and implement maxObjSize,
-   * for one thing.  Use of an HTTP proxy for security is also necessary
+   * for production use. Use of an HTTP proxy for security is also necessary
    * for production deployment.
    *
-   * @param maxObjSize Maximum size, in bytes, of object to fetch.  Except this
-   * isn't actually implemented.
+   * @param maxObjSize Maximum size, in bytes, of the object we will fetch, 0 if no limit..
    * @param connectionTimeoutMs timeout, in milliseconds, for requests.
    */
   public BasicHttpFetcher(int maxObjSize, int connectionTimeoutMs) {
-	  this.connectionTimeoutMs = connectionTimeoutMs;
+    setMaxObjectSizeBytes(maxObjSize);
+	  setConnectionTimeoutMs(connectionTimeoutMs);
   }
 
   /**
-   * Creates a new fetcher using the default maximum object size.
+   * Creates a new fetcher using the default maximum object size and timeout --
+   * no limit and 5 seconds.
    */
-  @Inject
   public BasicHttpFetcher() {
     this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS);
   }
 
   /**
-   * Change the connection timeout for fetches.
+   * Change the global maximum fetch size (in bytes) for all fetches. 
+   *
+   * @param maxObjectSizeBytes value for maximum number of bytes, or 0 for no limit
+   */
+  @Inject
+  public void setMaxObjectSizeBytes(@Named("shindig.http.client.max-object-size-bytes") int maxObjectSizeBytes) {
+    this.maxObjSize = maxObjectSizeBytes;
+  }
+
+  /**
+   * Change the global connection timeout for all fetchs.
    *
    * @param connectionTimeoutMs new connection timeout in milliseconds
    */
-  public void setConnectionTimeoutMs(int connectionTimeoutMs) {
+  @Inject(optional = true)
+  public void setConnectionTimeoutMs(@Named("shindig.http.client.connection-timeout-ms") int connectionTimeoutMs) {
+    Preconditions.checkArgument(connectionTimeoutMs > 0, "connection-timeout-ms must be greater than 0");
     this.connectionTimeoutMs = connectionTimeoutMs;
   }
 
@@ -140,10 +157,26 @@ public class BasicHttpFetcher implements HttpFetcher {
       is = new InflaterInputStream(responseBodyStream, inflater);
     }
 
-    byte[] body = IOUtils.toByteArray(is);
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+    int totalBytesRead = 0;
+    int currentBytesRead;
+
+    while ((currentBytesRead = is.read(buffer)) != -1) {
+      output.write(buffer, 0, currentBytesRead);
+      totalBytesRead += currentBytesRead;
+
+      if(maxObjSize > 0 && totalBytesRead > maxObjSize) {
+        IOUtils.closeQuietly(is);
+        IOUtils.closeQuietly(output);
+        // Exceeded max # of bytes
+        return HttpResponse.badrequest("Exceeded maximum number of bytes - " + this.maxObjSize);
+      }
+    }
+
     return new HttpResponseBuilder()
         .setHttpStatusCode(responseCode)
-        .setResponse(body)
+        .setResponse(output.toByteArray())
         .addHeaders(headers)
         .create();
   }

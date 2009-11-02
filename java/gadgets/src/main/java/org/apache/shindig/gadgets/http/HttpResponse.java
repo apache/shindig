@@ -185,6 +185,10 @@ public final class HttpResponse implements Externalizable {
     return new HttpResponse(SC_INTERNAL_SERVER_ERROR, "");
   }
 
+  public static HttpResponse badrequest(String msg) {
+    return new HttpResponse(SC_BAD_REQUEST, msg);
+  }
+  
   public static HttpResponse timeout() {
     return new HttpResponse(SC_GATEWAY_TIMEOUT, "");
   }
