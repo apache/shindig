@@ -132,7 +132,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
     opt_callback = opt_callback || function(){};
 
     var req = opensocial.newDataRequest();
-    var viewer = new opensocial.IdSpec({'userId' : 'VIEWER'});
+    var viewer = opensocial.newIdSpec({'userId' : 'VIEWER'});
     req.add(this.newCreateActivityRequest(viewer, activity), 'key');
     req.send(function(response) {
       opt_callback(response.get('key'));
@@ -264,7 +264,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
   };
 
   JsonRpcContainer.prototype.makeIdSpec = function(id) {
-    return new opensocial.IdSpec({'userId' : id});
+    return opensocial.newIdSpec({'userId' : id});
   };
 
   JsonRpcContainer.prototype.translateIdSpec = function(newIdSpec) {

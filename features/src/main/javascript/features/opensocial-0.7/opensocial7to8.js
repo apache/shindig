@@ -93,10 +93,10 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
 
 function translateIdSpec(oldIdSpec) {
   if (oldIdSpec == 'OWNER_FRIENDS') {
-    return new opensocial.IdSpec({userId : 'OWNER', groupId : 'FRIENDS'});
+    return opensocial.newIdSpec({userId : 'OWNER', groupId : 'FRIENDS'});
   } else if (oldIdSpec == 'VIEWER_FRIENDS') {
-    return new opensocial.IdSpec({userId : 'VIEWER', groupId : 'FRIENDS'});
+    return opensocial.newIdSpec({userId : 'VIEWER', groupId : 'FRIENDS'});
   } else {
-    return new opensocial.IdSpec({userId : oldIdSpec});
+    return opensocial.newIdSpec({userId : oldIdSpec});
   }
 };
