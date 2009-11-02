@@ -95,7 +95,7 @@ public class BasicHttpFetcher implements HttpFetcher {
    *
    * @param maxObjectSizeBytes value for maximum number of bytes, or 0 for no limit
    */
-  @Inject
+  @Inject(optional = true)
   public void setMaxObjectSizeBytes(@Named("shindig.http.client.max-object-size-bytes") int maxObjectSizeBytes) {
     this.maxObjSize = maxObjectSizeBytes;
   }
