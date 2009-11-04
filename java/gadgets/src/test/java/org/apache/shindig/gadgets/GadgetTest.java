@@ -75,10 +75,10 @@ public class GadgetTest extends EasyMockTestCase {
         .setContext(context)
         .setGadgetFeatureRegistry(registry)
         .setSpec(new GadgetSpec(Uri.parse(SPEC_URL), xml));
-    List<String> needed = Lists.newArrayList("core", "required1");
+    List<String> needed = Lists.newArrayList(gadget.getSpec().getModulePrefs().getFeatures().keySet());
     List<String> returned = Lists.newArrayList();
     // Call should only happen once, and be cached from there on out.
-    expect(registry.getFeatures(eq(needed))).andReturn(returned).once();
+    expect(registry.getFeatures(eq(needed))).andReturn(returned).anyTimes();
     replay();
     List<String> requiredFeatures1 = gadget.getAllFeatures();
     assertEquals(returned, requiredFeatures1);
