@@ -23,11 +23,6 @@
  */
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
-  ___.grantRead(gadgets.log, 'INFO');
-  ___.grantRead(gadgets.log, 'WARNING');
-  ___.grantRead(gadgets.log, 'ERROR');
-  ___.grantRead(gadgets.log, 'NONE');
-
   caja___.whitelistCtors([
       [gadgets, 'Prefs', Object]
   ]);
@@ -42,19 +37,5 @@ tamings___.push(function(imports) {
     [gadgets.Prefs, 'getString'],
     [gadgets.Prefs, 'set'],
     [gadgets.Prefs, 'setArray']
-  ]);
-  caja___.whitelistFuncs([
-    [gadgets, 'log'],
-    [gadgets, 'warn'],
-    [gadgets, 'error'],
-    [gadgets, 'setLogLevel'],
-    [gadgets.log, 'logAtLevel'],
-    [gadgets.util, 'escapeString'],
-    [gadgets.util, 'getFeatureParameters'],
-    [gadgets.util, 'hasFeature'],
-    [gadgets.util, 'registerOnLoadHandler'],
-    [gadgets.util, 'unescapeString'],
-    [gadgets.json, 'parse'],
-    [gadgets.json, 'stringify']
   ]);
 });

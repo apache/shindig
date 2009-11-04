@@ -21,5 +21,6 @@
   <dependency>core.util</dependency>
   <gadget>
     <script src="prefs.js"/>
+    <script src="taming.js"/>
   </gadget>
 </feature>

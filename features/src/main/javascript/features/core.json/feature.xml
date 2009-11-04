@@ -20,8 +20,10 @@
   <name>core.json</name>
   <gadget>
     <script src="json.js"/>
+    <script src="taming.js"/>
   </gadget>
   <container>
     <script src="json.js"/>
+    <script src="taming.js"/>
   </container>
 </feature>

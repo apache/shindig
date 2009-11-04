@@ -21,8 +21,10 @@
   <dependency>core.config</dependency>
   <gadget>
     <script src="util.js"/>
+    <script src="taming.js"/>
   </gadget>
   <container>
     <script src="util.js"/>
+    <script src="taming.js"/>
   </container>
 </feature>
