@@ -319,6 +319,19 @@ public class FeatureRegistryTest {
     assertEquals(0, unsupported.size());
   }
   
+  @Test
+  public void getFeatureResourcesNoTransitiveSingle() throws Exception {
+    setupFullRegistry("gadget", null);
+    GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
+    List<String> needed = Lists.newArrayList("top", "bottom");
+    List<String> unsupported = Lists.<String>newLinkedList();
+    List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported, false);
+    // Should return in order requested.
+    assertEquals(2, resources.size());
+    assertEquals("top", resources.get(0).getContent());
+    assertEquals("bottom", resources.get(1).getContent());
+    assertEquals(0, unsupported.size());
+  }
   
   @Test
   public void getAllFeatures() throws Exception {

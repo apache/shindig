@@ -160,7 +160,7 @@ public class FeatureRegistry {
   
   /**
    * For the given list of needed features, retrieves all the FeatureResource objects that
-   * contain their content and that of their transitive dependencies.
+   * contain their content and, if requested, that of their transitive dependencies.
    * 
    * Resources are returned in order of their place in the dependency tree, with "bottom"/
    * depended-on resources returned before those that depend on them. Resource objects
@@ -177,22 +177,29 @@ public class FeatureRegistry {
    * @throws GadgetException
    */
   public List<FeatureResource> getFeatureResources(
-      GadgetContext ctx, Collection<String> needed, List<String> unsupported) {
-    Map<Collection<String>, List<FeatureResource>> useCache =
-      (unsupported != null) ? cache : cacheIgnoreUnsupported;
+      GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
+    Map<Collection<String>, List<FeatureResource>> useCache = null;
+    if (transitive) {
+      useCache = (unsupported != null) ? cache : cacheIgnoreUnsupported;
+    }
     
     List<FeatureResource> resources = Lists.newLinkedList();
     
-    if (useCache.containsKey(needed)) {
+    if (useCache != null && useCache.containsKey(needed)) {
       return useCache.get(needed);
     }
     
-    List<FeatureNode> fullTree = getTransitiveDeps(needed, unsupported);
+    List<FeatureNode> featureNodes = null;
+    if (transitive) {
+      featureNodes = getTransitiveDeps(needed, unsupported);
+    } else {
+      featureNodes = getRequestedNodes(needed, unsupported);
+    }
 
     String targetBundleType =
         ctx.getRenderingContext() == RenderingContext.CONTAINER ? "container" : "gadget";
     
-    for (FeatureNode entry : fullTree) {
+    for (FeatureNode entry : featureNodes) {
       for (FeatureBundle bundle : entry.getBundles()) {
         if (bundle.getType().equals(targetBundleType)) {
           if (containerMatch(bundle.getAttribs().get("container"), ctx.getContainer())) {
@@ -202,11 +209,23 @@ public class FeatureRegistry {
       }
     }
     
-    if (unsupported == null || unsupported.isEmpty()) {
+    if (useCache != null && (unsupported == null || unsupported.isEmpty())) {
       useCache.put(needed, resources);
     }
       
     return resources;
+  }
+  
+  /**
+   * Helper method retrieving feature resources, including transitive dependencies.
+   * @param ctx Context for the request.
+   * @param needed List of all needed features.
+   * @param unsupported If non-null, a List populated with unknown features from the needed list.
+   * @return List of FeatureResources that may be used to render the needed features.
+   */
+  public List<FeatureResource> getFeatureResources(
+      GadgetContext ctx, Collection<String> needed, List<String> unsupported) {
+    return getFeatureResources(ctx, needed, unsupported, true);
   }
   
   /**
@@ -255,14 +274,7 @@ public class FeatureRegistry {
   }
   
   private List<FeatureNode> getTransitiveDeps(Collection<String> needed, List<String> unsupported) {
-    final List<FeatureNode> requested = Lists.newArrayList();
-    for (String featureName : needed) {
-      if (featureMap.containsKey(featureName)) {
-        requested.add(featureMap.get(featureName));
-      } else {
-        if (unsupported != null) unsupported.add(featureName);
-      }
-    }
+    final List<FeatureNode> requested = getRequestedNodes(needed, unsupported);
     
     Comparator<FeatureNode> nodeDepthComparator = new Comparator<FeatureNode>() {
       public int compare(FeatureNode one, FeatureNode two) {
@@ -296,6 +308,18 @@ public class FeatureRegistry {
     }
     
     return fullDeps;
+  }
+  
+  private List<FeatureNode> getRequestedNodes(Collection<String> needed, List<String> unsupported) {
+    List<FeatureNode> requested = Lists.newArrayList();
+    for (String featureName : needed) {
+      if (featureMap.containsKey(featureName)) {
+        requested.add(featureMap.get(featureName));
+      } else {
+        if (unsupported != null) unsupported.add(featureName);
+      }
+    }
+    return requested;
   }
   
   private boolean containerMatch(String containerAttrib, String container) {
