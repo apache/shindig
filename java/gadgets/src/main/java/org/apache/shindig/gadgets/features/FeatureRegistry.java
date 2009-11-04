@@ -255,6 +255,14 @@ public class FeatureRegistry {
     return allFeatures;
   }
   
+  /**
+   * Helper method, returns all known feature names.
+   * @return All known feature names.
+   */
+  public List<String> getAllFeatureNames() {
+    return Lists.newArrayList(featureMap.keySet());
+  }
+  
   // Visible for testing.
   String getResourceContent(String resource) throws IOException {
     return ResourceLoader.getContent(resource);
