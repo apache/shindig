@@ -111,6 +111,38 @@ public class FeatureRegistryTest {
   }
   
   @Test
+  public void registerFromFileInNestedDirectoryFeatureXmlFile() throws Exception {
+    // Get the directory from dummyUri and create a subdir.
+    File tmpFile = File.createTempFile("dummy", ".dat");
+    tmpFile.deleteOnExit();
+    File parentDir = tmpFile.getParentFile();
+    String childDirName = "" + Math.random();
+    File childDir = new File(parentDir, childDirName);
+    childDir.mkdirs();
+    childDir.deleteOnExit();
+    File featureDir = new File(childDir, "thefeature");
+    featureDir.mkdirs();
+    featureDir.deleteOnExit();
+    File resFile = File.createTempFile("content", ".js", featureDir);
+    resFile.deleteOnExit();
+    String content = "content-foo";
+    BufferedWriter out = new BufferedWriter(new FileWriter(resFile));
+    out.write(content);
+    out.close();
+    File featureFile = File.createTempFile("feature", ".xml", featureDir);
+    featureFile.deleteOnExit();
+    out = new BufferedWriter(new FileWriter(featureFile));
+    out.write(xml(NODEP_TPL, "gadget", resFile.getAbsolutePath(), null));
+    out.close();
+    registry.register(childDir.getAbsolutePath());
+    
+    // Verify single resource works all the way through.
+    List<FeatureResource> resources = registry.getAllFeatures();
+    assertEquals(1, resources.size());
+    assertEquals(content, resources.get(0).getContent());
+  }
+  
+  @Test
   public void registerFromResourceFeatureXml() throws Exception {
     String content = "resource-content()";
     Uri contentUri = expectResource(content);

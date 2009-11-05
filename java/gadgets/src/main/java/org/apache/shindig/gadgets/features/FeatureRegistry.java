@@ -417,7 +417,10 @@ public class FeatureRegistry {
     
     for (File featureFile : toLoad) {
       String featureFilePath = featureFile.getAbsolutePath();
-      if (featureFilePath.toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
+      if (featureFile.isDirectory()) {
+        // Traverse into subdirectories.
+        loadFile(featureFilePath);
+      } else if (featureFilePath.toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
         String content = ResourceLoader.getContent(featureFile);
         Uri parent = new UriBuilder().setScheme("file").setPath(featureFilePath).toUri();
         loadFeature(parent, content);
