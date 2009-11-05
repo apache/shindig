@@ -18,11 +18,11 @@
 
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
-
-import com.google.inject.Inject;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -54,21 +54,28 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
 
   @SuppressWarnings("boxing")
-@Override
+  @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     if (request.getHeader("If-Modified-Since") != null) {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    if (request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM) != null) {
+    // Avoid response splitting vulnerability
+    String ct = request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM);
+    if(ct != null && ct.indexOf('\r')<0 && ct.indexOf('\n')<0) {
       response.setHeader("Content-Type",
           request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM));
     }
-    if (request.getParameter(ProxyBase.REFRESH_PARAM) != null) {
-      HttpUtil.setCachingHeaders(response,
-          Integer.valueOf(request.getParameter(ProxyBase.REFRESH_PARAM)));
+    
+    boolean ignoreCache = proxyHandler.getIgnoreCache(request);
+    if (!ignoreCache && request.getParameter(ProxyBase.REFRESH_PARAM) != null) {
+        HttpUtil.setCachingHeaders(response, Integer.valueOf(request
+            .getParameter(ProxyBase.REFRESH_PARAM)));
+    } else {
+      HttpUtil.setNoCache(response);
     }
+    
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
       String url = request.getParameter(Integer.toString(i));

@@ -120,7 +120,7 @@ public abstract class ProxyBase {
   protected void setResponseHeaders(HttpServletRequest request,
       HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
-    if (results.isStrictNoCache()) {
+    if (results.isStrictNoCache() || "1".equals(request.getParameter(IGNORE_CACHE_PARAM))) {
       refreshInterval = 0;
     } else if (request.getParameter(REFRESH_PARAM) != null) {
       try {

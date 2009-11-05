@@ -42,17 +42,27 @@ import com.google.common.collect.Lists;
  */
 public class CssRequestRewriterTest extends BaseRewriterTestCase {
   private CssRequestRewriter rewriter;
+  private CssRequestRewriter rewriterNoOverrideExpires;
   private Uri dummyUri;
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
+    ContentRewriterFeature overrideFeatureNoOverrideExpires = rewriterFeatureFactory
+        .get(createSpecWithRewrite(".*", ".*exclude.*", null,
+            HTMLContentRewriter.TAGS));
+    ContentRewriterFeatureFactory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
+    rewriterNoOverrideExpires = new CssRequestRewriter(
+        factoryNoOverrideExpires, new CajaCssLexerParser(),
+        new DefaultProxyingLinkRewriterFactory(rewriterUris));
+
     ContentRewriterFeature overrideFeature =
-        rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
+        rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "3600",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
-    rewriter = new CssRequestRewriter(factory, rewriterUris, new CajaCssLexerParser());
+    rewriter = new CssRequestRewriter(factory, new CajaCssLexerParser(),
+        new DefaultProxyingLinkRewriterFactory(rewriterUris));
     dummyUri = Uri.parse("http://www.w3c.org");
   }
 
@@ -65,6 +75,49 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
+
+    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content).create();
+
+    MutableContent mc = new MutableContent(null, content);
+    rewriter.rewrite(request, response, mc);
+
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(mc.getContent()));
+  }
+
+  @Test
+  public void testCssBasicNoOverrideExpires() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
+    expected = expected.replaceAll("refresh=3600", "refresh=86400");
+    HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
+    request.setMethod("GET");
+    request.setGadget(SPEC_URL);
+
+    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content).create();
+
+    MutableContent mc = new MutableContent(null, content);
+    rewriterNoOverrideExpires.rewrite(request, response, mc);
+
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(mc.getContent()));
+  }
+
+  @Test
+  public void testCssBasicNoProxy() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
+    String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
+    expected = expected.replaceAll("fp=1150739864", "fp=1150739864&nocache=1");
+    HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
+    request.setMethod("GET");
+    request.setGadget(SPEC_URL);
+    request.setIgnoreCache(true);
 
     HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
       .setResponseString(content).create();
@@ -129,9 +182,9 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {list-style-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&fp=1150739864');\n"
+        "div {list-style-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif&fp=1150739864&refresh=3600');\n"
             + "list-style-position:outside;margin:5px;padding:0}\n"
-            + ".someid {background-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&fp=1150739864');\n"
+            + ".someid {background-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png&fp=1150739864&refresh=3600');\n"
             + "float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }

@@ -21,10 +21,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,18 +36,33 @@ import org.w3c.dom.Document;
  */
 public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   private HTMLContentRewriter rewriter;
+  private HTMLContentRewriter rewriterNoOverrideExpires;
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    ContentRewriterFeature overrideFeature =
-        rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "HTTP",
+    ContentRewriterFeature overrideFeatureNoOverrideExpires = rewriterFeatureFactory
+        .get(createSpecWithRewrite(".*", ".*exclude.*", null,
+            HTMLContentRewriter.TAGS));
+    ContentRewriterFeatureFactory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
+
+    rewriterNoOverrideExpires = new HTMLContentRewriter(
+        factoryNoOverrideExpires, new CssRequestRewriter(
+            factoryNoOverrideExpires, new CajaCssLexerParser(),
+            new DefaultProxyingLinkRewriterFactory(rewriterUris)),
+        new DefaultConcatLinkRewriterFactory(rewriterUris),
+        new DefaultProxyingLinkRewriterFactory(rewriterUris));
+    
+    ContentRewriterFeature overrideFeature = rewriterFeatureFactory
+        .get(createSpecWithRewrite(".*", ".*exclude.*", "3600",
             HTMLContentRewriter.TAGS));
     ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
 
-    rewriter = new HTMLContentRewriter(factory, rewriterUris,
-        new CssRequestRewriter(factory, rewriterUris, new CajaCssLexerParser()));
+    rewriter = new HTMLContentRewriter(factory, new CssRequestRewriter(factory,
+        new CajaCssLexerParser(), new DefaultProxyingLinkRewriterFactory(
+            rewriterUris)), new DefaultConcatLinkRewriterFactory(rewriterUris),
+        new DefaultProxyingLinkRewriterFactory(rewriterUris));
   }
 
   @Test
@@ -61,8 +77,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals("headScript1", wrapper.getValue("/html/head/script"));
     assertEquals(1, wrapper.getNodeList("/html/head/script").getLength());
 
-    // Body should contain 8 script tags after rewrite
-    assertEquals(8, wrapper.getNodeList("/html/body/script").getLength());
+    // Body should contain 11 script tags after rewrite
+    assertEquals(11, wrapper.getNodeList("/html/body/script").getLength());
 
     assertEquals("bodyScript1", wrapper.getValue("/html/body/script[1]"));
 
@@ -70,7 +86,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[2]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864" +
+            "&fp=1150739864&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F2.js");
 
@@ -81,7 +97,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript" +
             "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864" +
+            "&fp=1150739864&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F3.js");
 
     // Fifth script should contain a retained comment
@@ -92,7 +108,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[6]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864" +
+            "&fp=1150739864&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F4.js");
 
     // Excluded URL is untouched
@@ -102,9 +118,90 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[8]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864" +
-            "&1=http%3A%2F%2Fwww.example.org%2F6.js");
+            "&fp=1150739864&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F6.js" +
+            "&2=http%3A%2F%2Fwww.example.org%2F10.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&3=http%3A%2F%2Fwww.example.org%2F11.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&4=http%3A%2F%2Fwww.example.org%2F12.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&5=http%3A%2F%2Fwww.example.org%2F13.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&6=http%3A%2F%2Fwww.example.org%2F14.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&7=http%3A%2F%2Fwww.example.org%2F15.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&8=http%3A%2F%2Fwww.example.org%2F16.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&9=http%3A%2F%2Fwww.example.org%2F17.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&10=http%3A%2F%2Fwww.example.org%2F18.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&11=http%3A%2F%2Fwww.example.org%2F19.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
 
+    // Did it split the request
+    assertEquals(wrapper.getValue("/html/body/script[9]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F20.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&2=http%3A%2F%2Fwww.example.org%2F21.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&3=http%3A%2F%2Fwww.example.org%2F22.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&4=http%3A%2F%2Fwww.example.org%2F23.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+    
+    // Handle long requests
+    assertEquals(wrapper.getValue("/html/body/script[10]/@src"),
+        "http://www.example.org/23-long.js&0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+
+    // Resume concating
+    assertEquals(wrapper.getValue("/html/body/script[11]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+  }
+  
+  @Test
+  public void testScriptsBasicNoCache() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
+    Document doc = rewriteContent(rewriter, content, null, false, true).getDocument();
+
+    XPathWrapper wrapper = new XPathWrapper(doc);
+
+    // Second script should contain two concatenated urls with nocache
+    assertEquals(wrapper.getValue("/html/body/script[2]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&nocache=1&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
+            "&2=http%3A%2F%2Fwww.example.org%2F2.js");
+
+    // And check the last script
+    assertEquals(wrapper.getValue("/html/body/script[11]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&nocache=1&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+  }
+
+  @Test
+  public void testScriptsBasicNoCacheAndDebug() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
+    Document doc = rewriteContent(rewriter, content, null, true, true).getDocument();
+
+    XPathWrapper wrapper = new XPathWrapper(doc);
+
+    // Second script should contain two concatenated urls with nocache and debug
+    assertEquals(wrapper.getValue("/html/body/script[2]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&debug=1&nocache=1&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
+            "&2=http%3A%2F%2Fwww.example.org%2F2.js");
+
+    // and check the last script
+    assertEquals(wrapper.getValue("/html/body/script[11]/@src"),
+        "http://www.test.com/dir/concat?" +
+            "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
+            "&fp=1150739864&debug=1&nocache=1&refresh=3600" +
+            "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+            "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
   }
   
   @Test
@@ -129,7 +226,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("//img[1]/@src"),
         "http://www.test.com/dir/proxy?" +
             "url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
-            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=3600");
 
     // Excluded image is untouched
     assertEquals("http://www.example.org/excluded/img.gif", wrapper.getValue("//img[2]/@src"));
@@ -138,7 +235,88 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("//embed[1]/@src"),
         "http://www.test.com/dir/proxy?" +
             "url=http%3A%2F%2Fwww.example.org%2Fsome.swf" +
-            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864");
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=3600");
+
+    // Excluded embed is untouched
+    assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
+  }
+
+  @Test
+  public void testLinksBasicNoOverrideExpires() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
+    Document doc = rewriteContent(rewriterNoOverrideExpires, content, null).getDocument();
+
+    XPathWrapper wrapper = new XPathWrapper(doc);
+
+    // Image is rewritten to proxy, relative path is resolved
+    assertEquals(wrapper.getValue("//img[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=86400");
+
+    // Excluded image is untouched
+    assertEquals("http://www.example.org/excluded/img.gif", wrapper.getValue("//img[2]/@src"));
+
+    // Embed target is rewritten to proxy
+    assertEquals(wrapper.getValue("//embed[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fsome.swf" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=86400");
+
+    // Excluded embed is untouched
+    assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
+  }
+
+  @Test
+  public void testLinksBasicNoCache() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
+    Document doc = rewriteContent(rewriter, content, null, false, true).getDocument();
+
+    XPathWrapper wrapper = new XPathWrapper(doc);
+
+    // Image is rewritten to proxy, relative path is resolved
+    assertEquals(wrapper.getValue("//img[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&nocache=1&refresh=3600");
+
+    // Excluded image is untouched
+    assertEquals("http://www.example.org/excluded/img.gif", wrapper.getValue("//img[2]/@src"));
+
+    // Embed target is rewritten to proxy
+    assertEquals(wrapper.getValue("//embed[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fsome.swf" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&nocache=1&refresh=3600");
+
+    // Excluded embed is untouched
+    assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
+  }
+
+  @Test
+  public void testLinksBasicNoCacheAndDebug() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritelinksbasic.html"));
+    Document doc = rewriteContent(rewriter, content, null, true, true).getDocument();
+
+    XPathWrapper wrapper = new XPathWrapper(doc);
+
+    // Image is rewritten to proxy, relative path is resolved
+    assertEquals(wrapper.getValue("//img[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&debug=1&nocache=1&refresh=3600");
+
+    // Excluded image is untouched
+    assertEquals("http://www.example.org/excluded/img.gif", wrapper.getValue("//img[2]/@src"));
+
+    // Embed target is rewritten to proxy
+    assertEquals(wrapper.getValue("//embed[1]/@src"),
+        "http://www.test.com/dir/proxy?" +
+            "url=http%3A%2F%2Fwww.example.org%2Fsome.swf" +
+            "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&debug=1&nocache=1&refresh=3600");
 
     // Excluded embed is untouched
     assertEquals("http://www.example.org/excluded/some.swf", wrapper.getValue("//embed[2]/@src"));
@@ -167,7 +345,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     // Note that relative URLs are fully resolved
     assertEquals(wrapper.getValue("//link[1]/@href"),
         "http://www.test.com/dir/concat?" +
-            "rewriteMime=text/css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864" +
+            "rewriteMime=text/css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2Flinkedstyle1.css" +
             "&2=http%3A%2F%2Fwww.example.org%2Flinkedstyle3.css" +
             "&3=http%3A%2F%2Fwww.example.org%2Fimportedstyle1.css" +

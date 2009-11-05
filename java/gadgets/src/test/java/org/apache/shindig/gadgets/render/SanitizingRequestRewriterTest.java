@@ -54,9 +54,9 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
 
   private RequestRewriter createRewriter(Set<String> tags, Set<String> attributes) {
     ContentRewriterFeatureFactory rewriterFeatureFactory =
-        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style");
+        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style", "false");
     return new SanitizingRequestRewriter(rewriterFeatureFactory,
-        rewriterUris, new CajaCssSanitizer(new CajaCssParser()));
+        new CajaCssSanitizer(new CajaCssParser()), new DefaultSanitizingProxyingLinkRewriterFactory(rewriterUris));
   }
 
   @Test
@@ -80,6 +80,26 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
       "@import url('http://www.test.com/dir/proxy?"
         + "url=http%3A%2F%2Fwww.evil.com%2Fmore.css"
         + "&fp=45508&sanitize=1&rewriteMime=text%2Fcss');\n"
+        + "A {\n"
+        + "  font: BOLD\n"
+        + "}";
+    String rewritten = rewrite(req, response);
+    assertEquals(sanitized, rewritten);
+  }
+
+  @Test
+  public void enforceValidProxedCssAcceptedNoCache() throws Exception {
+    HttpRequest req = new HttpRequest(CONTENT_URI);
+    req.setRewriteMimeType("text/css");
+    req.setIgnoreCache(true);
+    HttpResponse response = new HttpResponseBuilder().setResponseString(
+        "@import url('http://www.evil.com/more.css'); A { font : BOLD }").create();
+    // The caja css sanitizer does *not* remove the initial colon in urls
+    // since this does not work in IE
+    String sanitized = 
+      "@import url('http://www.test.com/dir/proxy?"
+        + "url=http%3A%2F%2Fwww.evil.com%2Fmore.css"
+        + "&fp=45508&nocache=1&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
         + "}";

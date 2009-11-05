@@ -49,15 +49,15 @@ public class CssRequestRewriter implements RequestRewriter {
 
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
   private final CajaCssLexerParser cssParser;
-  private final ContentRewriterUris rewriterUris;
+  private final ProxyingLinkRewriterFactory proxyingLinkRewriterFactory;
 
   @Inject
   public CssRequestRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
-      ContentRewriterUris rewriterUris,
-      CajaCssLexerParser cssParser) {
+      CajaCssLexerParser cssParser,
+      ProxyingLinkRewriterFactory proxyingLinkRewriterFactory) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
-    this.rewriterUris = rewriterUris;
     this.cssParser = cssParser;
+    this.proxyingLinkRewriterFactory = proxyingLinkRewriterFactory;
   }
 
   public boolean rewrite(HttpRequest request, HttpResponse original,
@@ -69,7 +69,8 @@ public class CssRequestRewriter implements RequestRewriter {
     String css = content.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
-        createLinkRewriter(request.getGadget(), feature, request.getContainer()), sw, false);
+        proxyingLinkRewriterFactory.create(request.getGadget(), feature,
+            request.getContainer(), false, request.getIgnoreCache()), sw, false);
     content.setContent(sw.toString());
 
     return true;
@@ -174,11 +175,6 @@ public class CssRequestRewriter implements RequestRewriter {
       }
     }
     return imports;
-  }
-
-  protected LinkRewriter createLinkRewriter(Uri gadgetUri, ContentRewriterFeature feature, String container) {
-    String proxyBase = rewriterUris.getProxyBase(container); 
-    return new ProxyingLinkRewriter(gadgetUri, feature, proxyBase);
   }
 }
 

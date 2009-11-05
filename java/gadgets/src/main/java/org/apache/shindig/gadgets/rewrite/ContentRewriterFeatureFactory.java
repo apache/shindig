@@ -25,7 +25,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -44,6 +43,7 @@ public class ContentRewriterFeatureFactory {
   private final String excludeUrls;
   private final String expires;
   private final Set<String> includeTags;
+  private final boolean onlyAllowExcludes;
 
   private final ContentRewriterFeature defaultFeature;
 
@@ -53,11 +53,13 @@ public class ContentRewriterFeatureFactory {
       @Named("shindig.content-rewrite.include-urls")String includeUrls,
       @Named("shindig.content-rewrite.exclude-urls")String excludeUrls,
       @Named("shindig.content-rewrite.expires")String expires,
-      @Named("shindig.content-rewrite.include-tags")String includeTags) {
+      @Named("shindig.content-rewrite.include-tags")String includeTags,
+      @Named("shindig.content-rewrite.only-allow-excludes")String onlyAllowExcludes) {
     this.specFactory = specFactory;
     this.includeUrls = includeUrls;
     this.excludeUrls = excludeUrls;
     this.expires = expires;
+    this.onlyAllowExcludes = Boolean.parseBoolean(onlyAllowExcludes);
 
     ImmutableSet.Builder<String> includeTagsBuilder = ImmutableSet.builder();
     for (String s : includeTags.trim().toLowerCase().split("\\s*,\\s*")) {
@@ -67,7 +69,7 @@ public class ContentRewriterFeatureFactory {
     }
     this.includeTags = includeTagsBuilder.build();
     defaultFeature = new ContentRewriterFeature(null, includeUrls, excludeUrls, expires,
-        this.includeTags);
+        this.includeTags, this.onlyAllowExcludes);
   }
 
   public ContentRewriterFeature getDefault() {
@@ -102,7 +104,7 @@ public class ContentRewriterFeatureFactory {
         (ContentRewriterFeature)spec.getAttribute("content-rewriter");
     if (rewriterFeature != null) return rewriterFeature;
     rewriterFeature
-        = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires, includeTags);
+        = new ContentRewriterFeature(spec, includeUrls, excludeUrls, expires, includeTags, onlyAllowExcludes);
     spec.setAttribute("content-rewriter", rewriterFeature);
     return rewriterFeature;
   }
@@ -113,6 +115,6 @@ public class ContentRewriterFeatureFactory {
   public ContentRewriterFeature createRewriteAllFeature(int ttl) {
     return new ContentRewriterFeature(null,
         ".*", "", (ttl == -1) ? "HTTP" : Integer.toString(ttl),
-        Collections.<String>emptySet());
+        Collections.<String>emptySet(), false);
   }
 }

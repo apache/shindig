@@ -28,22 +28,27 @@ import org.apache.shindig.gadgets.servlet.ProxyBase;
  */
 public class ProxyingLinkRewriter implements LinkRewriter {
 
-  private final String prefix;
-  private final Uri parsedPrefix;
-
-  private final ContentRewriterFeature rewriterFeature;
-
-  private final Uri gadgetUri;
-
-  public ProxyingLinkRewriter(Uri gadgetUri, ContentRewriterFeature rewriterFeature,
-      String prefix) {
-    this.prefix = prefix;
-    parsedPrefix = Uri.parse(prefix);
+  protected final ContentRewriterUris rewriterUris;
+  protected final ContentRewriterFeature rewriterFeature;
+  protected final Uri gadgetUri;
+  protected final String container;
+  protected final boolean debug;
+  protected final boolean ignoreCache;
+  
+  public ProxyingLinkRewriter(ContentRewriterUris rewriterUris, Uri gadgetUri,
+      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      boolean ignoreCache) {
+    this.rewriterUris = rewriterUris;
     this.rewriterFeature = rewriterFeature;
     this.gadgetUri = gadgetUri;
+    this.container = container;
+    this.debug = debug;
+    this.ignoreCache = ignoreCache;
   }
 
   public String rewrite(String link, Uri context) {
+    String prefix = rewriterUris.getProxyBase(container);
+    Uri parsedPrefix = Uri.parse(prefix);
     link = link.trim();
     // We shouldnt bother proxying empty URLs
     if (link.length() == 0) {
@@ -51,18 +56,23 @@ public class ProxyingLinkRewriter implements LinkRewriter {
     }
 
     try {
-      Uri linkUri = processLink(Uri.parse(link));
+      Uri linkUri = processLink(parsedPrefix, Uri.parse(link));
       Uri uri = context.resolve(linkUri);
       if (rewriterFeature.shouldRewriteURL(uri.toString())) {
-        String result = prefix
-            + Utf8UrlCoder.encode(uri.toString())
-            + ((gadgetUri == null) ? "" : "&gadget=" + Utf8UrlCoder.encode(gadgetUri.toString()))
-            + "&fp="
-            + rewriterFeature.getFingerprint();
+        StringBuilder result = new StringBuilder();
+        result.append(prefix);
+        result.append(Utf8UrlCoder.encode(uri.toString()));
+        result.append(((gadgetUri == null) ? "" : "&gadget=" + Utf8UrlCoder.encode(gadgetUri.toString()))); 
+        result.append("&fp=");
+        result.append(rewriterFeature.getFingerprint());
+        if(debug)
+          result.append("&debug=1");
+        if(ignoreCache)
+          result.append("&nocache=1");
         if (rewriterFeature.getExpires() != null) {
-          result += '&' + ProxyBase.REFRESH_PARAM  + '=' + rewriterFeature.getExpires().toString();
+          result.append('&').append(ProxyBase.REFRESH_PARAM).append('=').append(rewriterFeature.getExpires().toString());
         }
-        return result;
+        return result.toString();
       } else {
         return uri.toString();
       }
@@ -75,7 +85,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
   /**
    * Preprocess link to avoid double-proxying
    */
-  private Uri processLink(Uri original) {
+  private Uri processLink(Uri parsedPrefix, Uri original) {
     if (parsedPrefix.getPath().equals(original.getPath())) {
       // Link is already rewritten to the proxy so extract the url param
       return Uri.parse(original.getQueryParameter("url"));

@@ -26,10 +26,8 @@ import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
-import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter.SanitizingProxyingLinkRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;
 
@@ -48,16 +46,16 @@ public class SanitizingRequestRewriter implements RequestRewriter {
 
   private final CajaCssSanitizer cssSanitizer;
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final ContentRewriterUris rewriterUris;
-
+  private final SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory;
+  
   @Inject
   public SanitizingRequestRewriter(
       ContentRewriterFeatureFactory rewriterFeatureFactory,
-      ContentRewriterUris rewriterUris,
-      CajaCssSanitizer cssSanitizer) {
-    this.rewriterUris = rewriterUris;
+      CajaCssSanitizer cssSanitizer,
+      SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory) {
     this.cssSanitizer = cssSanitizer;
     this.rewriterFeatureFactory = rewriterFeatureFactory;
+    this.sanitizingProxyingLinkRewriterFactory = sanitizingProxyingLinkRewriterFactory;
   }
 
   public boolean rewrite(HttpRequest request, HttpResponse resp, MutableContent content) {
@@ -137,11 +135,12 @@ public class SanitizingRequestRewriter implements RequestRewriter {
     try {
       String contentType = response.getHeader("Content-Type");
       if (contentType == null || contentType.toLowerCase().startsWith("text/")) {
-        String proxyBaseNoGadget = rewriterUris.getProxyBase(request.getContainer());
-        SanitizingProxyingLinkRewriter cssImportRewriter = new SanitizingProxyingLinkRewriter(
-            request.getGadget(), rewriterFeature, proxyBaseNoGadget, "text/css");
-        SanitizingProxyingLinkRewriter cssImageRewriter = new SanitizingProxyingLinkRewriter(
-            request.getGadget(), rewriterFeature, proxyBaseNoGadget, "image/*");
+        SanitizingProxyingLinkRewriter cssImportRewriter = sanitizingProxyingLinkRewriterFactory
+            .create(request.getGadget(), rewriterFeature, request
+                .getContainer(), "text/css", false, request.getIgnoreCache());
+        SanitizingProxyingLinkRewriter cssImageRewriter = sanitizingProxyingLinkRewriterFactory
+            .create(request.getGadget(), rewriterFeature, request
+                .getContainer(), "image/*", false, request.getIgnoreCache());
         sanitized = cssSanitizer.sanitize(content.getContent(), request.getUri(), cssImportRewriter,
             cssImageRewriter);
       }

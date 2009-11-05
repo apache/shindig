@@ -60,7 +60,18 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   };
 
   private final GadgetContext unsanitaryGadgetContext = new GadgetContext();
+  private final GadgetContext unsanitaryGadgetContextNoCacheAndDebug = new GadgetContext(){
+    @Override
+    public boolean getIgnoreCache() {
+      return true;
+    }
+    @Override
+    public boolean getDebug() {
+      return true;
+    }
+  };
   private Gadget gadget;
+  private Gadget gadgetNoCacheAndDebug;
 
   @Before
   @Override
@@ -71,7 +82,12 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
     gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
-  }
+
+    gadgetNoCacheAndDebug = new Gadget().setContext(unsanitaryGadgetContextNoCacheAndDebug);
+    gadgetNoCacheAndDebug.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+        "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
+    gadgetNoCacheAndDebug.setCurrentView(gadgetNoCacheAndDebug.getSpec().getViews().values().iterator().next());
+}
 
   private String rewrite(Gadget gadget, String content, Set<String> tags, Set<String> attributes)
       throws Exception {
@@ -95,9 +111,9 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     Set<String> newTags = new HashSet<String>(tags);
     newTags.addAll(DEFAULT_TAGS);
     ContentRewriterFeatureFactory rewriterFeatureFactory =
-        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style");
+        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style", "false");
     return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
-        rewriterUris, new CajaCssSanitizer(new CajaCssParser()));
+        new CajaCssSanitizer(new CajaCssParser()), new DefaultSanitizingProxyingLinkRewriterFactory(rewriterUris));
   }
 
   @Test
@@ -138,11 +154,35 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   }
 
   @Test
+  public void enforceStyleLinkRewrittenNoCacheAndDebug() throws Exception {
+    String markup =
+        "<link rel=\"stylesheet\" "
+            + "href=\"http://www.test.com/dir/proxy?"
+            + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
+            + "fp=45508rewriteMime=text/css\"/>";
+    String sanitized = 
+        "<html><head><link href=\"http://www.test.com/dir/proxy?"
+            + "url=http%3A%2F%2Fwww.evil.com%2Fx.css&gadget=www.example.org%2Fgadget.xml&"
+            + "fp=45508&debug=1&nocache=1&sanitize=1&rewriteMime=text/css\" rel=\"stylesheet\"></head><body></body></html>";
+    String rewritten = rewrite(gadgetNoCacheAndDebug, markup, set("link"), set("rel", "href"));
+    assertEquals(sanitized, rewritten);
+  }
+
+  @Test
   public void enforceNonStyleLinkStripped() throws Exception {
     String markup =
         "<link rel=\"script\" "
             + "href=\"www.exmaple.org/evil.js\"/>";
     String rewritten = rewrite(gadget, markup, set("link"), set("rel", "href", "type"));
+    assertEquals("<html><head></head><body></body></html>", rewritten);
+  }
+
+  @Test
+  public void enforceNonStyleLinkStrippedNoCacheAndDebug() throws Exception {
+    String markup =
+        "<link rel=\"script\" "
+            + "href=\"www.exmaple.org/evil.js\"/>";
+    String rewritten = rewrite(gadgetNoCacheAndDebug, markup, set("link"), set("rel", "href", "type"));
     assertEquals("<html><head></head><body></body></html>", rewritten);
   }
 
@@ -159,6 +199,22 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
       +	"fp=45508&sanitize=1&rewriteMime=text%2Fcss');"
       + "</style></head><body></body></html>";
     String rewritten = rewrite(gadget, markup, set("style"), set());
+    assertEquals(sanitized, rewritten);
+  }
+
+  @Test
+  public void enforceCssImportLinkRewrittenNoCacheAndDebug() throws Exception {
+    String markup =
+        "<style type=\"text/css\">@import url('www.evil.com/x.js');</style>";
+    // The caja css sanitizer does *not* remove the initial colon in urls
+    // since this does not work in IE
+    String sanitized = 
+        "<html><head><style>"
+      + "@import url('http://www.test.com/dir/proxy?url=www.example.org%2F"
+      + "www.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&"
+      + "fp=45508&debug=1&nocache=1&sanitize=1&rewriteMime=text%2Fcss');"
+      + "</style></head><body></body></html>";
+    String rewritten = rewrite(gadgetNoCacheAndDebug, markup, set("style"), set());
     assertEquals(sanitized, rewritten);
   }
 
@@ -184,6 +240,13 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     String markup = "<img src='http://www.evil.com/x.js'>Evil happens</img>";
     String sanitized = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&fp=45508&sanitize=1&rewriteMime=image/*\">Evil happens";
     assertEquals(sanitized, rewrite(gadget, markup, set("img"), set("src")));
+  }
+
+  @Test
+  public void enforceImageSrcProxiedNoCacheAndDebug() throws Exception {
+    String markup = "<img src='http://www.evil.com/x.js'>Evil happens</img>";
+    String sanitized = "<img src=\"http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.evil.com%2Fx.js&gadget=www.example.org%2Fgadget.xml&fp=45508&debug=1&nocache=1&sanitize=1&rewriteMime=image/*\">Evil happens";
+    assertEquals(sanitized, rewrite(gadgetNoCacheAndDebug, markup, set("img"), set("src")));
   }
 
   @Test

@@ -76,6 +76,13 @@ public class Feature {
   }
 
   /**
+   * Returns the values for the key, or an empty collection.
+   */
+  public Collection<String> getParamCollection(String key) {
+    return params.get(key);
+  }
+
+  /**
    * Whether this is a Require or an Optional feature.
    */
   private final boolean required;

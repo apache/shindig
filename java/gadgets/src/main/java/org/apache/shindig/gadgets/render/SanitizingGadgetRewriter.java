@@ -23,12 +23,9 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -103,19 +100,19 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
   private final Set<String> allowedAttributes;
   private final CajaCssSanitizer cssSanitizer;
   private final ContentRewriterFeatureFactory rewriterFeatureFactory;
-  private final ContentRewriterUris rewriterUris;
+  private final SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory;
 
   @Inject
   public SanitizingGadgetRewriter(@AllowedTags Set<String> allowedTags,
       @AllowedAttributes Set<String> allowedAttributes,
       ContentRewriterFeatureFactory rewriterFeatureFactory,
-      ContentRewriterUris rewriterUris,
-      CajaCssSanitizer cssSanitizer) {
+      CajaCssSanitizer cssSanitizer,
+      SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory) {
     this.allowedTags = allowedTags;
     this.allowedAttributes = allowedAttributes;
-    this.rewriterUris = rewriterUris;
     this.cssSanitizer = cssSanitizer;
     this.rewriterFeatureFactory = rewriterFeatureFactory;
+    this.sanitizingProxyingLinkRewriterFactory = sanitizingProxyingLinkRewriterFactory;
   }
 
 
@@ -148,11 +145,14 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
       ContentRewriterFeature rewriterFeature =
           rewriterFeatureFactory.createRewriteAllFeature(expires == null ? -1 : expires);
 
-      String proxyBaseNoGadget = rewriterUris.getProxyBase(gadget.getContext().getContainer());
-      LinkRewriter cssImportRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
-          rewriterFeature, proxyBaseNoGadget, "text/css");
-      LinkRewriter imageRewriter = new SanitizingProxyingLinkRewriter(gadget.getSpec().getUrl(),
-          rewriterFeature, proxyBaseNoGadget, "image/*");
+      SanitizingProxyingLinkRewriter cssImportRewriter = sanitizingProxyingLinkRewriterFactory
+          .create(gadget.getSpec().getUrl(), rewriterFeature, gadget
+              .getContext().getContainer(), "text/css", gadget.getContext()
+              .getDebug(), gadget.getContext().getIgnoreCache());
+      SanitizingProxyingLinkRewriter imageRewriter = sanitizingProxyingLinkRewriterFactory
+          .create(gadget.getSpec().getUrl(), rewriterFeature, gadget
+              .getContext().getContainer(), "image/*", gadget.getContext()
+              .getDebug(), gadget.getContext().getIgnoreCache());
 
       // Create the set of filters to process in order.
       filters = ImmutableList.of(
@@ -431,35 +431,6 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
         }
       }
       return Result.CONTINUE;
-    }
-  }
-
-  /**
-   * Forcible rewrite the link through the proxy and force sanitization with
-   * an expected mime type
-   */
-  static class SanitizingProxyingLinkRewriter extends ProxyingLinkRewriter {
-
-    private final String expectedMime;
-
-    SanitizingProxyingLinkRewriter(Uri gadgetUri, ContentRewriterFeature rewriterFeature,
-        String prefix, String expectedMime) {
-      super(gadgetUri, rewriterFeature, prefix);
-      this.expectedMime = expectedMime;
-    }
-
-    @Override
-    public String rewrite(String link, Uri context) {
-      try {
-        Uri.parse(link);
-      } catch (RuntimeException re) {
-        // Any failure in parse
-        return "about:blank";
-      }
-      String rewritten = super.rewrite(link, context);
-      rewritten += '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1";
-      rewritten += '&' + ProxyBase.REWRITE_MIME_TYPE_PARAM + '=' + expectedMime;
-      return rewritten;
     }
   }
 

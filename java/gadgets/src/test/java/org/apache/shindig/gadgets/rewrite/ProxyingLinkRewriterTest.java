@@ -35,42 +35,68 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
   @Test
   public void testAbsoluteRewrite() {
     String val = "http://a.b.com";
-    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=86400",
         rewrite(val));
+  }
+
+  @Test
+  public void testAbsoluteRewriteNoCache() {
+    String val = "http://a.b.com";
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&nocache=1&refresh=86400",
+        defaultLinkRewriterNoCache.rewrite(val, SPEC_URL));
+  }
+
+  @Test
+  public void testAbsoluteRewriteNoCacheAndDebug() {
+    String val = "http://a.b.com";
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&debug=1&nocache=1&refresh=86400",
+        defaultLinkRewriterNoCacheAndDebug.rewrite(val, SPEC_URL));
   }
 
   @Test
   public void testHostRelativeRewrite() {
     String val = "/somepath/test.gif";
-    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fsomepath%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fsomepath%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=86400",
         rewrite(val));
   }
 
   @Test
   public void testPathRelativeRewrite() {
     String val = "test.gif";
-    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=86400",
         rewrite(val));
   }
 
   @Test
   public void testLeadingAndTrailingSpace() {
     String val = " test.gif ";
-    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=86400",
         rewrite(val));
   }
 
   @Test
   public void testWithRefresh() throws Exception {
     ContentRewriterFeature contentRewriterFeature = new ContentRewriterFeature(
-        createSpecWithoutRewrite(), ".*", "", "86400",
-        ImmutableSet.of("embed", "img", "script", "link", "style"));
-    ProxyingLinkRewriter rewriter = new ProxyingLinkRewriter(
-      SPEC_URL,
-      contentRewriterFeature,
-        DEFAULT_PROXY_BASE);
+        createSpecWithoutRewrite(), ".*", "", "3600",
+        ImmutableSet.of("embed", "img", "script", "link", "style"), false);
+    ProxyingLinkRewriter rewriter = new DefaultProxyingLinkRewriterFactory(
+        defaultContainerRewriterUris).create(SPEC_URL, contentRewriterFeature,
+        "default", false, false);
     String val = " test.gif ";
-    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=86400",
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334&refresh=3600",
+        rewriter.rewrite(val, SPEC_URL));
+  }
+
+  @Test
+  public void testWithBadRefresh() throws Exception {
+    ContentRewriterFeature contentRewriterFeature = new ContentRewriterFeature(
+        createSpecWithoutRewrite(), ".*", "", "HTTP",
+        ImmutableSet.of("embed", "img", "script", "link", "style"), false);
+    ProxyingLinkRewriter rewriter = new DefaultProxyingLinkRewriterFactory(
+        defaultContainerRewriterUris).create(SPEC_URL, contentRewriterFeature,
+        "default", false, false);
+    String val = " test.gif ";
+    assertEquals("http://www.test.com/dir/proxy?url=http%3A%2F%2Fwww.example.org%2Fdir%2Ftest.gif&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=-182800334",
         rewriter.rewrite(val, SPEC_URL));
   }
 

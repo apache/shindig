@@ -62,29 +62,43 @@ public abstract class BaseRewriterTestCase {
   protected ContentRewriterFeature defaultRewriterFeature;
   protected ContentRewriterFeatureFactory rewriterFeatureFactory;
   protected LinkRewriter defaultLinkRewriter;
+  protected LinkRewriter defaultLinkRewriterNoCache;
+  protected LinkRewriter defaultLinkRewriterNoCacheAndDebug;
   protected GadgetHtmlParser parser;
   protected Injector injector;
   protected HttpResponse fakeResponse;
-  protected ContainerConfig config;
   protected ContentRewriterUris rewriterUris;
   protected IMocksControl control;
+  protected ContentRewriterUris defaultContainerRewriterUris;
 
   @Before
   public void setUp() throws Exception {
-    rewriterFeatureFactory = new ContentRewriterFeatureFactory(null, ".*", "", "HTTP",
-        "embed,img,script,link,style");
+    rewriterFeatureFactory = new ContentRewriterFeatureFactory(null, ".*", "", "86400",
+        "embed,img,script,link,style", "false");
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
-    defaultLinkRewriter = new ProxyingLinkRewriter(
-        SPEC_URL,
-        defaultRewriterFeature,
-        DEFAULT_PROXY_BASE);
+    defaultContainerRewriterUris = new ContentRewriterUris(
+        new AbstractContainerConfig() {
+          @Override
+          public Object getProperty(String container, String name) {
+            return null;
+          }
+        }, DEFAULT_PROXY_BASE, DEFAULT_CONCAT_BASE);
+    defaultLinkRewriter = new DefaultProxyingLinkRewriterFactory(
+        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
+        "default", false, false);
+    defaultLinkRewriterNoCache = new DefaultProxyingLinkRewriterFactory(
+        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
+        "default", false, true);
+    defaultLinkRewriterNoCacheAndDebug = new DefaultProxyingLinkRewriterFactory(
+        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
+        "default", true, true);
     injector = Guice.createInjector(new ParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
 
-    config = new AbstractContainerConfig() {
+    ContainerConfig config = new AbstractContainerConfig() {
       @Override
       public Object getProperty(String container, String name) {
         if (MOCK_CONTAINER.equals(container)) {
@@ -106,18 +120,48 @@ public abstract class BaseRewriterTestCase {
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,
       Set<String> tags) throws GadgetException {
-    String xml = "<Module>" +
-                 "<ModulePrefs title=\"title\">" +
-                 "<Optional feature=\"content-rewrite\">\n" +
-                 "      <Param name=\"expires\">" + expires + "</Param>\n" +
-                 "      <Param name=\"include-urls\">" + include + "</Param>\n" +
-                 "      <Param name=\"exclude-urls\">" + exclude + "</Param>\n" +
-                 "      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n" +
-                 "</Optional>" +
-                 "</ModulePrefs>" +
-                 "<Content type=\"html\">Hello!</Content>" +
-                 "</Module>";
-    return new GadgetSpec(SPEC_URL, xml);
+    StringBuilder xml = new StringBuilder();
+    xml.append("<Module>");
+    xml.append("<ModulePrefs title=\"title\">");
+    xml.append("<Optional feature=\"content-rewrite\">\n");
+    if(expires != null)
+      xml.append("      <Param name=\"expires\">" + expires + "</Param>\n");
+    if(include != null)
+      xml.append("      <Param name=\"include-urls\">" + include + "</Param>\n");
+    if(exclude != null)
+      xml.append("      <Param name=\"exclude-urls\">" + exclude + "</Param>\n");
+    if(tags != null)
+      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+    xml.append("</Optional>");
+    xml.append("</ModulePrefs>");
+    xml.append("<Content type=\"html\">Hello!</Content>");
+    xml.append("</Module>");
+    return new GadgetSpec(SPEC_URL, xml.toString());
+  }
+
+  public static GadgetSpec createSpecWithRewriteOS9(String[] includes, String[] excludes, String expires,
+      Set<String> tags) throws GadgetException {
+    StringBuilder xml = new StringBuilder();
+    xml.append("<Module>");
+    xml.append("<ModulePrefs title=\"title\">");
+    xml.append("<Optional feature=\"content-rewrite\">\n");
+    if(expires != null)
+      xml.append("      <Param name=\"expires\">" + expires + "</Param>\n");
+    if(includes != null)
+      for (String include : includes) {
+        xml.append("      <Param name=\"include-url\">" + include + "</Param>\n");
+      }
+    if(excludes != null)
+      for (String exclude : excludes) {
+        xml.append("      <Param name=\"exclude-url\">" + exclude + "</Param>\n");
+      }
+    if(tags != null)
+      xml.append("      <Param name=\"include-tags\">" + StringUtils.join(tags, ",") + "</Param>\n");
+    xml.append("</Optional>");
+    xml.append("</ModulePrefs>");
+    xml.append("<Content type=\"html\">Hello!</Content>");
+    xml.append("</Module>");
+    return new GadgetSpec(SPEC_URL, xml.toString());
   }
 
   public static GadgetSpec createSpecWithoutRewrite() throws GadgetException {
@@ -152,7 +196,13 @@ public abstract class BaseRewriterTestCase {
     return rewrittenContent;
   }
 
-  MutableContent rewriteContent(GadgetRewriter rewriter, String s, final String container)
+  MutableContent rewriteContent(GadgetRewriter rewriter, String s,
+      final String container) throws Exception {
+    return rewriteContent(rewriter, s, container, false, false);
+  }
+  
+  MutableContent rewriteContent(GadgetRewriter rewriter, String s,
+      final String container, final boolean debug, final boolean ignoreCache)
       throws Exception {
     MutableContent mc = new MutableContent(parser, s);
 
@@ -169,6 +219,16 @@ public abstract class BaseRewriterTestCase {
       public String getContainer() {
         return container;
       }
+      
+      @Override
+      public boolean getDebug() {
+        return debug;
+      }
+      
+      @Override
+      public boolean getIgnoreCache() {
+        return ignoreCache;
+      }
     };
 
     Gadget gadget = new Gadget()
@@ -182,7 +242,7 @@ public abstract class BaseRewriterTestCase {
     private final ContentRewriterFeature feature;
 
     public FakeRewriterFeatureFactory(ContentRewriterFeature feature) {
-      super(null, ".*", "", "HTTP", "");
+      super(null, ".*", "", "HTTP", "", "false");
       this.feature = feature;
     }
 
