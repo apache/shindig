@@ -263,8 +263,7 @@ gadgets.rpc = function() {
     if (url.indexOf("//") == 0) {
       url = window.location.protocol + url;
     }
-    if (url.indexOf("http://") != 0 &&
-        url.indexOf("https://") != 0) {
+    if (url.indexOf("://") == -1) {
       // Assumed to be schemaless. Default to current protocol.
       url = window.location.protocol + "//" + url;
     }
