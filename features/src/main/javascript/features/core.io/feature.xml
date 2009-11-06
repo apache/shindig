@@ -35,4 +35,8 @@
     <script src="io.js"/>
     <script src="taming.js"/>
   </gadget>
+  <container>
+    <script src="io.js"/>
+    <script src="taming.js"/>
+  </container>
 </feature>

@@ -21,4 +21,7 @@
   <gadget>
     <script src="config.js"/>
   </gadget>
+  <container>
+    <script src="config.js"/>
+  </container>
 </feature>
