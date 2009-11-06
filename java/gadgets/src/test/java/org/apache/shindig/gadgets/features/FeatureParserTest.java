@@ -48,6 +48,7 @@ public class FeatureParserTest {
       "  </container>" +
       "  <other_type>" +
       "    <script src=\"http://www.apache.org/two.js\"/>" +
+      "    <script src=\"//extern/unchanged.dat\" inline=\"false\"/>" +
       "  </other_type>" +
       "</feature>";
     FeatureParser.ParsedFeature parsed = new FeatureParser().parse(parent, featureXml);
@@ -102,10 +103,13 @@ public class FeatureParserTest {
     FeatureParser.ParsedFeature.Bundle bundle4 = parsed.getBundles().get(3);
     assertEquals("other_type", bundle4.getType());
     assertEquals(0, bundle4.getAttribs().size());
-    assertEquals(1, bundle4.getResources().size());
+    assertEquals(2, bundle4.getResources().size());
     assertNull(bundle4.getResources().get(0).getContent());
     assertEquals(Uri.parse("http://www.apache.org/two.js"),
         bundle4.getResources().get(0).getSource());
+    assertNull(bundle4.getResources().get(1).getContent());
+    assertEquals(Uri.parse("//extern/unchanged.dat"),
+        bundle4.getResources().get(1).getSource());
     assertEquals(0, bundle4.getResources().get(0).getAttribs().size());
   }
   

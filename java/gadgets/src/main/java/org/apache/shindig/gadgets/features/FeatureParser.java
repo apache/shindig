@@ -68,9 +68,17 @@ class FeatureParser {
             Element resourceChild = (Element)resourceKids.item(x);
             String src = resourceChild.getAttribute("src");
             String content = resourceChild.getTextContent();
+            Map<String, String> attribs = getAttribs(resourceChild);
+            Uri source = null;
+            if (src != null && src.length() > 0) {
+              if (!"false".equals(attribs.get("inline"))) {
+                source = parent.resolve(FeatureRegistry.getComponentUri(src));
+              } else {
+                source = Uri.parse(src);
+              }
+            }
             resources.add(new ParsedFeature.Resource(
-                src == null || src.length() == 0 ? null :
-                  parent.resolve(FeatureRegistry.getComponentUri(src)),
+                source,
                 src != null && src.length() != 0 ? null : content,
                 getAttribs(resourceChild)));
           }
