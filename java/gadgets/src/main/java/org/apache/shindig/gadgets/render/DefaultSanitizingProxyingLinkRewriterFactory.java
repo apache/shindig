@@ -25,10 +25,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
 
-/**
- * @author <a href="mailto:jweygandt@ebay.com">Jon Weygandt</a>
- * @version $Id: $
- */
 @Singleton
 public class DefaultSanitizingProxyingLinkRewriterFactory implements
     SanitizingProxyingLinkRewriterFactory {

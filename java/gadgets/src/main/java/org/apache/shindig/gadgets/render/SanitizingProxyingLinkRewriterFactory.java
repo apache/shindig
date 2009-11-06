@@ -23,10 +23,6 @@ import com.google.inject.ImplementedBy;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 
-/**
- * @author <a href="mailto:jweygandt@ebay.com">Jon Weygandt</a>
- * @version $Id: $
- */
 @ImplementedBy(DefaultSanitizingProxyingLinkRewriterFactory.class)
 public interface SanitizingProxyingLinkRewriterFactory {
   public SanitizingProxyingLinkRewriter create(Uri gadgetUri,

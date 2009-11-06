@@ -29,10 +29,6 @@ import java.net.URLEncoder;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-/**
- * @author <a href="mailto:jweygandt@ebay.com">Jon Weygandt</a>
- * @version $Id: $
- */
 public class ConcatLinkRewriter {
   private final static int MAX_URL_LENGTH = 1500;
 

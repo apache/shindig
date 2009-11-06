@@ -22,10 +22,6 @@ import com.google.inject.ImplementedBy;
 
 import org.apache.shindig.common.uri.Uri;
 
-/**
- * @author <a href="mailto:jweygandt@ebay.com">Jon Weygandt</a>
- * @version $Id: $
- */
 @ImplementedBy(DefaultProxyingLinkRewriterFactory.class)
 public interface ProxyingLinkRewriterFactory {
   public ProxyingLinkRewriter create(Uri gadgetUri,

@@ -23,10 +23,6 @@ import com.google.inject.Singleton;
 
 import org.apache.shindig.common.uri.Uri;
 
-/**
- * @author <a href="mailto:jweygandt@ebay.com">Jon Weygandt</a>
- * @version $Id: $
- */
 @Singleton
 public class DefaultProxyingLinkRewriterFactory implements
     ProxyingLinkRewriterFactory {
