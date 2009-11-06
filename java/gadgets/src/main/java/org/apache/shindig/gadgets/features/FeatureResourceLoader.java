@@ -62,9 +62,9 @@ public class FeatureResourceLoader {
    */
   public FeatureResource load(Uri uri, Map<String, String> attribs) throws GadgetException {
     try {
-      if (uri.getScheme().equals("file")) {
+      if ("file".equals(uri.getScheme())) {
         return loadFile(uri.getPath(), attribs);
-      } else if (uri.getScheme().equals("res")) {
+      } else if ("res".equals(uri.getScheme())) {
         return loadResource(uri.getPath(), attribs);
       }
       return loadUri(uri, attribs);
