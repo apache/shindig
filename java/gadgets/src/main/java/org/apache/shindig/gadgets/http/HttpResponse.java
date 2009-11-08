@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.encoding.EncodingDetector;
 
@@ -284,18 +285,37 @@ public final class HttpResponse implements Externalizable {
   }
 
   /**
+   * Calculate the Cache Expiration for this response.
+   *
+   *
+   * For errors (rc >=400) we intentionally ignore cache-control headers for most HTTP error responses, because if
+   * we don't we end up hammering sites that have gone down with lots of requests. Certain classes
+   * of client errors (authentication) have more severe behavioral implications if we cache them.
+   *
+   * For errors if the server provides a Retry-After header we use that.
+   *
+   * We technically shouldn't be caching certain 300 class status codes either, such as 302, but
+   * in practice this is a better option for performance.
+   *
    * @return consolidated cache expiration time or -1
    */
   public long getCacheExpiration() {
-    // We intentionally ignore cache-control headers for most HTTP error responses, because if
-    // we don't we end up hammering sites that have gone down with lots of requests. Certain classes
-    // of client errors (authentication) have more severe behavioral implications if we cache them.
     if (isError() && !NEGATIVE_CACHING_EXEMPT_STATUS.contains(httpStatusCode)) {
+      // If the server provides a Retry-After header use that as the cacheTtl
+      String retryAfter = this.getHeader("Retry-After");
+      if (retryAfter != null) {
+        if (StringUtils.isNumeric(retryAfter)) {
+          return date + Integer.parseInt(retryAfter);
+        } else {
+          Date expiresDate = DateUtil.parseRfc1123Date(retryAfter);
+          if (expiresDate != null)
+            return expiresDate.getTime();
+        }
+      }
+      // default value
       return date + negativeCacheTtl;
     }
 
-    // We technically shouldn't be caching certain 300 class status codes either, such as 302, but
-    // in practice this is a better option for performance.
     if (isStrictNoCache()) {
       return -1;
     }

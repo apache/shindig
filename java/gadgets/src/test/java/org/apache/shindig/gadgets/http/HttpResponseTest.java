@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.Date;
 
 import static junitx.framework.Assert.assertEquals;
 import static junitx.framework.Assert.assertFalse;
@@ -380,6 +381,22 @@ public class HttpResponseTest {
     assertAllowsNegativeCaching(HttpResponse.SC_NOT_FOUND);
     assertAllowsNegativeCaching(HttpResponse.SC_INTERNAL_SERVER_ERROR);
     assertAllowsNegativeCaching(HttpResponse.SC_GATEWAY_TIMEOUT);
+  }
+
+  @Test
+  public void testRetryAfter() {
+    HttpResponse response;
+    String nowPlus60 = DateUtil.formatRfc1123Date(System.currentTimeMillis() + 60 * 1000L);
+    for (String date : Arrays.asList("60", nowPlus60)) {
+      for (int rc : Arrays.asList(HttpResponse.SC_INTERNAL_SERVER_ERROR, HttpResponse.SC_GATEWAY_TIMEOUT, HttpResponse.SC_BAD_REQUEST)) {
+        response = new HttpResponseBuilder()
+            .setHttpStatusCode(rc)
+            .setHeader("Retry-After","60")
+            .create();
+        long ttl = response.getCacheTtl();
+        assertTrue(ttl <= 60 * 1000L && ttl > 0);
+      }
+    }
   }
 
   @Test
