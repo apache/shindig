@@ -114,7 +114,7 @@ public class JsServlet extends InjectedServlet {
         jsData.append(content);
       } else {
         // Support external/type=url feature serving through document.write()
-        jsData.append("document.write('<script src=\"").append(content).append("\"></script>");
+        jsData.append("document.write('<script src=\"").append(content).append("\"></script>')");
       }
       isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
       jsData.append(";\n");
