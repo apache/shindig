@@ -164,6 +164,15 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(recorder.getHeader("Content-Disposition"));
   }
 
+  public void testSetContentTypeHeader() throws Exception {
+    HttpResponse results = new HttpResponseBuilder()
+        .create();
+    replay();
+    proxy.setResponseHeaders(request, recorder, results);
+
+    assertEquals(recorder.getHeader("Content-Type"), "application/octet-stream");
+  }
+
   public void testSetResponseHeadersNoCache() throws Exception {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));

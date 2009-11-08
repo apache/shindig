@@ -140,6 +140,9 @@ public abstract class ProxyBase {
     if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type"))) {
       response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     }
+    if (results.getHeader("Content-Type") == null) {
+      response.setHeader("Content-Type", "application/octet-stream");
+    }
   }
 
   protected void setRequestHeaders(HttpServletRequest servletRequest, HttpRequest req) {
