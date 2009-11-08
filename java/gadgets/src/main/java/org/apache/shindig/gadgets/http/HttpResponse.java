@@ -305,7 +305,7 @@ public final class HttpResponse implements Externalizable {
       String retryAfter = this.getHeader("Retry-After");
       if (retryAfter != null) {
         if (StringUtils.isNumeric(retryAfter)) {
-          return date + Integer.parseInt(retryAfter);
+          return date + Integer.parseInt(retryAfter) * 1000L;
         } else {
           Date expiresDate = DateUtil.parseRfc1123Date(retryAfter);
           if (expiresDate != null)
@@ -331,7 +331,7 @@ public final class HttpResponse implements Externalizable {
   }
 
   /**
-   * @return Consolidated ttl or -1.
+   * @return Consolidated ttl in milliseconds or -1.
    */
   public long getCacheTtl() {
     long expiration = getCacheExpiration();
