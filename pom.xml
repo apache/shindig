@@ -1218,8 +1218,7 @@
     <!-- for jstl-1.2 for now.. -->
     <repository>
       <id>java.net</id>
-      <url>http://download.java.net/maven/1</url>
-      <layout>legacy</layout>
+      <url>http://download.java.net/maven/2/</url>
     </repository>
   </repositories>
 
@@ -1315,7 +1314,7 @@
       <dependency>
         <groupId>com.google.collections</groupId>
         <artifactId>google-collections</artifactId>
-        <version>1.0-rc3</version>
+        <version>1.0-rc2</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -1397,7 +1396,7 @@
       <dependency>
         <groupId>rome</groupId>
         <artifactId>rome</artifactId>
-        <version>0.9</version>
+        <version>1.0</version>
       </dependency>
       <dependency>
         <groupId>com.ibm.icu</groupId>
@@ -1500,10 +1499,8 @@
         <artifactId>jsecurity</artifactId>
         <version>0.9.0</version>
       </dependency>
-      <!-- TODO - switch to jakarta taglibs when the get a jstl 1.2 version out
-                  See https://issues.apache.org/bugzilla/show_bug.cgi?id=45197 -->
       <dependency>
-        <groupId>jstl</groupId>
+        <groupId>javax.servlet</groupId>
         <artifactId>jstl</artifactId>
         <version>1.2</version>
       </dependency>
