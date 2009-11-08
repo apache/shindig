@@ -52,7 +52,8 @@ public class DefaultUrlGenerator implements UrlGenerator {
   protected static final String OAUTH_GADGET_CALLBACK_URI_PARAM =
       "gadgets.oauthGadgetCallbackTemplate";
 
-  private final String jsChecksum;
+  // Allow for subclasses to override this (adding custom versioning, etc.)
+  protected String jsChecksum;
   private final Map<String, Uri> iframeBaseUris;
   private final Map<String, String> jsUriTemplates;
   private final Map<String, String> oauthCallbackUriTemplates;
@@ -80,7 +81,6 @@ public class DefaultUrlGenerator implements UrlGenerator {
       jsBuf.append(resource.getContent());
     }
     jsChecksum = HashUtil.checksum(jsBuf.toString().getBytes());
-
   }
 
   public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
