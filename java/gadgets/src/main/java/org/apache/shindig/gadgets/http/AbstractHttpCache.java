@@ -162,6 +162,8 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected static String getOwnerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignOwner()) {
+      if (request.getSecurityToken() == null)
+        throw new IllegalArgumentException("No Security Token set for request");
       String ownerId = request.getSecurityToken().getOwnerId();
       return ownerId == null ? "" : ownerId;
     }
@@ -172,6 +174,8 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected static String getViewerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignViewer()) {
+      if (request.getSecurityToken() == null)
+        throw new IllegalArgumentException("No Security Token set for request");
       String viewerId = request.getSecurityToken().getViewerId();
       return viewerId == null ? "" : viewerId;
     }
