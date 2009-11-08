@@ -114,6 +114,8 @@ public class FeedProcessor {
       throw new RuntimeException(e);
     } catch (FeedException e) {
       throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
+    } catch (IllegalArgumentException e) {
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
     }
   }
 }
