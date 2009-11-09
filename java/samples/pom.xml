@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>1.1-BETA4-incubating</version>
+    <version>1.1-BETA5-incubating-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>Provides Sample implementations of the SPI and API's inside the core of Shindig.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA4-incubating/java/samples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA4-incubating/java/samples</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/shindig-project-1.1-BETA4-incubating/java/samples</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/samples</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/samples</url>
   </scm>
 
   <repositories>
