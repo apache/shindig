@@ -100,7 +100,8 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
         clock,
-        callbackGenerator);
+        callbackGenerator,
+        false);
 
     logger = Logger.getLogger(OAuthResponseParams.class.getName());
     logger.addHandler(new Handler() {
@@ -148,11 +149,11 @@ public class OAuthRequestTest {
   /**
    * Builds a nicely populated fake token store.
    */
-  public static GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base) {
+  public GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base) {
     return getOAuthStore(base, new FakeGadgetSpecFactory());
   }
   
-  private static GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base,
+  private GadgetOAuthTokenStore getOAuthStore(BasicOAuthStore base,
       GadgetSpecFactory specFactory) {
     if (base == null) {
       base = new BasicOAuthStore();
@@ -338,7 +339,8 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
         clock,
-        createRealCallbackGenerator());
+        createRealCallbackGenerator(),
+        false);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -356,7 +358,8 @@ public class OAuthRequestTest {
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base),
         clock,
-        createRealCallbackGenerator());
+        createRealCallbackGenerator(),
+        false);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
@@ -402,13 +405,22 @@ public class OAuthRequestTest {
 
   @Test
   public void testOAuthFlow_noViewer() throws Exception {
-    MakeRequestClient client = makeNonSocialClient("owner", null, GADGET_URL);
+    for (boolean secureOwner : Arrays.asList(true, false)) {
+      // Test both with/without secure owner pages
+      fetcherConfig = new OAuthFetcherConfig(
+        new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
+        getOAuthStore(base),
+        clock, callbackGenerator,
+        secureOwner);
 
-    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
-    assertEquals("", response.getResponseAsString());
-    assertEquals(403, response.getHttpStatusCode());
-    assertEquals(-1, response.getCacheTtl());
-    assertEquals(OAuthError.NOT_OWNER.toString(), response.getMetadata().get("oauthError"));
+      MakeRequestClient client = makeNonSocialClient("owner", null, GADGET_URL);
+
+      HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+      assertEquals("", response.getResponseAsString());
+      assertEquals(403, response.getHttpStatusCode());
+      assertEquals(-1, response.getCacheTtl());
+      assertEquals(OAuthError.UNAUTHENTICATED.toString(), response.getMetadata().get("oauthError"));
+    }
   }
 
   @Test
@@ -416,7 +428,8 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator,
+        false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -447,7 +460,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, null);
+        clock, null, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -469,7 +482,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -496,7 +509,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -520,7 +533,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -541,7 +554,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -564,7 +577,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, callbackGenerator);
+        clock, callbackGenerator, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -585,7 +598,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, null);
+        clock, null, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -606,7 +619,7 @@ public class OAuthRequestTest {
     fetcherConfig = new OAuthFetcherConfig(
         new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
         getOAuthStore(base, null),
-        clock, null);
+        clock, null, false);
     
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     setNoSpecOptions(client);
@@ -638,6 +651,30 @@ public class OAuthRequestTest {
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
     assertEquals(OAuthError.NOT_OWNER.toString(), response.getMetadata().get("oauthError"));
+  }
+
+  @Test
+  public void testAccessTokenOkForSecureOwnerPage() throws Exception {
+    fetcherConfig = new OAuthFetcherConfig(
+        new BasicBlobCrypter("abcdefghijklmnop".getBytes()),
+        getOAuthStore(base),
+        clock,
+        callbackGenerator,
+        true);
+
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    MakeRequestClient friend = makeNonSocialClient("owner", "friend", GADGET_URL);
+    response = friend.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    assertEquals(200, response.getHttpStatusCode());
   }
 
   @Test

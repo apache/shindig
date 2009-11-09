@@ -34,41 +34,54 @@ public class OAuthFetcherConfig {
   private final GadgetOAuthTokenStore tokenStore;
   private final TimeSource clock;
   private final OAuthCallbackGenerator oauthCallbackGenerator;
+  private final boolean viewerAccessTokensEnabled;
 
   @Inject
   public OAuthFetcherConfig(
       @Named(OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter,
       GadgetOAuthTokenStore tokenStore,
       TimeSource clock,
-      OAuthCallbackGenerator oauthCallbackGenerator) {
+      OAuthCallbackGenerator oauthCallbackGenerator,
+      @Named("shindig.signing.viewer-access-tokens-enabled") boolean viewerAccessTokensEnabled) {
     this.stateCrypter = stateCrypter;
     this.tokenStore = tokenStore;
     this.clock = clock;
     this.oauthCallbackGenerator = oauthCallbackGenerator;
+    this.viewerAccessTokensEnabled = viewerAccessTokensEnabled;
   }
 
   /**
-   * Used to encrypt state stored on the client.
+   * @return A BlobCrypter Used to encrypt state stored on the client.
    */
   public BlobCrypter getStateCrypter() {
     return stateCrypter;
   }
 
   /**
-   * Persistent token storage.
+   * @return the persistent token storage.
    */
   public GadgetOAuthTokenStore getTokenStore() {
     return tokenStore;
   }
 
   /**
-   * Clock
+   * @return the Clock
    */
   public TimeSource getClock() {
     return clock;
   }
-  
+
+  /**
+   * @return callback Url generator
+   */
   public OAuthCallbackGenerator getOAuthCallbackGenerator() {
     return oauthCallbackGenerator;
+  }
+
+  /**
+   * @return true if the owner pages do not allow user controlled javascript
+   */
+  public boolean isViewerAccessTokensEnabled() {
+     return viewerAccessTokensEnabled;
   }
 }

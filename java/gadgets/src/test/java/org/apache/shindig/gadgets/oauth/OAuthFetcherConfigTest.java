@@ -36,9 +36,10 @@ public class OAuthFetcherConfigTest extends EasyMockTestCase {
     GadgetOAuthTokenStore tokenStore = mock(GadgetOAuthTokenStore.class);
     OAuthCallbackGenerator callbackGenerator = mock(OAuthCallbackGenerator.class);
     OAuthFetcherConfig config = new OAuthFetcherConfig(crypter, tokenStore, new TimeSource(),
-        callbackGenerator);
+        callbackGenerator, false);
     assertEquals(crypter, config.getStateCrypter());
     assertEquals(tokenStore, config.getTokenStore());
     assertEquals(callbackGenerator, config.getOAuthCallbackGenerator());
+    assertFalse(config.isViewerAccessTokensEnabled());
   }
 }

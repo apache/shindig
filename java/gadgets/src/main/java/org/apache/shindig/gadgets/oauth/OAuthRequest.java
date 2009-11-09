@@ -67,7 +67,8 @@ import java.util.regex.Pattern;
  * this works (The spec is at http://oauth.net/core/1.0/).
  *
  * The combination protocol works by sending identity information in all requests, and allows the
- * OAuth dance to happen as well when owner == viewer.  This lets OAuth service providers build up
+ * OAuth dance to happen as well when owner == viewer (by default) or for any viewer when the
+ * OAuthFetcherConfig#isViewerAccessTokensEnabled parameter is true. This lets OAuth service providers build up
  * an identity mapping from ids on social network sites to their own local ids.
  */
 public class OAuthRequest {
@@ -193,7 +194,7 @@ public class OAuthRequest {
     try {
       accessorInfo = fetcherConfig.getTokenStore().getOAuthAccessor(
           realRequest.getSecurityToken(), realRequest.getOAuthArguments(), clientState,
-          responseParams);
+          responseParams, fetcherConfig);
       response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
@@ -316,17 +317,17 @@ public class OAuthRequest {
     String pageOwner = realRequest.getSecurityToken().getOwnerId();
     String pageViewer = realRequest.getSecurityToken().getViewerId();
     String stateOwner = clientState.getOwner();
-    if (pageOwner == null) {
+    if (pageOwner == null || pageViewer == null) {
       throw responseParams.oauthRequestException(OAuthError.UNAUTHENTICATED, "Unauthenticated");
     }
-    if (!pageOwner.equals(pageViewer)) {
+    if (!fetcherConfig.isViewerAccessTokensEnabled() && !pageOwner.equals(pageViewer)) {
       throw responseParams.oauthRequestException(OAuthError.NOT_OWNER,
-          "Only page owners can grant OAuth approval");
+          "Non-Secure Owner Page -- Only page owners can grant OAuth approval");
     }
-    if (stateOwner != null && !stateOwner.equals(pageOwner)) {
+    if (stateOwner != null && !stateOwner.equals(pageViewer)) {
       throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Client state belongs to a different person " +
-          "(state owner=" + stateOwner + ", pageOwner=" + pageOwner + ')');
+          "(state owner=" + stateOwner + ", pageViewer=" + pageViewer + ')');
     }
   }
 

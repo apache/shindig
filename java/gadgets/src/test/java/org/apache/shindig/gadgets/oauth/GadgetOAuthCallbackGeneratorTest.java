@@ -67,7 +67,7 @@ public class GadgetOAuthCallbackGeneratorTest {
     securityToken = new BasicSecurityToken("viewer", "viewer", "app", "container.com",
         "gadget", "0", "default", MAKE_REQUEST_URL);
     gadget = control.createMock(Gadget.class);
-    fetcherConfig = new OAuthFetcherConfig(null, null, null, null);
+    fetcherConfig = new OAuthFetcherConfig(null, null, null, null, false);
     responseParams = new OAuthResponseParams(null, null, null);
   }
   

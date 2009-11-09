@@ -72,12 +72,14 @@ public class GadgetOAuthTokenStore {
    * - the OAuth request/authorization/access URLs.
    * - what HTTP method to use for request token and access token requests
    * - where the OAuth parameters are located.
+   * - Information from the OAuth Fetcher config to determine if owner pages are secure
    *
    * Note that most of that work gets skipped for signed fetch, we just look up the consumer key
    * and secret for that.  Signed fetch always sticks the parameters in the query string.
    */
   public AccessorInfo getOAuthAccessor(SecurityToken securityToken,
-      OAuthArguments arguments, OAuthClientState clientState, OAuthResponseParams responseParams)
+      OAuthArguments arguments, OAuthClientState clientState, OAuthResponseParams responseParams,
+      OAuthFetcherConfig fetcherConfig)
       throws OAuthRequestException {
 
     AccessorInfoBuilder accessorBuilder = new AccessorInfoBuilder();
@@ -108,11 +110,12 @@ public class GadgetOAuthTokenStore {
     }
 
     // Should we use the OAuth access token?  We never do this unless the client allows it, and
-    // if owner == viewer.
-    if (arguments.mayUseToken()
-        && securityToken.getOwnerId() != null
-        && securityToken.getOwnerId().equals(securityToken.getViewerId())) {
-      lookupToken(securityToken, consumer, arguments, clientState, accessorBuilder, responseParams);
+    // if owner == viewer or owner pages are secure.
+    if (arguments.mayUseToken() && securityToken.getViewerId() != null) {
+      if ((fetcherConfig != null && fetcherConfig.isViewerAccessTokensEnabled()) ||
+          securityToken.getViewerId().equals(securityToken.getOwnerId())) {
+        lookupToken(securityToken, consumer, arguments, clientState, accessorBuilder, responseParams);
+      }
     }
 
     return accessorBuilder.create(responseParams);
