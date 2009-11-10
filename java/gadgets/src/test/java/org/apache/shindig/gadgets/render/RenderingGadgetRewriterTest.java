@@ -626,6 +626,9 @@ public class RenderingGadgetRewriterTest {
     reset(featureRegistry);
     expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
         eq(ImmutableSet.<String>of()), eq(Lists.<String>newArrayList())))
+        .andReturn(ImmutableList.<FeatureResource>of());
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(ImmutableList.<String>of("foo", "core")), eq(Lists.<String>newArrayList())))
         .andAnswer(new IAnswer<List<FeatureResource>>() {
           @SuppressWarnings("unchecked")
           public List<FeatureResource> answer() throws Throwable {
@@ -636,6 +639,47 @@ public class RenderingGadgetRewriterTest {
         });
     replay(featureRegistry);
 
+    rewrite(gadget, "");
+  }
+  
+  @Test
+  public void unsupportedExternFeatureDoesNotThrow() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "</ModulePrefs>" +
+      "<Content type='html'/>" +
+      "</Module>";
+    
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public String getParameter(String name) {
+        if (name.equals("libs")) {
+          return "bar";
+        }
+        return null;
+      }
+    };
+    
+    Gadget gadget = makeGadgetWithSpec(gadgetXml).setContext(context);
+    
+    reset(featureRegistry);
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(ImmutableSet.<String>of("bar")), eq(Lists.<String>newArrayList())))
+        .andAnswer(new IAnswer<List<FeatureResource>>() {
+          @SuppressWarnings("unchecked")
+          public List<FeatureResource> answer() throws Throwable {
+            List<String> unsupported = (List<String>)getCurrentArguments()[2];
+            unsupported.add("bar");
+            return Lists.newArrayList();
+          }
+        });
+    expect(featureRegistry.getFeatureResources(same(gadget.getContext()),
+        eq(ImmutableList.<String>of("core")), eq(Lists.<String>newArrayList())))
+        .andReturn(ImmutableList.<FeatureResource>of());
+    expect(featureRegistry.getFeatures(eq(ImmutableList.of("core", "bar"))))
+        .andReturn(ImmutableList.of("core"));
+    replay(featureRegistry);
+    
     rewrite(gadget, "");
   }
 

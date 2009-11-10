@@ -240,7 +240,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     List<FeatureResource> externResources =
         featureRegistry.getFeatureResources(gadget.getContext(), extern, unsupported);
     if (!unsupported.isEmpty()) {
-      throw new UnsupportedFeatureException("In extern &libs=: " + unsupported.toString());
+      LOG.info("Unknown feature(s) in extern &libs=: " + unsupported.toString());
+      unsupported.clear();
     }
     
     // Get all resources requested by the gadget's requires/optional features.
