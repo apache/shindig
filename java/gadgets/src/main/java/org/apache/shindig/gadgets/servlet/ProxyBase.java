@@ -137,7 +137,8 @@ public abstract class ProxyBase {
     // We're skipping the content disposition header for flash due to an issue with Flash player 10
     // This does make some sites a higher value phishing target, but this can be mitigated by
     // additional referer checks.
-    if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type"))) {
+    if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type")) &&
+        !"application/x-shockwave-flash".equalsIgnoreCase(response.getContentType())) {
       response.setHeader("Content-Disposition", "attachment;filename=p.txt");
     }
     if (results.getHeader("Content-Type") == null) {
