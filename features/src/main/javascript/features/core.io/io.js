@@ -159,9 +159,16 @@ gadgets.io = function() {
      oauthErrorText: data.oauthErrorText,
      errors: []
     };
-    if(resp.rc < 200 || resp.rc > 206){
+
+    if (resp.rc < 200 || resp.rc >= 400){
     	resp.errors = [resp.rc + " Error"]
     } else if (resp.text) {
+      if (resp.rc >= 300 && resp.rc < 400) {
+        // Redirect pages will usually contain arbitrary
+        // HTML which will fail during parsing, inadvertently
+        // causing a 500 response. Thus we treat as text.
+        params.CONTENT_TYPE = "TEXT";
+      }
       switch (params.CONTENT_TYPE) {
         case "JSON":
         case "FEED":
