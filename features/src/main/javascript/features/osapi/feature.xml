@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>osapi</name>
+  <dependency>core.auth</dependency>
   <dependency>core.config</dependency>
   <dependency>core.io</dependency>
   <dependency>core.json</dependency>

@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>opensocial-jsonrpc</name>
+  <dependency>core.auth</dependency>
   <dependency>core.prefs</dependency>
   <dependency>core.io</dependency>
   <dependency>core.json</dependency>
