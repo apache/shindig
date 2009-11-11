@@ -57,7 +57,7 @@ public class ParseModule extends AbstractModule {
       try {
         if (domImpl == null) {
           domImpl = (DOMImplementation)
-              Class.forName("org.apache.xerces.internal.dom.DOMImplementationImpl").
+              Class.forName("org.apache.xerces.dom.DOMImplementationImpl").
                   getMethod("getDOMImplementation").invoke(null);
         }
       } catch (Exception ex) {
