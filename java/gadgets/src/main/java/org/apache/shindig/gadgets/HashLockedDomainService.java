@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 public class HashLockedDomainService implements LockedDomainService {
   private static final Logger LOG = Logger.getLogger(HashLockedDomainService.class.getName());
   private final boolean enabled;
+  private boolean lockSecurityTokens = false;
   private final Map<String, String> lockedSuffixes;
   private final Map<String, Boolean> required;
 
@@ -74,6 +75,24 @@ public class HashLockedDomainService implements LockedDomainService {
         required.put(container, config.getBool(container, LOCKED_DOMAIN_REQUIRED_KEY));
       }
     }
+  }
+  
+  /**
+   * Allows a renderer to render all gadgets that require a security token on a locked
+   * domain. This is recommended security practice, as it secures the token from other
+   * gadgets, but because the "security-token" dependency on "locked-domain" is
+   * both implicit (added by GadgetSpec code for OAuth elements) and/or transitive
+   * (included by opensocial and opensocial-templates features), turning this behavior
+   * by default may take some by surprise. As such, we provide this flag. If false
+   * (by default), locked-domain will apply only when the gadget's Requires/Optional
+   * sections include it. Otherwise, the transitive dependency tree will be traversed
+   * to make this decision.
+   * @param lockSecurityTokens If true, locks domains for all gadgets requiring security-token.
+   */
+  @Inject(optional = true)
+  public void setLockSecurityTokens(
+      @Named("shindig.locked-domain.lock-security-tokens") Boolean lockSecurityTokens) {
+    this.lockSecurityTokens = lockSecurityTokens;
   }
 
   public boolean isEnabled() {
@@ -122,7 +141,10 @@ public class HashLockedDomainService implements LockedDomainService {
   }
 
   private boolean gadgetWantsLockedDomain(Gadget gadget) {
-    return gadget.getAllFeatures().contains("locked-domain");
+    if (lockSecurityTokens) {
+      return gadget.getAllFeatures().contains("locked-domain");
+    }
+    return gadget.getSpec().getModulePrefs().getFeatures().keySet().contains("locked-domain");
   }
 
   private boolean hostRequiresLockedDomain(String host) {

@@ -32,6 +32,7 @@ This should not be used in a production setting.
 <feature>
   <name>opensocial-templates</name>
   <dependency>opensocial-data-context</dependency>
+  <dependency>security-token</dependency>
   <dependency>xmlutil</dependency>
   <gadget>
     <script src="jsTemplate/util.js"></script>

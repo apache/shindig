@@ -26,6 +26,7 @@
   <dependency>core.log</dependency>
   <dependency>core.util</dependency>
   <dependency>rpc</dependency>
+  <dependency>security-token</dependency>
   <gadget>
     <script src="osapi.js"></script>
     <script src="batch.js"></script>

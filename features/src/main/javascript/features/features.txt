@@ -52,6 +52,7 @@ features/opensocial-templates/feature.xml
 features/osapi/feature.xml
 features/pubsub/feature.xml
 features/rpc/feature.xml
+features/security-token/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
 features/skins/feature.xml

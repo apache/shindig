@@ -98,8 +98,7 @@ public class Gadget {
   public synchronized List<String> getAllFeatures() {
     if (allGadgetFeatures == null) {
       if (featureRegistry != null) {
-        allGadgetFeatures = featureRegistry.getFeatures(
-            Lists.newArrayList(this.spec.getModulePrefs().getFeatures().keySet()));
+        allGadgetFeatures = featureRegistry.getFeatures(Lists.newArrayList(directFeatureDeps));
       } else {
         throw new IllegalStateException(
             "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");

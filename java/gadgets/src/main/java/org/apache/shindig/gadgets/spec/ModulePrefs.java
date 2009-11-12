@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.apache.shindig.gadgets.spec;
+
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
@@ -84,10 +86,11 @@ public class ModulePrefs {
     categories = ImmutableList.of(getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
 
     // Eventually use a list of classes
+    MutableBoolean oauthMarker = new MutableBoolean(false);
     Set<ElementVisitor> visitors = ImmutableSet.of(
-        new FeatureVisitor(),
+        new FeatureVisitor(oauthMarker),
         new PreloadVisitor(),
-        new OAuthVisitor(),
+        new OAuthVisitor(oauthMarker),
         new IconVisitor(),
         new LocaleVisitor(),
         new LinkVisitor(),
@@ -621,6 +624,11 @@ public class ModulePrefs {
    */
   private class OAuthVisitor implements ElementVisitor {
     private OAuthSpec oauthSpec = null;
+    private final MutableBoolean oauthMarker;
+    
+    private OAuthVisitor(MutableBoolean oauthMarker) {
+      this.oauthMarker = oauthMarker;
+    }
 
     public boolean visit(String tag, Element element) throws SpecParserException {
       if (!"OAuth".equals(tag)) return false;
@@ -629,6 +637,7 @@ public class ModulePrefs {
         throw new SpecParserException("ModulePrefs/OAuth may only occur once.");
       }
       oauthSpec = new OAuthSpec(element, base);
+      oauthMarker.setValue(true);
       return true;
     }
 
@@ -643,9 +652,14 @@ public class ModulePrefs {
    */
   private static class FeatureVisitor implements ElementVisitor {
     private final Map<String, Feature> features = Maps.newHashMap();
+    private final MutableBoolean oauthMarker;
     private boolean coreIncluded = false;
 
     private static final Set<String> tags = ImmutableSet.of("Require", "Optional");
+    
+    private FeatureVisitor(MutableBoolean oauthMarker) {
+      this.oauthMarker = oauthMarker;
+    }
 
     public boolean visit (String tag, Element element) throws SpecParserException {
       if (!tags.contains(tag)) return false;
@@ -659,6 +673,10 @@ public class ModulePrefs {
       if (!coreIncluded) {
         // No library was explicitly included from core - add it as an implicit dependency.
         features.put(Feature.CORE_FEATURE.getName(), Feature.CORE_FEATURE);
+      }
+      if (oauthMarker.booleanValue()) {
+        // <OAuth> tag found: security token needed.
+        features.put(Feature.SECURITY_TOKEN_FEATURE.getName(), Feature.SECURITY_TOKEN_FEATURE);
       }
       moduleprefs.features = ImmutableMap.copyOf(features);
     }

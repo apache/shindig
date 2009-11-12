@@ -39,22 +39,28 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   private HashLockedDomainService lockedDomainService;
   private Gadget wantsLocked = null;
   private Gadget notLocked = null;
+  private Gadget wantsSecurityToken = null;
+  private Gadget wantsBoth = null;
   private final ContainerConfig requiredConfig = mock(ContainerConfig.class);
   private final ContainerConfig enabledConfig = mock(ContainerConfig.class);
 
   @SuppressWarnings("unchecked")
-  private Gadget makeGadget(boolean wantsLocked, String url) {
-    String gadgetXml;
+  private Gadget makeGadget(boolean wantsLocked, boolean wantsSecurityToken, String url) {
+
     List<String> gadgetFeatures = Lists.newArrayList();
-    if (wantsLocked) {
-      gadgetXml =
-          "<Module><ModulePrefs title=''>" +
-          "  <Require feature='locked-domain'/>" +
-          "</ModulePrefs><Content/></Module>";
+    String requires = "";
+    if (wantsLocked || wantsSecurityToken) {
       gadgetFeatures.add("locked-domain");
-    } else {
-      gadgetXml = "<Module><ModulePrefs title=''/><Content/></Module>";
+      if (wantsLocked) {
+        requires += "  <Require feature='locked-domain'/>";
+      }
+      if (wantsSecurityToken) {
+        requires += "  <Require feature='security-token'/>";
+        gadgetFeatures.add("security-token");
+      }
     }
+    
+    String gadgetXml = "<Module><ModulePrefs title=''>" + requires + "</ModulePrefs><Content/></Module>";
 
     GadgetSpec spec = null;
     try {
@@ -82,8 +88,11 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
     expect(enabledConfig.getContainers())
         .andReturn(Arrays.asList(ContainerConfig.DEFAULT_CONTAINER)).anyTimes();
-    wantsLocked = makeGadget(true, "http://somehost.com/somegadget.xml");
-    notLocked = makeGadget(false, "not-locked");
+    wantsLocked = makeGadget(true, false, "http://somehost.com/somegadget.xml");
+    notLocked = makeGadget(false, false, "not-locked");
+    wantsSecurityToken = makeGadget(false, true, "http://somehost.com/securitytoken.xml");
+    wantsBoth =
+        makeGadget(true, true, "http://somehost.com/tokenandlocked.xml");
   }
 
 
@@ -95,12 +104,16 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
     assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsLocked, "default"));
     assertTrue(lockedDomainService.gadgetCanRender("embed.com", notLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsSecurityToken, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsBoth, "default"));
 
     lockedDomainService = new HashLockedDomainService(enabledConfig, false);
     assertTrue(lockedDomainService.isSafeForOpenProxy("anywhere.com"));
     assertTrue(lockedDomainService.isSafeForOpenProxy("embed.com"));
     assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsLocked, "default"));
     assertTrue(lockedDomainService.gadgetCanRender("embed.com", notLocked, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsSecurityToken, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsBoth, "default"));
   }
 
   public void testEnabledForGadget() {
@@ -113,8 +126,29 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertFalse(lockedDomainService.gadgetCanRender("www.example.com", wantsLocked, "default"));
     assertTrue(lockedDomainService.gadgetCanRender(
         "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsLocked, "default"));
+    assertFalse(lockedDomainService.gadgetCanRender(
+        "8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", wantsSecurityToken, "default"));
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "h2nlf2a2dqou2lul3n50jb4v7e8t34kc-a.example.com:8080", wantsBoth, "default"));
+    
     String target = lockedDomainService.getLockedDomainForGadget(wantsLocked, "default");
     assertEquals("8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", target);
+    
+    target = lockedDomainService.getLockedDomainForGadget(wantsBoth, "default");
+    assertEquals("h2nlf2a2dqou2lul3n50jb4v7e8t34kc-a.example.com:8080", target);
+    
+    lockedDomainService.setLockSecurityTokens(true);
+    assertTrue(lockedDomainService.gadgetCanRender(
+        "lrrq12l8s5flpqcjoj1h1872lp9p93nk-a.example.com:8080", wantsSecurityToken, "default"));
+    target = lockedDomainService.getLockedDomainForGadget(wantsSecurityToken, "default");
+    assertEquals("lrrq12l8s5flpqcjoj1h1872lp9p93nk-a.example.com:8080", target);
+    
+    // Direct includes work as before.
+    target = lockedDomainService.getLockedDomainForGadget(wantsLocked, "default");
+    assertEquals("8uhr00296d2o3sfhqilj387krjmgjv3v-a.example.com:8080", target);
+    
+    target = lockedDomainService.getLockedDomainForGadget(wantsBoth, "default");
+    assertEquals("h2nlf2a2dqou2lul3n50jb4v7e8t34kc-a.example.com:8080", target);
   }
 
   public void testNotEnabledForGadget() {

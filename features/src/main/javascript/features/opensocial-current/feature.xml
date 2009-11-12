@@ -21,6 +21,7 @@
   <name>opensocial</name>
   <dependency>core.config</dependency>
   <dependency>opensocial-jsonrpc</dependency>
+  <dependency>security-token</dependency>
   <!-- <dependency>caja</dependency> -->
   <!-- Must include the "caja" feature to display samplecontainer -->
   <!-- gadgets when "use caja" is checked -->

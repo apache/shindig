@@ -26,6 +26,7 @@
   <dependency>core.util</dependency>
   <dependency>opensocial-base</dependency>
   <dependency>rpc</dependency>
+  <dependency>security-token</dependency>
   <gadget>   
     <script src="jsonrpccontainer.js"></script>
   </gadget>

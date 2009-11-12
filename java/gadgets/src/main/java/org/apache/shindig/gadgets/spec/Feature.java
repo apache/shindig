@@ -32,13 +32,14 @@ import com.google.common.collect.Multimap;
  * No substitutions on any fields.
  */
 public class Feature {
-  public static final Feature CORE_FEATURE = new Feature();
+  public static final Feature CORE_FEATURE = new Feature("core");
+  public static final Feature SECURITY_TOKEN_FEATURE = new Feature("security-token");
   
   // Instantiable only by CORE_FEATURE.
-  private Feature() {
+  private Feature(String name) {
     this.params = ImmutableMultimap.of();
     this.required = true;
-    this.name = "core";
+    this.name = name;
   }
   
   /**

@@ -225,6 +225,43 @@ public class ModulePrefsTest {
     String xml = "<ModulePrefs/>";
     new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
   }
+  
+  @Test
+  public void coreInjectedAutomatically() throws Exception {
+    String xml = "<ModulePrefs title=''><Require feature='foo'/></ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(2, prefs.getFeatures().size());
+    assertTrue(prefs.getFeatures().containsKey("foo"));
+    assertTrue(prefs.getFeatures().containsKey("core"));
+  }
+  
+  @Test
+  public void coreNotInjectedOnSplitCoreInclusion() throws Exception {
+    String xml = "<ModulePrefs title=''><Require feature='core.config'/></ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(1, prefs.getFeatures().size());
+    assertTrue(prefs.getFeatures().containsKey("core.config"));
+  }
+  
+  @Test
+  public void securityTokenInjectedOnOAuthTag() throws Exception {
+    String xml =
+        "<ModulePrefs title=''>" + 
+        "  <OAuth>" +
+        "    <Service name='serviceOne'>" +
+        "      <Request url='http://www.example.com/request'" +
+        "          method='GET' param_location='auth-header' />" +
+        "      <Authorization url='http://www.example.com/authorize'/>" +
+        "      <Access url='http://www.example.com/access' method='GET'" +
+        "          param_location='auth-header' />" +
+        "    </Service>" +
+        "  </OAuth>" +
+        "</ModulePrefs>";
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(2, prefs.getFeatures().size());
+    assertTrue(prefs.getFeatures().containsKey("core"));
+    assertTrue(prefs.getFeatures().containsKey("security-token"));
+  }
 
   @Test
   public void toStringIsSane() throws Exception {
