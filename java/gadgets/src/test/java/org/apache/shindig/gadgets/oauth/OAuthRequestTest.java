@@ -755,7 +755,9 @@ public class OAuthRequestTest {
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
-    assertNotNull(response.getMetadata().get("oauthApprovalUrl"));
+    assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
+    assertEquals("parameter_missing", response.getMetadata().get("oauthError"));
+    assertNull(response.getMetadata().get("oauthApprovalUrl"));
   }
 
   @Test
@@ -781,7 +783,7 @@ public class OAuthRequestTest {
     checkStringContains("should return original request", errorText, "GET /data?cachebust=2\n");
     checkStringContains("should return signed request", errorText, "GET /data?cachebust=2&");
     checkStringContains("should remove secret", errorText, "oauth_token_secret=REMOVED");
-    checkStringContains("should return response", errorText, "HTTP/1.1 403");
+    checkStringContains("should return response", errorText, "HTTP/1.1 401");
     checkStringContains("should return response", errorText, "oauth_problem=\"token_revoked\"");
 
     client.approveToken("user_data=reapproved");
@@ -1004,6 +1006,66 @@ public class OAuthRequestTest {
     assertEquals(3, serviceProvider.getResourceAccessCount());
 
     serviceProvider.setConsumersThrottled(false);
+    client.clearState();
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=3");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(4, serviceProvider.getResourceAccessCount());
+  }
+
+  @Test
+  public void testConsumerThrottled_vagueErrors() throws Exception {
+    serviceProvider.setVagueErrors(true);
+    assertEquals(0, serviceProvider.getRequestTokenCount());
+    assertEquals(0, serviceProvider.getAccessTokenCount());
+    assertEquals(0, serviceProvider.getResourceAccessCount());
+
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(0, serviceProvider.getAccessTokenCount());
+    assertEquals(0, serviceProvider.getResourceAccessCount());
+
+    client.approveToken("user_data=hello-oauth");
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(1, serviceProvider.getResourceAccessCount());
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=1");
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(2, serviceProvider.getResourceAccessCount());
+
+    serviceProvider.setConsumersThrottled(true);
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=2");
+    assertEquals(403, response.getHttpStatusCode());
+    assertEquals("some vague error", response.getResponseAsString());
+    Map<String, String> metadata = response.getMetadata();
+    assertNotNull(metadata);
+    assertEquals(null, metadata.get("oauthError"));
+    checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
+        "GET /data?cachebust=2\n");
+    checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
+        "GET /data?cachebust=2&oauth_body_hash=2jm");
+
+    assertEquals(1, serviceProvider.getRequestTokenCount());
+    assertEquals(1, serviceProvider.getAccessTokenCount());
+    assertEquals(3, serviceProvider.getResourceAccessCount());
+
+    serviceProvider.setConsumersThrottled(false);
+    
+    client.clearState(); // remove any cached oauth tokens
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + "?cachebust=3");
     assertEquals("User data is hello-oauth", response.getResponseAsString());
@@ -1333,7 +1395,7 @@ public class OAuthRequestTest {
   @Test
   public void testSignedFetch_error401() throws Exception {
     assertEquals(0, base.getAccessTokenRemoveCount());
-    serviceProvider.setConsumersThrottled(true);
+    serviceProvider.setConsumerUnauthorized(true);
     serviceProvider.setVagueErrors(true);
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
 
@@ -1342,6 +1404,22 @@ public class OAuthRequestTest {
     String errorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("Should return sent request", errorText, "GET /data");
     checkStringContains("Should return response", errorText, "HTTP/1.1 401");
+    checkStringContains("Should return response", errorText, "some vague error");
+    assertEquals(0, base.getAccessTokenRemoveCount());
+  }
+  
+  @Test
+  public void testSignedFetch_error403() throws Exception {
+    assertEquals(0, base.getAccessTokenRemoveCount());
+    serviceProvider.setConsumersThrottled(true);
+    serviceProvider.setVagueErrors(true);
+    MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertNull(response.getMetadata().get("oauthError"));
+    String errorText = response.getMetadata().get("oauthErrorText");
+    checkStringContains("Should return sent request", errorText, "GET /data");
+    checkStringContains("Should return response", errorText, "HTTP/1.1 403");
     checkStringContains("Should return response", errorText, "some vague error");
     assertEquals(0, base.getAccessTokenRemoveCount());
   }

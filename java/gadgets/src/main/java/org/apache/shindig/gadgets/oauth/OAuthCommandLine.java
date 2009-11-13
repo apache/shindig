@@ -77,6 +77,7 @@ public class OAuthCommandLine {
     final String consumerSecret = params.get("--consumerSecret");
     final String xOauthRequestor = params.get("--requestorId");
     final String accessToken = params.get("--accessToken");
+    final String tokenSecret = params.get("--tokenSecret");
     final String method = params.get("--method") == null ? "GET" :params.get("--method");
     String url = params.get("--url");
     String contentType = params.get("--contentType");
@@ -134,6 +135,7 @@ public class OAuthCommandLine {
     OAuthConsumer consumer = new OAuthConsumer(null, consumerKey, consumerSecret, null);
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     accessor.accessToken = accessToken;
+    accessor.tokenSecret = tokenSecret;
     OAuthMessage message = accessor.newRequestMessage(method, target.toString(), oauthParams);
 
     List<Map.Entry<String, String>> entryList = OAuthRequest.selectOAuthParams(message);

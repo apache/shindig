@@ -842,14 +842,17 @@ public class OAuthRequest {
    * @throws OAuthProtocolException
    */
   private void checkForProtocolProblem(HttpResponse response) throws OAuthProtocolException {
-    if (isFullOAuthError(response)) {
+    if (couldBeFullOAuthError(response)) {
+      // OK, might be OAuth related.
       OAuthMessage message = parseAuthHeader(null, response);
       if (OAuthUtil.getParameter(message, OAuthProblemException.OAUTH_PROBLEM) != null) {
         // SP reported extended error information
-        throw new OAuthProtocolException(message);
+        throw new OAuthProtocolException(response.getHttpStatusCode(), message);
       }
       // No extended information, guess based on HTTP response code.
-      throw new OAuthProtocolException(response.getHttpStatusCode());
+      if (response.getHttpStatusCode() == HttpResponse.SC_UNAUTHORIZED) {
+        throw new OAuthProtocolException(response.getHttpStatusCode());
+      }
     }
   }
 
@@ -858,9 +861,12 @@ public class OAuthRequest {
    * errors for signed fetch, we only care about places where we are dealing with OAuth request
    * and/or access tokens.
    */
-  private boolean isFullOAuthError(HttpResponse response) {
-    // 401 and 403 are likely to be authentication errors.
-    if (response.getHttpStatusCode() != HttpResponse.SC_UNAUTHORIZED
+  private boolean couldBeFullOAuthError(HttpResponse response) {
+    // 400, 401 and 403 are likely to be authentication errors.  Unfortunately there is
+    // significant overlap with other types of server errors as well, so we can't just assume
+    // that the root cause of these errors is a bad token or a bad consumer key.
+    if (response.getHttpStatusCode() != HttpResponse.SC_BAD_REQUEST
+        && response.getHttpStatusCode() != HttpResponse.SC_UNAUTHORIZED
         && response.getHttpStatusCode() != HttpResponse.SC_FORBIDDEN) {
       return false;
     }

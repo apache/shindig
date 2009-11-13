@@ -237,4 +237,8 @@ public class MakeRequestClient {
   public void setReceivedCallbackUrl(String receivedCallbackUrl) {
     this.receivedCallbackUrl = receivedCallbackUrl;
   }
+  
+  public void clearState() {
+    this.oauthState = null;
+  }
 }

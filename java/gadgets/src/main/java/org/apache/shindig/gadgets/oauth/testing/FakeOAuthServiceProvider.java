@@ -59,6 +59,8 @@ import java.util.Map.Entry;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
+
+
   public static final String BODY_ECHO_HEADER = "X-Echoed-Body";
 
   public static final String RAW_BODY_ECHO_HEADER = "X-Echoed-Raw-Body";
@@ -182,6 +184,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private final OAuthConsumer oauthConsumer;
   private final TimeSource clock;
 
+  private boolean unauthorized = false;
   private boolean throttled = false;
   private boolean vagueErrors = false;
   private boolean reportExpirationTimes = true;
@@ -301,16 +304,24 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       consumer = oauthConsumer;
     } else {
       return makeOAuthProblemReport(
-          "consumer_key_unknown", "invalid consumer: " + requestConsumer);
+          OAuthConstants.PROBLEM_CONSUMER_KEY_UNKNOWN, "invalid consumer: " + requestConsumer,
+          HttpResponse.SC_FORBIDDEN);
     }
     if (throttled) {
       return makeOAuthProblemReport(
-          "consumer_key_refused", "exceeded quota exhausted");
+          OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED, "exceeded quota exhausted",
+          HttpResponse.SC_FORBIDDEN);
+    }
+    if (unauthorized) {
+      return makeOAuthProblemReport(
+          OAuthConstants.PROBLEM_PERMISSION_DENIED, "user refused access",
+          HttpResponse.SC_BAD_REQUEST);
     }
     if (rejectExtraParams) {
       String extra = hasExtraParams(info.message);
       if (extra != null) {
-        return makeOAuthProblemReport("parameter_rejected", extra);
+        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_REJECTED, extra,
+            HttpResponse.SC_BAD_REQUEST);
       }
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
@@ -339,12 +350,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     return null;
   }
 
-  private HttpResponse makeOAuthProblemReport(String code, String text) throws IOException {
+  private HttpResponse makeOAuthProblemReport(String code, String text, int rc) throws IOException {
     if (vagueErrors) {
-      int rc = HttpResponse.SC_UNAUTHORIZED;
-      if ("consumer_key_unknown".equals(code)) {
-        rc = HttpResponse.SC_FORBIDDEN;
-      }
       return new HttpResponseBuilder()
           .setHttpStatusCode(rc)
           .setResponseString("some vague error")
@@ -354,7 +361,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     msg.addParameter("oauth_problem", code);
     msg.addParameter("oauth_problem_advice", text);    
     return new HttpResponseBuilder()
-        .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
+        .setHttpStatusCode(rc)
         .addHeader("WWW-Authenticate", msg.getAuthorizationHeader("realm"))
         .create();
   }
@@ -560,15 +567,20 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String requestToken = info.message.getParameter("oauth_token");
     TokenState state = tokenState.get(requestToken);
     if (throttled) {
-      return makeOAuthProblemReport(
-          "consumer_key_refused", "exceeded quota");
+      return makeOAuthProblemReport(OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED,
+          "exceeded quota", HttpResponse.SC_FORBIDDEN);
+    } else if (unauthorized) {
+      return makeOAuthProblemReport(OAuthConstants.PROBLEM_PERMISSION_DENIED,
+          "user refused access", HttpResponse.SC_UNAUTHORIZED);
     } else if (state == null) {
-      return makeOAuthProblemReport("token_rejected", "Unknown request token");
+      return makeOAuthProblemReport(OAuthConstants.PROBLEM_TOKEN_REJECTED,
+          "Unknown request token", HttpResponse.SC_UNAUTHORIZED);
     }   
     if (rejectExtraParams) {
       String extra = hasExtraParams(info.message);
       if (extra != null) {
-        return makeOAuthProblemReport("parameter_rejected", extra);
+        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_REJECTED,
+            extra, HttpResponse.SC_BAD_REQUEST);
       }
     }
 
@@ -580,21 +592,25 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     if (state.getState() == State.APPROVED_UNCLAIMED) {
       String sentVerifier = info.message.getParameter("oauth_verifier");
       if (state.verifier != null && !state.verifier.equals(sentVerifier)) {
-        return makeOAuthProblemReport("bad_verifier", "wrong oauth verifier");
+        return makeOAuthProblemReport(OAuthConstants.PROBLEM_BAD_VERIFIER, "wrong oauth verifier",
+            HttpResponse.SC_UNAUTHORIZED);
       }
       state.claimToken();
     } else if (state.getState() == State.APPROVED) {
       // Verify can refresh
       String sentHandle = info.message.getParameter("oauth_session_handle");
       if (sentHandle == null) {
-        return makeOAuthProblemReport("parameter_absent", "no oauth_session_handle");
+        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_ABSENT,
+            "no oauth_session_handle", HttpResponse.SC_BAD_REQUEST);
       }
       if (!sentHandle.equals(state.sessionHandle)) {
-        return makeOAuthProblemReport("token_invalid", "token not valid");
+        return makeOAuthProblemReport(OAuthConstants.PROBLEM_TOKEN_INVALID, "token not valid",
+            HttpResponse.SC_UNAUTHORIZED);
       }
       state.renewToken();
     } else if (state.getState() == State.REVOKED){
-      return makeOAuthProblemReport("token_revoked", "Revoked access token can't be renewed");
+      return makeOAuthProblemReport(OAuthConstants.PROBLEM_TOKEN_REVOKED,
+          "Revoked access token can't be renewed", HttpResponse.SC_UNAUTHORIZED);
     } else {
       throw new Exception("Token in weird state " + state.getState());
     }
@@ -633,13 +649,19 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     } else if ("container.com".equals(consumerId)) {
       consumer = signedFetchConsumer;
     } else {
-      return makeOAuthProblemReport("parameter_missing", "oauth_consumer_key not found");
+      return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_MISSING,
+          "oauth_consumer_key not found", HttpResponse.SC_BAD_REQUEST);
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     String responseBody = null;
     if (throttled) {
       return makeOAuthProblemReport(
-          "consumer_key_refused", "exceeded quota");
+          OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED, "exceeded quota", HttpResponse.SC_FORBIDDEN);
+    }
+    if (unauthorized) {
+      return makeOAuthProblemReport(
+          OAuthConstants.PROBLEM_PERMISSION_DENIED, "user refused access",
+          HttpResponse.SC_UNAUTHORIZED);
     }
     if (consumer == oauthConsumer) {
       // for OAuth, check the access token.  We skip this for signed fetch
@@ -647,7 +669,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       TokenState state = tokenState.get(accessToken);
       if (state == null) {
         return makeOAuthProblemReport(
-            "token_rejected", "Access token unknown");
+            OAuthConstants.PROBLEM_TOKEN_REJECTED, "Access token unknown",
+            HttpResponse.SC_UNAUTHORIZED);
       }
       // Check the signature
       accessor.accessToken = accessToken;
@@ -656,12 +679,14 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
       if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
-            "token_revoked", "User revoked permissions");
+            OAuthConstants.PROBLEM_TOKEN_REVOKED, "User revoked permissions",
+            HttpResponse.SC_UNAUTHORIZED);
       }
       if (sessionExtension) {
         long expiration = state.issued + TOKEN_EXPIRATION_SECONDS * 1000;
         if (expiration < clock.currentTimeMillis()) {
-          return makeOAuthProblemReport("access_token_expired", "token needs to be refreshed");
+          return makeOAuthProblemReport(OAuthConstants.PROBLEM_ACCESS_TOKEN_EXPIRED,
+              "token needs to be refreshed", HttpResponse.SC_UNAUTHORIZED);
         }
       }
       responseBody = "User data is " + state.getUserData();
@@ -746,6 +771,10 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   public void setConsumersThrottled(boolean throttled) {
     this.throttled = throttled;
+  }
+  
+  public void setConsumerUnauthorized(boolean unauthorized) {
+    this.unauthorized = unauthorized;
   }
 
   public void setReturnNull(boolean returnNull) {

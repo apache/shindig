@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.oauth;
 
 import org.apache.shindig.auth.OAuthUtil;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -79,7 +80,7 @@ class OAuthProtocolException extends Exception {
 
   private final String problemCode;
 
-  public OAuthProtocolException(OAuthMessage reply) {
+  public OAuthProtocolException(int status, OAuthMessage reply) {
     String problem = OAuthUtil.getParameter(reply, OAuthProblemException.OAUTH_PROBLEM);
     if (problem == null) {
       throw new IllegalArgumentException("No problem reported for OAuthProtocolException");
@@ -98,8 +99,14 @@ class OAuthProtocolException extends Exception {
       canRetry = true;
       canExtend = true;
     } else {
-      startFromScratch = true;
-      canRetry = true;
+      // fallback to status to figure out behavior
+      if (status == HttpResponse.SC_UNAUTHORIZED) {
+        startFromScratch = true;
+        canRetry = true;
+      } else {
+        startFromScratch = false;
+        canRetry = false;
+      }
       canExtend = false;
     }
   }
@@ -110,11 +117,11 @@ class OAuthProtocolException extends Exception {
    * @param status HTTP status code, assumed to be between 400 and 499 inclusive
    */
   public OAuthProtocolException(int status) {
-    if (status == 401) {
+    if (status == HttpResponse.SC_UNAUTHORIZED) {
       startFromScratch = true;
       canRetry = true;
     } else {
-      startFromScratch = true;
+      startFromScratch = false;
       canRetry = false;
     }
     canExtend = false;

@@ -25,4 +25,25 @@ public class OAuthConstants {
   public static final String OAUTH_BODY_HASH = "oauth_body_hash";
   public static final String OAUTH_VERIFIER = "oauth_verifier";
   public static final String OAUTH_CALLBACK_CONFIRMED = "oauth_callback_confirmed";
-}
+  
+  public static final String PROBLEM_ACCESS_TOKEN_EXPIRED = "access_token_expired";
+
+  public static final String PROBLEM_PARAMETER_MISSING = "parameter_missing";
+
+  public static final String PROBLEM_TOKEN_REVOKED = "token_revoked";
+
+  public static final String PROBLEM_TOKEN_INVALID = "token_invalid";
+
+  public static final String PROBLEM_PARAMETER_ABSENT = "parameter_absent";
+
+  public static final String PROBLEM_BAD_VERIFIER = "bad_verifier";
+
+  public static final String PROBLEM_TOKEN_REJECTED = "token_rejected";
+
+  public static final String PROBLEM_PARAMETER_REJECTED = "parameter_rejected";
+
+  public static final String PROBLEM_PERMISSION_DENIED = "permission_denied";
+
+  public static final String PROBLEM_CONSUMER_KEY_REFUSED = "consumer_key_refused";
+
+  public static final String PROBLEM_CONSUMER_KEY_UNKNOWN = "consumer_key_unknown";}
