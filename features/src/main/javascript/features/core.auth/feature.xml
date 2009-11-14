@@ -24,4 +24,8 @@
     <script src="auth.js"/>
     <script src="auth-init.js"/>
   </gadget>
+  <container>
+    <script src="auth.js"/>
+    <script src="auth-init.js"/>
+  </container>
 </feature>
