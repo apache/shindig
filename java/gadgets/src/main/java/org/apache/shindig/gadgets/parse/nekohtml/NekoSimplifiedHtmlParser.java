@@ -75,12 +75,12 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     OSML_TEMPLATE_ELEMENT.parent =
         new HTMLElements.Element[]{HTMLElements.getElement(HTMLElements.BODY)};
 
-    // data tags are allowed in HEAD or BODY
+    // data tags are allowed in BODY only, since Neko disallows HEAD elements from
+    // having child elements of their own.
     OSML_DATA_ELEMENT = new HTMLElements.Element(unknown.code, OSML_TEMPLATE_TAG,
         unknown.flags, HTMLElements.BODY, unknown.closes);
     OSML_DATA_ELEMENT.parent = new HTMLElements.Element[]{
-        HTMLElements.getElement(HTMLElements.BODY),
-        HTMLElements.getElement(HTMLElements.HEAD)};
+        HTMLElements.getElement(HTMLElements.BODY)};
   }
 
   private static final Map<String, HTMLElements.Element> OSML_ELEMENTS = ImmutableMap.of(
