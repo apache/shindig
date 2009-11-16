@@ -208,6 +208,12 @@ class GadgetFeatureRegistry {
         $content = (string)$script;
       } else {
         $content = trim($attributes['src']);
+
+        // Make html-santitization work see SHINDIG-346
+        if ($content == 'res://com/google/caja/plugin/html-sanitizer.js') { 
+          $content= 'http://google-caja.googlecode.com/svn/trunk/src/com/google/caja/plugin/html-sanitizer.js'; 
+        } 
+
         if (strtolower(substr($content, 0, strlen("http://"))) == "http://" || strtolower(substr($content, 0, strlen("https://"))) == "https://") {
           $type = 'URL';
         } else {
