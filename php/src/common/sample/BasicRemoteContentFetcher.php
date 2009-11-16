@@ -98,9 +98,9 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     	}
     }
     if ($isTextType && function_exists('mb_convert_encoding')) {
-      $charset = 'UTF-8';
-   		preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $charset);
-   		if (isset($charset[1])) {
+      if (0 == preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $charset)) {
+        $charset = 'UTF-8';
+      } else {
    			$charset = trim($charset[1]);
    			if (($pos = strpos($charset, "\n")) !== false) {
    			  $charset = trim(substr($charset, 0, $pos));
