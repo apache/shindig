@@ -468,7 +468,13 @@ public class PipelinedData {
         throws ELException {
       String hrefString = String.valueOf(expressions.parse(href, String.class)
           .getValue(context));
-      final Uri evaluatedHref = base.resolve(Uri.parse(hrefString));
+      final Uri evaluatedHref;
+
+      try {
+        evaluatedHref = base.resolve(Uri.parse(hrefString));
+      } catch (IllegalArgumentException e) {
+        throw new ELException("bad Uri '" + hrefString + "' - " + e.getMessage(), e);
+      }
 
       final Map<String, String> evaluatedAttributes = Maps.newHashMap();
       for (Map.Entry<String, String> attr : attributes.entrySet()) {

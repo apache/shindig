@@ -343,6 +343,24 @@ public class PipelinedDataTest {
   }
 
   @Test
+  public void badHrefTest() throws Exception {
+    // unparseable url escape
+    String xml = "<Content><HttpRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
+        + " key=\"key\""
+        + " href=\"/example.html%\""
+        + "/></Content>";
+
+    boolean foundException = false;
+    try {
+      PipelinedData pipelinedData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);
+      PipelinedData.Batch batch = pipelinedData.getBatch(expressions, elResolver);
+    } catch (RuntimeException e) {
+      foundException = true;
+    }
+    assertTrue("found RuntimeException (for now) see SHINDIG-1090", foundException);
+  }
+
+  @Test
   public void httpRequestDefaultsSigned() throws Exception {
     String xml = "<Content><HttpRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
         + " key=\"key\""
