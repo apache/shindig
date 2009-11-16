@@ -510,7 +510,7 @@ public class FeatureRegistryTest {
     BufferedWriter out = new BufferedWriter(new FileWriter(file));
     out.write(content);
     out.close();
-    return new UriBuilder().setScheme("file").setPath(file.getPath()).toUri();
+    return Uri.fromJavaUri(file.toURI());
   }
   
   private static Uri makeResourceUri(String suffix) {

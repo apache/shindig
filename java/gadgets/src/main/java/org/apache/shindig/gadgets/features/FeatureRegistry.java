@@ -37,6 +37,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -146,7 +147,7 @@ public class FeatureRegistry {
           // Load files in directory structure.
           logger.info("Loading files from: " + location);
           
-          loadFile(uriLoc.getPath());
+          loadFile(new File(uriLoc.getPath()));
         }
       }
       
@@ -401,11 +402,10 @@ public class FeatureRegistry {
     }
   }
   
-  private void loadFile(String filePath) throws GadgetException, IOException {
-    File file = new File(filePath);
+  private void loadFile(File file) throws GadgetException, IOException {
     if (!file.exists() || !file.canRead()) {
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
-          "Feature file '" + filePath + "' doesn't exist or can't be read");
+          "Feature file '" + file.getPath() + "' doesn't exist or can't be read");
     }
     
     File[] toLoad = null;
@@ -416,13 +416,12 @@ public class FeatureRegistry {
     }
     
     for (File featureFile : toLoad) {
-      String featureFilePath = featureFile.getAbsolutePath();
       if (featureFile.isDirectory()) {
         // Traverse into subdirectories.
-        loadFile(featureFilePath);
-      } else if (featureFilePath.toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
+        loadFile(featureFile);
+      } else if (featureFile.getName().toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
         String content = ResourceLoader.getContent(featureFile);
-        Uri parent = new UriBuilder().setScheme("file").setPath(featureFilePath).toUri();
+        Uri parent = Uri.fromJavaUri(featureFile.toURI());
         loadFeature(parent, content);
       } else {
         if (logger.isLoggable(Level.FINEST)) {
