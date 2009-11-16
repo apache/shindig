@@ -290,8 +290,9 @@ public class XmlUtil {
    * @throws XmlException if a parse error occured.
    */
   public static Element parse(String xml) throws XmlException {
+    DocumentBuilder builder = null;
     try {
-      DocumentBuilder builder = getBuilder();
+      builder = getBuilder();
       InputSource is = new InputSource(new StringReader(xml.trim()));
       return builder.parse(is).getDocumentElement();
     } catch (SAXParseException e) {
@@ -303,6 +304,11 @@ public class XmlUtil {
       throw new XmlException(e);
     } catch (IOException e) {
       throw new XmlException(e);
+    } finally {
+      // Remove reference to XmlUtils class to insure classes can be unloaded
+      if (builder != null) {
+        builder.setErrorHandler(null);
+      }
     }
   }
 
