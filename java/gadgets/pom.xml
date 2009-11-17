@@ -133,8 +133,8 @@
       <artifactId>caja</artifactId>
     </dependency>
     <dependency>
-      <groupId>caja</groupId>
-      <artifactId>json_simple</artifactId>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>

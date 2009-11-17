@@ -1339,10 +1339,9 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
-        <groupId>caja</groupId>
-        <artifactId>json_simple</artifactId>
-        <version>r1</version>
-        <scope>compile</scope>
+        <groupId>com.googlecode.json-simple</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1</version>
       </dependency>
       <dependency>
         <groupId>net.oauth.core</groupId>
