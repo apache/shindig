@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>1.1-BETA5-incubating-SNAPSHOT</version>
+    <version>1.1-BETA5-incubating</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>Common java code for Shindig</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/java/common</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/java/common</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA5-incubating/java/common</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/tags/shindig-project-1.1-BETA5-incubating/java/common</developerConnection>
+    <url>http://svn.apache.org/viewvc/incubator/shindig/tags/shindig-project-1.1-BETA5-incubating/java/common</url>
   </scm>
 
   <build>
