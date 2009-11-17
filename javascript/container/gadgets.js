@@ -644,12 +644,10 @@ gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
       '_numfields').value;
   for (var i = 0; i < numFields; i++) {
     var input = document.getElementById('m_' + this.id + '_' + i);
-    if (input.type != 'hidden') {
-      var userPrefNamePrefix = 'm_' + this.id + '_up_';
-      var userPrefName = input.name.substring(userPrefNamePrefix.length);
-      var userPrefValue = input.value;
-      this.userPrefs[userPrefName].value = userPrefValue;
-    }
+    var userPrefNamePrefix = 'm_' + this.id + '_up_';
+    var userPrefName = input.name.substring(userPrefNamePrefix.length);
+    var userPrefValue = input.value;
+    this.userPrefs[userPrefName].value = userPrefValue;
   }
 
   this.saveUserPrefs();
