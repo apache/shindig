@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.parse.nekohtml;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.xerces.xni.Augmentations;
@@ -48,6 +49,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -107,6 +109,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     Document document = handler.getDocument();
     DocumentFragment fragment = handler.getFragment();
     normalizeFragment(document, fragment);
+    fixNekoWeirdness(document);
     return document;
   }
 
@@ -163,6 +166,51 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     htmlScanner.setInputSource(inputSource);
     htmlScanner.scanDocument(true);
     return handler;
+  }
+  
+  private void fixNekoWeirdness(Document document) {
+    // Neko as of versions > 1.9.13 stuffs all leading <script> nodes into <head>.
+    // This breaks all sorts of assumptions in gadgets, notably the existence of document.body.
+    // We can't tell Neko to avoid putting <script> into <head> however, since gadgets
+    // like <Content><script>...</script><style>...</style> will break due to both
+    // <script> and <style> ending up in <body> -- at which point Neko unceremoniously
+    // drops the <style> (and <link>) elements.
+    // Therefore we just search for <script> elements in <head> and stuff them all into
+    // the top of <body>.
+    // This method assumes a normalized document as input.
+    Node html = DomUtil.getFirstNamedChildNode(document, "html");
+    if (html.getNextSibling() != null &&
+        html.getNextSibling().getNodeName().equalsIgnoreCase("html")) {
+      // if a doctype is specified, then the desired root <html> node is wrapped by an <HTML> node
+      // Pull out the <html> root.
+      html = html.getNextSibling();
+    }
+    Node head = DomUtil.getFirstNamedChildNode(html, "head");
+    if (head == null) {
+      head = document.createElement("head");
+      html.insertBefore(head, html.getFirstChild());
+    }
+    NodeList headNodes = head.getChildNodes();
+    Stack<Node> headScripts = new Stack<Node>();
+    for (int i = 0; i < headNodes.getLength(); ++i) {
+      Node headChild = headNodes.item(i);
+      if (headChild.getNodeName().equalsIgnoreCase("script")) {
+        headScripts.add(headChild);
+      }
+    }
+    
+    // Remove from head, add to top of <body> in <head> order.
+    Node body = DomUtil.getFirstNamedChildNode(html, "body");
+    if (body == null) {
+      body = document.createElement("body");
+      html.insertBefore(body, head.getNextSibling());
+    }
+    Node bodyFirst = body.getFirstChild();
+    while (headScripts.size() > 0) {
+      Node headScript = headScripts.pop();
+      head.removeChild(headScript);
+      body.insertBefore(headScript, bodyFirst);
+    }
   }
 
   protected HTMLConfiguration newConfiguration() {

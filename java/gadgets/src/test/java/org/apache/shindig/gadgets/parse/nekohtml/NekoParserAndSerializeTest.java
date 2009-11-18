@@ -68,5 +68,11 @@ public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest 
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands-expected.html");
     parseAndCompareBalanced(content, expected, simple);
   }
+  
+  public void testScriptPushedToBody() throws Exception {
+    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript-expected.html");
+    parseAndCompareBalanced(content, expected, simple);
+  }
 
 }
