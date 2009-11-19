@@ -111,6 +111,17 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
     if (scriptType != null) {
       Element replacement = elem.getOwnerDocument().createElement("script");
       replacement.setAttribute("type", scriptType);
+      
+      // Retain the remaining attributes of the node.
+      NamedNodeMap attribs = elem.getAttributes();
+      for (int i = 0; i < attribs.getLength(); ++i) {
+        Attr attr = (Attr)attribs.item(i);
+        if (!"type".equals(attr.getNodeName().equalsIgnoreCase("type"))) {
+          Attr newAttr = replacement.getOwnerDocument().createAttribute(attr.getNodeName());
+          newAttr.setValue(attr.getValue());
+          replacement.setAttributeNode(newAttr);
+        }
+      }
       return replacement;
     }
     return elem;
