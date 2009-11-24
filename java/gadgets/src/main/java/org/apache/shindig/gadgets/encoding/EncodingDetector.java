@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.encoding;
 
 import java.nio.charset.Charset;
 
+import com.google.inject.Inject;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
@@ -32,6 +33,17 @@ public class EncodingDetector {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
+ 
+  public static class FallbackEncodingDetector {
+    public Charset detectEncoding(byte[] input) {
+      // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.
+      CharsetDetector detector = new CharsetDetector();
+      detector.setText(input);
+      CharsetMatch match = detector.detect();
+      return Charset.forName(match.getName().toUpperCase());
+    }
+  }
+
   /**
    * Returns the detected encoding of the given byte array.
    *
@@ -40,9 +52,12 @@ public class EncodingDetector {
    *     encoding for HTTP) if the bytes are not valid UTF-8. Only recommended if you can reasonably
    *     expect that other encodings are going to be specified. Full encoding detection is very
    *     expensive!
+   * @param alternateDecoder specify a fallback encoding detection. 
+   *     Only used if assume88591IfNotUtf8 is false.
    * @return The detected encoding.
    */
-  public static Charset detectEncoding(byte[] input, boolean assume88591IfNotUtf8) {
+  public static Charset detectEncoding(byte[] input, boolean assume88591IfNotUtf8,
+      FallbackEncodingDetector alternateDecoder) {
     if (looksLikeValidUtf8(input)) {
       return UTF_8;
     }
@@ -51,11 +66,8 @@ public class EncodingDetector {
       return ISO_8859_1;
     }
 
-    // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.
-    CharsetDetector detector = new CharsetDetector();
-    detector.setText(input);
-    CharsetMatch match = detector.detect();
-    return Charset.forName(match.getName().toUpperCase());
+    // Fall back encoding:
+    return alternateDecoder.detectEncoding(input);
   }
 
   /**

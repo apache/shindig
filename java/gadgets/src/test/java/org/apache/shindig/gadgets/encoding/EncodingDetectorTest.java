@@ -18,34 +18,65 @@
  */
 package org.apache.shindig.gadgets.encoding;
 
+import static org.easymock.classextension.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
+
 public class EncodingDetectorTest {
+
+  private EncodingDetector.FallbackEncodingDetector newMockFallbackEncoding(byte[] input,
+      String charset) {
+    EncodingDetector.FallbackEncodingDetector detector =
+      EasyMock.createNiceMock(EncodingDetector.FallbackEncodingDetector.class);
+    expect(detector.detectEncoding(input)).andReturn(Charset.forName(charset)).once();
+    replay(detector);
+    return detector;
+  }
 
   @Test
   public void asciiAssumesUtf8() throws Exception {
     byte[] data = "Hello, world".getBytes("US-ASCII");
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true, null).name());
   }
-
+ 
   @Test
   public void detectedUtf8WithByteOrderMark() {
     byte[] data = {
         (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
     };
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
+    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true, null).name());
   }
 
   @Test
   public void assumeLatin1OnInvalidUtf8() throws Exception {
     byte[] data = "\u4F60\u597D".getBytes("BIG5");
-
-    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true).name());
+    
+    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true, null).name());
   }
 
+  @Test
+  public void testFallbackDetectorIsUsed() throws Exception {
+    byte[] data = ("\u6211\u662F\u4E00\u4E2A\u4E0D\u5584\u4E8E\u8BB2\u8BDD\u7684\u4EBA\uFF0C" +
+                   "\u552F\u5176\u4E0D\u5584\u4E8E\u8BB2\u8BDD\uFF0C\u6709\u601D\u60F3\u8868" +
+                   "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
+                   .getBytes("GB18030");
+
+    EncodingDetector.FallbackEncodingDetector detector = 
+      newMockFallbackEncoding(data, "GB18030");
+
+    assertEquals("GB18030", EncodingDetector.detectEncoding(data, false, detector).name());
+    verify(detector);
+  }
+  
+  // Test the fallback detector:
   @Test
   public void doNotAssumeLatin1OnInvalidUtf8() throws Exception {
     byte[] data = ("\u6211\u662F\u4E00\u4E2A\u4E0D\u5584\u4E8E\u8BB2\u8BDD\u7684\u4EBA\uFF0C" +
@@ -53,7 +84,10 @@ public class EncodingDetectorTest {
                    "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
                    .getBytes("GB18030");
 
-    assertEquals("GB18030", EncodingDetector.detectEncoding(data, false).name());
+    EncodingDetector.FallbackEncodingDetector detector =
+        new EncodingDetector.FallbackEncodingDetector();
+
+    assertEquals("GB18030", EncodingDetector.detectEncoding(data, false, detector).name());
   }
 
   @Test
@@ -63,13 +97,32 @@ public class EncodingDetectorTest {
                    "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
                    .getBytes("UTF-8");
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
+    EncodingDetector.FallbackEncodingDetector detector =
+        new EncodingDetector.FallbackEncodingDetector();
+
+    assertEquals("UTF-8", detector.detectEncoding(data).name());
   }
 
   @Test
   public void shortUtf8StringIsUtf8() throws Exception {
     byte[] data = "Games, HQ, Mang\u00E1, Anime e tudo que um bom nerd ama".getBytes("UTF-8");
 
-    assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true).name());
+    EncodingDetector.FallbackEncodingDetector detector =
+        new EncodingDetector.FallbackEncodingDetector();
+
+    assertEquals("UTF-8", detector.detectEncoding(data).name());
   }
+  
+  @Test
+  public void nullCustomDetector() throws Exception {
+    byte[] data = "\u4F60\u597D".getBytes("BIG5");
+
+    try {
+      assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, false, null).name());
+      fail("Null Custom encoder is not supported");
+    } catch (NullPointerException e) {
+      // Expected!
+    }
+  }
+
 }

@@ -134,6 +134,11 @@ public final class HttpResponse implements Externalizable {
   @Inject(optional = true) @Named("shindig.http.fast-encoding-detection")
   private static boolean fastEncodingDetection = true;
 
+  // Support injection of smarter encoding detection
+  @Inject(optional = true)
+  private static EncodingDetector.FallbackEncodingDetector customEncodingDetector =
+      new EncodingDetector.FallbackEncodingDetector();
+  
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = new MapMaker().makeMap();
 
@@ -472,7 +477,8 @@ public final class HttpResponse implements Externalizable {
           }
         }
       }
-      Charset encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection);
+      Charset encoding = EncodingDetector.detectEncoding(body, fastEncodingDetection,
+          customEncodingDetector);
       // Record the charset in the content-type header so that its value can be cached
       // and re-used. This is a BIG performance win.
       values.clear();
