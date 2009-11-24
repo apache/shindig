@@ -125,13 +125,17 @@ gadgets.rpctx.rmr = function() {
     channelFrame.id = 'rmrtransport-' + frameId;
     channelFrame.name = channelFrame.id;
 
-    // Determine the relay uri by taking the existing one,
-    // removing the path and appending robots.txt. It is
-    // not important if robots.txt actually exists, since RMR
-    // browsers treat 404s as legitimate for the purposes of
-    // this communication.
-    var relayUri =
-        gadgets.rpc.getOrigin(gadgets.rpc.getRelayUrl(frameId)) + '/robots.txt';
+    // Use the explicitly set relay, if one exists. Otherwise,
+    // Construct one using the parent parameter plus robots.txt
+    // as a synthetic relay. This works since browsers using RMR
+    // treat 404s as legitimate for the purposes of cross domain
+    // communication.
+    var relayUri = gadgets.rpc.getRelayUrl(frameId);
+    if (!relayUri) {
+      relayUri =
+          gadgets.rpc.getOrigin(gadgets.util.getUrlParameters()["parent"]) +
+          '/robots.txt';
+    }
 
     rmr_channels[frameId] = {
       frame: channelFrame,
