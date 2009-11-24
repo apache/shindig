@@ -74,8 +74,8 @@ public class FeatureResourceLoader {
   }
   
   protected FeatureResource loadFile(String path, Map<String, String> attribs) throws IOException {
-    return new DualModeStaticResource(path, getFileContent(new File(getOptPath(path))),
-        getFileContent(new File(path)));
+    return new DualModeStaticResource(path, getFileContent(FeatureRegistry.getFile(getOptPath(path))),
+        getFileContent(FeatureRegistry.getFile(path)));
   }
   
   protected String getFileContent(File file) {
