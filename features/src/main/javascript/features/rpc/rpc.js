@@ -623,6 +623,12 @@ gadgets.rpc = function() {
         l: useLegacyProtocol[targetId]
       };
 
+      if (targetId !== '..' && !document.getElementById(targetId)) {
+        // The target has been removed from the DOM. Don't even try.
+        gadgets.log("WARNING: attempted send to nonexistent frame: " + targetId);
+        return;
+      }
+
       // If target is on the same domain, call method directly
       if (callSameDomain(targetId, rpc)) {
         return;
