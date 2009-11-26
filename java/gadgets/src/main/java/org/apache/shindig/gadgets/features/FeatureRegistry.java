@@ -38,7 +38,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -202,11 +201,25 @@ public class FeatureRegistry {
         ctx.getRenderingContext() == RenderingContext.CONTAINER ? "container" : "gadget";
     
     for (FeatureNode entry : featureNodes) {
+      boolean specificContainerMatched = false;
+      List<FeatureBundle> noContainerBundles = Lists.newLinkedList();
       for (FeatureBundle bundle : entry.getBundles()) {
         if (bundle.getType().equals(targetBundleType)) {
-          if (containerMatch(bundle.getAttribs().get("container"), ctx.getContainer())) {
-            resources.addAll(bundle.getResources());
+          String containerAttrib = bundle.getAttribs().get("container");
+          if (containerAttrib != null) {
+            if (containerMatch(containerAttrib, ctx.getContainer())) {
+              resources.addAll(bundle.getResources());
+              specificContainerMatched = true;
+            }
+          } else {
+            // Applies only if there were no specific container matches.
+            noContainerBundles.add(bundle);
           }
+        }
+      }
+      if (!specificContainerMatched) {
+        for (FeatureBundle bundle : noContainerBundles) {
+          resources.addAll(bundle.getResources());
         }
       }
     }
@@ -340,10 +353,6 @@ public class FeatureRegistry {
   }
   
   private boolean containerMatch(String containerAttrib, String container) {
-    if (containerAttrib == null || containerAttrib.length() == 0) {
-      // Nothing specified = all match.
-      return true;
-    }
     Set<String> containers = Sets.newHashSet();
     for (String attr : containerAttrib.split(",")) {
       containers.add(attr.trim());
@@ -408,10 +417,6 @@ public class FeatureRegistry {
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
-  }
-  
-  private void loadFile(String filePath) throws GadgetException, IOException {
-    loadFile(getFile(filePath));
   }
 
   private void loadFile(File file) throws GadgetException, IOException {

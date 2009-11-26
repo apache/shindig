@@ -428,6 +428,55 @@ public class FeatureRegistryTest {
     }
   }
   
+  @Test
+  public void returnOnlyContainerFilteredJs() throws Exception {
+    String feature = "thefeature";
+    String container =  "foo";
+    String containerContent = "content1();";
+    String defaultContent = "content2();";
+    Uri featureUri =
+        expectResource(
+          getContainerAndDefaultTpl(feature, container, containerContent, defaultContent));
+    registry.register(featureUri.toString());
+    List<String> needed = Lists.newArrayList(feature);
+    List<String> unsupported = Lists.newLinkedList();
+    List<FeatureResource> resources = 
+        registry.getFeatureResources(
+          getCtx(RenderingContext.GADGET, container), needed, unsupported);
+    assertEquals(1, resources.size());
+    assertEquals(containerContent, resources.get(0).getContent());
+  }
+  
+  @Test
+  public void returnDefaultMatchJs() throws Exception {
+    String feature = "thefeature";
+    String container =  "foo";
+    String containerContent = "content1();";
+    String defaultContent = "content2();";
+    Uri featureUri =
+        expectResource(
+          getContainerAndDefaultTpl(feature, container, containerContent, defaultContent));
+    registry.register(featureUri.toString());
+    List<String> needed = Lists.newArrayList(feature);
+    List<String> unsupported = Lists.newLinkedList();
+    List<FeatureResource> resources = 
+        registry.getFeatureResources(
+          getCtx(RenderingContext.GADGET, "othercontainer"), needed, unsupported);
+    assertEquals(1, resources.size());
+    assertEquals(defaultContent, resources.get(0).getContent());
+  }
+  
+  private String getContainerAndDefaultTpl(String name, String container, String c1, String c2) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<feature><name>").append(name).append("</name>");
+    sb.append("<gadget container=\"").append(container).append("\">");
+    sb.append("<script>").append(c1).append("</script></gadget>");
+    sb.append("<gadget>");
+    sb.append("<script>").append(c2).append("</script></gadget>");
+    sb.append("</feature>");
+    return sb.toString();
+  }
+  
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
     return new GadgetContext() {
       @Override
