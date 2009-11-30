@@ -210,8 +210,8 @@ class MakeRequest {
     if (preg_match("/&#[xX][0-9a-zA-Z]{2,8};/", $content)) {
       $content = preg_replace("/&#[xX]([0-9a-zA-Z]{2,8});/e", "'&#'.hexdec('$1').';'", $content);
     }
-    if (preg_match("/\\\\[uU][0-9a-zA-Z]{2,8}/", $content)) {
-      $content = preg_replace("/\\\\[uU]([0-9a-zA-Z]{2,8})/e", "'&#'.hexdec('$1').';'", $content);
+    if (preg_match("/\\\\(u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})/", $content)) {
+      $content = preg_replace("/\\\\(u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})/e", "'&#'.hexdec('$1').';'", $content);
     }
     return mb_decode_numericentity($content, array(0x0, 0xFFFF, 0, 0xFFFF), 'UTF-8');
   }
