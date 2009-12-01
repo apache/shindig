@@ -120,8 +120,8 @@ public class BlobCrypterTest {
       fail("Blob should have expired");
     } catch (BlobExpiredException e) {
       assertEquals(start-skew, e.minDate.getTime());
-      assertEquals(start+realAge*1000, e.used.getTime());
-      assertEquals(start+skew+maxAge*1000, e.maxDate.getTime());
+      assertEquals(start+realAge*1000L, e.used.getTime());
+      assertEquals(start+skew+maxAge*1000L, e.maxDate.getTime());
     }
   }
 

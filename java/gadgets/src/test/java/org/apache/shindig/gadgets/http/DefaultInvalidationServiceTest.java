@@ -45,7 +45,6 @@ public class DefaultInvalidationServiceTest extends TestCase {
   IMocksControl control;
   HttpCache cache;
   DefaultInvalidationService service;
-  Cache<String, Long> invalidationCache;
   LruCacheProvider cacheProvider;
   FakeGadgetToken appxToken;
   FakeGadgetToken appyToken;

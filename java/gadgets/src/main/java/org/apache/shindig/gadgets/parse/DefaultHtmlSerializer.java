@@ -116,7 +116,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
       NamedNodeMap attribs = elem.getAttributes();
       for (int i = 0; i < attribs.getLength(); ++i) {
         Attr attr = (Attr)attribs.item(i);
-        if (!"type".equals(attr.getNodeName().equalsIgnoreCase("type"))) {
+        if (!attr.getNodeName().equalsIgnoreCase("type")) {
           Attr newAttr = replacement.getOwnerDocument().createAttribute(attr.getNodeName());
           newAttr.setValue(attr.getValue());
           replacement.setAttributeNode(newAttr);

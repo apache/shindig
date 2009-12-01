@@ -125,6 +125,7 @@ public class DataServiceServlet extends ApiServlet {
         case -32601:
           // Procedure doesn't exist
           errorCode = HttpServletResponse.SC_NOT_IMPLEMENTED;
+          break;
         case -32603:
         default:
           // Internal server error, or any application-defined error
