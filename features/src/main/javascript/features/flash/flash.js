@@ -150,8 +150,20 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
             flashObj.setAttribute(prop, opt_params[prop]);
           }
         }
+        // Inject flash object
+        swfContainer.innerHTML = '';
+        swfContainer.appendChild(flashObj);
+        return true;
       } else {
         // Use <object> tag for IE
+        // For some odd reason IE demands that innerHTML be used to set <param>
+        // values; they're otherwise ignored. As such, we need to be careful
+        // what values we accept in opt_params to avoid it being possible to
+        // use this HTML generation for nefarious purposes.
+        var propIsHtmlSafe = function(val) {
+          return !/["<>]/.test(val);
+        }
+       
         opt_params.movie = swfUrl;
         var attr = {
           width: opt_params.width,
@@ -162,28 +174,30 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
           attr.id = opt_params.id;
         }
 
-        flashObj = document.createElement('object');
-        flashObj.setAttribute('data', swfUrl);
+        var html = '<object';
         for (var attrProp in attr) {
-          if (!/___$/.test(attrProp)) {
-            flashObj.setAttribute(attrProp, attr[attrProp]);
+          if (!/___$/.test(attrProp) &&
+              propIsHtmlSafe(attrProp) &&
+              propIsHtmlSafe(attr[attrProp])) {
+            html += ' ' + attrProp + '="' + attr[attrProp] + '"';
           }
         }
+        html += '>';
+
         for (var paramsProp in opt_params) {
           var param = document.createElement('param');
           if (!/^swf_/.test(paramsProp) && 
               !attr[paramsProp] && 
-              !/___$/.test(paramsProp)) {
-            param.setAttribute('name', paramsProp);
-            param.setAttribute('value', opt_params[paramsProp]);
-            flashObj.appendChild(param);
+              !/___$/.test(paramsProp) &&
+              propIsHtmlSafe(paramsProp) &&
+              propIsHtmlSafe(opt_params[paramsProp])) {
+            html += '<param name="' + paramsProp + '" value="'
+                 + opt_params[paramsProp] + '" />';
           }
         }
+        html += '</object>';
       }
-      // Inject flash object
-      swfContainer.innerHTML = '';
-      swfContainer.appendChild(flashObj);
-      return true;
+      swfContainer.innerHTML = html;
     }
   }
   return false;
