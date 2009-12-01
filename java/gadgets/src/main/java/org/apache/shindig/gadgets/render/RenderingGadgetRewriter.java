@@ -84,7 +84,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   
   private static final int INLINE_JS_BUFFER = 50;
 
-  static final String DEFAULT_CSS =
+  protected static final String DEFAULT_CSS =
       "body,td,div,span,p{font-family:arial,sans-serif;}" +
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
@@ -328,7 +328,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * @param reqs The features needed to satisfy the request.
    * @throws GadgetException If there is a problem with the gadget auth token
    */
-  private String getLibraryConfig(Gadget gadget, List<String> reqs)
+  protected String getLibraryConfig(Gadget gadget, List<String> reqs)
       throws GadgetException {
     GadgetContext context = gadget.getContext();
 
