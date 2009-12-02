@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.features;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
@@ -206,6 +207,9 @@ public class FeatureRegistryTest {
     Uri feature2Uri = expectResource(xml(BOTTOM_TPL, "gadget", content2Uri.getPath(), null));
     
     registry.register(feature1Uri.toString());
+    List<FeatureResource> resources1 = registry.getAllFeatures();
+    assertEquals(1, resources1.size());
+    assertEquals(content1, resources1.get(0).getContent());
     
     // Register it again, different def.
     registry.register(feature2Uri.toString());
@@ -216,6 +220,113 @@ public class FeatureRegistryTest {
     // Check cached resources too.
     List<FeatureResource> resourcesAgain = registry.getAllFeatures();
     assertSame(resources2, resourcesAgain);
+  }
+  
+  @Test
+  public void cacheAccountsForUnsupportedState() throws Exception {
+    String content1 = "content1()";
+    Uri content1Uri = expectResource(content1);
+    Map<String, String> attribs = Maps.newHashMap();
+    String theContainer = "the-container";
+    attribs.put("container", theContainer);
+    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
+    
+    // Register it.
+    registry.register(feature1Uri.toString());
+    
+    // Retrieve content for matching context.
+    List<String> needed = Lists.newArrayList("bottom");
+    List<String> unsupported = Lists.newArrayList();
+    List<FeatureResource> resources = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+    
+    // Retrieve again w/ no unsupported list.
+    List<FeatureResource> resourcesUnsup = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, null);
+    
+    assertNotSame(resources, resourcesUnsup);
+    assertEquals(resources, resourcesUnsup);
+    assertEquals(1, resources.size());
+    assertEquals(content1, resources.get(0).getContent());
+    
+    // Now make sure the cache DOES work when needed.
+    List<FeatureResource> resources2 = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+    assertSame(resources, resources2);
+
+    List<FeatureResource> resourcesUnsup2 = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, null);
+    assertSame(resourcesUnsup, resourcesUnsup2);
+    
+    // Lastly, ensure that ignoreCache is properly accounted.
+    List<FeatureResource> resourcesIgnoreCache = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported);
+    assertNotSame(resources, resourcesIgnoreCache);
+    assertEquals(1, resourcesIgnoreCache.size());
+    assertEquals(content1, resourcesIgnoreCache.get(0).getContent());
+  }
+  
+  @Test
+  public void cacheAccountsForContext() throws Exception {
+    String content1 = "content1()";
+    Uri content1Uri = expectResource(content1);
+    Map<String, String> attribs = Maps.newHashMap();
+    String theContainer = "the-container";
+    attribs.put("container", theContainer);
+    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(), null, attribs));
+    
+    // Register it.
+    registry.register(feature1Uri.toString());
+    
+    // Retrieve content for matching context.
+    List<String> needed = Lists.newArrayList("bottom");
+    List<String> unsupported = Lists.newArrayList();
+    List<FeatureResource> resources = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+    
+    // Retrieve again w/ mismatch container.
+    List<FeatureResource> resourcesNoMatch = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported);
+    
+    // Retrieve again w/ mismatched context.
+    List<FeatureResource> ctxMismatch = registry.getFeatureResources(
+        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported);
+
+    assertNotSame(resources, resourcesNoMatch);
+    assertNotSame(resources, ctxMismatch);
+    assertNotSame(resourcesNoMatch, ctxMismatch);
+    
+    assertEquals(1, resources.size());
+    assertEquals(content1, resources.get(0).getContent());
+    
+    assertEquals(0, resourcesNoMatch.size());
+    assertEquals(0, ctxMismatch.size());
+    
+    // Make sure caches work with appropriate matching.
+    List<FeatureResource> resources2 = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+    assertSame(resources, resources2);
+    
+    List<FeatureResource> resourcesNoMatch2 = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, "foo"), needed, unsupported);
+    assertSame(resourcesNoMatch, resourcesNoMatch2);
+    
+    List<FeatureResource> ctxMismatch2 = registry.getFeatureResources(
+        getCtx(RenderingContext.CONTAINER, theContainer), needed, unsupported);
+    assertSame(ctxMismatch, ctxMismatch2);
+    
+    // Check ignoreCache
+    List<FeatureResource> resourcesIC = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer, true), needed, unsupported);
+    assertNotSame(resources, resourcesIC);
+    
+    List<FeatureResource> resourcesNoMatchIC = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, "foo", true), needed, unsupported);
+    assertNotSame(resourcesNoMatch, resourcesNoMatchIC);
+    
+    List<FeatureResource> ctxMismatchIC = registry.getFeatureResources(
+        getCtx(RenderingContext.CONTAINER, theContainer, true), needed, unsupported);
+    assertNotSame(ctxMismatch, ctxMismatchIC);
   }
   
   @Test
@@ -478,6 +589,11 @@ public class FeatureRegistryTest {
   }
   
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
+    return getCtx(rctx, container, false);
+  }
+  
+  private GadgetContext getCtx(final RenderingContext rctx, final String container,
+      final boolean ignoreCache) {
     return new GadgetContext() {
       @Override
       public RenderingContext getRenderingContext() {
@@ -487,6 +603,11 @@ public class FeatureRegistryTest {
       @Override
       public String getContainer() {
         return container != null ? container : ContainerConfig.DEFAULT_CONTAINER;
+      }
+      
+      @Override
+      public boolean getIgnoreCache() {
+        return ignoreCache;
       }
     };
   }

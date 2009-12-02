@@ -64,9 +64,7 @@ public class FeatureRegistry {
       = Logger.getLogger("org.apache.shindig.gadgets");
   
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
-  private final Map<Collection<String>, List<FeatureResource>> cache = new MapMaker().makeMap();
-  private final Map<Collection<String>, List<FeatureResource>> cacheIgnoreUnsupported =
-      new MapMaker().makeMap();
+  private final Map<FeatureCacheKey, List<FeatureResource>> cache = new MapMaker().makeMap();
 
   private final FeatureParser parser;
   private final FeatureResourceLoader resourceLoader;
@@ -154,6 +152,9 @@ public class FeatureRegistry {
       // Connect the dependency graph made up of all features and validate there
       // are no circular deps.
       connectDependencyGraph();
+      
+      // Clear caches.
+      cache.clear();
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, e);
     }
@@ -179,15 +180,13 @@ public class FeatureRegistry {
    */
   public List<FeatureResource> getFeatureResources(
       GadgetContext ctx, Collection<String> needed, List<String> unsupported, boolean transitive) {
-    Map<Collection<String>, List<FeatureResource>> useCache = null;
-    if (transitive) {
-      useCache = (unsupported != null) ? cache : cacheIgnoreUnsupported;
-    }
+    boolean useCache = (transitive && !ctx.getIgnoreCache());
     
+    FeatureCacheKey cacheKey = new FeatureCacheKey(needed, ctx, unsupported != null);
     List<FeatureResource> resources = Lists.newLinkedList();
     
-    if (useCache != null && useCache.containsKey(needed)) {
-      return useCache.get(needed);
+    if (useCache && cache.containsKey(cacheKey)) {
+      return cache.get(cacheKey);
     }
     
     List<FeatureNode> featureNodes = null;
@@ -224,8 +223,8 @@ public class FeatureRegistry {
       }
     }
     
-    if (useCache != null && (unsupported == null || unsupported.isEmpty())) {
-      useCache.put(needed, resources);
+    if (useCache && (unsupported == null || unsupported.isEmpty())) {
+      cache.put(cacheKey, resources);
     }
       
     return resources;
@@ -590,6 +589,38 @@ public class FeatureRegistry {
     
     public List<FeatureNode> getTransitiveDeps() {
       return this.transitiveDeps;
+    }
+  }
+  
+  private static class FeatureCacheKey {
+    private final Collection<String> needed;
+    private final RenderingContext rCtx;
+    private final String container;
+    private final Boolean useUnsupported;
+    
+    private FeatureCacheKey(Collection<String> needed, GadgetContext ctx, boolean useUnsupported) {
+      this.needed = needed;
+      this.rCtx = ctx.getRenderingContext();
+      this.container = ctx.getContainer();
+      this.useUnsupported = useUnsupported;
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+      if (!(other instanceof FeatureCacheKey)) {
+        return false;
+      }
+      FeatureCacheKey otherKey = (FeatureCacheKey)other;
+      return otherKey.needed.equals(this.needed) &&
+             otherKey.rCtx == this.rCtx &&
+             otherKey.container.equals(this.container) &&
+             otherKey.useUnsupported == this.useUnsupported;
+    }
+    
+    @Override
+    public int hashCode() {
+      // Doesn't need to be good, just cheap and consistent.
+      return needed.hashCode() + rCtx.hashCode() + container.hashCode() + useUnsupported.hashCode();
     }
   }
 }
