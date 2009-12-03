@@ -210,6 +210,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       Node headScript = headScripts.pop();
       head.removeChild(headScript);
       body.insertBefore(headScript, bodyFirst);
+      bodyFirst = headScript;
     }
   }
 

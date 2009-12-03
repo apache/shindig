@@ -44,6 +44,6 @@ public abstract class AbstractParserAndSerializerTest extends TestCase {
       throws Exception {
     Document document = parser.parseDom(content);
     expected = StringUtils.replace(expected, EOL, "\n");
-    assertEquals(expected, HtmlSerialization.serialize(document));
+    assertEquals(expected.trim(), HtmlSerialization.serialize(document).trim());
   }
 }
