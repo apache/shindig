@@ -143,6 +143,10 @@ public class ProxyHandler extends ProxyBase {
     }
 
     HttpRequest rcr = buildHttpRequest(request, URL_PARAM);
+    if (rcr == null) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "No url paramater in request");      
+    }
     HttpResponse results = requestPipeline.execute(rcr);
     
     if (results.isError()) {
