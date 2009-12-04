@@ -530,11 +530,6 @@ gadgets.rpc = function() {
     }
   }
 
-  // gadgets.config might not be available, such as when serving container js.
-  if (isChild) {
-    setupReceiver('..');
-  }
-
   return /** @scope gadgets.rpc */ {
     /**
      * Registers an RPC service.
@@ -816,6 +811,9 @@ gadgets.rpc = function() {
       // gadgets.rpc methods.
       if (transport.init(process, transportReady) === false) {
         transport = fallbackTransport;
+      }
+      if (isChild) {
+        setupReceiver('..');
       }
     },
 
