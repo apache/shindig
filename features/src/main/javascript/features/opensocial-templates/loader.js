@@ -276,14 +276,18 @@ os.Loader.injectStyle = function(cssCode) {
   var rules = cssCode.split("}");
   for (var i = 0; i < rules.length; i++) {
     var rule = rules[i].replace(/\n/g, "").replace(/\s+/g, " ");
-    if (rule.length > 2) {
-      if (sheet.insertRule) {
-        rule = rule + "}";
-        sheet.insertRule(rule, sheet.cssRules.length);
-      } else {
-        var ruleParts = rule.split("{");
-        sheet.addRule(ruleParts[0], ruleParts[1]);
+    try {
+      if (rule.length > 2) {
+        if (sheet.insertRule) {
+          rule = rule + "}";
+            sheet.insertRule(rule, sheet.cssRules.length);
+        } else {
+          var ruleParts = rule.split("{");
+          sheet.addRule(ruleParts[0], ruleParts[1]);
+        }
       }
+    } catch (err) {
+      gadgets.error("Error in stylesheet: " + rule + " - " + e.name + " - " + e.message);
     }
   }
 };
