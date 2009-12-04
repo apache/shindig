@@ -295,6 +295,30 @@ gadgets.rpc = function() {
     return protocol + "://" + host + portStr;
   }
 
+  function getTargetWin(id) {
+    if (typeof id === "undefined" ||
+        id === "..") {
+      return window.parent;
+    }
+
+    // Cast to a String to avoid an index lookup.
+    id = String(id);
+    
+    // Try window.frames first
+    var target = window.frames[id];
+    if (target) {
+      return target;
+    }
+    
+    // Fall back to getElementById()
+    target = document.getElementById(id);
+    if (target && target.contentWindow) {
+      return target.contentWindow;
+    }
+
+    return null;
+  }
+
   // Pick the most efficient RPC relay mechanism.
   var transport = getTransport();
 
@@ -369,12 +393,7 @@ gadgets.rpc = function() {
         return false;
       }
 
-      var targetEl = null;
-      if (target === '..') {
-        targetEl = window.parent;
-      } else {
-        targetEl = window.frames[target];
-      }
+      var targetEl = getTargetWin(target);
       try {
         // If this succeeds, then same-domain policy applied
         sameDomain[target] = targetEl.gadgets.rpc.receiveSameDomain;
@@ -799,6 +818,9 @@ gadgets.rpc = function() {
         transport = fallbackTransport;
       }
     },
+
+    /** Returns the window keyed by the ID. null/".." for parent, else child */
+    _getTargetWin: getTargetWin,
 
     /** Exported constant, for use by transports only. */
     ACK: ACK,

@@ -195,12 +195,13 @@ gadgets.rpctx.rmr = function() {
     rmr_channels[frameId].searchCounter++;
 
     try {
+      var targetWin = gadgets.rpc._getTargetWin(frameId);
       if (frameId === '..') {
         // We are a gadget.
-        channelWindow = window.parent.frames['rmrtransport-' + gadgets.rpc.RPC_ID];
+        channelWindow = targetWin.frames['rmrtransport-' + gadgets.rpc.RPC_ID];
       } else {
         // We are a container.
-        channelWindow = window.frames[frameId].frames['rmrtransport-..'];
+        channelWindow = targetWin.frames['rmrtransport-..'];
       }
     } catch (e) {
       // Just in case; may happen when relay is set to about:blank or unset.

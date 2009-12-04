@@ -81,7 +81,7 @@ gadgets.rpctx.wpm = function() {
     },
 
     call: function(targetId, from, rpc) {
-      var targetWin = targetId === '..' ? window.parent : window.frames[targetId];
+      var targetWin = gadgets.rpc._getTargetWin(targetId);
       // targetOrigin = canonicalized relay URL
       var origRelay = gadgets.rpc.getRelayUrl(targetId) ||
                       gadgets.util.getUrlParameters()["parent"];
