@@ -41,6 +41,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -99,6 +100,8 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected final RpcServiceLookup rpcServiceLookup;
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
+  protected Boolean externalizeFeatures = false;
+
   /**
    * @param messageBundleFactory Used for injecting message bundles into gadget output.
    */
@@ -117,9 +120,14 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
-    if (forcedLibs != null && forcedLibs.length() > 0) {
+    if (StringUtils.isNotBlank(forcedLibs)) {
       defaultExternLibs = ImmutableSortedSet.copyOf(Arrays.asList(forcedLibs.split(":")));
     }
+  }
+
+  @Inject(optional = true)
+  public void setExternalizeFeatureLibs(@Named("shindig.gadget-rewrite.externalize-feature-libs")Boolean externalizeFeatures) {
+    this.externalizeFeatures = externalizeFeatures;
   }
 
   public void rewrite(Gadget gadget, MutableContent mutableContent) throws RewritingException {
@@ -215,40 +223,37 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
-    String externParam = context.getParameter("libs");
 
-    // List of extern libraries we need
-    Set<String> extern;
+    // Set of extern libraries requested by the container
+    Set<String> externForcedLibs = defaultExternLibs;
 
     // gather the libraries we'll need to generate the extern libs
-    if (externParam == null || externParam.length() == 0) {
-      // Don't bother making a mutable copy if the list is empty
-      extern = (defaultExternLibs.isEmpty()) ? defaultExternLibs :
-          Sets.newTreeSet(defaultExternLibs);
-    } else {
-      extern = Sets.newTreeSet(Arrays.asList(externParam.split(":")));
+    String externParam = context.getParameter("libs");    
+    if (StringUtils.isNotBlank(externParam)) {
+      externForcedLibs = Sets.newTreeSet(Arrays.asList(externParam.split(":")));
     }
-    
-    if (!extern.isEmpty()) {
-      String jsUrl = urlGenerator.getBundledJsUrl(extern, context);
+
+    if (!externForcedLibs.isEmpty()) {
+      String jsUrl = urlGenerator.getBundledJsUrl(externForcedLibs, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", jsUrl);
       headTag.appendChild(libsTag);
     }
-    
+
     List<String> unsupported = Lists.newLinkedList();
-    List<FeatureResource> externResources =
-        featureRegistry.getFeatureResources(gadget.getContext(), extern, unsupported);
+
+    List<FeatureResource> externForcedResources =
+        featureRegistry.getFeatureResources(context, externForcedLibs, unsupported); 
     if (!unsupported.isEmpty()) {
       LOG.info("Unknown feature(s) in extern &libs=: " + unsupported.toString());
       unsupported.clear();
     }
-    
+
     // Get all resources requested by the gadget's requires/optional features.
     Map<String, Feature> featureMap = gadget.getSpec().getModulePrefs().getFeatures();
     List<String> gadgetFeatureKeys = Lists.newArrayList(gadget.getDirectFeatureDeps());
     List<FeatureResource> gadgetResources =
-        featureRegistry.getFeatureResources(gadget.getContext(), gadgetFeatureKeys, unsupported);
+        featureRegistry.getFeatureResources(context, gadgetFeatureKeys, unsupported);
     if (!unsupported.isEmpty()) {
       List<String> requiredUnsupported = Lists.newLinkedList();
       for (String notThere : unsupported) {
@@ -260,13 +265,33 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (!requiredUnsupported.isEmpty()) {
         throw new UnsupportedFeatureException(requiredUnsupported.toString());
       }
+    }    
+
+    // Inline or externalize the gadgetFeatureKeys
+    List<FeatureResource> inlineResources = Lists.newArrayList();        
+    List<String> allRequested = Lists.newArrayList(gadgetFeatureKeys);
+
+    if (externalizeFeatures) {
+      Set<String> externGadgetLibs = Sets.newTreeSet(featureRegistry.getFeatures(gadgetFeatureKeys));
+      externGadgetLibs.removeAll(externForcedLibs);
+
+      if (!externGadgetLibs.isEmpty()) {
+        String jsUrl = urlGenerator.getBundledJsUrl(externGadgetLibs, context);
+        Element libsTag = headTag.getOwnerDocument().createElement("script");
+        libsTag.setAttribute("src", jsUrl);
+        headTag.appendChild(libsTag);
+      }
+    } else {
+      inlineResources.addAll(gadgetResources);
     }
-    
+
     // Calculate inlineResources as all resources that are needed by the gadget to
     // render, minus all those included through externResources.
     // TODO: profile and if needed, optimize this a bit.
-    List<FeatureResource> inlineResources = Lists.newArrayList(gadgetResources);
-    inlineResources.removeAll(externResources);
+    if (!externForcedLibs.isEmpty()) {
+      allRequested.addAll(externForcedLibs);
+      inlineResources.removeAll(externForcedResources);
+    }
 
     // Precalculate the maximum length in order to avoid excessive garbage generation.
     int size = 0;
@@ -280,8 +305,6 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       }
     }
 
-    List<String> allRequested = Lists.newArrayList(gadgetFeatureKeys);
-    allRequested.addAll(extern);
     String libraryConfig =
         getLibraryConfig(gadget, featureRegistry.getFeatures(allRequested));
     
@@ -348,8 +371,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     addHasFeatureConfig(gadget, config);
-    addOsapiSystemListMethodsConfig(gadget.getContext().getContainer(), config, 
-      gadget.getContext().getHost());
+    addOsapiSystemListMethodsConfig(context.getContainer(), config, context.getHost());
     addSecurityTokenConfig(context, config);
     return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
   }
