@@ -133,9 +133,9 @@ public class FeatureRegistryTest {
     File featureFile = File.createTempFile("feature", ".xml", featureDir);
     featureFile.deleteOnExit();
     out = new BufferedWriter(new FileWriter(featureFile));
-    out.write(xml(NODEP_TPL, "gadget", resFile.getAbsolutePath(), null));
+    out.write(xml(NODEP_TPL, "gadget", resFile.toURI().toString(), null));
     out.close();
-    registry.register(childDir.getAbsolutePath());
+    registry.register(childDir.toURI().toString());
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures();
