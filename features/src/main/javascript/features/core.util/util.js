@@ -298,6 +298,7 @@ gadgets.util = function() {
      * @return {String} The escaped string
      */
     escapeString : function(str) {
+      if (!str) return str;
       var out = [], ch, shouldEscape;
       for (var i = 0, j = str.length; i < j; ++i) {
         ch = str.charCodeAt(i);
@@ -318,6 +319,7 @@ gadgets.util = function() {
      * @param {String} str The string to unescape.
      */
     unescapeString : function(str) {
+      if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
     }
   };
