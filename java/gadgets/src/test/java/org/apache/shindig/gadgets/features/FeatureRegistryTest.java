@@ -27,7 +27,6 @@ import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
-import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -134,9 +133,9 @@ public class FeatureRegistryTest {
     File featureFile = File.createTempFile("feature", ".xml", featureDir);
     featureFile.deleteOnExit();
     out = new BufferedWriter(new FileWriter(featureFile));
-    out.write(xml(NODEP_TPL, "gadget", getFileName(resFile), null));
+    out.write(xml(NODEP_TPL, "gadget", resFile.getAbsolutePath(), null));
     out.close();
-    registry.register(getFileName(childDir));
+    registry.register(childDir.getAbsolutePath());
     
     // Verify single resource works all the way through.
     List<FeatureResource> resources = registry.getAllFeatures();
@@ -681,17 +680,7 @@ public class FeatureRegistryTest {
     BufferedWriter out = new BufferedWriter(new FileWriter(file));
     out.write(content);
     out.close();
-    return new UriBuilder().setScheme("file").setAuthority("").setPath(
-        getFileName(file)).toUri();
-  }
-  
-  private static String getFileName(File input) throws Exception {
-	if (File.separatorChar == '\\') {
-	  // Crazy gross special Windows stuff.
-	  return Utf8UrlCoder.encode(input.getCanonicalPath().replaceAll("\\\\", "/"))
-	           .replaceAll("%2F", "/");
-	}
-	return input.getCanonicalPath();
+    return Uri.fromJavaUri(file.toURI());
   }
   
   private static Uri makeResourceUri(String suffix) {

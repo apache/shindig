@@ -29,7 +29,6 @@ import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -295,13 +294,6 @@ public class FeatureRegistry {
     return uri;
   }
   
-  static File getFile(String filePath) {
-    if (File.separatorChar == '\\') {
-      filePath = Utf8UrlCoder.decode(filePath);
-    }
-    return new File(filePath);
-  }
-  
   private List<FeatureNode> getTransitiveDeps(Collection<String> needed, List<String> unsupported) {
     final List<FeatureNode> requested = getRequestedNodes(needed, unsupported);
     
@@ -437,8 +429,7 @@ public class FeatureRegistry {
         loadFile(featureFile);
       } else if (featureFile.getName().toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
         String content = ResourceLoader.getContent(featureFile);
-        Uri parent = new UriBuilder().setScheme(FILE_SCHEME).setAuthority("")
-            .setPath(featureFile.getAbsolutePath()).toUri();
+        Uri parent = Uri.fromJavaUri(featureFile.toURI());
         loadFeature(parent, content);
       } else {
         if (logger.isLoggable(Level.FINEST)) {
