@@ -107,7 +107,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
    			}
    		}
    		// the xml and json parsers get very upset if there are invalid UTF8 sequences in the string, by recoding it any bad chars will be filtered out
-      //$content = mb_convert_encoding($content, 'UTF-8', $charset);
+      $content = mb_convert_encoding($content, 'UTF-8', $charset);
   	}
     // on redirects and such we get multiple headers back from curl it seems, we really only want the last one
     while (substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false) {
