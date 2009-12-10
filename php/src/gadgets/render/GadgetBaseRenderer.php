@@ -345,6 +345,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $styleNode->setAttribute('type', 'text/css');
     $styleNode->appendChild($doc->createTextNode(Config::get('gadget_css')));
     $node->appendChild($styleNode);
+
     // Inject the OpenSocial feature javascripts
     $scripts = $this->getJavaScripts();
     if ($scripts['external']) {
@@ -423,7 +424,9 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
               "mediaitems.get", "albums.create",
               "appdata.delete", "people.update",
               "appdata.create"),
-          'http://%host%/gadgets/api/rpc' => array('cache.invalidate'));
+          'http://%host%/gadgets/api/rpc' => array('cache.invalidate',
+              'http.head', 'http.get', 'http.put',
+              'http.post', 'http.delete'));
     }
     return "gadgets.config.init(" . json_encode($gadgetConfig) . ");\n";
   }

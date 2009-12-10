@@ -82,9 +82,7 @@ class AllTests {
 }
 
 ob_start();
-echo "<html><body><pre>";
 AllTests::main();
-echo "</pre></body></html>";
 $output = ob_get_clean();
 
 // make sure the result page isn't cached, some of the tests set caching headers which is bad here
@@ -95,5 +93,4 @@ header('Cache-Control: no-store, no-cache, must-revalidate', true);
 header('Cache-Control: pre-check=0, post-check=0, max-age=0', true);
 header("Pragma: no-cache", true);
 
-echo $output;
-
+echo "<html><body><pre>".$output."</pre></body></html>";

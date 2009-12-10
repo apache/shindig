@@ -75,7 +75,9 @@ class SystemHandler extends DataRequestHandler {
               "mediaitems.get", "albums.create",
               "appdata.delete", "people.update",
               "appdata.create"),
-          'http://%host%/gadgets/api/rpc' => array('cache.invalidate'));
+          'http://%host%/gadgets/api/rpc' => array('cache.invalidate',
+              'http.head', 'http.get', 'http.put',
+              'http.post', 'http.delete'));
     }
 	  return $gadgetConfig['osapi.services'];
   }

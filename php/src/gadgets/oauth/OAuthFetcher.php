@@ -146,8 +146,8 @@ class OAuthFetcher extends RemoteContentFetcher {
     if ($origClientState != null && strlen($origClientState) > 0) {
       try {
         $this->origClientState = $this->oauthCrypter->unwrap($origClientState, self::$CLIENT_STATE_MAX_AGE_SECS);
-      } catch (BlobCrypterException $e) {// Probably too old, pretend we never saw it at all.
-}
+      } catch (BlobCrypterException $e) {  // Probably too old, pretend we never saw it at all.
+      }
     }
     if ($this->origClientState == null) {
       $this->origClientState = array();
@@ -220,13 +220,13 @@ class OAuthFetcher extends RemoteContentFetcher {
   }
 
   public function fetch($request) {
+  	$this->realRequest = $request;
     try {
       $this->lookupOAuthMetadata();
     } catch (Exception $e) {
       $this->error = OAuthError::$BAD_OAUTH_CONFIGURATION;
       return $this->buildErrorResponse($e);
     }
-    $this->realRequest = $request;
     $response = $this->fetchRequest($request);
     return $response;
   }
@@ -235,6 +235,7 @@ class OAuthFetcher extends RemoteContentFetcher {
    * @return RemoteContentRequest
    */
   public function fetchRequest(RemoteContentRequest $request) {
+  	$this->realRequest = $request;
     $this->checkCanApprove();
     if ($this->needApproval()) {
       // This is section 6.1 of the OAuth spec.
@@ -303,9 +304,10 @@ class OAuthFetcher extends RemoteContentFetcher {
       self::addIdentityParams($msgParams, $request->getToken());
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
-      $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
-      $accessor->requestToken = $reply->get_parameter(OAuth::$OAUTH_TOKEN);
-      $accessor->tokenSecret = $reply->get_parameter(OAuth::$OAUTH_TOKEN_SECRET);
+      $reply->requireParameters(array(ShindigOAuth::$OAUTH_TOKEN,
+          ShindigOAuth::$OAUTH_TOKEN_SECRET));
+      $accessor->requestToken = $reply->get_parameter(ShindigOAuth::$OAUTH_TOKEN);
+      $accessor->tokenSecret = $reply->get_parameter(ShindigOAuth::$OAUTH_TOKEN_SECRET);
     } catch (Exception $e) {
       // It's unfortunate the OAuth libraries throw a generic Exception.
       throw new GadgetException($e);
@@ -320,14 +322,14 @@ class OAuthFetcher extends RemoteContentFetcher {
       throw new Exception("params was null in " . "newRequestMessage " . "Use newRequesMessage if you don't have a params to pass");
     }
     switch ($this->accessorInfo->getSignatureType()) {
-      case OAuth::$RSA_SHA1:
-        $params[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$RSA_SHA1;
+      case ShindigOAuth::$RSA_SHA1:
+        $params[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] = ShindigOAuth::$RSA_SHA1;
         break;
       case "PLAINTEXT":
-        $params[OAuth::$OAUTH_SIGNATURE_METHOD] = "PLAINTEXT";
+        $params[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] = "PLAINTEXT";
         break;
       default:
-        $params[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$HMAC_SHA1;
+        $params[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] = ShindigOAuth::$HMAC_SHA1;
     }
     $accessor = $this->accessorInfo->getAccessor();
     return $accessor->newRequestMessage($method, $url, $params);
@@ -372,7 +374,7 @@ class OAuthFetcher extends RemoteContentFetcher {
       } else {
         $first = false;
       }
-      $result .= OAuthUtil::urlencodeRFC3986($key) . "=\"" . OAuthUtil::urlencodeRFC3986($val) . '"';
+      $result .= ShindigOAuthUtil::urlencode_rfc3986($key) . "=\"" . ShindigOAuthUtil::urlencode_rfc3986($val) . '"';
     }
     return $result;
   }
@@ -395,18 +397,18 @@ class OAuthFetcher extends RemoteContentFetcher {
         break;
 
       case OAuthStoreVars::$OAuthParamLocation['POST_BODY']:
-        if (! OAuthUtil::isFormEncoded($contentType)) {
+        if (! ShindigOAuthUtil::isFormEncoded($contentType)) {
           throw new GadgetException("Invalid param: OAuth param location can only " . "be post_body if post body if of type x-www-form-urlencoded");
         }
         if (! isset($postBody) || count($postBody) == 0) {
-          $postBody = OAuthUtil::getPostBodyString($oauthParams);
+          $postBody = ShindigOAuthUtil::getPostBodyString($oauthParams);
         } else {
-          $postBody = $postBody . "&" . OAuthUtil::getPostBodyString($oauthParams);
+          $postBody = $postBody . "&" . ShindigOAuthUtil::getPostBodyString($oauthParams);
         }
         break;
 
       case OAuthStoreVars::$OAuthParamLocation['URI_QUERY']:
-        $url = OAuthUtil::addParameters($url, $oauthParams);
+        $url = ShindigOAuthUtil::addParameters($url, $oauthParams);
         break;
     }
     $postBodyBytes = ($postBody == null) ? null : null; //$postBody->getBytes("UTF-8"); //See what can we do with this?
@@ -418,15 +420,15 @@ class OAuthFetcher extends RemoteContentFetcher {
   /**
    * Sends OAuth request token and access token messages.
    */
-  private function sendOAuthMessage(OAuthRequest $request) {
+  private function sendOAuthMessage(ShindigOAuthRequest $request) {
     $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($request), $request->get_normalized_http_method(), $request->get_url(), null, RemoteContentRequest::$DEFAULT_CONTENT_TYPE, null, RemoteContentRequest::getDefaultOptions());
     $rcr->setToken($this->authToken);
 
     $remoteFetcherClass = Config::get('remote_content_fetcher');
     $fetcher = new $remoteFetcherClass();
     $content = $fetcher->fetchRequest($rcr);
-    $reply = OAuthRequest::from_request();
-    $params = OAuthUtil::decodeForm($content->getResponseContent());
+    $reply = ShindigOAuthRequest::from_request();
+    $params = ShindigOAuthUtil::decodeForm($content->getResponseContent());
     $reply->set_parameters($params);
     return $reply;
   }
@@ -461,9 +463,9 @@ class OAuthFetcher extends RemoteContentFetcher {
     } else {
       $authUrl .= "&";
     }
-    $authUrl .= OAuth::$OAUTH_TOKEN;
+    $authUrl .= ShindigOAuth::$OAUTH_TOKEN;
     $authUrl .= "=";
-    $authUrl .= OAuthUtil::urlencodeRFC3986($accessor->requestToken);
+    $authUrl .= ShindigOAuthUtil::urlencode_rfc3986($accessor->requestToken);
     $this->aznUrl = $authUrl;
   }
 
@@ -482,13 +484,14 @@ class OAuthFetcher extends RemoteContentFetcher {
       $accessor = $this->accessorInfo->getAccessor();
       $url = $accessor->consumer->callback_url->accessTokenURL;
       $msgParams = array();
-      $msgParams[OAuth::$OAUTH_TOKEN] = $accessor->requestToken;
+      $msgParams[ShindigOAuth::$OAUTH_TOKEN] = $accessor->requestToken;
       self::addIdentityParams($msgParams, $request->getToken());
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
-      $reply->requireParameters(array(OAuth::$OAUTH_TOKEN, OAuth::$OAUTH_TOKEN_SECRET));
-      $accessor->accessToken = $reply->get_parameter(OAuth::$OAUTH_TOKEN);
-      $accessor->tokenSecret = $reply->get_parameter(OAuth::$OAUTH_TOKEN_SECRET);
+      $reply->requireParameters(array(ShindigOAuth::$OAUTH_TOKEN,
+          ShindigOAuth::$OAUTH_TOKEN_SECRET));
+      $accessor->accessToken = $reply->get_parameter(ShindigOAuth::$OAUTH_TOKEN);
+      $accessor->tokenSecret = $reply->get_parameter(ShindigOAuth::$OAUTH_TOKEN_SECRET);
     } catch (Exception $e) {
       // It's unfortunate the OAuth libraries throw a generic Exception.
       throw new GadgetException("INTERNAL SERVER ERROR: " . $e);
@@ -528,7 +531,7 @@ class OAuthFetcher extends RemoteContentFetcher {
    */
   private function fetchData() {
     try {
-      $msgParams = OAuthUtil::isFormEncoded($this->realRequest->getContentType()) ? OAuthUtil::urldecodeRFC3986($this->realRequest->getPostBody()) : array();
+      $msgParams = ShindigOAuthUtil::isFormEncoded($this->realRequest->getContentType()) ? ShindigOAuthUtil::urldecode_rfc3986($this->realRequest->getPostBody()) : array();
       $method = $this->realRequest->getMethod();
       $msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
       // Build and sign the message.
@@ -541,8 +544,8 @@ class OAuthFetcher extends RemoteContentFetcher {
       $statusCode = $content->getHttpCode();
       if ($statusCode >= 400 && $statusCode < 500) {
         $message = $this->parseAuthHeader(null, $content);
-        if ($message->get_parameter(OAuth::$OAUTH_PROBLEM) != null) {
-          throw new OAuthProtocolException($message);
+        if ($message->get_parameter(ShindigOAuth::$OAUTH_PROBLEM) != null) {
+          throw new ShindigOAuthProtocolException($message);
         }
       }
       // Track metadata on the response
@@ -561,13 +564,13 @@ class OAuthFetcher extends RemoteContentFetcher {
    * @param resp
    * @return the updated message.
    */
-  private function parseAuthHeader(OAuthRequest $msg = null, RemoteContentRequest $resp) {
+  private function parseAuthHeader(ShindigOAuthRequest $msg = null, RemoteContentRequest $resp) {
     if ($msg == null) {
-      $msg = OAuthRequest::from_request();
+      $msg = ShindigOAuthRequest::from_request();
     }
     $authHeaders = $resp->getResponseHeader("WWW-Authenticate");
     if ($authHeaders != null) {
-      $msg->set_parameters(OAuthUtil::decodeAuthorization($authHeaders));
+      $msg->set_parameters(ShindigOAuthUtil::decodeAuthorization($authHeaders));
     }
     return $msg;
   }

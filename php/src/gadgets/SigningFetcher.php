@@ -55,38 +55,16 @@ class SigningFetcher extends RemoteContentFetcher {
   private $fetcher;
 
   /**
-   * Constructor based on signing with the given PrivateKey object.
+   * Constructor based on signing with the given PrivateKey object, as returned
+   * from the openssl_pkey_get_private method.
    *
    * @param RemoteContentFetcher $fetcher
    * @param keyName name of the key to include in the request
-   * @param privateKey the key to use for the signing
+   * @param privateKey A key resource identifier, as returned from
+   *     openssl_pkey_get_private
    * @return SigningFetcher
    */
-  public static function makeFromPrivateKey(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
-    return new SigningFetcher($fetcher, $keyName, $privateKey);
-  }
-
-  /**
-   * Constructor based on signing with the given PrivateKey object.
-   *
-   * @param RemoteContentFetcher $fetcher
-   * @param keyName name of the key to include in the request
-   * @param privateKey base64 encoded private key
-   * @return SigningFetcher
-   */
-  public static function makeFromB64PrivateKey(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
-    return new SigningFetcher($fetcher, $keyName, $privateKey);
-  }
-
-  /**
-   * Constructor based on signing with the given PrivateKey object.
-   *
-   * @param RemoteContentFetcher $fetcher
-   * @param keyName name of the key to include in the request
-   * @param privateKey DER encoded private key
-   * @return SigningFetcher
-   */
-  public static function makeFromPrivateKeyBytes(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
+  public static function makeFromOpenSslPrivateKey(RemoteContentFetcher $fetcher, $keyName, $privateKey) {
     return new SigningFetcher($fetcher, $keyName, $privateKey);
   }
 
@@ -149,8 +127,7 @@ class SigningFetcher extends RemoteContentFetcher {
       $this->addOpenSocialParams($msgParams, $request->getToken(), $request->getOptions()->ownerSigned, $request->getOptions()->viewerSigned);
       $this->addOAuthParams($msgParams, $request->getToken());
       $consumer = new OAuthConsumer(NULL, NULL, NULL);
-      $consumer->setProperty(OAuthSignatureMethod_RSA_SHA1::$PRIVATE_KEY, $this->privateKeyObject);
-      $signatureMethod = new OAuthSignatureMethod_RSA_SHA1();
+      $signatureMethod = new ShindigRsaSha1SignatureMethod($this->privateKeyObject, null);
       $req_req = OAuthRequest::from_consumer_and_token($consumer, NULL, $method, $resource, $msgParams);
       $req_req->sign_request($signatureMethod, $consumer, NULL);
       // Rebuild the query string, including all of the parameters we added.
@@ -165,7 +142,7 @@ class SigningFetcher extends RemoteContentFetcher {
           if ($postData === false) {
             $postData = array();
           }
-          $postData[] = OAuthUtil::urlencodeRFC3986($key) . "=" . OAuthUtil::urlencodeRFC3986($param);
+          $postData[] = OAuthUtil::urlencode_rfc3986($key) . "=" . OAuthUtil::urlencode_rfc3986($param);
         }
         if ($postData !== false) {
           $postData = implode("&", $postData);
@@ -224,20 +201,20 @@ class SigningFetcher extends RemoteContentFetcher {
   }
 
   private function addOAuthParams(&$msgParams, SecurityToken $token) {
-    $msgParams[OAuth::$OAUTH_TOKEN] = '';
+    $msgParams[ShindigOAuth::$OAUTH_TOKEN] = '';
     $domain = $token->getDomain();
     if ($domain != null) {
-      $msgParams[OAuth::$OAUTH_CONSUMER_KEY] = $domain;
+      $msgParams[ShindigOAuth::$OAUTH_CONSUMER_KEY] = $domain;
     }
     if ($this->keyName != null) {
       $msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY_OLD] = $this->keyName;
       $msgParams[SigningFetcher::$XOAUTH_PUBLIC_KEY_NEW] = $this->keyName;
     }
-    $nonce = OAuthRequest::generate_nonce();
-    $msgParams[OAuth::$OAUTH_NONCE] = $nonce;
+    $nonce = ShindigOAuthRequest::generate_nonce();
+    $msgParams[ShindigOAuth::$OAUTH_NONCE] = $nonce;
     $timestamp = time();
-    $msgParams[OAuth::$OAUTH_TIMESTAMP] = $timestamp;
-    $msgParams[OAuth::$OAUTH_SIGNATURE_METHOD] = OAuth::$RSA_SHA1;
+    $msgParams[ShindigOAuth::$OAUTH_TIMESTAMP] = $timestamp;
+    $msgParams[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] = ShindigOAuth::$RSA_SHA1;
   }
 
   /**

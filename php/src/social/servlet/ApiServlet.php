@@ -41,7 +41,7 @@ require 'src/social/model/Photo.php';
 require 'src/social/spi/RestfulCollection.php';
 require 'src/social/spi/DataCollection.php';
 require 'src/social/service/ResponseItem.php';
-require 'src/social/oauth/OAuth.php';
+require 'src/common/ShindigOAuth.php';
 
 /**
  * Common base class for API servlets.
@@ -59,6 +59,7 @@ abstract class ApiServlet extends HttpServlet {
   public static $SYSTEM_ROUTE = "system";
   public static $ALBUM_ROUTE = "albums";
   public static $MEDIA_ITEM_ROUTE = "mediaitems";
+  public static $HTTP_ROUTE = "http";
 
   public function __construct() {
     parent::__construct();
@@ -189,6 +190,10 @@ abstract class ApiServlet extends HttpServlet {
           require_once 'src/social/service/MediaItemHandler.php';
           $this->handlers[self::$MEDIA_ITEM_ROUTE] = new MediaItemHandler();
           break;
+        case self::$HTTP_ROUTE:
+           require_once 'src/social/service/HttpHandler.php';
+           $this->handlers[self::$HTTP_ROUTE] = new HttpHandler();
+           break;
         default:
           throw new SocialSpiException("The service " . $requestItem->getService() . " is not implemented", ResponseError::$NOT_IMPLEMENTED);
           break;

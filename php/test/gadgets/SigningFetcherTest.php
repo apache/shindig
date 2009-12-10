@@ -18,7 +18,7 @@
  * under the License.
  */
 
-require_once 'src/gadgets/oauth/OAuth.php';
+require_once 'src/common/ShindigOAuth.php';
 
 class MockSignatureMethod extends OAuthSignatureMethod_RSA_SHA1 {
   protected function fetch_public_cert(&$request) {
@@ -81,7 +81,7 @@ Cgpm3sdinamuC5b40tVhFhrfZyfUlqmssjU1nOsbnS+EqFgQJimbDg==
 EOD;
     $rsa_private_key = @openssl_pkey_get_private($private_key, 'shindig');
     $basicFetcher = $this->getMock('RemoteContentFetcher');
-    $this->signingFetcher = SigningFetcher::makeFromPrivateKey($basicFetcher, 'http://shindig/public.cer', $rsa_private_key);
+    $this->signingFetcher = SigningFetcher::makeFromOpenSslPrivateKey($basicFetcher, 'http://shindig/public.cer', $rsa_private_key);
   }
 
   /**

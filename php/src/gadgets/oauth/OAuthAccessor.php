@@ -53,16 +53,17 @@ class OAuthAccessor {
         }
       }
     }
-    $message = OAuthRequest::from_consumer_and_token($this->consumer, $this->accessToken, $method, $url, $parameters);
+    $token = new OAuthToken($this->accessToken, $this->tokenSecret);
+    $message = ShindigOAuthRequest::from_consumer_and_token($this->consumer, $token, $method, $url, $parameters);
     $signatureMethod = null;
-    if ($parameters[OAuth::$OAUTH_SIGNATURE_METHOD] == OAuth::$RSA_SHA1) {
+    if ($parameters[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] == ShindigOAuth::$RSA_SHA1) {
       $signatureMethod = new OAuthSignatureMethod_RSA_SHA1();
-    } else if ($parameters[OAuth::$OAUTH_SIGNATURE_METHOD] == OAuth::$HMAC_SHA1) {
+    } else if ($parameters[ShindigOAuth::$OAUTH_SIGNATURE_METHOD] == ShindigOAuth::$HMAC_SHA1) {
       $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
     } else { //PLAINTEXT
       $signatureMethod = new OAuthSignatureMethod_PLAINTEXT();
     }
-    $message->sign_request($signatureMethod, $this->consumer, $this->tokenSecret);
+    $message->sign_request($signatureMethod, $this->consumer, $token);
     return $message;
   }
 

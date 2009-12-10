@@ -35,7 +35,7 @@ class MockSigningFetcherFactory {
    * @throws GadgetException
    */
   public function getSigningFetcher(RemoteContentFetcher $networkFetcher) {
-    return SigningFetcher::makeFromB64PrivateKey($networkFetcher, $this->keyName, $this->privateKey);
+    return SigningFetcher::makeFromOpenSslPrivateKey($networkFetcher, $this->keyName, $this->privateKey);
   }
 
   /**
