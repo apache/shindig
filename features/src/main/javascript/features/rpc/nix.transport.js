@@ -63,6 +63,8 @@ gadgets.rpctx = gadgets.rpctx || {};
  *     - Internet Explorer 6
  *     - Internet Explorer 7
  */
+if (!gadgets.rpctx.nix) {  // make lib resilient to double-inclusion
+
 gadgets.rpctx.nix = function() {
   // Consts for NIX. VBScript doesn't
   // allow items to start with _ for some reason,
@@ -276,3 +278,5 @@ gadgets.rpctx.nix = function() {
     }
   };
 }();
+
+} // !end of double-inclusion guard

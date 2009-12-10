@@ -41,6 +41,8 @@ gadgets.rpctx = gadgets.rpctx || {};
  *   fe: Gecko-specific frameElement trick.
  *      - Firefox 1+
  */
+if (!gadgets.rpctx.frameElement) {  // make lib resilient to double-inclusion
+
 gadgets.rpctx.frameElement = function() {
   // Consts for FrameElement.
   var FE_G2C_CHANNEL = '__g2c_rpc';
@@ -132,3 +134,5 @@ gadgets.rpctx.frameElement = function() {
 
   };
 }();
+
+} // !end of double-inclusion guard

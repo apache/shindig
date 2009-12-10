@@ -42,6 +42,8 @@ gadgets.rpctx = gadgets.rpctx || {};
  *      - Firefox 3+
  *      - Opera 9+
  */
+if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
+
 gadgets.rpctx.wpm = function() {
   var ready;
 
@@ -96,3 +98,5 @@ gadgets.rpctx.wpm = function() {
     }
   };
 }();
+
+} // !end of double-inclusion guard

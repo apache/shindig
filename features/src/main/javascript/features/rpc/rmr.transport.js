@@ -41,6 +41,8 @@ gadgets.rpctx = gadgets.rpctx || {};
  *      - Safari 2+
  *      - Chrome 1
  */
+if (!gadgets.rpctx.rmr) {  // make lib resilient to double-inclusion
+
 gadgets.rpctx.rmr = function() {
   // Consts for RMR, including time in ms RMR uses to poll for
   // its relay frame to be created, and the max # of polls it does.
@@ -511,3 +513,5 @@ gadgets.rpctx.rmr = function() {
     }
   };
 }();
+
+} // !end of double-inclusion guard

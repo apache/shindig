@@ -58,6 +58,8 @@ var gadgets = gadgets || {};
  * @class Provides operations for making rpc calls.
  * @name gadgets.rpc
  */
+if (!gadgets.rpc) { // make lib resilient to double-inclusion
+
 gadgets.rpc = function() {
   // General constants.
   var CALLBACK_NAME = '__cb';
@@ -829,3 +831,5 @@ gadgets.rpc = function() {
 
 // Initialize library/transport.
 gadgets.rpc.init();
+
+} // !end of double-inclusion guard

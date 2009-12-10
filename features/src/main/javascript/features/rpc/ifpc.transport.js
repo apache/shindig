@@ -35,6 +35,8 @@ gadgets.rpctx = gadgets.rpctx || {};
  *      - No known major browsers still use this method, but it remains
  *        useful as a catch-all fallback for the time being.
  */
+if (!gadgets.rpctx.ifpc) {  // make lib resilient to double-inclusion
+
 gadgets.rpctx.ifpc = function() {
   var iframePool = [];
   var callId = 0;
@@ -154,3 +156,5 @@ gadgets.rpctx.ifpc = function() {
     }
   };
 }();
+
+} // !end of double inclusion guard
