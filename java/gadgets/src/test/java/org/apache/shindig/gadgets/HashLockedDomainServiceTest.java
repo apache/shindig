@@ -31,6 +31,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -74,9 +76,8 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     return new Gadget().setSpec(spec).setGadgetFeatureRegistry(registry);
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     expect(requiredConfig.getString(ContainerConfig.DEFAULT_CONTAINER,
         LOCKED_DOMAIN_SUFFIX_KEY)).andReturn("-a.example.com:8080").anyTimes();
     expect(requiredConfig.getBool(ContainerConfig.DEFAULT_CONTAINER,
@@ -96,6 +97,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
   }
 
 
+  @Test
   public void testDisabledGlobally() {
     replay();
 
@@ -116,6 +118,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertTrue(lockedDomainService.gadgetCanRender("embed.com", wantsBoth, "default"));
   }
 
+  @Test
   public void testEnabledForGadget() {
     replay();
 
@@ -151,6 +154,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertEquals("h2nlf2a2dqou2lul3n50jb4v7e8t34kc-a.example.com:8080", target);
   }
 
+  @Test
   public void testNotEnabledForGadget() {
     replay();
 
@@ -168,6 +172,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertNull(lockedDomainService.getLockedDomainForGadget(notLocked, "default"));
   }
 
+  @Test
   public void testRequiredForContainer() {
     replay();
 
@@ -196,6 +201,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
 
   }
 
+  @Test
   public void testMissingConfig() throws Exception {
     ContainerConfig containerMissingConfig = mock(ContainerConfig.class);
     expect(containerMissingConfig.getContainers())
@@ -207,6 +213,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     assertTrue(lockedDomainService.gadgetCanRender("www.example.com", notLocked, "default"));
   }
 
+  @Test
   public void testMultiContainer() throws Exception {
     ContainerConfig inheritsConfig  = mock(ContainerConfig.class);
     expect(inheritsConfig.getContainers())

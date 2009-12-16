@@ -37,6 +37,8 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import junitx.framework.StringAssert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -71,9 +73,8 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   private final FakeContainerConfig config = new FakeContainerConfig();
   private UrlGenerator urlGenerator;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getUrl()).andReturn(Uri.parse(SPEC_URL)).anyTimes();
     Map<String, String> prefMap = Maps.newHashMap();
@@ -97,6 +98,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     reset(registry);
   }
 
+  @Test
   public void testGetBundledJsParamWithGoodFeatureName() throws Exception {
     List<String> features = ImmutableList.of(
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -113,6 +115,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
         CONTAINER + "&debug=1"));
   }
 
+  @Test
   public void testGetBundledJsParamWithBadFeatureName() throws Exception {
     List<String> features = Lists.newArrayList();
     features.add("foo!");
@@ -125,6 +128,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     assertTrue(jsParam.matches("bar\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=1"));
   }
 
+  @Test
   public void testGetBundledJsParamWithNoFeatures() throws Exception {
     List<String> features = Lists.newArrayList();
     expect(context.getDebug()).andReturn(false);
@@ -135,6 +139,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     assertTrue(jsParam.matches("core\\.js\\?v=[0-9a-zA-Z]*&container=" + CONTAINER + "&debug=0"));
   }
 
+  @Test
   public void testGetBundledJsUrl() throws Exception {
     List<String> features = Arrays.asList("foo", "bar");
     expect(context.getDebug()).andReturn(false);
@@ -152,6 +157,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     assertEquals("0", uri.getQueryParameter("debug"));
   }
 
+  @Test
   public void testGetIframeUrlTypeHtml() throws Exception {
     String xml
         = "<Module>" +
@@ -176,6 +182,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     assertEquals(VIEW, iframeUrl.getQueryParameter("view"));
   }
 
+  @Test
   public void testGetIframeUrlTypeHtmlWithLockedDomain() throws Exception {
     String xml
         = "<Module>" +
@@ -204,6 +211,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
     assertEquals(VIEW, iframeUrl.getQueryParameter("view"));
   }
 
+  @Test
   public void testGetIframeUrlTypeUrl() throws Exception {
     String xml
         = "<Module>" +

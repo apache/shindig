@@ -24,12 +24,13 @@ import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
+import org.junit.Assert;
+import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class GadgetSpecTest extends TestCase {
+public class GadgetSpecTest extends Assert {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
 
+  @Test
   public void testBasic() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\"/>" +
@@ -43,6 +44,8 @@ public class GadgetSpecTest extends TestCase {
     assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
+
+  @Test
   public void testAlternativeConstructor() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\"/>" +
@@ -58,6 +61,7 @@ public class GadgetSpecTest extends TestCase {
     assertEquals(HashUtil.checksum(xml.getBytes()), spec.getChecksum());
   }
 
+  @Test
   public void testMultipleContentSections() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"title\"/>" +
@@ -71,6 +75,7 @@ public class GadgetSpecTest extends TestCase {
     assertEquals("test", spec.getView("test").getContent());
   }
 
+  @Test
   public void testMissingModulePrefs() throws Exception {
     String xml = "<Module>" +
                  "<Content type=\"html\"/>" +
@@ -83,6 +88,7 @@ public class GadgetSpecTest extends TestCase {
     }
   }
 
+  @Test
   public void testEnforceOneModulePrefs() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"hello\"/>" +
@@ -97,6 +103,7 @@ public class GadgetSpecTest extends TestCase {
     }
   }
 
+  @Test
   public void testSubstitutions() throws Exception {
     Substitutions substituter = new Substitutions();
     String title = "Hello, World!";

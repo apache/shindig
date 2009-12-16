@@ -17,35 +17,42 @@
  */
 package org.apache.shindig.social.opensocial.util;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.xml.XmlException;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests the XSDValidator
  */
-public class XSDValidatorTest extends TestCase {
+public class XSDValidatorTest extends Assert {
 
   /**
    * Check that the XSDValidator is working correctly by testing for pass and fail
    * @throws XmlException
    */
+  @Test
   public void testValidator() throws XmlException {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testschema1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
     assertNotSame("", XSDValidator.validate(this.getClass().getResourceAsStream("testschema1bad.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
-  
+
+  @Test
   public void testPerson1() throws XmlException {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/person1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
+
+  @Test
   public void testActivity1() throws XmlException {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/activity1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
+
+  @Test
   public void testAppdata1() throws XmlException {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/appdata1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
+
+  @Test
   public void testGroup1() throws XmlException {
     assertEquals("", XSDValidator.validate(this.getClass().getResourceAsStream("testxml/group1.xml"),this.getClass().getResourceAsStream("opensocial.xsd")));
   }
-
 }

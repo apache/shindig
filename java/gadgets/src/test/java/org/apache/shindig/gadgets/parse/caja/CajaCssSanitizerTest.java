@@ -23,6 +23,8 @@ import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 
 import com.google.caja.parser.css.CssTree;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
@@ -35,23 +37,23 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
   private LinkRewriter importRewriter;
   private LinkRewriter imageRewriter;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     parser = new CajaCssParser();
     sanitizer = new CajaCssSanitizer(parser);
     importRewriter = new LinkRewriter() {
       public String rewrite(String link, Uri context) {
-        return link + "&" + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=text/css";
+        return link + '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=text/css";
       }
     };
     imageRewriter = new LinkRewriter() {
       public String rewrite(String link, Uri context) {
-        return link + "&" + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=image/*";
+        return link + '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=image/*";
       }
     };
   }
 
+  @Test
   public void testPreserveSafe() throws Exception {
     String css = ".xyz { font: bold;} A { color: #7f7f7f}";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
@@ -59,6 +61,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     assertStyleEquals(css, styleSheet);
   }
 
+  @Test
   public void testSanitizeFunctionCall() throws Exception {
     String css = ".xyz { font : iamevil(bold); }";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
@@ -66,6 +69,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     assertStyleEquals(".xyz {}", styleSheet);
   }
 
+  @Test
    public void testSanitizeUnsafeProperties() throws Exception {
     String css = ".xyz { behavior: url('xyz.htc'); -moz-binding:url(\"http://ha.ckers.org/xssmoz.xml#xss\") }";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
@@ -73,6 +77,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     assertStyleEquals(".xyz {}", styleSheet);
   }
 
+  @Test
   public void testSanitizeScriptUrls() throws Exception {
     String css = ".xyz { background: url('javascript:doevill'); background : url(vbscript:moreevil); }";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
@@ -80,6 +85,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     assertStyleEquals(".xyz {}", styleSheet);
   }
 
+  @Test
   public void testProxyUrls() throws Exception {
     String css = ".xyz { background: url('http://www.example.org/img.gif');}";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
@@ -88,12 +94,13 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
         ".xyz { background: url('http://www.example.org/img.gif&sanitize=1&rewriteMime=image/*');}", styleSheet);
   }
 
+  @Test
   public void testUrlEscaping() throws Exception {
     String css = ".xyz { background: url('http://www.example.org/img.gif');}";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, importRewriter, imageRewriter);
-    assertEquals(parser.serialize(styleSheet).replaceAll("\\s", ""),
-        ".xyz{background:url('http://www.example.org/img.gif%26sanitize%3D1%26rewriteMime%3Dimage/%2A');}");
+    assertEquals(".xyz{background:url('http://www.example.org/img.gif%26sanitize%3D1%26rewriteMime%3Dimage/%2A');}",
+        parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
 
   public void assertStyleEquals(String expected, CssTree.StyleSheet styleSheet) throws Exception {

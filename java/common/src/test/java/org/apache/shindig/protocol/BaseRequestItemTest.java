@@ -27,20 +27,24 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
-import junit.framework.TestCase;
+
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test BaseRequestItem
  */
-public class BaseRequestItemTest extends TestCase {
+public class BaseRequestItemTest extends Assert {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
 
   protected BaseRequestItem request;
   protected BeanJsonConverter converter;
 
-  @Override protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     FAKE_TOKEN.setAppId("12345");
     FAKE_TOKEN.setOwnerId("someowner");
     FAKE_TOKEN.setViewerId("someowner");
@@ -50,12 +54,13 @@ public class BaseRequestItemTest extends TestCase {
         FAKE_TOKEN, converter, converter);
   }
 
-
+  @Test
   public void testParseCommaSeparatedList() throws Exception {
     request.setParameter("fields", "huey,dewey,louie");
     assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
   }
 
+  @Test
   public void testGetAppId() throws Exception {
     request.setParameter("appId", "100");
     assertEquals("100", request.getAppId());
@@ -64,6 +69,7 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(FAKE_TOKEN.getAppId(), request.getAppId());
   }
 
+  @Test
   public void testStartIndex() throws Exception {
     request.setParameter("startIndex", null);
     assertEquals(RequestItem.DEFAULT_START_INDEX, request.getStartIndex());
@@ -72,6 +78,7 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(5, request.getStartIndex());
   }
 
+  @Test
   public void testCount() throws Exception {
     request.setParameter("count", null);
     assertEquals(RequestItem.DEFAULT_COUNT, request.getCount());
@@ -80,6 +87,7 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(5, request.getCount());
   }
 
+  @Test
   public void testSortOrder() throws Exception {
     request.setParameter("sortOrder", null);
     assertEquals(SortOrder.ascending, request.getSortOrder());
@@ -88,6 +96,7 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(SortOrder.descending, request.getSortOrder());
   }
 
+  @Test
   public void testFields() throws Exception {
     request.setParameter("fields", "");
     assertEquals(Sets.<String>newHashSet(), request.getFields());
@@ -96,13 +105,15 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(Sets.newHashSet("happy", "sad", "grumpy"), request.getFields());
   }
 
+  @Test
   public void testGetTypedParameter() throws Exception {
     request.setParameter("anykey", "{name: 'Bob', id: '1234'}");
     InputData input = request.getTypedParameter("anykey", InputData.class);
     assertEquals("Bob", input.name);
     assertEquals(1234, input.id);
   }
-  
+
+  @Test
   public void testGetInvalidJsonTypedParameter() throws Exception {
     request.setParameter("anykey", "{name: 'Bob");
     int code = 0;
@@ -114,19 +125,21 @@ public class BaseRequestItemTest extends TestCase {
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, code);
   }
 
+  @Test
   public void testJSONConstructor() throws Exception {
-    request = new BaseRequestItem(new JSONObject("{" +
+    request = new BaseRequestItem(new JSONObject('{' +
             "userId:john.doe," +
             "groupId:@self," +
             "fields:[huey,dewey,louie]" +
-            "}"), null, FAKE_TOKEN, converter, converter);
+        '}'), null, FAKE_TOKEN, converter, converter);
     assertEquals(Lists.newArrayList("huey", "dewey", "louie"), request.getListParameter("fields"));
   }
 
+  @Test
   public void testAttributes() throws Exception {
     assertNull(request.getAttribute("undefined"));
     request.setAttribute("test", "value");
-    assertEquals((String)request.getAttribute("test"), "value");
+    assertEquals("value", request.getAttribute("test"));
     request.setAttribute("test", null);
     assertNull(request.getAttribute("undefined"));
   }
@@ -144,4 +157,3 @@ public class BaseRequestItemTest extends TestCase {
     }
   }
 }
-

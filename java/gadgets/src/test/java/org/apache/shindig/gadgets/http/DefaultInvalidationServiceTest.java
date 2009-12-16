@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
@@ -27,15 +26,16 @@ import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
 
 import com.google.common.collect.ImmutableSet;
 
-import junit.framework.TestCase;
-
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class DefaultInvalidationServiceTest extends TestCase {
+public class DefaultInvalidationServiceTest extends Assert {
 
   private static final Uri URI = Uri.parse("http://www.example.org/spec.xml");
   private static final HttpResponse CACHEABLE = new HttpResponseBuilder()
@@ -55,7 +55,7 @@ public class DefaultInvalidationServiceTest extends TestCase {
   HttpRequest signedRequest;
 
 
-  @Override
+  @Before
   public void setUp() {
     cacheProvider = new LruCacheProvider(100);
     cache = new DefaultHttpCache(cacheProvider);
@@ -85,21 +85,23 @@ public class DefaultInvalidationServiceTest extends TestCase {
         service);
   }
 
+  @Test
   public void testInvalidateUrl() throws Exception {
     cache.addResponse(new HttpRequest(URI), CACHEABLE);
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
     service.invalidateApplicationResources(
         ImmutableSet.of(URI),
         appxToken);
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 0);
+    assertEquals(0, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
   }
 
+  @Test
   public void testInvalidateUsers() throws Exception {
     service.invalidateUserResources(ImmutableSet.of("example.org:1", "example.org:2"),
         appxToken);
     service.invalidateUserResources(ImmutableSet.of("example.org:1", "example.org:2"),
         appyToken);
-    assertEquals(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME).getSize(), 4);
+    assertEquals(4, cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME).getSize());
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
         .getElement("INV_TOK:AppX:1"));
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
@@ -108,14 +110,15 @@ public class DefaultInvalidationServiceTest extends TestCase {
         .getElement("INV_TOK:AppY:1"));
     assertNotNull(cacheProvider.createCache(DefaultInvalidationService.CACHE_NAME)
         .getElement("INV_TOK:AppY:2"));
-
   }
 
+  @Test
   public void testFetchWithInvalidationEnabled() throws Exception {
     cache.addResponse(new HttpRequest(URI), CACHEABLE);
-    assertEquals(requestPipeline.execute(new HttpRequest(URI)), CACHEABLE);
+    assertEquals(CACHEABLE, requestPipeline.execute(new HttpRequest(URI)));
   }
 
+  @Test
   public void testFetchInvalidatedContent() throws Exception {
     // Prime the cache
     cache.addResponse(new HttpRequest(URI), CACHEABLE);
@@ -130,13 +133,14 @@ public class DefaultInvalidationServiceTest extends TestCase {
     assertEquals(requestPipeline.execute(new HttpRequest(URI)), fetcher.response);
   }
 
+  @Test
   public void testFetchContentWithMarker() throws Exception {
     oauth.httpResponse = CACHEABLE;
 
     // First entry added to cache is unmarked
     HttpResponse httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse, CACHEABLE);
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals(CACHEABLE, httpResponse);
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
 
     // Invalidate content for OwnerX. Next entry will have owner mark
     service.invalidateUserResources(ImmutableSet.of("OwnerX"), appxToken);
@@ -144,27 +148,28 @@ public class DefaultInvalidationServiceTest extends TestCase {
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT1").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse.getResponseAsString(), "NEWCONTENT1");
-    assertEquals(httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER), "o=1;");
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals("NEWCONTENT1", httpResponse.getResponseAsString());
+    assertEquals("o=1;", httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER));
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
 
     // Invalidate content for ViewerX. Next entry will have both owner and viewer mark
     service.invalidateUserResources(ImmutableSet.of("ViewerX"), appxToken);
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT2").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse.getResponseAsString(), "NEWCONTENT2");
-    assertEquals(httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER),
-        "o=1;v=2;");
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals("NEWCONTENT2", httpResponse.getResponseAsString());
+    assertEquals("o=1;v=2;",
+        httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER));
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
   }
 
+  @Test
   public void testFetchContentSignedOwner() throws Exception {
     oauth.httpResponse = CACHEABLE;
     signedRequest.getOAuthArguments().setSignViewer(false);
     HttpResponse httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse, CACHEABLE);
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals(CACHEABLE, httpResponse);
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
 
     // Invalidate by owner only
     service.invalidateUserResources(ImmutableSet.of("OwnerX"), appxToken);
@@ -172,44 +177,46 @@ public class DefaultInvalidationServiceTest extends TestCase {
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT1").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse.getResponseAsString(), "NEWCONTENT1");
-    assertEquals(httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER), "o=1;");
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals("NEWCONTENT1", httpResponse.getResponseAsString());
+    assertEquals("o=1;", httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER));
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
 
     // Invalidating viewer has no effect
     service.invalidateUserResources(ImmutableSet.of("ViewerX"), appxToken);
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT2").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse.getResponseAsString(), "NEWCONTENT1");
-    assertEquals(httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER), "o=1;");
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals("NEWCONTENT1", httpResponse.getResponseAsString());
+    assertEquals("o=1;", httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER));
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
   }
 
+  @Test
   public void testFetchContentSignedViewer() throws Exception {
     oauth.httpResponse = CACHEABLE;
     signedRequest.getOAuthArguments().setSignOwner(false);
     HttpResponse httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse, CACHEABLE);
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals(CACHEABLE, httpResponse);
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
 
     // Invalidate by owner has no effect
     service.invalidateUserResources(ImmutableSet.of("OwnerX"), appxToken);
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT1").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse, CACHEABLE);
+    assertEquals(CACHEABLE, httpResponse);
 
     // Invalidate the viewer
     service.invalidateUserResources(ImmutableSet.of("ViewerX"), appxToken);
     oauth.httpResponse = new HttpResponseBuilder(CACHEABLE).setResponseString("NEWCONTENT2").
         create();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse.getResponseAsString(), "NEWCONTENT2");
-    assertEquals(httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER), "v=2;");
-    assertEquals(cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize(), 1);
+    assertEquals("NEWCONTENT2", httpResponse.getResponseAsString());
+    assertEquals("v=2;", httpResponse.getHeader(DefaultInvalidationService.INVALIDATION_HEADER));
+    assertEquals(1, cacheProvider.createCache(DefaultHttpCache.CACHE_NAME).getSize());
   }
 
+  @Test
   public void testServeInvalidatedContentWithFetcherError() throws Exception {
     oauth.httpResponse = CACHEABLE;
     HttpResponse httpResponse = requestPipeline.execute(signedRequest);
@@ -220,6 +227,6 @@ public class DefaultInvalidationServiceTest extends TestCase {
     // Next request returns error
     oauth.httpResponse = HttpResponse.error();
     httpResponse = requestPipeline.execute(signedRequest);
-    assertEquals(httpResponse, CACHEABLE);
+    assertEquals(CACHEABLE, httpResponse);
   }
 }

@@ -30,26 +30,27 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests for RpcServlet.
  */
-public class RpcServletTest extends TestCase {
+public class RpcServletTest extends Assert {
   private RpcServlet servlet;
   private JsonRpcHandler handler;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     servlet = new RpcServlet();
     handler = createMock(JsonRpcHandler.class);
     servlet.setJsonRpcHandler(handler);
   }
 
+  @Test
   public void testDoGetNormal() throws Exception {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}",
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._");
@@ -64,6 +65,7 @@ public class RpcServletTest extends TestCase {
     verify(response);
   }
 
+  @Test
   public void testDoGetWithHandlerRpcException() throws Exception {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", "function");
     HttpServletResponse response = createHttpResponse("rpcExceptionMessage",
@@ -75,6 +77,7 @@ public class RpcServletTest extends TestCase {
     verify(response);
   }
 
+  @Test
   public void testDoGetWithHandlerJsonException() throws Exception {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", "function");
     HttpServletResponse response = createHttpResponse("Malformed JSON request.",
@@ -85,6 +88,7 @@ public class RpcServletTest extends TestCase {
     verify(response);
   }
 
+  @Test
   public void testDoGetWithMissingReqParam() throws Exception {
     HttpServletRequest request = createGetRequest(null, "function");
     HttpServletResponse response = createHttpResponse(null, HttpServletResponse.SC_BAD_REQUEST);
@@ -92,6 +96,7 @@ public class RpcServletTest extends TestCase {
     verify(response);
   }
 
+  @Test
   public void testDoGetWithMissingCallbackParam() throws Exception {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", null);
     HttpServletResponse response = createHttpResponse(null, HttpServletResponse.SC_BAD_REQUEST);
@@ -99,6 +104,7 @@ public class RpcServletTest extends TestCase {
     verify(response);
   }
 
+  @Test
   public void testDoGetWithBadCallbackParamValue() throws Exception {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", "/'!=");
     HttpServletResponse response = createHttpResponse(null, HttpServletResponse.SC_BAD_REQUEST);
@@ -141,5 +147,4 @@ public class RpcServletTest extends TestCase {
     replay(result, writer);
     return result;
   }
-
 }

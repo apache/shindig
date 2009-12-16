@@ -19,25 +19,16 @@ package org.apache.shindig.common;
 
 import com.google.common.collect.Lists;
 
-import junit.framework.TestCase;
-
 import org.easymock.classextension.EasyMock;
+import org.junit.Assert;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 
-public abstract class EasyMockTestCase extends TestCase {
+public abstract class EasyMockTestCase extends Assert {
   /** Tracks all EasyMock objects created for a test. */
   private final List<Object> mocks = Lists.newArrayList();
-
-  public EasyMockTestCase() {
-    super();
-  }
-
-  public EasyMockTestCase(String name) {
-    super(name);
-  }
 
   /**
    * Creates a strict mock object for the given class, adds it to the internal

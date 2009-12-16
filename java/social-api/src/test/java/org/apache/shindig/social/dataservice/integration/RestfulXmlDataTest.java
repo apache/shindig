@@ -30,11 +30,6 @@ import com.google.common.collect.Maps;
 
 public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
   /**
    * Expected response for app data in json:
    *
@@ -44,7 +39,7 @@ public class RestfulXmlDataTest extends AbstractLargeRestfulTests {
    * "george.doe" : {"count" : "2"},
    * "maija.m" : {}, // TODO: Should this entry really be included if she
    * doesn't have any data? } }
-   *
+   *                   s
    * @throws Exception
    *           if test encounters an error
    */

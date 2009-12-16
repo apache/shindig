@@ -20,7 +20,9 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.common.uri.Uri;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,13 +30,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.PatternSyntaxException;
 
-public class BasicGadgetBlacklistTest extends TestCase {
+public class BasicGadgetBlacklistTest extends Assert {
 
   private Uri someUri;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     someUri = Uri.parse("http://bla.com/foo.xml");
   }
 
@@ -47,17 +48,20 @@ public class BasicGadgetBlacklistTest extends TestCase {
     return new BasicGadgetBlacklist(temp);
   }
 
+  @Test
   public void testEmptyBlacklist() throws Exception {
     GadgetBlacklist bl = createBlacklist("");
     assertFalse(bl.isBlacklisted(someUri));
   }
 
+  @Test
   public void testExactMatches() throws Exception {
     GadgetBlacklist bl = createBlacklist(someUri + "\nhttp://baz.com/foo.xml");
     assertFalse(bl.isBlacklisted(Uri.parse("http://random.com/uri.xml")));
     assertTrue(bl.isBlacklisted(someUri));
   }
 
+  @Test
   public void testExactMatchesWithCaseMixture() throws Exception {
     GadgetBlacklist bl = createBlacklist(someUri + "\nhttp://BAZ.com/foo.xml");
     assertTrue(bl.isBlacklisted(someUri));
@@ -65,12 +69,14 @@ public class BasicGadgetBlacklistTest extends TestCase {
     assertTrue(bl.isBlacklisted(Uri.parse("http://baz.com/foo.xml")));
   }
 
+  @Test
   public void testIgnoredCommentsAndWhitespace() throws Exception {
     GadgetBlacklist bl = createBlacklist(
         "# comment\n  \t" + someUri + " \n  # comment\n\n");
     assertTrue(bl.isBlacklisted(someUri));
   }
 
+  @Test
   public void testRegexpMatches() throws Exception {
     GadgetBlacklist bl = createBlacklist("REGEXP http://bla.com/.*");
     assertTrue(bl.isBlacklisted(someUri));
@@ -78,13 +84,8 @@ public class BasicGadgetBlacklistTest extends TestCase {
     assertFalse(bl.isBlacklisted(Uri.parse("http://blo.com/bar.xml")));
   }
 
+  @Test(expected=PatternSyntaxException.class)
   public void testInvalidRegularExpression() throws Exception {
-    try {
-      createBlacklist("REGEXP +http://bla.com/.*");
-      fail();
-    } catch (PatternSyntaxException ex) {
-      // success
-    }
+    createBlacklist("REGEXP +http://bla.com/.*");
   }
-
 }

@@ -21,6 +21,8 @@ package org.apache.shindig.gadgets.parse;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.inject.Provider;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -33,7 +35,7 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
   private GadgetHtmlParser full = new NekoSimplifiedHtmlParser(
       new ParseModule.DOMImplementationProvider().get());
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     full.setSerializerProvider(new Provider<HtmlSerializer>() {
       public HtmlSerializer get() {
@@ -42,6 +44,7 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
     });
   }
 
+  @Test
   public void testWhitespaceNotCollapsedInSpecialTags() throws Exception {
     String content = loadFile(
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags.html");
@@ -49,7 +52,8 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
         "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags-expected.html");
     parseAndCompareBalanced(content, expected, full);
   }
-  
+
+  @Test
   public void testIeConditionalCommentNotRemoved() throws Exception {
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments.html");
     String expected = loadFile(
@@ -57,6 +61,7 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
     parseAndCompareBalanced(content, expected, full);
   }
 
+  @Test
   public void testSpecialTagsAreRecognized() {
     assertSpecialTag("textArea");
     assertSpecialTag("scrIpt");
@@ -73,6 +78,7 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
         CompactHtmlSerializer.isSpecialTag(tagName.toLowerCase()));
   }
 
+  @Test
   public void testCollapseHtmlWhitespace() throws IOException {
     assertCollapsed("abc", "abc");
     assertCollapsed("abc ", "abc");

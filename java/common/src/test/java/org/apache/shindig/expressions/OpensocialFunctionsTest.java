@@ -26,32 +26,37 @@ import javax.el.ValueExpression;
 
 import com.google.common.collect.Maps;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class OpensocialFunctionsTest extends TestCase {
+public class OpensocialFunctionsTest extends Assert {
   private Expressions expressions;
   private ELContext context;
   private Map<String, Object> vars = Maps.newHashMap();
   
-  @Override
-  protected void setUp() {
+  @Before
+  public void setUp() {
     Functions functions = new Functions(OpensocialFunctions.class);
     expressions = new Expressions(functions, null, new ShindigTypeConverter());
     context = expressions.newELContext(new RootELResolver(vars));
   }
-  
+
+  @Test
   public void testParseJsonObject() {
     ValueExpression testParseJsonObject =
       expressions.parse("${osx:parseJson('{a: 1}').a}", Integer.class);
     assertEquals(1, testParseJsonObject.getValue(context));
   }
 
+  @Test
   public void testParseJsonArray() {
     ValueExpression testParseJsonArray =
       expressions.parse("${osx:parseJson('[1, 2, 3]')[1]}", Integer.class);
     assertEquals(2, testParseJsonArray.getValue(context));
   }
-  
+
+  @Test
   public void testDecodeBase64() throws Exception {
     String test = "12345";
     String encoded = new String(Base64.encodeBase64(test.getBytes("UTF-8")), "UTF-8");
@@ -62,6 +67,7 @@ public class OpensocialFunctionsTest extends TestCase {
     assertEquals("12345", testDecodeBase64.getValue(context));
   }
 
+  @Test
   public void testUrlEncode() throws Exception {
     String test = "He He";
     vars.put("test", test);
@@ -71,6 +77,7 @@ public class OpensocialFunctionsTest extends TestCase {
     assertEquals("He+He", testUrlEncode.getValue(context));
   }
 
+  @Test
   public void testUrlDecode() throws Exception {
     String test = "He+He";
     vars.put("encoded", test);
@@ -80,24 +87,28 @@ public class OpensocialFunctionsTest extends TestCase {
     assertEquals("He He", testUrlDecode.getValue(context));
   }
 
+  @Test
   public void testParseJsonNull() throws Exception {
     ValueExpression testUrlEncode =
       expressions.parse("${osx:parseJson(null)}", String.class);
     assertEquals("", testUrlEncode.getValue(context));
   }
 
+  @Test
   public void testDecodeBase64Null() throws Exception {
     ValueExpression testUrlEncode =
       expressions.parse("${osx:decodeBase64(null)}", String.class);
     assertEquals("", testUrlEncode.getValue(context));
   }
 
+  @Test
   public void testUrlEncodeNull() throws Exception {
     ValueExpression testUrlEncode =
       expressions.parse("${osx:urlEncode(null)}", String.class);
     assertEquals("", testUrlEncode.getValue(context));
   }
 
+  @Test
   public void testUrlDecodeNull() throws Exception {
     ValueExpression testUrlDecode =
       expressions.parse("${osx:urlDecode(null)}", String.class);

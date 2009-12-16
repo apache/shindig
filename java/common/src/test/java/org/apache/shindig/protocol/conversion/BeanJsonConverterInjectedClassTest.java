@@ -17,25 +17,23 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import junit.framework.TestCase;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * The Class BeanJsonConverterInjectedClassTest.
  */
-public class BeanJsonConverterInjectedClassTest extends TestCase {
+public class BeanJsonConverterInjectedClassTest extends Assert {
   
   /** The bean json converter. */
   private BeanJsonConverter beanJsonConverter;
 
-  /* (non-Javadoc)
-   * @see junit.framework.TestCase#setUp()
-   */
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     this.beanJsonConverter = new BeanJsonConverter(Guice.createInjector(new TestModule()));
   }
   
@@ -44,6 +42,7 @@ public class BeanJsonConverterInjectedClassTest extends TestCase {
    * 
    * @throws Exception the exception
    */
+  @Test
   public void testJsonToObject() throws Exception {
     String json = "{x:'xValue',y:'yValue'}";
     TestObject object = (TestObject) beanJsonConverter.convertToObject(json, TestInterface.class);

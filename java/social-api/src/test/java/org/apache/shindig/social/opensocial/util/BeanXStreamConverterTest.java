@@ -41,7 +41,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -51,7 +55,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
-public class BeanXStreamConverterTest extends TestCase {
+public class BeanXStreamConverterTest extends Assert {
   private static final String XMLSCHEMA =
       " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
       + " xsi:schemaLocation=\"http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd\" ";
@@ -60,9 +64,8 @@ public class BeanXStreamConverterTest extends TestCase {
 
   private BeanXStreamConverter beanXmlConverter;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
 
     johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
@@ -105,6 +108,7 @@ public class BeanXStreamConverterTest extends TestCase {
     }
   }
 
+  @Test
   public void testToXmlOnSimpleClass() throws Exception {
     // since this doent implement the model, it wont get mapped correctly, hence
     // we cant validate
@@ -118,6 +122,7 @@ public class BeanXStreamConverterTest extends TestCase {
     assertEquals("robot", name.getTextContent());
   }
 
+  @Test
   public void testPersonToXml() throws Exception {
     String xml = XSDValidator.validateOpenSocial(beanXmlConverter.convertToString(johnDoe));
     Element element = XmlUtil.parse(xml);
@@ -125,6 +130,7 @@ public class BeanXStreamConverterTest extends TestCase {
     assertEquals(johnDoe.getId(), id.getTextContent());
   }
 
+  @Test
   public void testActivityToXml() throws Exception {
     String xml = XSDValidator.validateOpenSocial(beanXmlConverter.convertToString(activity));
 
@@ -133,6 +139,7 @@ public class BeanXStreamConverterTest extends TestCase {
     assertEquals(activity.getId(), id.getTextContent());
   }
 
+  @Test
   public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
     Map<String, Map<String, String>> map = Maps.newTreeMap();
@@ -157,6 +164,7 @@ public class BeanXStreamConverterTest extends TestCase {
         .deleteWhitespace(xml));
   }
 
+  @Test
   public void testMapToXml() throws XmlException {
     Map<String, String> m = Maps.newLinkedHashMap();
     m.put("key1", "value1");
@@ -171,6 +179,7 @@ public class BeanXStreamConverterTest extends TestCase {
         .deleteWhitespace(xml));
   }
 
+  @Test
   public void testEmptyList() throws XmlException {
     List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
@@ -192,6 +201,7 @@ public class BeanXStreamConverterTest extends TestCase {
         .deleteWhitespace(xml));
   }
 
+  @Test
   public void testElementNamesInList() throws Exception {
 
     List<Activity> activities = Lists.newArrayList();
@@ -241,21 +251,26 @@ public class BeanXStreamConverterTest extends TestCase {
 	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
-  public void testPerson1() throws XmlException, IOException {
+  @Test
+  public void testPerson1() throws Exception {
     String xml = loadXML("testxml/person1.xml");
     beanXmlConverter.convertToObject(xml, Person.class);
   }
 
-  public void testActivity1() throws XmlException, IOException {
+  @Test
+  public void testActivity1() throws Exception {
     String xml = loadXML("testxml/activity1.xml");
     beanXmlConverter.convertToObject(xml, Activity.class);
   }
 
-  public void testAppdata1() throws XmlException, IOException {
+  @Test
+  public void testAppdata1() throws Exception {
     String xml = loadXML("testxml/appdata1.xml");
     beanXmlConverter.convertToObject(xml, Map.class);
   }
 
+  @Test
+  @Ignore("TODO")
   public void testGroup1() throws XmlException {
     // TODO
   }

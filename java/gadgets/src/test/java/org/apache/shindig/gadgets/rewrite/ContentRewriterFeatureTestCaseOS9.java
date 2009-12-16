@@ -241,8 +241,8 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   @Test
   public void testSpecExcludeDisallowOverrideTagsSubset() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithRewrite(
-        "test\\.com", "testx", "0", Sets.newHashSet(new String[] { "img" })),
-        "", "", "0", Sets.newHashSet(new String[] { "img", "script" }), true);
+        "test\\.com", "testx", "0", Sets.newHashSet("img")),
+        "", "", "0", Sets.newHashSet("img", "script"), true);
     assertFalse(defaultRewriterFeature.shouldRewriteTag("IFRAME"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("img"));
     assertFalse(defaultRewriterFeature.shouldRewriteTag("ScripT"));
@@ -251,8 +251,8 @@ public class ContentRewriterFeatureTestCaseOS9 extends BaseRewriterTestCase {
   @Test
   public void testSpecExcludeDisallowOverrideTagsSuperset() throws Exception {
     defaultRewriterFeature = new ContentRewriterFeature(createSpecWithRewrite(
-        "test\\.com", "testx", "0", Sets.newHashSet(new String[] { "img", "script", "link" })),
-        "", "", "0", Sets.newHashSet(new String[] { "img", "script" }), true);
+        "test\\.com", "testx", "0", Sets.newHashSet("img", "script", "link")),
+        "", "", "0", Sets.newHashSet("img", "script"), true);
     assertFalse(defaultRewriterFeature.shouldRewriteTag("IFRAME"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("img"));
     assertTrue(defaultRewriterFeature.shouldRewriteTag("ScripT"));

@@ -28,6 +28,8 @@ import org.apache.shindig.gadgets.spec.PipelinedData;
 import com.google.common.collect.Lists;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMException;
@@ -130,7 +132,7 @@ public class SocialMarkupHtmlParserTest {
     String content = "<html><div id=\"div_super\" class=\"div_super\" valign:\"middle\"></div></html>";
     try {
       parser.parseDom(content);
-      assertTrue("No exception caught", false);
+      fail("No exception caught");
     } catch (DOMException e) {
       assertTrue(e.getMessage().contains("INVALID_CHARACTER_ERR"));
       assertTrue(e.getMessage().contains(

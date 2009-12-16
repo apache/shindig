@@ -41,6 +41,7 @@ import org.apache.shindig.social.opensocial.util.XSDValidator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -53,10 +54,8 @@ import java.util.Map;
 public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
 
-  @SuppressWarnings({ "boxing", "unchecked" })
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void restfulxXmlPeopleTestBefore() throws Exception {
 
     NameImpl name = new NameImpl("Sir Shin H. Digg Social Butterfly");
     name.setAdditionalName("H");
@@ -429,10 +428,8 @@ public class RestfulXmlPeopleTest extends AbstractLargeRestfulTests {
   }
 
   @SuppressWarnings("boxing")
-  private void assertFloatField(Map<String, List<String>> result,
-      Float expected, Object field) {
-    assertEquals(expected.floatValue(), Float.valueOf(result.get(
-        field.toString()).get(0)));
+  private void assertFloatField(Map<String, List<String>> result, Float expected, Object field) {
+    assertEquals(expected.floatValue(), Float.valueOf(result.get(field.toString()).get(0)), 0);
   }
 
   private void assertStringField(Map<String, List<String>> result,

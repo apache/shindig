@@ -18,30 +18,36 @@
  */
 package org.apache.shindig.common.servlet;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class UserAgentTest extends TestCase {
+public class UserAgentTest extends Assert {
   private UserAgent getUaEntry(String version) {
     return new UserAgent(UserAgent.Browser.OTHER, version);
   }
-  
+
+  @Test
   public void testVersionNumberParsingStandard() {
-    assertEquals(3D, getUaEntry("3").getVersionNumber());
+    assertEquals(3D, getUaEntry("3").getVersionNumber(), 0);
   }
-  
+
+  @Test
   public void testVersionNumberParsingStandardDecimal() {
-    assertEquals(3.1415, getUaEntry("3.1415").getVersionNumber());
+    assertEquals(3.1415, getUaEntry("3.1415").getVersionNumber(), 0);
   }
   
+  @Test
   public void testVersionNumberParsingMultiPart() {
-    assertEquals(3.1, getUaEntry("3.1.5").getVersionNumber());
+    assertEquals(3.1, getUaEntry("3.1.5").getVersionNumber(), 0);
   }
-  
+
+  @Test
   public void testVersionNumberParsingAlphaSuffix() {
-    assertEquals(4.5, getUaEntry("4.5beta2").getVersionNumber()); 
+    assertEquals(4.5, getUaEntry("4.5beta2").getVersionNumber(), 0);
   }
-  
+
+  @Test
   public void testVersionNumberParsingEmbeddedInTheMiddle() {
-    assertEquals(1.5, getUaEntry("beta 1.5 rc 5").getVersionNumber());
+    assertEquals(1.5, getUaEntry("beta 1.5 rc 5").getVersionNumber(), 0);
   }
 }

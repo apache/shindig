@@ -20,22 +20,27 @@ package org.apache.shindig.gadgets.variables;
 import org.apache.shindig.gadgets.variables.BidiSubstituter;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class BidiSubstituterTest extends TestCase {
+public class BidiSubstituterTest extends Assert {
 
+  @Test
   public void testBidiWithRtl() {
     assertRightToLeft(BidiSubstituter.RTL);
   }
 
+  @Test
   public void testBidiWithLtr() {
     assertLeftToRight(BidiSubstituter.LTR);
   }
 
+  @Test
   public void testBidiWithEmpty() {
     assertLeftToRight("");
   }
 
+  @Test
   public void testBidiWithNull() {
     assertLeftToRight(null);
   }

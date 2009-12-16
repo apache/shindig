@@ -24,11 +24,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import junit.framework.TestCase;
-
 import com.google.common.collect.Lists;
 
-public class DefaultMultipartFormParserTest extends TestCase {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class DefaultMultipartFormParserTest extends Assert {
 
   private static final String REQUEST_FIELDNAME = "request";
   private static final String REQUEST_DATA = "{name: 'HelloWorld'}";
@@ -46,7 +48,8 @@ public class DefaultMultipartFormParserTest extends TestCase {
   private MultipartFormParser multipartFormParser;
   private HttpServletRequest request;
   
-  @Override protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     multipartFormParser = new DefaultMultipartFormParser();
   }
 
@@ -54,6 +57,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
    * Test that requests must be both POST and have a multipart
    * content type.
    */
+  @Test
   public void testIsMultipartContent() {
     FakeHttpServletRequest request = new FakeHttpServletRequest();
 
@@ -102,7 +106,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
       writeBoundary();
 
       write("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" +
-          fileName + "\"");
+          fileName + '\"');
       write("\r\n");
       write("Content-Type: " + contentType);
       write("\r\n\r\n");
@@ -117,7 +121,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
     public void addFormField(String fieldName, String content, String contentType) {
       writeBoundary();
 
-      write("Content-Disposition: form-data; name=\"" + fieldName + "\"");
+      write("Content-Disposition: form-data; name=\"" + fieldName + '\"');
       if (contentType != null) {
         write("\r\n");
         write("Content-Type: " + contentType);
@@ -145,6 +149,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
     request = fakeReq;
   }
 
+  @Test
   public void testSingleFileItem() throws Exception {
     MultipartFormBuilder builder = new MultipartFormBuilder();
     builder.addFileItem(ALBUM_IMAGE_FIELDNAME, ALBUM_IMAGE_FILENAME, ALBUM_IMAGE_DATA,
@@ -162,7 +167,8 @@ public class DefaultMultipartFormParserTest extends TestCase {
     assertEquals(ALBUM_IMAGE_TYPE, formItem.getContentType());
     assertEquals(ALBUM_IMAGE_DATA, new String(formItem.get()));  
   }
-  
+
+  @Test
   public void testSingleRequest() throws Exception {
     MultipartFormBuilder builder = new MultipartFormBuilder();
     builder.addFormField(REQUEST_FIELDNAME, REQUEST_DATA);
@@ -178,6 +184,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
     assertEquals(REQUEST_DATA, new String(formItem.get()));
   }
 
+  @Test
   public void testSingleFileItemAndRequest() throws Exception {
     MultipartFormBuilder builder = new MultipartFormBuilder();
     builder.addFileItem(ALBUM_IMAGE_FIELDNAME, ALBUM_IMAGE_FILENAME, ALBUM_IMAGE_DATA,
@@ -202,6 +209,7 @@ public class DefaultMultipartFormParserTest extends TestCase {
     assertEquals(REQUEST_DATA, new String(formItem.get()));
   }
 
+  @Test
   public void testMultipleFileItemAndRequest() throws Exception {
     MultipartFormBuilder builder = new MultipartFormBuilder();
     builder.addFileItem(ALBUM_IMAGE_FIELDNAME, ALBUM_IMAGE_FILENAME, ALBUM_IMAGE_DATA,

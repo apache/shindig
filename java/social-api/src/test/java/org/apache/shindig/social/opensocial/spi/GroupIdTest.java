@@ -19,10 +19,12 @@ package org.apache.shindig.social.opensocial.spi;
 
 import org.apache.shindig.social.opensocial.spi.GroupId;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class GroupIdTest extends TestCase {
+public class GroupIdTest extends Assert {
 
+  @Test
   public void testFromJson() throws Exception {
     GroupId all = GroupId.fromJson("@all");
     assertEquals(GroupId.Type.all, all.getType());
@@ -37,5 +39,4 @@ public class GroupIdTest extends TestCase {
     assertEquals(GroupId.Type.groupId, group.getType());
     assertEquals("superbia", group.getGroupId());
   }
-
 }

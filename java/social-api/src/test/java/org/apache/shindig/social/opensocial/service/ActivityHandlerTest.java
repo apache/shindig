@@ -45,6 +45,8 @@ import com.google.common.collect.Sets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.isNull;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.StringReader;
 import java.util.List;
@@ -67,16 +69,15 @@ public class ActivityHandlerTest extends EasyMockTestCase {
   protected HandlerRegistry registry;
   protected ContainerConfig containerConfig;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     token.setAppId("appId");
 
     converter = mock(BeanJsonConverter.class);
     activityService = mock(ActivityService.class);
 
-    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+    JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
             "{'gadgets.features':{opensocial:" +
                "{supportedFields: {activity: ['id', 'title']}}" +
              "}}}");
@@ -106,18 +107,22 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
+  @Test
   public void testHandleGetAll() throws Exception {
     assertHandleGetForGroup(GroupId.Type.all);
   }
 
+  @Test
   public void testHandleGetFriends() throws Exception {
     assertHandleGetForGroup(GroupId.Type.friends);
   }
 
+  @Test
   public void testHandleGetSelf() throws Exception {
     assertHandleGetForGroup(GroupId.Type.self);
   }
 
+  @Test
   public void testHandleGetPlural() throws Exception {
     String path = "/activities/john.doe,jane.doe/@self/@app";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -138,6 +143,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
+  @Test
   public void testHandleGetActivityById() throws Exception {
     String path = "/activities/john.doe/@friends/@app/1";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -174,6 +180,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
         new StringReader(jsonActivity), token, converter);
   }
 
+  @Test
   public void testHandlePost() throws Exception {
     Future<?> future = setupBodyRequest("POST");
     assertNull(future.get());
@@ -181,6 +188,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
+  @Test
   public void testHandlePut() throws Exception {
     Future<?> future = setupBodyRequest("PUT");
     assertNull(future.get());
@@ -188,6 +196,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
+  @Test
   public void testHandleDelete() throws Exception {
     String path = "/activities/john.doe/@self/@app/1";
     RestHandler operation = registry.getRestHandler(path, "DELETE");
@@ -204,6 +213,7 @@ public class ActivityHandlerTest extends EasyMockTestCase {
     reset();
   }
 
+  @Test
   public void testHandleGetSuportedFields() throws Exception {
     String path = "/activities/@supportedFields";
     RestHandler operation = registry.getRestHandler(path, "GET");

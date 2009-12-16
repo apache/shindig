@@ -21,6 +21,7 @@ import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -33,14 +34,16 @@ public class BMPOptimizerTest extends BaseOptimizerTest {
 
   Logger log = Logger.getLogger(BMPOptimizerTest.class.getName());
 
+  @Test
   public void testSimpleImage() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/simple.bmp", "image/bmp");
     HttpResponse rewritten = rewrite(resp);
     assertTrue(rewritten.getContentLength() < resp.getContentLength());
-    assertEquals(rewritten.getHeader("Content-Type"), "image/png");
+    assertEquals("image/png", rewritten.getHeader("Content-Type"));
   }
 
+  @Test
   @Ignore("Kills some VMs")
   public void testEvilImages() throws Exception {
     try {
@@ -53,6 +56,7 @@ public class BMPOptimizerTest extends BaseOptimizerTest {
     }
   }
 
+  @Test
   public void testEvilImage2() throws Exception {
     try {
       HttpResponse resp =

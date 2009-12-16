@@ -19,14 +19,16 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.shindig.common.cache.LruCacheProvider;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
 /**
  * Basic test of CSS lexer
  */
-public class CajaCssLexerParserTest extends TestCase {
+public class CajaCssLexerParserTest extends Assert {
 
   private CajaCssLexerParser cajaCssParser;
 
@@ -34,18 +36,19 @@ public class CajaCssLexerParserTest extends TestCase {
       ".xyz { background-image : url(http://www.example.org/someimage.gif); }\n" +
       "A { color : #7f7f7f }\n";
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     cajaCssParser = new CajaCssLexerParser();
   }
 
+  @Test
   public void testBasicCssParse() throws Exception {
     String css = ".xyz { font : bold; } A { color : #7f7f7f }";
     List<Object> styleSheet = cajaCssParser.parse(css);
     assertEquals(cajaCssParser.serialize(styleSheet), css); 
   }
 
+  @Test
   public void testClone() throws Exception {
     // Set the cache so we force cloning
     cajaCssParser.setCacheProvider(new LruCacheProvider(100));
@@ -56,6 +59,7 @@ public class CajaCssLexerParserTest extends TestCase {
     assertEquals(cajaCssParser.serialize(styleSheet), cajaCssParser.serialize(styleSheet2));
   }
 
+  @Test
   public void testCache() throws Exception {
     cajaCssParser.setCacheProvider(new LruCacheProvider(100));
     // Ensure that we return cloned instances and not the original out of the cache. Cloned

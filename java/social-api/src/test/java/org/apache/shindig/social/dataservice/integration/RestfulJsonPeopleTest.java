@@ -20,6 +20,7 @@ package org.apache.shindig.social.dataservice.integration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.protocol.ContentTypes;
 import org.apache.shindig.protocol.model.Enum;
 import org.apache.shindig.protocol.model.EnumImpl;
@@ -44,6 +45,7 @@ import org.apache.shindig.social.opensocial.model.Url;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -53,10 +55,8 @@ import java.util.Map;
 public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
   private Person canonical;
 
-  @SuppressWarnings({ "unchecked", "boxing" })
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void restfulJsonPeopleTestBefore() throws Exception {
     NameImpl name = new NameImpl("Sir Shin H. Digg Social Butterfly");
     name.setAdditionalName("H");
     name.setFamilyName("Digg");
@@ -213,11 +213,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     // TODO(doll): Test all of the date fields
 
     Map<String, String> extraParams = Maps.newHashMap();
-    String allFieldsParam = "";
-    for (String allField : Person.Field.ALL_FIELDS) {
-      allFieldsParam += allField + ',';
-    }
-    extraParams.put("fields", allFieldsParam);
+    extraParams.put("fields", StringUtils.join(Person.Field.ALL_FIELDS, ','));
 
     // Currently, for Shindig {pid}/@all/{uid} == {uid}/@self
     String resp = getResponse("/people/canonical/@self", "GET", extraParams, null,

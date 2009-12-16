@@ -20,8 +20,6 @@ package org.apache.shindig.gadgets.render;
 
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -29,26 +27,31 @@ import com.google.common.collect.Sets;
 
 import org.apache.shindig.gadgets.http.BasicHttpFetcher;
 
-public class DefaultRpcServiceLookupTest extends TestCase {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class DefaultRpcServiceLookupTest extends Assert {
   
   private DefaultRpcServiceLookup svcLookup;
   private String socialEndpoint;
   private String host;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     svcLookup = new DefaultRpcServiceLookup(new DefaultServiceFetcher(null, new BasicHttpFetcher()), 60l);
     socialEndpoint = "http://localhost:8080/social/rpc";
     host = "localhost:8080";
   }
 
+  @Test
   public void testGetServicesForContainer_Empty() throws Exception {
     String container = "ig";
     Multimap<String, String> services = svcLookup.getServicesFor(container, host);
     assertEquals(0, services.size());
   }
-  
+
+  @Test
   public void testGetServicesForContainer_Null() throws Exception {
     String container = null;
     try {
@@ -59,6 +62,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     }
   }
 
+  @Test
   public void testGetServicesForContainer_OneContainerOneService() throws Exception {
     ImmutableSet<String> expectedServiceMethods = ImmutableSet.of("system.listMethods");
     LinkedHashMultimap<String, String> expectedServices = LinkedHashMultimap.create();
@@ -73,6 +77,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     assertEquals(expectedServiceMethods, actualServiceMethods);
   }
 
+  @Test
   public void testGetServicesForContainer_OneContainerTwoServices() throws Exception {
     Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get", 
             "people.update", "people.create", "people.delete");
@@ -86,6 +91,7 @@ public class DefaultRpcServiceLookupTest extends TestCase {
     assertServiceHasCorrectConfig(socialEndpoint, expectedServiceMethods, container, 1);  
   }
 
+  @Test
   public void testGetServiceForContainer_TwoContainersOneEndpoint() throws Exception {
     String socialEndpoint2 = "http://localhost:8080/api/rpc";
     Set<String> expectedServiceMethods = Sets.newHashSet("system.listMethods", "people.get", 

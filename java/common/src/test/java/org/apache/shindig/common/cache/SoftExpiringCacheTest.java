@@ -20,15 +20,16 @@ package org.apache.shindig.common.cache;
 
 import org.apache.shindig.common.util.FakeTimeSource;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SoftExpiringCacheTest extends TestCase {
+public class SoftExpiringCacheTest extends Assert {
   private FakeTimeSource timeSource;
   private Cache<String, String> cache;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     timeSource = new FakeTimeSource(0);
     cache = new LruCache<String, String>(5);
   }
@@ -39,6 +40,7 @@ public class SoftExpiringCacheTest extends TestCase {
     return expiringCache;
   }
 
+  @Test
   public void testGeneralCacheExpiration() {
     SoftExpiringCache<String, String> expiringCache = makeSoftExpiringCache();
     String key = "key1", val = "val1";
@@ -54,6 +56,7 @@ public class SoftExpiringCacheTest extends TestCase {
     assertTrue(expiringCache.getElement(key).isExpired);
   }
 
+  @Test
   public void testMissingValue() {
     SoftExpiringCache<String, String> expiringCache = makeSoftExpiringCache();
     assertNull(expiringCache.getElement("not set"));

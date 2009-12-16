@@ -103,7 +103,7 @@ public class Functions extends FunctionMapper {
         Method priorMethod = prefixMap.put(methodName, m);
         if (priorMethod != null) {
           throw new IllegalStateException(
-              "Method " + prefix + ":" + methodName + " re-defined.");
+              "Method " + prefix + ':' + methodName + " re-defined.");
         }
       }
     }

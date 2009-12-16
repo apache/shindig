@@ -26,11 +26,13 @@ import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.variables.Substitutions.Type;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Map;
 
-public class UserPrefSubstituterTest extends TestCase {
+public class UserPrefSubstituterTest extends Assert {
   private final Substitutions substituter = new Substitutions();
   private final static String DEFAULT_NAME = "default";
   private final static String DEFAULT_VALUE = "default value";
@@ -53,12 +55,12 @@ public class UserPrefSubstituterTest extends TestCase {
         "</Module>";
   private GadgetSpec spec;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     spec = new GadgetSpec(Uri.parse("#"), DEFAULT_XML);
   }
 
+  @Test
   public void testSubstitutions() throws Exception {
     Map<String, String> map = ImmutableMap.of(USER_NAME, USER_VALUE, OVERRIDE_NAME, OVERRIDE_VALUE);
     UserPrefs prefs = new UserPrefs(map);
@@ -72,6 +74,7 @@ public class UserPrefSubstituterTest extends TestCase {
         substituter.getSubstitution(Type.USER_PREF, OVERRIDE_NAME));
   }
 
+  @Test
   public void testEscaping() throws Exception {
     Map<String, String> map = ImmutableMap.of(USER_NAME, UNESCAPED_USER_VALUE);
     UserPrefs prefs = new UserPrefs(map);

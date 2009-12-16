@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import com.google.common.collect.Maps;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +49,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     }
   };
 
+  @Test
   public void testValidateUrlNoPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com");
     assertEquals("http", url.getScheme());
@@ -57,6 +59,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlHttps() throws Exception {
     Uri url = proxy.validateUrl("https://www.example.com");
     assertEquals("https", url.getScheme());
@@ -66,6 +69,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlWithPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo");
     assertEquals("http", url.getScheme());
@@ -75,6 +79,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlWithPort() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com:8080/foo");
     assertEquals("http", url.getScheme());
@@ -84,6 +89,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlWithEncodedPath() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo%20bar");
     assertEquals("http", url.getScheme());
@@ -93,6 +99,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlWithEncodedQuery() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com/foo?q=with%20space");
     assertEquals("http", url.getScheme());
@@ -103,6 +110,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
+  @Test
   public void testValidateUrlWithNoPathAndEncodedQuery() throws Exception {
     Uri url = proxy.validateUrl("http://www.example.com?q=with%20space");
     assertEquals("http", url.getScheme());
@@ -112,31 +120,22 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(url.getFragment());
   }
 
-  public void testValidateUrlNullInput() {
-    try {
-      proxy.validateUrl(null);
-      fail("Should have thrown");
-    } catch (GadgetException e) {
-      // good
-    }
+  @Test(expected = GadgetException.class)
+  public void testValidateUrlNullInput() throws Exception {
+    proxy.validateUrl(null);
   }
 
-  public void testValidateUrlBadInput() {
-    try {
+  @Test(expected=GadgetException.class)
+  public void testValidateUrlBadInput() throws Exception {
     proxy.validateUrl("%$#%#$%#$%");
-    } catch (GadgetException e) {
-      // good
-    }
   }
 
-  public void testValidateUrlBadProtocol() {
-    try {
+  @Test(expected=GadgetException.class)
+  public void testValidateUrlBadProtocol() throws Exception {
     proxy.validateUrl("gopher://foo");
-  } catch (GadgetException e) {
-    // good
-  }
   }
 
+  @Test
   public void testSetResponseHeaders() throws Exception {
     HttpResponse results = new HttpResponseBuilder().create();
     replay();
@@ -149,6 +148,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
+  @Test
   public void testSetResponseHeadersForFlash() throws Exception {
     HttpResponse results = new HttpResponseBuilder()
         .setHeader("Content-Type", "application/x-shockwave-flash")
@@ -164,15 +164,17 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertNull(recorder.getHeader("Content-Disposition"));
   }
 
+  @Test
   public void testSetContentTypeHeader() throws Exception {
     HttpResponse results = new HttpResponseBuilder()
         .create();
     replay();
     proxy.setResponseHeaders(request, recorder, results);
 
-    assertEquals(recorder.getHeader("Content-Type"), "application/octet-stream");
+    assertEquals("application/octet-stream", recorder.getHeader("Content-Type"));
   }
 
+  @Test
   public void testSetResponseHeadersNoCache() throws Exception {
     Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
     headers.put("Pragma", Arrays.asList("no-cache"));
@@ -190,6 +192,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
+  @Test
   public void testSetResponseHeadersForceParam() throws Exception {
     HttpResponse results = new HttpResponseBuilder().create();
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("30").anyTimes();
@@ -201,6 +204,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
 
+  @Test
   public void testSetResponseHeadersForceParamInvalid() throws Exception {
     HttpResponse results = new HttpResponseBuilder().create();
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").anyTimes();
@@ -214,6 +218,7 @@ public class ProxyBaseTest extends ServletTestFixture {
   }
 
 
+  @Test
   public void testGetParameter() {
     expect(request.getParameter("foo")).andReturn("bar");
     replay();
@@ -221,6 +226,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("bar", proxy.getParameter(request, "foo", "not foo"));
   }
 
+  @Test
   public void testGetParameterWithNullValue() {
     expect(request.getParameter("foo")).andReturn(null);
     replay();
@@ -228,6 +234,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("not foo", proxy.getParameter(request, "foo", "not foo"));
   }
 
+  @Test
   public void testGetContainerWithContainer() {
     expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn("bar");
     replay();
@@ -235,6 +242,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("bar", proxy.getContainer(request));
   }
 
+  @Test
   public void testGetContainerWithSynd() {
     expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn(null);
     expect(request.getParameter(ProxyBase.SYND_PARAM)).andReturn("syndtainer");
@@ -243,6 +251,7 @@ public class ProxyBaseTest extends ServletTestFixture {
     assertEquals("syndtainer", proxy.getContainer(request));
   }
 
+  @Test
   public void testGetContainerNoParam() {
     expect(request.getParameter(ProxyBase.CONTAINER_PARAM)).andReturn(null);
     expect(request.getParameter(ProxyBase.SYND_PARAM)).andReturn(null);

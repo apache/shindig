@@ -35,6 +35,8 @@ import com.google.common.collect.Sets;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expectLastCall;
+
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
@@ -58,9 +60,8 @@ public class InvalidationHandlerTest extends EasyMockTestCase {
   protected HandlerRegistry registry;
   protected ContainerConfig containerConfig;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     token.setAppId("appId");
     token.setViewerId("userX");

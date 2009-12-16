@@ -38,6 +38,7 @@ import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -90,13 +91,14 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     return new JSONObject(body).getJSONObject(REQUEST_URL.toString());
   }
 
-  @Override
+  @Before
   public void setUp() {
     expect(request.getMethod()).andReturn("POST").anyTimes();
     expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 
+  @Test
   public void testGetRequest() throws Exception {
     expectGetAndReturnBody(RESPONSE_BODY);
     replay();
@@ -109,6 +111,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testGetRequestWithUncommonStatusCode() throws Exception {
     HttpRequest req = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()
@@ -126,6 +129,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testGetRequestWithRefresh() throws Exception {
     expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").anyTimes();
 
@@ -141,6 +145,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals(120, httpRequest.getCacheTtl());
   }
 
+  @Test
   public void testExplicitHeaders() throws Exception {
     String headerString = "X-Foo=bar&X-Bar=baz%20foo";
 
@@ -160,6 +165,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testPostRequest() throws Exception {
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM)).andReturn("POST");
     expectPostAndReturnBody(REQUEST_BODY, RESPONSE_BODY);
@@ -206,6 +212,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testFetchFeedWithParameters() throws Exception {
     String entryTitle = "Feed title";
     String entryLink = "http://example.org/entry/0/1";
@@ -253,6 +260,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testFetchEmptyDocument() throws Exception {
     expectGetAndReturnBody("");
     replay();
@@ -275,6 +283,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     });
   }
 
+  @Test
   public void testSignedGetRequest() throws Exception {
 
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
@@ -295,6 +304,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testSignedPostRequest() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
@@ -316,6 +326,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testChangeSecurityToken() throws Exception {
     // Doesn't actually sign since it returns the standard fetcher.
     // Signing tests are in SigningFetcherTest
@@ -336,6 +347,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testDoOAuthRequest() throws Exception {
     // Doesn't actually do oauth dance since it returns the standard fetcher.
     // OAuth tests are in OAuthRequestTest
@@ -358,6 +370,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testInvalidSigningTypeTreatedAsNone() throws Exception {
     expectGetAndReturnBody(RESPONSE_BODY);
     expect(request.getParameter(MakeRequestHandler.AUTHZ_PARAM)).andReturn("garbage");
@@ -371,6 +384,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testBadHttpResponseIsPropagated() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.error());
@@ -383,6 +397,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testBadSecurityTokenThrows() throws Exception {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(null).atLeastOnce();
@@ -398,6 +413,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     }
   }
 
+  @Test
   public void testMetadataCopied() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()
@@ -415,6 +431,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testSetCookiesReturned() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()
@@ -437,6 +454,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertEquals("name=value", cookies.get(1));
   }
 
+  @Test
   public void testLocationReturned() throws Exception {
     HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
     HttpResponse response = new HttpResponseBuilder()

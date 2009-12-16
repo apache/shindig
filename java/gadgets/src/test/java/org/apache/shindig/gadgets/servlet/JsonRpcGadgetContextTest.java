@@ -22,14 +22,14 @@ import com.google.common.collect.Maps;
 
 import org.apache.shindig.gadgets.GadgetContext;
 
-import junit.framework.TestCase;
-
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Locale;
 import java.util.Map;
 
-public class JsonRpcGadgetContextTest extends TestCase {
+public class JsonRpcGadgetContextTest extends Assert {
   final static String SPEC_URL = "http://example.org/gadget.xml";
   final static int SPEC_ID = 1234;
   final static String[] PREF_KEYS = {"hello", "foo"};
@@ -41,6 +41,7 @@ public class JsonRpcGadgetContextTest extends TestCase {
     }
   }
 
+  @Test
   public void testCorrectExtraction() throws Exception {
     JSONObject gadget = new JSONObject()
         .put("url", SPEC_URL)

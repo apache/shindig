@@ -24,14 +24,14 @@ import org.apache.shindig.social.opensocial.model.Activity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class RestfulJsonActivityTest extends AbstractLargeRestfulTests {
   Activity johnsActivity;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void restfulJsonActivityTestBefore() throws Exception {
     johnsActivity = new ActivityImpl("1", "john.doe");
     johnsActivity.setTitle("yellow");
     johnsActivity.setBody("what a color!");

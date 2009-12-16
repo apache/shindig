@@ -155,13 +155,13 @@ public class EndToEndTest {
     NodeList bodyList = page.getElementsByTagName("body");
     
     // Result should contain just one body
-    assertEquals(bodyList.getLength(), 1);
+    assertEquals(1, bodyList.getLength());
     DomNode body = (DomNode) bodyList.item(0);
 
     // Failed output contains only an error block plus a onload script block
-    assertEquals(body.getChildNodes().getLength(), 2);
-    assertEquals(body.getFirstChild().getNodeName(), "pre");
-    assertEquals(body.getLastChild().getNodeName(), "script");
+    assertEquals(2, body.getChildNodes().getLength());
+    assertEquals("pre", body.getFirstChild().getNodeName());
+    assertEquals("script", body.getLastChild().getNodeName());
   }
 
   @Test
@@ -319,7 +319,7 @@ public class EndToEndTest {
     String testMethod = null;
     for (String alert : alertHandler.getCollectedAlerts()) {
       if (testMethod == null) {
-        assertFalse("Test method omitted", "FINISHED".equals(alert));
+        assertFalse("Test method omitted - '" + alert + '"', "FINISHED".equals(alert));
         testMethod = alert;
       } else {
         assertEquals("test method " + testMethod + " did not finish", "FINISHED", alert);

@@ -22,9 +22,11 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class UserPrefTest extends TestCase {
+public class UserPrefTest extends Assert {
+  @Test
   public void testBasic() throws Exception {
     String xml = "<UserPref" +
                  " name=\"name\"" +
@@ -40,6 +42,7 @@ public class UserPrefTest extends TestCase {
     assertEquals(UserPref.DataType.HIDDEN, userPref.getDataType());
   }
 
+  @Test
   public void testEnum() throws Exception {
     String xml = "<UserPref name=\"foo\" datatype=\"enum\">" +
                  " <EnumValue value=\"0\" display_value=\"Zero\"/>" +
@@ -51,6 +54,7 @@ public class UserPrefTest extends TestCase {
     assertEquals("1", userPref.getEnumValues().get("1"));
   }
 
+  @Test
   public void testSubstitutions() throws Exception {
     String xml = "<UserPref name=\"name\" datatype=\"enum\"" +
                  " display_name=\"__MSG_display_name__\"" +
@@ -73,6 +77,7 @@ public class UserPrefTest extends TestCase {
     assertEquals(displayValue, userPref.getEnumValues().get("0"));
   }
 
+  @Test
   public void testMissingName() throws Exception {
     String xml = "<UserPref datatype=\"string\"/>";
     try {
@@ -83,12 +88,14 @@ public class UserPrefTest extends TestCase {
     }
   }
 
+  @Test
   public void testMissingDataType() throws Exception {
     String xml = "<UserPref name=\"name\"/>";
     UserPref pref = new UserPref(XmlUtil.parse(xml));
     assertEquals(UserPref.DataType.STRING, pref.getDataType());
   }
 
+  @Test
   public void testMissingEnumValue() throws Exception {
     String xml = "<UserPref name=\"foo\" datatype=\"enum\">" +
                  " <EnumValue/>" +
@@ -101,6 +108,7 @@ public class UserPrefTest extends TestCase {
     }
   }
 
+  @Test
   public void testToString() throws Exception {
     String xml = "<UserPref name=\"name\" display_name=\"__MSG_display_name__\" "
         + "default_value=\"__MSG_default_value__\" required=\"false\" "

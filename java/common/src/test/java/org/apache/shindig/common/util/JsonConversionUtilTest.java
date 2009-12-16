@@ -17,25 +17,24 @@
  */
 package org.apache.shindig.common.util;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 /**
  * Test for conversion of a structured key-value set to a JSON object
  */
-public class JsonConversionUtilTest extends TestCase {
+public class JsonConversionUtilTest extends Assert {
 
-  public JsonConversionUtilTest() {
-  }
-
+  @Test
   public void testSimplePathToJsonParsing()
       throws Exception {
     JSONObject root = new JSONObject();
@@ -43,6 +42,7 @@ public class JsonConversionUtilTest extends TestCase {
     assertJsonEquals(root, new JSONObject("{a:{a:{}}}"));
   }
 
+  @Test
   public void testArrayPathToJsonParsing()
       throws Exception {
     JSONObject root = new JSONObject();
@@ -52,6 +52,7 @@ public class JsonConversionUtilTest extends TestCase {
     assertJsonEquals(root, new JSONObject("{a:{a:[{},{},{}]}}"));
   }
 
+  @Test
   public void testValueToJsonParsing()
       throws Exception {
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("abc"), "abc");
@@ -71,6 +72,7 @@ public class JsonConversionUtilTest extends TestCase {
         new JSONArray(Lists.newArrayList(true)));
   }
 
+  @Test
   public void testParameterMapToJsonParsing()
       throws Exception {
     assertJsonEquals(JsonConversionUtil.parametersToJsonObject(ImmutableMap.of("a.b.c", "1")),
@@ -96,6 +98,7 @@ public class JsonConversionUtilTest extends TestCase {
         new JSONObject("{a:{b:{c:\"hello, true, false, null, 1,2\"}}}"));
   }
 
+  @Test
   public void testJSONToParameterMapParsing()
       throws Exception {
     Map<String, String> resultMap = JsonConversionUtil

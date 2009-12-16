@@ -19,11 +19,8 @@ package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertNotNull;
-
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -31,12 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.Date;
 
-import static junitx.framework.Assert.assertEquals;
-import static junitx.framework.Assert.assertFalse;
-
-public class HttpResponseTest {
+public class HttpResponseTest extends Assert {
   private static final byte[] UTF8_DATA = {
     (byte)0xEF, (byte)0xBB, (byte)0xBF, 'h', 'e', 'l', 'l', 'o'
   };

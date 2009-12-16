@@ -17,7 +17,8 @@
  */
 package org.apache.shindig.common.util;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,19 +27,23 @@ import java.util.concurrent.ExecutionException;
 /**
  * Tests ImmediateFuture.
  */
-public class ImmediateFutureTest extends TestCase {
+public class ImmediateFutureTest extends Assert {
+  @Test
   public void testGet() throws Exception {
     assertEquals("foo", ImmediateFuture.newInstance("foo").get());
   }
 
+  @Test
   public void testGetNull() throws Exception {
     assertNull(ImmediateFuture.newInstance(null).get());
   }
 
+  @Test
   public void testGetWithTimeout() throws Exception {
     assertEquals("foo", ImmediateFuture.newInstance("foo").get(1L, TimeUnit.MILLISECONDS));
   }
 
+  @Test
   public void testCancel() {
     Future<String> stringFuture = ImmediateFuture.newInstance("foo");
     assertFalse(stringFuture.cancel(true));
@@ -46,10 +51,12 @@ public class ImmediateFutureTest extends TestCase {
     assertFalse(stringFuture.isCancelled());
   }
 
+  @Test
   public void testIsDone() {
     assertTrue(ImmediateFuture.newInstance("foo").isDone());
   }
 
+  @Test
   public void testErrorInstance() throws Exception {
     RuntimeException re = new RuntimeException();
     Future<String> errorFuture = ImmediateFuture.errorInstance(re);

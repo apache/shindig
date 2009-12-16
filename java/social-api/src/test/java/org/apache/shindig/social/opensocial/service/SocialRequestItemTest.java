@@ -24,20 +24,23 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Guice;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test social specific request parameters
  */
-public class SocialRequestItemTest extends TestCase {
+public class SocialRequestItemTest extends Assert {
 
   private static final FakeGadgetToken FAKE_TOKEN = new FakeGadgetToken();
 
   protected SocialRequestItem request;
   protected BeanJsonConverter converter;
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     FAKE_TOKEN.setAppId("12345");
     FAKE_TOKEN.setOwnerId("someowner");
     FAKE_TOKEN.setViewerId("someowner");
@@ -47,11 +50,13 @@ public class SocialRequestItemTest extends TestCase {
         FAKE_TOKEN, converter, converter);
   }
 
+  @Test
   public void testGetUser() throws Exception {
     request.setParameter("userId", "@owner");
     assertEquals(UserId.Type.owner, request.getUsers().iterator().next().getType());
   }
 
+  @Test
   public void testGetGroup() throws Exception {
     request.setParameter("groupId", "@self");
     assertEquals(GroupId.Type.self, request.getGroup().getType());

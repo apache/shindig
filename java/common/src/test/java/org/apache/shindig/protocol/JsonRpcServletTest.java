@@ -42,16 +42,17 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
  */
-public class JsonRpcServletTest extends TestCase {
+public class JsonRpcServletTest extends Assert {
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
@@ -72,7 +73,8 @@ public class JsonRpcServletTest extends TestCase {
   private final PrintWriter writer = new PrintWriter(stream);
   private final TestHandler handler = new TestHandler();
 
-  @Override protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     servlet = new JsonRpcServlet();
     req = mockControl.createMock(HttpServletRequest.class);
     res = mockControl.createMock(HttpServletResponse.class);
@@ -102,6 +104,7 @@ public class JsonRpcServletTest extends TestCase {
     return stream.toString("UTF-8");
   }
 
+  @Test
   public void testMethodRecognition() throws Exception {
     setupRequest("{method:test.get,id:id,params:{userId:5,groupId:@self}}");
 
@@ -115,6 +118,7 @@ public class JsonRpcServletTest extends TestCase {
     JsonAssert.assertJsonEquals("{id: 'id', data: {foo:'bar'}}", getOutput());
   }
 
+  @Test
   public void testPostMultipartFormData() throws Exception {
     reset(multipartFormParser);
 
@@ -157,6 +161,7 @@ public class JsonRpcServletTest extends TestCase {
    * Test that it passes even when content-type is not set for "request" parameter. This would
    * be the case where the request is published via webform.
    */
+  @Test
   public void testPostMultipartFormDataWithRequestFieldHavingNoContentType() throws Exception {
     reset(multipartFormParser);
 
@@ -198,6 +203,7 @@ public class JsonRpcServletTest extends TestCase {
   /**
    * Test that any form-data other than "request" does not undergo any content type check.
    */
+  @Test
   public void testPostMultipartFormDataOnlyRequestFieldHasContentTypeChecked()
       throws Exception {
     reset(multipartFormParser);
@@ -244,6 +250,7 @@ public class JsonRpcServletTest extends TestCase {
    * Test that "request" field undergoes contentType check, and error is thrown if wrong content
    * type is present. 
    */
+  @Test
   public void testPostMultipartFormDataRequestFieldIsSubjectedToContentTypeCheck()
       throws Exception {
     reset(multipartFormParser);
@@ -283,6 +290,7 @@ public class JsonRpcServletTest extends TestCase {
     assertTrue(-1 != output.indexOf("Unsupported Content-Type application/octet-stream"));
   }
 
+  @Test
   public void testInvalidService() throws Exception {
     setupRequest("{method:junk.get,id:id,params:{userId:5,groupId:@self}}");
 
@@ -303,6 +311,7 @@ public class JsonRpcServletTest extends TestCase {
    * Tests a data handler that returns a failed Future.
    * @throws Exception on failure
    */
+  @Test
   public void testFailedRequest() throws Exception {
     setupRequest("{id:id,method:test.futureException}");
 
@@ -317,6 +326,7 @@ public class JsonRpcServletTest extends TestCase {
         "{id:id,error:{message:'badRequest: FAILURE_MESSAGE',code:400}}", getOutput());
   }
 
+  @Test
   public void testBasicBatch() throws Exception {
     setupRequest("[{method:test.get,id:'1'},{method:test.get,id:'2'}]");
 
@@ -331,6 +341,7 @@ public class JsonRpcServletTest extends TestCase {
         getOutput());
   }
 
+  @Test
   public void testGetExecution() throws Exception {
     expect(req.getParameterMap()).andStubReturn(
         ImmutableMap.of("method", new String[]{"test.get"}, "id", new String[]{"1"}));
@@ -349,18 +360,21 @@ public class JsonRpcServletTest extends TestCase {
     JsonAssert.assertJsonEquals("{id:'1',data:{foo:'bar'}}", getOutput());
   }
 
+  @Test
   public void testGetJsonResponseWithKey() throws Exception {
     ResponseItem responseItem = new ResponseItem("Name");
     Object result = servlet.getJSONResponse("my-key", responseItem);
     JsonAssert.assertObjectEquals("{id: 'my-key', data: 'Name'}", result);
   }
 
+  @Test
   public void testGetJsonResponseWithoutKey() throws Exception {
     ResponseItem responseItem = new ResponseItem("Name");
     Object result = servlet.getJSONResponse(null, responseItem);
     JsonAssert.assertObjectEquals("{data: 'Name'}", result);
   }
 
+  @Test
   public void testGetJsonResponseErrorWithData() throws Exception {
     ResponseItem responseItem = new ResponseItem(401, "Error Message", "Optional Data");
     Object result = servlet.getJSONResponse(null, responseItem);
@@ -369,6 +383,7 @@ public class JsonRpcServletTest extends TestCase {
         result);
   }
 
+  @Test
   public void testGetJsonResponseErrorWithoutData() throws Exception {
     ResponseItem responseItem = new ResponseItem(401, "Error Message");
     Object result = servlet.getJSONResponse(null, responseItem);
@@ -408,5 +423,4 @@ public class JsonRpcServletTest extends TestCase {
     expect(formDataItem.getInputStream()).andStubReturn(in);
     return formDataItem;
   }
-
 }

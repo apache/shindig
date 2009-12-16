@@ -27,24 +27,27 @@ import org.custommonkey.xmlunit.examples.RecursiveElementNameAndTextQualifier;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.Map;
 
 /**
  * Basic test for betwixt based XML conversion
  */
-public class BeanXmlConverterTest extends TestCase {
+public class BeanXmlConverterTest extends Assert {
   private TestModel.Car car;
   private BeanXmlConverter beanXmlConverter;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     car = new TestModel.Car();
     beanXmlConverter = new BeanXmlConverter();
   }
 
+  @Test
   public void testCarToXml() throws Exception {
     String xml = beanXmlConverter.convertToXml(car);
     XMLUnit.setIgnoreWhitespace(true);
@@ -54,6 +57,8 @@ public class BeanXmlConverterTest extends TestCase {
     XMLAssert.assertXMLEqual(diff, true);
   }
 
+  @Test
+  @Ignore("unknown why this is disabled")
   public void xxxtestMapsToXml() throws Exception {
     // This is the structure our app data currently takes
     Map<String, Map<String, String>> map = Maps.newTreeMap();

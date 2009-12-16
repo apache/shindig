@@ -28,16 +28,19 @@ import javax.el.ValueExpression;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class FunctionsTest extends TestCase {
+public class FunctionsTest extends Assert {
   private Functions functions;
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     functions = new Functions(FunctionsTest.class);
   }
 
+  @Test
   public void testExpose() throws Exception {
     Method hi = functions.resolveFunction("test", "hi");
     assertEquals("hi", hi.invoke(null));
@@ -48,11 +51,13 @@ public class FunctionsTest extends TestCase {
     Method bonjour = functions.resolveFunction("other", "bonjour");
     assertEquals("French hello", bonjour.invoke(null));
   }
-  
+
+  @Test
   public void testNonStaticNotExposed() {
     assertNull(functions.resolveFunction("test", "goodbye"));
   }
-  
+
+  @Test
   public void testDefaultBinding() throws Exception {
     Injector injector = Guice.createInjector();
     functions = injector.getInstance(Functions.class);
@@ -62,7 +67,8 @@ public class FunctionsTest extends TestCase {
     assertTrue(o instanceof JSONObject);
     assertEquals(1, ((JSONObject) o).getInt("a"));
   }
-  
+
+  @Test
   public void testExpressionEvaluation() {
     Expressions expressions = new Expressions(functions, null, new ShindigTypeConverter());
     ELContext context = expressions.newELContext();

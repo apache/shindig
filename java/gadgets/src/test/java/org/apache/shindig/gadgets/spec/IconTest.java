@@ -22,9 +22,11 @@ package org.apache.shindig.gadgets.spec;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.variables.Substitutions;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class IconTest extends TestCase {
+public class IconTest extends Assert {
+  @Test
   public void testBasicIcon() throws Exception {
     String xml = "<Icon type=\"foo\" mode=\"base64\">helloWorld</Icon>";
     Icon icon = new Icon(XmlUtil.parse(xml));
@@ -33,6 +35,7 @@ public class IconTest extends TestCase {
     assertEquals("helloWorld", icon.getContent());
   }
 
+  @Test
   public void testInvalidMode() throws Exception {
     String xml = "<Icon type=\"foo\" mode=\"broken\"/>";
     try {
@@ -43,6 +46,7 @@ public class IconTest extends TestCase {
     }
   }
 
+  @Test
   public void testSubstitutions() throws Exception {
     String xml = "<Icon>http://__MSG_domain__/icon.png</Icon>";
     Substitutions substituter = new Substitutions();

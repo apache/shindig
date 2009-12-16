@@ -47,6 +47,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Maps;
+import org.junit.Before;
+import org.junit.Test;
 
 public class AppDataHandlerTest extends EasyMockTestCase {
 
@@ -63,9 +65,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       ImmutableSet.of(new UserId(UserId.Type.userId, "john.doe")));
 
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     converter = mock(BeanJsonConverter.class);
     appDataService = mock(AppDataService.class);
@@ -91,18 +92,22 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetAll() throws Exception {
     assertHandleGetForGroup(GroupId.Type.all);
   }
 
+  @Test
   public void testHandleGetFriends() throws Exception {
     assertHandleGetForGroup(GroupId.Type.friends);
   }
 
+  @Test
   public void testHandleGetSelf() throws Exception {
     assertHandleGetForGroup(GroupId.Type.self);
   }
 
+  @Test
   public void testHandleGetPlural() throws Exception {
     String path = "/appdata/john.doe,jane.doe/@self/appId";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -121,6 +126,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetWithoutFields() throws Exception {
     String path = "/appdata/john.doe/@friends/appId";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -160,11 +166,13 @@ public class AppDataHandlerTest extends EasyMockTestCase {
     return operation.execute(params, new StringReader(jsonAppData), token, converter);
   }
 
+  @Test
   public void testHandlePost() throws Exception {
     assertNull(setupPostData("POST").get());
     verify();
   }
 
+  @Test
   public void testHandlePut() throws Exception {
     assertNull(setupPostData("PUT").get());
     verify();
@@ -174,6 +182,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
    * Test that the handler correctly recognizes null keys in the data.
    * @throws Exception if the test fails
    */
+  @Test
   public void testHandleNullPostDataKeys() throws Exception {
     String path = "/appdata/john.doe/@self/appId";
     RestHandler operation = registry.getRestHandler(path, "POST");
@@ -194,8 +203,8 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((ProtocolException)ee.getCause()).getCode(),
-          HttpServletResponse.SC_BAD_REQUEST);
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST,
+          ((ProtocolException) ee.getCause()).getCode());
       // was expecting an Exception
     }
     verify();
@@ -204,6 +213,7 @@ public class AppDataHandlerTest extends EasyMockTestCase {
    * Test that the handler correctly recognizes invalid keys in the data.
    * @throws Exception if the test fails
    */
+  @Test
   public void testHandleInvalidPostDataKeys() throws Exception {
     String path = "/appdata/john.doe/@self/appId";
     RestHandler operation = registry.getRestHandler(path, "POST");
@@ -224,13 +234,14 @@ public class AppDataHandlerTest extends EasyMockTestCase {
       operation.execute(params, new StringReader(jsonAppData), token, converter).get();
       fail();
     } catch (ExecutionException ee) {
-      assertEquals(((ProtocolException)ee.getCause()).getCode(),
-          HttpServletResponse.SC_BAD_REQUEST);
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST,
+          ((ProtocolException) ee.getCause()).getCode());
     }
     verify();
   }
 
 
+  @Test
   public void testHandleDelete() throws Exception {
     Map<String, String[]> params = Maps.newHashMap();
     params.put("fields", new String[]{"pandas"});

@@ -126,7 +126,7 @@ public class ModulePrefsTest {
     Multimap<String, Node> extra = prefs.getExtraElements();
 
     assertTrue(extra.containsKey("NavigationItem"));
-    assertEquals(extra.get("NavigationItem").iterator().next().getChildNodes().getLength(), 1);
+    assertEquals(1, extra.get("NavigationItem").iterator().next().getChildNodes().getLength());
   }
 
   @Test

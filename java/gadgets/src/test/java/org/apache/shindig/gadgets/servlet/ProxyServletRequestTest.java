@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.EasyMockTestCase;
+import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,6 +44,7 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
     return new ProxyServletRequest(request);
   }
 
+  @Test
   public void testOldRequestSyntax() throws Exception {
     ProxyServletRequest req = setupMockRequest(
       "http://localhost/gadgets/proxy?url=" + URL
@@ -52,6 +54,7 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testChainedSyntaxWithNoParameters() throws Exception {
     ProxyServletRequest req = setupMockRequest(
       "http://localhost/gadgets/proxy//http://remote/proxy?query=foo"
@@ -62,6 +65,7 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testChainedSyntaxWithOneParameter() throws Exception {
     ProxyServletRequest req = setupMockRequest(
       "http://localhost/gadgets/proxy/nocache=1/http://remote/proxy?nocache=0"
@@ -72,6 +76,7 @@ public class ProxyServletRequestTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testChainedSyntaxWithParametersDontDecode() throws Exception {
     ProxyServletRequest req = setupMockRequest(
       "http://u:p@127.0.0.1:80/g/proxy/a=b%20+c&url=u/http://r/p%3Fa+e"

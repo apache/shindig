@@ -19,26 +19,27 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import com.google.caja.parser.css.CssTree;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.cache.LruCacheProvider;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
 /**
  * Basic CSS parse tests
  */
-public class CajaCssParserTest extends TestCase {
+public class CajaCssParserTest extends Assert {
 
   private CajaCssParser cajaCssParser;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     cajaCssParser = new CajaCssParser();
     cajaCssParser.setCacheProvider(new LruCacheProvider(10));
   }
 
+  @Test
   public void testBasicCssParse() throws Exception {
     String css = ".xyz { font : bold; } A { color : #7f7f7f }";
     CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(css);
@@ -52,12 +53,13 @@ public class CajaCssParserTest extends TestCase {
    * These tests test Caja's parsing of "funky" CSS which are not legal
    * but accepted by commonly used browsers
    */
+  @Test
   public void testCajaParseColonInRValue() throws Exception {
     String original = " A {\n"
         + " -moz-opacity: 0.80;\n"
         + " filter: alpha(opacity=40);\n"
         + " filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);\n"
-        + "}";
+        + '}';
     CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
     List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
         styleSheet, CssTree.SimpleSelector.class);
@@ -65,10 +67,11 @@ public class CajaCssParserTest extends TestCase {
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
+  @Test
   public void testCajaParseNoLValue() throws Exception {
     String original = "body, input, td {\n"
         + "  Arial, sans-serif;\n"
-        + "}";
+        + '}';
     cajaCssParser.parseDom(original);
     CssTree.StyleSheet styleSheet = cajaCssParser.parseDom(original);
     List<CssTree.SimpleSelector> selectorList = CajaCssUtils.descendants(
@@ -77,6 +80,7 @@ public class CajaCssParserTest extends TestCase {
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
+  @Test
   public void testCajaParseNoScheme() throws Exception {
     String original = "span { background-image:url('//www.example.org/image.gif'); }";
     cajaCssParser.parseDom(original);
@@ -91,6 +95,7 @@ public class CajaCssParserTest extends TestCase {
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
+  @Test
   public void testCajaParseCommentInContent() throws Exception {
     String original = "body { font : bold; } \n//A comment\n A { font : bold; }";
     cajaCssParser.parseDom(original);
@@ -101,6 +106,7 @@ public class CajaCssParserTest extends TestCase {
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
+  @Test
   public void testCajaParseDotInIdent() throws Exception {
     String original = "li{list-style:none;.padding-bottom:4px;}";
     cajaCssParser.parseDom(original);
@@ -111,6 +117,7 @@ public class CajaCssParserTest extends TestCase {
     assertSame(CssTree.SimpleSelector.class, selectorList.get(0).getClass());
   }
 
+  @Test
   public void testCajaParseDotInFunction() throws Exception {
     String original = ".iepngfix {behavior: expression(IEPNGFIX.fix(this)); }";
     cajaCssParser.parseDom(original);

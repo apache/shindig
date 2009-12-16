@@ -1053,7 +1053,7 @@ public class OAuthRequestTest {
     assertEquals("some vague error", response.getResponseAsString());
     Map<String, String> metadata = response.getMetadata();
     assertNotNull(metadata);
-    assertEquals(null, metadata.get("oauthError"));
+    assertNull(metadata.get("oauthError"));
     checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
         "GET /data?cachebust=2\n");
     checkStringContains("oauthErrorText missing request entry", metadata.get("oauthErrorText"),
@@ -1979,7 +1979,7 @@ public class OAuthRequestTest {
         return;
       }
     }
-    fail("List did not contain " + key + "=" + value + "; instead was " + params);
+    fail("List did not contain " + key + '=' + value + "; instead was " + params);
   }
 
   private String getLogText() {

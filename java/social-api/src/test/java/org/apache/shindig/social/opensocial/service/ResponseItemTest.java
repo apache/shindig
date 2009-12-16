@@ -17,22 +17,19 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
-import static junit.framework.Assert.assertFalse;
-import static junitx.framework.Assert.assertNotEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-
 import org.apache.shindig.protocol.ResponseItem;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
+
+import static junitx.framework.Assert.assertNotEquals;
 
 
 /**
  * Tests Response Item equality methods.
  */
-public class ResponseItemTest {
+public class ResponseItemTest extends Assert {
 
   @Test
   public void testEquals() {

@@ -36,13 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import junit.framework.TestCase;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class MessageHandlerTest extends TestCase {
+public class MessageHandlerTest extends Assert {
 
   private MessageService messageService;
   private MessageHandler handler;
@@ -53,8 +54,8 @@ public class MessageHandlerTest extends TestCase {
   protected HandlerRegistry registry;
 
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     messageService = EasyMock.createMock(MessageService.class);
     messageService = EasyMock.createMock(MessageService.class);
@@ -68,8 +69,8 @@ public class MessageHandlerTest extends TestCase {
     registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
-  public void testPostMessage() 
-      throws ProtocolException, InterruptedException, ExecutionException {
+  @Test
+  public void testPostMessage() throws Exception {
     MessageImpl message = new MessageImpl("A message body", "A title", Message.Type.PRIVATE_MESSAGE);
     message.setRecipients(recipients);
 

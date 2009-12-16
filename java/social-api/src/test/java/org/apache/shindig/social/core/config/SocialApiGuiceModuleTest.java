@@ -23,21 +23,22 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.easymock.EasyMock;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
-public class SocialApiGuiceModuleTest extends TestCase {
+public class SocialApiGuiceModuleTest extends Assert {
   private Injector injector;
 
-  @Override public void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     injector = Guice.createInjector(new SocialApiGuiceModule(), new PropertiesModule(),
         new AbstractModule() {
           @Override
@@ -50,6 +51,7 @@ public class SocialApiGuiceModuleTest extends TestCase {
   /**
    * Test default auth handler injection
    */
+  @Test
   public void testAuthHandler() {
     injector.getInstance(AuthenticationHandlerProvider.class).get();
 

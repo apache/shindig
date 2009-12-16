@@ -21,24 +21,17 @@ package org.apache.shindig.common.crypto;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import org.apache.shindig.common.crypto.BasicBlobCrypter;
-import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.FakeTimeSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import java.security.GeneralSecurityException;
 import java.util.regex.Pattern;
 
 public class CryptoTest {
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(CryptoTest.class);
-  }
-
   private BasicBlobCrypter crypter;
 
   public CryptoTest() {
@@ -70,7 +63,7 @@ public class CryptoTest {
   }
 
 
-  @Test
+  @Test(expected = GeneralSecurityException.class)
   public void testHmacSha1VerifyTampered() throws Exception {
     String key = "abcd1234";
     String val = "your mother is a hedgehog";
@@ -78,12 +71,7 @@ public class CryptoTest {
         -21, 2, 47, -101, 9, -40, 18, 43, 76, 117,
         -51, 115, -122, -91, 39, 0, -18, 122, 30, 90,
     };
-    try {
-      Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // OK
-    }
+    Crypto.hmacSha1Verify(key.getBytes(), val.getBytes(), expected);
   }
 
   @Test

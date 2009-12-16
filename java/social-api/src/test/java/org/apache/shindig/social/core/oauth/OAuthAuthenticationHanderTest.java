@@ -34,6 +34,7 @@ import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
 import org.easymock.classextension.EasyMock;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -59,8 +60,8 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   private static final String DOMAIN = "example.org";
   private static final String CONTAINER = "sandbox";
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     reqHandler = new OAuthAuthenticationHandler(mockStore, true);
     formEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "a=b&c=d",
         OAuth.FORM_ENCODED);
@@ -101,7 +102,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
               FakeOAuthRequest.CONSUMER_SECRET, new OAuthServiceProvider(null, null, null)))
           .anyTimes();
     } catch (OAuthProblemException e) {
-
+      // ignore
     }
   }
 
@@ -111,7 +112,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
           EasyMock.eq(FakeOAuthRequest.CONSUMER_KEY), EasyMock.eq(FakeOAuthRequest.REQUESTOR))).
             andReturn(new AnonymousSecurityToken());
     } catch (OAuthProblemException e) {
-
+      // ignore
     }
   }
 
@@ -123,10 +124,10 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     HttpServletRequest request = formEncodedPost.sign(TOKEN,
         FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.NONE);
     SecurityToken token = reqHandler.getSecurityTokenFromRequest(request);
-    assertEquals(token.getViewerId(), FakeOAuthRequest.REQUESTOR);
-    assertEquals(token.getAppId(), APP_ID);
-    assertEquals(token.getDomain(), DOMAIN);
-    assertEquals(token.getContainer(), CONTAINER);
+    assertEquals(FakeOAuthRequest.REQUESTOR, token.getViewerId());
+    assertEquals(APP_ID, token.getAppId());
+    assertEquals(DOMAIN, token.getDomain());
+    assertEquals(CONTAINER, token.getContainer());
     assertNotNull(token);
     assertTrue(token instanceof OAuthSecurityToken);
     verify();

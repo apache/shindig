@@ -47,6 +47,7 @@ import org.easymock.Capture;
 import org.easymock.IArgumentMatcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -82,9 +83,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
   private Map<String,FormDataItem> emptyFormItems;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     token.setAppUrl("http://www.example.com/gadget.xml");
 

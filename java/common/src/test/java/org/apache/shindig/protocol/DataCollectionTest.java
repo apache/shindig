@@ -18,12 +18,15 @@
 package org.apache.shindig.protocol;
 
 import com.google.common.collect.Maps;
-import junit.framework.TestCase;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 
-public class DataCollectionTest extends TestCase {
+public class DataCollectionTest extends Assert {
 
+  @Test
   public void testBasicMethods() throws Exception {
     Map<String, Map<String, String>> entry = Maps.newHashMap();
     DataCollection collection = new DataCollection(entry);

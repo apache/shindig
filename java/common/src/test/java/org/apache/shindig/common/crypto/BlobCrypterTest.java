@@ -21,14 +21,7 @@ package org.apache.shindig.common.crypto;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import org.apache.shindig.common.crypto.BasicBlobCrypter;
-import org.apache.shindig.common.crypto.BlobCrypter;
-import org.apache.shindig.common.crypto.BlobCrypterException;
-import org.apache.shindig.common.crypto.BlobExpiredException;
-import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.util.FakeTimeSource;
-
-import junit.framework.JUnit4TestAdapter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -39,9 +32,6 @@ import org.junit.Test;
 import java.util.Map;
 
 public class BlobCrypterTest {
-  public static junit.framework.Test suite() {
-    return new JUnit4TestAdapter(BlobCrypterTest.class);
-  }
 
   private BasicBlobCrypter crypter;
   private FakeTimeSource timeSource;
@@ -125,51 +115,36 @@ public class BlobCrypterTest {
     }
   }
 
-  @Test
+  @Test(expected=BlobCrypterException.class)
   public void testTamperIV() throws Exception {
-    try {
-      Map<String, String> in = ImmutableMap.of("a","b");
+    Map<String, String> in = ImmutableMap.of("a","b");
 
-      String blob = crypter.wrap(in);
-      byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
-      blobBytes[0] ^= 0x01;
-      String tampered = new String(Base64.encodeBase64(blobBytes));
-      crypter.unwrap(tampered, 30);
-      fail("Signature verification should have failed.");
-    } catch (BlobCrypterException e) {
-      // Good
-    }
+    String blob = crypter.wrap(in);
+    byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
+    blobBytes[0] ^= 0x01;
+    String tampered = new String(Base64.encodeBase64(blobBytes));
+    crypter.unwrap(tampered, 30);
   }
 
-  @Test
+  @Test(expected=BlobCrypterException.class)
   public void testTamperData() throws Exception {
-    try {
-      Map<String, String> in = ImmutableMap.of("a","b");
-      String blob = crypter.wrap(in);
-      byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
-      blobBytes[30] ^= 0x01;
-      String tampered = new String(Base64.encodeBase64(blobBytes));
-      crypter.unwrap(tampered, 30);
-      fail("Signature verification should have failed.");
-    } catch (BlobCrypterException e) {
-      // Good
-    }
+    Map<String, String> in = ImmutableMap.of("a","b");
+    String blob = crypter.wrap(in);
+    byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
+    blobBytes[30] ^= 0x01;
+    String tampered = new String(Base64.encodeBase64(blobBytes));
+    crypter.unwrap(tampered, 30);
   }
 
-  @Test
+  @Test(expected=BlobCrypterException.class)
   public void testTamperMac() throws Exception {
-    try {
-      Map<String, String> in = ImmutableMap.of("a","b");
+    Map<String, String> in = ImmutableMap.of("a","b");
 
-      String blob = crypter.wrap(in);
-      byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
-      blobBytes[blobBytes.length-1] ^= 0x01;
-      String tampered = new String(Base64.encodeBase64(blobBytes));
-      crypter.unwrap(tampered, 30);
-      fail("Signature verification should have failed.");
-    } catch (BlobCrypterException e) {
-      // Good
-    }
+    String blob = crypter.wrap(in);
+    byte[] blobBytes = Base64.decodeBase64(blob.getBytes());
+    blobBytes[blobBytes.length-1] ^= 0x01;
+    String tampered = new String(Base64.encodeBase64(blobBytes));
+    crypter.unwrap(tampered, 30);
   }
 
   @Test
@@ -182,27 +157,17 @@ public class BlobCrypterTest {
     assertEquals("b", out.get("a"));
   }
 
-  @Test
+  @Test(expected=BlobCrypterException.class)
   public void testBadKey() throws Exception {
     BlobCrypter alt = new BasicBlobCrypter("1123456789abcdef".getBytes());
     Map<String, String> in = ImmutableMap.of("a","b");
 
     String blob = crypter.wrap(in);
-    try {
-      alt.unwrap(blob, 30);
-      fail("Decryption should have failed");
-    } catch (BlobCrypterException e) {
-      // Good.
-    }
+    alt.unwrap(blob, 30);
   }
 
-  @Test
+  @Test(expected=IllegalArgumentException.class)
   public void testShortKeyFails() throws Exception {
-    try {
-      new BasicBlobCrypter("0123456789abcde".getBytes());
-      fail("Short key should fail");
-    } catch (IllegalArgumentException e) {
-      // good.
-    }
+    new BasicBlobCrypter("0123456789abcde".getBytes());
   }
 }

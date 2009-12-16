@@ -23,21 +23,22 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.social.core.config.SocialApiGuiceModule;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 
 
-public class AuthenticationProviderHandlerTest extends TestCase {
+public class AuthenticationProviderHandlerTest extends Assert {
   /**
    * Test that existing custom handlers won't be broken with the switch
    * to injecting List<ProviderHandler>.
    */
+  @Test
   public void testCustomHandler() {
     Injector injector = Guice.createInjector(new SocialApiGuiceModule(),
         new CustomAuthHandlerProviderModule(), new PropertiesModule());

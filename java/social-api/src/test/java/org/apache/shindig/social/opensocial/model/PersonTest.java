@@ -19,14 +19,16 @@ package org.apache.shindig.social.opensocial.model;
 
 import org.apache.shindig.social.core.model.PersonImpl;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class PersonTest extends TestCase {
-
+public class PersonTest extends Assert {
+  @Test
   public void testInvalidFromUrlString() throws Exception {
     assertNull(Person.Field.fromUrlString("badness"));
   }
 
+  @Test
   public void testFromUrlString() throws Exception {
     assertUrlStringMaps(Person.Field.NAME);
     assertUrlStringMaps(Person.Field.THUMBNAIL_URL);
@@ -36,6 +38,7 @@ public class PersonTest extends TestCase {
     assertEquals(field, Person.Field.fromUrlString(field.toString()));
   }
 
+  @Test
   public void testGetProfileUrl() throws Exception {
     Person person = new PersonImpl();
     assertNull(person.getProfileUrl());
@@ -56,6 +59,7 @@ public class PersonTest extends TestCase {
     assertEquals(address, person.getUrls().get(0).getValue());
   }
 
+  @Test
   public void testGetThumbnailUrl() throws Exception {
     Person person = new PersonImpl();
     assertNull(person.getThumbnailUrl());
@@ -74,5 +78,4 @@ public class PersonTest extends TestCase {
     assertEquals(1, person.getPhotos().size());
     assertEquals(url, person.getPhotos().get(0).getValue());
   }
-
 }

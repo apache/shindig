@@ -37,7 +37,11 @@ import junit.framework.TestCase;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-public class DataServiceServletTest extends TestCase {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class DataServiceServletTest extends Assert {
 
   private static final FakeGadgetToken FAKE_GADGET_TOKEN = new FakeGadgetToken()
       .setOwnerId("john.doe").setViewerId("john.doe");
@@ -52,7 +56,8 @@ public class DataServiceServletTest extends TestCase {
 
   private IMocksControl mockControl = EasyMock.createNiceControl();
 
-  @Override protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     servlet = new DataServiceServlet();
     req = mockControl.createMock(HttpServletRequest.class);
     res = mockControl.createMock(HttpServletResponse.class);
@@ -76,6 +81,7 @@ public class DataServiceServletTest extends TestCase {
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }
 
+  @Test
   public void testUriRecognition() throws Exception {
     verifyHandlerWasFoundForPathInfo("/test/5/@self");
   }
@@ -109,11 +115,13 @@ public class DataServiceServletTest extends TestCase {
     mockControl.reset();
   }
 
+  @Test
   public void testOverridePostWithGet() throws Exception {
     String route = "/test";
     verifyHandlerWasFoundForPathInfo(route, "POST", "GET");
   }
 
+  @Test
   public void  testOverrideGetWithPost() throws Exception {
     String route = "/test";
     verifyHandlerWasFoundForPathInfo(route, "GET", "POST");
@@ -122,6 +130,7 @@ public class DataServiceServletTest extends TestCase {
   /**
    * Tests a data handler that returns a failed Future
    */
+  @Test
   public void testFailedRequest() throws Exception {
     String route = "/test";
     setupRequest(route, "DELETE", null);
@@ -152,6 +161,7 @@ public class DataServiceServletTest extends TestCase {
     req = fakeReq;
   }
 
+  @Test
   public void testGetConverterForRequest() throws Exception {
     assertConverter(atomConverter, "atom");
     assertConverter(xmlConverter, "xml");
@@ -160,6 +170,7 @@ public class DataServiceServletTest extends TestCase {
     assertConverter(jsonConverter, "ahhhh!");
   }
 
+  @Test
   public void testGetConverterForRequestContentType() throws Exception {
     assertConverterForContentType(atomConverter, ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
     assertConverterForContentType(xmlConverter, ContentTypes.OUTPUT_XML_CONTENT_TYPE);

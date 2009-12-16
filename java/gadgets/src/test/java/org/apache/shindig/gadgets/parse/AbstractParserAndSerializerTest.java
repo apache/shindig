@@ -22,7 +22,7 @@ package org.apache.shindig.gadgets.parse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * Base test fixture for HTML parsing and serialization.
  */
-public abstract class AbstractParserAndSerializerTest extends TestCase {
+public abstract class AbstractParserAndSerializerTest extends Assert {
 
   /** The vm line separator */
   private static final String EOL = System.getProperty("line.separator");

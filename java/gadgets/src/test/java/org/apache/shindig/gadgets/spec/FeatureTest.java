@@ -21,12 +21,14 @@ package org.apache.shindig.gadgets.spec;
 
 import org.apache.shindig.common.xml.XmlUtil;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
-public class FeatureTest extends TestCase {
+public class FeatureTest extends Assert {
+  @Test
   public void testRequire() throws Exception {
     String xml = "<Require feature=\"foo\"/>";
     Feature feature = new Feature(XmlUtil.parse(xml));
@@ -34,6 +36,7 @@ public class FeatureTest extends TestCase {
     assertTrue(feature.getRequired());
   }
 
+  @Test
   public void testOptional() throws Exception {
     String xml = "<Optional feature=\"foo\"/>";
     Feature feature = new Feature(XmlUtil.parse(xml));
@@ -41,6 +44,7 @@ public class FeatureTest extends TestCase {
     assertFalse(feature.getRequired());
   }
 
+  @Test
   public void testParams() throws Exception {
     String key = "bar";
     String value = "Hello, World!";
@@ -53,6 +57,7 @@ public class FeatureTest extends TestCase {
     assertEquals(ImmutableList.of(value), params.get(key));
   }
 
+  @Test
   public void testMultiParams() throws Exception {
     String key = "bar";
     String key2 = "bar2";
@@ -72,11 +77,11 @@ public class FeatureTest extends TestCase {
     assertEquals(value, feature.getParam(key));
     assertEquals(ImmutableList.of(value2, value), params.get(key2));
     assertEquals(value2, feature.getParam(key2));
-    
-    assertEquals(ImmutableList.of(), params.get("foobar"));
+    assertTrue(params.get("foobar").isEmpty());
     assertNull(feature.getParam("foobar"));
   }
 
+  @Test
   public void testDoesNotLikeUnnamedFeatures() throws Exception {
     String xml = "<Require/>";
     try {
@@ -87,6 +92,7 @@ public class FeatureTest extends TestCase {
     }
   }
 
+  @Test
   public void testEnforceParamNames() throws Exception {
     String xml = "<Require feature=\"foo\"><Param>Test</Param></Require>";
     try {

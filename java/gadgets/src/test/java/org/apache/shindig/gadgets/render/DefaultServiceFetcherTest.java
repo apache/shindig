@@ -32,6 +32,8 @@ import org.easymock.classextension.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -46,9 +48,8 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
   protected static final String endPoint2 = "http://%host%/social/api/rpc";
 
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     JSONObject config = createConfig();
 
     JsonContainerConfig containerConfig =
@@ -83,6 +84,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     return config;
   }
 
+  @Test
   public void testReadConfigNoEndpoints() throws Exception {
     JSONObject config = createConfig();
     config.getJSONObject("default").
@@ -101,6 +103,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     assertEquals(configuredServices, services);
   }
 
+  @Test
   public void testReadConfigEndpointsDown() throws Exception {
     EasyMock.expect(mockFetcher.fetch(EasyMock.isA(HttpRequest.class))).andReturn(
         new HttpResponse("")).anyTimes();
@@ -110,6 +113,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     assertEquals(configuredServices, services);
   }
 
+  @Test
   public void testReadConfigWithValidEndpoints() throws Exception {
     List<String> endPoint1Services = ImmutableList.of("do.something", "delete.someting");
     JSONObject service1 = new JSONObject();
@@ -133,6 +137,7 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
     assertEquals(mergedServices, LinkedHashMultimap.create(services));
   }
 
+  @Test
   public void testReadConfigBadContainer() throws Exception {
     Multimap<String, String> multimap = fetcher.getServicesForContainer("badcontainer", "dontcare");
     assertEquals(0, multimap.size());

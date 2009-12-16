@@ -24,12 +24,14 @@ import com.google.inject.Injector;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class AuthInfoTest extends TestCase {
+public class AuthInfoTest extends Assert {
 
+  @Test
   public void testToken() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
     SecurityToken token = new FakeGadgetToken();
@@ -41,6 +43,7 @@ public class AuthInfoTest extends TestCase {
     assertEquals(token, new AuthInfo(req).getSecurityToken());
   }
 
+  @Test
   public void testAuthType() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
 
@@ -50,7 +53,8 @@ public class AuthInfoTest extends TestCase {
     // This should work when creating a new AuthInfo from the same request
     assertEquals("FakeAuth", new AuthInfo(req).getAuthType());
   }
-  
+
+  @Test
   public void testBinding() throws Exception {
     HttpServletRequest req = new FakeHttpServletRequest();
     SecurityToken token = new FakeGadgetToken();

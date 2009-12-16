@@ -25,6 +25,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,9 +51,8 @@ public class ProxyServletTest extends ServletTestFixture {
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     servlet.setProxyHandler(proxyHandler);
     expect(request.getParameter(ProxyBase.URL_PARAM))
         .andReturn(REQUEST_URL.toString()).anyTimes();
@@ -73,6 +74,7 @@ public class ProxyServletTest extends ServletTestFixture {
       assertEquals(expectedBody, recorder.getResponseAsString());
   }
 
+  @Test
   public void testDoGetNormal() throws Exception {
     setupBasic();
     expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
@@ -83,6 +85,7 @@ public class ProxyServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 
+  @Test
   public void testDoGetHttpError() throws Exception {
     setupBasic();
     expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
@@ -93,6 +96,7 @@ public class ProxyServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
 
+  @Test
   public void testDoGetException() throws Exception {
     setupBasic();
     expect(pipeline.execute(internalRequest)).andThrow(
@@ -105,6 +109,7 @@ public class ProxyServletTest extends ServletTestFixture {
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
   }
 
+  @Test
   public void testDoGetAlternateSyntax() throws Exception {
     setupAltSyntax();
     expect(request.getRequestURI()).andReturn(ALT_SYNTAX_URL);

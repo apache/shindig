@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
  */
 public class GIFOptimizerTest extends BaseOptimizerTest {
 
+  @Test
   public void testEfficientGIF() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/unanimated.gif", "image/gif");
@@ -40,12 +42,13 @@ public class GIFOptimizerTest extends BaseOptimizerTest {
    * that has not pixels that map to them so it is Opaque.
    * @throws Exception
    */
+  @Test
   public void testBadPaletteGIFToPNG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/large.gif", "image/gif");
     HttpResponse httpResponse = rewrite(resp);
     assertTrue(httpResponse.getContentLength() <= resp.getContentLength());
-    assertEquals(httpResponse.getHeader("Content-Type"), "image/png");
+    assertEquals("image/png", httpResponse.getHeader("Content-Type"));
   }
 
   /**
@@ -53,12 +56,13 @@ public class GIFOptimizerTest extends BaseOptimizerTest {
    * tranparency
    * @throws Exception
    */
+  @Test
   public void testDirectColorModelGif() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/directcolor.gif", "image/gif");
     HttpResponse httpResponse = rewrite(resp);
     assertTrue(httpResponse.getContentLength() <= resp.getContentLength());
-    assertEquals(httpResponse.getHeader("Content-Type"), "image/gif");
+    assertEquals("image/gif", httpResponse.getHeader("Content-Type"));
   }
 
   protected HttpResponse rewrite(HttpResponse original)

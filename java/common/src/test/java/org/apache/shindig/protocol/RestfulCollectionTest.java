@@ -19,12 +19,13 @@ package org.apache.shindig.protocol;
 
 import com.google.common.collect.Lists;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
-public class RestfulCollectionTest extends TestCase {
-
+public class RestfulCollectionTest extends Assert {
+  @Test
   public void testBasicMethods() throws Exception {
     RestfulCollection<String> collection
         = new RestfulCollection<String>(Lists.<String>newArrayList());
@@ -42,6 +43,7 @@ public class RestfulCollectionTest extends TestCase {
     assertEquals(totalResults, collection.getTotalResults());
   }
 
+  @Test
   public void testConstructors() throws Exception {
     List<String> entry = Lists.newArrayList("banana", "who");
     RestfulCollection<String> collection = new RestfulCollection<String>(entry);
@@ -61,5 +63,4 @@ public class RestfulCollectionTest extends TestCase {
     assertEquals(totalResults, collection.getTotalResults());
     assertEquals(resultsPerPage, collection.getItemsPerPage());
   }
-
 }

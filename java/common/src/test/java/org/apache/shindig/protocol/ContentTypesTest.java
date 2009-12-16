@@ -18,42 +18,45 @@
  */
 package org.apache.shindig.protocol;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Test content type checks
  */
-public class ContentTypesTest extends TestCase {
+public class ContentTypesTest extends Assert {
 
-  @Override
-  protected void setUp() throws Exception {
-  }
-
+  @Test
   public void testAllowJson() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE, true);
   }
 
+  @Test
   public void testAllowJsonRpc() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
         "application/json-rpc", true);
   }
 
+  @Test
   public void testAllowAtom() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_ATOM_CONTENT_TYPES,
         ContentTypes.OUTPUT_ATOM_CONTENT_TYPE, true);
   }
 
+  @Test
   public void testAllowXml() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_XML_CONTENT_TYPES,
         ContentTypes.OUTPUT_XML_CONTENT_TYPE, true);
   }
 
+  @Test
   public void testAllowMultipart() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_MULTIPART_CONTENT_TYPES,
         ContentTypes.MULTIPART_FORM_CONTENT_TYPE, true);
   }
 
+  @Test
   public void testForbidden() throws Exception {
     try {
       ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
@@ -63,6 +66,7 @@ public class ContentTypesTest extends TestCase {
     }
   }
 
+  @Test
   public void testStrictDisallowUnknown() throws Exception {
     try {
       ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
@@ -72,11 +76,13 @@ public class ContentTypesTest extends TestCase {
     }
   }
 
+  @Test
   public void testNonStrictAllowUnknown() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
         "text/plain", false);
   }
 
+  @Test
   public void textExtractMimePart() throws Exception {
     assertEquals("text/xml", ContentTypes.extractMimePart("Text/Xml ; charset = ISO-8859-1;x=y"));
   }

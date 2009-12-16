@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -27,25 +28,27 @@ import java.io.IOException;
  * Test PNG handling
  */
 public class PNGOptimizerTest extends BaseOptimizerTest {
-
+  @Test
   public void testRewriteInefficientPNG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/inefficient.png", "image/png");
     HttpResponse httpResponse = rewrite(resp);
     assertTrue(httpResponse.getContentLength() <= resp.getContentLength());
-    assertEquals(httpResponse.getHeader("Content-Type"), "image/png");
+    assertEquals("image/png", httpResponse.getHeader("Content-Type"));
   }
 
   // Strip the alpha component from an image that was stored in RGBA form but
   // which is entirely opaque
+  @Test
   public void testStripAlpha() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/rgbawithnoalpha.png", "image/png");
     HttpResponse httpResponse = rewrite(resp);
     assertTrue(httpResponse.getContentLength() <= resp.getContentLength());
-    assertEquals(httpResponse.getHeader("Content-Type"), "image/png");
+    assertEquals("image/png", httpResponse.getHeader("Content-Type"));
   }
 
+  @Test
   public void testEvil() throws Exception {
     // Metadata length is too long causes OutOfMemory
     try {

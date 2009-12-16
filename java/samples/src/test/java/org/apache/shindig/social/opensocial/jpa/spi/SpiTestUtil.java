@@ -18,6 +18,7 @@
 package org.apache.shindig.social.opensocial.jpa.spi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.auth.SecurityToken;
@@ -222,7 +223,7 @@ public class SpiTestUtil {
    */
   public static void assertPersonEquals(Person actual, String expectedId, String expectedName) {
     assertEquals(actual.getId(), expectedId);
-    assertTrue(actual.getName() != null);
+    assertNotNull(actual.getName());
     assertEquals(actual.getName().getFormatted(), expectedName);
   }
 

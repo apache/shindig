@@ -19,6 +19,8 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -26,24 +28,26 @@ import java.io.IOException;
  * Test JPEG rewiting.
  */
 public class JPEGOptimizerTest extends BaseOptimizerTest {
-
+  @Test
   public void testSmallJPEGToPNG() throws Exception {
     // Should be significantly smaller
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/small.jpg", "image/jpeg");
     HttpResponse rewritten = rewrite(resp);
-    assertEquals(rewritten.getHeader("Content-Type"), "image/png");
+    assertEquals("image/png", rewritten.getHeader("Content-Type"));
     assertTrue(rewritten.getContentLength() * 100 / resp.getContentLength() < 70);
   }
 
+  @Test
   public void testLargeJPEG() throws Exception {
     HttpResponse resp =
         createResponse("org/apache/shindig/gadgets/rewrite/image/large.jpg", "image/jpeg");
     HttpResponse rewritten = rewrite(resp);
-    assertEquals(resp.getHeader("Content-Type"), "image/jpeg");
+    assertEquals("image/jpeg", resp.getHeader("Content-Type"));
     assertTrue(rewritten.getContentLength() <= resp.getContentLength());
   }
 
+  @Test
   public void testBadImage() throws Exception {
     // Not a JPEG
     try {
@@ -57,6 +61,8 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
 
   }
 
+  @Test
+  @Ignore
   public void xtestBadICC1() throws Exception {
     // ICC section too long 
     HttpResponse resp =
@@ -64,6 +70,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     rewrite(resp);
   }
 
+  @Test
   public void testBadICC2() throws Exception {
     // ICC section too long
     try {
@@ -76,6 +83,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     }
   }
 
+  @Test
   public void testBadICC3() throws Exception {
     // ICC length lies
     try {
@@ -88,6 +96,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     }
   }
 
+  @Test
   public void testBadICC4() throws Exception {
     // ICC count too large
     HttpResponse resp =
@@ -102,6 +111,7 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     }
   }
 
+  @Test
   public void testBadICC5() throws Exception {
     // ICC length too large. Should be readable by most VMs
     HttpResponse resp =

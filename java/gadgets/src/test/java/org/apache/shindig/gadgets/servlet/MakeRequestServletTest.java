@@ -29,6 +29,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -53,9 +55,8 @@ public class MakeRequestServletTest extends ServletTestFixture {
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     servlet.setMakeRequestHandler(handler);
     expect(request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM))
@@ -96,6 +97,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 
+  @Test
   public void testDoGetHttpError() throws Exception {
     setupGet();
     expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
@@ -106,6 +108,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
 
+  @Test
   public void testDoGetException() throws Exception {
     setupGet();
     expect(pipeline.execute(internalRequest)).andThrow(
@@ -118,6 +121,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
   }
 
+  @Test
   public void testDoPostNormal() throws Exception {
     setupPost();
     expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
@@ -128,6 +132,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 
+  @Test
   public void testDoPostHttpError() throws Exception {
     setupPost();
     expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
@@ -138,6 +143,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     assertResponseOk(HttpResponse.SC_NOT_FOUND, "");
   }
 
+  @Test
   public void testDoPostException() throws Exception {
     setupPost();
     expect(pipeline.execute(internalRequest)).andThrow(

@@ -25,7 +25,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.TypeLiteral;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,12 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class BeanJsonConverterTest extends TestCase {
+public class BeanJsonConverterTest extends Assert {
   private BeanJsonConverter beanJsonConverter;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     beanJsonConverter = new BeanJsonConverter(Guice.createInjector());
   }
 
@@ -74,8 +75,9 @@ public class BeanJsonConverterTest extends TestCase {
     }
   }
 
+  @Test
   public void testJsonToObject() throws Exception {
-    String json = "{" +
+    String json = '{' +
         "hello:'world'," +
         "count:10," +
         "someStatic:'foo'," +
@@ -94,6 +96,7 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(TestObject.TestEnum.bar, object.testEnum);
   }
 
+  @Test
   public void testJsonToPrimitives() throws Exception {
     String simpleJson = "{hello:'world',count:10}";
 
@@ -105,6 +108,7 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(10, map.get("count"));
   }
 
+  @Test
   public void testJsonToCar() throws Exception {
     String carJson = "{engine:[{value:DIESEL},{value:TURBO}],parkingTickets:{SF:$137,NY:'$301'}," +
             "passengers:[{gender:female,name:'Mum'}, {gender:male,name:'Dad'}]}";
@@ -118,17 +122,17 @@ public class BeanJsonConverterTest extends TestCase {
 
     assertEquals(car.getParkingTickets(), ImmutableMap.of("SF", "$137", "NY", "$301"));
     TestModel.Passenger mum = car.getPassengers().get(0);
-    assertEquals(mum.getGender(), TestModel.Gender.female);
-    assertEquals(mum.getName(), "Mum");
+    assertEquals(TestModel.Gender.female, mum.getGender());
+    assertEquals("Mum", mum.getName());
     TestModel.Passenger dad = car.getPassengers().get(1);
-    assertEquals(dad.getGender(), TestModel.Gender.male);
-    assertEquals(dad.getName(), "Dad");
+    assertEquals(TestModel.Gender.male, dad.getGender());
+    assertEquals("Dad", dad.getName());
   }
 
+  @Test
   public void testJsonToMap() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
-    Map<String, Object> data = Maps.newHashMap();
-    data = beanJsonConverter.convertToObject(jsonActivity,
+    Map<String, Object> data = beanJsonConverter.convertToObject(jsonActivity,
         new TypeLiteral<Map<String, Object>>(){}.getType());
 
     assertEquals(2, data.size());
@@ -144,6 +148,7 @@ public class BeanJsonConverterTest extends TestCase {
     }
   }
 
+  @Test
   public void testJsonToMapWithConversion() throws Exception {
     String jsonActivity = "{count : 0, favoriteColor : 'yellow'}";
     Map<String, String> data = Maps.newHashMap();
@@ -163,10 +168,10 @@ public class BeanJsonConverterTest extends TestCase {
     }
   }
 
+  @Test
   public void testJsonToNestedGeneric() throws Exception {
     String jsonActivity = "{key0:[0,1,2],key1:[3,4,5]}";
-    Map<String, List<Integer>> data = Maps.newHashMap();
-    data = beanJsonConverter.convertToObject(jsonActivity,
+    Map<String, List<Integer>> data =  beanJsonConverter.convertToObject(jsonActivity,
         new TypeLiteral<Map<String, List<Integer>>>(){}.getType());
 
     assertEquals(2, data.size());
@@ -175,10 +180,11 @@ public class BeanJsonConverterTest extends TestCase {
     assertEquals(Arrays.asList(3, 4, 5), data.get("key1"));
   }
 
+  @Test
   public void testEmptyJsonMap() throws Exception {
     String emptyMap = "{}";
     Map<String, String> data = beanJsonConverter.convertToObject(emptyMap, 
          new TypeLiteral<Map<String,String>>(){}.getType());
-    assertTrue(data.size() == 0);
+    assertTrue(data.isEmpty());
   }
 }

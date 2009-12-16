@@ -22,6 +22,8 @@ import org.apache.shindig.social.dataservice.integration.RestfulJsonDataTest;
 import org.apache.shindig.social.opensocial.jpa.spi.SpiDatabaseBootstrap;
 
 import com.google.inject.Injector;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * JPA restful Json data test, which wraps around shindig's <code>RestfulJsonDataTest</code>
@@ -39,10 +41,8 @@ public class JpaRestfulJsonDataTest extends RestfulJsonDataTest {
    * 
    * @throws Exception the exception
    */
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    
+  @Before
+  public void setUp() throws Exception {
     // Init config
     Injector injector = JpaRestfulTestConfigHelper.init();
     this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
@@ -52,12 +52,8 @@ public class JpaRestfulJsonDataTest extends RestfulJsonDataTest {
     this.bootstrap.init();
   }
   
-  /* (non-Javadoc)
-   * @see junit.framework.TestCase#tearDown()
-   */
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
+  @After
+  public void tearDown() throws Exception {
     this.bootstrap.tearDown();
   }
 

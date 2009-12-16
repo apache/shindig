@@ -23,8 +23,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.social.SocialApiTestsGuiceModule;
 import org.apache.shindig.social.core.model.ActivityImpl;
@@ -43,21 +41,23 @@ import org.apache.shindig.social.opensocial.model.Person;
 
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.util.List;
 import java.util.Map;
 
-public class BeanXStreamAtomConverterTest extends TestCase {
+public class BeanXStreamAtomConverterTest extends Assert {
   private Person johnDoe;
   private Activity activity;
 
   private BeanXStreamAtomConverter beanXmlConverter;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
 
     johnDoe = new PersonImpl("johnDoeId", "Johnny", new NameImpl("John Doe"));
@@ -99,6 +99,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     }
   }
 
+  @Test
   public void testToXmlOnSimpleClass() throws Exception {
     // since this doent implement the model, it wont get mapped correctly, hence
     // we cant validate
@@ -112,6 +113,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     assertEquals("robot", name.getTextContent());
   }
 
+  @Test
   public void testPersonToXml() throws Exception {
     String xml = beanXmlConverter.convertToString(johnDoe);
     Element element = XmlUtil.parse(xml);
@@ -119,6 +121,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     assertEquals("urn:guid:" + johnDoe.getId(), id.getTextContent());
   }
 
+  @Test
   public void testActivityToXml() throws Exception {
     String xml = beanXmlConverter.convertToString(activity);
 
@@ -127,6 +130,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
     assertEquals(activity.getId(), id.getTextContent());
   }
 
+  @Test
   public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
     Map<String, Map<String, String>> map = Maps.newTreeMap();
@@ -157,6 +161,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
+  @Test
   public void testMapToXml() throws Exception {
     Map<String, String> m = Maps.newLinkedHashMap();
     m.put("key1", "value1");
@@ -178,6 +183,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
+  @Test
   public void testEmptyList() throws Exception {
     List<String> empty = Lists.newArrayList();
     String xml = beanXmlConverter.convertToString(empty);
@@ -208,6 +214,7 @@ public class BeanXStreamAtomConverterTest extends TestCase {
 	XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
+  @Test
   public void testElementNamesInList() throws Exception {
     List<Activity> activities = Lists.newArrayList();
     activities.add(activity);

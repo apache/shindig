@@ -37,18 +37,18 @@ import java.util.Collections;
 
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test the JSONOpensocialService
  */
-public class JsonDbOpensocialServiceTest extends TestCase {
+public class JsonDbOpensocialServiceTest extends Assert {
   private JsonDbOpensocialService db;
 
   private static final UserId CANON_USER = new UserId(UserId.Type.userId, "canonical");
@@ -61,13 +61,13 @@ public class JsonDbOpensocialServiceTest extends TestCase {
 
   private SecurityToken token = new FakeGadgetToken();
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
     db = injector.getInstance(JsonDbOpensocialService.class);
   }
 
+  @Test
   public void testGetPersonDefaultFields() throws Exception {
     Person person = db
         .getPerson(CANON_USER, Person.Field.DEFAULT_FIELDS, token).get();
@@ -79,12 +79,14 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         person.getThumbnailUrl());
   }
 
+  @Test
   public void testGetPersonAllFields() throws Exception {
     Person person = db
         .getPerson(CANON_USER, Person.Field.ALL_FIELDS, token).get();
     assertNotNull("Canonical user not found", person);
   }
 
+  @Test
   public void testGetPersonAllAppData() throws Exception {
     Person person = db
         .getPerson(CANON_USER, ImmutableSet.of("id", "appData"), token).get();
@@ -95,6 +97,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         ImmutableMap.of("count", "2", "size", "100"), person.getAppData());
   }
 
+  @Test
   public void testGetPersonOneAppDataField() throws Exception {
     Person person = db
         .getPerson(CANON_USER, ImmutableSet.of("id", "appData.size"), token).get();
@@ -105,6 +108,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         ImmutableMap.of("size", "100"), person.getAppData());
   }
 
+  @Test
   public void testGetPersonMultipleAppDataFields() throws Exception {
     Person person = db
         .getPerson(CANON_USER,
@@ -117,6 +121,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
         ImmutableMap.of("count", "2", "size", "100"), person.getAppData());
   }
 
+  @Test
   public void testGetExpectedFriends() throws Exception {
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(PersonService.TOP_FRIENDS_SORT);
@@ -137,6 +142,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
   }
 
+  @Test
   public void testGetExpectedUsersForPlural() throws Exception {
     CollectionOptions options = new CollectionOptions();
     options.setSortBy(PersonService.TOP_FRIENDS_SORT);
@@ -157,6 +163,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertEquals("jane.doe", responseItem.getEntry().get(1).getId());
   }
 
+  @Test
   public void testGetExpectedActivities() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
         ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
@@ -164,6 +171,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertSame(2, responseItem.getTotalResults());
   }
 
+  @Test
   public void testGetExpectedActivitiesForPlural() throws Exception {
     RestfulCollection<Activity> responseItem = db.getActivities(
         ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(), null,
@@ -171,6 +179,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertSame(3, responseItem.getTotalResults());
   }
 
+  @Test
   public void testGetExpectedActivity() throws Exception {
     Activity activity = db.getActivity(
         CANON_USER, SELF_GROUP, APP_ID,
@@ -181,6 +190,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertNull(activity.getBodyId());
   }
 
+  @Test
   public void testDeleteExpectedActivity() throws Exception {
     db.deleteActivities(CANON_USER, SELF_GROUP, APP_ID, ImmutableSet.of(APP_ID),
         new FakeGadgetToken());
@@ -196,6 +206,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     }
   }
 
+  @Test
   public void testGetExpectedAppData() throws Exception {
     DataCollection responseItem = db.getPersonData(
         ImmutableSet.of(CANON_USER), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
@@ -208,6 +219,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("size"));
   }
 
+  @Test
   public void testGetExpectedAppDataForPlural() throws Exception {
     DataCollection responseItem = db.getPersonData(
         ImmutableSet.of(CANON_USER, JOHN_DOE), SELF_GROUP, APP_ID, Collections.<String>emptySet(),
@@ -224,6 +236,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertTrue(responseItem.getEntry().get(JOHN_DOE.getUserId()).containsKey("count"));
   }
 
+  @Test
   public void testDeleteExpectedAppData() throws Exception {
     // Delete the data
     db.deletePersonData(CANON_USER, SELF_GROUP, APP_ID,
@@ -241,6 +254,7 @@ public class JsonDbOpensocialServiceTest extends TestCase {
     assertTrue(responseItem.getEntry().get(CANONICAL_USER_ID).containsKey("size"));
   }
 
+  @Test
   public void testUpdateExpectedAppData() throws Exception {
     // Delete the data
     db.updatePersonData(CANON_USER, SELF_GROUP, APP_ID,

@@ -20,6 +20,7 @@ package org.apache.shindig.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +37,7 @@ public final class JsonAssert {
       Object leftValue = left.opt(i);
       Object rightValue = right.opt(i);
 
-      assertEquals(left.toString() + " != " + right.toString(),
+      assertSame(left.toString() + " != " + right.toString(),
                    leftValue.getClass(), rightValue.getClass());
 
       if (leftValue instanceof JSONObject) {
@@ -65,8 +66,8 @@ public final class JsonAssert {
       if (leftValue != null) {
         assertNotNull(left.toString() + " != " + right.toString(), rightValue);
       }
-      assertEquals(left.toString() + " != " + right.toString(),
-                   leftValue.getClass(), rightValue.getClass());
+      assertSame(left.toString() + " != " + right.toString(),
+                 leftValue.getClass(), rightValue.getClass());
 
       if (leftValue instanceof JSONObject) {
         assertJsonObjectEquals((JSONObject) leftValue, (JSONObject) rightValue);

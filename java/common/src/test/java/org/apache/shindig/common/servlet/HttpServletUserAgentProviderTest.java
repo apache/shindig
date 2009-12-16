@@ -22,8 +22,8 @@ import com.google.inject.Provider;
 import static org.easymock.EasyMock.expect;
 
 import org.apache.shindig.common.EasyMockTestCase;
-import org.apache.shindig.common.servlet.HttpServletUserAgentProvider;
-import org.apache.shindig.common.servlet.UserAgent;
+
+import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,7 +32,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class HttpServletUserAgentProviderTest extends EasyMockTestCase {
   private UserAgent.Parser parser = new PassThroughUAParser();
-  
+
+  @Test
   public void testProviderWorks() {
     String agentVersion = "AGENT_VERSION";
     HttpServletRequest req = mock(HttpServletRequest.class);
@@ -42,16 +43,18 @@ public class HttpServletUserAgentProviderTest extends EasyMockTestCase {
         parser, new HttpServletRequestProvider(req));
     UserAgent entry = provider.get();
     assertEquals(UserAgent.Browser.OTHER, entry.getBrowser());
-    assertEquals(agentVersion, entry.getVersion().toString());
+    assertEquals(agentVersion, entry.getVersion());
     verify();
   }
-  
+
+  @Test
   public void testNoRequestGetsNull() {
     HttpServletUserAgentProvider provider = new HttpServletUserAgentProvider(
         parser, new HttpServletRequestProvider(null));
     assertNull(provider.get());
   }
-  
+
+  @Test
   public void testNoUserAgentGetsNull() {
     HttpServletRequest req = mock(HttpServletRequest.class);
     expect(req.getHeader("User-Agent")).andReturn(null).once();

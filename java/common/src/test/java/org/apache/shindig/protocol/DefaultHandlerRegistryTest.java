@@ -27,11 +27,10 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Guice;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.json.JSONObject;
-import static org.junit.Assert.assertArrayEquals;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -43,45 +42,50 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Tests BasicHandleRregistry
  */
-public class DefaultHandlerRegistryTest extends TestCase {
+public class DefaultHandlerRegistryTest extends Assert {
 
   private DefaultHandlerRegistry registry;
   private BeanJsonConverter converter;
 
-  @Override
-  @SuppressWarnings("unchecked")
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     converter = new BeanJsonConverter(Guice.createInjector());
     registry = new DefaultHandlerRegistry(null, converter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));
   }
 
+  @Test
   public void testGetHandlerRPC() throws Exception {
     assertNotNull(registry.getRpcHandler(new JSONObject("{method : test.get}")));
   }
 
+  @Test
   public void testGetHandlerRest() throws Exception {
     assertNotNull(registry.getRestHandler("/test/", "GET"));
   }
 
+  @Test
   public void testOverrideHandlerRPC() throws Exception {
     assertNotNull(registry.getRpcHandler(new JSONObject("{method : test.overidden}")));
   }
 
+  @Test
   public void testOverrideHandlerRPCName() throws Exception {
     assertNotNull(registry.getRpcHandler(new JSONObject("{method : test.override.rpcname}")));
   }
 
+  @Test
   public void testOverrideHandlerRest() throws Exception {
     assertNotNull(registry.getRestHandler("/test/overidden/method/", "GET"));
   }
 
+  @Test
   public void testGetForAliasHandler() {
     assertNotNull(registry.getRestHandler("/test", "GET"));
   }
 
+  @Test
   public void testRpcHandler_serviceDoesntExist() throws Exception {
     JSONObject rpc = new JSONObject("{method : makebelieve.get}");
     RpcHandler rpcHandler = registry.getRpcHandler(rpc);
@@ -91,12 +95,13 @@ public class DefaultHandlerRegistryTest extends TestCase {
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
       assertSame(t.getCause().getClass(), ProtocolException.class);
-      Assert.assertEquals(((ProtocolException) t.getCause()).getCode(), HttpServletResponse.SC_NOT_IMPLEMENTED);
+      Assert.assertEquals(HttpServletResponse.SC_NOT_IMPLEMENTED, ((ProtocolException) t.getCause()).getCode());
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
     }
   }
 
+  @Test
   public void testRestHandler_serviceDoesntExist() {
     RestHandler restHandler = registry.getRestHandler("/makebelieve", "GET");
     try {
@@ -105,33 +110,37 @@ public class DefaultHandlerRegistryTest extends TestCase {
       fail("Expect exception for missing method");
     } catch (ExecutionException t) {
       assertSame(t.getCause().getClass(), ProtocolException.class);
-      Assert.assertEquals(((ProtocolException) t.getCause()).getCode(), HttpServletResponse.SC_NOT_IMPLEMENTED);
+      Assert.assertEquals(HttpServletResponse.SC_NOT_IMPLEMENTED, ((ProtocolException) t.getCause()).getCode());
     } catch (Throwable t) {
       fail("Unexpected exception " + t.toString());
     }
   }
 
+  @Test
   public void testNonFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "GET");
     Future<?> future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
-    assertEquals(future.get(), TestHandler.GET_RESPONSE);
+    assertEquals(TestHandler.GET_RESPONSE, future.get());
   }
 
+  @Test
   public void testFutureDispatch() throws Exception {
     // Test calling a handler method which does not return a future
     RestHandler handler = registry.getRestHandler("/test", "POST");
     Future<?> future = handler.execute(Maps.<String, String[]>newHashMap(), null, null, null);
-    assertEquals(future.get(), TestHandler.CREATE_RESPONSE);
+    assertEquals(TestHandler.CREATE_RESPONSE, future.get());
   }
 
+  @Test
   public void testRpcWithInputClassThatIsntRequestItem() throws Exception {
     JSONObject rpc = new JSONObject("{ method : test.echo, params: {value: 'Bob' }}");
     RpcHandler handler = registry.getRpcHandler(rpc);
     Future<?> future = handler.execute(null, null, converter);
     assertEquals(future.get(), TestHandler.ECHO_PREFIX + "Bob");
   }
-  
+
+  @Test
   public void testRestWithInputClassThatIsntRequestItem() throws Exception {
     RestHandler handler = registry.getRestHandler("/test/echo", "GET");
     String[] value = {"Bob"};
@@ -139,13 +148,15 @@ public class DefaultHandlerRegistryTest extends TestCase {
     assertEquals(future.get(), TestHandler.ECHO_PREFIX + "Bob");
   }
 
+  @Test
   public void testNoArgumentClass() throws Exception {
     JSONObject rpc = new JSONObject("{ method : test.noArg }");
     RpcHandler handler = registry.getRpcHandler(rpc);
     Future<?> future = handler.execute(null, null, converter);
-    assertEquals(future.get(), TestHandler.NO_ARG_RESPONSE);
+    assertEquals(TestHandler.NO_ARG_RESPONSE, future.get());
   }
 
+  @Test
   public void testNonFutureException() throws Exception {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.exception }");
@@ -159,6 +170,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     }
   }
 
+  @Test
   public void testFutureException() throws Exception {
     // Test calling a handler method which does not return a future
     JSONObject rpc = new JSONObject("{ method : test.futureException }");
@@ -172,12 +184,14 @@ public class DefaultHandlerRegistryTest extends TestCase {
     }
   }
 
+  @Test
   public void testSupportedRpcServices() throws Exception {
     assertEquals(registry.getSupportedRpcServices(),
         Sets.newHashSet("test.create", "test.get", "test.overridden", "test.exception",
             "test.futureException", "test.override.rpcname", "test.echo", "test.noArg"));
   }
 
+  @Test
   public void testSupportedRestServices() throws Exception {
     assertEquals(registry.getSupportedRestServices(),
         Sets.newHashSet("GET /test/{someParam}/{someOtherParam}",
@@ -188,15 +202,12 @@ public class DefaultHandlerRegistryTest extends TestCase {
             "GET /test/echo"));
   }
 
+  @Test(expected = IllegalStateException.class)
   public void testAddNonService() {
-    try {
-      registry.addHandlers(Sets.newHashSet(new Object()));
-      fail("Adding an invalid service object succeded");
-    } catch (IllegalStateException ise) {
-
-    }
+    registry.addHandlers(Sets.newHashSet(new Object()));
   }
 
+  @Test
   public void testRestPath() {
     DefaultHandlerRegistry.RestPath restPath =
         new DefaultHandlerRegistry.RestPath("/service/const1/{p1}/{p2}+/const2/{p3}", null);
@@ -213,6 +224,7 @@ public class DefaultHandlerRegistryTest extends TestCase {
     assertNull(restPath.accept("service/constmiss/{p1}/{p2}+/const2".split("/")));
   }
 
+  @Test
   public void testRestPathOrdering() {
     DefaultHandlerRegistry.RestPath restPath1 =
         new DefaultHandlerRegistry.RestPath("/service/const1/{p1}/{p2}+/const2/{p3}", null);

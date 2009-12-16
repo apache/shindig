@@ -182,7 +182,7 @@ public class FeatureRegistryTest {
     Uri feature2Uri = expectResource(xml(BOTTOM_TPL, "gadget", null, content2));
     
     // .txt file to join the two
-    Uri txtFile = expectResource(feature1Uri.toString() + "\n" + feature2Uri.toString(), ".txt");
+    Uri txtFile = expectResource(feature1Uri.toString() + '\n' + feature2Uri.toString(), ".txt");
     
     // Load resources from the text file and do basic validation they're good.
     registry.register(txtFile.toString());
@@ -467,7 +467,7 @@ public class FeatureRegistryTest {
     setupFullRegistry("gadget", null);
     GadgetContext ctx = getCtx(RenderingContext.GADGET, null);
     List<String> needed = Lists.newArrayList("top", "bottom");
-    List<String> unsupported = Lists.<String>newLinkedList();
+    List<String> unsupported = Lists.newLinkedList();
     List<FeatureResource> resources = registry.getFeatureResources(ctx, needed, unsupported, false);
     // Should return in order requested.
     assertEquals(2, resources.size());
@@ -518,7 +518,7 @@ public class FeatureRegistryTest {
     Uri loopAUri = expectResource(xml(LOOP_A_TPL, type, null, "loop_a"));
     Uri loopBUri = expectResource(xml(LOOP_B_TPL, type, null, "loop_b"));
     Uri loopCUri = expectResource(xml(LOOP_C_TPL, type, null, "loop_c"));
-    Uri txtFile = expectResource(loopAUri.toString() + "\n" + loopBUri.toString() + "\n" +
+    Uri txtFile = expectResource(loopAUri.toString() + '\n' + loopBUri.toString() + '\n' +
         loopCUri.toString(), ".txt");
     try {
       registry.register(txtFile.toString());
@@ -630,8 +630,8 @@ public class FeatureRegistryTest {
     Uri midAUri = expectResource(xml(MID_A_TPL, type, null, "mid_a", attribs));
     Uri midBUri = expectResource(xml(MID_B_TPL, type, null, "mid_b", attribs));
     Uri bottomUri = expectResource(xml(BOTTOM_TPL, type, null, "bottom", attribs));
-    Uri txtFile = expectResource(nodepUri.toString() + "\n" + topUri.toString() + "\n" +
-        midAUri.toString() + "\n" + midBUri.toString() + "\n" + bottomUri.toString(), ".txt");
+    Uri txtFile = expectResource(nodepUri.toString() + '\n' + topUri.toString() + '\n' +
+        midAUri.toString() + '\n' + midBUri.toString() + '\n' + bottomUri.toString(), ".txt");
     registry.register(txtFile.toString());
   }
   
@@ -667,7 +667,7 @@ public class FeatureRegistryTest {
       sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\" ");
     }
     return tpl.replaceAll("%type%", type)
-        .replaceAll("%uri%", uri != null ? "src=\"" + uri + "\"" : "")
+        .replaceAll("%uri%", uri != null ? "src=\"" + uri + '\"' : "")
         .replaceAll("%content%", content != null ? content : "")
         .replaceAll("%type_attribs%", sb.toString());
   }

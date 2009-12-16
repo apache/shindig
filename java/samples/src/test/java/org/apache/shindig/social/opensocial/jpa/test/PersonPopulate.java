@@ -299,7 +299,7 @@ public class PersonPopulate {
   private <T> T findOne(String query, String[] names, Object[] params) {
     List<T> l = find(query, names, params);
     if (!l.isEmpty()) {
-      return (T) l.get(0);
+      return l.get(0);
     }
     return null;
   }

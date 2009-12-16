@@ -48,6 +48,8 @@ import com.google.common.collect.Sets;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -80,12 +82,12 @@ public class PersonHandlerTest extends EasyMockTestCase {
     DEFAULT_OPTIONS.setMax(20);
   }
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     token = new FakeGadgetToken();
     converter = mock(BeanJsonConverter.class);
     personService = mock(PersonService.class);
-    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+    JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
             "{'gadgets.features':{opensocial:" +
                "{supportedFields: {person: ['id', {name: 'familyName'}]}}" +
              "}}}");
@@ -97,6 +99,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     registry.addHandlers(ImmutableSet.<Object>of(handler));
   }
 
+  @Test
   public void testHandleGetAllNoParams() throws Exception {
     String path = "/people/john.doe/@all";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -118,6 +121,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetFriendsNoParams() throws Exception {
     String path = "/people/john.doe/@friends";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -138,6 +142,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetFriendsWithParams() throws Exception {
     String path = "/people/john.doe/@friends";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -175,6 +180,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetFriendById() throws Exception {
     String path = "/people/john.doe/@friends/jane.doe";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -195,6 +201,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetSelf() throws Exception {
     String path = "/people/john.doe/@self";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -209,6 +216,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetPlural() throws Exception {
     String path = "/people/john.doe,jane.doe/@self";
     RestHandler operation = registry.getRestHandler(path, "GET");
@@ -229,6 +237,7 @@ public class PersonHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testHandleGetSupportedFields() throws Exception {
     String path = "/people/@supportedFields";
     RestHandler operation = registry.getRestHandler(path, "GET");

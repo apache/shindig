@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.easymock.Capture;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +67,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     expect(request.getHeader("Host")).andReturn(host);
   }
 
+  @Test
   public void testIfModifiedSinceAlwaysReturnsEarly() throws Exception {
     expect(request.getHeader("If-Modified-Since"))
         .andReturn("Yes, this is an invalid header.");
@@ -78,6 +80,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertFalse(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testLockedDomainEmbed() throws Exception {
     setupProxyRequestMock("www.example.com", URL_ONE);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
@@ -91,6 +94,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testNoUrl() throws Exception {
     setupProxyRequestMock("www.example.com", null);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
@@ -104,8 +108,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     }
   }
 
-
-  
+  @Test
   public void testHttpRequestFillsParentAndContainer() throws Exception {
     setupProxyRequestMock("www.example.com", URL_ONE);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
@@ -127,6 +130,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
+  @Test
   public void testLockedDomainFailedEmbed() throws Exception {
     setupFailedProxyRequestMock("www.example.com", URL_ONE);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
@@ -139,6 +143,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     }
   }
 
+  @Test
   public void testHeadersPreserved() throws Exception {
     // Some headers may be blacklisted. These are OK.
     String url = "http://example.org/file.evil";
@@ -162,6 +167,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
   
+  @Test
   public void testGetFallback() throws Exception {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
@@ -185,6 +191,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
   }
 
+  @Test
   public void testNoCache() throws Exception {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
@@ -204,6 +211,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
   }
 
+  @Test
   public void testXForwardedFor() throws Exception {
     String url = "http://example.org/";
     String domain = "example.org";
@@ -253,18 +261,22 @@ public class ProxyHandlerTest extends ServletTestFixture {
     reset();
   }
 
+  @Test
   public void testMimeMatchPass() throws Exception {
     expectMime("text/css", "text/css", "text/css");
   }
 
+  @Test
   public void testMimeMatchPassWithAdditionalAttributes() throws Exception {
     expectMime("text/css", "text/css; charset=UTF-8", "text/css");
   }
 
+  @Test
   public void testMimeMatchOverrideNonMatch() throws Exception {
     expectMime("text/css", "image/png; charset=UTF-8", "text/css");
   }
 
+  @Test
   public void testMimeMatchVarySupport() throws Exception {
     expectMime("image/*", "image/gif", "image/gif");
   }

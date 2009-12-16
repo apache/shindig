@@ -17,18 +17,17 @@
  */
 package org.apache.shindig.gadgets.rewrite.image;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.junit.Assert;
 
 import java.io.IOException;
 
 /**
  * Test BasicOptimizer
  */
-public abstract class BaseOptimizerTest extends TestCase {
+public abstract class BaseOptimizerTest extends Assert {
 
   protected HttpResponse createResponse(String resource, String mimeType) throws IOException {
     byte[] bytes = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(resource));

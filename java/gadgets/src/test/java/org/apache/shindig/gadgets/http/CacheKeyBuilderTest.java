@@ -17,10 +17,11 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import junit.framework.TestCase;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests for the {@link CacheKeyBuilder}.
@@ -32,63 +33,72 @@ import org.apache.shindig.gadgets.AuthType;
  * changing the caching scheme across runs would generate lots of traffic due to artificial
  * cache misses.
  */
-public class CacheKeyBuilderTest extends TestCase {
+public class CacheKeyBuilderTest extends Assert {
 
   private CacheKeyBuilder builder;
 
-  @Override
+  @Before
   public void setUp() {
     builder = new CacheKeyBuilder()
         .setLegacyParam(0, Uri.parse("http://example.com"))
         .setLegacyParam(1, AuthType.SIGNED);
   }
 
+  @Test
   public void testBuilder() {
     assertEquals("http://example.com:signed:0:0:0:0:0:0:0", builder.build());
   }
 
+  @Test
   public void testOwner() {
     builder.setLegacyParam(2, "owner");
     assertEquals("http://example.com:signed:owner:0:0:0:0:0:0", builder.build());
   }
 
+  @Test
   public void testViewer() {
     builder.setLegacyParam(3, "viewer");
     assertEquals("http://example.com:signed:0:viewer:0:0:0:0:0", builder.build());
   }
 
+  @Test
   public void testTokenOwner() {
     builder.setLegacyParam(4, "token");
     assertEquals("http://example.com:signed:0:0:token:0:0:0:0", builder.build());
   }
 
+  @Test
   public void testAppUrl() {
     builder.setLegacyParam(5, "appurl");
     assertEquals("http://example.com:signed:0:0:0:appurl:0:0:0", builder.build());
   }
 
+  @Test
   public void testInstanceId() {
     builder.setLegacyParam(6, "id");
     assertEquals("http://example.com:signed:0:0:0:0:id:0:0", builder.build());
   }
 
+  @Test
   public void testServiceName() {
     builder.setLegacyParam(7, "srv");
     assertEquals("http://example.com:signed:0:0:0:0:0:srv:0", builder.build());
   }
 
+  @Test
   public void testTokenName() {
     builder.setLegacyParam(8, "token");
     assertEquals("http://example.com:signed:0:0:0:0:0:0:token", builder.build());
   }
 
   // The additional parameters, proxy image dimensions
-
+  @Test
   public void testParam() {
     builder.setParam("rh", 1);
     assertEquals("http://example.com:signed:0:0:0:0:0:0:0:rh=1", builder.build());
   }
 
+  @Test
   public void testResizeParams() {
     builder.setParam("rh", 1);
     builder.setParam("rq", 2);

@@ -23,10 +23,12 @@ import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.junit.Test;
 
 import java.util.Locale;
 
 public class HttpGadgetContextTest extends ServletTestFixture {
+  @Test
   public void testIgnoreCacheParam() {
     expect(request.getParameter("nocache")).andReturn(Integer.toString(Integer.MAX_VALUE));
     replay();
@@ -34,6 +36,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertTrue(context.getIgnoreCache());
   }
 
+  @Test
   public void testLocale() {
     expect(request.getParameter("lang")).andReturn(Locale.CHINA.getLanguage());
     expect(request.getParameter("country")).andReturn(Locale.CHINA.getCountry());
@@ -42,6 +45,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertEquals(Locale.CHINA, context.getLocale());
   }
 
+  @Test
   public void testDebug() {
     expect(request.getParameter("debug")).andReturn("1");
     replay();
@@ -49,6 +53,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertTrue(context.getDebug());
   }
 
+  @Test
   public void testGetParameter() {
     expect(request.getParameter("foo")).andReturn("bar");
     replay();
@@ -56,6 +61,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertEquals("bar", context.getParameter("foo"));
   }
 
+  @Test
   public void testGetHost() {
     expect(request.getHeader("Host")).andReturn("foo.org");
     replay();
@@ -63,6 +69,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertEquals("foo.org", context.getHost());
   }
 
+  @Test
   public void testGetUserIp() {
     expect(request.getRemoteAddr()).andReturn("2.3.4.5");
     replay();
@@ -70,6 +77,7 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     assertEquals("2.3.4.5", context.getUserIp());
   }
 
+  @Test
   public void testGetSecurityToken() throws Exception {
     SecurityToken expected = new AnonymousSecurityToken();
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId())).andReturn(expected);

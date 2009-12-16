@@ -43,6 +43,7 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
 import org.easymock.EasyMock;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -85,9 +86,8 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     this.servlet = servlet;
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void abstractLargeRestfulBefore() throws Exception {
     Injector injector = Guice.createInjector(new SocialApiTestsGuiceModule());
 
     servlet = new DataServiceServlet();

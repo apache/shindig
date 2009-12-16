@@ -21,6 +21,7 @@ import org.apache.shindig.social.core.model.ActivityImpl;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.util.XSDValidator;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,9 +33,8 @@ import java.util.Map;
 public class RestfulXmlActivityTest extends AbstractLargeRestfulTests {
   private Activity johnsActivity;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void restfulXmlActivityTestBefore() throws Exception {
     johnsActivity = new ActivityImpl("1", "john.doe");
     johnsActivity.setTitle("yellow");
     johnsActivity.setBody("what a color!");

@@ -20,18 +20,20 @@ package org.apache.shindig.gadgets.parse;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 import org.w3c.dom.Document;
 
 /**
  * Note these tests are of marginal use. Consider removing. More useful tests would exercise
  * the capability of the parser to handle strange HTML.
  */
-public class HtmlParserTest extends TestCase {
+public class HtmlParserTest extends Assert {
 
   private final GadgetHtmlParser nekoParser = new NekoSimplifiedHtmlParser(
       new ParseModule.DOMImplementationProvider().get());
 
+  @Test
   public void testParseSimpleString() throws Exception {
     parseSimpleString(nekoParser);
   }
@@ -42,6 +44,7 @@ public class HtmlParserTest extends TestCase {
     assertEquals("content", wrapper.getValue("/html/body"));
   }
 
+  @Test
   public void testParseTagWithStringContents() throws Exception {
     parseTagWithStringContents(nekoParser);
   }
@@ -52,6 +55,7 @@ public class HtmlParserTest extends TestCase {
     assertEquals("content", wrapper.getValue("/html/body/span"));
   }
 
+  @Test
   public void testParseTagWithAttributes() throws Exception {
     parseTagWithAttributes(nekoParser);
   }
@@ -63,6 +67,7 @@ public class HtmlParserTest extends TestCase {
     assertEquals("foo", wrapper.getValue("/html/body/div/@id"));
   }
 
+  @Test
   public void testParseNestedContentWithNoCloseForBrAndHr() throws Exception {
     parseNestedContentWithNoCloseForBrAndHr(nekoParser);
   }                     

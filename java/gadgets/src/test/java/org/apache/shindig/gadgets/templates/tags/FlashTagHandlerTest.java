@@ -111,6 +111,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     EasyMock.expect(gadgetContext.getParameter(EasyMock.eq("st"))).andReturn("12345");
   }
 
+  @Test
   public void testBasicRender() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
@@ -126,9 +127,9 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     replay();
     handler.process(result.getDocumentElement().getFirstChild().getNextSibling(), tag, processor);
     XPathWrapper wrapper = new XPathWrapper(result);
-    assertEquals(wrapper.getValue("/html/head/script[1]"), "swfobject()");
-    assertEquals(wrapper.getValue("/html/body/div/@id"), "os_xFlash_alt_1");
-    assertEquals(wrapper.getValue("/html/body/div"), "Click Me");
+    assertEquals("swfobject()", wrapper.getValue("/html/head/script[1]"));
+    assertEquals("os_xFlash_alt_1", wrapper.getValue("/html/body/div/@id"));
+    assertEquals("Click Me", wrapper.getValue("/html/body/div"));
     assertNull(wrapper.getNode("/html/body/div/@onclick"));
     assertEquals(wrapper.getValue("/html/body/script[1]"),
         "swfobject.embedSWF(\"http://www.example.org/test.swf\",\"os_xFlash_alt_1\",\"100px\","
@@ -136,6 +137,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testSanitizedRender() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
@@ -151,9 +153,9 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     replay();
     handler.process(result.getDocumentElement().getFirstChild().getNextSibling(), tag, processor);
     XPathWrapper wrapper = new XPathWrapper(result);
-    assertEquals(wrapper.getValue("/html/head/script[1]"), "swfobject()");
-    assertEquals(wrapper.getValue("/html/body/div/@id"), "os_xFlash_alt_1");
-    assertEquals(wrapper.getValue("/html/body/div"), "Click Me");
+    assertEquals("swfobject()", wrapper.getValue("/html/head/script[1]"));
+    assertEquals("os_xFlash_alt_1", wrapper.getValue("/html/body/div/@id"));
+    assertEquals("Click Me", wrapper.getValue("/html/body/div"));
     assertNull(wrapper.getNode("/html/body/div/@onclick"));
     assertEquals(wrapper.getValue("/html/body/script[1]"),
         "swfobject.embedSWF(\"http://www.example.org/test.swf\",\"os_xFlash_alt_1\",\"100px\","
@@ -162,6 +164,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     verify();
   }
 
+  @Test
   public void testSanitizedRenderClickToPlay() throws Exception {
     Document document = parser.parseDom(
         "<script type='text/os-template'>"
@@ -177,10 +180,10 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     replay();
     handler.process(result.getDocumentElement().getFirstChild().getNextSibling(), tag, processor);
     XPathWrapper wrapper = new XPathWrapper(result);
-    assertEquals(wrapper.getValue("/html/head/script[1]"), "swfobject()");
-    assertEquals(wrapper.getValue("/html/body/div/@id"), "os_xFlash_alt_1");
-    assertEquals(wrapper.getValue("/html/body/div"), "Click Me");
-    assertEquals(wrapper.getValue("/html/body/div/@onclick"), "os_xFlash_alt_1()");
+    assertEquals("swfobject()", wrapper.getValue("/html/head/script[1]"));
+    assertEquals("os_xFlash_alt_1", wrapper.getValue("/html/body/div/@id"));
+    assertEquals("Click Me", wrapper.getValue("/html/body/div"));
+    assertEquals("os_xFlash_alt_1()", wrapper.getValue("/html/body/div/@onclick"));
     assertEquals(wrapper.getValue("/html/body/script[1]"),
         "function os_xFlash_alt_1(){ swfobject.embedSWF(\"http://www.example.org/test.swf\","
             + "\"os_xFlash_alt_1\",\"100px\",\"100px\",\"9.0.115\",null,null,"
@@ -214,26 +217,26 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     tag.setAttribute("allownetworking", "none");
     tag.setAttribute("flashvars", "a=b&c=d");
     FlashTagHandler.SwfObjectConfig config = handler.getSwfConfig(tag, processor);
-    assertEquals(config.id,  "myflash");
-    assertEquals(config.clazz,  "stylish");
+    assertEquals("myflash", config.id);
+    assertEquals("stylish", config.clazz);
     assertEquals(config.swf, Uri.parse("http://www.example.org/x.swf"));
-    assertEquals(config.width, "100px");
-    assertEquals(config.height, "200px");
-    assertEquals(config.name, "myflashname");
-    assertEquals(config.play, FlashTagHandler.SwfObjectConfig.Play.onclick);
-    assertEquals(config.menu, Boolean.TRUE);
-    assertEquals(config.scale, FlashTagHandler.SwfObjectConfig.Scale.exactfit);
-    assertEquals(config.wmode, FlashTagHandler.SwfObjectConfig.WMode.transparent);
-    assertEquals(config.devicefont, Boolean.TRUE);
-    assertEquals(config.swliveconnect, Boolean.TRUE);
-    assertEquals(config.allowscriptaccess, FlashTagHandler.SwfObjectConfig.ScriptAccess.samedomain);
+    assertEquals("100px", config.width);
+    assertEquals("200px", config.height);
+    assertEquals("myflashname", config.name);
+    assertEquals(FlashTagHandler.SwfObjectConfig.Play.onclick, config.play);
+    assertEquals(Boolean.TRUE, config.menu);
+    assertEquals(FlashTagHandler.SwfObjectConfig.Scale.exactfit, config.scale);
+    assertEquals(FlashTagHandler.SwfObjectConfig.WMode.transparent, config.wmode);
+    assertEquals(Boolean.TRUE, config.devicefont);
+    assertEquals(Boolean.TRUE, config.swliveconnect);
+    assertEquals(FlashTagHandler.SwfObjectConfig.ScriptAccess.samedomain, config.allowscriptaccess);
     assertNull(config.loop);
-    assertEquals(config.quality, FlashTagHandler.SwfObjectConfig.Quality.autohigh);
-    assertEquals(config.salign, FlashTagHandler.SwfObjectConfig.SAlign.tl);
-    assertEquals(config.bgcolor, "#77ff77");
-    assertEquals(config.allowfullscreen, Boolean.TRUE);
-    assertEquals(config.allownetworking, FlashTagHandler.SwfObjectConfig.NetworkAccess.none);
-    assertEquals(config.flashvars, "a=b&c=d");
+    assertEquals(FlashTagHandler.SwfObjectConfig.Quality.autohigh, config.quality);
+    assertEquals(FlashTagHandler.SwfObjectConfig.SAlign.tl, config.salign);
+    assertEquals("#77ff77", config.bgcolor);
+    assertEquals(Boolean.TRUE, config.allowfullscreen);
+    assertEquals(FlashTagHandler.SwfObjectConfig.NetworkAccess.none, config.allownetworking);
+    assertEquals("a=b&c=d", config.flashvars);
   }
 
   @Test
