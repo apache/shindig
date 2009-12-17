@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.parse.nekohtml;
+package org.apache.shindig.gadgets.parse.caja;
 
-import org.apache.shindig.gadgets.parse.AbstractSocialMarkupHtmlParserTest;
+import org.apache.shindig.gadgets.parse.AbstractParserAndSerializerTest;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
-/**
- * Test for the social markup parser.
- */
-public class SocialMarkupHtmlParserTest extends AbstractSocialMarkupHtmlParserTest {
+public class CajaParserAndSerializerTest extends AbstractParserAndSerializerTest {
+
   @Override
   protected GadgetHtmlParser makeParser() {
-    return new NekoSimplifiedHtmlParser(new ParseModule.DOMImplementationProvider().get());
+    return new CajaHtmlParser(new ParseModule.DOMImplementationProvider().get());
   }
+
 }

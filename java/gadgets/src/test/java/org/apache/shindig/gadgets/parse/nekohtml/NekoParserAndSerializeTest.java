@@ -17,7 +17,10 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
+import static org.junit.Assert.assertNull;
+
 import org.apache.shindig.gadgets.parse.AbstractParserAndSerializerTest;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.junit.Test;
 
@@ -25,61 +28,51 @@ import org.junit.Test;
  * Test behavior of neko based parser and serializers
  */
 public class NekoParserAndSerializeTest extends AbstractParserAndSerializerTest {
-
-  private NekoSimplifiedHtmlParser simple = new NekoSimplifiedHtmlParser(
+  @Override
+  protected GadgetHtmlParser makeParser() {
+    return new NekoSimplifiedHtmlParser(
         new ParseModule.DOMImplementationProvider().get());
-
-  @Test
-  public void testDocWithDoctype() throws Exception {
-    // Note that doctype is properly retained
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test.html");
-    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
   }
-
+  
+  // Neko-specific tests.
   @Test
-  public void testDocNoDoctype() throws Exception {
-    // Note that no doctype is properly created when none specified
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fulldocnodoctype.html");
-    assertNull(simple.parseDom(content).getDoctype());
-  }
+  public void scriptPushedToBody() throws Exception {
+    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript.html");
+    String expected =
+        loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }  
 
+  // Neko overridden tests (due to Neko quirks)
+  @Override
   @Test
-  public void testNotADocument() throws Exception {
+  public void notADocument() throws Exception {
     // Note that no doctype is injected for fragments
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
+    parseAndCompareBalanced(content, expected, parser);
   }
-
+  
+  @Override
   @Test
-  public void testNotADocument2() throws Exception {
-    // Note that no doctype is injected for fragments
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment2.html");
-    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fragment2-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
-  }
-
-  @Test
-  public void testNoBody() throws Exception {
+  public void noBody() throws Exception {
     // Note that no doctype is injected for fragments
     String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-headnobody.html");
     String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-headnobody-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
+    parseAndCompareBalanced(content, expected, parser);
   }
 
+  // Overridden because of comment vs. script ordering. Neko stuffs script into head, but
+  // postprocessing moves it back down into body, *above* the comment element. This is
+  // semantically meaningless (to HTML), so we create a new test to accommodate it.
+  @Override
   @Test
-  public void testAmpersand() throws Exception {
-    // Note that no doctype is injected for fragments
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands.html");
-    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-ampersands-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
-  }
-
-  @Test
-  public void testScriptPushedToBody() throws Exception {
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript.html");
-    String expected = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-leadingscript-expected.html");
-    parseAndCompareBalanced(content, expected, simple);
+  public void docNoDoctype() throws Exception {
+    // Note that no doctype is properly created when none specified
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-fulldocnodoctype.html");
+    String expected =
+        loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-fulldocnodoctype-expected.html");
+    assertNull(parser.parseDom(content).getDoctype());
+    parseAndCompareBalanced(content, expected, parser);
   }
 }

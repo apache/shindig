@@ -129,6 +129,11 @@
       <artifactId>json</artifactId>
     </dependency>
     <dependency>
+      <groupId>diff_match_patch</groupId>
+      <artifactId>diff_match_patch</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>caja</groupId>
       <artifactId>caja</artifactId>
     </dependency>

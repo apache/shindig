@@ -18,16 +18,19 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
-import org.apache.shindig.gadgets.parse.AbstractSocialMarkupHtmlParserTest;
+import org.apache.shindig.gadgets.parse.CompactHtmlSerializerTest;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 
 /**
- * Test for the social markup parser.
+ * Compact HTML serializer test using the Neko parser implementation.
  */
-public class SocialMarkupHtmlParserTest extends AbstractSocialMarkupHtmlParserTest {
+public class NekoCompactHtmlSerializerTest extends CompactHtmlSerializerTest {
+
   @Override
   protected GadgetHtmlParser makeParser() {
-    return new NekoSimplifiedHtmlParser(new ParseModule.DOMImplementationProvider().get());
+    return new NekoSimplifiedHtmlParser(
+        new ParseModule.DOMImplementationProvider().get());
   }
+
 }

@@ -20,19 +20,22 @@ package org.apache.shindig.gadgets.parse;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Lists;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.LinkedList;
 
 /**
  * Parser for arbitrary HTML content
@@ -89,34 +92,121 @@ public abstract class GadgetHtmlParser {
       key = HashUtil.rawChecksum(source.getBytes());
       document = documentCache.getElement(key);
     }
+    
     if (document == null) {
       document = parseDomImpl(source);
 
       HtmlSerialization.attach(document, serializerProvider.get(), source);
 
+      Node html = document.getDocumentElement();
+      
+      Node head = null;
+      Node body = null;
+      LinkedList<Node> beforeHead = Lists.newLinkedList();
+      LinkedList<Node> beforeBody = Lists.newLinkedList();
+      
+      while (html.hasChildNodes()) {
+        Node child = html.removeChild(html.getFirstChild());
+        if (child.getNodeType() == Node.ELEMENT_NODE &&
+            "head".equalsIgnoreCase(child.getNodeName())) {
+          if (head == null) {
+            head = child;
+          } else {
+            // Concatenate <head> elements together.
+            transferChildren(head, child);
+          }
+        } else if (child.getNodeType() == Node.ELEMENT_NODE &&
+                   "body".equalsIgnoreCase(child.getNodeName())) {
+          if (body == null) {
+            body = child;
+          } else {
+            // Concatenate <body> elements together.
+            transferChildren(body, child);
+          }
+        } else if (head == null) {
+          beforeHead.add(child);
+        } else if (body == null) {
+          beforeBody.add(child);
+        } else {
+          // Both <head> and <body> are present. Append to tail of <body>.
+          body.appendChild(child);
+        }
+      }
+      
       // Ensure head tag exists
-      if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head") == null) {
+      if (head == null) {
+        // beforeHead contains all elements that should be prepended to <body>. Switch them.
+        LinkedList<Node> temp = beforeBody;
+        beforeBody = beforeHead;
+        beforeHead = temp;
+        
         // Add as first element
-        document.getDocumentElement().insertBefore(
-            document.createElement("head"),
-            document.getDocumentElement().getFirstChild());
+        head = document.createElement("head");
+        html.insertBefore(head, html.getFirstChild());
+      } else {
+        // Re-append head node.
+        html.appendChild(head);
       }
-      // If body not found the document was entirely empty. Create the
-      // element anyway
-      if (DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body") == null) {
-        document.getDocumentElement().appendChild(
-            document.createElement("body"));
+      
+      // Ensure body tag exists.
+      if (body == null) {
+        // Add immediately after head.
+        body = document.createElement("body");
+        html.insertBefore(body, head.getNextSibling());
+      } else {
+        // Re-append body node.
+        html.appendChild(body);
       }
+      
+      // Leftovers: nodes before the first <head> node found and the first <body> node found.
+      // Prepend beforeHead to the front of <head>, and beforeBody to beginning of <body>,
+      // in the order they were found in the document.
+      prependToNode(head, beforeHead);
+      prependToNode(body, beforeBody);
+      
+      // One exception. <style> nodes from <body> end up at the end of <head>, since doing so
+      // is HTML compliant and can never break rendering due to ordering concerns.
+      LinkedList<Node> styleNodes = Lists.newLinkedList();
+      NodeList bodyKids = body.getChildNodes();
+      for (int i = 0; i < bodyKids.getLength(); ++i) {
+        Node bodyKid = bodyKids.item(i);
+        if (bodyKid.getNodeType() == Node.ELEMENT_NODE &&
+            "style".equalsIgnoreCase(bodyKid.getNodeName())) {
+          styleNodes.add(bodyKid);
+        }
+      }
+      
+      for (Node styleNode : styleNodes) {
+        head.appendChild(body.removeChild(styleNode));
+      }
+      
+      // Finally, reprocess all script nodes for OpenSocial purposes, as these
+      // may be interpreted (rightly, from the perspective of HTML) as containing text only.
+      reprocessScriptForOpenSocial(html);
+      
       if (shouldCache) {
         documentCache.addElement(key, document);
       }
     }
+    
     if (shouldCache) {
       Document copy = (Document)document.cloneNode(true);
       HtmlSerialization.copySerializer(document, copy);
       return copy;
     }
     return document;
+  }
+  
+  protected void transferChildren(Node to, Node from) {
+    while (from.hasChildNodes()) {
+      to.appendChild(from.removeChild(from.getFirstChild()));
+    }
+  }
+  
+  protected void prependToNode(Node to, LinkedList<Node> from) {
+    while (from.size() > 0) {
+      to.insertBefore(from.removeLast(), to.getFirstChild());
+    }
   }
 
   /**
@@ -139,6 +229,7 @@ public abstract class GadgetHtmlParser {
       }
     }
     DocumentFragment fragment = parseFragmentImpl(source);
+    reprocessScriptForOpenSocial(fragment);
     if (shouldCache) {
       fragmentCache.addElement(key, fragment);
     }
@@ -157,13 +248,63 @@ public abstract class GadgetHtmlParser {
   protected boolean shouldCache() {
     return documentCache != null && documentCache.getCapacity() != 0;
   }
-
+  
+  private void reprocessScriptForOpenSocial(Node root) throws GadgetException {
+    LinkedList<Node> nodeQueue = Lists.newLinkedList();
+    nodeQueue.add(root);
+    while (!nodeQueue.isEmpty()) {
+      Node next = nodeQueue.removeFirst();
+      if (next.getNodeType() == Node.ELEMENT_NODE &&
+          "script".equalsIgnoreCase(next.getNodeName())) {
+        Attr typeAttr = (Attr)next.getAttributes().getNamedItem("type");
+        if (typeAttr != null && SCRIPT_TYPE_TO_OSML_TAG.get(typeAttr.getValue()) != null) {
+          // The underlying parser impl may have already parsed these.
+          // Only re-parse with the coalesced text children if that's all there are.
+          boolean parseOs = true;
+          StringBuilder sb = new StringBuilder();
+          NodeList scriptKids = next.getChildNodes();
+          for (int i = 0; parseOs && i < scriptKids.getLength(); ++i) {
+            Node scriptKid = scriptKids.item(i);
+            if (scriptKid.getNodeType() != Node.TEXT_NODE) {
+              parseOs = false;
+            }
+            sb.append(scriptKid.getTextContent());
+          }
+          if (parseOs) {
+            // Clean out the script node.
+            while (next.hasChildNodes()) {
+              next.removeChild(next.getFirstChild());
+            }
+            DocumentFragment osFragment = parseFragmentImpl(sb.toString());
+            while (osFragment.hasChildNodes()) {
+              Node osKid = osFragment.removeChild(osFragment.getFirstChild());
+              osKid = next.getOwnerDocument().adoptNode(osKid);
+              if (osKid.getNodeType() == Node.ELEMENT_NODE) {
+                next.appendChild(osKid);
+              }
+            }
+          }
+        }
+      }
+      
+      // Enqueue children for inspection.
+      NodeList children = next.getChildNodes();
+      for (int i = 0; i < children.getLength(); ++i) {
+        nodeQueue.add(children.item(i));
+      }
+    }
+  }
+  
   /**
-   * @param source
-   * @return a parsed document or document fragment
+   * TODO: remove the need for parseDomImpl as a parsing method. Gadget HTML is
+   * tag soup handled in custom fashion, or is a legitimate fragment. In either case,
+   * we can simply use the fragment parsing implementation and patch up in higher-level calls.
+   * @param source a piece of HTML
+   * @return a Document parsed from the HTML
    * @throws GadgetException
    */
-  protected abstract Document parseDomImpl(String source) throws GadgetException;
+  protected abstract Document parseDomImpl(String source)
+      throws GadgetException;
 
   /**
    * @param source a snippet of HTML markup
@@ -172,39 +313,6 @@ public abstract class GadgetHtmlParser {
    */
   protected abstract DocumentFragment parseFragmentImpl(String source) 
       throws GadgetException;
-  
-  /**
-   * Normalize head and body tags in the passed fragment before including it
-   * in the document
-   * @param document
-   * @param fragment
-   */
-  protected void normalizeFragment(Document document, DocumentFragment fragment) {
-    Node htmlNode = DomUtil.getFirstNamedChildNode(fragment, "HTML");
-    if (htmlNode != null) {
-      document.appendChild(htmlNode);
-    } else {
-      Node bodyNode = DomUtil.getFirstNamedChildNode(fragment, "body");
-      Node headNode = DomUtil.getFirstNamedChildNode(fragment, "head");
-      if (bodyNode != null || headNode != null) {
-        // We have either a head or body so put fragment into HTML tag
-        Node root = document.appendChild(document.createElement("html"));
-        if (headNode != null && bodyNode == null) {
-          fragment.removeChild(headNode);
-          root.appendChild(headNode);
-          Node body = root.appendChild(document.createElement("body"));
-          body.appendChild(fragment);
-        } else {
-          root.appendChild(fragment);
-        }
-      } else {
-        // No head or body so put fragment into a body
-        Node root = document.appendChild(document.createElement("html"));
-        Node body = root.appendChild(document.createElement("body"));
-        body.appendChild(fragment);
-      }
-    }
-  }
 
   private static class DefaultSerializerProvider implements Provider<HtmlSerializer> {
     public HtmlSerializer get() {

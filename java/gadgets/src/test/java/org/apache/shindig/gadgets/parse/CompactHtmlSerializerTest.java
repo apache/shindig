@@ -18,9 +18,11 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,10 +32,11 @@ import java.io.StringWriter;
 /**
  * Test cases for CompactHtmlSerializer.
  */
-public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
+public abstract class CompactHtmlSerializerTest extends AbstractParsingTestBase {
+  
+  protected abstract GadgetHtmlParser makeParser();
 
-  private GadgetHtmlParser full = new NekoSimplifiedHtmlParser(
-      new ParseModule.DOMImplementationProvider().get());
+  private GadgetHtmlParser full = makeParser();
 
   @Before
   public void setUp() throws Exception {
@@ -45,24 +48,24 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
   }
 
   @Test
-  public void testWhitespaceNotCollapsedInSpecialTags() throws Exception {
+  public void whitespaceNotCollapsedInSpecialTags() throws Exception {
     String content = loadFile(
-        "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags.html");
+        "org/apache/shindig/gadgets/parse/test-with-specialtags.html");
     String expected = loadFile(
-        "org/apache/shindig/gadgets/parse/nekohtml/test-with-specialtags-expected.html");
+        "org/apache/shindig/gadgets/parse/test-with-specialtags-expected.html");
+    parseAndCompareBalanced(content, expected, full);
+  }
+  
+  @Test
+  public void ieConditionalCommentNotRemoved() throws Exception {
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-with-iecond-comments.html");
+    String expected = loadFile(
+        "org/apache/shindig/gadgets/parse/test-with-iecond-comments-expected.html");
     parseAndCompareBalanced(content, expected, full);
   }
 
   @Test
-  public void testIeConditionalCommentNotRemoved() throws Exception {
-    String content = loadFile("org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments.html");
-    String expected = loadFile(
-        "org/apache/shindig/gadgets/parse/nekohtml/test-with-iecond-comments-expected.html");
-    parseAndCompareBalanced(content, expected, full);
-  }
-
-  @Test
-  public void testSpecialTagsAreRecognized() {
+  public void specialTagsAreRecognized() {
     assertSpecialTag("textArea");
     assertSpecialTag("scrIpt");
     assertSpecialTag("Style");
@@ -78,7 +81,6 @@ public class CompactHtmlSerializerTest extends AbstractParserAndSerializerTest {
         CompactHtmlSerializer.isSpecialTag(tagName.toLowerCase()));
   }
 
-  @Test
   public void testCollapseHtmlWhitespace() throws IOException {
     assertCollapsed("abc", "abc");
     assertCollapsed("abc ", "abc");

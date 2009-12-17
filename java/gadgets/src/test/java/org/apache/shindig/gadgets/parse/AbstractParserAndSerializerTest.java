@@ -16,34 +16,74 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import static org.junit.Assert.assertNull;
 
-import org.junit.Assert;
-import org.w3c.dom.Document;
-
-import java.io.IOException;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Base test fixture for HTML parsing and serialization.
  */
-public abstract class AbstractParserAndSerializerTest extends Assert {
-
-  /** The vm line separator */
-  private static final String EOL = System.getProperty("line.separator");
-
-  protected String loadFile(String path) throws IOException {
-    return IOUtils.toString(this.getClass().getClassLoader().
-        getResourceAsStream(path));
+public abstract class AbstractParserAndSerializerTest extends AbstractParsingTestBase {
+  protected GadgetHtmlParser parser;
+  
+  protected abstract GadgetHtmlParser makeParser();
+  
+  @Before
+  public void setUp() throws Exception {
+    parser = makeParser();
   }
 
-  protected void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
-      throws Exception {
-    Document document = parser.parseDom(content);
-    expected = StringUtils.replace(expected, EOL, "\n");
-    assertEquals(expected.trim(), HtmlSerialization.serialize(document).trim());
+  @Test
+  public void docWithDoctype() throws Exception {
+    // Note that doctype is properly retained
+    String content = loadFile("org/apache/shindig/gadgets/parse/test.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/test-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
+
+  @Test
+  public void docNoDoctype() throws Exception {
+    // Note that no doctype is properly created when none specified
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-fulldocnodoctype.html");
+    String expected =
+        loadFile("org/apache/shindig/gadgets/parse/test-fulldocnodoctype-expected.html");
+    assertNull(parser.parseDom(content).getDoctype());
+    parseAndCompareBalanced(content, expected, parser);
+  }
+
+  @Test
+  public void notADocument() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-fragment.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/test-fragment-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
+
+  @Test
+  public void notADocument2() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-fragment2.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/test-fragment2-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
+
+  @Test
+  public void noBody() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-headnobody.html");
+    String expected = loadFile("org/apache/shindig/gadgets/parse/test-headnobody-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
+
+  @Test
+  public void ampersand() throws Exception {
+    // Note that no doctype is injected for fragments
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-with-ampersands.html");
+    String expected =
+        loadFile("org/apache/shindig/gadgets/parse/test-with-ampersands-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
   }
 }
