@@ -177,7 +177,7 @@ shindig.samplecontainer = {};
       gadgets.container.gadgets_[gadget].secureToken = escape(generateSecureToken());
     }
     reloadStateFile(function() {
-      gadgets.container.renderGadgets();
+      gadgets.container.refreshGadgets();
     });
   }
 

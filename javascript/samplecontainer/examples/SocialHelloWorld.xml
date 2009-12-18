@@ -23,6 +23,7 @@
               thumbnail="http://localhost:8080/"
               icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
    <Require feature="osapi"></Require>
+       <Require feature="settitle"/>
    <Require feature="dynamic-height"></Require>
  </ModulePrefs>
  <Content type="html">
@@ -69,6 +70,7 @@
    </style>
 
    <script type="text/javascript">
+   gadgets.window.setTitle('Social Hello World');
      var hellos = new Array('Hello World', 'Hallo Welt', 'Ciao a tutti', 'Hola mundo',
        '&#1055;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077; &#1085;&#1072; &#1089;&#1074;&#1077;&#1090;', '&#12371;&#12435;&#12395;&#12385;&#12399;&#19990;&#30028;', '&#20320;&#22909;&#19990;&#30028;', '&#50668;&#47084;&#48516;, &#50504;&#45397;&#54616;&#49464;&#50836;');
      var numberOfStyles = 6;
