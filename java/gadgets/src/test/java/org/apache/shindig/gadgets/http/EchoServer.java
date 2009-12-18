@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.commons.lang.StringUtils;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import javax.servlet.ServletException;
@@ -67,7 +68,7 @@ public class EchoServer extends FakeHttpServer {
       String[] headers = req.getParameterValues(HEADER_PARAM);
       if (headers != null) {
         for (String header : headers) {
-          String[] nameAndValue = header.split("=", 2);
+          String[] nameAndValue = StringUtils.splitPreserveAllTokens(header, "=", 2);
           resp.setHeader(nameAndValue[0], nameAndValue[1]);
         }
       }

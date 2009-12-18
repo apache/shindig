@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.tools.jmx.Manager;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class GuiceServletContextListener implements ServletContextListener {
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
     if (moduleNames != null) {
-      for (String moduleName : moduleNames.split(":")) {
+      for (String moduleName : StringUtils.split(moduleNames, ':')) {
         try {
           moduleName = moduleName.trim();
           if (moduleName.length() > 0) {

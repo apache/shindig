@@ -58,7 +58,7 @@ public class ProcessorTest {
 
   @Before
   public void setUp() throws Exception {
-    JSONObject config = new JSONObject("{"  + ContainerConfig.DEFAULT_CONTAINER + ":" +
+    JSONObject config = new JSONObject('{' + ContainerConfig.DEFAULT_CONTAINER + ':' +
         "{'gadgets.features':{views:" +
            "{aliased: {aliases: ['some-alias', 'alias']}}" +
          "}}}");

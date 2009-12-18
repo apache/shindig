@@ -62,10 +62,10 @@ public interface HandlerExecutionListener {
     public static final Logger LOG = Logger.getLogger(HandlerExecutionListener.class.toString());
 
     public void executing(String service, String operation, RequestItem request) {
-      LOG.info("start - " + service + " " + operation);
+      LOG.info("start - " + service + ' ' + operation);
     }
     public void executed(String service, String operation, RequestItem request) {
-      LOG.info("  end - " + service + " " + operation);
+      LOG.info("  end - " + service + ' ' + operation);
     }
   }
 }

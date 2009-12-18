@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.auth;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobExpiredException;
 import org.apache.shindig.common.crypto.Crypto;
@@ -52,7 +53,7 @@ public class BlobCrypterSecurityTokenTest {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
     String token = t.encrypt();
     assertTrue("should start with container: " + token, token.startsWith("container:"));
-    String[] fields = token.split(":");
+    String[] fields = StringUtils.split(token, ':');
     BlobCrypterSecurityToken t2 =
         BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], null);
     assertNull(t2.getAppId(), t2.getAppId());
@@ -82,7 +83,7 @@ public class BlobCrypterSecurityTokenTest {
     t.setTrustedJson("trusted");
     String token = t.encrypt();
     assertTrue("should start with container: " + token, token.startsWith("container:"));
-    String[] fields = token.split(":");
+    String[] fields = StringUtils.split(token, ':');
     BlobCrypterSecurityToken t2 =
         BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
     assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
@@ -102,7 +103,7 @@ public class BlobCrypterSecurityTokenTest {
     String token = t.encrypt();
     // one hour plus clock skew
     timeSource.incrementSeconds(3600 + 181);
-    String[] fields = token.split(":");
+    String[] fields = StringUtils.split(token, ':');
     try {
       BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
       fail("Token should have expired");

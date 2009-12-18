@@ -124,20 +124,17 @@ public abstract class ApiServlet extends InjectedServlet {
   }
 
   protected ResponseItem getResponseItem(Future<?> future) {
-    ResponseItem response;
     try {
       // TODO: use timeout methods?
       Object result = future != null ? future.get() : null;
       // TODO: null is now a supported return value for post/delete, but
       // is bad for get().
-      response = new ResponseItem(result != null ? result : Collections.emptyMap());
+      return new ResponseItem(result != null ? result : Collections.emptyMap());
     } catch (InterruptedException ie) {
-      response = responseItemFromException(ie);
+      return responseItemFromException(ie);
     } catch (ExecutionException ee) {
-      response = responseItemFromException(ee.getCause());
+      return responseItemFromException(ee.getCause());
     }
-
-    return response;
   }
 
   protected ResponseItem responseItemFromException(Throwable t) {

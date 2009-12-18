@@ -191,11 +191,11 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
         String snippet = sp.getSnippet(msg);
         messageText.append(msg.getMessageLevel().name())
-                   .append(" ")
+                   .append(' ')
                    .append(html(msg.format(mc)));
 
         if (!StringUtils.isEmpty(snippet)) {
-          messageText.append("\n").append(snippet);
+          messageText.append('\n').append(snippet);
         }
       }
     }

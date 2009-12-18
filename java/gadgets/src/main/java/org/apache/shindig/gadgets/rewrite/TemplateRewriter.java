@@ -275,7 +275,7 @@ public class TemplateRewriter implements GadgetRewriter {
       StringBuilder buffer = new StringBuilder();
       buffer.append("opensocial.template.Loader.loadContent(");
       JsonSerializer.appendString(buffer, library.serialize());
-      buffer.append(",");
+      buffer.append(',');
       JsonSerializer.appendString(buffer, library.getLibraryUri().toString());
       buffer.append(");");       
       scriptElement.setTextContent(buffer.toString());

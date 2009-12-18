@@ -100,13 +100,13 @@ public class TemplateRewriterTest {
 
   private static final String TEMPLATE_LIBRARY_URI = "http://example.org/library.xml";
   private static final String CONTENT_WITH_TAG_FROM_LIBRARY =
-    "<script type='text/os-template' xmlns:my='#my'><my:Tag4/></script>";  ;
- 
+    "<script type='text/os-template' xmlns:my='#my'><my:Tag4/></script>";
+
   private static final String CONTENT_TESTING_PRECEDENCE_RULES =
     "<script type='text/os-template' xmlns:my='#my' tag='my:Tag1'>inline1</script>" +
     "<script type='text/os-template' xmlns:my='#my' tag='my:Tag2'>inline2</script>" +
     "<script type='text/os-template' xmlns:my='#my' tag='my:Tag3'>inline3</script>" +
-    "<script type='text/os-template' xmlns:my='#my'><my:Tag1/><my:Tag2/><my:Tag3/><my:Tag4/></script>";  ;
+    "<script type='text/os-template' xmlns:my='#my'><my:Tag1/><my:Tag2/><my:Tag3/><my:Tag4/></script>";
 
   @Before
   public void setUp() {
@@ -263,18 +263,18 @@ public class TemplateRewriterTest {
   private void testExpectingTransform(String code, String condition) throws Exception {
     setupGadget(code);
     rewriter.rewrite(gadget, content);
-    assertTrue("Template wasn't transformed (" + condition + ")", 
+    assertTrue("Template wasn't transformed (" + condition + ')',
         content.getContent().indexOf("Hello, John") > 0);
-    assertTrue("Template tag wasn't removed (" + condition + ")",
+    assertTrue("Template tag wasn't removed (" + condition + ')',
         !content.getContent().contains("text/os-template"));
   }
 
   private void testExpectingNoTransform(String code, String condition) throws Exception {
     setupGadget(code);
     rewriter.rewrite(gadget, content);
-    assertTrue("Template was transformed (" + condition + ")", 
+    assertTrue("Template was transformed (" + condition + ')',
         content.getContent().indexOf("${user.name}") > 0);
-    assertTrue("Template tag was removed (" + condition + ")", 
+    assertTrue("Template tag was removed (" + condition + ')',
         content.getContent().indexOf("text/os-template") > 0);
   }
   

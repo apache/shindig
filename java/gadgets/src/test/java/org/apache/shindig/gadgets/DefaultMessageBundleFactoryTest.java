@@ -119,7 +119,7 @@ public class DefaultMessageBundleFactoryTest {
       = "<Module>" +
         "<ModulePrefs title='foo'>" +
         " <Locale messages='" + BUNDLE_URI + "'/>" +
-        " <Locale country='" + LOCALE.getCountry() + "'" +
+        " <Locale country='" + LOCALE.getCountry() + '\'' +
         "  messages='" + COUNTRY_BUNDLE_URI + "'/>" +
         " <Locale lang='" + LOCALE.getLanguage() + "' messages='" + LANG_BUNDLE_URI + "'/>" +
         " <Locale lang='" + LOCALE.getLanguage() + "' country='" + LOCALE.getCountry() + "' " +

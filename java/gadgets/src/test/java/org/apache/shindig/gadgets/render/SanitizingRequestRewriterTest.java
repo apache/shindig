@@ -82,7 +82,7 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
         + "&fp=45508&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
-        + "}";
+        + '}';
     String rewritten = rewrite(req, response);
     assertEquals(sanitized, rewritten);
   }
@@ -102,7 +102,7 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
         + "&fp=45508&nocache=1&sanitize=1&rewriteMime=text%2Fcss');\n"
         + "A {\n"
         + "  font: BOLD\n"
-        + "}";
+        + '}';
     String rewritten = rewrite(req, response);
     assertEquals(sanitized, rewritten);
   }

@@ -350,7 +350,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
                 sb.append("Around ...<");
                 if (qName.prefix != null) {
                   sb.append(qName.prefix);
-                  sb.append(":");
+                  sb.append(':');
                 }
                 sb.append(qName.localpart);
                 for (int j = 0; j < xmlAttributes.getLength(); j++) {

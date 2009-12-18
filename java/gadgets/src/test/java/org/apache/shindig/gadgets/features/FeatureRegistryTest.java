@@ -117,7 +117,7 @@ public class FeatureRegistryTest {
     File tmpFile = File.createTempFile("dummy", ".dat");
     tmpFile.deleteOnExit();
     File parentDir = tmpFile.getParentFile();
-    String childDirName = "" + Math.random();
+    String childDirName = String.valueOf(Math.random());
     File childDir = new File(parentDir, childDirName);
     childDir.mkdirs();
     childDir.deleteOnExit();

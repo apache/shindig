@@ -74,6 +74,6 @@ public final class UserAgent {
     WEBKIT,
     CHROME,
     OPERA,
-    OTHER;
+    OTHER
   }
 }

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 
 import com.google.common.collect.Lists;
@@ -96,8 +97,8 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
       if (line.length() == 0 || line.charAt(0) == COMMENT_MARKER) {
         continue;
       }
-
-      String[] parts = line.split("\\s+");
+      // replaces regex \\s+
+      String[] parts = StringUtils.split(line);
       if (parts.length == 1) {
         exactMatches.add(line.toLowerCase());
       } else if (parts.length == 2

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.protocol;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
@@ -243,7 +244,7 @@ public class BaseRequestItem implements RequestItem {
       return Collections.emptyList();
     }
     if (param instanceof String && ((String)param).indexOf(',') != -1) {
-      List<String> listParam = Arrays.asList(((String)param).split(","));
+      List<String> listParam = Arrays.asList(StringUtils.split((String)param, ','));
       this.parameters.put(paramName, listParam);
       return listParam;
     }

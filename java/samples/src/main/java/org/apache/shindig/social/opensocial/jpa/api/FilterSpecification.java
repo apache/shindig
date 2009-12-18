@@ -76,7 +76,7 @@ public class FilterSpecification {
    * @param finalProp the final property
    * @return true if special
    */
-  public static final boolean isSpecial(String finalProp) {
+  public static boolean isSpecial(String finalProp) {
     return SPECIAL_OPERATION.equals(finalProp);
   }
 
@@ -85,7 +85,7 @@ public class FilterSpecification {
    * @param finalProp the final property
    * @return true if valid.
    */
-  public static final boolean isValid(String finalProp) {
+  public static boolean isValid(String finalProp) {
     return (finalProp != null);
   }
 

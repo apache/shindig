@@ -148,7 +148,7 @@ public class AppDataServiceDb implements AppDataService {
     case friends:
       sb.append(ApplicationDataMapDb.FINDBY_FRIENDS_GROUP);
       lastParam = JPQLUtils.addInClause(sb, "p", "id", lastParam, paramList.size());
-      sb.append(")");
+      sb.append(')');
       // userId translates into all friends
       break;
     case groupId:
@@ -176,7 +176,7 @@ public class AppDataServiceDb implements AppDataService {
     Map<String, Map<String, String>> results = new HashMap<String, Map<String, String>>();
 
     // only add in the fields
-    if (fields == null || fields.size() == 0) {
+    if (fields == null || fields.isEmpty()) {
       for (ApplicationDataMapDb adm : dataMaps) {
         results.put(adm.getPersonId(), adm.getValues());
       }

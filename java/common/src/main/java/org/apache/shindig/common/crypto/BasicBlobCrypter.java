@@ -21,6 +21,7 @@ package org.apache.shindig.common.crypto;
 import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.TimeSource;
 
@@ -204,7 +205,8 @@ public class BasicBlobCrypter implements BlobCrypter {
   private Map<String, String> deserialize(byte[] plain)
   throws UnsupportedEncodingException {
     String base = new String(plain, UTF8);
-    String[] items = base.split("[&=]");
+    // replaces [&=] regex
+    String[] items = StringUtils.splitPreserveAllTokens(base, "&=");
     Map<String, String> map = Maps.newHashMapWithExpectedSize(items.length);
     for (int i=0; i < items.length; ) {
       String key = URLDecoder.decode(items[i++], UTF8);

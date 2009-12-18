@@ -199,7 +199,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if (style == null) {
       style = element.getTextContent();
     } else {
-      style = style + "\n" + element.getTextContent();
+      style = style + '\n' + element.getTextContent();
     }
   }
 
@@ -207,7 +207,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
     if (javaScript == null) {
       javaScript = element.getTextContent();
     } else {
-      javaScript = javaScript + "\n" + element.getTextContent();
+      javaScript = javaScript + '\n' + element.getTextContent();
     }
   }
 

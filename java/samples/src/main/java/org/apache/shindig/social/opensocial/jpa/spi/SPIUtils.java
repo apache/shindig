@@ -66,7 +66,7 @@ public class SPIUtils {
   }
 
   public static <T> List<T> toList(Set<T> s) {
-    List<T> l = new ArrayList<T>();
+    List<T> l = new ArrayList<T>(s.size());
     l.addAll(s);
     return l;
   }

@@ -183,7 +183,7 @@ public class PipelineDataGadgetRewriterTest {
     }
     
     public void appendTo(StringBuffer buffer) {
-      buffer.append("eqBuffer[social=" + socialCount + ",http=" + httpCount + "]");
+      buffer.append("eqBuffer[social=" + socialCount + ",http=" + httpCount + ']');
     }
 
     public boolean matches(Object obj) {

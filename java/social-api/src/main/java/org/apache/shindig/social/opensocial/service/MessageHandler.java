@@ -146,7 +146,7 @@ public class MessageHandler {
           "A message collection is required");
     }
 
-    if (messageIds.size() == 0) {
+    if (messageIds.isEmpty()) {
       // No message IDs specified, this is a PUT to a message collection
       MessageCollection msgCollection = request.getTypedParameter("entity", MessageCollection.class);
       if (msgCollection == null) {

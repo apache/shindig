@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
@@ -125,9 +126,9 @@ public class MakeRequestHandler extends ProxyBase {
 
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
-      String[] headerList = headerData.split("&");
+      String[] headerList = StringUtils.split(headerData, '&');
       for (String header : headerList) {
-        String[] parts = header.split("=");
+        String[] parts = StringUtils.splitPreserveAllTokens(header, '=');
         if (parts.length != 2) {
           throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
               "Malformed header specified,");

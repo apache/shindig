@@ -121,7 +121,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
     if (StringUtils.isNotBlank(forcedLibs)) {
-      defaultExternLibs = ImmutableSortedSet.copyOf(Arrays.asList(forcedLibs.split(":")));
+      defaultExternLibs = ImmutableSortedSet.of(StringUtils.split(forcedLibs, ':'));
     }
   }
 
@@ -230,7 +230,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     // gather the libraries we'll need to generate the extern libs
     String externParam = context.getParameter("libs");    
     if (StringUtils.isNotBlank(externParam)) {
-      externForcedLibs = Sets.newTreeSet(Arrays.asList(externParam.split(":")));
+      externForcedLibs = Sets.newTreeSet(Arrays.asList(StringUtils.split(externParam, ':')));
     }
 
     if (!externForcedLibs.isEmpty()) {

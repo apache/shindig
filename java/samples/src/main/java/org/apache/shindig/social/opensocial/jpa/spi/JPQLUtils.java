@@ -41,14 +41,14 @@ public class JPQLUtils {
    */
   public static int addInClause(StringBuilder sb, String alias, String inField, int firstField,
       int nfields) {
-    sb.append(alias).append(".").append(inField).append(" in (");
+    sb.append(alias).append('.').append(inField).append(" in (");
     for (int i = firstField; i < (firstField + nfields); i++) {
       if (i != firstField) {
         sb.append(", ");
       }
-      sb.append("?").append(i);
+      sb.append('?').append(i);
     }
-    sb.append(")");
+    sb.append(')');
     return firstField + nfields;
   }
 
@@ -91,7 +91,7 @@ public class JPQLUtils {
       fromIndex = queryInUpperCase.indexOf(" FROM ");
       if (fromIndex == -1) {
         // Couldn't find the FROM keyword in the query
-        throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid query [" + query + "]");
+        throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid query [" + query + ']');
       }
     }
     query = "select count(*) " + query.substring(fromIndex, query.length());

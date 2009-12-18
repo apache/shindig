@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.xml.XmlUtil;
@@ -85,7 +86,7 @@ public class GadgetSpec {
       }
       if ("Content".equals(name)) {
         String viewNames = XmlUtil.getAttribute(element, "view", "default");
-        for (String view : viewNames.split(",")) {
+        for (String view : StringUtils.split(viewNames, ',')) {
           view = view.trim();
           List<Element> viewElements = views.get(view);
           if (viewElements == null) {

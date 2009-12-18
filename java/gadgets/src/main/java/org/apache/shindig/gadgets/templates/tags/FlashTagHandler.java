@@ -94,7 +94,7 @@ public class FlashTagHandler extends AbstractTagHandler {
       if (StringUtils.isEmpty(config.flashvars)) {
         config.flashvars = stVar;
       } else {
-        config.flashvars += "&" + stVar;
+        config.flashvars += '&' + stVar;
       }
     }
 
@@ -151,12 +151,12 @@ public class FlashTagHandler extends AbstractTagHandler {
       builder.append(altContentId);
       builder.append("\",");
       JsonSerializer.appendString(builder, config.width);
-      builder.append(",");
+      builder.append(',');
       JsonSerializer.appendString(builder, config.height);
-      builder.append(",\"" + flashMinVersion + "\",");
+      builder.append(",\"").append(flashMinVersion).append("\",");
       builder.append("null,null,");
       JsonSerializer.appendMap(builder, config.getParams());
-      builder.append(",");
+      builder.append(',');
       JsonSerializer.appendMap(builder, config.getAttributes());
       builder.append(");");
       return builder.toString();

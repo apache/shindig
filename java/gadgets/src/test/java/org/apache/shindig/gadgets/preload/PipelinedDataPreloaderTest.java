@@ -433,7 +433,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     assertEquals(1, pipeline.requests.size());
     HttpRequest request = pipeline.requests.get(0);
 
-    assertEquals(HTTP_REQUEST_URL + "?" + PARAMS, request.getUri().toString());
+    assertEquals(HTTP_REQUEST_URL + '?' + PARAMS, request.getUri().toString());
     assertEquals("GET", request.getMethod());
   }
 

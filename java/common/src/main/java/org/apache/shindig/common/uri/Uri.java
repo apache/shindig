@@ -72,7 +72,7 @@ public final class Uri {
       out.append("//").append(authority);
       // insure that there's a separator between authority/path
       if (path != null && path.length() > 1 && !path.startsWith("/")) {
-        out.append("/");
+        out.append('/');
       }
     }
     if (path != null) {

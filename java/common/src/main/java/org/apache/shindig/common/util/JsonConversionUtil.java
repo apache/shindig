@@ -20,6 +20,7 @@ package org.apache.shindig.common.util;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,7 +55,7 @@ public class JsonConversionUtil {
     JSONObject paramsRoot = new JSONObject();
     for (Map.Entry<String, String[]> entry : params.entrySet()) {
       if (!RESERVED_PARAMS.contains(entry.getKey().toLowerCase())) {
-        String[] path = entry.getKey().split("\\.");
+        String[] path = StringUtils.splitPreserveAllTokens(entry.getKey(), '.');
         JSONObject holder = buildHolder(paramsRoot, path, 0);
         holder.put(path[path.length - 1], convertToJsonValue(entry.getValue()[0]));
       }
@@ -129,7 +130,7 @@ public class JsonConversionUtil {
     JSONObject root = new JSONObject();
 
     for (Map.Entry<String, String> entry : params.entrySet()) {
-      String[] path = entry.getKey().split("\\.");
+      String[] path = StringUtils.splitPreserveAllTokens(entry.getKey(), '.');
       JSONObject holder = buildHolder(root, path, 0);
       if (path.length > 1) {
         holder.put(path[path.length - 1], convertToJsonValue(entry.getValue()));

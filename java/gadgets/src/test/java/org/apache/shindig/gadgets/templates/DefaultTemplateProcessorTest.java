@@ -134,7 +134,7 @@ public class DefaultTemplateProcessorTest {
   @Test
   public void testTextNodeEscaping() throws Exception {
     String output = executeTemplate("${xss.script}");
-    assertFalse("Escaping not performed: \"" + output + "\"", output.contains("<script>alert("));
+    assertFalse("Escaping not performed: \"" + output + '\"', output.contains("<script>alert("));
   }
   
   @Test
@@ -201,7 +201,7 @@ public class DefaultTemplateProcessorTest {
   @Test
   public void testCustomTag() throws Exception {
     String output = executeTemplate("<test:Foo text='${foo.title}' data='${user}'/>", 
-        "xmlns:test='" + TEST_NS + "'");
+        "xmlns:test='" + TEST_NS + '\'');
     assertEquals("<b>BAR</b>", output);
   }
 
@@ -238,8 +238,8 @@ public class DefaultTemplateProcessorTest {
   @Test
   public void testSafeCrossDocumentCloning() throws Exception {
     String template = "<test:Bar text='${foo.title}' data='${user}'/>";
-    executeTemplate(template, "xmlns:test='" + TEST_NS + "'");
-    executeTemplate(template, "xmlns:test='" + TEST_NS + "'");
+    executeTemplate(template, "xmlns:test='" + TEST_NS + '\'');
+    executeTemplate(template, "xmlns:test='" + TEST_NS + '\'');
 
     // This is a little hacky but is fine for testing purposes. Assumes that DOM implementation
     // is based on Xerces which will always has a userData hashtable
@@ -277,7 +277,7 @@ public class DefaultTemplateProcessorTest {
   }
   
   private Element prepareTemplate(String markup, String extra) throws GadgetException {    
-    String content = "<script type=\"text/os-template\"" + extra + ">" + markup + "</script>";
+    String content = "<script type=\"text/os-template\"" + extra + '>' + markup + "</script>";
     Document document = parser.parseDom(content);
     return (Element) document.getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG).item(0);
   }

@@ -342,7 +342,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
             appData.put(key, personData.get(key));
           }
         } else {
-          String appDataPrefix = Person.Field.APP_DATA.toString() + ".";
+          String appDataPrefix = Person.Field.APP_DATA.toString() + '.';
           for (String field : fields) {
             if (field.startsWith(appDataPrefix)) {
               if (appData == null) {

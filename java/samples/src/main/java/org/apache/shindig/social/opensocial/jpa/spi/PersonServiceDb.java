@@ -121,7 +121,7 @@ public class PersonServiceDb implements PersonService {
     if (GroupId.Type.self.equals(groupId.getType())) {
       plist = JPQLUtils.getListQuery(entiyManager, sb.toString(), paramList, collectionOptions);
       totalResults = Long.valueOf(1);
-      if (0 == plist.size()) {
+      if (plist.isEmpty()) {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
       }
     } else {
@@ -215,7 +215,7 @@ public class PersonServiceDb implements PersonService {
         case contains:
           filterPos = lastPos + 1;
           sb.append(" like ").append(" ?").append(filterPos);
-          filterValue = "%" + filterValue + "%";
+          filterValue = '%' + filterValue + '%';
           collectionOptions.setFilter(filterValue);
           break;
         case equals:
@@ -228,7 +228,7 @@ public class PersonServiceDb implements PersonService {
         case startsWith:
           filterPos = lastPos + 1;
           sb.append(" like ").append(" ?").append(filterPos);
-          filterValue = "%" + filterValue + "%";
+          filterValue = '%' + filterValue + '%';
           collectionOptions.setFilter(filterValue);
           break;
         }
@@ -256,7 +256,7 @@ public class PersonServiceDb implements PersonService {
           // If sortBy is name then order by p.name.familyName, p.name.givenName.
           sb.append(" order by p.name.familyName, p.name.givenName ");
         } else {
-          sb.append(" order by p." + sortBy);
+          sb.append(" order by p.").append(sortBy);
         }
         switch (collectionOptions.getSortOrder()) {
         case ascending:

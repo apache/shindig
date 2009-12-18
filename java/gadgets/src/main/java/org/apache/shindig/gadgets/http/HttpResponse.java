@@ -362,7 +362,7 @@ public final class HttpResponse implements Externalizable {
     }
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {
-      String[] directives = cacheControl.split(",");
+      String[] directives = StringUtils.split(cacheControl, ',');
       for (String directive : directives) {
         directive = directive.trim();
         if (directive.equalsIgnoreCase("no-cache")
@@ -401,11 +401,11 @@ public final class HttpResponse implements Externalizable {
   private long getCacheControlMaxAge() {
     String cacheControl = getHeader("Cache-Control");
     if (cacheControl != null) {
-      String[] directives = cacheControl.split(",");
+      String[] directives = StringUtils.split(cacheControl, ',');
       for (String directive : directives) {
         directive = directive.trim();
         if (directive.startsWith("max-age")) {
-          String[] parts = directive.split("=");
+          String[] parts = StringUtils.split(directive, '=');
           if (parts.length == 2) {
             try {
               return Long.parseLong(parts[1]) * 1000;
@@ -456,7 +456,7 @@ public final class HttpResponse implements Externalizable {
     Collection<String> values = headers.get("Content-Type");
     if (!values.isEmpty()) {
       String contentType = values.iterator().next();
-      String[] parts = contentType.split(";");
+      String[] parts = StringUtils.split(contentType, ';');
       if (BINARY_CONTENT_TYPES.contains(parts[0])) {
         return DEFAULT_ENCODING;
       }

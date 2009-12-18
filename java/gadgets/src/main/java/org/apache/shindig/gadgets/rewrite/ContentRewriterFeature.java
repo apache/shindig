@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
@@ -59,7 +60,7 @@ public class ContentRewriterFeature {
 
   protected enum PATTERNS {
     ALL, NONE, REGEX, STRINGS
-  };
+  }
 
   protected PATTERNS includePatterns;
   protected PATTERNS excludePatterns;
@@ -149,7 +150,7 @@ public class ContentRewriterFeature {
       String includeTagList = f.getParam(INCLUDE_TAGS);
       if (includeTagList != null) {
         Set<String> tags = Sets.newTreeSet();
-        for (String tag : includeTagList.split(",")) {
+        for (String tag : StringUtils.split(includeTagList, ',')) {
           if (tag != null) {
             tags.add(tag.trim().toLowerCase());
           }
@@ -178,7 +179,7 @@ public class ContentRewriterFeature {
       }
 
       Collection<String> includeUrls = f.getParamCollection(INCLUDE_URL);
-      if (includeUrls.size() == 0) {
+      if (includeUrls.isEmpty()) {
         includes = Collections.emptyList();
       } else if (includeUrls.contains("*")) {
         includes = Collections.singleton("*");
@@ -193,7 +194,7 @@ public class ContentRewriterFeature {
       includes = Collections.emptyList();
     }
 
-    if (includes.size() == 0
+    if (includes.isEmpty()
         && (includeRegex == null || "".equals(includeRegex))) {
       includePatterns = PATTERNS.NONE;
     } else if (includes.size() > 0) {
@@ -225,7 +226,7 @@ public class ContentRewriterFeature {
       }
 
       Collection<String> excludeUrls = f.getParamCollection(EXCLUDE_URL);
-      if (excludeUrls.size() == 0) {
+      if (excludeUrls.isEmpty()) {
         excludes = Collections.emptyList();
       } else if (excludeUrls.contains("*")) {
         excludes = Collections.singleton("*");
@@ -242,7 +243,7 @@ public class ContentRewriterFeature {
       excludes = Collections.emptyList();
     }
 
-    if (excludes.size() == 0
+    if (excludes.isEmpty()
         && (excludeRegex == null || "".equals(excludeRegex))) {
       excludePatterns = PATTERNS.NONE;
     } else if (excludes.size() > 0) {

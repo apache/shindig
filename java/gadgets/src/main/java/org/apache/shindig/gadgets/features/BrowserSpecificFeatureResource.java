@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.UserAgent;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
@@ -96,7 +97,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
   }
   
   private boolean browserMatches() {
-    if (browserMatch.size() == 0) {
+    if (browserMatch.isEmpty()) {
       // Not browser-sensitive.
       return true;
     }
@@ -116,10 +117,10 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     }
     
     // Comma-delimited list of <browser>-<versionKey> pairs.
-    String[] entries = browserKey.split(",");
+    String[] entries = StringUtils.split(browserKey, ',');
     for (String entry : entries) {
       entry = entry.trim();
-      String[] browserAndVersion = entry.split("-");
+      String[] browserAndVersion = StringUtils.split(entry, '-');
       String browser = browserAndVersion[0];
       String versionKey = browserAndVersion.length == 2 ? browserAndVersion[1] : null;
       
@@ -237,7 +238,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       private final int[] parts;
       
       private VersionNumber(String str) {
-        String[] strParts = str.split("\\.");
+        String[] strParts = StringUtils.split(str, '.');
         int[] intParts = new int[strParts.length];
         try {
           for (int i = 0; i < strParts.length; ++i) {

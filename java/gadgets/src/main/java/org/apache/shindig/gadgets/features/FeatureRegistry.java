@@ -388,7 +388,7 @@ public class FeatureRegistry {
       StringBuilder sb = new StringBuilder();
       sb.append("Problems found processing features:\n");
       for (String problem : problems) {
-        sb.append(problem).append("\n");
+        sb.append(problem).append('\n');
       }
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG, sb.toString());
     }

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.auth;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
@@ -98,7 +99,7 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
       // No token is present, assume anonymous access
       return new AnonymousSecurityToken();
     }
-    String[] fields = token.split(":");
+    String[] fields = StringUtils.split(token, ':');
     if (fields.length != 2) {
       throw new SecurityTokenException("Invalid security token " + token);
     }
