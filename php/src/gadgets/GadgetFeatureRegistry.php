@@ -210,7 +210,7 @@ class GadgetFeatureRegistry {
         $content = trim($attributes['src']);
 
         // Make html-santitization work see SHINDIG-346
-        if ($content == 'res://com/google/caja/plugin/html-sanitizer.js') { 
+        if ($content == 'res://com/google/caja/plugin/html-sanitizer-minified.js') { 
           $content= 'http://google-caja.googlecode.com/svn/trunk/src/com/google/caja/plugin/html-sanitizer.js'; 
         } 
 
