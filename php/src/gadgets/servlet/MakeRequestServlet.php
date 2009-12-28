@@ -26,7 +26,7 @@ require 'src/common/RemoteContentRequest.php';
 require 'src/common/RemoteContent.php';
 require 'src/common/Cache.php';
 require 'src/common/RemoteContentFetcher.php';
-require 'src/gadgets/oauth/OAuth.php';
+require 'src/common/ShindigOAuth.php';
 require 'src/gadgets/oauth/OAuthStore.php';
 
 class MakeRequestServlet extends HttpServlet {

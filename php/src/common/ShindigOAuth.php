@@ -56,6 +56,7 @@ class ShindigOAuth {
   public static $OAUTH_SIGNATURE = "oauth_signature";
   public static $OAUTH_TIMESTAMP = "oauth_timestamp";
   public static $OAUTH_NONCE = "oauth_nonce";
+  public static $OAUTH_VERIFIER = "oauth_verifier";
   public static $OAUTH_VERSION = "oauth_version";
   public static $HMAC_SHA1 = "HMAC_SHA1";
   public static $RSA_SHA1 = "RSA_SHA1";

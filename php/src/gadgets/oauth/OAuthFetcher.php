@@ -44,6 +44,7 @@ class OAuthFetcher extends RemoteContentFetcher {
   public static $ERROR_TEXT = "oauthErrorText";
   // names of additional OAuth parameters we include in outgoing requests
   public static $XOAUTH_APP_URL = "xoauth_app_url";
+  public static $OAUTH_CALLBACK = "oauth_callback";
 
   /**
    * @var RemoteContentFetcher
@@ -302,6 +303,11 @@ class OAuthFetcher extends RemoteContentFetcher {
       $url = $accessor->consumer->callback_url->requestTokenURL;
       $msgParams = array();
       self::addIdentityParams($msgParams, $request->getToken());
+      $callbackState = new OAuthCallbackState($this->oauthCrypter);
+      $callbackUrl = "http://" . getenv('HTTP_HOST') . "/gadgets/oauthcallback";
+      $callbackState->setRealCallbackUrl($callbackUrl);
+      $cs = $callbackState->getEncryptedState();
+      $msgParams[self::$OAUTH_CALLBACK] = $callbackUrl . "?cs=" . urlencode($cs);
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(ShindigOAuth::$OAUTH_TOKEN,
@@ -486,6 +492,18 @@ class OAuthFetcher extends RemoteContentFetcher {
       $msgParams = array();
       $msgParams[ShindigOAuth::$OAUTH_TOKEN] = $accessor->requestToken;
       self::addIdentityParams($msgParams, $request->getToken());
+      $callbackUrl = $this->requestParams->getReceivedCallback();
+      if (strlen($callbackUrl) > 0) {
+        $parsed_url = parse_url($callbackUrl);
+        parse_str($parsed_url["query"], $url_params);
+        if (strlen($url_params["oauth_token"]) > 0 &&
+            strlen($url_params["oauth_verifier"]) > 0 &&
+            $url_params["oauth_token"] == $accessor->requestToken) {
+          $msgParams[ShindigOAuth::$OAUTH_VERIFIER] = $url_params["oauth_verifier"];
+        } else {
+          throw new GadgetException("Invalid received callback URL: ".$callbackUrl);
+        }
+      }
       $request = $this->newRequestMessageParams($url->url, $msgParams);
       $reply = $this->sendOAuthMessage($request);
       $reply->requireParameters(array(ShindigOAuth::$OAUTH_TOKEN,
@@ -542,7 +560,10 @@ class OAuthFetcher extends RemoteContentFetcher {
       $fetcher = new $remoteFetcherClass();
       $content = $fetcher->fetchRequest($rcr);
       $statusCode = $content->getHttpCode();
-      if ($statusCode >= 400 && $statusCode < 500) {
+      if ($statusCode == 401) {
+        $tokenKey = $this->buildTokenKey();
+        $this->tokenStore->removeTokenAndSecret($tokenKey);
+      } else if ($statusCode >= 400 && $statusCode < 500) {
         $message = $this->parseAuthHeader(null, $content);
         if ($message->get_parameter(ShindigOAuth::$OAUTH_PROBLEM) != null) {
           throw new ShindigOAuthProtocolException($message);
@@ -595,7 +616,7 @@ class OAuthFetcher extends RemoteContentFetcher {
   private function filterOAuthParams($message) {
     $result = array();
     foreach ($message->get_parameters() as $key => $value) {
-      if (strstr(strtolower($key), "oauth") != - 1 || strstr(strtolower($key), "xoauth") != - 1) {
+      if (preg_match('/^(oauth|xoauth|opensocial)/', strtolower($key))) {
         $result[$key] = $value;
       }
     }

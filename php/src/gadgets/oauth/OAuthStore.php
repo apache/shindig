@@ -24,6 +24,8 @@ interface OAuthStore {
 
   public function setTokenAndSecret($tokenKey, $tokenInfo);
 
+  public function removeTokenAndSecret($tokenKey);
+
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages for
    * resource access.

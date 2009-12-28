@@ -93,6 +93,10 @@ class GadgetOAuthTokenStore {
     $this->store->setTokenAndSecret($tokenKey, $tokenInfo);
   }
 
+  public function removeTokenAndSecret(TokenKey $tokenKey) {
+    $this->store->removeTokenAndSecret($tokenKey);
+  }
+
   /**
    * Retrieve an OAuthAccessor that is ready to sign OAuthMessages.
    *

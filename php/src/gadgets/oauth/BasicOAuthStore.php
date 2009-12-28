@@ -18,8 +18,6 @@
  * under the License.
  */
 
-require 'src/common/ShindigOAuth.php';
-
 class BasicOAuthStore implements OAuthStore {
 
   private $consumerInfos = array();
@@ -104,6 +102,10 @@ class BasicOAuthStore implements OAuthStore {
 
   public function setTokenAndSecret($tokenKey, $tokenInfo) {
     $this->tokens[md5(serialize($tokenKey))] = $tokenInfo;
+  }
+
+  public function removeTokenAndSecret($tokenKey) {
+    unset($this->tokens[md5(serialize($tokenKey))]);
   }
 
   private function getTokenInfo($tokenKey) {

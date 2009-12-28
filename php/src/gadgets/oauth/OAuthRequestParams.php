@@ -27,12 +27,14 @@ class OAuthRequestParams {
   public static $REQUEST_TOKEN_PARAM = "OAUTH_REQUEST_TOKEN";
   public static $REQUEST_TOKEN_SECRET_PARAM = "OAUTH_REQUEST_TOKEN_SECRET";
   public static $CLIENT_STATE_PARAM = "oauthState";
+  public static $RECEIVED_CALLBACK_PARAM = "OAUTH_RECEIVED_CALLBACK";
   public static $BYPASS_SPEC_CACHE_PARAM = "bypassSpecCache";
   protected $serviceName;
   protected $tokenName;
   protected $requestToken;
   protected $requestTokenSecret;
   protected $origClientState;
+  protected $receivedCallback;
   protected $bypassSpecCache;
 
   public function __construct(array $arguments) {
@@ -41,6 +43,7 @@ class OAuthRequestParams {
     $this->requestToken = self::getParam($arguments, self::$REQUEST_TOKEN_PARAM, null);
     $this->requestTokenSecret = self::getParam($arguments, self::$REQUEST_TOKEN_SECRET_PARAM, null);
     $this->origClientState = self::getParam($arguments, self::$CLIENT_STATE_PARAM, null);
+    $this->receivedCallback = self::getParam($arguments, self::$RECEIVED_CALLBACK_PARAM, "");
     $this->bypassSpecCache = '1' == self::getParam($arguments, self::$BYPASS_SPEC_CACHE_PARAM, null);
   }
 
@@ -74,5 +77,9 @@ class OAuthRequestParams {
 
   public function getOrigClientState() {
     return $this->origClientState;
+  }
+
+  public function getReceivedCallback() {
+    return $this->receivedCallback;
   }
 }
