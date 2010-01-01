@@ -209,6 +209,7 @@ shindig.samplecontainer = {};
      if (cacheUrlMatches && cacheUrlMatches[1] == "0") {
        document.getElementById("useCacheCheckbox").checked = false;
      }
+     gadgets.pubsubrouter.init(function() { return gadgetUrl; });
   };
 
   shindig.samplecontainer.initGadget = function() {
@@ -271,6 +272,10 @@ shindig.samplecontainer = {};
           = gadgets.json.stringify(data);
       }
     );
+  };
+
+  shindig.samplecontainer.sendHello = function() {
+    gadgets.pubsubrouter.publish('helloworld', 'hello from the container');
   };
 
   osapi.messages = {};

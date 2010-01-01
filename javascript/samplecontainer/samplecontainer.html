@@ -51,7 +51,7 @@
 
 </style>
 
-<script type="text/javascript" src="../../js/core:rpc?debug=1"></script>
+<script type="text/javascript" src="../../js/core:rpc:pubsub?c=1&debug=1"></script>
 <script type="text/javascript" src="../container/cookies.js"></script>
 <script type="text/javascript" src="../container/util.js"></script>
 <script type="text/javascript" src="../container/gadgets.js"></script>
@@ -87,6 +87,7 @@
 
       <input type="button" value="reset all" onclick="shindig.samplecontainer.changeGadgetUrl();"/>
       <input type="button" value="dump state" onclick="shindig.samplecontainer.dumpStateFile();"/>
+      <input type="button" value="Send Hello" onclick="shindig.samplecontainer.sendHello();"/>
     </div>
     <div style="clear:both; height: 1px;">&nbsp;</div>
   </div>

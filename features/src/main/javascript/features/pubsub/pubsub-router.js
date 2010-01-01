@@ -37,7 +37,7 @@ gadgets.pubsubrouter = function() {
 
   function router(command, channel, message) {
     var gadgetId = this.f;
-    var sender = gadgetIdToSpecUrl(gadgetId);
+    var sender = gadgetId === '..' ? 'container' : gadgetIdToSpecUrl(gadgetId);
     if (sender) {
       switch (command) {
       case 'subscribe':
@@ -101,6 +101,15 @@ gadgets.pubsubrouter = function() {
       }
       gadgetIdToSpecUrl = gadgetIdToSpecUrlHandler;
       gadgets.rpc.register('pubsub', router);
+    },
+
+    /**
+     * Publishes a message to a channel.
+     * @param {string} channel Channel name.
+     * @param {string} message Message to publish.
+     */
+    publish: function(channel, message) {
+      router.call({f: '..'}, 'publish', channel, message);
     }
   };
 }();

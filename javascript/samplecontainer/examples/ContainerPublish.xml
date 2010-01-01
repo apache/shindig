@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Container Publish Example">
+    <Require feature="pubsub"></Require>
+  </ModulePrefs>
+
+  <Content type="html" view="default">
+    <![CDATA[
+      <div>Container Message: <span id="message_display"></span></div>
+
+      <script type="text/javascript">
+        function handleHelloWorld(sender, message) {
+          document.getElementById('message_display').appendChild(
+              document.createTextNode(message))
+        }
+
+        gadgets.pubsub.subscribe('helloworld', handleHelloWorld);
+      </script>
+    ]]>
+  </Content>
+</Module>
