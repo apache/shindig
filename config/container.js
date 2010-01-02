@@ -96,8 +96,9 @@
 "gadgets.features" : {
   "core.io" : {
     // Note: /proxy is an open proxy. Be careful how you expose this!
-    "proxyUrl" : "http://%host%/gadgets/proxy?refresh=%refresh%&url=%url%%rewriteMime%",
-    "jsonProxyUrl" : "http://%host%/gadgets/makeRequest"
+    // Note: Here // is replaced with the current protocol http/https
+    "proxyUrl" : "//%host%/gadgets/proxy?refresh=%refresh%&url=%url%%rewriteMime%",
+    "jsonProxyUrl" : "//%host%/gadgets/makeRequest"
   },
   "views" : {
     "profile" : {
