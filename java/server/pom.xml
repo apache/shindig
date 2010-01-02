@@ -140,13 +140,14 @@
       <artifactId>google-collections</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.code.guice</groupId>
+      <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
-    <dependency>
+<!--    <dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
     </dependency>
+-->
     <dependency>
       <groupId>xml-apis</groupId>
       <artifactId>xml-apis</artifactId>

@@ -76,13 +76,20 @@
   <dependencies>
     <!-- external dependencies -->
     <dependency>
-      <groupId>com.google.code.guice</groupId>
+      <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-jmx</artifactId>
+    </dependency>
+
+
+    <!--<dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
     </dependency>
+-->
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>

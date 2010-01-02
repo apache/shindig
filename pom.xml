@@ -1216,10 +1216,6 @@
       <id>oauth</id>
       <url>http://oauth.googlecode.com/svn/code/maven</url>
     </repository>
-    <repository>
-      <id>guice</id>
-      <url>http://guice-maven.googlecode.com/svn/trunk/</url>
-    </repository>
     <!-- for jstl-1.2 for now.. -->
     <repository>
       <id>java.net</id>
@@ -1305,17 +1301,25 @@
       </dependency>
 
       <!-- external dependencies -->
+      <dependency> 
+        <groupId>com.google.inject</groupId> 
+        <artifactId>guice</artifactId> 
+        <version>2.0</version> 
+      </dependency> 
+
       <dependency>
-        <groupId>com.google.code.guice</groupId>
-        <artifactId>guice</artifactId>
+        <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-jmx</artifactId>
         <version>2.0</version>
       </dependency>
-      <!-- dependency not declared in guice pom -->
+
+      <!-- dependency not declared in guice pom 
       <dependency>
         <groupId>aopalliance</groupId>
         <artifactId>aopalliance</artifactId>
         <version>1.0</version>
-      </dependency>
+      </dependency> -->
+
       <dependency>
         <groupId>com.google.collections</groupId>
         <artifactId>google-collections</artifactId>
