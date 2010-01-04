@@ -170,7 +170,7 @@ class ShindigOAuthUtil extends OAuthUtil {
       return false;
     }
     $semi = strpos($contentType, ";");
-    if ($semi >= 0) {
+    if ($semi != false) {
       $contentType = substr($contentType, 0, $semi);
     }
     return strtolower(ShindigOAuth::$FORM_ENCODED) == strtolower(trim($contentType));

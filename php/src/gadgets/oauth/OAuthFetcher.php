@@ -417,9 +417,9 @@ class OAuthFetcher extends RemoteContentFetcher {
         $url = ShindigOAuthUtil::addParameters($url, $oauthParams);
         break;
     }
-    $postBodyBytes = ($postBody == null) ? null : null; //$postBody->getBytes("UTF-8"); //See what can we do with this?
     $rcr = new RemoteContentRequest($url);
-    $rcr->createRemoteContentRequest($method, $url, $newHeaders, $postBodyBytes, $options);
+    $rcr->createRemoteContentRequest($method, $url, $newHeaders, null, $options);
+    $rcr->setPostBody($postBody);
     return $rcr;
   }
 
@@ -549,17 +549,48 @@ class OAuthFetcher extends RemoteContentFetcher {
    */
   private function fetchData() {
     try {
-      $msgParams = ShindigOAuthUtil::isFormEncoded($this->realRequest->getContentType()) ? ShindigOAuthUtil::urldecode_rfc3986($this->realRequest->getPostBody()) : array();
+      // TODO: it'd be better using $this->realRequest->getContentType(), but not set before hand. Temporary hack.
+      $postBody = $this->realRequest->getPostBody();
+      $url = $this->realRequest->getUrl();
+      $msgParams = array();
+      if (ShindigOAuthUtil::isFormEncoded($this->realRequest->getHeader("Content-Type")) && strlen($postBody) > 0) {
+        $entries = explode('&', $postBody);
+        foreach ($entries as $entry) {
+          $parts = explode('=', $entry);
+          if (count($parts) == 2) {
+            $msgParams[ShindigOAuthUtil::urldecode_rfc3986($parts[0])] = ShindigOAuthUtil::urldecode_rfc3986($parts[1]);
+          }
+        }
+      }
       $method = $this->realRequest->getMethod();
       $msgParams[self::$XOAUTH_APP_URL] = $this->authToken->getAppUrl();
       // Build and sign the message.
-      $oauthRequest = $this->newRequestMessageMethod($method, $this->realRequest->getUrl(), $msgParams);
-      $rcr = $this->createRemoteContentRequest($this->filterOAuthParams($oauthRequest), $this->realRequest->getMethod(), $this->realRequest->getUrl(), $this->realRequest->getHeaders(), $this->realRequest->getContentType(), $this->realRequest->getPostBody(), $this->realRequest->getOptions());
-      //TODO is there a better way to detect an SP error?
+      $oauthRequest = $this->newRequestMessageMethod($method, $url, $msgParams);
+      $oauthParams = $this->filterOAuthParams($oauthRequest);
+      $newHeaders = array();
+      switch ($method) {
+        case 'POST' :
+          if (empty($postBody) || count($postBody) == 0) {
+            $postBody = ShindigOAuthUtil::getPostBodyString($oauthParams);
+          } else {
+            $postBody = $postBody . "&" . ShindigOAuthUtil::getPostBodyString($oauthParams);
+          }
+          // To avoid 417 Response from server, adding empty "Expect" header
+          $newHeaders['Expect'] = '';
+          break;
+        case 'GET' :
+          $url = ShindigOAuthUtil::addParameters($url, $oauthParams);
+          break;
+      }
+      // To choose HTTP method client requested, we don't use $this->createRemoteContentRequest() here.
+      $rcr = new RemoteContentRequest($url);
+      $rcr->createRemoteContentRequest($method, $url, $newHeaders, null, $this->realRequest->getOptions());
+      $rcr->setPostBody($postBody);
       $remoteFetcherClass = Config::get('remote_content_fetcher');
       $fetcher = new $remoteFetcherClass();
       $content = $fetcher->fetchRequest($rcr);
       $statusCode = $content->getHttpCode();
+      //TODO is there a better way to detect an SP error? For example: http://wiki.oauth.net/ProblemReporting
       if ($statusCode == 401) {
         $tokenKey = $this->buildTokenKey();
         $this->tokenStore->removeTokenAndSecret($tokenKey);
