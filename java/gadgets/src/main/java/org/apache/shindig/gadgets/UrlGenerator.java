@@ -47,13 +47,6 @@ public interface UrlGenerator {
    * @return The url for the bundled javascript that includes all referenced feature libraries.
    */
   String getBundledJsUrl(Collection<String> features, GadgetContext context);
-
-  /**
-   * @param features
-   * @param context
-   * @return The bundled js parameter for type=url gadgets.
-   */
-  String getBundledJsParam(Collection<String> features, GadgetContext context);
   
   /**
    * Validates the inbound URL, for use by serving code for caching and redirection purposes.

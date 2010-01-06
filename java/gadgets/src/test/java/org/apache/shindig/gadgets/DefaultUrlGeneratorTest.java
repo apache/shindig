@@ -71,7 +71,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
   private final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
   private final FeatureRegistry registry = mock(FeatureRegistry.class);
   private final FakeContainerConfig config = new FakeContainerConfig();
-  private UrlGenerator urlGenerator;
+  private DefaultUrlGenerator urlGenerator;
 
   @Before
   public void setUp() throws Exception {

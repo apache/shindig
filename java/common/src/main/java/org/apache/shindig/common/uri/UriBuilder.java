@@ -42,10 +42,8 @@ public class UriBuilder {
   private String scheme;
   private String authority;
   private String path;
-  private String query;
-  private String fragment;
-  private final Map<String, List<String>> queryParameters;
-
+  private final ParamString query;
+  private final ParamString fragment;
 
   /**
    * Construct a new builder from an existing uri.
@@ -54,17 +52,16 @@ public class UriBuilder {
     scheme = uri.getScheme();
     authority = uri.getAuthority();
     path = uri.getPath();
-    query = uri.getQuery();
-    fragment = uri.getFragment();
-
-    queryParameters = Maps.newLinkedHashMap(uri.getQueryParameters());
+    query = new ParamString(uri.getQuery());
+    fragment = new ParamString(uri.getFragment());
   }
 
   /**
    * Create an empty builder.
    */
   public UriBuilder() {
-    queryParameters =  Maps.newLinkedHashMap();
+    query =  new ParamString();
+    fragment = new ParamString();
   }
 
   /**
@@ -121,42 +118,28 @@ public class UriBuilder {
   }
 
   /**
-   * @return The query part of the uri, or null if none was specified.
+   * @return The queryParameters fragment.
    */
   public String getQuery() {
-    if (query == null) {
-      query = joinParameters(queryParameters);
-    }
-    return query;
+    return query.getString();
   }
 
   /**
    * Assigns the specified query string as the query portion of the uri, automatically decoding
    * parameters to populate the parameter map for calls to getParameter.
    */
-  public UriBuilder setQuery(String query) {
-    queryParameters.clear();
-    queryParameters.putAll(splitParameters(query));
-    this.query = query;
+  public UriBuilder setQuery(String str) {
+    query.setString(str);
     return this;
   }
 
   public UriBuilder addQueryParameter(String name, String value) {
-    query = null;
-    List<String> params = queryParameters.get(name);
-    if (params == null) {
-      params = Lists.newArrayList();
-      queryParameters.put(name, params);
-    }
-    params.add(value);
+    query.add(name, value);
     return this;
   }
 
   public UriBuilder addQueryParameters(Map<String, String> parameters) {
-    query = null;
-    for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      addQueryParameter(entry.getKey(), entry.getValue());
-    }
+    query.addAll(parameters);
     return this;
   }
 
@@ -164,8 +147,7 @@ public class UriBuilder {
    * Force overwrites a given query parameter with the given value.
    */
   public UriBuilder putQueryParameter(String name, String... values) {
-    query = null;
-    queryParameters.put(name, Lists.newArrayList(values));
+    query.put(name, values);
     return this;
   }
 
@@ -173,8 +155,7 @@ public class UriBuilder {
    * Force overwrites a given query parameter with the given value.
    */
   public UriBuilder putQueryParameter(String name, Iterable<String> values) {
-    query = null;
-    queryParameters.put(name, Lists.newArrayList(values));
+    query.put(name, values);
     return this;
   }
   
@@ -182,8 +163,7 @@ public class UriBuilder {
    * Removes a query parameter.
    */
   public UriBuilder removeQueryParameter(String name) {
-    query = null;
-    queryParameters.remove(name);
+    query.remove(name);
     return this;
   }
   
@@ -191,37 +171,88 @@ public class UriBuilder {
    * @return The queryParameters part of the uri, separated into component parts.
    */
   public Map<String, List<String>> getQueryParameters() {
-    return queryParameters;
+    return query.getParams();
   }
 
   /**
    * @return All queryParameters parameters with the given name.
    */
   public List<String> getQueryParameters(String name) {
-    return queryParameters.get(name);
+    return query.getParams(name);
   }
 
   /**
    * @return The first queryParameters parameter value with the given name.
    */
   public String getQueryParameter(String name) {
-    Collection<String> values = queryParameters.get(name);
-    if (values == null || values.isEmpty()) {
-      return null;
-    }
-    return values.iterator().next();
+    return query.get(name);
   }
 
   /**
    * @return The queryParameters fragment.
    */
   public String getFragment() {
-    return fragment;
+    return fragment.getString();
   }
 
-  public UriBuilder setFragment(String fragment) {
-    this.fragment = fragment;
+  public UriBuilder setFragment(String str) {
+    fragment.setString(str);
     return this;
+  }
+  
+  public UriBuilder addFragmentParameter(String name, String value) {
+    fragment.add(name, value);
+    return this;
+  }
+
+  public UriBuilder addFragmentParameters(Map<String, String> parameters) {
+    fragment.addAll(parameters);
+    return this;
+  }
+
+  /**
+   * Force overwrites a given fragment parameter with the given value.
+   */
+  public UriBuilder putFragmentParameter(String name, String... values) {
+    fragment.put(name, values);
+    return this;
+  }
+
+  /**
+   * Force overwrites a given fragment parameter with the given value.
+   */
+  public UriBuilder putFragmentParameter(String name, Iterable<String> values) {
+    fragment.put(name, values);
+    return this;
+  }
+  
+  /**
+   * Removes a fragment parameter.
+   */
+  public UriBuilder removeFragmentParameter(String name) {
+    fragment.remove(name);
+    return this;
+  }
+  
+  /**
+   * @return The fragmentParameters part of the uri, separated into component parts.
+   */
+  public Map<String, List<String>> getFragmentParameters() {
+    return fragment.getParams();
+  }
+
+  /**
+   * @return All fragmentParameters parameters with the given name.
+   */
+  public List<String> getFragmentParameters(String name) {
+    return fragment.getParams(name);
+  }
+
+  /**
+   * @return The first fragmentParameters parameter value with the given name.
+   */
+  public String getFragmentParameter(String name) {
+    return fragment.get(name);
   }
 
   /**
@@ -287,5 +318,105 @@ public class UriBuilder {
     if (!(obj instanceof UriBuilder)) {return false;}
 
     return toString().equals(obj.toString());
+  }
+  
+  private static class ParamString {
+    private final Map<String, List<String>> params;
+    private String str;
+    
+    private ParamString() {
+      this.params = Maps.newLinkedHashMap();
+    }
+    
+    private ParamString(String str) {
+      this();
+      setString(str);
+    }
+    
+    /**
+     * @return The queryParameters fragment.
+     */
+    public String getString() {
+      if (str == null) {
+        str = joinParameters(params);
+      }
+      return str;
+    }
+
+    /**
+     * Assigns the specified query string as the query portion of the uri, automatically decoding
+     * parameters to populate the parameter map for calls to getParameter.
+     */
+    public void setString(String str) {
+      params.clear();
+      params.putAll(splitParameters(str));
+      this.str = str;
+    }
+
+    public void add(String name, String value) {
+      str = null;
+      List<String> values = params.get(name);
+      if (values == null) {
+        values = Lists.newArrayList();
+        params.put(name, values);
+      }
+      values.add(value);
+    }
+
+    public void addAll(Map<String, String> parameters) {
+      str = null;
+      for (Map.Entry<String, String> entry : parameters.entrySet()) {
+        add(entry.getKey(), entry.getValue());
+      }
+    }
+
+    /**
+     * Force overwrites a given query parameter with the given value.
+     */
+    public void put(String name, String... values) {
+      str = null;
+      params.put(name, Lists.newArrayList(values));
+    }
+
+    /**
+     * Force overwrites a given query parameter with the given value.
+     */
+    public void put(String name, Iterable<String> values) {
+      str = null;
+      params.put(name, Lists.newArrayList(values));
+    }
+    
+    /**
+     * Removes a query parameter.
+     */
+    public void remove(String name) {
+      str = null;
+      params.remove(name);
+    }
+    
+    /**
+     * @return The queryParameters part of the uri, separated into component parts.
+     */
+    public Map<String, List<String>> getParams() {
+      return params;
+    }
+
+    /**
+     * @return All queryParameters parameters with the given name.
+     */
+    public List<String> getParams(String name) {
+      return params.get(name);
+    }
+
+    /**
+     * @return The first queryParameters parameter value with the given name.
+     */
+    public String get(String name) {
+      Collection<String> values = params.get(name);
+      if (values == null || values.isEmpty()) {
+        return null;
+      }
+      return values.iterator().next();
+    }
   }
 }

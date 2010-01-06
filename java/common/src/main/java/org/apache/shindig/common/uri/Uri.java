@@ -46,6 +46,7 @@ public final class Uri {
   private final String fragment;
 
   private final Map<String, List<String>> queryParameters;
+  private final Map<String, List<String>> fragmentParameters;
 
   private static UriParser parser = new DefaultUriParser();
 
@@ -62,6 +63,8 @@ public final class Uri {
     fragment = builder.getFragment();
     queryParameters
         = Collections.unmodifiableMap(Maps.newLinkedHashMap(builder.getQueryParameters()));
+    fragmentParameters
+        = Collections.unmodifiableMap(Maps.newLinkedHashMap(builder.getFragmentParameters()));
 
     StringBuilder out = new StringBuilder();
 
@@ -340,6 +343,31 @@ public final class Uri {
    */
   public String getFragment() {
     return fragment;
+  }
+  
+  /**
+   * @return The fragment part of the uri, separated into component parts.
+   */
+  public Map<String, List<String>> getFragmentParameters() {
+    return fragmentParameters;
+  }
+
+  /**
+   * @return All query parameters with the given name.
+   */
+  public Collection<String> getFragmentParameters(String name) {
+    return fragmentParameters.get(name);
+  }
+
+  /**
+   * @return The first query parameter value with the given name.
+   */
+  public String getFragmentParameter(String name) {
+    Collection<String> values = fragmentParameters.get(name);
+    if (values == null || values.isEmpty()) {
+      return null;
+    }
+    return values.iterator().next();
   }
 
   @Override

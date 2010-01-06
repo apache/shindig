@@ -247,6 +247,97 @@ public class UriBuilderTest {
     assertEquals("http://apache.org/shindig?hello+world=foo%26bar#foo", builder.toString());
     assertEquals("hello+world=foo%26bar", builder.getQuery());
   }
+  
+  @Test
+  public void addSingleFragmentParameter() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .addFragmentParameter("hello", "world")
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#hello=world", builder.toString());
+  }
+
+  @Test
+  public void addTwoFragmentParameters() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .addFragmentParameter("hello", "world")
+        .addFragmentParameter("foo", "bar")
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#hello=world&foo=bar", builder.toString());
+  }
+
+  @Test
+  public void iterableFragmentParameters() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .putFragmentParameter("hello", Lists.newArrayList("world", "monde"))
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#hello=world&hello=monde", builder.toString());
+  }
+ 
+  @Test
+  public void removeFragmentParameter() {
+    UriBuilder uri = UriBuilder.parse("http://www.example.com/foo#bar=baz&quux=baz");
+    uri.removeFragmentParameter("bar");
+    assertEquals("http://www.example.com/foo#quux=baz", uri.toString());
+    uri.removeFragmentParameter("quux");
+    assertEquals("http://www.example.com/foo", uri.toString());
+  }
+
+  @Test
+  public void addIdenticalFragmentParameters() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .addFragmentParameter("hello", "world")
+        .addFragmentParameter("hello", "goodbye")
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#hello=world&hello=goodbye", builder.toString());
+  }
+
+  @Test
+  public void addBatchFragmentParameters() {
+    Map<String, String> params = Maps.newLinkedHashMap();
+    params.put("foo", "bar");
+    params.put("hello", "world");
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .addFragmentParameters(params)
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#foo=bar&hello=world", builder.toString());
+  }
+
+  @Test
+  public void fragmentStringIsUnescaped() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .setFragment("hello+world=world%26bar");
+    assertEquals("world&bar", builder.getFragmentParameter("hello world"));
+  }
+
+  @Test
+  public void fragmentParamsAreEscaped() {
+    UriBuilder builder = new UriBuilder()
+        .setScheme("http")
+        .setAuthority("apache.org")
+        .setPath("/shindig")
+        .addFragmentParameter("hello world", "foo&bar")
+        .setQuery("foo");
+    assertEquals("http://apache.org/shindig?foo#hello+world=foo%26bar", builder.toString());
+    assertEquals("hello+world=foo%26bar", builder.getFragment());
+  }
 
   @Test
   public void parse() {
