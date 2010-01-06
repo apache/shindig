@@ -62,7 +62,7 @@ public class RenderTagHandler extends AbstractTagHandler {
       // TODO: for non-Elements, output errors
       if (value instanceof ElementWrapper) {
         copyChildren((ElementWrapper) value, result);
-      } else if (value instanceof List) {
+      } else if (value instanceof List<?>) {
         List<?> children = (List<?>) value;
         for (Object probablyAnElement : children) {
           if (probablyAnElement instanceof ElementWrapper) {

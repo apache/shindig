@@ -20,7 +20,6 @@ package org.apache.shindig.social.opensocial.model;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**

@@ -22,14 +22,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.common.util.FakeTimeSource;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
 import java.security.GeneralSecurityException;
 import java.util.regex.Pattern;
+
+import org.apache.shindig.common.util.FakeTimeSource;
+import org.junit.Test;
 
 public class CryptoTest {
   private BasicBlobCrypter crypter;

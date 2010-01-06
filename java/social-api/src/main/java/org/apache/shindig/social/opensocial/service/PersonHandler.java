@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+
 import org.apache.shindig.common.util.FutureUtil;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
@@ -33,12 +37,7 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
 
 @Service(name = "people", path = "/{userId}+/{groupId}/{personId}+")
 public class PersonHandler {

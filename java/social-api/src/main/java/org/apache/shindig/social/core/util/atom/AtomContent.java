@@ -60,7 +60,7 @@ public class AtomContent {
    * @param value
    */
   public AtomContent(Object value) {
-    if (value instanceof Map) {
+    if (value instanceof Map<?, ?>) {
       Map<?, ?> entries = (Map<?, ?>) value;
       List<AtomKeyValue> keyValues = Lists.newArrayList();
       for ( Entry<?, ?> e : entries.entrySet() ) {

@@ -22,25 +22,24 @@ package org.apache.shindig.gadgets.render;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.common.uri.Uri;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 /**
@@ -110,7 +109,6 @@ public class DefaultServiceFetcher {
 
   @SuppressWarnings("unchecked")
   private List<String> getEndpointsFromContainerConfig(String container, String host) {
-    @SuppressWarnings("unchecked")
     Map<String, Object> properties = (Map<String, Object>) containerConfig.getMap(container,
         GADGETS_FEATURES_CONFIG).get(OSAPI_FEATURE_CONFIG);
 

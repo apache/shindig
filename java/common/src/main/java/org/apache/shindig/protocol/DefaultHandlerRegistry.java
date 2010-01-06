@@ -90,7 +90,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
     for (final Object handler : handlers) {
       Class<?> handlerType;
       Provider<?> handlerProvider;
-      if (handler instanceof Class) {
+      if (handler instanceof Class<?>) {
         handlerType = (Class<?>) handler;
         handlerProvider = injector.getProvider(handlerType);
       } else {
@@ -476,7 +476,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
           result = method.invoke(handler, item.getTypedRequest(inputClass));
         }
 
-        if (result instanceof Future) {
+        if (result instanceof Future<?>) {
           return (Future<?>) result;
         }
         return ImmediateFuture.newInstance(result);

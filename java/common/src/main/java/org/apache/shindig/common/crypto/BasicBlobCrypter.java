@@ -81,6 +81,9 @@ public class BasicBlobCrypter implements BlobCrypter {
       BufferedReader reader = new BufferedReader(
           new InputStreamReader(openFile, CharsetUtil.UTF8));
       String line = reader.readLine();
+      if (line == null) {
+        throw new IOException("Unexpectedly empty keyfile:" + keyfile);
+      }
       line = line.trim();
       byte[] keyBytes = CharsetUtil.getUtf8Bytes(line);
       init(keyBytes);

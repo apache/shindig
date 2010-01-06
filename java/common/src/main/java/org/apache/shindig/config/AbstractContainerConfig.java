@@ -44,7 +44,6 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
     return 0;
   }
 
-  @SuppressWarnings("unchecked")
   public boolean getBool(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof Boolean) {

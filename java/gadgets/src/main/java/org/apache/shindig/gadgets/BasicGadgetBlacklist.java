@@ -90,22 +90,27 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
   }
 
   private void parseBlacklist(File blacklistFile) throws IOException {
-    BufferedReader in = new BufferedReader(new FileReader(blacklistFile));
-    String line;
-    while ((line = in.readLine()) != null) {
-      line = line.trim();
-      if (line.length() == 0 || line.charAt(0) == COMMENT_MARKER) {
-        continue;
+    BufferedReader in = null;
+    try {
+      in = new BufferedReader(new FileReader(blacklistFile));
+      String line;
+      while ((line = in.readLine()) != null) {
+        line = line.trim();
+        if (line.length() == 0 || line.charAt(0) == COMMENT_MARKER) {
+          continue;
+        }
+        // replaces regex \\s+
+        String[] parts = StringUtils.split(line);
+        if (parts.length == 1) {
+          exactMatches.add(line.toLowerCase());
+        } else if (parts.length == 2
+                   && parts[0].toUpperCase().equals(REGEXP_PREFIX)) {
+          // compile will throw PatternSyntaxException on invalid patterns.
+          regexpMatches.add(Pattern.compile(parts[1], Pattern.CASE_INSENSITIVE));
+        }
       }
-      // replaces regex \\s+
-      String[] parts = StringUtils.split(line);
-      if (parts.length == 1) {
-        exactMatches.add(line.toLowerCase());
-      } else if (parts.length == 2
-                 && parts[0].toUpperCase().equals(REGEXP_PREFIX)) {
-        // compile will throw PatternSyntaxException on invalid patterns.
-        regexpMatches.add(Pattern.compile(parts[1], Pattern.CASE_INSENSITIVE));
-      }
+    } finally {
+      in.close();
     }
   }
 

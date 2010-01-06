@@ -72,7 +72,7 @@ public class ShindigTypeConverter implements TypeConverter {
       return ImmutableList.of();
     }
     
-    if (obj instanceof Iterable) {
+    if (obj instanceof Iterable<?>) {
       return ((Iterable<?>) obj);
     }
     

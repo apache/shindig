@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.encoding;
 
 import java.nio.charset.Charset;
 
-import com.google.inject.Inject;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
@@ -79,7 +78,7 @@ public class EncodingDetector {
     int i = 0;
     if (input.length >= 3 &&
        (input[0] & 0xFF) == 0xEF &&
-       (input[1] & 0xFF) == 0xBB &
+       (input[1] & 0xFF) == 0xBB &&
        (input[2] & 0xFF) == 0xBF) {
       // Skip BOM.
       i = 3;

@@ -217,7 +217,7 @@ public class BaseRequestItem implements RequestItem {
 
   public String getParameter(String paramName) {
     Object param = this.parameters.get(paramName);
-    if (param instanceof List) {
+    if (param instanceof List<?>) {
       if (((List<?>)param).isEmpty()) {
         return null;
       } else {
@@ -248,7 +248,7 @@ public class BaseRequestItem implements RequestItem {
       this.parameters.put(paramName, listParam);
       return listParam;
     }
-    else if (param instanceof List) {
+    else if (param instanceof List<?>) {
       // Assume it's a list of strings.  This is not type-safe.
       @SuppressWarnings("unchecked")
       List<String> listParam = (List<String>) param;

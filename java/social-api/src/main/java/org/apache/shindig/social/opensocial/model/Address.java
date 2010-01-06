@@ -17,16 +17,15 @@
  */
 package org.apache.shindig.social.opensocial.model;
 
+import java.util.EnumSet;
+import java.util.Map;
+
 import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.social.core.model.AddressImpl;
 
-import com.google.inject.ImplementedBy;
-import com.google.common.collect.Maps;
 import com.google.common.base.Functions;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.Maps;
+import com.google.inject.ImplementedBy;
 
 /**
  * Base interface for all address objects

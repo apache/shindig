@@ -106,11 +106,13 @@ public class BasicImageRewriter implements ImageRewriter {
   }
 
   public HttpResponse rewrite(HttpRequest request, HttpResponse response) {
-    Uri uri = request.getUri();
-
-    if (uri == null || request == null || response == null)
+    if (request == null || response == null)
       return response;
-
+    
+    Uri uri = request.getUri();
+    if (null == uri)
+      return response;
+    
     try {
       // Check resizing
       Integer resizeQuality = request.getParamAsInteger(PARAM_RESIZE_QUALITY);

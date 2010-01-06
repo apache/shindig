@@ -17,12 +17,14 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
-import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.RestHandler;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
@@ -31,17 +33,13 @@ import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.easymock.classextension.EasyMock;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class MessageHandlerTest extends Assert {
 

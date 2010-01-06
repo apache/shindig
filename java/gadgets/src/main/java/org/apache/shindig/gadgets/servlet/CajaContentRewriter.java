@@ -81,9 +81,10 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         public Reader retrieve(ExternalReference externalReference, String string)
             throws UriCallbackException {
           logger.info("Retrieving " + externalReference.toString());
+          Reader in = null;
           try {
             URI resourceUri = retrievedUri.resolve(externalReference.getUri());
-            Reader in = new InputStreamReader(
+            in = new InputStreamReader(
                 resourceUri.toURL().openConnection().getInputStream(), "UTF-8");
             char[] buf = new char[4096];
             StringBuilder sb = new StringBuilder();
@@ -95,6 +96,13 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
             throw new UriCallbackException(externalReference, ex);
           } catch (IOException ex) {
             throw new UriCallbackException(externalReference, ex);
+          } finally {
+            try {
+              in.close();
+            } catch (IOException e) {
+              // Not sure what else we can do here
+              throw new RuntimeException(e);
+            }
           }
         }
 

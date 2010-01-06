@@ -17,6 +17,10 @@
  */
 package org.apache.shindig.social.opensocial.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.conversion.BeanConverter;
@@ -27,13 +31,7 @@ import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.json.JSONObject;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Subclass with social specific extensions

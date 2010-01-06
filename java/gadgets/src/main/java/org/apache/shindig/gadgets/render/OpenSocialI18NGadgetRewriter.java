@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import java.io.IOException;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
@@ -27,13 +32,6 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.google.inject.Inject;
-
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Produce data constants that are needed by the opensocial-i18n

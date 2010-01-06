@@ -98,7 +98,7 @@ public class BeanXStreamConverter implements BeanConverter {
   private String convertToXml(Object obj) {
 
     writerStack.reset();
-    if (obj instanceof Map) {
+    if (obj instanceof Map<?, ?>) {
       Map<?, ?> m = (Map<?, ?>) obj;
       XStreamConfiguration.ConverterConfig cc = converterMap
           .get(XStreamConfiguration.ConverterSet.MAP);

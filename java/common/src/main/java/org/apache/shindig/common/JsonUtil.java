@@ -49,7 +49,7 @@ public class JsonUtil {
 
     if (value instanceof JSONObject) {
       return ((JSONObject) value).opt(propertyName);
-    } else if (value instanceof Map) {
+    } else if (value instanceof Map<?, ?>) {
       return ((Map<?, ?>) value).get(propertyName);
     } else {
       // Try getter conversion

@@ -116,7 +116,6 @@ public class BasicOAuthStore implements OAuthStore {
     }
   }
 
-  @SuppressWarnings("unused")
   private void storeConsumerInfo(URI gadgetUri, String serviceName, JSONObject consumerInfo)
       throws JSONException, GadgetException {
     realStoreConsumerInfo(gadgetUri, serviceName, consumerInfo);

@@ -507,6 +507,13 @@ public final class HttpResponse implements Externalizable {
   }
   
   @Override
+  public int hashCode() {
+    return httpStatusCode
+      ^ headers.hashCode()
+      ^ responseBytes.hashCode();
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (obj == this) { return true; }
     if (!(obj instanceof HttpResponse)) { return false; }

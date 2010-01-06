@@ -472,6 +472,15 @@ public class HttpRequest {
   }
 
   @Override
+  public int hashCode() {
+    return method.hashCode()
+      ^ uri.hashCode()
+      ^ authType.hashCode()
+      ^ postBody.hashCode()
+      ^ headers.hashCode();
+  }
+  
+  @Override
   public boolean equals(Object obj) {
     if (obj == this) {return true;}
     if (obj instanceof HttpRequest) {

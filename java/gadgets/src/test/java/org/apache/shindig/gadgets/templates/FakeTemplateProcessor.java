@@ -41,7 +41,7 @@ public class FakeTemplateProcessor implements TemplateProcessor {
     // Some quick-and-dirty mocking:  put a List in the map, and
     // you get one result per-entry
     Object result = expressionResults.get(expression);
-    if (result instanceof List && !type.isAssignableFrom(List.class)) {
+    if (result instanceof List<?> && !type.isAssignableFrom(List.class)) {
       result = ((List<?>) result).remove(0);
     }
     return type.cast(result);

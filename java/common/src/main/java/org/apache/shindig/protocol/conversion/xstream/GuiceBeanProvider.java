@@ -17,13 +17,6 @@
  */
 package org.apache.shindig.protocol.conversion.xstream;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.google.inject.Injector;
-import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
-
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -34,7 +27,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.inject.Injector;
+import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
 /**
  *

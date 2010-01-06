@@ -17,6 +17,12 @@
  */
 package org.apache.shindig.protocol;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.common.testing.FakeGadgetToken;
@@ -25,21 +31,12 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.easymock.IMocksControl;
 import org.easymock.classextension.EasyMock;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.TestCase;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 public class DataServiceServletTest extends Assert {
 
