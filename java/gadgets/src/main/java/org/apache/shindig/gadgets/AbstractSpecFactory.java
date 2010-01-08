@@ -85,12 +85,24 @@ public abstract class AbstractSpecFactory<T> {
     }
 
     if (obj == null) {
+      boolean bypassCache = false;
       try {
         obj = fetchFromNetwork(query);
+      } catch (SpecRetrievalFailedException e) {
+        // Don't cache the resulting exception.
+        // The underlying RequestPipeline may (and should) cache non-OK HTTP responses
+        // independently, and may do so for the same spec in different ways depending
+        // on context. There's no computational benefit to caching this exception in
+        // the spec cache since we won't try to re-parse the data anyway, as we would
+        // an OK response with a faulty spec.
+        bypassCache = true;
+        obj = e;
       } catch (GadgetException e) {
         obj = e;
       }
-      cache.addElement(query.specUri, obj, refresh);
+      if (!bypassCache) {
+        cache.addElement(query.specUri, obj, refresh);
+      }
     }
 
     if (obj instanceof GadgetException) {
@@ -104,7 +116,7 @@ public abstract class AbstractSpecFactory<T> {
   /**
    * Retrieves a spec from the network, parses, and adds it to the cache.
    */
-  protected T fetchFromNetwork(Query query) throws GadgetException {
+  protected T fetchFromNetwork(Query query) throws SpecRetrievalFailedException, GadgetException {
     HttpRequest request = new HttpRequest(query.specUri)
         .setIgnoreCache(query.ignoreCache)
         .setGadget(query.gadgetUri)
@@ -205,6 +217,13 @@ public abstract class AbstractSpecFactory<T> {
           cache.addElement(query.specUri, e, refresh);
         }
       }
+    }
+  }
+  
+  private static class SpecRetrievalFailedException extends GadgetException {
+    SpecRetrievalFailedException(Uri specUri, int code) {
+      super(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
+            "Unable to retrieve spec for " + specUri + ". HTTP error " + code);
     }
   }
 }

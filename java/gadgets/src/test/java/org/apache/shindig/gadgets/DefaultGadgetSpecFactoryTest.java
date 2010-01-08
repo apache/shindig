@@ -239,19 +239,23 @@ public class DefaultGadgetSpecFactoryTest {
     specFactory.getGadgetSpec(createContext(SPEC_URL, true));
   }
 
-  @Test(expected = GadgetException.class)
-  public void badFetchServesCached() throws Exception {
+  public void badFetchThrowsExceptionOverridingCache() throws Exception {
     HttpRequest firstRequest = createCacheableRequest();
-    expect(pipeline.execute(firstRequest)).andReturn(new HttpResponse(LOCAL_SPEC_XML)).once();
+    expect(pipeline.execute(firstRequest)).andReturn(new HttpResponse(LOCAL_SPEC_XML)).times(2);
     HttpRequest secondRequest = createIgnoreCacheRequest();
     expect(pipeline.execute(secondRequest)).andReturn(HttpResponse.error()).once();
     replay(pipeline);
 
-    GadgetSpec original = specFactory.getGadgetSpec(createContext(SPEC_URL, false));
-    GadgetSpec cached = specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+    specFactory.getGadgetSpec(createContext(SPEC_URL, false));
 
-    assertEquals(original.getUrl(), cached.getUrl());
-    assertEquals(original.getChecksum(), cached.getChecksum());
+    try {
+      specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+    } catch (GadgetException e) {
+      // Expected condition. 
+    }
+    
+    // Now make sure the cache wasn't populated w/ the error.
+    specFactory.getGadgetSpec(createContext(SPEC_URL, false));
   }
 
   @Test(expected = GadgetException.class)
