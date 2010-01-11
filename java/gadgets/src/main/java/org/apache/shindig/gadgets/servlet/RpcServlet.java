@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,7 +76,7 @@ public class RpcServlet extends InjectedServlet {
       return;
     }
 
-    Result result = process(request, response, reqValue.getBytes());
+    Result result = process(request, response, reqValue);
     response.getWriter().write(result.isSuccess()
         ? callbackValue + '(' + result.getOutput() + ')'
         : result.getOutput());
@@ -84,10 +85,17 @@ public class RpcServlet extends InjectedServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    ServletInputStream is = request.getInputStream();
-    byte[] body = IOUtils.toByteArray(is);
-    Result result = process(request, response, body);
-    response.getWriter().write(result.getOutput());
+    try{
+      InputStreamReader is = new InputStreamReader(request.getInputStream(),
+          getRequestCharacterEncoding(request));
+      String body = IOUtils.toString(is);
+      Result result = process(request, response, body);
+      response.getWriter().write(result.getOutput());
+    } catch (UnsupportedEncodingException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      logger.log(Level.INFO, e.getMessage(), e);
+      response.getWriter().write("Unsupported input character set");
+    }
   }
 
   private String validateParameterValue(HttpServletRequest request, String parameter)
@@ -99,19 +107,14 @@ public class RpcServlet extends InjectedServlet {
     return result;
   }
 
-  private Result process(HttpServletRequest request, HttpServletResponse response, byte[] body) {
+  private Result process(HttpServletRequest request, HttpServletResponse response, String body) {
     try {
-      String encoding = getRequestCharacterEncoding(request);
-      JSONObject req = new JSONObject(new String(body, encoding));
+      JSONObject req = new JSONObject(body);
       JSONObject resp = jsonHandler.process(req);
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("application/json; charset=utf-8");
       response.setHeader("Content-Disposition", "attachment;filename=rpc.txt");
       return new Result(resp.toString(), true);
-    } catch (UnsupportedEncodingException e) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      logger.log(Level.INFO, e.getMessage(), e);
-      return new Result("Unsupported input character set", false);
     } catch (JSONException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new Result("Malformed JSON request.", false);

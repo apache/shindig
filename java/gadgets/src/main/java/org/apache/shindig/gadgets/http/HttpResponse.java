@@ -142,10 +142,10 @@ public final class HttpResponse implements Externalizable {
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = new MapMaker().makeMap();
 
-  private transient String responseString;
-  private transient long date;
-  private transient Charset encoding;
-  private transient Map<String, String> metadata;
+  private String responseString;
+  private long date;
+  private Charset encoding;
+  private Map<String, String> metadata;
 
   private int httpStatusCode;
   private Multimap<String, String> headers;

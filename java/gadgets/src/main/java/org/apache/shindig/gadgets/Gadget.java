@@ -60,7 +60,7 @@ public class Gadget {
    * @param registry The gadget feature registry to use to find dependent
    *                 features.
    */
-  public Gadget setGadgetFeatureRegistry(FeatureRegistry registry) {
+  public synchronized Gadget setGadgetFeatureRegistry(FeatureRegistry registry) {
     this.featureRegistry = registry;
     return this;
   }

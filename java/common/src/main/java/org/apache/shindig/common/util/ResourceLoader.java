@@ -71,7 +71,12 @@ public class ResourceLoader {
    * @throws IOException
    */
   public static String getContent(String resource) throws IOException {
-    return IOUtils.toString(openResource(resource), "UTF-8");
+    InputStream is = openResource(resource);
+    try{
+      return IOUtils.toString(is, "UTF-8");
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   /**
@@ -80,6 +85,11 @@ public class ResourceLoader {
    * @throws IOException
    */
   public static String getContent(File file) throws IOException {
-    return IOUtils.toString(new FileInputStream(file), "UTF-8");
+    InputStream is = new FileInputStream(file);
+    try{
+      return IOUtils.toString(is, "UTF-8");
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 }

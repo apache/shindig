@@ -21,6 +21,7 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.common.collect.BiMap;
@@ -94,7 +95,14 @@ public abstract class GadgetHtmlParser {
     }
     
     if (document == null) {
-      document = parseDomImpl(source);
+      try {
+        document = parseDomImpl(source);
+      } catch (GadgetException e) {
+        throw e;
+      } catch (Exception e) {
+        // DOMException is a RuntimeException
+        throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+      }
 
       HtmlSerialization.attach(document, serializerProvider.get(), source);
 

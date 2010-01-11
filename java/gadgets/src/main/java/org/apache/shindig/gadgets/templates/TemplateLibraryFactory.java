@@ -31,6 +31,8 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.w3c.dom.Element;
 
+import java.io.UnsupportedEncodingException;
+
 import com.google.inject.Inject;
 
 /**
@@ -69,8 +71,12 @@ public class TemplateLibraryFactory {
       String key = null;
       Element element = null;
       if (!context.getIgnoreCache()) {
-        key = HashUtil.rawChecksum(content.getBytes());
-        element = parsedXmlCache.getElement(key);
+        try {
+          key = HashUtil.rawChecksum(content.getBytes("UTF-8"));
+          element = parsedXmlCache.getElement(key);
+        } catch (UnsupportedEncodingException e) {
+          // this won't happen, but if it does, cache won't be used.
+        }
       }
       
       if (element == null) {

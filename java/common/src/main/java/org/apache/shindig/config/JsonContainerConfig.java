@@ -325,7 +325,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
         all.put(container, contents);
       }
     } catch (JSONException e) {
-System.out.println("Trouble parsing " + json);
+      LOG.warning("Trouble parsing " + json);
       throw new ContainerConfigException("Trouble parsing " + json, e);
     }
   }

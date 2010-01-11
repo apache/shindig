@@ -75,10 +75,10 @@ public class BasicBlobCrypter implements BlobCrypter {
    * @throws IOException if the file can't be read.
    */
   public BasicBlobCrypter(File keyfile) throws IOException {
-    FileInputStream openFile = null;
+    BufferedReader reader = null;
     try {
-      openFile = new FileInputStream(keyfile);
-      BufferedReader reader = new BufferedReader(
+      FileInputStream openFile = new FileInputStream(keyfile);
+      reader = new BufferedReader(
           new InputStreamReader(openFile, CharsetUtil.UTF8));
       String line = reader.readLine();
       if (line == null) {
@@ -89,8 +89,8 @@ public class BasicBlobCrypter implements BlobCrypter {
       init(keyBytes);
     } finally {
       try {
-        if (openFile != null) {
-          openFile.close();
+        if (reader != null) {
+          reader.close();
         }
       } catch (IOException e) {
         // oh well.
@@ -183,7 +183,7 @@ public class BasicBlobCrypter implements BlobCrypter {
   public Map<String, String> unwrap(String in, int maxAgeSec)
   throws BlobCrypterException {
     try {
-      byte[] bin = Base64.decodeBase64(in.getBytes());
+      byte[] bin = Base64.decodeBase64(in.getBytes("UTF-8"));
       byte[] hmac = new byte[Crypto.HMAC_SHA1_LEN];
       byte[] cipherText = new byte[bin.length-Crypto.HMAC_SHA1_LEN];
       System.arraycopy(bin, 0, cipherText, 0, cipherText.length);

@@ -109,8 +109,13 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
           regexpMatches.add(Pattern.compile(parts[1], Pattern.CASE_INSENSITIVE));
         }
       }
-    } finally {
-      in.close();
+    }finally{
+      try{
+        in.close();
+      }catch(IOException e){
+        //ignore
+      }
+      
     }
   }
 
