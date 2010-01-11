@@ -146,7 +146,7 @@ public class JsonRpcHandlerTest {
     assertEquals("foo", orderedEnums.getJSONObject(3).getString("value"));
   }
 
-  @Test(expected = RpcException.class)
+  @Test
   public void testUnexpectedError() throws Exception {
     JSONArray gadgets = new JSONArray()
         .put(createGadget(SPEC_URL.toString(), 0, null));
@@ -155,7 +155,9 @@ public class JsonRpcHandlerTest {
         .put("gadgets", gadgets);
 
     urlGenerator.throwRandomFault = true;
-    jsonRpcHandler.process(input);
+    JSONObject resp = jsonRpcHandler.process(input);
+    String actual = resp.getJSONArray("gadgets").getJSONObject(0).getJSONArray("errors").getString(0);
+    assertEquals("BROKEN", actual);
   }
 
   // TODO: Verify that user pref specs are returned correctly.

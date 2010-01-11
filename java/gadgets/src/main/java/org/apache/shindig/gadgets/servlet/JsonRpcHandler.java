@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
@@ -37,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -49,9 +49,9 @@ import java.util.concurrent.ExecutorService;
  * a single output JSON construct.
  */
 public class JsonRpcHandler {
-  private final ExecutorService executor;
-  private final Processor processor;
-  private final UrlGenerator urlGenerator;
+  protected final ExecutorService executor;
+  protected final Processor processor;
+  protected final UrlGenerator urlGenerator;
 
   @Inject
   public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator) {
@@ -88,13 +88,13 @@ public class JsonRpcHandler {
     CompletionService<JSONObject> processor =  new ExecutorCompletionService<JSONObject>(executor);
 
     for (GadgetContext context : gadgets) {
-      processor.submit(new Job(context));
+      processor.submit(createNewJob(context));
     }
 
     JSONObject response = new JSONObject();
 
     int numJobs = gadgets.size();
-    do {
+    while (numJobs > 0) {
       try {
         JSONObject gadget = processor.take().get();
         response.append("gadgets", gadget);
@@ -121,12 +121,16 @@ public class JsonRpcHandler {
       } finally {
         numJobs--;
       }
-    } while (numJobs > 0);
+    } 
     return response;
   }
 
-  private class Job implements Callable<JSONObject> {
-    private final GadgetContext context;
+  protected Job createNewJob(GadgetContext context) {
+    return new Job(context);
+  }
+
+  protected class Job implements Callable<JSONObject> {
+    protected final GadgetContext context;
 
     public Job(GadgetContext context) {
       this.context = context;
@@ -136,7 +140,14 @@ public class JsonRpcHandler {
       try {
         Gadget gadget = processor.process(context);
         GadgetSpec spec = gadget.getSpec();
-
+        return getGadgetJson(gadget,spec);
+      } catch (Exception e) {
+        throw new RpcException(context, e);
+      }
+    }
+    
+    protected JSONObject getGadgetJson(Gadget gadget, GadgetSpec spec)
+        throws JSONException {
         JSONObject gadgetJson = new JSONObject();
 
         ModulePrefs prefs = spec.getModulePrefs();
@@ -144,12 +155,18 @@ public class JsonRpcHandler {
         // TODO: modularize response fields based on requested items.
         JSONObject views = new JSONObject();
         for (View view : spec.getViews().values()) {
-          views.put(view.getName(), new JSONObject()
+          JSONObject jv = new JSONObject()
                // .put("content", view.getContent())
                .put("type", view.getType().toString())
                .put("quirks", view.getQuirks())
                .put("preferredHeight", view.getPreferredHeight())
-               .put("preferredWidth", view.getPreferredWidth()));
+               .put("preferredWidth", view.getPreferredWidth());
+          Map<String, String> vattrs = view.getAttributes();
+          if(vattrs.size()>0){
+            JSONObject ja = new JSONObject(vattrs);
+            jv.put("attributes", ja);
+          }
+          views.put(view.getName(), jv);
         }
 
         // Features.
@@ -210,12 +227,6 @@ public class JsonRpcHandler {
                   .put("scaling", prefs.getScaling())
                   .put("scrolling", prefs.getScrolling());
         return gadgetJson;
-      } catch (ProcessingException e) {
-        throw new RpcException(context, e);
-      } catch (JSONException e) {
-        // Shouldn't be possible
-        throw new RpcException(context, e);
-      }
     }
 
     private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
