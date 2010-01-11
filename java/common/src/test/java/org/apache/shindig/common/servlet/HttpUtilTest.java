@@ -50,20 +50,20 @@ public class HttpUtilTest {
   @Test
   public void testSetCachingHeaders() {
     HttpUtil.setCachingHeaders(recorder);
-    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.DEFAULT_TTL, false);
+    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.getDefaultTtl(), false);
   }
 
   @Test
   public void testSetCachingHeadersNoProxy() {
     HttpUtil.setCachingHeaders(recorder, true);
 
-    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.DEFAULT_TTL, true);
+    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.getDefaultTtl(), true);
   }
   
   @Test
   public void testSetCachingHeadersAllowProxy() {
     HttpUtil.setCachingHeaders(recorder, false);
-    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.DEFAULT_TTL, false);
+    checkCacheControlHeaders(testStartTime, recorder, HttpUtil.getDefaultTtl(), false);
   }
 
   @Test

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HttpUtil {
   // 1 year.
-  public static final int DEFAULT_TTL = 60 * 60 * 24 * 365;
+  private static int defaultTtl = 60 * 60 * 24 * 365;
 
   private static TimeSource timeSource;
 
@@ -46,7 +46,7 @@ public class HttpUtil {
    * @param response The HTTP response
    */
   public static void setCachingHeaders(HttpServletResponse response) {
-    setCachingHeaders(response, DEFAULT_TTL, false);
+    setCachingHeaders(response, defaultTtl, false);
   }
 
   /**
@@ -57,7 +57,7 @@ public class HttpUtil {
    * @param noProxy True if you don't want the response to be cacheable by proxies.
    */
   public static void setCachingHeaders(HttpServletResponse response, boolean noProxy) {
-    setCachingHeaders(response, DEFAULT_TTL, noProxy);
+    setCachingHeaders(response, defaultTtl, noProxy);
   }
 
   /**
@@ -98,5 +98,13 @@ public class HttpUtil {
         response.setHeader("Cache-Control", "public,max-age=" + Integer.toString(ttl));
       }
     }
+  }
+
+  public static int getDefaultTtl() {
+    return defaultTtl;
+  }
+
+  public static void setDefaultTtl(int defaultTtl) {
+    defaultTtl = defaultTtl;
   }
 }
