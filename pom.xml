@@ -198,6 +198,15 @@
       </roles>
     </developer>
     <developer>
+      <id>jasvir</id>
+      <name>Jasvir Nagra</name>
+      <email>jasvir@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>johnh</id>
       <name>John Hjelmstad</name>
       <email>johnh@apache.org</email>
