@@ -53,6 +53,14 @@ public abstract class AbstractParserAndSerializerTest extends AbstractParsingTes
     assertNull(parser.parseDom(content).getDoctype());
     parseAndCompareBalanced(content, expected, parser);
   }
+  
+  @Test
+  public void docStartsWithHeader() throws Exception {
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-startswithcomment.html");
+    String expected =
+        loadFile("org/apache/shindig/gadgets/parse/test-startswithcomment-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
 
   @Test
   public void notADocument() throws Exception {

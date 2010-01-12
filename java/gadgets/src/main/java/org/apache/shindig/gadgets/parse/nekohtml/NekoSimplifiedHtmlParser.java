@@ -107,7 +107,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
     }
 
     Document document = handler.getDocument();
-    document.appendChild(handler.getFragment().getFirstChild());
+    document.appendChild(DomUtil.getFirstNamedChildNode(handler.getFragment(), "html"));
     fixNekoWeirdness(document);
     return document;
   }
