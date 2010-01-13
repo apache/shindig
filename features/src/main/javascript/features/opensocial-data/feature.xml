@@ -22,7 +22,7 @@
   <dependency>core.io</dependency>
   <dependency>core.util</dependency>
   <dependency>opensocial-data-context</dependency>
-  <dependency>opensocial-0.8</dependency>
+  <dependency>opensocial</dependency>
   <dependency>xmlutil</dependency>
   <gadget>    
     <script src="data.js"></script>

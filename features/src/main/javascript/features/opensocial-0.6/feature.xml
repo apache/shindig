@@ -19,11 +19,7 @@
 -->
 <feature>
   <name>opensocial-0.6</name>
-  <dependency>core.io</dependency>
-  <dependency>core.prefs</dependency>
-  <dependency>core.util</dependency>
   <dependency>opensocial-0.7</dependency>
-  <dependency>views</dependency>
   <gadget>
     <script src="opensocial6to7.js"></script>
   </gadget>
