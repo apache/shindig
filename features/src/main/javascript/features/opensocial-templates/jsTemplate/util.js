@@ -123,7 +123,7 @@ function isArray(value) {
  *
  * @param {Array} array  Array to be sliced.
  * @param {number} start  The start of the slice.
- * @param {number} opt_end  The end of the slice (optional).
+ * @param {number=} opt_end  The end of the slice (optional).
  * @return {Array} array  The slice of the array from start to end.
  */
 function arraySlice(array, start, opt_end) {

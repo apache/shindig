@@ -23,12 +23,6 @@
 
 var gadgets = gadgets || {};
 
-/**
- * @static
- * @class Provides operations for getting information about and modifying the
- *     window the gadget is placed in.
- * @name gadgets.window
- */
 gadgets.window = gadgets.window || {};
 
 // we wrap these in an anonymous function to avoid storing private data
@@ -42,7 +36,6 @@ gadgets.window = gadgets.window || {};
    * @member gadgets.window
    */
   gadgets.window.getViewportDimensions = function() {
-    var x,y;
     if (self.innerHeight) {
       // all except Explorer
       x = self.innerWidth;

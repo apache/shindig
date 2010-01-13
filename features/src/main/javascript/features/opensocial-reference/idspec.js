@@ -142,14 +142,14 @@ opensocial.IdSpec.GroupId = {
 /**
  * Gets the id spec's data that's associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *   see the <a href="opensocial.IdSpec.Field.html">Field</a> class
  * for possible values
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  * @member opensocial.IdSpec
  */
 opensocial.IdSpec.prototype.getField = function(key, opt_params) {
@@ -160,8 +160,8 @@ opensocial.IdSpec.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this id spec associated with the given key.
  *
- * @param {String} key The key to set data for
- * @param {String} data The data to set
+ * @param {string} key The key to set data for
+ * @param {string} data The data to set
  */
 opensocial.IdSpec.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

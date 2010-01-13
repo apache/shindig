@@ -34,6 +34,7 @@ var gadgets = gadgets || {};
 
 /**
  * Log an informational message
+ * @param {Object} message - the message to log
  */
 gadgets.log = function(message) {
   gadgets.log.logAtLevel(gadgets.log.INFO, message);
@@ -42,6 +43,7 @@ gadgets.log = function(message) {
  
 /**
  * Log a warning
+ * @param {Object} message - the message to log
  */
 gadgets.warn = function(message) {
   gadgets.log.logAtLevel(gadgets.log.WARNING, message);
@@ -49,6 +51,7 @@ gadgets.warn = function(message) {
 
 /**
  * Log an error
+ * @param {Object} message - The message to log
  */
 gadgets.error = function(message) {
   gadgets.log.logAtLevel(gadgets.log.ERROR, message);
@@ -56,7 +59,7 @@ gadgets.error = function(message) {
 
 /**
  * Sets the log level threshold.
- * @param {Number} logLevel - New log level threshold.
+ * @param {number} logLevel - New log level threshold.
  * @static
  */
 gadgets.setLogLevel = function(logLevel) {
@@ -65,9 +68,8 @@ gadgets.setLogLevel = function(logLevel) {
 
 /**
  * Logs a log message if output console is available, and log threshold is met.
- * @param {Number} level - the level to log with. Optional, defaults to
+ * @param {number} level - the level to log with. Optional, defaults to gadgets.log.INFO.
  * @param {Object} message - The message to log
- * gadgets.log.INFO.
  * @static
  */
 gadgets.log.logAtLevel = function(level, message) {
@@ -90,29 +92,27 @@ gadgets.log.logAtLevel = function(level, message) {
 /**
  * Log level for informational logging.
  * @static
+ * @const
  */
 gadgets.log.INFO = 1;
 
 /**
  * Log level for warning logging.
  * @static
+ * @const
  */
 gadgets.log.WARNING = 2;
 
 /**
- * Log level for error logging.
- * @static
- */
-
-/**
  * Log level for no logging
  * @static
+ * @const
  */
 gadgets.log.NONE = 4;
 
 /**
  * Current log level threshold.
- * @type Number
+ * @type number
  * @private
  * @static
  */

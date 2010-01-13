@@ -53,7 +53,7 @@ opensocial.ResponseItem = function(originalDataRequest, data,
 /**
  * Returns true if there was an error in fetching this data from the server.
  *
- * @return {Boolean} True if there was an error; otherwise, false
+ * @return {boolean} True if there was an error; otherwise, false
  */
 opensocial.ResponseItem.prototype.hadError = function() {
   return !!this.errorCode_;
@@ -125,7 +125,7 @@ opensocial.ResponseItem.Error = {
  * or one of the values defined by
  * <a href="opensocial.ResponseItem.Error.html"><code>Error</code></a>.
  *
- * @return {String} The error code, or null if no error occurred
+ * @return {string} The error code, or null if no error occurred
  */
 opensocial.ResponseItem.prototype.getErrorCode = function() {
   return this.errorCode_;
@@ -135,7 +135,7 @@ opensocial.ResponseItem.prototype.getErrorCode = function() {
 /**
  * If the request had an error, returns the error message.
  *
- * @return {String} A human-readable description of the error that occurred;
+ * @return {string} A human-readable description of the error that occurred;
  *    can be null, even if an error occurred
  */
 opensocial.ResponseItem.prototype.getErrorMessage = function() {

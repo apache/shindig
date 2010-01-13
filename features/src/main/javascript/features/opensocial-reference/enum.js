@@ -78,7 +78,7 @@ opensocial.Enum = function(key, displayValue) {
  * Use this for logic within your gadget. If they key is null then the value
  * does not fit in the defined enums.
  *
- * @return {String} The enum's key. This should be one of the defined enums
+ * @return {string} The enum's key. This should be one of the defined enums
  *     below.
  */
 opensocial.Enum.prototype.getKey = function() {
@@ -90,7 +90,7 @@ opensocial.Enum.prototype.getKey = function() {
  * The value of this enum. This will be a user displayable string. If the
  * container supports localization, the string will be localized.
  *
- * @return {String} The enum's value.
+ * @return {string} The enum's value.
  */
 opensocial.Enum.prototype.getDisplayValue = function() {
   return gadgets.util.escape(this.displayValue);

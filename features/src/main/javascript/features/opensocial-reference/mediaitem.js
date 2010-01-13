@@ -32,9 +32,9 @@
 /**
  * Represents images, movies, and audio.
  *
- * @param {String} mimeType The media's type
- * @param {String} url The media's location
- * @param {Map.<opensocial.MediaItem.Field, Object>} opt_params
+ * @param {string} mimeType The media's type
+ * @param {string} url The media's location
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
  *    Any other fields that should be set on the media item object.
  *    All of the defined Fields are supported.
  * @constructor
@@ -116,10 +116,10 @@ opensocial.MediaItem.Field = {
 /**
  * Gets the media item data that's associated with the specified key.
  *
- * @param {String} key The key to get data for; see the
+ * @param {string} key The key to get data for; see the
  *   <a href="opensocial.MediaItem.Field.html">Field</a> class
  *   for possible values
- * @return {String} The data
+ * @return {string} The data
  */
 opensocial.MediaItem.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -129,8 +129,8 @@ opensocial.MediaItem.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this media item associated with the given key.
  *
- * @param {String} key The key to set data for
- * @param {String} data The data to set
+ * @param {string} key The key to set data for
+ * @param {string} data The data to set
  */
 opensocial.MediaItem.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

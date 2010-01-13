@@ -43,7 +43,7 @@ var osapi = osapi || {};
     /**
      * Create a new request in the batch
      * @param {string} key id for the request
-     * @param {object} request the opensocial request object which is of the form
+     * @param {Object} request the opensocial request object which is of the form
      * { method : <service-method>
      *   rpc  : <request>
      *   transport : <rpc dispatcher>
@@ -58,7 +58,7 @@ var osapi = osapi || {};
 
     /**
      * Convert our internal request format into a JSON-RPC
-     * @param request
+     * @param {Object} request
      */
     var toJsonRpc = function(request) {
       var jsonRpc = {method : request.request.method, id : request.key};
@@ -73,7 +73,7 @@ var osapi = osapi || {};
      * bound transports and then merge them before calling the userCallback. If the result
      * of an rpc is another rpc request then it will be chained and executed.
      *
-     * @param {Function} userCallback the callback to the gadget where results are passed.
+     * @param {function(Object)} userCallback the callback to the gadget where results are passed.
      */
     var execute =  function(userCallback) {
       var batchResult = {};

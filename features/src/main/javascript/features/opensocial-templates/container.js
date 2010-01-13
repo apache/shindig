@@ -153,7 +153,7 @@ os.Container.executeOnDomLoad = function(callback) {
  * Compiles and registers all DOM elements in the document. Templates are
  * registered as tags if they specify their name with the "tag" attribute
  * and as templates if they have a name (or id) attribute.
- * @param {Object} opt_doc Optional document to use rather than the global doc.
+ * @param {Object=} opt_doc Optional document to use rather than the global doc.
  */
 os.Container.registerDocumentTemplates = function(opt_doc) {
   var doc = opt_doc || document;
@@ -173,8 +173,8 @@ os.Container.registerDocumentTemplates = function(opt_doc) {
 
 /**
  * Compiles and registers all unnamed templates in the document.
- * @param {Object} opt_data Optional JSON data.
- * @param {Object} opt_doc Optional document to use instead of window.document.
+ * @param {Object=} opt_data Optional JSON data.
+ * @param {Object=} opt_doc Optional document to use instead of window.document.
  */
 os.Container.compileInlineTemplates = function(opt_data, opt_doc) {
   var doc = opt_doc || document;
@@ -210,7 +210,7 @@ os.Container.getDefaultContext = function() {
 
 /**
  * Renders any registered inline templates.
- * @param {Object} opt_doc Optional document to use instead of window.document.
+ * @param {Object=} opt_doc Optional document to use instead of window.document.
  */
 os.Container.renderInlineTemplates = function(opt_doc) {
   var doc = opt_doc || document;
@@ -271,8 +271,8 @@ os.Container.renderInlineTemplates = function(opt_doc) {
 * optional data.
 * @param {Object} template The template object to use.
 * @param {Element} element The DOM element to inject the template into.
-* @param {Object} opt_data Optional data to be used as to create a context.
-* @param {Object} opt_context Optional pre-constructed rendering context.
+* @param {Object=} opt_data Optional data to be used as to create a context.
+* @param {Object=} opt_context Optional pre-constructed rendering context.
 * @return {Function} The constructed closure.
 * TODO(davidbyttow): Move this into util.js
 */
@@ -330,7 +330,7 @@ os.Container.registerTag = function(elementId) {
  * Renders a DOM element with a specified template and contextual data.
  * @param {string} elementId Id of DOM element to inject into.
  * @param {string} templateId Id of the template.
- * @param {Object} opt_data Data to supply to template.
+ * @param {Object=} opt_data Data to supply to template.
  */
 os.Container.renderElement = function(elementId, templateId, opt_data) {
   var template = os.getTemplate(templateId);
@@ -348,7 +348,7 @@ os.Container.renderElement = function(elementId, templateId, opt_data) {
 
 /**
  * Compiles and renders all inline templates.
- * @param {Object} opt_doc Optional document to use instead of window.document.
+ * @param {Object=} opt_doc Optional document to use instead of window.document.
  */
 os.Container.processInlineTemplates = function(opt_doc) {
   os.Container.compileInlineTemplates(opt_doc);
@@ -397,8 +397,8 @@ os.Container.processWaitingForLibraries_ = false;
 /**
  * Utility method which will automatically register all templates
  * and render all that are inline.
- * @param {Object} opt_data Optional JSON object to render templates against
- * @param {Document} opt_doc Optional document to use instead of window.document
+ * @param {Object=} opt_data Optional JSON object to render templates against
+ * @param {Document=} opt_doc Optional document to use instead of window.document
  */
 os.Container.processDocument = function(opt_data, opt_doc) {
   if (os.Container.requiredLibraries_ > 0) {
@@ -472,7 +472,7 @@ os.Container.isTemplateType_ = function(typeName) {
 /**
  * Compiles and registers a template from a DOM element.
  * @param {Element} element DOM element from which to create a template.
- * @param {string} opt_id Optional id for template.
+ * @param {string=} opt_id Optional id for template.
  * @return {Object} The compiled and registered template object.
  * @private
  */

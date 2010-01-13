@@ -62,10 +62,10 @@ gadgets.rpctx.rmr = function() {
    * Append an RMR relay frame to the document. This allows the receiver
    * to start receiving messages.
    *
-   * @param {object} channelFrame Relay frame to add to the DOM body.
+   * @param {Node} channelFrame Relay frame to add to the DOM body.
    * @param {string} relayUri Base URI for the frame.
-   * @param {string} Data to pass along to the frame.
-   * @param {string} opt_frameId ID of frame for which relay is being appended.
+   * @param {string} data to pass along to the frame.
+   * @param {string=} opt_frameId ID of frame for which relay is being appended (optional).
    */
   function appendRmrFrame(channelFrame, relayUri, data, opt_frameId) {
     var appendFn = function() {
@@ -240,9 +240,9 @@ gadgets.rpctx.rmr = function() {
    * method. If this method fails, the system attempts again
    * using the known default of IFPC.
    *
-   * @param {String} targetId Module Id of the RPC service provider.
-   * @param {String} serviceName Name of the service to call.
-   * @param {String} from Module Id of the calling provider.
+   * @param {string} targetId Module Id of the RPC service provider.
+   * @param {string} serviceName Name of the service to call.
+   * @param {string} from Module Id of the calling provider.
    * @param {Object} rpc The RPC data for this call.
    */
   function callRmr(targetId, serviceName, from, rpc) {

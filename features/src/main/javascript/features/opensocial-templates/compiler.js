@@ -41,7 +41,7 @@ os.isIe = navigator.userAgent.indexOf('Opera') != 0 &&
  * Takes an XML node containing Template markup and compiles it into a Template.
  * The node itself is not considered part of the markup.
  * @param {Node} node XML node to be compiled.
- * @param {string} opt_id An optional ID for the new template.
+ * @param {string=} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object.
  */
 os.compileXMLNode = function(node, opt_id) {
@@ -67,7 +67,7 @@ os.compileXMLNode = function(node, opt_id) {
 /**
  * Takes an XML Document and compiles it into a Template object.
  * @param {Document} doc XML document to be compiled.
- * @param {string} opt_id An optional ID for the new template.
+ * @param {string=} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object.
  */
 os.compileXMLDoc = function(doc, opt_id) {
@@ -147,7 +147,7 @@ os.variableMap_ = {
 
 /**
  * Replace the top level variables
- * @param {string} expr The expression
+ * @param {string} text The expression
  * @return {string} Expression with replacements
  */
 os.replaceTopLevelVars_ = function(text) {
@@ -200,8 +200,8 @@ os.setIdentifierResolver = function(resolver) {
  * TODO: This should not be in compiler.
  *
  * @param {JsEvalContext|Object} context Context to get property from
- * @param {String} name Name of the property
- * @return {Object|String}
+ * @param {string} name Name of the property
+ * @return {Object|string}
  */
 os.getFromContext = function(context, name, opt_default) {
   if (!context) {
@@ -253,7 +253,7 @@ os.getFromContext = function(context, name, opt_default) {
 /**
  * Prepares an expression for JS evaluation.
  * @param {string} expr The expression snippet to parse.
- * @param {string} opt_default An optional default value reference (such as the
+ * @param {string=} opt_default An optional default value reference (such as the
  * literal string 'null').
  */
 os.transformExpression_ = function(expr, opt_default) {
@@ -293,7 +293,7 @@ os.appendJSTAttribute_ = function(node, attrName, value) {
  * counterparts.
  * @param {Element} from An XML or HTML node to copy attributes from.
  * @param {Element} to An HTML node to copy attributes to.
- * @param {String} opt_customTag The name of the custom tag, being processed if
+ * @param {string=} opt_customTag The name of the custom tag, being processed if
  * any.
  *
  * TODO(levik): On IE, some properties/attributes might be case sensitive when
@@ -592,8 +592,8 @@ os.pushTextNode = function(array, text) {
  * Removes extra whitespace and newline characters for IE - to be used for
  * transforming strings that are destined for textNode content.
  * @param {string} string The string to trim spaces from.
- * @param {boolean} opt_trimStart Trim the start of the string.
- * @param {boolean} opt_trimEnd Trim the end of the string.
+ * @param {boolean=} opt_trimStart Trim the start of the string.
+ * @param {boolean=} opt_trimEnd Trim the end of the string.
  * @return {string} The string with extra spaces removed on IE, original
  * string on other browsers.
  */
@@ -808,8 +808,8 @@ os.canBeInToken = function(ch) {
  * os.VAR_idenfitierresolver ("$_ir") is used as the function name.
  * So, "foo.bar" becomes "$_ir($_ir($context, 'foo'), 'bar')"
  * @param {string} iden A string representing an identifier.
- * @param {string} opt_context A string expression to use for context.
- * @param {string} opt_default An optional default value reference (such as the
+ * @param {string=} opt_context A string expression to use for context.
+ * @param {string=} opt_default An optional default value reference (such as the
  * literal string 'null').
  */
 os.wrapSingleIdentifier = function(iden, opt_context, opt_default) {
@@ -875,7 +875,7 @@ os.wrapIdentifiersInToken = function(token, opt_default) {
  * Wraps all identifiers in a JS expression. The expression is tokenized, then
  * each token is wrapped individually.
  * @param {string} expr The expression to wrap.
- * @param {string} opt_default An optional default value reference (such as the
+ * @param {string=} opt_default An optional default value reference (such as the
  * literal string 'null').
  */
 os.wrapIdentifiersInExpression = function(expr, opt_default) {

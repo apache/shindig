@@ -115,7 +115,7 @@ gadgets.Prefs = function() {
 
 /**
  * Sets internal values
- * @return {Boolean} True if the prefs is modified.
+ * @return {boolean} True if the prefs is modified.
  */
 gadgets.Prefs.setInternal_ = function(key, value) {
   var wasModified = false;
@@ -156,8 +156,8 @@ gadgets.Prefs.setDefaultPrefs_ = function(defprefs) {
  * Retrieves a preference as a string.
  * Returned value will be html entity escaped.
  *
- * @param {String} key The preference to fetch
- * @return {String} The preference; if not set, an empty string
+ * @param {string} key The preference to fetch
+ * @return {string} The preference; if not set, an empty string
  */
 gadgets.Prefs.prototype.getString = function(key) {
   if (key === ".lang") { key = "lang"; }
@@ -174,8 +174,8 @@ gadgets.Prefs.prototype.setDontEscape_ = function() {
 
 /**
  * Retrieves a preference as an integer.
- * @param {String} key The preference to fetch
- * @return {Number} The preference; if not set, 0
+ * @param {string} key The preference to fetch
+ * @return {number} The preference; if not set, 0
  */
 gadgets.Prefs.prototype.getInt = function(key) {
   var val = parseInt(prefs[key], 10);
@@ -184,8 +184,8 @@ gadgets.Prefs.prototype.getInt = function(key) {
 
 /**
  * Retrieves a preference as a floating-point value.
- * @param {String} key The preference to fetch
- * @return {Number} The preference; if not set, 0
+ * @param {string} key The preference to fetch
+ * @return {number} The preference; if not set, 0
  */
 gadgets.Prefs.prototype.getFloat = function(key) {
   var val = parseFloat(prefs[key]);
@@ -194,8 +194,8 @@ gadgets.Prefs.prototype.getFloat = function(key) {
 
 /**
  * Retrieves a preference as a boolean.
- * @param {String} key The preference to fetch
- * @return {Boolean} The preference; if not set, false
+ * @param {string} key The preference to fetch
+ * @return {boolean} The preference; if not set, false
  */
 gadgets.Prefs.prototype.getBool = function(key) {
   var val = prefs[key];
@@ -216,7 +216,7 @@ gadgets.Prefs.prototype.getBool = function(key) {
  * this call.
  * </p>
  *
- * @param {String} key The pref to store
+ * @param {string} key The pref to store
  * @param {Object} val The values to store
  */
 gadgets.Prefs.prototype.set = function(key, value) {
@@ -228,8 +228,8 @@ gadgets.Prefs.prototype.set = function(key, value) {
  * UserPref values that were not declared as lists are treated as
  * one-element arrays.
  *
- * @param {String} key The preference to fetch
- * @return {Array.&lt;String&gt;} The preference; if not set, an empty array
+ * @param {string} key The preference to fetch
+ * @return {Array.<string>} The preference; if not set, an empty array
  */
 gadgets.Prefs.prototype.getArray = function(key) {
   var val = prefs[key];
@@ -249,7 +249,7 @@ gadgets.Prefs.prototype.getArray = function(key) {
  * To use this call,
  * the gadget must require the feature setprefs.
  *
- * @param {String} key The pref to store
+ * @param {string} key The pref to store
  * @param {Array} val The values to store
  */
 gadgets.Prefs.prototype.setArray = function(key, val) {
@@ -258,8 +258,8 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
 
 /**
  * Fetches an unformatted message.
- * @param {String} key The message to fetch
- * @return {String} The message
+ * @param {string} key The message to fetch
+ * @return {string} The message
  */
 gadgets.Prefs.prototype.getMsg = function(key) {
   return messages[key] || "";
@@ -268,7 +268,7 @@ gadgets.Prefs.prototype.getMsg = function(key) {
 /**
  * Gets the current country, returned as ISO 3166-1 alpha-2 code.
  *
- * @return {String} The country for this module instance
+ * @return {string} The country for this module instance
  */
 gadgets.Prefs.prototype.getCountry = function() {
   return country;
@@ -278,7 +278,7 @@ gadgets.Prefs.prototype.getCountry = function() {
  * Gets the current language the gadget should use when rendering, returned as a
  * ISO 639-1 language code.
  *
- * @return {String} The language for this module instance
+ * @return {string} The language for this module instance
  */
 gadgets.Prefs.prototype.getLang = function() {
   return language;
@@ -287,7 +287,7 @@ gadgets.Prefs.prototype.getLang = function() {
 /**
  * Gets the module id for the current instance.
  *
- * @return {String | Number} The module id for this module instance
+ * @return {string | number} The module id for this module instance
  */
 gadgets.Prefs.prototype.getModuleId = function() {
   return moduleId;

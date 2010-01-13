@@ -56,8 +56,8 @@ var REGEXP_semicolon = /\s*;\s*/;
 
 /**
  * See constructor_()
- * @param {Object|null} opt_data
- * @param {Object} opt_parent
+ * @param {Object|null=} opt_data
+ * @param {Object=} opt_parent
  * @constructor
  */
 function JsEvalContext(opt_data, opt_parent) {
@@ -69,9 +69,9 @@ function JsEvalContext(opt_data, opt_parent) {
  * object, whose properties can be referred to in jstemplate
  * expressions, and it holds the locally defined variables.
  *
- * @param {Object|null} opt_data The context object. Null if no context.
+ * @param {Object|null=} opt_data The context object. Null if no context.
  *
- * @param {Object} opt_parent The parent context, from which local
+ * @param {Object=} opt_parent The parent context, from which local
  * variables are inherited. Normally the context object of the parent
  * context is the object whose property the parent object is. Null for the
  * context of the root object.
@@ -184,8 +184,8 @@ JsEvalContext.recycledInstances_ = [];
  * A factory to create a JsEvalContext instance, possibly reusing
  * one from recycledInstances_. (IE6 perf)
  *
- * @param {Object} opt_data
- * @param {JsEvalContext} opt_parent
+ * @param {Object=} opt_data
+ * @param {JsEvalContext=} opt_parent
  * @return {JsEvalContext}
  */
 JsEvalContext.create = function(opt_data, opt_parent) {
@@ -302,7 +302,7 @@ JsEvalContext.prototype.getVariable = function(name) {
  * and returns the result.
  *
  * @param {string} expr A javascript expression
- * @param {Element} opt_template An optional node to serve as "this"
+ * @param {Element=} opt_template An optional node to serve as "this"
  *
  * @return {Object?} value
  */

@@ -35,8 +35,7 @@
 /**
  * Base interface for all message collection objects.
  *
- * @param {String} body The main text of the message.
- * @param {Map.<opensocial.MessageCollection.Field, Object>} opt_params Any other
+ * @param {Object.<opensocial.MessageCollection.Field, Object>=} opt_params Any other
  *    fields that should be set on the message object. All of the defined
  *    Fields are supported.
  * @private
@@ -102,14 +101,14 @@ opensocial.MessageCollection.Field = {
 /**
  * Gets the message data that's associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *   see the <a href="opensocial.MessageCollection.Field.html">Field</a> class
  * for possible values
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  * @member opensocial.MessageCollection
  */
 opensocial.MessageCollection.prototype.getField = function(key, opt_params) {
@@ -120,8 +119,8 @@ opensocial.MessageCollection.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this message associated with the given key.
  *
- * @param {String} key The key to set data for
- * @param {String} data The data to set
+ * @param {string} key The key to set data for
+ * @param {string} data The data to set
  */
 opensocial.MessageCollection.prototype.setField = function(key, data) {
   return this.fields_[key] = data;

@@ -50,7 +50,7 @@ gadgets.pubsub = function() {
     /**
      * Subscribes to a channel.
      * @param {string} channel Channel name.
-     * @param {function} callback Callback function that receives messages.
+     * @param {function(Object,Object)} callback Callback function that receives messages.
      *                   For example:
      *                   function(sender, message) {
      *                     if (isTrustedGadgetSpecUrl(sender)) {

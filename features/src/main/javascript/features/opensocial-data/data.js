@@ -246,14 +246,14 @@ opensocial.data.currentAPIRequest_ = null;
 
 
 /**
- * @type {Array<string>} An array of keys requested by the shared DataRequest.
+ * @type {Array.<string>} An array of keys requested by the shared DataRequest.
  * @private
  */
 opensocial.data.currentAPIRequestKeys_ = null;
 
 
 /**
- * @type {Object<string, Function(Object)>} A map of custom callbacks for the
+ * @type {Object.<string, function(Object)>} A map of custom callbacks for the
  * keys in the shared DataRequest.
  * @private
  */
@@ -285,8 +285,8 @@ opensocial.data.getCurrentAPIRequest = function() {
  * automatically sent once the syncronous block is done executing.
  * @param {Object} request Specifies data to fetch
  * (constructed via DataRequest's newFetch???Request() methods)
- * @param {String} key The key to map generated response data to
- * @param {Function(string, ResponseItem)} opt_callback An optional callback
+ * @param {string} key The key to map generated response data to
+ * @param {function(string, ResponseItem)=} opt_callback An optional callback
  * function to pass the returned ResponseItem to. If present, the function will
  * be called with the key and ResponseItem as params. If this is omitted, the
  * ResponseItem will be passed to putDataSet() with the specified key.
@@ -321,7 +321,7 @@ opensocial.data.sendCurrentAPIRequest_ = function() {
  * Creates a callback closure for processing a DataResponse. The closure
  * remembers which keys were requested, and what custom callbacks need to be
  * called.
- * @return {Function(DataResponse)} a handler for DataResponse.
+ * @return {function(DataResponse)} a handler for DataResponse.
  * @private
  */
 opensocial.data.createSharedRequestCallback_ = function() {
@@ -336,9 +336,9 @@ opensocial.data.createSharedRequestCallback_ = function() {
 /**
  * Processes a response to the shared API DataRequest by looping through
  * requested keys and notifying appropriate parties of the received data.
- * @param {DataResonse} data Data received from the server
- * @param {Array<string>} keys The list of keys that were requested
- * @param {Object<string, Function(string, ResponseItem)>} callbacks A map of
+ * @param {DataResonse} responseItem Data received from the server
+ * @param {Array.<string>} keys The list of keys that were requested
+ * @param {Object.<string, function(string, ResponseItem)>} callbacks A map of
  * any custom callbacks by key.
  */
 opensocial.data.onAPIResponse = function(responseItem, keys, callbacks) {
@@ -389,7 +389,7 @@ opensocial.data.extractJson_ = function(responseItem, key) {
 /**
  * Registers a tag as a data request handler.
  * @param {string} name Prefixed tag name.
- * @param {Function} handler Method to call when this tag is invoked.
+ * @param {function} handler Method to call when this tag is invoked.
  *
  * TODO: Store these tag handlers separately from the ones for UI tags.
  * TODO: Formalize the callback interface.
@@ -412,7 +412,7 @@ opensocial.data.registerRequestHandler = function(name, handler) {
 
 /**
  * Loads and executes all inline data request sections.
- * @param {Object} opt_doc Optional document to use instead of window.document.
+ * @param {Object=} opt_doc Optional document to use instead of window.document.
  * TODO: Currently this processes all 'script' blocks together,
  *     instead of collecting them all and then processing together. Not sure
  *     which is preferred yet.
@@ -537,7 +537,7 @@ opensocial.data.transformSpecialValue = function(value) {
  * (if any) to the params object.
  * @param {object} params The params object used to construct an Opensocial
  * DataRequest
- * @param {string} fieldStr A string containing comma-separated field names
+ * @param {string} fieldsStr A string containing comma-separated field names
  */
 opensocial.data.addFieldsToParams_ = function(params, fieldsStr) {
   if (!fieldsStr) {

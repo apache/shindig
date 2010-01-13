@@ -378,11 +378,9 @@ gadgets.rpc = function() {
    * This works when gadgets are rendered on the same domain as their container,
    * a potentially useful optimization for trusted content which keeps
    * RPC behind a consistent interface.
-   * @param {String} target Module id of the rpc service provider
-   * @param {String} from Module id of the caller (this)
-   * @param {String} callbackId Id of the call
-   * @param {String} rpcData JSON-encoded RPC payload
-   * @return
+   * @param {string} target Module id of the rpc service provider
+   * @param {Object} rpc RPC data
+   * @return {boolean}
    */
   function callSameDomain(target, rpc) {
     if (typeof sameDomain[target] === 'undefined') {
@@ -415,6 +413,11 @@ gadgets.rpc = function() {
     return false;
   }
 
+  /**
+   * @param {string} targetId
+   * @param {string} url
+   * @param {boolean=} opt_useLegacy
+   */
   function setRelayUrl(targetId, url, opt_useLegacy) {
     relayUrl[targetId] = url;
     useLegacyProtocol[targetId] = !!opt_useLegacy;
@@ -517,6 +520,11 @@ gadgets.rpc = function() {
     setAuthToken(gadgetId, rpctoken);
   }
 
+  /**
+   * @param {string} targetId
+   * @param {string=} opt_receiverurl
+   * @param {string=} opt_authtoken
+   */
   function setupReceiver(targetId, opt_receiverurl, opt_authtoken) {
     if (targetId === '..') {
       // Gadget/IFRAME to container.
@@ -535,8 +543,8 @@ gadgets.rpc = function() {
   return /** @scope gadgets.rpc */ {
     /**
      * Registers an RPC service.
-     * @param {String} serviceName Service name to register.
-     * @param {Function} handler Service handler.
+     * @param {string} serviceName Service name to register.
+     * @param {function(Object,Object)} handler Service handler.
      *
      * @member gadgets.rpc
      */
@@ -555,7 +563,7 @@ gadgets.rpc = function() {
 
     /**
      * Unregisters an RPC service.
-     * @param {String} serviceName Service name to unregister.
+     * @param {string} serviceName Service name to unregister.
      *
      * @member gadgets.rpc
      */
@@ -575,7 +583,7 @@ gadgets.rpc = function() {
     /**
      * Registers a default service handler to processes all unknown
      * RPC calls which raise an exception by default.
-     * @param {Function} handler Service handler.
+     * @param {function(Object,Object)} handler Service handler.
      *
      * @member gadgets.rpc
      */
@@ -607,10 +615,10 @@ gadgets.rpc = function() {
 
     /**
      * Calls an RPC service.
-     * @param {String} targetId Module Id of the RPC service provider.
+     * @param {string} targetId Module Id of the RPC service provider.
      *                          Empty if calling the parent container.
-     * @param {String} serviceName Service name to call.
-     * @param {Function|null} callback Callback function (if any) to process
+     * @param {string} serviceName Service name to call.
+     * @param {function()|null} callback Callback function (if any) to process
      *                                 the return value of the RPC request.
      * @param {*} var_args Parameters for the RPC request.
      *
@@ -680,8 +688,8 @@ gadgets.rpc = function() {
 
     /**
      * Gets the relay URL of a target frame.
-     * @param {String} targetId Name of the target frame.
-     * @return {String|undefined} Relay URL of the target frame.
+     * @param {string} targetId Name of the target frame.
+     * @return {string|undefined} Relay URL of the target frame.
      *
      * @member gadgets.rpc
      */
@@ -697,9 +705,9 @@ gadgets.rpc = function() {
 
     /**
      * Sets the relay URL of a target frame.
-     * @param {String} targetId Name of the target frame.
-     * @param {String} url Full relay URL of the target frame.
-     * @param {Boolean} opt_useLegacy True if this relay needs the legacy IFPC
+     * @param {string} targetId Name of the target frame.
+     * @param {string} url Full relay URL of the target frame.
+     * @param {boolean=} opt_useLegacy True if this relay needs the legacy IFPC
      *     wire format.
      *
      * @member gadgets.rpc
@@ -709,8 +717,8 @@ gadgets.rpc = function() {
 
     /**
      * Sets the auth token of a target frame.
-     * @param {String} targetId Name of the target frame.
-     * @param {String} token The authentication token to use for all
+     * @param {string} targetId Name of the target frame.
+     * @param {string} token The authentication token to use for all
      *     calls to or from this target id.
      *
      * @member gadgets.rpc
@@ -760,7 +768,7 @@ gadgets.rpc = function() {
 
     /**
      * Gets the RPC relay mechanism.
-     * @return {String} RPC relay mechanism. See above for
+     * @return {string} RPC relay mechanism. See above for
      *   a list of supported types.
      *
      * @member gadgets.rpc
@@ -772,7 +780,7 @@ gadgets.rpc = function() {
     /**
      * Receives and processes an RPC request. (Not to be used directly.)
      * Only used by IFPC.
-     * @param {Array.<String>} fragment An RPC request fragment encoded as
+     * @param {Array.<string>} fragment An RPC request fragment encoded as
      *        an array. The first 4 elements are target id, source id & call id,
      *        total packet number, packet id. The last element stores the actual
      *        JSON-encoded and URI escaped packet data.

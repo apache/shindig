@@ -109,11 +109,11 @@ gadgets.oauth = gadgets.oauth || {};
  *
  * @description used to create a new OAuth popup window manager.
  *
- * @param {String} destination Target URL for the popup window.
- * @param {String} windowOptions Options for window.open, used to specify
+ * @param {string} destination Target URL for the popup window.
+ * @param {string} windowOptions Options for window.open, used to specify
  *     look and feel of the window.
- * @param {function} openCallback Function to call when the window is opened.
- * @param {function} closeCallback Function to call when the window is closed.
+ * @param {function()} openCallback Function to call when the window is opened.
+ * @param {function()} closeCallback Function to call when the window is closed.
  */
 gadgets.oauth.Popup = function(destination, windowOptions, openCallback,
     closeCallback) {
@@ -125,8 +125,7 @@ gadgets.oauth.Popup = function(destination, windowOptions, openCallback,
 };
 
 /**
- * @return an onclick handler for the "open the approval window" link
- * @type function
+ * @return {function()} an onclick handler for the "open the approval window" link
  */
 gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
   var self = this;
@@ -189,10 +188,9 @@ gadgets.oauth.Popup.prototype.handleApproval_ = function() {
 };
 
 /**
- * @return an onclick handler for the "I've approved" link.  This may not
+ * @return {function()} an onclick handler for the "I've approved" link.  This may not
  * ever be called.  If we successfully detect that the window was closed,
  * this link is unnecessary.
- * @type function
  */
 gadgets.oauth.Popup.prototype.createApprovedOnClick = function() {
   var self = this;

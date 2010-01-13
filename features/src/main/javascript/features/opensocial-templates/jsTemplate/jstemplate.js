@@ -99,7 +99,7 @@ var STRING_zero = '0';
  * template that, if processed again with the same data, will remain
  * unchanged.
  *
- * @param {boolean} opt_debugging Optional flag to collect debugging
+ * @param {boolean=} opt_debugging Optional flag to collect debugging
  *     information while processing the template.  Only takes effect
  *     in MAPS_DEBUG.
  */
@@ -872,7 +872,7 @@ JstProcessor.prototype.jstAttributes_ = function(template) {
  * returning the template.
  *
  * @param {string} name The ID of the HTML element used as template.
- * @param {Function} opt_loadHtmlFn A function which, when called, will return
+ * @param {Function=} opt_loadHtmlFn A function which, when called, will return
  *   HTML that contains an element whose ID is 'name'.
  *
  * @return {Element|null} The DOM node of the template. (Only element nodes
@@ -901,7 +901,7 @@ function jstGetTemplate(name, opt_loadHtmlFn) {
  * does not exist, throw an exception.
  *
  * @param {string} name The ID of the HTML element used as template.
- * @param {Function} opt_loadHtmlFn A function which, when called, will return
+ * @param {Function=} opt_loadHtmlFn A function which, when called, will return
  *   HTML that contains an element whose ID is 'name'.
  *
  * @return {Element} The DOM node of the template. (Only element nodes
@@ -922,7 +922,7 @@ function jstGetTemplateOrDie(name, opt_loadHtmlFn) {
  * @param {string} name
  * @param {Function} loadHtmlFn A function that returns HTML to be inserted
  * into the DOM.
- * @param {string} opt_target The id of a DOM object under which to attach the
+ * @param {string=} opt_target The id of a DOM object under which to attach the
  *   HTML once it's inserted.  An object with this id is created if it does not
  *   exist.
  * @return {Element} The node whose id is 'name'

@@ -45,10 +45,11 @@
  * Construct the data response.
  * This object contains the requested server data mapped to the requested keys.
  *
- * @param {Map.<String, ResponseItem>} responseItems Key/value map of data
+ * @param {Object.<string, ResponseItem>} responseItems Key/value map of data
  *    response information
- * @param {Boolean} opt_globalError Optional field indicating whether there were
+ * @param {boolean=} opt_globalError Optional field indicating whether there were
  *    any errors generating this data response
+ * @param {string=} opt_errorMessage
  *
  * @private
  * @constructor
@@ -64,7 +65,7 @@ opensocial.DataResponse = function(responseItems, opt_globalError,
 /**
  * Returns true if there was an error in fetching this data from the server.
  *
- * @return {Boolean} True if there was an error; otherwise, false
+ * @return {boolean} True if there was an error; otherwise, false
  * @member opensocial.DataResponse
  */
 opensocial.DataResponse.prototype.hadError = function() {
@@ -75,7 +76,7 @@ opensocial.DataResponse.prototype.hadError = function() {
 /**
  * If the entire request had a batch level error, returns the error message.
  *
- * @return {String} A human-readable description of the error that occurred.
+ * @return {string} A human-readable description of the error that occurred.
  */
 opensocial.DataResponse.prototype.getErrorMessage = function() {
   return this.errorMessage_;

@@ -79,12 +79,12 @@ opensocial.Container.prototype.getEnvironment = function() {};
  * opensocial.ResponseItem. The response item will have its error code set to
  * NOT_IMPLEMENTED.
  *
- * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
  *    OWNER_FRIENDS, or a single ID within one of those groups
  * @param {opensocial.Message} message The message to send to the specified
  *     users.
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
  *    reloaded from scratch. This function will be passed one parameter, an
  *    opensocial.ResponseItem. The error code will be set to reflect whether
@@ -92,6 +92,7 @@ opensocial.Container.prototype.getEnvironment = function() {};
  *    message was sent. If there was an error, you can use the response item's
  *    getErrorCode method to determine how to proceed. The data on the response
  *    item will not be set.
+ * @param {Object=} opt_params TODO
  *
  * @member opensocial
  * @private
@@ -109,13 +110,13 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  * opensocial.ResponseItem. The response item will have its error code set to
  * NOT_IMPLEMENTED.
  *
- * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
  *    OWNER_FRIENDS, or a single ID within one of those groups
  * @param {opensocial.Message} reason The reason the user wants the gadget to
  *     share itself. This reason can be used by the container when prompting the
  *     user for permission to share the app. It may also be ignored.
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
  *    reloaded from scratch. This function will be passed one parameter, an
  *    opensocial.ResponseItem. The error code will be set to reflect whether
@@ -123,6 +124,7 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  *    sharing request was sent. If there was an error, you can use the response
  *    item's getErrorCode method to determine how to proceed. The data on the
  *    response item will not be set.
+ * @param {Object} opt_params TODO
  *
  * @member opensocial
  * @private
@@ -148,7 +150,7 @@ opensocial.Container.prototype.requestShareApp = function(recipients, reason,
  * @param {Activity} activity The activity to create. The only required field is
  *     title.
  * @param {CreateActivityPriority} priority The priority for this request.
- * @param {Function} opt_callback Function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback Function to call once the request has been
  *    processed.
  * @private
  */
@@ -167,8 +169,8 @@ opensocial.Container.prototype.requestCreateActivity = function(activity,
  * Returns whether the current gadget has access to the specified
  * permission.
  *
- * @param {opensocial.Permission | String} permission The permission
- * @return {Boolean} Whether the gadget has access for the permission.
+ * @param {opensocial.Permission | string} permission The permission
+ * @return {boolean} Whether the gadget has access for the permission.
  *
  * @private
  */
@@ -182,9 +184,9 @@ opensocial.Container.prototype.hasPermission = function(permission) {
  *
  * @param {Array.<opensocial.Permission>} permissions The permissions to request
  *    access to from the viewer
- * @param {String} reason Will be displayed to the user as the reason why these
+ * @param {string} reason Will be displayed to the user as the reason why these
  *    permissions are needed.
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed. This callback will either be called or the gadget will be
  *    reloaded from scratch
  *
@@ -207,7 +209,7 @@ opensocial.Container.prototype.requestPermission = function(permissions, reason,
  *
  * @param {opensocial.DataRequest} dataRequest Specifies which data to get from
  *    the server
- * @param {Function} callback Function to call after the data is fetched
+ * @param {function(opensocial.ResponseItem)} callback Function to call after the data is fetched
  * @private
  */
 opensocial.Container.prototype.requestData = function(dataRequest, callback) {};
@@ -217,9 +219,9 @@ opensocial.Container.prototype.requestData = function(dataRequest, callback) {};
  * Request a profile for the specified person id.
  * When processed, returns a Person object.
  *
- * @param {String} id The id of the person to fetch. Can also be standard
+ * @param {string} id The id of the person to fetch. Can also be standard
  *    person IDs of VIEWER and OWNER.
- * @param {Map.<opensocial.DataRequest.PeopleRequestFields, Object>} opt_params
+ * @param {Object.<opensocial.DataRequest.PeopleRequestFields, Object>=} opt_params
  *    Additional params to pass to the request. This request supports
  *    PROFILE_DETAILS.
  * @return {Object} a request object
@@ -235,7 +237,7 @@ opensocial.Container.prototype.newFetchPersonRequest = function(id,
  *
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people to
  *     fetch. See also <a href="opensocial.IdSpec.html">IdSpec</a>.
- * @param {Map.<opensocial.DataRequest.PeopleRequestFields, Object>} opt_params
+ * @param {Object.<opensocial.DataRequest.PeopleRequestFields, Object>=} opt_params
  *    Additional params to pass to the request. This request supports
  *    PROFILE_DETAILS, SORT_ORDER, FILTER, FILTER_OPTIONS, FIRST, and MAX.
  * @return {Object} a request object
@@ -252,10 +254,10 @@ opensocial.Container.prototype.newFetchPeopleRequest = function(idSpec,
  *
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people to
  *     fetch. See also <a href="opensocial.IdSpec.html">IdSpec</a>.
- * @param {Array.<String> | String} keys The keys you want data for. This
+ * @param {Array.<string> | string} keys The keys you want data for. This
  *     can be an array of key names, a single key name, or "*" to mean
  *     "all keys".
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request
@@ -273,8 +275,8 @@ opensocial.Container.prototype.newFetchPersonAppDataRequest = function(idSpec,
  * person, per application. Containers supporting this request SHOULD provide
  * at least 10KB of space per user per application for this data.
  *
- * @param {String} key The name of the key
- * @param {String} value The value
+ * @param {string} key The name of the key
+ * @param {string} value The value
  * @return {Object} a request object
  * @private
  */
@@ -286,7 +288,7 @@ opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(
  * Deletes the given keys from the datastore for the current VIEWER.
  * When processed, does not return any data.
  *
- * @param {Array.&lt;String&gt; | String} keys The keys you want to delete from
+ * @param {Array.<string> | string} keys The keys you want to delete from
  *     the datastore; this can be an array of key names, a single key name,
  *     or "*" to mean "all keys"
  * @return {Object} A request object
@@ -303,7 +305,7 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
  *
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people to
  *     fetch. See also <a href="opensocial.IdSpec.html">IdSpec</a>.
- * @param {Map.<opensocial.DataRequest.ActivityRequestFields, Object>} opt_params
+ * @param {Object.<opensocial.DataRequest.ActivityRequestFields, Object>=} opt_params
  *    Additional params to pass to the request.
  * @return {Object} a request object
  * @private
@@ -339,10 +341,7 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
 /**
  * Get an activity object used to create activities on the server
  *
- * @param {opensocial.Activity.Template || String} title The title of an
- *     activity, a template is reccommended, but this field can also be a
- *     string.
- * @param {Map.<opensocial.Activity.Field, Object>} opt_params Any other
+ * @param {Object.<opensocial.Activity.Field, Object>=} opt_params Any other
  *    fields that should be set on the activity object. All of the defined
  *    Fields are supported.
  * @return {opensocial.Activity} the activity object
@@ -357,9 +356,9 @@ opensocial.Container.prototype.newActivity = function(opt_params) {
  * Creates a media item. Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
- * @param {String} mimeType of the media
- * @param {String} url where the media can be found
- * @param {Map.<opensocial.MediaItem.Field, Object>} opt_params
+ * @param {string} mimeType of the media
+ * @param {string} url where the media can be found
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
  *    Any other fields that should be set on the media item object.
  *    All of the defined Fields are supported.
  *
@@ -377,8 +376,8 @@ opensocial.Container.prototype.newMediaItem = function(mimeType, url,
  * Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
- * @param {String} body The main text of the message.
- * @param {Map.&lt;opensocial.Message.Field, Object&gt;} opt_params
+ * @param {string} body The main text of the message.
+ * @param {Object.<opensocial.Message.Field, Object>=} opt_params
  *    Any other fields that should be set on the message object;
  *    all of the defined
  *    <a href="opensocial.Message.Field.html">Field</a>s
@@ -396,7 +395,7 @@ opensocial.Container.prototype.newMessage = function(body, opt_params) {
 /**
  * Creates an IdSpec object.
  *
- * @param {Map.&lt;opensocial.IdSpec.Field, Object&gt;} parameters
+ * @param {Object.<opensocial.IdSpec.Field, Object>} params
  *    Parameters defining the id spec.
  * @return {opensocial.IdSpec} The new
  *     <a href="opensocial.IdSpec.html">IdSpec</a> object
@@ -410,7 +409,7 @@ opensocial.Container.prototype.newIdSpec = function(params) {
 /**
  * Creates a NavigationParameters object.
  *
- * @param {Map.&lt;opensocial.NavigationParameters.Field, Object&gt;} parameters
+ * @param {Object.<opensocial.NavigationParameters.Field, Object>} params
  *     Parameters defining the navigation
  * @return {opensocial.NavigationParameters} The new
  *     <a href="opensocial.NavigationParameters.html">NavigationParameters</a>
@@ -488,13 +487,13 @@ opensocial.Container.isArray = function(val) {
 /**
  * Returns the value corresponding to the key in the fields map. Escapes
  * the value appropriately.
- * @param {Map<String, Object>} fields All of the values mapped by key.
- * @param {String} key The key to get data for.
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<string, Object>} fields All of the values mapped by key.
+ * @param {string} key The key to get data for.
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  * @private
  */
 opensocial.Container.getField = function(fields, key, opt_params) {

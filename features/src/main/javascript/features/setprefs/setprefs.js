@@ -25,8 +25,8 @@
 
 /**
  * Stores a preference.
- * @param {String | Object} key The pref to store.
- * @param {String} val The values to store.
+ * @param {string | Object} key The pref to store.
+ * @param {string} value The values to store.
  * @private This feature is documented in prefs.js
  */
 gadgets.Prefs.prototype.set = function(key, value) {
@@ -60,8 +60,8 @@ gadgets.Prefs.prototype.set = function(key, value) {
 
 /**
  * Stores a preference from the given list.
- * @param {String} key The pref to store.
- * @param {Array.<String | Number>} val The values to store.
+ * @param {string} key The pref to store.
+ * @param {Array.<string | number>} val The values to store.
  * @private This feature is documented in prefs.js
  */
 gadgets.Prefs.prototype.setArray = function(key, val) {

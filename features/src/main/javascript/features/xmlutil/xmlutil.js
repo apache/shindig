@@ -55,7 +55,7 @@ opensocial.xmlutil.parseXML = function(str) {
 
 /**
  * Map of Namespace prefixes to their respective URLs.
- * @type Map<string, string>
+ * @type Object.<string,string>
  */
 opensocial.xmlutil.NSMAP = {
   "os": "http://opensocial.org/"
@@ -69,7 +69,7 @@ opensocial.xmlutil.NSMAP = {
  * the supplied code. An empty string is returned if no injection is needed.
  *
  * @param {string} xml XML-like source code.
- * @param {Element} opt_container Optional container node to look for namespace
+ * @param {Element=} opt_container Optional container node to look for namespace
  * declarations.
  * @return {string} A string of xmlns delcarations required for this XML.
  */
@@ -102,7 +102,7 @@ opensocial.xmlutil.serializeNamespaces_ = function(namespaces) {
 /**
  * Returns a map of XML namespaces declared on an DOM Element.
  * @param {Element} el The Element to inspect
- * @return {object(string, string)} A Map of keyed by prefix of declared 
+ * @return {Object.<string, string>} A Map of keyed by prefix of declared 
  * namespaces. 
  */
 opensocial.xmlutil.getNamespaceDeclarations_ = function(el) {
@@ -130,7 +130,7 @@ opensocial.xmlutil.ENTITIES = "<!ENTITY nbsp \"&#160;\">";
  * Prepares an XML-like string to be parsed by browser parser. Injects a DOCTYPE
  * with entities and a top-level <root> element to encapsulate the code.
  * @param {string} xml XML string to be prepared.
- * @param {Element} opt_container Optional container Element with namespace
+ * @param {Element=} opt_container Optional container Element with namespace
  * declarations.
  * @return {string} XML string prepared for client-side parsing.
  */

@@ -39,8 +39,8 @@
 /**
  * Base interface for all environment objects.
  *
- * @param {String} domain The current domain
- * @param {Map.&lt;String, Map.&lt;String, Boolean&gt;&gt;} supportedFields
+ * @param {string} domain The current domain
+ * @param {Object.<string, Object.<string, boolean>>} supportedFields
  *    The fields supported by this container
  *
  * @private
@@ -56,7 +56,7 @@ opensocial.Environment = function(domain, supportedFields) {
  * Returns the current domain &mdash;
  * for example, "orkut.com" or "myspace.com".
  *
- * @return {String} The domain
+ * @return {string} The domain
  */
 opensocial.Environment.prototype.getDomain = function() {
   return this.domain;
@@ -143,8 +143,8 @@ opensocial.Environment.ObjectType = {
  * @param {opensocial.Environment.ObjectType} objectType
  *    The <a href="opensocial.Environment.ObjectType.html">object type</a>
  *    to check for the field
- * @param {String} fieldName The name of the field to check for
- * @return {Boolean} True if the field is supported on the specified object type
+ * @param {string} fieldName The name of the field to check for
+ * @return {boolean} True if the field is supported on the specified object type
  */
 opensocial.Environment.prototype.supportsField = function(objectType,
     fieldName) {

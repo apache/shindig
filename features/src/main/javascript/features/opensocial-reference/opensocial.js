@@ -58,15 +58,15 @@ var opensocial = opensocial || {};
  * NOT_IMPLEMENTED.
  * </p>
  *
- * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
  *    OWNER_FRIENDS, or a single ID within one of those groups
  * @param {opensocial.Message} message The message to send to the specified
  *     users
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
  *    reloaded from scratch
- * @param {opensocial.NavigationParameters} opt_params The optional parameters
+ * @param {opensocial.NavigationParameters=} opt_params The optional parameters
  *     indicating where to send a user when a request is made, or when a request is
  *     accepted; options are of type
  *     <a href="opensocial.NavigationParameters.DestinationType.html">
@@ -100,16 +100,16 @@ opensocial.requestSendMessage = function(recipients, message, opt_callback,
  * NOT_IMPLEMENTED.
  * </p>
  *
- * @param {Array.&lt;String&gt; | String} recipients An ID, array of IDs, or a
+ * @param {Array.<string> | string} recipients An ID, array of IDs, or a
  *     group reference; the supported keys are VIEWER, OWNER, VIEWER_FRIENDS,
  *    OWNER_FRIENDS, or a single ID within one of those groups
  * @param {opensocial.Message} reason The reason the user wants the gadget to
  *     share itself. This reason can be used by the container when prompting the
  *     user for permission to share the app. It may also be ignored.
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
  *    reloaded from scratch
- * @param {opensocial.NavigationParameters} opt_params The optional parameters
+ * @param {opensocial.NavigationParameters=} opt_params The optional parameters
  *     indicating where to send a user when a request is made, or when a request is
  *     accepted; options are of type
  *     <a href="opensocial.NavigationParameters.DestinationType.html">
@@ -160,7 +160,7 @@ opensocial.requestShareApp = function(recipients, reason, opt_callback,
  * @param {opensocial.CreateActivityPriority} priority The
  *    <a href="opensocial.CreateActivityPriority.html">priority</a> for this
  *    request
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed.
  *
  * @member opensocial
@@ -222,7 +222,7 @@ opensocial.CreateActivityPriority = {
  *
  * @param {opensocial.Permission} permission
  *    The <a href="opensocial.Permission.html">permission</a>
- * @return {Boolean}
+ * @return {boolean}
  *    True if the gadget has access for the permission; false if it doesn't
  *
  * @member opensocial
@@ -238,12 +238,12 @@ opensocial.hasPermission = function(permission) {
  * opensocial.ResponseItem. The response item will have its error code set to
  * NOT_IMPLEMENTED.
  *
- * @param {Array.&lt;opensocial.Permission&gt;} permissions
+ * @param {Array.<opensocial.Permission>} permissions
  *    The <a href="opensocial.Permission.html">permissions</a> to request
  *    from the viewer
- * @param {String} reason Displayed to the user as the reason why these
+ * @param {string} reason Displayed to the user as the reason why these
  *    permissions are needed
- * @param {Function} opt_callback The function to call once the request has been
+ * @param {function(opensocial.ResponseItem)=} opt_callback The function to call once the request has been
  *    processed; either this callback will be called or the gadget will be
  *    reloaded from scratch. This function will be passed one parameter, an
  *    opensocial.ResponseItem. The error code will be set to reflect whether
@@ -336,7 +336,7 @@ opensocial.newDataRequest = function() {
  * <p>See <a href="opensocial.Activity.Field.html">Field</a>s are supported for
  * more details.</p>
  *
- * @param {Map.&lt;opensocial.Activity.Field, Object&gt;} params
+ * @param {Object.<opensocial.Activity.Field, Object>} params
  *    Parameters defining the activity.
  * @return {opensocial.Activity} The new
  *    <a href="opensocial.Activity.html">activity</a> object
@@ -352,11 +352,11 @@ opensocial.newActivity = function(params) {
  * Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
- * @param {String} mimeType
+ * @param {string} mimeType
  *    <a href="opensocial.MediaItem.Type.html">MIME type</a> of the
  *    media
- * @param {String} url Where the media can be found
- * @param {Map.&lt;opensocial.MediaItem.Field, Object&gt;} opt_params
+ * @param {string} url Where the media can be found
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
  *    Any other fields that should be set on the media item object;
  *    all of the defined
  *    <a href="opensocial.MediaItem.Field.html">Field</a>s
@@ -376,8 +376,8 @@ opensocial.newMediaItem = function(mimeType, url, opt_params) {
  * Represents images, movies, and audio.
  * Used when creating activities on the server.
  *
- * @param {String} body The main text of the message.
- * @param {Map.&lt;opensocial.Message.Field, Object&gt;} opt_params
+ * @param {string} body The main text of the message.
+ * @param {Object.<opensocial.Message.Field, Object>=} opt_params
  *    Any other fields that should be set on the message object;
  *    all of the defined
  *    <a href="opensocial.Message.Field.html">Field</a>s
@@ -417,7 +417,7 @@ opensocial.EscapeType = {
 /**
  * Creates an IdSpec object.
  *
- * @param {Map.&lt;opensocial.IdSpec.Field, Object&gt;} parameters
+ * @param {Object.<opensocial.IdSpec.Field, Object>} params
  *    Parameters defining the id spec.
  * @return {opensocial.IdSpec} The new
  *     <a href="opensocial.IdSpec.html">IdSpec</a> object
@@ -436,7 +436,7 @@ opensocial.newIdSpec = function(params) {
  * </p>
  *
  *
- * @param {Map.&lt;opensocial.NavigationParameters.Field, Object&gt;} parameters
+ * @param {Object.<opensocial.NavigationParameters.Field, Object>} params
  *     Parameters defining the navigation
  * @return {opensocial.NavigationParameters} The new
  *     <a href="opensocial.NavigationParameters.html">NavigationParameters</a>

@@ -33,8 +33,8 @@ var gadgets = gadgets || {};
  *
  * @description Used to create messages that will appear to the user within the
  *     gadget.
- * @param {String} opt_moduleId Optional module Id
- * @param {Element} opt_container Optional HTML container element where
+ * @param {string=} opt_moduleId Optional module Id
+ * @param {Element=} opt_container Optional HTML container element where
  *                                mini-messages will appear.
  */
 gadgets.MiniMessage = function(opt_moduleId, opt_container) {
@@ -66,7 +66,7 @@ gadgets.MiniMessage.prototype.createContainer_ = function() {
 
 /**
  * Helper function that dynamically inserts CSS rules to the page.
- * @param {String} cssText CSS rules to inject
+ * @param {string} cssText CSS rules to inject
  * @private
  */
 gadgets.MiniMessage.addCSS_ = function(cssText) {
@@ -85,8 +85,8 @@ gadgets.MiniMessage.addCSS_ = function(cssText) {
 
 /**
  * Helper function that expands a class name into two class names.
- * @param {String} label The CSS class name
- * @return {String} "X Xn", with n is the ID of this module
+ * @param {string} label The CSS class name
+ * @return {string} "X Xn", with n is the ID of this module
  * @private
  */
 gadgets.MiniMessage.prototype.cascade_ = function(label) {
@@ -98,9 +98,9 @@ gadgets.MiniMessage.prototype.cascade_ = function(label) {
  * the message table element from the DOM.  The action is cancelled if the
  * callback function returns false.
  * @param {Element} element HTML element to remove
- * @param {Function} opt_callback Optional callback function to be called when
+ * @param {function()=} opt_callback Optional callback function to be called when
  *                                the message is dismissed.
- * @return {Function} A function that dismisses the specified message
+ * @return {function()} A function that dismisses the specified message
  * @private
  */
 gadgets.MiniMessage.prototype.dismissFunction_ = function(element, opt_callback) {
@@ -120,8 +120,8 @@ gadgets.MiniMessage.prototype.dismissFunction_ = function(element, opt_callback)
  * Creates a dismissible message with an [[]x] icon that allows users to dismiss
  * the message. When the message is dismissed, it is removed from the DOM
  * and the optional callback function, if defined, is called.
- * @param {String | Object} message The message as an HTML string or DOM element
- * @param {Function} opt_callback Optional callback function to be called when
+ * @param {string | Object} message The message as an HTML string or DOM element
+ * @param {function()=} opt_callback Optional callback function to be called when
  *                                the message is dismissed
  * @return {Element} HTML element of the created message
  */
@@ -145,10 +145,10 @@ gadgets.MiniMessage.prototype.createDismissibleMessage = function(message,
  * Creates a message that displays for the specified number of seconds.
  * When the timer expires,
  * the message is dismissed and the optional callback function is executed.
- * @param {String | Object} message The message as an HTML string or DOM element
+ * @param {string | Object} message The message as an HTML string or DOM element
  * @param {number} seconds Number of seconds to wait before dismissing
  *                         the message
- * @param {Function} opt_callback Optional callback function to be called when
+ * @param {function()=} opt_callback Optional callback function to be called when
  *                                the message is dismissed
  * @return {Element} HTML element of the created message
  */
@@ -162,7 +162,7 @@ gadgets.MiniMessage.prototype.createTimerMessage = function(message, seconds,
 /**
  * Creates a static message that can only be dismissed programmatically
  * (by calling dismissMessage()).
- * @param {String | Object} message The message as an HTML string or DOM element
+ * @param {string | Object} message The message as an HTML string or DOM element
  * @return {Element} HTML element of the created message
  */
 gadgets.MiniMessage.prototype.createStaticMessage = function(message) {

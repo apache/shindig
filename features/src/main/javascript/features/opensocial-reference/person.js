@@ -493,7 +493,7 @@ opensocial.Person.Field = {
 /**
  * Gets an ID that can be permanently associated with this person.
  *
- * @return {String} The ID
+ * @return {string} The ID
  */
 opensocial.Person.prototype.getId = function() {
   return this.getField(opensocial.Person.Field.ID);
@@ -511,7 +511,7 @@ var ORDERED_NAME_FIELDS_ = [
  * Gets a text display name for this person; guaranteed to return
  * a useful string.
  *
- * @return {String} The display name
+ * @return {string} The display name
  */
 opensocial.Person.prototype.getDisplayName = function() {
   var name = this.getField(opensocial.Person.Field.NAME);
@@ -541,14 +541,14 @@ opensocial.Person.prototype.getDisplayName = function() {
 /**
  * Gets data for this person that is associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Person.Field.html"><code>
  *    Person.Field</code></a>
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>=}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  */
 opensocial.Person.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -559,8 +559,8 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
  * Gets the app data for this person that is associated with the specified
  * key.
  *
- * @param {String} key The key to get app data for.
- * @return {String} The corresponding app data.
+ * @param {string} key The key to get app data for.
+ * @return {string} The corresponding app data.
  */
 opensocial.Person.prototype.getAppData = function(key) {
 };
@@ -569,7 +569,7 @@ opensocial.Person.prototype.getAppData = function(key) {
 /**
  * Returns true if this person object represents the currently logged in user.
  *
- * @return {Boolean} True if this is the currently logged in user;
+ * @return {boolean} True if this is the currently logged in user;
  *   otherwise, false
  */
 opensocial.Person.prototype.isViewer = function() {
@@ -580,7 +580,7 @@ opensocial.Person.prototype.isViewer = function() {
 /**
  * Returns true if this person object represents the owner of the current page.
  *
- * @return {Boolean} True if this is the owner of the page;
+ * @return {boolean} True if this is the owner of the page;
  *   otherwise, false
  */
 opensocial.Person.prototype.isOwner = function() {

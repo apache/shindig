@@ -41,7 +41,7 @@ gadgets.i18n.numFormatter_ = null;
 /**
  * Format the given date object into a string representation using pattern
  * specified.
- * @param {string/number} pattern String to specify patterns or Number used to reference predefined
+ * @param {string|number} pattern String to specify patterns or Number used to reference predefined
  *        pattern that a date should be formatted into.
  * @param {Date} date Date object being formatted.
  *
@@ -68,7 +68,7 @@ gadgets.i18n.formatDateTime = function(pattern, date) {
  * Parse a string using the format as specified in pattern string, and
  * return date in the passed "date" parameter.
  *
- * @param {string/number} pattern String to specify patterns or Number used to
+ * @param {string|number} pattern String to specify patterns or Number used to
  *        reference predefined
  *        pattern that a date should be parsed from.
  * @param {string} text The string that need to be parsed.
@@ -96,11 +96,11 @@ gadgets.i18n.parseDateTime = function(pattern, text, start, date) {
 
 /**
  * Format the number using given pattern.
- * @param {string/number} pattern String to specify patterns or Number used to
+ * @param {string|number} pattern String to specify patterns or Number used to
  *        reference predefined
  *        pattern that a number should be formatted into.
  * @param {number} value The number being formatted.
- * @param {string} opt_currencyCode optional international currency code, it
+ * @param {string=} opt_currencyCode optional international currency code, it
  *     determines the currency code/symbol should be used in format/parse. If
  *     not given, the currency code for current locale will be used.
  * @return {string} The formatted string.
@@ -128,14 +128,14 @@ gadgets.i18n.formatNumber = function(pattern, value, opt_currencyCode) {
 
 /**
  * Parse the given text using specified pattern to get a number.
- * @param {string/number} pattern String to specify patterns or Number used
+ * @param {string|number} pattern String to specify patterns or Number used
  *        to reference predefined
  *        pattern that a number should be parsed from.
  * @param {string} text input text being parsed.
- * @param {Array} opt_pos optional one element array that holds position
+ * @param {Array=} opt_pos optional one element array that holds position
  *     information. It tells from where parse should begin. Upon return, it
  *     holds parse stop position.
- * @param {string} opt_currencyCode optional international currency code, it
+ * @param {string=} opt_currencyCode optional international currency code, it
  *     determines the currency code/symbol should be used in format/parse. If
  *     not given, the currency code for current locale will be used.
  * @return {number} Parsed number, 0 if in error.

@@ -68,13 +68,13 @@ gadgets.config = function() {
      * Registers a configurable component and its configuration parameters.
      * Multiple callbacks may be registered for a single component if needed.
      *
-     * @param {String} component The name of the component to register. Should
+     * @param {string} component The name of the component to register. Should
      *     be the same as the fully qualified name of the <Require> feature or
      *     the name of a fully qualified javascript object reference
      *     (e.g. "gadgets.io").
-     * @param {Object} opt_validators Mapping of option name to validation
+     * @param {Object=} opt_validators Mapping of option name to validation
      *     functions that take the form function(data) {return isValid(data);}
-     * @param {Function} opt_callback A function to be invoked when a
+     * @param {function(Object)=} opt_callback A function to be invoked when a
      *     configuration is registered. If passed, this function will be invoked
      *     immediately after a call to init has been made. Do not assume that
      *     dependent libraries have been configured until after init is
@@ -100,7 +100,7 @@ gadgets.config = function() {
     /**
      * Retrieves configuration data on demand.
      *
-     * @param {String} opt_component The component to fetch. If not provided
+     * @param {string=} opt_component The component to fetch. If not provided
      *     all configuration will be returned.
      * @return {Object} The requested configuration, or an empty object if no
      *     configuration has been registered for that component.
@@ -116,7 +116,7 @@ gadgets.config = function() {
      * Initializes the configuration.
      *
      * @param {Object} config The full set of configuration data.
-     * @param {Boolean} opt_noValidation True if you want to skip validation.
+     * @param {boolean=} opt_noValidation True if you want to skip validation.
      * @throws {Error} If there is a configuration error.
      */
     init: function(config, opt_noValidation) {
@@ -153,7 +153,7 @@ gadgets.config = function() {
 
     /**
      * Ensures that data is one of a fixed set of items.
-     * @param {Array.<String>} list The list of valid values.
+     * @param {Array.<string>} list The list of valid values.
      * Also supports argument sytax: EnumValidator("Dog", "Cat", "Fish");
      */
     EnumValidator: function(list) {

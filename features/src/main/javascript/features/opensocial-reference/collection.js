@@ -53,7 +53,7 @@ opensocial.Collection = function(array, opt_offset, opt_totalSize) {
 
 /**
  * Finds the entry with the given ID value, or returns null if none is found.
- * @param {String} id The ID to look for
+ * @param {string} id The ID to look for
  * @return {Object?} The data
  */
 opensocial.Collection.prototype.getById = function(id) {
@@ -73,7 +73,7 @@ opensocial.Collection.prototype.getById = function(id) {
  * Gets the size of this collection,
  * which is equal to or less than the
  * total size of the result.
- * @return {Number} The size of this collection
+ * @return {number} The size of this collection
  */
 opensocial.Collection.prototype.size = function() {
   return this.array_.length;
@@ -84,7 +84,7 @@ opensocial.Collection.prototype.size = function() {
  * Executes the provided function once per member of the collection,
  * with each member in turn as the
  * parameter to the function.
- * @param {Function} fn The function to call with each collection entry
+ * @param {function(Object)} fn The function to call with each collection entry
  */
 opensocial.Collection.prototype.each = function(fn) {
   for (var i = 0; i < this.size(); i++) {
@@ -95,7 +95,7 @@ opensocial.Collection.prototype.each = function(fn) {
 
 /**
  * Returns an array of all the objects in this collection.
- * @return {Array.&lt;Object&gt;} The values in this collection
+ * @return {Array.<Object>} The values in this collection
  */
 opensocial.Collection.prototype.asArray = function() {
   return this.array_;
@@ -105,7 +105,7 @@ opensocial.Collection.prototype.asArray = function() {
 /**
  * Gets the total size of the larger result set
  * that this collection belongs to.
- * @return {Number} The total size of the result
+ * @return {number} The total size of the result
  */
 opensocial.Collection.prototype.getTotalSize = function() {
   return this.totalSize_;
@@ -114,7 +114,7 @@ opensocial.Collection.prototype.getTotalSize = function() {
 
 /**
  * Gets the offset of this collection within a larger result set.
- * @return {Number} The offset into the total collection
+ * @return {number} The offset into the total collection
  */
 opensocial.Collection.prototype.getOffset = function() {
   return this.offset_;

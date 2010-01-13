@@ -117,6 +117,7 @@ shindig.Auth = function() {
    * We send the expanded auth token in the body of post requests, so we
    * don't run into problems with length there.  (But people who put
    * several hundred characters in their gadget URLs are still lame.)
+   * @param {string} urlParams
    */
   function addParamsToToken(urlParams) {
     var args = authToken.split('&');
@@ -163,7 +164,7 @@ shindig.Auth = function() {
     /**
      * Gets the auth token.
      *
-     * @return {String} the gadget authentication token
+     * @return {string} the gadget authentication token
      *
      * @member shindig.auth
      */
@@ -174,7 +175,7 @@ shindig.Auth = function() {
     /**
      * Updates the security token with new data from the gadget server.
      *
-     * @param {String} newToken the new auth token data.
+     * @param {string} newToken the new auth token data.
      *
      * @member shindig.auth
      */
@@ -185,6 +186,7 @@ shindig.Auth = function() {
     /**
      * Quickly retrieves data that is known to have been injected by
      * a trusted container server.
+     * @return {Object}
      */
     getTrustedData : function() {
       return trusted;

@@ -46,6 +46,7 @@ gadgets.io = function() {
 
   /**
    * Internal facility to create an xhr request.
+   * @nosideeffects
    */
   function makeXhr() {
     var x; 
@@ -66,8 +67,8 @@ gadgets.io = function() {
    * if the error is fatal.
    *
    * @param {Object} xobj The XHR object to check
-   * @param {Function} callback The callback to call if the error is fatal
-   * @return true if the xobj is not ready to be processed
+   * @param {function(Object)} callback The callback to call if the error is fatal
+   * @return {boolean} true if the xobj is not ready to be processed
    */
   function hadError(xobj, callback) {
     if (xobj.readyState !== 4) {
@@ -100,8 +101,8 @@ gadgets.io = function() {
   /**
    * Handles non-proxied XHR callback processing.
    *
-   * @param {String} url
-   * @param {Function} callback
+   * @param {string} url
+   * @param {function(Object)} callback
    * @param {Object} params
    * @param {Object} xobj
    */
@@ -120,11 +121,11 @@ gadgets.io = function() {
   /**
    * Handles XHR callback processing.
    *
-   * @param {String} url
-   * @param {Function} callback
+   * @param {string} url
+   * @param {function(Object)} callback
    * @param {Object} params
    * @param {Object} xobj
-   */
+   */ 
   function processResponse(url, callback, params, xobj) {
     if (hadError(xobj, callback)) {
       return;
@@ -146,6 +147,12 @@ gadgets.io = function() {
     }
     callback(transformResponseData(params, data));
   }
+
+  /**
+   * @param {Object} params
+   * @param {Object} data
+   * @return {Object}
+   */
 
   function transformResponseData(params, data) {
     // Sometimes rc is not present, generally when used
@@ -214,13 +221,15 @@ gadgets.io = function() {
   /**
    * Sends an XHR post or get request
    *
-   * @param realUrl The url to fetch data from that was requested by the gadget
-   * @param proxyUrl The url to proxy through
-   * @param callback The function to call once the data is fetched
-   * @param postData The data to post to the proxyUrl
-   * @param params The params to use when processing the response
-   * @param processResponseFunction The function that should process the
+   * @param {string} realUrl The url to fetch data from that was requested by the gadget
+   * @param {string} proxyUrl The url to proxy through
+   * @param {function()} callback The function to call once the data is fetched
+   * @param {Object} paramData The params to use when processing the response
+   * @param {function(string,function(Object),Object,Object)} 
+   *     processResponseFunction The function that should process the
    *     response from the sever before calling the callback
+   * @param {string=} opt_contentType - Optional content type defaults to
+   *     'application/x-www-form-urlencoded'
    */
   function makeXhrRequest(realUrl, proxyUrl, callback, paramData, method,
       params, processResponseFunction, opt_contentType) {
@@ -250,11 +259,11 @@ gadgets.io = function() {
    * directive. The preloader will only satisfy a request for a specific piece
    * of content once.
    *
-   * @param postData The definition of the request to be executed by the proxy
-   * @param params The params to use when processing the response
-   * @param callback The function to call once the data is fetched
-   * @return true if the request can be satisfied by the preloaded content
-   *         false otherwise
+   * @param {Object} postData The definition of the request to be executed by the proxy
+   * @param {Object} params The params to use when processing the response
+   * @param {function(Object)} callback The function to call once the data is fetched
+   * @return {boolean} true if the request can be satisfied by the preloaded 
+   *         content false otherwise
    */
   function respondWithPreload(postData, params, callback) {
     if (gadgets.io.preloaded_ && postData.httpMethod === "GET") {
@@ -313,10 +322,10 @@ gadgets.io = function() {
      *    {contentType: gadgets.io.ContentType.FEED});
      * </pre>
      *
-     * @param {String} url The URL where the content is located
-     * @param {Function} callback The function to call with the data from the
-     *     URL once it is fetched
-     * @param {Map.&lt;gadgets.io.RequestParameters, Object&gt;} opt_params
+     * @param {string} url The URL where the content is located
+     * @param {function(Object)} callback The function to call with the data from
+     *     the URL once it is fetched
+     * @param {Object.<gadgets.io.RequestParameters, Object>=} opt_params
      *     Additional
      *     <a href="gadgets.io.RequestParameters.html">parameters</a>
      *     to pass to the request
@@ -389,7 +398,7 @@ gadgets.io = function() {
         }
         paramData.oauthState = oauthState || "";
         // Just copy the OAuth parameters into the req to the server
-        for (opt in params) {
+        for (var opt in params) {
           if (params.hasOwnProperty(opt)) {
             if (opt.indexOf("OAUTH_") === 0) {
               paramData[opt] = params[opt];
@@ -400,6 +409,7 @@ gadgets.io = function() {
 
       var proxyUrl = config.jsonProxyUrl.replace("%host%", document.location.host);
 
+      // FIXME -- processResponse is not used in call
       if (!respondWithPreload(paramData, params, callback, processResponse)) {
         if (httpMethod === "GET" && refreshInterval > 0) {
           // this content should be cached
@@ -441,9 +451,9 @@ gadgets.io = function() {
      * (key=value&amp;...)
      *
      * @param {Object} fields The post fields you wish to encode
-     * @param {Boolean} opt_noEscaping An optional parameter specifying whether
+     * @param {boolean=} opt_noEscaping An optional parameter specifying whether
      *     to turn off escaping of the parameters. Defaults to false.
-     * @return {String} The processed post data in www-form-urlencoded format.
+     * @return {string} The processed post data in www-form-urlencoded format.
      *
      * @member gadgets.io
      */
@@ -470,14 +480,14 @@ gadgets.io = function() {
     /**
      * Gets the proxy version of the passed-in URL.
      *
-     * @param {String} url The URL to get the proxy URL for
-     * @param {Object} opt_params Optional Parameter Object.
+     * @param {string} url The URL to get the proxy URL for
+     * @param {Object.<gadgets.io.RequestParameters, Object>=} opt_params Optional Parameter Object.
      *     The following properties are supported:
      *       .REFRESH_INTERVAL The number of seconds that this
      *           content should be cached.  Defaults to 3600.
      *
-     * @return {String} The proxied version of the URL
-     *
+     * @return {string} The proxied version of the URL
+     * @nosideeffects
      * @member gadgets.io
      */
     getProxyUrl : function (url, opt_params) {
@@ -519,14 +529,23 @@ gadgets.io.RequestParameters = gadgets.util.makeEnum([
   "OAUTH_RECEIVED_CALLBACK"
 ]);
 
+/**
+ * @const
+ */
 gadgets.io.MethodType = gadgets.util.makeEnum([
   "GET", "POST", "PUT", "DELETE", "HEAD"
 ]);
 
+/**
+ * @const
+ */
 gadgets.io.ContentType = gadgets.util.makeEnum([
   "TEXT", "DOM", "JSON", "FEED"
 ]);
 
+/**
+ * @const
+ */
 gadgets.io.AuthorizationType = gadgets.util.makeEnum([
   "NONE", "SIGNED", "OAUTH"
 ]);

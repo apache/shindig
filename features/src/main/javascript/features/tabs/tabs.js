@@ -51,7 +51,7 @@ gadgets.Tab = function(handle) {
 
 /**
  * Returns the label of the tab as a string (may contain HTML).
- * @return {String} Label of the tab.
+ * @return {string} Label of the tab.
  */
 gadgets.Tab.prototype.getName = function() {
   return this.td_.innerHTML;
@@ -75,7 +75,7 @@ gadgets.Tab.prototype.getContentContainer = function() {
 
 /**
  * Returns the callback function that is executed when the tab is selected.
- * @return {Function} The callback function of the tab.
+ * @return {function(string)} The callback function of the tab.
  */
 gadgets.Tab.prototype.getCallback = function() {
   return this.callback_;
@@ -83,7 +83,7 @@ gadgets.Tab.prototype.getCallback = function() {
 
 /**
  * Returns the tab's index.
- * @return {Number} The tab's index.
+ * @return {number} The tab's index.
  */
 gadgets.Tab.prototype.getIndex = function() {
   var tabs = this.handle_.getTabs();
@@ -99,12 +99,12 @@ gadgets.Tab.prototype.getIndex = function() {
  * @class A class gadgets can use to make tabs.
  * @description Creates a new TabSet object
  *
- * @param {String} opt_moduleId Optional suffix for the ID of tab container.
- * @param {String} opt_defaultTab Optional tab name that specifies the name of
+ * @param {string=} opt_moduleId Optional suffix for the ID of tab container.
+ * @param {string=} opt_defaultTab Optional tab name that specifies the name of
  *                   of the tab that is selected after initialization.
  *                   If this parameter is omitted, the first tab is selected by
  *                   default.
- * @param {Element} opt_container The HTML element to contain the tabs.  If
+ * @param {Element=} opt_container The HTML element to contain the tabs.  If
  *                    omitted, a new div element is created and inserted at the
  *                    very top.
  */
@@ -175,8 +175,8 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
 
 /**
  * Adds a new tab based on the name-value pairs specified in opt_params.
- * @param {String} tabName Label of the tab to create.
- * @param {Object} opt_params Optional parameter object. The following
+ * @param {string} tabName Label of the tab to create.
+ * @param {string|Object=} opt_params Optional parameter object. The following
  *                   properties are supported:
  *                   .contentContainer An existing HTML element to be used as
  *                     the tab content container. If omitted, the tabs
@@ -187,7 +187,7 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
  *                     the mouse cursor over the tab.
  *                   .index The index at which to insert the tab. If omitted,
  *                     the new tab is appended to the end.
- * @return {String} DOM id of the tab container.
+ * @return {string} DOM id of the tab container.
  */
 gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
   if (typeof opt_params === 'string') {
@@ -240,7 +240,7 @@ gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
 
 /**
  * Removes a tab at tabIndex and all of its associated content.
- * @param {Number} tabIndex Index of the tab to remove.
+ * @param {number} tabIndex Index of the tab to remove.
  */
 gadgets.TabSet.prototype.removeTab = function(tabIndex) {
   var tab = this.tabs_[tabIndex];
@@ -279,7 +279,7 @@ gadgets.TabSet.prototype.getSelectedTab = function() {
 /**
  * Selects the tab at tabIndex and fires the tab's callback function if it
  * exists. If the tab is already selected, the callback is not fired.
- * @param {Number} tabIndex Index of the tab to select.
+ * @param {number} tabIndex Index of the tab to select.
  */
 gadgets.TabSet.prototype.setSelectedTab = function(tabIndex) {
   if (this.tabs_[tabIndex]) {
@@ -290,8 +290,8 @@ gadgets.TabSet.prototype.setSelectedTab = function(tabIndex) {
 /**
  * Swaps the positions of tabs at tabIndex1 and tabIndex2. The selected tab
  * does not change, and no callback functions are called.
- * @param {Number} tabIndex1 Index of the first tab to swap.
- * @param {Number} tabIndex2 Index of the secnod tab to swap.
+ * @param {number} tabIndex1 Index of the first tab to swap.
+ * @param {number} tabIndex2 Index of the secnod tab to swap.
  */
 gadgets.TabSet.prototype.swapTabs = function(tabIndex1, tabIndex2) {
   var tab1 = this.tabs_[tabIndex1];
@@ -309,7 +309,7 @@ gadgets.TabSet.prototype.swapTabs = function(tabIndex1, tabIndex2) {
 
 /**
  * Returns an array of all existing tab objects.
- * @return {Array.&lt;gadgets.Tab&gt;} Array of all existing tab objects.
+ * @return {Array.<gadgets.Tab>} Array of all existing tab objects.
  */
 gadgets.TabSet.prototype.getTabs = function() {
   return this.tabs_;
@@ -317,8 +317,8 @@ gadgets.TabSet.prototype.getTabs = function() {
 
 /**
  * Sets the alignment of tabs. Tabs are center-aligned by default.
- * @param {String} align 'left', 'center', or 'right'.
- * @param {Number} opt_offset Optional parameter to set the number of pixels
+ * @param {string} align 'left', 'center', or 'right'.
+ * @param {number=} opt_offset Optional parameter to set the number of pixels
  *                   to offset tabs from the left or right edge. The default
  *                   value is 3px.
  */
@@ -338,7 +338,7 @@ gadgets.TabSet.prototype.alignTabs = function(align, opt_offset) {
 
 /**
  * Shows or hides tabs and all associated content.
- * @param {Boolean} display true to show tabs; false to hide tabs.
+ * @param {boolean} display true to show tabs; false to hide tabs.
  */
 gadgets.TabSet.prototype.displayTabs = function(display) {
   this.mainContainer_.style.display = display ? 'block' : 'none';
@@ -357,7 +357,7 @@ gadgets.TabSet.prototype.getHeaderContainer = function() {
  * content will be appended.
  * This container element is created and inserted as the first child of the
  * gadget if opt_element is not specified.
- * @param {Element} opt_element Optional HTML container element.
+ * @param {Element=} opt_element Optional HTML container element.
  * @return {Element} HTML container element.
  */
 gadgets.TabSet.prototype.createMainContainer_ = function(opt_element) {
@@ -378,8 +378,8 @@ gadgets.TabSet.prototype.createMainContainer_ = function(opt_element) {
 
 /**
  * Helper method that expands a class name into two class names.
- * @param {String} label CSS class
- * @return {String} Expanded class names.
+ * @param {string} label CSS class
+ * @return {string} Expanded class names.
  */
 gadgets.TabSet.prototype.cascade_ = function(label) {
   return label + ' ' + label + this.moduleId_;
@@ -495,6 +495,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
 
 /**
  * Helper method that shows or hides the navigation elements.
+ * @private
  */
 gadgets.TabSet.prototype.adjustNavigation_ = function() {
   this.leftNavContainer_.style.display = 'none';
@@ -521,7 +522,8 @@ gadgets.TabSet.prototype.adjustNavigation_ = function() {
 /**
  * Helper method that smoothly scrolls the tabs container.
  * @param {Element} container The tabs container element.
- * @param {Number} distance The amount of pixels to scroll right.
+ * @param {number} distance The amount of pixels to scroll right.
+ * @private
  */
 gadgets.TabSet.prototype.smoothScroll_ = function(container, distance) {
   var scrollAmount = 10;
@@ -542,7 +544,7 @@ gadgets.TabSet.prototype.smoothScroll_ = function(container, distance) {
 
 /**
  * Helper function that dynamically inserts CSS rules to the page.
- * @param {String} cssText CSS rules to inject
+ * @param {string} cssText CSS rules to inject
  * @private
  */
 gadgets.TabSet.addCSS_ = function(cssText) {
@@ -561,7 +563,7 @@ gadgets.TabSet.addCSS_ = function(cssText) {
 
 /**
  * Helper method that creates a new gadgets.Tab object.
- * @param {String} tabName Label of the tab to create.
+ * @param {string} tabName Label of the tab to create.
  * @param {Object} params Parameter object. The following properties
  *                   are supported:
  *                   .contentContainer An existing HTML element to be used as
@@ -599,7 +601,7 @@ gadgets.TabSet.prototype.createTab_ = function(tabName, params) {
 /**
  * Helper method that creates a function to select the specified tab.
  * @param {gadgets.Tab} tab The tab to select.
- * @return {Function} Callback function to select the tab.
+ * @return {function()} Callback function to select the tab.
  */
 gadgets.TabSet.prototype.setSelectedTabGenerator_ = function(tab) {
   return function() { tab.handle_.selectTab_(tab); };
@@ -609,6 +611,7 @@ gadgets.TabSet.prototype.setSelectedTabGenerator_ = function(tab) {
  * Helper method that selects a tab and unselects the previously selected.
  * If the tab is already selected, then callback is not executed.
  * @param {gadgets.Tab} tab The tab to select.
+ * @private
  */
 gadgets.TabSet.prototype.selectTab_ = function(tab) {
   if (this.selectedTab_ === tab) {
@@ -634,8 +637,16 @@ gadgets.TabSet.prototype.selectTab_ = function(tab) {
 
 // Aliases for legacy code
 
+/**
+ * @type {gadgets.TabSet}
+ */
 var _IG_Tabs = gadgets.TabSet;
 _IG_Tabs.prototype.moveTab = _IG_Tabs.prototype.swapTabs;
+
+/**
+ * @param {string} tabName
+ * @param {function()} callback
+ */
 _IG_Tabs.prototype.addDynamicTab = function(tabName, callback) {
   return this.addTab(tabName, {callback: callback});
 };

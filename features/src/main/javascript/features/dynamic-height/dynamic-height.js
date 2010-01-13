@@ -40,9 +40,10 @@ gadgets.window = gadgets.window || {};
   /**
    * Parse out the value (specified in px) for a CSS attribute of an element.
    *
-   * @param {Object} elem the element with the attribute to look for.
-   * @param {String} attr the CSS attribute name of interest.
-   * @returns {int} the value of the px attr of the elem.
+   * @param {Element} elem the element with the attribute to look for.
+   * @param {string} attr the CSS attribute name of interest.
+   * @returns {number} the value of the px attr of the elem.
+   * @private
    */
   function parseIntFromElemPxAttribute(elem, attr) {
     var style = window.getComputedStyle(elem, "");
@@ -59,7 +60,8 @@ gadgets.window = gadgets.window || {};
    * containing parent element. Not counting "float" elements may lead to
    * undercounting.
    *
-   * @returns {int} the height of the gadget.
+   * @returns {number} the height of the gadget.
+   * @private
    */
   function getHeightForWebkit() {
     var result = 0;
@@ -91,7 +93,7 @@ gadgets.window = gadgets.window || {};
 
   /**
    * Adjusts the gadget height
-   * @param {Number} opt_height An optional preferred height in pixels. If not
+   * @param {number=} opt_height An optional preferred height in pixels. If not
    *     specified, will attempt to fit the gadget to its content.
    * @member gadgets.window
    */
@@ -171,7 +173,9 @@ gadgets.window = gadgets.window || {};
   };
 }());
 
-// Alias for legacy code
+/**
+ * @see gadgets.window#adjustHeight
+ */
 var _IG_AdjustIFrameHeight = gadgets.window.adjustHeight;
 
 // TODO Attach gadgets.window.adjustHeight to the onresize event

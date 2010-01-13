@@ -32,7 +32,9 @@ var gadgets = gadgets || {};
 gadgets.util = function() {
   /**
    * Parses URL parameters into an object.
-   * @return {Array.&lt;String&gt;} The parameters
+   * @param {string} url - the url parameters to parse
+   * @return {Array.<string>} The parameters as an array
+   * @nosideeffects
    */
   function parseUrlParams(url) {
     // Get settings from url, 'hash' takes precedence over 'search' component
@@ -56,9 +58,14 @@ gadgets.util = function() {
   var services = {};
   var onLoadHandlers = [];
 
-  // Maps code points to the value to replace them with.
-  // If the value is "false", the character is removed entirely, otherwise
-  // it will be replaced with an html entity.
+  /**
+   * @enum {boolean}
+   * @private
+   * Maps code points to the value to replace them with.
+   * If the value is "false", the character is removed entirely, otherwise
+   * it will be replaced with an html entity.
+   */
+  
   var escapeCodePoints = {
    // nul; most browsers truncate because they use c strings under the covers.
    0 : false,
@@ -86,8 +93,9 @@ gadgets.util = function() {
    * Regular expression callback that returns strings from unicode code points.
    *
    * @param {Array} match Ignored
-   * @param {String} value The codepoint value to convert
-   * @return {String} The character corresponding to value.
+   * @param {number} value The codepoint value to convert
+   * @return {string} The character corresponding to value.
+   * @nosideeffects
    */
   function unescapeEntity(match, value) {
     return String.fromCharCode(value);
@@ -108,7 +116,7 @@ gadgets.util = function() {
     /**
      * Gets the URL parameters.
      *
-     * @param {String} opt_url Optional URL whose parameters to parse.
+     * @param {string=} opt_url Optional URL whose parameters to parse.
      *                         Defaults to window's current URL.
      * @return {Object} Parameters passed into the query string
      * @member gadgets.util
@@ -152,7 +160,7 @@ gadgets.util = function() {
      * @param {Object} scope The execution scope; may be null if there is no
      *     need to associate a specific instance of an object with this
      *     callback
-     * @param {Function} callback The callback to invoke when this is run;
+     * @param {function(Object,Object)} callback The callback to invoke when this is run;
      *     any arguments passed in will be passed after your initial arguments
      * @param {Object} var_args Initial arguments to be passed to the callback
      *
@@ -178,11 +186,12 @@ gadgets.util = function() {
     /**
      * Utility function for generating an "enum" from an array.
      *
-     * @param {Array.<String>} values The values to generate.
-     * @return {Map&lt;String,String&gt;} An object with member fields to handle
+     * @param {Array.<string>} values The values to generate.
+     * @return {Object.<string,string>} An object with member fields to handle
      *   the enum.
      *
      * @private Implementation detail.
+     * @nosideeffects
      */
     makeEnum : function (values) {
       var obj = {};
@@ -195,10 +204,11 @@ gadgets.util = function() {
     /**
      * Gets the feature parameters.
      *
-     * @param {String} feature The feature to get parameters for
+     * @param {string} feature The feature to get parameters for
      * @return {Object} The parameters for the given feature, or null
      *
      * @member gadgets.util
+     * @nosideeffects
      */
     getFeatureParameters : function (feature) {
       return typeof features[feature] === "undefined" ? null : features[feature];
@@ -207,10 +217,11 @@ gadgets.util = function() {
     /**
      * Returns whether the current feature is supported.
      *
-     * @param {String} feature The feature to test for
-     * @return {Boolean} True if the feature is supported
+     * @param {string} feature The feature to test for
+     * @return {boolean} True if the feature is supported
      *
      * @member gadgets.util
+     * @nosideeffects
      */
     hasFeature : function (feature) {
       return typeof features[feature] !== "undefined";
@@ -223,6 +234,7 @@ gadgets.util = function() {
      * @return {Object} List of Services that enumerate their methods
      *
      * @member gadgets.util
+     * @nosideeffects
      */
     getServices : function () {
       return services;
@@ -230,7 +242,7 @@ gadgets.util = function() {
 
     /**
      * Registers an onload handler.
-     * @param {Function} callback The handler to run
+     * @param {function()} callback The handler to run
      *
      * @member gadgets.util
      */
@@ -260,9 +272,10 @@ gadgets.util = function() {
      * Otherwise, does not attempt to modify the input.
      *
      * @param {Object} input The object to escape
-     * @param {Boolean} opt_escapeObjects Whether to escape objects.
+     * @param {boolean=} opt_escapeObjects Whether to escape objects.
      * @return {Object} The escaped object
      * @private Only to be used by the container, not gadgets.
+     * @nosideeffects
      */
     escape : function(input, opt_escapeObjects) {
       if (!input) {
@@ -294,8 +307,9 @@ gadgets.util = function() {
      * TODO: Parsing the string would probably be more accurate and faster than
      * a bunch of regular expressions.
      *
-     * @param {String} str The string to escape
-     * @return {String} The escaped string
+     * @param {string} str The string to escape
+     * @return {string} The escaped string
+     * @nosideeffects
      */
     escapeString : function(str) {
       if (!str) return str;
@@ -316,7 +330,9 @@ gadgets.util = function() {
     /**
      * Reverses escapeString
      *
-     * @param {String} str The string to unescape.
+     * @param {string} str The string to unescape.
+     * @return {string}
+     * @nosideeffects
      */
     unescapeString : function(str) {
       if (!str) return str;

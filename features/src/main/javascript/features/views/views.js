@@ -137,7 +137,7 @@ gadgets.views = function() {
      * http://bitworking.org/projects/URI-Templates/spec/draft-gregorio-uritemplate-03.html
      *
      * @param {string} urlTemplate A URL template for a container view.
-     * @param {Map&lt;string, string&gt;} environment A set of named variables.
+     * @param {Object.<string, string>} environment A set of named variables.
      * @return {string} A URL string with substituted variables.
      */
     bind : function(urlTemplate, environment) {
@@ -163,6 +163,10 @@ gadgets.views = function() {
           vars,
           flag;
 
+      /**
+       * @param {string} varName
+       * @param {string=} defaultVal
+       */
       function getVar(varName, defaultVal) {
         return environment.hasOwnProperty(varName) ?
                environment[varName] : defaultVal;
@@ -187,7 +191,7 @@ gadgets.views = function() {
 
       function objectIsEmpty(v) {
     	if ((typeof v === 'object') || (typeof v === 'function')) {
-    	  for (i in v) {
+    	  for (var i in v) {
     	    if (v.hasOwnProperty(i)) {
     	      return false;
     	    }
@@ -229,7 +233,7 @@ gadgets.views = function() {
                 if (typeof v === 'string') {
                   j.push(k + '=' + v);
                 } else if (typeof v === 'object') {
-                  for (i in v) {
+                  for (var i in v) {
                     if (v.hasOwnProperty(i)) {
                       j.push(i + '=' + v[i]);
 		    }
@@ -239,7 +243,7 @@ gadgets.views = function() {
               break;
             case 'list':
               matchVar(vars);
-              value = getVar(match[1]);
+              var value = getVar(match[1]);
               if (typeof value === 'object' && typeof value.join === 'function') {
                 result.push(value.join(arg));
               }
@@ -275,9 +279,9 @@ gadgets.views = function() {
      * in the new view.
      *
      * @param {string | gadgets.views.View} view The view to navigate to
-     * @param {Map.&lt;String, String&gt;} opt_params Parameters to pass to the
+     * @param {Object.<string, string>=} opt_params Parameters to pass to the
      *     gadget after it has been navigated to on the surface
-     * @param {string} opt_ownerId The ID of the owner of the page to navigate to;
+     * @param {string=} opt_ownerId The ID of the owner of the page to navigate to;
      *                 defaults to the current owner.
      */
     requestNavigateTo : function(view, opt_params, opt_ownerId) {
@@ -300,7 +304,7 @@ gadgets.views = function() {
      * Returns a map of all the supported views. Keys each gadgets.view.View by
      * its name.
      *
-     * @return {Map&lt;gadgets.views.ViewType | String, gadgets.views.View&gt;}
+     * @return {Object.<gadgets.views.ViewType | string, gadgets.views.View>}
      *   All supported views, keyed by their name attribute.
      */
     getSupportedViews : function() {
@@ -312,7 +316,7 @@ gadgets.views = function() {
      * include all url parameters, only the ones passed into
      * gadgets.views.requestNavigateTo
      *
-     * @return {Map.&lt;String, String&gt;} The parameter map
+     * @return {Object.<string, string>} The parameter map
      */
     getParams : function() {
       return params;
@@ -320,13 +324,27 @@ gadgets.views = function() {
   };
 }();
 
+
+/**
+ * @class
+ * View Class
+ * @name gadgets.views.View
+ */
+
+/**
+ * View Representation
+ * @constructor
+ * @param {string} name - the name of the view
+ * @param {boolean=} opt_isOnlyVisible - is this view devoted to this gadget.
+ */
+
 gadgets.views.View = function(name, opt_isOnlyVisible) {
   this.name_ = name;
   this.isOnlyVisible_ = !!opt_isOnlyVisible;
 };
 
 /**
- * @return {String} The view name.
+ * @return {string} The view name.
  */
 gadgets.views.View.prototype.getName = function() {
   return this.name_;
@@ -348,7 +366,7 @@ gadgets.views.View.prototype.getUrlTemplate = function() {
 /**
  * Binds the view's URL template with variables in the passed environment
  * to produce a URL string.
- * @param {Map&lt;string, string&gt;} environment A set of named variables.
+ * @param {Object.<string, string>} environment A set of named variables.
  * @return {string} A URL string with substituted variables.
  */
 gadgets.views.View.prototype.bind = function(environment) {
@@ -356,7 +374,7 @@ gadgets.views.View.prototype.bind = function(environment) {
 };
 
 /**
- * @return {Boolean} True if this is the only visible gadget on the page.
+ * @return {boolean} True if this is the only visible gadget on the page.
  */
 gadgets.views.View.prototype.isOnlyVisibleGadget = function() {
   return this.isOnlyVisible_;

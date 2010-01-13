@@ -34,7 +34,7 @@ gadgets.flash = gadgets.flash || {};
 
 /**
  * Detects Flash Player and its major version.
- * @return {Number} The major version of Flash Player
+ * @return {number} The major version of Flash Player
  *                  or 0 if Flash is not supported.
  *
  * @member gadgets.flash
@@ -66,19 +66,18 @@ gadgets.flash.swfContainerId_ = 0;
 
 /**
  * Injects a Flash file into the DOM tree.
- * @param {String} swfUrl SWF URL.
- * @param {String | Object} swfContainer The id or object reference of an
+ * @param {string} swfUrl SWF URL.
+ * @param {string | Object} swfContainer The id or object reference of an
  *     existing html container element.
- * @param {Number} swfVersion Minimal Flash Player version required.
- * @param {Object} opt_params An optional object that may contain any valid html
+ * @param {number} swfVersion Minimal Flash Player version required.
+ * @param {Object=} opt_params An optional object that may contain any valid html
  *     parameter. All attributes will be passed through to the flash movie on
  *     creation.
- * @return {Boolean} Whether the function call completes successfully.
+ * @return {boolean} Whether the function call completes successfully.
  *
  * @member gadgets.flash
  */
-gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
-    opt_params) {
+gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params) {
   switch (typeof swfContainer) {
     case 'string':
       swfContainer = document.getElementById(swfContainer);
@@ -206,7 +205,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion,
 /**
  * Injects a cached Flash file into the DOM tree.
  * Accepts the same parameters as gadgets.flash.embedFlash does.
- * @return {Boolean} Whether the function call completes successfully.
+ * @return {boolean} Whether the function call completes successfully.
  *
  * @member gadgets.flash
  */

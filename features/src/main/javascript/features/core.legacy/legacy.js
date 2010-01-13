@@ -123,6 +123,10 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
       }, params);
 }
 
+/**
+ * @param {string} url
+ * @param {Object=} opt_params
+ */
 function _IG_GetCachedUrl(url, opt_params) {
   var params = opt_params || {};
   params['REFRESH_INTERVAL'] = 3600;
@@ -131,9 +135,17 @@ function _IG_GetCachedUrl(url, opt_params) {
   }
   return gadgets.io.getProxyUrl(url, params);
 }
+/**
+ * @param {string} url
+ * @param {Object=} opt_params
+ */
 function _IG_GetImageUrl(url, opt_params) {
   return _IG_GetCachedUrl(url, opt_params);
 }
+/**
+ * @param {string} url
+ * @return {Element}
+ */
 function _IG_GetImage(url) {
   var img = document.createElement('img');
   img.src = _IG_GetCachedUrl(url);
@@ -163,7 +175,7 @@ var _args = gadgets.util.getUrlParameters;
 /**
  * Fetches an object by document id.
  *
- * @param {String | Object} el The element you wish to fetch. You may pass
+ * @param {string | Object} el The element you wish to fetch. You may pass
  *     an object in which allows this to be called regardless of whether or
  *     not the type of the input is known.
  * @return {HTMLElement} The element, if it exists in the document, or null.
@@ -176,7 +188,7 @@ function _gel(el) {
  * Fetches elements by tag name.
  * This is functionally identical to document.getElementsByTagName()
  *
- * @param {String} tag The tag to match elements against.
+ * @param {string} tag The tag to match elements against.
  * @return {Array.<HTMLElement>} All elements of this tag type.
  */
 function _gelstn(tag) {
@@ -190,7 +202,7 @@ function _gelstn(tag) {
 /**
  * Fetches elements with ids matching a given regular expression.
  *
- * @param {tagName} tag The tag to match elements against.
+ * @param {string} tagName The tag to match elements against.
  * @param {RegEx} regex The expression to match.
  * @return {Array.<HTMLElement>} All elements of this tag type that match
  *     regex.
@@ -208,8 +220,8 @@ function _gelsbyregex(tagName, regex) {
 
 /**
  * URI escapes the given string.
- * @param {String} str The string to escape.
- * @return {String} The escaped string.
+ * @param {string} str The string to escape.
+ * @return {string} The escaped string.
  */
 function _esc(str) {
   return window.encodeURIComponent ? encodeURIComponent(str) : escape(str);
@@ -217,8 +229,8 @@ function _esc(str) {
 
 /**
  * URI unescapes the given string.
- * @param {String} str The string to unescape.
- * @return {String} The unescaped string.
+ * @param {string} str The string to unescape.
+ * @return {string} The unescaped string.
  */
 function _unesc(str) {
   return window.decodeURIComponent ? decodeURIComponent(str) : unescape(str);
@@ -227,8 +239,8 @@ function _unesc(str) {
 /**
  * Encodes HTML entities such as <, " and >.
  *
- * @param {String} str The string to escape.
- * @return The escaped string.
+ * @param {string} str The string to escape.
+ * @return {string} The escaped string.
  */
 function _hesc(str) {
   return gadgets.util.escapeString(str);
@@ -237,8 +249,8 @@ function _hesc(str) {
 /**
  * Removes HTML tags from the given input string.
  *
- * @param {String} str The string to strip.
- * @return The stripped string.
+ * @param {string} str The string to strip.
+ * @return {string} The stripped string.
  */
 function _striptags(str) {
   return str.replace(/<\/?[^>]+>/g, "");
@@ -247,8 +259,8 @@ function _striptags(str) {
 /**
  * Trims leading & trailing whitespace from the given string.
  *
- * @param {String} str The string to trim.
- * @return {String} The trimmed string.
+ * @param {string} str The string to trim.
+ * @return {string} The trimmed string.
  */
 function _trim(str) {
   return str.replace(/^\s+|\s+$/g, "");
@@ -257,7 +269,7 @@ function _trim(str) {
 /**
  * Toggles the given element between being shown and block-style display.
  *
- * @param {String | HTMLElement} el The element to toggle.
+ * @param {string | HTMLElement} el The element to toggle.
  */
 function _toggle(el) {
   el = (typeof el === "string") ? _gel(el) : el;
@@ -271,38 +283,38 @@ function _toggle(el) {
 }
 
 /**
- * {Number} A counter used by uniqueId().
+ * @type {number} A counter used by uniqueId().
  */
 var _global_legacy_uidCounter = 0;
 
 /**
- * @return a unique number.
+ * @return {number} a unique number.
  */
 function _uid() {
   return _global_legacy_uidCounter++;
 }
 
 /**
- * @param {Number} a
- * @param {Number} b
- * @return The lesser of a or b.
+ * @param {number} a
+ * @param {number} b
+ * @return {number} The lesser of a or b.
  */
 function _min(a, b) {
   return (a < b ? a : b);
 }
 
 /**
- * @param {Number} a
- * @param {Number} b
- * @return The greater of a or b.
+ * @param {number} a
+ * @param {number} b
+ * @return {number} The greater of a or b.
  */
 function _max(a, b) {
   return (a > b ? a : b);
 }
 
 /**
- * @param {String} name
- * @param {Array.<String | Object>} sym
+ * @param {string} name
+ * @param {Array.<string | Object>} sym
  */
 function _exportSymbols(name, sym) {
   var attach = window;

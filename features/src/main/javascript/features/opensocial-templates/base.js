@@ -109,7 +109,7 @@ os.regExps_ = {
  * Preprocess the template.
  * @param {Element|TextNode|string} node DOM node containing the template data, or the
  * string source.
- * @param {string} opt_id An optional ID for the new template.
+ * @param {string=} opt_id An optional ID for the new template.
  * @return {os.Template} A compiled Template object
  */
 os.compileTemplate = function(node, opt_id) {
@@ -133,8 +133,8 @@ os.compileTemplate = function(node, opt_id) {
 /**
  * Compile a template without requiring a DOM node.
  * @param {string} src XML data to be compiled.
- * @param {string} opt_id An optional ID for the new template.
- * @param {Element} opt_container An optional container DOM Element 
+ * @param {string=} opt_id An optional ID for the new template.
+ * @param {Element=} opt_container An optional container DOM Element 
  * to look for namespaces
  * @return {opensocial.template.Template} A compiled Template object.
  */
@@ -220,7 +220,7 @@ os.computeChildMap_ = function(node) {
  * Creates a functor which returns a value from the specified node given a
  * name.
  * @param {Node} node Node to get the value from.
- * @return {Function} The functor which takes a type {string}.
+ * @return {function(string)} The functor which takes a type {string}.
  * @private
  */
 os.createNodeAccessor_ = function(node) {
@@ -265,7 +265,7 @@ os.customAttributes_ = {};
  * Registers a custom attribute functor. When this attribute is encountered in
  * a DOM node, the specified functor will be called.
  * @param {string} attrName The name of the custom attribute.
- * @param {Function} functor A function with signature
+ * @param {function(string)} functor A function with signature
  *     function({Element}, {string}, {Object}, {JSEvalContext})
  */
 os.registerAttribute_ = function(attrName, functor) {

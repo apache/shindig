@@ -53,10 +53,10 @@ gadgets.skins = function() {
     /**
      * Fetches the display property mapped to the given key.
      *
-     * @param {String} propertyKey The key to get data for;
+     * @param {string} propertyKey The key to get data for;
      *    keys are defined in <a href="gadgets.skins.Property.html"><code>
      *    gadgets.skins.Property</code></a>
-     * @return {String} The data
+     * @return {string} The data
      *
      * @member gadgets.skins
      */

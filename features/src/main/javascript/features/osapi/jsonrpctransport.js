@@ -24,8 +24,8 @@
 
   /**
    * Called by a batch to execute all requests
-   * @param requests
-   * @param callback
+   * @param {Object} requests
+   * @param {function(Object)} callback
    */
   function execute(requests, callback) {
 

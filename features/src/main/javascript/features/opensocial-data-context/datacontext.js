@@ -41,7 +41,7 @@ opensocial.data.DataContext = function() {
    *
    * @param {string} key The key to associate with this object.
    * @param {ResponseItem|Object} obj The data object.
-   * @param {boolean} opt_fireListeners Default true.
+   * @param {boolean=} opt_fireListeners Default true.
    */
   var putDataSet = function(key, obj, opt_fireListeners) {
     if (typeof obj === 'undefined' || obj === null) {
@@ -57,7 +57,7 @@ opensocial.data.DataContext = function() {
   /**
    * Registers a callback listener for a given set of keys.
    * @param {string|Array.<string>} keys Key or set of keys to listen on.
-   * @param {Function(Array.<string>)} callback Function to call when a
+   * @param {function(Array.<string>)} callback Function to call when a
    * listener is fired.
    * @param {booelan} oneTimeListener Remove this listener after first callback?
    * @param {boolean} fireIfReady Instantly fire this if all data is available?
@@ -89,7 +89,7 @@ opensocial.data.DataContext = function() {
   
   /**
    * Checks if the data for a map of keys is available.
-   * @param {Object<string, ?>} An map of keys to check.
+   * @param {Object.<string, *>} keys An map of keys to check.
    * @return {boolean} Data for all the keys is present.
    */
   var isDataReady = function(keys) {
@@ -136,7 +136,7 @@ opensocial.data.DataContext = function() {
   /**
    * Scans all active listeners and fires off any callbacks that inserting this
    * key or list of keys satisfies.
-   * @param {string|Array<string>} keys The key that was updated.
+   * @param {string|Array.<string>} keys The key that was updated.
    * @private
    */
   var fireCallbacks = function(keys) {
@@ -176,7 +176,7 @@ opensocial.data.DataContext = function() {
     /**
      * Registers a callback listener for a given set of keys.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {Function(Array.<string>)} callback Function to call when a 
+     * @param {function(Array.<string>)} callback Function to call when a 
      * listener is fired.
      */
     registerListener : function(keys, callback) {
@@ -188,7 +188,7 @@ opensocial.data.DataContext = function() {
      * be registered. Not part of the spec. Exposed because needed by 
      * opensocial-templates.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {Function(Array.<string>)} callback Function to call when a 
+     * @param {function(Array.<string>)} callback Function to call when a 
      */
     registerOneTimeListener_ : function(keys, callback) {
       registerListener(keys, callback, true, true);
@@ -199,7 +199,7 @@ opensocial.data.DataContext = function() {
      * registered that do not fire initially, but only after a data change.
      * Exposed because needed by opensocial-templates.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {Function(Array.<string>)} callback Function to call when a
+     * @param {function(Array.<string>)} callback Function to call when a
      */
     registerDeferredListener_ : function(keys, callback) {
       registerListener(keys, callback, false, false);
@@ -227,7 +227,7 @@ opensocial.data.DataContext = function() {
     
     /**
      * Inserts multiple data sets from a JSON object.
-     * @param {Object<string, Object>} dataSets a JSON object containing Data
+     * @param {Object.<string, Object>} dataSets a JSON object containing Data
      * sets keyed by Data Set Key. All the DataSets are added, before firing
      * listeners.
      */

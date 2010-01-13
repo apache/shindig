@@ -138,14 +138,14 @@ opensocial.Address.Field = {
 /**
  * Gets data for this body type that is associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Address.Field.html"><code>
  *    Address.Field</code></a>
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request
- * @return {String} The data
+ * @return {string} The data
  */
 opensocial.Address.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

@@ -103,14 +103,14 @@ opensocial.NavigationParameters.Field = {
 /**
  * Gets the NavigationParameters' data that's associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *     see the <a href="opensocial.NavigationParameters.Field.html">Field</a>
  *     class for possible values
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *     opt_params Additional
  *     <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *     to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  * @member opensocial.NavigationParameters
  */
 opensocial.NavigationParameters.prototype.getField = function(key, opt_params) {
@@ -121,7 +121,7 @@ opensocial.NavigationParameters.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this NavigationParameters associated with the given key.
  *
- * @param {String} key The key to set data for
+ * @param {string} key The key to set data for
  * @param {Object} data The data to set
  */
 opensocial.NavigationParameters.prototype.setField = function(key, data) {

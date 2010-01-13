@@ -22,8 +22,8 @@ var tamings___ = tamings___ || [];
 
   /**
    * Called by the transports for each service method that they expose
-   * @param method  The method to expose e.g. "people.get"
-   * @param transport The transport used to execute a call for the method
+   * @param {string} method  The method to expose e.g. "people.get"
+   * @param {Object.<String,Object>} transport The transport used to execute a call for the method
    */
   osapi._registerMethod = function (method, transport) {
     var parts = method.split(".");

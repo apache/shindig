@@ -65,7 +65,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   
     /**
      * Formats integers to 2 digits.
-     * @param {Number} n
+     * @param {number} n
      */
     function f(n) {
       return n < 10 ? '0' + n : n;
@@ -93,6 +93,8 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   
     /**
      * Converts a json object into a string.
+     * @param {*} value
+     * @return {string}
      */
     function stringify(value) {
       var a,          // The array holding the partial texts.

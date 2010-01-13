@@ -39,7 +39,7 @@ gadgets.i18n.NumberFormat = function(symbol) {
  * Apply a predefined pattern to NumberFormat object.
  * @param {number} patternType The number that indicates a predefined number
  *     format pattern.
- * @param {string} opt_currency Optional international currency code. This
+ * @param {string=} opt_currency Optional international currency code. This
  *     determines the currency code/symbol used in format/parse. If not given,
  *     the currency code for current locale will be used.
  */
@@ -67,7 +67,7 @@ function(patternType, opt_currency) {
 /**
  * Apply a pattern to NumberFormat object.
  * @param {string} pattern The number format pattern string.
- * @param {string} opt_currency Optional international currency code. This
+ * @param {string=} opt_currency Optional international currency code. This
  *     determines the currency code/symbol used in format/parse. If not given,
  *     the currency code for current locale will be used.
  */
@@ -108,7 +108,7 @@ function(pattern, opt_currency) {
  * parsing stops after the call. If an error occurs, opt_pos won't be updated.
  *
  * @param {string} text the string to be parsed.
- * @param {Array} opt_pos position to pass in and get back.
+ * @param {Array=} opt_pos position to pass in and get back.
  * @return {number} Parsed number, or 0 if the parse fails.
  */
 gadgets.i18n.NumberFormat.prototype.parse = function(text, opt_pos) {

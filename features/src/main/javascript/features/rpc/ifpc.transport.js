@@ -46,7 +46,7 @@ gadgets.rpctx.ifpc = function() {
    * Encodes arguments for the legacy IFPC wire format.
    *
    * @param {Object} args
-   * @return {String} the encoded args
+   * @return {string} the encoded args
    */
   function encodeLegacyData(args) {
     var argsEscaped = [];
@@ -58,7 +58,7 @@ gadgets.rpctx.ifpc = function() {
 
   /**
    * Helper function to emit an invisible IFrame.
-   * @param {String} src SRC attribute of the IFrame to emit.
+   * @param {string} src SRC attribute of the IFrame to emit.
    * @private
    */
   function emitInvisibleIframe(src) {

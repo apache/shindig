@@ -146,8 +146,7 @@
  *
  * Private, see opensocial.createActivity() for usage.
  *
- * @param {Map.&lt;opensocial.Activity.Field, Object&gt;} params
- *    Parameters defining the activity.
+ * @param {Object.<opensocial.Activity.Field, Object>} params Parameters defining the activity.
  * @private
  * @constructor
  */
@@ -179,6 +178,7 @@ opensocial.Activity = function(params) {
  * </p>
  *
  * @name opensocial.Activity.Field
+ * @enum {string}
  */
 opensocial.Activity.Field = {
   /**
@@ -338,7 +338,7 @@ opensocial.Activity.Field = {
 /**
  * Gets an ID that can be permanently associated with this activity.
  *
- * @return {String} The ID
+ * @return {string} The ID
  * @member opensocial.Activity
  */
 opensocial.Activity.prototype.getId = function() {
@@ -349,14 +349,14 @@ opensocial.Activity.prototype.getId = function() {
 /**
  * Gets the activity data that's associated with the specified key.
  *
- * @param {String} key The key to get data for;
+ * @param {string} key The key to get data for;
  *   see the <a href="opensocial.Activity.Field.html">Field</a> class
  * for possible values
- * @param {Map.&lt;opensocial.DataRequest.DataRequestFields, Object&gt;}
+ * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>=}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {String} The data
+ * @return {string} The data
  * @member opensocial.Activity
  */
 opensocial.Activity.prototype.getField = function(key, opt_params) {
@@ -367,8 +367,8 @@ opensocial.Activity.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this activity associated with the given key.
  *
- * @param {String} key The key to set data for
- * @param {String} data The data to set
+ * @param {string} key The key to set data for
+ * @param {string} data The data to set
  */
 opensocial.Activity.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

@@ -24,6 +24,8 @@
 
 /**
  * Creates a context object out of a json data object.
+ * @param {Object} data
+ * @param {Object=} opt_globals
  */
 os.createContext = function(data, opt_globals) {
   var context = JsEvalContext.create(data);
@@ -112,7 +114,7 @@ os.getTemplate = function(templateId) {
 
 /**
  * Sets a single compiled node into this template.
- * @param node {Element} A compiled node.
+ * @param {Element} node - A compiled node.
  */
 os.Template.prototype.setCompiledNode_ = function(node) {
   os.removeChildren(this.templateRoot_);
@@ -121,7 +123,7 @@ os.Template.prototype.setCompiledNode_ = function(node) {
 
 /**
  * Sets a list of compiled nodes into this template.
- * @param nodes {Array.Element} An array of compiled nodes.
+ * @param {Array.<Element>} nodes An array of compiled nodes.
  */
 os.Template.prototype.setCompiledNodes_ = function(nodes) {
   os.removeChildren(this.templateRoot_);
