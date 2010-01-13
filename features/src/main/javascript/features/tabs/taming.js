@@ -42,6 +42,6 @@ tamings___.push(function(imports) {
     [gadgets.TabSet, 'swapTabs']
   ]);
   caja___.whitelistCtors([
-    [gadgets, 'TabSet'],
+    [gadgets, 'TabSet']
   ]);
 });

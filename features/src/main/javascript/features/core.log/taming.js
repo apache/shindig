@@ -32,6 +32,6 @@ tamings___.push(function(imports) {
     [gadgets, 'warn'],
     [gadgets, 'error'],
     [gadgets, 'setLogLevel'],
-    [gadgets.log, 'logAtLevel'],
+    [gadgets.log, 'logAtLevel']
   ]);
 });

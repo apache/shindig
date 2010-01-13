@@ -25,7 +25,7 @@
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistCtors([
-      [gadgets, 'MiniMessage', Object],
+      [gadgets, 'MiniMessage', Object]
   ]);
   caja___.whitelistMeths([
     [gadgets.MiniMessage, 'createDismissibleMessage'],
