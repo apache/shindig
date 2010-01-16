@@ -75,7 +75,7 @@ var caja___ = (function() {
     var length = schemas.length;
     for (var i=0; i < length; i++) {
       var schema = schemas[i];
-      if (typeof schema[0][schema[1]] == 'function') {
+      if (typeof schema[0].prototype[schema[1]] == 'function') {
         ___.grantInnocentMethod(schema[0].prototype, schema[1]);
       } else {
         gadgets.warn("Error taming method: " + schema[0] + "." + schema[1]);
