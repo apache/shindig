@@ -23,7 +23,7 @@
  */
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
-  ___.tamesTo(gadgets.flash.embedFlash, function () {
+  ___.tamesTo(gadgets.flash.embedFlash, (function () {
     var cleanse = (function () {
       // Gets a fresh Array and Object constructor that 
       // doesn't have the caja properties on it.  This is 
@@ -121,7 +121,7 @@ tamings___.push(function(imports) {
         })(channel)
       });
     });
-  });
+  })());
 
   var d = document.createElement('div');
   d.appendChild(document.createTextNode("bridge"));
