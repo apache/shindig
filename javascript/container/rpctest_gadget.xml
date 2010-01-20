@@ -101,6 +101,12 @@
       Messages/second: <span id="results_msgs_per_sec"></span><br/>
       Bytes/second: <span id="results_bytes_per_sec"></span>
     </div><hr/>
+    <div>Callback<br/>
+      <ul>
+        <li>Input: <input type="text" value="test-value" size="20" id="echo_test_input"/> <input type="button" value="Sync Callback Test" onclick="runCallbackTest(null,true);"/> <input type="button" value="Async Callback Test" onclick="runCallbackTest(null,false);"/></li>
+        <li>Result: <span id="echo_test_result"></span></li>
+      </ul>
+    </div><hr/>
     <div id="childgadgetdiv"><input type="button" value="Child Gadget Tests" onclick="appendChildGadget();"/></div>
   ]]>
   </Content>

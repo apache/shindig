@@ -170,6 +170,13 @@
       Bytes/second: <span id="results_bytes_per_sec"></span>
     </div>
     <hr/>
+    <div>Callback<br/>
+      <ul>
+        <li>Input: <input type="text" value="test-value" size="20" id="echo_test_input"/> <input type="button" value="Sync Callback Test" onclick="runCallbackTest('gadget',true);"/> <input type="button" value="Async Callback Test" onclick="runCallbackTest('gadget',false);"/></li>
+        <li>Result: <span id="echo_test_result"></span></li>
+      </ul>
+    </div>
+    <hr/>
     <div>Gadget: <span id="showgadget" style="display:none"><input type="button" onclick="appendGadget(); this.style.display='none';" value="Append Gadget Now (for delayed load testing)"/></span></div>
     <div id="container"></div>
   </body>

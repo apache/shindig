@@ -58,11 +58,24 @@ function completePerfStats() {
   document.getElementById("results").style.display = "";
 };
 
+function syncCallbackService(toEcho) {
+  return toEcho;
+};
+
+function asyncCallbackService(toEcho) {
+  var self = this;
+  window.setTimeout(function() {
+    self.callback(toEcho);
+  }, 0);
+};
+
 function initPerfTest() {
   clearPerfStats();
   gadgets.rpc.register("perf_service", perfService);
   gadgets.rpc.register("clear_perf_stats", clearPerfStats);
   gadgets.rpc.register("complete_perf_stats", completePerfStats);
+  gadgets.rpc.register("sync_callback_service", syncCallbackService);
+  gadgets.rpc.register("async_callback_service", asyncCallbackService);
 };
 
 var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-*&(){}'";
@@ -109,4 +122,14 @@ function runPerfTest(targetId) {
 
   // kick off the send loop
   sendPerfMessage();
+};
+
+function runCallbackTest(targetId, isSync) {
+  document.getElementById("echo_test_result").innerHTML = "";
+  var service = (isSync ? "" : "a") + "sync_callback_service";
+  var echoValue = document.getElementById("echo_test_input").value;
+  var callback = function(response) {
+    document.getElementById("echo_test_result").innerHTML = response + " at " + new Date().toUTCString();
+  };
+  gadgets.rpc.call(targetId, service, callback, echoValue);
 };
