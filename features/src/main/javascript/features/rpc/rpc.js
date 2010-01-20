@@ -57,7 +57,7 @@ if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
 /**
  * @static
- * @class Provides operations for making rpc calls.
+ * @namespace Provides operations for making rpc calls.
  * @name gadgets.rpc
  */
 
