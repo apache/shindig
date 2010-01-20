@@ -339,7 +339,11 @@ public class EndToEndTest {
    */
   private HtmlPage executePageTest(String testName, String testMethod)
       throws IOException {
-    String gadgetUrl = EndToEndServer.SERVER_URL + '/' + testName + ".xml";
+    if (!testName.endsWith(".xml")) {
+      testName = testName + ".xml";
+    }
+
+    String gadgetUrl = EndToEndServer.SERVER_URL + '/' + testName;
     String url = EndToEndServer.GADGET_BASEURL + "?url=" + URLEncoder.encode(gadgetUrl, "UTF-8");
     BasicSecurityTokenDecoder decoder = new BasicSecurityTokenDecoder();
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
