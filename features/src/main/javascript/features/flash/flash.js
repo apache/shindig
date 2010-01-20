@@ -121,7 +121,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
         var a = document.createElement('a');
         a.href = swfUrl;
         // Get the part up to the last slash
-        opt_params.base = a.href.match(/^(.*\/)[^/]*$/)[1];
+        opt_params.base = a.href.match(/^(.*\/)[^\/]*$/)[1];
       }
       // Set wmode to "opaque" if it's not defined. The default value
       // "window" is undesirable because browsers will render Flash
