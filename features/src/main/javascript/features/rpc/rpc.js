@@ -53,23 +53,45 @@ var gadgets = gadgets || {};
  *     true if successful, false otherwise.
  */
 
+if (!gadgets.rpc) { // make lib resilient to double-inclusion
+
 /**
  * @static
  * @class Provides operations for making rpc calls.
  * @name gadgets.rpc
  */
-if (!gadgets.rpc) { // make lib resilient to double-inclusion
 
 gadgets.rpc = function() {
-  // General constants.
+  /** 
+   * @const
+   * @private
+   */
   var CALLBACK_NAME = '__cb';
+
+  /** 
+   * @const
+   * @private
+   */
   var DEFAULT_NAME = '';
 
-  // Special service name for acknowledgements.
+  /** Exported constant, for use by transports only.
+   * @const
+   * @type {string}
+   * @member gadgets.rpc
+   */
   var ACK = '__ack';
 
-  // Timeout and number of attempts made to setup a transport receiver.
+  /** 
+   * Timeout and number of attempts made to setup a transport receiver.
+   * @const
+   * @private
+   */
   var SETUP_FRAME_TIMEOUT = 500;
+
+  /** 
+   * @const
+   * @private
+   */
   var SETUP_FRAME_MAX_TRIES = 10;
 
   var services = {};
@@ -129,20 +151,23 @@ gadgets.rpc = function() {
   // for a time while this technique is proven.
   var useEarlyQueueing = (params['rpc_earlyq'] === "1");
 
-  /*
+  /**
    * Return a transport representing the best available cross-domain
    * message-passing mechanism available to the browser.
    *
-   * Transports are selected on a cascading basis determined by browser
+   * <p>Transports are selected on a cascading basis determined by browser
    * capability and other checks. The order of preference is:
-   * 1. wpm: Uses window.postMessage standard.
-   * 2. dpm: Uses document.postMessage, similar to wpm but pre-standard.
-   * 3. nix: Uses IE-specific browser hacks.
-   * 4. rmr: Signals message passing using relay file's onresize handler.
-   * 5. fe: Uses FF2-specific window.frameElement hack.
-   * 6. ifpc: Sends messages via active load of a relay file.
-   *
-   * See each transport's commentary/documentation for details.
+   * <ol>
+   * <li> wpm: Uses window.postMessage standard.
+   * <li> dpm: Uses document.postMessage, similar to wpm but pre-standard.
+   * <li> nix: Uses IE-specific browser hacks.
+   * <li> rmr: Signals message passing using relay file's onresize handler.
+   * <li> fe: Uses FF2-specific window.frameElement hack.
+   * <li> ifpc: Sends messages via active load of a relay file.
+   * </ol>
+   * <p>See each transport's commentary/documentation for details.
+   * @return {Object}
+   * @member gadgets.rpc
    */
   function getTransport() {
     return typeof window.postMessage === 'function' ? gadgets.rpctx.wpm :
@@ -256,7 +281,9 @@ gadgets.rpc = function() {
    * flow, thereby obviating Firebug and other tools reporting an exception).
    *
    * @param {string} url Base URL to canonicalize.
+   * @memberOf gadgets.rpc
    */
+
   function getOrigin(url) {
     if (!url) {
       return "";
@@ -378,6 +405,7 @@ gadgets.rpc = function() {
    * This works when gadgets are rendered on the same domain as their container,
    * a potentially useful optimization for trusted content which keeps
    * RPC behind a consistent interface.
+   *
    * @param {string} target Module id of the rpc service provider
    * @param {Object} rpc RPC data
    * @return {boolean}
@@ -414,19 +442,39 @@ gadgets.rpc = function() {
   }
 
   /**
-   * @param {string} targetId
-   * @param {string} url
-   * @param {boolean=} opt_useLegacy
+   * Sets the relay URL of a target frame.
+   * @param {string} targetId Name of the target frame.
+   * @param {string} url Full relay URL of the target frame.
+   * @param {boolean=} opt_useLegacy True if this relay needs the legacy IFPC
+   *     wire format.
+   *
+   * @member gadgets.rpc
+   * @deprecated
    */
   function setRelayUrl(targetId, url, opt_useLegacy) {
     relayUrl[targetId] = url;
     useLegacyProtocol[targetId] = !!opt_useLegacy;
   }
 
+  /**
+   * Helper method to retrieve the authToken for a given gadget.
+   * Not to be used directly.
+   * @member gadgets.rpc
+   * @return {string}
+   */
   function getAuthToken(targetId) {
     return authToken[targetId];
   }
 
+  /**
+   * Sets the auth token of a target frame.
+   * @param {string} targetId Name of the target frame.
+   * @param {string} token The authentication token to use for all
+   *     calls to or from this target id.
+   *
+   * @member gadgets.rpc
+   * @deprecated
+   */
   function setAuthToken(targetId, token) {
     token = token || "";
 
@@ -521,6 +569,44 @@ gadgets.rpc = function() {
   }
 
   /**
+   * Sets up the gadgets.rpc library to communicate with the receiver.
+   * <p>This method replaces setRelayUrl(...) and setAuthToken(...)
+   *
+   * <p>Simplified instructions - highly recommended:
+   * <ol>
+   * <li> Generate &lt;iframe id="&lt;ID&gt;" url="...#parent=&lt;PARENTURL&gt;&rpctoken=&lt;RANDOM&gt;"/&gt;
+   *      and add to DOM.
+   * <li> Call gadgets.rpc.setupReceiver("&lt;ID>");
+   *      <p>All parent/child communication initializes automatically from here.
+   *         Naturally, both sides need to include the library.
+   * </ol>
+   *
+   * <p>Detailed container/parent instructions:
+   * <ol>
+   * <li> Create the target IFRAME (eg. gadget) with a given &lt;ID> and params
+   *    rpctoken=<token> (eg. #rpctoken=1234), which is a random/unguessbable
+   *    string, and parent=&lt;url>, where &lt;url> is the URL of the container.
+   * <li> Append IFRAME to the document.
+   * <li> Call gadgets.rpc.setupReceiver(&lt;ID>)
+   * <p>[Optional]. Strictly speaking, you may omit rpctoken and parent. This
+   *             practice earns little but is occasionally useful for testing.
+   *             If you omit parent, you MUST pass your container URL as the 2nd
+   *             parameter to this method.
+   * </ol>
+   *
+   * <p>Detailed gadget/child IFRAME instructions:
+   * <ol>
+   * <li> If your container/parent passed parent and rpctoken params (query string
+   *    or fragment are both OK), you needn't do anything. The library will self-
+   *    initialize.
+   * <li> If "parent" is omitted, you MUST call this method with targetId '..'
+   *    and the second param set to the parent URL.
+   * <li> If "rpctoken" is omitted, but the container set an authToken manually
+   *    for this frame, you MUST pass that ID (however acquired) as the 2nd param
+   *    to this method.
+   * </ol>
+   *
+   * @member gadgets.rpc
    * @param {string} targetId
    * @param {string=} opt_receiverurl
    * @param {string=} opt_authtoken
@@ -606,6 +692,7 @@ gadgets.rpc = function() {
      * method that allows the caller to verify the message receiver
      * (by way of the parent parameter, through getRelayUrl(...)).
      * At present this means IFPC or WPM.
+     * @member gadgets.rpc
      */
     forceParentVerifiable: function() {
       if (!transport.isParentVerifiable()) {
@@ -703,67 +790,9 @@ gadgets.rpc = function() {
       return url;
     },
 
-    /**
-     * Sets the relay URL of a target frame.
-     * @param {string} targetId Name of the target frame.
-     * @param {string} url Full relay URL of the target frame.
-     * @param {boolean=} opt_useLegacy True if this relay needs the legacy IFPC
-     *     wire format.
-     *
-     * @member gadgets.rpc
-     * @deprecated
-     */
     setRelayUrl: setRelayUrl,
-
-    /**
-     * Sets the auth token of a target frame.
-     * @param {string} targetId Name of the target frame.
-     * @param {string} token The authentication token to use for all
-     *     calls to or from this target id.
-     *
-     * @member gadgets.rpc
-     * @deprecated
-     */
     setAuthToken: setAuthToken,
-
-    /**
-     * Sets up the gadgets.rpc library to communicate with the receiver.
-     * This method replaces setRelayUrl(...) and setAuthToken(...)
-     *
-     * Simplified instructions - highly recommended:
-     * 1. Generate <iframe id="<ID>" url="...#parent=<PARENTURL>&rpctoken=<RANDOM>"/>
-     *    and add to DOM.
-     * 2. Call gadgets.rpc.setupReceiver("<ID>");
-     * --> All parent/child communication initializes automatically from here.
-     *     Naturally, both sides need to include the library.
-     *
-     * Detailed container/parent instructions:
-     * 1. Create the target IFRAME (eg. gadget) with a given <ID> and params
-     *    rpctoken=<token> (eg. #rpctoken=1234), which is a random/unguessbable
-     *    string, and parent=<url>, where <url> is the URL of the container.
-     * 2. Append IFRAME to the document.
-     * 3. Call gadgets.rpc.setupReceiver(<ID>)
-     * [Optional]. Strictly speaking, you may omit rpctoken and parent. This
-     *             practice earns little but is occasionally useful for testing.
-     *             If you omit parent, you MUST pass your container URL as the 2nd
-     *             parameter to this method.
-     *
-     * Detailed gadget/child IFRAME instructions:
-     * 0. If your container/parent passed parent and rpctoken params (query string
-     *    or fragment are both OK), you needn't do anything. The library will self-
-     *    initialize.
-     * 1. If "parent" is omitted, you MUST call this method with targetId '..'
-     *    and the second param set to the parent URL.
-     * 2. If "rpctoken" is omitted, but the container set an authToken manually
-     *    for this frame, you MUST pass that ID (however acquired) as the 2nd param
-     *    to this method.
-     */
     setupReceiver: setupReceiver,
-
-    /**
-     * Helper method to retrieve the authToken for a given gadget.
-     * Not to be used directly.
-     */
     getAuthToken: getAuthToken,
 
     /**
@@ -800,6 +829,7 @@ gadgets.rpc = function() {
      * (Not to be used directly). Converts the inbound rpc object's
      * Array into a local Array to pass the process() Array test.
      * @param {Object} rpc RPC object containing all request params
+     * @member gadgets.rpc
      */
     receiveSameDomain: function(rpc) {
       // Pass through to local process method but converting to a local Array
@@ -807,13 +837,13 @@ gadgets.rpc = function() {
       window.setTimeout(function() { process(rpc); }, 0);
     },
 
-    /**
-     * Helper method to get the protocol://host:port of an input URL.
-     */
+    // Helper method to get the protocol://host:port of an input URL.
+    // see docs above
     getOrigin: getOrigin,
 
     /**
      * Internal-only method used to initialize gadgets.rpc.
+     * @member gadgets.rpc
      */
     init: function() {
       // Conduct any global setup necessary for the chosen transport.
@@ -830,7 +860,6 @@ gadgets.rpc = function() {
     /** Returns the window keyed by the ID. null/".." for parent, else child */
     _getTargetWin: getTargetWin,
 
-    /** Exported constant, for use by transports only. */
     ACK: ACK,
 
     RPC_ID: rpcId

@@ -192,6 +192,7 @@ opensocial.requestCreateActivity = function(activity, priority, opt_callback) {
  * </p>
  *
  * @name opensocial.CreateActivityPriority
+ * @enum {string}
  */
 opensocial.CreateActivityPriority = {
   /**

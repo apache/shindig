@@ -205,23 +205,45 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
 /**
  * Injects a cached Flash file into the DOM tree.
  * Accepts the same parameters as gadgets.flash.embedFlash does.
+ * @param {string} swfUrl SWF URL.
+ * @param {string | Object} swfContainer The id or object reference of an
+ *     existing html container element.
+ * @param {number} swfVersion Minimal Flash Player version required.
+ * @param {Object=} opt_params An optional object that may contain any valid html
+ *     parameter. All attributes will be passed through to the flash movie on
+ *     creation.
  * @return {boolean} Whether the function call completes successfully.
  *
  * @member gadgets.flash
  */
-gadgets.flash.embedCachedFlash = function() {
-  var args = Array.prototype.slice.call(arguments);
-  args[0] = gadgets.io.getProxyUrl(args[0], { rewriteMime: "application/x-shockwave-flash" });
-  return gadgets.flash.embedFlash.apply(this, args);
+gadgets.flash.embedCachedFlash = function(swfUrl, swfContainer, swfVersion, opt_params) {
+  var url = gadgets.io.getProxyUrl(swfUrl, { rewriteMime: "application/x-shockwave-flash" });
+  return gadgets.flash.embedFlash(url, swfContainer, swfVersion, opt_params);
 };
 
-// Aliases for legacy code
+/** 
+ * iGoogle compatible way to get flash version.
+ * @deprecated use gadgets.flash.getMajorVersion instead
+ * @see gadgets.flash.getMajorVersion
+ */
 var _IG_GetFlashMajorVersion = gadgets.flash.getMajorVersion;
+
+
+/** 
+ * iGoogle compatible way to embed flash
+ * @deprecated use gadgets.flash.embedFlash instead
+ * @see gadgets.flash.embedFlash
+ */
 var _IG_EmbedFlash = function(swfUrl, swfContainer, opt_params) {
   return gadgets.flash.embedFlash(swfUrl, swfContainer, opt_params.swf_version,
       opt_params);
 };
 
+/** 
+ * iGoogle compatible way to embed cached flash
+ * @deprecated use gadgets.flash.embedCachedFlash() instead
+ * @see gadgets.flash.embedCachedFlash
+ */
 var _IG_EmbedCachedFlash = function(swfUrl, swfContainer, opt_params) {
   return gadgets.flash.embedCachedFlash(swfUrl, swfContainer, opt_params.swf_version,
       opt_params);

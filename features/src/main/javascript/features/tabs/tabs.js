@@ -359,6 +359,7 @@ gadgets.TabSet.prototype.getHeaderContainer = function() {
  * gadget if opt_element is not specified.
  * @param {Element=} opt_element Optional HTML container element.
  * @return {Element} HTML container element.
+ * @private
  */
 gadgets.TabSet.prototype.createMainContainer_ = function(opt_element) {
   var newId = 'tl_' + this.moduleId_;
@@ -380,6 +381,7 @@ gadgets.TabSet.prototype.createMainContainer_ = function(opt_element) {
  * Helper method that expands a class name into two class names.
  * @param {string} label CSS class
  * @return {string} Expanded class names.
+ * @private
  */
 gadgets.TabSet.prototype.cascade_ = function(label) {
   return label + ' ' + label + this.moduleId_;
@@ -389,6 +391,7 @@ gadgets.TabSet.prototype.cascade_ = function(label) {
  * Helper method that creates the tabs table and inserts it into the main
  * container as the first child.
  * @return {Element} HTML element of the tab container table.
+ * @private
  */
 gadgets.TabSet.prototype.createTabTable_ = function() {
   var table = document.createElement('table');
@@ -574,6 +577,7 @@ gadgets.TabSet.addCSS_ = function(cssText) {
  *                   .tooltip A tooltip description that pops up when user moves
  *                     the mouse cursor over the tab.
  * @return {gadgets.Tab} A new gadgets.Tab object.
+ * @private
  */
 gadgets.TabSet.prototype.createTab_ = function(tabName, params) {
   var tab = new gadgets.Tab(this);
@@ -602,6 +606,7 @@ gadgets.TabSet.prototype.createTab_ = function(tabName, params) {
  * Helper method that creates a function to select the specified tab.
  * @param {gadgets.Tab} tab The tab to select.
  * @return {function()} Callback function to select the tab.
+ * @private
  */
 gadgets.TabSet.prototype.setSelectedTabGenerator_ = function(tab) {
   return function() { tab.handle_.selectTab_(tab); };
@@ -639,6 +644,7 @@ gadgets.TabSet.prototype.selectTab_ = function(tab) {
 
 /**
  * @type {gadgets.TabSet}
+ * @deprecated
  */
 var _IG_Tabs = gadgets.TabSet;
 _IG_Tabs.prototype.moveTab = _IG_Tabs.prototype.swapTabs;
@@ -646,6 +652,7 @@ _IG_Tabs.prototype.moveTab = _IG_Tabs.prototype.swapTabs;
 /**
  * @param {string} tabName
  * @param {function()} callback
+ * @deprecated
  */
 _IG_Tabs.prototype.addDynamicTab = function(tabName, callback) {
   return this.addTab(tabName, {callback: callback});
