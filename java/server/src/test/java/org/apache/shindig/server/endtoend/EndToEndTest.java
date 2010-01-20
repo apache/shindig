@@ -108,6 +108,7 @@ public class EndToEndTest {
   }
 
   @Test
+  @Ignore("probably need a new version of caja for this one..")
   public void caja() throws Exception {
     executeAllPageTests("cajaTest.xml");
   }
