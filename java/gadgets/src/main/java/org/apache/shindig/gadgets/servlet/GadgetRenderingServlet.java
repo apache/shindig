@@ -89,6 +89,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
         resp.getWriter().print(results.getContent());
         break;
       case ERROR:
+        resp.setStatus(results.getHttpStatusCode());
         resp.getWriter().print(StringEscapeUtils.escapeHtml(results.getErrorMessage()));
         break;
       case MUST_REDIRECT:

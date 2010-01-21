@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Exceptions thrown during gadget rendering.
  *
@@ -25,15 +27,24 @@ package org.apache.shindig.gadgets.render;
  * be easily localizable.
  */
 public class RenderingException extends Exception {
-  public RenderingException(Throwable t) {
+  private final int httpStatusCode;
+  
+  public RenderingException(Throwable t, int httpStatusCode) {
     super(t);
+    this.httpStatusCode = httpStatusCode;
   }
 
-  public RenderingException(String message) {
+  public RenderingException(String message, int httpStatusCode) {
     super(message);
+    this.httpStatusCode = httpStatusCode;    
   }
 
-  public RenderingException(String message, Throwable t) {
+  public RenderingException(String message, Throwable t, int httpStatusCode) {
     super(message, t);
+    this.httpStatusCode = httpStatusCode;    
+  }
+
+  public int getHttpStatusCode() {
+    return httpStatusCode;
   }
 }

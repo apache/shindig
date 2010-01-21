@@ -38,6 +38,7 @@ import com.google.common.collect.Maps;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -108,10 +109,11 @@ public class RendererTest {
 
   @Test
   public void handlesRenderingExceptionGracefully() {
-    htmlRenderer.exception = new RenderingException("oh no!");
+    htmlRenderer.exception = new RenderingException("four-oh-four", HttpServletResponse.SC_NOT_FOUND);
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
-    assertEquals("oh no!", results.getErrorMessage());
+    assertEquals("four-oh-four", results.getErrorMessage());
+    assertEquals(HttpServletResponse.SC_NOT_FOUND, results.getHttpStatusCode());    
   }
 
   @Test

@@ -87,28 +87,32 @@ public class GadgetRenderingServletTest {
   public void errorsPassedThrough() throws Exception {
     servlet.setRenderer(renderer);
     expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.error("busted"));
+        .andReturn(RenderingResults.error("busted", HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
     control.replay();
 
     servlet.doGet(request, recorder);
 
-    assertEquals(HttpServletResponse.SC_OK, recorder.getHttpStatusCode());
+    assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, recorder.getHttpStatusCode());
     assertNull("Cache-Control header passed where it should not be.",
         recorder.getHeader("Cache-Control"));
     assertEquals("busted", recorder.getResponseAsString());
+
   }
 
   @Test
   public void errorsAreEscaped() throws Exception {
     servlet.setRenderer(renderer);
     expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.error("busted<script>alert(document.domain)</script>"));
+        .andReturn(RenderingResults.error("busted<script>alert(document.domain)</script>",
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
     control.replay();
 
     servlet.doGet(request, recorder);
 
     assertEquals("busted&lt;script&gt;alert(document.domain)&lt;/script&gt;",
         recorder.getResponseAsString());
+
+    assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, recorder.getHttpStatusCode());
   }
 
   @Test

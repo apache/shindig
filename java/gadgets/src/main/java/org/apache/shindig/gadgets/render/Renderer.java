@@ -30,6 +30,7 @@ import org.apache.shindig.gadgets.spec.View;
 
 import com.google.inject.Inject;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -64,7 +65,8 @@ public class Renderer {
    */
   public RenderingResults render(GadgetContext context) {
     if (!validateParent(context)) {
-      return RenderingResults.error("Unsupported parent parameter. Check your container code.");
+      return RenderingResults.error("Unsupported parent parameter. Check your container code.",
+          HttpServletResponse.SC_BAD_REQUEST);
     }
 
     try {
@@ -73,7 +75,7 @@ public class Renderer {
       if (gadget.getCurrentView() == null) {
         return RenderingResults.error("Unable to locate an appropriate view in this gadget. " +
             "Requested: '" + gadget.getContext().getView() +
-            "' Available: " + gadget.getSpec().getViews().keySet());
+            "' Available: " + gadget.getSpec().getViews().keySet(), HttpServletResponse.SC_NOT_FOUND);
       }
 
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
@@ -81,25 +83,25 @@ public class Renderer {
       }
 
       if (!lockedDomainService.gadgetCanRender(context.getHost(), gadget, context.getContainer())) {
-        return RenderingResults.error("Invalid domain");
+        return RenderingResults.error("Invalid domain", HttpServletResponse.SC_BAD_REQUEST);
       }
 
       return RenderingResults.ok(renderer.render(gadget));
     } catch (RenderingException e) {
-      return logError(context.getUrl(), e);
+      return logError(context.getUrl(), e.getHttpStatusCode(), e);
     } catch (ProcessingException e) {
-      return logError(context.getUrl(), e);
+      return logError(context.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
     } catch (RuntimeException e) {
       if (e.getCause() instanceof GadgetException) {
-        return logError(context.getUrl(), e.getCause());
+        return logError(context.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getCause());
       }
       throw e;
     }
   }
 
-  private RenderingResults logError(Uri gadgetUrl, Throwable t) {
+  private RenderingResults logError(Uri gadgetUrl, int statusCode, Throwable t) {
     LOG.info("Failed to render gadget " + gadgetUrl + ": " + t.getMessage());
-    return RenderingResults.error(t.getMessage());
+    return RenderingResults.error(t.getMessage(), statusCode);
   }
 
   /**

@@ -33,6 +33,9 @@ import java.util.List;
 
 import com.google.inject.Inject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Handles producing output markup for a gadget based on the provided context.
  */
@@ -90,9 +93,9 @@ public class HtmlRenderer {
       
       return mc.getContent();
     } catch (GadgetException e) {
-      throw new RenderingException(e.getMessage(), e);
+      throw new RenderingException(e.getMessage(), e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } catch (RewritingException e) {
-      throw new RenderingException(e.getMessage(), e);
+      throw new RenderingException(e.getMessage(), e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
   

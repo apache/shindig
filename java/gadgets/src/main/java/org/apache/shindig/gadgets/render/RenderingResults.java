@@ -22,6 +22,8 @@ import org.apache.shindig.common.uri.Uri;
 
 import com.google.common.base.Preconditions;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Contains the results of a rendering operation.
  */
@@ -29,26 +31,32 @@ public class RenderingResults {
   private final Status status;
   private final String content;
   private final String errorMessage;
+  private final int httpStatusCode;
+
   private final Uri redirect;
 
-  private RenderingResults(Status status, String content, String errorMessage, Uri redirect) {
+  private RenderingResults(Status status, String content, String errorMessage,
+      int httpStatusCode, Uri redirect) {
     this.status = status;
     this.content = content;
     this.errorMessage = errorMessage;
+    this.httpStatusCode = httpStatusCode;
+    
     this.redirect = redirect;
   }
 
   public static RenderingResults ok(String content) {
-    return new RenderingResults(Status.OK, content, null, null);
+    return new RenderingResults(Status.OK, content, null, HttpServletResponse.SC_OK, null);
   }
 
-  public static RenderingResults error(String errorMessage) {
-    return new RenderingResults(Status.ERROR, null, errorMessage, null);
+  public static RenderingResults error(String errorMessage, int httpStatusCode) {
+    return new RenderingResults(Status.ERROR, null, errorMessage, httpStatusCode, null);
   }
 
   public static RenderingResults mustRedirect(Uri redirect) {
     Preconditions.checkNotNull(redirect);
-    return new RenderingResults(Status.MUST_REDIRECT, null, null, redirect);
+    return new RenderingResults(Status.MUST_REDIRECT, null, null, HttpServletResponse.SC_FOUND,
+        redirect);
   }
 
   /**
@@ -72,6 +80,14 @@ public class RenderingResults {
   public String getErrorMessage() {
     Preconditions.checkState(status == Status.ERROR, "Only available when status is ERROR.");
     return errorMessage;
+  }
+
+  /**
+   * @return The HTTP status code for rendering. Only available when status is ERROR.
+   */
+  public int getHttpStatusCode() {
+    Preconditions.checkState(status == Status.ERROR, "Only available when status is ERROR.");
+    return httpStatusCode;
   }
 
   /**

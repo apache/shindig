@@ -38,6 +38,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Implements proxied rendering.
  */
@@ -106,7 +108,7 @@ public class ProxyRenderer {
 
     if (response.isError()) {
       throw new RenderingException("Unable to reach remote host. HTTP status " +
-        response.getHttpStatusCode());
+        response.getHttpStatusCode(), HttpServletResponse.SC_NOT_FOUND);
     }
 
     return response.getResponseAsString();
