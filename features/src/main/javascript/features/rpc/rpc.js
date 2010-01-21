@@ -615,7 +615,7 @@ gadgets.rpc = function() {
     if (targetId === '..') {
       // Gadget/IFRAME to container.
       var rpctoken = opt_authtoken || params.rpctoken || params.ifpctok || "";
-      if (gadgets.config) {
+      if (window['__isgadget'] === true) {
         setupContainerGadgetContext(rpctoken);
       } else {
         setupContainerGenericIframe(rpctoken, opt_receiverurl);

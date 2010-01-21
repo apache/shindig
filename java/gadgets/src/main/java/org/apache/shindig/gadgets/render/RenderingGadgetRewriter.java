@@ -90,6 +90,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       "a {color:#0000cc;}a:visited {color:#551a8b;}" +
       "a:active {color:#ff0000;}" +
       "body{margin: 0px;padding: 0px;background-color:white;}";
+  static final String IS_GADGET_BEACON = "window['__isgadget']=true;";
   static final String INSERT_BASE_ELEMENT_KEY = "gadgets.insertBaseElement";
   static final String FEATURES_KEY = "gadgets.features";
 
@@ -162,6 +163,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       }
 
       injectBaseTag(gadget, head);
+      injectGadgetBeacon(gadget, head);
       injectFeatureLibraries(gadget, head);
 
       // This can be one script block.
@@ -214,6 +216,12 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     bodyTag.appendChild(onloadScript);
     onloadScript.appendChild(bodyTag.getOwnerDocument().createTextNode(
         "gadgets.util.runOnLoadHandlers();"));
+  }
+  
+  protected void injectGadgetBeacon(Gadget gadget, Node headTag) throws GadgetException {
+    Element beaconNode = headTag.getOwnerDocument().createElement("script");
+    beaconNode.setTextContent(IS_GADGET_BEACON);
+    headTag.appendChild(beaconNode);
   }
 
   /**

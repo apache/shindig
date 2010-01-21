@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.render;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.DEFAULT_CSS;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.FEATURES_KEY;
 import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.INSERT_BASE_ELEMENT_KEY;
+import static org.apache.shindig.gadgets.render.RenderingGadgetRewriter.IS_GADGET_BEACON;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.eq;
 import static org.easymock.classextension.EasyMock.expect;
@@ -198,6 +199,8 @@ public class RenderingGadgetRewriterTest {
     assertTrue("Missing opening html tag", matcher.group(BEFORE_HEAD_GROUP).contains("<html>"));
     // TODO: reinstate test when non-tag-reordering parser is used.
     // assertTrue("Custom head content is missing.", matcher.group(HEAD_GROUP).contains(head));
+    assertTrue("IsGadget beacon not included.",
+        matcher.group(HEAD_GROUP).contains("<script>" + IS_GADGET_BEACON + "</script>"));
     assertTrue("Forced javascript not included.",
         matcher.group(HEAD_GROUP).contains("<script src=\"/js/foo\">"));
     assertFalse("Default styling was injected when a doctype was specified.",
