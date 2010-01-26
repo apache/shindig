@@ -108,7 +108,21 @@ public class EndToEndTest {
   }
 
   @Test
-  @Ignore("probably need a new version of caja for this one..")
+  public void cajaFetchPerson() throws Exception {
+    executeAllPageTests("fetchPersonTest", true /* caja */);
+  }
+
+  @Test
+  public void cajaFetchPeople() throws Exception {
+    executeAllPageTests("fetchPeopleTest", true /* caja */);
+  }
+
+  @Test
+  public void cajaTestMakeRequest() throws Exception {
+      executeAllPageTests("makeRequestTest", true /* caja */);
+  }
+
+  @Test
   public void caja() throws Exception {
     executeAllPageTests("cajaTest.xml");
   }
@@ -150,7 +164,6 @@ public class EndToEndTest {
   }
 
   @Test
-  @Ignore("per jasvir, this test is failing with webclient for an unknown reason")
   public void testFailCaja() throws Exception {
     HtmlPage page = executePageTest("failCajaTest", null);
     NodeList bodyList = page.getElementsByTagName("body");
@@ -340,6 +353,11 @@ public class EndToEndTest {
    */
   private HtmlPage executePageTest(String testName, String testMethod)
       throws IOException {
+    return executePageTest(testName, testMethod, false /* caja */);
+  }
+
+      private HtmlPage executePageTest(String testName, String testMethod, boolean caja)
+      throws IOException {
     if (!testName.endsWith(".xml")) {
       testName = testName + ".xml";
     }
@@ -350,6 +368,9 @@ public class EndToEndTest {
     url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
     if (testMethod != null) {
       url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
+    }
+    if (caja) {
+      url += "&caja=1&libs=caja";
     }
     
     url += "&nocache=1";
@@ -371,7 +392,17 @@ public class EndToEndTest {
    * @throws IOException
    */
   private HtmlPage executeAllPageTests(String testName) throws IOException {
-    return executePageTest(testName, "all");
+      return executePageTest(testName, "all", false);
+  }
+
+  /**
+   * Executes all page test in a single XML file injecting a flag to cajole the test first.
+   * @param testName name of the test, which must match a gadget XML file
+   *     name in test/resources/endtoend (minus .xml).
+   * @throws IOException
+   */
+    private HtmlPage executeAllPageTests(String testName, boolean caja) throws IOException {
+        return executePageTest(testName, "all", caja);
   }
 
   private BasicSecurityToken createToken(String owner, String viewer)

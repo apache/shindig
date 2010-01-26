@@ -26,26 +26,25 @@
     <![CDATA[
       <script type="text/javascript" src="/testframework.js"></script>
       <script type="text/javascript">
+        function getAndCheckError(response, key) {
+          assertFalse('Data error', response.hadError());
+          var dataItem = response.get(key);
+          assertFalse('Data item error for ' + key, dataItem.hadError());
+          return dataItem.getData();
+        }
         var tests = {
           simpleTest: function() {
-          assertTrue("Basic cajoling failing", true);
-          finished();
-          },
-          
+            assertTrue("Basic cajoling failing", true);
+            finished();
+          },          
           domitaTest: function() {
             var elDiv = document.createElement('div');
             elDiv.setAttribute('id', 'elDiv');
             elDiv.innerHTML = "hello world";
-            document.appendChild(elDiv);
-            assertEquals(document.getElementById('elDiv').innerHTML, "hello world");
+            document.body.appendChild(elDiv);
+            assertEquals("Basic dom operations failing", 
+              document.getElementById('elDiv').innerHTML, "hello world");
             finished();
-          },
-          registerOnLoadHandlerTest: function() {
-            var onLoaded = function () { 
-              // only complete the test successfully if registerOnLoadHandler works
-              finished(); 
-            };
-            gadgets.util.registerOnLoadHandlerTest(onLoaded);
           }
         };
       </script>

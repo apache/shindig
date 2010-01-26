@@ -23,7 +23,10 @@
  */
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
+  ___.grantRead(opensocial.Person, 'Field');
+  ___.grantRead(opensocial.Name, 'Field');
   ___.grantRead(opensocial.IdSpec, 'PersonId');
+  ___.grantRead(opensocial.IdSpec, 'GroupId');
   ___.grantRead(opensocial.DataRequest, 'PeopleRequestFields');
   // TODO(jasvir): The following object *is* exposed to gadget
   // code because its returned by opensocial.DataRequest.*
@@ -32,6 +35,9 @@ tamings___.push(function(imports) {
   ___.grantRead(JsonRpcRequestItem, 'processData');
   ___.grantRead(JsonRpcRequestItem, 'processResponse');
   ___.grantRead(JsonRpcRequestItem, 'errors');
+
+  ___.grantInnocentMethod(JsonPerson.prototype, 'getDisplayName');
+  ___.grantInnocentMethod(JsonPerson.prototype, 'getAppData');
 
   caja___.whitelistCtors([
       [window, 'JsonRpcRequestItem', Object],

@@ -26,6 +26,7 @@ tamings___.push(function(imports) {
   caja___.whitelistFuncs([
     [gadgets.util, 'escapeString'],
     [gadgets.util, 'getFeatureParameters'],
+    [gadgets.util, 'getUrlParameters'],
     [gadgets.util, 'hasFeature'],
     [gadgets.util, 'registerOnLoadHandler'],
     [gadgets.util, 'unescapeString']
