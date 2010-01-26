@@ -22,6 +22,8 @@
  * Tame and expose core gadgets.flash.* API to cajoled gadgets
  */
 var tamings___ = tamings___ || [];
+var bridge___;
+
 tamings___.push(function(imports) {
   ___.tamesTo(gadgets.flash.embedFlash, (function () {
     var cleanse = (function () {
@@ -32,7 +34,6 @@ tamings___.push(function(imports) {
       var ifr = document.createElement("iframe");
       ifr.width = 1; ifr.height = 1; ifr.border = 0;
       document.body.appendChild(ifr);
-      var A = ifr.contentWindow.Array;
       var O = ifr.contentWindow.Object;
       document.body.removeChild(ifr);
     
@@ -42,13 +43,12 @@ tamings___.push(function(imports) {
             return obj; 
         }
         if (t === 'object') {
-          var o;
-          if (obj instanceof Array) { o = new A; }
-          else if (obj instanceof Object) { o = new O; }
+          var o = new O; 
           for (i in obj) {
             if (/__$/.test(i)) { continue; }
             o[i] = c(obj[i]);
           }
+          if (obj.length !== undefined) { o.length = obj.length; }
           return o;
         }
         return (void 0);
@@ -56,6 +56,43 @@ tamings___.push(function(imports) {
       return c;
     })();
 
+
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode("bridge"));
+    document.body.appendChild(d);
+    
+    gadgets.flash.embedFlash(
+        "/gadgets/files/container/Bridge.swf", 
+        d,
+        10,
+        {
+          allowNetworking: "always",
+          allowScriptAccess: "all",
+          width: 0,
+          height: 0,
+          flashvars: "logging=true"
+        });
+    bridge___ = d.childNodes[0];
+    bridge___.channels = [];
+    
+    callJS = function (functionName, argv) {
+      // This assumes that there's a single gadget in the frame.
+      var $v = ___.getNewModuleHandler().getImports().$v;
+      return $v.cf($v.ro(functionName), argv);
+    };
+        
+    onFlashBridgeReady = function () {
+      var len = bridge___.channels.length;
+      for(var i = 0; i < len; ++i) {
+        bridge___.registerChannel(bridge___.channels[i]);
+      }
+      delete bridge___.channels;
+      var outers = ___.getNewModuleHandler().getImports().$v.getOuters();
+      if (outers.onFlashBridgeReady) {
+        callJS("onFlashBridgeReady", []);
+      }
+    };
+  
     return ___.frozenFunc(function tamedEmbedFlash(
            swfUrl, 
            swfContainer,
@@ -122,40 +159,4 @@ tamings___.push(function(imports) {
       });
     });
   })());
-
-  var d = document.createElement('div');
-  d.appendChild(document.createTextNode("bridge"));
-  document.body.appendChild(d);
-  
-  gadgets.flash.embedFlash(
-      "/gadgets/files/container/Bridge.swf", 
-      d,
-      10,
-      {
-        allowNetworking: "always",
-        allowScriptAccess: "all",
-        width: 0,
-        height: 0,
-        flashvars: "logging=true"
-      });
-  bridge___ = d.childNodes[0];
-  bridge___.channels = [];
-  
-  callJS = function (functionName, argv) {
-    // This assumes that there's a single gadget in the frame.
-    var $v = ___.getNewModuleHandler().getImports().$v;
-    return $v.cf($v.ro(functionName), [argv]);
-  };
-      
-  onFlashBridgeReady = function () {
-    var len = bridge___.channels.length;
-    for(var i = 0; i < len; ++i) {
-      bridge___.registerChannel(bridge___.channels[i]);
-    }
-    delete bridge___.channels;
-    var outers = ___.getNewModuleHandler().getImports().$v.getOuters();
-    if (outers.onFlashBridgeReady) {
-      callJS("onFlashBridgeReady");
-    }
-  };
 });
