@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
@@ -39,6 +40,7 @@ import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -112,18 +114,14 @@ public class MakeRequestHandler extends ProxyBase {
    * @throws GadgetException
    */
   protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    String encoding = request.getCharacterEncoding();
-    if (encoding == null) {
-      encoding = "UTF-8";
-    }
-
     Uri url = validateUrl(request.getParameter(URL_PARAM));
 
     HttpRequest req = new HttpRequest(url)
         .setMethod(getParameter(request, METHOD_PARAM, "GET"))
-        .setPostBody(getParameter(request, POST_DATA_PARAM, "").getBytes())
         .setContainer(getContainer(request));
 
+    setPostData(request,req);
+    
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
       String[] headerList = StringUtils.split(headerData, '&');
@@ -176,6 +174,25 @@ public class MakeRequestHandler extends ProxyBase {
 
     this.setRequestHeaders(request, req);
     return req;
+  }
+
+  /**
+   * Set http request post data according to servlet request.
+   * It uses header encoding if available, and defaulted to utf8
+   * Override the function if different behavior is needed.
+   */
+  protected void setPostData(HttpServletRequest request, HttpRequest req)
+      throws GadgetException {
+    String encoding = request.getCharacterEncoding();
+    if (encoding == null) {
+      encoding = "UTF-8";
+    }
+    try {
+      req.setPostBody(getParameter(request, POST_DATA_PARAM, "")
+          .getBytes(encoding.toUpperCase()));
+    } catch (UnsupportedEncodingException e) {
+      throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+    }    
   }
 
   /**
