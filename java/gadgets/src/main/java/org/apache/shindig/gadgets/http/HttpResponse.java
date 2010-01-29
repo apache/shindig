@@ -457,7 +457,9 @@ public final class HttpResponse implements Externalizable {
     if (!values.isEmpty()) {
       String contentType = values.iterator().next();
       String[] parts = StringUtils.split(contentType, ';');
-      if (BINARY_CONTENT_TYPES.contains(parts[0])) {
+      if (parts == null
+          || parts.length == 0
+          || BINARY_CONTENT_TYPES.contains(parts[0])) {
         return DEFAULT_ENCODING;
       }
       if (parts.length == 2) {

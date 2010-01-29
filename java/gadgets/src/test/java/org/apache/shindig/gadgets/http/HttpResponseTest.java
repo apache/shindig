@@ -156,6 +156,15 @@ public class HttpResponseTest extends Assert {
   }
 
   @Test
+  public void testEncodingDetectionWithEmptyContentType() throws Exception {
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Content-Type", "")
+        .setResponseString("something")
+        .create();
+    assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding());
+  }
+  
+  @Test
   public void testEncodingDetectionUtf8WithBomNoContentHeader() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
         .setResponse(UTF8_DATA)
