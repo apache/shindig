@@ -47,53 +47,33 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
     assertTrue(rewritten.getContentLength() <= resp.getContentLength());
   }
 
-  @Test
+  @Test(expected=Throwable.class)
   public void testBadImage() throws Exception {
     // Not a JPEG
-    try {
-      HttpResponse resp =
-          createResponse("org/apache/shindig/gadgets/rewrite/image/bad.jpg", "image/jpeg");
-      rewrite(resp);
-      fail("Should fail to read an invalid JPEG");
-    } catch (Throwable t) {
-      // Exception type can vary between implementations
-    }
-
-  }
-
-  @Test
-  @Ignore
-  public void xtestBadICC1() throws Exception {
-    // ICC section too long 
     HttpResponse resp =
-        createResponse("org/apache/shindig/gadgets/rewrite/image/badicc.jpg", "image/jpeg");
+        createResponse("org/apache/shindig/gadgets/rewrite/image/bad.jpg", "image/jpeg");
     rewrite(resp);
   }
 
-  @Test
-  public void testBadICC2() throws Exception {
-    // ICC section too long
-    try {
-      HttpResponse resp =
-          createResponse("org/apache/shindig/gadgets/rewrite/image/badicc2.jpg", "image/jpeg");
-      rewrite(resp);
-      fail("Should error with invalid ICC data");
-    } catch (Throwable t) {
-      //assertTrue(t instanceof ImageReadException);
-    }
+  @Test(expected=Throwable.class)
+  public void xtestBadICC1() throws Exception {
+    // ICC section too long 
+    HttpResponse resp = createResponse("org/apache/shindig/gadgets/rewrite/image/badicc.jpg", "image/jpeg");
+    rewrite(resp);
   }
 
-  @Test
+  @Test(expected=Throwable.class)
+  public void testBadICC2() throws Exception {
+    // ICC section too long
+    HttpResponse resp = createResponse("org/apache/shindig/gadgets/rewrite/image/badicc2.jpg", "image/jpeg");
+    rewrite(resp);
+  }
+
+  @Test(expected=Throwable.class)
   public void testBadICC3() throws Exception {
     // ICC length lies
-    try {
-      HttpResponse resp =
-          createResponse("org/apache/shindig/gadgets/rewrite/image/badicc3.jpg", "image/jpeg");
-      rewrite(resp);
-      fail("Should error with invalid ICC data");
-    } catch (Throwable t) {
-      //assertTrue(t instanceof ImageReadException);
-    }
+    HttpResponse resp = createResponse("org/apache/shindig/gadgets/rewrite/image/badicc3.jpg", "image/jpeg");
+    rewrite(resp);
   }
 
   @Test
