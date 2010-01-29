@@ -122,6 +122,13 @@
     </servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>accel</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.HtmlAccelServlet
+    </servlet-class>
+  </servlet>
+
   <!-- Proxy -->
   <servlet>
     <servlet-name>proxy</servlet-name>
@@ -261,6 +268,11 @@
   <servlet-mapping>
     <servlet-name>xml-to-html</servlet-name>
     <url-pattern>/gadgets/ifr</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>accel</servlet-name>
+    <url-pattern>/gadgets/accel</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
