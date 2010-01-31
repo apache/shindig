@@ -31,7 +31,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 /**
  * Guice bindings for the rewrite package.
@@ -40,12 +39,7 @@ public class RewriteModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(new TypeLiteral<List<GadgetRewriter>>(){})
-        .annotatedWith(Names.named("shindig.rewriters.gadget"))
-        .toProvider(GadgetRewritersProvider.class);
-    bind(new TypeLiteral<List<GadgetRewriter>>(){})
-        .annotatedWith(Names.named("shindig.rewriters.accelerate"))
-        .toProvider(AccelRewritersProvider.class);
+    bind(new TypeLiteral<List<GadgetRewriter>>(){}).toProvider(GadgetRewritersProvider.class);
     bind(new TypeLiteral<List<RequestRewriter>>(){}).toProvider(RequestRewritersProvider.class);
   }
 
@@ -53,7 +47,7 @@ public class RewriteModule extends AbstractModule {
     private final List<GadgetRewriter> rewriters;
 
     @Inject
-    private GadgetRewritersProvider(PipelineDataGadgetRewriter pipelineRewriter,
+    public GadgetRewritersProvider(PipelineDataGadgetRewriter pipelineRewriter,
         TemplateRewriter templateRewriter,
         HTMLContentRewriter optimizingRewriter,
         CssRequestRewriter cssRewriter,
@@ -76,28 +70,11 @@ public class RewriteModule extends AbstractModule {
     }
   }
 
-  private static class AccelRewritersProvider implements Provider<List<GadgetRewriter>> {
-    private final List<GadgetRewriter> rewriters;
-
-    @Inject
-    private AccelRewritersProvider(
-        HTMLContentRewriter optimizingRewriter,
-        CajaContentRewriter cajaRewriter) {
-      rewriters = Lists.newArrayList();
-      rewriters.add(optimizingRewriter);
-      rewriters.add(cajaRewriter);
-    }
-
-    public List<GadgetRewriter> get() {
-      return rewriters;
-    }
-  }
-
   private static class RequestRewritersProvider implements Provider<List<RequestRewriter>> {
     private final List<RequestRewriter> rewriters;
 
     @Inject
-    private RequestRewritersProvider(HTMLContentRewriter optimizingRewriter,
+    public RequestRewritersProvider(HTMLContentRewriter optimizingRewriter,
         CssRequestRewriter cssRewriter,
         SanitizingRequestRewriter sanitizedRewriter) {
       rewriters = Lists.newArrayList();

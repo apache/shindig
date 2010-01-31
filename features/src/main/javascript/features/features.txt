@@ -28,7 +28,6 @@ features/core.io/feature.xml
 features/core.json/feature.xml
 features/core.legacy/feature.xml
 features/core.log/feature.xml
-features/core.none/feature.xml
 features/core.prefs/feature.xml
 features/core.util/feature.xml
 features/core/feature.xml

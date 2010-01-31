@@ -29,9 +29,11 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.inject.Inject;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -41,17 +43,17 @@ public class HtmlRenderer {
   public static final String PATH_PARAM = "path";
   private final PreloaderService preloader;
   private final ProxyRenderer proxyRenderer;
-  private final GadgetRewritersProvider rewritersProvider;
+  private final List<GadgetRewriter> gadgetRewriters;
   private final GadgetHtmlParser htmlParser;
 
   @Inject
   public HtmlRenderer(PreloaderService preloader,
                       ProxyRenderer proxyRenderer,
-                      GadgetRewritersProvider rewritersProvider,
+                      List<GadgetRewriter> gadgetRewriters,
                       GadgetHtmlParser htmlParser) {
     this.preloader = preloader;
     this.proxyRenderer = proxyRenderer;
-    this.rewritersProvider = rewritersProvider;
+    this.gadgetRewriters = gadgetRewriters;
     this.htmlParser = htmlParser;
   }
 
@@ -85,8 +87,7 @@ public class HtmlRenderer {
       }
 
       MutableContent mc = new MutableContent(htmlParser, content);
-      for (GadgetRewriter rewriter : 
-           rewritersProvider.getRewriters(gadget.getContext())) {
+      for (GadgetRewriter rewriter : gadgetRewriters) {
         rewriter.rewrite(gadget, mc);
       }
       
