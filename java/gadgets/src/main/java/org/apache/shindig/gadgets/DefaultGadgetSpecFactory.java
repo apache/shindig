@@ -24,6 +24,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 
@@ -42,7 +43,7 @@ import java.util.concurrent.ExecutorService;
 public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
     implements GadgetSpecFactory {
   public static final String CACHE_NAME = "gadgetSpecs";
-  static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
+  public static final String RAW_GADGETSPEC_XML_PARAM_NAME = "rawxml";
   static final Uri RAW_GADGET_URI = Uri.parse("http://localhost/raw.xml");
 
   @Inject
@@ -63,8 +64,14 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
       // Set URI to a fixed, safe value (localhost), preventing a gadget rendered
       // via raw XML (eg. via POST) to be rendered on a locked domain of any other
       // gadget whose spec is hosted non-locally.
-      try {
-        return new GadgetSpec(RAW_GADGET_URI, XmlUtil.parse(rawxml), rawxml);
+      try 
+      {
+        Uri uri = RAW_GADGET_URI;
+        // For accelerate page, pass in page url instead of fake one:
+        if (HtmlAccelServlet.isAccel(context)) {
+          uri = context.getUrl();
+        }
+        return new GadgetSpec(uri, XmlUtil.parse(rawxml), rawxml);
       } catch (XmlException e) {
         throw new SpecParserException(e);
       }

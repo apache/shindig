@@ -43,17 +43,17 @@ public class HtmlRenderer {
   public static final String PATH_PARAM = "path";
   private final PreloaderService preloader;
   private final ProxyRenderer proxyRenderer;
-  private final List<GadgetRewriter> gadgetRewriters;
+  private final GadgetRewritersProvider gadgetRewritersProvider;
   private final GadgetHtmlParser htmlParser;
 
   @Inject
   public HtmlRenderer(PreloaderService preloader,
                       ProxyRenderer proxyRenderer,
-                      List<GadgetRewriter> gadgetRewriters,
+                      GadgetRewritersProvider gadgetRewritersProvider,
                       GadgetHtmlParser htmlParser) {
     this.preloader = preloader;
     this.proxyRenderer = proxyRenderer;
-    this.gadgetRewriters = gadgetRewriters;
+    this.gadgetRewritersProvider = gadgetRewritersProvider;
     this.htmlParser = htmlParser;
   }
 
@@ -87,7 +87,8 @@ public class HtmlRenderer {
       }
 
       MutableContent mc = new MutableContent(htmlParser, content);
-      for (GadgetRewriter rewriter : gadgetRewriters) {
+      for (GadgetRewriter rewriter : 
+          gadgetRewritersProvider.getRewriters(gadget.getContext())) {
         rewriter.rewrite(gadget, mc);
       }
       

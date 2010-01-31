@@ -17,13 +17,16 @@
  */
 package org.apache.shindig.server;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.shindig.auth.AuthenticationServletFilter;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.servlet.GuiceServletContextListener;
+import org.apache.shindig.gadgets.DefaultGadgetSpecFactory;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
+import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 import org.apache.shindig.gadgets.servlet.JsServlet;
 import org.apache.shindig.gadgets.servlet.MakeRequestServlet;
 import org.apache.shindig.gadgets.servlet.ProxyServlet;
@@ -38,6 +41,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Joiner;
@@ -49,6 +53,7 @@ import com.google.common.collect.Maps;
 public class JettyLauncher {
 
   private static final String GADGET_BASE = "/gadgets/ifr";
+  private static final String ACCEL_BASE = "/gadgets/accel";
   private static final String PROXY_BASE = "/gadgets/proxy";
   private static final String MAKEREQUEST_BASE = "/gadgets/makeRequest";
   private static final String GADGETS_RPC_BASE = "/gadgets/api/rpc/*";
@@ -103,6 +108,11 @@ public class JettyLauncher {
     ServletHolder gadgetServletHolder = new ServletHolder(new GadgetRenderingServlet());
     context.addServlet(gadgetServletHolder, GADGET_BASE);
     context.addFilter(AuthenticationServletFilter.class, GADGET_BASE, 0);
+
+    // Attach the html acceleration rendering servlet
+    ServletHolder accelServletHolder = new ServletHolder(new HtmlAccelServlet());
+    context.addServlet(accelServletHolder, ACCEL_BASE);
+    context.addFilter(AuthenticationServletFilter.class, ACCEL_BASE, 0);
 
     // Attach the make-request servlet
     ServletHolder makeRequestHolder = new ServletHolder(new MakeRequestServlet());
