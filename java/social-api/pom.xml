@@ -59,6 +59,12 @@
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
+
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-gadgets</artifactId>
+      </dependency>
+
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>
@@ -99,7 +105,7 @@
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>
-      <artifactId>oauth-httpclient3</artifactId>
+      <artifactId>oauth-httpclient4</artifactId>
     </dependency>
 
     <!-- may only be needed for JDK < 1.6 -->
@@ -124,8 +130,8 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>

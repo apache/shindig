@@ -18,10 +18,8 @@
 
 package org.apache.shindig.social.sample.service;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.shindig.common.util.ImmediateFuture;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
@@ -29,6 +27,11 @@ import org.apache.shindig.protocol.Service;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpFetcher;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+
 
 import java.io.IOException;
 import java.util.concurrent.Future;
@@ -42,10 +45,11 @@ import com.google.inject.Inject;
 public class SampleContainerHandler {
 
   private final JsonDbOpensocialService service;
-
+  private final HttpFetcher fetcher;
   @Inject
-  public SampleContainerHandler(JsonDbOpensocialService dbService) {
+  public SampleContainerHandler(JsonDbOpensocialService dbService, HttpFetcher fetcher) {
     this.service = dbService;
+    this.fetcher = fetcher;
   }
 
   /**
@@ -93,19 +97,14 @@ public class SampleContainerHandler {
     String errorMessage = "The json state file " + stateFileLocation
         + " could not be fetched and parsed.";
 
-    HttpMethod jsonState = new GetMethod(stateFileLocation);
-    HttpClient client = new HttpClient();
     try {
-      client.executeMethod(jsonState);
-
-      if (jsonState.getStatusCode() != 200) {
+      HttpResponse response = fetcher.fetch(new HttpRequest(Uri.parse(stateFileLocation)));
+      if (response.getHttpStatusCode() != 200) {
         throw new RuntimeException(errorMessage);
       }
-      return jsonState.getResponseBodyAsString();
-    } catch (IOException e) {
+      return response.getResponseAsString();
+    } catch (GadgetException e) {
       throw new RuntimeException(errorMessage, e);
-    } finally {
-      jsonState.releaseConnection();
     }
   }
 }

@@ -84,12 +84,12 @@ public class LruCacheProvider implements CacheProvider {
   public <K, V> Cache<K, V> createCache(String name) {
     int capacity = getCapacity(name);
     if (name == null) {
-      LOG.info("Creating anonymous cache");
+      LOG.fine("Creating anonymous cache");
       return new LruCache<K, V>(capacity);
     } else {
       Cache<K, V> cache = (Cache<K, V>) caches.get(name);
       if (cache == null) {
-        LOG.info("Creating cache named " + name);
+        LOG.fine("Creating cache named " + name);
         cache = new LruCache<K, V>(capacity);
         caches.put(name, cache);
       }

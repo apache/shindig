@@ -142,7 +142,7 @@
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>
-      <artifactId>oauth-httpclient3</artifactId>
+      <artifactId>oauth-httpclient4</artifactId>
     </dependency>
 
     <!-- Hibernate -->

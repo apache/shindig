@@ -143,7 +143,7 @@
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>
-      <artifactId>oauth-httpclient3</artifactId>
+      <artifactId>oauth-httpclient4</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.collections</groupId>
@@ -208,8 +208,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0.1</version>
     </dependency>
 
     <!-- test -->
