@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.shindig.common.uri.Uri;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -247,6 +248,9 @@ public class BasicHttpFetcher implements HttpFetcher {
             if ((redirectUri == null) || (redirectUri.equals(""))) {
                 redirectUri = "/";
             }
+            // Url can be relative to original:
+            redirectUri = request.getUri().resolve(Uri.parse(redirectUri)).toString();
+            
             httpMethod.releaseConnection();
             httpMethod = new GetMethod(redirectUri);
 

@@ -186,7 +186,20 @@ public abstract class AbstractHttpFetcherTest {
     assertEquals(200, response.getHttpStatusCode());
     assertEquals("redirected", response.getResponseAsString());
   }
-  
+
+  @Test public void testFollowRelativeRedirects() throws Exception {
+    String content = "";
+    Uri uri = new UriBuilder(BASE_URL)
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "302")
+        .addQueryParameter("header", "Location=/?body=redirected")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(200, response.getHttpStatusCode());
+    assertEquals("redirected", response.getResponseAsString());
+  }
+
   @Test public void testNoFollowRedirects() throws Exception {
     String content = "";
     Uri uri = new UriBuilder(BASE_URL)
