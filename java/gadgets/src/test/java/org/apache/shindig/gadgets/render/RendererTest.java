@@ -101,10 +101,11 @@ public class RendererTest {
 
   @Test
   public void handlesProcessingExceptionGracefully() {
-    processor.exception = new ProcessingException("foo");
+    processor.exception = new ProcessingException("foo", HttpServletResponse.SC_FORBIDDEN);
     RenderingResults results = renderer.render(makeContext("html"));
     assertEquals(RenderingResults.Status.ERROR, results.getStatus());
     assertEquals("foo", results.getErrorMessage());
+    assertEquals(HttpServletResponse.SC_FORBIDDEN, results.getHttpStatusCode());    
   }
 
   @Test

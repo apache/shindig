@@ -22,15 +22,23 @@ package org.apache.shindig.gadgets.process;
  * Exceptions thrown during gadget processing.
  */
 public class ProcessingException extends Exception {
-  public ProcessingException(Throwable t) {
+  private int statusCode;
+
+  public ProcessingException(Throwable t, int httpStatusCode) {
     super(t);
+    statusCode = httpStatusCode;
   }
-
-  public ProcessingException(String message) {
+  public ProcessingException(String message, int httpStatusCode) {
     super(message);
+    statusCode = httpStatusCode;
   }
 
-  public ProcessingException(String message, Throwable t) {
+  public ProcessingException(String message, Throwable t, int httpStatusCode) {
     super(message, t);
+    statusCode = httpStatusCode;
+  }
+  
+  public int getHttpStatusCode() {
+    return statusCode;
   }
 }

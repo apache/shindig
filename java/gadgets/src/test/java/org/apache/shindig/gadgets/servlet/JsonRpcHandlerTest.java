@@ -46,6 +46,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 public class JsonRpcHandlerTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
   private static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");
@@ -203,7 +205,8 @@ public class JsonRpcHandlerTest {
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    processor.exceptions.put(SPEC_URL2, new ProcessingException("broken"));
+    processor.exceptions.put(SPEC_URL2, 
+        new ProcessingException("broken", HttpServletResponse.SC_BAD_REQUEST));
 
     JSONObject response = jsonRpcHandler.process(input);
 

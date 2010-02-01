@@ -90,7 +90,7 @@ public class Renderer {
     } catch (RenderingException e) {
       return logError(context.getUrl(), e.getHttpStatusCode(), e);
     } catch (ProcessingException e) {
-      return logError(context.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+      return logError(context.getUrl(), e.getHttpStatusCode(), e);
     } catch (RuntimeException e) {
       if (e.getCause() instanceof GadgetException) {
         return logError(context.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getCause());

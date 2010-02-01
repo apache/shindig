@@ -42,6 +42,8 @@ import org.easymock.classextension.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletResponse;
+
 public class GadgetOAuthCallbackGeneratorTest {
 
   private static final String MAKE_REQUEST_URL = "http://renderinghost/gadgets/makeRequest";
@@ -111,7 +113,7 @@ public class GadgetOAuthCallbackGeneratorTest {
     request.setSecurityToken(securityToken);
     request.setOAuthArguments(new OAuthArguments());
     expect(processor.process(eqContext(securityToken, request.getOAuthArguments())))
-        .andThrow(new ProcessingException("doh"));
+        .andThrow(new ProcessingException("doh", HttpServletResponse.SC_BAD_REQUEST));
     
     control.replay();
     

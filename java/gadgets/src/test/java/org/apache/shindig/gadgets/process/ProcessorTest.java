@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.process;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
@@ -36,6 +37,8 @@ import org.apache.shindig.gadgets.variables.VariableSubstituter;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
@@ -130,20 +133,36 @@ public class ProcessorTest {
     assertTrue("Blacklist not checked", blacklist.wasChecked);
   }
 
-  @Test(expected = ProcessingException.class)
+  @Test
   public void blacklistedGadgetThrows() throws Exception {
     blacklist.isBlacklisted = true;
-    processor.process(makeContext("html"));
+    try {
+      processor.process(makeContext("html"));
+      fail("expected ProcessingException");
+    } catch (ProcessingException e) {
+      assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
+    }
+    
   }
 
-  @Test(expected = ProcessingException.class)
-  public void nullUrlThrows() throws ProcessingException {
-    processor.process(makeContext("html", null));
+  @Test
+  public void nullUrlThrows() throws Exception {
+    try {
+      processor.process(makeContext("html", null));
+      fail("expected ProcessingException");
+    } catch (ProcessingException e) {
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST, e.getHttpStatusCode());
+    }
   }
 
-  @Test(expected = ProcessingException.class)
-  public void nonHttpOrHttpsThrows() throws ProcessingException {
-    processor.process(makeContext("html", Uri.parse("file://foo")));
+  @Test
+  public void nonHttpOrHttpsThrows() throws Exception {
+    try {
+      processor.process(makeContext("html", Uri.parse("file://foo")));
+      fail("expected ProcessingException");
+    } catch (ProcessingException e) {
+      assertEquals(HttpServletResponse.SC_FORBIDDEN, e.getHttpStatusCode());
+    }
   }
 
   private static class FakeBlacklist implements GadgetBlacklist {

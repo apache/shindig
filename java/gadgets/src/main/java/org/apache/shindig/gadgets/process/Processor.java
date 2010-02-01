@@ -34,6 +34,8 @@ import com.google.inject.Singleton;
 
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Converts an input Context into an output Gadget.
  */
@@ -69,16 +71,19 @@ public class Processor {
     Uri url = context.getUrl();
 
     if (url == null) {
-      throw new ProcessingException("Missing or malformed url parameter");
+      throw new ProcessingException("Missing or malformed url parameter",
+          HttpServletResponse.SC_BAD_REQUEST);
     }
 
     if (!"http".equalsIgnoreCase(url.getScheme()) && !"https".equalsIgnoreCase(url.getScheme())) {
-      throw new ProcessingException("Unsupported scheme (must be http or https).");
+      throw new ProcessingException("Unsupported scheme (must be http or https).",
+          HttpServletResponse.SC_FORBIDDEN);
     }
 
     if (blacklist.isBlacklisted(context.getUrl())) {
       LOG.info("Attempted to render blacklisted gadget: " + context.getUrl());
-      throw new ProcessingException("The requested gadget is unavailable");
+      throw new ProcessingException("The requested gadget is unavailable",
+          HttpServletResponse.SC_FORBIDDEN);
     }
 
     try {
@@ -91,7 +96,8 @@ public class Processor {
           .setSpec(spec)
           .setCurrentView(getView(context, spec));
     } catch (GadgetException e) {
-      throw new ProcessingException(e.getMessage(), e);
+      throw new ProcessingException(e.getMessage(), e, 
+          HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
