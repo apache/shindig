@@ -75,32 +75,22 @@ public class GadgetSpecTest extends Assert {
     assertEquals("test", spec.getView("test").getContent());
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testMissingModulePrefs() throws Exception {
     String xml = "<Module>" +
                  "<Content type=\"html\"/>" +
                  "</Module>";
-    try {
-      new GadgetSpec(SPEC_URL, xml);
-      fail("No exception thrown when ModulePrefs is missing.");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    new GadgetSpec(SPEC_URL, xml);
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testEnforceOneModulePrefs() throws Exception {
     String xml = "<Module>" +
                  "<ModulePrefs title=\"hello\"/>" +
                  "<ModulePrefs title=\"world\"/>" +
                  "<Content type=\"html\"/>" +
                  "</Module>";
-    try {
-      new GadgetSpec(SPEC_URL, xml);
-      fail("No exception thrown when more than 1 ModulePrefs is specified.");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    new GadgetSpec(SPEC_URL, xml);
   }
 
   @Test

@@ -56,24 +56,16 @@ public class ContentTypesTest extends Assert {
         ContentTypes.MULTIPART_FORM_CONTENT_TYPE, true);
   }
 
-  @Test
+  @Test(expected=ContentTypes.InvalidContentTypeException.class)
   public void testForbidden() throws Exception {
-    try {
-      ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-          "application/x-www-form-urlencoded", false);
-      fail("Should fail as form encoded is forbidden");
-    } catch (ContentTypes.InvalidContentTypeException icte) {
-    }
+    ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
+        "application/x-www-form-urlencoded", false);
   }
 
-  @Test
+  @Test(expected=ContentTypes.InvalidContentTypeException.class)
   public void testStrictDisallowUnknown() throws Exception {
-    try {
-      ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-          "text/plain", true);
-      fail("Should fail with strict content type checking enabled");
-    } catch (ContentTypes.InvalidContentTypeException icte) {
-    }
+    ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
+        "text/plain", true);
   }
 
   @Test

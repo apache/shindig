@@ -35,15 +35,10 @@ public class IconTest extends Assert {
     assertEquals("helloWorld", icon.getContent());
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testInvalidMode() throws Exception {
     String xml = "<Icon type=\"foo\" mode=\"broken\"/>";
-    try {
-      new Icon(XmlUtil.parse(xml));
-      fail("No exception thrown when an invalid mode attribute is passed.");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    new Icon(XmlUtil.parse(xml));
   }
 
   @Test

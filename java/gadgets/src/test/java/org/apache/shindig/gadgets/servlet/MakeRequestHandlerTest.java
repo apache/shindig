@@ -397,7 +397,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
-  @Test
+  @Test(expected=GadgetException.class)
   public void testBadSecurityTokenThrows() throws Exception {
     expect(request.getAttribute(AuthInfo.Attribute.SECURITY_TOKEN.getId()))
         .andReturn(null).atLeastOnce();
@@ -405,12 +405,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     replay();
 
-    try {
-      handler.doFetch(request, recorder);
-      fail("Should have thrown");
-    } catch (GadgetException e) {
-      // good.
-    }
+    handler.doFetch(request, recorder);
   }
 
   @Test

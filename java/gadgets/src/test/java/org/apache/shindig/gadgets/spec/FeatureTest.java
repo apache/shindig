@@ -81,25 +81,15 @@ public class FeatureTest extends Assert {
     assertNull(feature.getParam("foobar"));
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testDoesNotLikeUnnamedFeatures() throws Exception {
     String xml = "<Require/>";
-    try {
-      new Feature(XmlUtil.parse(xml));
-      fail("No exception thrown when an unnamed feature is passed.");
-    } catch (SpecParserException e) {
-      // Ok
-    }
+    new Feature(XmlUtil.parse(xml));
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testEnforceParamNames() throws Exception {
     String xml = "<Require feature=\"foo\"><Param>Test</Param></Require>";
-    try {
-      new Feature(XmlUtil.parse(xml));
-      fail("No exception thrown when an unnamed parameter is passed.");
-    } catch (SpecParserException e) {
-      // OK.
-    }
+    new Feature(XmlUtil.parse(xml));
   }
 }

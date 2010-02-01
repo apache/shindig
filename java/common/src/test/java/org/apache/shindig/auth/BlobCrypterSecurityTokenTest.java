@@ -48,7 +48,7 @@ public class BlobCrypterSecurityTokenTest {
     crypter.timeSource = timeSource;
   }
 
-  @Test
+  @Test(expected=UnsupportedOperationException.class)
   public void testNullValues() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
     String token = t.encrypt();
@@ -65,12 +65,9 @@ public class BlobCrypterSecurityTokenTest {
     assertNull(t2.getTrustedJson(), t2.getTrustedJson());
     assertNull(t2.getUpdatedToken(), t2.getUpdatedToken());
     assertEquals(CONTAINER, t2.getContainer());
-    try {
-      t2.getActiveUrl();
-      fail("Should have thrown");
-    } catch (UnsupportedOperationException e) {
-      // pass
-    }
+
+    // expect an exception
+    t2.getActiveUrl();
   }
 
   @Test
@@ -97,18 +94,15 @@ public class BlobCrypterSecurityTokenTest {
     assertEquals("active", t2.getActiveUrl());
   }
 
-  @Test
+  @Test(expected=BlobExpiredException.class)
   public void testExpired() throws Exception {
     BlobCrypterSecurityToken t = new BlobCrypterSecurityToken(crypter, CONTAINER, DOMAIN);
     String token = t.encrypt();
     // one hour plus clock skew
     timeSource.incrementSeconds(3600 + 181);
     String[] fields = StringUtils.split(token, ':');
-    try {
-      BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
-      fail("Token should have expired");
-    } catch (BlobExpiredException e) {
-      // good
-    }
+
+    // expect an exception
+    BlobCrypterSecurityToken.decrypt(crypter, CONTAINER, DOMAIN, fields[1], "active");
   }
 }

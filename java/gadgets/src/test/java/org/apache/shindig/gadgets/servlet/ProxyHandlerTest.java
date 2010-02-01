@@ -94,18 +94,14 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
-  @Test
+  @Test(expected=GadgetException.class)
   public void testNoUrl() throws Exception {
     setupProxyRequestMock("www.example.com", null);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
     replay();
 
-    try {
-      proxyHandler.doFetch(request, recorder);
-      fail("Proxy should raise exception if there is no url");
-    } catch (GadgetException e) {
-      // Good!
-    }
+    proxyHandler.doFetch(request, recorder);
+    fail("Proxy should raise exception if there is no url");
   }
 
   @Test
@@ -130,17 +126,13 @@ public class ProxyHandlerTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
   }
 
-  @Test
+  @Test(expected=GadgetException.class)
   public void testLockedDomainFailedEmbed() throws Exception {
     setupFailedProxyRequestMock("www.example.com", URL_ONE);
     expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
     replay();
-    try {
-      proxyHandler.doFetch(request, response);
-      fail("Should have thrown");
-    } catch (GadgetException e) {
-      // good
-    }
+
+    proxyHandler.doFetch(request, response);
   }
 
   @Test

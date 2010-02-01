@@ -44,15 +44,10 @@ public class OAuthServiceTest {
     assertEquals("http://azn.example.com", url.toString());
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testParseAuthorizeUrl_nourl() throws Exception {
     String xml = "<Authorization/>";
-    try {
-      service.parseAuthorizationUrl(XmlUtil.parse(xml), SPEC_URL);
-      fail("Should have rejected malformed Authorization element");
-    } catch (SpecParserException e) {
-      assertEquals("OAuth/Service/Authorization @url is not valid: ", e.getMessage());
-    }
+    service.parseAuthorizationUrl(XmlUtil.parse(xml), SPEC_URL);
   }
 
   @Test

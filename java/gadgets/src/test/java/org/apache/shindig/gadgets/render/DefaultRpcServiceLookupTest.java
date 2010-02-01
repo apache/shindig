@@ -51,15 +51,11 @@ public class DefaultRpcServiceLookupTest extends Assert {
     assertEquals(0, services.size());
   }
 
-  @Test
+  @Test(expected=Exception.class)
   public void testGetServicesForContainer_Null() throws Exception {
     String container = null;
-    try {
-      svcLookup.getServicesFor(container, host);
-      fail("Should have thrown an exception for an invalid container");
-    } catch (Exception e) {
-      
-    }
+    svcLookup.getServicesFor(container, host);
+    fail("Should have thrown an exception for an invalid container");
   }
 
   @Test

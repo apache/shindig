@@ -48,17 +48,13 @@ public class PNGOptimizerTest extends BaseOptimizerTest {
     assertEquals("image/png", httpResponse.getHeader("Content-Type"));
   }
 
-  @Test
+  @Test(expected=IOException.class)
   public void testEvil() throws Exception {
     // Metadata length is too long causes OutOfMemory
-    try {
-      HttpResponse resp =
-          createResponse("org/apache/shindig/gadgets/rewrite/image/evil.png", "image/png");
-      rewrite(resp);
-      fail("Should have failed to read image");
-    } catch (IOException ioe) {
-      // Expected
-    }
+    HttpResponse resp =
+        createResponse("org/apache/shindig/gadgets/rewrite/image/evil.png", "image/png");
+    rewrite(resp);
+    fail("Should have failed to read image");
   }
 
   HttpResponse rewrite(HttpResponse original)

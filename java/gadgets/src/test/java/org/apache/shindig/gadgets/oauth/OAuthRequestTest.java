@@ -1293,7 +1293,7 @@ public class OAuthRequestTest {
     }
   }
 
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testGetTamperedFormContent() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     // Tamper with the body before it hits the service provider
@@ -1303,16 +1303,12 @@ public class OAuthRequestTest {
         return serviceProvider.fetch(request);
       }
     });
-    try {
-      client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
-          OAuth.FORM_ENCODED, "foo=bar".getBytes());
-      fail("Should have thrown with oauth signature mismatch");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+        OAuth.FORM_ENCODED, "foo=bar".getBytes());
+    fail("Should have thrown with oauth signature mismatch");
   }
   
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testGetTamperedRemoveRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1324,16 +1320,12 @@ public class OAuthRequestTest {
         return serviceProvider.fetch(request);
       }
     });
-    try {
-      client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
-          "funky-content", raw);
-      fail("Should have thrown with body hash in form encoded request");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendGetWithBody(FakeOAuthServiceProvider.RESOURCE_URL,
+        "funky-content", raw);
+    fail("Should have thrown with body hash in form encoded request");
   }
 
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testPostTamperedRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1344,16 +1336,12 @@ public class OAuthRequestTest {
         return serviceProvider.fetch(request);
       }
     });
-    try {
-      client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
-          "funky-content", raw);
-      fail("Should have thrown with oauth_body_hash mismatch");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+       "funky-content", raw);
+    fail("Should have thrown with oauth_body_hash mismatch");
   }
 
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testPostTamperedFormContent() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     // Tamper with the body before it hits the service provider
@@ -1363,15 +1351,11 @@ public class OAuthRequestTest {
         return serviceProvider.fetch(request);
       }
     });
-    try {
-      client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
-      fail("Should have thrown with oauth signature mismatch");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "foo=bar");
+    fail("Should have thrown with oauth signature mismatch");
   }
   
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testPostTamperedRemoveRawContent() throws Exception {
     byte[] raw = { 0, 1, 2, 3, 4, 5 };
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
@@ -1383,13 +1367,9 @@ public class OAuthRequestTest {
         return serviceProvider.fetch(request);
       }
     });
-    try {
-      client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
-          "funky-content", raw);
-      fail("Should have thrown with body hash in form encoded request");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendRawPost(FakeOAuthServiceProvider.RESOURCE_URL,
+        "funky-content", raw);
+    fail("Should have thrown with body hash in form encoded request");
   }
   
   @Test
@@ -1866,7 +1846,7 @@ public class OAuthRequestTest {
     assertEquals("User data is hello-oauth", response.getResponseAsString());
   }
 
-  @Test
+  @Test(expected=RuntimeException.class)
   public void testAccessTokenData_noDirectRequest() throws Exception {
     serviceProvider.setReturnAccessTokenData(true);
 
@@ -1879,12 +1859,8 @@ public class OAuthRequestTest {
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
 
-    try {
-      client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
-      fail("Service provider should have rejected bogus request to access token URL");
-    } catch (RuntimeException e) {
-      // good
-    }
+    client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
+    fail("Service provider should have rejected bogus request to access token URL");
   }
 
   @Test

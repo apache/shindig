@@ -77,15 +77,10 @@ public class UserPrefTest extends Assert {
     assertEquals(displayValue, userPref.getEnumValues().get("0"));
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testMissingName() throws Exception {
     String xml = "<UserPref datatype=\"string\"/>";
-    try {
-      new UserPref(XmlUtil.parse(xml));
-      fail("No exception thrown when name is missing");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    new UserPref(XmlUtil.parse(xml));
   }
 
   @Test
@@ -95,17 +90,12 @@ public class UserPrefTest extends Assert {
     assertEquals(UserPref.DataType.STRING, pref.getDataType());
   }
 
-  @Test
+  @Test(expected=SpecParserException.class)
   public void testMissingEnumValue() throws Exception {
     String xml = "<UserPref name=\"foo\" datatype=\"enum\">" +
                  " <EnumValue/>" +
                  "</UserPref>";
-    try {
-      new UserPref(XmlUtil.parse(xml));
-      fail("No exception thrown when EnumValue@value is missing");
-    } catch (SpecParserException e) {
-      // OK
-    }
+    new UserPref(XmlUtil.parse(xml));
   }
 
   @Test

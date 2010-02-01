@@ -93,15 +93,11 @@ public class FeatureResourceLoaderTest {
     assertTrue(resource.isProxyCacheable());
   }
   
-  @Test
+  @Test(expected=IllegalArgumentException.class)
   public void loadFileNothingAvailable() throws Exception {
     Uri nilUri = new UriBuilder().setScheme("file").setPath("/does/not/exist.js").toUri();
-    try {
-      loader.load(nilUri, null);
-      fail("Should have failed indicating could not find: " + nilUri.toString());
-    } catch (IllegalArgumentException e) {
-      // Expected.
-    }
+    loader.load(nilUri, null);
+    fail("Should have failed indicating could not find: " + nilUri.toString());
   }
   
   @Test

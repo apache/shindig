@@ -113,16 +113,11 @@ public class EncodingDetectorTest {
     assertEquals("UTF-8", detector.detectEncoding(data).name());
   }
   
-  @Test
+  @Test(expected=NullPointerException.class)
   public void nullCustomDetector() throws Exception {
     byte[] data = "\u4F60\u597D".getBytes("BIG5");
 
-    try {
-      assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, false, null).name());
-      fail("Null Custom encoder is not supported");
-    } catch (NullPointerException e) {
-      // Expected!
-    }
+    // expect a NPE
+    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, false, null).name());
   }
-
 }

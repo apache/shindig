@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetException;
 
 import org.junit.Test;
 
@@ -113,13 +114,9 @@ public class FeatureParserTest {
     assertEquals(0, bundle4.getResources().get(0).getAttribs().size());
   }
   
-  @Test
-  public void parseInvalidXml() {
-    try {
-      new FeatureParser().parse(Uri.parse(""), "This is not valid XML.");
-      fail("Should have failed to parse invalid XML");
-    } catch (Exception e) {
-      // Expected.
-    }
+  @Test(expected=GadgetException.class)
+  public void parseInvalidXml() throws GadgetException {
+    // Should failed to parse invalid XML");
+    new FeatureParser().parse(Uri.parse(""), "This is not valid XML.");
   }
 }
