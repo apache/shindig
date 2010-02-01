@@ -18,6 +18,7 @@
 -->
 <feature>
   <name>core.log</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="log.js"/>
     <script src="taming.js"/>

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @fileoverview General purpose utilities that gadgets can use.
  */

@@ -21,8 +21,6 @@
  *     with views of the current gadget.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * Implements the gadgets.views API spec. See
  * http://code.google.com/apis/gadgets/docs/reference/gadgets.views.html

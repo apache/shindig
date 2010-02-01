@@ -18,6 +18,7 @@
 -->
 <feature>
   <name>core.config</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="config.js"/>
   </gadget>

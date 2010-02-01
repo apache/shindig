@@ -25,7 +25,6 @@
  * @private
  * @constructor
  */
-var gadgets = gadgets || {};
 
 /**
  * @private

@@ -20,8 +20,6 @@
  * @fileoverview This library provides functions for getting skin information.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Provides operations for getting display information about the

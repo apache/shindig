@@ -18,6 +18,7 @@
 #
 # List each feature you want to support here
 
+features/globals/feature.xml
 features/analytics/feature.xml
 features/auth-refresh/feature.xml
 features/caja/feature.xml

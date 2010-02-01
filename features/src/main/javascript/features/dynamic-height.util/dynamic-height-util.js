@@ -21,8 +21,6 @@
  * to get the frame's viewport dimensions.
  */
 
-var gadgets = gadgets || {};
-
 gadgets.window = gadgets.window || {};
 
 // we wrap these in an anonymous function to avoid storing private data

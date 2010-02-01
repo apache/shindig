@@ -21,7 +21,6 @@
  * to set the title of a gadget dynamically.
  */
 
-var gadgets = gadgets || {};
 
 /* NOTE: no class comment because one already exists in dynamic-height */
 gadgets.window = gadgets.window || {};

@@ -112,6 +112,7 @@
                 <source>../../../../src/test/javascript/features/mocks/env.js</source>
                 <source>../../../../src/test/javascript/features/mocks/window.js</source>
                 <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
+                <source>globals/globals.js</source>
                 <source>core.config/config.js</source>
                 <source>core.json/json.js</source>
                 <source>core.auth/auth.js</source>

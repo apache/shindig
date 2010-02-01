@@ -21,8 +21,6 @@
  * to change the height of a gadget dynamically.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Provides operations for getting information about and modifying the

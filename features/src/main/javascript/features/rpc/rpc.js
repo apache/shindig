@@ -20,7 +20,6 @@
  * @fileoverview Remote procedure call library for gadget-to-container,
  * container-to-gadget, and gadget-to-gadget (thru container) communication.
  */
-var gadgets = gadgets || {};
 
 /**
  * gadgets.rpc Transports

@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>flash</name>
+  <dependency>globals</dependency>
   <dependency>core.io</dependency>
   <gadget>
     <script src="flash.js"/>

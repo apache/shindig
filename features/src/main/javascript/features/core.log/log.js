@@ -30,8 +30,6 @@
  * addition is the ability to call gadgets.setLogLevel().
  */
 
-var gadgets = gadgets || {};
-
 /**
  * Log an informational message
  * @param {Object} message - the message to log

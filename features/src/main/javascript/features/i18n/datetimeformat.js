@@ -20,8 +20,6 @@
  * @fileoverview Functions for dealing with Date formatting
  */
 
-var gadgets = gadgets || {};
-
 gadgets.i18n = gadgets.i18n || {};
 
 /**

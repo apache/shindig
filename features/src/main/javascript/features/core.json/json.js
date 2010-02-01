@@ -28,8 +28,6 @@
  * It will return false if there is an error.
 */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Provides operations for translating objects to and from JSON.

@@ -20,8 +20,6 @@
  * @fileoverview Date/Time parsing library with locale support
  */
 
-var gadgets = gadgets || {};
-
 gadgets.i18n = gadgets.i18n || {};
 
 /**

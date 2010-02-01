@@ -58,8 +58,6 @@
  * configuration.
  */
 
-var gadgets = gadgets || {};
-
 gadgets.config = function() {
   var components = [];
 

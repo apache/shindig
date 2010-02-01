@@ -21,8 +21,6 @@
  * @fileoverview Number format/parse library with locale support
  */
 
-var gadgets = gadgets || {};
-
 gadgets.i18n = gadgets.i18n || {};
 
 

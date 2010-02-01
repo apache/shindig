@@ -23,6 +23,4 @@
  * Bootstraps auth.js.
  */
 
-var shindig = shindig || {};
-
 shindig.auth = new shindig.Auth();

@@ -26,8 +26,6 @@
  * </ul>
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @class MiniMessage class.
  *

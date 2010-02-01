@@ -23,8 +23,6 @@
  * Flash content into gadgets.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Embeds Flash content in gadgets.

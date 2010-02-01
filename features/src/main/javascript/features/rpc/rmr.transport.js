@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-var gadgets = gadgets || {};
 gadgets.rpctx = gadgets.rpctx || {};
 
 /*

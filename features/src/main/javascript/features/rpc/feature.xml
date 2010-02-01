@@ -28,6 +28,7 @@ useLegacyProtocol: Boolean
 (if true, all calls to rpc.call will use the same wire format as ifpc).
 -->
   <name>rpc</name>
+  <dependency>globals</dependency>
   <dependency>core.config</dependency>
   <dependency>core.log</dependency>
   <dependency>core.json</dependency>

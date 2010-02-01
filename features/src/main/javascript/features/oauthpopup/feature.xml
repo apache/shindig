@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>oauthpopup</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="oauthpopup.js"/>
   </gadget>

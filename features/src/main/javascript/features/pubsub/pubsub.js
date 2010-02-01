@@ -20,8 +20,6 @@
  * @fileoverview Gadget-side PubSub library for gadget-to-gadget communication.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Provides operations for making rpc calls.

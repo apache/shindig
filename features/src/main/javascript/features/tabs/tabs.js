@@ -20,8 +20,6 @@
  * @fileoverview Tabs library for gadgets.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @class Tab class for gadgets.
  * You create tabs using the TabSet addTab() method.

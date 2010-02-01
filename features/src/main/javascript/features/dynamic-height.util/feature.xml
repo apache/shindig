@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>dynamic-height.util</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="dynamic-height-util.js"/>
   </gadget>

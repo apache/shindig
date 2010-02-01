@@ -21,8 +21,6 @@
  * communication library.
  */
 
-var gadgets = gadgets || {};
-
 /**
  * @static
  * @class Routes PubSub messages.

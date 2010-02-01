@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>minimessage</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="minimessage.js"/>
     <script src="taming.js"/>

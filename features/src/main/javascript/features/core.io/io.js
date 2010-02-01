@@ -20,8 +20,6 @@
 /*global ActiveXObject, DOMParser */
 /*global shindig */
 
-var gadgets = gadgets || {};
-
 /**
  * @fileoverview Provides remote content retrieval facilities.
  *     Available to every gadget.

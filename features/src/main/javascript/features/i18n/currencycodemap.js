@@ -21,8 +21,6 @@
  * @fileoverview Currency code map.
  */
 
-var gadgets = gadgets || {};
-
 gadgets.i18n = gadgets.i18n || {};
 
 /**

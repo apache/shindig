@@ -40,8 +40,6 @@
  *   &lt;/script&lg;
  */
 
-var gadgets = gadgets || {};
-
 (function() {
 
 var instance = null;

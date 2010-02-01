@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-var gadgets = gadgets || {};
-
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.DateTimeConstants = {

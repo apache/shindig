@@ -68,8 +68,6 @@
  *   doSomething(trusted.foo.bar);
  */
 
-var shindig = shindig || {};
-
 /**
  * Class used to mange the gadget auth token.  Singleton initialized from
  * auth-init.js.

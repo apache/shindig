@@ -18,6 +18,7 @@
 -->
 <feature>
   <name>core.json</name>
+  <dependency>globals</dependency>
   <gadget>
     <script src="json.js"/>
     <script src="taming.js"/>

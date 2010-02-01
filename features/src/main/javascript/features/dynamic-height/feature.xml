@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 -->
 <feature>
   <name>dynamic-height</name>
+  <dependency>globals</dependency>
   <dependency>dynamic-height.util</dependency>
   <dependency>rpc</dependency>
   <gadget>

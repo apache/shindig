@@ -28,6 +28,7 @@
       encoded inside of the POST body.
 -->
   <name>core.io</name>
+  <dependency>globals</dependency>
   <dependency>core.auth</dependency>
   <dependency>core.config</dependency>
   <dependency>core.json</dependency>
