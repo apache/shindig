@@ -142,17 +142,19 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     ob_end_clean();
     $this->GadgetHtmlRenderer->addHeadTags($this->domElement, $this->domDocument);
 
-    $tmpNodeList = $this->domElement->getElementsByTagName("style");
+    // TODO: currently we just test the script part
     $tmpNodeList = $this->domElement->getElementsByTagName("script");
-    $script = '';
-    foreach($this->GadgetHtmlRenderer->gadget->features as $feature) {
-      $script .= $this->gadgetContext->getRegistry()->getFeatureContent($feature, $this->gadgetContext, true);
-    }
+    $scripts = $this->GadgetHtmlRenderer->getJavaScripts();
 
+    $idx = 0;
     foreach($tmpNodeList as $tmpNode) {
-      $this->assertEquals('text/javascript', $tmpNode->getAttribute('type'));
-      $nodeValue = substr($tmpNode->nodeValue, 0, strpos($tmpNode->nodeValue, 'gadgets.config.init('));
-      $this->assertEquals(trim($script), trim($nodeValue));
+      $script = $scripts[$idx++];
+      if ($script['type'] == 'inline') {
+        $this->assertEquals('text/javascript', $tmpNode->getAttribute('type'));
+        $this->assertEquals(trim($script['content']), trim($tmpNode->nodeValue));
+      } else {
+        $this->assertEquals($script['content'], $tmpNode->getAttribute('src'));
+      }
     }
   }
 

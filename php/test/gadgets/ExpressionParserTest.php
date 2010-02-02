@@ -41,9 +41,9 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
     $this->input = 'osx:parseJson(osx:urlDecode(osx:urlEncode(osx:decodeBase64("' . $encoded_json . '"))))'
         . '.array_attr['
         . $attr_equ . "?0:1"
-        . "]==1?(true?'no_prefix_id.Ee > 0':"
+        . "]==1?(true?'no_prefix_id.Ee <= 0':"
         . '"\'should never be here\'	\\\\\\""'
-        . "):'no_prefix_id.Ee <= 0'";
+        . "):'no_prefix_id.Ee > 0'";
     
     $this->tokenStream = array(
         new Token(ExpType::$FUNCTION, 'osx:parseJson'),
@@ -54,7 +54,7 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
         new Token(ExpType::$PAREN, '('),
         new Token(ExpType::$FUNCTION, 'osx:decodeBase64'),
         new Token(ExpType::$PAREN, '('),
-        new Token(ExpType::$STRING, 'eyJhcnJheV9hdHRyIjpbMSwgMF19'),
+        new Token(ExpType::$STRING, 'eyJhcnJheV9hdHRyIjogWzAsIDFdfQ=='),
         new Token(ExpType::$PAREN, ')'),
         new Token(ExpType::$PAREN, ')'),
         new Token(ExpType::$PAREN, ')'),
@@ -66,9 +66,9 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
         new Token(ExpType::$DOT, '.'),
         new Token(ExpType::$IDENTITY, 'Ee'),
         new Token(ExpType::$BINARY_OP, '+'),
-        new Token(ExpType::$UNARY_OP, '- '),
-        new Token(ExpType::$UNARY_OP, '- '),
-        new Token(ExpType::$UNARY_OP, '- '),
+        new Token(ExpType::$UNARY_OP, ' -'),
+        new Token(ExpType::$UNARY_OP, ' -'),
+        new Token(ExpType::$UNARY_OP, ' -'),
         new Token(ExpType::$PAREN, '('),
         new Token(ExpType::$PAREN, '('),
         new Token(ExpType::$INT, 2),
@@ -80,6 +80,7 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
         new Token(ExpType::$FLOAT, 4.0),
         new Token(ExpType::$BINARY_OP, ' - '),
         new Token(ExpType::$INT, 3),
+        new Token(ExpType::$PAREN, ')'),
         new Token(ExpType::$BINARY_OP, ' - '),
         new Token(ExpType::$FLOAT, 1.0),
         new Token(ExpType::$BINARY_OP, '/'),
@@ -88,7 +89,7 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
         new Token(ExpType::$FLOAT, 0.5),
         new Token(ExpType::$PAREN, ')'),
         new Token(ExpType::$BINARY_OP, '>'),
-        new Token(ExpType::$UNARY_OP, '- '),
+        new Token(ExpType::$UNARY_OP, ' -'),
         new Token(ExpType::$FLOAT, 5.0),
         new Token(ExpType::$BINARY_OP, '+'),
         new Token(ExpType::$INT, 4),
@@ -115,12 +116,12 @@ class ExpressionParserTest extends PHPUnit_Framework_TestCase {
         new Token(ExpType::$PAREN, '('),
         new Token(ExpType::$BOOL, true),
         new Token(ExpType::$TERNARY, '?'),
-        new Token(ExpType::$STRING, 'no_prefix_id.Ee > 0'),
+        new Token(ExpType::$STRING, 'no_prefix_id.Ee <= 0'),
         new Token(ExpType::$TERNARY, ':'),
-        new Token(ExpType::$STRING, '"\'should never be here\'	\\\\\\""'),
+        new Token(ExpType::$STRING, '\'should never be here\'	\\"'),
         new Token(ExpType::$PAREN, ')'),
         new Token(ExpType::$TERNARY, ':'),
-        new Token(ExpType::$STRING, 'no_prefix_id.Ee <= 0')
+        new Token(ExpType::$STRING, 'no_prefix_id.Ee > 0')
     );
     
     $no_prefix_id = new ObjEe();
