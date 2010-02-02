@@ -286,6 +286,8 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
 
     if (groupId === 'FRIENDS') {
       groupId = "@friends";
+    } else if (groupId == 'ALL') {
+      groupId = "@all";
     } else if (groupId === 'SELF' || !groupId) {
       groupId = "@self";
     }
