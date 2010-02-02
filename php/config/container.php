@@ -161,6 +161,7 @@ $shindigConfig = array(
   // connection timeout setting for all curl requests, set this time something low if you want errors reported
   // quicker to the end user, and high (between 10 and 20) if your on a slow connection
   'curl_connection_timeout' => '10',
+  'curl_request_timeout' => '10',
 
   // If your development server is behind a proxy, enter the proxy details here in 'proxy.host.com:port' format.
   'proxy' => '',

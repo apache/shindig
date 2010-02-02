@@ -127,6 +127,12 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     if (! $httpCode) {
       $httpCode = '404';
     }
+
+    if (curl_errno($request->handle)) {
+      $httpCode = '500';
+      $body = 'Curl error: ' . curl_error($request->handle);
+    }   
+
     $request->setHttpCode($httpCode);
     $request->setHttpCodeMsg($this->resolveHttpCode($httpCode));
     $request->setContentType($contentType);
@@ -239,7 +245,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     curl_setopt($handle, CURLOPT_AUTOREFERER, 1);
     curl_setopt($handle, CURLOPT_MAXREDIRS, 10);
     curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, Config::get('curl_connection_timeout'));
-    curl_setopt($handle, CURLOPT_TIMEOUT, Config::get('curl_connection_timeout'));
+    curl_setopt($handle, CURLOPT_TIMEOUT, Config::get('curl_request_timeout'));
     curl_setopt($handle, CURLOPT_HEADER, 1);
     curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, 0);
     $proxy = Config::get('proxy');
