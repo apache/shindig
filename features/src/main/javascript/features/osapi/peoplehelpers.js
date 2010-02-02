@@ -23,7 +23,7 @@
  */
 gadgets.util.registerOnLoadHandler(function() {
 
-  // No point defining these if osapi.people.get doesnt exist
+  // No point defining these if osapi.people.get doesn't exist
   if (osapi && osapi.people && osapi.people.get) {
     /**
     * Helper functions to get People.

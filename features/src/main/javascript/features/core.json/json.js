@@ -42,15 +42,15 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   // HTML5 implementation, or already defined.
   // Not a direct alias as the opensocial specification disagrees with the HTML5 JSON spec.
   // JSON says to throw on parse errors and to support filtering functions. OS does not.
-  gadgets.json = {
-    parse: function(str) {
+  gadgets['json'] = {
+    'parse': function(str) {
       try {
         return window.JSON.parse(str);
       } catch (e) {
         return false;
       }
     },
-    stringify: function(obj) {
+    'stringify': function(obj) {
       try {
         return window.JSON.stringify(obj);
       } catch (e) {
@@ -59,11 +59,12 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     }
   };
 } else {
-  gadgets.json = function () {
+  gadgets['json'] = function () {
   
     /**
      * Formats integers to 2 digits.
      * @param {number} n
+     * @private
      */
     function f(n) {
       return n < 10 ? '0' + n : n;
@@ -79,6 +80,10 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     };
   
     // table of character substitutions
+    /**
+     * @const
+     * @enum {string}
+     */
     var m = {
       '\b': '\\b',
       '\t': '\\t',
@@ -93,6 +98,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
      * Converts a json object into a string.
      * @param {*} value
      * @return {string}
+     * @member gadgets.json
      */
     function stringify(value) {
       var a,          // The array holding the partial texts.
@@ -161,8 +167,8 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     }
   
     return {
-      stringify: stringify,
-      parse: function (text) {
+      'stringify': stringify,
+      'parse': function (text) {
       // Parsing happens in three stages. In the first stage, we run the text against
       // regular expressions that look for non-JSON patterns. We are especially
       // concerned with '()' and 'new' because they can cause invocation, and '='

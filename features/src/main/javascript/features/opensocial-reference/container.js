@@ -124,7 +124,7 @@ opensocial.Container.prototype.requestSendMessage = function(recipients,
  *    sharing request was sent. If there was an error, you can use the response
  *    item's getErrorCode method to determine how to proceed. The data on the
  *    response item will not be set.
- * @param {Object} opt_params TODO
+ * @param {Object=} opt_params TODO
  *
  * @member opensocial
  * @private

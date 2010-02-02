@@ -22,6 +22,8 @@
  *
  * @private
  * @constructor
+ * @param {string} body
+ * @param {Object=} opt_params
  */
 var JsonMessage = function(body, opt_params) {
   opt_params = opt_params || {};

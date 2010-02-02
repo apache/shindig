@@ -41,12 +41,6 @@
     <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/features</url>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>jsdoctk1</id>
-      <url>http://jsdoctk-plugin.googlecode.com/svn/repo</url>
-    </repository>
-  </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>jsdoctk2</id>

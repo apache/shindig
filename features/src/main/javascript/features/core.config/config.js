@@ -17,19 +17,16 @@
  * under the License.
  */
 
-/*global configuration */
-
 /**
- * @fileoverview
+ * @fileoverview Provides unified configuration for all features.
  *
- * Provides unified configuration for all features.
  *
- * This is a custom shindig library that has not yet been submitted for
+ * <p>This is a custom shindig library that has not yet been submitted for
  * standardization. It is designed to make developing of features for the
  * opensocial / gadgets platforms easier and is intended as a supplemental
  * tool to Shindig's standardized feature loading mechanism.
  *
- * Usage:
+ * <p>Usage:
  * First, you must register a component that needs configuration:
  * <pre>
  *   var config = {
@@ -39,29 +36,32 @@
  *   gadgets.config.register("my-feature", config, myCallback);
  * </pre>
  *
- * This will register a component named "my-feature" that expects input config
+ * <p>This will register a component named "my-feature" that expects input config
  * containing a "name" field with a value that is a non-empty string, and a
  * "url" field with a value that matches the given regular expression.
  *
- * When gadgets.config.init is invoked by the container, it will automatically
+ * <p>When gadgets.config.init is invoked by the container, it will automatically
  * validate your registered configuration and will throw an exception if
  * the provided configuration does not match what was required.
  *
- * Your callback will be invoked by passing all configuration data passed to
+ * <p>Your callback will be invoked by passing all configuration data passed to
  * gadgets.config.init, which allows you to optionally inspect configuration
  * from other features, if present.
  *
- * Note that the container may optionally bypass configuration validation for
+ * <p>Note that the container may optionally bypass configuration validation for
  * performance reasons. This does not mean that you should duplicate validation
  * code, it simply means that validation will likely only be performed in debug
  * builds, and you should assume that production builds always have valid
  * configuration.
  */
 
+/** @namespace */
 gadgets.config = function() {
   var components = [];
+  var configuration;
 
   return {
+    'register':
     /**
      * Registers a configurable component and its configuration parameters.
      * Multiple callbacks may be registered for a single component if needed.
@@ -81,8 +81,11 @@ gadgets.config = function() {
      *     complete. Takes the form function(config), where config will be
      *     all registered config data for all components. This allows your
      *     component to read configuration from other components.
+     * @member gadgets.config
+     * @name register
+     * @function
      */
-    register: function(component, opt_validators, opt_callback) {
+    function(component, opt_validators, opt_callback) {
       var registered = components[component];
       if (!registered) {
         registered = [];
@@ -95,6 +98,7 @@ gadgets.config = function() {
       });
     },
 
+    'get':
     /**
      * Retrieves configuration data on demand.
      *
@@ -102,8 +106,11 @@ gadgets.config = function() {
      *     all configuration will be returned.
      * @return {Object} The requested configuration, or an empty object if no
      *     configuration has been registered for that component.
+     * @member gadgets.config
+     * @name get
+     * @function
      */
-    get: function(opt_component) {
+    function(opt_component) {
       if (opt_component) {
         return configuration[opt_component] || {};
       }
@@ -116,8 +123,11 @@ gadgets.config = function() {
      * @param {Object} config The full set of configuration data.
      * @param {boolean=} opt_noValidation True if you want to skip validation.
      * @throws {Error} If there is a configuration error.
+     * @member gadgets.config
+     * @name init 
+     * @function
      */
-    init: function(config, opt_noValidation) {
+    'init': function(config, opt_noValidation) {
       configuration = config;
       for (var name in components) {
         if (components.hasOwnProperty(name)) {
@@ -151,10 +161,15 @@ gadgets.config = function() {
 
     /**
      * Ensures that data is one of a fixed set of items.
-     * @param {Array.<string>} list The list of valid values.
      * Also supports argument sytax: EnumValidator("Dog", "Cat", "Fish");
+     *
+     * @param {Array.<string>} list The list of valid values.
+     *
+     * @member gadgets.config
+     * @name  EnumValidator
+     * @function
      */
-    EnumValidator: function(list) {
+    'EnumValidator': function(list) {
       var listItems = [];
       if (arguments.length > 1) {
         for (var i = 0, arg; (arg = arguments[i]); ++i) {
@@ -174,8 +189,11 @@ gadgets.config = function() {
 
     /**
      * Tests the value against a regular expression.
+     * @member gadgets.config
+     * @name RegexValidator
+     * @function
      */
-    RegExValidator: function(re) {
+    'RegExValidator': function(re) {
       return function(data) {
         return re.test(data);
       };
@@ -183,22 +201,34 @@ gadgets.config = function() {
 
     /**
      * Validates that a value was provided.
+     * @param {*} data
+     * @member gadgets.config
+     * @name ExistsValidator
+     * @function
      */
-    ExistsValidator: function(data) {
+    'ExistsValidator': function(data) {
       return typeof data !== "undefined";
     },
 
     /**
      * Validates that a value is a non-empty string.
+     * @param {*} data
+     * @member gadgets.config
+     * @name NonEmptyStringValidator
+     * @function
      */
-    NonEmptyStringValidator: function(data) {
+    'NonEmptyStringValidator': function(data) {
       return typeof data === "string" && data.length > 0;
     },
 
     /**
      * Validates that the value is a boolean.
+     * @param {*} data
+     * @member gadgets.config
+     * @name BooleanValidator
+     * @function
      */
-    BooleanValidator: function(data) {
+    'BooleanValidator': function(data) {
       return typeof data === "boolean";
     },
 
@@ -208,18 +238,22 @@ gadgets.config = function() {
      * Doesn't actually do type validation though, but instead relies
      * on other validators.
      *
-     * example:
+     * This can be used recursively as well to validate sub-objects.
+     *
+     * @example
      *
      *  var validator = new gadgets.config.LikeValidator(
      *    "booleanField" : gadgets.config.BooleanValidator,
      *    "regexField" : new gadgets.config.RegExValidator(/foo.+/);
      *  );
      *
-     * This can be used recursively as well to validate sub-objects.
      *
      * @param {Object} test The object to test against.
+     * @member gadgets.config
+     * @name BooleanValidator
+     * @function
      */
-    LikeValidator : function(test) {
+    'LikeValidator' : function(test) {
       return function(data) {
         for (var member in test) {
           if (test.hasOwnProperty(member)) {

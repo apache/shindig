@@ -78,7 +78,7 @@ gadgets.pubsubrouter = function() {
      * @param {function(number)} gadgetIdToSpecUrlHandler Function that returns the full
      *                   gadget spec URL of a given gadget id. For example:
      *                   function(id) { return idToUrlMap[id]; }
-     * @param {object=} opt_callbacks Optional event handlers. Supported handlers:
+     * @param {Object=} opt_callbacks Optional event handlers. Supported handlers:
      *                 opt_callbacks.onSubscribe: function(gadgetId, channel)
      *                   Called when a gadget tries to subscribe to a channel.
      *                 opt_callbacks.onUnsubscribe: function(gadgetId, channel)

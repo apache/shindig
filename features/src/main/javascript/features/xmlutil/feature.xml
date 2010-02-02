@@ -19,6 +19,7 @@
 -->
 <feature>
   <name>xmlutil</name>
+  <dependency>globals</dependency>
   <gadget>    
     <script src="xmlutil.js"></script>
   </gadget>

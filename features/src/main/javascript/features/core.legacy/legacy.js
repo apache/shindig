@@ -18,33 +18,41 @@
  */
 
 /*global gadgets */
+var gadgets;
 
-// All functions in this file should be treated as deprecated legacy routines.
-// Gadget authors are explicitly discouraged from using any of them.
+/**
+ * @fileoverview All functions in this file should be treated as deprecated legacy routines.
+ * Gadget authors are explicitly discouraged from using any of them.
+ */
 
 var JSON = window.JSON || gadgets.json;
 
+/**
+ * @deprecated
+ */
 var _IG_Prefs = (function() {
+  var instance = null;
 
-var instance = null;
-
-var _IG_Prefs = function() {
-  if (!instance) {
-    instance = new gadgets.Prefs();
-    instance.setDontEscape_();
-  }
-  return instance;
-};
+  var _IG_Prefs = function() {
+    if (!instance) {
+      instance = new gadgets.Prefs();
+      instance.setDontEscape_();
+    }
+    return instance;
+  };
 
  _IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
 
-return _IG_Prefs;
+  return _IG_Prefs;
 })();
 
 function _IG_Fetch_wrapper(callback, obj) {
   callback(obj.data ? obj.data : "");
 }
 
+/**
+ * @deprecated
+ */
 function _IG_FetchContent(url, callback, opt_params) {
   var params = opt_params || {};
   // This is really the only legacy parameter documented
@@ -66,6 +74,9 @@ function _IG_FetchContent(url, callback, opt_params) {
   gadgets.io.makeRequest(url, cb, params);
 }
 
+/**
+ * @deprecated
+ */
 function _IG_FetchXmlContent(url, callback, opt_params) {
   var params = opt_params || {};
   if (params.refreshInterval) {
@@ -78,6 +89,10 @@ function _IG_FetchXmlContent(url, callback, opt_params) {
   gadgets.io.makeRequest(url, cb, params);
 }
 
+
+/**
+ * @deprecated
+ */
 function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
                              opt_params) {
   var params = opt_params || {};
@@ -126,6 +141,7 @@ function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
 /**
  * @param {string} url
  * @param {Object=} opt_params
+ * @deprecated
  */
 function _IG_GetCachedUrl(url, opt_params) {
   var params = opt_params || {};
@@ -138,13 +154,16 @@ function _IG_GetCachedUrl(url, opt_params) {
 /**
  * @param {string} url
  * @param {Object=} opt_params
+ * @deprecated
  */
 function _IG_GetImageUrl(url, opt_params) {
   return _IG_GetCachedUrl(url, opt_params);
 }
+
 /**
  * @param {string} url
  * @return {Element}
+ * @deprecated
  */
 function _IG_GetImage(url) {
   var img = document.createElement('img');
@@ -153,13 +172,20 @@ function _IG_GetImage(url) {
 }
 
 
+/**
+ * @deprecated
+ */
 function _IG_RegisterOnloadHandler(callback) {
   gadgets.util.registerOnLoadHandler(callback);
 }
 
-// _IG_Callback takes the arguments in the scope the callback is executed and
-// places them first in the argument array. MakeClosure takes the arguments
-// from the scope at callback construction and pushes them first in the array
+/** 
+ * _IG_Callback takes the arguments in the scope the callback is executed and
+ * places them first in the argument array. MakeClosure takes the arguments
+ * from the scope at callback construction and pushes them first in the array
+ *
+ * @deprecated
+ */
 function _IG_Callback(handler_func, var_args) {
   var orig_args = arguments;
   return function() {
@@ -179,6 +205,7 @@ var _args = gadgets.util.getUrlParameters;
  *     an object in which allows this to be called regardless of whether or
  *     not the type of the input is known.
  * @return {HTMLElement} The element, if it exists in the document, or null.
+ * @deprecated
  */
 function _gel(el) {
   return document.getElementById ? document.getElementById(el) : null;
@@ -190,6 +217,7 @@ function _gel(el) {
  *
  * @param {string} tag The tag to match elements against.
  * @return {Array.<HTMLElement>} All elements of this tag type.
+ * @deprecated
  */
 function _gelstn(tag) {
   if (tag === "*" && document.all) {
@@ -206,6 +234,7 @@ function _gelstn(tag) {
  * @param {RegEx} regex The expression to match.
  * @return {Array.<HTMLElement>} All elements of this tag type that match
  *     regex.
+ * @deprecated
  */
 function _gelsbyregex(tagName, regex) {
   var matchingTags = _gelstn(tagName);
@@ -222,6 +251,7 @@ function _gelsbyregex(tagName, regex) {
  * URI escapes the given string.
  * @param {string} str The string to escape.
  * @return {string} The escaped string.
+ * @deprecated
  */
 function _esc(str) {
   return window.encodeURIComponent ? encodeURIComponent(str) : escape(str);
@@ -231,6 +261,7 @@ function _esc(str) {
  * URI unescapes the given string.
  * @param {string} str The string to unescape.
  * @return {string} The unescaped string.
+ * @deprecated
  */
 function _unesc(str) {
   return window.decodeURIComponent ? decodeURIComponent(str) : unescape(str);
@@ -241,6 +272,7 @@ function _unesc(str) {
  *
  * @param {string} str The string to escape.
  * @return {string} The escaped string.
+ * @deprecated
  */
 function _hesc(str) {
   return gadgets.util.escapeString(str);
@@ -251,6 +283,7 @@ function _hesc(str) {
  *
  * @param {string} str The string to strip.
  * @return {string} The stripped string.
+ * @deprecated
  */
 function _striptags(str) {
   return str.replace(/<\/?[^>]+>/g, "");
@@ -261,6 +294,7 @@ function _striptags(str) {
  *
  * @param {string} str The string to trim.
  * @return {string} The trimmed string.
+ * @deprecated
  */
 function _trim(str) {
   return str.replace(/^\s+|\s+$/g, "");
@@ -270,6 +304,7 @@ function _trim(str) {
  * Toggles the given element between being shown and block-style display.
  *
  * @param {string | HTMLElement} el The element to toggle.
+ * @deprecated
  */
 function _toggle(el) {
   el = (typeof el === "string") ? _gel(el) : el;
@@ -282,22 +317,27 @@ function _toggle(el) {
   }
 }
 
-/**
- * @type {number} A counter used by uniqueId().
- */
-var _global_legacy_uidCounter = 0;
 
-/**
- * @return {number} a unique number.
- */
-function _uid() {
-  return _global_legacy_uidCounter++;
-}
+var _uid = (function() {
+  /**
+   * @type {number} A counter used by uniqueId().
+   */
+  var _legacy_uidCounter = 0;
+
+  /**
+   * @return {number} a unique number.
+   * @deprecated
+   */
+  return function () {
+    return _legacy_uidCounter++;
+  };
+})();
 
 /**
  * @param {number} a
  * @param {number} b
  * @return {number} The lesser of a or b.
+ * @deprecated
  */
 function _min(a, b) {
   return (a < b ? a : b);
@@ -307,6 +347,7 @@ function _min(a, b) {
  * @param {number} a
  * @param {number} b
  * @return {number} The greater of a or b.
+ * @deprecated
  */
 function _max(a, b) {
   return (a > b ? a : b);
@@ -315,6 +356,7 @@ function _max(a, b) {
 /**
  * @param {string} name
  * @param {Array.<string | Object>} sym
+ * @deprecated
  */
 function _exportSymbols(name, sym) {
   var attach = window;

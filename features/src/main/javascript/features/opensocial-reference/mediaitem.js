@@ -66,6 +66,8 @@ opensocial.MediaItem = function(mimeType, url, opt_params) {
  * </p>
  *
  * @name opensocial.MediaItem.Type
+ * @enum {string}
+ * @const
  */
 opensocial.MediaItem.Type = {
   /** @member opensocial.MediaItem.Type */

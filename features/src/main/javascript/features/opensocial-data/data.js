@@ -27,12 +27,14 @@
 
 /**
  * @type {string} The key attribute constant.
+ * @const
  */
 
 opensocial.data.ATTR_KEY = "key";
 
 /**
  * @type {string} The type of script tags that contain data markup.
+ * @const
  */
 opensocial.data.SCRIPT_TYPE = "text/os-data";
 
@@ -535,7 +537,7 @@ opensocial.data.transformSpecialValue = function(value) {
 /**
  * Parses a string of comma-separated field names and adds the resulting array
  * (if any) to the params object.
- * @param {object} params The params object used to construct an Opensocial
+ * @param {Object} params The params object used to construct an Opensocial
  * DataRequest
  * @param {string} fieldsStr A string containing comma-separated field names
  */

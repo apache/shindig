@@ -43,6 +43,9 @@
  *
  * @private
  * @constructor
+ * @param {Array} array
+ * @param {number=} opt_offset
+ * @param {number=} opt_totalSize
  */
 opensocial.Collection = function(array, opt_offset, opt_totalSize) {
   this.array_ = array || [];
@@ -73,6 +76,7 @@ opensocial.Collection.prototype.getById = function(id) {
  * Gets the size of this collection,
  * which is equal to or less than the
  * total size of the result.
+ *
  * @return {number} The size of this collection
  */
 opensocial.Collection.prototype.size = function() {
@@ -84,6 +88,7 @@ opensocial.Collection.prototype.size = function() {
  * Executes the provided function once per member of the collection,
  * with each member in turn as the
  * parameter to the function.
+ *
  * @param {function(Object)} fn The function to call with each collection entry
  */
 opensocial.Collection.prototype.each = function(fn) {

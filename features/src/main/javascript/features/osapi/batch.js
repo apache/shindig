@@ -38,6 +38,8 @@ var osapi = osapi || {};
     //     transport : <rpc dispatcher>
     //  }
     // }
+
+    /** @type {Array.<Object>} */
     var keyedRequests = [];
 
     /**
@@ -81,6 +83,7 @@ var osapi = osapi || {};
       var perTransportBatch = {};
 
       // Break requests into their per-transport batches in call order
+      /** @type {number} */
       var latchCount = 0;
       var transports = [];
       for (var i = 0; i < keyedRequests.length; i++) {

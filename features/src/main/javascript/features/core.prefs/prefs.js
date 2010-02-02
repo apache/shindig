@@ -22,14 +22,16 @@
  *
  * Provides access to user prefs, module dimensions, and messages.
  *
- * Clients can access their preferences by constructing an instance of
+ * <p>Clients can access their preferences by constructing an instance of
  * gadgets.Prefs and passing in their module id.  Example:
  *
+ * <pre>
  *   var prefs = new gadgets.Prefs();
  *   var name = prefs.getString("name");
  *   var lang = prefs.getLang();
+ * </pre>
  *
- * Modules with type=url can also use this library to parse arguments passed
+ * <p>Modules with type=url can also use this library to parse arguments passed
  * by URL, but this is not the common case:
  *
  *   &lt;script src="http://apache.org/shindig/prefs.js"&gt;&lt;/script&gt;
@@ -37,7 +39,7 @@
  *   gadgets.Prefs.parseUrl();
  *   var prefs = new gadgets.Prefs();
  *   var name = prefs.getString("name");
- *   &lt;/script&lg;
+ *   &lt;/script&gt;
  */
 
 (function() {

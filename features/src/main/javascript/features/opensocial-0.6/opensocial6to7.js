@@ -29,6 +29,9 @@ opensocial.requestNavigateTo = function() {
 
 // If using enums, gadgets are ok.
 // TODO: Translate hardcoded string params to the new gadgets values
+/**
+ * @deprecated
+ */
 opensocial.makeRequest = function() {
   return gadgets.io.makeRequest();
 };

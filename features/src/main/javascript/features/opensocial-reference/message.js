@@ -72,6 +72,8 @@ opensocial.Message = function(body_or_params, opt_params) {
  * </p>
  *
  * @name opensocial.Message.Field
+ * @enum {string}
+ * @const
  */
 opensocial.Message.Field = {
   /**
@@ -84,6 +86,7 @@ opensocial.Message.Field = {
    * The main text of the message. HTML attributes are allowed and are
    * sanitized by the container.
    * @member opensocial.Message.Field
+   * @const
    */
   BODY : 'body',
 

@@ -36,9 +36,9 @@ var mocks = mocks || {};
 /**
  * @constructor
  * @description creates a new fake window object.
- * @param {String} url Destination url.
- * @param {String} target Name of window
- * @param {String} options Options for window, such as size.
+ * @param {string} url Destination url.
+ * @param {string} target Name of window
+ * @param {string} options Options for window, such as size.
  */
 mocks.FakeWindow = function(url, target, options) {
   // Properties passed to window.open

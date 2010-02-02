@@ -185,7 +185,7 @@ os.createTemplateCustomTag = function(template) {
  * (including transformed custom tags) are used as keys. 
  * Where multiple elements share a name, the map value will be an array.
  * @param {Element} node The node whose children are to be mapped
- * @return {object} A Map of Element names to Elements.
+ * @return {Object} A Map of Element names to Elements.
  */
 os.computeChildMap_ = function(node) {
   var map = {};

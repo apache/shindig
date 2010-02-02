@@ -50,6 +50,8 @@ opensocial.Phone = function(opt_params) {
  * <a href="opensocial.Phone.html#getField">Phone.getField()</a> method.
  *
  * @name opensocial.Phone.Field
+ * @enum {string}
+ * @const
  */
 opensocial.Phone.Field = {
   /**

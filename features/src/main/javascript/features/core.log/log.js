@@ -18,72 +18,91 @@
  */
 
 /**
- * @fileoverview
- * Support for basic logging capability for gadgets, meant to replace
- * alert(msg) and window.console.log(msg).
+ * @fileoverview Support for basic logging capability for gadgets.
  *
- * Currently only works on browsers with a console (WebKit based browsers
- * or Firefox with Firebug extension).
+ * This functionality replaces alert(msg) and window.console.log(msg).
  *
- * API is designed to be equivalent to existing console.log | warn | error
+ * <p>Currently only works on browsers with a console (WebKit based browsers,
+ * Firefox with Firebug extension, or Opera).
+ *
+ * <p>API is designed to be equivalent to existing console.log | warn | error
  * logging APIs supported by Firebug and WebKit based browsers. The only
  * addition is the ability to call gadgets.setLogLevel().
  */
 
 /**
+ * @static
+ * @namespace Support for basic logging capability for gadgets.
+ * @name gadgets.log
+ */
+
+gadgets['log'] = (function() {
+   /** @const */
+   var info_=1;
+   /** @const */
+   var warning_=2;
+   /** @const */
+   var error_=3;
+   /** @const */
+   var none_=4;
+
+/**
  * Log an informational message
  * @param {Object} message - the message to log
+ * @member gadgets
+ * @name log
+ * @function
  */
-gadgets.log = function(message) {
-  gadgets.log.logAtLevel(gadgets.log.INFO, message);
+var log = function(message) {
+  logAtLevel(info_, message);
 };
-
  
 /**
  * Log a warning
  * @param {Object} message - the message to log
+ * @static 
  */
 gadgets.warn = function(message) {
-  gadgets.log.logAtLevel(gadgets.log.WARNING, message);
+  logAtLevel(warning_, message);
 };
 
 /**
  * Log an error
  * @param {Object} message - The message to log
+ * @static 
  */
 gadgets.error = function(message) {
-  gadgets.log.logAtLevel(gadgets.log.ERROR, message);
+  logAtLevel(error_, message);
 };
 
 /**
  * Sets the log level threshold.
  * @param {number} logLevel - New log level threshold.
  * @static
+ * @member gadgets.log
+ * @name setLogLevel
  */
-gadgets.setLogLevel = function(logLevel) {
-  gadgets.log.logLevelThreshold_ = logLevel;
+gadgets['setLogLevel'] = function(logLevel) {
+  logLevelThreshold_ = logLevel;
 };
 
 /**
  * Logs a log message if output console is available, and log threshold is met.
  * @param {number} level - the level to log with. Optional, defaults to gadgets.log.INFO.
  * @param {Object} message - The message to log
- * @static
+ * @private
  */
-gadgets.log.logAtLevel = function(level, message) {
-  if (level < gadgets.log.logLevelThreshold_ || !gadgets.log._console) {
+ function logAtLevel(level, message) {
+  if (level < logLevelThreshold_ || !_console) {
     return;
   }
 
-  var logger;
-  var gadgetconsole = gadgets.log._console;
-
-  if (level == gadgets.log.WARNING && gadgetconsole.warn) {
-    gadgetconsole.warn(message)
-  } else if (level == gadgets.log.ERROR && gadgetconsole.error) {
-    gadgetconsole.error(message);
-  } else if (gadgetconsole.log) {
-    gadgetconsole.log(message);
+  if (level === warning_ && _console.warn) {
+    _console.warn(message)
+  } else if (level === error_ && _console.error) {
+    _console.error(message);
+  } else if (_console.log) {
+    _console.log(message);
   }
 };
 
@@ -91,35 +110,45 @@ gadgets.log.logAtLevel = function(level, message) {
  * Log level for informational logging.
  * @static
  * @const
+ * @member gadgets.log
+ * @name INFO
  */
-gadgets.log.INFO = 1;
+log['INFO'] = info_;
 
 /**
  * Log level for warning logging.
  * @static
  * @const
+ * @member gadgets.log
+ * @name WARNING
  */
-gadgets.log.WARNING = 2;
+log['WARNING'] = warning_;
 
 /**
  * Log level for no logging
  * @static
  * @const
+ * @member gadgets.log
+ * @name NONE
  */
-gadgets.log.NONE = 4;
+log['NONE'] = none_;
 
 /**
  * Current log level threshold.
- * @type number
+ * @type {number}
  * @private
- * @static
  */
-gadgets.log.logLevelThreshold_ = gadgets.log.INFO;
+var logLevelThreshold_ = info_;
+
+
 
 /**
  * Console to log to
  * @private
  * @static
  */
-gadgets.log._console = window.console ? window.console :
+var _console = window.console ? window.console :
                        window.opera   ? window.opera.postError : undefined;
+
+   return log; 
+})();

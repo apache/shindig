@@ -29,7 +29,7 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
      * Execute the JSON-RPC batch of gadgets.rpc. The container is expected to implement
      * the method osapi._handleGadgetRpcMethod(<JSON-RPC batch>)
      *
-     * @param {object} requests the opensocial JSON-RPC request batch
+     * @param {Object} requests the opensocial JSON-RPC request batch
      * @param {function(Object)} callback to the osapi batch with either an error response or
      * a JSON-RPC batch result
      * @private

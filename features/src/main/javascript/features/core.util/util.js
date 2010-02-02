@@ -27,12 +27,11 @@
  * @name gadgets.util
  */
 
-gadgets.util = function() {
+gadgets['util'] = function() {
   /**
    * Parses URL parameters into an object.
    * @param {string} url - the url parameters to parse
    * @return {Array.<string>} The parameters as an array
-   * @nosideeffects
    */
   function parseUrlParams(url) {
     // Get settings from url, 'hash' takes precedence over 'search' component
@@ -58,6 +57,7 @@ gadgets.util = function() {
 
   /**
    * @enum {boolean}
+   * @const
    * @private
    * Maps code points to the value to replace them with.
    * If the value is "false", the character is removed entirely, otherwise
@@ -93,7 +93,6 @@ gadgets.util = function() {
    * @param {Array} match Ignored
    * @param {number} value The codepoint value to convert
    * @return {string} The character corresponding to value.
-   * @nosideeffects
    */
   function unescapeEntity(match, value) {
     return String.fromCharCode(value);
@@ -120,7 +119,7 @@ gadgets.util = function() {
      * @member gadgets.util
      * @private Implementation detail.
      */
-    getUrlParameters : function (opt_url) {
+    'getUrlParameters' : function (opt_url) {
       if (parameters !== null && typeof opt_url === "undefined") {
         // "parameters" is a cache of current window params only.
         return parameters;
@@ -165,7 +164,7 @@ gadgets.util = function() {
      * @member gadgets.util
      * @private Implementation detail.
      */
-    makeClosure : function (scope, callback, var_args) {
+    'makeClosure' : function (scope, callback, var_args) {
       // arguments isn't a real array, so we copy it into one.
       var baseArgs = [];
       for (var i = 2, j = arguments.length; i < j; ++i) {
@@ -189,9 +188,8 @@ gadgets.util = function() {
      *   the enum.
      *
      * @private Implementation detail.
-     * @nosideeffects
      */
-    makeEnum : function (values) {
+    'makeEnum' : function (values) {
       var obj = {};
       for (var i = 0, v; (v = values[i]); ++i) {
         obj[v] = v;
@@ -206,9 +204,8 @@ gadgets.util = function() {
      * @return {Object} The parameters for the given feature, or null
      *
      * @member gadgets.util
-     * @nosideeffects
      */
-    getFeatureParameters : function (feature) {
+    'getFeatureParameters' : function (feature) {
       return typeof features[feature] === "undefined" ? null : features[feature];
     },
 
@@ -219,9 +216,8 @@ gadgets.util = function() {
      * @return {boolean} True if the feature is supported
      *
      * @member gadgets.util
-     * @nosideeffects
      */
-    hasFeature : function (feature) {
+    'hasFeature' : function (feature) {
       return typeof features[feature] !== "undefined";
     },
     
@@ -232,9 +228,8 @@ gadgets.util = function() {
      * @return {Object} List of Services that enumerate their methods
      *
      * @member gadgets.util
-     * @nosideeffects
      */
-    getServices : function () {
+    'getServices' : function () {
       return services;
     },
 
@@ -244,7 +239,7 @@ gadgets.util = function() {
      *
      * @member gadgets.util
      */
-    registerOnLoadHandler : function (callback) {
+    'registerOnLoadHandler' : function (callback) {
       onLoadHandlers.push(callback);
     },
 
@@ -252,7 +247,7 @@ gadgets.util = function() {
      * Runs all functions registered via registerOnLoadHandler.
      * @private Only to be used by the container, not gadgets.
      */
-    runOnLoadHandlers : function () {
+    'runOnLoadHandlers' : function () {
       for (var i = 0, j = onLoadHandlers.length; i < j; ++i) {
         onLoadHandlers[i]();
       }
@@ -273,9 +268,8 @@ gadgets.util = function() {
      * @param {boolean=} opt_escapeObjects Whether to escape objects.
      * @return {Object} The escaped object
      * @private Only to be used by the container, not gadgets.
-     * @nosideeffects
      */
-    escape : function(input, opt_escapeObjects) {
+    'escape' : function(input, opt_escapeObjects) {
       if (!input) {
         return input;
       } else if (typeof input === "string") {
@@ -307,9 +301,8 @@ gadgets.util = function() {
      *
      * @param {string} str The string to escape
      * @return {string} The escaped string
-     * @nosideeffects
      */
-    escapeString : function(str) {
+    'escapeString' : function(str) {
       if (!str) return str;
       var out = [], ch, shouldEscape;
       for (var i = 0, j = str.length; i < j; ++i) {
@@ -330,9 +323,8 @@ gadgets.util = function() {
      *
      * @param {string} str The string to unescape.
      * @return {string}
-     * @nosideeffects
      */
-    unescapeString : function(str) {
+    'unescapeString' : function(str) {
       if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
     }
@@ -340,5 +332,5 @@ gadgets.util = function() {
 }();
 // Initialize url parameters so that hash data is pulled in before it can be
 // altered by a click.
-gadgets.util.getUrlParameters();
+gadgets['util'].getUrlParameters();
 

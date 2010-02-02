@@ -44,7 +44,6 @@ gadgets.io = function() {
 
   /**
    * Internal facility to create an xhr request.
-   * @nosideeffects
    */
   function makeXhr() {
     var x; 
@@ -485,7 +484,6 @@ gadgets.io = function() {
      *           content should be cached.  Defaults to 3600.
      *
      * @return {string} The proxied version of the URL
-     * @nosideeffects
      * @member gadgets.io
      */
     getProxyUrl : function (url, opt_params) {
