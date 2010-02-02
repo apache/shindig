@@ -22,7 +22,7 @@ class GadgetUrlRenderer extends GadgetRenderer {
 
   /**
    * Renders an 'URL' type view (where the iframe is redirected to the specified url)
-   * This is more a legacy iGoogle support feature then something that should be actually
+   * This is more a legacy iGoogle support feature than something that should be actually
    * used. Proxied content is the socially aware (and higher performance) version of this
    * See GadgetHrefRenderer for it's implementation.
    *
@@ -35,13 +35,21 @@ class GadgetUrlRenderer extends GadgetRenderer {
     $queryStr = strpos($redirURI, '?') !== false ? substr($redirURI, strpos($redirURI, '?')) : '';
     $query = $queryStr;
     $query .= $this->getPrefsQueryString($gadget->gadgetSpec->userPrefs);
+    
+    // deal with features
+    $registry = $this->context->getRegistry();
+    // since the URL mode doesn't actually have the gadget XML body, it can't inline
+    // the javascript content anyway - thus could us just ignore the 'forcedJsLibs' part.
+    $forcedJsLibs = array();
+    $sortedFeatureGroups = array();
+    $registry->sortFeatures($gadget->features, $forcedJsLibs, $sortedFeatureGroups);
+    
+    // join the groups
     $features = array();
-    $forcedLibs = Config::get('focedJsLibs');
-    if ($forcedLibs == null) {
-      $features = $gadget->features;
-    } else {
-      $features = explode(':', $forcedLibs);
+    foreach ($sortedFeatureGroups as $featureGroup) {
+      $features = array_merge($features, $featureGroup['features']);
     }
+    
     $query .= $this->appendLibsToQuery($features);
     $query .= '&lang=' . urlencode(isset($_GET['lang']) ? $_GET['lang'] : 'en');
     $query .= '&country=' . urlencode(isset($_GET['country']) ? $_GET['country'] : 'US');

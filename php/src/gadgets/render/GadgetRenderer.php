@@ -38,12 +38,10 @@ abstract class GadgetRenderer {
    * @return string the list of libraries in core:caja:etc.js?v=checksum> format
    */
   protected function getJsUrl($features) {
-    $ret = '';
     if (! is_array($features) || ! count($features)) {
-      $ret = 'core';
-    } else {
-      $ret = implode(':', $features);
+      return 'null';
     }
+    $ret = implode(':', $features);
     $cache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
     if (($md5 = $cache->get(md5('getJsUrlMD5'))) === false) {
       $registry = $this->context->getRegistry();

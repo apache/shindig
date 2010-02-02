@@ -298,26 +298,27 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   }
 
   public function getJavaScripts() {
+    $registry = $this->context->getRegistry();
     $forcedJsLibs = $this->getForcedJsLibs();
-    $externalScript = false;
-    if (! empty($forcedJsLibs)) {
-      // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.9:settitle.js"> type url)
-      // we inject the tag and don't inline those libs (and their dependencies)
-      $forcedJsLibs = explode(':', $forcedJsLibs);
-      $externalScript = Config::get('default_js_prefix') . $this->getJsUrl($forcedJsLibs, $this->gadget) . "&container=" . $this->context->getContainer();
-      $registry = $this->context->getRegistry();
-      $missing = array();
-      $registry->resolveFeatures($forcedJsLibs, $forcedJsLibs, $missing);
-    }
-    $script = '';
-    foreach ($this->gadget->features as $feature) {
-      if (! is_array($forcedJsLibs) || (is_array($forcedJsLibs) && ! in_array($feature, $forcedJsLibs))) {
-        $script .= $this->context->getRegistry()->getFeatureContent($feature, $this->context, true);
+    $sortedFeatureGroups = array();
+    $registry->sortFeatures($this->gadget->features, $forcedJsLibs, $sortedFeatureGroups);
+    $scripts = array();
+    
+    // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.9:settitle.js"> type url)
+    // we inject the tag and don't inline those libs (and their dependencies)
+    foreach ($sortedFeatureGroups as $featureGroup) {
+      if ($featureGroup['type'] == 'inline') {
+        $featureGroup['content'] = $registry->getFeaturesContent($featureGroup['features'], $this->context, true);
+      } else {
+        $featureGroup['content'] = Config::get('default_js_prefix') . $this->getJsUrl($featureGroup['features']) . "&container=" . $this->context->getContainer();
       }
+      $scripts[] = $featureGroup;
     }
+    
+    $script = '';
     // Add the JavaScript initialization strings for the configuration, localization and preloads
     $script .= "\n";
-    $script .= $this->appendJsConfig($this->gadget, count($forcedJsLibs));
+    $script .= $this->appendJsConfig($this->gadget, $sortedFeatureGroups);
     $script .= $this->appendMessages($this->gadget);
     $script .= $this->appendPreloads($this->gadget);
     if (count($this->dataInserts)) {
@@ -330,7 +331,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {
       $script .= "opensocial.template.Container.disableAutoProcessing();\n";
     }
-    return array('inline' => $script, 'external' => $externalScript);
+    $scripts[] = array(
+        'type' => 'inline',
+        'content' => $script
+    );
+    return $scripts;
   }
 
   /**
@@ -348,62 +353,73 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
 
     // Inject the OpenSocial feature javascripts
     $scripts = $this->getJavaScripts();
-    if ($scripts['external']) {
+    foreach ($scripts as $script) {
       $scriptNode = $doc->createElement('script');
-      $scriptNode->setAttribute('src', $scripts['external']);
+      if ($script['type'] == 'inline') {
+        $scriptNode->setAttribute('type', 'text/javascript');
+        $scriptNode->appendChild($doc->createTextNode($script['content']));
+      } else {
+        $scriptNode->setAttribute('src', $script['content']);
+      }
       $node->appendChild($scriptNode);
     }
-    $scriptNode = $doc->createElement('script');
-    $scriptNode->setAttribute('type', 'text/javascript');
-    $scriptNode->appendChild($doc->createTextNode($scripts['inline']));
-    $node->appendChild($scriptNode);
   }
 
   /**
    * Retrieve the forced javascript libraries (if any), using either the &libs= from the query
    * or if that's empty, from the config
    *
-   * @return unknown
+   * @return array contains the names of forced external javascript libs. 
    */
   private function getForcedJsLibs() {
     $forcedJsLibs = $this->context->getForcedJsLibs();
     // allow the &libs=.. param to override our forced js libs configuration value
     if (empty($forcedJsLibs)) {
-      $forcedJsLibs = Config::get('focedJsLibs');
+      $forcedJsLibs = Config::get('forcedJsLibs');
     }
-    return $forcedJsLibs;
+    if (empty($forcedJsLibs)) {
+      return array();
+    } else {
+      return explode(':', $forcedJsLibs);
+    }
   }
 
   /**
    * Appends the javascript features configuration string
    *
    * @param Gadget $gadget
-   * @param unknown_type $hasForcedLibs
+   * @param $featureGroups
    * @return string
    */
-  private function appendJsConfig(Gadget $gadget, $hasForcedLibs) {
+  private function appendJsConfig(Gadget $gadget, $featureGroups) {
     $container = $this->context->getContainer();
     $containerConfig = $this->context->getContainerConfig();
-    //TODO some day we should parse the forcedLibs too, and include their config selectivly as well for now we just include everything if forced libs is set.
-    if ($hasForcedLibs) {
-      $gadgetConfig = $containerConfig->getConfig($container, 'gadgets.features');
-    } else {
-      $gadgetConfig = array();
-      $featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
-      foreach ($gadget->getJsLibraries() as $library) {
-        $feature = $library->getFeatureName();
-        if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
-          $gadgetConfig[$feature] = $featureConfig[$feature];
-        }
+    $forcedJsLibs = $this->getForcedJsLibs();
+    $gadgetConfig = array();
+    $featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
+    
+    // TODO some day we should parse the forcedLibs too, and include their config selectivly as well.
+    // For now we just include everything.
+    $features = array();
+    foreach ($featureGroups as $featureGroup) {
+      $features = array_merge($features, $featureGroup['features']);
+    }
+    
+    foreach ($features as $feature) {
+      if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
+        $gadgetConfig[$feature] = $featureConfig[$feature];
       }
     }
+    
     // Add gadgets.util support. This is calculated dynamically based on request inputs.
     // See java/org/apache/shindig/gadgets/render/RenderingContentRewriter.java for reference.
     $requires = array();
-    foreach ($gadget->features as $feature) {
+    foreach ($features as $feature) {
       $requires[$feature] = new EmptyClass();
     }
     $gadgetConfig['core.util'] = $requires;
+    
+    // following are some quick-fixes for osml and osapi.
     if (isset($gadgetConfig['osml'])) {
       unset($gadgetConfig['osml']);
     }

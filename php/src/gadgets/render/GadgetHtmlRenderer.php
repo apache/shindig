@@ -50,13 +50,16 @@ class GadgetHtmlRenderer extends GadgetBaseRenderer {
       // Manually generate the html document using basic string concatinations instead of using our DOM based functions
       $content .= "<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n";
       $content .= '<style>'.Config::get('gadget_css')."</style>\n";
+
       $scripts = $this->getJavaScripts();
-      if ($scripts['external']) {
-        $content .= "<script type=\"text/javascript\" src=\"{$scripts['external']}\"></script>\n";
+      foreach ($scripts as $script) {
+        if ($script['type'] == 'inline') {
+          $content .= "<script type=\"text/javascript\">{$script['content']}</script>\n";
+        } else {
+          $content .= "<script type=\"text/javascript\" src=\"{$script['content']}\"></script>\n";
+        }
       }
-      if (!empty($scripts['inline'])) {
-        $content .= "<script type=\"text/javascript\">{$scripts['inline']}</script>\n";
-      }
+
       $content .= "</head>\n<body>\n";
       $content .= $gadget->substitutions->substitute($view['content']);
       $content .= '<script type="text/javascript">'.$this->getBodyScript()."</script>\n";

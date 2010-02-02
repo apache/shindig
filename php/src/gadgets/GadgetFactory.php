@@ -70,7 +70,9 @@ class GadgetFactory {
    */
   private function parseFeatures(Gadget &$gadget) {
     $found = $missing = array();
-    if (! $this->context->getRegistry()->resolveFeatures(array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures), $found, $missing)) {
+    if (! $this->context->getRegistry()->resolveFeatures(
+        array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures),
+        $found, $missing, true)) {
       $requiredMissing = false;
       foreach ($missing as $featureName) {
         if (in_array($featureName, $gadget->gadgetSpec->requiredFeatures)) {

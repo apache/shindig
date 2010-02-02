@@ -46,7 +46,7 @@ class GadgetContext {
 
     // Request variables
     $this->setIgnoreCache($this->getIgnoreCacheParam());
-    $this->setForcedJsLibs($this->getFocedJsLibsParam());
+    $this->setForcedJsLibs($this->getForcedJsLibsParam());
     $this->setUrl($this->getUrlParam());
     $this->setModuleId($this->getModuleIdParam());
     $this->setView($this->getViewParam());
@@ -79,7 +79,7 @@ class GadgetContext {
     return (isset($_GET['nocache']) && intval($_GET['nocache']) == 1) || (isset($_GET['bpc']) && intval($_GET['bpc']) == 1);
   }
 
-  private function getFocedJsLibsParam() {
+  private function getForcedJsLibsParam() {
     return isset($_GET['libs']) ? trim($_GET['libs']) : null;
   }
 

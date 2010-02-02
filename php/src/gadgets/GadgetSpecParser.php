@@ -215,7 +215,8 @@ class GadgetSpecParser {
    */
   private function parseFeatures(DOMElement &$modulePrefs, GadgetSpec &$gadget) {
     $gadget->requiredFeatures = $gadget->optionalFeatures = array();
-    if (($requiredNodes = $modulePrefs->getElementsByTagName('Require')) != null) {
+    $requiredNodes = $modulePrefs->getElementsByTagName('Require');
+    if ($requiredNodes->length != 0) {
       foreach ($requiredNodes as $requiredFeature) {
         $gadget->requiredFeatures[] = $requiredFeature->getAttribute('feature');
         if ($requiredFeature->getAttribute('feature') == 'content-rewrite') {
@@ -225,7 +226,8 @@ class GadgetSpecParser {
         }
       }
     }
-    if (($optionalNodes = $modulePrefs->getElementsByTagName('Optional')) != null) {
+    $optionalNodes = $modulePrefs->getElementsByTagName('Optional');
+    if ($optionalNodes->length != 0) {
       foreach ($optionalNodes as $optionalFeature) {
         $gadget->optionalFeatures[] = $optionalFeature->getAttribute('feature');
         // Content-rewrite is a special case since it has Params as child nodes

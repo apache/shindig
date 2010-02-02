@@ -110,7 +110,7 @@ $shindigConfig = array(
   'jsondb_path' => realpath(dirname(__FILE__) . '/../../javascript/sampledata') . '/canonicaldb.json',
 
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
-  'focedJsLibs' => '',
+  'forcedJsLibs' => '',
 
   // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an
   // unknown custom class, this is particuarly useful for when intergrating shindig into an existing framework that also depends on autoloading
