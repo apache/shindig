@@ -159,9 +159,12 @@ class MakeRequest {
       // (since RemoteContentRquest checks if its false)
       // so the request to POST is still honored
       $request = new RemoteContentRequest($params->getHref(), null, $params->getRequestBody());
-    } else {
+    } else if ($method == 'DELETE' || $method == 'GET' || $method == 'HEAD') {
       $request = new RemoteContentRequest($params->getHref());
+    } else {
+      throw new Exception("Invalid HTTP method.");
     }
+    $request->setMethod($method);
     if ($signer) {
       switch ($params->getAuthz()) {
         case 'SIGNED':

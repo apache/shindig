@@ -210,9 +210,15 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
       $outHeaders[] = "User-Agent: " . BasicRemoteContentFetcher::USER_AGENT;
       curl_setopt($request->handle, CURLOPT_HTTPHEADER, $outHeaders);
     }
+    $method = $request->getMethod();
     if ($request->isPost()) {
       curl_setopt($request->handle, CURLOPT_POST, 1);
       curl_setopt($request->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
+    } else if ($method == 'DELETE' || $method == 'HEAD' || $method == 'PUT') {
+      curl_setopt($request->handle, CURLOPT_CUSTOMREQUEST, $method);
+      if ($method == "PUT") {
+        curl_setopt($request->handle, CURLOPT_POSTFIELDS, $request->getPostBody());
+      }
     }
   }
 
