@@ -979,6 +979,7 @@
               <link>http://www.json.org/javadoc/</link>
               <link>http://junit.sourceforge.net/javadoc/</link>
             </links>
+            <fixTags>since,param,return,throws</fixTags>
           </configuration>
         </plugin>
         <plugin>
