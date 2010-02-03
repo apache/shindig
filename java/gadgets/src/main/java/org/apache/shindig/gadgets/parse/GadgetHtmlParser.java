@@ -236,7 +236,15 @@ public abstract class GadgetHtmlParser {
         return;
       }
     }
-    DocumentFragment fragment = parseFragmentImpl(source);
+    
+    DocumentFragment fragment = null;
+    try {
+      fragment = parseFragmentImpl(source);
+    } catch (Exception e) {
+      // DOMException is a RuntimeException
+      throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+    }
+    
     reprocessScriptForOpenSocial(fragment);
     if (shouldCache) {
       fragmentCache.addElement(key, fragment);

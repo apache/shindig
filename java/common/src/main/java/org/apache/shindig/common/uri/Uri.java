@@ -171,8 +171,9 @@ public final class Uri {
         result.setPath(relativePath);
       } else {
         // resolve a relative reference
-        int endindex = path.lastIndexOf('/') + 1;
-        result.setPath(normalizePath(path.substring(0, endindex) + relativePath));
+        String basePath = path != null ? path : "/";
+        int endindex = basePath.lastIndexOf('/') + 1;
+        result.setPath(normalizePath(basePath.substring(0, endindex) + relativePath));
       }
     }
     Uri resolved = result.toUri();

@@ -199,6 +199,14 @@ public class UriTest {
 
     assertEquals("http://example.org/foo/bar/wee", base.resolve(other).toString());
   }
+  
+  @Test
+  public void resolvePathRelativeToNullPath() throws Exception {
+    Uri base = new UriBuilder().setScheme("http").setAuthority("example.org").toUri();
+    Uri other = Uri.parse("dir");
+    
+    assertEquals("http://example.org/dir", base.resolve(other).toString());
+  }
 
   @Test
   public void resolvePathAbsolute() throws Exception {
