@@ -128,8 +128,8 @@ public class MakeRequestHandler extends ProxyBase {
       for (String header : headerList) {
         String[] parts = StringUtils.splitPreserveAllTokens(header, '=');
         if (parts.length != 2) {
-          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
-              "Malformed header specified,");
+          throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+              "Malformed header param specified:" + header);
         }
         String headerName = Utf8UrlCoder.decode(parts[0]);
         if (!HttpRequestHandler.BAD_HEADERS.contains(headerName.toUpperCase())) {
