@@ -391,10 +391,8 @@ class GadgetSpecParser {
     if (($localeNodes = $modulePrefs->getElementsByTagName('Locale')) != null) {
       foreach ($localeNodes as $node) {
         $messageBundle = array();
-        if (($messageBundleNode = $node->getElementsByTagName('messagebundle')) != null && $messageBundleNode->length > 0) {
+        if (($messages = $node->getElementsByTagName('msg')) != null && $messages->length > 0) {
           // parse inlined messages
-          $messageBundleNode = $messageBundleNode->item(0);
-          $messages = $messageBundleNode->getElementsByTagName('msg');
           foreach ($messages as $msg) {
             $messageBundle[$msg->getAttribute('name')] = trim($msg->nodeValue);
           }
