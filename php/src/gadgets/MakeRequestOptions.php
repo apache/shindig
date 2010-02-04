@@ -231,7 +231,7 @@ class MakeRequestOptions {
     $options = new MakeRequestOptions($href);
     $options->setHttpMethod($request->getMethod())
             ->setRequestBody($request->getParameter('body'))
-            ->setRequestHeaders($request->getParameter('headers'))
+            ->setRequestHeaders($request->getParameter('headers', array()))
             ->setResponseFormat($request->getParameter('format'))
             ->setAuthz($request->getParameter('authz'))
             ->setSignViewer($request->getParameter('sign_viewer'))     
