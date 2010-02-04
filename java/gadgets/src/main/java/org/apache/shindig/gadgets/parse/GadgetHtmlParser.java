@@ -21,7 +21,6 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 
 import com.google.common.collect.BiMap;
@@ -31,8 +30,10 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.w3c.dom.Attr;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -50,6 +51,7 @@ public abstract class GadgetHtmlParser {
   private Cache<String, Document> documentCache;
   private Cache<String, DocumentFragment> fragmentCache;
   private Provider<HtmlSerializer> serializerProvider = new DefaultSerializerProvider();
+  protected final DOMImplementation documentFactory;
 
   /**
    * Allowed tag names for OpenSocial Data and template blocks.
@@ -62,6 +64,10 @@ public abstract class GadgetHtmlParser {
    */
   public static final BiMap<String, String> SCRIPT_TYPE_TO_OSML_TAG = ImmutableBiMap.of(
       "text/os-data", OSML_DATA_TAG, "text/os-template", OSML_TEMPLATE_TAG);
+  
+  protected GadgetHtmlParser(DOMImplementation documentFactory) {
+    this.documentFactory = documentFactory;
+  }
 
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
@@ -99,9 +105,9 @@ public abstract class GadgetHtmlParser {
         document = parseDomImpl(source);
       } catch (GadgetException e) {
         throw e;
-      } catch (Exception e) {
+      } catch (DOMException e) {
         // DOMException is a RuntimeException
-        throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+        return errorDom(e);
       }
 
       HtmlSerialization.attach(document, serializerProvider.get(), source);
@@ -240,9 +246,10 @@ public abstract class GadgetHtmlParser {
     DocumentFragment fragment = null;
     try {
       fragment = parseFragmentImpl(source);
-    } catch (Exception e) {
+    } catch (DOMException e) {
       // DOMException is a RuntimeException
-      throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+      appendParseException(result, e);
+      return;
     }
     
     reprocessScriptForOpenSocial(fragment);
@@ -259,6 +266,27 @@ public abstract class GadgetHtmlParser {
       Node clone = destDoc.importNode(nodes.item(i), true);
       dest.appendChild(clone);
     }    
+  }
+  
+  protected Document errorDom(DOMException e) {
+    // Create a bare-bones DOM whose body is just error text.
+    // We do this to echo information to the developer that originally
+    // supplied the data, since doing so is more useful than simply
+    // returning a black-box HTML error code stemming from an NPE or other condition downstream.
+    // The method is protected to allow overriding of this behavior.
+    Document doc = documentFactory.createDocument(null, null, null);
+    Node html = doc.createElement("html");
+    html.appendChild(doc.createElement("head"));
+    Node body = doc.createElement("body");
+    appendParseException(body, e);
+    html.appendChild(body);
+    doc.appendChild(html);
+    return doc;
+  }
+  
+  private void appendParseException(Node node, DOMException e) {
+    node.appendChild(node.getOwnerDocument().createTextNode(
+        GadgetException.Code.HTML_PARSE_ERROR.toString() + ": " + e.toString()));
   }
   
   protected boolean shouldCache() {

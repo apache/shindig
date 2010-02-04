@@ -40,11 +40,9 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 
 public class CajaHtmlParser extends GadgetHtmlParser {
-  private final DOMImplementation documentFactory;
-
   @Inject
   public CajaHtmlParser(DOMImplementation documentFactory) {
-    this.documentFactory = documentFactory;
+    super(documentFactory);
   }
   
   @Override

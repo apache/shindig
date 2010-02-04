@@ -20,14 +20,12 @@ package org.apache.shindig.gadgets.parse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.spec.PipelinedData;
@@ -35,7 +33,6 @@ import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -149,16 +146,14 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
   public void testInvalid() throws Exception {
     String content =
         "<html><div id=\"div_super\" class=\"div_super\" valign:\"middle\"></div></html>";
-    try {
-      parser.parseDom(content);
-      fail("No exception caught on invalid character");
-    } catch (DOMException e) {
-      assertTrue(e.getMessage().contains("INVALID_CHARACTER_ERR"));
-      assertTrue(e.getMessage().contains(
-          "Around ...<div id=\"div_super\" class=\"div_super\"..."));
-    } catch (GadgetException e) {
-      assertEquals(GadgetException.Code.HTML_PARSE_ERROR, e.getCode());
-    }
+    Document doc = parser.parseDom(content);
+    
+    // Returns a bare Document with error text in it.
+    Node body = doc.getElementsByTagName("body").item(0);
+    
+    assertTrue(body.getTextContent().contains("INVALID_CHARACTER_ERR"));
+    assertTrue(body.getTextContent().contains(
+        "Around ...<div id=\"div_super\" class=\"div_super\"..."));
   }
 
   private void assertEmpty(Node n) {
