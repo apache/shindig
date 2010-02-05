@@ -209,7 +209,8 @@ class GadgetFeatureRegistry {
       if ($entry == null) {
         continue;
       }
-      if (strtolower(substr($entry['name'], 0, strlen('core'))) != 'core') {
+      $featureName = strtolower(substr($entry['name'], 0, strlen('core')));
+      if ($featureName != 'core' && $featureName != 'glob') {
         $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
       }
     }
