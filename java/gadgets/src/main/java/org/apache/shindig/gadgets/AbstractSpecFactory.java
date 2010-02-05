@@ -220,7 +220,7 @@ public abstract class AbstractSpecFactory<T> {
     }
   }
   
-  private static class SpecRetrievalFailedException extends GadgetException {
+  protected static class SpecRetrievalFailedException extends GadgetException {
     SpecRetrievalFailedException(Uri specUri, int code) {
       super(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
             "Unable to retrieve spec for " + specUri + ". HTTP error " + code);
