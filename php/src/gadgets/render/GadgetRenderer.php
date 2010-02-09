@@ -33,7 +33,7 @@ abstract class GadgetRenderer {
    * generates the library string (core:caja:etc.js) including a checksum of all the
    * javascript content (?v=<md5 of js>) for cache busting
    *
-   * @param string $libs
+   * @param string $features
    * @param Gadget $gadget
    * @return string the list of libraries in core:caja:etc.js?v=checksum> format
    */

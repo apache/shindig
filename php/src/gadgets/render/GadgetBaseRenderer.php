@@ -300,25 +300,36 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   public function getJavaScripts() {
     $registry = $this->context->getRegistry();
     $forcedJsLibs = $this->getForcedJsLibs();
-    $sortedFeatureGroups = array();
-    $registry->sortFeatures($this->gadget->features, $forcedJsLibs, $sortedFeatureGroups);
-    $scripts = array();
+    $externFeatures = array();
+    $inlineFeatures = array();
+    foreach ($this->gadget->features as $feature) {
+      if (in_array($feature, $forcedJsLibs)) {
+        $externFeatures[] = $feature;
+      } else {
+        $inlineFeatures[] = $feature;
+      }
+    }
+    $sortedExternFeatures = array();
+    $sortedInlineFeatures = array();
+    $registry->sortFeatures($externFeatures, $sortedExternFeatures);
+    $registry->sortFeatures($inlineFeatures, $sortedInlineFeatures);
     
     // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.9:settitle.js"> type url)
     // we inject the tag and don't inline those libs (and their dependencies)
-    foreach ($sortedFeatureGroups as $featureGroup) {
-      if ($featureGroup['type'] == 'inline') {
-        $featureGroup['content'] = $registry->getFeaturesContent($featureGroup['features'], $this->context, true);
-      } else {
-        $featureGroup['content'] = Config::get('default_js_prefix') . $this->getJsUrl($featureGroup['features']) . "&container=" . $this->context->getContainer();
-      }
-      $scripts[] = $featureGroup;
+    $scripts = array();
+    if (! empty($sortedExternFeatures)) {
+      $scripts[] = array(
+          'type' => 'extern',
+          'content' => Config::get('default_js_prefix') . $this->getJsUrl($sortedExternFeatures) . "&container=" . $this->context->getContainer()
+      );
     }
-    
     $script = '';
+    foreach ($sortedInlineFeatures as $feature) {
+      $script .= $registry->getFeatureContent($feature, $this->context, true);
+    }
     // Add the JavaScript initialization strings for the configuration, localization and preloads
     $script .= "\n";
-    $script .= $this->appendJsConfig($this->gadget, $sortedFeatureGroups);
+    $script .= $this->appendJsConfig($this->gadget, $sortedExternFeatures, $sortedInlineFeatures);
     $script .= $this->appendMessages($this->gadget);
     $script .= $this->appendPreloads($this->gadget);
     if (count($this->dataInserts)) {
@@ -380,7 +391,13 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (empty($forcedJsLibs)) {
       return array();
     } else {
-      return explode(':', $forcedJsLibs);
+      $features = explode(':', $forcedJsLibs);
+      // expend features here
+      $resultsFound = array();
+      $resultsMissing = array();
+      $registry = $this->context->getRegistry();
+      $registry->resolveFeatures($features, $resultsFound, $resultsMissing);
+      return $resultsFound;
     }
   }
 
@@ -388,23 +405,19 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * Appends the javascript features configuration string
    *
    * @param Gadget $gadget
-   * @param $featureGroups
+   * @param $externFeatures
+   * @param $inlineFeatures
    * @return string
    */
-  private function appendJsConfig(Gadget $gadget, $featureGroups) {
+  private function appendJsConfig(Gadget $gadget, $externFeatures, $inlineFeatures) {
     $container = $this->context->getContainer();
     $containerConfig = $this->context->getContainerConfig();
-    $forcedJsLibs = $this->getForcedJsLibs();
     $gadgetConfig = array();
     $featureConfig = $containerConfig->getConfig($container, 'gadgets.features');
     
     // TODO some day we should parse the forcedLibs too, and include their config selectivly as well.
     // For now we just include everything.
-    $features = array();
-    foreach ($featureGroups as $featureGroup) {
-      $features = array_merge($features, $featureGroup['features']);
-    }
-    
+    $features = array_merge($externFeatures, $inlineFeatures);
     foreach ($features as $feature) {
       if (! isset($gadgetConfig[$feature]) && ! empty($featureConfig[$feature])) {
         $gadgetConfig[$feature] = $featureConfig[$feature];

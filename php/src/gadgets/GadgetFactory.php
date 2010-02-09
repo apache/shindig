@@ -72,7 +72,7 @@ class GadgetFactory {
     $found = $missing = array();
     if (! $this->context->getRegistry()->resolveFeatures(
         array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures),
-        $found, $missing, true)) {
+        $found, $missing)) {
       $requiredMissing = false;
       foreach ($missing as $featureName) {
         if (in_array($featureName, $gadget->gadgetSpec->requiredFeatures)) {

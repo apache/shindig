@@ -40,17 +40,10 @@ class GadgetUrlRenderer extends GadgetRenderer {
     $registry = $this->context->getRegistry();
     // since the URL mode doesn't actually have the gadget XML body, it can't inline
     // the javascript content anyway - thus could us just ignore the 'forcedJsLibs' part.
-    $forcedJsLibs = array();
-    $sortedFeatureGroups = array();
-    $registry->sortFeatures($gadget->features, $forcedJsLibs, $sortedFeatureGroups);
+    $sortedFeatures = array();
+    $registry->sortFeatures($gadget->features, $sortedFeatures);
     
-    // join the groups
-    $features = array();
-    foreach ($sortedFeatureGroups as $featureGroup) {
-      $features = array_merge($features, $featureGroup['features']);
-    }
-    
-    $query .= $this->appendLibsToQuery($features);
+    $query .= $this->appendLibsToQuery($sortedFeatures);
     $query .= '&lang=' . urlencode(isset($_GET['lang']) ? $_GET['lang'] : 'en');
     $query .= '&country=' . urlencode(isset($_GET['country']) ? $_GET['country'] : 'US');
     if (substr($query, 0, 1) == '&') {

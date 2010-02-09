@@ -28,7 +28,8 @@ class GadgetFeatureRegistry {
   public $features;
   private $coreDone = false;
   private $coreFeaturs;
-
+  private $sortedFeatures;
+  
   public function __construct($featurePath) {
     $this->registerFeatures($featurePath);
   }
@@ -86,90 +87,41 @@ class GadgetFeatureRegistry {
     return $ret;
   }
 
-  public function resolveFeatures($needed, &$resultsFound, &$resultsMissing, $isExpand) {
+  public function resolveFeatures($needed, &$resultsFound, &$resultsMissing) {
     $resultsFound = array();
     $resultsMissing = array();
     if (! count($needed)) {
-      // Shortcut for gadgets that don't have any explicit dependencies.
-      $resultsFound = $this->coreFeatures;
-      return true;
+      $needed = $this->coreFeatures;
     }
     foreach ($needed as $featureName) {
       $feature = isset($this->features[$featureName]) ? $this->features[$featureName] : null;
       if ($feature == null) {
         $resultsMissing[] = $featureName;
       } else {
-        $this->addFeatureToResults($resultsFound, $feature, $isExpand);
+        $this->addFeatureToResults($resultsFound, $feature);
       }
     }
     return count($resultsMissing) == 0;
   }
   
-  public function sortFeatures($features, $forcedJsLibs, &$sortedFeatureGroups) {
-    $sortedFeatureGroups = array();
-    if (empty($features)) return;
-
-    // Topological sorting with constrain
-    // Build the topology matrix
+  public function sortFeatures($features, &$sortedFeatures) {
+    if (empty($features)) {
+      return;
+    }
     $sortedFeatures = array();
-    $reverseDeps = array();
-    foreach ($features as $feature) {
-      $reverseDeps[$feature] = array();
-    }
-    $depCount = array();
-    foreach ($features as $feature) {
-      $deps = $this->features[$feature]['deps'];
-      $deps = array_uintersect($deps, $features, "strcasecmp");
-      $depCount[$feature] = count($deps);
-      foreach ($deps as $dep) {
-        $reverseDeps[$dep][] = $feature;
+    foreach ($this->sortedFeatures as $feature) {
+      if (in_array($feature, $features)) {
+        $sortedFeatures[] = $feature;
       }
-    }
-    
-    // iterate to do the sorting
-    $prevIsForcedJsLibs = true;
-    $featureQueue = array();
-    while (! empty($depCount)) {
-      $fail = true;
-      while (! empty($depCount)) {  // get grouped features greedily
-        $foundAll = true;
-        foreach ($depCount as $feature => $count) {
-          if ($count != 0) continue;
-          $fail = false; // found at least one root node
-          if ((! $prevIsForcedJsLibs) ^ in_array($feature, $forcedJsLibs)) {
-            $foundAll = false;
-            $featureQueue[] = $feature;
-            foreach ($reverseDeps[$feature] as $reverseDep) {
-              $depCount[$reverseDep] -= 1;
-            }
-            unset($depCount[$feature]);
-          }
-        }
-        if ($foundAll) break;
-      }
-      if ($fail) {
-        throw new GadgetException("Sorting feature dependence failed: it contains ring!");
-      }
-      if (! empty($featureQueue)) {
-        if ($prevIsForcedJsLibs) {
-          $sortedFeatureGroups[] = array('type' => 'external', 'features' => $featureQueue);
-        } else {
-          $sortedFeatureGroups[] = array('type' => 'inline', 'features' => $featureQueue);
-        }
-      }
-      $prevIsForcedJsLibs = ! $prevIsForcedJsLibs;
-      $featureQueue = array();
     }
   }
   
-  private function addFeatureToResults(&$results, $feature, $isExpand) {
+  private function addFeatureToResults(&$results, $feature) {
     if (in_array($feature['name'], $results)) {
       return;
     }
-    if ($isExpand) {
-      foreach ($feature['deps'] as $dep) {
-        $this->addFeatureToResults($results, $this->features[$dep], true);
-      }
+    foreach ($feature['deps'] as $dep) {
+      $this->addFeatureToResults($results, $this->features[$dep]);
     }
     if (!in_array($feature['name'], $results)) {
       $results[] = $feature['name'];
@@ -214,6 +166,41 @@ class GadgetFeatureRegistry {
         $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
       }
     }
+    // Topologically sort all features according to their dependency
+    $features = array();
+    foreach ($this->features as $feature) {
+      $features[] = $feature['name'];
+    }
+    $sortedFeatures = array();
+    $reverseDeps = array();
+    foreach ($features as $feature) {
+      $reverseDeps[$feature] = array();
+    }
+    $depCount = array();
+    foreach ($features as $feature) {
+      $deps = $this->features[$feature]['deps'];
+      $deps = array_uintersect($deps, $features, "strcasecmp");
+      $depCount[$feature] = count($deps);
+      foreach ($deps as $dep) {
+        $reverseDeps[$dep][] = $feature;
+      }
+    }
+    while (! empty($depCount)) {
+      $fail = true;
+      foreach ($depCount as $feature => $count) {
+        if ($count != 0) continue;
+        $fail = false;
+        $sortedFeatures[] = $feature;
+        foreach ($reverseDeps[$feature] as $reverseDep) {
+          $depCount[$reverseDep] -= 1;
+        }
+        unset($depCount[$feature]);
+      }
+      if ($fail && ! empty($depCount)) {
+        throw new GadgetException("Sorting feature dependence failed: it contains ring!");
+      }
+    }
+    $this->sortedFeatures = $sortedFeatures;
   }
 
   /**
