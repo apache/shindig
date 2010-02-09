@@ -30,7 +30,7 @@ class RpcRequestItem extends RequestItem {
       throw new SocialSpiException("Missing method in RPC call");
     }
     parent::__construct($rpc['method'], $rpc['method'], $token);
-    if (isset($rpc->params)) {
+    if (isset($rpc['params'])) {
       $this->data = $rpc['params'];
     } else {
       $this->data = array();
