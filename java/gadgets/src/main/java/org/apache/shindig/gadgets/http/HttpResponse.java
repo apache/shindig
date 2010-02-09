@@ -468,7 +468,7 @@ public final class HttpResponse implements Externalizable {
           String charset = parts[1].substring(offset + 8).toUpperCase();
           // Some servers include quotes around the charset:
           //   Content-Type: text/html; charset="UTF-8"
-          if (charset.charAt(0) == '"') {
+          if (charset.length() >= 2 && charset.startsWith("\"") && charset.endsWith("\"")) {
             charset = charset.substring(1, charset.length() - 1);
           }
           
