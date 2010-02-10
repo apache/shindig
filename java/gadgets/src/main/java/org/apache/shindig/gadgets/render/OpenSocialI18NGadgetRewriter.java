@@ -27,8 +27,10 @@ import org.apache.shindig.common.util.ResourceLoader;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +44,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
   private static final String DATA_PATH = "features/i18n/data/";
   private Map<Locale, String> i18nConstantsCache = new ConcurrentHashMap<Locale, String>();
 
-  public void rewrite(Gadget gadget, MutableContent mutableContent) {
+  public void rewrite(Gadget gadget, MutableContent mutableContent) throws RewritingException {
     // Don't touch sanitized gadgets.
     if (gadget.sanitizeOutput()) {
       return;
@@ -58,9 +60,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       injectI18NConstants(gadget, head);
       mutableContent.documentChanged();
     } catch (GadgetException e) {
-      // TODO: Rewriter interface needs to be modified to handle GadgetException or
-      // RewriterException or something along those lines.
-      throw new RuntimeException(e);
+      throw new RewritingException(e, e.getHttpStatusCode());
     } 
   } 
 
@@ -80,7 +80,8 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
         i18nConstantsCache.put(locale, inlineJs.toString());
       } catch (IOException e) {
         throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
-            "Unexpected inability to load i18n data for locale: " + localeName);
+            "Unexpected inability to load i18n data for locale: " + localeName,
+            HttpResponse.SC_INTERNAL_SERVER_ERROR);
       }
     }
     Element inlineTag = headTag.getOwnerDocument().createElement("script");

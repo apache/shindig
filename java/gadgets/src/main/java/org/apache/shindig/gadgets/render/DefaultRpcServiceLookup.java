@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.render;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Multimap;

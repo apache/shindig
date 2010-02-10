@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.shindig.gadgets.http.HttpResponse;
+
 /**
  * Base class for all Gadget exceptions. The bulk of the code uses
  * this class directly, differentiating between error conditions by
@@ -80,27 +82,52 @@ public class GadgetException extends Exception {
   }
 
   private final Code code;
+  private final int httpStatusCode;
+  
+  public GadgetException(Code code, int httpStatusCode) {
+    this.code = code;
+    this.httpStatusCode = httpStatusCode;
+  }
+
+  public GadgetException(Code code, Throwable cause, int httpStatusCode) {
+    super(cause);
+    this.code = code;
+    this.httpStatusCode = httpStatusCode;
+  }
+
+  public GadgetException(Code code, String msg, Throwable cause, int httpStatusCode) {
+    super(msg, cause);
+    this.code = code;
+    this.httpStatusCode = httpStatusCode;
+  }
+
+  public GadgetException(Code code, String msg, int httpStatusCode) {
+    super(msg);
+    this.code = code;
+    this.httpStatusCode = httpStatusCode;
+  }
 
   public GadgetException(Code code) {
-    this.code = code;
+    this(code, HttpResponse.SC_INTERNAL_SERVER_ERROR);
   }
 
   public GadgetException(Code code, Throwable cause) {
-    super(cause);
-    this.code = code;
+    this(code, cause, HttpResponse.SC_INTERNAL_SERVER_ERROR);
   }
 
   public GadgetException(Code code, String msg, Throwable cause) {
-    super(msg, cause);
-    this.code = code;
+    this(code, msg, cause, HttpResponse.SC_INTERNAL_SERVER_ERROR);
   }
 
   public GadgetException(Code code, String msg) {
-    super(msg);
-    this.code = code;
+    this(code, msg, HttpResponse.SC_INTERNAL_SERVER_ERROR);
   }
 
   public Code getCode() {
     return code;
+  }
+  
+  public int getHttpStatusCode() {
+    return httpStatusCode;
   }
 }

@@ -24,6 +24,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class CssRequestRewriter implements RequestRewriter {
   }
 
   public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
+      MutableContent content) throws RewritingException {
     if (!RewriterUtils.isCss(request, original)) {
       return false;
     }
@@ -87,7 +88,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * @return Empty list of extracted import URIs.
    */
   public List<String> rewrite(Reader content, Uri source,
-      LinkRewriter rewriter, Writer writer, boolean extractImports) {
+      LinkRewriter rewriter, Writer writer, boolean extractImports) throws RewritingException {
     try {
       String original = IOUtils.toString(content);
       try {
@@ -103,11 +104,11 @@ public class CssRequestRewriter implements RequestRewriter {
           writer.write(original);
           return Collections.emptyList();
         } else {
-          throw new RuntimeException(ge);
+          throw new RewritingException(ge, ge.getHttpStatusCode());
         }
       }
     } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new RewritingException(ioe, HttpResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -121,7 +122,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * @return Empty list of extracted import URIs.
    */
   public List<String> rewrite(Element styleNode, Uri source,
-      LinkRewriter rewriter, boolean extractImports) {
+      LinkRewriter rewriter, boolean extractImports) throws RewritingException {
     try {
       List<Object> stylesheet = cssParser.parse(styleNode.getTextContent());
       List<String> imports = rewrite(stylesheet, source, rewriter, extractImports);
@@ -140,7 +141,7 @@ public class CssRequestRewriter implements RequestRewriter {
               "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
         return Collections.emptyList();
       } else {
-        throw new RuntimeException(ge);
+        throw new RewritingException(ge, ge.getHttpStatusCode());
       }
     }
   }

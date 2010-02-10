@@ -74,7 +74,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
   }
 
   public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
+      MutableContent content) throws RewritingException {
     if (RewriterUtils.isHtml(request, original)) {
       ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
       return rewriteImpl(feature, request.getGadget(), request.getUri(), content,
@@ -84,7 +84,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     return false;
   }
 
-  public void rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
     // Don't rewrite urls if caja is enabled since caja will inline them anyway
     if (gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja") ||
         "1".equals(gadget.getContext().getParameter("caja"))) {
@@ -105,7 +105,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
 
   boolean rewriteImpl(ContentRewriterFeature feature, Uri gadgetUri,
       Uri contentBase, MutableContent content, String container, boolean debug,
-      boolean ignoreCache) {
+      boolean ignoreCache) throws RewritingException {
     if (!feature.isRewriteEnabled() || content.getDocument() == null) {
       return false;
     }
@@ -138,7 +138,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
 
   protected boolean rewriteStyleTags(Element head, List<Element> elementList,
       ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase, String container,
-      boolean debug, boolean ignoreCache) {
+      boolean debug, boolean ignoreCache) throws RewritingException {
     if (!feature.getIncludedTags().contains("style")) {
       return false;
     }

@@ -191,9 +191,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       mutableContent.documentChanged();
     } catch (GadgetException e) {
-      // TODO: Rewriter interface needs to be modified to handle GadgetException or
-      // RewriterException or something along those lines.
-      throw new RewritingException(e.getLocalizedMessage(), e);
+      throw new RewritingException(e.getLocalizedMessage(), e, e.getHttpStatusCode());
     }
   }
 

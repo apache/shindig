@@ -29,12 +29,8 @@ import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.View;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.inject.Inject;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles producing output markup for a gadget based on the provided context.
@@ -94,9 +90,9 @@ public class HtmlRenderer {
       
       return mc.getContent();
     } catch (GadgetException e) {
-      throw new RenderingException(e.getMessage(), e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      throw new RenderingException(e.getMessage(), e, e.getHttpStatusCode());
     } catch (RewritingException e) {
-      throw new RenderingException(e.getMessage(), e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      throw new RenderingException(e.getMessage(), e, e.getHttpStatusCode());
     }
   }
   

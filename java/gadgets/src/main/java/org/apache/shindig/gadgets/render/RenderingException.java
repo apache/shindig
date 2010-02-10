@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Exceptions thrown during gadget rendering.
  *

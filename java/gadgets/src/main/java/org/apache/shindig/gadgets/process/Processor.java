@@ -96,8 +96,7 @@ public class Processor {
           .setSpec(spec)
           .setCurrentView(getView(context, spec));
     } catch (GadgetException e) {
-      throw new ProcessingException(e.getMessage(), e, 
-          HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      throw new ProcessingException(e.getMessage(), e, e.getHttpStatusCode());
     }
   }
 

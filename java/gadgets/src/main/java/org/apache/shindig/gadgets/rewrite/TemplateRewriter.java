@@ -109,16 +109,14 @@ public class TemplateRewriter implements GadgetRewriter {
     this.containerTags = containerTags;
   }
 
-  public void rewrite(Gadget gadget, MutableContent content) {
+  public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
     Feature f = gadget.getSpec().getModulePrefs().getFeatures()
         .get("opensocial-templates");
     if (f != null && isServerTemplatingEnabled(f)) {
       try {
         rewriteImpl(gadget, f, content);
       } catch (GadgetException ge) {
-        // TODO: Rewriter interface needs to be modified to handle GadgetException or
-        // RewriterException or something along those lines.
-        throw new RuntimeException(ge);
+        throw new RewritingException(ge, ge.getHttpStatusCode());
       }
     }
   }

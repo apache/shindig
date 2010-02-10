@@ -153,7 +153,7 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
   }
 
   @Test
-  public void testNoRewriteUnknownMimeType() {
+  public void testNoRewriteUnknownMimeType() throws Exception {
     MutableContent mc = control.createMock(MutableContent.class); 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
@@ -163,7 +163,7 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
   }
 
   private void validateRewritten(String content, Uri base,
-      LinkRewriter linkRewriter, String expected) {
+      LinkRewriter linkRewriter, String expected) throws Exception{
     MutableContent mc = new MutableContent(null, content);
     HttpRequest request = new HttpRequest(base);
     rewriter.rewrite(request,
@@ -172,12 +172,12 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
         StringUtils.deleteWhitespace(mc.getContent()));
   }
 
-  private void validateRewritten(String content, String expected) {
+  private void validateRewritten(String content, String expected) throws Exception {
     validateRewritten(content, dummyUri, defaultLinkRewriter, expected);
   }
 
   @Test
-  public void testUrlDeclarationRewrite() {
+  public void testUrlDeclarationRewrite() throws Exception {
     String original =
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
@@ -190,7 +190,7 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
   }
 
   @Test
-  public void testExtractImports() {
+  public void testExtractImports() throws Exception {
     String original = " @import url(www.example.org/some.css);\n" +
         "@import url('www.example.org/someother.css');\n" +
         "@import url(\"www.example.org/another.css\");\n" +

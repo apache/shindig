@@ -130,6 +130,7 @@ public abstract class AbstractSpecFactory<T> {
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                                 "Unable to retrieve spec for " + query.specUri + ". HTTP error " +
+                                response.getHttpStatusCode(),
                                 response.getHttpStatusCode());
     }
 
@@ -223,7 +224,7 @@ public abstract class AbstractSpecFactory<T> {
   protected static class SpecRetrievalFailedException extends GadgetException {
     SpecRetrievalFailedException(Uri specUri, int code) {
       super(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
-            "Unable to retrieve spec for " + specUri + ". HTTP error " + code);
+            "Unable to retrieve spec for " + specUri + ". HTTP error " + code, code);
     }
   }
 }
