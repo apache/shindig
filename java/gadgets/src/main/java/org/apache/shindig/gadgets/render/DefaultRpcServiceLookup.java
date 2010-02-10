@@ -65,9 +65,10 @@ public class DefaultRpcServiceLookup implements RpcServiceLookup {
    * @return Map of Services, by endpoint for the given container.
    */
   public Multimap<String, String> getServicesFor(String container, String host) {
-    Preconditions.checkNotNull(container);
-    Preconditions.checkArgument(container.length() != 0);
-    Preconditions.checkNotNull(host);
+    // Support empty container or host by providing empty services:
+    if (container == null || container.length() == 0 || host == null) {
+      return ImmutableMultimap.<String, String>builder().build();
+    }
 
     Multimap<String, String> foundServices = containerServices.get(container);
     if (foundServices == null) {

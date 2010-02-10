@@ -51,11 +51,11 @@ public class DefaultRpcServiceLookupTest extends Assert {
     assertEquals(0, services.size());
   }
 
-  @Test(expected=Exception.class)
+  @Test
   public void testGetServicesForContainer_Null() throws Exception {
     String container = null;
-    svcLookup.getServicesFor(container, host);
-    fail("Should have thrown an exception for an invalid container");
+    Multimap<String, String> services = svcLookup.getServicesFor(container, host);
+    assertEquals(0, services.size());
   }
 
   @Test
