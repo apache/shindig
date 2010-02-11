@@ -131,7 +131,7 @@ public abstract class AbstractSpecFactory<T> {
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
                                 "Unable to retrieve spec for " + query.specUri + ". HTTP error " +
                                 response.getHttpStatusCode(),
-                                response.getHttpStatusCode());
+                                HttpResponse.SC_BAD_GATEWAY);
     }
 
     try {

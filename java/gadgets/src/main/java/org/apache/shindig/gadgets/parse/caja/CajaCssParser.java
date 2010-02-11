@@ -21,6 +21,7 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.CssLexer;
@@ -50,8 +51,6 @@ import java.util.logging.Logger;
 
 /** A CSS DOM parser using Caja. */
 public class CajaCssParser {
-
-  private static final Logger log = Logger.getLogger(CajaCssParser.class.getName());
 
   /**
    * Dummy URI that is never read from. Needed to construct Caja parser
@@ -89,7 +88,9 @@ public class CajaCssParser {
           parsedCssCache.addElement(key, parsedCss);
         }
       } catch (ParseException pe) {
-        throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe);
+        // Bad input; not server's fault.
+        throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe,
+            HttpResponse.SC_BAD_REQUEST);
       }
     }
     if (shouldCache) {

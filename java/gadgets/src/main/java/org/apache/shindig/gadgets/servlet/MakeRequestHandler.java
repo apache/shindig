@@ -92,7 +92,8 @@ public class MakeRequestHandler extends ProxyBase {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
       } catch (RewritingException e) {
-        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+            e.getHttpStatusCode());
       }
     }
 
@@ -129,7 +130,7 @@ public class MakeRequestHandler extends ProxyBase {
         String[] parts = StringUtils.splitPreserveAllTokens(header, '=');
         if (parts.length != 2) {
           throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-              "Malformed header param specified:" + header);
+              "Malformed header param specified:" + header, HttpResponse.SC_BAD_REQUEST);
         }
         String headerName = Utf8UrlCoder.decode(parts[0]);
         if (!HttpRequestHandler.BAD_HEADERS.contains(headerName.toUpperCase())) {
@@ -191,7 +192,10 @@ public class MakeRequestHandler extends ProxyBase {
       req.setPostBody(getParameter(request, POST_DATA_PARAM, "")
           .getBytes(encoding.toUpperCase()));
     } catch (UnsupportedEncodingException e) {
-      throw new GadgetException(Code.HTML_PARSE_ERROR, e);
+      // We might consider enumerating at least a small list of encodings
+      // that we must always honor. For now, we return SC_BAD_REQUEST since
+      // the encoding parameter could theoretically be anything.
+      throw new GadgetException(Code.HTML_PARSE_ERROR, e, HttpResponse.SC_BAD_REQUEST);
     }    
   }
 
@@ -221,8 +225,7 @@ public class MakeRequestHandler extends ProxyBase {
     return JsonSerializer.serialize(Collections.singletonMap(originalUrl, resp));
   }
 
-  protected RequestPipeline getRequestPipeline()
-  {
+  protected RequestPipeline getRequestPipeline() {
     return requestPipeline;
   }
 
@@ -233,6 +236,7 @@ public class MakeRequestHandler extends ProxyBase {
   private SecurityToken extractAndValidateToken(HttpServletRequest request) throws GadgetException {
     SecurityToken token = new AuthInfo(request).getSecurityToken();
     if (token == null) {
+      // TODO: Determine appropriate external error code for this.
       throw new GadgetException(GadgetException.Code.INVALID_SECURITY_TOKEN);
     }
     return token;

@@ -139,13 +139,14 @@ public class ProxyHandler extends ProxyBase {
       String msg = "Embed request for url " + getParameter(request, URL_PARAM, "") +
           " made to wrong domain " + host;
       logger.info(msg);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg);
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
+          HttpResponse.SC_BAD_REQUEST);
     }
 
     HttpRequest rcr = buildHttpRequest(request, URL_PARAM);
     if (rcr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "No url paramater in request");      
+          "No url paramater in request", HttpResponse.SC_BAD_REQUEST);      
     }
     HttpResponse results = requestPipeline.execute(rcr);
     
@@ -161,7 +162,8 @@ public class ProxyHandler extends ProxyBase {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
       } catch (RewritingException e) {
-        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+            e.getHttpStatusCode());
       }
     }
 

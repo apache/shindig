@@ -168,7 +168,8 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
   private HttpResponse fetch(HttpGadgetContext context) throws GadgetException {
 
     if (context.getUrl() == null) {
-      throw new GadgetException(Code.INVALID_PARAMETER, "Missing url paramater");
+      throw new GadgetException(Code.INVALID_PARAMETER, "Missing url paramater",
+          HttpResponse.SC_BAD_REQUEST);
     }
 
     HttpRequest request = new HttpRequest(context.getUrl())

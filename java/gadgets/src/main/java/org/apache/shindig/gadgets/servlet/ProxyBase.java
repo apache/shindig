@@ -70,14 +70,14 @@ public abstract class ProxyBase {
   protected Uri validateUrl(String urlToValidate) throws GadgetException {
     if (urlToValidate == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "url parameter is missing.");
+          "url parameter is missing.", HttpResponse.SC_BAD_REQUEST);
     }
     try {
       UriBuilder url = UriBuilder.parse(urlToValidate);
       if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
             "Invalid request url scheme in url: " + Utf8UrlCoder.encode(urlToValidate) +
-            "; only \"http\" and \"https\" supported.");
+            "; only \"http\" and \"https\" supported.", HttpResponse.SC_BAD_REQUEST);
       }
       if (url.getPath() == null || url.getPath().length() == 0) {
         url.setPath("/");
@@ -85,7 +85,7 @@ public abstract class ProxyBase {
       return url.toUri();
     } catch (IllegalArgumentException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "url parameter is not a valid url: " + urlToValidate);
+          "url parameter is not a valid url: " + urlToValidate, HttpResponse.SC_BAD_REQUEST);
     }
   }
 
@@ -127,7 +127,7 @@ public abstract class ProxyBase {
         refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "refresh parameter is not a number");
+            "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
       }
     } else {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
@@ -177,17 +177,11 @@ public abstract class ProxyBase {
   protected void outputError(HttpServletResponse resp, GadgetException e)
       throws IOException {
     
-    int responseCode;
     Level level = Level.FINE;
-    
-    switch (e.getCode()) {
-      case INTERNAL_SERVER_ERROR:
-        responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-        level = Level.WARNING;
-        break;
-      default:
-        responseCode = HttpServletResponse.SC_BAD_REQUEST;
-        break;
+    int responseCode = HttpResponse.SC_BAD_REQUEST;
+    if (e.getCode() == GadgetException.Code.INTERNAL_SERVER_ERROR) {
+      level = Level.WARNING;
+      responseCode = e.getHttpStatusCode();
     }
     
     logger.log(level, "Request failed", e);

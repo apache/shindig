@@ -33,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -95,12 +96,14 @@ public class CajaHtmlParser extends GadgetHtmlParser {
         for (Message m : mq.getMessages()) {
           err.append(m.toString()).append("\n");
         }
-        throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, err.toString());
+        throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, err.toString(),
+            HttpResponse.SC_BAD_REQUEST);
       }
       return fragment;
     } catch (ParseException e) {
       throw new GadgetException(
-          GadgetException.Code.HTML_PARSE_ERROR, e.getCajaMessage().toString());
+          GadgetException.Code.HTML_PARSE_ERROR, e.getCajaMessage().toString(),
+          HttpResponse.SC_BAD_REQUEST);
     }
   }
 

@@ -25,6 +25,7 @@ import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,9 +114,11 @@ public class FeedProcessor {
       // This shouldn't ever happen.
       throw new RuntimeException(e);
     } catch (FeedException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
+          HttpResponse.SC_BAD_GATEWAY);
     } catch (IllegalArgumentException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
+          HttpResponse.SC_BAD_GATEWAY);
     }
   }
 }

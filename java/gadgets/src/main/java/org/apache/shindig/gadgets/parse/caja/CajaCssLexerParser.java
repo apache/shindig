@@ -21,6 +21,7 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.CssLexer;
@@ -137,7 +138,8 @@ public class CajaCssLexerParser {
       }
       parsedCss.add(builder.toString());
     } catch (ParseException pe) {
-      throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe);
+      throw new GadgetException(GadgetException.Code.CSS_PARSE_ERROR, pe,
+          HttpResponse.SC_BAD_REQUEST);
     }
     return parsedCss;
   }

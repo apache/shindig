@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.oauth;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
 
 import com.google.common.collect.Maps;
@@ -210,7 +211,7 @@ public class OAuthArguments {
       return UseToken.NEVER;
     }
     throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-        "Unknown use token value " + useTokenStr);
+        "Unknown use token value " + useTokenStr, HttpResponse.SC_BAD_REQUEST);
   }
 
   /**

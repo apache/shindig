@@ -88,7 +88,8 @@ public class TemplateLibraryFactory {
 
       return new XmlTemplateLibrary(uri, element, content);
     } catch (XmlException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
+          HttpResponse.SC_BAD_REQUEST);
     }
   }
   
