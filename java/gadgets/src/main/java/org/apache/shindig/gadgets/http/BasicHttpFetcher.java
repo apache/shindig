@@ -28,6 +28,7 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpVersion;
@@ -63,6 +64,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +81,8 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A simple HTTP fetcher implementation based on Apache httpclient. Not recommended for production deployments until
@@ -245,14 +250,48 @@ public class BasicHttpFetcher implements HttpFetcher {
     }
   }
 
-  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request) {
+  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request) 
+      throws GadgetException {
     HttpUriRequest httpMethod = null;
     Preconditions.checkNotNull(request);
     final String methodType = request.getMethod();
-    final String requestUri = request.getUri().toString();
 
     final org.apache.http.HttpResponse response;
     final long started = System.currentTimeMillis();
+
+    // Break the request Uri to its components:
+    Uri uri = request.getUri();
+    if (StringUtils.isEmpty(uri.getAuthority())) {
+      throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
+          "Missing domain name for request: " + uri,
+          HttpServletResponse.SC_BAD_REQUEST);
+    }
+    if (StringUtils.isEmpty(uri.getScheme())) {
+      throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
+          "Missing schema for request: " + uri,
+          HttpServletResponse.SC_BAD_REQUEST);
+    }
+    String[] hostparts = uri.getAuthority().split(":");
+    int port = -1; // default port
+    if (hostparts.length > 2) {
+      throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
+          "Bad host name in request: " + uri.getAuthority(),
+          HttpServletResponse.SC_BAD_REQUEST);
+    }
+    if (hostparts.length == 2) {
+      try {
+        port = Integer.parseInt(hostparts[1]);
+      } catch (NumberFormatException e) {
+        throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
+            "Bad port number in request: " + uri.getAuthority(),
+            HttpServletResponse.SC_BAD_REQUEST);
+      }
+    }
+    HttpHost host = new HttpHost(hostparts[0], port, uri.getScheme());   
+    String requestUri = uri.getPath();
+    if (uri.getQuery() != null) {
+      requestUri += "?" + uri.getQuery();
+    }
 
     try {
       if ("POST".equals(methodType) || "PUT".equals(methodType)) {
@@ -277,8 +316,10 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       if (!request.getFollowRedirects())
         httpMethod.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-      
-      response = FETCHER.execute(httpMethod);
+
+      // HttpClient doesn't handle all cases when breaking url (specifically '_' in domain)
+      // So lets pass it the url parsed:
+      response = FETCHER.execute(host, httpMethod);
 
       if (response == null)
         throw new IOException("Unknown problem with request");
@@ -299,13 +340,15 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       // Find timeout exceptions, respond accordingly
       if (TIMEOUT_EXCEPTIONS.contains(e.getClass())) {
-        LOG.warning("Timeout for " + request.getUri() + " Exception: " + e.getClass().getName() + " - " + e.getMessage() + " - " + (now - started) + "ms");
+        LOG.info("Timeout for " + request.getUri() + " Exception: " + e.getClass().getName() + " - " + e.getMessage() + " - " + (now - started) + "ms");
         return HttpResponse.timeout();
       }
 
-      LOG.log(Level.WARNING, "Got Exception fetching " + request.getUri() + " - " + (now - started) + "ms", e);
+      LOG.log(Level.INFO, "Got Exception fetching " + request.getUri() + " - " + (now - started) + "ms", e);
 
-      return HttpResponse.error();
+      // Separate shindig error from external error 
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+          HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } finally {
       // cleanup any outstanding resources..
       if (httpMethod != null) try {

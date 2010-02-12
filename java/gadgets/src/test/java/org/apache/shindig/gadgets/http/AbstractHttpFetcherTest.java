@@ -19,10 +19,14 @@
 package org.apache.shindig.gadgets.http;
 
 import junitx.framework.ArrayAssert;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.GadgetException;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -47,6 +51,61 @@ public abstract class AbstractHttpFetcherTest {
     if (server != null) {
       server.stop();
     }
+  }
+
+  @Test public void testHttpBadHost() throws Exception {
+    Uri uri = Uri.parse("http://a:b:c/");
+    HttpRequest request = new HttpRequest(uri);
+    try {
+      HttpResponse response = fetcher.fetch(request);
+      fail("Expected GadgetException");
+    } catch (GadgetException e) {
+      assertEquals(400, e.getHttpStatusCode());
+      assertTrue(e.getMessage().contains("Bad host name in request"));
+    }    
+  }
+
+  @Test public void testHttpBadPort() throws Exception {
+    Uri uri = Uri.parse("http://a:b/");
+    HttpRequest request = new HttpRequest(uri);
+    try {
+      HttpResponse response = fetcher.fetch(request);
+      fail("Expected GadgetException");
+    } catch (GadgetException e) {
+      assertEquals(400, e.getHttpStatusCode());
+      assertTrue(e.getMessage().contains("Bad port number in request"));
+    }    
+  }
+
+  @Test public void testHttpBadUrl() throws Exception {
+    Uri uri = Uri.parse("host/data");
+    HttpRequest request = new HttpRequest(uri);
+    try {
+      HttpResponse response = fetcher.fetch(request);
+      fail("Expected GadgetException");
+    } catch (GadgetException e) {
+      assertEquals(400, e.getHttpStatusCode());
+      assertTrue(e.getMessage().contains("Missing domain name for request"));
+    }    
+  }
+
+  @Test public void testHttpNoSchema() throws Exception {
+    Uri uri = Uri.parse("//host/data");
+    HttpRequest request = new HttpRequest(uri);
+    try {
+      HttpResponse response = fetcher.fetch(request);
+      fail("Expected GadgetException");
+    } catch (GadgetException e) {
+      assertEquals(400, e.getHttpStatusCode());
+      assertTrue(e.getMessage().contains("Missing schema for request"));
+    }    
+  }
+
+  @Test public void testHttpUnderscore() throws Exception {
+    Uri uri = Uri.parse("http://0.test_host.com/data");
+    HttpRequest request = new HttpRequest(uri);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(504, response.getHttpStatusCode()); //timeout
   }
 
   @Test public void testHttpFetch() throws Exception {

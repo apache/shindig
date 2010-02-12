@@ -103,7 +103,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
     expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("gmodules.com/gadgets/accel"))
+    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
         .once();
     expect(request.getQueryString()).andReturn("url=" + url).once();
     expect(renderer.render(isA(GadgetContext.class)))
@@ -114,6 +114,58 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     verify();
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void testHtmlAccelRewriteErrorCode() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>This is error page</body></html>";
+    
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(404)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expect(request.getParameter("url")).andReturn(url).once();
+    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
+        .once();
+    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    
+    servlet.doGet(request, recorder);
+    verify();
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(404, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void testHtmlAccelRewriteInternalError() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>This is error page</body></html>";
+    
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(500)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expect(request.getParameter("url")).andReturn(url).once();
+    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
+        .once();
+    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    
+    servlet.doGet(request, recorder);
+    verify();
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(502, recorder.getHttpStatusCode());
   }
 
   @Test
@@ -141,7 +193,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
     expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("gmodules.com/gadgets/accel"))
+    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
         .once();
     expect(request.getQueryString()).andReturn("url=" + url).once();
     replay();

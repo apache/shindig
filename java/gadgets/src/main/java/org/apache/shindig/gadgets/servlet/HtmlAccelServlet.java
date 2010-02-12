@@ -106,7 +106,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     try {
       data = fetch(context);
     } catch (GadgetException e) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      resp.sendError(e.getHttpStatusCode(), e.getMessage());
       return;
     }
     
@@ -115,7 +115,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error fetching data");
       return;
     }
-    
+
     // If not html, just return data
     if (!isHtmlContent(data)) {
       respondVerbatim(data, resp);
@@ -153,6 +153,14 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     
     // Call the gadget renderer to rewrite content:
     super.doGet(reqWrapper,resp);
+    
+    // Pass original return code:
+    if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+      // Convert external "internal error" to gateway error
+      resp.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+    } else if (data.getHttpStatusCode() >= 400) {
+      resp.setStatus(data.getHttpStatusCode());
+    }
   }
 
   @Override
@@ -191,6 +199,10 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
       }
     }
     response.setStatus(results.getHttpStatusCode());
+    if (results.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+      // Convert external "internal error" to gateway error
+      response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+    }
     IOUtils.copy(results.getResponse(), response.getOutputStream());
   }
 

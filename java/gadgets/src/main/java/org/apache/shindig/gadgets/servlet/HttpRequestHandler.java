@@ -236,10 +236,10 @@ public class HttpRequestHandler {
       }
       return httpApiResponse;
     } catch (GadgetException ge) {
-      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+      throw new ProtocolException(ge.getHttpStatusCode(),
           ge.getMessage(), ge);
     } catch (RewritingException re) {
-      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+      throw new ProtocolException(re.getHttpStatusCode(),
           re.getMessage(), re);
     }
   }

@@ -61,9 +61,14 @@ public class TemplateLibraryFactory {
     request.setCacheTtl(300);
     HttpResponse response = pipeline.execute(request);
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
+      int retcode = response.getHttpStatusCode();
+      if (retcode == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+        // Convert external "internal error" to gateway error: 
+        retcode = HttpResponse.SC_BAD_GATEWAY;
+      }
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
           "Unable to retrieve template library xml. HTTP error " +
-          response.getHttpStatusCode());      
+          response.getHttpStatusCode(), retcode);      
     }
     
     String content = response.getResponseAsString();

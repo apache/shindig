@@ -194,7 +194,12 @@ public class ProxyHandler extends ProxyBase {
     setResponseHeaders(request, response, results);
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {
-      response.sendError(results.getHttpStatusCode());
+      if (results.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+        // External "internal error" should be mapped to gateway error
+        response.sendError(HttpResponse.SC_BAD_GATEWAY);
+      } else {
+        response.sendError(results.getHttpStatusCode());
+      }
     }
 
     IOUtils.copy(results.getResponse(), response.getOutputStream());
