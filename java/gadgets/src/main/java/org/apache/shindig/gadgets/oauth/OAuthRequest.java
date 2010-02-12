@@ -500,7 +500,13 @@ public class OAuthRequest {
       case URL_ONLY:
         break;
       case URL_AND_FORM_PARAMS:
-        params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+        try {
+          params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
+        } catch (IllegalArgumentException e) {
+          // Occurs if OAuth.decodeForm finds an invalid URL to decode.
+          throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
+              "Could not decode body", e);
+        }
         break;
       case URL_AND_BODY_HASH:
         try {
