@@ -69,7 +69,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
   @Inject
   public void setCacheProvider(CacheProvider cacheProvider) {
     cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
-    System.err.println("Cajoled cache created" + cajoledCache);
+    logger.info("Cajoled cache created" + cajoledCache);
   }
 
   public void rewrite(Gadget gadget, MutableContent content) {
