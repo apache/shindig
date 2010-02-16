@@ -146,6 +146,23 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   }
 
   @Test
+  public void testGetRequestWithBadTtl() throws Exception {
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").anyTimes();
+
+    Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(requestCapture))).andReturn(new HttpResponse(RESPONSE_BODY));
+
+    replay();
+
+    handler.fetch(request, recorder);
+
+    HttpRequest httpRequest = requestCapture.getValue();
+    assertEquals(null, recorder.getHeader("Cache-Control"));
+    assertEquals(-1, httpRequest.getCacheTtl());
+  }
+
+
+  @Test
   public void testExplicitHeaders() throws Exception {
     String headerString = "X-Foo=bar&X-Bar=baz%20foo";
 

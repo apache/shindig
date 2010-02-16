@@ -22,6 +22,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.UrlValidationStatus;
+import org.apache.shindig.gadgets.http.BasicHttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
@@ -29,8 +30,10 @@ import org.apache.shindig.gadgets.render.RenderingResults;
 import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +43,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class GadgetRenderingServlet extends InjectedServlet {
   static final int DEFAULT_CACHE_TTL = 60 * 5;
+
+  private static final Logger LOG = Logger.getLogger(GadgetRenderingServlet.class.getName());
+
   private Renderer renderer;
   private UrlGenerator urlGenerator;
 
@@ -81,8 +87,13 @@ public class GadgetRenderingServlet extends InjectedServlet {
           // with a query parameter.
           int ttl = DEFAULT_CACHE_TTL;
           String ttlStr = req.getParameter(ProxyBase.REFRESH_PARAM);
-          if (ttlStr != null) {
-            ttl = Integer.parseInt(ttlStr);
+          if (!StringUtils.isEmpty(ttlStr)) {
+            try {
+              ttl = Integer.parseInt(ttlStr);
+            } catch (NumberFormatException e) {
+              // Ignore malformed TTL value
+              LOG.info("Bad TTL value '" + ttlStr + "' was ignored");
+            }
           }
           HttpUtil.setCachingHeaders(resp, ttl, true);
         }

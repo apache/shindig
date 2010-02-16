@@ -69,6 +69,28 @@ public class GadgetRenderingServletTest {
   }
 
   @Test
+  public void renderWithTtl() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok("working"));
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120");
+    control.replay();
+    servlet.doGet(request, recorder);
+    assertEquals("private,max-age=120", recorder.getHeader("Cache-Control"));
+  }
+
+  @Test
+  public void renderWithBadTtl() throws Exception {
+    servlet.setRenderer(renderer);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok("working"));
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("");
+    control.replay();
+    servlet.doGet(request, recorder);
+    assertEquals("private,max-age=300", recorder.getHeader("Cache-Control"));
+  }
+
+  @Test
   public void normalResponse() throws Exception {
     servlet.setRenderer(renderer);
     expect(renderer.render(isA(GadgetContext.class)))

@@ -203,6 +203,66 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
   }
 
+  /**
+   * Override HttpRequest equals to check for cache control fields
+   */
+  static class HttpRequestCache extends HttpRequest {
+    public HttpRequestCache(Uri uri) {
+      super(uri);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof HttpRequest) {
+        HttpRequest req = (HttpRequest)obj;
+        if (req.getCacheTtl() != getCacheTtl() || req.getIgnoreCache() != getIgnoreCache()) {
+          return false;
+        }
+      }
+      return super.equals(obj);
+    }
+  }
+
+  @Test
+  public void testWithCache() throws Exception {
+    String url = "http://example.org/file.evil";
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").atLeastOnce();
+
+    HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(120).setIgnoreCache(false);
+    HttpResponse resp = new HttpResponse("Hello");
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
+  }
+
+  @Test
+  public void testWithBadTtl() throws Exception {
+    String url = "http://example.org/file.evil";
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").atLeastOnce();
+
+    HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(-1).setIgnoreCache(false);
+    HttpResponse resp = new HttpResponse("Hello");
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
+  }
+
   @Test
   public void testXForwardedFor() throws Exception {
     String url = "http://example.org/";

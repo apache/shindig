@@ -75,8 +75,13 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     boolean ignoreCache = proxyHandler.getIgnoreCache(request);
     if (!ignoreCache && request.getParameter(ProxyBase.REFRESH_PARAM) != null) {
-        HttpUtil.setCachingHeaders(response, Integer.valueOf(request
+      try {
+        HttpUtil.setCachingHeaders(response, Integer.parseInt(request
             .getParameter(ProxyBase.REFRESH_PARAM)));
+      } catch (NumberFormatException e) {
+        // Ignore malform ttl:
+        HttpUtil.setNoCache(response);        
+      }
     } else {
       HttpUtil.setNoCache(response);
     }
