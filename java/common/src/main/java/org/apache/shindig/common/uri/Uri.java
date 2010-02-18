@@ -97,7 +97,17 @@ public final class Uri {
    * @return A new Uri, parsed into components.
    */
   public static Uri parse(String text) {
-    return parser.parse(text);
+    try {
+      return parser.parse(text);
+    } catch (IllegalArgumentException e) {
+      // This occurs all the time. Wrap the exception in a Uri-specific
+      // exception, yet one that remains a RuntimeException, so that
+      // callers may catch a specific exception rather than a blanket
+      // Exception, as a compromise between throwing a checked exception
+      // here (forcing wide-scale refactoring across the code base) and
+      // forcing users to simply catch abstract Exceptions here and there.
+      throw new UriException(e);
+    }
   }
 
   /**
@@ -105,7 +115,7 @@ public final class Uri {
    */
   public static Uri fromJavaUri(URI uri) {
     if (uri.isOpaque()) {
-      throw new IllegalArgumentException("No support for opaque Uris " + uri.toString());
+      throw new UriException("No support for opaque Uris " + uri.toString());
     }
     return new UriBuilder()
         .setScheme(uri.getScheme())
@@ -124,7 +134,7 @@ public final class Uri {
       return new URI(toString());
     } catch (URISyntaxException e) {
       // Shouldn't ever happen.
-      throw new IllegalArgumentException(e);
+      throw new UriException(e);
     }
   }
 
@@ -185,7 +195,7 @@ public final class Uri {
     if (StringUtils.isEmpty(uri.authority) &&
         StringUtils.isEmpty(uri.path) &&
         StringUtils.isEmpty(uri.query)) {
-      throw new IllegalArgumentException("Invalid scheme-specific part");
+      throw new UriException("Invalid scheme-specific part");
     }
   }
 
@@ -386,5 +396,15 @@ public final class Uri {
     if (obj == this) {return true;}
     if (!(obj instanceof Uri)) {return false;}
     return Objects.equal(text, ((Uri)obj).text);
+  }
+  
+  public static class UriException extends IllegalArgumentException {
+    private UriException(Exception e) {
+      super(e);
+    }
+    
+    private UriException(String msg) {
+      super(msg);
+    }
   }
 }
