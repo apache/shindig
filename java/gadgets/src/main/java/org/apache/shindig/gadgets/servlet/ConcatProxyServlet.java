@@ -23,14 +23,8 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,6 +32,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
@@ -106,7 +107,17 @@ public class ConcatProxyServlet extends InjectedServlet {
         break;
       }
       try {
-
+        try {
+          // Validate the url:
+          Uri uri = Uri.parse(url);
+          url = uri.toString();
+        } catch (Uri.UriException e) {
+          // ServletOutputStream.println support only ascii, so lets use write:
+          response.getOutputStream().write(
+              formatHttpError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage())
+                .getBytes("UTF-8"));
+          continue;
+        }
         wrapper.processUrl(url);
         proxyHandler.doFetch(new RequestWrapper(request, url), wrapper);
 
@@ -381,7 +392,7 @@ public class ConcatProxyServlet extends InjectedServlet {
    */
   private static class EscapedServletOutputStream extends ServletOutputStream {
 
-    private ByteArrayOutputStream tempStream;
+    private final ByteArrayOutputStream tempStream;
     protected EscapedServletOutputStream() {
       tempStream = new ByteArrayOutputStream();
     }

@@ -77,7 +77,18 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + data + "/* ---- End " + url + " ---- */\r\n";
     return res;
   }
-  
+
+  private String addErrComment(String url, int code) {
+    String res = "/* ---- Start " + url + " ---- */\r\n"
+        + "/* ---- Error " + code + " ---- */\r\n";
+    return res;
+  }
+
+  private String addErrComment(String url, int code, String msg) {
+    String res = "/* ---- Error " + code + ", " + msg + " ---- */";
+    return res;
+  }
+
   /**
    * Simulate the asJSON result of one script
    * @param url - the script url
@@ -113,7 +124,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString());
     runConcat(results, URL1,URL2);
   }
-  
+
   @Test
   public void testThreeConcat() throws Exception {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString())
@@ -141,6 +152,42 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     verify();
     assertEquals(results, recorder.getResponseAsString());
     assertEquals(400, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void testConcat404() throws Exception {
+    String url = "http://nobodyhome.com/";
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpResponse resp = new HttpResponseBuilder().setHttpStatusCode(404).create();
+    expect(pipeline.execute(req)).andReturn(resp).anyTimes();
+    
+    expect(request.getParameter("1")).andReturn(URL1.toString()).once();
+    expect(request.getParameter("2")).andReturn(url).once();
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+    
+    String results = addComment(SCRT1, URL1.toString()) + addErrComment(url,404);
+    assertEquals(results, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void testConcatBadUrl() throws Exception {
+    String url = "http://\u03C0 1";
+    expect(request.getParameter("1")).andReturn(URL1.toString()).once();
+    expect(request.getParameter("2")).andReturn(url).once();
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+
+    // Note that the results is a bit out of order. 
+    String results = addComment(SCRT1 + addErrComment(url, 400,
+        "java.lang.IllegalArgumentException: " +
+        "java.net.URISyntaxException: Illegal character in authority at index 7: " + url),
+        URL1.toString());
+    assertEquals(results, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
   }
 
   @Test
