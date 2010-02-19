@@ -398,6 +398,10 @@ public final class Uri {
     return Objects.equal(text, ((Uri)obj).text);
   }
   
+  /**
+   * Interim typed, but not checked, exception facilitating migration
+   * of Uri methods to throwing a checked UriException later.
+   */
   public static class UriException extends IllegalArgumentException {
     private UriException(Exception e) {
       super(e);
