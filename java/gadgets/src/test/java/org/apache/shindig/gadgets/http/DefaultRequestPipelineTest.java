@@ -17,15 +17,16 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.collect.Maps;
+import com.google.inject.Provider;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
-
-import com.google.common.collect.Maps;
-import com.google.inject.Provider;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.Map;
@@ -87,6 +88,49 @@ public class DefaultRequestPipelineTest {
     HttpResponse response = pipeline.execute(request);
 
     assertEquals(fetched, response);
+    assertEquals(request, fetcher.request);
+    assertEquals(fetched, cache.data.get(DEFAULT_URI));
+    assertEquals(1, cache.readCount);
+    assertEquals(1, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneStaleCachedServed() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder().setCacheTtl(-1).create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    fetcher.response = HttpResponse.error();
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(cached, response); // cached item is served instead of 500
+    assertEquals(request, fetcher.request);
+    assertEquals(1, cache.readCount);
+    assertEquals(0, cache.writeCount);
+    assertEquals(1, fetcher.fetchCount);
+  }
+
+  @Test
+  public void authTypeNoneWasCachedErrorStale() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    HttpResponse cached = new HttpResponseBuilder()
+        .setCacheTtl(-1)
+        .setHttpStatusCode(401)
+        .create();
+    cache.data.put(DEFAULT_URI, cached);
+
+    HttpResponse fetched = HttpResponse.error();
+    fetcher.response = fetched;
+
+    HttpResponse response = pipeline.execute(request);
+
+    assertEquals(fetched, response); // 500 served because cached is an error (401)
     assertEquals(request, fetcher.request);
     assertEquals(fetched, cache.data.get(DEFAULT_URI));
     assertEquals(1, cache.readCount);

@@ -24,6 +24,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
@@ -32,10 +35,6 @@ import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
@@ -228,7 +227,7 @@ public class AbstractHttpCacheTest {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     String key = cache.createKey(request);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
-    cache.map.put(key, response);
+    cache.addResponse(request, response);
 
     assertNull("Did not return null when response was uncacheable", cache.getResponse(request));
   }
@@ -340,7 +339,7 @@ public class AbstractHttpCacheTest {
   }
 
   @Test
-  public void removeResponseIsNoLongerUsable() {
+  public void removeResponseIsStaled() {
     long expiration = System.currentTimeMillis() + 1000L;
     HttpRequest request = new HttpRequest(DEFAULT_URI);
     String key = cache.createKey(request);
@@ -353,8 +352,9 @@ public class AbstractHttpCacheTest {
 
     cache.setClock(fakeClock);
 
-    assertNull("Returned an expired entry when removing from the cache.",
-               cache.removeResponse(request));
+    // The cache itself still hold and return staled value, 
+    // caller responsible to decide what to do about it 
+    assertEquals(response, cache.removeResponse(request));
     assertEquals(0, cache.map.size());
   }
 

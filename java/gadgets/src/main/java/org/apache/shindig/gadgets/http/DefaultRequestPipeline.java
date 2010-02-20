@@ -17,14 +17,14 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
 /**
  * A standard implementation of a request pipeline. Performs request caching and
@@ -54,6 +54,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   public HttpResponse execute(HttpRequest request) throws GadgetException {
     normalizeProtocol(request);
     HttpResponse invalidatedResponse = null;
+    HttpResponse staleResponse = null;
 
     if (!request.getIgnoreCache()) {
       HttpResponse cachedResponse = httpCache.getResponse(request);
@@ -65,6 +66,11 @@ public class DefaultRequestPipeline implements RequestPipeline {
             return cachedResponse;
           } else {
             invalidatedResponse = cachedResponse;
+          }
+        } else {
+          if (!cachedResponse.isError()) {
+            // Remember good but stale cached response, to be served if server unavailable
+            staleResponse = cachedResponse;
           }
         }
       }
@@ -89,6 +95,12 @@ public class DefaultRequestPipeline implements RequestPipeline {
       return invalidatedResponse;
     }
 
+    if (fetchedResponse.getHttpStatusCode() >= 500 && staleResponse != null) {
+      // If we have trouble accessing the remote server,
+      // Lets try the latest good but staled result 
+      return staleResponse;
+    }
+    
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       fetchedResponse = imageRewriter.rewrite(request, fetchedResponse);
     }

@@ -21,11 +21,11 @@ import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
 
+import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
-
-import com.google.inject.Inject;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
@@ -228,13 +228,12 @@ public abstract class AbstractHttpCache implements HttpCache {
   }
 
   /**
-   * Utility function to verify that an entry is cacheable and not expired
+   * Utility function to verify that an entry is usable
+   * The cache still serve staled data, it is the responsible of the user
+   * to decide if to use it or not (use isStale).
    * @return true If the response can be used.
    */
   protected boolean responseStillUsable(HttpResponse response) {
-    if (response == null) {
-      return false;
-    }
-    return response.getCacheExpiration() > clock.currentTimeMillis();
+    return response != null;
   }
 }
