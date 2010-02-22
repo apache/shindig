@@ -17,16 +17,24 @@
  */
 package org.apache.shindig.common.uri;
 
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static junitx.framework.Assert.assertNotEquals;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static junitx.framework.Assert.assertNotEquals;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Tests for UriBuilder
@@ -389,5 +397,75 @@ public class UriBuilderTest {
     assertNotEquals(uri, Uri.parse("http://example.org/foo/bar/baz?blah=blah#boo"));
 
     assertEquals(uri.hashCode(), uri2.hashCode());
+  }
+  
+  @Test
+  public void constructFromServletRequestHttpStandardPortAndModify() {
+    HttpServletRequest req = createMock(HttpServletRequest.class);
+    expect(req.getScheme()).andReturn("http").once();
+    expect(req.getServerName()).andReturn("example.com");
+    expect(req.getServerPort()).andReturn(80).once();
+    expect(req.getRequestURI()).andReturn("/my/path");
+    expect(req.getQueryString()).andReturn("foo=bar&baz=bak");
+    replay(req);
+    
+    UriBuilder builder = new UriBuilder(req);
+    verify(req);
+    
+    assertEquals("http://example.com/my/path?foo=bar&baz=bak", builder.toString());
+    assertEquals("bar", builder.getQueryParameter("foo"));  // sanity check on a single param
+    assertEquals(0, builder.getFragmentParameters().size());  // shouldn't NPE
+    
+    // Simple modification
+    builder.setPath("/other/path");
+    assertEquals("http://example.com/other/path?foo=bar&baz=bak", builder.toString());
+  }
+  
+  @Test
+  public void constructFromServletRequestHttpsStandardPort() {
+    HttpServletRequest req = createMock(HttpServletRequest.class);
+    expect(req.getScheme()).andReturn("https").once();
+    expect(req.getServerName()).andReturn("example.com");
+    expect(req.getServerPort()).andReturn(443).once();
+    expect(req.getRequestURI()).andReturn("/my/path");
+    expect(req.getQueryString()).andReturn("foo=bar&baz=bak");
+    replay(req);
+    
+    UriBuilder builder = new UriBuilder(req);
+    verify(req);
+    
+    assertEquals("https://example.com/my/path?foo=bar&baz=bak", builder.toString());
+  }
+  
+  @Test
+  public void constructFromServletRequestNonStandardPort() {
+    HttpServletRequest req = createMock(HttpServletRequest.class);
+    expect(req.getScheme()).andReturn("HtTp").once();  // Shouldn't happen but try anyway.
+    expect(req.getServerName()).andReturn("example.com");
+    expect(req.getServerPort()).andReturn(5000).once();
+    expect(req.getRequestURI()).andReturn("/my/path");
+    expect(req.getQueryString()).andReturn("one=two&three=four");
+    replay(req);
+    
+    UriBuilder builder = new UriBuilder(req);
+    verify(req);
+    
+    assertEquals("http://example.com:5000/my/path?one=two&three=four", builder.toString());
+  }
+  
+  @Test
+  public void constructFromServletRequestNonePort() {
+    HttpServletRequest req = createMock(HttpServletRequest.class);
+    expect(req.getScheme()).andReturn("http").once();  // Shouldn't happen but try anyway.
+    expect(req.getServerName()).andReturn("example.com");
+    expect(req.getServerPort()).andReturn(-1).once();  // No port specified (0 or -1)
+    expect(req.getRequestURI()).andReturn("/my/path");
+    expect(req.getQueryString()).andReturn("one=two&three=four");
+    replay(req);
+    
+    UriBuilder builder = new UriBuilder(req);
+    verify(req);
+    
+    assertEquals("http://example.com/my/path?one=two&three=four", builder.toString());
   }
 }

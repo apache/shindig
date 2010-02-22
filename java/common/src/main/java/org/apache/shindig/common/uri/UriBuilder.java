@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Constructs Uris from inputs.
@@ -54,6 +55,22 @@ public class UriBuilder {
     path = uri.getPath();
     query = new ParamString(uri.getQuery());
     fragment = new ParamString(uri.getFragment());
+  }
+  
+  /**
+   * Construct a new builder from a servlet request.
+   */
+  public UriBuilder(HttpServletRequest req) {
+    scheme = req.getScheme().toLowerCase();
+    int serverPort = req.getServerPort();
+    authority = req.getServerName() +
+        ((serverPort == 80 && "http".equals(scheme)) ||
+         (serverPort == 443 && "https".equals(scheme)) ||
+         (serverPort <= 0) ? "" :
+           ":" + serverPort);
+    path = req.getRequestURI();
+    query = new ParamString(req.getQueryString());
+    fragment = new ParamString();
   }
 
   /**
