@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;

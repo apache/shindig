@@ -32,7 +32,7 @@ import com.google.inject.Inject;
  *
  * GET and POST are supported so as to facilitate improved browser caching.
  *
- * Currently this just delegates to ProxyHandler, which deals with both
+ * Currently this just delegates to MakeRequestHandler, which deals with both
  * makeRequest and open proxy calls.
  */
 public class MakeRequestServlet extends InjectedServlet {

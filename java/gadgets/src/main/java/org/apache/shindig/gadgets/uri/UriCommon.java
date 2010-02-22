@@ -22,6 +22,7 @@ public interface UriCommon {
   public static final String USER_PREF_PREFIX = "up_";
   public enum Param {
     URL("url"),
+    GADGET("gadget"),
     CONTAINER("container"),
     VIEW("view"),
     LANG("lang"),
@@ -31,7 +32,10 @@ public interface UriCommon {
     VERSION("v"),
     SECURITY_TOKEN("st"),
     MODULE_ID("mid"),
-    LIBS("libs");
+    REFRESH("refresh"),
+    LIBS("libs"),
+    JSON("json"),
+    TYPE("type");
    
     private final String key;
     private Param(String key) {

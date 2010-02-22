@@ -105,6 +105,6 @@ public class HttpUtil {
   }
 
   public static void setDefaultTtl(int defaultTtl) {
-    defaultTtl = defaultTtl;
+    HttpUtil.defaultTtl = defaultTtl;
   }
 }
