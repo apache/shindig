@@ -17,18 +17,25 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.GadgetSpecFactory;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -40,338 +47,361 @@ import java.util.regex.Pattern;
  * result. For legacy applications include-urls and exclude-urls, which are
  * regular expressions as well as a common seperated list in include-tags.
  * Default values are container specific.
- * 
- * TODO: This really needs to be fixed, because it makes GadgetSpec mutable. It
- * is *ONLY* needed by code in the rewrite package.
  */
 public class ContentRewriterFeature {
-
   protected static final String INCLUDE_URLS = "include-urls";
   protected static final String EXCLUDE_URLS = "exclude-urls";
   protected static final String INCLUDE_URL = "include-url";
   protected static final String EXCLUDE_URL = "exclude-url";
   protected static final String INCLUDE_TAGS = "include-tags";
   protected static final String EXPIRES = "expires";
+  
+  public static final Integer EXPIRES_DEFAULT = -1;  // -1 = Use HTTP.
 
-  public static final String EXPIRES_DEFAULT = "HTTP";
-
-  // Use tree set to maintain order for fingerprint
-  protected Set<String> includeTags;
-
-  protected enum PATTERNS {
+  protected enum PatternOptions {
     ALL, NONE, REGEX, STRINGS
   }
-
-  protected PATTERNS includePatterns;
-  protected PATTERNS excludePatterns;
-
-  protected Pattern includePattern;
-  protected Pattern excludePattern;
-  protected Pattern excludeOverridePattern;
-  protected Collection<String> includes;
-  protected Collection<String> excludes;
-
-  // If null then dont enforce a min TTL for proxied content. Use contents
-  // headers
-  protected Integer expires;
-
-  protected Integer fingerprint;
-
+  
   /**
-   * Constructor which takes a gadget spec and the default container settings
-   * 
-   * @param spec
-   * @param defaultInclude
-   *          As a regex
-   * @param defaultExclude
-   *          As a regex
-   * @param defaultExpires
-   *          Either "HTTP" or a ttl in seconds
-   * @param defaultTags
-   *          Set of default tags that can be rewritten
+   * Factory for content rewriter features.
    */
-  public ContentRewriterFeature(GadgetSpec spec, String defaultInclude,
-      String defaultExclude, String defaultExpires, Set<String> defaultTags,
-      boolean onlyAllowExcludes) {
-    Feature f = null;
-    if (spec != null) {
-      f = spec.getModulePrefs().getFeatures().get("content-rewrite");
-    }
-    setUpIncludes(f, defaultInclude, onlyAllowExcludes);
-    setUpExcludes(f, defaultExclude, onlyAllowExcludes);
-    setUpIncludeTags(f, defaultTags, onlyAllowExcludes);
-    setUpExpires(f, defaultExpires, onlyAllowExcludes);
-  }
+  @Singleton
+  public static class Factory {
+    private final GadgetSpecFactory specFactory;
+    private final Config defaultConfig;
 
-  protected void setUpExpires(Feature f, String defaultExpires,
-      boolean onlyAllowExcludes) {
-    Integer defaultExpiresVal = null;
-    try {
-      defaultExpiresVal = new Integer(defaultExpires);
-    } catch (NumberFormatException e) {
-      // ignore
+    @Inject
+    public Factory(GadgetSpecFactory specFactory, DefaultConfig defaultConfig) {
+      this.specFactory = specFactory;
+      this.defaultConfig = defaultConfig;
     }
-    List<String> expiresOptions = Lists.newArrayListWithCapacity(3);
-    if (f != null) {
-      if (f.getParams().containsKey(EXPIRES)) {
-        String p = normalizeParam(f.getParam(EXPIRES), null);
-        Integer expiresParamVal = null;
+
+    public Config getDefault() {
+      return defaultConfig;
+    }
+    
+    public Config get(HttpRequest request) {
+      return get(request.getGadget());
+    }
+
+    public Config get(final Uri gadgetUri) {
+      GadgetSpec spec;
+      if (gadgetUri != null) {
         try {
-          expiresParamVal = new Integer(p);
-        } catch (NumberFormatException e) {
-          // ignore
+          GadgetContext context = new GadgetContext() {
+            @Override
+            public Uri getUrl() {
+              return gadgetUri;
+            }
+          };
+
+          spec = specFactory.getGadgetSpec(context);
+          if (spec != null) {
+            return get(spec);
+          }
+        } catch (GadgetException ge) {
+          // Falls through to default.
         }
-        if (!onlyAllowExcludes || defaultExpiresVal == null
-            || (expiresParamVal != null && expiresParamVal < defaultExpiresVal))
-          expiresOptions.add(p);
       }
+      return defaultConfig;
     }
 
-    expiresOptions.add(defaultExpires);
-    expiresOptions.add(EXPIRES_DEFAULT);
+    public Config get(GadgetSpec spec) {
+      Config rewriterFeature =
+          (Config)spec.getAttribute("content-rewriter");
+      if (rewriterFeature != null) return rewriterFeature;
+      rewriterFeature = new Config(spec, defaultConfig);
+      spec.setAttribute("content-rewriter", rewriterFeature);
+      return rewriterFeature;
+    }
 
-    for (String expiryOption : expiresOptions) {
-      try {
-        expires = new Integer(expiryOption);
-        break;
-      } catch (NumberFormatException nfe) {
-        // Not an integer
-        if (EXPIRES_DEFAULT.equalsIgnoreCase(expiryOption)) {
-          break;
-        }
-      }
+    /**
+     * Create a rewriter feature that allows all URIs to be rewritten.
+     */
+    public Config createRewriteAllFeature(int ttl) {
+      return new Config(
+          ".*", "", (ttl == -1) ? "HTTP" : Integer.toString(ttl),
+          "", false, true);
     }
   }
+  
+  @Singleton
+  public static class DefaultConfig extends Config {
+    @Inject
+    public DefaultConfig(
+        @Named("shindig.content-rewrite.include-urls")String includeUrls,
+        @Named("shindig.content-rewrite.exclude-urls")String excludeUrls,
+        @Named("shindig.content-rewrite.expires")String expires,
+        @Named("shindig.content-rewrite.include-tags")String includeTags,
+        @Named("shindig.content-rewrite.only-allow-excludes")String onlyAllowExcludes,
+        @Named("shindig.content-rewrite.enable-split-js-concat")String enableSplitJsConcat) {
+      super(includeUrls, excludeUrls, expires, includeTags,
+          Boolean.parseBoolean(onlyAllowExcludes), Boolean.parseBoolean(enableSplitJsConcat));
+    }
+  }
+  
+  public static class Config {
+    private final MatchBundle includes;
+    private final MatchBundle excludes;
 
-  protected void setUpIncludeTags(Feature f, Set<String> defaultTags,
-      boolean onlyAllowExcludes) {
-    this.includeTags = ImmutableSortedSet.copyOf(defaultTags);
-    if (f != null) {
-      String includeTagList = f.getParam(INCLUDE_TAGS);
-      if (includeTagList != null) {
-        Set<String> tags = Sets.newTreeSet();
-        for (String tag : StringUtils.split(includeTagList, ',')) {
-          if (tag != null) {
-            tags.add(tag.trim().toLowerCase());
+    // Use tree set to maintain order for fingerprint
+    private final Set<String> includeTags;
+
+    // If null then dont enforce a min TTL for proxied content.
+    // Use contents headers
+    private final Integer expires;
+    private final boolean onlyAllowExcludes;
+    private final boolean enableSplitJs;
+    
+    // Lazily computed
+    private Integer fingerprint;
+    
+    /**
+     * Constructor which takes a gadget spec and container settings
+     * as "raw" input strings.
+     * 
+     * @param defaultInclude As a regex
+     * @param defaultExclude As a regex
+     * @param defaultExpires Either "HTTP" or a ttl in seconds
+     * @param defaultTags Set of default tags that can be rewritten
+     * @param onlyAllowExcludes If includes are always implicitly "all"
+     * @param enableSplitJs If split-JS technique is enabled
+     */
+    Config(String defaultInclude,
+        String defaultExclude, String defaultExpires, String defaultTags,
+        boolean onlyAllowExcludes, boolean enableSplitJs) {
+      // Set up includes from defaultInclude param
+      this.includes = getMatchBundle(paramTrim(defaultInclude),
+          Collections.<String>emptyList());
+      
+      // Set up excludes from defaultExclude param
+      this.excludes = getMatchBundle(paramTrim(defaultExclude),
+          Collections.<String>emptyList());
+
+      // Parse includeTags
+      ImmutableSet.Builder<String> includeTagsBuilder = ImmutableSet.builder();
+      for (String s : paramTrim(defaultTags).toLowerCase().split("\\s*,\\s*")) {
+        if (s != null && s.length() > 0) {
+          includeTagsBuilder.add(s);
+        }
+      }
+      this.includeTags = includeTagsBuilder.build();
+      
+      // Parse expires field
+      int expiresVal = EXPIRES_DEFAULT;
+      try {
+        expiresVal = Integer.parseInt(paramTrim(defaultExpires));
+      } catch (NumberFormatException e) {
+        // Fall through to default.
+      }
+      this.expires = expiresVal;
+      
+      // Save config for onlyAllowExcludes
+      this.onlyAllowExcludes = onlyAllowExcludes;
+      this.enableSplitJs = enableSplitJs;
+    }
+    
+    Config(GadgetSpec spec, Config defaultConfig) {
+      this.onlyAllowExcludes = defaultConfig.onlyAllowExcludes;
+      
+      Feature f = spec.getModulePrefs().getFeatures().get("content-rewrite");
+      
+      // Include overrides.
+      // Note: Shindig originally supported the plural versions with regular
+      // expressions. But the OpenSocial specification v0.9 allows for singular
+      // spellings, with multiple values. Plus they are case insensitive substrings.
+      // For backward compatibility, if the singular versions are present they
+      // will override the plural versions. 10/6/09
+      String includeRegex = defaultConfig.includes.param;
+      Collection<String> includeUrls = Lists.newArrayList();
+      if (f != null && !onlyAllowExcludes) {
+        if (f.getParams().containsKey(INCLUDE_URLS)) {
+          includeRegex = f.getParam(INCLUDE_URLS);
+        }
+        Collection<String> paramUrls = f.getParamCollection(INCLUDE_URL);
+        for (String url : paramUrls) {
+          includeUrls.add(url.trim().toLowerCase());
+        }
+      }
+      this.includes = getMatchBundle(includeRegex, includeUrls);
+      
+      // Exclude overrides. Only use the exclude regex specified by the
+      // gadget spec if !onlyAllowExcludes.
+      String excludeRegex = defaultConfig.excludes.param;
+      Collection<String> excludeUrls = Lists.newArrayList();
+      if (f != null) {
+        if (f.getParams().containsKey(EXCLUDE_URLS)) {
+          excludeRegex = f.getParam(EXCLUDE_URLS);
+        }
+        Collection<String> eParamUrls = f.getParamCollection(EXCLUDE_URL);
+        for (String url : eParamUrls) {
+          excludeUrls.add(url.trim().toLowerCase());
+        }
+      }
+      this.excludes = getMatchBundle(excludeRegex, excludeUrls);
+      
+      // Spec-specified include tags.
+      Set<String> tagsVal = null;
+      if (f != null && f.getParams().containsKey(INCLUDE_TAGS)) {
+        tagsVal = Sets.newTreeSet();
+        for (String tag : StringUtils.split(f.getParam(INCLUDE_TAGS), ',')) {
+          if (!StringUtils.isEmpty(tag)) {
+            tagsVal.add(tag.trim().toLowerCase());
           }
         }
         if (onlyAllowExcludes) {
-          tags.retainAll(defaultTags);
+          // Only excludes are allowed. Keep only subset of
+          // specified tags that are in the defaults.
+          tagsVal.retainAll(defaultConfig.includeTags);
         }
-        includeTags = tags;
-      }
-    }
-  }
-
-  // Note: Shindig originally supported the plural versions with regular
-  // expressions. But the OpenSocial specification v0.9 allows for singular
-  // spellings, with multiple values. Plus they are case insensitive substrings.
-  // For backward compatibility, if the singular versions are present they
-  // will override the plural versions. 10/6/09
-
-  protected void setUpIncludes(Feature f, String defaultInclude,
-      boolean onlyAllowExcludes) {
-    String includeRegex = normalizeParam(defaultInclude, null);
-
-    if (f != null && !onlyAllowExcludes) {
-      if (f.getParams().containsKey(INCLUDE_URLS)) {
-        includeRegex = normalizeParam(f.getParam(INCLUDE_URLS), includeRegex);
-      }
-
-      Collection<String> includeUrls = f.getParamCollection(INCLUDE_URL);
-      if (includeUrls.isEmpty()) {
-        includes = Collections.emptyList();
-      } else if (includeUrls.contains("*")) {
-        includes = Collections.singleton("*");
       } else {
-        includes = new ArrayList<String>(includeUrls.size());
-        for (String s : includeUrls) {
-          if (s.length() > 0)
-            includes.add(s.toLowerCase());
+        tagsVal = ImmutableSortedSet.copyOf(defaultConfig.includeTags);
+      }
+      this.includeTags = tagsVal;
+
+      // Let spec/feature override if present and smaller than default.
+      int expiresVal = defaultConfig.expires;
+      if (f != null && f.getParams().containsKey(EXPIRES)) {
+        try {
+          int overrideVal = Integer.parseInt(f.getParam(EXPIRES));
+          expiresVal = Math.min(overrideVal, expiresVal);
+        } catch (NumberFormatException e) {
+          // Falls through to default.
+          if ("HTTP".equalsIgnoreCase(f.getParam(EXPIRES).trim())) {
+            expiresVal = EXPIRES_DEFAULT;
+          }
         }
       }
-    } else {
-      includes = Collections.emptyList();
+      this.expires = expiresVal;
+      this.enableSplitJs = defaultConfig.enableSplitJs;
     }
-
-    if (includes.isEmpty()
-        && (includeRegex == null || "".equals(includeRegex))) {
-      includePatterns = PATTERNS.NONE;
-    } else if (includes.size() > 0) {
-      if (includes.size() == 1 && "*".equals(includes.iterator().next())) {
-        includePatterns = PATTERNS.ALL;
-      } else {
-        includePatterns = PATTERNS.STRINGS;
+    
+    private String paramTrim(String param) {
+      if (param == null) {
+        return param;
       }
-    } else {
-      if (".*".equals(includeRegex)) {
-        includePatterns = PATTERNS.ALL;
-      } else {
-        includePatterns = PATTERNS.REGEX;
-      }
-      includePattern = Pattern.compile(includeRegex);
+      
+      return param.trim();
     }
-  }
-
-  protected void setUpExcludes(Feature f, String defaultExclude,
-      boolean onlyAllowExcludes) {
-    String excludeRegex = normalizeParam(defaultExclude, null);
-    String excludeOverrideRegex = onlyAllowExcludes ? excludeRegex : null;
-
-    if (f != null) {
-      // Note use of default for exclude as null here to allow clearing value in
-      // the presence of a container default.
-      if (f.getParams().containsKey(EXCLUDE_URLS)) {
-        excludeRegex = normalizeParam(f.getParam(EXCLUDE_URLS), null);
-      }
-
-      Collection<String> excludeUrls = f.getParamCollection(EXCLUDE_URL);
-      if (excludeUrls.isEmpty()) {
-        excludes = Collections.emptyList();
-      } else if (excludeUrls.contains("*")) {
-        excludes = Collections.singleton("*");
-      } else {
-        excludes = new ArrayList<String>(excludeUrls.size());
-        // Override Shindig defaults
-        excludeRegex = null;
-        for (String s : excludeUrls) {
-          if (s.length() > 0)
-            excludes.add(s.toLowerCase());
+    
+    private MatchBundle getMatchBundle(String regex, Collection<String> matches) {
+      MatchBundle bundle = new MatchBundle();
+      bundle.param = regex;
+      bundle.matches = matches;
+      
+      if (bundle.matches.isEmpty() && StringUtils.isEmpty(bundle.param)) {
+        bundle.options = PatternOptions.NONE;
+      } else if (bundle.matches.size() == 1) {
+        String firstVal = bundle.matches.iterator().next();
+        if ("*".equals(firstVal)) {
+          bundle.options = PatternOptions.ALL;
+        } else if ("".equals(firstVal)){
+          bundle.options = PatternOptions.NONE;
+        } else {
+          bundle.options = PatternOptions.STRINGS;
         }
-      }
-    } else {
-      excludes = Collections.emptyList();
-    }
-
-    if (excludes.isEmpty()
-        && (excludeRegex == null || "".equals(excludeRegex))) {
-      excludePatterns = PATTERNS.NONE;
-    } else if (excludes.size() > 0) {
-      if (excludes.size() == 1 && "*".equals(excludes.iterator().next())) {
-        excludePatterns = PATTERNS.ALL;
+      } else if (bundle.matches.size() > 1) {
+        bundle.options = PatternOptions.STRINGS;
       } else {
-        excludePatterns = PATTERNS.STRINGS;
+        if (".*".equals(bundle.param)) {
+          bundle.options = PatternOptions.ALL;
+        } else {
+          bundle.options = PatternOptions.REGEX;
+        }
+        bundle.pattern = Pattern.compile(bundle.param);
       }
-    } else {
-      if (".*".equals(excludeRegex)) {
-        excludePatterns = PATTERNS.ALL;
-      } else {
-        excludePatterns = PATTERNS.REGEX;
-      }
-      excludePattern = Pattern.compile(excludeRegex);
+      return bundle;
+    }
+    
+    private static class MatchBundle {
+      private String param;
+      private PatternOptions options;
+      private Pattern pattern;
+      private Collection<String> matches;
     }
 
-    if (excludeOverrideRegex != null
-        && !excludeOverrideRegex.equals(excludeRegex)) {
-      excludeOverridePattern = Pattern.compile(excludeOverrideRegex);
-      if (excludePatterns == PATTERNS.NONE)
-        excludePatterns = PATTERNS.REGEX;
+    protected boolean shouldInclude(String url) {
+      return matcherMatches(url, includes);
     }
-  }
 
-  protected String normalizeParam(String paramValue, String defaultVal) {
-    if (paramValue == null) {
-      return defaultVal;
+    protected boolean shouldExclude(String url) {
+      return matcherMatches(url, excludes);
     }
-    paramValue = paramValue.trim();
-    if (paramValue.length() == 0) {
-      return defaultVal;
-    }
-    return paramValue;
-  }
-
-  protected boolean shouldInclude(String url) {
-    switch (includePatterns) {
-    case NONE:
-      return false;
-    case ALL:
-      return true;
-    case REGEX:
-      return includePattern.matcher(url).find();
-    case STRINGS:
-      // "*" is handled by ALL
-      String urllc = url.toLowerCase();
-      for (String substr : includes) {
-        if (urllc.indexOf(substr) >= 0)
-          return true;
-      }
-      return false;
-    }
-    return false;
-  }
-
-  protected boolean shouldExclude(String url) {
-    switch (excludePatterns) {
-    case NONE:
-      return false;
-    case ALL:
-      return true;
-    case REGEX:
-      return (excludeOverridePattern != null && excludeOverridePattern.matcher(
-          url).find())
-          || (excludePattern != null && excludePattern.matcher(url).find());
-    case STRINGS:
-      if (excludeOverridePattern != null
-          && excludeOverridePattern.matcher(url).find())
+    
+    private static boolean matcherMatches(String url, MatchBundle bundle) {
+      switch (bundle.options) {
+      case NONE:
+        return false;
+      case ALL:
         return true;
-      // "*" is handled by ALL
-      String urllc = url.toLowerCase();
-      for (String substr : excludes) {
-        if (urllc.indexOf(substr) >= 0)
-          return true;
+      case REGEX:
+        return bundle.pattern.matcher(url).find();
+      case STRINGS:
+        // "*" is handled by ALL
+        String urllc = url.toLowerCase();
+        for (String substr : bundle.matches) {
+          if (urllc.indexOf(substr) >= 0)
+            return true;
+        }
+        return false;
       }
       return false;
     }
-    return false;
-  }
 
-  public boolean isRewriteEnabled() {
-    return includePatterns != PATTERNS.NONE && excludePatterns != PATTERNS.ALL;
-  }
-
-  public boolean shouldRewriteURL(String url) {
-    return shouldInclude(url) && !shouldExclude(url);
-  }
-
-  public boolean shouldRewriteTag(String tag) {
-    if (tag != null) {
-      return this.includeTags.contains(tag.toLowerCase());
+    public boolean isRewriteEnabled() {
+      return includes.options != PatternOptions.NONE &&
+             excludes.options != PatternOptions.ALL;
     }
-    return false;
-  }
 
-  public Set<String> getIncludedTags() {
-    return includeTags;
-  }
-
-  /**
-   * @return the min TTL to enforce or null if proxy should respect headers
-   */
-  public Integer getExpires() {
-    return expires;
-  }
-
-  /**
-   * @return fingerprint of rewriting rule for cache-busting
-   */
-  public int getFingerprint() {
-    if (fingerprint == null) {
-      int result;
-      result = (includePattern != null ? includePattern.pattern().hashCode()
-          : 0);
-      for (String s : includes) {
-        result = 31 * result + s.hashCode();
-      }
-      result = 31 * result
-          + (excludePattern != null ? excludePattern.pattern().hashCode() : 0);
-      for (String s : excludes) {
-        result = 31 * result + s.hashCode();
-      }
-      for (String s : includeTags) {
-        result = 31 * result + s.hashCode();
-      }
-      fingerprint = result;
+    public boolean shouldRewriteURL(String url) {
+      return shouldInclude(url) && !shouldExclude(url);
     }
-    return fingerprint;
+
+    public boolean shouldRewriteTag(String tag) {
+      if (tag != null) {
+        return this.includeTags.contains(tag.toLowerCase());
+      }
+      return false;
+    }
+
+    public Set<String> getIncludedTags() {
+      return includeTags;
+    }
+
+    /**
+     * @return the min TTL to enforce or null if proxy should respect headers
+     */
+    public Integer getExpires() {
+      return expires;
+    }
+    
+    public boolean isSplitJsEnabled() {
+      return enableSplitJs;
+    }
+
+    /**
+     * @return fingerprint of rewriting rule for cache-busting
+     */
+    public int getFingerprint() {
+      if (fingerprint == null) {
+        int result =
+            (includes.pattern != null ?
+              includes.pattern.pattern().hashCode() : 0);
+        for (String s : includes.matches) {
+          result = 31 * result + s.hashCode();
+        }
+        result = 31 * result +
+            (excludes.pattern != null ?
+              excludes.pattern.pattern().hashCode() : 0);
+        for (String s : excludes.matches) {
+          result = 31 * result + s.hashCode();
+        }
+        for (String s : includeTags) {
+          result = 31 * result + s.hashCode();
+        }
+        fingerprint = result;
+      }
+      return fingerprint;
+    }
   }
 }

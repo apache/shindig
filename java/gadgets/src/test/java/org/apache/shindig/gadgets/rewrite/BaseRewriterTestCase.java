@@ -57,10 +57,11 @@ public abstract class BaseRewriterTestCase {
     replaceDefaultWithMockServer(DEFAULT_PROXY_BASE);
   public static final String MOCK_CONCAT_BASE =
     replaceDefaultWithMockServer(DEFAULT_CONCAT_BASE);
+  protected final String TAGS = "embed,img,script,link,style";
 
   protected Set<String> tags;
-  protected ContentRewriterFeature defaultRewriterFeature;
-  protected ContentRewriterFeatureFactory rewriterFeatureFactory;
+  protected ContentRewriterFeature.Config defaultRewriterFeature;
+  protected ContentRewriterFeature.Factory rewriterFeatureFactory;
   protected LinkRewriter defaultLinkRewriter;
   protected LinkRewriter defaultLinkRewriterNoCache;
   protected LinkRewriter defaultLinkRewriterNoCacheAndDebug;
@@ -73,8 +74,9 @@ public abstract class BaseRewriterTestCase {
 
   @Before
   public void setUp() throws Exception {
-    rewriterFeatureFactory = new ContentRewriterFeatureFactory(null, ".*", "", "86400",
-        "embed,img,script,link,style", "false");
+    rewriterFeatureFactory = new ContentRewriterFeature.Factory(null,
+        new ContentRewriterFeature.DefaultConfig(".*", "", "86400",
+          "embed,img,script,link,style", "false", "false"));
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
     defaultContainerRewriterUris = new ContentRewriterUris(
@@ -177,8 +179,8 @@ public abstract class BaseRewriterTestCase {
     return originalText.replace("test.com", "mock.com");
   }
 
-  ContentRewriterFeatureFactory mockContentRewriterFeatureFactory(
-      ContentRewriterFeature feature) {
+  ContentRewriterFeature.Factory mockContentRewriterFeatureFactory(
+      ContentRewriterFeature.Config feature) {
     return new FakeRewriterFeatureFactory(feature);
   }
 
@@ -238,21 +240,21 @@ public abstract class BaseRewriterTestCase {
     return mc;
   }
 
-  private static class FakeRewriterFeatureFactory extends ContentRewriterFeatureFactory {
-    private final ContentRewriterFeature feature;
+  private static class FakeRewriterFeatureFactory extends ContentRewriterFeature.Factory {
+    private final ContentRewriterFeature.Config feature;
 
-    public FakeRewriterFeatureFactory(ContentRewriterFeature feature) {
-      super(null, ".*", "", "HTTP", "", "false");
+    public FakeRewriterFeatureFactory(ContentRewriterFeature.Config feature) {
+      super(null, new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "", "false", "false"));
       this.feature = feature;
     }
 
     @Override
-    public ContentRewriterFeature get(GadgetSpec spec) {
+    public ContentRewriterFeature.Config get(GadgetSpec spec) {
       return feature;
     }
 
     @Override
-    public ContentRewriterFeature get(HttpRequest request) {
+    public ContentRewriterFeature.Config get(HttpRequest request) {
       return feature;
     }
   }

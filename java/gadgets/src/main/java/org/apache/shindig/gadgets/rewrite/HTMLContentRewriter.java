@@ -57,13 +57,13 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
       "embed", ImmutableSet.of("src")
   );
 
-  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final CssRequestRewriter cssRewriter;
   private final ConcatLinkRewriterFactory concatLinkRewriterFactory;
   private final ProxyingLinkRewriterFactory proxyingLinkRewriterFactory;
 
   @Inject
-  public HTMLContentRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
+  public HTMLContentRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
       CssRequestRewriter cssRewriter,
       ConcatLinkRewriterFactory concatLinkRewriterFactory,
       ProxyingLinkRewriterFactory proxyingLinkRewriterFactory) {
@@ -76,7 +76,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
   public boolean rewrite(HttpRequest request, HttpResponse original,
       MutableContent content) throws RewritingException {
     if (RewriterUtils.isHtml(request, original)) {
-      ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
+      ContentRewriterFeature.Config feature = rewriterFeatureFactory.get(request);
       return rewriteImpl(feature, request.getGadget(), request.getUri(), content,
           request.getContainer(), false, request.getIgnoreCache());
     }
@@ -91,7 +91,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
       return;
     }
     
-    ContentRewriterFeature feature = rewriterFeatureFactory.get(gadget.getSpec());
+    ContentRewriterFeature.Config feature = rewriterFeatureFactory.get(gadget.getSpec());
     Uri contentBase = gadget.getSpec().getUrl();
     View view = gadget.getCurrentView();
     if (view != null && view.getHref() != null) {
@@ -103,7 +103,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
         gadget.getContext().getIgnoreCache());
   }
 
-  boolean rewriteImpl(ContentRewriterFeature feature, Uri gadgetUri,
+  boolean rewriteImpl(ContentRewriterFeature.Config feature, Uri gadgetUri,
       Uri contentBase, MutableContent content, String container, boolean debug,
       boolean ignoreCache) throws RewritingException {
     if (!feature.isRewriteEnabled() || content.getDocument() == null) {
@@ -137,7 +137,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
   }
 
   protected boolean rewriteStyleTags(Element head, List<Element> elementList,
-      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase, String container,
+      ContentRewriterFeature.Config feature, Uri gadgetUri, Uri contentBase, String container,
       boolean debug, boolean ignoreCache) throws RewritingException {
     if (!feature.getIncludedTags().contains("style")) {
       return false;
@@ -190,7 +190,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     return mutated;
   }
 
-  protected boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature feature,
+  protected boolean rewriteJsTags(List<Element> elementList, ContentRewriterFeature.Config feature,
       Uri gadgetUri, Uri contentBase, String container, boolean debug, boolean ignoreCache) {
     if (!feature.getIncludedTags().contains("script")) {
       return false;
@@ -236,7 +236,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
   }
 
   protected boolean rewriteContentReferences(List<Element> elementList,
-      ContentRewriterFeature feature, Uri gadgetUri, Uri contentBase, String container,
+      ContentRewriterFeature.Config feature, Uri gadgetUri, Uri contentBase, String container,
       boolean debug, boolean ignoreCache) {
     boolean mutated = false;
     LinkRewriter rewriter = proxyingLinkRewriterFactory.create(gadgetUri,
@@ -265,7 +265,7 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     return mutated;
   }
 
-  private void concatenateTags(final ContentRewriterFeature feature,
+  private void concatenateTags(final ContentRewriterFeature.Config feature,
       List<Element> tags, Uri gadgetUri, Uri contentBase, String mimeType,
       final String attr, String container, boolean debug, boolean ignoreCache) {
     // Filter out excluded URLs

@@ -35,7 +35,7 @@ public class DefaultProxyingLinkRewriterFactory implements
   }
 
   public ProxyingLinkRewriter create(Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache) {
     return new ProxyingLinkRewriter(rewriterUris, gadgetUri, rewriterFeature,
         container, debug, ignoreCache);

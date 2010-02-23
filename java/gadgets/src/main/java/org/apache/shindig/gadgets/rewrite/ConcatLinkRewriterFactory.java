@@ -25,7 +25,7 @@ import org.apache.shindig.common.uri.Uri;
 @ImplementedBy(DefaultConcatLinkRewriterFactory.class)
 public interface ConcatLinkRewriterFactory {
   public ConcatLinkRewriter create(Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache);
 
 }

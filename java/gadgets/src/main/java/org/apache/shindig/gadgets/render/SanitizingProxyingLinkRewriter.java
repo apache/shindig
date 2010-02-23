@@ -34,7 +34,7 @@ public class SanitizingProxyingLinkRewriter extends ProxyingLinkRewriter {
   private final String expectedMime;
 
   public SanitizingProxyingLinkRewriter(ContentRewriterUris rewriterUris,
-      Uri gadgetUri, ContentRewriterFeature rewriterFeature, String container,
+      Uri gadgetUri, ContentRewriterFeature.Config rewriterFeature, String container,
       String expectedMime, boolean debug, boolean nocache) {
     super(rewriterUris, gadgetUri, rewriterFeature, container, debug, nocache);
     this.expectedMime = expectedMime;

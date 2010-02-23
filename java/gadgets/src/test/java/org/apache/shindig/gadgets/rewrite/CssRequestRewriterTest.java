@@ -49,18 +49,18 @@ public class CssRequestRewriterTest extends BaseRewriterTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    ContentRewriterFeature overrideFeatureNoOverrideExpires = rewriterFeatureFactory
+    ContentRewriterFeature.Config overrideFeatureNoOverrideExpires = rewriterFeatureFactory
         .get(createSpecWithRewrite(".*", ".*exclude.*", null,
             HTMLContentRewriter.TAGS));
-    ContentRewriterFeatureFactory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
+    ContentRewriterFeature.Factory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
     rewriterNoOverrideExpires = new CssRequestRewriter(
         factoryNoOverrideExpires, new CajaCssLexerParser(),
         new DefaultProxyingLinkRewriterFactory(rewriterUris));
 
-    ContentRewriterFeature overrideFeature =
+    ContentRewriterFeature.Config overrideFeature =
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "3600",
             HTMLContentRewriter.TAGS));
-    ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
+    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(overrideFeature);
     rewriter = new CssRequestRewriter(factory, new CajaCssLexerParser(),
         new DefaultProxyingLinkRewriterFactory(rewriterUris));
     dummyUri = Uri.parse("http://www.w3c.org");

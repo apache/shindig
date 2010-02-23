@@ -22,7 +22,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.LinkRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -99,13 +98,13 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
   private final Set<String> allowedTags;
   private final Set<String> allowedAttributes;
   private final CajaCssSanitizer cssSanitizer;
-  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory;
 
   @Inject
   public SanitizingGadgetRewriter(@AllowedTags Set<String> allowedTags,
       @AllowedAttributes Set<String> allowedAttributes,
-      ContentRewriterFeatureFactory rewriterFeatureFactory,
+      ContentRewriterFeature.Factory rewriterFeatureFactory,
       CajaCssSanitizer cssSanitizer,
       SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory) {
     this.allowedTags = allowedTags;
@@ -142,7 +141,7 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
     NodeSanitizer(Gadget gadget) {
       this.context = gadget.getSpec().getUrl();
       Integer expires = rewriterFeatureFactory.getDefault().getExpires();
-      ContentRewriterFeature rewriterFeature =
+      ContentRewriterFeature.Config rewriterFeature =
           rewriterFeatureFactory.createRewriteAllFeature(expires == null ? -1 : expires);
 
       SanitizingProxyingLinkRewriter cssImportRewriter = sanitizingProxyingLinkRewriterFactory

@@ -38,7 +38,7 @@ public class DefaultSanitizingProxyingLinkRewriterFactory implements
   }
 
   public SanitizingProxyingLinkRewriter create(Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container,
+      ContentRewriterFeature.Config rewriterFeature, String container,
       String expectedMime, boolean debug, boolean nocache) {
     return new SanitizingProxyingLinkRewriter(rewriterUris, gadgetUri,
         rewriterFeature, container, expectedMime, debug, nocache);

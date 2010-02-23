@@ -34,14 +34,14 @@ public class ConcatLinkRewriter {
 
   private final ContentRewriterUris rewriterUris;
 
-  private final ContentRewriterFeature rewriterFeature;
+  private final ContentRewriterFeature.Config rewriterFeature;
   private final Uri gadgetUri;
   private final String container;
   private final boolean debug;
   private final boolean ignoreCache;
 
   public ConcatLinkRewriter(ContentRewriterUris rewriterUris, Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache) {
     this.rewriterUris = rewriterUris;
     this.rewriterFeature = rewriterFeature;
@@ -102,7 +102,7 @@ public class ConcatLinkRewriter {
     return concatUris;
   }
 
-  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature feature,
+  protected String getConcatBase(Uri gadgetUri, ContentRewriterFeature.Config feature,
       String mimeType, String container) {
     String concatBaseNoGadget = rewriterUris.getConcatBase(container);
     return concatBaseNoGadget

@@ -29,14 +29,14 @@ import org.apache.shindig.gadgets.servlet.ProxyBase;
 public class ProxyingLinkRewriter implements LinkRewriter {
 
   protected final ContentRewriterUris rewriterUris;
-  protected final ContentRewriterFeature rewriterFeature;
+  protected final ContentRewriterFeature.Config rewriterFeature;
   protected final Uri gadgetUri;
   protected final String container;
   protected final boolean debug;
   protected final boolean ignoreCache;
   
   public ProxyingLinkRewriter(ContentRewriterUris rewriterUris, Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache) {
     this.rewriterUris = rewriterUris;
     this.rewriterFeature = rewriterFeature;
@@ -69,7 +69,8 @@ public class ProxyingLinkRewriter implements LinkRewriter {
           result.append("&debug=1");
         if(ignoreCache)
           result.append("&nocache=1");
-        if (rewriterFeature.getExpires() != null) {
+        if (rewriterFeature.getExpires() != null &&
+            rewriterFeature.getExpires() != ContentRewriterFeature.EXPIRES_DEFAULT) {
           result.append('&').append(ProxyBase.REFRESH_PARAM).append('=').append(rewriterFeature.getExpires().toString());
         }
         return result.toString();

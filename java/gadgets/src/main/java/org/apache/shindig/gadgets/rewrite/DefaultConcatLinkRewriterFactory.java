@@ -38,7 +38,7 @@ public class DefaultConcatLinkRewriterFactory implements
   }
 
   public ConcatLinkRewriter create(Uri gadgetUri,
-      ContentRewriterFeature rewriterFeature, String container, boolean debug,
+      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache) {
     return new ConcatLinkRewriter(rewriterUris, gadgetUri, rewriterFeature,
         container, debug, ignoreCache);

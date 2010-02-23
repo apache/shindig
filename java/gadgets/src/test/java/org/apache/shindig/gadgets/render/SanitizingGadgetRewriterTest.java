@@ -24,7 +24,7 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
@@ -110,8 +110,9 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
   private GadgetRewriter createRewriter(Set<String> tags, Set<String> attributes) {
     Set<String> newTags = new HashSet<String>(tags);
     newTags.addAll(DEFAULT_TAGS);
-    ContentRewriterFeatureFactory rewriterFeatureFactory =
-        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style", "false");
+    ContentRewriterFeature.Factory rewriterFeatureFactory =
+        new ContentRewriterFeature.Factory(null,
+          new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "embed,img,script,link,style", "false", "false"));
     return new SanitizingGadgetRewriter(newTags, attributes, rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new DefaultSanitizingProxyingLinkRewriterFactory(rewriterUris));
   }

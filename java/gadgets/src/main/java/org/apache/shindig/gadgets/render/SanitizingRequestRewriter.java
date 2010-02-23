@@ -27,7 +27,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;
 
@@ -45,12 +44,12 @@ public class SanitizingRequestRewriter implements RequestRewriter {
     Logger.getLogger(SanitizingRequestRewriter.class.getName());
 
   private final CajaCssSanitizer cssSanitizer;
-  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory;
   
   @Inject
   public SanitizingRequestRewriter(
-      ContentRewriterFeatureFactory rewriterFeatureFactory,
+      ContentRewriterFeature.Factory rewriterFeatureFactory,
       CajaCssSanitizer cssSanitizer,
       SanitizingProxyingLinkRewriterFactory sanitizingProxyingLinkRewriterFactory) {
     this.cssSanitizer = cssSanitizer;
@@ -61,7 +60,7 @@ public class SanitizingRequestRewriter implements RequestRewriter {
   public boolean rewrite(HttpRequest request, HttpResponse resp, MutableContent content) {
     // Content fetched through the proxy can stipulate that it must be sanitized.
     if (request.isSanitizationRequested()) {
-      ContentRewriterFeature rewriterFeature =
+      ContentRewriterFeature.Config rewriterFeature =
         rewriterFeatureFactory.createRewriteAllFeature(request.getCacheTtl());
       if (StringUtils.isEmpty(request.getRewriteMimeType())) {
         logger.log(Level.WARNING, "Request to sanitize without content type for "
@@ -130,7 +129,7 @@ public class SanitizingRequestRewriter implements RequestRewriter {
    * Sanitize a CSS file.
    */
   private boolean rewriteProxiedCss(HttpRequest request, HttpResponse response,
-      MutableContent content, ContentRewriterFeature rewriterFeature) {
+      MutableContent content, ContentRewriterFeature.Config rewriterFeature) {
     String sanitized = "";
     try {
       String contentType = response.getHeader("Content-Type");

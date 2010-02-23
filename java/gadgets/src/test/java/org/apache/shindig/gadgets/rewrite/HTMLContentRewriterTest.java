@@ -42,10 +42,10 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    ContentRewriterFeature overrideFeatureNoOverrideExpires = rewriterFeatureFactory
+    ContentRewriterFeature.Config overrideFeatureNoOverrideExpires = rewriterFeatureFactory
         .get(createSpecWithRewrite(".*", ".*exclude.*", null,
             HTMLContentRewriter.TAGS));
-    ContentRewriterFeatureFactory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
+    ContentRewriterFeature.Factory factoryNoOverrideExpires = mockContentRewriterFeatureFactory(overrideFeatureNoOverrideExpires);
 
     rewriterNoOverrideExpires = new HTMLContentRewriter(
         factoryNoOverrideExpires, new CssRequestRewriter(
@@ -54,10 +54,10 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         new DefaultConcatLinkRewriterFactory(rewriterUris),
         new DefaultProxyingLinkRewriterFactory(rewriterUris));
     
-    ContentRewriterFeature overrideFeature = rewriterFeatureFactory
+    ContentRewriterFeature.Config overrideFeature = rewriterFeatureFactory
         .get(createSpecWithRewrite(".*", ".*exclude.*", "3600",
             HTMLContentRewriter.TAGS));
-    ContentRewriterFeatureFactory factory = mockContentRewriterFeatureFactory(overrideFeature);
+    ContentRewriterFeature.Factory factory = mockContentRewriterFeatureFactory(overrideFeature);
 
     rewriter = new HTMLContentRewriter(factory, new CssRequestRewriter(factory,
         new CajaCssLexerParser(), new DefaultProxyingLinkRewriterFactory(

@@ -48,12 +48,12 @@ public class CssRequestRewriter implements RequestRewriter {
 
   private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
 
-  private final ContentRewriterFeatureFactory rewriterFeatureFactory;
+  private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final CajaCssLexerParser cssParser;
   private final ProxyingLinkRewriterFactory proxyingLinkRewriterFactory;
 
   @Inject
-  public CssRequestRewriter(ContentRewriterFeatureFactory rewriterFeatureFactory,
+  public CssRequestRewriter(ContentRewriterFeature.Factory rewriterFeatureFactory,
       CajaCssLexerParser cssParser,
       ProxyingLinkRewriterFactory proxyingLinkRewriterFactory) {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
@@ -66,7 +66,7 @@ public class CssRequestRewriter implements RequestRewriter {
     if (!RewriterUtils.isCss(request, original)) {
       return false;
     }
-    ContentRewriterFeature feature = rewriterFeatureFactory.get(request);
+    ContentRewriterFeature.Config feature = rewriterFeatureFactory.get(request);
     String css = content.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),

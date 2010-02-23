@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterFeatureFactory;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;
 import org.junit.Test;
@@ -53,8 +53,9 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
   }
 
   private RequestRewriter createRewriter(Set<String> tags, Set<String> attributes) {
-    ContentRewriterFeatureFactory rewriterFeatureFactory =
-        new ContentRewriterFeatureFactory(null, ".*", "", "HTTP", "embed,img,script,link,style", "false");
+    ContentRewriterFeature.Factory rewriterFeatureFactory =
+        new ContentRewriterFeature.Factory(null,
+          new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "embed,img,script,link,style", "false", "false"));
     return new SanitizingRequestRewriter(rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new DefaultSanitizingProxyingLinkRewriterFactory(rewriterUris));
   }
