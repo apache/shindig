@@ -153,6 +153,10 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
         
+        Element messagesNode = formatErrors(doc, is, content.getContent(), mq, 
+          /* visible */ false);
+        cajoledOutput.appendChild(messagesNode);
+        
         if (cajoledCache != null) {
           cajoledCache.addElement(key, cajoledOutput);
         }
@@ -163,7 +167,8 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
       } catch (GadgetRewriteException e) {
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
-        createContainerFor(doc, formatErrors(doc, is, content.getContent(), mq));
+        createContainerFor(doc, 
+          formatErrors(doc, is, content.getContent(), mq, false /* visible */));
         logException(e, mq);
         safe = true;
       } finally {
@@ -186,29 +191,30 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
   }
 
   private Element formatErrors(Document doc, InputSource is,
-      CharSequence orig, MessageQueue mq) {
+      CharSequence orig, MessageQueue mq, boolean visible) {
     MessageContext mc = new MessageContext();
     Map<InputSource, CharSequence> originalSrc = Maps.newHashMap();
     originalSrc.put(is, orig);
     mc.addInputSource(is);
     SnippetProducer sp = new SnippetProducer(originalSrc, mc);
 
-    StringBuilder messageText = new StringBuilder();
+    Element errElement = doc.createElement("ul");
+    // Style defined in gadgets.css
+    errElement.setAttribute("class", "gadgets-messages");
+    if (!visible) {
+      errElement.setAttribute("style", "display: none");
+    }
     for (Message msg : mq.getMessages()) {
       // Ignore LINT messages
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
         String snippet = sp.getSnippet(msg);
-        messageText.append(msg.getMessageLevel().name())
-                   .append(' ')
-                   .append(html(msg.format(mc)));
-
-        if (!StringUtils.isEmpty(snippet)) {
-          messageText.append('\n').append(snippet);
-        }
+        String messageText = msg.getMessageLevel().name() + ' ' + 
+          html(msg.format(mc)) + ':' + snippet;
+        Element li = doc.createElement("li");
+        li.appendChild(doc.createTextNode(messageText.toString()));
+        errElement.appendChild(li);
       }
     }
-    Element errElement = doc.createElement("pre");
-    errElement.appendChild(doc.createTextNode(messageText.toString()));
     return errElement;
   }
 

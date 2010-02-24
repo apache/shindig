@@ -174,7 +174,7 @@ public class EndToEndTest {
 
     // Failed output contains only an error block plus a onload script block
     assertEquals(2, body.getChildNodes().getLength());
-    assertEquals("pre", body.getFirstChild().getNodeName());
+    assertEquals("ul", body.getFirstChild().getNodeName());
     assertEquals("script", body.getLastChild().getNodeName());
   }
 

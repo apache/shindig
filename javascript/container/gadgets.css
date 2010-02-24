@@ -59,3 +59,8 @@
 
 .gadgets-log-entry {
 }
+
+// Used to style messages produced during rewriting by CajaContentRewriter
+.gadgets-messages {
+	
+}
