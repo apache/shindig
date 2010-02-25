@@ -42,10 +42,7 @@ var caja___ = (function() {
   var fire = function(globalScope) {
     for (var tamer in tamings___) {
       if (tamings___.hasOwnProperty(tamer)) {
-        // This is just tamings___[tamer](globalScope)
-        // but in a way that does not leak a potent "this"
-        // to the taming functions
-        (1, tamings___[tamer])(globalScope);
+        tamings___[tamer].call(___.USELESS, globalScope);
       }
     }
   }

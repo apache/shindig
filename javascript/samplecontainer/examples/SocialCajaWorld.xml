@@ -40,8 +40,8 @@
         border: 1px;
         padding: 10px 10px;
       }
-      a.visitattack { display: none; color: #0000ff; }
-      a.visitattack:visited { display: none; color: #000000; }
+      a.visitattack { color: #0000ff; }
+      a.visitattack:visited { color: #000000; }
       .name { background:#C3D9FF none repeat scroll 0 0; padding:4px 3px 3px 4px;}
     </style>
     <div id="intro">

@@ -23,8 +23,6 @@
  */
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
-  caja___.whitelistFuncs([
-    [gadgets.json, 'parse'],
-    [gadgets.json, 'stringify']
-  ]);
+    ___.tamesTo(gadgets.json.stringify, safeJSON.stringify);
+    ___.tamesTo(gadgets.json.parse, safeJSON.parse);
 });

@@ -66,6 +66,7 @@ public class EndToEndTest {
     "fetchPersonTest.xml",
     "fetchPeopleTest.xml",
     "errorTest.xml",
+    "jsonTest.xml",
     "cajaTest.xml",
     "failCajaTest.xml",      
     "osapi/personTest.xml",
@@ -105,6 +106,16 @@ public class EndToEndTest {
   @Test
   public void messageBundles() throws Exception {
     executeAllPageTests("messageBundle");
+  }
+
+  @Test
+  public void jsonParse() throws Exception {
+    executeAllPageTests("jsonTest");
+  }
+
+  @Test
+  public void cajaJsonParse() throws Exception {
+    executeAllPageTests("jsonTest", true /* caja */);
   }
 
   @Test

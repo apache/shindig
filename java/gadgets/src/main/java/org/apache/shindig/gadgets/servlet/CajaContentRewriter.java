@@ -35,6 +35,7 @@ import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
+import com.google.caja.reporting.HtmlSnippetProducer;
 import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -143,7 +144,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         Pair<Node, Element> htmlAndJs = rw.rewriteContent(retrievedUri, root, cb);
         Node html = htmlAndJs.a;
         Element script = htmlAndJs.b;
-
+        
         cajoledOutput = doc.createElement("div");
         cajoledOutput.setAttribute("id", "cajoled-output");
         cajoledOutput.setAttribute("classes", "g___");
@@ -156,7 +157,6 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         Element messagesNode = formatErrors(doc, is, content.getContent(), mq, 
           /* visible */ false);
         cajoledOutput.appendChild(messagesNode);
-        
         if (cajoledCache != null) {
           cajoledCache.addElement(key, cajoledOutput);
         }
@@ -168,7 +168,7 @@ public class CajaContentRewriter implements org.apache.shindig.gadgets.rewrite.G
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
         createContainerFor(doc, 
-          formatErrors(doc, is, content.getContent(), mq, false /* visible */));
+          formatErrors(doc, is, content.getContent(), mq, true /* visible */));
         logException(e, mq);
         safe = true;
       } finally {
