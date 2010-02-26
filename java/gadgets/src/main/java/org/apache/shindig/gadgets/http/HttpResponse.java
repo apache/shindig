@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.gadgets.encoding.EncodingDetector;
@@ -108,7 +109,7 @@ public final class HttpResponse implements Externalizable {
       "application/octet-stream", "application/ogg", "application/zip", "audio/mpeg",
       "audio/x-ms-wma", "audio/vnd.rn-realaudio", "audio/x-wav", "video/mpeg", "video/mp4",
       "video/quicktime", "video/x-ms-wmv", "video/x-flv", "video/flv",
-      "video/x-ms-asf", "application/pdf"
+      "video/x-ms-asf", "application/pdf", "image/x-icon"
   );
 
   // These HTTP status codes should always honor the HTTP status returned by the remote host. All
