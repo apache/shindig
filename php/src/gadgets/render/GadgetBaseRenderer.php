@@ -331,6 +331,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $script .= "\n";
     $script .= $this->appendJsConfig($this->gadget, $sortedExternFeatures, $sortedInlineFeatures);
     $script .= $this->appendMessages($this->gadget);
+    $script .= $this->appendPreferences($this->gadget);
     $script .= $this->appendPreloads($this->gadget);
     if (count($this->dataInserts)) {
       foreach ($this->dataInserts as $data) {
@@ -467,11 +468,19 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
    * @return string
    */
   private function appendMessages(Gadget $gadget) {
-    $msgs = '';
-    if (! empty($gadget->gadgetSpec->locales)) {
-      $msgs = json_encode($gadget->gadgetSpec->locales);
-    }
+    $msgs = json_encode($this->dataContext['Msg']);
     return "gadgets.Prefs.setMessages_($msgs);\n";
+  }
+
+  /**
+   * Injects the pre-defined user preferences into the javascript api
+   *
+   * @param Gadget $gadget
+   * @return string
+   */
+  private function appendPreferences(Gadget $gadget) {
+    $prefs = json_encode($this->dataContext['UserPrefs']);
+    return "gadgets.Prefs.setDefaultPrefs_($prefs);\n";
   }
 
   /**
