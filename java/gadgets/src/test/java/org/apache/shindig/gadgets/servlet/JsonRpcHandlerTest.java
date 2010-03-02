@@ -261,7 +261,7 @@ public class JsonRpcHandlerTest {
     }
   }
 
-  private static class FakeUrlGenerator implements UrlGenerator {
+  protected static class FakeUrlGenerator implements UrlGenerator {
     protected boolean throwRandomFault = false;
     protected String iframeUrl = "http://example.org/gadgets/foo-does-not-matter";
 
