@@ -21,24 +21,26 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.inject.Inject;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.uri.ConcatUriManager;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
@@ -47,16 +49,27 @@ import javax.servlet.http.HttpServletResponseWrapper;
  */
 public class ConcatProxyServlet extends InjectedServlet {
 
-  public static final String JSON_PARAM = "json";
+  public static final String JSON_PARAM = Param.JSON.getKey();
+  private static final Pattern JSON_PARAM_PATTERN = Pattern.compile("^\\w*$");
+  
+  // TODO: parameterize these.
+  static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
+  static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
   private static final Logger logger
       = Logger.getLogger(ConcatProxyServlet.class.getName());
 
-  private transient ProxyHandler proxyHandler;
+  private RequestPipeline requestPipeline;
+  private ConcatUriManager concatUriManager;
 
   @Inject
-  public void setProxyHandler(ProxyHandler proxyHandler) {
-    this.proxyHandler = proxyHandler;
+  public void setRequestPipeline(RequestPipeline requestPipeline) {
+    this.requestPipeline = requestPipeline;
+  }
+  
+  @Inject
+  public void setConcatUriManager(ConcatUriManager concatUriManager) {
+    this.concatUriManager = concatUriManager;
   }
 
   @SuppressWarnings("boxing")
@@ -67,360 +80,186 @@ public class ConcatProxyServlet extends InjectedServlet {
       response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    // Avoid response splitting vulnerability
-    String ct = request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM);
-    if(ct != null && ct.indexOf('\r')<0 && ct.indexOf('\n')<0) {
-      response.setHeader("Content-Type",
-          request.getParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM));
-    }
 
-    boolean ignoreCache = proxyHandler.getIgnoreCache(request);
-    if (!ignoreCache && request.getParameter(ProxyBase.REFRESH_PARAM) != null) {
-      try {
-        HttpUtil.setCachingHeaders(response, Integer.parseInt(request
-            .getParameter(ProxyBase.REFRESH_PARAM)));
-      } catch (NumberFormatException e) {
-        // Ignore malform ttl:
-        HttpUtil.setNoCache(response);        
+    Uri uri = new UriBuilder(request).toUri();
+    ConcatUriManager.ConcatUri concatUri = concatUriManager.process(uri);
+
+    ConcatUriManager.Type concatType = concatUri.getType();
+    try {
+      if (concatType == null) {
+        throw new GadgetException(GadgetException.Code.MISSING_PARAMETER, "Missing type",
+            HttpResponse.SC_BAD_REQUEST);
       }
-    } else {
-      HttpUtil.setNoCache(response);
-    }
-    
-    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-
-    // Check for json concat
-    String jsonVar = request.getParameter(JSON_PARAM);
-    if (jsonVar != null && !jsonVar.matches("^\\w*$")) {
-      response.getOutputStream().println(
-          formatHttpError(HttpServletResponse.SC_BAD_REQUEST,
-              "Bad json variable name " + jsonVar));
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      HttpUtil.setCachingHeaders(response,
+          concatUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
+    } catch (GadgetException gex) {
+      response.sendError(HttpResponse.SC_BAD_REQUEST, formatError(gex, uri));
       return;
     }
     
-    ResponseWrapper wrapper = new ResponseWrapper(response, jsonVar);
+    // Throughout this class, wherever output is generated it's done as a UTF8 String.
+    // As such, we affirmatively state that UTF8 is being returned here.
+    response.setHeader("Content-Type", concatType.getMimeType() + "; charset=UTF8");
+    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
 
-    for (int i = 1; i < Integer.MAX_VALUE; i++) {
-      String url = request.getParameter(Integer.toString(i));
-      if (url == null) {
-        break;
+    // Check for json concat and set output stream.
+    ConcatOutputStream cos = null;
+    
+    String jsonVar = concatUri.getSplitParam();
+    if (jsonVar != null) {
+      // JSON-concat mode.
+      if (JSON_PARAM_PATTERN.matcher(jsonVar).matches()) {
+        cos = new JsonConcatOutputStream(response.getOutputStream(), jsonVar);
+      } else {
+        response.getOutputStream().println(
+            formatHttpError(HttpServletResponse.SC_BAD_REQUEST,
+                "Bad json variable name " + jsonVar, null));
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
       }
-      try {
-        try {
-          // Validate the url:
-          Uri uri = Uri.parse(url);
-          url = uri.toString();
-        } catch (Uri.UriException e) {
-          // ServletOutputStream.println support only ascii, so lets use write:
-          response.getOutputStream().write(
-              formatHttpError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage())
-                .getBytes("UTF-8"));
-          continue;
-        }
-        wrapper.processUrl(url);
-        proxyHandler.doFetch(new RequestWrapper(request, url), wrapper);
+    } else {
+      // Standard concat output mode.
+      cos = new VerbatimConcatOutputStream(response.getOutputStream());
+    }
 
-        if (wrapper.getStatus() != HttpServletResponse.SC_OK) {
-          response.getOutputStream().println(
-              formatHttpError(wrapper.getStatus(), wrapper.getErrorMessage()));
-        }
-        
+    for (Uri resourceUri : concatUri.getBatch()) {
+      try {
+        HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
+        HttpResponse httpResp = requestPipeline.execute(httpReq);
+        cos.output(resourceUri, httpResp);
       } catch (GadgetException ge) {
-        if (ge.getCode() != GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT) {
-          wrapper.done();
-          outputError(ge, url, response);
+        response.setStatus(HttpResponse.SC_BAD_REQUEST);
+        if (cos.outputError(resourceUri, ge)) {
+          // True returned from outputError indicates a terminal error.
           return;
-        } else {
-          response.getOutputStream().println("/* ---- End " + url + " 404 ---- */");
         }
       }
     }
-    wrapper.done();
-    response.setStatus(200);
+    
+    cos.close();
+    response.setStatus(HttpResponse.SC_OK);
   }
 
-  private static String formatHttpError(int status, String errorMessage) {
+  private static String formatHttpError(int status, String errorMessage, Uri uri) {
     StringBuilder err = new StringBuilder();
     err.append("/* ---- Error ");
     err.append(status);
-    if (errorMessage != null) {
+    if (!StringUtils.isEmpty(errorMessage)) {
       err.append(", ");
       err.append(errorMessage);
+    }
+    if (uri != null) {
+      err.append(" (").append(uri.toString()).append(")");
     }
 
     err.append(" ---- */");
     return err.toString();
   }
 
-  private static void outputError(GadgetException excep, String url, HttpServletResponse resp)
+  private static String formatError(GadgetException excep, Uri uri)
       throws IOException {
     StringBuilder err = new StringBuilder();
     err.append(excep.getCode().toString());
     err.append(" concat(");
-    err.append(url);
+    err.append(uri.toString());
     err.append(") ");
     err.append(excep.getMessage());
 
     // Log the errors here for now. We might want different severity levels
     // for different error codes.
     logger.log(Level.INFO, "Concat proxy request failed", err);
-    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, err.toString());
+    return err.toString();
   }
-
-  /**
-   * Simple request wrapper to make repeated calls to ProxyHandler
-   */
-  private static class RequestWrapper extends HttpServletRequestWrapper {
-
-    private final String url;
-
-    protected RequestWrapper(HttpServletRequest httpServletRequest, String url) {
-      super(httpServletRequest);
-      this.url = url;
-    }
-
-    @Override
-    public String getParameter(String paramName) {
-      if (ProxyBase.URL_PARAM.equals(paramName)) {
-        return url;
-      }
-      return super.getParameter(paramName);
-    }
-  }
-
-  /**
-   * Wrap the response to prevent writing through of the status code and to hold a reference to the
-   * stream across multiple proxied parts
-   * Handles json concatenation by using the EscapedServletOutputStream class
-   * to escape the data
-   */
-  private static class ResponseWrapper extends HttpServletResponseWrapper {
-
-    private ServletOutputStream outputStream;
-    private EscapedServletOutputStream jsonStream;
-
-    private int errorCode = SC_OK;
-    private String errorMessage;
-    /** Specify hash key for json concat **/ 
-    private String jsonVar = null;
-    private String url = null;
-
-    protected ResponseWrapper(HttpServletResponse httpServletResponse,
-        String jsonVar) throws IOException {
-      super(httpServletResponse);
-      if (jsonVar != null && jsonVar.length() > 0) {
-        this.jsonVar = jsonVar;
-        super.getOutputStream().println(jsonVar + "={");
-      }
-    }
-
+  
+  private static abstract class ConcatOutputStream extends ServletOutputStream {
+    private final ServletOutputStream wrapped;
     
-    @Override
-    public ServletOutputStream getOutputStream() throws IOException {
-      // For errors, we don't want the content returned by the remote
-      // server;  we'll just include an HTTP error code to avoid creating
-      // syntactically invalid output overall.
-      if (errorCode != SC_OK) {
-        closeStream();
-        outputStream = new NullServletOutputStream();
-      }
-      
-      if (outputStream == null) {
-        outputStream = super.getOutputStream();
-      }
-      
-      return outputStream;
+    protected ConcatOutputStream(ServletOutputStream wrapped) {
+      this.wrapped = wrapped;
     }
-
-    /**
-     * Restart a new file to concat
-     * Close previous file, and add start comment if not json concat
-     */
-    public void processUrl(String fileUrl) throws IOException {
-      closeStream();
-      errorCode = SC_OK;
-      this.url = fileUrl;
-      if (jsonVar == null) {
-        super.getOutputStream().println("/* ---- Start " + url + " ---- */");
+    
+    protected abstract void outputJs(Uri uri, String data) throws IOException;
+    
+    public void output(Uri uri, HttpResponse resp) throws IOException {
+      if (resp.getHttpStatusCode() != HttpServletResponse.SC_OK) {
+        println(formatHttpError(resp.getHttpStatusCode(), resp.getResponseAsString(), uri));
       } else {
-        // Create escaping stream (make sure url variable is defined)
-        jsonStream = new EscapedServletOutputStream();
-        outputStream = jsonStream;
+        outputJs(uri, resp.getResponseAsString());
       }
-    }
-
-    /**
-     * Add close of json hash
-     */
-    public void done() throws IOException {
-      closeStream();
-      if (jsonVar != null) {
-        // Close json concat main variable
-        super.getOutputStream().println("};");
-      }
-    }
-
-    private void closeStream() throws IOException {
-      if (jsonVar == null && outputStream != null) {
-        outputStream.println("/* ---- End " + url + " ---- */");
-      } else if (jsonStream != null) {
-        byte[] data = jsonStream.getBytes();
-        ServletOutputStream mainStream = super.getOutputStream();
-        mainStream.print("\"" + url + "\":\"");
-        mainStream.write(data);
-        mainStream.println("\",");
-      }      
-      outputStream = null;
-      jsonStream = null;
     }
     
-    public int getStatus() {
-      return errorCode;
-    }
-
-    public String getErrorMessage() {
-      return errorMessage;
-    }
-
-    @Override
-    public void addCookie(Cookie cookie) {
-    }
-
-    // Suppress headers
-    @Override
-    public void setDateHeader(String s, long l) {
-    }
-
-    @Override
-    public void addDateHeader(String s, long l) {
-    }
-
-    @Override
-    public void setHeader(String s, String s1) {
-    }
-
-    @Override
-    public void addHeader(String s, String s1) {
-    }
-
-    @Override
-    public void setIntHeader(String s, int i) {
-    }
-
-    @Override
-    public void addIntHeader(String s, int i) {
-    }
-
-    @Override
-    public void sendError(int i, String s) throws IOException {
-      errorCode = i;
-      errorMessage = s;
-    }
-
-    @Override
-    public void sendError(int i) throws IOException {
-      errorCode = i;
-    }
-
-    @Override
-    public void sendRedirect(String s) throws IOException {
-    }
-
-    @Override
-    public void setStatus(int i) {
-    }
-
-    @Override
-    public void setStatus(int i, String s) {
-    }
-
-    @Override
-    public void setContentLength(int i) {
-    }
-
-    @Override
-    public void setContentType(String s) {
-    }
-
-    @Override
-    public void flushBuffer() throws IOException {
-    }
-
-    @Override
-    public void reset() {
-    }
-
-    @Override
-    public void resetBuffer() {
-    }
-
-    @Override
-    public void setLocale(Locale locale) {
-    }
-
-    @Override
-    public void setCharacterEncoding(String s) {
-    }
-  }
-
-  /**
-   * Small ServletOutputStream class, overriding just enough to ensure
-   * there's no output.
-   */
-  private static class NullServletOutputStream extends ServletOutputStream {
-
-    protected NullServletOutputStream() {
+    public boolean outputError(Uri uri, GadgetException e)
+        throws IOException {
+      print(formatError(e, uri));
+      return e.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
     @Override
     public void write(int b) throws IOException {
+      wrapped.write(b);
     }
 
     @Override
     public void write(byte b[], int off, int len) throws IOException {
+      wrapped.write(b, off, len);
     }
 
     @Override
     public void write(byte b[]) throws IOException {
+      wrapped.write(b);
+    }
+    
+    @Override
+    public void close() throws IOException {
+      wrapped.close();
+    }
+    
+    @Override
+    public void print(String data) throws IOException {
+      write(data.getBytes("UTF8"));
+    }
+    
+    @Override
+    public void println(String data) throws IOException {
+      print(data);
+      write("\r\n".getBytes("UTF8"));
     }
   }
   
-  /**
-   * Override Servlet output stream to support json escaping of the stream data
-   * Use getBytes to get the escaped data. 
-   */
-  private static class EscapedServletOutputStream extends ServletOutputStream {
-
-    private final ByteArrayOutputStream tempStream;
-    protected EscapedServletOutputStream() {
-      tempStream = new ByteArrayOutputStream();
-    }
-    
-    public byte[] getBytes() throws IOException {
-      try {
-        return StringEscapeUtils.escapeJavaScript(tempStream.toString("UTF8")).getBytes();
-      } catch (UnsupportedEncodingException e) {
-        // Need to return IOException since that what ServletOutputStream constructor do.
-        throw new IOException("Unsuported encoding in data");
-      }
+  private static class VerbatimConcatOutputStream extends ConcatOutputStream {    
+    public VerbatimConcatOutputStream(ServletOutputStream wrapped) {
+      super(wrapped);
     }
 
     @Override
-    public void write(int b) throws IOException {
-      tempStream.write(b);
-    }
-
-    @Override
-    public void write(byte b[], int off, int len) throws IOException {
-      tempStream.write(b, off, len);
-    }
-
-    @Override
-    public void write(byte b[]) throws IOException {
-      tempStream.write(b);
+    protected void outputJs(Uri uri, String data) throws IOException {
+      println("/* ---- Start " + uri.toString() + " ---- */");
+      print(data);
+      println("/* ---- End " + uri.toString() + " ---- */");
     }
   }
+  
+  private static class JsonConcatOutputStream extends ConcatOutputStream {    
+    public JsonConcatOutputStream(ServletOutputStream wrapped, String tok) throws IOException {
+      super(wrapped);
+      this.println(tok + "={");
+    }
 
+    @Override
+    protected void outputJs(Uri uri, String data) throws IOException {
+      print("\"");
+      print(uri.toString());
+      print("\":\"");
+      print(StringEscapeUtils.escapeJavaScript(data));
+      println("\",");
+    }
+    
+    @Override
+    public void close() throws IOException {
+      println("};");
+      super.close();
+    }
+    
+  }
 }
 
