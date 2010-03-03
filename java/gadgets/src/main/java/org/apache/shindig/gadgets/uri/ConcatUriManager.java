@@ -69,6 +69,15 @@ public interface ConcatUriManager {
       }
       return null;
     }
+    
+    public static Type fromMime(String mime) {
+      for (Type val : Type.values()) {
+        if (val.getMimeType().equals(mime)) {
+          return val;
+        }
+      }
+      return null;
+    }
   }
   
   /**

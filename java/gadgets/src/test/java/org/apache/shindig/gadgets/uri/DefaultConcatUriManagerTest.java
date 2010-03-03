@@ -258,6 +258,17 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   }
   
   @Test
+  public void validateOldStyleTypeUri() {
+    DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
+    ConcatUriManager.ConcatUri validated =
+        manager.process(
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+            "&1=http://legit.com/1.dat&" + Param.TYPE.getKey() + "=NOTATYPE&rewriteMime=text/css"));
+    assertEquals(UriStatus.VALID_UNVERSIONED, validated.getStatus());
+    assertEquals(ConcatUriManager.Type.CSS, validated.getType());
+  }
+  
+  @Test
   public void validateCssUriUnversioned() {
     checkUnversionedUri(ConcatUriManager.Type.CSS, false);
   }

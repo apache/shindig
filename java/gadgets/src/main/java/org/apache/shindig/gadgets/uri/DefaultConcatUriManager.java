@@ -164,7 +164,11 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     List<Uri> uris = Lists.newLinkedList();
     Type type = Type.fromType(uri.getQueryParameter(Param.TYPE.getKey()));
     if (type == null) {
-      return BAD_URI;
+      // try "legacy" method
+      type = Type.fromMime(uri.getQueryParameter("rewriteMime"));
+      if (type == null) {
+        return BAD_URI;
+      }
     }
     String splitParam = type == Type.JS ? uri.getQueryParameter(Param.JSON.getKey()) : null;
     
