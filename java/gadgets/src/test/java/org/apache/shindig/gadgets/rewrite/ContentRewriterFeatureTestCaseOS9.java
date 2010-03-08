@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
+import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.junit.Test;
 
 /**

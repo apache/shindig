@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.easymock.EasyMock;

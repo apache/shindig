@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
@@ -31,6 +31,12 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature.Config;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature.DefaultConfig;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature.Factory;
 import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
 import org.apache.shindig.gadgets.rewrite.old.DefaultProxyingLinkRewriterFactory;
 import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;

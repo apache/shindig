@@ -19,7 +19,6 @@ package org.apache.shindig.gadgets.rewrite.old;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.old.DefaultProxyingLinkRewriterFactory;
 import org.apache.shindig.gadgets.rewrite.old.ProxyingLinkRewriter;

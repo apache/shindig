@@ -22,13 +22,13 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
-import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
+import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
 import org.apache.shindig.gadgets.render.old.DefaultSanitizingProxyingLinkRewriterFactory;
 import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
-import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 

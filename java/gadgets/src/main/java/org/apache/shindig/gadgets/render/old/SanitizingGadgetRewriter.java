@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.render.old;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
+import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;

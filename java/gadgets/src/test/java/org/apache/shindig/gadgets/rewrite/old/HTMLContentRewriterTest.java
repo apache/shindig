@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
-import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.XPathWrapper;

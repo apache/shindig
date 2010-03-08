@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;

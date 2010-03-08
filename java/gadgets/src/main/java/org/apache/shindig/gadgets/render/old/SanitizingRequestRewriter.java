@@ -25,7 +25,7 @@ import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
+import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RequestRewriter;

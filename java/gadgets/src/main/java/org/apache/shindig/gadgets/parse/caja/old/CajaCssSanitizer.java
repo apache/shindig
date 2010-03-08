@@ -15,11 +15,12 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.parse.caja;
+package org.apache.shindig.gadgets.parse.caja.old;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
 
 import com.google.caja.lang.css.CssSchema;
