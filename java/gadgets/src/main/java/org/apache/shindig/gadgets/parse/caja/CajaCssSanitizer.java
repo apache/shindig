@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.parse.caja;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.rewrite.LinkRewriter;
+import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
 
 import com.google.caja.lang.css.CssSchema;
 import com.google.caja.parser.AbstractParseTreeNode;

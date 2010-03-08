@@ -19,12 +19,13 @@
 /*
  * To add signing
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 
 @Singleton
 public class DefaultConcatLinkRewriterFactory implements

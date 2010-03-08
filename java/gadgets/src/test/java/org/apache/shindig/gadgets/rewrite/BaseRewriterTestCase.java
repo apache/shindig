@@ -31,6 +31,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
+import org.apache.shindig.gadgets.rewrite.old.DefaultProxyingLinkRewriterFactory;
+import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.AbstractModule;
@@ -179,7 +182,7 @@ public abstract class BaseRewriterTestCase {
     return originalText.replace("test.com", "mock.com");
   }
 
-  ContentRewriterFeature.Factory mockContentRewriterFeatureFactory(
+  protected ContentRewriterFeature.Factory mockContentRewriterFeatureFactory(
       ContentRewriterFeature.Config feature) {
     return new FakeRewriterFeatureFactory(feature);
   }
@@ -198,12 +201,12 @@ public abstract class BaseRewriterTestCase {
     return rewrittenContent;
   }
 
-  MutableContent rewriteContent(GadgetRewriter rewriter, String s,
+  protected MutableContent rewriteContent(GadgetRewriter rewriter, String s,
       final String container) throws Exception {
     return rewriteContent(rewriter, s, container, false, false);
   }
   
-  MutableContent rewriteContent(GadgetRewriter rewriter, String s,
+  protected MutableContent rewriteContent(GadgetRewriter rewriter, String s,
       final String container, final boolean debug, final boolean ignoreCache)
       throws Exception {
     MutableContent mc = new MutableContent(parser, s);

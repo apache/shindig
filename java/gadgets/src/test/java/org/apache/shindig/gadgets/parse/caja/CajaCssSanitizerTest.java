@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.rewrite.LinkRewriter;
+import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 
 import com.google.caja.parser.css.CssTree;

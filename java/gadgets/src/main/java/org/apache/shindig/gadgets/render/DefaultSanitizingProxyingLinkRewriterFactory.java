@@ -23,7 +23,7 @@ import com.google.inject.Singleton;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
+import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
 
 @Singleton
 public class DefaultSanitizingProxyingLinkRewriterFactory implements

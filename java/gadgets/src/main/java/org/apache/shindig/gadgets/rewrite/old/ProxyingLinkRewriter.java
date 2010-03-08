@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 
 /**

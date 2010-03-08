@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.shindig.common.uri.Uri;
 
-@Singleton
-public class DefaultProxyingLinkRewriterFactory implements
-    ProxyingLinkRewriterFactory {
+/**
+ * Rewrite a link
+ */
+public interface LinkRewriter {
 
-  private final ContentRewriterUris rewriterUris;
+  public String rewrite(String link, Uri context);
 
-  @Inject
-  public DefaultProxyingLinkRewriterFactory(ContentRewriterUris rewriterUris) {
-    this.rewriterUris = rewriterUris;
-  }
-
-  public ProxyingLinkRewriter create(Uri gadgetUri,
-      ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
-      boolean ignoreCache) {
-    return new ProxyingLinkRewriter(rewriterUris, gadgetUri, rewriterFeature,
-        container, debug, ignoreCache);
-  }
 }

@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets.render;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.ContentRewriterUris;
-import org.apache.shindig.gadgets.rewrite.ProxyingLinkRewriter;
+import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
+import org.apache.shindig.gadgets.rewrite.old.ProxyingLinkRewriter;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 
 /**

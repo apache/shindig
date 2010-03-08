@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -24,7 +24,13 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterUtils;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
+import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
+import org.apache.shindig.gadgets.rewrite.old.ProxyingLinkRewriterFactory;
 import org.w3c.dom.Element;
 
 import java.io.IOException;

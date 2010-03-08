@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,6 +23,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.XPathWrapper;
+import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;

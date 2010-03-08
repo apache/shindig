@@ -15,13 +15,19 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.RewriterUtils;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.View;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;

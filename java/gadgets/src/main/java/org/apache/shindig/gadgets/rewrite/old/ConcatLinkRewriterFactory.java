@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import com.google.inject.ImplementedBy;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 
-@ImplementedBy(DefaultProxyingLinkRewriterFactory.class)
-public interface ProxyingLinkRewriterFactory {
-  public ProxyingLinkRewriter create(Uri gadgetUri,
+@ImplementedBy(DefaultConcatLinkRewriterFactory.class)
+public interface ConcatLinkRewriterFactory {
+  public ConcatLinkRewriter create(Uri gadgetUri,
       ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache);
-}
 
+}

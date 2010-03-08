@@ -15,10 +15,14 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.shindig.gadgets.rewrite.BaseRewriterTestCase;
+import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.old.DefaultProxyingLinkRewriterFactory;
+import org.apache.shindig.gadgets.rewrite.old.ProxyingLinkRewriter;
 import org.junit.Test;
 
 /**

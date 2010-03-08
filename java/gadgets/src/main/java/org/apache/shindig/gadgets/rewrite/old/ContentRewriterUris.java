@@ -15,7 +15,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.rewrite.old;
 
 import org.apache.shindig.config.ContainerConfig;
 
@@ -31,8 +31,8 @@ public class ContentRewriterUris {
   private final String proxyBaseNoGadget;
   private final String concatBaseNoGadget;
 
-  static final String PROXY_BASE_CONFIG_PROPERTY = "gadgets.rewriteProxyBase";
-  static final String CONCAT_BASE_CONFIG_PROPERTY = "gadgets.rewriteConcatBase";
+  public static final String PROXY_BASE_CONFIG_PROPERTY = "gadgets.rewriteProxyBase";
+  public static final String CONCAT_BASE_CONFIG_PROPERTY = "gadgets.rewriteConcatBase";
 
   @Inject
   public ContentRewriterUris(
