@@ -22,12 +22,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 
 import com.google.common.collect.Lists;
-import com.google.inject.ImplementedBy;
 
 import java.util.List;
 import java.util.Map;
 
-@ImplementedBy(DefaultConcatUriManager.class)
 public interface ConcatUriManager {
   public enum Type {
     JS("text/javascript", "src", "js", "script"), // JavaScript

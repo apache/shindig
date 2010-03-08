@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.internal.Nullable;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.config.ContainerConfig;
@@ -68,7 +69,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
-                                Versioner versioner) {
+                                @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }

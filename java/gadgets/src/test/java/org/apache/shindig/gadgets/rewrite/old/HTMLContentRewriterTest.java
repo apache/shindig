@@ -73,7 +73,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testScriptsBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
-    Document doc = rewriteContent(rewriter, content, null).getDocument();
+    Document doc = rewriteContent(rewriter, content, "default").getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -93,7 +93,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[" + (scriptIx++) + "]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F2.js");
 
@@ -104,7 +104,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript" +
             "&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F3.js");
 
     // Fifth script should contain a retained comment
@@ -115,7 +115,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[" + (scriptIx++) + "]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F4.js");
 
     // Excluded URL is untouched
@@ -125,7 +125,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[" + (scriptIx++) + "]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F6.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F10.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&3=http%3A%2F%2Fwww.example.org%2F11.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
@@ -142,7 +142,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[" + (scriptIx++) + "]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F20.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&2=http%3A%2F%2Fwww.example.org%2F21.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&3=http%3A%2F%2Fwww.example.org%2F22.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
@@ -156,7 +156,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[" + (scriptIx++) + "]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&refresh=3600" +
+            "&fp=1150739864&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
   }
@@ -165,7 +165,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testScriptsBasicNoCache() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
-    Document doc = rewriteContent(rewriter, content, null, false, true).getDocument();
+    Document doc = rewriteContent(rewriter, content, "default", false, true).getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -174,7 +174,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[3]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&nocache=1&refresh=3600" +
+            "&fp=1150739864&container=default&nocache=1&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F2.js");
 
@@ -183,7 +183,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[12]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&nocache=1&refresh=3600" +
+            "&fp=1150739864&container=default&nocache=1&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
   }
@@ -192,7 +192,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testScriptsBasicNoCacheAndDebug() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
-    Document doc = rewriteContent(rewriter, content, null, true, true).getDocument();
+    Document doc = rewriteContent(rewriter, content, "default", true, true).getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
 
@@ -201,7 +201,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[3]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&debug=1&nocache=1&refresh=3600" +
+            "&fp=1150739864&container=default&debug=1&nocache=1&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F1.js" +
             "&2=http%3A%2F%2Fwww.example.org%2F2.js");
 
@@ -210,7 +210,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     assertEquals(wrapper.getValue("/html/body/script[12]/@src"),
         "http://www.test.com/dir/concat?" +
             "rewriteMime=text/javascript&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml" +
-            "&fp=1150739864&debug=1&nocache=1&refresh=3600" +
+            "&fp=1150739864&container=default&debug=1&nocache=1&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2F24.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
             "&2=http%3A%2F%2Fwww.example.org%2F25.js%260123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
   }
@@ -347,7 +347,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
   public void testStyleBasic() throws Exception {
     String content = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylebasic.html"));
-    MutableContent mc = rewriteContent(rewriter, content, null);
+    MutableContent mc = rewriteContent(rewriter, content, "default");
     Document doc = mc.getDocument();
 
     XPathWrapper wrapper = new XPathWrapper(doc);
@@ -356,7 +356,8 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     // Note that relative URLs are fully resolved
     assertEquals(wrapper.getValue("//link[1]/@href"),
         "http://www.test.com/dir/concat?" +
-            "rewriteMime=text/css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864&refresh=3600" +
+            "rewriteMime=text/css&gadget=http%3A%2F%2Fwww.example.org%2Fdir%2Fg.xml&fp=1150739864" +
+            "&container=default&refresh=3600" +
             "&1=http%3A%2F%2Fwww.example.org%2Flinkedstyle1.css" +
             "&2=http%3A%2F%2Fwww.example.org%2Flinkedstyle3.css" +
             "&3=http%3A%2F%2Fwww.example.org%2Fimportedstyle1.css" +

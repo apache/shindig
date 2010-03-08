@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.render.RenderModule;
 import org.apache.shindig.gadgets.rewrite.RewriteModule;
 import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
+import org.apache.shindig.gadgets.uri.UriModule;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -61,6 +62,7 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new RenderModule());
     install(new RewriteModule());
     install(new TemplateModule());
+    install(new UriModule());
 
     // Handlers for /gadgets/rpc
     bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(

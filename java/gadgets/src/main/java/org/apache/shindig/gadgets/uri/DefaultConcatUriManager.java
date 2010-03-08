@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.internal.Nullable;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -46,7 +47,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   private final Versioner versioner;
   
   @Inject
-  public DefaultConcatUriManager(ContainerConfig config, Versioner versioner) {
+  public DefaultConcatUriManager(ContainerConfig config, @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }

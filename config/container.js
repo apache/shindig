@@ -87,6 +87,11 @@
 //"gadgets.securityTokenType" : "secure",
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
+
+// Default concat Uri config; used for testing.
+"gadgets.uri.concat.host" : "localhost:9003",
+"gadgets.uri.concat.path" : "/gadgets/concat",
+
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
 // the javascript name.
