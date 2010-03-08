@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.render;
+package org.apache.shindig.gadgets.render.old;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.sanselan.ImageFormat;

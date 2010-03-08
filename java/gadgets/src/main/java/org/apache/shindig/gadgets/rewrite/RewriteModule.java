@@ -20,8 +20,8 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
-import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
-import org.apache.shindig.gadgets.render.SanitizingRequestRewriter;
+import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;

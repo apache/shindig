@@ -27,7 +27,7 @@ import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;

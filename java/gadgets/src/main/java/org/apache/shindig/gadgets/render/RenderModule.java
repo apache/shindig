@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.render;
 
 import java.util.Set;
 
+import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;

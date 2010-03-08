@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.templates;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
