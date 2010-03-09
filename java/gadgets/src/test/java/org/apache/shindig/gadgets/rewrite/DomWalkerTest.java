@@ -25,29 +25,18 @@ import static org.easymock.classextension.EasyMock.replay;
 import static org.easymock.classextension.EasyMock.verify;
 
 import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.name.Names;
-import com.google.inject.util.Modules;
 
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Node;
 
 import java.util.List;
 
-public class DomWalkerTest {
-  private Document doc;
+public class DomWalkerTest extends DomWalkerTestBase {
   private Node root;
   private Node child1;
   private Node child2;
@@ -57,6 +46,8 @@ public class DomWalkerTest {
   
   @Before
   public void setUp() {
+    super.setUp();
+    
     // Create a base document with structure:
     // <root>
     //   <child1>text1</child1>
@@ -65,17 +56,6 @@ public class DomWalkerTest {
     //   </child2>
     // </root>
     // ...which should allow all relevant test cases to be exercised.
-    Injector injector = Guice.createInjector(Modules.override(new ParseModule())
-        .with(new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(Integer.class).annotatedWith(
-                Names.named("shindig.cache.lru.default.capacity"))
-                  .toInstance(0);
-          }
-        }));
-    DOMImplementation domImpl = injector.getInstance(DOMImplementation.class);
-    doc = domImpl.createDocument(null, null, null);
     root = doc.createElement("root");
     child1 = doc.createElement("child1");
     text1 = doc.createTextNode("text1");
@@ -279,14 +259,5 @@ public class DomWalkerTest {
     }
     replay(mc);
     return mc;
-  }
-  
-  private Gadget gadget() {
-    GadgetSpec spec = createMock(GadgetSpec.class);
-    expect(spec.getUrl()).andReturn(Uri.parse("http://example.com")).anyTimes();
-    Gadget gadget = createMock(Gadget.class);
-    expect(gadget.getSpec()).andReturn(spec).anyTimes();
-    replay(spec, gadget);
-    return gadget;
   }
 }
