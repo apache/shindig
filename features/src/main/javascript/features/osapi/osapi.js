@@ -17,9 +17,7 @@
  */
 
 var osapi = osapi || {};
-var tamings___ = tamings___ || [];
 (function() {
-
   /**
    * Called by the transports for each service method that they expose
    * @param {string} method  The method to expose e.g. "people.get"
@@ -38,16 +36,20 @@ var tamings___ = tamings___ || [];
       var batch = osapi.newBatch();
       var boundCall = {};
       boundCall.execute = function(callback) {
+        var feralCallback = window.___ ? ___.untame(callback) : callback;
+        var that = window.___ ? ___.USELESS : this;
         batch.add(method, this);
         batch.execute(function(batchResult) {
           if (batchResult.error) {
-            callback(batchResult.error);
+            feralCallback.call(that, batchResult.error);
           } else {
-            callback(batchResult[method]);
+            feralCallback.call(that, batchResult[method]);
           }
         });
       }
-
+      if (window.___) {
+          ___.markInnocent(boundCall.execute, 'execute');
+      }
       // TODO: This shouldnt really be necessary. The spec should be clear enough about
       // defaults that we dont have to populate this.
       rpc = rpc || {};

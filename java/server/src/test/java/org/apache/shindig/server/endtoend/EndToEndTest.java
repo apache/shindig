@@ -237,6 +237,16 @@ public class EndToEndTest {
   }
 
   @Test
+  public void testCajaOsapiAppdata() throws Exception {
+    executeAllPageTests("osapi/appdataTest", true /* caja */);
+  }
+
+  @Test
+  public void testCajaOsapiBatch() throws Exception {
+    executeAllPageTests("osapi/batchTest", true /* caja */);
+  }
+  
+  @Test
   public void testTemplateRewrite() throws Exception {
     HtmlPage page = executePageTest("templateRewriter", null);
     

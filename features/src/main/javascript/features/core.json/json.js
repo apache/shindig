@@ -42,22 +42,27 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   // HTML5 implementation, or already defined.
   // Not a direct alias as the opensocial specification disagrees with the HTML5 JSON spec.
   // JSON says to throw on parse errors and to support filtering functions. OS does not.
-  gadgets['json'] = {
-    'parse': function(str) {
-      try {
-        return window.JSON.parse(str);
-      } catch (e) {
-        return false;
+  gadgets['json'] = (function() {
+    var endsWith___ = /___$/;
+    return {
+      'parse': function(str) {
+        try {
+          return window.JSON.parse(str);
+        } catch (e) {
+          return false;
+        }
+      },
+      'stringify': function(obj) {
+        try {
+          return window.JSON.stringify(obj, function(k,v) {
+            return !endsWith___.test(k) ? v : null;
+          });
+        } catch (e) {
+          return null;
+        }
       }
-    },
-    'stringify': function(obj) {
-      try {
-        return window.JSON.stringify(obj);
-      } catch (e) {
-        return null;
-      }
-    }
-  };
+    };
+  })();
 } else {
   gadgets['json'] = function () {
   
