@@ -25,10 +25,13 @@ import static org.easymock.EasyMock.isA;
 import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.uri.PassthruManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.Capture;
 import org.junit.Test;
 
@@ -42,8 +45,9 @@ public class ProxyHandlerTest extends ServletTestFixture {
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
+  private final ProxyUriManager passthruManager = new PassthruManager();
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry);
+      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry, passthruManager);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -57,13 +61,31 @@ public class ProxyHandlerTest extends ServletTestFixture {
     HttpResponse resp = new HttpResponseBuilder().addAllHeaders(headers).create();
     expect(pipeline.execute(req)).andReturn(resp);
   }
+  
+  private void setupProxyRequestBase(String host) {
+    expect(request.getServerName()).andReturn(host).anyTimes();
+    expect(request.getScheme()).andReturn("http").anyTimes();
+    expect(request.getServerPort()).andReturn(80).anyTimes();
+    expect(request.getRequestURI()).andReturn("/").anyTimes();
+  }
 
-  private void setupProxyRequestMock(String host, String url) throws Exception {
+  private void setupProxyRequestMock(String host, String url, String... extraParams)
+      throws Exception {
+    setupProxyRequestBase(host);
     expect(request.getHeader("Host")).andReturn(host);
-    expect(request.getParameter("url")).andReturn(url).atLeastOnce();
+    String query = (url != null ? "url=" + Utf8UrlCoder.encode(url) + "&" : "")
+        + "container=default";
+    String[] params = extraParams;
+    if (params != null && params.length > 0) {
+      for (int i = 0; i < params.length; i += 2) {
+        query += "&" + params[i] + "=" + Utf8UrlCoder.encode(params[i+1]);
+      }
+    }
+    expect(request.getQueryString()).andReturn(query);
   }
 
   private void setupFailedProxyRequestMock(String host, String url) throws Exception {
+    setupProxyRequestBase(host);
     expect(request.getHeader("Host")).andReturn(host);
   }
 
@@ -166,9 +188,8 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String fallback_url = "http://fallback.com/fallback.png";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
-    expect(request.getParameter(ProxyBase.IGNORE_CACHE_PARAM)).andReturn("1").atLeastOnce();
-    expect(request.getParameter(ProxyHandler.FALLBACK_URL_PARAM)).andReturn(fallback_url).atLeastOnce();
+    setupProxyRequestMock(domain, url, ProxyBase.IGNORE_CACHE_PARAM, "1",
+        ProxyHandler.FALLBACK_URL_PARAM, fallback_url);
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = HttpResponse.error();
@@ -189,8 +210,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
-    expect(request.getParameter(ProxyBase.IGNORE_CACHE_PARAM)).andReturn("1").atLeastOnce();
+    setupProxyRequestMock(domain, url, ProxyBase.IGNORE_CACHE_PARAM, "1");
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = new HttpResponse("Hello");
@@ -229,8 +249,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").atLeastOnce();
+    setupProxyRequestMock(domain, url, ProxyBase.REFRESH_PARAM, "120");
 
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(120).setIgnoreCache(false);
     HttpResponse resp = new HttpResponse("Hello");
@@ -249,8 +268,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").atLeastOnce();
+    setupProxyRequestMock(domain, url, ProxyBase.REFRESH_PARAM, "foo");
 
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(-1).setIgnoreCache(false);
     HttpResponse resp = new HttpResponse("Hello");
@@ -293,9 +311,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
-    expect(request.getParameter(ProxyHandler.REWRITE_MIME_TYPE_PARAM))
-        .andReturn(expectedMime).anyTimes();
+    setupProxyRequestMock(domain, url, ProxyHandler.REWRITE_MIME_TYPE_PARAM, expectedMime);
 
     HttpRequest req = new HttpRequest(Uri.parse(url))
         .setRewriteMimeType(expectedMime);

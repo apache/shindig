@@ -67,26 +67,21 @@ public abstract class ProxyBase {
    * @return A URI representing a validated form of the url.
    * @throws GadgetException If the url is not valid.
    */
-  protected Uri validateUrl(String urlToValidate) throws GadgetException {
+  protected Uri validateUrl(Uri urlToValidate) throws GadgetException {
     if (urlToValidate == null) {
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "url parameter is missing.", HttpResponse.SC_BAD_REQUEST);
+      throw new GadgetException(GadgetException.Code.MISSING_PARAMETER, "Missing url param",
+          HttpResponse.SC_BAD_REQUEST);
     }
-    try {
-      UriBuilder url = UriBuilder.parse(urlToValidate);
-      if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
-        throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "Invalid request url scheme in url: " + Utf8UrlCoder.encode(urlToValidate) +
-            "; only \"http\" and \"https\" supported.", HttpResponse.SC_BAD_REQUEST);
-      }
-      if (url.getPath() == null || url.getPath().length() == 0) {
-        url.setPath("/");
-      }
-      return url.toUri();
-    } catch (IllegalArgumentException e) {
+    UriBuilder url = new UriBuilder(urlToValidate);
+    if (!"http".equals(url.getScheme()) && !"https".equals(url.getScheme())) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "url parameter is not a valid url: " + urlToValidate, HttpResponse.SC_BAD_REQUEST);
+          "Invalid request url scheme in url: " + Utf8UrlCoder.encode(urlToValidate.toString()) +
+          "; only \"http\" and \"https\" supported.", HttpResponse.SC_BAD_REQUEST);
     }
+    if (url.getPath() == null || url.getPath().length() == 0) {
+      url.setPath("/");
+    }
+    return url.toUri();
   }
 
   /**
@@ -127,7 +122,7 @@ public abstract class ProxyBase {
         refreshInterval =  Integer.valueOf(request.getParameter(REFRESH_PARAM));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
+            "refresh parameter is not a number");
       }
     } else {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
@@ -177,11 +172,17 @@ public abstract class ProxyBase {
   protected void outputError(HttpServletResponse resp, GadgetException e)
       throws IOException {
     
+    int responseCode;
     Level level = Level.FINE;
-    int responseCode = HttpResponse.SC_BAD_REQUEST;
-    if (e.getCode() == GadgetException.Code.INTERNAL_SERVER_ERROR) {
-      level = Level.WARNING;
-      responseCode = e.getHttpStatusCode();
+    
+    switch (e.getCode()) {
+      case INTERNAL_SERVER_ERROR:
+        responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        level = Level.WARNING;
+        break;
+      default:
+        responseCode = HttpServletResponse.SC_BAD_REQUEST;
+        break;
     }
     
     logger.log(level, "Request failed", e);
@@ -191,7 +192,7 @@ public abstract class ProxyBase {
   abstract protected void doFetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException;
 
-  protected boolean getIgnoreCache(HttpServletRequest request) {
+  protected static boolean getIgnoreCache(HttpServletRequest request) {
     String ignoreCache = request.getParameter(IGNORE_CACHE_PARAM);
     if (ignoreCache == null) {
       return false;

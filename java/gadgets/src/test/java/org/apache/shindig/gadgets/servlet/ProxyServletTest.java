@@ -25,6 +25,8 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.PassthruManager;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,13 +42,12 @@ public class ProxyServletTest extends ServletTestFixture {
   private static final Uri REQUEST_URL = Uri.parse("http://example.org/file");
   private static final String BASIC_SYNTAX_URL
       = "http://opensocial.org/proxy?foo=bar&url=" + REQUEST_URL;
-  private static final String ALT_SYNTAX_URL
-      = "http://opensocial.org/proxy/foo=bar/" + REQUEST_URL;
   private static final String RESPONSE_BODY = "Hello, world!";
   private static final String ERROR_MESSAGE = "Broken!";
 
+  private final ProxyUriManager passthruManager = new PassthruManager();
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, lockedDomainService, null);
+      = new ProxyHandler(pipeline, lockedDomainService, null, passthruManager);
   private final ProxyServlet servlet = new ProxyServlet();
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);
@@ -60,23 +61,24 @@ public class ProxyServletTest extends ServletTestFixture {
     expect(lockedDomainService.isSafeForOpenProxy(REQUEST_DOMAIN))
         .andReturn(true).anyTimes();
   }
-
-  private void setupBasic() {
-    expect(request.getRequestURI()).andReturn(BASIC_SYNTAX_URL);
-  }
-
-  private void setupAltSyntax() {
-    expect(request.getRequestURI()).andReturn(ALT_SYNTAX_URL);
+  
+  private void setupRequest(String str) {
+    Uri uri = Uri.parse(str);
+    expect(request.getScheme()).andReturn(uri.getScheme());
+    expect(request.getServerName()).andReturn(uri.getAuthority());
+    expect(request.getServerPort()).andReturn(80);
+    expect(request.getRequestURI()).andReturn(uri.getPath());
+    expect(request.getQueryString()).andReturn(uri.getQuery());
   }
 
   private void assertResponseOk(int expectedStatus, String expectedBody) {
-      assertEquals(expectedStatus, recorder.getHttpStatusCode());
-      assertEquals(expectedBody, recorder.getResponseAsString());
+    assertEquals(expectedStatus, recorder.getHttpStatusCode());
+    assertEquals(expectedBody, recorder.getResponseAsString());
   }
 
   @Test
   public void testDoGetNormal() throws Exception {
-    setupBasic();
+    setupRequest(BASIC_SYNTAX_URL);
     expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
     replay();
 
@@ -87,7 +89,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   @Test
   public void testDoGetHttpError() throws Exception {
-    setupBasic();
+    setupRequest(BASIC_SYNTAX_URL);
     expect(pipeline.execute(internalRequest)).andReturn(HttpResponse.notFound());
     replay();
 
@@ -98,7 +100,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   @Test
   public void testDoGetException() throws Exception {
-    setupBasic();
+    setupRequest(BASIC_SYNTAX_URL);
     expect(pipeline.execute(internalRequest)).andThrow(
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, ERROR_MESSAGE));
     replay();
@@ -107,17 +109,5 @@ public class ProxyServletTest extends ServletTestFixture {
 
     assertEquals(HttpServletResponse.SC_BAD_REQUEST, recorder.getHttpStatusCode());
     assertContains(ERROR_MESSAGE, recorder.getResponseAsString());
-  }
-
-  @Test
-  public void testDoGetAlternateSyntax() throws Exception {
-    setupAltSyntax();
-    expect(request.getRequestURI()).andReturn(ALT_SYNTAX_URL);
-    expect(pipeline.execute(internalRequest)).andReturn(internalResponse);
-    replay();
-
-    servlet.doGet(request, recorder);
-
-    assertResponseOk(HttpResponse.SC_OK, RESPONSE_BODY);
   }
 }

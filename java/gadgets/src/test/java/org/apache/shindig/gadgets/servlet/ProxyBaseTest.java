@@ -51,7 +51,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlNoPath() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
@@ -61,7 +61,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlHttps() throws Exception {
-    Uri url = proxy.validateUrl("https://www.example.com");
+    Uri url = proxy.validateUrl(Uri.parse("https://www.example.com"));
     assertEquals("https", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
@@ -71,7 +71,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlWithPath() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com/foo");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com/foo"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/foo", url.getPath());
@@ -81,7 +81,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlWithPort() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com:8080/foo");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com:8080/foo"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com:8080", url.getAuthority());
     assertEquals("/foo", url.getPath());
@@ -91,7 +91,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlWithEncodedPath() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com/foo%20bar");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com/foo%20bar"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/foo%20bar", url.getPath());
@@ -101,7 +101,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlWithEncodedQuery() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com/foo?q=with%20space");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com/foo?q=with%20space"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/foo", url.getPath());
@@ -112,7 +112,7 @@ public class ProxyBaseTest extends ServletTestFixture {
 
   @Test
   public void testValidateUrlWithNoPathAndEncodedQuery() throws Exception {
-    Uri url = proxy.validateUrl("http://www.example.com?q=with%20space");
+    Uri url = proxy.validateUrl(Uri.parse("http://www.example.com?q=with%20space"));
     assertEquals("http", url.getScheme());
     assertEquals("www.example.com", url.getAuthority());
     assertEquals("/", url.getPath());
@@ -123,16 +123,6 @@ public class ProxyBaseTest extends ServletTestFixture {
   @Test(expected = GadgetException.class)
   public void testValidateUrlNullInput() throws Exception {
     proxy.validateUrl(null);
-  }
-
-  @Test(expected=GadgetException.class)
-  public void testValidateUrlBadInput() throws Exception {
-    proxy.validateUrl("%$#%#$%#$%");
-  }
-
-  @Test(expected=GadgetException.class)
-  public void testValidateUrlBadProtocol() throws Exception {
-    proxy.validateUrl("gopher://foo");
   }
 
   @Test

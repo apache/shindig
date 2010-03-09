@@ -115,7 +115,19 @@ public class MakeRequestHandler extends ProxyBase {
    * @throws GadgetException
    */
   protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    Uri url = validateUrl(request.getParameter(URL_PARAM));
+    String urlStr = request.getParameter(URL_PARAM);
+    if (urlStr == null) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          URL_PARAM + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
+    }
+    
+    Uri url = null;
+    try {
+      url = validateUrl(Uri.parse(urlStr));
+    } catch (IllegalArgumentException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "Invalid " + URL_PARAM + " parameter", HttpResponse.SC_BAD_REQUEST);
+    }
 
     HttpRequest req = new HttpRequest(url)
         .setMethod(getParameter(request, METHOD_PARAM, "GET"))
