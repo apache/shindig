@@ -460,7 +460,7 @@ gadgets.io = function() {
       var buf = [];
       var first = false;
       for (var i in fields) {
-        if (fields.hasOwnProperty(i)) {
+        if (fields.hasOwnProperty(i) && !/___$/.test(i)) {
           if (!first) {
             first = true;
           } else {
