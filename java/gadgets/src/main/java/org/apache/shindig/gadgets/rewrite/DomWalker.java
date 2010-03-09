@@ -207,25 +207,24 @@ public class DomWalker {
   
   // TODO: Remove these lame hacks by changing Gadget to a proper general Context object.
   public static Gadget makeGadget(final Uri context) {
-    final GadgetSpec spec = null;
     try {
-      new GadgetSpec(context,
+      final GadgetSpec spec = new GadgetSpec(context,
         "<Module><ModulePrefs author=\"a\" title=\"t\"></ModulePrefs>" +
         "<Content></Content></Module>");
+      return new Gadget() {
+        @Override
+        public GadgetSpec getSpec() {
+          return spec;
+        }
+      }.setContext(new GadgetContext() {
+        @Override
+        public Uri getUrl() {
+          return context;
+        }
+      });
     } catch (Exception e) {
       throw new RuntimeException("Unexpected boilerplate parse failure");
     }
-    return new Gadget() {
-      @Override
-      public GadgetSpec getSpec() {
-        return spec;
-      }
-    }.setContext(new GadgetContext() {
-      @Override
-      public Uri getUrl() {
-        return context;
-      }
-    });
   }
   
   public static Gadget makeGadget(final HttpRequest request) {
