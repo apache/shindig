@@ -34,10 +34,10 @@ import java.util.List;
 import java.util.Map;
 
 public class DefaultConcatUriManager implements ConcatUriManager {
-  static final String CONCAT_HOST_PARAM = "gadgets.uri.concat.host";
-  static final String CONCAT_PATH_PARAM = "gadgets.uri.concat.path";
-  static final String CONCAT_JS_SPLIT_PARAM = "gadgets.uri.concat.js.splitToken";
-  static final String CONCAT_JS_EVAL_TPL = "eval(%s['%s']);";
+  public static final String CONCAT_HOST_PARAM = "gadgets.uri.concat.host";
+  public static final String CONCAT_PATH_PARAM = "gadgets.uri.concat.path";
+  public static final String CONCAT_JS_SPLIT_PARAM = "gadgets.uri.concat.js.splitToken";
+  public static final String CONCAT_JS_EVAL_TPL = "eval(%s['%s']);";
   
   private static final ConcatUri BAD_URI =
       new ConcatUri(UriStatus.BAD_URI, null, null, null, null);

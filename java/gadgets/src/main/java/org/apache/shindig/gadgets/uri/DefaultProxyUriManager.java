@@ -58,8 +58,8 @@ import java.util.Map;
  * to be subsumed into the version param.
  */
 public class DefaultProxyUriManager implements ProxyUriManager {
-  static final String PROXY_HOST_PARAM = "gadgets.uri.proxy.host";
-  static final String PROXY_PATH_PARAM = "gadgets.uri.proxy.path";
+  public static final String PROXY_HOST_PARAM = "gadgets.uri.proxy.host";
+  public static final String PROXY_PATH_PARAM = "gadgets.uri.proxy.path";
   static final String CHAINED_PARAMS_START_BEACON = "&s&";
   static final String CHAINED_PARAMS_END_BEACON = "&e";
   static final String CHAINED_PARAMS_TOKEN = "%chained_params%";
