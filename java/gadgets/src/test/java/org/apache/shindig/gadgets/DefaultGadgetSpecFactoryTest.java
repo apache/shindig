@@ -34,7 +34,6 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-
 import org.easymock.EasyMock;
 import org.junit.Test;
 
@@ -126,6 +125,30 @@ public class DefaultGadgetSpecFactoryTest {
   public void specFetched() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
     HttpResponse response = new HttpResponse(LOCAL_SPEC_XML);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+
+  @Test
+  public void specFetchedWithBom() throws Exception {
+    HttpRequest request = createIgnoreCacheRequest();
+    HttpResponse response = new HttpResponse("&#xFEFF;" + LOCAL_SPEC_XML);
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+
+    assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
+  }
+
+  @Test
+  public void specFetchedWithBomChar() throws Exception {
+    HttpRequest request = createIgnoreCacheRequest();
+    HttpResponse response = new HttpResponse("\uFEFF" + LOCAL_SPEC_XML);
     expect(pipeline.execute(request)).andReturn(response);
     replay(pipeline);
 

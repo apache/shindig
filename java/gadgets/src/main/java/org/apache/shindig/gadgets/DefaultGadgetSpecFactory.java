@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.uri.Uri;
@@ -27,11 +31,6 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-
 import org.w3c.dom.Element;
 
 import java.util.concurrent.ExecutorService;
@@ -89,6 +88,11 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
 
   @Override
   protected GadgetSpec parse(String content, Query query) throws XmlException, GadgetException {
+    // Allow BOM entity as first item on stream and ignore it:
+    final String BOM_ENTITY = "&#xFEFF;";
+    if (content.substring(0, BOM_ENTITY.length()).equalsIgnoreCase(BOM_ENTITY)) {
+      content = content.substring(BOM_ENTITY.length());
+    }
     Element element = XmlUtil.parse(content);
     return new GadgetSpec(query.getSpecUri(), element, content);
   }
