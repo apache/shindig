@@ -23,7 +23,6 @@ import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
-import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import java.util.List;
@@ -57,7 +56,11 @@ public class RewriteModule extends AbstractModule {
     @Inject
     public GadgetRewritersProvider(PipelineDataGadgetRewriter pipelineRewriter,
         TemplateRewriter templateRewriter,
-        HTMLContentRewriter optimizingRewriter,
+        StyleTagExtractorContentRewriter styleExtractorRewriter,
+        StyleAdjacencyContentRewriter styleAdjacentRewriter,
+        StyleConcatContentRewriter styleConcatRewriter,
+        ScriptConcatContentRewriter scriptConcatRewriter,
+        ProxyingContentRewriter proxyingRewriter,
         CssRequestRewriter cssRewriter,
         CajaContentRewriter cajaRewriter,
         SanitizingGadgetRewriter sanitizedRewriter,
@@ -66,7 +69,14 @@ public class RewriteModule extends AbstractModule {
       rewriters = Lists.newArrayList();
       rewriters.add(pipelineRewriter);
       rewriters.add(templateRewriter);
-      rewriters.add(optimizingRewriter);
+
+      // Optimizing rewriters.
+      rewriters.add(styleExtractorRewriter);
+      rewriters.add(styleAdjacentRewriter);
+      rewriters.add(styleConcatRewriter);
+      rewriters.add(scriptConcatRewriter);
+      rewriters.add(proxyingRewriter);
+      
       rewriters.add(cajaRewriter);
       rewriters.add(sanitizedRewriter);
       rewriters.add(renderingRewriter);
@@ -83,10 +93,21 @@ public class RewriteModule extends AbstractModule {
 
     @Inject
     public AccelRewritersProvider(
-        HTMLContentRewriter optimizingRewriter,
+        StyleTagExtractorContentRewriter styleExtractorRewriter,
+        StyleAdjacencyContentRewriter styleAdjacentRewriter,
+        StyleConcatContentRewriter styleConcatRewriter,
+        ScriptConcatContentRewriter scriptConcatRewriter,
+        ProxyingContentRewriter proxyingRewriter,
         CajaContentRewriter cajaRewriter) {
       rewriters = Lists.newArrayList();
-      rewriters.add(optimizingRewriter);
+
+      // Optimizing rewriters.
+      rewriters.add(styleExtractorRewriter);
+      rewriters.add(styleAdjacentRewriter);
+      rewriters.add(styleConcatRewriter);
+      rewriters.add(scriptConcatRewriter);
+      rewriters.add(proxyingRewriter);
+      
       rewriters.add(cajaRewriter);
     }
 
@@ -99,11 +120,23 @@ public class RewriteModule extends AbstractModule {
     private final List<RequestRewriter> rewriters;
 
     @Inject
-    public RequestRewritersProvider(HTMLContentRewriter optimizingRewriter,
+    public RequestRewritersProvider(
+        StyleTagExtractorContentRewriter styleExtractorRewriter,
+        StyleAdjacencyContentRewriter styleAdjacentRewriter,
+        StyleConcatContentRewriter styleConcatRewriter,
+        ScriptConcatContentRewriter scriptConcatRewriter,
+        ProxyingContentRewriter proxyingRewriter,
         CssRequestRewriter cssRewriter,
         SanitizingRequestRewriter sanitizedRewriter) {
       rewriters = Lists.newArrayList();
-      rewriters.add(optimizingRewriter);
+
+      // Optimizing rewriters.
+      rewriters.add(styleExtractorRewriter);
+      rewriters.add(styleAdjacentRewriter);
+      rewriters.add(styleConcatRewriter);
+      rewriters.add(scriptConcatRewriter);
+      rewriters.add(proxyingRewriter);
+      
       rewriters.add(cssRewriter);
       rewriters.add(sanitizedRewriter);
     }

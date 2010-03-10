@@ -34,6 +34,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -70,6 +71,33 @@ public class DomWalkerTestBase {
       elem.setAttributeNode(attr);
     }
     return elem;
+  }
+  
+  protected Element htmlDoc(Node[] headNodes, Node... bodyNodes) {
+    // Clear document of all nodes.
+    while (doc.hasChildNodes()) {
+      doc.removeChild(doc.getFirstChild());
+    }
+    
+    // Recreate document with valid HTML structure.
+    Element html = elem("html");
+    Element head = elem("head");
+    appendAll(head, headNodes);
+    Element body = elem("body");
+    appendAll(body, bodyNodes);
+    html.appendChild(head);
+    html.appendChild(body);
+    doc.appendChild(html);
+    
+    return html;
+  }
+  
+  private void appendAll(Node parent, Node[] children) {
+    if (children == null || children.length == 0) return;
+    
+    for (Node child : children) {
+      parent.appendChild(child);
+    }
   }
   
   protected Gadget gadget() {
