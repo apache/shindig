@@ -24,6 +24,7 @@ import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -68,6 +69,7 @@ public class EndToEndTest {
     "jsonTest.xml",
     "cajaTest.xml",
     "failCajaTest.xml",      
+    "failCajaUrlTest.xml",      
     "osapi/personTest.xml",
     "osapi/peopleTest.xml",
     "osapi/activitiesTest.xml",
@@ -186,6 +188,15 @@ public class EndToEndTest {
     assertEquals(2, body.getChildNodes().getLength());
     assertEquals("ul", body.getFirstChild().getNodeName());
     assertEquals("script", body.getLastChild().getNodeName());
+  }
+
+  @Test
+  public void testCajaFailUrlGadgets() throws Exception {
+    try {
+      HtmlPage page = executePageTest("failCajaUrlTest", null, /* caja */ true);
+    } catch (FailingHttpStatusCodeException e) {
+      assertEquals(HttpServletResponse.SC_BAD_REQUEST, e.getStatusCode());
+    }
   }
 
   @Test

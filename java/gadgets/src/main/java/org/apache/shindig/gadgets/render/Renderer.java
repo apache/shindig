@@ -77,8 +77,12 @@ public class Renderer {
             "Requested: '" + gadget.getContext().getView() +
             "' Available: " + gadget.getSpec().getViews().keySet(), HttpServletResponse.SC_NOT_FOUND);
       }
-
+      
       if (gadget.getCurrentView().getType() == View.ContentType.URL) {
+        if (requiresCaja(gadget)) {
+          return RenderingResults.error("Caja does not support url type gadgets.",
+            HttpServletResponse.SC_BAD_REQUEST);
+        }
         return RenderingResults.mustRedirect(gadget.getCurrentView().getHref());
       }
 
@@ -105,6 +109,14 @@ public class Renderer {
     return RenderingResults.error(t.getMessage(), statusCode);
   }
 
+  /**
+   * Returns true iff the gadget opts into the caja or the container forces caja by flag
+   */
+  private boolean requiresCaja(Gadget gadget) {
+    return gadget.getSpec().getModulePrefs().getFeatures().containsKey("caja")
+        || "1".equals(gadget.getContext().getParameter("caja"));
+  }
+  
   /**
    * Validates that the parent parameter was acceptable.
    *
