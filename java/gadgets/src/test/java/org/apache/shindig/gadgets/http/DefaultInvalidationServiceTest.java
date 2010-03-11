@@ -17,15 +17,14 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
-
-import com.google.common.collect.ImmutableSet;
-
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 import org.junit.Assert;
@@ -82,7 +81,7 @@ public class DefaultInvalidationServiceTest extends Assert {
     fetcher = new DefaultRequestPipelineTest.FakeHttpFetcher();
     oauth = new DefaultRequestPipelineTest.FakeOAuthRequestProvider();
     requestPipeline = new DefaultRequestPipeline(fetcher, cache, oauth, new NoOpImageRewriter(),
-        service);
+        service, new HttpResponseMetadataHelper());
   }
 
   @Test

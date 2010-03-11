@@ -38,8 +38,14 @@ public class DefaultRequestPipelineTest {
   private final FakeHttpCache cache = new FakeHttpCache();
   private final FakeOAuthRequestProvider oauth = new FakeOAuthRequestProvider();
 
+  private final HttpResponseMetadataHelper helper = new HttpResponseMetadataHelper() {
+    @Override
+    public String getHash(HttpResponse resp) {
+      return resp.getResponseAsString();
+    }
+  };
   private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
-      new NoOpImageRewriter(), new NoOpInvalidationService());
+      new NoOpImageRewriter(), new NoOpInvalidationService(), helper);
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
@@ -56,6 +62,25 @@ public class DefaultRequestPipelineTest {
     assertEquals(1, cache.readCount);
     assertEquals(1, cache.writeCount);
     assertEquals(1, fetcher.fetchCount);
+    assertEquals(1, response.getMetadata().size());
+    assertEquals("response",
+        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+  }
+
+  @Test
+  public void verifyHashCode() throws Exception {
+    HttpRequest request = new HttpRequest(DEFAULT_URI)
+        .setAuthType(AuthType.NONE);
+
+    fetcher.response = new HttpResponse("response");
+
+    RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
+        new NoOpImageRewriter(), new NoOpInvalidationService(),
+        new HttpResponseMetadataHelper());
+    HttpResponse response = pipeline.execute(request);
+    assertEquals(1, response.getMetadata().size());
+    assertEquals("q7u8tbpmidtu1gtqhjv0kb0rvo",
+        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
   }
 
   @Test
@@ -93,6 +118,10 @@ public class DefaultRequestPipelineTest {
     assertEquals(1, cache.readCount);
     assertEquals(1, cache.writeCount);
     assertEquals(1, fetcher.fetchCount);
+    assertEquals(1, response.getMetadata().size());
+    assertEquals("fetched",
+        response.getMetadata().get(HttpResponseMetadataHelper.DATA_HASH));
+
   }
 
   @Test

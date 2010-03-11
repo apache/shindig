@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Nullable;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -37,18 +38,21 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final Provider<OAuthRequest> oauthRequestProvider;
   private final ImageRewriter imageRewriter;
   private final InvalidationService invalidationService;
+  private final HttpResponseMetadataHelper metadataHelper;
 
   @Inject
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
                                 ImageRewriter imageRewriter,
-                                InvalidationService invalidationService) {
+                                InvalidationService invalidationService,
+                                @Nullable HttpResponseMetadataHelper metadataHelper) {
     this.httpFetcher = httpFetcher;
     this.httpCache = httpCache;
     this.oauthRequestProvider = oauthRequestProvider;
     this.imageRewriter = imageRewriter;
     this.invalidationService = invalidationService;
+    this.metadataHelper = metadataHelper;
   }
 
   public HttpResponse execute(HttpRequest request) throws GadgetException {
@@ -104,7 +108,8 @@ public class DefaultRequestPipeline implements RequestPipeline {
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
       fetchedResponse = imageRewriter.rewrite(request, fetchedResponse);
     }
-
+    // Set response hash value in metadata (used for url versioning)
+    fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
     if (!request.getIgnoreCache() ) {
       // Mark the response with invalidation information prior to caching
       if (fetchedResponse.getCacheTtl() > 0) {
