@@ -34,6 +34,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
-    verifyQueryUri(RESOURCE_1, uris.get(0), debug, noCache, version);
+    verifyQueryUri(RESOURCE_1, uris.get(0), debug, noCache, version, host, path);
   }
   
   @Test
@@ -80,7 +81,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
-    verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, false);
+    verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, false, host, path);
   }
   
   @Test
@@ -99,7 +100,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1);
     List<Uri> uris = makeAndGet(host, path, debug, noCache, resources, version);
     assertEquals(1, uris.size());
-    verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, true);
+    verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, true, host, path);
   }
   
   @Test
@@ -111,7 +112,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> uris = makeAndGet(host, path, true, true, resources, versions);
     assertEquals(3, uris.size());
     for (int i = 0; i < 3; ++i) {
-      verifyQueryUri(resources.get(i), uris.get(i), true, true, versions[i]);
+      verifyQueryUri(resources.get(i), uris.get(i), true, true, versions[i], host, path);
     }
   }
   
@@ -124,7 +125,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<Uri> uris = makeAndGet(host, path, true, true, resources, versions);
     assertEquals(3, uris.size());
     for (int i = 0; i < 3; ++i) {
-      verifyChainedUri(resources.get(i), uris.get(i), true, true, versions[i], false);
+      verifyChainedUri(resources.get(i), uris.get(i), true, true, versions[i], false, host, path);
     }
   }
   
@@ -235,25 +236,37 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         ProxyUriManager.ProxyUri.fromList(gadget, resources), 123);
   }
   
-  private void verifyQueryUri(Uri orig, Uri uri, boolean debug, boolean noCache, String version)
-      throws Exception {
-    assertEquals(version == null ? 6 : 7, uri.getQueryParameters().size());
-    assertEquals(SPEC_URI.toString(), uri.getQueryParameter(Param.GADGET.getKey()));
-    assertEquals(CONTAINER, uri.getQueryParameter(Param.CONTAINER.getKey()));
-    assertEquals(debug ? "1" : "0", uri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals(noCache ? "1" : "0", uri.getQueryParameter(Param.NO_CACHE.getKey()));
+  private void verifyQueryUri(Uri orig, Uri uri, boolean debug, boolean noCache, String version,
+      String host, String path) throws Exception {
+    // Make sure the manager can parse out results.
+    DefaultProxyUriManager manager = makeManager(host, path, null);
+    ProxyUri proxyUri = manager.process(uri);
+    assertEquals(orig, proxyUri.getResource());
+    assertEquals(debug, proxyUri.isDebug());
+    assertEquals(noCache, proxyUri.isNoCache());
+    assertEquals(noCache ? 0 : 123, (int)proxyUri.getRefresh());
+    assertEquals(CONTAINER, proxyUri.getContainer());
+    assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
+    
+    // "Raw" query param verification.
     assertEquals("123", uri.getQueryParameter(Param.REFRESH.getKey()));
-    assertEquals(orig.toString(), uri.getQueryParameter(Param.URL.getKey()));
     if (version != null) {
       assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
     }
   }
   
   private void verifyChainedUri(Uri orig, Uri uri, boolean debug, boolean noCache, String version,
-      boolean endOfPath)
+      boolean endOfPath, String host, String path)
       throws Exception {
-    // Query params should copy over (even if none)
-    assertEquals(orig.getQueryParameters().size(), uri.getQueryParameters().size());
+    // Make sure the manager can parse out results.
+    DefaultProxyUriManager manager = makeManager(host, path, null);
+    ProxyUri proxyUri = manager.process(uri);
+    assertEquals(orig, proxyUri.getResource());
+    assertEquals(debug, proxyUri.isDebug());
+    assertEquals(noCache, proxyUri.isNoCache());
+    assertEquals(noCache ? 0 : 123, (int)proxyUri.getRefresh());
+    assertEquals(CONTAINER, proxyUri.getContainer());
+    assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
     
     // URI should end with the proxied content.
     String uriStr = uri.toString();
@@ -266,11 +279,8 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         (endOfPath ? uriStr.indexOf("/", proxyEnd) : uriStr.indexOf("/path"))
         - DefaultProxyUriManager.CHAINED_PARAMS_END_BEACON.length());
     uri = new UriBuilder().setQuery(paramsUri).toUri();
-    assertEquals(version == null ? 5 : 6, uri.getQueryParameters().size());
-    assertEquals(SPEC_URI.toString(), uri.getQueryParameter(Param.GADGET.getKey()));
-    assertEquals(CONTAINER, uri.getQueryParameter(Param.CONTAINER.getKey()));
-    assertEquals(debug ? "1" : "0", uri.getQueryParameter(Param.DEBUG.getKey()));
-    assertEquals(noCache ? "1" : "0", uri.getQueryParameter(Param.NO_CACHE.getKey()));
+    
+    // "Raw" query param verification.
     assertEquals("123", uri.getQueryParameter(Param.REFRESH.getKey()));
     if (version != null) {
       assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));

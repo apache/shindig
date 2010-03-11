@@ -174,15 +174,24 @@ public class DefaultProxyUriManager implements ProxyUriManager {
           String proxyPath = config.getString(container, PROXY_PATH_PARAM);
           if (proxyPath != null) {
             String[] chainedChunks = proxyPath.split(CHAINED_PARAMS_TOKEN);
+            
+            // Parse out the URI of the actual resource. This URI is found as the
+            // substring of the "full" URI, after the chained proxy prefix. We
+            // first search for the pre- and post-fixes of the original /pre/%chained_params%/post
+            // ContainerConfig value, and take the URI as everything beyond that point.
+            String startToken = chainedChunks[0], endToken = "/";
             if (chainedChunks.length == 2) {
-              // Pull URI out of original inUri's full representation.
-              String fullProxyUri = uriIn.toString();
-              int sfxIx = fullProxyUri.indexOf(chainedChunks[1]);
-              if (sfxIx > 0) {
-                uriStr = fullProxyUri.substring(sfxIx + chainedChunks[1].length());
-                while (uriStr.startsWith("/")) {
-                  uriStr = uriStr.substring(1);
-                }
+              endToken = chainedChunks[1];
+            }
+            
+            // Pull URI out of original inUri's full representation.
+            String fullProxyUri = uriIn.toString();
+            int startIx = fullProxyUri.indexOf(startToken);
+            int endIx = fullProxyUri.indexOf(endToken, startIx + startToken.length());
+            if (startIx > 0 && endIx > 0) {
+              uriStr = fullProxyUri.substring(endIx + endToken.length());
+              while (uriStr.startsWith("/")) {
+                uriStr = uriStr.substring(1);
               }
             }
           }
