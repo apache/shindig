@@ -42,6 +42,6 @@ public class ProxyServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    proxyHandler.fetch(new ProxyServletRequest(request), response);
+    proxyHandler.fetch(request, response);
   }
 }
