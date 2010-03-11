@@ -17,23 +17,23 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.common.cache.Cache;
-import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.util.HashUtil;
-import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import org.apache.shindig.common.cache.Cache;
+import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.util.HashUtil;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -107,7 +107,9 @@ public abstract class GadgetHtmlParser {
         throw e;
       } catch (DOMException e) {
         // DOMException is a RuntimeException
-        return errorDom(e);
+        document = errorDom(e);
+        HtmlSerialization.attach(document, serializerProvider.get(), source);      
+        return document;
       }
 
       HtmlSerialization.attach(document, serializerProvider.get(), source);

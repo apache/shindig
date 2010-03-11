@@ -26,10 +26,7 @@ import com.google.common.collect.Lists;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.apache.shindig.gadgets.spec.PipelinedData;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -154,6 +151,8 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
     assertTrue(body.getTextContent().contains("INVALID_CHARACTER_ERR"));
     assertTrue(body.getTextContent().contains(
         "Around ...<div id=\"div_super\" class=\"div_super\"..."));
+    // Verify Serialization: 
+    assertTrue(HtmlSerialization.serialize(doc).contains("INVALID_CHARACTER_ERR"));
   }
 
   private void assertEmpty(Node n) {
@@ -178,7 +177,7 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
       for (Element script : scripts) {
         Attr typeAttr = (Attr)script.getAttributes().getNamedItem("type");
         if (typeAttr != null && scriptType.equalsIgnoreCase(typeAttr.getValue())) {
-          elements.add((Element)script);
+          elements.add(script);
         }
       }
     }
