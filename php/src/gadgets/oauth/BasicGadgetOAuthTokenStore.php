@@ -37,7 +37,7 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
       $oauthConfigStr = file_get_contents($this->OAUTH_CONFIG);
       // remove all comments because this confuses the json parser
       // note: the json parser also crashes on trailing ,'s in records so please don't use them
-      $contents = preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $oauthConfigStr);
+      $contents = self::removeComments($oauthConfigStr);
       $oauthConfig = json_decode($contents, true);
       if ($oauthConfig == $contents) {
         throw new GadgetException("OAuth configuration json failed to parse.");
@@ -48,6 +48,15 @@ class BasicGadgetOAuthTokenStore extends GadgetOAuthTokenStore {
     } catch (Exception $e) {
       throw new GadgetException($e);
     }
+  }
+
+  public static function removeComments($str) {
+    // remove /* */ style comments
+    $str = preg_replace('@/\\*.*?\\*/@s', '', $str);
+    // remove // style comments, but keep 'http://' 'https://' and '"//'
+    // for example: "gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback"
+    $str = preg_replace('/[^http:\/\/|^https:\/\/|"\/\/]\/\/.*$/m', '', $str);
+    return $str;
   }
 
   private function storeConsumerInfos($gadgetUri, $oauthConfig) {

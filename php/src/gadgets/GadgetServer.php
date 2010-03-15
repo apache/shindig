@@ -149,6 +149,7 @@ class GadgetServer {
     }
     // userPref's
     $upValues = $gadget->getUserPrefValues();
+    $userPrefs = array();
     foreach ($gadget->getUserPrefs() as $pref) {
       $name = $pref->getName();
       $value = $upValues->getPref($name);
@@ -158,8 +159,10 @@ class GadgetServer {
       if ($value == null) {
         $value = "";
       }
+      $userPrefs[$name] = $value;
       $substitutor->addSubstitution('UP', $name, $value);
     }
+    $gadget->setPrefs(new UserPrefs($userPrefs));
     $this->substitutePreloads($gadget, $substitutor);
   }
 

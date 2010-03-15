@@ -50,7 +50,7 @@ class ContainerConfig {
     $contents = file_get_contents($file);
     // remove all comments (both /* */ and // style) because this confuses the json parser
     // note: the json parser also crashes on trailing ,'s in records so please don't use them
-    $contents = preg_replace('/[^http:\/\/|^https:\/\/]\/\/.*$/m', '', preg_replace('@/\\*(?:.|[\\n\\r])*?\\*/@', '', $contents));
+    $contents = self::removeComments($contents);
     $config = json_decode($contents, true);
     if ($config == $contents) {
       throw new Exception("Failed to json_decode the container configuration");
@@ -65,6 +65,15 @@ class ContainerConfig {
     }
   }
 
+  public static function removeComments($str) {
+    // remove /* */ style comments
+    $str = preg_replace('@/\\*.*?\\*/@s', '', $str);
+    // remove // style comments, but keep 'http://' 'https://' and '"//'
+    // for example: "gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback"
+    $str = preg_replace('/[^http:\/\/|^https:\/\/|"\/\/]\/\/.*$/m', '', $str);
+    return $str;
+  }
+  
   public function getConfig($container, $name) {
     $config = array();
     if (isset($this->config[$container]) && isset($this->config[$container][$name])) {
