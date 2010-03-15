@@ -392,7 +392,7 @@ public class OAuthRequest {
     return list;
   }
 
-  private boolean allowParam(String paramName) {
+  protected boolean allowParam(String paramName) {
     String canonParamName = paramName.toLowerCase();
     return (!(canonParamName.startsWith("oauth") ||
         canonParamName.startsWith("xoauth") ||
@@ -913,7 +913,7 @@ public class OAuthRequest {
     return result;
   }
 
-  private static boolean isContainerInjectedParameter(String key) {
+  protected static boolean isContainerInjectedParameter(String key) {
     key = key.toLowerCase();
     return key.startsWith("oauth") || key.startsWith("xoauth") || key.startsWith("opensocial");
   }
