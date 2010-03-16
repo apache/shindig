@@ -222,10 +222,11 @@ public class JsonRpcServlet extends ApiServlet {
         RestfulCollection<?> collection = (RestfulCollection<?>) response;
         // Return sublist info
         if (collection.getTotalResults() != collection.getEntry().size()) {
-          map.put("totalResults", collection.getTotalResults());
           map.put("startIndex", collection.getStartIndex());
           map.put("itemsPerPage", collection.getItemsPerPage());
         }
+        // always put in totalResults
+        map.put("totalResults", collection.getTotalResults());
 
         if (!collection.isFiltered())
           map.put("filtered", collection.isFiltered());
