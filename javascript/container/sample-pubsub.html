@@ -22,9 +22,7 @@
 <title>Sample: PubSub</title>
 <!-- default container look and feel -->
 <link rel="stylesheet" href="gadgets.css">
-<script type="text/javascript" src="http://localhost:8080/gadgets/js/pubsub.js?c=1&debug=1"></script>
-<script type="text/javascript" src="util.js"></script>
-<script type="text/javascript" src="gadgets.js"></script>
+<script type="text/javascript" src="http://localhost:8080/gadgets/js/shindig-container:pubsub.js?c=1&debug=1"></script>
 <script type="text/javascript">
 var my = {};
 
@@ -35,10 +33,10 @@ my.gadgetSpecUrls = [
 ];
 
 my.LayoutManager = function() {
-  gadgets.LayoutManager.call(this);
+  shindig.LayoutManager.call(this);
 };
 
-my.LayoutManager.inherits(gadgets.LayoutManager);
+my.LayoutManager.inherits(shindig.LayoutManager);
 
 my.LayoutManager.prototype.getGadgetChrome = function(gadget) {
   var chromeId = 'gadget-chrome-' + gadget.id;
@@ -62,15 +60,15 @@ my.init = function() {
       // return true to reject the request.
     }
   });
-  gadgets.container.layoutManager = new my.LayoutManager();
+  shindig.container.layoutManager = new my.LayoutManager();
 };
 
 my.renderGadgets = function() {
   for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
-    var gadget = gadgets.container.createGadget(
+    var gadget = shindig.container.createGadget(
         {specUrl: my.gadgetSpecUrls[i], title: (i ? "Subscriber" : "Publisher")});
-    gadgets.container.addGadget(gadget);
-    gadgets.container.renderGadget(gadget);
+    shindig.container.addGadget(gadget);
+    shindig.container.renderGadget(gadget);
   }
 };
 

@@ -25,8 +25,7 @@
  */
 
 // TODO: find the official solution for a cookies library
-var shindig = shindig || {};
-shindig.cookies = shindig.cookies || {};
+shindig.cookies = {};
 
 
 shindig.cookies.JsType_ = {

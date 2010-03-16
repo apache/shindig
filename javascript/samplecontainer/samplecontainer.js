@@ -90,10 +90,10 @@ shindig.samplecontainer = {};
   }
 
   SampleContainerGadget = function(opt_params) {
-    gadgets.IfrGadget.call(this, opt_params);
+    shindig.IfrGadget.call(this, opt_params);
   };
 
-  SampleContainerGadget.inherits(gadgets.IfrGadget);
+  SampleContainerGadget.inherits(shindig.IfrGadget);
 
   SampleContainerGadget.prototype.getAdditionalParams = function() {
     var params = '';
@@ -107,7 +107,7 @@ shindig.samplecontainer = {};
     return params;
   };
 
-  gadgets.container.gadgetClass = SampleContainerGadget;
+  shindig.container.gadgetClass = SampleContainerGadget;
 
   function setEvilBit() {
     sendRequestToServer('setevilness/' + doEvil, 'POST');
@@ -146,10 +146,10 @@ shindig.samplecontainer = {};
 
   function generateGadgets(metadata) {
     // TODO: The gadget.js file should really have a clearGadgets method
-    gadgets.container.view_ = current_view;
-    gadgets.container.gadgets_ = {};
+    shindig.container.view_ = current_view;
+    shindig.container.gadgets_ = {};
     for (var i = 0; i < metadata.gadgets.length; i++) {
-      gadget = gadgets.container.createGadget({'specUrl': metadata.gadgets[i].url,
+      gadget = shindig.container.createGadget({'specUrl': metadata.gadgets[i].url,
           'title': metadata.gadgets[i].title, 'userPrefs': metadata.gadgets[i].userPrefs});
       // Shindigs rpc code uses direct javascript calls when running on the same domain
       // to simulate cross-domain when running sample container we replace 
@@ -158,26 +158,26 @@ shindig.samplecontainer = {};
 
       gadget.setServerBase(iframeBaseUrl);
       gadget.secureToken = escape(generateSecureToken());
-      gadgets.container.addGadget(gadget);
+      shindig.container.addGadget(gadget);
     }
 
-    gadgets.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
+    shindig.container.layoutManager.setGadgetChromeIds(['gadget-chrome']);
     reloadStateFile(function() {
-      gadgets.container.renderGadgets();
+      shindig.container.renderGadgets();
     });
   };
 
   function refreshGadgets(metadata) {
     // TODO: The gadget.js file should really have a getGadgets method
-    for (var gadget in gadgets.container.gadgets_) {
+    for (var gadget in shindig.container.gadgets_) {
       var gadgetMetadata = metadata.gadgets[0];
-      gadgets.container.gadgets_[gadget].title = gadgetMetadata.title;
-      gadgets.container.gadgets_[gadget].specUrl = gadgetMetadata.url;
-      gadgets.container.gadgets_[gadget].userPrefs = gadgetMetadata.userPrefs;
-      gadgets.container.gadgets_[gadget].secureToken = escape(generateSecureToken());
+      shindig.container.gadgets_[gadget].title = gadgetMetadata.title;
+      shindig.container.gadgets_[gadget].specUrl = gadgetMetadata.url;
+      shindig.container.gadgets_[gadget].userPrefs = gadgetMetadata.userPrefs;
+      shindig.container.gadgets_[gadget].secureToken = escape(generateSecureToken());
     }
     reloadStateFile(function() {
-      gadgets.container.refreshGadgets();
+      shindig.container.refreshGadgets();
     });
   }
 
@@ -246,7 +246,7 @@ shindig.samplecontainer = {};
 
   shindig.samplecontainer.changeGadgetUrl = function() {
     shindig.samplecontainer.unpackFormState();
-    gadgets.container.nocache_ = useCache ? 0 : 1;
+    shindig.container.nocache_ = useCache ? 0 : 1;
 
     setEvilBit();
 

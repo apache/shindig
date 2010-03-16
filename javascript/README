@@ -41,11 +41,7 @@
   2) Play around with the code.
 
      A) Create an HTML file including the following <head> boilerplate:
-        <script type="text/javascript" src="../../js/rpc.js?c=1"></script>
-        <script type="text/javascript" src="cookies.js"></script>
-        <script type="text/javascript" src="util.js"></script>
-        <script type="text/javascript" src="gadgets.js"></script>
-        <script type="text/javascript" src="cookiebaseduserprefstore.js"></script>
+        <script type="text/javascript" src="../../js/shindig-container:rpc.js?c=1"></script>
 
      B) For each Gadget you wish to add to the page:
         i) Create it. Example, for Gadget whose spec is at http://foo.com/spec.xml

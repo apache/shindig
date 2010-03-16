@@ -22,24 +22,20 @@
 <title>Sample: set-pref support</title>
 <!-- default container look and feel -->
 <link rel="stylesheet" href="gadgets.css">
-<script type="text/javascript" src="../../js/rpc.js?c=1&debug=1"></script>
-<script type="text/javascript" src="cookies.js"></script>
-<script type="text/javascript" src="util.js"></script>
-<script type="text/javascript" src="gadgets.js"></script>
-<script type="text/javascript" src="cookiebaseduserprefstore.js"></script>
+<script type="text/javascript" src="../../js/shindig-container:rpc.js?c=1&debug=1"></script>
 <script type="text/javascript">
 var specUrl0 = 'http://www.google.com/ig/modules/test_setprefs_multiple_ifpc.xml';
 
 function init() {
-  gadgets.container.layoutManager =
-      new gadgets.FloatLeftLayoutManager('gadget-parent');
+  shindig.container.layoutManager =
+      new shindig.FloatLeftLayoutManager('gadget-parent');
 
-  var gadget = gadgets.container.createGadget({specUrl: specUrl0});
-  gadgets.container.addGadget(gadget);
+  var gadget = shindig.container.createGadget({specUrl: specUrl0});
+  shindig.container.addGadget(gadget);
 };
 
 function renderGadgets() {
-  gadgets.container.renderGadgets();
+  shindig.container.renderGadgets();
 };
 </script>
 </head>

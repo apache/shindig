@@ -20,11 +20,9 @@
  * @fileoverview Open Gadget Container
  */
 
-var gadgets = gadgets || {};
-
-gadgets.errors = {};
-gadgets.errors.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
-gadgets.errors.TO_BE_DONE = 'to be done';
+shindig.errors = {};
+shindig.errors.SUBCLASS_RESPONSIBILITY = 'subclass responsibility';
+shindig.errors.TO_BE_DONE = 'to be done';
 
 /**
  * Calls an array of asynchronous functions and calls the continuation
@@ -41,7 +39,7 @@ gadgets.errors.TO_BE_DONE = 'to be done';
  * @param {Object} opt_this Optional object used as "this" when calling each
  *     function
  */
-gadgets.callAsyncAndJoin = function(functions, continuation, opt_this) {
+shindig.callAsyncAndJoin = function(functions, continuation, opt_this) {
   var pending = functions.length;
   var results = [];
   for (var i = 0; i < functions.length; i++) {
@@ -63,7 +61,7 @@ gadgets.callAsyncAndJoin = function(functions, continuation, opt_this) {
 // ----------
 // Extensible
 
-gadgets.Extensible = function() {
+shindig.Extensible = function() {
 };
 
 /**
@@ -71,7 +69,7 @@ gadgets.Extensible = function() {
  * @param {Object} dependencies Object whose properties are set on this
  *     container as dependencies
  */
-gadgets.Extensible.prototype.setDependencies = function(dependencies) {
+shindig.Extensible.prototype.setDependencies = function(dependencies) {
   for (var p in dependencies) {
     this[p] = dependencies[p];
   }
@@ -82,7 +80,7 @@ gadgets.Extensible.prototype.setDependencies = function(dependencies) {
  * @param {String} name Name of dependency
  * @return {Object} Dependency with that name or undefined if not found
  */
-gadgets.Extensible.prototype.getDependencies = function(name) {
+shindig.Extensible.prototype.getDependencies = function(name) {
   return this[name];
 };
 
@@ -95,7 +93,7 @@ gadgets.Extensible.prototype.getDependencies = function(name) {
  * User preference store interface.
  * @constructor
  */
-gadgets.UserPrefStore = function() {
+shindig.UserPrefStore = function() {
 };
 
 /**
@@ -103,8 +101,8 @@ gadgets.UserPrefStore = function() {
  * @param {Object} gadget Gadget object
  * @return {Object} All user preference of given gadget
  */
-gadgets.UserPrefStore.prototype.getPrefs = function(gadget) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.UserPrefStore.prototype.getPrefs = function(gadget) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -112,8 +110,8 @@ gadgets.UserPrefStore.prototype.getPrefs = function(gadget) {
  * @param {Object} gadget Gadget object
  * @param {Object} prefs User preferences
  */
-gadgets.UserPrefStore.prototype.savePrefs = function(gadget) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.UserPrefStore.prototype.savePrefs = function(gadget) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 
@@ -125,14 +123,14 @@ gadgets.UserPrefStore.prototype.savePrefs = function(gadget) {
  * TODO: Turn this into a real implementation that is production safe
  * @constructor
  */
-gadgets.DefaultUserPrefStore = function() {
-  gadgets.UserPrefStore.call(this);
+shindig.DefaultUserPrefStore = function() {
+  shindig.UserPrefStore.call(this);
 };
-gadgets.DefaultUserPrefStore.inherits(gadgets.UserPrefStore);
+shindig.DefaultUserPrefStore.inherits(shindig.UserPrefStore);
 
-gadgets.DefaultUserPrefStore.prototype.getPrefs = function(gadget) { };
+shindig.DefaultUserPrefStore.prototype.getPrefs = function(gadget) { };
 
-gadgets.DefaultUserPrefStore.prototype.savePrefs = function(gadget) { };
+shindig.DefaultUserPrefStore.prototype.savePrefs = function(gadget) { };
 
 
 // -------------
@@ -143,19 +141,19 @@ gadgets.DefaultUserPrefStore.prototype.savePrefs = function(gadget) { };
  * setting title, etc.
  * @constructor
  */
-gadgets.GadgetService = function() {
+shindig.GadgetService = function() {
 };
 
-gadgets.GadgetService.prototype.setHeight = function(elementId, height) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.GadgetService.prototype.setHeight = function(elementId, height) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
-gadgets.GadgetService.prototype.setTitle = function(gadget, title) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.GadgetService.prototype.setTitle = function(gadget, title) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
-gadgets.GadgetService.prototype.setUserPref = function(id) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.GadgetService.prototype.setUserPref = function(id) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 
@@ -166,8 +164,8 @@ gadgets.GadgetService.prototype.setUserPref = function(id) {
  * Base implementation of GadgetService.
  * @constructor
  */
-gadgets.IfrGadgetService = function() {
-  gadgets.GadgetService.call(this);
+shindig.IfrGadgetService = function() {
+  shindig.GadgetService.call(this);
   gadgets.rpc.register('resize_iframe', this.setHeight);
   gadgets.rpc.register('set_pref', this.setUserPref);
   gadgets.rpc.register('set_title', this.setTitle);
@@ -175,11 +173,11 @@ gadgets.IfrGadgetService = function() {
   gadgets.rpc.register('requestSendMessage', this.requestSendMessage);
 };
 
-gadgets.IfrGadgetService.inherits(gadgets.GadgetService);
+shindig.IfrGadgetService.inherits(shindig.GadgetService);
 
-gadgets.IfrGadgetService.prototype.setHeight = function(height) {
-  if (height > gadgets.container.maxheight_) {
-    height = gadgets.container.maxheight_;
+shindig.IfrGadgetService.prototype.setHeight = function(height) {
+  if (height > shindig.container.maxheight_) {
+    height = shindig.container.maxheight_;
   }
 
   var element = document.getElementById(this.f);
@@ -188,7 +186,7 @@ gadgets.IfrGadgetService.prototype.setHeight = function(height) {
   }
 };
 
-gadgets.IfrGadgetService.prototype.setTitle = function(title) {
+shindig.IfrGadgetService.prototype.setTitle = function(title) {
   var element = document.getElementById(this.f + '_title');
   if (element) {
     element.innerHTML = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -202,10 +200,10 @@ gadgets.IfrGadgetService.prototype.setTitle = function(title) {
  * @param {String} value Value of user preference
  * More names and values may follow
  */
-gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
+shindig.IfrGadgetService.prototype.setUserPref = function(editToken, name,
     value) {
-  var id = gadgets.container.gadgetService.getGadgetIdFromModuleId(this.f);
-  var gadget = gadgets.container.getGadget(id);
+  var id = shindig.container.gadgetService.getGadgetIdFromModuleId(this.f);
+  var gadget = shindig.container.getGadget(id);
   for (var i = 1, j = arguments.length; i < j; i += 2) {
     this.userPrefs[arguments[i]].value = arguments[i + 1];
   }
@@ -225,7 +223,7 @@ gadgets.IfrGadgetService.prototype.setUserPref = function(editToken, name,
  * indicating where to send a user when a request is made, or when a request
  * is accepted; options are of type  NavigationParameters.DestinationType
  */
-gadgets.IfrGadgetService.prototype.requestSendMessage = function(recipients,
+shindig.IfrGadgetService.prototype.requestSendMessage = function(recipients,
     message, opt_callback, opt_params) {
     if (opt_callback) {
       window.setTimeout(function() {
@@ -239,10 +237,10 @@ gadgets.IfrGadgetService.prototype.requestSendMessage = function(recipients,
  * Navigates the page to a new url based on a gadgets requested view and
  * parameters.
  */
-gadgets.IfrGadgetService.prototype.requestNavigateTo = function(view,
+shindig.IfrGadgetService.prototype.requestNavigateTo = function(view,
     opt_params) {
-  var id = gadgets.container.gadgetService.getGadgetIdFromModuleId(this.f);
-  var url = gadgets.container.gadgetService.getUrlForView(view);
+  var id = shindig.container.gadgetService.getGadgetIdFromModuleId(this.f);
+  var url = shindig.container.gadgetService.getUrlForView(view);
 
   if (opt_params) {
     var paramStr = gadgets.json.stringify(opt_params);
@@ -263,7 +261,7 @@ gadgets.IfrGadgetService.prototype.requestNavigateTo = function(view,
  *
  * @param view The view name to get the url for
  */
-gadgets.IfrGadgetService.prototype.getUrlForView = function(
+shindig.IfrGadgetService.prototype.getUrlForView = function(
     view) {
   if (view === 'canvas') {
     return '/canvas';
@@ -274,7 +272,7 @@ gadgets.IfrGadgetService.prototype.getUrlForView = function(
   }
 };
 
-gadgets.IfrGadgetService.prototype.getGadgetIdFromModuleId = function(
+shindig.IfrGadgetService.prototype.getGadgetIdFromModuleId = function(
     moduleId) {
   // Quick hack to extract the gadget id from module id
   return parseInt(moduleId.match(/_([0-9]+)$/)[1], 10);
@@ -288,7 +286,7 @@ gadgets.IfrGadgetService.prototype.getGadgetIdFromModuleId = function(
  * Layout manager interface.
  * @constructor
  */
-gadgets.LayoutManager = function() {
+shindig.LayoutManager = function() {
 };
 
 /**
@@ -297,8 +295,8 @@ gadgets.LayoutManager = function() {
  * @param {Object} gadget Gadget instance
  * @return {Object} HTML element that is the chrome for the given gadget
  */
-gadgets.LayoutManager.prototype.getGadgetChrome = function(gadget) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.LayoutManager.prototype.getGadgetChrome = function(gadget) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 // -------------------
@@ -308,22 +306,22 @@ gadgets.LayoutManager.prototype.getGadgetChrome = function(gadget) {
  * Static layout manager where gadget ids have a 1:1 mapping to chrome ids.
  * @constructor
  */
-gadgets.StaticLayoutManager = function() {
-  gadgets.LayoutManager.call(this);
+shindig.StaticLayoutManager = function() {
+  shindig.LayoutManager.call(this);
 };
 
-gadgets.StaticLayoutManager.inherits(gadgets.LayoutManager);
+shindig.StaticLayoutManager.inherits(shindig.LayoutManager);
 
 /**
  * Sets chrome ids, whose indexes are gadget instance ids (starting from 0).
  * @param {Array} gadgetChromeIds Gadget id to chrome id map
  */
-gadgets.StaticLayoutManager.prototype.setGadgetChromeIds =
+shindig.StaticLayoutManager.prototype.setGadgetChromeIds =
     function(gadgetChromeIds) {
   this.gadgetChromeIds_ = gadgetChromeIds;
 };
 
-gadgets.StaticLayoutManager.prototype.getGadgetChrome = function(gadget) {
+shindig.StaticLayoutManager.prototype.getGadgetChrome = function(gadget) {
   var chromeId = this.gadgetChromeIds_[gadget.id];
   return chromeId ? document.getElementById(chromeId) : null;
 };
@@ -338,14 +336,14 @@ gadgets.StaticLayoutManager.prototype.getGadgetChrome = function(gadget) {
  * @param {String} layoutRootId Id of the element that is the parent of all
  *     gadgets.
  */
-gadgets.FloatLeftLayoutManager = function(layoutRootId) {
-  gadgets.LayoutManager.call(this);
+shindig.FloatLeftLayoutManager = function(layoutRootId) {
+  shindig.LayoutManager.call(this);
   this.layoutRootId_ = layoutRootId;
 };
 
-gadgets.FloatLeftLayoutManager.inherits(gadgets.LayoutManager);
+shindig.FloatLeftLayoutManager.inherits(shindig.LayoutManager);
 
-gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
+shindig.FloatLeftLayoutManager.prototype.getGadgetChrome =
     function(gadget) {
   var layoutRoot = document.getElementById(this.layoutRootId_);
   if (layoutRoot) {
@@ -386,7 +384,7 @@ gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
  *    "debug": send debug=1 to the gadget server, gets us uncompressed
  *        javascript
  */
-gadgets.Gadget = function(params) {
+shindig.Gadget = function(params) {
   this.userPrefs = {};
 
   if (params) {
@@ -401,21 +399,21 @@ gadgets.Gadget = function(params) {
   }
 };
 
-gadgets.Gadget.prototype.getUserPrefs = function() {
+shindig.Gadget.prototype.getUserPrefs = function() {
   return this.userPrefs;
 };
 
-gadgets.Gadget.prototype.saveUserPrefs = function() {
-  gadgets.container.userPrefStore.savePrefs(this);
+shindig.Gadget.prototype.saveUserPrefs = function() {
+  shindig.container.userPrefStore.savePrefs(this);
 };
 
-gadgets.Gadget.prototype.getUserPrefValue = function(name) {
+shindig.Gadget.prototype.getUserPrefValue = function(name) {
   var pref = this.userPrefs[name];
   return typeof(pref.value) != 'undefined' && pref.value != null ?
       pref.value : pref['default'];
 };
 
-gadgets.Gadget.prototype.render = function(chrome) {
+shindig.Gadget.prototype.render = function(chrome) {
   if (chrome) {
     var gadget = this;
     this.getContent(function(content) {
@@ -425,8 +423,8 @@ gadgets.Gadget.prototype.render = function(chrome) {
   }
 };
 
-gadgets.Gadget.prototype.getContent = function(continuation) {
-  gadgets.callAsyncAndJoin([
+shindig.Gadget.prototype.getContent = function(continuation) {
+  shindig.callAsyncAndJoin([
       this.getTitleBarContent, this.getUserPrefsDialogContent,
       this.getMainContent], function(results) {
         continuation(results.join(''));
@@ -438,8 +436,8 @@ gadgets.Gadget.prototype.getContent = function(continuation) {
  * @param {Function} continuation Function that handles title bar content as
  *     the one and only argument
  */
-gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.Gadget.prototype.getTitleBarContent = function(continuation) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -447,8 +445,8 @@ gadgets.Gadget.prototype.getTitleBarContent = function(continuation) {
  * @param {Function} continuation Function that handles user preferences
  *     content as the one and only argument
  */
-gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /**
@@ -456,15 +454,15 @@ gadgets.Gadget.prototype.getUserPrefsDialogContent = function(continuation) {
  * @param {Function} continuation Function that handles gadget content as
  *     the one and only argument
  */
-gadgets.Gadget.prototype.getMainContent = function(continuation) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.Gadget.prototype.getMainContent = function(continuation) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
 /*
  * Gets additional parameters to append to the iframe url
  * Override this method if you need any custom params.
  */
-gadgets.Gadget.prototype.getAdditionalParams = function() {
+shindig.Gadget.prototype.getAdditionalParams = function() {
   return '';
 };
 
@@ -472,34 +470,34 @@ gadgets.Gadget.prototype.getAdditionalParams = function() {
 // ---------
 // IfrGadget
 
-gadgets.IfrGadget = function(opt_params) {
-  gadgets.Gadget.call(this, opt_params);
+shindig.IfrGadget = function(opt_params) {
+  shindig.Gadget.call(this, opt_params);
   this.serverBase_ = '../../'; // default gadget server
 };
 
-gadgets.IfrGadget.inherits(gadgets.Gadget);
+shindig.IfrGadget.inherits(shindig.Gadget);
 
-gadgets.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
+shindig.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
-gadgets.IfrGadget.prototype.CONTAINER = 'default';
+shindig.IfrGadget.prototype.CONTAINER = 'default';
 
-gadgets.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
-gadgets.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
-gadgets.IfrGadget.prototype.cssClassTitle = 'gadgets-gadget-title';
-gadgets.IfrGadget.prototype.cssClassTitleButtonBar =
+shindig.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
+shindig.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
+shindig.IfrGadget.prototype.cssClassTitle = 'gadgets-gadget-title';
+shindig.IfrGadget.prototype.cssClassTitleButtonBar =
     'gadgets-gadget-title-button-bar';
-gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialog =
+shindig.IfrGadget.prototype.cssClassGadgetUserPrefsDialog =
     'gadgets-gadget-user-prefs-dialog';
-gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
+shindig.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
     'gadgets-gadget-user-prefs-dialog-action-bar';
-gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
-gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
-gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
-gadgets.IfrGadget.prototype.rpcRelay = 'files/container/rpc_relay.html';
+shindig.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
+shindig.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
+shindig.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
+shindig.IfrGadget.prototype.rpcRelay = 'files/container/rpc_relay.html';
 
-gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
+shindig.IfrGadget.prototype.getTitleBarContent = function(continuation) {
   var settingsButton = this.hasViewablePrefs_() ?
-      '<a href="#" onclick="gadgets.container.getGadget(' + this.id +
+      '<a href="#" onclick="shindig.container.getGadget(' + this.id +
           ').handleOpenUserPrefsDialog();return false;" class="' + this.cssClassTitleButton +
           '">settings</a> '
       : '';
@@ -508,25 +506,25 @@ gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
       this.getIframeId() + '_title" class="' +
       this.cssClassTitle + '">' + (this.title ? this.title : 'Title') + '</span> | <span class="' +
       this.cssClassTitleButtonBar + '">' + settingsButton +
-      '<a href="#" onclick="gadgets.container.getGadget(' + this.id +
+      '<a href="#" onclick="shindig.container.getGadget(' + this.id +
       ').handleToggle();return false;" class="' + this.cssClassTitleButton +
       '">toggle</a></span></div>');
 };
 
-gadgets.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
+shindig.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
   continuation('<div id="' + this.getUserPrefsDialogId() + '" class="' +
       this.cssClassGadgetUserPrefsDialog + '"></div>');
 };
 
-gadgets.IfrGadget.prototype.setServerBase = function(url) {
+shindig.IfrGadget.prototype.setServerBase = function(url) {
   this.serverBase_ = url;
 };
 
-gadgets.IfrGadget.prototype.getServerBase = function() {
+shindig.IfrGadget.prototype.getServerBase = function() {
   return this.serverBase_;
 };
 
-gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
+shindig.IfrGadget.prototype.getMainContent = function(continuation) {
   var iframeId = this.getIframeId();
   gadgets.rpc.setRelayUrl(iframeId, this.serverBase_ + this.rpcRelay);
   gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
@@ -539,24 +537,24 @@ gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
       '></iframe></div>');
 };
 
-gadgets.IfrGadget.prototype.getIframeId = function() {
+shindig.IfrGadget.prototype.getIframeId = function() {
   return this.GADGET_IFRAME_PREFIX_ + this.id;
 };
 
-gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
+shindig.IfrGadget.prototype.getUserPrefsDialogId = function() {
   return this.getIframeId() + '_userPrefsDialog';
 };
 
-gadgets.IfrGadget.prototype.getIframeUrl = function() {
+shindig.IfrGadget.prototype.getIframeUrl = function() {
   return this.serverBase_ + 'ifr?' +
       'container=' + this.CONTAINER +
       '&mid=' +  this.id +
-      '&nocache=' + gadgets.container.nocache_ +
-      '&country=' + gadgets.container.country_ +
-      '&lang=' + gadgets.container.language_ +
-      '&view=' + gadgets.container.view_ +
+      '&nocache=' + shindig.container.nocache_ +
+      '&country=' + shindig.container.country_ +
+      '&lang=' + shindig.container.language_ +
+      '&view=' + shindig.container.view_ +
       (this.specVersion ? '&v=' + this.specVersion : '') +
-      (gadgets.container.parentUrl_ ? '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) : '') +
+      (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
       (this.debug ? '&debug=1' : '') +
       this.getAdditionalParams() +
       this.getUserPrefsParams() +
@@ -568,7 +566,7 @@ gadgets.IfrGadget.prototype.getIframeUrl = function() {
       (this.hashData ? '&' + this.hashData : '');
 };
 
-gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
+shindig.IfrGadget.prototype.getUserPrefsParams = function() {
   var params = '';
   for(var name in this.getUserPrefs()) {
     params += '&up_' + encodeURIComponent(name) + '=' +
@@ -577,7 +575,7 @@ gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
   return params;
 };
 
-gadgets.IfrGadget.prototype.handleToggle = function() {
+shindig.IfrGadget.prototype.handleToggle = function() {
   var gadgetIframe = document.getElementById(this.getIframeId());
   if (gadgetIframe) {
     var gadgetContent = gadgetIframe.parentNode;
@@ -587,7 +585,7 @@ gadgets.IfrGadget.prototype.handleToggle = function() {
 };
 
 
-gadgets.IfrGadget.prototype.hasViewablePrefs_ = function() {
+shindig.IfrGadget.prototype.hasViewablePrefs_ = function() {
   for(var name in this.getUserPrefs()) {
     var pref = this.userPrefs[name];
     if (pref.type != 'hidden') {
@@ -598,7 +596,7 @@ gadgets.IfrGadget.prototype.hasViewablePrefs_ = function() {
 };
 
 
-gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
+shindig.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
   if (this.userPrefsDialogContentLoaded) {
     this.showUserPrefsDialog();
   } else {
@@ -617,27 +615,27 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
   }
 };
 
-gadgets.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
+shindig.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
   userPrefsDialog.innerHTML = content +
       '<div class="' + this.cssClassGadgetUserPrefsDialogActionBar +
-      '"><input type="button" value="Save" onclick="gadgets.container.getGadget(' +
-      this.id +').handleSaveUserPrefs()"> <input type="button" value="Cancel" onclick="gadgets.container.getGadget(' +
+      '"><input type="button" value="Save" onclick="shindig.container.getGadget(' +
+      this.id +').handleSaveUserPrefs()"> <input type="button" value="Cancel" onclick="shindig.container.getGadget(' +
       this.id +').handleCancelUserPrefs()"></div>';
   userPrefsDialog.childNodes[0].style.display = '';
 };
 
-gadgets.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
+shindig.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
   userPrefsDialog.style.display = (opt_show || opt_show === undefined)
       ? '' : 'none';
 };
 
-gadgets.IfrGadget.prototype.hideUserPrefsDialog = function() {
+shindig.IfrGadget.prototype.hideUserPrefsDialog = function() {
   this.showUserPrefsDialog(false);
 };
 
-gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
+shindig.IfrGadget.prototype.handleSaveUserPrefs = function() {
   this.hideUserPrefsDialog();
 
   var numFields = document.getElementById('m_' + this.id +
@@ -654,11 +652,11 @@ gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
   this.refresh();
 };
 
-gadgets.IfrGadget.prototype.handleCancelUserPrefs = function() {
+shindig.IfrGadget.prototype.handleCancelUserPrefs = function() {
   this.hideUserPrefsDialog();
 };
 
-gadgets.IfrGadget.prototype.refresh = function() {
+shindig.IfrGadget.prototype.refresh = function() {
   var iframeId = this.getIframeId();
   document.getElementById(iframeId).src = this.getIframeUrl();
 };
@@ -671,7 +669,7 @@ gadgets.IfrGadget.prototype.refresh = function() {
  * Container interface.
  * @constructor
  */
-gadgets.Container = function() {
+shindig.Container = function() {
   this.gadgets_ = {};
   this.parentUrl_ = 'http://' + document.location.host;
   this.country_ = 'ALL';
@@ -683,67 +681,67 @@ gadgets.Container = function() {
   this.maxheight_ = 0x7FFFFFFF;
 };
 
-gadgets.Container.inherits(gadgets.Extensible);
+shindig.Container.inherits(shindig.Extensible);
 
 /**
  * Known dependencies:
  *     gadgetClass: constructor to create a new gadget instance
- *     userPrefStore: instance of a subclass of gadgets.UserPrefStore
- *     gadgetService: instance of a subclass of gadgets.GadgetService
- *     layoutManager: instance of a subclass of gadgets.LayoutManager
+ *     userPrefStore: instance of a subclass of shindig.UserPrefStore
+ *     gadgetService: instance of a subclass of shindig.GadgetService
+ *     layoutManager: instance of a subclass of shindig.LayoutManager
  */
 
-gadgets.Container.prototype.gadgetClass = gadgets.Gadget;
+shindig.Container.prototype.gadgetClass = shindig.Gadget;
 
-gadgets.Container.prototype.userPrefStore = new gadgets.DefaultUserPrefStore();
+shindig.Container.prototype.userPrefStore = new shindig.DefaultUserPrefStore();
 
-gadgets.Container.prototype.gadgetService = new gadgets.GadgetService();
+shindig.Container.prototype.gadgetService = new shindig.GadgetService();
 
-gadgets.Container.prototype.layoutManager =
-    new gadgets.StaticLayoutManager();
+shindig.Container.prototype.layoutManager =
+    new shindig.StaticLayoutManager();
 
-gadgets.Container.prototype.setParentUrl = function(url) {
+shindig.Container.prototype.setParentUrl = function(url) {
   this.parentUrl_ = url;
 };
 
-gadgets.Container.prototype.setCountry = function(country) {
+shindig.Container.prototype.setCountry = function(country) {
   this.country_ = country;
 };
 
-gadgets.Container.prototype.setNoCache = function(nocache) {
+shindig.Container.prototype.setNoCache = function(nocache) {
   this.nocache_ = nocache;
 };
 
-gadgets.Container.prototype.setLanguage = function(language) {
+shindig.Container.prototype.setLanguage = function(language) {
   this.language_ = language;
 };
 
-gadgets.Container.prototype.setView = function(view) {
+shindig.Container.prototype.setView = function(view) {
   this.view_ = view;
 };
 
-gadgets.Container.prototype.setMaxHeight = function(maxheight) {
+shindig.Container.prototype.setMaxHeight = function(maxheight) {
   this.maxheight_ = maxheight;
 };
 
-gadgets.Container.prototype.getGadgetKey_ = function(instanceId) {
+shindig.Container.prototype.getGadgetKey_ = function(instanceId) {
   return 'gadget_' + instanceId;
 };
 
-gadgets.Container.prototype.getGadget = function(instanceId) {
+shindig.Container.prototype.getGadget = function(instanceId) {
   return this.gadgets_[this.getGadgetKey_(instanceId)];
 };
 
-gadgets.Container.prototype.createGadget = function(opt_params) {
+shindig.Container.prototype.createGadget = function(opt_params) {
   return new this.gadgetClass(opt_params);
 };
 
-gadgets.Container.prototype.addGadget = function(gadget) {
+shindig.Container.prototype.addGadget = function(gadget) {
   gadget.id = this.getNextGadgetInstanceId();
   this.gadgets_[this.getGadgetKey_(gadget.id)] = gadget;
 };
 
-gadgets.Container.prototype.addGadgets = function(gadgets) {
+shindig.Container.prototype.addGadgets = function(gadgets) {
   for (var i = 0; i < gadgets.length; i++) {
     this.addGadget(gadgets[i]);
   }
@@ -752,7 +750,7 @@ gadgets.Container.prototype.addGadgets = function(gadgets) {
 /**
  * Renders all gadgets in the container.
  */
-gadgets.Container.prototype.renderGadgets = function() {
+shindig.Container.prototype.renderGadgets = function() {
   for (var key in this.gadgets_) {
     this.renderGadget(this.gadgets_[key]);
   }
@@ -762,20 +760,20 @@ gadgets.Container.prototype.renderGadgets = function() {
  * Renders a gadget.  Gadgets are rendered inside their chrome element.
  * @param {Object} gadget Gadget object
  */
-gadgets.Container.prototype.renderGadget = function(gadget) {
-  throw Error(gadgets.errors.SUBCLASS_RESPONSIBILITY);
+shindig.Container.prototype.renderGadget = function(gadget) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
-gadgets.Container.prototype.nextGadgetInstanceId_ = 0;
+shindig.Container.prototype.nextGadgetInstanceId_ = 0;
 
-gadgets.Container.prototype.getNextGadgetInstanceId = function() {
+shindig.Container.prototype.getNextGadgetInstanceId = function() {
   return this.nextGadgetInstanceId_++;
 };
 
 /**
  * Refresh all the gadgets in the container.
  */
-gadgets.Container.prototype.refreshGadgets = function() {
+shindig.Container.prototype.refreshGadgets = function() {
   for (var key in this.gadgets_) {
     this.gadgets_[key].refresh();
   }
@@ -789,17 +787,17 @@ gadgets.Container.prototype.refreshGadgets = function() {
  * Container that renders gadget using ifr.
  * @constructor
  */
-gadgets.IfrContainer = function() {
-  gadgets.Container.call(this);
+shindig.IfrContainer = function() {
+  shindig.Container.call(this);
 };
 
-gadgets.IfrContainer.inherits(gadgets.Container);
+shindig.IfrContainer.inherits(shindig.Container);
 
-gadgets.IfrContainer.prototype.gadgetClass = gadgets.IfrGadget;
+shindig.IfrContainer.prototype.gadgetClass = shindig.IfrGadget;
 
-gadgets.IfrContainer.prototype.gadgetService = new gadgets.IfrGadgetService();
+shindig.IfrContainer.prototype.gadgetService = new shindig.IfrGadgetService();
 
-gadgets.IfrContainer.prototype.setParentUrl = function(url) {
+shindig.IfrContainer.prototype.setParentUrl = function(url) {
   if (!url.match(/^http[s]?:\/\//)) {
     url = document.location.href.match(/^[^?#]+\//)[0] + url;
   }
@@ -811,7 +809,7 @@ gadgets.IfrContainer.prototype.setParentUrl = function(url) {
  * Renders a gadget using ifr.
  * @param {Object} gadget Gadget object
  */
-gadgets.IfrContainer.prototype.renderGadget = function(gadget) {
+shindig.IfrContainer.prototype.renderGadget = function(gadget) {
   var chrome = this.layoutManager.getGadgetChrome(gadget);
   gadget.render(chrome);
 };
@@ -819,4 +817,4 @@ gadgets.IfrContainer.prototype.renderGadget = function(gadget) {
 /**
  * Default container.
  */
-gadgets.container = new gadgets.IfrContainer();
+shindig.container = new shindig.IfrContainer();
