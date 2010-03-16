@@ -18,10 +18,10 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.eq;
-import static org.easymock.classextension.EasyMock.isA;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,14 +29,13 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
 import org.junit.Test;
 
 import java.util.List;
@@ -211,8 +210,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
     DefaultProxyUriManager manager = makeManager(host, path, null);
     Uri testUri = new UriBuilder().setAuthority(host).setPath(
-        "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_START_BEACON + "&refresh=123" +
-        DefaultProxyUriManager.CHAINED_PARAMS_END_BEACON + "/path/http://foo.com").toUri();
+        "/proxy/refresh=123/path/http://foo.com").toUri();
     manager.process(testUri);
   }
   
@@ -232,8 +230,8 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
     DefaultProxyUriManager manager = makeManager(host, path, null);
     Uri testUri = new UriBuilder().setAuthority(host).setPath(
-        "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_START_BEACON + "&container=" +
-        CONTAINER + DefaultProxyUriManager.CHAINED_PARAMS_END_BEACON + "/path/").toUri();
+        "/proxy/container=" +
+        CONTAINER + "/path/").toUri();
     manager.process(testUri);
   }
   
@@ -296,10 +294,8 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     
     int proxyEnd = uriStr.indexOf("/proxy/") + "/proxy/".length();
     String paramsUri = uriStr.substring(
-        proxyEnd +
-        DefaultProxyUriManager.CHAINED_PARAMS_START_BEACON.length(),
-        (endOfPath ? uriStr.indexOf("/", proxyEnd) : uriStr.indexOf("/path"))
-        - DefaultProxyUriManager.CHAINED_PARAMS_END_BEACON.length());
+        proxyEnd,
+        (endOfPath ? uriStr.indexOf("/", proxyEnd) : uriStr.indexOf("/path")));
     uri = new UriBuilder().setQuery(paramsUri).toUri();
     
     // "Raw" query param verification.

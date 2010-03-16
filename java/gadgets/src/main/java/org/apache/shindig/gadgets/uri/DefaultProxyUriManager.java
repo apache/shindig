@@ -25,9 +25,9 @@ import com.google.inject.internal.Nullable;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -49,7 +49,7 @@ import java.util.Map;
  * Chained: Returned URI contains query params in its path, with the proxied
  * resource's URI appended verbatim to the end. This enables proxied SWFs
  * to perform proxied, relative-URI resource loads. Example:
- * http://www.example.com/gadgets/proxy/&s&refresh=1&...&e/http://www.foo.com/img.gif
+ * http://www.example.com/gadgets/proxy/refresh=1&.../http://www.foo.com/img.gif
  * 
  * Query param: All params are provided on the query string. Example:
  * http://www.example.com/gadgets/proxy?refresh=1&url=http://www.foo.com/img.gif&...
@@ -61,8 +61,6 @@ import java.util.Map;
 public class DefaultProxyUriManager implements ProxyUriManager {
   public static final String PROXY_HOST_PARAM = "gadgets.uri.proxy.host";
   public static final String PROXY_PATH_PARAM = "gadgets.uri.proxy.path";
-  static final String CHAINED_PARAMS_START_BEACON = "&s&";
-  static final String CHAINED_PARAMS_END_BEACON = "&e";
   static final String CHAINED_PARAMS_TOKEN = "%chained_params%";
 
   private final ContainerConfig config;
@@ -137,8 +135,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     String path = getReqConfig(container, PROXY_PATH_PARAM);
     if (path.contains(CHAINED_PARAMS_TOKEN)) {
       // Chained proxy syntax. Stuff query params into the path and append URI verbatim at the end
-      path = path.replace(CHAINED_PARAMS_TOKEN,
-          CHAINED_PARAMS_START_BEACON + queryBuilder.getQuery() + CHAINED_PARAMS_END_BEACON);
+      path = path.replace(CHAINED_PARAMS_TOKEN, queryBuilder.getQuery());
       uri.setPath(path);
       String uriStr = uri.toString();
       String curUri = uriStr + (!uriStr.endsWith("/") ? "/" : "") + puc.getResource().toString();
@@ -169,14 +166,19 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       queryUri = uriIn;
     } else {
       // Check for chained query string in the path.
-      int start = uriIn.getPath().indexOf(CHAINED_PARAMS_START_BEACON);
-      int end = uriIn.getPath().indexOf(CHAINED_PARAMS_END_BEACON, start);
-      if (start >= 0 && end > start) {
-        // Looks like chained proxy syntax. Pull out params.
-        String queryStr =
-            uriIn.getPath().substring(start + CHAINED_PARAMS_START_BEACON.length(), end);
-        queryUri = new UriBuilder().setQuery(queryStr).toUri();
-        container = queryUri.getQueryParameter(Param.CONTAINER.getKey());
+      String containerStr = Param.CONTAINER.getKey() + "=";
+      String path = uriIn.getPath();
+      int start = path.indexOf(containerStr);
+      if (start > 0) {
+        start += containerStr.length();
+        int end = path.indexOf("&", start);
+        if (end < start) {
+          end = path.indexOf("/", start);
+        }
+        if (end > start) {
+          // Looks like chained proxy syntax. Pull out params.
+          container = path.substring(start,end);
+        }
         if (container != null) {
           String proxyPath = config.getString(container, PROXY_PATH_PARAM);
           if (proxyPath != null) {
@@ -186,20 +188,23 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             // substring of the "full" URI, after the chained proxy prefix. We
             // first search for the pre- and post-fixes of the original /pre/%chained_params%/post
             // ContainerConfig value, and take the URI as everything beyond that point.
-            String startToken = chainedChunks[0], endToken = "/";
+            String startToken = chainedChunks[0];
+            String endToken = "/";
             if (chainedChunks.length == 2) {
               endToken = chainedChunks[1];
             }
             
             // Pull URI out of original inUri's full representation.
             String fullProxyUri = uriIn.toString();
-            int startIx = fullProxyUri.indexOf(startToken);
-            int endIx = fullProxyUri.indexOf(endToken, startIx + startToken.length());
+            int startIx = fullProxyUri.indexOf(startToken) + startToken.length();
+            int endIx = fullProxyUri.indexOf(endToken, startIx);
             if (startIx > 0 && endIx > 0) {
+              queryUri = new UriBuilder().setQuery(fullProxyUri.substring(startIx,endIx)).toUri();
               uriStr = fullProxyUri.substring(endIx + endToken.length());
               while (uriStr.startsWith("/")) {
                 uriStr = uriStr.substring(1);
               }
+              
             }
           }
         }
