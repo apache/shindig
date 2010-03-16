@@ -43,8 +43,11 @@ function assertEquals(msg, a, b) {
  * method must be called to verify that a test completed successfully,
  * instead of simply failing to load.
  */
+
 function finished() {
   alert("FINISHED");
+  // After finishing run the next test..
+  runOneTest();
 }
 
 /** Executes the test identifed by the testMethod URL parameter */
@@ -72,11 +75,21 @@ function executeTest() {
   }
 }
 
-function allTests() {
-  for (var testMethod in tests) {
-    alert(testMethod);
-    tests[testMethod]();
+var testFunctions = [];
+
+function runOneTest() {
+  var t = testFunctions.pop();
+  if (t) {
+    alert(t);
+    tests[t]();
   }
+}
+function allTests() {
+  // Collect the test names and iterate through them serially
+  for (var testMethod in tests) {
+    testFunctions.push(testMethod);
+  }
+  runOneTest();
 }
 
 gadgets.util.registerOnLoadHandler(executeTest);
