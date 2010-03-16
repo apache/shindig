@@ -242,7 +242,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     if (!externForcedLibs.isEmpty()) {
       String jsUrl = urlGenerator.getBundledJsUrl(externForcedLibs, context);
       Element libsTag = headTag.getOwnerDocument().createElement("script");
-      libsTag.setAttribute("src", jsUrl);
+      libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
       headTag.appendChild(libsTag);
     }
 
@@ -284,7 +284,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (!externGadgetLibs.isEmpty()) {
         String jsUrl = urlGenerator.getBundledJsUrl(externGadgetLibs, context);
         Element libsTag = headTag.getOwnerDocument().createElement("script");
-        libsTag.setAttribute("src", jsUrl);
+        libsTag.setAttribute("src", jsUrl.replaceAll("&", "&amp;"));
         headTag.appendChild(libsTag);
       }
     } else {
@@ -329,7 +329,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
           inlineJs.setLength(0);
         }
         Element referenceTag = headTag.getOwnerDocument().createElement("script");
-        referenceTag.setAttribute("src", theContent);
+        referenceTag.setAttribute("src", theContent.replaceAll("&", "&amp;"));
         headTag.appendChild(referenceTag);
       } else {
         inlineJs.append(theContent).append(";\n");

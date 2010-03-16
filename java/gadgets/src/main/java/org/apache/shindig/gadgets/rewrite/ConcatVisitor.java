@@ -131,7 +131,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       // with new (concat) URI, immediately ahead of the first elem.
       Element firstElem = sourceBatch.get(0);
       Element elemConcat = (Element)firstElem.cloneNode(true);
-      elemConcat.setAttribute(type.getSrcAttrib(), concatUri.getUri().toString());
+      elemConcat.setAttribute(type.getSrcAttrib(), StringUtils.replace(concatUri.getUri().toString(), "&", "&amp;"));
       firstElem.getParentNode().insertBefore(elemConcat, firstElem);
       
       // Now for all Elements, either A) remove them or B) replace each
