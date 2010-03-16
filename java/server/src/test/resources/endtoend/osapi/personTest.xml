@@ -29,8 +29,9 @@
           /** Test fetching a specific ID */
           fetchId: function() {
             function receivedData(response) {
-              assertFalse("Should not have error", response.error);
-              assertEquals("Names don't match", "Shin Digg", response.displayName);
+              var data = gadgets.json.stringify(response);
+              assertFalse("Should not have error - " + data, response.error);
+              assertEquals("Names don't match - " + data, "Shin Digg", response.displayName);
               finished();
             }
             osapi.people.get({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
@@ -39,8 +40,9 @@
           /** Test fetching the owner, which should be "canonical" */
           fetchOwner: function() {
             function receivedData(response) {
-              assertFalse("Should not have error", response.error);
-              assertEquals("Names don't match", "Shin Digg", response.displayName);
+              var data = gadgets.json.stringify(response);
+              assertFalse("Should not have error - " + data, response.error);
+              assertEquals("Names don't match - " + data, "Shin Digg", response.displayName);
               finished();
             }
             osapi.people.getOwner({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
@@ -49,8 +51,9 @@
           /** Test fetching the viewer, which should be "john.doe" */
           fetchViewer: function() {
             function receivedData(response) {
-              assertFalse("Should not have error", response.error);
-              assertEquals("Names don't match", "Johnny", response.displayName);
+              var data = gadgets.json.stringify(response);
+              assertFalse("Should not have error - " + data, response.error);
+              assertEquals("Names don't match - " + data, "Johnny", response.displayName);
               finished();
             }
             osapi.people.getViewer({ userId : 'canonical', fields : ["id", "displayName"]}).execute(receivedData);
@@ -59,9 +62,10 @@
           /** Test fetching the owner and viewer as a batch */
           fetchOwnerAndViewer: function() {
             function receivedData(response) {
-              assertFalse("Should not have error", response.error);
-              assertEquals("Names don't match", "Shin Digg", response[0].displayName);
-              assertEquals("Names don't match", "Johnny", response[1].displayName);
+              var data = gadgets.json.stringify(response);
+              assertFalse("Should not have error - " + data, response.error);
+              assertEquals("Names don't match - " + data, "Shin Digg", response.list[0].displayName);
+              assertEquals("Names don't match - " + data, "Johnny", response.list[1].displayName);
               finished();
             }
             osapi.people.get({ userId : ['@owner', '@viewer'], fields : ["id", "displayName"]}).execute(receivedData);
@@ -69,8 +73,9 @@
 
           fetchPersonNotFound: function() {
             function receivedData(response) {
-              assertTrue("Should have error", response.error);
-              assertEquals("Not a badRequest", "badRequest", response.error.code);
+              var data = gadgets.json.stringify(response);
+              assertTrue("Should have error - " + data, response.error);
+              assertEquals("Not a badRequest - " + data, "400", response.error.code);
               finished();
             }
 

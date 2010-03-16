@@ -26,20 +26,26 @@
       <script type="text/javascript" src="/testframework.js"></script>
       <script type="text/javascript">
         var assertFriends = function(response) {
-          assertEquals('Wrong friend count', 4, response.length);
-          assertEquals('Should be Johnny', 'Johnny', response[0].displayName);
-          assertEquals('Should be Janey', 'Janey', response[1].displayName);
-          assertEquals('Should be Georgey', 'Georgey', response[2].displayName);
-          assertEquals('Should be Maija', 'Maija', response[3].displayName);
+          assertEquals('Wrong friend count - ' + gadgets.json.stringify(response), 4, response.totalResults)
+          assertTrue('No response - ' + gadgets.json.stringify(response), response.list);
+          assertEquals('Wrong friend count - ' + gadgets.json.stringify(response), 4, response.list.length);
+          assertTrue('arg 0 is defined', response.list[0]);
+          assertEquals('Should be Johnny', 'Johnny', response.list[0].displayName);
+          assertTrue('arg 1 is defined', response.list[1]);
+          assertEquals('Should be Janey', 'Janey', response.list[1].displayName);
+          assertTrue('arg 2 is defined', response.list[2]);
+          assertEquals('Should be Georgey', 'Georgey', response.list[2].displayName);
+          assertTrue('arg 3 is defined', response.list[3]);
+          assertEquals('Should be Maija', 'Maija', response.list[3].displayName);
         };
 
         var tests = {
           /** Test fetching the owner's friends, which should be 'canonical' */
           fetchOwnerFriends: function() {
-
             function receivedData(response) {
               assertFalse('Data error', response.error);
               assertFriends(response);
+
               finished();
             }
 
@@ -50,7 +56,7 @@
           fetchEmptyFriendsById: function() {
             function receivedData(response) {
               assertFalse('Data error', response.error);
-              assertEquals('Wrong friend count', 0, response.length);
+              assertEquals('Wrong friend count - '  + response.error, 0, response.totalResults);
               finished();
             }
 

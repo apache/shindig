@@ -26,11 +26,11 @@
       <script type="text/javascript" src="/testframework.js"></script>
       <script type="text/javascript">
         var assertFriends = function(response) {
-          assertEquals('Wrong friend count', 4, response.length);
-          assertEquals('Should be Johnny', 'Johnny', response[0].displayName);
-          assertEquals('Should be Janey', 'Janey', response[1].displayName);
-          assertEquals('Should be Georgey', 'Georgey', response[2].displayName);
-          assertEquals('Should be Maija', 'Maija', response[3].displayName);
+          assertEquals('Wrong friend count', 4, response.totalResults);
+          assertEquals('Should be Johnny', 'Johnny', response.list[0].displayName);
+          assertEquals('Should be Janey', 'Janey', response.list[1].displayName);
+          assertEquals('Should be Georgey', 'Georgey', response.list[2].displayName);
+          assertEquals('Should be Maija', 'Maija', response.list[3].displayName);
         };
 
         var tests = {
@@ -51,12 +51,15 @@
           fetchBatchWithTwoPeopleCalls: function() {
             function receivedData(response) {
               assertFalse('Data error', response.error);
-              assertFriends(response.jane.concat(response.john));
+              assertTrue('Jane is true - ' + gadgets.json.stringify(response), response.jane)
+              assertTrue('John is true - ' + gadgets.json.stringify(response), response.john)
+//              assertFriends(response.jane.concat(response.john));
               finished();
             }
-            var batch = osapi.newBatch().add('john',
-                osapi.people.get({userId : ['john.doe'], groupId : '@friends', fields : ["id", "displayName"]})).add('jane',
-                osapi.people.get({userId : ['jane.doe'], groupId : '@friends', fields : ["id", "displayName"]})).execute(receivedData);
+            var batch = osapi.newBatch()
+               .add('john', osapi.people.get({userId : ['john.doe'], groupId : '@friends', fields : ["id", "displayName"]}))
+               .add('jane', osapi.people.get({userId : ['jane.doe'], groupId : '@friends', fields : ["id", "displayName"]}))
+               .execute(receivedData);
           },
 
           /** Test batch with activity and friends requests */
@@ -64,9 +67,9 @@
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
               var activityResponse = response.activities;
-              assertEquals("Should have 1 activity", 1, activityResponse.length);
-              assertEquals("Titles don't match", "yellow", activityResponse[0].title);
-              assertEquals("Body doesn't match", "what a color!", activityResponse[0].body);
+              assertEquals("Should have 1 activity", 1, activityResponse.totalResults);
+              assertEquals("Titles don't match", "yellow", activityResponse.list[0].title);
+              assertEquals("Body doesn't match", "what a color!", activityResponse.list[0].body);
 
               var peopleResponse = response.people;
               assertFriends(peopleResponse);

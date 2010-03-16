@@ -30,19 +30,18 @@
           fetchId: function() {
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 2 activities", 2, response.length);
+              assertEquals("Should have 3 activities", 3, response.totalResults);
               finished();
             }
-
             osapi.activities.get({ userId : 'canonical', groupId : '@self'}).execute(receivedData);
           },
           /** Test fetching viewer's activity */
           fetchViewerActivities: function() {
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 1 activity", 1, response.length);
-              assertEquals("Titles don't match", "yellow", response[0].title);
-              assertEquals("Body doesn't match", "what a color!", response[0].body);
+              assertEquals("Should have 1 activity", 1, response.totalResults);
+              assertEquals("Titles don't match", "yellow", response.list[0].title);
+              assertEquals("Body doesn't match", "what a color!", response.list[0].body);
               finished();
             }
 
@@ -52,11 +51,11 @@
           fetchViewerFriendActivities: function() {
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 2 activities", 2, response.length);
-              assertEquals("Titles don't match", "Jane just posted a photo of a monkey", response[0].title);
-              assertEquals("Body doesn't match", "and she thinks you look like him", response[0].body);
-              assertEquals("Body doesn't match", "Jane says George likes yoda!", response[1].title);
-              assertEquals("Body doesn't match", "or is it you?", response[1].body);
+              assertEquals("Should have 2 activities", 2, response.totalResults);
+              assertEquals("Titles don't match", "Jane just posted a photo of a monkey", response.list[0].title);
+              assertEquals("Body doesn't match", "and she thinks you look like him", response.list[0].body);
+              assertEquals("Body doesn't match", "Jane says George likes yoda!", response.list[1].title);
+              assertEquals("Body doesn't match", "or is it you?", response.list[1].body);
               finished();
             }
 
@@ -66,15 +65,15 @@
           createNewActivity: function() {
             function newData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 3 activities", 3, response.length);
-              assertEquals("Titles don't match", "New activity", response[2].title);
-              assertEquals("Body doesn't match", "Hey", response[2].body);
+              assertEquals("Should have 3 activities", 3, response.totalResults);
+              assertEquals("Titles don't match", "New activity", response.list[2].title);
+              assertEquals("Body doesn't match", "Hey", response.list[2].body);
               finished();
             }
 
             function receivedData(response) {
               assertFalse("Should not have error", response.error);
-              assertEquals("Should have 0 activities", undefined, response.length);
+              assertEquals("Should have 0 activities", undefined, response.totalResults);
               osapi.activities.get({userId:'canonical'}).execute(newData);
             }
 

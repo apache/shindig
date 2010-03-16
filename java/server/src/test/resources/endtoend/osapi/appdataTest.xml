@@ -37,7 +37,7 @@
             osapi.appdata.get({ userId : 'canonical', keys : ['gifts']}).execute(receivedData);
           },
           /** Test creating appdata, retrieving appdata and deleting appdata */
-          fetchId: function() {
+          appdataWrite: function() {
             function assertNoErrorAndEmptyResponse(response) {
               assertFalse("Should not have error", response.error);
               assertEquals("Should have 0 appdata items", undefined, response.length);
@@ -73,7 +73,6 @@
             osapi.appdata.update({userId: '@viewer', data: {pet: "crazed monkey"}}).execute(
                 updateResponse);
           }
-
         };
       </script>
     ]]>
