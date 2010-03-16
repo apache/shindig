@@ -192,10 +192,10 @@ public class BasicImageRewriter implements ImageRewriter {
           // If both image dimensions are fixed, the two-step resizing process will need to know
           // how much it has to fix up the image.
           double ratio = getResizeRatio(requestedWidth, requestedHeight, origWidth, origHeight);
-          int widthAfterStep1 = max(1, (int) (ratio * origWidth));
+          int widthAfterStep1 = max(1, (int) Math.round(ratio * origWidth));
           widthDelta = requestedWidth - widthAfterStep1;
 
-          int heightAfterStep1 = max(1, (int) (ratio * origHeight));
+          int heightAfterStep1 = max(1, (int) Math.round(ratio * origHeight));
           heightDelta = requestedHeight - heightAfterStep1;
           
           if (noExpand) {
