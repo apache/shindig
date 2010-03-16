@@ -59,6 +59,7 @@ import com.google.common.collect.Maps;
 public class EndToEndServer {
   private static final int JETTY_PORT = 9003;
   private static final String GADGET_BASE = "/gadgets/ifr";
+  private static final String GADGET_RPC_BASE = "/gadgets/api/rpc/*";
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
@@ -131,8 +132,7 @@ public class EndToEndServer {
     context.addFilter(AuthenticationServletFilter.class, REST_BASE, 0);
 
     // Attach JsonRpcServlet, wrapped in a proxy to fake errors
-    ServletHolder rpcServletHolder = new ServletHolder(new ForceErrorServlet(
-        new JsonRpcServlet()));
+    ServletHolder rpcServletHolder = new ServletHolder(new ForceErrorServlet(new JsonRpcServlet()));
     rpcServletHolder.setInitParameter("handlers", "org.apache.shindig.social.handlers");
     context.addServlet(rpcServletHolder, JSON_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
@@ -140,6 +140,12 @@ public class EndToEndServer {
     // Attach the ConcatProxyServlet - needed for rewritten JS
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
     context.addServlet(concatHolder, CONCAT_BASE);
+
+    // Attach the Gadget 
+    ServletHolder gadgetsJsonRpcServletHolder = new ServletHolder(new JsonRpcServlet());
+    gadgetsJsonRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.gadgets.handlers");
+    context.addServlet(gadgetsJsonRpcServletHolder, GADGET_RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, GADGET_RPC_BASE, 0);
 
     // Attach the JsServlet - needed for rewritten JS
     ServletHolder jsHolder = new ServletHolder(new JsServlet());
