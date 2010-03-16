@@ -279,7 +279,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       }
 
       if (GroupId.Type.self == groupId.getType() && result.isEmpty()) {
-        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "People '" + idSet + "' not found");
       }
 
       // We can pretend that by default the people are in top friends order
@@ -321,7 +321,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           return ImmediateFuture.newInstance(personObj);
         }
       }
-      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Person not found");
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Person '" + id.getUserId(token) + "' not found");
     } catch (JSONException je) {
       throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
           je);
