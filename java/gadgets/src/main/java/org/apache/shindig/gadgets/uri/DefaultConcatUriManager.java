@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.internal.Nullable;
+import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -45,11 +46,18 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   
   private final ContainerConfig config;
   private final Versioner versioner;
+  private boolean strictParsing;
   
   @Inject
   public DefaultConcatUriManager(ContainerConfig config, @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
+  }
+  
+  @Inject(optional = true)
+  public void setUseStrictParsing(
+      @Named("shindig.uri.concat.use-strict-parsing") String useStrict) {
+    this.strictParsing = Boolean.parseBoolean(useStrict);
   }
 
   public List<ConcatData> make(List<ConcatUri> resourceUris,
@@ -149,15 +157,17 @@ public class DefaultConcatUriManager implements ConcatUriManager {
 
   public ConcatUri process(Uri uri) {
     String container = uri.getQueryParameter(Param.CONTAINER.getKey());
-    if (container == null) {
+    if (strictParsing && container == null) {
       return BAD_URI;
     }
     
-    String concatHost = getReqVal(container, CONCAT_HOST_PARAM);
-    String concatPath = getReqVal(container, CONCAT_PATH_PARAM);
-    if (!uri.getAuthority().equalsIgnoreCase(concatHost) ||
-        !uri.getPath().equals(concatPath)) {
-      return BAD_URI;
+    if (strictParsing) {
+      String concatHost = getReqVal(container, CONCAT_HOST_PARAM);
+      String concatPath = getReqVal(container, CONCAT_PATH_PARAM);
+      if (!uri.getAuthority().equalsIgnoreCase(concatHost) ||
+          !uri.getPath().equals(concatPath)) {
+        return BAD_URI;
+      }
     }
     
     // At this point the Uri is at least concat.

@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.internal.Nullable;
+import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.config.ContainerConfig;
@@ -66,12 +67,18 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
   private final ContainerConfig config;
   private final Versioner versioner;
+  private boolean strictParsing = false;
   
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
                                 @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
+  }
+  
+  @Inject(optional = true)
+  public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") String useStrict) {
+    this.strictParsing = Boolean.parseBoolean(useStrict);
   }
   
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
@@ -198,6 +205,12 @@ public class DefaultProxyUriManager implements ProxyUriManager {
         }
       }
     }
+    
+    if (!strictParsing && container != null && StringUtils.isEmpty(uriStr)) {
+      // Query-style despite the container being configured for chained style.
+      uriStr = uriIn.getQueryParameter(Param.URL.getKey());
+      queryUri = uriIn;
+    }
 
     // Parameter validation.
     if (StringUtils.isEmpty(uriStr) || StringUtils.isEmpty(container)) {
@@ -210,7 +223,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     
     String queryHost = config.getString(container, PROXY_HOST_PARAM);
     if (queryHost == null ||
-        !queryHost.equalsIgnoreCase(uriIn.getAuthority())) {
+        (strictParsing && !queryHost.equalsIgnoreCase(uriIn.getAuthority()))) {
       throw new GadgetException(GadgetException.Code.INVALID_PATH, "Invalid proxy host",
           HttpResponse.SC_BAD_REQUEST);
     }

@@ -202,6 +202,15 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   }
   
   @Test
+  public void validateNoContainerStrict() {
+    DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
+    manager.setUseStrictParsing("true");
+    ConcatUriManager.ConcatUri validated =
+        manager.process(Uri.parse("http://host.com/path?q=f"));
+    assertEquals(UriStatus.BAD_URI, validated.getStatus());
+  }
+  
+  @Test
   public void validateNoContainer() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
     ConcatUriManager.ConcatUri validated =
@@ -210,20 +219,22 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   }
   
   @Test
-  public void validateHostMismatch() {
+  public void validateHostMismatchStrict() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
+    manager.setUseStrictParsing("true");
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://another.com/path?" +
-            Param.CONTAINER.getKey() + "=" + CONTAINER));
+            Param.CONTAINER.getKey() + "=" + CONTAINER + "&type=css"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
   
   @Test
-  public void validatePathMismatch() {
+  public void validatePathMismatchStrict() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
+    manager.setUseStrictParsing("true");
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://host.com/another?" +
-            Param.CONTAINER.getKey() + "=" + CONTAINER));
+            Param.CONTAINER.getKey() + "=" + CONTAINER + "&type=css"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
   

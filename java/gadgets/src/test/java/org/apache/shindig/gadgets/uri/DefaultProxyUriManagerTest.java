@@ -174,6 +174,28 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   }
   
   @Test(expected = GadgetException.class)
+  public void mismatchedHostStrict() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    DefaultProxyUriManager manager = makeManager("foo" + host, path, null);
+    manager.setUseStrictParsing("true");
+    Uri testUri = new UriBuilder().setAuthority(host).setPath(path)
+        .addQueryParameter(Param.URL.getKey(), "http://foo.com").toUri();
+    manager.process(testUri);
+  }
+  
+  @Test
+  public void mismatchedHostNonStrict() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    DefaultProxyUriManager manager = makeManager("foo" + host, path, null);
+    Uri testUri = new UriBuilder().setAuthority(host).setPath(path)
+        .addQueryParameter(Param.URL.getKey(), "http://foo.com")
+        .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER).toUri();
+    manager.process(testUri);
+  }
+  
+  @Test(expected = GadgetException.class)
   public void missingContainerParamQuery() throws Exception {
     String host = "host.com";
     String path = "/proxy/path";
