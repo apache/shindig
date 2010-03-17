@@ -55,6 +55,16 @@ public class JsonConversionUtilTest extends Assert {
   @Test
   public void testValueToJsonParsing()
       throws Exception {
+    String longNumber = "108502345354398668456";
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue(longNumber), longNumber);
+    String longDoubleOverflow = "108502345354398668456.1234";
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue(longDoubleOverflow),
+        longDoubleOverflow);
+    String longDoubleFractionPart = "1.108502345354398668456108502345354398668456";
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue(longDoubleFractionPart),
+        longDoubleFractionPart);
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("12345"), 12345);
+    assertJsonEquals(JsonConversionUtil.convertToJsonValue("12.345"), 12.345);
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("abc"), "abc");
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("\"a,b,c\""), "a,b,c");
     assertJsonEquals(JsonConversionUtil.convertToJsonValue("true"), true);

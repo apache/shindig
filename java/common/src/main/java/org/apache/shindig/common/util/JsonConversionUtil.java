@@ -190,8 +190,17 @@ public class JsonConversionUtil {
         // Attempt to parse as an array of literals
         JSONArray parsedArray = new JSONArray('[' + value + ']');
         if (parsedArray.length() == 1) {
-          // Not an array
-          return parsedArray.get(0);
+          // Not an array.
+          Object obj = parsedArray.get(0);
+          if (obj instanceof Double && !obj.toString().equals(value)) {
+            // Numeric overflow or truncation occurred. ie. large int/long
+            // converted to Double with exponent or Double truncated.
+            // In Shindig we return this as a verbatim String to avoid
+            // loss of data on input, as with lengthy ID values consisting
+            // of only numbers.
+            return value;
+          }
+          return obj;
         }
         return parsedArray;
       } catch (JSONException je) {
