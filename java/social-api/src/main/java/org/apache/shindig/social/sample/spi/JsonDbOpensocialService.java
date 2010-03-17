@@ -285,10 +285,10 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
       // We can pretend that by default the people are in top friends order
       if (options.getSortBy().equals(Person.Field.NAME.toString())) {
         Collections.sort(result, NAME_COMPARATOR);
-      }
 
-      if (options.getSortOrder() == SortOrder.descending) {
-        Collections.reverse(result);
+        if (options.getSortOrder() == SortOrder.descending) {
+          Collections.reverse(result);
+        }
       }
 
       // TODO: The samplecontainer doesn't really have the concept of HAS_APP so
