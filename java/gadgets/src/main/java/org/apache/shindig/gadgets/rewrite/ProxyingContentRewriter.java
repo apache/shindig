@@ -22,8 +22,8 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
+import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
 import java.util.Arrays;
@@ -32,17 +32,25 @@ import java.util.List;
 public class ProxyingContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;
+  private final ConcatUriManager concatUriManager;
   
   @Inject
   public ProxyingContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
-      ProxyUriManager proxyUriManager) {
+      ProxyUriManager proxyUriManager, ConcatUriManager concatUriManager) {
     this.featureConfigFactory = featureConfigFactory;
     this.proxyUriManager = proxyUriManager;
+    this.concatUriManager = concatUriManager;
   }
   
   @Override
   protected List<Visitor> makeVisitors(Gadget context, Uri gadgetUri) {
     ContentRewriterFeature.Config config = featureConfigFactory.get(gadgetUri);
-    return Arrays.<Visitor>asList(new ProxyingVisitor(config, proxyUriManager));
+    // Note that concat is including with proxy in order to prevent 
+    // proxying the rewritten concat url
+    // Basically Url rewritters should all be in one dom walker.
+    return Arrays.<Visitor>asList(
+        new ConcatVisitor.Js(config, concatUriManager),
+        new ConcatVisitor.Css(config, concatUriManager),
+        new ProxyingVisitor(config, proxyUriManager));
   }
 }
