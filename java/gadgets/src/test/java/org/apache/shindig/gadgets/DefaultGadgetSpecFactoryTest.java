@@ -145,6 +145,25 @@ public class DefaultGadgetSpecFactoryTest {
     assertEquals(LOCAL_CONTENT, spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
+  @Test(expected = GadgetException.class)
+  public void specFetchedEmptyContent() throws Exception {
+    HttpRequest request = createIgnoreCacheRequest();
+    HttpResponse response = new HttpResponse("");
+    expect(pipeline.execute(request)).andReturn(response);
+    replay(pipeline);
+
+    GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+  }
+
+  @Test(expected = GadgetException.class)
+  public void malformedGadgetSpecIsCachedAndThrows2() throws Exception {
+    HttpRequest request = createIgnoreCacheRequest();
+    expect(pipeline.execute(request)).andReturn(new HttpResponse("")).once();
+    replay(pipeline);
+
+    specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+  }
+
   @Test
   public void specFetchedWithBomChar() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();

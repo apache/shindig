@@ -90,7 +90,8 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
   protected GadgetSpec parse(String content, Query query) throws XmlException, GadgetException {
     // Allow BOM entity as first item on stream and ignore it:
     final String BOM_ENTITY = "&#xFEFF;";
-    if (content.substring(0, BOM_ENTITY.length()).equalsIgnoreCase(BOM_ENTITY)) {
+    if (content.length() >= BOM_ENTITY.length() && 
+        content.substring(0, BOM_ENTITY.length()).equalsIgnoreCase(BOM_ENTITY)) {
       content = content.substring(BOM_ENTITY.length());
     }
     Element element = XmlUtil.parse(content);
