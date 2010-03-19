@@ -35,10 +35,4 @@ public interface RequestPipeline {
    * TODO: This should throw a custom exception type.
    */
   HttpResponse execute(HttpRequest request) throws GadgetException;
-
-  /**
-   * Normalize the request protocol. Typically this would restrict the allowed
-   * protocols to http/https but containers may support other protocols
-   */
-  void normalizeProtocol(HttpRequest request)  throws GadgetException;
 }

@@ -120,7 +120,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
     return fetchedResponse;
   }
 
-  public void normalizeProtocol(HttpRequest request) throws GadgetException {
+  protected void normalizeProtocol(HttpRequest request) throws GadgetException {
     // Normalize the protocol part of the URI
     if (request.getUri().getScheme()== null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
