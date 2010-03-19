@@ -102,6 +102,12 @@ public class JsonSerializerTest {
   }
 
   @Test
+  public void serializeJsonObjectWithNullPropertyValue() throws Exception {
+    String json = "{foo:null}";
+    assertJsonEquals(json, JsonSerializer.serialize(new JSONObject(json)));
+  }
+
+  @Test
   public void serializePrimitives() throws Exception {
     assertEquals("null", JsonSerializer.serialize((Object) null));
     assertEquals("\"hello\"", JsonSerializer.serialize("hello"));

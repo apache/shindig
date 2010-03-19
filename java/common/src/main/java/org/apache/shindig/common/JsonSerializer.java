@@ -142,7 +142,7 @@ public final class JsonSerializer {
    */
   @SuppressWarnings("unchecked")
   public static void append(Appendable buf, Object value) throws IOException {
-    if (value == null) {
+    if (value == null || value == JSONObject.NULL) {
       buf.append("null");
     } else if (value instanceof Number ||
                value instanceof Boolean) {
