@@ -31,7 +31,7 @@ import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.json.JSONObject;

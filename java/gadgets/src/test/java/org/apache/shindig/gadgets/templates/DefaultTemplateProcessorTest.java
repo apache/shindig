@@ -18,6 +18,13 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.expressions.RootELResolver;
@@ -27,18 +34,12 @@ import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -47,12 +48,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.el.ELResolver;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+
+import javax.el.ELResolver;
 
 /**
  * Unit tests for DefaultTemplateProcessor.

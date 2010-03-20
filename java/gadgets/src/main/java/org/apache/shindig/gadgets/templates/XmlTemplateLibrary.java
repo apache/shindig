@@ -18,10 +18,13 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.tags.DefaultTagRegistry;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
@@ -31,9 +34,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 
 /**
  * An Object representing a Library of Template-based custom OSML tags.
@@ -50,12 +50,12 @@ public class XmlTemplateLibrary implements TemplateLibrary {
   private final Uri libraryUri;
   private final String source;
   private final boolean safe;
-  private TagRegistry registry;
+  private final TagRegistry registry;
   private String nsPrefix;
   private String nsUri;
   private String style;
   private String javaScript;
-  private Set<TemplateResource> libraryResources;
+  private final Set<TemplateResource> libraryResources;
 
   /**
    * @param uri URI of the template library

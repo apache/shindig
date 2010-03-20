@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
@@ -39,11 +44,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
 
 /**
  * A content rewriter that will sanitize output for simple 'badge' like display.
@@ -85,7 +85,8 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
         includingChildren ? Bypass.ALL : Bypass.ONLY_SELF, copyOnClone);
   }
   
-  private static enum Bypass { ALL, ONLY_SELF, NONE }
+  // Public so it can be used by the old rewriter
+  public static enum Bypass { ALL, ONLY_SELF, NONE }
 
     private static UserDataHandler copyOnClone = new UserDataHandler() {
     public void handle(short operation, String key, Object data, Node src, Node dst) {
@@ -110,6 +111,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   }
 
 
+  @Override
   public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
     if (gadget.sanitizeOutput()) {
       boolean sanitized = false;
@@ -136,7 +138,8 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     return list;
   }
 
-  private static Bypass canBypassSanitization(Element element) {
+  // Public so it can be used by the old rewriter
+  public static Bypass canBypassSanitization(Element element) {
     Bypass bypass = (Bypass) element.getUserData(BYPASS_SANITIZATION_KEY);
     if (bypass == null) {
       bypass = Bypass.NONE;
@@ -218,10 +221,12 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
       this.allowedAttributes = allowedAttributes;
     }
     
+    @Override
     public boolean removeTag(Gadget gadget, Element elem, Uri context) {
       return !allowedTags.contains(elem.getNodeName().toLowerCase());
     }
 
+    @Override
     public boolean removeAttr(Gadget gadget, Attr attr, Uri context) {
       return !allowedAttributes.contains(attr.getName().toLowerCase());
     }

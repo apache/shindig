@@ -18,23 +18,22 @@
  */
 package org.apache.shindig.gadgets.render.old;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
-import org.apache.shindig.gadgets.render.old.DefaultSanitizingProxyingLinkRewriterFactory;
-import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -292,7 +291,8 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, true);
+    org.apache.shindig.gadgets.render.SanitizingGadgetRewriter
+        .bypassSanitization(paragraphTag, true);
     rewriter.rewrite(gadget, mc);
      
     // The document should be unchanged
@@ -310,7 +310,8 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
+    org.apache.shindig.gadgets.render.SanitizingGadgetRewriter
+        .bypassSanitization(paragraphTag, false);
     rewriter.rewrite(gadget, mc);
      
     // The document should be unchanged
@@ -331,7 +332,8 @@ public class SanitizingGadgetRewriterTest extends BaseRewriterTestCase {
     
     Element paragraphTag = (Element) document.getElementsByTagName("p").item(0);
     // Mark the paragraph tag element as trusted
-    SanitizingGadgetRewriter.bypassSanitization(paragraphTag, false);
+    org.apache.shindig.gadgets.render.SanitizingGadgetRewriter
+        .bypassSanitization(paragraphTag, false);
 
     // Now, clone the paragraph tag and replace the paragraph tag
     Element cloned = (Element) paragraphTag.cloneNode(true);

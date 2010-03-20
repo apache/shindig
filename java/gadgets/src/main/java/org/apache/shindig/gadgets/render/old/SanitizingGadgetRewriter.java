@@ -18,9 +18,15 @@
  */
 package org.apache.shindig.gadgets.render.old;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter.Bypass;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -39,11 +45,6 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
 
 /**
  * A content rewriter that will sanitize output for simple 'badge' like display.
@@ -68,26 +69,7 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
     return ("1".equals(gadget.getContext().getParameter("sanitize")));
   }
   
-  /**
-   * Marks that an element and all its attributes are trusted content.
-   * This status is preserved across {@link Node#cloneNode} calls.  Be
-   * extremely careful when using this, especially with {@code includingChildren}
-   * set to {@code true}, as untrusted content that gets inserted (e.g, via
-   * os:RenderAll in templating) would become trusted.
-   * 
-   * @param element the trusted element
-   * @param includingChildren if true, children of this element will are also
-   *     trusted.  Never set this to true on an element that will ever have
-   *     untrusted children inserted (e.g., if it contains or may contain os:Render).
-   */
-  public static void bypassSanitization(Element element, boolean includingChildren) {
-    element.setUserData(BYPASS_SANITIZATION_KEY,
-        includingChildren ? Bypass.ALL : Bypass.ONLY_SELF, copyOnClone);
-  }
-  
-  private static enum Bypass { ALL, ONLY_SELF, NONE }
-
-    private static UserDataHandler copyOnClone = new UserDataHandler() {
+  private static UserDataHandler copyOnClone = new UserDataHandler() {
     public void handle(short operation, String key, Object data, Node src, Node dst) {
       if (operation == NODE_IMPORTED || operation == NODE_CLONED) {
         dst.setUserData(key, data, copyOnClone);
@@ -173,7 +155,9 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
         case Node.ELEMENT_NODE:
         case Node.DOCUMENT_NODE:
           Element element = (Element) node;
-          Bypass bypass = canBypassSanitization(element);
+          Bypass bypass =  
+            org.apache.shindig.gadgets.render.SanitizingGadgetRewriter
+                .canBypassSanitization(element);
           if (bypass == Bypass.ALL) {
             return;
           } else if (bypass == Bypass.ONLY_SELF) {
@@ -237,14 +221,6 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
     }
 
     return list;
-  }
-
-  private static Bypass canBypassSanitization(Element element) {
-    Bypass bypass = (Bypass) element.getUserData(BYPASS_SANITIZATION_KEY);
-    if (bypass == null) {
-      bypass = Bypass.NONE;
-    }
-    return bypass;
   }
 
   /**
