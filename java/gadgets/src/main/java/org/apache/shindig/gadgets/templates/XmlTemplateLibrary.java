@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.templates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
@@ -230,7 +231,7 @@ public class XmlTemplateLibrary implements TemplateLibrary {
   private TagHandler createHandler(String tagName, Element template,
       Set<TemplateResource> resources)
       throws TemplateParserException {
-    String [] nameParts = tagName.split(":");
+    String [] nameParts = StringUtils.splitPreserveAllTokens(tagName, ':');
     // At this time, we only support namespaced tags
     if (nameParts.length != 2) {
       return null;

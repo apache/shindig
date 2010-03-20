@@ -144,7 +144,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       if (path.startsWith("/")) {
         path = path.substring(1);
       }
-      String[] pathParts = path.split("/");
+      String[] pathParts = StringUtils.splitPreserveAllTokens(path, '/');
       Map<String, SortedSet<RestPath>> methods = serviceMethodPathMap.get(pathParts[0]);
       if (methods != null) {
         SortedSet<RestPath> paths = methods.get(method);
@@ -551,7 +551,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       int tmpConstCount = 0;
       int tmpConstIndex = -1;
       this.operationPath = path;
-      String[] partArr = path.substring(1).split("/");
+      String[] partArr = StringUtils.split(path.substring(1), '/');
       parts = Lists.newArrayList();
       for (int i = 0; i < partArr.length; i++) {
         String part = partArr[i];
@@ -606,7 +606,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
           }
           parsedParams.put(parts.get(i).partName, new String[]{requestPathParts[i]});
         } else if (parts.get(i).type == PartType.PLURAL_PARAM) {
-          parsedParams.put(parts.get(i).partName, requestPathParts[i].split(","));
+          parsedParams.put(parts.get(i).partName, StringUtils.splitPreserveAllTokens(requestPathParts[i], ','));
         }
       }
       return new RestInvocationWrapper(parsedParams, handler);

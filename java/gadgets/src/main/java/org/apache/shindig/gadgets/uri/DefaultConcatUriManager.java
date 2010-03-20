@@ -64,7 +64,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       boolean isAdjacent) {
     List<ConcatData> concatUris = Lists.newArrayListWithCapacity(resourceUris.size());
     
-    if (resourceUris.size() == 0) {
+    if (resourceUris.isEmpty()) {
       return concatUris;
     }
 

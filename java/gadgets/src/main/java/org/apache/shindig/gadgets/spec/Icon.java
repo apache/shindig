@@ -71,7 +71,7 @@ public class Icon {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(32 + type.length() + content.length());
     buf.append("<Icon type='").append(type).append('\'');
     if (mode != null) {
       buf.append(" mode='").append(mode).append('\'');

@@ -58,7 +58,7 @@ public class StyleTagExtractorVisitor implements Visitor {
   public boolean revisit(Gadget gadget, List<Node> nodes)
       throws RewritingException {
     boolean mutated = false;
-    if (nodes.size() == 0) {
+    if (nodes.isEmpty()) {
       return mutated;
     }
     

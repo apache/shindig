@@ -94,7 +94,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       if (mq.hasMessageAtLevel(MessageLevel.ERROR)) {
         StringBuilder err = new StringBuilder();
         for (Message m : mq.getMessages()) {
-          err.append(m.toString()).append("\n");
+          err.append(m.toString()).append('\n');
         }
         throw new GadgetException(GadgetException.Code.HTML_PARSE_ERROR, err.toString(),
             HttpResponse.SC_BAD_REQUEST);

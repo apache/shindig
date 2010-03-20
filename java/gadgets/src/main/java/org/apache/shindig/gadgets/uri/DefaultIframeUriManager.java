@@ -224,7 +224,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
   }
   
   public static final String tplKey(String key) {
-    return "%" + key + "%";
+    return '%' + key + '%';
   }
   
   /** Overridable methods for custom behavior */

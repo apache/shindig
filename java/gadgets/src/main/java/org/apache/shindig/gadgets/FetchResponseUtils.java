@@ -57,7 +57,7 @@ public class FetchResponseUtils {
     Map<String, Collection<String>> headers = Maps.newHashMap();
     addHeaders(headers, response, "set-cookie");
     addHeaders(headers, response, "location");
-    if (headers.size() > 0) {
+    if (!headers.isEmpty()) {
       resp.put("headers", headers);
     }
     // Merge in additional response data

@@ -161,8 +161,8 @@ public class DefaultJsUriManagerTest {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Uri testUri = Uri.parse("http://other-host.org/gadgets/js/feature" + JS_SUFFIX + "?" +
-        Param.CONTAINER.getKey() + "=" + CONTAINER);
+    Uri testUri = Uri.parse("http://other-host.org/gadgets/js/feature" + JS_SUFFIX + '?' +
+        Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertTrue(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
@@ -174,8 +174,8 @@ public class DefaultJsUriManagerTest {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Uri testUri = Uri.parse("http://target-host.org/gadgets/other-js/feature" + JS_SUFFIX + "?" +
-        Param.CONTAINER.getKey() + "=" + CONTAINER);
+    Uri testUri = Uri.parse("http://target-host.org/gadgets/other-js/feature" + JS_SUFFIX + '?' +
+        Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertTrue(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
@@ -188,7 +188,7 @@ public class DefaultJsUriManagerTest {
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     TestDefaultJsUriManager manager = makeManager(config, null);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/feature.gif?" +
-        Param.CONTAINER.getKey() + "=" + CONTAINER);
+        Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertTrue(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
@@ -203,8 +203,8 @@ public class DefaultJsUriManagerTest {
     String version = "verstring";
     TestDefaultJsUriManager manager = makeManager(config, null);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
-        JS_SUFFIX + "?" + Param.CONTAINER.getKey() + "=" + CONTAINER + "&" +
-        Param.VERSION.getKey() + "=" + version);
+        JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER + '&' +
+        Param.VERSION.getKey() + '=' + version);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertFalse(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.VALID_UNVERSIONED);
@@ -221,8 +221,8 @@ public class DefaultJsUriManagerTest {
     Versioner versioner = mockVersioner(extern, version, badVersion);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
-        JS_SUFFIX + "?" + Param.CONTAINER.getKey() + "=" + CONTAINER + "&" +
-        Param.VERSION.getKey() + "=" + badVersion);
+        JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER + '&' +
+        Param.VERSION.getKey() + '=' + badVersion);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertFalse(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.INVALID_VERSION);
@@ -238,7 +238,7 @@ public class DefaultJsUriManagerTest {
     Versioner versioner = mockVersioner(extern, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
-        JS_SUFFIX + "?" + Param.CONTAINER.getKey() + "=" + CONTAINER);
+        JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertFalse(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.VALID_UNVERSIONED);
@@ -254,8 +254,8 @@ public class DefaultJsUriManagerTest {
     Versioner versioner = mockVersioner(extern, version, version);
     TestDefaultJsUriManager manager = makeManager(config, versioner);
     Uri testUri = Uri.parse("http://target-host.org/gadgets/js/" + addJsLibs(extern) +
-        JS_SUFFIX + "?" + Param.CONTAINER.getKey() + "=" + CONTAINER + "&" +
-        Param.VERSION.getKey() + "=" + version);
+        JS_SUFFIX + '?' + Param.CONTAINER.getKey() + '=' + CONTAINER + '&' +
+        Param.VERSION.getKey() + '=' + version);
     JsUri jsUri = manager.processExternJsUri(testUri);
     assertFalse(manager.hadError());
     assertEquals(jsUri.getStatus(), UriStatus.VALID_VERSIONED);

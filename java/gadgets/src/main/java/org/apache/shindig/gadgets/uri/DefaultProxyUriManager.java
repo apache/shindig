@@ -82,7 +82,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
     List<Uri> result = Lists.newArrayListWithCapacity(resources.size());
     
-    if (resources.size() == 0) {
+    if (resources.isEmpty()) {
       return result;
     }
     
@@ -166,7 +166,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       queryUri = uriIn;
     } else {
       // Check for chained query string in the path.
-      String containerStr = Param.CONTAINER.getKey() + "=";
+      String containerStr = Param.CONTAINER.getKey() + '=';
       String path = uriIn.getPath();
       int start = path.indexOf(containerStr);
       if (start > 0) {
@@ -182,7 +182,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
         if (container != null) {
           String proxyPath = config.getString(container, PROXY_PATH_PARAM);
           if (proxyPath != null) {
-            String[] chainedChunks = proxyPath.split(CHAINED_PARAMS_TOKEN);
+            String[] chainedChunks = StringUtils.splitByWholeSeparatorPreserveAllTokens(proxyPath, CHAINED_PARAMS_TOKEN);
             
             // Parse out the URI of the actual resource. This URI is found as the
             // substring of the "full" URI, after the chained proxy prefix. We
@@ -190,7 +190,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             // ContainerConfig value, and take the URI as everything beyond that point.
             String startToken = chainedChunks[0];
             String endToken = "/";
-            if (chainedChunks.length == 2) {
+            if (chainedChunks.length == 2 && chainedChunks[1].length() > 0) {
               endToken = chainedChunks[1];
             }
             
@@ -221,8 +221,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     if (StringUtils.isEmpty(uriStr) || StringUtils.isEmpty(container)) {
       throw new GadgetException(GadgetException.Code.MISSING_PARAMETER,
           "Missing required parameter(s):" +
-          (StringUtils.isEmpty(uriStr) ? " " + Param.URL.getKey() : "") +
-          (StringUtils.isEmpty(container) ? " " + Param.CONTAINER.getKey() : ""),
+          (StringUtils.isEmpty(uriStr) ? ' ' + Param.URL.getKey() : "") +
+          (StringUtils.isEmpty(container) ? ' ' + Param.CONTAINER.getKey() : ""),
           HttpResponse.SC_BAD_REQUEST);
     }
     

@@ -63,7 +63,7 @@ public class DefaultJsUriManager implements JsUriManager {
     // Add JS info to path and set it in URI.
     StringBuilder jsPath = new StringBuilder(jsPathBase);
     if (!jsPathBase.endsWith("/")) {
-      jsPath.append("/");
+      jsPath.append('/');
     }
     jsPath.append(addJsLibs(extern));
     jsPath.append(JS_SUFFIX);

@@ -224,7 +224,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     manager.setUseStrictParsing("true");
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://another.com/path?" +
-            Param.CONTAINER.getKey() + "=" + CONTAINER + "&type=css"));
+            Param.CONTAINER.getKey() + '=' + CONTAINER + "&type=css"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
   
@@ -234,7 +234,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     manager.setUseStrictParsing("true");
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://host.com/another?" +
-            Param.CONTAINER.getKey() + "=" + CONTAINER + "&type=css"));
+            Param.CONTAINER.getKey() + '=' + CONTAINER + "&type=css"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
   
@@ -243,7 +243,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
             "&1=!!!"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
@@ -253,7 +253,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
             "&1=http://legit.com/1.dat"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
@@ -263,7 +263,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
             "&1=http://legit.com/1.dat&" + Param.TYPE.getKey() + "=NOTATYPE"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
   }
@@ -273,7 +273,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
             "&1=http://legit.com/1.dat&" + Param.TYPE.getKey() + "=NOTATYPE&rewriteMime=text/css"));
     assertEquals(UriStatus.VALID_UNVERSIONED, validated.getStatus());
     assertEquals(ConcatUriManager.Type.CSS, validated.getType());
@@ -315,9 +315,9 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, versioner);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
             "&1=http://legit.com/1.dat&2=http://another.com/2.dat&" + Param.TYPE.getKey() +
-            "=" + type.getType() + "&" + Param.JSON.getKey() +
+              '=' + type.getType() + '&' + Param.JSON.getKey() +
             "=split&" + Param.GADGET.getKey() + "=http://www.gadget.com/g.xml&" +
             Param.REFRESH.getKey() + "=123"));
     assertEquals(UriStatus.VALID_UNVERSIONED, validated.getStatus());
@@ -336,9 +336,9 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, versioner);
     ConcatUriManager.ConcatUri validated =
         manager.process(
-          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + "=" + CONTAINER +
-            "&1=http://legit.com/1.dat&2=http://another.com/2.dat&" + Param.TYPE.getKey() + "="
-            + type.getType() + "&" + Param.VERSION.getKey() + "=something&" + Param.JSON.getKey() +
+          Uri.parse("http://host.com/path?" + Param.CONTAINER.getKey() + '=' + CONTAINER +
+            "&1=http://legit.com/1.dat&2=http://another.com/2.dat&" + Param.TYPE.getKey() + '='
+            + type.getType() + '&' + Param.VERSION.getKey() + "=something&" + Param.JSON.getKey() +
             "=split&" + Param.GADGET.getKey() + "=http://www.gadget.com/g.xml&" +
             Param.REFRESH.getKey() + "=123"));
     assertEquals(status, validated.getStatus());

@@ -21,6 +21,7 @@ package org.apache.shindig.common.testing;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -465,22 +466,22 @@ public class FakeHttpServletRequest implements HttpServletRequest {
       if (queryString == null && !parameters.isEmpty()) {
         boolean hasPrevious = false;
         StringBuilder queryString = new StringBuilder();
-        for (Map.Entry<String, String[]> stringEntry : parameters.entrySet()) {
+        for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
           // We're not interested in blank keys
-          if (stringEntry.getKey() == null || stringEntry.getKey().equals("") || postParameters.contains(stringEntry.getKey())) {
+          if (StringUtils.isBlank(entry.getKey()) || postParameters.contains(entry.getKey())) {
             continue;
           }
           if (hasPrevious) {
             queryString.append('&');
           }
 
-          String[] values = stringEntry.getValue();
+          String[] values = entry.getValue();
           // Append the parameters to the query string
           if (values.length == 0) {
-            queryString.append(URLEncoder.encode(stringEntry.getKey(), "UTF-8"));
+            queryString.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
           } else {
             for (int i = 0; i < values.length; i++) {
-              queryString.append(URLEncoder.encode(stringEntry.getKey(), "UTF-8")).append('=').append(
+              queryString.append(URLEncoder.encode(entry.getKey(), "UTF-8")).append('=').append(
                       URLEncoder.encode(values[i], "UTF-8"));
               if (i < values.length - 1) {
                 queryString.append('&');
@@ -508,7 +509,7 @@ public class FakeHttpServletRequest implements HttpServletRequest {
 
   public String getRequestURI() {
     StringBuilder buf = new StringBuilder();
-    if (!contextPath.equals("")) {
+    if (StringUtils.isNotBlank(contextPath)) {
       buf.append(contextPath);
     }
 

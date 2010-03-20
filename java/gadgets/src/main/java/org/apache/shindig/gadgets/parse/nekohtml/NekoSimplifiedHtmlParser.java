@@ -203,7 +203,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       html.insertBefore(body, head.getNextSibling());
     }
     Node bodyFirst = body.getFirstChild();
-    while (headScripts.size() > 0) {
+    while (!headScripts.isEmpty()) {
       Node headScript = headScripts.pop();
       head.removeChild(headScript);
       body.insertBefore(headScript, bodyFirst);
@@ -490,7 +490,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
    * force it to be reparsed.
    * -
    */
-  private class NormalizingTagBalancer extends HTMLTagBalancer {
+  private static class NormalizingTagBalancer extends HTMLTagBalancer {
 
     private StringBuilder scriptContent;
 

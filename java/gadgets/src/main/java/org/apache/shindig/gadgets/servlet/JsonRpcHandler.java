@@ -162,7 +162,7 @@ public class JsonRpcHandler {
                .put("preferredHeight", view.getPreferredHeight())
                .put("preferredWidth", view.getPreferredWidth());
           Map<String, String> vattrs = view.getAttributes();
-          if(vattrs.size()>0){
+          if (!vattrs.isEmpty()){
             JSONObject ja = new JSONObject(vattrs);
             jv.put("attributes", ja);
           }

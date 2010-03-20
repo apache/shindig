@@ -220,7 +220,7 @@ public abstract class GadgetHtmlParser {
   }
   
   protected void prependToNode(Node to, LinkedList<Node> from) {
-    while (from.size() > 0) {
+    while (!from.isEmpty()) {
       to.insertBefore(from.removeLast(), to.getFirstChild());
     }
   }

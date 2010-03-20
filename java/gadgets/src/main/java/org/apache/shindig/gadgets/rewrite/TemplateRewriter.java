@@ -294,8 +294,7 @@ public class TemplateRewriter implements GadgetRewriter {
         continue;
       }
       
-      // TODO: split() is a regex compile, and should be avoided
-      String [] nameParts = template.getAttribute("tag").split(":");
+      String [] nameParts = StringUtils.splitPreserveAllTokens(template.getAttribute("tag"), ':');
       // At this time, we only support 
       if (nameParts.length != 2) {
         continue;

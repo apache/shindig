@@ -64,14 +64,14 @@ public abstract class AbstractParsingTestBase {
     // care about, such as whitespace deltas and differently-computed escape sequences.
     diff_match_patch dmp = new diff_match_patch();
     LinkedList<Diff> diffs = dmp.diff_main(expected, serialized);
-    while (diffs.size() > 0) {
+    while (!diffs.isEmpty()) {
       Diff cur = diffs.removeFirst();
       switch (cur.operation) {
       case DELETE:
         if (StringUtils.isBlank(cur.text) || "amp;".equalsIgnoreCase(cur.text)) {
           continue;
         }
-        if (diffs.size() == 0) {
+        if (diffs.isEmpty()) {
           // End of the set: assert known failure.
           assertEquals(expected, serialized);
         }

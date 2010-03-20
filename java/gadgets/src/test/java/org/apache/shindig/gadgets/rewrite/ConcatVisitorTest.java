@@ -421,7 +421,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(7, parent.getChildNodes().getLength());
     Element jsConcat = (Element)parent.getChildNodes().item(1);
     assertEquals("script", jsConcat.getTagName());
-    Uri concatUri = Uri.parse(jsConcat.getAttribute("src").replaceAll("&amp;", "&"));
+    Uri concatUri = Uri.parse(StringUtils.replace(jsConcat.getAttribute("src"), "&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());

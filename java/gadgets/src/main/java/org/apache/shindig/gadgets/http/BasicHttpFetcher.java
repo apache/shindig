@@ -271,7 +271,7 @@ public class BasicHttpFetcher implements HttpFetcher {
           "Missing schema for request: " + uri,
           HttpServletResponse.SC_BAD_REQUEST);
     }
-    String[] hostparts = uri.getAuthority().split(":");
+    String[] hostparts = StringUtils.splitPreserveAllTokens(uri.getAuthority(),':');
     int port = -1; // default port
     if (hostparts.length > 2) {
       throw new GadgetException(GadgetException.Code.INVALID_USER_DATA,
@@ -290,7 +290,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     HttpHost host = new HttpHost(hostparts[0], port, uri.getScheme());   
     String requestUri = uri.getPath();
     if (uri.getQuery() != null) {
-      requestUri += "?" + uri.getQuery();
+      requestUri += '?' + uri.getQuery();
     }
 
     try {

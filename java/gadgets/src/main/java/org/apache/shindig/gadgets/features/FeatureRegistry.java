@@ -345,7 +345,7 @@ public class FeatureRegistry {
   
   private boolean containerMatch(String containerAttrib, String container) {
     Set<String> containers = Sets.newHashSet();
-    for (String attr : containerAttrib.split(",")) {
+    for (String attr : StringUtils.split(containerAttrib, ',')) {
       containers.add(attr.trim());
     }
     return containers.contains(container);
@@ -384,7 +384,7 @@ public class FeatureRegistry {
       }
     }
     
-    if (problems.size() > 0) {
+    if (!problems.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       sb.append("Problems found processing features:\n");
       for (String problem : problems) {

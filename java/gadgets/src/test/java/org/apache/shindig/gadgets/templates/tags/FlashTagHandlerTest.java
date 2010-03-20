@@ -253,7 +253,7 @@ public class FlashTagHandlerTest extends EasyMockTestCase {
     assertTrue(wrapper.getValue("/html/body/span").startsWith("Failed to process os:Flash tag"));
   }
 
-  private class MyTemplateProcessor implements TemplateProcessor {
+  private static class MyTemplateProcessor implements TemplateProcessor {
     public TemplateContext context;
 
     public DocumentFragment processTemplate(Element template, TemplateContext templateContext,

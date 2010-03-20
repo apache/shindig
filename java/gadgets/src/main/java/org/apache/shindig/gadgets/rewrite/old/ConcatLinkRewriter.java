@@ -80,7 +80,7 @@ public class ConcatLinkRewriter {
 
         if (paramIndex == 1) {
           builder = new StringBuilder(concatBase);
-          builder.append("container=").append(container).append("&");
+          builder.append("container=").append(container).append('&');
           if (debug)
             builder.append("debug=1&");
           if (ignoreCache)

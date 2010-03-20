@@ -94,8 +94,8 @@ public class OAuthCallbackServlet extends InjectedServlet {
       // Copy the query parameters from this URL over to the real URL.
       UriBuilder realUri = UriBuilder.parse(callbackState.getRealCallbackUrl());
       Map<String, List<String>> params = UriBuilder.splitParameters(req.getQueryString());
-      for (String param : params.keySet()) {
-        realUri.putQueryParameter(param, params.get(param));
+      for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+        realUri.putQueryParameter(entry.getKey(), entry.getValue());
       }
       realUri.removeQueryParameter(CALLBACK_STATE_PARAM);
       HttpUtil.setCachingHeaders(resp, ONE_HOUR_IN_SECONDS, true);

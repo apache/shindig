@@ -101,7 +101,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
    * @return simulated hash mapping
    */
   private String addVar(String url, String data) {
-    return  "\"" + url + "\":\"" + data +"\",\r\n"; 
+    return '\"' + url + "\":\"" + data +"\",\r\n";
     
   }
   

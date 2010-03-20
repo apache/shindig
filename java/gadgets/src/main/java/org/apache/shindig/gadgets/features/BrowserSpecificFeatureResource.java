@@ -93,7 +93,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     // If browser-specific (ie. browserMatch has some qualifiers in it), not proxy cacheable
     // (since the vast majority of browsers don't support Vary: User-Agent, we just say "false")
     // Otherwise, delegate this call.
-    return browserMatch.size() > 0 ? false : delegate.isProxyCacheable();
+    return browserMatch.isEmpty() ? delegate.isProxyCacheable() : false;
   }
   
   private boolean browserMatches() {

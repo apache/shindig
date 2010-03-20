@@ -149,7 +149,7 @@ public class ConcatProxyServlet extends InjectedServlet {
       err.append(errorMessage);
     }
     if (uri != null) {
-      err.append(" (").append(uri.toString()).append(")");
+      err.append(" (").append(uri.toString()).append(')');
     }
 
     err.append(" ---- */");
