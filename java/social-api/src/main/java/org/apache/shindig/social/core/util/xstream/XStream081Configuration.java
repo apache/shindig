@@ -266,6 +266,10 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ImplicitCollectionFieldMapping(Person.class, "urls", Url.class, "urls"),
         new ImplicitCollectionFieldMapping(Person.class, "lookingFor", EnumImpl.class, "lookingFor"),
 
+        new ImplicitCollectionFieldMapping(Message.class, "recipients", String.class, "recipients"),
+        new ImplicitCollectionFieldMapping(Message.class, "collectionIds", String.class, "collectionsIds"),
+        new ImplicitCollectionFieldMapping(Message.class, "replies", String.class, "replies"),
+
         new ImplicitCollectionFieldMapping(Activity.class, "mediaItems", MediaItem.class, "mediaItems"))
     );
 
