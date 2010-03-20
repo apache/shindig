@@ -1077,7 +1077,7 @@
         <plugin>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.21</version>
+          <version>6.1.22</version>
         </plugin>
         <plugin>
           <groupId>org.apache.geronimo.genesis.plugins</groupId>
@@ -1439,7 +1439,7 @@
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
-        <version>6.1.15</version>
+        <version>6.1.22</version>
       </dependency>
       <dependency>
         <groupId>joda-time</groupId>
