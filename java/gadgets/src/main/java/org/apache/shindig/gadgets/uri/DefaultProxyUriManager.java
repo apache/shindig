@@ -227,10 +227,11 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     }
     
     String queryHost = config.getString(container, PROXY_HOST_PARAM);
-    if (queryHost == null ||
-        (strictParsing && !queryHost.equalsIgnoreCase(uriIn.getAuthority()))) {
-      throw new GadgetException(GadgetException.Code.INVALID_PATH, "Invalid proxy host",
-          HttpResponse.SC_BAD_REQUEST);
+    if (strictParsing) {
+      if (queryHost == null || !queryHost.equalsIgnoreCase(uriIn.getAuthority())) {
+        throw new GadgetException(GadgetException.Code.INVALID_PATH, "Invalid proxy host",
+            HttpResponse.SC_BAD_REQUEST);
+      }
     }
     
     try {
