@@ -102,7 +102,7 @@
   "core.io" : {
     // Note: /proxy is an open proxy. Be careful how you expose this!
     // Note: Here // is replaced with the current protocol http/https
-    "proxyUrl" : "//%host%/gadgets/proxy?refresh=%refresh%&url=%url%%rewriteMime%",
+    "proxyUrl" : "//%host%/gadgets/proxy?container=default&refresh=%refresh%&url=%url%%rewriteMime%",
     "jsonProxyUrl" : "//%host%/gadgets/makeRequest"
   },
   "views" : {
