@@ -200,6 +200,16 @@ public class TemplateRewriterTest {
     
     testFeatureRemoved();
   }
+
+  @Test
+  public void osmlWithLibrary() throws Exception {
+    setupGadget(getGadgetXmlWithLibrary(CONTENT_WITH_TAG_FROM_LIBRARY, "osml"));
+    rewriter.rewrite(gadget, content);
+    assertTrue("Custom tags were evaluated", content.getContent().equals(
+        "<html><head></head><body><my:Tag4></my:Tag4></body></html>"));
+
+    testFeatureRemoved();
+  }
   
   @Test
   public void tagPrecedenceRules() throws Exception {
@@ -217,6 +227,24 @@ public class TemplateRewriterTest {
     assertTrue("Precedence rules violated",
         content.getContent().indexOf("default1osml2inline3external4") > 0);
    
+    testFeatureRemoved();
+  }
+
+  @Test
+  public void tagPrecedenceRulesWithOSMLFeature() throws Exception {
+    // A strict subset of os templating is enabled when the osml feature is required
+    // Tag definitions include:
+    // Default handlers: tag1 default1
+    // OSML: tag1 osml1 tag2 osml2
+
+    config.put("${Cur['gadgets.features'].osml.library}",
+        "org/apache/shindig/gadgets/rewrite/OSML_test.xml");
+
+    setupGadget(getGadgetXmlWithLibrary(CONTENT_TESTING_PRECEDENCE_RULES, "osml"));
+    rewriter.rewrite(gadget, content);
+    assertTrue("Precedence rules violated", content.getContent().indexOf(
+        "default1osml2<my:Tag3></my:Tag3><my:Tag4></my:Tag4>") > 0);
+
     testFeatureRemoved();
   }
   
@@ -328,8 +356,12 @@ public class TemplateRewriterTest {
   }
   
   private static String getGadgetXmlWithLibrary(String content) {
+    return getGadgetXmlWithLibrary(content, "opensocial-templates");
+  }
+
+  private static String getGadgetXmlWithLibrary(String content, String feature) {
     return "<Module>" + "<ModulePrefs title='Title'>"
-        + "  <Require feature='opensocial-templates'>"
+        + "  <Require feature='" + feature + "'>"
         + "    <Param name='" + TemplateRewriter.REQUIRE_LIBRARY_PARAM + "'>"
         + TEMPLATE_LIBRARY_URI
         + "    </Param>"

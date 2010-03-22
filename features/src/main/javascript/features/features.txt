@@ -52,6 +52,7 @@ features/opensocial-jsonrpc/feature.xml
 features/opensocial-reference/feature.xml
 features/opensocial-templates/feature.xml
 features/osapi/feature.xml
+features/osml/feature.xml
 features/pubsub/feature.xml
 features/rpc/feature.xml
 features/security-token/feature.xml

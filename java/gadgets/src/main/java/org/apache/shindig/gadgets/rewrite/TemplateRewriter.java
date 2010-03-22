@@ -73,6 +73,8 @@ import java.util.logging.Logger;
 public class TemplateRewriter implements GadgetRewriter {
 
   public final static Set<String> TAGS = ImmutableSet.of("script");
+  public static final String TEMPLATES_FEATURE_NAME = "opensocial-templates";
+  public static final String OSML_FEATURE_NAME = "osml";
 
   /** Set to true to block auto-processing of templates */
   static final String DISABLE_AUTO_PROCESSING_PARAM = "disableAutoProcessing";
@@ -81,7 +83,7 @@ public class TemplateRewriter implements GadgetRewriter {
   static final String REQUIRE_LIBRARY_PARAM = "requireLibrary";
   
   /** Enable client support? **/
-  static final String CLIENT_SUPPORT_PARAM = "client";  
+  static final String CLIENT_SUPPORT_PARAM = "client";
 
   private static final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
   
@@ -110,8 +112,14 @@ public class TemplateRewriter implements GadgetRewriter {
   }
 
   public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {
-    Feature f = gadget.getSpec().getModulePrefs().getFeatures()
-        .get("opensocial-templates");
+    Map<String, Feature> directFeatures = gadget.getSpec().getModulePrefs()
+        .getFeatures();
+
+    Feature f = directFeatures.get(TEMPLATES_FEATURE_NAME);
+    if (f == null && directFeatures.containsKey(OSML_FEATURE_NAME)) {
+      f = directFeatures.get(OSML_FEATURE_NAME);
+    }
+    
     if (f != null && isServerTemplatingEnabled(f)) {
       try {
         rewriteImpl(gadget, f, content);
@@ -155,11 +163,13 @@ public class TemplateRewriter implements GadgetRewriter {
     }
     List<Element> templates = builder.build();
 
-    // User-defined custom tags - Priority 3
-    registries.add(registerCustomTags(templates));
-    
-    // User-defined libraries - Priority 4
-    loadTemplateLibraries(gadget.getContext(), f, registries, libraries);
+    if (!OSML_FEATURE_NAME.equals(f.getName())) {
+      // User-defined custom tags - Priority 3
+      registries.add(registerCustomTags(templates));
+
+      // User-defined libraries - Priority 4
+      loadTemplateLibraries(gadget.getContext(), f, registries, libraries);
+    }
     
     TagRegistry registry = new CompositeTagRegistry(registries);
     
@@ -202,7 +212,7 @@ public class TemplateRewriter implements GadgetRewriter {
 
     // If we don't need the feature, remove it and all templates from the gadget
     if (!needsFeature) {
-      templateContext.getGadget().removeFeature("opensocial-templates");
+      templateContext.getGadget().removeFeature(TEMPLATES_FEATURE_NAME);
       for (Element template : allTemplates) {
         Node parent = template.getParentNode();
         if (parent != null) {
