@@ -146,7 +146,7 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   public function testSetRenderingContext() {
     $redering_context = 'Dummie_rendering_context';
     $this->GadgetContext->setRenderingContext($redering_context);
-    $this->assertAttributeEquals($redering_context, 'renderingContext', $this->GadgetContext);
+    $this->assertEquals($redering_context, $this->GadgetContext->getRenderingContext());
   
   }
 
@@ -156,7 +156,7 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   public function testSetUrl() {
     $url = 'Dummie_url';
     $this->GadgetContext->setUrl($url);
-    $this->assertAttributeEquals($url, 'url', $this->GadgetContext);
+    $this->assertEquals($url, $this->GadgetContext->getUrl());
   
   }
 
@@ -166,7 +166,7 @@ class GadgetContextTest extends PHPUnit_Framework_TestCase {
   public function testSetView() {
     $view = 'Dummie_view';
     $this->GadgetContext->setView($view);
-    $this->assertAttributeEquals($view, 'view', $this->GadgetContext);
+    $this->assertEquals($view, $this->GadgetContext->getView());
   
   }
 
