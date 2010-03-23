@@ -68,7 +68,7 @@ class ContainerConfig {
     $str = preg_replace('@/\\*.*?\\*/@s', '', $str);
     // remove // style comments, but keep 'http://' 'https://' and '"//'
     // for example: "gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback"
-    $str = preg_replace('/[^http:\/\/|^https:\/\/|"\/\/]\/\/.*$/m', '', $str);
+    $str = preg_replace('/(?<!http:|https:)\/\/.*$/m', '', $str);
     return $str;
   }
 
