@@ -497,13 +497,17 @@ gadgets.io = function() {
 
       var rewriteMimeParam =
           params.rewriteMime ? "&rewriteMime=" + encodeURIComponent(params.rewriteMime) : "";
-      return config.proxyUrl.replace("%url%", encodeURIComponent(url)).
+      var ret = config.proxyUrl.replace("%url%", encodeURIComponent(url)).
           replace("%host%", document.location.host).
           replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh)).
           replace("%gadget%", encodeURIComponent(urlParams.url)).
           replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd)).
           replace("%rewriteMime%", rewriteMimeParam);
+      if (ret.indexOf('//') == 0) {
+        ret = window.location.protocol + ret;
+      }
+      return ret;
     }
   };
 }();

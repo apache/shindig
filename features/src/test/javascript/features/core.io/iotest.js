@@ -42,6 +42,13 @@ IoTest.prototype.setUp = function() {
   gadgets.io.preloaded_ = [];
 };
 
+IoTest.prototype.setSchemaless = function() {
+  gadgets.config.init({ "core.io" : {
+      "proxyUrl" : "//example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
+      "jsonProxyUrl" : "http://example.com/json" }});
+  gadgets.io.preloaded_ = [];
+};
+
 IoTest.prototype.tearDown = function() {
   gadgets.util.getUrlParameters = this.oldGetUrlParameters;
   window.XMLHttpRequest = this.oldXMLHTTPRequest;
@@ -74,6 +81,18 @@ IoTest.prototype.testGetProxyUrl_disableCache = function() {
   this.assertEquals(
       "http://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
           "&refresh=0" +
+          "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
+          "&c=foo",
+      proxied);
+};
+
+IoTest.prototype.testGetProxyUrl_schemaless = function() {
+  this.setSchemaless();
+  window.location = { protocol: "https:" };
+  var proxied = gadgets.io.getProxyUrl("http://target.example.com/image.gif");
+  this.assertEquals(
+      "https://example.com/proxy?url=http%3a%2f%2ftarget.example.com%2fimage.gif" +
+          "&refresh=3600" +
           "&g=http%3a%2f%2fwww.gadget.com%2fgadget.xml" +
           "&c=foo",
       proxied);
