@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class HashLockedDomainServiceTest extends EasyMockTestCase {
@@ -72,7 +73,7 @@ public class HashLockedDomainServiceTest extends EasyMockTestCase {
     }
 
     FeatureRegistry registry = mock(FeatureRegistry.class);
-    expect(registry.getFeatures(isA(List.class))).andReturn(gadgetFeatures).anyTimes();
+    expect(registry.getFeatures(isA(Collection.class))).andReturn(gadgetFeatures).anyTimes();
     return new Gadget().setSpec(spec).setGadgetFeatureRegistry(registry);
   }
 

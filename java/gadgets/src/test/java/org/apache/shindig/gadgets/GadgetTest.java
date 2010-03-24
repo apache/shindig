@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -75,7 +76,7 @@ public class GadgetTest extends EasyMockTestCase {
         .setContext(context)
         .setGadgetFeatureRegistry(registry)
         .setSpec(new GadgetSpec(Uri.parse(SPEC_URL), xml));
-    List<String> needed = Lists.newArrayList(gadget.getSpec().getModulePrefs().getFeatures().keySet());
+    Collection<String> needed = Lists.newArrayList(gadget.getSpec().getModulePrefs().getFeatures().keySet());
     List<String> returned = Lists.newArrayList();
     // Call should only happen once, and be cached from there on out.
     expect(registry.getFeatures(eq(needed))).andReturn(returned).anyTimes();

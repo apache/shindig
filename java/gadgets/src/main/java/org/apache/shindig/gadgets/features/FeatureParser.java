@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.features;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -91,7 +93,7 @@ class FeatureParser {
   }
   
   private Map<String, String> getAttribs(Element element) {
-    Map<String, String> attribs = Maps.newHashMap();
+    ImmutableMap.Builder<String, String> attribs = ImmutableMap.builder();
     NamedNodeMap attribNodes = element.getAttributes();
     for (int x = 0, y = attribNodes.getLength(); x < y; ++x) {
       Attr attr = (Attr)attribNodes.item(x);
@@ -99,7 +101,7 @@ class FeatureParser {
         attribs.put(attr.getName(), attr.getValue());
       }
     }
-    return Collections.unmodifiableMap(attribs);
+    return attribs.build();
   }
   
   static class ParsedFeature {
@@ -109,8 +111,8 @@ class FeatureParser {
     
     private ParsedFeature(String name, List<String> deps, List<Bundle> bundles) {
       this.name = name;
-      this.deps = Collections.unmodifiableList(deps);
-      this.bundles = Collections.unmodifiableList(bundles);
+      this.deps = ImmutableList.copyOf(deps);
+      this.bundles = ImmutableList.copyOf(bundles);
     }
     
     public String getName() {
@@ -157,7 +159,7 @@ class FeatureParser {
       private Resource(Uri source, String content, Map<String, String> attribs) {
         this.source = source;
         this.content = content;
-        this.attribs = Collections.unmodifiableMap(attribs);
+        this.attribs = ImmutableMap.copyOf(attribs);
       }
       
       public Uri getSource() {
