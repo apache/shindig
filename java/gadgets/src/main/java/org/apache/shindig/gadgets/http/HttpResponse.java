@@ -391,6 +391,12 @@ public final class HttpResponse implements Externalizable {
       Date expiresDate = DateUtil.parseRfc1123Date(expires);
       if (expiresDate != null) {
         return expiresDate.getTime();
+      } else {
+        // Per RFC2616, 14.21 (http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21):
+        // "HTTP/1.1 clients and caches MUST treat other invalid date formats,
+        // especially including the value "0", as in the past (i.e., "already
+        // expired")."
+        return 0;
       }
     }
     return -1;

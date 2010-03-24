@@ -289,6 +289,18 @@ public class HttpResponseTest extends Assert {
     // Second rounding makes this n-1.
     assertTtlOk(maxAge, response);
   }
+  
+  @Test
+  public void testExpiresZeroValue() throws Exception {
+    HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "0").create();
+    assertEquals(0, roundToSeconds(response.getCacheExpiration()));
+  }
+  
+  @Test
+  public void testExpiresUnknownValue() throws Exception {
+    HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "howdy").create();
+    assertEquals(0, roundToSeconds(response.getCacheExpiration()));
+  }
 
   @Test
   public void testMaxAgeNoDate() throws Exception {
@@ -388,16 +400,13 @@ public class HttpResponseTest extends Assert {
   @Test
   public void testRetryAfter() {
     HttpResponse response;
-    String nowPlus60 = DateUtil.formatRfc1123Date(System.currentTimeMillis() + 60 * 1000L);
-    for (String date : Arrays.asList("60", nowPlus60)) {
-      for (int rc : Arrays.asList(HttpResponse.SC_INTERNAL_SERVER_ERROR, HttpResponse.SC_GATEWAY_TIMEOUT, HttpResponse.SC_BAD_REQUEST)) {
-        response = new HttpResponseBuilder()
-            .setHttpStatusCode(rc)
-            .setHeader("Retry-After","60")
-            .create();
-        long ttl = response.getCacheTtl();
-        assertTrue(ttl <= 60 * 1000L && ttl > 0);
-      }
+    for (int rc : Arrays.asList(HttpResponse.SC_INTERNAL_SERVER_ERROR, HttpResponse.SC_GATEWAY_TIMEOUT, HttpResponse.SC_BAD_REQUEST)) {
+      response = new HttpResponseBuilder()
+          .setHttpStatusCode(rc)
+          .setHeader("Retry-After","60")
+          .create();
+      long ttl = response.getCacheTtl();
+      assertTrue(ttl <= 60 * 1000L && ttl > 0);
     }
   }
 
