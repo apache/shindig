@@ -31,4 +31,5 @@ Sebastian Bergmann (http://www.phpunit.de/).
 This product includes software (JSMin) developed by
 Douglas Crockford  (http://www.crockford.com/). 
 
-
+This product includes software (OAuth.php) developed by 
+Andy Smith (http://oauth.googlecode.com/svn/code/php/LICENSE.txt)
