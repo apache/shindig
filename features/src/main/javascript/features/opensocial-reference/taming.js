@@ -23,11 +23,37 @@
  */
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
-  ___.grantRead(opensocial.Person, 'Field');
-  ___.grantRead(opensocial.Name, 'Field');
-  ___.grantRead(opensocial.IdSpec, 'PersonId');
-  ___.grantRead(opensocial.IdSpec, 'GroupId');
+  ___.grantRead(opensocial, 'CreateActivityPriority');
+  ___.grantRead(opensocial, 'EscapeType');
+  ___.grantRead(opensocial.Activity, 'Field');
+  ___.grantRead(opensocial.Address, 'Field');
+  ___.grantRead(opensocial.BodyType, 'Field');
+  ___.grantRead(opensocial.DataRequest, 'ActivityRequestFields');
+  ___.grantRead(opensocial.DataRequest, 'DataRequestFields');
+  ___.grantRead(opensocial.DataRequest, 'FilterType');
+  ___.grantRead(opensocial.DataRequest, 'Group');
   ___.grantRead(opensocial.DataRequest, 'PeopleRequestFields');
+  ___.grantRead(opensocial.DataRequest, 'SortOrder');
+  ___.grantRead(opensocial.Email, 'Field');
+  ___.grantRead(opensocial.Enum, 'Smoker');
+  ___.grantRead(opensocial.Enum, 'Drinker');
+  ___.grantRead(opensocial.Enum, 'Gender');
+  ___.grantRead(opensocial.Enum, 'LookingFor');
+  ___.grantRead(opensocial.Enum, 'Presence');
+  ___.grantRead(opensocial.IdSpec, 'Field');
+  ___.grantRead(opensocial.IdSpec, 'GroupId');
+  ___.grantRead(opensocial.IdSpec, 'PersonId');
+  ___.grantRead(opensocial.MediaItem, 'Field');
+  ___.grantRead(opensocial.Message, 'Field');
+  ___.grantRead(opensocial.MessageCollection, 'Field');
+  ___.grantRead(opensocial.Name, 'Field');
+  ___.grantRead(opensocial.NavigationParameters, 'Field');
+  ___.grantRead(opensocial.Organization, 'Field');
+  ___.grantRead(opensocial.Person, 'Field');
+  ___.grantRead(opensocial.Phone, 'Field');
+  ___.grantRead(opensocial.ResponseItem, 'Error');
+  ___.grantRead(opensocial.Url, 'Field');
+
   // TODO(jasvir): The following object *is* exposed to gadget
   // code because its returned by opensocial.DataRequest.*
   // but isn't documented in gadget API.
