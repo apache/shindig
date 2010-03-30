@@ -70,21 +70,6 @@ public class DefaultConcatUriManager implements ConcatUriManager {
 
     ConcatUri exemplar = resourceUris.get(0);
     String container = exemplar.getContainer();
-    String concatHost = getReqVal(container, CONCAT_HOST_PARAM);
-    String concatPath = getReqVal(container, CONCAT_PATH_PARAM);
-    
-    UriBuilder uriBuilder = new UriBuilder();
-    uriBuilder.setAuthority(concatHost);
-    uriBuilder.setPath(concatPath);
-    
-    uriBuilder.addQueryParameter(Param.CONTAINER.getKey(), container);
-    uriBuilder.addQueryParameter(Param.GADGET.getKey(), exemplar.getGadget());
-    uriBuilder.addQueryParameter(Param.DEBUG.getKey(), exemplar.isDebug() ? "1" : "0");
-    uriBuilder.addQueryParameter(Param.NO_CACHE.getKey(), exemplar.isNoCache() ? "1" : "0");
-    
-    // Above params are common for all generated Uris.
-    // Use as a base for specific ConcatUri instances.
-    Uri uriBase = uriBuilder.toUri();
     
     List<String> versions = null;
     List<List<Uri>> batches = Lists.newArrayListWithCapacity(resourceUris.size());
@@ -100,31 +85,33 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     for (ConcatUri ctx : resourceUris) {
       String version = versionIt != null ? versionIt.next() : null;
       concatUris.add(
-          makeConcatUri(uriBase, ctx.getBatch(), ctx.getType(), container, isAdjacent, version));
+          makeConcatUri(ctx, isAdjacent, version));
     }
     
     return concatUris;
   }
   
-  private ConcatData makeConcatUri(Uri uriBase, List<Uri> resourceUris, Type contentType,
-      String container, boolean isAdjacent, String version) {
+  private ConcatData makeConcatUri(ConcatUri ctx, boolean isAdjacent, String version) {
     // TODO: Consider per-bundle isAdjacent plus first-bundle direct evaluation
     
-    if (!isAdjacent && contentType != Type.JS) {
+    if (!isAdjacent && ctx.getType() != Type.JS) {
       // Split-concat is only supported for JS at the moment.
       // This situation should never occur due to ConcatLinkRewriter's implementation.
       throw new UnsupportedOperationException("Split concatenation only supported for JS");
     }
     
-    UriBuilder uriBuilder = new UriBuilder(uriBase);
-    uriBuilder.addQueryParameter(Param.TYPE.getKey(), contentType.getType());
+    UriBuilder uriBuilder = ctx.makeQueryParams(null, version);
+    
+    String concatHost = getReqVal(ctx.getContainer(), CONCAT_HOST_PARAM);
+    String concatPath = getReqVal(ctx.getContainer(), CONCAT_PATH_PARAM);
+    uriBuilder.setAuthority(concatHost);
+    uriBuilder.setPath(concatPath);
+
+    uriBuilder.addQueryParameter(Param.TYPE.getKey(), ctx.getType().getType());
+    List<Uri> resourceUris = ctx.getBatch();
     Map<Uri, String> snippets = Maps.newHashMapWithExpectedSize(resourceUris.size());
     
-    if (version != null) {
-      uriBuilder.addQueryParameter(Param.VERSION.getKey(), version);
-    }
-    
-    String splitParam = getReqVal(container, CONCAT_JS_SPLIT_PARAM);
+    String splitParam = getReqVal(ctx.getContainer(), CONCAT_JS_SPLIT_PARAM);
     if (!isAdjacent) {
       uriBuilder.addQueryParameter(Param.JSON.getKey(), splitParam);
     }

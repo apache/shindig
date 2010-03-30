@@ -18,16 +18,17 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.Uri.UriException;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import java.util.Iterator;
 import java.util.List;
@@ -97,7 +98,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
       String uriStr = element.getAttribute(RESOURCE_TAGS.get(element.getNodeName()));
       try {
         reservedUris.add(new ProxyUriManager.ProxyUri(gadget, Uri.parse(uriStr)));
-      } catch (Exception e) {
+      } catch (UriException e) {
         // Uri parse exception, add null.
         reservedUris.add(null);
       }

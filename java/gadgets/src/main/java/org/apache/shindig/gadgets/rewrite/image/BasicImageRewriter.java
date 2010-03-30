@@ -37,6 +37,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageIOOutputter;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageOutputter;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -68,13 +69,13 @@ public class BasicImageRewriter implements ImageRewriter {
 
   private static final String CONTENT_LENGTH = "Content-Length";
   /** Parameter used to request image rendering quality */
-  public static final String PARAM_RESIZE_QUALITY = "resize_q";
+  public static final String PARAM_RESIZE_QUALITY = Param.RESIZE_QUALITY.getKey();
   /** Parameter used to request image width change */
-  public static final String PARAM_RESIZE_WIDTH = "resize_w";
+  public static final String PARAM_RESIZE_WIDTH = Param.RESIZE_WIDTH.getKey();
   /** Parameter used to request image height change */
-  public static final String PARAM_RESIZE_HEIGHT = "resize_h";
+  public static final String PARAM_RESIZE_HEIGHT = Param.RESIZE_HEIGHT.getKey();
   /** Parameter used to request resizing will not expand image */
-  public static final String PARAM_NO_EXPAND = "no_expand";
+  public static final String PARAM_NO_EXPAND = Param.NO_EXPAND.getKey();
 
   public static final String
       CONTENT_TYPE_AND_EXTENSION_MISMATCH =

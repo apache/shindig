@@ -29,6 +29,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.io.IOException;
 import java.util.Set;
@@ -51,8 +52,8 @@ public abstract class ProxyBase {
   public static final String SYND_PARAM = "synd";
 
   // Public because of rewriter. Rewriter should be cleaned up.
-  public static final String REWRITE_MIME_TYPE_PARAM = "rewriteMime";
-  public static final String SANITIZE_CONTENT_PARAM = "sanitize";
+  public static final String REWRITE_MIME_TYPE_PARAM = Param.REWRITE_MIME_TYPE.getKey();
+  public static final String SANITIZE_CONTENT_PARAM = Param.SANITIZE.getKey();
 
   protected static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
       "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",

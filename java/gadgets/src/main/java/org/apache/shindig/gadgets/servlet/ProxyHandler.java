@@ -18,16 +18,10 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
@@ -55,16 +49,10 @@ import javax.servlet.http.HttpServletResponse;
 public class ProxyHandler extends ProxyBase {
   private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
 
-  private static final String[] INTEGER_RESIZE_PARAMS = new String[] {
-    PARAM_RESIZE_HEIGHT, PARAM_RESIZE_WIDTH, PARAM_RESIZE_QUALITY, PARAM_NO_EXPAND
-  };
-
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
   
-  static final String FALLBACK_URL_PARAM = "fallback_url";
-
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
   private final RequestRewriterRegistry contentRewriterRegistry;
@@ -84,31 +72,12 @@ public class ProxyHandler extends ProxyBase {
   /**
    * Generate a remote content request based on the parameters sent from the client.
    */
-  private HttpRequest buildHttpRequest(HttpServletRequest request, Uri uri,
+  private HttpRequest buildHttpRequest(HttpServletRequest request,
       ProxyUriManager.ProxyUri uriCtx, Uri tgt) throws GadgetException {
     validateUrl(tgt);
-
-    HttpRequest req = uriCtx.makeHttpRequest(uriCtx.getResource());
-    copySanitizedIntegerParams(uri, req);
-
-    // Allow the rewriter to use an externally forced MIME type. This is needed
-    // allows proper rewriting of <script src="x"/> where x is returned with
-    // a content type like text/html which unfortunately happens all too often
-    req.setRewriteMimeType(uri.getQueryParameter(REWRITE_MIME_TYPE_PARAM));
-    req.setSanitizationRequested("1".equals(uri.getQueryParameter(SANITIZE_CONTENT_PARAM)));
-
+    HttpRequest req = uriCtx.makeHttpRequest(tgt);
     this.setRequestHeaders(request, req);
-    
     return req;
-  }
-
-  private void copySanitizedIntegerParams(Uri uri, HttpRequest req) {
-    for (String resizeParamName : INTEGER_RESIZE_PARAMS) {
-      if (uri.getQueryParameter(resizeParamName) != null) {
-        req.setParam(resizeParamName,
-            NumberUtils.createInteger(uri.getQueryParameter(resizeParamName)));
-      }
-    }
   }
 
   @Override
@@ -131,8 +100,9 @@ public class ProxyHandler extends ProxyBase {
           HttpResponse.SC_BAD_REQUEST);
     }
     
-    Uri requestUri = new UriBuilder(request).toUri();
-    ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(requestUri);
+    // Parse request uri:
+    ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(
+        new UriBuilder(request).toUri());
     
     try {
       HttpUtil.setCachingHeaders(response,
@@ -142,7 +112,7 @@ public class ProxyHandler extends ProxyBase {
       return;
     }
 
-    HttpRequest rcr = buildHttpRequest(request, requestUri, proxyUri, proxyUri.getResource());
+    HttpRequest rcr = buildHttpRequest(request, proxyUri, proxyUri.getResource());
     if (rcr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "No url paramater in request", HttpResponse.SC_BAD_REQUEST);      
@@ -151,16 +121,10 @@ public class ProxyHandler extends ProxyBase {
     
     if (results.isError()) {
       // Error: try the fallback. Particularly useful for proxied images.
-      String fallbackStr = requestUri.getQueryParameter(FALLBACK_URL_PARAM);
-      if (fallbackStr != null) {
-        try {
-          HttpRequest fallbackRcr =
-              buildHttpRequest(request, requestUri, proxyUri, Uri.parse(fallbackStr));
-          results = requestPipeline.execute(fallbackRcr);
-        } catch (IllegalArgumentException e) {
-          throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-              FALLBACK_URL_PARAM + " param is invalid: " + e, HttpResponse.SC_BAD_REQUEST);
-        }
+      Uri fallbackUri = proxyUri.getFallbackUri();
+      if (fallbackUri != null) {
+        HttpRequest fallbackRcr = buildHttpRequest(request, proxyUri, fallbackUri);
+        results = requestPipeline.execute(fallbackRcr);
       }
     }
     

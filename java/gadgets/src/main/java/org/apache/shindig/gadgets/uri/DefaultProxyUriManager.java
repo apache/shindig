@@ -113,21 +113,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   }
 
   private Uri makeProxiedUri(ProxyUri puc, Integer forcedRefresh, String version) {
-    UriBuilder queryBuilder = new UriBuilder();
-    
-    // Add all params common to both chained and query syntax.
+    UriBuilder queryBuilder = puc.makeQueryParams(forcedRefresh, version);
+
     String container = puc.getContainer();
-    queryBuilder.addQueryParameter(Param.CONTAINER.getKey(), container);
-    queryBuilder.addQueryParameter(Param.GADGET.getKey(), puc.getGadget());
-    queryBuilder.addQueryParameter(Param.DEBUG.getKey(), puc.isDebug() ? "1" : "0");
-    queryBuilder.addQueryParameter(Param.NO_CACHE.getKey(), puc.isNoCache() ? "1" : "0");
-    if (forcedRefresh != null) {
-      queryBuilder.addQueryParameter(Param.REFRESH.getKey(), forcedRefresh.toString());
-    }
-    if (version != null) {
-      queryBuilder.addQueryParameter(Param.VERSION.getKey(), version);
-    }
-    
     UriBuilder uri = new UriBuilder();
     uri.setAuthority(getReqConfig(container, PROXY_HOST_PARAM));
     

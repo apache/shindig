@@ -63,6 +63,112 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(1, uris.size());
     verifyQueryUri(RESOURCE_1, uris.get(0), debug, noCache, version, host, path);
   }
+
+  @Test
+  public void refreshVerifyBasic() throws Exception {
+    verifyRefresh(false, false, "version", 20);
+  }
+
+  @Test
+  public void refreshVerifyNoCache() throws Exception {
+    verifyRefresh(false, true, "version", 20);
+  }
+
+  @Test
+  public void refreshVerifyNoRefresh() throws Exception {
+    verifyRefresh(false, false, "version", null);
+  }
+
+  public void verifyRefresh(boolean debug, boolean noCache, String version, Integer refresh)
+      throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    ProxyUriManager.Versioner versioner = makeVersioner(null, version);
+    DefaultProxyUriManager manager = makeManager(host, path, versioner);
+    Gadget gadget = mockGadget(debug, noCache);
+    List<ProxyUri> proxyUris = Lists.newLinkedList();
+    proxyUris.add(new ProxyUri(refresh, debug, noCache, CONTAINER, SPEC_URI.toString(),
+        RESOURCE_1));
+    
+    List<Uri> uris = manager.make(proxyUris, null);
+    assertEquals(1, uris.size());
+    verifyQueryUriWithRefresh(RESOURCE_1, uris.get(0), debug, noCache,
+        version, refresh, host, path);
+  }
+
+  @Test
+  public void verifyAddedParamsQuery() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    ProxyUriManager.Versioner versioner = makeVersioner(null, "version1", "version2");
+    DefaultProxyUriManager manager = makeManager(host, path, versioner);
+    Gadget gadget = mockGadget(false, true);
+    List<ProxyUri> proxyUris = Lists.newLinkedList();
+    ProxyUri pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
+        RESOURCE_1);
+    pUri.setResize(100, 10, 90, true);
+    proxyUris.add(pUri);
+
+    pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
+        RESOURCE_2);
+    pUri.setResize(null, 10, null, false);
+    proxyUris.add(pUri);
+
+    List<Uri> uris = manager.make(proxyUris, null);
+    assertEquals(2, uris.size());
+    verifyQueryUriWithRefresh(RESOURCE_1, uris.get(0), false, true,
+        "version1", null, host, path);
+    // Verify added param:
+    assertEquals("100", uris.get(0).getQueryParameter("resize_w"));
+    assertEquals("10", uris.get(0).getQueryParameter("resize_h"));
+    assertEquals("90", uris.get(0).getQueryParameter("resize_q"));
+    assertEquals("1", uris.get(0).getQueryParameter("no_expand"));
+    assertEquals(null, uris.get(1).getQueryParameter("resize_w"));
+    assertEquals("10", uris.get(1).getQueryParameter("resize_h"));
+    assertEquals(null, uris.get(1).getQueryParameter("resize_q"));
+    assertEquals(null, uris.get(1).getQueryParameter("no_expand"));
+  }
+  
+  @Test
+  public void verifyAddedParamsChained() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
+    ProxyUriManager.Versioner versioner = makeVersioner(null, "version");
+    DefaultProxyUriManager manager = makeManager(host, path, versioner);
+    Gadget gadget = mockGadget(false, true);
+    List<ProxyUri> proxyUris = Lists.newLinkedList();
+    ProxyUri pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
+        RESOURCE_1);
+    pUri.setResize(100, 10, 90, true);
+    proxyUris.add(pUri);
+    
+    List<Uri> uris = manager.make(proxyUris, null);
+    assertEquals(1, uris.size());
+    verifyChainedUri(RESOURCE_1, uris.get(0), false, true,
+        null, false, host, path);
+    // Verify added param:
+    assertEquals("/proxy/container=container&gadget=http%3A%2F%2Fexample.com%2Fgadget.xml" +
+        "&debug=0&nocache=1&v=version&resize_h=10&resize_w=100&resize_q=90&no_expand=1" +
+        "/path/http://example.com/one.dat",
+        uris.get(0).getPath());
+  }
+
+  @Test
+  public void testFallbackUrl() throws Exception {
+    ProxyUri uri = new ProxyUri(null, false, false, "open", "http://example.com/gadget",
+        Uri.parse("http://example.com/resource"));
+    uri.setFallbackUrl("http://example.com/fallback");
+    
+    assertEquals("http://example.com/fallback", uri.getFallbackUri().toString());
+  }
+  
+  @Test(expected = GadgetException.class)
+  public void testBadFallbackUrl() throws Exception {
+    ProxyUri uri = new ProxyUri(null, false, false, "open", "http://example.com/gadget",
+        Uri.parse("http://example.com/resource"));
+    uri.setFallbackUrl("bad url");
+    uri.getFallbackUri(); // throws exception!
+  }
   
   @Test
   public void basicProxyChainedStyle() throws Exception {
@@ -127,7 +233,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
       verifyChainedUri(resources.get(i), uris.get(i), true, true, versions[i], false, host, path);
     }
   }
-  
+
   @Test
   public void validateQueryStyleUnversioned() throws Exception {
     // Validate tests also serve as end-to-end tests: create, unpack.
@@ -249,32 +355,43 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
 
   private List<Uri> makeAndGet(String host, String path, boolean debug, boolean noCache,
       List<Uri> resources, String... version) {
+    return makeAndGetWithRefresh(host, path, debug, noCache, resources, 123, version);
+  }
+  
+  private List<Uri> makeAndGetWithRefresh(String host, String path, boolean debug,
+      boolean noCache, List<Uri> resources, Integer refresh, String... version) {
     ProxyUriManager.Versioner versioner = makeVersioner(null, version);
     DefaultProxyUriManager manager = makeManager(host, path, versioner);
     Gadget gadget = mockGadget(debug, noCache);
     return manager.make(
-        ProxyUriManager.ProxyUri.fromList(gadget, resources), 123);
+        ProxyUriManager.ProxyUri.fromList(gadget, resources), refresh);
   }
-  
+
   private void verifyQueryUri(Uri orig, Uri uri, boolean debug, boolean noCache, String version,
       String host, String path) throws Exception {
+    verifyQueryUriWithRefresh(orig, uri, debug, noCache, version, 123, host, path);
+  }
+  
+  private void verifyQueryUriWithRefresh(Uri orig, Uri uri, boolean debug, boolean noCache,
+      String version, Integer refresh, String host, String path) throws Exception {
     // Make sure the manager can parse out results.
     DefaultProxyUriManager manager = makeManager(host, path, null);
     ProxyUri proxyUri = manager.process(uri);
     assertEquals(orig, proxyUri.getResource());
     assertEquals(debug, proxyUri.isDebug());
     assertEquals(noCache, proxyUri.isNoCache());
-    assertEquals(noCache ? 0 : 123, (int)proxyUri.getRefresh());
+    assertEquals(noCache ? new Integer(0) : refresh, proxyUri.getRefresh());
     assertEquals(CONTAINER, proxyUri.getContainer());
     assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
     
     // "Raw" query param verification.
-    assertEquals("123", uri.getQueryParameter(Param.REFRESH.getKey()));
+    assertEquals(noCache || refresh == null ? null : refresh.toString(),
+        uri.getQueryParameter(Param.REFRESH.getKey()));
     if (version != null) {
       assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
     }
   }
-  
+
   private void verifyChainedUri(Uri orig, Uri uri, boolean debug, boolean noCache, String version,
       boolean endOfPath, String host, String path)
       throws Exception {
@@ -299,7 +416,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     uri = new UriBuilder().setQuery(paramsUri).toUri();
     
     // "Raw" query param verification.
-    assertEquals("123", uri.getQueryParameter(Param.REFRESH.getKey()));
+    assertEquals(noCache ? null : "123", uri.getQueryParameter(Param.REFRESH.getKey()));
     if (version != null) {
       assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
     }

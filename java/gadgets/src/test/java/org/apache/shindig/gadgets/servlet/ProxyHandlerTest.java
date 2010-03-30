@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.uri.PassthruManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
 import org.junit.Test;
 
@@ -189,7 +190,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
     setupProxyRequestMock(domain, url, ProxyBase.IGNORE_CACHE_PARAM, "1",
-        ProxyHandler.FALLBACK_URL_PARAM, fallback_url);
+        Param.FALLBACK_URL_PARAM.getKey(), fallback_url);
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = HttpResponse.error();

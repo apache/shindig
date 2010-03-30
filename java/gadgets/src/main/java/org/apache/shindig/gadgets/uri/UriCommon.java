@@ -35,7 +35,16 @@ public interface UriCommon {
     REFRESH("refresh"),
     LIBS("libs"),
     JSON("json"),
-    TYPE("type");
+    TYPE("type"),
+    REWRITE_MIME_TYPE("rewriteMime"),
+    SANITIZE("sanitize"),
+    
+    // Proxy resize params:
+    RESIZE_HEIGHT("resize_h"),
+    RESIZE_WIDTH("resize_w"),
+    RESIZE_QUALITY("resize_q"),
+    NO_EXPAND("no_expand"),
+    FALLBACK_URL_PARAM("fallback_url");
    
     private final String key;
     private Param(String key) {

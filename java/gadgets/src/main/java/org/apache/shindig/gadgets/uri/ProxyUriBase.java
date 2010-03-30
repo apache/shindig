@@ -19,7 +19,9 @@
 package org.apache.shindig.gadgets.uri;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -27,16 +29,18 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 public class ProxyUriBase {
-  private final UriStatus status;
-  private final Integer refresh;
-  private final boolean debug;
-  private final boolean noCache;
-  private final String container;
-  private final String gadget;
-
+  private UriStatus status = null;
+  private Integer refresh = null;
+  private boolean debug = false;
+  private boolean noCache = false;
+  private String container = null;
+  private String gadget = null;
+  private String rewriteMimeType = null;
+  private boolean sanitizeContent = false;
+  
   protected ProxyUriBase(Gadget gadget) {
     this(null,  // Meaningless in "context" mode. translateStatusRefresh invalid here.
-         parseRefresh(gadget.getContext().getParameter(Param.REFRESH.getKey())),
+         getIntegerValue(gadget.getContext().getParameter(Param.REFRESH.getKey())),
          gadget.getContext().getDebug(),
          gadget.getContext().getIgnoreCache(),
          gadget.getContext().getContainer(),
@@ -44,15 +48,11 @@ public class ProxyUriBase {
   }
   
   protected ProxyUriBase(UriStatus status, Uri origUri) {
-    this(status,
-         origUri != null ? parseRefresh(origUri.getQueryParameter(Param.REFRESH.getKey())) : null,
-         origUri != null ? getBooleanValue(origUri.getQueryParameter(Param.DEBUG.getKey())) : false,
-         origUri != null ? getBooleanValue(origUri.getQueryParameter(Param.NO_CACHE.getKey())) : false,
-         origUri != null ? origUri.getQueryParameter(Param.CONTAINER.getKey()) : null,
-         origUri != null ? origUri.getQueryParameter(Param.GADGET.getKey()) : null);
+    this.status = status;
+    setFromUri(origUri);
   }
-  
-  private ProxyUriBase(UriStatus status, Integer refresh, boolean debug, boolean noCache,
+
+  protected ProxyUriBase(UriStatus status, Integer refresh, boolean debug, boolean noCache,
       String container, String gadget) {
     this.status = status;
     this.refresh = refresh;
@@ -62,6 +62,33 @@ public class ProxyUriBase {
     this.gadget = gadget;
   }
 
+  /**
+   * Parse uri query paramaters.
+   * Note this function is called by a constructor,
+   * and can be override to handle derived class parsing
+   */
+  public void setFromUri(Uri uri) {
+    if (uri != null) {
+      refresh = getIntegerValue(uri.getQueryParameter(Param.REFRESH.getKey()));
+      debug = getBooleanValue(uri.getQueryParameter(Param.DEBUG.getKey()));
+      noCache = getBooleanValue(uri.getQueryParameter(Param.NO_CACHE.getKey()));
+      container = uri.getQueryParameter(Param.CONTAINER.getKey());
+      gadget = uri.getQueryParameter(Param.GADGET.getKey());
+      rewriteMimeType = uri.getQueryParameter(Param.REWRITE_MIME_TYPE.getKey());
+      sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));
+    }  
+  }
+  
+  public ProxyUriBase setRewriteMimeType(String type) {
+    this.rewriteMimeType = type;
+    return this;
+  }
+  
+  public ProxyUriBase setSanitizeContent(boolean sanitize) {
+    this.sanitizeContent = sanitize;
+    return this;
+  }
+  
   public UriStatus getStatus() {
     return status;
   }
@@ -85,7 +112,15 @@ public class ProxyUriBase {
   public String getGadget() {
     return gadget;
   }
+
+  public String getRewriteMimeType() {
+    return rewriteMimeType;
+  }
   
+  public boolean sanitizeContent() {
+    return sanitizeContent;
+  }
+
   public HttpRequest makeHttpRequest(Uri targetUri) throws GadgetException {
     HttpRequest req = new HttpRequest(targetUri)
         .setIgnoreCache(isNoCache())
@@ -102,9 +137,53 @@ public class ProxyUriBase {
     if (getRefresh() != null && getRefresh() >= 0) {
       req.setCacheTtl(getRefresh());
     }
+
+    // Allow the rewriter to use an externally forced MIME type. This is needed
+    // allows proper rewriting of <script src="x"/> where x is returned with
+    // a content type like text/html which unfortunately happens all too often
+    if (rewriteMimeType != null) {
+      req.setRewriteMimeType(getRewriteMimeType());
+    }
+    req.setSanitizationRequested(sanitizeContent());
+
     return req;
   }
-  
+
+  /**
+   * Construct the query parameters for proxy url  
+   * @param forcedRefresh optional overwrite the refresh time 
+   * @param version optional version
+   * @return Url with only query parameters set
+   */
+  public UriBuilder makeQueryParams(Integer forcedRefresh, String version) {
+    UriBuilder queryBuilder = new UriBuilder();
+    
+    // Add all params common to both chained and query syntax.
+    String container = getContainer();
+    queryBuilder.addQueryParameter(Param.CONTAINER.getKey(), container);
+    queryBuilder.addQueryParameter(Param.GADGET.getKey(), getGadget());
+    queryBuilder.addQueryParameter(Param.DEBUG.getKey(), isDebug() ? "1" : "0");
+    queryBuilder.addQueryParameter(Param.NO_CACHE.getKey(), isNoCache() ? "1" : "0");
+    if (!isNoCache()) {
+      if (forcedRefresh != null) {
+        queryBuilder.addQueryParameter(Param.REFRESH.getKey(), forcedRefresh.toString());
+      } else if (getRefresh() != null) {
+        queryBuilder.addQueryParameter(Param.REFRESH.getKey(), getRefresh().toString());      
+      }
+    }
+
+    if (version != null) {
+      queryBuilder.addQueryParameter(Param.VERSION.getKey(), version);
+    }
+    if (rewriteMimeType != null) {
+      queryBuilder.addQueryParameter(Param.REWRITE_MIME_TYPE.getKey(), rewriteMimeType);
+    }
+    if (sanitizeContent) {
+      queryBuilder.addQueryParameter(Param.SANITIZE.getKey(), "1");
+    }
+    return queryBuilder;
+  }
+
   public Integer translateStatusRefresh(int longVal, int defaultVal)
       throws GadgetException {
     Integer retRefresh = 0;
@@ -139,23 +218,21 @@ public class ProxyUriBase {
     return retRefresh;
   }
 
-  private static boolean getBooleanValue(String str) {
+  protected static boolean getBooleanValue(String str) {
     if (str != null && "1".equals(str)) {
       return true;
     }
     return false;
   }
   
-  private static Integer parseRefresh(String refreshStr) {
-    Integer refreshVal = null;
-    if (refreshStr != null) {
-      try {
-        refreshVal = Integer.parseInt(refreshStr);
-      } catch (NumberFormatException e) {
-        // -1 is sentinel for invalid value.
-        refreshVal = -1;
-      }
+  protected static Integer getIntegerValue(String str) {
+    Integer val = null;
+    try {
+      val = NumberUtils.createInteger(str);
+    } catch (NumberFormatException e) {
+      // -1 is sentinel for invalid value.
+      val = -1;
     }
-    return refreshVal;
+    return val;
   }
 }
