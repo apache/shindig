@@ -94,4 +94,12 @@ public abstract class AbstractParserAndSerializerTest extends AbstractParsingTes
         loadFile("org/apache/shindig/gadgets/parse/test-with-ampersands-expected.html");
     parseAndCompareBalanced(content, expected, parser);
   }
+  
+  @Test
+  public void textBeforeScript() throws Exception {
+    String content = loadFile("org/apache/shindig/gadgets/parse/test-text-before-script.html");
+    String expected = 
+        loadFile("org/apache/shindig/gadgets/parse/test-text-before-script-expected.html");
+    parseAndCompareBalanced(content, expected, parser);
+  }
 }
