@@ -249,7 +249,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
           $person['isOwner'] = true;
         }
-        if ($fields[0] != '@all') {
+        if ($fields && $fields[0] != '@all') {
           $newPerson = array();
           $newPerson['id'] = $id;
           $newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
