@@ -47,7 +47,11 @@ gadgets.io = function() {
    */
   function makeXhr() {
     var x; 
-    if (window.ActiveXObject) {
+    if (typeof shindig != 'undefined' &&
+        shindig.xhrwrapper &&
+        shindig.xhrwrapper.createXHR) {
+      return shindig.xhrwrapper.createXHR();
+    } else if (window.ActiveXObject) {
       x = new ActiveXObject("Msxml2.XMLHTTP");
       if (!x) {
         x = new ActiveXObject("Microsoft.XMLHTTP");

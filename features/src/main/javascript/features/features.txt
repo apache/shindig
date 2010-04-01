@@ -63,4 +63,5 @@ features/skins/feature.xml
 features/swfobject/feature.xml
 features/tabs/feature.xml
 features/views/feature.xml
+features/xhrwrapper/feature.xml
 features/xmlutil/feature.xml

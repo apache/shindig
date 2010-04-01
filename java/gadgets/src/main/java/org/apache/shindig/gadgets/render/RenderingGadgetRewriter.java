@@ -379,7 +379,18 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     addHasFeatureConfig(gadget, config);
     addOsapiSystemListMethodsConfig(context.getContainer(), config, context.getHost());
     addSecurityTokenConfig(context, config);
+    addXhrWrapperConfig(gadget, config);
     return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
+  }
+
+  private void addXhrWrapperConfig(Gadget gadget, Map<String, Object> config) {
+    boolean isUsingXhrWrapper = gadget.getAllFeatures().contains("xhrwrapper");
+    if (isUsingXhrWrapper) {
+      Map<String, String> xhrWrapperConfig = Maps.newHashMapWithExpectedSize(2);
+      Uri contentsUri = gadget.getCurrentView().getHref();
+      xhrWrapperConfig.put("contentUrl", contentsUri == null ? "" : contentsUri.toString());
+      config.put("shindig.xhrwrapper", xhrWrapperConfig);
+    }
   }
 
   private void addSecurityTokenConfig(GadgetContext context, Map<String, Object> config) {

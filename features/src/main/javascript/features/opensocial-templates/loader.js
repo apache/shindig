@@ -83,7 +83,11 @@ os.Loader.requestUrlXHR_ = function(url, callback) {
     return;
   }
   var req = null;
-  if (typeof(XMLHttpRequest) != "undefined") {
+  if (typeof shindig != 'undefined' &&
+      shindig.xhrwrapper &&
+      shindig.xhrwrapper.createXHR) {
+    req = shindig.xhrwrapper.createXHR();
+  } else if (typeof XMLHttpRequest != "undefined") {
     req = new XMLHttpRequest();
   } else {
     req = new ActiveXObject("MSXML2.XMLHTTP");

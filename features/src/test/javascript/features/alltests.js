@@ -43,6 +43,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/core/log.js'));
   eval(JsUtil.prototype.include(srcDir + '/core.io/io.js'));
   eval(JsUtil.prototype.include(srcDir + '/views/views.js'));
+  eval(JsUtil.prototype.include(srcDir + '/xhrwrapper/xhrwrapper.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/opensocial.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/activity.js'));
   eval(JsUtil.prototype.include(srcDir + '/opensocial-reference/address.js'));
@@ -91,6 +92,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/osapi/batchtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/osapi/jsonrpctransporttest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/views/urltemplatetest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + "/xhrwrapper/xhrwrappertest.js"));
 }
 
 function AllTests() {

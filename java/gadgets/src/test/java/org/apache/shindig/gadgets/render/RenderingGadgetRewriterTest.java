@@ -117,7 +117,8 @@ public class RenderingGadgetRewriterTest {
     Gadget gadget = new Gadget()
         .setContext(context)
         .setPreloads(ImmutableList.<PreloadedData>of())
-        .setSpec(spec);
+        .setSpec(spec)
+        .setGadgetFeatureRegistry(featureRegistry);
     // Convenience: by default expect no features requested, by gadget or extern.
     // expectFeatureCalls(...) resets featureRegistry if called again.
     expectFeatureCalls(gadget,
@@ -617,6 +618,41 @@ public class RenderingGadgetRewriterTest {
     assertEquals("", defaultsJson.get("pref_two"));
   }
 
+  @Test
+  public void xhrWrapperConfigurationInjected() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title=''>" +
+      "  <Require feature='xhrwrapper' />" +
+      "</ModulePrefs>" +
+      "<Content type='html' href='http://foo.com/bar/baz.html' />" +
+      "</Module>";
+    
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+    gadget.setCurrentView(gadget.getSpec().getView("default"));
+    
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+    
+    boolean containsConfig =
+        rewritten.contains("\"shindig.xhrwrapper\":{\"contentUrl\":\"http://foo.com/bar/baz.html\"}");
+    assertTrue("No shindig.xhrwrapper configuration present in rewritten HTML.", containsConfig);
+  }
+
+  @Test
+  public void xhrWrapperConfigurationNotInjectedIfUnnecessary() throws Exception {
+    String gadgetXml =
+      "<Module><ModulePrefs title='' />" +
+      "<Content type='html' href='http://foo.com/bar/baz.html' />" +
+      "</Module>";
+    
+    Gadget gadget = makeGadgetWithSpec(gadgetXml);
+    gadget.setCurrentView(gadget.getSpec().getView("default"));
+    
+    String rewritten = rewrite(gadget, BODY_CONTENT);
+    
+    boolean containsConfig = rewritten.contains("\"shindig.xhrwrapper\"");
+    assertFalse("shindig.xhrwrapper configuration present in rewritten HTML.", containsConfig);
+  }
+
   @Test(expected = RewritingException.class)
   public void unsupportedFeatureThrows() throws Exception {
     String gadgetXml =
@@ -682,6 +718,8 @@ public class RenderingGadgetRewriterTest {
         eq(ImmutableList.<String>of("core")), eq(Lists.<String>newArrayList())))
         .andReturn(ImmutableList.<FeatureResource>of());
     expect(featureRegistry.getFeatures(eq(ImmutableList.of("core", "bar"))))
+        .andReturn(ImmutableList.of("core"));
+    expect(featureRegistry.getFeatures(eq(ImmutableList.of("core"))))
         .andReturn(ImmutableList.of("core"));
     replay(featureRegistry);
     
@@ -843,7 +881,8 @@ public class RenderingGadgetRewriterTest {
     GadgetContext gadgetContext = gadget.getContext();
     List<String> gadgetFeatures = Lists.newArrayList(gadget.getDirectFeatureDeps());
     List<String> allFeatures = Lists.newArrayList(gadgetFeatures);
-    allFeatures.addAll(externLibs);
+    List<String> allFeaturesAndLibs = Lists.newArrayList(gadgetFeatures);
+    allFeaturesAndLibs.addAll(externLibs);
     List<String> emptyList = Lists.newArrayList();
     expect(featureRegistry.getFeatureResources(same(gadgetContext), eq(externLibs), eq(emptyList)))
         .andReturn(externResources);
@@ -851,6 +890,8 @@ public class RenderingGadgetRewriterTest {
         .andReturn(gadgetResources);
     expect(featureRegistry.getFeatures(eq(allFeatures)))
         .andReturn(allFeatures);
+    expect(featureRegistry.getFeatures(eq(allFeaturesAndLibs)))
+        .andReturn(allFeaturesAndLibs);
     replay(featureRegistry);
   }
   

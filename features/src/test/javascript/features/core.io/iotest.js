@@ -34,7 +34,9 @@ IoTest.prototype.setUp = function() {
 
   this.fakeXhrs = new fakeXhr.Factory(this);
   this.oldXMLHttpRequest = window.XMLHTTPRequest;
+  this.oldXhrWrapper = shindig.xhrwrapper;
   window.XMLHttpRequest = this.fakeXhrs.getXhrConstructor();
+  shindig.xhrwrapper = undefined;
 
   gadgets.config.init({ "core.io" : {
       "proxyUrl" : "http://example.com/proxy?url=%url%&refresh=%refresh%&g=%gadget%&c=%container%",
@@ -52,6 +54,7 @@ IoTest.prototype.setSchemaless = function() {
 IoTest.prototype.tearDown = function() {
   gadgets.util.getUrlParameters = this.oldGetUrlParameters;
   window.XMLHttpRequest = this.oldXMLHTTPRequest;
+  shindig.xhrwrapper = this.oldXhrWrapper;
 };
 
 IoTest.prototype.testGetProxyUrl = function() {
