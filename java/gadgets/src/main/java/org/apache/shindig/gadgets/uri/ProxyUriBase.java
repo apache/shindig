@@ -73,6 +73,10 @@ public class ProxyUriBase {
       debug = getBooleanValue(uri.getQueryParameter(Param.DEBUG.getKey()));
       noCache = getBooleanValue(uri.getQueryParameter(Param.NO_CACHE.getKey()));
       container = uri.getQueryParameter(Param.CONTAINER.getKey());
+      if (container == null) {
+        // Support "synd" for legacy purposes.
+        container = uri.getQueryParameter(Param.SYND.getKey());
+      }
       gadget = uri.getQueryParameter(Param.GADGET.getKey());
       rewriteMimeType = uri.getQueryParameter(Param.REWRITE_MIME_TYPE.getKey());
       sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));

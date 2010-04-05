@@ -144,6 +144,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     
     // First determine if the URI is chained-syntax or query-style.
     String container = uriIn.getQueryParameter(Param.CONTAINER.getKey());
+    if (container == null) {
+      container = uriIn.getQueryParameter(Param.SYND.getKey());
+    }
     String uriStr = null;
     Uri queryUri = null;
     if (container != null &&

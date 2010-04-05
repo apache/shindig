@@ -44,7 +44,11 @@ public interface UriCommon {
     RESIZE_WIDTH("resize_w"),
     RESIZE_QUALITY("resize_q"),
     NO_EXPAND("no_expand"),
-    FALLBACK_URL_PARAM("fallback_url");
+    FALLBACK_URL_PARAM("fallback_url"),
+    
+    // This is a legacy param, superseded by container.
+    @Deprecated
+    SYND("synd");
    
     private final String key;
     private Param(String key) {

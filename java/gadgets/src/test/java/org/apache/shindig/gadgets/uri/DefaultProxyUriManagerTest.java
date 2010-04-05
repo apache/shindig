@@ -85,7 +85,6 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String path = "/proxy/path";
     ProxyUriManager.Versioner versioner = makeVersioner(null, version);
     DefaultProxyUriManager manager = makeManager(host, path, versioner);
-    Gadget gadget = mockGadget(debug, noCache);
     List<ProxyUri> proxyUris = Lists.newLinkedList();
     proxyUris.add(new ProxyUri(refresh, debug, noCache, CONTAINER, SPEC_URI.toString(),
         RESOURCE_1));
@@ -102,7 +101,6 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String path = "/proxy/path";
     ProxyUriManager.Versioner versioner = makeVersioner(null, "version1", "version2");
     DefaultProxyUriManager manager = makeManager(host, path, versioner);
-    Gadget gadget = mockGadget(false, true);
     List<ProxyUri> proxyUris = Lists.newLinkedList();
     ProxyUri pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
         RESOURCE_1);
@@ -135,7 +133,6 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
     ProxyUriManager.Versioner versioner = makeVersioner(null, "version");
     DefaultProxyUriManager manager = makeManager(host, path, versioner);
-    Gadget gadget = mockGadget(false, true);
     List<ProxyUri> proxyUris = Lists.newLinkedList();
     ProxyUri pUri = new ProxyUri(null, false, true, CONTAINER, SPEC_URI.toString(),
         RESOURCE_1);
@@ -274,6 +271,26 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
     assertEquals(123, (int)proxyUri.getRefresh());
     assertEquals(status, proxyUri.getStatus());
+    assertEquals(false, proxyUri.isDebug());
+    assertEquals(false, proxyUri.isNoCache());
+  }
+  
+  @Test
+  public void containerFallsBackToSynd() throws Exception {
+    String host = "host.com";
+    String path = "/path";
+    DefaultProxyUriManager manager = makeManager(host, path, null);
+    UriBuilder uriBuilder = new UriBuilder();
+    uriBuilder.setScheme("http").setAuthority(host).setPath(path);
+    uriBuilder.addQueryParameter(Param.URL.getKey(), RESOURCE_1.toString());
+    uriBuilder.addQueryParameter("synd", CONTAINER);
+    uriBuilder.addQueryParameter(Param.GADGET.getKey(), SPEC_URI.toString());
+    uriBuilder.addQueryParameter(Param.REFRESH.getKey(), "321");
+    ProxyUriManager.ProxyUri proxyUri = manager.process(uriBuilder.toUri());
+    assertEquals(RESOURCE_1, proxyUri.getResource());
+    assertEquals(CONTAINER, proxyUri.getContainer());
+    assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
+    assertEquals(321, (int)proxyUri.getRefresh());
     assertEquals(false, proxyUri.isDebug());
     assertEquals(false, proxyUri.isNoCache());
   }
