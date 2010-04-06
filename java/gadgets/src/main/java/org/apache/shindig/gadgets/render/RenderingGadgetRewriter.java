@@ -23,6 +23,7 @@ import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -31,6 +32,7 @@ import org.apache.shindig.gadgets.UnsupportedFeatureException;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
@@ -387,9 +389,30 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     boolean isUsingXhrWrapper = gadget.getAllFeatures().contains("xhrwrapper");
     if (isUsingXhrWrapper) {
       Map<String, String> xhrWrapperConfig = Maps.newHashMapWithExpectedSize(2);
-      Uri contentsUri = gadget.getCurrentView().getHref();
+      View view = gadget.getCurrentView();
+      Uri contentsUri = view.getHref();
       xhrWrapperConfig.put("contentUrl", contentsUri == null ? "" : contentsUri.toString());
+      if (AuthType.OAUTH.equals(view.getAuthType())) {
+        addOAuthConfig(xhrWrapperConfig, view);
+      } else if (AuthType.SIGNED.equals(view.getAuthType())) {
+        xhrWrapperConfig.put("authorization", "signed");
+      }
       config.put("shindig.xhrwrapper", xhrWrapperConfig);
+    }
+  }
+
+  private void addOAuthConfig(Map<String, String> xhrWrapperConfig, View view) {
+    Map<String, String> oAuthConfig = Maps.newHashMapWithExpectedSize(3);
+    try {
+      OAuthArguments oAuthArguments = new OAuthArguments(view);
+      oAuthConfig.put("authorization", "oauth");
+      oAuthConfig.put("oauthService", oAuthArguments.getServiceName());
+      if (!"".equals(oAuthArguments.getTokenName())) {
+        oAuthConfig.put("oauthTokenName", oAuthArguments.getTokenName());
+      }
+      xhrWrapperConfig.putAll(oAuthConfig);
+    } catch (GadgetException e) {
+      // Do not add any OAuth configuration if an exception was thrown
     }
   }
 

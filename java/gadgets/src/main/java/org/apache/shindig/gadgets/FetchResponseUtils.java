@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import java.util.Collection;
 import java.util.Map;
@@ -44,10 +45,12 @@ public class FetchResponseUtils {
    * @param response the response body
    * @param id the response id, or null if not needed
    * @param body string to use as the body of the response.
+   * @param getFullHeaders whether all response headers should be included,
+   *     or only a small set
    * @return a JSONObject representation of the response body.
    */
   public static Map<String, Object> getResponseAsJson(HttpResponse response, String id,
-      String body) {
+      String body, boolean getFullHeaders) {
     Map<String, Object> resp = Maps.newHashMap();
     if (id != null) {
       resp.put("id", id);
@@ -55,8 +58,12 @@ public class FetchResponseUtils {
     resp.put("rc", response.getHttpStatusCode());
     resp.put("body", body);
     Map<String, Collection<String>> headers = Maps.newHashMap();
-    addHeaders(headers, response, "set-cookie");
-    addHeaders(headers, response, "location");
+    if (getFullHeaders) {
+      addAllHeaders(headers, response);
+    } else {
+      addHeaders(headers, response, "set-cookie");
+      addHeaders(headers, response, "location");
+    }
     if (!headers.isEmpty()) {
       resp.put("headers", headers);
     }
@@ -65,6 +72,14 @@ public class FetchResponseUtils {
       resp.put(entry.getKey(), entry.getValue());
     }
     return resp;
+  }
+
+  private static void addAllHeaders(Map<String, Collection<String>> headers,
+      HttpResponse response) {
+    Multimap<String, String> responseHeaders = response.getHeaders();
+    for (String name : responseHeaders.keySet()) {
+      headers.put(name.toLowerCase(), responseHeaders.get(name));
+    }
   }
 
   private static void addHeaders(Map<String, Collection<String>> headers, HttpResponse response,

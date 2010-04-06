@@ -64,6 +64,7 @@ public class MakeRequestHandler extends ProxyBase {
   public static final String NUM_ENTRIES_PARAM = "numEntries";
   public static final String DEFAULT_NUM_ENTRIES = "3";
   public static final String GET_SUMMARIES_PARAM = "getSummaries";
+  public static final String GET_FULL_HEADERS_PARAM = "getFullHeaders";
   public static final String AUTHZ_PARAM = "authz";
 
   private final RequestPipeline requestPipeline;
@@ -217,6 +218,8 @@ public class MakeRequestHandler extends ProxyBase {
    */
   protected String convertResponseToJson(SecurityToken authToken, HttpServletRequest request,
       HttpResponse results) throws GadgetException {
+    boolean getFullHeaders =
+        Boolean.parseBoolean(getParameter(request, GET_FULL_HEADERS_PARAM, "false"));
     String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
     String body = results.getResponseAsString();
     if (body.length() > 0) {
@@ -224,7 +227,8 @@ public class MakeRequestHandler extends ProxyBase {
         body = processFeed(originalUrl, request, body);
       }
     }
-    Map<String, Object> resp = FetchResponseUtils.getResponseAsJson(results, null, body);
+    Map<String, Object> resp =
+        FetchResponseUtils.getResponseAsJson(results, null, body, getFullHeaders);
 
     if (authToken != null) {
       String updatedAuthToken = authToken.getUpdatedToken();

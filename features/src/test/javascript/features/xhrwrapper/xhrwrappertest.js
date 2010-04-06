@@ -161,6 +161,47 @@ XhrWrapperTest.prototype.testRepointWrongUrls = function() {
   this.checkRequest('GET', 'http://foo.bar/baz/foo/bar/baz.xml');
 };
 
+XhrWrapperTest.prototype.testOauthParamsUsed = function() {
+  gadgets.config.init({
+      'shindig.xhrwrapper': {
+          'contentUrl': 'http://foo.bar/baz/bax.html',
+          'authorization': 'oauth',
+          'oauthService': 'testOauthService'
+    	}
+  });
+  xhr = new shindig.xhrwrapper.XhrWrapper();
+  xhr.open('GET', '/foo/bar/baz.xml');
+  xhr.send();
+  this.checkOAuth('testOauthService');
+
+  gadgets.config.init({
+      'shindig.xhrwrapper': {
+          'contentUrl': 'http://foo.bar/baz/bax.html',
+          'authorization': 'oauth',
+          'oauthService': 'testOauthService',
+          'oauthTokenName': 'testOauthToken'
+    	}
+  });
+  xhr = new shindig.xhrwrapper.XhrWrapper();
+  xhr.open('GET', '/foo/bar/baz.xml');
+  xhr.send();
+  this.checkOAuth('testOauthService', 'testOauthToken');
+};
+
+XhrWrapperTest.prototype.testSignedAuthParamsUsed = function() {
+	  gadgets.config.init({
+	      'shindig.xhrwrapper': {
+	          'contentUrl': 'http://foo.bar/baz/bax.html',
+	          'authorization': 'signed'
+	    	}
+	  });
+	  xhr = new shindig.xhrwrapper.XhrWrapper();
+	  xhr.open('GET', '/foo/bar/baz.xml');
+	  xhr.send();
+
+	  this.assertEquals('SIGNED', this.madeRequest.params['AUTHORIZATION']);
+	};
+
 XhrWrapperTest.prototype.mockMakeRequest = function(info) {
   var that = this;
   return function(url, callback, opt_params) {
@@ -189,3 +230,8 @@ XhrWrapperTest.prototype.checkRequest = function(method, url) {
   this.assertEquals(url, this.madeRequest.url);
 };
 
+XhrWrapperTest.prototype.checkOAuth = function(service, opt_token) {
+  this.assertEquals('OAUTH', this.madeRequest.params['AUTHORIZATION']);
+  this.assertEquals(service, this.madeRequest.params['OAUTH_SERVICE_NAME']);
+  this.assertEquals(opt_token, this.madeRequest.params['OAUTH_TOKEN_NAME']);
+};

@@ -70,7 +70,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
    *     gadgets.io.makeRequest to make the actual network accesses.
    */
   shindig.xhrwrapper.XhrWrapper = function() {
-    this.config_ = gadgets.config.get('shindig.xhrwrapper');
+    this.config_ = originalNS.gadgets.config.get('shindig.xhrwrapper');
 
     // XMLHttpRequest event listeners
     this.onreadystatechange = null;
@@ -166,15 +166,36 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
    *     request.
    */
   shindig.xhrwrapper.XhrWrapper.prototype.send = function(opt_data) {
-    this.aborted_ = false;
-    var that = this;
-    var params = {};
-    params[gadgets.io.RequestParameters.METHOD] = this.method_;
-    params[gadgets.io.RequestParameters.HEADERS] = this.requestHeaders_;
-    params[gadgets.io.RequestParameters.POST_DATA] = opt_data;
-    gadgets.io.makeRequest(this.url_.toString(),
-                           function(response) { that.callback_(response); },
-                           params);
+    // Switch to the original namespaces for call to gadgets.io.makeRequest.
+    switchOriginalNS_();
+    try {
+      this.aborted_ = false;
+      var that = this;
+      var params = {};
+      params[gadgets.io.RequestParameters.METHOD] = this.method_;
+      params[gadgets.io.RequestParameters.HEADERS] = this.requestHeaders_;
+      params[gadgets.io.RequestParameters.GET_FULL_HEADERS] = true;
+      params[gadgets.io.RequestParameters.POST_DATA] = opt_data;
+      if (this.config_.authorization) {
+        if (this.config_.authorization == 'oauth') {
+          params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.OAUTH;
+          params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = this.config_.oauthService;
+          if (this.config_.oauthTokenName) {
+            params[gadgets.io.RequestParameters.OAUTH_TOKEN_NAME] = this.config_.oauthTokenName;
+          }
+        } else if (this.config_.authorization == 'signed') {
+          params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
+        }
+      }
+
+      gadgets.io.makeRequest(this.url_.toString(),
+                             function(response) { that.callback_(response); },
+                             params);
+    } catch (e) {
+      throw e;
+    } finally {
+      switchGadgetNS_();
+    }
   };
 
   /**
@@ -201,10 +222,14 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
     this.readyState = 4;
     this.responseHeaders_ = response.headers;
     this.responseText = response.text;
+    // Switch to the original namespaces for call to opensocial.xmlutil.parseXML
+    switchOriginalNS_();
     try {
       this.responseXML = opensocial.xmlutil.parseXML(response.text);
     } catch (x) {
       this.responseXML = null;
+    } finally {
+      switchGadgetNS_();
     }
     this.status = response.rc;
     if (response.errors) {
@@ -373,6 +398,74 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
     }
   };
 
+  /*
+   * XhrWrapper is designed to take type=url gadgets and convert them to
+   * type=html gadgets with minimal changes. Some of those gadgets, instead
+   * of loading the feature JavaScript on demand, have it hardcoded.
+   * When such a gadget is loaded as a type=html gadget, the code hardcoded
+   * in the gadget will overwrite the code from Shindig.
+   *
+   * This is bad because when this code tries to call gadgets.io.makeRequest,
+   * it will call the wrong function, or it might even be undefined.
+   * 
+   * Therefore, we save the original namespaces before the gadget has a chance
+   * to overwrite them, then switch between them as necessary.
+   * 
+   * This works like this:
+   * 
+   * switchOriginalNS_();
+   * try {
+   *   functionThatNeedsTheOriginalNamespaces();
+   * } catch (e) {
+   *   throw e;
+   * } finally {
+   *   // Make sure we switch back to the gadget namespaces.
+   *   switchGadgetNS_();
+   * }
+   */
+  var originalNS = {};
+  var gadgetNS = {};
+  var namespaces = ['gadgets', 'opensocial', 'shindig']; 
+
+  /**
+   * Copies the Shindig namespaces between two objects.
+   * 
+   * @param {Object} from Object to copy from, or null for the global object.
+   * @param {Object} to Object to copy to, or null for the global object.
+   * @private
+   */
+  function copyNS_(from, to) {
+    // NB "this" is the global object.
+    var orig = from ? from : this;
+    var dest = to ? to : this;
+    for (var i in namespaces) {
+      var nsName = namespaces[i];
+      if (typeof orig[nsName] != 'undefined') {
+        dest[nsName] = orig[nsName];
+      }
+    }
+  };
+
+  /**
+   * Switches from the gadget's namespaces to the original namespaces.
+   * @private
+   */
+  function switchOriginalNS_() {
+    copyNS_(null, gadgetNS);
+    copyNS_(originalNS, null);
+  };
+
+  /**
+   * Switches from the original namespaces to the gadget's namespaces.
+   * @private
+   */
+  function switchGadgetNS_() {
+    copyNS_(gadgetNS, null);
+  };
+
+  // Save the original namespaces.
+  copyNS_(null, originalNS);
+  
   // Replace the browser's XMLHttpRequest and ActiveXObject constructors with
   // xhrwrapper's.
   if (window.XMLHttpRequest) {

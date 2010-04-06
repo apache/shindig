@@ -124,6 +124,7 @@ IoTest.prototype.setStandardArgs = function(req, inBody) {
   this.setArg(req, inBody, "signOwner", "true");
   this.setArg(req, inBody, "getSummaries", "false");
   this.setArg(req, inBody, "gadget", "http://www.gadget.com/gadget.xml");
+  this.setArg(req, inBody, "getFullHeaders", "false");
   this.setArg(req, inBody, "container", "foo");
   this.setArg(req, inBody, "headers", "");
   this.setArg(req, inBody, "numEntries", "3");

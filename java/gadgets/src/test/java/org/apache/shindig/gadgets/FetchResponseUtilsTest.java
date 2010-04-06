@@ -36,7 +36,7 @@ public class FetchResponseUtilsTest {
     HttpResponse response = new HttpResponseBuilder()
         .setHttpStatusCode(999)
         .create();
-    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body", false);
 
     JsonAssert.assertObjectEquals("{'rc':999,'id':'key',body:'body'}", obj);
   }
@@ -48,7 +48,7 @@ public class FetchResponseUtilsTest {
         .setMetadata("metaname", "metavalue")
         .setMetadata("more meta", "more value")
         .create();
-    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, null, "body");
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, null, "body", false);
 
     JsonAssert.assertObjectEquals(
         "{rc:999,body:'body',metaname:'metavalue','more meta':'more value'}", obj);
@@ -61,7 +61,7 @@ public class FetchResponseUtilsTest {
         .setHeader("Set-Cookie", "cookie")
         .setHeader("location", "here")
         .create();
-    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body", false);
     JsonAssert.assertObjectEquals(
         "{rc:999,id:'key',body:'body',headers:{set-cookie:['cookie'],location:['here']}}", obj);
   }
@@ -74,7 +74,7 @@ public class FetchResponseUtilsTest {
         .addHeader("Set-Cookie", "cookie2")
         .addHeader("Set-Cookie", "cookie3")
         .create();
-    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body");
+    Map<String, Object> obj = FetchResponseUtils.getResponseAsJson(response, "key", "body", false);
     JsonAssert.assertObjectEquals(
         "{rc:999,id:'key',body:'body',headers:{set-cookie:['cookie','cookie2','cookie3']}}", obj);
   }

@@ -620,21 +620,79 @@ public class RenderingGadgetRewriterTest {
 
   @Test
   public void xhrWrapperConfigurationInjected() throws Exception {
+    checkXhrWrapperConfigurationInjection(
+        "No shindig.xhrwrapper configuration present in rewritten HTML.", null, null, null);
+
+    checkXhrWrapperConfigurationInjection(
+        "No shindig.xhrwrapper.authorization=signed configuration present in rewritten HTML.",
+        "signed", null, null);
+
+    checkXhrWrapperConfigurationInjection(
+        "No shindig.xhrwrapper.oauthService configuration present in rewritten HTML.",
+        "oauth", "serviceName", null);
+
+    checkXhrWrapperConfigurationInjection(
+        "No shindig.xhrwrapper.oauthTokenName configuration present in rewritten HTML.",
+        "oauth", "serviceName", "tokenName");
+  }
+  
+  private void checkXhrWrapperConfigurationInjection(String message, String auth, String oauthService, String oauthToken)
+      throws Exception {
+    String oAuthBlock = "";
+    String authzAttr = "";
+    if (auth != null) {
+      authzAttr = " authz='" + auth + "'";
+      if ("oauth".equals(auth)) {
+        if (oauthService != null) {
+          oAuthBlock =
+              "<OAuth><Service name='" + oauthService + "'>" +
+              "<Access url='http://foo' method='GET' />" +
+              "<Request url='http://bar' method='GET' />" +
+              "<Authorization url='http://baz' />" +
+              "</Service></OAuth>";
+          authzAttr += " oauth_service_name='" + oauthService + "'";
+        }
+        if (oauthToken != null) {
+          authzAttr += " oauth_token_name='" + oauthToken + "'";
+        }
+      }
+    }
+
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
       "  <Require feature='xhrwrapper' />" +
+      oAuthBlock +
       "</ModulePrefs>" +
-      "<Content type='html' href='http://foo.com/bar/baz.html' />" +
+      "<Content type='html' href='http://foo.com/bar/baz.html'" + authzAttr + " />" +
       "</Module>";
+    
+    String expected = "{" +
+        (oauthService == null ? "" : "\"oauthService\":\"serviceName\",") +
+        "\"contentUrl\":\"http://foo.com/bar/baz.html\"" +
+        (auth == null ? "" : ",\"authorization\":\"" + auth + "\"") +
+        (oauthToken == null ? "" : ",\"oauthTokenName\":\"tokenName\"") +
+        "}";
     
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.setCurrentView(gadget.getSpec().getView("default"));
-    
     String rewritten = rewrite(gadget, BODY_CONTENT);
     
-    boolean containsConfig =
-        rewritten.contains("\"shindig.xhrwrapper\":{\"contentUrl\":\"http://foo.com/bar/baz.html\"}");
-    assertTrue("No shindig.xhrwrapper configuration present in rewritten HTML.", containsConfig);
+    assertXhrConfigContains(message, expected, rewritten);
+  }
+  
+  private void assertXhrConfigContains(String message, String expected, String content) throws Exception {
+    // TODO: make this test a little more robust. This check ensures that ordering is not taken
+    // into account during config comparison.
+    String prefix = "gadgets.config.init(";
+    int configIdx = content.indexOf(prefix);
+    assertTrue("gadgets.config.init not found in rewritten content", configIdx != -1);
+    int endIdx = content.indexOf(")", configIdx + prefix.length());
+    assertTrue("unexpected error, gadgets.config.init not closed", endIdx != -1);
+    String configJson = content.substring(configIdx + prefix.length(), endIdx);
+    JSONObject config = new JSONObject(configJson);
+    JSONObject xhrConfig = config.getJSONObject("shindig.xhrwrapper");
+    JSONObject expectedJson = new JSONObject(expected);
+    assertEquals(message, xhrConfig.toString(), expectedJson.toString());
   }
 
   @Test

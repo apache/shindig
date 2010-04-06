@@ -104,8 +104,8 @@ public class HttpPreloader implements Preloader {
     private final Map<String, Object> data;
 
     public HttpPreloadData(HttpResponse response, String key) {
-      this.data
-          = FetchResponseUtils.getResponseAsJson(response, key, response.getResponseAsString());
+      this.data = FetchResponseUtils.getResponseAsJson(response, key,
+          response.getResponseAsString(), false);
     }
 
     public Collection<Object> toJson() {
