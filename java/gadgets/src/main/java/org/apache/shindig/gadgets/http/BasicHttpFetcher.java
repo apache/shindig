@@ -321,11 +321,8 @@ public class BasicHttpFetcher implements HttpFetcher {
       // So lets pass it the url parsed:
       response = FETCHER.execute(host, httpMethod);
 
-      if (response == null)
+      if (response == null) {
         throw new IOException("Unknown problem with request");
-
-      if (response.getEntity() == null) {
-        throw new IOException("Cannot retrieve " + request.getUri() + " reason " + response.getStatusLine().getReasonPhrase());
       }
 
       long now = System.currentTimeMillis();
@@ -431,15 +428,17 @@ public class BasicHttpFetcher implements HttpFetcher {
       }
     }
 
-    HttpEntity entity = Preconditions.checkNotNull(response.getEntity());
+    HttpEntity entity = response.getEntity();
 
     if (maxObjSize > 0 && entity.getContentLength() > maxObjSize) {
       return HttpResponse.badrequest("Exceeded maximum number of bytes - " + maxObjSize);
     }
 
+    byte[] responseBytes = (entity == null) ? null : EntityUtils.toByteArray(entity);
+
     return builder
         .setHttpStatusCode(response.getStatusLine().getStatusCode())
-        .setResponse(EntityUtils.toByteArray(entity))
+        .setResponse(responseBytes)
         .create();
   }
 }
