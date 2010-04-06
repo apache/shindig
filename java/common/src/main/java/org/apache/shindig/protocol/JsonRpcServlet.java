@@ -289,6 +289,8 @@ public class JsonRpcServlet extends ApiServlet {
   protected void sendError(HttpServletResponse servletResponse, ResponseItem responseItem)
       throws IOException {
     jsonConverter.append(servletResponse.getWriter(), getErrorJson(responseItem));
+
+    servletResponse.setStatus(responseItem.getErrorCode());
   }
 
   private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
