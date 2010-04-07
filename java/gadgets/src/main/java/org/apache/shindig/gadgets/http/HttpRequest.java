@@ -401,7 +401,7 @@ public class HttpRequest {
   }
 
   public <T> void setParam(String paramName, T paramValue) {
-    params.put(paramName, String.valueOf(paramValue));
+    params.put(paramName,  (paramValue == null) ? null : String.valueOf(paramValue));
   }
 
   public Map<String, String> getParams() {
