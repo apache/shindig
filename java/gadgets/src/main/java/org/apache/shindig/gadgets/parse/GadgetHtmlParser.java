@@ -89,7 +89,7 @@ public abstract class GadgetHtmlParser {
     return normalized.contains("<!DOCTYPE") || normalized.contains("<HTML");
   }
 
-  public final Document parseDom(String source) throws GadgetException {
+  public Document parseDom(String source) throws GadgetException {
     Document document = null;
     String key = null;
     // Avoid checksum overhead if we arent caching
@@ -233,7 +233,7 @@ public abstract class GadgetHtmlParser {
    * @param result Node to append results to
    * @throws GadgetException
    */
-  public final void parseFragment(String source, Node result) throws GadgetException {
+  public void parseFragment(String source, Node result) throws GadgetException {
     boolean shouldCache = shouldCache();
     String key = null;    
     if (shouldCache) {
