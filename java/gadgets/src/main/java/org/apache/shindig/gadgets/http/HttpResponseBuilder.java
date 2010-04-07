@@ -17,16 +17,17 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import org.apache.shindig.common.util.CharsetUtil;
-import org.apache.shindig.common.util.DateUtil;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.util.CharsetUtil;
+import org.apache.shindig.common.util.DateUtil;
 
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,27 @@ public class HttpResponseBuilder {
    */
   public HttpResponseBuilder setResponseString(String body) {
     responseBytes = CharsetUtil.getUtf8Bytes(body);
+    setEncoding(CharsetUtil.UTF8);
+    return this;
+  }
+
+  public HttpResponseBuilder setEncoding(Charset charset) {
+
+    Collection<String> values = headers.get("Content-Type");
+    if (!values.isEmpty()) {
+      String contentType = values.iterator().next();
+      String newContentType = "";
+      // Remove previously set charset:
+      String[] parts = StringUtils.split(contentType, ';');
+      for (String part : parts) {
+        if (part.indexOf("charset=") < 0) {
+          newContentType += part + "; ";
+        }
+      }
+      newContentType += "charset=" + charset.name();
+      values.clear();
+      values.add(newContentType);
+    }
     return this;
   }
 

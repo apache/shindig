@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import org.apache.shindig.common.util.CharsetUtil;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -131,12 +132,42 @@ public class HttpResponseBuilderTest {
     assertEquals("no-cache", headers.get("Pragma").iterator().next());
   }
 
+  @Test
+  public void setEncoding() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/html; charset=Big5")
+        .setEncoding(CharsetUtil.UTF8);
+    
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
+  }
+
+  @Test
+  public void setEncodingEmpty() {
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/html")
+        .setEncoding(CharsetUtil.UTF8);
+    
+    Multimap<String, String> headers = builder.getHeaders();
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
+  }
 
   @Test
   public void setResponseString() {
     HttpResponse resp = new HttpResponseBuilder()
         .setResponseString("foo")
         .create();
+    assertEquals("foo", resp.getResponseAsString());
+  }
+
+  @Test
+  public void setResponseStringWithContentType() {
+    HttpResponse resp = new HttpResponseBuilder()
+        .addHeader("Content-Type", "text/html")
+        .setResponseString("foo")
+        .create();
+    Multimap<String, String> headers = resp.getHeaders();
+    assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
     assertEquals("foo", resp.getResponseAsString());
   }
 

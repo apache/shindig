@@ -24,6 +24,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
+
+import net.oauth.OAuth;
+import net.oauth.OAuth.Parameter;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.crypto.BasicBlobCrypter;
@@ -43,19 +50,11 @@ import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
 import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider;
 import org.apache.shindig.gadgets.oauth.testing.MakeRequestClient;
 import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider.TokenPair;
-
-import com.google.common.collect.Lists;
-
-import net.oauth.OAuth;
-import net.oauth.OAuth.Parameter;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -1817,7 +1816,7 @@ public class OAuthRequestTest {
     client.approveToken("user_data=hello-oauth");
 
     response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
-    assertEquals("application/json; charset=utf-8", response.getHeader("Content-Type"));
+    assertEquals("application/json; charset=UTF-8", response.getHeader("Content-Type"));
     JSONObject json = new JSONObject(response.getResponseAsString());
     assertEquals("userid value", json.get("userid"));
     assertEquals("xoauth_stuff value", json.get("xoauth_stuff"));

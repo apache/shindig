@@ -163,7 +163,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     // Some headers may be blacklisted. These are OK.
     String url = "http://example.org/file.evil";
     String domain = "example.org";
-    String contentType = "text/evil; charset=utf-8";
+    String contentType = "text/evil; charset=UTF-8";
     String magicGarbage = "fadfdfdfd";
     Map<String, List<String>> headers = Maps.newHashMap();
     headers.put("Content-Type", Arrays.asList(contentType));
@@ -347,6 +347,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
   @Test
   public void testMimeMatchVarySupport() throws Exception {
-    expectMime("image/*", "image/gif", "image/gif");
+    // We use CaptureRewrite which always rewrite - always set encoding
+    expectMime("image/*", "image/gif", "image/gif; charset=UTF-8");
   }
 }
