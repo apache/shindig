@@ -65,3 +65,4 @@ features/tabs/feature.xml
 features/views/feature.xml
 features/xhrwrapper/feature.xml
 features/xmlutil/feature.xml
+features/com.google.gadgets.analytics/feature.xml
