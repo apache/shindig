@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import org.apache.shindig.common.uri.Uri;
@@ -62,6 +63,22 @@ public interface ProxyUriManager {
     public ProxyUri(UriStatus status, Uri resource, Uri base) {
       super(status, base);
       this.resource = resource;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof ProxyUri)) {
+        return false; 
+      }
+      ProxyUri objUri = (ProxyUri) obj;
+      return (super.equals(obj) 
+          && Objects.equal(this.resource, objUri.resource)
+          && Objects.equal(this.fallbackUrl, objUri.fallbackUrl)
+          && Objects.equal(this.resizeHeight, objUri.resizeHeight)
+          && Objects.equal(this.resizeWidth, objUri.resizeWidth)
+          && Objects.equal(this.resizeQuality, objUri.resizeQuality)
+          && Objects.equal(this.resizeWidth, objUri.resizeWidth)
+          && this.resizeNoExpand == objUri.resizeNoExpand);
     }
     
     /* (non-Javadoc)

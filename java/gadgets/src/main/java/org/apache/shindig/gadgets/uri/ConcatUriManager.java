@@ -18,10 +18,11 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-
-import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.Map;
@@ -134,6 +135,18 @@ public interface ConcatUriManager {
       this.batch = uris;
       this.splitParam = splitParam;
       this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof ConcatUri)) {
+        return false; 
+      }
+      ConcatUri objUri = (ConcatUri) obj;
+      return (super.equals(obj) 
+          && Objects.equal(this.batch, objUri.batch)
+          && Objects.equal(this.splitParam, objUri.splitParam)
+          && Objects.equal(this.type, objUri.type));
     }
     
     public List<Uri> getBatch() {

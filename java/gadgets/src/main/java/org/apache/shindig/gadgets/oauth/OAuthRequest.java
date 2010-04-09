@@ -16,11 +16,20 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import net.oauth.OAuth;
+import net.oauth.OAuthAccessor;
+import net.oauth.OAuthException;
+import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
+import net.oauth.OAuth.Parameter;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.common.uri.Uri;
@@ -35,17 +44,6 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import net.oauth.OAuth;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthException;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.OAuth.Parameter;
-
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -200,6 +198,8 @@ public class OAuthRequest {
       // No data for us.
       if (OAuthError.UNAUTHENTICATED.toString().equals(responseParams.getError())) {
         responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
+      } else if (OAuthError.INVALID_REQUEST.toString().equals(responseParams.getError())) {
+        responseParams.logDetailedInfo("Invalid OAuth fetch request", e);
       } else {
         responseParams.logDetailedWarning("OAuth fetch fatal error", e);
       }

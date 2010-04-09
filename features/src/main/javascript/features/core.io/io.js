@@ -389,7 +389,7 @@ gadgets.io = function() {
         container : urlParams.container || urlParams.synd || "default",
         // should we bypass gadget spec cache (e.g. to read OAuth provider URLs)
         bypassSpecCache : gadgets.util.getUrlParameters().nocache || "",
-        getFullHeaders : !!params.GET_FULL_HEADERS,
+        getFullHeaders : !!params.GET_FULL_HEADERS
       };
 
       // OAuth goodies

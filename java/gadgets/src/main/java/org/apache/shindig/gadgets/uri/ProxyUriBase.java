@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.base.Objects;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -67,6 +69,7 @@ public class ProxyUriBase {
    * Note this function is called by a constructor,
    * and can be override to handle derived class parsing
    */
+  @SuppressWarnings("deprecation") // we still need to support SYND while parsing
   public void setFromUri(Uri uri) {
     if (uri != null) {
       refresh = getIntegerValue(uri.getQueryParameter(Param.REFRESH.getKey()));
@@ -82,7 +85,23 @@ public class ProxyUriBase {
       sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));
     }  
   }
-  
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ProxyUriBase)) {
+      return false; 
+    }
+    ProxyUriBase objUri = (ProxyUriBase) obj;
+    return (Objects.equal(this.status, objUri.status)
+        && Objects.equal(this.refresh, objUri.refresh)
+        && Objects.equal(this.container, objUri.container)
+        && Objects.equal(this.gadget, objUri.gadget)
+        && Objects.equal(this.rewriteMimeType, objUri.rewriteMimeType)
+        && this.noCache == objUri.noCache
+        && this.debug == objUri.debug
+        && this.sanitizeContent == objUri.sanitizeContent);
+  }
+
   public ProxyUriBase setRewriteMimeType(String type) {
     this.rewriteMimeType = type;
     return this;

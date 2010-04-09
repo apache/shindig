@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import com.google.common.collect.Lists;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -27,11 +32,6 @@ import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
-import com.google.common.collect.Lists;
-import com.google.inject.ImplementedBy;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -235,7 +235,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
   
   protected String getScheme(Gadget gadget, String container) {
     // Scheme-relative by default. Override for specific use cases.
-    return "";
+    return null;
   }
   
   protected void addExtras(UriBuilder uri) {
