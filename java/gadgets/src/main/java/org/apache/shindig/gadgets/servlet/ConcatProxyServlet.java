@@ -30,6 +30,8 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
@@ -61,6 +63,7 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   private RequestPipeline requestPipeline;
   private ConcatUriManager concatUriManager;
+  private RequestRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
@@ -70,6 +73,11 @@ public class ConcatProxyServlet extends InjectedServlet {
   @Inject
   public void setConcatUriManager(ConcatUriManager concatUriManager) {
     this.concatUriManager = concatUriManager;
+  }
+
+  @Inject
+  public void setContentRewriterRegistry(RequestRewriterRegistry contentRewriterRegistry) {
+    this.contentRewriterRegistry = contentRewriterRegistry;
   }
 
   @SuppressWarnings("boxing")
@@ -126,6 +134,14 @@ public class ConcatProxyServlet extends InjectedServlet {
       try {
         HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
         HttpResponse httpResp = requestPipeline.execute(httpReq);
+        if (contentRewriterRegistry != null) {
+          try {
+            httpResp = contentRewriterRegistry.rewriteHttpResponse(httpReq, httpResp);
+          } catch (RewritingException e) {
+            throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+                e.getHttpStatusCode());
+          }
+        }
         cos.output(resourceUri, httpResp);
       } catch (GadgetException ge) {
         response.setStatus(HttpResponse.SC_BAD_REQUEST);
