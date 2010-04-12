@@ -275,7 +275,7 @@ public class UriBuilder {
   /**
    * Utility method for joining key / value pair parameters into a url-encoded string.
    */
-  static String joinParameters(Map<String, List<String>> query) {
+  public static String joinParameters(Map<String, List<String>> query) {
     if (query.isEmpty()) {
       return null;
     }
