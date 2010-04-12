@@ -44,7 +44,7 @@ public class VariableSubstituter {
    */
   public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) throws GadgetException {
     MessageBundle bundle =
-        messageBundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache());
+        messageBundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache(), context.getContainer());
     String dir = bundle.getLanguageDirection();
 
     Substitutions substituter = new Substitutions();

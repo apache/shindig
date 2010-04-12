@@ -172,7 +172,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       Element mainScriptTag = document.createElement("script");
       GadgetContext context = gadget.getContext();
       MessageBundle bundle = messageBundleFactory.getBundle(
-          gadget.getSpec(), context.getLocale(), context.getIgnoreCache());
+          gadget.getSpec(), context.getLocale(), context.getIgnoreCache(), context.getContainer());
       injectMessageBundles(bundle, mainScriptTag);
       injectDefaultPrefs(gadget, mainScriptTag);
       injectPreloads(gadget, mainScriptTag);

@@ -96,7 +96,7 @@ public class VariableSubstituterTest {
 
   private static class FakeMessageBundleFactory implements MessageBundleFactory {
 
-    public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
+    public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
         throws GadgetException {
       LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
       if (localeSpec == null) {

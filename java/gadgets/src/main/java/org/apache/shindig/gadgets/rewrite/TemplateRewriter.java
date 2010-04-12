@@ -345,7 +345,7 @@ public class TemplateRewriter implements GadgetRewriter {
       Gadget gadget = templateContext.getGadget();
       
       MessageBundle bundle = messageBundleFactory.getBundle(gadget.getSpec(),
-          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache());
+          gadget.getContext().getLocale(), gadget.getContext().getIgnoreCache(), gadget.getContext().getContainer());
       MessageELResolver messageELResolver = new MessageELResolver(expressions, bundle);
   
       int autoUpdateID = 0;

@@ -60,9 +60,9 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     return new MessageBundle(((LocaleQuery) query).locale, content);
   }
 
-  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
+  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
       throws GadgetException {
-    MessageBundle exact = getBundleFor(spec, locale, ignoreCache);
+    MessageBundle exact = getBundleFor(spec, locale, ignoreCache, container);
 
     // We don't want to fetch the same bundle multiple times, so we verify that the exact match
     // has not already been fetched.
@@ -74,26 +74,26 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     if (isAllCountry) {
       lang = MessageBundle.EMPTY;
     } else {
-      lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache);
+      lang = getBundleFor(spec, new Locale(locale.getLanguage(), "ALL"), ignoreCache, container);
     }
 
     if (isAllLanguage) {
       country = MessageBundle.EMPTY;
     } else {
-      country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache);
+      country = getBundleFor(spec, new Locale("all", locale.getCountry()), ignoreCache, container);
     }
 
     if (isAllCountry || isAllLanguage) {
       // If either of these is true, we already picked up both anyway.
       all = MessageBundle.EMPTY;
     } else {
-      all = getBundleFor(spec, ALL_ALL, ignoreCache);
+      all = getBundleFor(spec, ALL_ALL, ignoreCache, container);
     }
 
     return new MessageBundle(all, country, lang, exact);
   }
 
-  private MessageBundle getBundleFor(GadgetSpec spec, Locale locale, boolean ignoreCache)
+  private MessageBundle getBundleFor(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
       throws GadgetException {
     LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
     if (localeSpec == null) {
@@ -107,8 +107,7 @@ public class DefaultMessageBundleFactory extends AbstractSpecFactory<MessageBund
     LocaleQuery query = new LocaleQuery();
     query.setSpecUri(localeSpec.getMessages())
          .setGadgetUri(spec.getUrl())
-         // TODO: Get the real container that was used during the request here.
-         .setContainer(ContainerConfig.DEFAULT_CONTAINER)
+         .setContainer(container)
          .setIgnoreCache(ignoreCache);
     query.locale = localeSpec;
 

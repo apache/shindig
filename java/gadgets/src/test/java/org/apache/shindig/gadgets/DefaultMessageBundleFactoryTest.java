@@ -31,6 +31,7 @@ import org.apache.shindig.common.cache.LruCacheProvider;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.TimeSource;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -154,7 +155,7 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response);
     replay(pipeline);
 
-    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
 
     assertEquals(MSG_0_VALUE, bundle.getMessages().get(MSG_0_NAME));
     assertEquals(MSG_1_VALUE, bundle.getMessages().get(MSG_1_NAME));
@@ -164,7 +165,7 @@ public class DefaultMessageBundleFactoryTest {
 
   @Test
   public void getLangBundle() throws Exception {
-    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LANG_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, LANG_LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
 
     assertEquals(MSG_0_LANG_VALUE, bundle.getMessages().get(MSG_0_NAME));
     assertEquals(MSG_1_VALUE, bundle.getMessages().get(MSG_1_NAME));
@@ -174,7 +175,7 @@ public class DefaultMessageBundleFactoryTest {
 
   @Test
   public void getCountryBundle() throws Exception {
-    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, COUNTRY_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, COUNTRY_LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
 
     assertEquals(MSG_0_COUNTRY_VALUE, bundle.getMessages().get(MSG_0_NAME));
     assertNull(bundle.getMessages().get(MSG_1_NAME));
@@ -184,7 +185,7 @@ public class DefaultMessageBundleFactoryTest {
 
   @Test
   public void getAllAllBundle() throws Exception {
-    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true);
+    MessageBundle bundle = bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true, ContainerConfig.DEFAULT_CONTAINER);
     assertEquals(MSG_0_ALL_VALUE, bundle.getMessages().get(MSG_0_NAME));
     assertNull(bundle.getMessages().get(MSG_1_NAME));
     assertNull(bundle.getMessages().get(MSG_2_NAME));
@@ -203,7 +204,7 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
     verify(pipeline);
 
     assertEquals("true", bundle.getMessages().get("lang"));
@@ -220,7 +221,7 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LANG_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, LANG_LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
     verify(pipeline);
 
     assertEquals("true", bundle.getMessages().get("lang"));
@@ -236,7 +237,7 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    MessageBundle bundle = bundleFactory.getBundle(externalSpec, COUNTRY_LOCALE, true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, COUNTRY_LOCALE, true, ContainerConfig.DEFAULT_CONTAINER);
     verify(pipeline);
 
     assertEquals("true", bundle.getMessages().get("country"));
@@ -250,7 +251,7 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(allAllResponse);
 
     replay(pipeline);
-    MessageBundle bundle = bundleFactory.getBundle(externalSpec, new Locale("all", "ALL"), true);
+    MessageBundle bundle = bundleFactory.getBundle(externalSpec, new Locale("all", "ALL"), true, ContainerConfig.DEFAULT_CONTAINER);
     verify(pipeline);
 
     assertEquals("true", bundle.getMessages().get("all"));
@@ -263,8 +264,8 @@ public class DefaultMessageBundleFactoryTest {
     expect(pipeline.execute(isA(HttpRequest.class))).andReturn(response).once();
     replay(pipeline);
 
-    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
-    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
+    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
 
     verify(pipeline);
 
@@ -273,7 +274,7 @@ public class DefaultMessageBundleFactoryTest {
 
   @Test
   public void ignoreCacheDoesNotStore() throws Exception {
-    bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true);
+    bundleFactory.getBundle(gadgetSpec, new Locale("all", "ALL"), true, ContainerConfig.DEFAULT_CONTAINER);
     assertEquals(0, cache.getSize());
   }
 
@@ -302,11 +303,11 @@ public class DefaultMessageBundleFactoryTest {
 
     time.set(System.currentTimeMillis());
 
-    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    MessageBundle bundle0 = bundleFactory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
 
     time.set(time.get() + MAX_AGE + 1);
 
-    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    MessageBundle bundle1 = bundleFactory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
 
     verify(pipeline);
 
@@ -321,7 +322,7 @@ public class DefaultMessageBundleFactoryTest {
         .andReturn(badResponse).once();
     replay(pipeline);
 
-    bundleFactory.getBundle(gadgetSpec, LOCALE, false);
+    bundleFactory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
   }
 
   @Test
@@ -331,7 +332,7 @@ public class DefaultMessageBundleFactoryTest {
     MessageBundleFactory factory = new DefaultMessageBundleFactory(
         new TestExecutorService(), capturingFetcher, cacheProvider, MAX_AGE);
 
-    factory.getBundle(gadgetSpec, LOCALE, false);
+    factory.getBundle(gadgetSpec, LOCALE, false, ContainerConfig.DEFAULT_CONTAINER);
 
     assertEquals(MAX_AGE / 1000, capturingFetcher.request.getCacheTtl());
   }

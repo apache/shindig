@@ -38,9 +38,10 @@ public interface MessageBundleFactory {
    * @param spec The gadget to inspect for Locales.
    * @param locale The language and country to get a message bundle for.
    * @param ignoreCache  True to bypass any caching of message bundles for debugging purposes.
+   * @param container The container that is requesting this message bundle
    * @return The newly created MesageBundle.
    * @throws GadgetException if retrieval fails for any reason.
    */
-  MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache)
+  MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container)
       throws GadgetException;
 }

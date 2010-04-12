@@ -29,7 +29,7 @@ import java.util.Locale;
  * Simple message bundle factory -- only honors inline bundles.
  */
 public class FakeMessageBundleFactory implements MessageBundleFactory {
-  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache) {
+  public MessageBundle getBundle(GadgetSpec spec, Locale locale, boolean ignoreCache, String container) {
     LocaleSpec localeSpec = spec.getModulePrefs().getLocale(locale);
     if (localeSpec == null) {
       return MessageBundle.EMPTY;
