@@ -138,6 +138,7 @@ $shindigConfig = array(
   'person_service' => 'JsonDbOpensocialService',
   'activity_service' => 'JsonDbOpensocialService',
   'app_data_service' => 'JsonDbOpensocialService',
+  'group_service' => 'JsonDbOpensocialService',
   'messages_service' => 'JsonDbOpensocialService',
   'invalidate_service' => 'DefaultInvalidateService',
   'album_service' => 'JsonDbOpensocialService',

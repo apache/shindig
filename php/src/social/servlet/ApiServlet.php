@@ -54,6 +54,7 @@ abstract class ApiServlet extends HttpServlet {
   public static $PEOPLE_ROUTE = "people";
   public static $ACTIVITY_ROUTE = "activities";
   public static $APPDATA_ROUTE = "appdata";
+  public static $GROUP_ROUTE = "groups";
   public static $MESSAGE_ROUTE = "messages";
   public static $INVALIDATE_ROUTE = "cache";
   public static $SYSTEM_ROUTE = "system";
@@ -165,6 +166,11 @@ abstract class ApiServlet extends HttpServlet {
           require_once 'src/social/spi/AppDataService.php';
           require_once 'src/social/service/AppDataHandler.php';
           $this->handlers[self::$APPDATA_ROUTE] = new AppDataHandler();
+          break;
+        case self::$GROUP_ROUTE:
+          require_once 'src/social/spi/GroupService.php';
+          require_once 'src/social/service/GroupHandler.php';
+          $this->handlers[self::$GROUP_ROUTE] = new GroupHandler();
           break;
         case self::$MESSAGE_ROUTE:
           require_once 'src/social/spi/MessagesService.php';

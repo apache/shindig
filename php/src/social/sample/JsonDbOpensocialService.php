@@ -22,7 +22,7 @@
 /**
  * Implementation of supported services backed by a JSON DB
  */
-class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, MessagesService, AlbumService, MediaItemService {
+class JsonDbOpensocialService implements ActivityService, PersonService, AppDataService, GroupService, MessagesService, AlbumService, MediaItemService {
 
   /**
    * The DB
@@ -60,6 +60,11 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   private static $DATA_TABLE = "data";
 
   /**
+   * db["groups"] -> Map<Person.Id, Array<Group>>
+   */
+  private static $GROUPS_TABLE = "groups";
+
+  /**
    * db["friendLinks"] -> Map<Person.Id, Array<Person.Id>>
    */
   private static $FRIEND_LINK_TABLE = "friendLinks";
@@ -73,6 +78,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   private $allData = null;
 
+  private $allGroups = null;
+  
   private $allActivities = null;
 
   private $allMessageCollections = null;
@@ -135,6 +142,12 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     $db[self::$DATA_TABLE] = $this->allData;
     return $this->allData;
+  }
+
+  private function getAllGroups() {
+    $db = $this->getDb();
+    $this->allGroups = $db[self::$GROUPS_TABLE];
+    return $this->allGroups;
   }
 
   private function getAllActivities() {
@@ -412,6 +425,19 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
     return null;
   }
+
+  public function getPersonGroups($userId, GroupId $groupId, SecurityToken $token) {
+    $allGroups = $this->getAllGroups();
+    $ids = $this->getIdSet($userId, $groupId, $token);
+    $output = array();
+    foreach ($ids as $id) {
+      if (isset($allGroups[$id])) {
+        $output[$id] = $allGroups[$id];
+      }
+    }
+    return $output;
+  }
+
 
   public function getActivity($userId, $groupId, $appdId, $fields, $activityId, SecurityToken $token) {
     $activities = $this->getActivities($userId, $groupId, $appdId, null, null, null, null, $fields, array(
