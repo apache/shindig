@@ -43,6 +43,16 @@ class Config {
       }
     }
   }
+  
+  /**
+   * Merges the given array with the config array. It uses the keys/values from config/container.php.
+   */
+  static function setConfig($tconfig) {
+    if (!is_array(self::$config))
+      self::loadConfig();
+    
+    self::$config = array_merge(self::$config, $tconfig);
+  }
 
   static function get($key) {
     if (! self::$config) {
