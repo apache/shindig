@@ -403,12 +403,12 @@ public class BasicHttpFetcher implements HttpFetcher {
   /**
    * Change the global read timeout for all new fetchs.
    *
-   * @param connectionTimeoutMs new connection timeout in milliseconds
+   * @param readTimeoutMs new connection timeout in milliseconds
    */
   @Inject(optional = true)
-  public void setReadTimeoutMs(@Named("shindig.http.client.read-timeout-ms") int connectionTimeoutMs) {
-    Preconditions.checkArgument(connectionTimeoutMs > 0, "connection-timeout-ms must be greater than 0");
-    FETCHER.getParams().setIntParameter(HttpConnectionParams.SO_TIMEOUT, connectionTimeoutMs);
+  public void setReadTimeoutMs(@Named("shindig.http.client.read-timeout-ms") int readTimeoutMs) {
+    Preconditions.checkArgument(readTimeoutMs > 0, "read-timeout-ms must be greater than 0");
+    FETCHER.getParams().setIntParameter(HttpConnectionParams.SO_TIMEOUT, readTimeoutMs);
   }
 
 
