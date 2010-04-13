@@ -18,19 +18,18 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import java.util.Collection;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
+
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Generates and validates URLs serviced by a gadget JavaScript service (JsServlet).
@@ -88,7 +87,7 @@ public class DefaultJsUriManager implements JsUriManager {
     // Finally, version it, but only if !nocache.
     if (versioner != null && !gadget.getContext().getIgnoreCache()) {
       uri.addQueryParameter(Param.VERSION.getKey(),
-          versioner.version(gadget.getSpec().getUrl(), container, extern));
+          versioner.version(gadget.getContext().getUrl(), container, extern));
     }
     
     return uri.toUri();

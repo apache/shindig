@@ -18,32 +18,25 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import static org.apache.shindig.gadgets.uri.DefaultJsUriManager.addJsLibs;
 import static org.apache.shindig.gadgets.uri.DefaultJsUriManager.JS_SUFFIX;
-
+import static org.apache.shindig.gadgets.uri.DefaultJsUriManager.addJsLibs;
+import static org.easymock.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.expect;
 import static org.easymock.classextension.EasyMock.replay;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.Lists;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.spec.Feature;
-import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.JsUriManager.Versioner;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.junit.Test;
 
 import java.util.Collection;
@@ -321,19 +314,13 @@ public class DefaultJsUriManagerTest {
   }
   
   private Gadget mockGadget(boolean nocache, boolean debug) {
-    final GadgetSpec spec = createMock(GadgetSpec.class);
-    expect(spec.getUrl()).andReturn(GADGET_URI).anyTimes();
-    final ModulePrefs prefs = createMock(ModulePrefs.class);
-    expect(prefs.getFeatures()).andReturn(Maps.<String, Feature>newHashMap()).anyTimes();
-    replay(prefs);
-    expect(spec.getModulePrefs()).andReturn(prefs).anyTimes();
-    replay(spec);
     GadgetContext context = createMock(GadgetContext.class);
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getIgnoreCache()).andReturn(nocache).anyTimes();
     expect(context.getDebug()).andReturn(debug).anyTimes();
+    expect(context.getUrl()).andReturn(GADGET_URI).anyTimes();
     replay(context);
-    return new Gadget().setContext(context).setSpec(spec);
+    return new Gadget().setContext(context);
   }
   
   private TestDefaultJsUriManager makeManager(ContainerConfig config, Versioner versioner) {
