@@ -106,7 +106,7 @@ class OutputJsonConverter extends OutputConverter {
         
         case ':':
           if (! $in_string) {
-            $new_json .= ": ";
+            $new_json .= ":";
           } else {
             $new_json .= $char;
           }
