@@ -35,6 +35,7 @@ public class MutableContent {
   private String content;
   private HttpResponse contentSource;
   private Document document;
+  private int numChanges;
   private final GadgetHtmlParser contentParser;
   private final Map<String, Object> pipelinedData;
 
@@ -53,7 +54,8 @@ public class MutableContent {
   public MutableContent(GadgetHtmlParser contentParser, String content) {
     this.contentParser = contentParser;
     this.content = content;
-    pipelinedData = Maps.newHashMap();
+    this.numChanges = 0;
+    this.pipelinedData = Maps.newHashMap();
   }
 
   /**
@@ -63,7 +65,7 @@ public class MutableContent {
   public MutableContent(GadgetHtmlParser contentParser, HttpResponse contentSource) {
     this.contentParser = contentParser;
     this.contentSource = contentSource;
-    pipelinedData = Maps.newHashMap();
+    this.pipelinedData = Maps.newHashMap();
   }
 
 
@@ -101,6 +103,7 @@ public class MutableContent {
       content = newContent;
       document = null;
       contentSource = null;
+      numChanges++;
     }
   }
 
@@ -113,6 +116,7 @@ public class MutableContent {
     if (document != null) {
       content = null;
       contentSource = null;
+      numChanges++;
     }
   }
   
@@ -138,6 +142,10 @@ public class MutableContent {
       return null;
     }
     return document;
+  }
+  
+  public int getNumChanges() {
+    return numChanges;
   }
 
   /**

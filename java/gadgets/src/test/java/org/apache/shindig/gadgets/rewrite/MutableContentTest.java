@@ -54,14 +54,19 @@ public class MutableContentTest {
 
     assertSame(content, mhc.getContent());
     assertSame(document, mhc.getDocument());
+    assertEquals(0, mhc.getNumChanges());
   }
 
   @Test
   public void modifyContentReflectedInTree() throws Exception {
+    assertEquals(0, mhc.getNumChanges());
     mhc.setContent("NEW CONTENT");
+    assertEquals(1, mhc.getNumChanges());
     Document document = mhc.getDocument();
     assertEquals(1, document.getChildNodes().getLength());
     assertEquals("NEW CONTENT", document.getChildNodes().item(0).getTextContent());
+    mhc.documentChanged();
+    assertEquals(2, mhc.getNumChanges());
   }
 
   @Test
@@ -70,12 +75,15 @@ public class MutableContentTest {
 
     // First child should be text node per other tests. Modify it.
     document.getFirstChild().getFirstChild().setTextContent("FOO CONTENT");
+    assertEquals(0, mhc.getNumChanges());
     MutableContent.notifyEdit(document);
+    assertEquals(1, mhc.getNumChanges());
     assertTrue(mhc.getContent().contains("FOO CONTENT"));
 
     // Do it again
     document.getFirstChild().getFirstChild().setTextContent("BAR CONTENT");
     MutableContent.notifyEdit(document);
+    assertEquals(2, mhc.getNumChanges());
     assertTrue(mhc.getContent().contains("BAR CONTENT"));
 
     // GadgetHtmlNode hasn't changed because string hasn't changed
