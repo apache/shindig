@@ -150,19 +150,6 @@ public class DefaultJsUriManagerTest {
   }
   
   @Test
-  public void processHostMismatch() {
-    String targetHost = "target-host.org";
-    ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
-    TestDefaultJsUriManager manager = makeManager(config, null);
-    Uri testUri = Uri.parse("http://other-host.org/gadgets/js/feature" + JS_SUFFIX + '?' +
-        Param.CONTAINER.getKey() + '=' + CONTAINER);
-    JsUri jsUri = manager.processExternJsUri(testUri);
-    assertTrue(manager.hadError());
-    assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
-    assertSame(DefaultJsUriManager.INVALID_URI, jsUri);
-  }
-  
-  @Test
   public void processPathPrefixMismatch() {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");

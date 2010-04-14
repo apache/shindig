@@ -114,14 +114,6 @@ public class DefaultJsUriManager implements JsUriManager {
       return INVALID_URI;
     }
     
-    // We somewhat cheat in that jsHost may contain protocol/scheme as well.
-    Uri hostUri = Uri.parse(jsHost);
-    
-    if (!host.equals(hostUri.getAuthority())) {
-      issueUriFormatError("Js Uri host mismatch, is: " + host + ", expected: " + jsHost);
-      return INVALID_URI;
-    }
-    
     // Pull out the collection of features referenced by the Uri.
     String path = uri.getPath();
     if (path == null) {
