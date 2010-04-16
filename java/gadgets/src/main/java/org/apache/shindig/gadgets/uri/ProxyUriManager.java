@@ -156,7 +156,7 @@ public interface ProxyUriManager {
       req.setParam(Param.RESIZE_HEIGHT.getKey(), resizeHeight);
       req.setParam(Param.RESIZE_WIDTH.getKey(), resizeWidth);
       req.setParam(Param.RESIZE_QUALITY.getKey(), resizeQuality);
-      req.setParam(Param.NO_EXPAND.getKey(), resizeNoExpand);
+      req.setParam(Param.NO_EXPAND.getKey(), resizeNoExpand ? "1" : "0");
       return req;
     };
     
