@@ -379,6 +379,6 @@ function _exportSymbols(name, sym) {
  * TODO - implement
  */
 function _IG_AddDOMEventHandler(src, etype, func) {
-  gadgets.log.warn("_IG_AddDOMEventHandler not implemented - see SHINDIG-198");
+  gadgets.warn("_IG_AddDOMEventHandler not implemented - see SHINDIG-198");
 }
 
