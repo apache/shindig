@@ -573,7 +573,7 @@ gadgets.rpc = function() {
    *
    * <p>Simplified instructions - highly recommended:
    * <ol>
-   * <li> Generate &lt;iframe id="&lt;ID&gt;" url="...#parent=&lt;PARENTURL&gt;&rpctoken=&lt;RANDOM&gt;"/&gt;
+   * <li> Generate &lt;iframe id="&lt;ID&gt;" src="...#parent=&lt;PARENTURL&gt;&rpctoken=&lt;RANDOM&gt;"/&gt;
    *      and add to DOM.
    * <li> Call gadgets.rpc.setupReceiver("&lt;ID>");
    *      <p>All parent/child communication initializes automatically from here.
