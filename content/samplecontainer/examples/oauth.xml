@@ -19,7 +19,7 @@
 -->
 <Module>
   <ModulePrefs title="Demo OAuth Gadget"
-               icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
+               icon="http://localhost:8080/samplecontainer/examples/icon.png">
     <OAuth>
       <Service>
         <Request url="http://localhost:9090/oauth-provider/request_token" />
@@ -45,7 +45,7 @@
     </div>
 
     <div id="approval" style="display: none">
-      <img src="http://localhost:8080/gadgets/files/samplecontainer/examples/new.gif">
+      <img src="http://localhost:8080/samplecontainer/examples/new.gif">
       <a href="#" id="personalize">Personalize this gadget</a>
     </div>
 

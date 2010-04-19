@@ -76,7 +76,8 @@ function __autoload($className) {
   }
 }
 
-$servletMap = array(Config::get('web_prefix') . '/gadgets/files' => 'FilesServlet', 
+$servletMap = array(Config::get('web_prefix') . '/container' => 'FilesServlet', 
+    Config::get('web_prefix') . '/samplecontainer' => 'FilesServlet', 
     Config::get('web_prefix') . '/gadgets/js' => 'JsServlet', 
     Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
     Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet', 

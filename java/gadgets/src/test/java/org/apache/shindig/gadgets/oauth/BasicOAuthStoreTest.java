@@ -38,7 +38,7 @@ public class BasicOAuthStoreTest {
 
   private static final String SAMPLE_FILE =
       '{' +
-    "'http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml' : {" +
+    "'http://localhost:8080/samplecontainer/examples/oauth.xml' : {" +
     "'' : {" +
     "'consumer_key' : 'gadgetConsumer'," +
     "'consumer_secret' : 'gadgetSecret'," +
@@ -68,7 +68,7 @@ public class BasicOAuthStoreTest {
   @Test
   public void testInit() throws Exception {
     FakeGadgetToken t = new FakeGadgetToken();
-    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t.setAppUrl("http://localhost:8080/samplecontainer/examples/oauth.xml");
     OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");
     ConsumerInfo consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
     OAuthConsumer consumer = consumerInfo.getConsumer();
@@ -95,7 +95,7 @@ public class BasicOAuthStoreTest {
   public void testGetAndSetAndRemoveToken() {
     FakeGadgetToken t = new FakeGadgetToken();
     ConsumerInfo consumer = new ConsumerInfo(null, null, null);
-    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t.setAppUrl("http://localhost:8080/samplecontainer/examples/oauth.xml");
     t.setViewerId("viewer-one");
     assertNull(store.getTokenInfo(t, consumer, "", ""));
 
@@ -107,7 +107,7 @@ public class BasicOAuthStoreTest {
     assertEquals("secret", info.getTokenSecret());
 
     FakeGadgetToken t2 = new FakeGadgetToken();
-    t2.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t2.setAppUrl("http://localhost:8080/samplecontainer/examples/oauth.xml");
     t2.setViewerId("viewer-two");
     assertNull(store.getTokenInfo(t2, consumer, "service", "token"));
 
@@ -154,7 +154,7 @@ public class BasicOAuthStoreTest {
     store.initFromConfigString(SAMPLE_FILE);
     
     FakeGadgetToken t = new FakeGadgetToken();
-    t.setAppUrl("http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml");
+    t.setAppUrl("http://localhost:8080/samplecontainer/examples/oauth.xml");
     OAuthServiceProvider provider = new OAuthServiceProvider("req", "authorize", "access");
     ConsumerInfo consumerInfo = store.getConsumerKeyAndSecret(t, "", provider);
     OAuthConsumer consumer = consumerInfo.getConsumer();

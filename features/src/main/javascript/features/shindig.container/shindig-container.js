@@ -472,7 +472,7 @@ shindig.Gadget.prototype.getAdditionalParams = function() {
 
 shindig.IfrGadget = function(opt_params) {
   shindig.Gadget.call(this, opt_params);
-  this.serverBase_ = '../../'; // default gadget server
+  this.serverBase_ = '/gadgets/'; // default gadget server
 };
 
 shindig.IfrGadget.inherits(shindig.Gadget);
@@ -493,7 +493,7 @@ shindig.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
 shindig.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 shindig.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
 shindig.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
-shindig.IfrGadget.prototype.rpcRelay = 'files/container/rpc_relay.html';
+shindig.IfrGadget.prototype.rpcRelay = '../container/rpc_relay.html';
 
 shindig.IfrGadget.prototype.getTitleBarContent = function(continuation) {
   var settingsButton = this.hasViewablePrefs_() ?

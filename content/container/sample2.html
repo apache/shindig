@@ -22,7 +22,7 @@
 <title>Sample: Dynamic Height</title>
 <!-- default container look and feel -->
 <link rel="stylesheet" href="gadgets.css">
-<script type="text/javascript" src="../../js/shindig-container:rpc.js?c=1&debug=1"></script>
+<script type="text/javascript" src="/gadgets/js/shindig-container:rpc.js?c=1&debug=1"></script>
 <script type="text/javascript">
 var my = {};
 
@@ -52,7 +52,7 @@ my.init = function() {
 
 my.renderGadgets = function() {
   for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
-    var gadget = gadgets.container.createGadget(
+    var gadget = shindig.container.createGadget(
         {specUrl: my.gadgetSpecUrls[i]});
     shindig.container.addGadget(gadget);
     shindig.container.renderGadget(gadget);

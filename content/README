@@ -26,13 +26,13 @@
         (Note: yourserver:yourport defaults to localhost:8080 for the java server,
         and just localhost for the php server)
 
-        * http://yourserver:yourport/gadgets/files/container/sample1.html - basic container
-        * http://yourserver:yourport/gadgets/files/container/sample2.html - custom rendering
-        * http://yourserver:yourport/gadgets/files/container/sample3.html - custom layouts
-        * http://yourserver:yourport/gadgets/files/container/sample4.html - set pref
-        * http://yourserver:yourport/gadgets/files/container/sample5.html - set pref
-        * http://yourserver:yourport/gadgets/files/container/sample6.html - dynamic height
-        * http://yourserver:yourport/gadgets/files/container/sample7.html - set title
+        * http://yourserver:yourport/container/sample1.html - basic container
+        * http://yourserver:yourport/container/sample2.html - custom rendering
+        * http://yourserver:yourport/container/sample3.html - custom layouts
+        * http://yourserver:yourport/container/sample4.html - set pref
+        * http://yourserver:yourport/container/sample5.html - set pref
+        * http://yourserver:yourport/container/sample6.html - dynamic height
+        * http://yourserver:yourport/container/sample7.html - set title
 
         These samples are very basic and aren't production-ready. Shindig will
         include a more advanced container at a later date but it hasn't been
@@ -86,10 +86,10 @@
        are using the java based server make sure you run with mvn jetty:run-war)
 
      B) Hit the sample container at
-       http://yourserver:yourport/gadgets/files/samplecontainer/samplecontainer.html
+       http://yourserver:yourport/samplecontainer/samplecontainer.html
 
      C) See the sample container help document for more details on how it works:
-       http://yourserver:yourport/gadgets/files/samplecontainer/getting-started.html
+       http://yourserver:yourport/samplecontainer/getting-started.html
 
      D) Get, and try to run, coderunner.xml and compliancetests.xml from the project
        http://opensocial-resources.googlecode.com/

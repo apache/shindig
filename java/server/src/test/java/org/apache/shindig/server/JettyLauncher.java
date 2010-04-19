@@ -41,7 +41,9 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.resource.Resource;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Joiner;
@@ -61,7 +63,7 @@ public class JettyLauncher {
   private static final String REST_BASE = "/social/rest/*";
   private static final String JSON_RPC_BASE = "/social/rpc/*";
   private static final String CONCAT_BASE = "/gadgets/concat";
-  private static final String GADGETS_FILES = "/gadgets/files/*";
+  private static final List<String> FILES = Arrays.asList("/container/*", "/samplecontainer/*");
   private static final String JS_BASE = "/gadgets/js/*";
   private static final String METADATA_BASE = "/gadgets/metadata/*";
 
@@ -148,19 +150,20 @@ public class JettyLauncher {
         // Skip Gzip
         if (s.endsWith(".gz")) return null;
         
-        String stripped = s.substring("/gadgets/files/".length());
         try {
-          Resource resource = Resource.newResource(trunk + "/javascript/" + stripped);
+          Resource resource = Resource.newResource(trunk + "/content/" + s);
           // Try to open it.
           resource.getInputStream();
           return resource;
         } catch (IOException ioe) {
-          return Resource.newClassPathResource(stripped);
+          return Resource.newClassPathResource(s);
         }
       }
     };
     ServletHolder gadgetFiles = new ServletHolder(defaultServlet);
-    context.addServlet(gadgetFiles, GADGETS_FILES);
+    for (String pattern : FILES) {
+      context.addServlet(gadgetFiles, pattern);
+    }
   }
 
   public void start() throws Exception {

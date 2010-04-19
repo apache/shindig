@@ -40,7 +40,7 @@
   }
 </style>
 </head>
-<script src="../../js/core.js?c=1"></script>
+<script src="/gadgets/js/core.js?c=1"></script>
 <body>
 <script>
   function makeXhr() {
@@ -111,7 +111,7 @@
   };
 
   var xhr = makeXhr();
-  xhr.open("POST", "../../metadata", true);
+  xhr.open("POST", "/gadgets/metadata", true);
   xhr.onreadystatechange = function(xobj) {
     return function() {
       processResp(xobj);

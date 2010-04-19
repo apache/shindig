@@ -44,7 +44,7 @@
         <directory>conf</directory>
       </resource>
       <resource>
-        <directory>${basedir}/../../javascript/sampledata/</directory>
+        <directory>${basedir}/../../content/sampledata/</directory>
         <targetPath>sampledata</targetPath>
         <includes>
           <include>**/*.*</include>

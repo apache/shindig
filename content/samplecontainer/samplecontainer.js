@@ -154,7 +154,7 @@ shindig.samplecontainer = {};
       // Shindigs rpc code uses direct javascript calls when running on the same domain
       // to simulate cross-domain when running sample container we replace 
       // 'localhost' with '127.0.0.1' 
-      var iframeBaseUrl = baseUrl.replace("localhost", "127.0.0.1") + '../../';
+      var iframeBaseUrl = baseUrl.replace("localhost", "127.0.0.1") + '../../gadgets/';
 
       gadget.setServerBase(iframeBaseUrl);
       gadget.secureToken = escape(generateSecureToken());

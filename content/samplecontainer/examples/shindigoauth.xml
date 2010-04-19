@@ -19,7 +19,7 @@
 -->
 <Module>
   <ModulePrefs title="Demo 3-legged OAuth to Shindig"
-               icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
+               icon="http://localhost:8080/samplecontainer/examples/icon.png">
     <OAuth>
       <Service name="shindig">
         <Request url="http://localhost:8080/oauth/requestToken" />
@@ -44,7 +44,7 @@
     </div>
 
     <div id="approval" style="display: none">
-      <img src="http://localhost:8080/gadgets/files/samplecontainer/examples/new.gif">
+      <img src="http://localhost:8080/samplecontainer/examples/new.gif">
       <a href="#" id="personalize">Personalize this gadget</a>
     </div>
 

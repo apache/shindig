@@ -437,31 +437,31 @@
 // Gadgets/App information.  OAuth Consumer Key defaults to the app url.
 //
 "apps" : {
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml":
+    "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml":
         { "title" : "Social Hello World",
           "consumerSecret" : "secret",
-           "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" :
+           "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" :
         { "title" : "Social Activities World",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/oauth.xml" :
+          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/samplecontainer/examples/oauth.xml" :
         { "title" : "Demo OAuth Gadget",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"},
-    "http://localhost:8080/gadgets/files/samplecontainer/examples/shindigoauth.xml" :
+          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"},
+    "http://localhost:8080/samplecontainer/examples/shindigoauth.xml" :
         { "title" : "Demo OAuth Gadget",
           "consumerSecret" : "secret",
-          "icon" : "http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png"}
+          "icon" : "http://localhost:8080/samplecontainer/examples/icon.png"}
  },
 
  // duplicates userApplications as above..
  "permissions": {
-   "john.doe" : { "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
-                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
+   "john.doe" : { "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    },
-   "canonical" :{ "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
-                  "http://localhost:8080/gadgets/files/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
+   "canonical" :{ "http://localhost:8080/samplecontainer/examples/SocialHelloWorld.xml" : { "installed" : true},
+                  "http://localhost:8080/samplecontainer/examples/SocialActivitiesWorld.xml" : { "installed" : true}
    }
  },
 // Passwords for authenticaiton service

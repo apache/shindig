@@ -51,8 +51,7 @@
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>${basedir}/../../javascript/</directory>
-              <targetPath>gadgets/files</targetPath>
+              <directory>${basedir}/../../content/</directory>
               <includes>
                 <include>**/*.*</include>
               </includes>
@@ -71,16 +70,18 @@
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
         <configuration>
-          <webAppSourceDirectory>${basedir}/target/shindig-server-${pom.version}</webAppSourceDirectory>
-          <contextPath>/</contextPath>
-          <webXml>${basedir}/target/shindig-server-${pom.version}/WEB-INF/web.${runType}.xml</webXml>
+          <webAppConfig>
+            <contextPath>/</contextPath>
+            <baseResource implementation="org.mortbay.resource.ResourceCollection">
+              <resourcesAsCSV>src/main/webapp,${basedir}/../../content</resourcesAsCSV>
+            </baseResource>
+          </webAppConfig>
         </configuration>
       </plugin>
     </plugins>
     <resources>
       <resource>
-        <directory>${basedir}/../../javascript/</directory>
-        <targetPath>gadgets/files</targetPath>
+        <directory>${basedir}/../../content/</directory>
         <includes>
           <include>**/*.*</include>
         </includes>

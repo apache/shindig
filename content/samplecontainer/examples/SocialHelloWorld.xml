@@ -21,7 +21,7 @@
  <ModulePrefs title="Social Hello World"
               description="The Social Hello World Application Displays multilingual hello messages"
               thumbnail="http://localhost:8080/"
-              icon="http://localhost:8080/gadgets/files/samplecontainer/examples/icon.png">
+              icon="http://localhost:8080/samplecontainer/examples/icon.png">
    <Require feature="osapi"></Require>
        <Require feature="settitle"/>
    <Require feature="dynamic-height"></Require>
@@ -40,7 +40,7 @@
      }
 
      div.bubble {
-       background-image: url(/gadgets/files/samplecontainer/examples/bubble.gif);
+       background-image: url(/samplecontainer/examples/bubble.gif);
        background-repeat: no-repeat;
        width: 202px;
        height: 66px;
@@ -107,7 +107,7 @@
              && allPeople[i].thumbnailUrl.indexOf('null') == -1) {
            html += '<img src="' + allPeople[i].thumbnailUrl + '"/>';
          } else {
-           html += '<img src="/gadgets/files/samplecontainer/examples/nophoto.gif"/>';
+           html += '<img src="/samplecontainer/examples/nophoto.gif"/>';
          }
          html += '<br style="clear:both"></div>';
        }

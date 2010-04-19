@@ -62,7 +62,7 @@ tamings___.push(function(imports) {
     document.body.appendChild(d);
     
     gadgets.flash.embedFlash(
-        "/gadgets/files/container/Bridge.swf", 
+        "/container/Bridge.swf", 
         d,
         10,
         {
