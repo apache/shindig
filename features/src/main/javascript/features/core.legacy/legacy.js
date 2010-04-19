@@ -370,3 +370,15 @@ function _exportSymbols(name, sym) {
     attach[sym[k]] = sym[k + 1];
   }
 }
+
+/**
+ * @deprecated
+ * @param {Object} src
+ * @param {string} etype
+ * @param {function} func
+ * TODO - implement
+ */
+function _IG_AddDOMEventHandler(src, etype, func) {
+  gadgets.log.warn("_IG_AddDOMEventHandler not implemented - see SHINDIG-198");
+}
+
