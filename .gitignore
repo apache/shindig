@@ -1,4 +1,7 @@
+*~
+*.swp
 
+# output of git svn show-ignore below
 # /
 /target
 /work
