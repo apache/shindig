@@ -38,10 +38,6 @@
     <url>http://svn.apache.org/viewvc/shindig/trunk/java/server</url>
   </scm>
 
-  <properties>
-    <runType>full</runType>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
