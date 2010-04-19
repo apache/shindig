@@ -89,7 +89,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
   /**
    * Returns all response headers as a string.
    * 
-   * @return {string?} The text of all response headers, or null if no response
+   * @return {?string} The text of all response headers, or null if no response
    *     has been received.
    */
   shindig.xhrwrapper.XhrWrapper.prototype.getAllResponseHeaders = function() {
@@ -108,7 +108,7 @@ shindig.xhrwrapper = shindig.xhrwrapper || {};
    * Returns the value of a particular response header.
    * 
    * @param {string} The name of the header to return.
-   * @return {string?} The value of the header, or null if no response has
+   * @return {?string} The value of the header, or null if no response has
    *     been received or the header doesn't exist in the response.
    */
   shindig.xhrwrapper.XhrWrapper.prototype.getResponseHeader = function(header) {

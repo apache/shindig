@@ -148,8 +148,8 @@ function assertTemplateDomEquals(lhs, rhs) {
  *
  * @param {string} templateText The text of the inline template to evaluate
  * @param {string} output The expected output
- * @param {Object?} context The data context
- * @param {Array<String>?} namedTemplates Array of text of namedTemplates
+ * @param {?Object} context The data context
+ * @param {?Array<String>} namedTemplates Array of text of namedTemplates
  */
 function assertTemplateOutput(templateText, output, context,
     namedTemplates) {

@@ -275,7 +275,7 @@ JsEvalContext.prototype.clone = function(data, index, count) {
  *
  * @param {string} name
  *
- * @param {Object?} value
+ * @param {?Object} value
  */
 JsEvalContext.prototype.setVariable = function(name, value) {
   this.vars_[name] = value;
@@ -290,7 +290,7 @@ JsEvalContext.prototype.setVariable = function(name, value) {
  *
  * @param {string} name
  *
- * @return {Object?} value
+ * @return {?Object} value
  */
 JsEvalContext.prototype.getVariable = function(name) {
   return this.vars_[name];
@@ -304,7 +304,7 @@ JsEvalContext.prototype.getVariable = function(name) {
  * @param {string} expr A javascript expression
  * @param {Element=} opt_template An optional node to serve as "this"
  *
- * @return {Object?} value
+ * @return {?Object} value
  */
 JsEvalContext.prototype.evalExpression = function(expr, opt_template) {
   var exprFunction = jsEvalToFunction(expr);

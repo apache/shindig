@@ -57,7 +57,7 @@ opensocial.Collection = function(array, opt_offset, opt_totalSize) {
 /**
  * Finds the entry with the given ID value, or returns null if none is found.
  * @param {string} id The ID to look for
- * @return {Object?} The data
+ * @return {?Object} The data
  */
 opensocial.Collection.prototype.getById = function(id) {
    // TODO(doll): A non-linear search would be better

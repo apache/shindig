@@ -106,7 +106,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
    *
    * @param {boolean} success if false, the message will not be sent
    * @param {string=} opt_errorCode an error code if success is false
-   * @param {Array.<string>?} recipientIds an array of recipient IDs,
+   * @param {?Array.<string>} recipientIds an array of recipient IDs,
    *     if success is true
    * @private
    */
