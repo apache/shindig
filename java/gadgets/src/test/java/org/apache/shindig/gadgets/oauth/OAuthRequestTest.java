@@ -1926,6 +1926,8 @@ public class OAuthRequestTest {
     client.setTrustedParam("oauth_magic", "foo");
     client.setTrustedParam("opensocial_magic", "bar");
     client.setTrustedParam("xoauth_magic", "quux");
+    
+    client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
@@ -1933,8 +1935,77 @@ public class OAuthRequestTest {
 
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("User data is hello-oauth", response.getResponseAsString());
-    assertEquals(9, serviceProvider.getTrustedParamCount());
+    assertEquals(12, serviceProvider.getTrustedParamCount());
   }
+  
+  /**
+   * Test different behaviors of trusted parameters.
+   * 1) pass two parameters with same name, the latter will win.
+   * 2) parameter name starting with 'oauth' 'oauth' or 'opensocial'.
+   * 3) trusted parameter can override existing parameter.
+   */
+  @Test
+  public void testTrustedParamsMisc() throws Exception {
+    serviceProvider.setCheckTrustedParams(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    client.setTrustedParam("oauth_magic", "foo");
+    client.setTrustedParam("opensocial_magic", "bar");
+    
+    client.setTrustedParam("xoauth_magic", "quux_overridden");
+    client.setTrustedParam("xoauth_magic", "quux");
+    
+    client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    assertEquals(12, serviceProvider.getTrustedParamCount());
+  }
+  
+  /**
+   * Test trusted parameters will always be sent when signOwner and signViewer
+   * are false.
+   */
+  @Test
+  public void testAlwaysAppendTrustedParams() throws Exception {
+    serviceProvider.setCheckTrustedParams(true);
+    MakeRequestClient client = makeStrictNonSocialClient("owner", "owner", GADGET_URL);
+    client.setTrustedParam("oauth_magic", "foo");
+    client.setTrustedParam("opensocial_magic", "bar");
+    client.setTrustedParam("xoauth_magic", "quux");
+    
+    client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("", response.getResponseAsString());
+    client.approveToken("user_data=hello-oauth");
+
+    response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals("User data is hello-oauth", response.getResponseAsString());
+    assertEquals(12, serviceProvider.getTrustedParamCount());
+  }
+  
+  /**
+   * Test invalid trusted parameters which are not prefixed with 'oauth' 'xoauth' or 'opensocial'. 
+   */
+  @Test
+  public void testTrustedParamsInvalidParameter() throws Exception {
+    serviceProvider.setCheckTrustedParams(true);
+    MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
+    client.setTrustedParam("oauth_magic", "foo");
+    client.setTrustedParam("opensocial_magic", "bar");
+    client.setTrustedParam("xoauth_magic", "quux");
+    client.setTrustedParam("opensocial_owner_id", "overridden_opensocial_owner_id");
+    client.setTrustedParam("invalid_trusted_parameter", "invalid");
+
+    HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+    assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
+  }
+  
+  
 
   // Checks whether the given parameter list contains the specified
   // key/value pair

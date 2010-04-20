@@ -48,6 +48,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -399,6 +400,37 @@ public class OAuthRequest {
         canonParamName.startsWith("opensocial")) &&
         ALLOWED_PARAM_NAME.matcher(canonParamName).matches());
   }
+  
+  /**
+   * This gives a chance to override parameters by passing trusted parameters.
+   * 
+   */
+  private void overrideParameters(List<Parameter> authParams)
+    throws OAuthRequestException {
+    if (trustedParams == null) {
+      return;
+    }
+    
+    Map<String, String> paramMap = Maps.newLinkedHashMap();
+    for (Parameter param : authParams) {
+      paramMap.put(param.getKey(), param.getValue());
+    }
+    for (Parameter param : trustedParams) {
+      if (!isContainerInjectedParameter(param.getKey())) {
+        throw responseParams.oauthRequestException(
+            OAuthError.INVALID_REQUEST,
+            "invalid trusted parameter name " 
+            + param.getKey() 
+            + ", trusted parameter must start with 'oauth' 'xoauth'or 'opensocial' ");         
+      }
+      paramMap.put(param.getKey(), param.getValue());    
+    }
+    
+    authParams.clear();
+    for (String key : paramMap.keySet()) {
+      authParams.add(new Parameter(key, paramMap.get(key)));
+    }
+  }
 
   /**
    * Add identity information, such as owner/viewer/gadget.
@@ -430,10 +462,6 @@ public class OAuthRequest {
     String appUrl = realRequest.getSecurityToken().getAppUrl();
     if (appUrl != null) {
       params.add(new Parameter(OPENSOCIAL_APPURL, appUrl));
-    }
-
-    if (trustedParams != null) {
-      params.addAll(trustedParams);
     }
     
     if (realRequest.getOAuthArguments().isProxiedContentRequest()) {
@@ -521,9 +549,17 @@ public class OAuthRequest {
         break;
     }
 
-    addIdentityParams(params);
+    // authParams are parameters prefixed with 'xoauth' 'oauth' or 'opensocial',
+    // trusted parameters have ability to override these parameters.
+    List<Parameter> authParams = Lists.newArrayList();
+    
+    addIdentityParams(authParams);
 
-    addSignatureParams(params);
+    addSignatureParams(authParams);
+    
+    overrideParameters(authParams);
+    
+    params.addAll(authParams);
 
     try {
       OAuthMessage signed = OAuthUtil.newRequestMessage(accessorInfo.getAccessor(),

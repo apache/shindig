@@ -431,7 +431,11 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       if (!"quux".equals(OAuthUtil.getParameter(info.message, "xoauth_magic"))) {
         throw new RuntimeException("no xoauth_magic=quux parameter");
       }
-      trustedParamCount += 3;
+      if (!"overridden_opensocial_owner_id".equals(
+          OAuthUtil.getParameter(info.message, "opensocial_owner_id"))) {
+        throw new RuntimeException("opensocial_owner_id should be overridden");
+      }
+      trustedParamCount += 4;
     }
     
     return info;
