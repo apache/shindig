@@ -60,11 +60,17 @@ public class ProxyRendererTest {
   private static final Uri PROXIED_HTML_HREF = Uri.parse("http://example.org/proxied.php");
   private static final Uri EXPECTED_PROXIED_HTML_HREF
       = Uri.parse("http://example.org/proxied.php?lang=all&country=ALL");
+  private static final String USER_AGENT = "TestUserAgent/1.0";
   private static final GadgetContext CONTEXT = new GadgetContext() {
     @Override
     public SecurityToken getToken() {
       return new AnonymousSecurityToken();
     }
+    
+    @Override
+    public String getUserAgent() {
+      return USER_AGENT;
+    }    
   };
 
   private final FakeHttpCache cache = new FakeHttpCache();
@@ -215,6 +221,18 @@ public class ProxyRendererTest {
 
     JsonAssert.assertJsonEquals(JsonSerializer.serialize(prefetchedJson), postBody);
     assertTrue(pipelineExecutor.wasPreloaded);
+  }
+  
+  @Test
+  public void appendUserAgent() throws Exception {
+    String expectedUA = USER_AGENT + " Shindig";
+    HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
+    HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
+    pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
+    
+    String content = proxyRenderer.render(makeHrefGadget("none"));
+    String actualUA = pipeline.lastHttpRequest.getHeader("User-Agent");
+    assertEquals(expectedUA, actualUA);
   }
 
   private static class FakeHttpCache extends AbstractHttpCache {

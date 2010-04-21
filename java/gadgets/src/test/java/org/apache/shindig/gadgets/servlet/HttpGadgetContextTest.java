@@ -85,4 +85,12 @@ public class HttpGadgetContextTest extends ServletTestFixture {
     GadgetContext context = new HttpGadgetContext(request);
     assertEquals(expected, context.getToken());
   }
+  
+  @Test
+  public void testGetUserAgent() throws Exception {
+    expect(request.getHeader("User-Agent")).andReturn("Mozilla/4.0");
+    replay();
+    GadgetContext context = new HttpGadgetContext(request);
+    assertEquals("Mozilla/4.0", context.getUserAgent());
+  }
 }

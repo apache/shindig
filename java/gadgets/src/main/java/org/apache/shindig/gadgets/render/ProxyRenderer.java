@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
+import org.apache.shindig.gadgets.servlet.HttpGadgetContext;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.View;
 
@@ -45,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ProxyRenderer {
   public static final String PATH_PARAM = "path";
+  public static final String UA_IDENT = "Shindig";
 
   private final RequestPipeline requestPipeline;
   private final HttpCache httpCache;
@@ -97,6 +99,7 @@ public class ProxyRenderer {
         .setSecurityToken(context.getToken())
         .setContainer(context.getContainer())
         .setGadget(gadget.getSpec().getUrl());
+    setUserAgent(request, context);
 
     HttpResponse response = httpCache.getResponse(request);
 
@@ -138,5 +141,28 @@ public class ProxyRenderer {
     }
 
     return request;
+  }
+
+  /**
+   * Sets the User-Agent header in the new request to a variant of the original
+   * request's User-Agent, plus a small ident string for the gadget server.
+   */
+  private void setUserAgent(HttpRequest request, GadgetContext context) {
+    String userAgent = context.getUserAgent();
+    if (userAgent != null) {
+      String myIdent = getUAIdent();
+      if (myIdent != null) {
+        userAgent = userAgent + " " + myIdent;
+      }
+      request.setHeader("User-Agent", userAgent);
+    }
+  }
+  
+  /**
+   * Returns the program name which will be added at the end of the User-Agent
+   * string, to identify the gadget server.
+   */
+  protected String getUAIdent() {
+    return UA_IDENT;
   }
 }

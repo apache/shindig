@@ -166,6 +166,15 @@ public class HttpGadgetContext extends GadgetContext {
     return view;
   }
 
+  @Override
+  public String getUserAgent() {
+    String userAgent = request.getHeader("User-Agent");
+    if (userAgent == null) {
+      return super.getUserAgent();
+    }
+    return userAgent;
+  }
+  
   /**
    * @param req
    * @return The container, if set, or null.

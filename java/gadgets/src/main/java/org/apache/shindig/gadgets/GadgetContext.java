@@ -132,4 +132,11 @@ public class GadgetContext {
   public SecurityToken getToken() {
     return delegate == null ? null : delegate.getToken();
   }
+  
+  /**
+   * @return The user agent string, or null if not present.
+   */
+  public String getUserAgent() {
+    return delegate == null ? null : delegate.getUserAgent();
+  }
 }
