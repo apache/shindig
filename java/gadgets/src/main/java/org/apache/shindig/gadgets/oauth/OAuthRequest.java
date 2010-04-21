@@ -609,7 +609,15 @@ public class OAuthRequest {
         if (result.getPostBodyLength() == 0) {
           result.setPostBody(CharsetUtil.getUtf8Bytes(oauthData));
         } else {
-          result.setPostBody((result.getPostBodyAsString() + '&' + oauthData).getBytes());
+          StringBuilder postBody = new StringBuilder();
+          postBody.append(result.getPostBodyAsString());
+
+          if (!result.getPostBodyAsString().endsWith("&")) {
+            postBody.append('&');
+          }
+
+          postBody.append(oauthData);
+          result.setPostBody(postBody.toString().getBytes());
         }
         break;
 
