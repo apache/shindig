@@ -35,7 +35,11 @@ public class AbsolutePathReferenceVisitor implements Visitor {
   public final static Map<String, String> RESOURCE_TAGS =
     ImmutableMap.<String, String>builder()
         .put("a", "href")
+        .put("area", "href")
+        .put("q", "cite")
         .put("img", "src")
+        .put("input", "src")
+        .put("body", "background")
         .put("embed", "src")
         .put("link", "href")
         .put("script", "src")
