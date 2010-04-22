@@ -48,7 +48,7 @@
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>${basedir}/../../javascript/</directory>
+              <directory>${basedir}/../../content/</directory>
               <targetPath>files</targetPath>
               <includes>
                 <include>**/*.*</include>
@@ -82,7 +82,7 @@
         <!-- duplicated here for the jar build. -->
         <!-- TODO: Eliminate duplicate copies in WAR output -->
         <!-- this is relative to the pom.xml directory -->
-        <directory>${basedir}/../../javascript/</directory>
+        <directory>${basedir}/../../content/</directory>
         <targetPath>files</targetPath>
         <includes>
           <include>**/*.*</include>
