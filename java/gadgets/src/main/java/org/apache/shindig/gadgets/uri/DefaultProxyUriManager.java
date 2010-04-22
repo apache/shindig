@@ -95,7 +95,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     Map<Uri, String> versions = Maps.newHashMap();
     if (versioner != null) {
       List<String> versionList = versioner.version(resourceUris, resources.get(0).getContainer());
-      if (versionList.size() == resources.size()) {
+      if (versionList != null && versionList.size() == resources.size()) {
         // This should always be the case.
         // Should we error if not, or just WARNING?
         Iterator<String> versionIt = versionList.iterator();

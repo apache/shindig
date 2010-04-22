@@ -232,6 +232,18 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   }
 
   @Test
+  public void batchedProxyChainedStyleNoVerisons() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
+    List<Uri> resources = ImmutableList.<Uri>of(RESOURCE_1, RESOURCE_2, RESOURCE_3);
+    List<Uri> uris = makeAndGet(host, path, true, true, resources);
+    assertEquals(3, uris.size());
+    for (int i = 0; i < 3; ++i) {
+      verifyChainedUri(resources.get(i), uris.get(i), true, true, null, false, host, path);
+    }
+  }
+
+  @Test
   public void validateQueryStyleUnversioned() throws Exception {
     // Validate tests also serve as end-to-end tests: create, unpack.
     checkValidate("/proxy/path", UriStatus.VALID_UNVERSIONED, null);
@@ -453,8 +465,13 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   @SuppressWarnings("unchecked")
   private ProxyUriManager.Versioner makeVersioner(UriStatus status, String... versions) {
     ProxyUriManager.Versioner versioner = createMock(ProxyUriManager.Versioner.class);
-    expect(versioner.version(isA(List.class), eq(CONTAINER)))
-        .andReturn(Lists.newArrayList(versions)).anyTimes();
+    if (versions.length > 0) {
+      expect(versioner.version(isA(List.class), eq(CONTAINER)))
+          .andReturn(Lists.newArrayList(versions)).anyTimes();
+    } else {
+      expect(versioner.version(isA(List.class), eq(CONTAINER)))
+          .andReturn(null).anyTimes();
+    }
     expect(versioner.validate(isA(Uri.class), eq(CONTAINER), isA(String.class)))
         .andReturn(status).anyTimes();
     replay(versioner);
