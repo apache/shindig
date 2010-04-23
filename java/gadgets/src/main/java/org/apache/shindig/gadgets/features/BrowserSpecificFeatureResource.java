@@ -103,8 +103,10 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     }
     UserAgent ua = uaProvider.get();
     List<VersionMatcher> versionMatchers = browserMatch.get(ua.getBrowser());
-    for (VersionMatcher matcher : versionMatchers) {
-      if (matcher.matches(ua.getVersion())) return true;
+    if (versionMatchers != null) {
+      for (VersionMatcher matcher : versionMatchers) {
+        if (matcher.matches(ua.getVersion())) return true;
+      }
     }
     return false;
   }
