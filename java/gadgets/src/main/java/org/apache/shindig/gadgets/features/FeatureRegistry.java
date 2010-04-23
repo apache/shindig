@@ -18,10 +18,8 @@
 package org.apache.shindig.gadgets.features;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -440,7 +438,8 @@ public class FeatureRegistry {
    * @param xml xml to parse
    * @throws GadgetException
    */
-  protected void loadFeature(Uri parent, String xml, Map<String,FeatureNode> featureMapBuilder) throws GadgetException {
+  protected void loadFeature(Uri parent, String xml, Map<String,FeatureNode> featureMapBuilder)
+      throws GadgetException {
     FeatureParser.ParsedFeature parsed = parser.parse(parent, xml);
     // Duplicate feature = OK, just indicate it's being overridden.
     if (featureMapBuilder.containsKey(parsed.getName())) {
@@ -458,7 +457,8 @@ public class FeatureRegistry {
           resources.add(new InlineFeatureResource(parsedResource.getContent()));
         } else {
           // Load using resourceLoader
-          resources.add(resourceLoader.load(parsedResource.getSource(), parsedResource.getAttribs()));
+          resources.add(resourceLoader.load(parsedResource.getSource(),
+              getResourceAttribs(parsedBundle.getAttribs(), parsedResource.getAttribs())));
         }
       }
       bundles.add(new FeatureBundle(parsedBundle.getType(), parsedBundle.getAttribs(), resources));
@@ -466,6 +466,13 @@ public class FeatureRegistry {
     
     // Add feature to the master Map. The dependency tree isn't connected/validated/linked yet.
     featureMapBuilder.put(parsed.getName(), new FeatureNode(parsed.getName(), bundles, parsed.getDeps()));
+  }
+  
+  private Map<String, String> getResourceAttribs(Map<String, String> bundleAttribs,
+      Map<String, String> resourceAttribs) {
+    // For a given resource, attribs are a merge (by key, not by value) of bundle attribs and per-resource
+    // attribs, the latter serving as higher-precedence overrides.
+    return ImmutableMap.<String, String>builder().putAll(bundleAttribs).putAll(resourceAttribs).build();
   }
   
   private static class InlineFeatureResource extends FeatureResource.Default {

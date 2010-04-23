@@ -17,9 +17,9 @@
  */
 package org.apache.shindig.gadgets.features;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.ImmutableMap;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -27,7 +27,6 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,10 +36,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 public class FeatureRegistryTest {
   private static final String NODEP_TPL =
@@ -67,11 +68,17 @@ public class FeatureRegistryTest {
   private FeatureResourceLoader resourceLoader;
   private ResourceMock resourceMock;
   FeatureRegistry registry;
+  private Map<String, String> lastAttribs;
 
   @Before
   public void setUp() {
     resourceMock = new ResourceMock();
+    lastAttribs = null;
     resourceLoader = new FeatureResourceLoader() {
+      public FeatureResource load(Uri uri, Map<String, String> attribs) throws GadgetException {
+        lastAttribs = ImmutableMap.copyOf(attribs);
+        return super.load(uri, attribs);
+      }
       @Override
       protected String getResourceContent(String resource) {
         try {
@@ -591,6 +598,43 @@ public class FeatureRegistryTest {
     return sb.toString();
   }
   
+  @Test
+  public void resourceGetsMergedAttribs() throws Exception {
+    String content1 = "content1()";
+    Uri content1Uri = expectResource(content1);
+    Map<String, String> attribs = Maps.newHashMap();
+    String theContainer = "the-container";
+    attribs.put("container", theContainer);
+    attribs.put("one", "bundle-one");
+    attribs.put("two", "bundle-two");
+    
+    Map<String, String> resourceAttribs = Maps.newHashMap();
+    attribs.put("two", "attrib-two");
+    attribs.put("three", "attrib-three");
+    Uri feature1Uri = expectResource(xml(BOTTOM_TPL, "gadget", content1Uri.getPath(),
+        null, attribs, resourceAttribs));
+    
+    // Register it.
+    registry = new TestFeatureRegistry(feature1Uri.toString());
+    
+    // Retrieve the resource for matching context.
+    List<String> needed = Lists.newArrayList("bottom");
+    List<String> unsupported = Lists.newArrayList();
+    List<FeatureResource> resources = registry.getFeatureResources(
+        getCtx(RenderingContext.GADGET, theContainer), needed, unsupported);
+
+    // Sanity test.
+    assertEquals(1, resources.size());
+
+    // Check the attribs passed into the resource. This is a little funky, but it works.
+    assertNotNull(lastAttribs);
+    assertEquals(4, lastAttribs.size());
+    assertEquals(theContainer, lastAttribs.get("container"));
+    assertEquals("bundle-one", lastAttribs.get("one"));
+    assertEquals("attrib-two", lastAttribs.get("two"));
+    assertEquals("attrib-three", lastAttribs.get("three"));
+  }
+  
   private GadgetContext getCtx(final RenderingContext rctx, final String container) {
     return getCtx(rctx, container, false);
   }
@@ -655,7 +699,7 @@ public class FeatureRegistryTest {
     for (String dep : deps) {
       sb.append("<dependency>").append(dep).append("</dependency>");
     }
-    sb.append("<%type% %type_attribs%><script %uri%>%content%</script></%type%>");
+    sb.append("<%type% %type_attribs%><script %uri% %res_attribs%>%content%</script></%type%>");
     sb.append("</feature>");
     return sb.toString();
   }
@@ -666,14 +710,24 @@ public class FeatureRegistryTest {
   
   private static String xml(String tpl, String type, String uri, String content,
       Map<String, String> attribs) {
+    return xml(tpl, type, uri, content, attribs, Maps.<String, String>newHashMap());
+  }
+  
+  private static String xml(String tpl, String type, String uri, String content,
+      Map<String, String> attribs, Map<String, String> resourceAttribs) {
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, String> entry : attribs.entrySet()) {
       sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\" ");
     }
+    StringBuilder sbRes = new StringBuilder();
+    for (Map.Entry<String, String> entry : resourceAttribs.entrySet()) {
+      sbRes.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\" ");
+    }
     return tpl.replaceAll("%type%", type)
         .replaceAll("%uri%", uri != null ? "src=\"" + uri + '\"' : "")
         .replaceAll("%content%", content != null ? content : "")
-        .replaceAll("%type_attribs%", sb.toString());
+        .replaceAll("%type_attribs%", sb.toString())
+        .replaceAll("%res_attribs%", sbRes.toString());
   }
   
   private static Uri makeFile(String content) throws Exception {
