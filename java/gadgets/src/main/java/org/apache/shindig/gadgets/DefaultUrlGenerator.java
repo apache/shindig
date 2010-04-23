@@ -161,6 +161,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
     } else {
       uri.addQueryParameter("v", spec.getChecksum());
     }
+    uri.addQueryParameter("debug", context.getDebug() ? "1" : "0");
 
     uri.addQueryParameter("lang", context.getLocale().getLanguage());
     uri.addQueryParameter("country", context.getLocale().getCountry());
@@ -176,7 +177,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
       uri.addQueryParameter("up_" + pref.getName(), value);
     }
     // add url last to work around browser bugs
-    if(type != View.ContentType.URL) {
+    if (type != View.ContentType.URL) {
       uri.addQueryParameter("url", url);
     }
 
