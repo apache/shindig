@@ -66,6 +66,7 @@
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
         <configuration>
+          <reload>manual</reload>
           <webAppConfig>
             <contextPath>/</contextPath>
             <baseResource implementation="org.mortbay.resource.ResourceCollection">
