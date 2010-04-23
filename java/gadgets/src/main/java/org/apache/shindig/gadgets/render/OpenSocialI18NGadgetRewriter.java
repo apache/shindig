@@ -75,8 +75,8 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
       String dateTimeConstantsResource = "DateTimeConstants__" + localeName + ".js";
       String numberConstantsResource = "NumberFormatConstants__" + localeName + ".js";
       try {
-        inlineJs.append(ResourceLoader.getContent(dateTimeConstantsResource))
-            .append('\n').append(ResourceLoader.getContent(numberConstantsResource));
+        inlineJs.append(attemptToLoadResource(dateTimeConstantsResource))
+            .append('\n').append(attemptToLoadResource(numberConstantsResource));
         i18nConstantsCache.put(locale, inlineJs.toString());
       } catch (IOException e) {
         throw new GadgetException(GadgetException.Code.INVALID_CONFIG,
@@ -95,24 +95,30 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     String country = locale.getCountry(); 
     if (!language.equalsIgnoreCase("ALL")) {
       try {
-        attemptToLoadResource(language);
+        attemptToLoadDateConstants(language);
         localeName = language; 
       } catch (IOException e) { }
     }
 
     if (!country.equalsIgnoreCase("ALL")) {
       try {
-        attemptToLoadResource(localeName + '_' + country);
+        attemptToLoadDateConstants(localeName + '_' + country);
         localeName += '_' + country;
       } catch (IOException e) { }
     } 
     return localeName;
   }
 
-  protected String attemptToLoadResource(String localeName) throws IOException {
-    return ResourceLoader.getContent(DATA_PATH
-        + "DateTimeConstants__" + localeName 
-        + ".js");
+  private String attemptToLoadDateConstants(String localeName) throws IOException {
+    return attemptToLoadResource("DateTimeConstants__" + localeName + ".js");
+  }
+  
+  private String attemptToLoadResource(String i18nRes) throws IOException {
+    return attemptToLoadResourceFullyQualified(DATA_PATH + i18nRes);
+  }
+  
+  protected String attemptToLoadResourceFullyQualified(String resource) throws IOException {
+    return ResourceLoader.getContent(resource);
   }
 }
 
