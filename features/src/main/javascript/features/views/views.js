@@ -286,6 +286,9 @@ gadgets.views = function() {
       if (typeof view !== "string") {
         view = view.getName();
       }
+      // TODO If we want to implement a POPUP view we'll have to do it here,
+      // The parent frame's attempts to use window.open will fail since it's not
+      // directly initiated from the onclick handler
       gadgets.rpc.call(null, "requestNavigateTo", null, view, opt_params, opt_ownerId);
     },
 
