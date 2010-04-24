@@ -23,6 +23,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenDecoder;
 
 import com.google.common.collect.Maps;
+import org.apache.shindig.auth.SecurityTokenException;
 
 import java.util.Map;
 
@@ -207,6 +208,10 @@ public class FakeGadgetToken implements SecurityToken {
   public static class Decoder implements SecurityTokenDecoder {
     public SecurityToken createToken(Map<String, String> tokenParameters)  {
       return FakeGadgetToken.createToken(tokenParameters);
+    }
+
+    public String encodeToken(SecurityToken token) throws SecurityTokenException {
+      return null; // NOT USED
     }
   }
 }

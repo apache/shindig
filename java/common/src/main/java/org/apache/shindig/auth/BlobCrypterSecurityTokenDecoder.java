@@ -117,4 +117,18 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
       throw new SecurityTokenException(e);
     }
   }
+
+  public String encodeToken(SecurityToken token) throws SecurityTokenException {
+    if (! (token instanceof BlobCrypterSecurityToken)) {
+      throw new SecurityTokenException("Can only encode BlogCrypterSecurityTokens");
+    }
+
+    BlobCrypterSecurityToken t = (BlobCrypterSecurityToken)token;
+
+    try {
+      return t.encrypt();
+    } catch (BlobCrypterException e) {
+      throw new SecurityTokenException(e);
+    }
+  }
 }

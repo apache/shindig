@@ -49,4 +49,6 @@ public interface SecurityTokenDecoder {
    */
   SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException;
+
+  String encodeToken(SecurityToken token) throws SecurityTokenException;
 }
