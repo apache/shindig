@@ -67,7 +67,8 @@ public class XmlUtil {
           @Override
           protected DocumentBuilder initialValue() {
             try {
-              LOG.info("Created a new document builder");
+              if (LOG.isLoggable(Level.FINE))
+                LOG.fine("Created a new document builder");
               return builderFactory.newDocumentBuilder();
             } catch (ParserConfigurationException e) {
               throw new RuntimeException(e);
