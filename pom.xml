@@ -1348,13 +1348,6 @@
         <version>2.0</version>
       </dependency>
 
-      <!-- dependency not declared in guice pom 
-      <dependency>
-        <groupId>aopalliance</groupId>
-        <artifactId>aopalliance</artifactId>
-        <version>1.0</version>
-      </dependency> -->
-
       <dependency>
         <groupId>com.google.collections</groupId>
         <artifactId>google-collections</artifactId>

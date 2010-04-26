@@ -84,12 +84,6 @@
       <artifactId>guice-jmx</artifactId>
     </dependency>
 
-
-    <!--<dependency>
-      <groupId>aopalliance</groupId>
-      <artifactId>aopalliance</artifactId>
-    </dependency>
--->
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
