@@ -177,6 +177,7 @@ gadgets.rpc = function() {
    */
   function getRelayChannel() {
     return typeof window.postMessage === 'function' ? 'wpm' :
+           typeof window.postMessage === 'object' ? 'wpm':
            typeof document.postMessage === 'function' ? 'dpm' :
            window.ActiveXObject ? 'nix' : 
            navigator.product === 'Gecko' ? 'fe' :
@@ -192,10 +193,17 @@ gadgets.rpc = function() {
     // postMessage based ones, setup the handler to receive
     // messages.
     if (relayChannel === 'dpm' || relayChannel === 'wpm') {
-      window.addEventListener('message', function(packet) {
+      var onmessage = function (packet) {
         // TODO validate packet.domain for security reasons
         process(gadgets.json.parse(packet.data));
-      }, false);
+      }
+      
+      if (typeof window.addEventListener != 'undefined') { 
+        window.addEventListener('message', onmessage, false);
+      } else if (typeof window.attachEvent != 'undefined') {
+        window.attachEvent('onmessage', onmessage);
+      }
+      
     }
 
     // If the channel type is NIX, we need to ensure the
