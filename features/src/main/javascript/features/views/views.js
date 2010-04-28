@@ -211,8 +211,11 @@ gadgets.views = function() {
      *                 defaults to the current owner.
      */
     requestNavigateTo : function(view, opt_params, opt_ownerId) {
+      if (typeof view !== "string") {
+        view = view.getName();
+      }
       gadgets.rpc.call(
-          null, "requestNavigateTo", null, view.getName(), opt_params, opt_ownerId);
+          null, "requestNavigateTo", null, view, opt_params, opt_ownerId);
     },
 
     /**
