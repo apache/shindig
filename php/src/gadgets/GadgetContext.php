@@ -284,7 +284,7 @@ class GadgetContext {
    * @return SecurityToken An object representation of the token data.
    */
   public function validateToken($token, $signer) {
-    if (count(explode(':', $token)) != 7) {
+    if (count(explode(':', $token)) < 7) {
       $token = urldecode(base64_decode($token));
     }
     if (empty($token)) {

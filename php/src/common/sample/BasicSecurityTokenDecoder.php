@@ -40,8 +40,10 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
     try {
       //TODO remove this once we have a better way to generate a fake token
       // in the example files
-      if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) == 7) {
-        $tokens = explode(":", $stringToken);
+      if (Config::get('allow_plaintext_token') && count(explode(':', $stringToken)) >= 7) {
+      	//Parses the security token in the form st=o:v:a:d:u:m:c
+	    $tokens = $this->parseToken($stringToken);
+	    
         return new BasicSecurityToken(null, null, urldecode($tokens[$this->OWNER_INDEX]), urldecode($tokens[$this->VIEWER_INDEX]), urldecode($tokens[$this->APP_ID_INDEX]), urldecode($tokens[$this->DOMAIN_INDEX]), urldecode($tokens[$this->APP_URL_INDEX]), urldecode($tokens[$this->MODULE_ID_INDEX]), urldecode($tokens[$this->CONTAINER_INDEX]));
       } else {
         return BasicSecurityToken::createFromToken($stringToken, Config::get('token_max_age'));
@@ -50,4 +52,21 @@ class BasicSecurityTokenDecoder extends SecurityTokenDecoder {
       throw new GadgetException('INVALID_GADGET_TOKEN');
     }
   }
+
+  /**
+   * {@inheritDoc}
+   *
+   * Parses the security token
+   */
+  private function parseToken($stringToken) {
+    $data = explode(":", $stringToken);
+	$url_number = count($data)-6;
+
+	//get array elements conrresponding to broken url - http://host:port/gadget.xml -> ["http","//host","port/gadget.xml"]
+	$url_array = array_slice($data,4,$url_number) ;
+	$url = implode(":",$url_array);
+	array_splice($data,4,$url_number,$url);
+    return $data;
+  }
+
 }

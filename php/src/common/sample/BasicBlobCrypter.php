@@ -83,8 +83,9 @@ class BasicBlobCrypter extends BlobCrypter {
    */
   public function unwrap($in, $maxAgeSec) {
     //TODO remove this once we have a better way to generate a fake token in the example files
-    if ($this->allowPlaintextToken && count(explode(':', $in)) == 7) {
-      $data = explode(":", $in);
+    if ($this->allowPlaintextToken && count(explode(':', $in)) >= 7) {
+      //Parses the security token in the form st=o:v:a:d:u:m:c
+      $data = $this->parseToken($in);
       $out = array();
       $out['o'] = $data[0];
       $out['v'] = $data[1];
@@ -111,6 +112,22 @@ class BasicBlobCrypter extends BlobCrypter {
       $this->checkTimestamp($out, $maxAgeSec);
     }
     return $out;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * Parses the security token
+   */
+  private function parseToken($stringToken) {
+    $data = explode(":", $stringToken);
+	$url_number = count($data)-6;
+
+	//get array elements conrresponding to broken url - http://host:port/gadget.xml -> ["http","//host","port/gadget.xml"]
+	$url_array = array_slice($data,4,$url_number) ;
+	$url = implode(":",$url_array);
+	array_splice($data,4,$url_number,$url);
+    return $data;
   }
 
   private function deserialize($plain) {

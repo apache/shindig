@@ -89,5 +89,19 @@ class BasicBlobCrypterTest extends PHPUnit_Framework_TestCase {
     $this->BasicBlobCrypter->unwrap($wrapped, - 4000);
   }
 
+  /**
+   * Tests BasicBlobCrypter->unwrap() with plaintext token
+   */
+  public function testUnwrapPlaintextToken() {
+    $token = "o:v:a:d:http://host:80/gadget.xml:m:c";
+    $unwrapped = $this->BasicBlobCrypter->unwrap($token, null);
+    $this->assertEquals($unwrapped['o'], 'o');
+    $this->assertEquals($unwrapped['v'], 'v');
+    $this->assertEquals($unwrapped['a'], 'a');
+    $this->assertEquals($unwrapped['d'], 'd');
+    $this->assertEquals($unwrapped['u'], 'http://host:80/gadget.xml');
+    $this->assertEquals($unwrapped['m'], 'm');
+  }
+
 }
 
