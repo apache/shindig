@@ -138,7 +138,7 @@ public class JsServlet extends InjectedServlet {
 
       if (features != null) {
         // Discard what we don't care about.
-        for (String name : needed) {
+        for (String name : registry.getFeatures(needed)) {
           Object conf = features.get(name);
           if (conf != null) {
             config.put(name, conf);
