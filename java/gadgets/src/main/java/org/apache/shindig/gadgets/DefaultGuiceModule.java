@@ -18,6 +18,13 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.ImmutableSet;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -27,11 +34,6 @@ import org.apache.shindig.gadgets.rewrite.RewriteModule;
 import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.uri.UriModule;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -64,15 +66,18 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new TemplateModule());
     install(new UriModule());
 
-    // Handlers for /gadgets/rpc
-    bind(new TypeLiteral<Set<Object>>(){}).annotatedWith(
-        Names.named("org.apache.shindig.gadgets.handlers"))
-        .toInstance(ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class));
     // bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60l);
-
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
+  }
+
+
+  @Provides
+  @Singleton
+  @Named("org.apache.shindig.gadgets.handlers")
+  protected Set<Object> getGadgetHandlers() {
+    return ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class);
   }
 
 

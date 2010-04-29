@@ -18,6 +18,12 @@
  */
 package org.apache.shindig.gadgets.templates;
 
+import com.google.common.collect.ImmutableSet;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+
 import org.apache.shindig.gadgets.templates.tags.FlashTagHandler;
 import org.apache.shindig.gadgets.templates.tags.HtmlTagHandler;
 import org.apache.shindig.gadgets.templates.tags.IfTagHandler;
@@ -26,43 +32,29 @@ import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.apache.shindig.gadgets.templates.tags.VariableTagHandler;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
-
 import java.util.Set;
 
 /**
- * Guice Module to provide Template-specific classes 
+ * Guice Module to provide Template-specific classes
  */
 public class TemplateModule extends AbstractModule {
 
   @Override
   protected void configure() {
     bind(TemplateProcessor.class).to(DefaultTemplateProcessor.class);
-    // TODO: switch to Guice multibindings when that JAR becomes available
-    // in a Maven repository
-    bind(new TypeLiteral<Set<TagHandler>>(){}).toProvider(TagHandlersProvider.class); 
   }
-   
-  public static class TagHandlersProvider implements Provider<Set<TagHandler>> {
-    
-    private final Set<TagHandler> handlers;
-    
-    @Inject
-    public TagHandlersProvider(HtmlTagHandler htmlHandler, 
-        IfTagHandler ifHandler, RepeatTagHandler repeatHandler, 
-        RenderTagHandler renderHandler, FlashTagHandler flashHandler,
-        VariableTagHandler variableHandler) {
-      handlers = ImmutableSet.of((TagHandler) htmlHandler, ifHandler,
-          repeatHandler, renderHandler, flashHandler,
-          variableHandler);
-    }
-    
-    public Set<TagHandler> get() {
-      return handlers;
-    }
+
+  // TODO: switch to Guice multibindings when that JAR becomes available
+  // in a Maven repository
+
+  @Provides
+  @Singleton
+  protected Set<TagHandler> getTagHandlers(HtmlTagHandler htmlHandler,
+                                           IfTagHandler ifHandler, RepeatTagHandler repeatHandler,
+                                           RenderTagHandler renderHandler, FlashTagHandler flashHandler,
+                                           VariableTagHandler variableHandler) {
+    return ImmutableSet.of((TagHandler) htmlHandler, ifHandler,
+        repeatHandler, renderHandler, flashHandler,
+        variableHandler);
   }
 }

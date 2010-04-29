@@ -410,12 +410,12 @@ public class SanitizingGadgetRewriter implements GadgetRewriter {
   }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.PARAMETER)
+  @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
   @BindingAnnotation
   public @interface AllowedTags { }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.PARAMETER)
+  @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
   @BindingAnnotation
   public @interface AllowedAttributes { }
 }
