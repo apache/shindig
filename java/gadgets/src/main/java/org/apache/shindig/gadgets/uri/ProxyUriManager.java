@@ -158,7 +158,7 @@ public interface ProxyUriManager {
       req.setParam(Param.RESIZE_QUALITY.getKey(), resizeQuality);
       req.setParam(Param.NO_EXPAND.getKey(), resizeNoExpand ? "1" : "0");
       return req;
-    };
+    }
     
     
     public static List<ProxyUri> fromList(Gadget gadget, List<Uri> uris) {
