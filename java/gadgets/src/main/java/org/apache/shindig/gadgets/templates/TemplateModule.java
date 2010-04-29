@@ -49,7 +49,7 @@ public class TemplateModule extends AbstractModule {
 
   @Provides
   @Singleton
-  protected Set<TagHandler> getTagHandlers(HtmlTagHandler htmlHandler,
+  protected Set<TagHandler> provideTagHandlers(HtmlTagHandler htmlHandler,
                                            IfTagHandler ifHandler, RepeatTagHandler repeatHandler,
                                            RenderTagHandler renderHandler, FlashTagHandler flashHandler,
                                            VariableTagHandler variableHandler) {

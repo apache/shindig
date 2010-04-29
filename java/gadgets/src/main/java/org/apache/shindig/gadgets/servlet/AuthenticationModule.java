@@ -41,7 +41,7 @@ public class AuthenticationModule extends AbstractModule {
 
   @Provides
   @Singleton
-  List<AuthenticationHandler> getAuthenticationHandlers(UrlParameterAuthenticationHandler urlParameterAuthHandler,
+  List<AuthenticationHandler> provideAuthenticationHandlers(UrlParameterAuthenticationHandler urlParameterAuthHandler,
                                                         AnonymousAuthenticationHandler anonymoustAuthHandler) {
       return ImmutableList.of(urlParameterAuthHandler, anonymoustAuthHandler);
   }

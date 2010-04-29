@@ -47,7 +47,7 @@ public class RewriteModule extends AbstractModule {
   @Provides
   @Singleton
   @Named("shindig.rewriters.gadget")
-  protected List<GadgetRewriter> getGadgetRewriters(
+  protected List<GadgetRewriter> provideGadgetRewriters(
       PipelineDataGadgetRewriter pipelineRewriter,
       TemplateRewriter templateRewriter,
       HTMLContentRewriter optimizingRewriter,
@@ -62,7 +62,7 @@ public class RewriteModule extends AbstractModule {
   @Provides
   @Singleton
   @Named("shindig.rewriters.accelerate")
-  protected List<GadgetRewriter> getAccelRewriters(
+  protected List<GadgetRewriter> provideAccelRewriters(
       HTMLContentRewriter optimizingRewriter,
       CajaContentRewriter cajaRewriter) {
     return ImmutableList.of(optimizingRewriter, cajaRewriter);
@@ -70,7 +70,7 @@ public class RewriteModule extends AbstractModule {
 
   @Provides
   @Singleton
-  protected List<RequestRewriter> getRequestRewriters(
+  protected List<RequestRewriter> provideRequestRewriters(
       HTMLContentRewriter optimizingRewriter,
       CssRequestRewriter cssRewriter,
       SanitizingRequestRewriter sanitizedRewriter) {

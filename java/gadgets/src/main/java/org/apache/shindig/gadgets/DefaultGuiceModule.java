@@ -76,7 +76,7 @@ public class DefaultGuiceModule extends AbstractModule {
   @Provides
   @Singleton
   @Named("org.apache.shindig.gadgets.handlers")
-  protected Set<Object> getGadgetHandlers() {
+  protected Set<Object> provideGadgetHandlers() {
     return ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class);
   }
 
