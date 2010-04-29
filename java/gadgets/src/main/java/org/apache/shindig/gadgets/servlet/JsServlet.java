@@ -19,7 +19,9 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableSet;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.config.ContainerConfig;
@@ -34,6 +36,7 @@ import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,6 +58,12 @@ public class JsServlet extends InjectedServlet {
   @Inject
   public void setUrlGenerator(UrlGenerator urlGenerator) {
     this.urlGenerator = urlGenerator;
+  }
+
+  private ContainerConfig containerConfig;
+  @Inject
+  public void setContainerConfig(ContainerConfig containerConfig) {
+    this.containerConfig = containerConfig;
   }
 
   @Override
@@ -105,8 +114,8 @@ public class JsServlet extends InjectedServlet {
         return container;
       }
     };
-    Collection<? extends FeatureResource> resources =
-        registry.getFeatureResources(ctx, needed, null);
+
+    Collection<? extends FeatureResource> resources = registry.getFeatureResources(ctx, needed, null);
     StringBuilder jsData = new StringBuilder();
     boolean isProxyCacheable = true;
     for (FeatureResource featureResource : resources) {
@@ -121,7 +130,24 @@ public class JsServlet extends InjectedServlet {
       jsData.append(";\n");
     }
 
+    if (context == RenderingContext.CONTAINER) {
+      // Append some container specific things
 
+      Map<String, Object> features = containerConfig.getMap(ctx.getContainer(), "gadgets.features");
+      Map<String, Object> config = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
+
+      if (features != null) {
+        // Discard what we don't care about.
+        for (String name : needed) {
+          Object conf = features.get(name);
+          if (conf != null) {
+            config.put(name, conf);
+          }
+        }
+        jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
+      }
+    }
+    
     if (jsData.length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
