@@ -17,12 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.HtmlSerialization;
 import org.w3c.dom.Document;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -33,6 +39,7 @@ import com.google.common.collect.Maps;
  */
 public class MutableContent {
   private String content;
+  private byte[] contentBytes;
   private HttpResponse contentSource;
   private Document document;
   private int numChanges;
@@ -68,7 +75,6 @@ public class MutableContent {
     this.pipelinedData = Maps.newHashMap();
   }
 
-
   /**
    * Retrieves the current content for this object in String form.
    * If content has been retrieved in parse tree form and has
@@ -77,6 +83,8 @@ public class MutableContent {
    * between retrieval of parse tree (through {@code getParseTree}),
    * with subsequent edits and retrieval of String contents to avoid
    * repeated serialization and deserialization.
+   * As a final fallback, if content has been set as bytes, interprets
+   * them as a UTF8 String.
    * @return Renderable/active content.
    */
   public String getContent() {
@@ -87,6 +95,12 @@ public class MutableContent {
         contentSource = null;
       } else if (document != null) {
         content = HtmlSerialization.serialize(document);
+      } else if (contentBytes != null) {
+        try {
+          content = new String(contentBytes, "UTF8");
+        } catch (UnsupportedEncodingException e) {
+          // Never happens.
+        }
       }
     }
     return content;
@@ -94,7 +108,7 @@ public class MutableContent {
   
   /**
    * Sets the object's content as a raw String. Note, this operation
-   * may clears the document if the content has changed
+   * may clear the document if the content has changed
    * @param newContent New content.
    */
   public void setContent(String newContent) {
@@ -103,19 +117,67 @@ public class MutableContent {
       content = newContent;
       document = null;
       contentSource = null;
+      contentBytes = null;
       numChanges++;
     }
   }
 
+  /**
+   * Retrieves the current content for this object as bytes.
+   * The returned byte array should be treated as immutable. If it
+   * is modified, resultant behavior is
+   * @return Active content as bytes.
+   */
+  public InputStream getContentBytes() {
+    if (contentBytes == null) {
+      if (contentSource != null) {
+        try {
+          contentBytes = IOUtils.toByteArray(contentSource.getResponse());
+          contentSource = null;
+        } catch (IOException e) {
+          // Doesn't occur; responseBytes wrapped as a ByteArrayInputStream.
+        }
+      } else if (content != null) {
+        try {
+          contentBytes = content.getBytes("UTF8");
+        } catch (UnsupportedEncodingException e) {
+          // Doesn't happen.
+        }
+      } else if (document != null) {
+        try {
+          contentBytes = HtmlSerialization.serialize(document).getBytes("UTF8");
+        } catch (UnsupportedEncodingException e) {
+          // Doesn't happen.
+        }
+      }
+    }
+    return new ByteArrayInputStream(contentBytes);
+  }
+  
+  /**
+   * Sets the object's contentBytes as the given raw input.
+   * Note, this operation may clear the document if the content has changed.
+   * @param newBytes New content.
+   */
+  public void setContentBytes(byte[] newBytes) {
+    if (contentBytes == null || Arrays.equals(contentBytes, newBytes)) {
+      contentBytes = newBytes;
+      document = null;
+      contentSource = null;
+      content = null;
+      numChanges++;
+    }
+  }
 
   /**
    * Notification that the content of the document has changed. Causes the content
-   * string to be cleared
+   * string and bytes to be cleared.
    */
   public void documentChanged() {
     if (document != null) {
       content = null;
       contentSource = null;
+      contentBytes = null;
       numChanges++;
     }
   }
