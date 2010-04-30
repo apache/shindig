@@ -45,7 +45,7 @@ import java.util.List;
 @Table(name = "media_item")
 public class MediaItemDb implements MediaItem, DbObject {
   /**
-   * The internal object ID used for references to this object. Should be generated 
+   * The internal object ID used for references to this object. Should be generated
    * by the underlying storage mechanism
    */
   @Id
@@ -109,6 +109,146 @@ public class MediaItemDb implements MediaItem, DbObject {
   private String url;
 
   /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "album_id")
+  private String albumId;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "created")
+  private String created;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "description")
+  private String description;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "title")
+  private String title;
+
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "duration")
+  private String duration;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "file_size")
+  private String fileSize;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "id")
+  private String id;
+
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "language")
+  private String language;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "last_updated")
+  private String lastUpdated;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "location")
+  private String location;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "num_comments")
+  private String numComments;
+
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "num_views")
+  private String numViews;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "num_votes")
+  private String numVotes;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "rating")
+  private String rating;
+
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "start_time")
+  private String startTime;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "tagged_people")
+  private String taggedPeople;
+
+  /**
+   * model field.
+   * @see org.apache.shindig.social.opensocial.model.MediaItem
+   */
+  @Basic
+  @Column(name = "tags")
+  private String tags;
+
+  /**
    * Create a new blank media item.
    */
   public MediaItemDb() {
@@ -126,7 +266,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     this.url = url;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#getMimeType()
    */
@@ -134,7 +274,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     return mimeType;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#setMimeType(java.lang.String)
    */
@@ -142,7 +282,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     this.mimeType = mimeType;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#getType()
    */
@@ -150,7 +290,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     return type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#setType(org.apache.shindig.social.opensocial.model.MediaItem.Type)
    */
@@ -158,7 +298,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     this.type = type;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#getUrl()
    */
@@ -166,7 +306,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     return url;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#setUrl(java.lang.String)
    */
@@ -174,7 +314,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     this.url = url;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#getThumbnailUrl()
    */
@@ -182,7 +322,7 @@ public class MediaItemDb implements MediaItem, DbObject {
     return thumbnailUrl;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.model.MediaItem#setThumbnailUrl(java.lang.String)
    */
@@ -190,7 +330,242 @@ public class MediaItemDb implements MediaItem, DbObject {
     this.thumbnailUrl = url;
   }
 
-  /** 
+  /**
+   * {@inheritDoc}
+   */
+  public String getAlbumId() {
+    return albumId;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setAlbumId(String albumId) {
+    this.albumId = albumId;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getCreated() {
+    return created;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setCreated(String created) {
+    this.created = created;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getDuration() {
+    return duration;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setDuration(String duration) {
+    this.duration = duration;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getFileSize() {
+    return fileSize;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setFileSize(String fileSize) {
+    this.fileSize = fileSize;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getLanguage() {
+    return language;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public void setLastUpdated(String lastUpdated) {
+    this.lastUpdated = lastUpdated;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getLocation() {
+    return location;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setLocation(String location) {
+    this.location = location;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getNumComments() {
+    return numComments;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setNumComments(String numComments) {
+    this.numComments = numComments;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getNumViews() {
+    return numViews;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setNumViews(String numViews) {
+    this.numViews = numViews;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getNumVotes() {
+    return numVotes;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setNumVotes(String numVotes) {
+    this.numVotes = numVotes;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getRating() {
+    return rating;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setRating(String rating) {
+    this.rating = rating;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getStartTime() {
+    return startTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setStartTime(String startTime) {
+    this.startTime = startTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getTaggedPeople() {
+    return taggedPeople;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setTaggedPeople(String taggedPeople) {
+    this.taggedPeople = taggedPeople;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getTags() {
+    return tags;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setTags(String tags) {
+    this.tags = tags;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  /**
    * {@inheritDoc}
    * @see org.apache.shindig.social.opensocial.jpa.api.DbObject#getObjectId()
    */
