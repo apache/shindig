@@ -4,7 +4,7 @@ for that, you'd need to look over the log messages to see all the
 patch contributors.
 
 If you have a question or comment, it's probably best to mail
-dev@shindig.apache.org, rather than mailing any of these
+shindig-dev@incubator.apache.org, rather than mailing any of these
 people directly.
 
 Blanket commit access:
@@ -31,6 +31,7 @@ Blanket commit access:
 	     chico	Chico Charlesworth  chico@apache.org         PMC Member
 	    chirag	Chirag Shah         chirag@apache.org        PMC Member
 	  chaowang	Jacky Wang          chaowang@apache.org      PMC Member
+	   zhoresh	Ziv Horesh          zhoresh@apache.org       PMC Member
 	      fitz	Brian Fitzpatrick   fitz@apache.org          Mentor    
 	    gstein	Greg Stein          gstein@apache.org        Emeritus Mentor
 	   sylvain	Sylvain Wallez      sylvain@apache.org       Mentor    

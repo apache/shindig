@@ -320,6 +320,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>zhoresh</id>
+      <name>Ziv Horesh</name>
+      <email>zhoresh@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
     <!-- Mentors -->
     <developer>
       <id>fitz</id>
