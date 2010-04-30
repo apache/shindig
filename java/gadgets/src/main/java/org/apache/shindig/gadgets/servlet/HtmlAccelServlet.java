@@ -17,10 +17,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.DefaultGadgetSpecFactory;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -28,8 +30,10 @@ import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,6 +63,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
   public static final String HTML_CONTENT = "text/html";
   public static final String CONTENT_ENCODING = "Content-Encoding";
   public static final String CONTENT_LENGTH = "Content-Length";
+  public static final String DEFAULT_CONTAINER ="accel";
 
   /** Fake spec to wrap the html data */
   private static final String FAKE_SPEC_TPL = 
@@ -90,7 +95,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
       @Named("shindig.accelerate.added-params") Map<String, String> params) {
     this.addedServletParams = params;
   }
-  
+
   public static boolean isAccel(GadgetContext context) {
     return context.getParameter(HtmlAccelServlet.ACCEL_GADGET_PARAM_NAME) ==
       HtmlAccelServlet.ACCEL_GADGET_PARAM_VALUE;
@@ -102,7 +107,20 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
 
     // Get data to accelerate:
     HttpResponse data;
-    HttpGadgetContext context = new HttpGadgetContext(req);
+    final Map<String, List<String>> requestParams = getAccelParams(req);
+
+    // Create request to handle parsed params
+    final HttpServletRequestWrapper dataWrapper = new HttpServletRequestWrapper(req) {
+      @Override
+      public String getParameter(String name) {
+        if (requestParams.containsKey(name)) {
+          List<String> values = requestParams.get(name);
+          if (values != null && values.size() > 0) return values.get(0);
+        }
+        return null;
+      }
+    };
+    HttpGadgetContext context = new HttpGadgetContext(dataWrapper);
     try {
       data = fetch(context);
     } catch (GadgetException e) {
@@ -125,6 +143,12 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     // For html, use the gadgetServlet for rewrite
     String content = data.getResponseAsString();
 
+    // Use response TTL, by using the refresh param:
+    if (!requestParams.containsKey(UriCommon.Param.REFRESH.getKey()) && data.getCacheTtl() > 0) {
+      requestParams.put(UriCommon.Param.REFRESH.getKey(),
+          ImmutableList.of(Long.toString(data.getCacheTtl() / 1000)));
+    }
+    
     // Create fake spec wrapper for the html:
     // (Note that the content can be big so don't use the limited String.Format)
     final String spec = createFakeSpec(content);
@@ -143,7 +167,11 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
         if (name == DefaultGadgetSpecFactory.RAW_GADGETSPEC_XML_PARAM_NAME) {
           return spec;
         }
-        // Allow overriding extra params (i.e. container)
+        String value = dataWrapper.getParameter(name);
+        if (value != null) {
+          return value;
+        }
+        // Allow overriding extra params
         if (addedServletParams != null && addedServletParams.containsKey(name)) {
           return addedServletParams.get(name);
         }
@@ -174,7 +202,6 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
   }
 
   private HttpResponse fetch(HttpGadgetContext context) throws GadgetException {
-
     if (context.getUrl() == null) {
       throw new GadgetException(Code.INVALID_PARAMETER, "Missing url paramater",
           HttpResponse.SC_BAD_REQUEST);
@@ -212,5 +239,46 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     String data = content.replace("]]>", "<![CDATA[")
       .replace("<![CDATA[", "]]><![CDATA[");
     return String.format(FAKE_SPEC_TPL, data);   
+  }
+  
+  /**
+   * Parse request to get accelerated parameters
+   * Support parameterize using the url query param,
+   * Or chained using the url pattern: <prefix>/<params>/<url>
+   * For example:
+   * http://shindig.com/gadgets/accel/refresh=300/http://example.com/accelerate.html?id=X
+   */
+  protected Map<String, List<String>> getAccelParams(HttpServletRequest req) {
+    String path = new UriBuilder(req).getPath();
+    String accelServletPrefix = req.getServletPath();
+
+    String paramsStr = null;
+    String accelUrl = null;
+    // Check for chain param style request:
+    if (path.startsWith(accelServletPrefix + "/")) {
+      int startQuery = accelServletPrefix.length() + 1;
+      int endQuery = path.indexOf("/", startQuery);
+      if (endQuery >= startQuery) {
+        paramsStr = path.substring(startQuery, endQuery);
+        accelUrl = path.substring(endQuery + 1); // + "?" + req.getQueryString();
+      }
+    }
+    // Otherwise Get original request params:
+    if (paramsStr == null) {
+      paramsStr = req.getQueryString();
+    }
+    
+    // Convert to parameter maps:
+    UriBuilder uriBuilder = new UriBuilder().setQuery(paramsStr);
+    Map<String, List<String>> params = uriBuilder.getQueryParameters();
+    if (accelUrl != null) {
+      params.put(UriCommon.Param.URL.getKey(), ImmutableList.of(accelUrl));
+    }
+
+    // Add defaults:
+    if (!params.containsKey(UriCommon.Param.CONTAINER.getKey())) {
+      params.put(UriCommon.Param.CONTAINER.getKey(), ImmutableList.of(DEFAULT_CONTAINER));
+    }
+    return params;
   }
 }

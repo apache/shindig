@@ -18,10 +18,11 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
-import com.google.caja.util.Maps;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -33,6 +34,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
+import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,7 +44,7 @@ import java.util.Map;
 public class HtmlAccelServletTest extends ServletTestFixture {
 
   private static final String REWRITE_CONTENT = "working rewrite";
-  
+  private static final String SERVLET = "/gadgets/accel";
   private HtmlAccelServlet servlet;
   private Renderer renderer;
 
@@ -61,7 +63,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     
     HttpRequest req = new HttpRequest(Uri.parse(url));
     expect(pipeline.execute(req)).andReturn(null).once();
-    expect(request.getParameter("url")).andReturn(url).once();
+    expectRequest("", url);
     replay();
     
     servlet.doGet(request, recorder);
@@ -82,7 +84,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .setHttpStatusCode(200)
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
-    expect(request.getParameter("url")).andReturn(url).once();
+    expectRequest("", url);
     replay();
     
     servlet.doGet(request, recorder);
@@ -102,10 +104,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .setHttpStatusCode(200)
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
-    expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
-        .once();
-    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expectRequest("", url);
     expect(renderer.render(isA(GadgetContext.class)))
         .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
@@ -114,6 +113,62 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     verify();
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
+  }
+
+  @Test
+  public void testHtmlAccelRewriteChain() throws Exception {
+    String url = "http://example.org/data.html?id=1";
+    String data = "<html><body>Hello World</body></html>";
+    
+    Capture<HttpRequest> reqCapture = new Capture<HttpRequest>();
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setCacheTtl(567)
+        .setHttpStatusCode(200)
+        .create();
+    expect(pipeline.execute(capture(reqCapture))).andReturn(resp).once();
+    expectRequest("//" + url, null);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    
+    servlet.doGet(request, recorder);
+    verify();
+    HttpRequest req = reqCapture.getValue();
+    assertEquals(url, req.getUri().toString());
+    assertEquals("accel", req.getContainer());
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertEquals("private,max-age=566", recorder.getHeader("Cache-Control"));
+    // Note: due to rounding (MS to S conversion), ttl is down by 1
+  }
+
+  @Test
+  public void testHtmlAccelRewriteChainParams() throws Exception {
+    String url = "http://example.org/data.html?id=1";
+    String data = "<html><body>Hello World</body></html>";
+    
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(200)
+        .create();
+    Capture<HttpRequest> reqCapture = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(reqCapture))).andReturn(resp).once();
+    expectRequest("/container=open&refresh=3600/" + url, null);
+    expect(renderer.render(isA(GadgetContext.class)))
+        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    
+    servlet.doGet(request, recorder);
+    verify();
+    HttpRequest req = reqCapture.getValue();
+    assertEquals(url, req.getUri().toString());
+    assertEquals("open", req.getContainer());
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertEquals("private,max-age=3600", recorder.getHeader("Cache-Control"));
   }
 
   @Test
@@ -128,10 +183,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .setHttpStatusCode(404)
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
-    expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
-        .once();
-    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expectRequest("", url);
     expect(renderer.render(isA(GadgetContext.class)))
         .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
@@ -154,10 +206,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .setHttpStatusCode(500)
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
-    expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
-        .once();
-    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expectRequest("", url);
     expect(renderer.render(isA(GadgetContext.class)))
         .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
@@ -192,16 +241,26 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .setHttpStatusCode(200)
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
-    expect(request.getParameter("url")).andReturn(url).once();
-    expect(request.getRequestURL()).andReturn(new StringBuffer("apache.org/gadgets/accel"))
-        .once();
-    expect(request.getQueryString()).andReturn("url=" + url).once();
+    expectRequest("", url);
     replay();
    
     servlet.doGet(request, recorder);
     verify();
   }
-  
+
+  private void expectRequest(String extraPath, String url) {
+    expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
+    expect(request.getScheme()).andReturn("http").once();
+    expect(request.getServerName()).andReturn("apache.org").once();
+    expect(request.getServerPort()).andReturn(-1).once();    
+    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();    
+    expect(request.getRequestURL())
+        .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
+        .anyTimes();
+    String queryParams = (url == null ? "" : "url=" + url);
+    expect(request.getQueryString()).andReturn(queryParams).anyTimes();
+  }
+
   private static class FakeUrlGenerator implements UrlGenerator {
 
     public UrlValidationStatus validateJsUrl(String url) {
