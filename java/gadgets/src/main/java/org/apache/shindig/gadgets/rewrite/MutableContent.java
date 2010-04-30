@@ -123,10 +123,8 @@ public class MutableContent {
   }
 
   /**
-   * Retrieves the current content for this object as bytes.
-   * The returned byte array should be treated as immutable. If it
-   * is modified, resultant behavior is
-   * @return Active content as bytes.
+   * Retrieves the current content for this object as an InputStream.
+   * @return Active content as InputStream.
    */
   public InputStream getContentBytes() {
     if (contentBytes == null) {
@@ -160,7 +158,7 @@ public class MutableContent {
    * @param newBytes New content.
    */
   public void setContentBytes(byte[] newBytes) {
-    if (contentBytes == null || Arrays.equals(contentBytes, newBytes)) {
+    if (contentBytes == null || !Arrays.equals(contentBytes, newBytes)) {
       contentBytes = newBytes;
       document = null;
       contentSource = null;
