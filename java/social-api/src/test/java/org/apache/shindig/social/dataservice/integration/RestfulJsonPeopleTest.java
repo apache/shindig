@@ -92,7 +92,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
 
     canonical.setBirthday(new Date());
     canonical.setDrinker(new EnumImpl<Enum.Drinker>(Enum.Drinker.SOCIALLY));
-    ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
+    ListField email = new ListFieldImpl("work", "dev@shindig.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
 
     canonical.setEthnicity("developer");
@@ -116,7 +116,7 @@ public class RestfulJsonPeopleTest extends AbstractLargeRestfulTests {
     job1.setStartDate(new Date());
     job1.setSubField("Development");
     job1.setTitle("Grand PooBah");
-    job1.setWebpage("http://incubator.apache.org/projects/shindig.html");
+    job1.setWebpage("http://shindig.apache.org/");
     job1.setType("job");
 
     Organization job2 = new OrganizationImpl();

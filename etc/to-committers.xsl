@@ -36,7 +36,7 @@ for that, you'd need to look over the log messages to see all the
 patch contributors.
 
 If you have a question or comment, it's probably best to mail
-shindig-dev@incubator.apache.org, rather than mailing any of these
+dev@shindig.apache.org, rather than mailing any of these
 people directly.
 
 Blanket commit access:&#xa;</xsl:text>

@@ -78,7 +78,7 @@
 "displayValue" : "Socially"
 },
 "emails" : [{
-"value" : "shindig-dev@incubator.apache.org",
+"value" : "dev@shindig.apache.org",
 "type" : "work"
 }],
 "ethnicity" : "developer",
@@ -103,7 +103,7 @@
 "startDate" : "1995-01-01",
 "subField" : "Development",
 "title" : "Grand PooBah",
-"webpage" : "http://incubator.apache.org/projects/shindig.html",
+"webpage" : "http://shindig.apache.org/",
 "type" : "job"
 },{
 "address" : {

@@ -19,7 +19,7 @@ code from its Subversion repository
 
 mkdir /var/www/html/shindig
 cd /var/www/html/shindig
-svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
+svn co http://svn.apache.org/repos/asf/shindig/trunk/ .
 
 
 Running Shindig
