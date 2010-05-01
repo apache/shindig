@@ -12,8 +12,8 @@
   Documentation
   -------------
 
-  The most up-to-date documentation can be found at http://incubator.apache.org/shindig/
-  and at http://incubator.apache.org/shindig/developers/java/index.html for specific 
+  The most up-to-date documentation can be found at http://shindig.apache.org/
+  and at http://shindig.apache.org/developers/java/index.html for specific 
   Java documentation.
 
   Release Notes
@@ -61,10 +61,10 @@
   Shindig URLS
   ------------
 
-  Home Page:          http://incubator.apache.org/shindig/
-  Downloads:          http://incubator.apache.org/shindig/download/index.html
-  Mailing Lists:      http://incubator.apache.org/shindig/mail-lists.html
-  Source Code:        http://svn.apache.org/repos/asf/incubator/shindig/
+  Home Page:          http://shindig.apache.org/
+  Downloads:          http://shindig.apache.org/download/index.html
+  Mailing Lists:      http://shindig.apache.org/mail-lists.html
+  Source Code:        http://svn.apache.org/repos/asf/shindig/
   Issue Tracking:     https://issues.apache.org/jira/browse/SHINDIG
   Wiki:               http://cwiki.apache.org/confluence/display/SHINDIG/
 

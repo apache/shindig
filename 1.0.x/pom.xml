@@ -28,7 +28,7 @@
 
   <groupId>org.apache.shindig</groupId>
   <artifactId>shindig-project</artifactId>
-  <version>1.0.1-incubating-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Shindig Project</name>
@@ -37,7 +37,7 @@
     backend APIs and proxy required for hosting OpenSocial
     applications.
   </description>
-  <url>http://incubator.apache.org/shindig</url>
+  <url>http://shindig.apache.org/</url>
   <inceptionYear>2007</inceptionYear>
 
   <prerequisites>
@@ -48,9 +48,9 @@
   <!-- S C M                                                                  -->
   <!-- ====================================================================== -->
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/branches/1.0.x-incubating</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/1.0.x</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/1.0.x</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/1.0.x</url>
   </scm>
 
   <!-- ====================================================================== -->
@@ -76,7 +76,7 @@
     <!-- This is the technical website for Shindig 1.0.x -->
     <site>
       <id>apache.website</id>
-      <url>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.0.x</url>
+      <url>scp://people.apache.org/www/shindig.apache.org/shindig-1.0.x</url>
     </site>
   </distributionManagement>
 
@@ -86,25 +86,25 @@
   <mailingLists>
     <mailingList>
       <name>Shindig Dev List</name>
-      <subscribe>shindig-dev-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>shindig-dev-unsubscribe@incubator.apache.org</unsubscribe>
-      <post>shindig-dev@incubator.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-shindig-dev/</archive>
+      <subscribe>dev-subscribe@shindig.apache.org</subscribe>
+      <unsubscribe>dev-unsubscribe@shindig.apache.org</unsubscribe>
+      <post>dev@shindig.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/shindig-dev/</archive>
       <otherArchives>
         <otherArchive>http://shindig-dev.markmail.org/</otherArchive>
       </otherArchives>
     </mailingList>
     <mailingList>
       <name>Shindig Commit List</name>
-      <subscribe>shindig-commits-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>shindig-commits-unsubscribe@incubator.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-shindig-commits/</archive>
+      <subscribe>commits-subscribe@shindig.apache.org</subscribe>
+      <unsubscribe>commits-unsubscribe@shindig.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/shindig-commits/</archive>
     </mailingList>
     <mailingList>
       <name>Shindig Issues List</name>
-      <subscribe>shindig-issues-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>shindig-issues-unsubscribe@incubator.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-shindig-issues/</archive>
+      <subscribe>issues-subscribe@shindig.apache.org</subscribe>
+      <unsubscribe>issues-unsubscribe@shindig.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/shindig-issues/</archive>
     </mailingList>
   </mailingLists>
 
@@ -496,7 +496,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-site-plugin</artifactId>
             <configuration>
-              <stagingSiteURL>scp://people.apache.org/www/incubator.apache.org/shindig/shindig-1.0.x/${pom.version}</stagingSiteURL>
+              <stagingSiteURL>scp://people.apache.org/www/shindig.apache.org/shindig-1.0.x/${pom.version}</stagingSiteURL>
             </configuration>
           </plugin>
         </plugins>
@@ -509,8 +509,8 @@
             <artifactId>maven-checkstyle-plugin</artifactId>
             <version>2.2</version>
             <configuration>
-              <configLocation>http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/site/checkstyle.xml</configLocation>
-              <headerLocation>http://svn.apache.org/repos/asf/incubator/shindig/branches/1.0.x-incubating/site/java.header</headerLocation>
+              <configLocation>http://svn.apache.org/repos/asf/shindig/branches/1.0.x/site/checkstyle.xml</configLocation>
+              <headerLocation>http://svn.apache.org/repos/asf/shindig/branches/1.0.x/site/java.header</headerLocation>
               <encoding>${project.build.sourceEncoding}</encoding>
             </configuration>
           </plugin>
@@ -962,7 +962,6 @@
             <configuration>
               <resourceBundles>
                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
               </resourceBundles>
             </configuration>
           </execution>
