@@ -62,7 +62,9 @@ gadgets.pubsubrouter = function() {
         var channelSubscribers = subscribers[channel];
         if (channelSubscribers) {
           for (var subscriber in channelSubscribers) {
-            gadgets.rpc.call(subscriber, 'pubsub', null, channel, sender, message);
+            if (channelSubscribers.hasOwnProperty(subscriber)) {
+              gadgets.rpc.call(subscriber, 'pubsub', null, channel, sender, message);
+            }
           }
         }
         break;
