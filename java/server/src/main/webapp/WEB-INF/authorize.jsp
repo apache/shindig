@@ -71,17 +71,9 @@ The following application wants to access your account information<br/><br/>
 <img src="${appThumbnail}" align="left" width="120" height="60"/>
 <c:out value="${appDesc}" default=""/>
 <br/>
-<c:if test="${SECURITY_THREAT_2009_1}">
-  <font color="red"><b>POSSIBLE SECURITY RISK</b> - 
-  Deny this request unless you directly initiated it from the Official 
-  <i><c:out value="${appTitle}"/></i> web site
-  </font>
-</c:if>
 
 <form name="authZForm" action="authorize" method="POST">
   <input type="hidden" name="oauth_token" value="<%= token %>"/>
-  <input type="hidden" name="oauth_callback" value="<%= 
-    (callback != null ? URLEncoder.encode(callback, "UTF-8") : "") %>"/>
   <input type="submit" name="Authorize" value="Deny"/>
   <input type="submit" name="Authorize" value="Authorize"/>
 </form>

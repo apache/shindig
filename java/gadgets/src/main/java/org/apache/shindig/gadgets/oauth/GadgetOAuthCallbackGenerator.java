@@ -81,18 +81,15 @@ import org.apache.shindig.gadgets.servlet.OAuthCallbackServlet;
  */
 public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
 
-  private final boolean enableSignedCallbacks;
   private final Processor processor;
   private final LockedDomainService lockedDomainService;
   private final UrlGenerator urlGenerator;
   private final BlobCrypter stateCrypter;
 
   @Inject
-  public GadgetOAuthCallbackGenerator(@Named("shindig.signing.enable-signed-callbacks")
-      boolean enableSignedCallbacks, Processor processor, LockedDomainService lockedDomainService,
+  public GadgetOAuthCallbackGenerator(Processor processor, LockedDomainService lockedDomainService,
       UrlGenerator urlGenerator, @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER)
       BlobCrypter stateCrypter) {
-    this.enableSignedCallbacks = enableSignedCallbacks;
     this.processor = processor;
     this.lockedDomainService = lockedDomainService;
     this.urlGenerator = urlGenerator;
@@ -101,9 +98,6 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
   
   public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
       HttpRequest request, OAuthResponseParams responseParams) throws OAuthRequestException {
-    if (!enableSignedCallbacks) {
-      return null;
-    }
     Uri activeUrl = checkGadgetCanRender(request.getSecurityToken(),
         request.getOAuthArguments(), responseParams);
     String gadgetDomainCallback = getGadgetDomainCallback(request.getSecurityToken(), activeUrl);

@@ -60,15 +60,6 @@ public class SampleOAuthServlet extends InjectedServlet {
   @Inject void setAuthorizeAction(@Named("shindig.oauth.authorize-action") String authorizeAction) {
      this.oauthAuthorizeAction = authorizeAction;
   }
-  
-  @Inject void setSupportOAuth10(@Named("shindig.oauth.enable-oauth-1.0") boolean enableOAuth10) {
-    this.enableOAuth10 = enableOAuth10;
-  }
-
-  @Inject void setSupportSignedCallbacks(@Named("shindig.oauth.enable-signed-callbacks")
-      boolean enableSignedCallbacks) {
-    this.enableSignedCallbacks = enableSignedCallbacks;
-  }
 
   @Override
   protected void doPost(HttpServletRequest servletRequest,
@@ -120,16 +111,16 @@ public class SampleOAuthServlet extends InjectedServlet {
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     VALIDATOR.validateMessage(requestMessage, accessor);
 
-    String callback = null;
-    if (enableSignedCallbacks) {
-      callback = requestMessage.getParameter(OAuth.OAUTH_CALLBACK);
+    String callback = requestMessage.getParameter(OAuth.OAUTH_CALLBACK);
+
+    if (callback == null) {
+      // see if the consumer has a callback
+      callback = consumer.callbackURL;
     }
-    if (callback == null && !enableOAuth10) {
-      OAuthProblemException e = new OAuthProblemException(OAuth.Problems.PARAMETER_ABSENT);
-      e.setParameter(OAuth.Problems.OAUTH_PARAMETERS_ABSENT, OAuth.OAUTH_CALLBACK);
-      throw e;
+    if (callback == null) {
+      callback = "oob";
     }
-   
+
     // generate request_token and secret
     OAuthEntry entry = dataStore.generateRequestToken(consumerKey,
         requestMessage.getParameter(OAuth.OAUTH_VERSION), callback);
@@ -169,28 +160,14 @@ public class SampleOAuthServlet extends InjectedServlet {
       servletResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "consumer for entry not found");
       return;
     }
-    
-    // A flag to deal with protocol flaws in OAuth/1.0
-    Boolean securityThreat_2009_1 = !entry.callbackUrlSigned;
-
-    // Check for a callback in the oauth entry
-    String callback = entry.callbackUrl;
-
-    if (callback == null) {
-      // see if there's a callback in the url params
-      callback = requestMessage.getParameter(OAuth.OAUTH_CALLBACK);
-    }
-
-    if (callback == null) {
-      // see if the consumer has a callback
-      callback = consumer.callbackURL;
-    }
 
     // The token is disabled if you try to convert to an access token prior to authorization
     if (entry.type == OAuthEntry.Type.DISABLED) {
       servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "This token is disabled, please reinitate login");
       return;
     }
+
+    String callback = entry.callbackUrl;
 
     // Redirect to a UI flow if the token is not authorized
     if (!entry.authorized) {
@@ -208,8 +185,7 @@ public class SampleOAuthServlet extends InjectedServlet {
 
         servletRequest.setAttribute("TOKEN", entry.token);
         servletRequest.setAttribute("CONSUMER", consumer);
-        servletRequest.setAttribute("SECURITY_THREAT_2009_1", securityThreat_2009_1);
-        
+
         servletRequest.getRequestDispatcher(oauthAuthorizeAction).forward(servletRequest,servletResponse);
       }
       return;

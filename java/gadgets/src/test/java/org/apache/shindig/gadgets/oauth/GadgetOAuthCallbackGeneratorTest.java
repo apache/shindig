@@ -74,17 +74,10 @@ public class GadgetOAuthCallbackGeneratorTest {
   }
   
   private GadgetOAuthCallbackGenerator getGenerator() {
-    return new GadgetOAuthCallbackGenerator(true, processor, lockedDomainService, urlGenerator,
+    return new GadgetOAuthCallbackGenerator(processor, lockedDomainService, urlGenerator,
         stateCrypter);
   }
 
-  @Test
-  public void testDisabled() throws Exception {
-    GadgetOAuthCallbackGenerator generator = new GadgetOAuthCallbackGenerator(false, null, null,
-        null, null);
-    assertNull(generator.generateCallback(null, null, null, null));
-  }
-  
   @Test
   public void testWrongDomain() throws Exception {
     HttpRequest request = new HttpRequest(DEST_URL);
