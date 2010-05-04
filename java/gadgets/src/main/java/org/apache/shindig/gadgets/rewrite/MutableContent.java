@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -118,7 +119,7 @@ public class MutableContent {
       document = null;
       contentSource = null;
       contentBytes = null;
-      numChanges++;
+      incrementNumChanges();
     }
   }
 
@@ -127,6 +128,10 @@ public class MutableContent {
    * @return Active content as InputStream.
    */
   public InputStream getContentBytes() {
+    return new ByteArrayInputStream(getRawContentBytes());
+  }
+  
+  protected byte[] getRawContentBytes() {
     if (contentBytes == null) {
       if (contentSource != null) {
         try {
@@ -136,25 +141,20 @@ public class MutableContent {
           // Doesn't occur; responseBytes wrapped as a ByteArrayInputStream.
         }
       } else if (content != null) {
-        try {
-          contentBytes = content.getBytes("UTF8");
-        } catch (UnsupportedEncodingException e) {
-          // Doesn't happen.
-        }
+        contentBytes = CharsetUtil.getUtf8Bytes(content);
       } else if (document != null) {
-        try {
-          contentBytes = HtmlSerialization.serialize(document).getBytes("UTF8");
-        } catch (UnsupportedEncodingException e) {
-          // Doesn't happen.
-        }
+        CharsetUtil.getUtf8Bytes(HtmlSerialization.serialize(document));
       }
     }
-    return new ByteArrayInputStream(contentBytes);
+    return contentBytes;
   }
   
   /**
    * Sets the object's contentBytes as the given raw input.
    * Note, this operation may clear the document if the content has changed.
+   * Also note, it's mandated that the new bytes array will NOT be modified
+   * by the caller of this API. The array is not copied, for performance reasons.
+   * If the caller may modify a byte array, it MUST pass in a new copy.
    * @param newBytes New content.
    */
   public void setContentBytes(byte[] newBytes) {
@@ -163,7 +163,7 @@ public class MutableContent {
       document = null;
       contentSource = null;
       content = null;
-      numChanges++;
+      incrementNumChanges();
     }
   }
 
@@ -176,7 +176,7 @@ public class MutableContent {
       content = null;
       contentSource = null;
       contentBytes = null;
-      numChanges++;
+      incrementNumChanges();
     }
   }
   
@@ -206,6 +206,10 @@ public class MutableContent {
   
   public int getNumChanges() {
     return numChanges;
+  }
+  
+  protected void incrementNumChanges() {
+    ++numChanges;
   }
 
   /**

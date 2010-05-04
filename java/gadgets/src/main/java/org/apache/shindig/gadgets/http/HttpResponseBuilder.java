@@ -26,6 +26,11 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -36,28 +41,32 @@ import java.util.Map;
 /**
  * Constructs HttpResponse objects.
  */
-public class HttpResponseBuilder {
+public class HttpResponseBuilder extends MutableContent {
   private int httpStatusCode = HttpResponse.SC_OK;
   private final Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
-  private byte[] responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
   private final Map<String, String> metadata = Maps.newHashMap();
 
-  public HttpResponseBuilder() {}
+  public HttpResponseBuilder() {
+    super(unsupportedParser(), (String)null);
+    this.setResponse(null);
+  }
 
   public HttpResponseBuilder(HttpResponseBuilder builder) {
+    super(unsupportedParser(), builder.create());
     httpStatusCode = builder.httpStatusCode;
     headers.putAll(builder.headers);
     metadata.putAll(builder.metadata);
-    responseBytes = builder.responseBytes;
   }
 
   public HttpResponseBuilder(HttpResponse response) {
+    this(unsupportedParser(), response);
+  }
+  
+  public HttpResponseBuilder(GadgetHtmlParser parser, HttpResponse response) {
+    super(parser, response);
     httpStatusCode = response.getHttpStatusCode();
-
     headers.putAll(response.getHeaders());
-
     metadata.putAll(response.getMetadata());
-    responseBytes = response.getResponseAsBytes();
   }
 
   /**
@@ -71,7 +80,7 @@ public class HttpResponseBuilder {
    * @param body The response string.  Converted to UTF-8 bytes and copied when set.
    */
   public HttpResponseBuilder setResponseString(String body) {
-    responseBytes = CharsetUtil.getUtf8Bytes(body);
+    setContentBytes(CharsetUtil.getUtf8Bytes(body));
     setEncoding(CharsetUtil.UTF8);
     return this;
   }
@@ -103,8 +112,9 @@ public class HttpResponseBuilder {
     if (responseBytes == null) {
       responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
     }
-    this.responseBytes = new byte[responseBytes.length];
-    System.arraycopy(responseBytes, 0, this.responseBytes, 0, responseBytes.length);
+    byte[] newBytes = new byte[responseBytes.length];
+    System.arraycopy(responseBytes, 0, newBytes, 0, responseBytes.length);
+    setContentBytes(newBytes);
     return this;
   }
 
@@ -115,23 +125,15 @@ public class HttpResponseBuilder {
     if (responseBytes == null) {
       responseBytes = ArrayUtils.EMPTY_BYTE_ARRAY;
     }
-    this.responseBytes = responseBytes;
+    setContentBytes(responseBytes);
     return this;
   }
 
-  /**
-   * @param httpStatusCode The HTTP response status, defined on HttpResponse.
-   */
   public HttpResponseBuilder setHttpStatusCode(int httpStatusCode) {
     this.httpStatusCode = httpStatusCode;
     return this;
   }
 
-  /**
-   * Add a single header to the response. If a value for the given name is already set, a second
-   * value is added. If you wish to overwrite any possible values for a header, use
-   * {@link #setHeader(String, String)}.
-   */
   public HttpResponseBuilder addHeader(String name, String value) {
     if (name != null) {
       headers.put(name, value);
@@ -139,9 +141,6 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * Sets a single header value, overwriting any previously set headers with the same name.
-   */
   public HttpResponseBuilder setHeader(String name, String value) {
     if (name != null) {
       headers.replaceValues(name, Lists.newArrayList(value));
@@ -149,9 +148,13 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * Adds an entire map of headers to the response.
-   */
+  public String getHeader(String name) {
+    if (name != null && headers.containsKey(name)) {
+      return headers.get(name).iterator().next();
+    }
+    return null;
+  }
+
   public HttpResponseBuilder addHeaders(Map<String, String> headers) {
     for (Map.Entry<String,String> entry : headers.entrySet()) {
       this.headers.put(entry.getKey(), entry.getValue());
@@ -159,9 +162,6 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * Adds all headers in the provided multimap to the response.
-   */
   public HttpResponseBuilder addAllHeaders(Map<String, ? extends List<String>> headers) {
     for (Map.Entry<String,? extends List<String>> entry : headers.entrySet()) {
       this.headers.putAll(entry.getKey(), entry.getValue());
@@ -169,18 +169,10 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * Remove all headers with the given name from the response.
-   *
-   * @return Any values that were removed from the response.
-   */
   public Collection<String> removeHeader(String name) {
     return headers.removeAll(name);
   }
 
-  /**
-   * @param cacheTtl The time to live for this response, in seconds.
-   */
   public HttpResponseBuilder setCacheTtl(int cacheTtl) {
     headers.removeAll("Pragma");
     headers.removeAll("Expires");
@@ -188,10 +180,6 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * @param expirationTime The expiration time for this response, in
-   * milliseconds since the Unix epoch.
-   */
   public HttpResponseBuilder setExpirationTime(long expirationTime) {
     headers.removeAll("Cache-Control");
     headers.removeAll("Pragma");
@@ -210,17 +198,11 @@ public class HttpResponseBuilder {
     return this;
   }
 
-  /**
-   * Adds a new piece of metadata to the response.
-   */
   public HttpResponseBuilder setMetadata(String key, String value) {
     metadata.put(key, value);
     return this;
   }
 
-  /**
-   * Merges the given Map of metadata into the existing metadata.
-   */
   public HttpResponseBuilder setMetadata(Map<String, String> metadata) {
     this.metadata.putAll(metadata);
     return this;
@@ -233,12 +215,28 @@ public class HttpResponseBuilder {
   Map<String, String> getMetadata() {
     return metadata;
   }
-
+  
   byte[] getResponse() {
-    return responseBytes;
+    // Supported to avoid copying data unnecessarily.
+    return getRawContentBytes();
   }
 
   public int getHttpStatusCode() {
     return httpStatusCode;
+  }
+  
+  private static GadgetHtmlParser unsupportedParser() {
+    return new GadgetHtmlParser(null) {
+      @Override
+      protected Document parseDomImpl(String source) throws GadgetException {
+        throw new UnsupportedOperationException("Using HttpResponseBuilder in non-rewriting context");
+      }
+
+      @Override
+      protected DocumentFragment parseFragmentImpl(String source)
+          throws GadgetException {
+        throw new UnsupportedOperationException("Using HttpResponseBuilder in non-rewriting context");
+      }
+    };
   }
 }
