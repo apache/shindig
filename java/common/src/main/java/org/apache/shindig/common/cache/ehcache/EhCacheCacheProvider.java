@@ -97,12 +97,12 @@ public class EhCacheCacheProvider implements CacheProvider {
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
     if (name == null) {
-      LOG.info("Creating anonymous cache");
+      LOG.fine("Creating anonymous cache");
       return new EhConfiguredCache<K, V>(name, cacheManager);
     } else {
       Cache<K, V> cache = (Cache<K, V>) caches.get(name);
       if (cache == null) {
-        LOG.info("Creating cache named " + name);
+        LOG.fine("Creating cache named " + name);
         cache = new EhConfiguredCache<K, V>(name, cacheManager);
         caches.put(name, cache);
       }
