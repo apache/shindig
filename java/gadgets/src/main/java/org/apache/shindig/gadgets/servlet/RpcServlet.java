@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,8 +43,6 @@ import java.util.regex.Pattern;
 public class RpcServlet extends InjectedServlet {
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
-  // Starts with alpha or underscore, followed by alphanum, underscore or period
-  static final Pattern GET_REQUEST_CALLBACK_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_\\.]+");
 
   private static final int POST_REQUEST_MAX_SIZE = 1024 * 128;
   private static final Logger logger = Logger.getLogger("org.apache.shindig.gadgets");
@@ -62,14 +61,9 @@ public class RpcServlet extends InjectedServlet {
     String callbackValue;
 
     try {
+      HttpUtil.isJSONP(request);
       reqValue = validateParameterValue(request, GET_REQUEST_REQ_PARAM);
       callbackValue = validateParameterValue(request, GET_REQUEST_CALLBACK_PARAM);
-      if (!GET_REQUEST_CALLBACK_PATTERN.matcher(callbackValue).matches()) {
-        throw new IllegalArgumentException("Wrong format for parameter '" +
-            GET_REQUEST_CALLBACK_PARAM + "' specified. Expected: " +
-            GET_REQUEST_CALLBACK_PATTERN.toString());
-      }
-
     } catch (IllegalArgumentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       logger.log(Level.INFO, e.getMessage(), e);
@@ -150,5 +144,4 @@ public class RpcServlet extends InjectedServlet {
       return success;
     }
   }
-
 }

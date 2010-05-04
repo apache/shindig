@@ -20,6 +20,7 @@ package org.apache.shindig.protocol;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.JsonConversionUtil;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 /**
  * JSON-RPC handler servlet.
@@ -72,10 +75,18 @@ public class JsonRpcServlet extends ApiServlet {
   }
   
   @Override
-  protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+  protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
     setCharacterEncodings(servletRequest, servletResponse);
     servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
+
+    // only GET/POST
+    String method = servletRequest.getMethod();
+
+    if (!("GET".equals(method) || "POST".equals(method))) {
+      sendError(servletResponse, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "Only POST/GET"));
+      return;
+    }
 
     SecurityToken token = getSecurityToken(servletRequest);
     if (token == null) {
@@ -83,74 +94,81 @@ public class JsonRpcServlet extends ApiServlet {
       return;
     }
 
-    try {
-      JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
-      dispatch(request, null, servletRequest, servletResponse, token);
-    } catch (JSONException je) {
-      sendJsonParseError(je, servletResponse);
-    }
-  }
-
-  @Override
-  protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-      throws IOException {
-    setCharacterEncodings(servletRequest, servletResponse);
-    servletResponse.setContentType(ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
 
     try {
-      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
-      SecurityToken token = getSecurityToken(servletRequest);
-      if (token == null) {
-        sendSecurityError(servletResponse);
+      String content = null;
+      String callback = null; // for JSONP
+      Map<String,FormDataItem> formData = Maps.newHashMap();
+
+      // Get content or deal with JSON-RPC GET
+      if ("POST".equals(method)) {
+        content = getPostContent(servletRequest, formData);
+      } else if (HttpUtil.isJSONP(servletRequest)) {
+        content = servletRequest.getParameter("request");
+        callback = servletRequest.getParameter("callback");
+      } else {
+        // GET request, fromRequest() creates the json objects directly.
+        JSONObject request = JsonConversionUtil.fromRequest(servletRequest);
+
+        if (request != null) {
+          dispatch(request, formData, servletRequest, servletResponse, token, null);
+          return;
+        }
+      }
+      
+      if (content == null) {
+        sendError(servletResponse, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "No content specified"));
         return;
       }
 
-      String content = null;
-      Map<String, FormDataItem> formItems = Collections.emptyMap();  // default for most requests
-
-      if (formParser.isMultipartContent(servletRequest)) {
-        formItems = new HashMap<String, FormDataItem>();
-        for (FormDataItem item : formParser.parse(servletRequest)) {
-          if (item.isFormField() && REQUEST_PARAM.equals(item.getFieldName()) && content == null) {
-            // As per spec, in case of a multipart/form-data content, there will be one form field
-            // with field name as "request". It will contain the json request. Any further form
-            // field or file item will not be parsed out, but will be exposed via getFormItem
-            // method of RequestItem.
-            if (!StringUtils.isEmpty(item.getContentType())) {
-              checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
-            }
-            content = item.getAsString();
-          } else {
-            formItems.put(item.getFieldName(), item);
-          }
-        }
-
-        if (content == null) {
-          content = "";
-        }
-      } else {
-        content = IOUtils.toString(servletRequest.getInputStream(),
-            servletRequest.getCharacterEncoding());
-      }
-
-      if ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{')) {
-        // Is a batch
+      if (isContentJsonBatch(content)) {
         JSONArray batch = new JSONArray(content);
-        dispatchBatch(batch, formItems, servletRequest, servletResponse, token);
+        dispatchBatch(batch, formData, servletRequest, servletResponse, token, callback);
       } else {
         JSONObject request = new JSONObject(content);
-        dispatch(request, formItems, servletRequest, servletResponse, token);
+        dispatch(request, formData, servletRequest, servletResponse, token, callback);
       }
+      return;
     } catch (JSONException je) {
       sendJsonParseError(je, servletResponse);
-    } catch (ContentTypes.InvalidContentTypeException icte) {
+    } catch (IllegalArgumentException e) {
+      // a bad jsonp request..
+      sendBadRequest(e, servletResponse);
+    }  catch (ContentTypes.InvalidContentTypeException icte) {
       sendBadRequest(icte, servletResponse);
     }
   }
 
+  protected String getPostContent(HttpServletRequest request, Map<String,FormDataItem> formItems)
+      throws ContentTypes.InvalidContentTypeException, IOException {
+    String content = null;
+
+    checkContentTypes(ALLOWED_CONTENT_TYPES, request.getContentType());
+
+    if (formParser.isMultipartContent(request)) {
+      for (FormDataItem item : formParser.parse(request)) {
+        if (item.isFormField() && REQUEST_PARAM.equals(item.getFieldName()) && content == null) {
+          // As per spec, in case of a multipart/form-data content, there will be one form field
+          // with field name as "request". It will contain the json request. Any further form
+          // field or file item will not be parsed out, but will be exposed via getFormItem
+          // method of RequestItem.
+          if (!StringUtils.isEmpty(item.getContentType())) {
+            checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
+          }
+          content = item.getAsString();
+        } else {
+          formItems.put(item.getFieldName(), item);
+        }
+      }
+    } else {
+      content = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
+    }
+    return content;
+  }
+
   protected void dispatchBatch(JSONArray batch, Map<String, FormDataItem> formItems ,
       HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-      SecurityToken token) throws JSONException, IOException {
+      SecurityToken token, String callback) throws JSONException, IOException {
     // Use linked hash map to preserve order
     List<Future<?>> responses = Lists.newArrayListWithCapacity(batch.length());
 
@@ -174,14 +192,19 @@ public class JsonRpcServlet extends ApiServlet {
       }
       result.add(getJSONResponse(key, getResponseItem(responses.get(i))));
     }
-    
-    jsonConverter.append(servletResponse.getWriter(), result);
+
+    // Generate the output
+    Writer writer = servletResponse.getWriter();
+    if (callback != null) writer.append(callback+'(');
+    jsonConverter.append(writer, result);
+    if (callback != null) writer.append(");\n");
   }
 
   protected void dispatch(JSONObject request, Map<String, FormDataItem> formItems,
       HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-      SecurityToken token) throws JSONException, IOException {
+      SecurityToken token, String callback) throws JSONException, IOException {
     String key = null;
+
     if (request.has("id")) {
       key = request.getString("id");
     }
@@ -194,9 +217,23 @@ public class JsonRpcServlet extends ApiServlet {
     ResponseItem response = getResponseItem(future);
     Object result = getJSONResponse(key, response);
 
-    jsonConverter.append(servletResponse.getWriter(), result);
+    // Generate the output
+    Writer writer = servletResponse.getWriter();
+    if (callback != null) writer.append(callback+'(');
+    jsonConverter.append(writer, result);
+    if (callback != null) writer.append(");\n");
   }
 
+  /**
+   * Determine if the content contains a batch request
+   *
+   * @param content json content or null
+   * @return true if content contains is a json array, not a json object or null
+   */
+  private boolean isContentJsonBatch(String content) {
+    if (content == null) return false;
+    return ((content.indexOf('[') != -1) && content.indexOf('[') < content.indexOf('{'));
+  }
   /**
    * Wrap call to dispatcher to allow for implementation specific overrides
    * and servlet-request contextual handling
@@ -295,7 +332,7 @@ public class JsonRpcServlet extends ApiServlet {
 
   private void sendBadRequest(Throwable t, HttpServletResponse response) throws IOException {
     sendError(response, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST,
-        "Invalid batch - " + t.getMessage()));
+        "Invalid input - " + t.getMessage()));
   }
 
   private void sendJsonParseError(JSONException e, HttpServletResponse response) throws IOException {

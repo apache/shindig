@@ -20,7 +20,9 @@ package org.apache.shindig.common.servlet;
 
 import org.apache.shindig.common.util.TimeSource;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Pattern;
 
 /**
  * Collection of HTTP utilities
@@ -106,5 +108,25 @@ public class HttpUtil {
 
   public static void setDefaultTtl(int defaultTtl) {
     HttpUtil.defaultTtl = defaultTtl;
+  }
+
+
+  static final Pattern GET_REQUEST_CALLBACK_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_\\.]+");
+
+  public static boolean isJSONP(HttpServletRequest request) throws IllegalArgumentException {
+    String callback = request.getParameter("callback");
+
+    // Must be a GET
+    if (!"GET".equals(request.getMethod()))
+      return false;
+    
+    // No callback specified
+    if (callback == null) return false;
+
+    if (!GET_REQUEST_CALLBACK_PATTERN.matcher(callback).matches()) {
+       throw new IllegalArgumentException("Wrong format for parameter 'callback' specified. Must match: " +
+            GET_REQUEST_CALLBACK_PATTERN.toString());
+    }
+    return true;
   }
 }

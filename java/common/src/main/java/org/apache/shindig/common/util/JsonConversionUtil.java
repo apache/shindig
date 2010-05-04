@@ -25,13 +25,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Utilities for converting a JSON object to and from a URL encoding
@@ -44,10 +43,13 @@ public class JsonConversionUtil {
 
   @SuppressWarnings("unchecked")
   public static JSONObject fromRequest(HttpServletRequest request) throws JSONException {
-    //String methodName = request.getPathInfo().replaceAll("/", "");
+    Map<String, String[]> params = request.getParameterMap();
+
+    if (!params.containsKey("method")) {
+      return null;
+    }
 
     JSONObject root = new JSONObject();
-    Map<String, String[]> params = request.getParameterMap();
     root.put("method", params.get("method")[0]);
     if (params.containsKey("id")) {
       root.put("id", params.get("id")[0]);

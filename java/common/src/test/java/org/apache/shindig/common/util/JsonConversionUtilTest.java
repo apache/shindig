@@ -17,8 +17,11 @@
  */
 package org.apache.shindig.common.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+
+import org.apache.shindig.common.testing.FakeHttpServletRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +30,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -117,6 +121,15 @@ public class JsonConversionUtilTest extends Assert {
     assertEquals("hello", resultMap.get(".a.b(0).c"));
     assertEquals("hello", resultMap.get(".a.b(1).c"));
   }
+
+  @Test
+  public void testJsonFromRequest() throws Exception {
+    HttpServletRequest fakeRequest;
+    for (String badParms : ImmutableList.of("x=1", "x=1&callback=")) {
+      fakeRequest = new FakeHttpServletRequest("http://foo.com/gadgets/rpc?" + badParms);
+      assertNull(JsonConversionUtil.fromRequest(fakeRequest));
+    }
+   }
 
   public static void assertJsonEquals(Object expected, Object actual)
       throws JSONException {
