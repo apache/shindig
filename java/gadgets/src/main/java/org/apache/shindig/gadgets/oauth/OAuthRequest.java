@@ -48,7 +48,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -95,7 +94,7 @@ public class OAuthRequest {
   protected static final String XOAUTH_PUBLIC_KEY_OLD = "xoauth_signature_publickey";
   protected static final String XOAUTH_PUBLIC_KEY_NEW = "xoauth_public_key";
 
-  protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./]+");
+  protected static final Pattern ALLOWED_PARAM_NAME = Pattern.compile("[-:\\w~!@$*()_\\[\\]:,./ ]+");
 
   private static final long ACCESS_TOKEN_EXPIRE_UNKNOWN = 0;
   private static final long ACCESS_TOKEN_FORCE_EXPIRE = -1;
