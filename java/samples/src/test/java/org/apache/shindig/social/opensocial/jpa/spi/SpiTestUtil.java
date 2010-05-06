@@ -117,7 +117,7 @@ public class SpiTestUtil {
 
     canonical.setBirthday(buildDate("1975-01-01"));
     canonical.setDrinker(new EnumImpl<Drinker>(Drinker.SOCIALLY));
-    ListField email = new ListFieldImpl("work", "shindig-dev@incubator.apache.org");
+    ListField email = new ListFieldImpl("work", "dev@shindig.apache.org");
     canonical.setEmails(Lists.newArrayList(email));
 
     canonical.setEthnicity("developer");
@@ -141,7 +141,7 @@ public class SpiTestUtil {
     job1.setStartDate(buildDate("1995-01-01"));
     job1.setSubField("Development");
     job1.setTitle("Grand PooBah");
-    job1.setWebpage("http://incubator.apache.org/projects/shindig.html");
+    job1.setWebpage("http://shindig.apache.org/");
     job1.setType("job");
 
     Organization job2 = new OrganizationImpl();

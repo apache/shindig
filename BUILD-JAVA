@@ -6,7 +6,7 @@ Checking out the source code from SVN
 2) Create a subdirectory and checkout the Apache Shindig code from its Subversion repository
   * mkdir ~/src/shindig (or wherever you'd like to put it)
   * cd ~/src/shindig
-3) svn co http://svn.apache.org/repos/asf/incubator/shindig/trunk/ .
+3) svn co http://svn.apache.org/repos/asf/shindig/trunk/ .
 
 
 Installing and running the various java servers
@@ -131,7 +131,7 @@ To see the cajoled code (Firefox only), right-click inside the iframe and do "Th
 Additional Reading
 ----------------------------------
 
-For more information, see http://incubator.apache.org/projects/shindig.html
+For more information, see http://shindig.apache.org/
 
 Read javascript/README for instructions for using the Apache Shindig Gadget Container JavaScript
 to enable your page to render Gadgets using gmodules.com or a server started up as described above.

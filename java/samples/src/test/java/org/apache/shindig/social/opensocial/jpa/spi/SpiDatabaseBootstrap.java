@@ -384,7 +384,7 @@ public class SpiDatabaseBootstrap {
     
     List<ListField> emails = new ArrayList<ListField>();
     EmailDb email = new EmailDb();
-    email.setValue("shindig-dev@incubator.apache.org");
+    email.setValue("dev@shindig.apache.org");
     email.setType("work");
     emails.add(email);
     person.setEmails(emails);
@@ -414,7 +414,7 @@ public class SpiDatabaseBootstrap {
     organization1.setStartDate(buildDate("1995-01-01"));
     organization1.setSubField("Development");
     organization1.setTitle("Grand PooBah");
-    organization1.setWebpage("http://incubator.apache.org/projects/shindig.html");
+    organization1.setWebpage("http://shindig.apache.org/");
     organization1.setType("job");
     
     PersonOrganizationDb organization2 = new PersonOrganizationDb();

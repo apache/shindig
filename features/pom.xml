@@ -36,9 +36,9 @@
   </description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/shindig/trunk/features</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/shindig/trunk/features</developerConnection>
-    <url>http://svn.apache.org/viewvc/incubator/shindig/trunk/features</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/features</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/features</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/features</url>
   </scm>
 
   <pluginRepositories>
