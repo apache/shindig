@@ -67,7 +67,10 @@ gadgets.rpctx.wpm = function() {
           window.addEventListener('message', onmessage, false); 
       } else if (typeof window.attachEvent != 'undefined') { 
           window.attachEvent('onmessage', onmessage); 
+      } else {
+          gadgets.warn("wpm init failure");
       }
+
       ready('..', true);  // Immediately ready to send to parent.
       return true;
     },
