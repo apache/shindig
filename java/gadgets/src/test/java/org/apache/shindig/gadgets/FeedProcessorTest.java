@@ -61,6 +61,43 @@ public class FeedProcessorTest {
       "<description>" + FEED_ENTRY_SUMMARY + "</description>" +
       "</item>" +
       "</channel></rss>";
+  private final static String MEDIA_CONTENT_URL1 = "http://example.com/img1.jpg";
+  private final static String MEDIA_CONTENT_URL2 = "http://example.com/img2.jpg";
+  private final static String MEDIA_CONTENT_URL3 = "http://example.com/img3.jpg";
+  private final static String MEDIA_CONTENT_TYPE = "image/jpeg";
+  private final static int MEDIA_CONTENT_WIDTH = 800;
+  private final static int MEDIA_CONTENT_HEIGHT = 600;
+  private final static String MEDIA_THUMB_URL = "http://exmaple.com/thumb.jpg";
+  private final static int MEDIA_THUMB_WIDTH = 75;
+  private final static int MEDIA_THUMB_HEIGHT = 50;
+  private final static String DATA_RSS_WITH_MEDIARSS =
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+      "<rss version=\"2.0\" xmlns:media=\"http://search.yahoo.com/mrss/\"><channel>" +
+      "<title>" + FEED_TITLE + "</title>" +
+      "<link>http://example.org/</link>" +
+      "<description>Example RSS Feed</description>" +
+      "<pubDate>Sun, 19 May 2002 15:21:36 GMT</pubDate>" +
+      "<item>" +
+      "<title>" + FEED_ENTRY_TITLE + "</title>" +
+      "<link>" + FEED_ENTRY_LINK + "</link>" +
+      "<guid>" + FEED_ENTRY_LINK + "#item1" + "</guid>" +
+      "<pubDate>" + DATE_RSS + "</pubDate>" +
+      "<description>" + FEED_ENTRY_SUMMARY + "</description>" +
+      "<author>" + FEED_AUTHOR_EMAIL + "</author>" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL1 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL2 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL3 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:thumbnail url=\"" + MEDIA_THUMB_URL + "\" width=\"" + MEDIA_THUMB_WIDTH + "\" height=\"" + MEDIA_THUMB_HEIGHT + "\" />" +
+      "</item>" +
+      "<item>" +
+      "<title>" + FEED_ENTRY_TITLE + "</title>" +
+      "<link>" + FEED_ENTRY_LINK + "</link>" +
+      "<guid>" + FEED_ENTRY_LINK + "#item1" + "</guid>" +
+      "<description>" + FEED_ENTRY_SUMMARY + "</description>" +
+      "<media:thumbnail url=\"" + MEDIA_THUMB_URL + "\" />" +
+      "</item>" +
+      "</channel></rss>";
+      
   private final static String URL_ATOM = "http://www.example.com/feed.atom";
   private final static String DATE_ATOM = "2008-06-06T22:20:00Z";
   private final static String DATA_ATOM =
@@ -83,6 +120,33 @@ public class FeedProcessorTest {
       "<link href=\"" + FEED_ENTRY_LINK + "\"/>" +
       "<id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da3443fa6a</id>" +
       "<summary>" + FEED_ENTRY_SUMMARY + "</summary>" +
+      "</entry>" +
+      "</feed>";
+  private final static String DATA_ATOM_WITH_MEDIARSS =
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+      "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:media=\"http://search.yahoo.com/mrss/\">" +
+      "<title>" + FEED_TITLE + "</title>" +
+      "<link href=\"http://example.org/\"/>" +
+      "<updated>2003-12-13T18:30:02Z</updated>" +
+      "<id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>" +
+      "<author><name>" + FEED_AUTHOR + "</name></author>" +
+      "<entry>" +
+      "<title>" + FEED_ENTRY_TITLE + "</title>" +
+      "<link href=\"" + FEED_ENTRY_LINK + "\"/>" +
+      "<id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>" +
+      "<updated>" + DATE_ATOM + "</updated>" +
+      "<summary>" + FEED_ENTRY_SUMMARY + "</summary>" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL1 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL2 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:content url=\"" + MEDIA_CONTENT_URL3 + "\" type=\"" + MEDIA_CONTENT_TYPE + "\" isDefault=\"false\" expression=\"sample\" width=\"" + MEDIA_CONTENT_WIDTH + "\" height=\"" + MEDIA_CONTENT_HEIGHT + "\" />" +
+      "<media:thumbnail url=\"" + MEDIA_THUMB_URL + "\" width=\"" + MEDIA_THUMB_WIDTH + "\" height=\"" + MEDIA_THUMB_HEIGHT + "\" />" +
+      "</entry>" +
+      "<entry>" +
+      "<title>" + FEED_ENTRY_TITLE + "</title>" +
+      "<link href=\"" + FEED_ENTRY_LINK + "\"/>" +
+      "<id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da3443fa6a</id>" +
+      "<summary>" + FEED_ENTRY_SUMMARY + "</summary>" +
+      "<media:thumbnail url=\"" + MEDIA_THUMB_URL + "\" />" +
       "</entry>" +
       "</feed>";
   private final static String BAD_XML = "broken xml !!!! & ><";
@@ -134,6 +198,52 @@ public class FeedProcessorTest {
     assertNull("Summary should not be returned when getSummaries is false",
         entry.optString("Summary", null));
   }
+  
+  @Test
+  public void parseMediaRss() throws Exception {
+      JSONObject feed = processor.process(URL_RSS, DATA_RSS_WITH_MEDIARSS, true, 1);
+
+      assertEquals(URL_RSS, feed.getString("URL"));
+      assertEquals(FEED_TITLE, feed.getString("Title"));
+      assertEquals(FEED_AUTHOR_EMAIL, feed.getString("Author"));
+
+      JSONArray entryArray = feed.getJSONArray("Entry");
+      JSONObject entry = entryArray.getJSONObject(0);
+
+      assertEquals(1, entryArray.length());
+      assertEquals(FEED_ENTRY_TITLE, entry.getString("Title"));
+      assertEquals(FEED_ENTRY_LINK, entry.getString("Link"));
+      assertEquals(FEED_ENTRY_SUMMARY, entry.getString("Summary"));
+      
+      // Three lots of content, each with a width/height and type
+      JSONObject media = entry.getJSONObject("Media");
+      JSONArray contents = media.getJSONArray("Contents");
+      
+      assertEquals(3, contents.length());
+      
+      JSONObject contents1 = contents.getJSONObject(0);
+      assertEquals(MEDIA_CONTENT_URL1, contents1.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents1.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents1.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents1.getInt("Height"));
+      
+      JSONObject contents2 = contents.getJSONObject(1);
+      assertEquals(MEDIA_CONTENT_URL2, contents2.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents2.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents2.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents2.getInt("Height"));
+      
+      JSONObject contents3 = contents.getJSONObject(2);
+      assertEquals(MEDIA_CONTENT_URL3, contents3.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents3.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents3.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents3.getInt("Height"));
+      
+      JSONObject thumbnail = media.getJSONObject("Thumbnail");
+      assertEquals(MEDIA_THUMB_URL, thumbnail.getString("URL"));
+      assertEquals(MEDIA_THUMB_WIDTH, thumbnail.getInt("Width"));
+      assertEquals(MEDIA_THUMB_HEIGHT, thumbnail.getInt("Height"));
+  }
 
   @Test
   public void parseAtom() throws Exception {
@@ -174,6 +284,52 @@ public class FeedProcessorTest {
     JSONObject entry = feed.getJSONArray("Entry").getJSONObject(0);
     assertNull("Summary should not be returned when getSummaries is false",
         entry.optString("Summary", null));
+  }
+  
+  @Test
+  public void parseMediaAtom() throws Exception {
+      JSONObject feed = processor.process(URL_ATOM, DATA_ATOM_WITH_MEDIARSS, true, 1);
+
+      assertEquals(URL_ATOM, feed.getString("URL"));
+      assertEquals(FEED_TITLE, feed.getString("Title"));
+      assertEquals(FEED_AUTHOR, feed.getString("Author"));
+
+      JSONArray entryArray = feed.getJSONArray("Entry");
+      JSONObject entry = entryArray.getJSONObject(0);
+
+      assertEquals(1, entryArray.length());
+      assertEquals(FEED_ENTRY_TITLE, entry.getString("Title"));
+      assertEquals(FEED_ENTRY_LINK, entry.getString("Link"));
+      assertEquals(FEED_ENTRY_SUMMARY, entry.getString("Summary"));
+      
+      // Three lots of content, each with a width/height and type
+      JSONObject media = entry.getJSONObject("Media");
+      JSONArray contents = media.getJSONArray("Contents");
+      
+      assertEquals(3, contents.length());
+      
+      JSONObject contents1 = contents.getJSONObject(0);
+      assertEquals(MEDIA_CONTENT_URL1, contents1.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents1.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents1.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents1.getInt("Height"));
+      
+      JSONObject contents2 = contents.getJSONObject(1);
+      assertEquals(MEDIA_CONTENT_URL2, contents2.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents2.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents2.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents2.getInt("Height"));
+      
+      JSONObject contents3 = contents.getJSONObject(2);
+      assertEquals(MEDIA_CONTENT_URL3, contents3.getString("URL"));
+      assertEquals(MEDIA_CONTENT_TYPE, contents3.getString("Type"));
+      assertEquals(MEDIA_CONTENT_WIDTH, contents3.getInt("Width"));
+      assertEquals(MEDIA_CONTENT_HEIGHT, contents3.getInt("Height"));
+      
+      JSONObject thumbnail = media.getJSONObject("Thumbnail");
+      assertEquals(MEDIA_THUMB_URL, thumbnail.getString("URL"));
+      assertEquals(MEDIA_THUMB_WIDTH, thumbnail.getInt("Width"));
+      assertEquals(MEDIA_THUMB_HEIGHT, thumbnail.getInt("Height"));
   }
 
   @Test(expected=GadgetException.class)

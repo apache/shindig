@@ -18,20 +18,25 @@
  */
 package org.apache.shindig.gadgets;
 
+import java.io.StringReader;
+import java.util.List;
+
+import com.sun.syndication.feed.module.mediarss.types.UrlReference;
+
+import com.sun.syndication.feed.module.mediarss.MediaEntryModule;
+import com.sun.syndication.feed.module.mediarss.MediaModule;
+import com.sun.syndication.feed.module.mediarss.types.MediaContent;
+import com.sun.syndication.feed.module.mediarss.types.Thumbnail;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
-
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.StringReader;
-import java.util.List;
 
 /**
  * Processes RSS & Atom Feeds and converts them into JSON output.
@@ -40,16 +45,20 @@ public class FeedProcessor {
 
   /**
    * Converts feed XML to JSON.
-   *
-   * @param feedUrl The url that the feed was retrieved from.
-   * @param feedXml The raw XML of the feed to be converted.
-   * @param getSummaries True if summaries should be returned.
-   * @param numEntries Number of entries to return.
+   * 
+   * @param feedUrl
+   *            The url that the feed was retrieved from.
+   * @param feedXml
+   *            The raw XML of the feed to be converted.
+   * @param getSummaries
+   *            True if summaries should be returned.
+   * @param numEntries
+   *            Number of entries to return.
    * @return The JSON representation of the feed.
    */
   @SuppressWarnings("unchecked")
-  public JSONObject process(String feedUrl, String feedXml,
-      boolean getSummaries, int numEntries) throws GadgetException {
+  public JSONObject process(String feedUrl, String feedXml, boolean getSummaries, int numEntries)
+          throws GadgetException {
     try {
       SyndFeed feed = new SyndFeedInput().build(new StringReader(feedXml));
       JSONObject json = new JSONObject();
@@ -84,11 +93,9 @@ public class FeedProcessor {
         entry.put("Link", e.getLink());
         if (getSummaries) {
           if (e.getContents() != null && !e.getContents().isEmpty()) {
-            entry.put("Summary",
-                ((SyndContent)e.getContents().get(0)).getValue());
+            entry.put("Summary", ((SyndContent) e.getContents().get(0)).getValue());
           } else {
-            entry.put("Summary",
-                e.getDescription() != null ? e.getDescription().getValue() : "");
+            entry.put("Summary", e.getDescription() != null ? e.getDescription().getValue() : "");
           }
         }
 
@@ -105,6 +112,63 @@ public class FeedProcessor {
           jsonAuthor = e.getAuthor();
         }
 
+        JSONObject media = new JSONObject();
+        MediaEntryModule mediaModule = (MediaEntryModule) e.getModule(MediaModule.URI);
+        if (mediaModule != null) {
+          if (mediaModule.getMediaContents().length > 0) {
+            JSONArray contents = new JSONArray();
+
+            for (MediaContent c : mediaModule.getMediaContents()) {
+              JSONObject content = new JSONObject();
+
+              if (c.getReference() instanceof UrlReference) {
+                content.put("URL", ((UrlReference) c.getReference()).getUrl().toString());
+              }
+
+              if (c.getType() != null) {
+                content.put("Type", c.getType());
+              }
+
+              if (c.getWidth() != null) {
+                content.put("Width", c.getWidth());
+              }
+
+              if (c.getHeight() != null) {
+                content.put("Height", c.getHeight());
+              }
+
+              contents.put(content);
+            }
+
+            media.put("Contents", contents);
+          }
+
+          if (mediaModule.getMetadata() != null) {
+            if (mediaModule.getMetadata().getThumbnail().length > 0) {
+              // "If multiple thumbnails are included, it is assumed that they are in order of importance"
+              // Only use the first thumbnail for simplicity's
+              // sake
+
+              JSONObject thumbnail = new JSONObject();
+
+              Thumbnail t = mediaModule.getMetadata().getThumbnail()[0];
+              thumbnail.put("URL", t.getUrl().toString());
+
+              if (t.getWidth() != null) {
+                thumbnail.put("Width", t.getWidth());
+              }
+
+              if (t.getHeight() != null) {
+                thumbnail.put("Height", t.getHeight());
+              }
+
+              media.put("Thumbnail", thumbnail);
+            }
+          }
+        }
+
+        entry.put("Media", media);
+
         entries.put(entry);
       }
 
@@ -114,11 +178,9 @@ public class FeedProcessor {
       // This shouldn't ever happen.
       throw new RuntimeException(e);
     } catch (FeedException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
-          HttpResponse.SC_BAD_GATEWAY);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e, HttpResponse.SC_BAD_GATEWAY);
     } catch (IllegalArgumentException e) {
-      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e,
-          HttpResponse.SC_BAD_GATEWAY);
+      throw new GadgetException(GadgetException.Code.MALFORMED_XML_DOCUMENT, e, HttpResponse.SC_BAD_GATEWAY);
     }
   }
 }
