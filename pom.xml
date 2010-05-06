@@ -1391,7 +1391,7 @@
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth</artifactId>
-        <version>20090531</version>
+        <version>20090825</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
@@ -1403,7 +1403,7 @@
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth-httpclient4</artifactId>
-        <version>20090531</version>
+        <version>20090913</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
