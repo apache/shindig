@@ -26,7 +26,7 @@
  *
  * gadgets.json.parse(text) takes a JSON text and produces a JavaScript value.
  * It will return false if there is an error.
-*/
+ */
 
 /**
  * @static
@@ -45,6 +45,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
   gadgets['json'] = (function() {
     var endsWith___ = /___$/;
     return {
+      /* documented below */
       'parse': function(str) {
         try {
           return window.JSON.parse(str);
@@ -52,6 +53,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
           return false;
         }
       },
+      /* documented below */
       'stringify': function(obj) {
         try {
           return window.JSON.stringify(obj, function(k,v) {
@@ -64,6 +66,10 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     };
   })();
 } else {
+/**
+ * Port of the public domain JSON library by Douglas Crockford.
+ * See: http://www.json.org/json2.js
+ */
   gadgets['json'] = function () {
   
     /**
@@ -200,4 +206,28 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     };
   }();
 }
+/**
+ * Flatten an object to a stringified values. Useful for dealing with
+ * json->querystring transformations. 
+ * 
+ * @param obj {Object}
+ * @return {Object} object with only string values
+ * @private not in official specification yet
+ */
 
+gadgets['json'].flatten = function(obj) {
+  var flat = {};
+
+  if (obj === null || obj === undefined) return flat;
+
+  for (var k in obj) {
+    if (obj.hasOwnProperty(k)) {
+      var value = obj[k];
+      if (null === value || undefined === value) {
+        continue;
+      }
+      flat[k] = (typeof value === 'string') ? value : gadgets.json.stringify(value);
+    }
+  }
+  return flat;
+}
