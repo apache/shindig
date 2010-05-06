@@ -62,11 +62,6 @@ public class JsonRpcServlet extends ApiServlet {
    */
   public static final String REQUEST_PARAM = "request";
   
-  /**
-   * Error code for JSON-RPC requests with an error parsing JSON.
-   */
-  public static final int SC_JSON_PARSE_ERROR = -32700;
-  
   private MultipartFormParser formParser;
 
   @Inject
@@ -128,7 +123,6 @@ public class JsonRpcServlet extends ApiServlet {
         JSONObject request = new JSONObject(content);
         dispatch(request, formData, servletRequest, servletResponse, token, callback);
       }
-      return;
     } catch (JSONException je) {
       sendJsonParseError(je, servletResponse);
     } catch (IllegalArgumentException e) {
@@ -195,7 +189,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback+'(');
+    if (callback != null) writer.append(callback).append('(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
@@ -219,7 +213,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback+'(');
+    if (callback != null) writer.append(callback).append('(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
@@ -336,7 +330,7 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   private void sendJsonParseError(JSONException e, HttpServletResponse response) throws IOException {
-    sendError(response, new ResponseItem(SC_JSON_PARSE_ERROR,
+    sendError(response, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST,
         "Invalid JSON - " + e.getMessage()));
   }
 }
