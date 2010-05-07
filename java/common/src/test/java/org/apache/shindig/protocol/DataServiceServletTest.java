@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.FakeHttpServletRequest;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.easymock.IMocksControl;
@@ -49,7 +50,7 @@ public class DataServiceServletTest extends Assert {
   private BeanJsonConverter jsonConverter;
   private BeanConverter xmlConverter;
   private BeanConverter atomConverter;
-
+  private ContainerConfig containerConfig;
 
   private IMocksControl mockControl = EasyMock.createNiceControl();
 
@@ -61,6 +62,7 @@ public class DataServiceServletTest extends Assert {
     jsonConverter = mockControl.createMock(BeanJsonConverter.class);
     xmlConverter = mockControl.createMock(BeanConverter.class);
     atomConverter = mockControl.createMock(BeanConverter.class);
+    containerConfig = mockControl.createMock(ContainerConfig.class);
 
     EasyMock.expect(jsonConverter.getContentType()).andReturn(
         ContentTypes.OUTPUT_JSON_CONTENT_TYPE).anyTimes();
@@ -68,12 +70,13 @@ public class DataServiceServletTest extends Assert {
         ContentTypes.OUTPUT_XML_CONTENT_TYPE).anyTimes();
     EasyMock.expect(atomConverter.getContentType()).andReturn(
         ContentTypes.OUTPUT_ATOM_CONTENT_TYPE).anyTimes();
-
+    
     HandlerRegistry registry = new DefaultHandlerRegistry(null, jsonConverter,
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(Sets.<Object>newHashSet(new TestHandler()));
 
     servlet.setHandlerRegistry(registry);
+    servlet.setContainerConfig(containerConfig);
 
     servlet.setBeanConverters(jsonConverter, xmlConverter, atomConverter);
   }

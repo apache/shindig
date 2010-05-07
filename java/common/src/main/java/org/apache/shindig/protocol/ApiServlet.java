@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.inject.Provider;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 
@@ -92,6 +94,14 @@ public abstract class ApiServlet extends InjectedServlet {
   public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
   }
+
+  protected ContainerConfig containerConfig;
+
+  @Inject
+  public void setContainerConfig(ContainerConfig containerConfig) {
+    this.containerConfig = containerConfig;
+  }
+
 
   @Inject(optional = true)
   public void setDisallowUnknownContentTypes(

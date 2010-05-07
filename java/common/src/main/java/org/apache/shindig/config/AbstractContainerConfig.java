@@ -53,19 +53,19 @@ public abstract class AbstractContainerConfig implements ContainerConfig {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Object> getList(String container, String property) {
+  public <T> List<T> getList(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof List) {
-      return (List<Object>) value;
+      return (List<T>) value;
     }
     return Collections.emptyList();
   }
 
   @SuppressWarnings("unchecked")
-  public Map<String, Object> getMap(String container, String property) {
+  public <T> Map<String, T> getMap(String container, String property) {
     Object value = getProperty(container, property);
     if (value instanceof Map) {
-      return (Map<String, Object>) value;
+      return (Map<String, T>) value;
     }
     return Collections.emptyMap();
   }

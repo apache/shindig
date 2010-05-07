@@ -79,11 +79,11 @@ public interface ContainerConfig {
    * @return The configuration property stored under the given name for the given container, or an
    * empty list if it is not defined or not a list.
    */
-  List<Object> getList(String container, String name);
+  <T> List<T> getList(String container, String name);
 
   /**
    * @return The configuration property stored under the given name for the given container, or an
    * empty map if it is not defined or not a map.
    */
-  Map<String, Object> getMap(String container, String name);
+  <T> Map<String, T> getMap(String container, String name);
 }

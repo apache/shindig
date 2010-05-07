@@ -17,7 +17,11 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.servlet.HttpUtil;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 
 import com.google.common.collect.ImmutableMap;
@@ -103,6 +107,8 @@ public class DataServiceServlet extends ApiServlet {
       return;
     }
 
+    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), "gadgets.parentOrigins"));
+
     BeanConverter converter = getConverterForRequest(servletRequest);
 
     handleSingleRequest(servletRequest, servletResponse, token, converter);
@@ -169,7 +175,13 @@ public class DataServiceServlet extends ApiServlet {
         response = ImmutableMap.of("entry", response);
       }
 
+      // JSONP style callbacks
+      String callback =  (HttpUtil.isJSONP(servletRequest) && ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(converter.getContentType())) ?
+          servletRequest.getParameter("callback") : null;
+
+      if (callback != null) writer.write(callback + "(");
       writer.write(converter.convertToString(response));
+      if (callback != null) writer.write(");\n");
     } else {
       sendError(servletResponse, responseItem);
     }

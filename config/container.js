@@ -60,6 +60,10 @@
 // DNS domain on which gadgets should render.
 "gadgets.lockedDomainSuffix" : "-a.example.com:8080",
 
+// Origins for CORS requests and/or Referer validation
+// Indicate a set of origins or an entry with * to indicate that all origins are allowed
+"gadgets.parentOrigins" : ["*"],
+
 // Various urls generated throughout the code base.
 // iframeBaseUri will automatically have the host inserted
 // if locked domain is enabled and the implementation supports it.

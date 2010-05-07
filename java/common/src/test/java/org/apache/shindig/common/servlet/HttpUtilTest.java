@@ -28,9 +28,11 @@ import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
 import org.easymock.classextension.EasyMock;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -91,7 +93,26 @@ public class HttpUtilTest {
     HttpUtil.setNoCache(recorder);
     checkCacheControlHeaders(testStartTime, recorder, 0, true);
   }
-  
+
+  @Test
+  public void testCORSstar() {
+    HttpUtil.setCORSheader(recorder, Collections.singleton("*"));
+    assertEquals(recorder.getHeader(HttpUtil.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER), "*");
+  }
+
+  @Test
+  public void testCORSnull() {
+     HttpUtil.setCORSheader(recorder, null);
+     assertEquals(recorder.getHeader(HttpUtil.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER), null);
+   }
+
+   @Test
+   @Ignore("HttpServletResponseRecorder doesn't support multiple headers")
+   public void testCORSmultiple() {
+     HttpUtil.setCORSheader(recorder, Arrays.asList("http://foo.example.com", "http://bar.example.com"));
+     // TODO fix HttpServletResponseRecorder and add multi-header test here
+   }
+
   public static void checkCacheControlHeaders(long testStartTime,
       HttpServletResponseRecorder response, int ttl, boolean noProxy) {
 

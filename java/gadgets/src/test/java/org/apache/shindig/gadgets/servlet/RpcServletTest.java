@@ -26,10 +26,12 @@ import static org.easymock.classextension.EasyMock.verify;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;

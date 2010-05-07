@@ -18,10 +18,12 @@
  */
 package org.apache.shindig.common.servlet;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.TimeSource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -128,5 +130,23 @@ public class HttpUtil {
             GET_REQUEST_CALLBACK_PATTERN.toString());
     }
     return true;
+  }
+
+
+  public static final String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
+
+  /**
+   * Set the header for Cross-Site Resource Sharing.
+   * @param resp HttpServletResponse to modify
+   * @param validOrigins a space separated list of Origins as defined by the html5 spec
+   * @see http://dev.w3.org/html5/spec/browsers.html#origin-0
+   */
+  public static void setCORSheader(HttpServletResponse resp, Collection<String> validOrigins) {
+    if (validOrigins == null) {
+      return;
+    }
+    for (String origin : validOrigins) {
+      resp.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
+    }
   }
 }

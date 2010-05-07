@@ -24,6 +24,7 @@ import static org.easymock.classextension.EasyMock.reset;
 
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.apache.shindig.protocol.multipart.MultipartFormParser;
@@ -66,6 +67,7 @@ public class JsonRpcServletTest extends Assert {
   private HttpServletResponse res;
   private JsonRpcServlet servlet;
   private MultipartFormParser multipartFormParser;
+  private ContainerConfig containerConfig;
 
   private final IMocksControl mockControl = EasyMock.createNiceControl();
 
@@ -78,6 +80,7 @@ public class JsonRpcServletTest extends Assert {
     servlet = new JsonRpcServlet();
     req = mockControl.createMock(HttpServletRequest.class);
     res = mockControl.createMock(HttpServletResponse.class);
+    containerConfig = mockControl.createMock(ContainerConfig.class);
 
     multipartFormParser = mockControl.createMock(MultipartFormParser.class);
     EasyMock.expect(multipartFormParser.isMultipartContent(req)).andStubReturn(false);
@@ -91,6 +94,8 @@ public class JsonRpcServletTest extends Assert {
 
     servlet.setHandlerRegistry(registry);
     servlet.setBeanConverters(converter, null, null);
+    servlet.setContainerConfig(containerConfig);
+
     handler.setMock(new TestHandler() {
       @Override
       public Object get(RequestItem req) {

@@ -4,8 +4,18 @@ FROM 1.0.x TO 1.1.x
 Almost all interfaces have been updated from 1.0.x -> 1.1.x.  The 
 following information is not complete.
 
+== container.js config changes ==
+
+* gadgets.parentOrigins: Default ["*"]
+
+An array of valid origin domains for the container.
 
 == Java Interface Changes ==
+
+* AbstractContainerConfig
+
+Changed signature on getMap() and getList() to use Java
+generics.
 
 * SecurityTokenDecoder 
 
@@ -14,6 +24,7 @@ with the new SecurityTokenCodec interface and implementations.
 
 You will need to adjust any custom SecurityToken decoders to 
 encode tokens as well as decode them.
+
 
 == Java Guice Changes ==
 

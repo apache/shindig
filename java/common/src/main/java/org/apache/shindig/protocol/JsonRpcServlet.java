@@ -89,6 +89,7 @@ public class JsonRpcServlet extends ApiServlet {
       return;
     }
 
+    HttpUtil.setCORSheader(servletResponse, containerConfig.<String>getList(token.getContainer(), "gadgets.parentOrigins"));
 
     try {
       String content = null;
@@ -123,6 +124,7 @@ public class JsonRpcServlet extends ApiServlet {
         JSONObject request = new JSONObject(content);
         dispatch(request, formData, servletRequest, servletResponse, token, callback);
       }
+      return;
     } catch (JSONException je) {
       sendJsonParseError(je, servletResponse);
     } catch (IllegalArgumentException e) {
@@ -189,7 +191,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback).append('(');
+    if (callback != null) writer.append(callback+'(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
@@ -213,7 +215,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback).append('(');
+    if (callback != null) writer.append(callback+'(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
