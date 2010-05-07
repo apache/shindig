@@ -187,7 +187,7 @@ class GadgetRenderingServlet extends HttpServlet {
       }
       // otherwise it was already included by config.forceJsLibs.
     }
-    $content .= $this->appendJsConfig($context, $gadget, ! empty($forcedLibs)) . $this->appendMessages($gadget) . $this->appendPreloads($gadget, $context) . "</script>";
+    $content .= $this->appendJsConfig($context, $gadget, ! empty($forcedLibs)) . $this->appendMessages($gadget) . $this->appendPreferences($gadget) . $this->appendPreloads($gadget, $context) . "</script>";
     if (strlen($externJs) > 0) {
       $content .= $externJs;
     }
@@ -359,6 +359,11 @@ class GadgetRenderingServlet extends HttpServlet {
       $msgs = json_encode($bundle->getMessages());
     }
     return "gadgets.Prefs.setMessages_($msgs);\n";
+  }
+
+  private function appendPreferences(Gadget $gadget) {
+    $prefs = json_encode($gadget->getUserPrefValues()->getPrefs());
+    return "gadgets.Prefs.setDefaultPrefs_($prefs);\n";
   }
 
   /**
