@@ -1,0 +1,34 @@
+FROM 1.0.x TO 1.1.x
+===================
+
+Almost all interfaces have been updated from 1.0.x -> 1.1.x.  The 
+following information is not complete.
+
+
+== Java Interface Changes ==
+
+* SecurityTokenDecoder 
+
+The interface and implementation are replaced
+with the new SecurityTokenCodec interface and implementations.
+
+You will need to adjust any custom SecurityToken decoders to 
+encode tokens as well as decode them.
+
+== Java Guice Changes ==
+
+1.1.x uses Guice 2.0 which allows for @Provides annotations and much more.
+
+* TemplateModule
+
+If you had previously customized the Set of TagHandlers you'll need to start
+using Guice Multibindings instead.  This is much easier than subclassing the
+Guice module.  Here's what you would add to your local module to add a new 
+Tag handler.
+
+  Multibinder.newSetBinder(binder(), TagHandler.class).addBinding().to(MyCustomTagHandler.class);
+
+== PHP Changes ==
+
+TBD
+

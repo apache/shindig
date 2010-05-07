@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 
 import org.apache.shindig.gadgets.templates.tags.FlashTagHandler;
 import org.apache.shindig.gadgets.templates.tags.HtmlTagHandler;
@@ -42,19 +43,18 @@ public class TemplateModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(TemplateProcessor.class).to(DefaultTemplateProcessor.class);
+    bindTagHandlers();
   }
 
-  // TODO: switch to Guice multibindings when that JAR becomes available
-  // in a Maven repository
-
-  @Provides
-  @Singleton
-  protected Set<TagHandler> provideTagHandlers(HtmlTagHandler htmlHandler,
-                                           IfTagHandler ifHandler, RepeatTagHandler repeatHandler,
-                                           RenderTagHandler renderHandler, FlashTagHandler flashHandler,
-                                           VariableTagHandler variableHandler) {
-    return ImmutableSet.of((TagHandler) htmlHandler, ifHandler,
-        repeatHandler, renderHandler, flashHandler,
-        variableHandler);
+  /* No need to subclass. 
+     You can add the same construct in your own modules to register your own tag handler.. */
+  protected void bindTagHandlers() {
+    Multibinder<TagHandler> tagBinder = Multibinder.newSetBinder(binder(), TagHandler.class);
+    tagBinder.addBinding().to(HtmlTagHandler.class);
+    tagBinder.addBinding().to(IfTagHandler.class);
+    tagBinder.addBinding().to(RenderTagHandler.class);
+    tagBinder.addBinding().to(RepeatTagHandler.class);
+    tagBinder.addBinding().to(FlashTagHandler.class);
+    tagBinder.addBinding().to(VariableTagHandler.class);
   }
 }
