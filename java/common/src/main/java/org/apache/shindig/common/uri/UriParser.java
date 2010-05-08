@@ -28,5 +28,5 @@ public interface UriParser {
    * @param text The text uri.
    * @return A new Uri, parsed into components.
    */
-  public Uri parse(String text);
+  Uri parse(String text);
 }

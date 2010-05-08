@@ -67,8 +67,8 @@ public class BeanJsonConverterInjectedClassTest extends Assert {
    * TestInterface.
    */
   public interface TestInterface {    
-    public String getX();    
-    public void setX(String x);
+    String getX();    
+    void setX(String x);
   }
 
   /**

@@ -54,6 +54,6 @@ public interface LockedDomainService {
    * @return the host name on which the gadget should render, or null if locked domain should not
    * be used to render this gadget.
    */
-  public String getLockedDomainForGadget(Gadget gadget, String container);
+  String getLockedDomainForGadget(Gadget gadget, String container);
 
 }

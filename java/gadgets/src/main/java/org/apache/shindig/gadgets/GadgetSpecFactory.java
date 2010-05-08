@@ -29,5 +29,5 @@ import com.google.inject.ImplementedBy;
 public interface GadgetSpecFactory {
 
   /** Return a gadget spec for a context */
-  public GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
+  GadgetSpec getGadgetSpec(GadgetContext context) throws GadgetException;
 }

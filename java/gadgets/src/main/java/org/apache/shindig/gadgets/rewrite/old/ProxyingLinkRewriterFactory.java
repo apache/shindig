@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 
 @ImplementedBy(DefaultProxyingLinkRewriterFactory.class)
 public interface ProxyingLinkRewriterFactory {
-  public ProxyingLinkRewriter create(Uri gadgetUri,
+  ProxyingLinkRewriter create(Uri gadgetUri,
       ContentRewriterFeature.Config rewriterFeature, String container, boolean debug,
       boolean ignoreCache);
 }

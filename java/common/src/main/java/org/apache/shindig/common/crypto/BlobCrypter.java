@@ -37,7 +37,7 @@ public interface BlobCrypter {
    *
    * @throws BlobCrypterException when crypto errors occur
    */
-  public String wrap(Map<String, String> in) throws BlobCrypterException;
+  String wrap(Map<String, String> in) throws BlobCrypterException;
 
   /**
    * Unwraps a blob.
@@ -49,7 +49,6 @@ public interface BlobCrypter {
    * @throws BlobExpiredException if the blob is too old to be accepted.
    * @throws BlobCrypterException if the blob can't be decoded.
    */
-  public Map<String, String> unwrap(String in, int maxAgeSec)
+  Map<String, String> unwrap(String in, int maxAgeSec)
       throws BlobCrypterException;
-
 }

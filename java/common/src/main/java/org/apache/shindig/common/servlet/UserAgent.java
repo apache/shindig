@@ -64,7 +64,7 @@ public final class UserAgent {
   }
   
   public interface Parser {
-    public UserAgent parse(String userAgent);
+    UserAgent parse(String userAgent);
   }
   
   public enum Browser {

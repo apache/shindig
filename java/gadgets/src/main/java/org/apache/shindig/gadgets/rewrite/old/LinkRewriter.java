@@ -25,6 +25,6 @@ import org.apache.shindig.common.uri.Uri;
  */
 public interface LinkRewriter {
 
-  public String rewrite(String link, Uri context);
+  String rewrite(String link, Uri context);
 
 }

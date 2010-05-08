@@ -32,5 +32,5 @@ public interface BeanConverter {
    * @param pojo Object to serialize
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
-  public void append(Appendable buf, Object pojo) throws IOException;
+  void append(Appendable buf, Object pojo) throws IOException;
 }

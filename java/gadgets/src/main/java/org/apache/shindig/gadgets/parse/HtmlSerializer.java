@@ -26,5 +26,5 @@ import org.w3c.dom.Document;
  */
 @ImplementedBy(DefaultHtmlSerializer.class)
 public interface HtmlSerializer {
-  public String serialize(Document doc);
+  String serialize(Document doc);
 }

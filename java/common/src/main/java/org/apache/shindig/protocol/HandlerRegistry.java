@@ -52,10 +52,10 @@ public interface HandlerRegistry {
   /**
    * @return The list of available services
    */
-  public Set<String> getSupportedRestServices();
+  Set<String> getSupportedRestServices();
 
   /**
    * @return The list of available services
    */
-  public Set<String> getSupportedRpcServices();
+  Set<String> getSupportedRpcServices();
 }

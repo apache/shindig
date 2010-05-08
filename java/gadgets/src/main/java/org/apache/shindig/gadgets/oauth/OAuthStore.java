@@ -127,7 +127,7 @@ public interface OAuthStore {
    * 
    * @throws GadgetException if no OAuth consumer can be found (e.g. no consumer key can be used.)
    */
-  public ConsumerInfo getConsumerKeyAndSecret(SecurityToken securityToken, String serviceName,
+  ConsumerInfo getConsumerKeyAndSecret(SecurityToken securityToken, String serviceName,
       OAuthServiceProvider provider) throws GadgetException;
 
   /**
@@ -139,18 +139,18 @@ public interface OAuthStore {
    * @return the token and secret, or null if none exist
    * @throws GadgetException if an error occurs during lookup
    */
-  public TokenInfo getTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
+  TokenInfo getTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo,
       String serviceName, String tokenName) throws GadgetException;
 
   /**
    * Set the access token for the given user/gadget/service/token
    */
-  public void setTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo, String serviceName,
+  void setTokenInfo(SecurityToken securityToken, ConsumerInfo consumerInfo, String serviceName,
       String tokenName, TokenInfo tokenInfo) throws GadgetException;
 
   /**
    * Remove the access token for the given user/gadget/service/token
    */
-  public void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
+  void removeToken(SecurityToken securityToken, ConsumerInfo consumerInfo,
       String serviceName, String tokenName) throws GadgetException;
 }

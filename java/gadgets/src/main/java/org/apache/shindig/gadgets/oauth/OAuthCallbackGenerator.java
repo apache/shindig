@@ -28,6 +28,6 @@ import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestExceptio
  */
 @ImplementedBy(GadgetOAuthCallbackGenerator.class)
 public interface OAuthCallbackGenerator {  
-  public String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
+  String generateCallback(OAuthFetcherConfig fetcherConfig, String baseCallback,
       HttpRequest request, OAuthResponseParams responseParams) throws OAuthRequestException;
 }

@@ -31,5 +31,5 @@ public interface CacheProvider {
    * @param name The name of the cache.
    * @return A Cache configured to the required specification.
    */
-  public <K, V> Cache<K, V> createCache(String name);
+  <K, V> Cache<K, V> createCache(String name);
 }

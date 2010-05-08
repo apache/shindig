@@ -35,12 +35,12 @@ public interface TagHandler {
   /**
    * @return the local name of the element this tag parses.
    */
-  public String getTagName();
+  String getTagName();
   
   /**
    * @return the namespace of the element this tag parses.
    */
-  public String getNamespaceUri();
+  String getNamespaceUri();
 
   /**
    * Processes the custom tag.
@@ -50,6 +50,6 @@ public interface TagHandler {
    * @param processor A TemplateProcessor, used to evaluate expressions and render
    *     sub-templates if needed.
    */
-  public void process(Node result, Element tag, TemplateProcessor processor);
+  void process(Node result, Element tag, TemplateProcessor processor);
   
 }

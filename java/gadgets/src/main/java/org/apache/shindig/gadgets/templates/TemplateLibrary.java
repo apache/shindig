@@ -29,12 +29,12 @@ public interface TemplateLibrary {
   /**
    * @return a registry of tags in this library.
    */
-  public TagRegistry getTagRegistry();
+  TagRegistry getTagRegistry();
   
-  public Uri getLibraryUri();
+  Uri getLibraryUri();
 
-  public boolean isSafe();
+  boolean isSafe();
   
-  public String serialize();
+  String serialize();
   
 }
