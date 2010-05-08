@@ -99,8 +99,9 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
         Names.named("org.apache.shindig.social.handlers"))));
     servlet.setHandlerRegistry(dispatcher);
     ContainerConfig containerConfig = EasyMock.createMock(ContainerConfig.class);
-    EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*"));
-    servlet.setContainerConfig(EasyMock.createMock(ContainerConfig.class));
+    EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*")).anyTimes();
+    EasyMock.replay(containerConfig);
+    servlet.setContainerConfig(containerConfig);
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
@@ -156,6 +157,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
     EasyMock.expect(res.getWriter()).andReturn(writer);
     res.setCharacterEncoding("UTF-8");
     res.setContentType(contentType);
+    res.addHeader("Access-Control-Allow-Origin", "*");
 
     EasyMock.replay(res);
     servlet.service(req, res);
