@@ -18,6 +18,7 @@
 
 package org.apache.shindig.social.opensocial.jpa.spi.integration;
 
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.DataServiceServlet;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
@@ -30,11 +31,14 @@ import org.apache.shindig.social.opensocial.service.AppDataHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
 
-import javax.persistence.EntityManager;
+import org.easymock.EasyMock;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import java.util.Collections;
+import javax.persistence.EntityManager;
 
 /**
  * JPARestfulTestConfigHelper helps configure a JPA Restful test.
@@ -71,6 +75,11 @@ public class JpaRestfulTestConfigHelper {
     servlet.setBeanConverters(new BeanJsonConverter(injector),
         new BeanXStreamConverter(new XStream081Configuration(injector)),
         new BeanXStreamAtomConverter(new XStream081Configuration(injector)));
+
+    ContainerConfig containerConfig = EasyMock.createMock(ContainerConfig.class);
+    EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*")).anyTimes();
+    EasyMock.replay(containerConfig);
+    servlet.setContainerConfig(containerConfig);
     return servlet;
   }
   
