@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-var osapi = osapi || {};
 (function() {
   /**
    * Called by the transports for each service method that they expose

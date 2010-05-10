@@ -20,8 +20,6 @@
  * @fileoverview Base OSAPI binding
  */
 
-var osapi = osapi || {};
-
 /**
  * Container-side binding for the gadgetsrpctransport used by osapi. Containers
  * add services to the client-side osapi implementation by defining them in the osapi

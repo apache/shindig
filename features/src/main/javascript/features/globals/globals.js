@@ -9,3 +9,9 @@ var gadgets = gadgets || {};
  * @type {Object} 
  */
 var shindig = shindig || {};
+
+/** 
+ * @namespace The global osapi namespace, used for opensocial API specific extensions
+ * @type {Object} 
+ */
+var osapi = osapi || {};

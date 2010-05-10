@@ -15,7 +15,6 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-var osapi = osapi || {};
 
 /**
  * A transport for osapi based on gadgets.rpc. Allows osapi to expose APIs requiring container
