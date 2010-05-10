@@ -35,6 +35,8 @@ import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.uri.UriModule;
 
+import org.apache.shindig.gadgets.variables.SubstituterModule;
+
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +65,7 @@ public class DefaultGuiceModule extends AbstractModule {
     install(new PreloadModule());
     install(new RenderModule());
     install(new RewriteModule());
+    install(new SubstituterModule());
     install(new TemplateModule());
     install(new UriModule());
 

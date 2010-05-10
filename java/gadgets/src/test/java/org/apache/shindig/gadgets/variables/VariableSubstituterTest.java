@@ -30,13 +30,20 @@ import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
 import org.junit.Test;
 
 import java.util.Locale;
 
 public class VariableSubstituterTest {
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
-  private final VariableSubstituter substituter = new VariableSubstituter(messageBundleFactory);
+  private final VariableSubstituter substituter = new VariableSubstituter(Lists.newArrayList(
+    new MessageSubstituter(messageBundleFactory),
+    new UserPrefSubstituter(),
+    new ModuleSubstituter(),
+    new BidiSubstituter(messageBundleFactory)
+  ));
 
   private GadgetSpec substitute(String xml) throws Exception {
     return substituter.substitute(new GadgetContext(), new GadgetSpec(Uri.parse("#"), xml));
@@ -92,6 +99,24 @@ public class VariableSubstituterTest {
     spec = substituter.substitute(context, spec);
 
     assertEquals("I heart shindig", spec.getModulePrefs().getTitle());
+  }
+  
+  @Test
+  public void nestedMessageBundleInUserPrefSubstituted() throws Exception {
+    String xml = 
+      "<Module>" + 
+      " <ModulePrefs title='__UP_title__ for __MODULE_ID__'>" +
+      "  <Locale>" +
+      "   <msg name='title'>Gadget title</msg>" +
+      "  </Locale>" +
+      " </ModulePrefs>" +
+      " <UserPref name='title' default_value='__MSG_title__' />" +
+      " <Content />" +
+      "</Module>";
+
+    GadgetSpec spec = substitute(xml);
+
+    assertEquals("Gadget title for 0", spec.getModulePrefs().getTitle());
   }
 
   private static class FakeMessageBundleFactory implements MessageBundleFactory {

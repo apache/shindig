@@ -17,31 +17,30 @@
  */
 package org.apache.shindig.gadgets.variables;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import com.google.inject.Inject;
+
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.UserPref;
+import org.apache.shindig.gadgets.spec.MessageBundle;
 
 /**
- * Substitutes user prefs into the spec.
+ * Provides static hangman substitutions for message bundles.
  */
-public class UserPrefSubstituter implements Substituter {
+public class MessageSubstituter implements Substituter {
+  private final MessageBundleFactory messageBundleFactory;
 
-  public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec) {
-    UserPrefs values = context.getUserPrefs();
-    
-    for (UserPref pref : spec.getUserPrefs()) {
-      String name = pref.getName();
-      String value = values.getPref(name);
-      if (value == null) {
-        value = pref.getDefaultValue();
-        if (value == null) {
-          value = "";
-        }
-      }
-      substituter.addSubstitution(Substitutions.Type.USER_PREF, name, StringEscapeUtils
-            .escapeHtml(value));
-    }
+  @Inject
+  public MessageSubstituter(MessageBundleFactory messageBundleFactory) {
+    this.messageBundleFactory = messageBundleFactory;
+  }
+
+  public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)
+          throws GadgetException {
+    MessageBundle bundle = messageBundleFactory.getBundle(spec, context.getLocale(),
+        context.getIgnoreCache(), context.getContainer());
+        
+    substituter.addSubstitutions(Substitutions.Type.MESSAGE, bundle.getMessages());
   }
 }

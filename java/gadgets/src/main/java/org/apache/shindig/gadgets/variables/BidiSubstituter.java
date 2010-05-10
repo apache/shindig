@@ -17,11 +17,19 @@
  */
 package org.apache.shindig.gadgets.variables;
 
+import com.google.inject.Inject;
+
+import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.MessageBundleFactory;
+import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.MessageBundle;
+
 /**
  * Provides static hangman substitutions for bidirectional language support.
  * Useful for generating internationalized layouts using CSS.
  */
-public class BidiSubstituter {
+public class BidiSubstituter implements Substituter {
   public static final String START_EDGE = "START_EDGE";
   public static final String END_EDGE = "END_EDGE";
   public static final String DIR = "DIR";
@@ -32,15 +40,24 @@ public class BidiSubstituter {
   public static final String RTL = "rtl";
   public static final String LTR = "ltr";
 
-  public static void addSubstitutions(Substitutions substituter, String dir) {
+  private final MessageBundleFactory messageBundleFactory;
+
+  @Inject
+  public BidiSubstituter(MessageBundleFactory messageBundleFactory) {
+    this.messageBundleFactory = messageBundleFactory;
+  }
+
+  public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)
+      throws GadgetException {
+    MessageBundle bundle =
+        messageBundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache(),
+                    context.getContainer());
+    String dir = bundle.getLanguageDirection();
+
     boolean rtl = RTL.equals(dir);
-    substituter.addSubstitution(Substitutions.Type.BIDI, START_EDGE,
-        rtl ? RIGHT : LEFT);
-    substituter.addSubstitution(Substitutions.Type.BIDI, END_EDGE,
-        rtl ? LEFT : RIGHT);
-    substituter.addSubstitution(Substitutions.Type.BIDI, DIR,
-        rtl ? RTL : LTR);
-    substituter.addSubstitution(Substitutions.Type.BIDI, REVERSE_DIR,
-        rtl ? LTR : RTL);
+    substituter.addSubstitution(Substitutions.Type.BIDI, START_EDGE, rtl ? RIGHT : LEFT);
+    substituter.addSubstitution(Substitutions.Type.BIDI, END_EDGE, rtl ? LEFT : RIGHT);
+    substituter.addSubstitution(Substitutions.Type.BIDI, DIR, rtl ? RTL : LTR);
+    substituter.addSubstitution(Substitutions.Type.BIDI, REVERSE_DIR, rtl ? LTR : RTL);
   }
 }

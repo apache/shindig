@@ -18,23 +18,25 @@
  */
 package org.apache.shindig.gadgets.variables;
 
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.MessageBundle;
-
-import com.google.inject.Inject;
 
 /**
  * Performs variable substitution on a gadget spec.
  */
 public class VariableSubstituter {
-  private final MessageBundleFactory messageBundleFactory;
+  private final List<Substituter> substituters;
 
   @Inject
-  public VariableSubstituter(MessageBundleFactory messageBundleFactory) {
-    this.messageBundleFactory = messageBundleFactory;
+  public VariableSubstituter(@Named("shindig.substituters.gadget") List<Substituter> substituters) {
+    this.substituters = ImmutableList.copyOf(substituters);
   }
 
   /**
@@ -42,18 +44,13 @@ public class VariableSubstituter {
    *
    * @return A new GadgetSpec, with all fields substituted as needed.
    */
-  public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) throws GadgetException {
-    MessageBundle bundle =
-        messageBundleFactory.getBundle(spec, context.getLocale(), context.getIgnoreCache(), context.getContainer());
-    String dir = bundle.getLanguageDirection();
-
-    Substitutions substituter = new Substitutions();
-    substituter.addSubstitutions(Substitutions.Type.MESSAGE, bundle.getMessages());
-    BidiSubstituter.addSubstitutions(substituter, dir);
-    substituter.addSubstitution(Substitutions.Type.MODULE, "ID",
-        Integer.toString(context.getModuleId()));
-    UserPrefSubstituter.addSubstitutions(substituter, spec, context.getUserPrefs());
-
-    return spec.substitute(substituter);
+  public GadgetSpec substitute(GadgetContext context, GadgetSpec spec) throws GadgetException {   
+    Substitutions substitutions = new Substitutions();
+    
+    for (Substituter substituter : substituters) {
+        substituter.addSubstitutions(substitutions, context, spec);
+    }
+    
+    return spec.substitute(substitutions);
   }
 }

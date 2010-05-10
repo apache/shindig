@@ -41,19 +41,19 @@ public class Substitutions {
     MESSAGE("MSG"),
 
     /**
-     * Bi-directional text transformations.
-     */
-    BIDI("BIDI"),
-
-    /**
      * User preferences.
      */
     USER_PREF("UP"),
-
+    
     /**
      * MODULE_ variables (i.e. MODULE_ID)
      */
-    MODULE("MODULE");
+    MODULE("MODULE"),
+
+    /**
+     * Bi-directional text transformations.
+     */
+    BIDI("BIDI");
 
     private final String prefix;
 
@@ -83,7 +83,7 @@ public class Substitutions {
    * @param value
    */
   public void addSubstitution(Type type, String key, String value) {
-    substitutions.put(type.prefix + key, value);
+    substitutions.put(type.prefix + key, substituteString(value));
   }
 
   /**

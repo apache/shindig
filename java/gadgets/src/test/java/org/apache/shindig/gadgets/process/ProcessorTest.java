@@ -40,6 +40,10 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Lists;
+
+import org.apache.shindig.gadgets.variables.Substituter;
+
 public class ProcessorTest {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private static final Uri TYPE_URL_HREF = Uri.parse("http://example.org/gadget.php");
@@ -196,7 +200,7 @@ public class ProcessorTest {
     protected boolean wasSubstituted;
 
     protected FakeVariableSubstituter() {
-      super(null);
+      super(Lists.<Substituter>newArrayList());
     }
 
     @Override

@@ -17,31 +17,16 @@
  */
 package org.apache.shindig.gadgets.variables;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UserPrefs;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.UserPref;
 
 /**
- * Substitutes user prefs into the spec.
+ * Provides hangman substitution variables related to the Module (i.e. __MODULE_ID__)
  */
-public class UserPrefSubstituter implements Substituter {
-
-  public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec) {
-    UserPrefs values = context.getUserPrefs();
-    
-    for (UserPref pref : spec.getUserPrefs()) {
-      String name = pref.getName();
-      String value = values.getPref(name);
-      if (value == null) {
-        value = pref.getDefaultValue();
-        if (value == null) {
-          value = "";
-        }
-      }
-      substituter.addSubstitution(Substitutions.Type.USER_PREF, name, StringEscapeUtils
-            .escapeHtml(value));
-    }
+public class ModuleSubstituter implements Substituter {
+  public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)
+        throws GadgetException {
+    substituter.addSubstitution(Substitutions.Type.MODULE, "ID", Integer.toString(context.getModuleId()));
   }
 }
