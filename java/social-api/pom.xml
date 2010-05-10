@@ -138,11 +138,6 @@
 
     <!-- test -->
     <dependency>
-      <groupId>woodstox</groupId>
-      <artifactId>wstx</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>rhino</groupId>
       <artifactId>js</artifactId>
       <scope>test</scope>
