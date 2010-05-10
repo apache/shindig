@@ -76,7 +76,7 @@ public class OAuthUtil {
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new OAuthException(e);
     }
   }
   
