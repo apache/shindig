@@ -118,6 +118,8 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
   this.navTable_ = null;
   this.tabsContainer_ = null;
   this.rtl_ = document.body.dir === 'rtl';
+  this.prefs_ = new gadgets.Prefs();
+  this.selectedTabIndex_ = this.prefs_.getString("selectedTab");
   this.mainContainer_ = this.createMainContainer_(opt_container);
   this.tabTable_ = this.createTabTable_();
   this.displayTabs(false);
@@ -223,6 +225,9 @@ gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
     this.tabs_.push(tab);
   } else {
     this.tabs_.splice(tabIndex, 0, tab);
+
+    // Inserting may change selected tab's index
+    this.saveSelectedTabIndex_();
   }
 
   if (tabName == this.defaultTabName_ || (!this.defaultTabName_ && tabIndex === 0)) {
@@ -616,7 +621,7 @@ gadgets.TabSet.prototype.setSelectedTabGenerator_ = function(tab) {
  * @param {gadgets.Tab} tab The tab to select.
  * @private
  */
-gadgets.TabSet.prototype.selectTab_ = function(tab) {
+gadgets.TabSet.prototype.selectTab_ = function(tab, opt_inhibit_save) {
   if (this.selectedTab_ === tab) {
     return;
   }
@@ -633,8 +638,26 @@ gadgets.TabSet.prototype.selectTab_ = function(tab) {
   tab.contentContainer_.style.display = 'block';
   this.selectedTab_ = tab;
 
+  // Remember which tab is selected only if nosave is not true.
+  var nosave = (opt_inhibit_save === true) ? true : false;
+  if (!nosave) {
+    this.saveSelectedTabIndex_();
+  }
+
   if (typeof tab.callback_ === 'function') {
     tab.callback_(tab.contentContainer_.id);
+  }
+};
+
+gadgets.TabSet.prototype.saveSelectedTabIndex_ = function() {
+  try {
+    var currentTabIndex = this.selectedTab_.getIndex();
+    if (currentTabIndex >= 0) {
+      this.selectedTabIndex_ = currentTabIndex;
+      this.prefs_.set("selectedTab", currentTabIndex);
+    }
+  } catch (e) {
+    // ignore.  setprefs is optional for tablib.
   }
 };
 
