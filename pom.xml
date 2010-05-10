@@ -578,7 +578,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.6.1</version>
+            <version>2.7</version>
             <configuration>
               <source>1.5</source>
               <target>1.5</target>
@@ -594,9 +594,6 @@
             <reportSets>
               <reportSet>
                 <id>non-aggregate</id>
-                <configuration>
-                  <aggregate>false</aggregate>
-                </configuration>
                 <reports>
                   <report>javadoc</report>
                   <report>test-javadoc</report>
@@ -604,9 +601,6 @@
               </reportSet>
               <reportSet>
                 <id>aggregate</id>
-                <configuration>
-                  <aggregate>true</aggregate>
-                </configuration>
                 <reports>
                   <report>aggregate</report>
                   <report>test-aggregate</report>
@@ -648,7 +642,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
             <configuration>
               <targetJdk>1.5</targetJdk>
               <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
@@ -926,7 +920,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.1</version>
+          <version>2.3</version>
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
@@ -992,7 +986,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.6.1</version>
+          <version>2.7</version>
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
