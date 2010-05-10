@@ -143,6 +143,10 @@
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>
+      <artifactId>oauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.oauth.core</groupId>
       <artifactId>oauth-httpclient4</artifactId>
     </dependency>
     <dependency>
