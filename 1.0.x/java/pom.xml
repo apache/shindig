@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>shindig-parent</artifactId>
@@ -40,9 +40,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-1.0.1/java</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-1.0.1/java</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-1.0.1/java</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/1.0.x/java</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/1.0.x/java</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/1.0.x/java</url>
   </scm>
 
   <properties>
