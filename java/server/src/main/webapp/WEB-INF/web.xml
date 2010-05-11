@@ -33,37 +33,36 @@
       org.apache.shindig.gadgets.DefaultGuiceModule:
       org.apache.shindig.social.sample.SampleModule:
       org.apache.shindig.gadgets.oauth.OAuthModule:
-      org.apache.shindig.common.cache.ehcache.EhCacheModule
+      org.apache.shindig.common.cache.ehcache.EhCacheModule:
+      org.apache.shindig.sample.shiro.ShiroModule
     </param-value>
   </context-param>
 
     <filter>
-        <filter-name>JSecurityFilter</filter-name>
-        <filter-class>org.jsecurity.web.servlet.JSecurityFilter</filter-class>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class>
         <init-param>
             <param-name>config</param-name>
             <param-value>
-
-                # The JSecurityFilter configuration is very powerful and flexible, while still remaining succinct.
+                # The ShiroFilter configuration is very powerful and flexible, while still remaining succinct.
                 # Please read the comprehensive example, with full comments and explanations, in the JavaDoc:
                 #
                 # http://www.jsecurity.org/api/org/jsecurity/web/servlet/JSecurityFilter.html
                 [main]
-                shindigSampleRealm = org.apache.shindig.social.sample.oauth.SampleRealm
+                shindigSampleRealm = org.apache.shindig.sample.shiro.SampleShiroRealm
                 securityManager.realm = $shindigSampleRealm
 
                 [filters]
-                jsecurity.loginUrl = /login.jsp
+                shiro.loginUrl = /login.jsp
 
                 [urls]
                 # The /login.jsp is not restricted to authenticated users (otherwise no one could log in!), but
                 # the 'authc' filter must still be specified for it so it can process that url's
                 # login submissions. It is 'smart' enough to allow those requests through as specified by the
-                # jsecurity.loginUrl above.
+                # shiro.loginUrl above.
                 /login.jsp = authc
 
                 /oauth/authorize/** = authc
-                /remoting/** = authc, roles[b2bClient], perms[remote:invoke:"lan,wan"]
 
             </param-value>
         </init-param>
@@ -76,12 +75,12 @@
 
 
   <filter-mapping>
-      <filter-name>JSecurityFilter</filter-name>
+      <filter-name>ShiroFilter</filter-name>
       <url-pattern>/oauth/authorize</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
-      <filter-name>JSecurityFilter</filter-name>
+      <filter-name>ShiroFilter</filter-name>
       <url-pattern>*.jsp</url-pattern>
   </filter-mapping>
 

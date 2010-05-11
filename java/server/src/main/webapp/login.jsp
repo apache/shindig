@@ -16,10 +16,10 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   --%>
-<%@ page import="org.jsecurity.SecurityUtils" %>
+<%@ page import="org.apache.shiro.SecurityUtils" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="jsec" uri="http://www.jsecurity.org/tags" %>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 
 <html>
 <head>
@@ -28,7 +28,7 @@
 
 <h2>Please Log in</h2>
 
-<jsec:guest>
+<shiro:guest>
     <p>Try one of the accounts defined in canonicaldb.json</p>
 
 
@@ -82,10 +82,10 @@
         </tbody>
     </table>
     <br/><br/>
-</jsec:guest>
+</shiro:guest>
 
 
-<c:out value="${jsecLoginFailure}" default=""/><br/>
+<c:out value="${shiroLoginFailure}" default=""/><br/>
 
 
 <form action="" method="post">

@@ -150,12 +150,16 @@
       <artifactId>json</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jsecurity</groupId>
-      <artifactId>jsecurity</artifactId>
-    </dependency>
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
     </dependency>
 
     <!-- test -->

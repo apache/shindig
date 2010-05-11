@@ -16,20 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.social.sample.oauth;
+package org.apache.shindig.sample.shiro;
 
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
-import org.jsecurity.authc.AccountException;
-import org.jsecurity.authc.AuthenticationException;
-import org.jsecurity.authc.AuthenticationInfo;
-import org.jsecurity.authc.AuthenticationToken;
-import org.jsecurity.authc.SimpleAuthenticationInfo;
-import org.jsecurity.authc.UsernamePasswordToken;
-import org.jsecurity.authz.AuthorizationException;
-import org.jsecurity.authz.AuthorizationInfo;
-import org.jsecurity.authz.SimpleAuthorizationInfo;
-import org.jsecurity.realm.AuthorizingRealm;
-import org.jsecurity.subject.PrincipalCollection;
+import org.apache.shiro.authc.AccountException;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
 
 import java.util.Set;
 
@@ -37,14 +37,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
 /**
- * A Sample Jsecurity Realm that uses the JSON DB to get passwords
+ * A Sample Shiro Realm that uses the JSON DB to get passwords
  *
  */
-public class SampleRealm extends AuthorizingRealm {
-  // HACK, jsecurity relies upon no-arg constructors..
+public class SampleShiroRealm extends AuthorizingRealm {
+  // HACK, apache.shiro relies upon no-arg constructors..
   @Inject
   private static JsonDbOpensocialService jsonDbService;
-
 
   protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
     UsernamePasswordToken upToken = (UsernamePasswordToken) token;
