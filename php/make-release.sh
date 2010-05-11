@@ -39,7 +39,7 @@ cp -r * /tmp/$NAME
 cp -r ../features /tmp/$NAME/
 cp -r ../javascript /tmp/$NAME
 cp .htaccess /tmp/$NAME
-cp ../{COMMITTERS,COPYING,DISCLAIMER,LICENSE,NOTICE} /tmp/$NAME
+cp ../{COMMITTERS,COPYING,LICENSE,NOTICE} /tmp/$NAME
 cp ../config/{oauth.json,container.js} /tmp/$NAME/config/
 cd /tmp/$NAME
 

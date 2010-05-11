@@ -42,7 +42,7 @@
       <outputDirectory>shindig-${pom.version}-java</outputDirectory>
       <directory>../</directory>
       <includes>
-        <include>DISCLAIMER</include>
+        <include>UPGRADING</include>
       </includes>
       <excludes>
         <exclude>LICENSE</exclude>

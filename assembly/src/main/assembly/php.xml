@@ -32,7 +32,6 @@
         <include>features/**</include>
         <include>javascript/**</include>
         <include>config/**</include>
-        <include>DISCLAIMER</include>
       </includes>
       <excludes>
         <exclude>site/**</exclude>

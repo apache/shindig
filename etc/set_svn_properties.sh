@@ -116,8 +116,8 @@ find . -name "KEYS*" | grep -v '.svn' | xargs -n 1 svn propset svn:mime-type tex
 find . -name "INSTALL*" | grep -v '.svn' | xargs -n 1 svn propset svn:eol-style native
 find . -name "INSTALL*" | grep -v '.svn' | xargs -n 1 svn propset svn:mime-type text/plain
 
-find . -name "DISCLAIMER*" | grep -v '.svn' | xargs -n 1 svn propset svn:eol-style native
-find . -name "DISCLAIMER*" | grep -v '.svn' | xargs -n 1 svn propset svn:mime-type text/plain
+find . -name "UPGRADING*" | grep -v '.svn' | xargs -n 1 svn propset svn:eol-style native
+find . -name "UPGRADING*" | grep -v '.svn' | xargs -n 1 svn propset svn:mime-type text/plain
 
 find . -name "COMMITTERS*" | grep -v '.svn' | xargs -n 1 svn propset svn:eol-style native
 find . -name "COMMITTERS*" | grep -v '.svn' | xargs -n 1 svn propset svn:mime-type text/plain
