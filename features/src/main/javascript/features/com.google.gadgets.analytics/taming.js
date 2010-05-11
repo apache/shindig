@@ -28,6 +28,6 @@ tamings___.push(function(imports) {
   ]);
   caja___.whitelistMeths([
     [gadgets.analytics, 'reportPageview'],
-    [gadgets.analytics, 'reportEvent'],
+    [gadgets.analytics, 'reportEvent']
   ]);
 });
