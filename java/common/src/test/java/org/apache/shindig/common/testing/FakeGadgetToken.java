@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.testing;
 
+import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenDecoder;
@@ -30,7 +31,7 @@ import java.util.Map;
 /**
  * A fake SecurityToken implementation to help testing.
  */
-public class FakeGadgetToken implements SecurityToken {
+public class FakeGadgetToken extends AbstractSecurityToken implements SecurityToken {
 
   private String updatedToken = null;
   private String trustedJson = null;
@@ -44,6 +45,7 @@ public class FakeGadgetToken implements SecurityToken {
   private String activeUrl = null;
   private String authMode = AuthenticationMode.SECURITY_TOKEN_URL_PARAMETER.name();
   private int moduleId = 0;
+  private Long expiresAt = null;
 
   public FakeGadgetToken setUpdatedToken(String updatedToken) {
     this.updatedToken = updatedToken;
@@ -89,7 +91,12 @@ public class FakeGadgetToken implements SecurityToken {
     this.moduleId = moduleId;
     return this;
   }
-  
+
+  public FakeGadgetToken setExpiresAt(Long expiresAt) {
+    this.expiresAt = expiresAt;
+    return this;
+  }
+
   public FakeGadgetToken setActiveUrl(String activeUrl) {
     this.activeUrl = activeUrl;
     return this;
@@ -119,16 +126,16 @@ public class FakeGadgetToken implements SecurityToken {
     return container;
   }
 
-  public String toSerialForm() {
-    return "";
-  }
-
   public String getAppUrl() {
     return appUrl;
   }
 
   public long getModuleId() {
     return moduleId;
+  }
+
+  public Long getExpiresAt() {
+    return expiresAt;
   }
 
   public String getUpdatedToken() {

@@ -178,7 +178,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
       OAuthConsumer authConsumer) throws OAuthProblemException {
     if (entry != null) {
       return new OAuthSecurityToken(entry.userId, entry.callbackUrl, entry.appId,
-          entry.domain, entry.container);
+          entry.domain, entry.container, entry.expiresAt().getTime());
     } else {
       String userId = getParameter(message, REQUESTOR_ID_PARAM);
       return store.getSecurityTokenForConsumerRequest(authConsumer.consumerKey, userId);

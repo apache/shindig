@@ -17,6 +17,11 @@ An array of valid origin domains for the container.
 Changed signature on getMap() and getList() to use Java
 generics.
 
+* SecurityToken
+
+New methods: getExpiresAt() and isExpired() are now required.  A new AbstractSecurityToken
+base class is available.
+
 * SecurityTokenDecoder 
 
 The interface and implementation are replaced

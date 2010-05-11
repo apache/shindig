@@ -88,7 +88,8 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
           Utf8UrlCoder.decode(tokens[APP_URL_INDEX]),
           Utf8UrlCoder.decode(tokens[MODULE_ID_INDEX]),
           Utf8UrlCoder.decode(tokens[CONTAINER_ID_INDEX]),
-          parameters.get(SecurityTokenDecoder.ACTIVE_URL_NAME));
+          parameters.get(SecurityTokenDecoder.ACTIVE_URL_NAME),
+          null);
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
     } catch (ArrayIndexOutOfBoundsException e) {

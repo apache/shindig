@@ -18,44 +18,52 @@
  */
 package org.apache.shindig.auth;
 
+import org.apache.shindig.config.ContainerConfig;
+
 /**
  * A special class of Token representing the anonymous viewer/owner
  *
- * All methods except for isAnonymous will throw IllegalArgumentExceptions
  */
-public class AnonymousSecurityToken implements SecurityToken {
-
-  private String container;
+public class AnonymousSecurityToken extends AbstractSecurityToken implements SecurityToken {
+  private final String container;
+  private final long moduleId;
+  private final String appUrl;
+  private final Long expiresAt;
 
   public AnonymousSecurityToken() {
-    this.container = "default";
+    this(ContainerConfig.DEFAULT_CONTAINER);
   }
+  
   public AnonymousSecurityToken(String container) {
+    this(container, 0L, "", null);
+  }
+
+  public AnonymousSecurityToken(String container, long moduleId, String appUrl, Long expiresAt) {
     this.container = container;
+    this.moduleId = moduleId;
+    this.appUrl = appUrl;
+    this.expiresAt = expiresAt;
   }
 
   public boolean isAnonymous() {
     return true;
   }
 
-  public String toSerialForm() {
-    return "";
-  }
-
   public String getOwnerId() {
-    return "";
+    return "-1";
   }
 
   public String getViewerId() {
-    return "";
+    return "-1";
   }
 
   public String getAppId() {
-    return "";
+    return appUrl;
   }
 
   public String getDomain() {
     return "";
+    return appUrl;
   }
 
   public String getContainer() {
@@ -63,11 +71,15 @@ public class AnonymousSecurityToken implements SecurityToken {
   }
 
   public String getAppUrl() {
-    return "";
+    return appUrl;
   }
 
   public long getModuleId() {
-    return 0L;
+    return moduleId;
+  }
+
+  public Long getExpiresAt() {
+    return expiresAt;
   }
 
   public String getUpdatedToken() {
@@ -80,9 +92,5 @@ public class AnonymousSecurityToken implements SecurityToken {
 
   public String getTrustedJson() {
     return "";
-  }
-
-  public String getActiveUrl() {
-    throw new UnsupportedOperationException("No active URL available");
   }
 }

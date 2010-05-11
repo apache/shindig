@@ -95,7 +95,7 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
   public SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException {
     String token = tokenParameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
-    if (token == null || token.trim().length() == 0) {
+    if (StringUtils.isBlank(token)) {
       // No token is present, assume anonymous access
       return new AnonymousSecurityToken();
     }

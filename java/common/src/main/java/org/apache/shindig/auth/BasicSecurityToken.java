@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Primitive token implementation that uses strings as tokens.
  */
-public class BasicSecurityToken implements SecurityToken {
+public class BasicSecurityToken extends AbstractSecurityToken implements SecurityToken {
   /** serialized form of the token */
   private final String token;
 
@@ -51,10 +51,7 @@ public class BasicSecurityToken implements SecurityToken {
   private static final String APPURL_KEY = "u";
   private static final String MODULE_KEY = "m";
   private static final String CONTAINER_KEY = "c";
-
-  public String toSerialForm() {
-    return token;
-  }
+  private static final String EXPIRES_KEY = "x";
 
   /**
    * Generates a token from an input string
@@ -70,7 +67,7 @@ public class BasicSecurityToken implements SecurityToken {
   }
 
   public BasicSecurityToken(String owner, String viewer, String app,
-      String domain, String appUrl, String moduleId, String container, String activeUrl)
+      String domain, String appUrl, String moduleId, String container, String activeUrl, Long expiresAt)
       throws BlobCrypterException {
     tokenData = Maps.newHashMapWithExpectedSize(7);
     putNullSafe(OWNER_KEY, owner);
@@ -80,6 +77,9 @@ public class BasicSecurityToken implements SecurityToken {
     putNullSafe(APPURL_KEY, appUrl);
     putNullSafe(MODULE_KEY, moduleId);
     putNullSafe(CONTAINER_KEY, container);
+    if (expiresAt != null)
+      putNullSafe(EXPIRES_KEY, expiresAt.toString());
+
     token = crypter.wrap(tokenData);
     this.activeUrl = activeUrl;
   }
@@ -137,6 +137,10 @@ public class BasicSecurityToken implements SecurityToken {
    */
   public long getModuleId() {
     return Long.parseLong(tokenData.get(MODULE_KEY));
+  }
+
+  public Long getExpiresAt() {
+    return Long.parseLong(tokenData.get(EXPIRES_KEY));
   }
 
   /**

@@ -67,7 +67,7 @@ public class GadgetOAuthCallbackGeneratorTest {
     urlGenerator = control.createMock(UrlGenerator.class);
     stateCrypter = new BasicBlobCrypter("1111111111111111111".getBytes());
     securityToken = new BasicSecurityToken("viewer", "viewer", "app", "container.com",
-        "gadget", "0", "default", MAKE_REQUEST_URL);
+        "gadget", "0", "default", MAKE_REQUEST_URL, null);
     gadget = control.createMock(Gadget.class);
     fetcherConfig = new OAuthFetcherConfig(null, null, null, null, false);
     responseParams = new OAuthResponseParams(null, null, null);

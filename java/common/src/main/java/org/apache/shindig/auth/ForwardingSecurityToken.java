@@ -56,6 +56,14 @@ public abstract class ForwardingSecurityToken implements SecurityToken {
     return delegate.getModuleId();
   }
 
+  public Long getExpiresAt() {
+    return delegate.getExpiresAt();
+  }
+
+  public boolean isExpired() {
+    return delegate.isExpired();
+  }
+
   public String getUpdatedToken() {
     return delegate.getUpdatedToken();
   }

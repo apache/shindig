@@ -17,30 +17,33 @@
  */
 package org.apache.shindig.social.core.oauth;
 
+import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 
-public class OAuthSecurityToken implements SecurityToken {
+public class OAuthSecurityToken extends AbstractSecurityToken implements SecurityToken {
   private final String userId;
   private final String appUrl;
   private final String appId;
   private final String domain;
   private final String container;
   private final String authMode;
+  private final Long expiresAt;
 
   public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
-      String container) {
-    this(userId, appUrl, appId, domain, container, AuthenticationMode.OAUTH.name());
+      String container, Long expiresAt) {
+    this(userId, appUrl, appId, domain, container, expiresAt, AuthenticationMode.OAUTH.name());
   }
 
   public OAuthSecurityToken(String userId, String appUrl, String appId, String domain,
-      String container, String authMode) {
+      String container, Long expiresAt, String authMode) {
     this.userId = userId;
     this.appUrl = appUrl;
     this.appId = appId;
     this.domain = domain;
     this.container = container;
     this.authMode = authMode;
+    this.expiresAt = null; // TODO add
   }
 
   public String getOwnerId() {
@@ -67,14 +70,13 @@ public class OAuthSecurityToken implements SecurityToken {
     return appUrl;
   }
 
+  public Long getExpiresAt() {
+    return expiresAt;
+  }
+
   // We don't support this concept yet. We probably don't need to as opensocial calls don't
   // currently depend on the app instance id.
   public long getModuleId() {
-    throw new UnsupportedOperationException();
-  }
-
-  // Not needed for this basic token
-  public String toSerialForm() {
     throw new UnsupportedOperationException();
   }
 
@@ -89,11 +91,8 @@ public class OAuthSecurityToken implements SecurityToken {
   public String getTrustedJson() {
     throw new UnsupportedOperationException();
   }
+
   public boolean isAnonymous() {
     return false;
-  }
-
-  public String getActiveUrl() {
-    throw new UnsupportedOperationException("No active URL available");
   }
 }

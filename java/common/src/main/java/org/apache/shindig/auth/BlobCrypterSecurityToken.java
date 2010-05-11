@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * Container is included so different containers can use different security tokens if necessary.
  */
-public class BlobCrypterSecurityToken implements SecurityToken {
+public class BlobCrypterSecurityToken extends AbstractSecurityToken implements SecurityToken {
 
   protected static final int MAX_TOKEN_LIFETIME_SECS = 3600;
 
@@ -41,6 +41,7 @@ public class BlobCrypterSecurityToken implements SecurityToken {
   protected static final String GADGET_KEY = "g";
   protected static final String GADGET_INSTANCE_KEY = "i";
   protected static final String TRUSTED_JSON_KEY = "j";
+  protected static final String EXPIRES_KEY = "x";
 
   protected final BlobCrypter crypter;
   protected final String container;
@@ -50,6 +51,8 @@ public class BlobCrypterSecurityToken implements SecurityToken {
   protected String viewerId;
   protected String appUrl;
   protected long moduleId;
+  protected Long expiresAt;
+
   protected String trustedJson;
   protected String activeUrl;
 
@@ -95,6 +98,10 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     if (moduleId != null) {
       token.setModuleId(Long.parseLong(moduleId));
     }
+    String expiresAt = values.get(EXPIRES_KEY);
+    if (expiresAt != null) {
+      token.setExpiresAt(Long.parseLong(expiresAt));
+    }
     token.setTrustedJson(values.get(TRUSTED_JSON_KEY));
   }
 
@@ -120,6 +127,9 @@ public class BlobCrypterSecurityToken implements SecurityToken {
     }
     if (moduleId != 0) {
       values.put(GADGET_INSTANCE_KEY, Long.toString(moduleId));
+    }
+    if (expiresAt != null) {
+      values.put(EXPIRES_KEY, Long.toString(expiresAt));
     }
     if (trustedJson != null) {
       values.put(TRUSTED_JSON_KEY, trustedJson);
@@ -155,6 +165,14 @@ public class BlobCrypterSecurityToken implements SecurityToken {
 
   public void setModuleId(long moduleId) {
     this.moduleId = moduleId;
+  }
+
+  public Long getExpiresAt() {
+    return expiresAt;
+  }
+
+  public void setExpiresAt(Long expiresAt) {
+    this.expiresAt = expiresAt;
   }
 
   public String getOwnerId() {

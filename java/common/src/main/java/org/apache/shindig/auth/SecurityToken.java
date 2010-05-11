@@ -60,6 +60,16 @@ public interface SecurityToken {
   long getModuleId();
 
   /**
+   * @return the timestamp that this token expires or null if unknown or indeterminate
+   */
+  Long getExpiresAt();
+
+  /**
+   * @return true if the token is no longer valid
+   */
+  boolean isExpired();
+
+  /**
    * @return an updated version of the token to return to the gadget, or null
    * if there is no need to update the token.
    */

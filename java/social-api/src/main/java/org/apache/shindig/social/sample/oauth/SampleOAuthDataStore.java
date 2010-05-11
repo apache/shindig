@@ -169,7 +169,7 @@ public class SampleOAuthDataStore implements OAuthDataStore {
     String domain = "samplecontainer.com";
     String container = "default";
 
-    return new OAuthSecurityToken(userId, null, consumerKey, domain, container,
+    return new OAuthSecurityToken(userId, null, consumerKey, domain, container, null,
         AuthenticationMode.OAUTH_CONSUMER_REQUEST.name());
     
   }
