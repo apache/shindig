@@ -47,7 +47,7 @@ public final class UserAgent {
    * @return Version string of user agent.
    */
   public String getVersion() {
-    return version.trim();
+    return version != null ? version.trim() : null;
   }
   
   /**
