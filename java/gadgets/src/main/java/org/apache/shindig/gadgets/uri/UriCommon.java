@@ -31,6 +31,7 @@ public interface UriCommon {
     NO_CACHE("nocache"),
     VERSION("v"),
     SECURITY_TOKEN("st"),
+    OAUTH2_TOKEN("oauth_token"),
     MODULE_ID("mid"),
     REFRESH("refresh"),
     LIBS("libs"),

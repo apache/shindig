@@ -39,7 +39,7 @@ public class JsonConversionUtil {
 
   private static final Pattern ARRAY_MATCH = Pattern.compile("(\\w+)\\((\\d+)\\)");
 
-  private static final Set<String> RESERVED_PARAMS = ImmutableSet.of("method", "id", "st");
+  private static final Set<String> RESERVED_PARAMS = ImmutableSet.of("method", "id", "st", "oauth_token");
 
   @SuppressWarnings("unchecked")
   public static JSONObject fromRequest(HttpServletRequest request) throws JSONException {

@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
  * Produces security tokens by extracting the "st" parameter from the request url or post body.
  */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
-  private static final String TOKEN_PARAM = "st";
-
+  private static final String SECURITY_TOKEN_PARAM = "st";
+  private static final String OAUTH2_TOKEN_PARAM = "oauth_token";
   private final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
@@ -63,10 +63,16 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     return this.securityTokenDecoder;
   }
 
-  protected Map<String, String> getMappedParameters(
-      final HttpServletRequest request) {
+  protected Map<String, String> getMappedParameters(final HttpServletRequest request) {
     Map<String, String> params = Maps.newHashMap();
-    params.put(SecurityTokenDecoder.SECURITY_TOKEN_NAME, request.getParameter(TOKEN_PARAM));
+
+    String oauth_token_value = request.getParameter(OAUTH2_TOKEN_PARAM);
+
+    if (request.isSecure() && oauth_token_value != null) {
+      params.put(SecurityTokenDecoder.SECURITY_TOKEN_NAME, oauth_token_value);
+    } else {
+      params.put(SecurityTokenDecoder.SECURITY_TOKEN_NAME, request.getParameter(SECURITY_TOKEN_PARAM));
+    }
     params.put(SecurityTokenDecoder.ACTIVE_URL_NAME, getActiveUrl(request));
     return params;
   }
