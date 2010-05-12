@@ -23,7 +23,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
@@ -73,16 +75,15 @@ public class DefaultGuiceModule extends AbstractModule {
 
     // We perform static injection on HttpResponse for cache TTLs.
     requestStaticInjection(HttpResponse.class);
+
+    registerGadgetHandlers();
   }
 
-
-  @Provides
-  @Singleton
-  @Named("org.apache.shindig.gadgets.handlers")
-  protected Set<Object> provideGadgetHandlers() {
-    return ImmutableSet.<Object>of(InvalidationHandler.class, HttpRequestHandler.class);
+  protected void registerGadgetHandlers() {
+    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
+    handlerBinder.addBinding().to(InvalidationHandler.class);
+    handlerBinder.addBinding().to(HttpRequestHandler.class);
   }
-
 
   public static final ThreadFactory DAEMON_THREAD_FACTORY =
     new ThreadFactory() {

@@ -84,7 +84,7 @@
 // Config param to load Opensocial data for social
 // preloads in data pipelining.  %host% will be
 // substituted with the current host.
-"gadgets.osDataUri" : "http://%host%/social/rpc",
+"gadgets.osDataUri" : "http://%host%/rpc",
 
 // Uncomment these to switch to a secure version
 //
@@ -148,7 +148,7 @@
     // Must be on the same domain as the gadget rendering server
     "path" : "http://%host%/social/rpc",
     // Path to issue invalidate calls
-    "invalidatePath" : "http://%host%/gadgets/api/rpc",
+    "invalidatePath" : "http://%host%/rpc",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
@@ -168,7 +168,7 @@
   },
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
-    "endPoints" : [ "http://%host%/social/rpc", "http://%host%/gadgets/api/rpc" ]                   
+    "endPoints" : [ "http://%host%/rpc" ]                   
   },
   "osml": {
     // OSML library resource.  Can be set to null or the empty string to disable OSML

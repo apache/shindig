@@ -96,7 +96,7 @@ public abstract class AbstractLargeRestfulTests extends EasyMockTestCase {
 
     HandlerRegistry dispatcher = injector.getInstance(HandlerRegistry.class);
     dispatcher.addHandlers(injector.getInstance(Key.get(new TypeLiteral<Set<Object>>(){},
-        Names.named("org.apache.shindig.social.handlers"))));
+        Names.named("org.apache.shindig.handlers"))));
     servlet.setHandlerRegistry(dispatcher);
     ContainerConfig containerConfig = EasyMock.createMock(ContainerConfig.class);
     EasyMock.expect(containerConfig.<String>getList(null, "gadgets.parentOrigins")).andReturn(Collections.<String>singletonList("*")).anyTimes();

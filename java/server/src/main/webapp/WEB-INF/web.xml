@@ -31,6 +31,7 @@
     <param-value>
       org.apache.shindig.common.PropertiesModule:
       org.apache.shindig.gadgets.DefaultGuiceModule:
+      org.apache.shindig.social.core.config.SocialApiGuiceModule:
       org.apache.shindig.social.sample.SampleModule:
       org.apache.shindig.gadgets.oauth.OAuthModule:
       org.apache.shindig.common.cache.ehcache.EhCacheModule:
@@ -91,6 +92,8 @@
     <url-pattern>/gadgets/makeRequest</url-pattern>
     <url-pattern>/gadgets/api/rpc/*</url-pattern>
     <url-pattern>/gadgets/api/rest/*</url-pattern>
+    <url-pattern>/rpc/*</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
   </filter-mapping>
 
   <listener>
@@ -158,50 +161,26 @@
     <servlet-class>org.apache.shindig.gadgets.servlet.JsServlet</servlet-class>
   </servlet>
 
-  <!-- Serve social REST api -->
   <servlet>
-    <servlet-name>socialRestapiServlet</servlet-name>
+    <servlet-name>restapiServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.DataServiceServlet
     </servlet-class>
     <init-param>
       <param-name>handlers</param-name>
-      <param-value>org.apache.shindig.social.handlers</param-value>
+      <param-value>org.apache.shindig.handlers</param-value>
     </init-param>
   </servlet>
 
   <!-- Serve social RPC api -->
   <servlet>
-    <servlet-name>socialJsonRpcServlet</servlet-name>
+    <servlet-name>jsonRpcServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.JsonRpcServlet
     </servlet-class>
     <init-param>
       <param-name>handlers</param-name>
-      <param-value>org.apache.shindig.social.handlers</param-value>
-    </init-param>
-  </servlet>
-
-  <!-- Serve gadgets RPC api -->
-  <servlet>
-    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
-    <servlet-class>
-      org.apache.shindig.protocol.JsonRpcServlet
-    </servlet-class>
-    <init-param>
-      <param-name>handlers</param-name>
-      <param-value>org.apache.shindig.gadgets.handlers</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>gadgetsRestapiServlet</servlet-name>
-    <servlet-class>
-      org.apache.shindig.protocol.DataServiceServlet
-    </servlet-class>
-    <init-param>
-      <param-name>handlers</param-name>
-      <param-value>org.apache.shindig.gadgets.handlers</param-value>
+      <param-value>org.apache.shindig.handlers</param-value>
     </init-param>
   </servlet>
 
@@ -229,13 +208,17 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
+    <servlet-name>jsonRpcServlet</servlet-name>
+    <url-pattern>/rpc/*</url-pattern>
     <url-pattern>/gadgets/api/rpc/*</url-pattern>
+    <url-pattern>/social/rpc/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>gadgetsRestapiServlet</servlet-name>
+    <servlet-name>restapiServlet</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
     <url-pattern>/gadgets/api/rest/*</url-pattern>
+    <url-pattern>/social/rest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
@@ -261,16 +244,6 @@
   <servlet-mapping>
     <servlet-name>metadata</servlet-name>
     <url-pattern>/gadgets/metadata</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>socialRestapiServlet</servlet-name>
-    <url-pattern>/social/rest/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>socialJsonRpcServlet</servlet-name>
-    <url-pattern>/social/rpc/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
