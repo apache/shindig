@@ -67,6 +67,9 @@ public class DefaultSecurityTokenDecoder implements SecurityTokenDecoder {
   }
 
   public String encodeToken(SecurityToken token) throws SecurityTokenException {
+    if (token == null) {
+      return null;
+    }
     return decoder.encodeToken(token);
   }
 }

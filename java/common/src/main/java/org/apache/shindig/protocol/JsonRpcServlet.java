@@ -79,7 +79,8 @@ public class JsonRpcServlet extends ApiServlet {
     String method = servletRequest.getMethod();
 
     if (!("GET".equals(method) || "POST".equals(method))) {
-      sendError(servletResponse, new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "Only POST/GET"));
+      sendError(servletResponse, 
+                new ResponseItem(HttpServletResponse.SC_BAD_REQUEST, "Only POST/GET Allowed"));
       return;
     }
 
