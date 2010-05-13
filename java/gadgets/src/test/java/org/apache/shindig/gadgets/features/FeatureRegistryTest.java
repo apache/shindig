@@ -17,9 +17,11 @@
  */
 package org.apache.shindig.gadgets.features;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.ImmutableMap;
+import com.google.inject.internal.ImmutableSet;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -92,7 +94,7 @@ public class FeatureRegistryTest {
 
   private class TestFeatureRegistry extends FeatureRegistry {
     TestFeatureRegistry(String featureFiles) throws GadgetException {
-      super(resourceLoader, featureFiles);
+      super(resourceLoader, ImmutableList.<String>of(featureFiles));
     }
     @Override
     String getResourceContent(String resource) throws IOException {

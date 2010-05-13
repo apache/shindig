@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.features;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
@@ -58,7 +59,6 @@ import java.util.logging.Level;
  */
 @Singleton
 public class FeatureRegistry {
-  public static final char FILE_SEPARATOR = ',';
   public static final String RESOURCE_SCHEME = "res";
   public static final String FILE_SCHEME = "file";
   
@@ -72,19 +72,19 @@ public class FeatureRegistry {
   private final FeatureResourceLoader resourceLoader;
   private final ImmutableMap<String, FeatureNode> featureMap;
   
-  @Inject
 
 /**
  *
  * @param featureFiles
  * @throws GadgetException
  */
+  @Inject
   public FeatureRegistry(FeatureResourceLoader resourceLoader,
-                         @Named("shindig.features.default") String featureFiles) throws GadgetException {
+                         @Named("org.apache.shindig.features") List<String> features) throws GadgetException {
     this.parser = new FeatureParser();
     this.resourceLoader = resourceLoader;
 
-    featureMap = register(featureFiles);
+    featureMap = register(features);
 
     // Connect the dependency graph made up of all features and validate there
     // are no circular deps.
@@ -115,11 +115,11 @@ public class FeatureRegistry {
    *    them with a comma.
    * @throws GadgetException If any of the files can't be read, are malformed, or invalid.
    */
-  protected ImmutableMap<String,FeatureNode> register(String resourceKey) throws GadgetException {
+  protected ImmutableMap<String,FeatureNode> register(List<String> resourceList) throws GadgetException {
     Map<String,FeatureNode> featureMapBuilder = Maps.newHashMap();
 
     try {
-      for (String location : StringUtils.split(resourceKey, FILE_SEPARATOR)) {
+      for (String location : resourceList) {
         Uri uriLoc = getComponentUri(location);
         
         if (uriLoc.getScheme() != null && uriLoc.getScheme().equals(RESOURCE_SCHEME)) {

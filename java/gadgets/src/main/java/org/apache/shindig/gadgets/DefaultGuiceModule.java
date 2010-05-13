@@ -18,14 +18,19 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
 
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
@@ -39,6 +44,7 @@ import org.apache.shindig.gadgets.uri.UriModule;
 
 import org.apache.shindig.gadgets.variables.SubstituterModule;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +53,9 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Creates a module to supply all of the core gadget classes.
+ *
+ * Instead of subclassing this consider adding features to the
+ * multibindings for features and rpc handlers.
  */
 public class DefaultGuiceModule extends AbstractModule {
 
@@ -77,12 +86,37 @@ public class DefaultGuiceModule extends AbstractModule {
     requestStaticInjection(HttpResponse.class);
 
     registerGadgetHandlers();
+    registerFeatureHandlers();
   }
 
+  /**
+   * Sets up multibinding for rpc handlers
+   */
   protected void registerGadgetHandlers() {
     Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
     handlerBinder.addBinding().to(InvalidationHandler.class);
     handlerBinder.addBinding().to(HttpRequestHandler.class);
+  }
+
+  /**
+   * Sets up the multibinding for extended feature resources
+   */
+  protected void registerFeatureHandlers() {
+    Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended"));
+  }
+
+  /**
+   * Merges the features provided in shindig.properties with the extended features from multibinding
+   * @param features Comma separated string from shindig.properties key 'shindig.features.default'
+   * @param extended Set of paths/resources from plugins
+   * @return the merged, list of all features to load.
+   */
+  @Provides
+  @Singleton
+  @Named("org.apache.shindig.features")
+  protected List<String> defaultFeatures(@Named("shindig.features.default")String features,
+                                         @Named("org.apache.shindig.features-extended")Set<String> extended) {
+    return ImmutableList.<String>builder().addAll(extended).add(StringUtils.split(features, ',')).build();
   }
 
   public static final ThreadFactory DAEMON_THREAD_FACTORY =
