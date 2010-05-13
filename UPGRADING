@@ -1,7 +1,7 @@
-FROM 1.0.x TO 1.1.x
+FROM 1.0.x TO 2.0.x
 ===================
 
-Almost all interfaces have been updated from 1.0.x -> 1.1.x.  The 
+Almost all interfaces have been updated from 1.0.x -> 2.0.x.  The 
 following information is not complete.
 
 
@@ -46,7 +46,7 @@ encode tokens as well as decode them.
 
 == Java Guice Changes ==
 
-1.1.x uses Guice 2.0 which allows for @Provides annotations and much more.
+2.0.x uses Guice 2.0 which allows for @Provides annotations and much more.
 
 * TemplateModule
 
