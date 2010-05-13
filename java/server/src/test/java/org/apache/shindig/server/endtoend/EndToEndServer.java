@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Suite for running the end-to-end tests. The suite is responsible for starting up and shutting
@@ -59,10 +60,13 @@ import com.google.common.collect.Maps;
  */
 public class EndToEndServer {
   private static final int JETTY_PORT = 9003;
+
   private static final String GADGET_BASE = "/gadgets/ifr";
   private static final String GADGET_RPC_BASE = "/gadgets/api/rpc/*";
-  private static final String REST_BASE = "/social/rest/*";
-  private static final String JSON_RPC_BASE = "/social/rpc/*";
+  private static final String SOCIAL_REST_BASE = "/social/rest/*";
+  private static final String SOCIAL_RPC_BASE = "/social/rpc/*";
+  private static final String RPC_BASE = "/rpc";
+  private static final String REST_BASE = "/rest";
   private static final String CONCAT_BASE = "/gadgets/concat";
   private static final String JS_BASE = "/gadgets/js/*";
   private static final String MAKE_REQUEST_BASE = "/gadgets/makeRequest";
@@ -133,14 +137,14 @@ public class EndToEndServer {
     ServletHolder restServletHolder = new ServletHolder(new ForceErrorServlet(
         new DataServiceServlet()));
     restServletHolder.setInitParameter("handlers", "org.apache.shindig.handlers");
-    context.addServlet(restServletHolder, REST_BASE);
-    context.addFilter(AuthenticationServletFilter.class, REST_BASE, 0);
+    context.addServlet(restServletHolder, SOCIAL_REST_BASE);
+    context.addFilter(AuthenticationServletFilter.class, SOCIAL_REST_BASE, 0);
 
     // Attach JsonRpcServlet, wrapped in a proxy to fake errors
     ServletHolder rpcServletHolder = new ServletHolder(new ForceErrorServlet(new JsonRpcServlet()));
     rpcServletHolder.setInitParameter("handlers", "org.apache.shindig.handlers");
-    context.addServlet(rpcServletHolder, JSON_RPC_BASE);
-    context.addFilter(AuthenticationServletFilter.class, JSON_RPC_BASE, 0);
+    context.addServlet(rpcServletHolder, SOCIAL_RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, SOCIAL_RPC_BASE, 0);
 
     // Attach the ConcatProxyServlet - needed for rewritten JS
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
@@ -151,6 +155,8 @@ public class EndToEndServer {
     gadgetsJsonRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.handlers");
     context.addServlet(gadgetsJsonRpcServletHolder, GADGET_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, GADGET_RPC_BASE, 0);
+    context.addServlet(gadgetsJsonRpcServletHolder, RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, RPC_BASE, 0);
 
     // Attach the JsServlet - needed for rewritten JS
     ServletHolder jsHolder = new ServletHolder(new JsServlet());
