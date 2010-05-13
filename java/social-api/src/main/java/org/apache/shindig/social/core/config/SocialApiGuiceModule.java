@@ -75,8 +75,6 @@ public class SocialApiGuiceModule extends AbstractModule {
     for (Class handler : getHandlers()) {
       handlerBinder.addBinding().toInstance(handler);
     }
-
-    bind(Long.class).annotatedWith(Names.named("org.apache.shindig.serviceExpirationDurationMinutes")).toInstance(60L);
   }
 
   /**

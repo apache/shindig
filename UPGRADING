@@ -23,6 +23,7 @@ Too many to mention.  Check the top-level pom.xml for all the new versions
 
 * servlet-api is upgraded to 2.5
 
+
 == Java Interface Changes ==
 
 * AbstractContainerConfig
@@ -64,6 +65,10 @@ is easy, just use the following syntax:
 
     Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"))
         .addBinding().toInstance(MyHandler.class);
+
+The long value annotated with the name "org.apache.shindig.serviceExpirationDurationMinutes" has
+been moved to shindig/common/conf/shindig.properties.  Guice 2.0 can inject Long values from Strings
+automatically.
 
 == PHP Changes ==
 
