@@ -243,10 +243,10 @@ public class HttpResponseTest extends Assert {
         .addHeader("Pragma", "junk")
         .create();
     assertFalse(response.isStrictNoCache());
-    int expected = roundToSeconds(System.currentTimeMillis() + HttpResponse.DEFAULT_TTL);
+    int expected = roundToSeconds(System.currentTimeMillis() + response.getDefaultTtl());
     int expires = roundToSeconds(response.getCacheExpiration());
     assertEquals(expected, expires);
-    assertTrue(response.getCacheTtl() <= HttpResponse.DEFAULT_TTL && response.getCacheTtl() > 0);
+    assertTrue(response.getCacheTtl() <= response.getDefaultTtl() && response.getCacheTtl() > 0);
   }
   
   @Test
@@ -351,9 +351,9 @@ public class HttpResponseTest extends Assert {
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time))
         .create();
-    assertEquals(time + roundToSeconds(HttpResponse.DEFAULT_TTL),
+    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
         roundToSeconds(response.getCacheExpiration()));
-    assertTtlOk(roundToSeconds(HttpResponse.DEFAULT_TTL), response);
+    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
   }
 
   @Test
@@ -384,7 +384,7 @@ public class HttpResponseTest extends Assert {
         .setStrictNoCache()
         .create();
     long ttl = response.getCacheTtl();
-    assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
+    assertTrue(ttl <= response.getDefaultTtl() && ttl > 0);
   }
 
   @Test

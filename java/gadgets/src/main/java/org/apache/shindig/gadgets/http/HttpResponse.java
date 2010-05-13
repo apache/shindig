@@ -450,6 +450,15 @@ public final class HttpResponse implements Externalizable {
   }
 
   /**
+   * returns the default TTL for responses.  Used mainly by tests because Guice static injects TTL values.
+   *
+   * @return milliseconds of the ttl
+   */
+  public long getDefaultTtl() {
+    return defaultTtl;  
+  }
+
+  /**
    * Attempts to determine the encoding of the body. If it can't be determined, we use
    * DEFAULT_ENCODING instead.
    *
