@@ -70,9 +70,6 @@ public abstract class ApiServlet extends InjectedServlet {
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
 
-  @Deprecated
-  protected boolean disallowUnknownContentTypes = true;
-
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -102,12 +99,6 @@ public abstract class ApiServlet extends InjectedServlet {
     this.containerConfig = containerConfig;
   }
 
-
-  @Inject(optional = true)
-  public void setDisallowUnknownContentTypes(
-      @Named("shindig.api.disallow-unknown-content-types") boolean disallowUnknownContentTypes) {
-    this.disallowUnknownContentTypes = disallowUnknownContentTypes;
-  }
 
   @Inject
   public void setBeanConverters(
@@ -167,6 +158,6 @@ public abstract class ApiServlet extends InjectedServlet {
 
   public void checkContentTypes(Set<String> allowedContentTypes,
       String contentType) throws ContentTypes.InvalidContentTypeException {
-    ContentTypes.checkContentTypes(allowedContentTypes, contentType, disallowUnknownContentTypes);
+    ContentTypes.checkContentTypes(allowedContentTypes, contentType);
   }
 }

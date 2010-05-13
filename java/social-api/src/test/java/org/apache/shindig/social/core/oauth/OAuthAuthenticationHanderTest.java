@@ -62,7 +62,7 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
 
   @Before
   public void setUp() throws Exception {
-    reqHandler = new OAuthAuthenticationHandler(mockStore, true);
+    reqHandler = new OAuthAuthenticationHandler(mockStore);
     formEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "a=b&c=d",
         OAuth.FORM_ENCODED);
     nonFormEncodedPost = new FakeOAuthRequest("POST", TEST_URL, "BODY",
@@ -324,32 +324,6 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
   }
 
   @Test
-  public void testLegacyBodySigning() throws Exception {
-    expectConsumer();
-    expectSecurityToken();
-    replay();
-    FakeHttpServletRequest request = nonFormEncodedPost.sign(null,
-        FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.LEGACY);
-    assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
-  }
-
-  @Test
-  public void testLegacyBodySigningNotEnabled() throws Exception {
-    reqHandler = new OAuthAuthenticationHandler(mockStore, false);
-    expectConsumer();
-    expectSecurityToken();
-    replay();
-    FakeHttpServletRequest request = nonFormEncodedPost.sign(null,
-        FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.LEGACY);
-    try {
-      reqHandler.getSecurityTokenFromRequest(request);
-      fail("Legacy signing not enabled");
-    } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
-      // Pass
-    }
-  }
-
-  @Test
   public void testConsumerFailBodyHashSigningWithFormEncoding() throws Exception {
     replay();
     FakeOAuthRequest bodyHashPost =
@@ -364,20 +338,6 @@ public class OAuthAuthenticationHanderTest extends EasyMockTestCase {
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       // Pass
     }
-  }
-
-  @Test
-  public void testLegacyBodySigningJson() throws Exception {
-    expectConsumer();
-    expectSecurityToken();
-    replay();
-    FakeOAuthRequest jsonPost =
-        new FakeOAuthRequest("POST", TEST_URL,
-        "{a:b,b:'c=d&d==f&&g=y'}",
-        "application/json");
-    FakeHttpServletRequest request = jsonPost.sign(null,
-        FakeOAuthRequest.OAuthParamLocation.URI_QUERY, FakeOAuthRequest.BodySigning.LEGACY);
-    assertNotNull(reqHandler.getSecurityTokenFromRequest(request));
   }
 
   @Test

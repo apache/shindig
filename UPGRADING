@@ -44,6 +44,15 @@ with the new SecurityTokenCodec interface and implementations.
 You will need to adjust any custom SecurityToken decoders to 
 encode tokens as well as decode them.
 
+* SocialSpiException class is removed, use ProtocolException instead
+
+* GuiceBeanConverter.DuplicateFieldException class is removed 
+
+* RestfulCollection
+
+The constructor RestfulCollection(List<T> entry, int startIndex, int totalResults) is removed.  
+Use the constructor with an items-per-page parameter instead.
+
 
 == Java Guice Changes ==
 

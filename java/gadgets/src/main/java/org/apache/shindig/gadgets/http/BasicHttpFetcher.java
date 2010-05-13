@@ -118,11 +118,6 @@ public class BasicHttpFetcher implements HttpFetcher {
     this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
   }
 
-  @Deprecated
-  public BasicHttpFetcher(int maxObjSize, int connectionTimeoutMs) {
-    this(maxObjSize, connectionTimeoutMs, DEFAULT_READ_TIMEOUT_MS);
-  }
-
   /**
    * Creates a new fetcher for fetching HTTP objects.  Not really suitable
    * for production use. Use of an HTTP proxy for security is also necessary

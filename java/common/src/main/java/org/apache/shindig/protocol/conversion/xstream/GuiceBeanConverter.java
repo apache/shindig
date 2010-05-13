@@ -162,15 +162,4 @@ public class GuiceBeanConverter implements Converter {
           result, fieldName));
     }
   }
-
-  /**
-   * @deprecated since 1.3
-   */
-  @Deprecated
-  public static class DuplicateFieldException extends ConversionException {
-    public DuplicateFieldException(String msg) {
-      super(msg);
-    }
-  }
-
 }

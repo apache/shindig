@@ -29,49 +29,43 @@ public class ContentTypesTest extends Assert {
   @Test
   public void testAllowJson() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-        ContentTypes.OUTPUT_JSON_CONTENT_TYPE, true);
+        ContentTypes.OUTPUT_JSON_CONTENT_TYPE);
   }
 
   @Test
   public void testAllowJsonRpc() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-        "application/json-rpc", true);
+        "application/json-rpc");
   }
 
   @Test
   public void testAllowAtom() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_ATOM_CONTENT_TYPES,
-        ContentTypes.OUTPUT_ATOM_CONTENT_TYPE, true);
+        ContentTypes.OUTPUT_ATOM_CONTENT_TYPE);
   }
 
   @Test
   public void testAllowXml() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_XML_CONTENT_TYPES,
-        ContentTypes.OUTPUT_XML_CONTENT_TYPE, true);
+        ContentTypes.OUTPUT_XML_CONTENT_TYPE);
   }
 
   @Test
   public void testAllowMultipart() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_MULTIPART_CONTENT_TYPES,
-        ContentTypes.MULTIPART_FORM_CONTENT_TYPE, true);
+        ContentTypes.MULTIPART_FORM_CONTENT_TYPE);
   }
 
   @Test(expected=ContentTypes.InvalidContentTypeException.class)
   public void testForbidden() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-        "application/x-www-form-urlencoded", false);
+        "application/x-www-form-urlencoded");
   }
 
   @Test(expected=ContentTypes.InvalidContentTypeException.class)
   public void testStrictDisallowUnknown() throws Exception {
     ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-        "text/plain", true);
-  }
-
-  @Test
-  public void testNonStrictAllowUnknown() throws Exception {
-    ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES,
-        "text/plain", false);
+        "text/plain");
   }
 
   @Test

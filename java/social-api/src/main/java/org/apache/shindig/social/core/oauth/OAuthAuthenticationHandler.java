@@ -56,14 +56,9 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
 
   private final OAuthDataStore store;
 
-  @Deprecated
-  private final boolean allowLegacyBodySigning;
-
   @Inject
-  public OAuthAuthenticationHandler(OAuthDataStore store,
-      @Named("shindig.oauth.legacy-body-signing") boolean allowLegacyBodySigning) {
+  public OAuthAuthenticationHandler(OAuthDataStore store) {
     this.store = store;
-    this.allowLegacyBodySigning = allowLegacyBodySigning;
   }
 
   public String getName() {
@@ -88,27 +83,6 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     try {
       return verifyMessage(message);
     } catch (OAuthProblemException oauthException) {
-      // Legacy body signing is intended for backwards compatability with opensocial clients
-      // that assumed they could use the raw request body as a pseudo query param to get
-      // body signing. This assumption was born out of the limitations of the OAuth 1.0 spec which
-      // states that request bodies are only signed if they are form-encoded. This lead many clients
-      // to force a content type of application/x-www-form-urlencoded for xml/json bodies and then
-      // hope that receiver decoding of the body didnt have encoding issues. This didn't work out
-      // to well so now these clients are required to specify the correct content type. This code
-      // lets clients which sign using the old technique to work if they specify the correct content
-      // type. This support is deprecated and should be removed later.
-      if (allowLegacyBodySigning &&
-          (StringUtils.isEmpty(request.getContentType())  ||
-          !request.getContentType().contains(OAuth.FORM_ENCODED))) {
-        try {
-          message.addParameter(readBodyString(request), "");
-          return verifyMessage(message);
-        } catch (OAuthProblemException ioe) {
-          // ignore, let original exception be thrown
-        } catch (IOException e) {
-          // also ignore;
-        }
-      }
       throw new InvalidAuthenticationException("OAuth Authentication Failure", oauthException);
     }
   }
