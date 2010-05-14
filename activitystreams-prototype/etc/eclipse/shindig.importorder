@@ -1,0 +1,11 @@
+#Organize Import Order
+#Mon May 05 17:33:38 PDT 2008
+8=javax
+7=java
+6=org
+5=org.apache.abdera
+4=org.apache.shindig
+3=net
+2=junit
+1=com
+0=com.google

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+  <ModulePrefs title="Content upload">
+    <Require feature="dynamic-height"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+    <script type="text/javascript">
+
+function initData() {
+  var jsonInput = document.getElementById("json-input");
+  jsonInput.value = ' [ { "method":"mediaitems.create", "params": {"albumId":"1", "mediaItem": { "id" : "11223344", "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png", "mimeType" : "image/png", "type" : "image", "url" : "@field:1.jpg", "albumId" : "1" } } } ]';
+  gadgets.window.adjustHeight();
+}
+
+
+function restDelete() {
+  var restUrl = document.getElementById("rest-delete-url");
+  var xhr = new window.XMLHttpRequest();
+  xhr.open("DELETE", restUrl.value, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  xhr.send(null);
+}
+
+function restGet() {
+  var restUrl = document.getElementById("rest-get-url");
+  var xhr = new window.XMLHttpRequest();
+  xhr.open("GET", restUrl.value, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  xhr.send(null);
+}
+
+gadgets.util.registerOnLoadHandler(initData);
+    </script>
+
+    please use firebug to see the requests and the responses and copy the created url to browser address bar to fetch the created image.
+    <p>The JSON RPC method.</p>
+    The JSON data that will be posted.
+    <form enctype="multipart/form-data"
+      action="http://shindig/social/rpc?st=1:1:1:partuza:test.com:1:0" method="POST">
+      <textarea id="json-input" cols=100 rows=4 name="request" ></textarea><br/>
+      The image file to upload:
+      <input name="uploadedfile" type="file" /><br />
+      <input type="submit" value="JsonRpc create media item." />
+    </form>
+    <br/>
+    <p> The REST method.</p>
+    <form enctype="multipart/form-data" action="http://shindig/social/rest/mediaitems/@me/@self/1?st=1:1:1:partuza:test.com:1:0&mediaType=IMAGE&title=mobile&description=g1" method="POST">
+      Choose an image file to upload:
+      <input type="file" name="uploadedfile" />
+      <input type="submit" value="Rest create media item." />
+    </form>
+    <p> REST delete </p>
+    The url: <input id="rest-delete-url" size=60 type="text" value="http://shindig/social/rest/mediaitems/@me/@self/1/64?st=1:1:1:partuza:test.com:1:0" />
+    <input type="button" onclick="restDelete()" value="delete"/>
+
+    <p> REST get </p>
+    The url: <input id="rest-get-url" size=60 type="text" value="http://shindig/social/rest/mediaitems/@me/@self/1/64?st=1:1:1:partuza:test.com:1:0" />
+    <input type="button" onclick="restGet()" value="get"/>
+
+    ]]>
+  </Content>
+</Module>

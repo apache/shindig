@@ -1,0 +1,13 @@
+The runner.sh script will run the javascript unit tests configured in src/test/javascript/features/alltests.js.
+It requires a version of rhino in your local m2 repository.
+
+It should be launched from the feature root directory,
+
+bin/runner.sh
+
+You should modify this to add your tests to it.
+
+It should be cleaned up to run all tests, but works for the osapi tests at the moment. The problem is that the alltests.js, which is an example from the jsunit site, is not recognizing all the AllTests_Suite.
+
+
+

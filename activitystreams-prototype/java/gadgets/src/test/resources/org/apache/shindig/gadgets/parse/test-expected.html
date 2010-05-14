@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head id="head">
+  <link href="http://www.example.org/css.css" rel="stylesheet" type="text/css">
+  <title>An example</title>
+</head><body>
+  <!-- Some comment -->
+    <script type="text/javascript">document.write("&&&")</script>
+    <script src="http://www.example.org/1.js" type="text/javascript"></script>
+    <div>
+      <table><TBODY><tr><td>a cell</td></tr></TBODY></table>
+    </div>
+    <p>Lorem ipsum</p>
+    <a href="/test.html" title="">link</a>
+    <form action="/test/submit">
+      <div>
+        <input type="hidden" value="something">
+        <input type="text">
+      </div>
+      <div><-- An unbalanced tag we dont care about -->
+      <p>Some entities &amp;#x27;&quot;</p>
+      <p>Not a real entity &fake;</p>
+    </div></form>
+</body></html>

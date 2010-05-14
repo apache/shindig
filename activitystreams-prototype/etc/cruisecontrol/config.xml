@@ -1,0 +1,61 @@
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+--->
+
+<cruisecontrol>
+  <project name="shindig">
+
+    <listeners>
+      <currentbuildstatuslistener file="logs/${project.name}/status.txt"/>
+    </listeners>
+
+    <bootstrappers>
+      <svnbootstrapper localWorkingCopy="../shindig"/>
+    </bootstrappers>
+
+    <modificationset quietperiod="30">
+      <svn localWorkingCopy="../shindig"/>
+    </modificationset>
+
+    <schedule interval="300">
+      <maven2 mvnscript="mvn" pomfile="../shindig/java/pom.xml" goal="clean package site-deploy -P reporting"/>
+    </schedule>
+
+    <log>
+      <merge dir="projects/${project.name}/target/test-results"/>
+      <merge dir="../shindig/java/gadgets/target/surefire-reports" pattern="TEST-*.xml" />
+      <merge dir="../shindig/java/server/target/surefire-reports" pattern="TEST-*.xml" />
+      <merge dir="../shindig/java/common/target/surefire-reports" pattern="TEST-*.xml" />
+      <merge dir="../shindig/java/social-api/target/surefire-reports" pattern="TEST-*.xml" />
+    </log>
+
+    <publishers>
+      <onsuccess>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/gadgets/target/shindig-gadgets-1.1-incubating-SNAPSHOT-sources.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/gadgets/target/shindig-gadgets-1.1-incubating-SNAPSHOT.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/server/target/shindig-server-1.1-incubating-SNAPSHOT-sources.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/server/target/shindig-server-1.1-incubating-SNAPSHOT.war"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/common/target/shindig-common-1.1-incubating-SNAPSHOT-sources.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/common/target/shindig-common-1.1-incubating-SNAPSHOT.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/social-api/target/shindig-social-api-1.1-incubating-SNAPSHOT-sources.jar"/>
+        <artifactspublisher dest="artifacts/${project.name}" file="../shindig/java/social-api/target/shindig-social-api-1.1-incubating-SNAPSHOT.jar"/>
+      </onsuccess>
+    </publishers>
+
+  </project>
+</cruisecontrol>
