@@ -94,7 +94,7 @@ public class HttpResponseBuilder extends MutableContent {
       // Remove previously set charset:
       String[] parts = StringUtils.split(contentType, ';');
       for (String part : parts) {
-        if (part.indexOf("charset=") < 0) {
+        if (!part.contains("charset=")) {
           newContentType += part + "; ";
         }
       }

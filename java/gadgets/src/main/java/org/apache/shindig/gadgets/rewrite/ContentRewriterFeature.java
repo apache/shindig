@@ -340,7 +340,7 @@ public class ContentRewriterFeature {
         // "*" is handled by ALL
         String urllc = url.toLowerCase();
         for (String substr : bundle.matches) {
-          if (urllc.indexOf(substr) >= 0)
+          if (urllc.contains(substr))
             return true;
         }
         return false;

@@ -67,7 +67,7 @@ public class CompactHtmlSerializer extends DefaultHtmlSerializer {
    */
   private boolean isIeConditionalComment(Node n) {
     String comment = n.getTextContent();
-    return comment.indexOf("[if ") != -1 && comment.indexOf("[endif]") != -1;
+    return comment.contains("[if ") && comment.contains("[endif]");
   }
 
   /**

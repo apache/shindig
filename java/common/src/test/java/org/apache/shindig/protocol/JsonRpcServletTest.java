@@ -292,7 +292,7 @@ public class JsonRpcServletTest extends Assert {
     mockControl.verify();
 
     String output = getOutput();
-    assertTrue(-1 != output.indexOf("Unsupported Content-Type application/octet-stream"));
+    assertTrue(output.contains("Unsupported Content-Type application/octet-stream"));
   }
 
   @Test
