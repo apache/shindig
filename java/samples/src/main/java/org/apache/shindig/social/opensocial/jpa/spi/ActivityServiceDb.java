@@ -198,7 +198,7 @@ public class ActivityServiceDb implements ActivityService {
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.
     RestfulCollection<Activity> restCollection = new RestfulCollection<Activity>(
-        plist, options.getFirst(), totalResults.intValue(), options.getMax()    );
+        plist, options.getFirst(), totalResults.intValue(), options.getMax());
     return ImmediateFuture.newInstance(restCollection);
   }
   
