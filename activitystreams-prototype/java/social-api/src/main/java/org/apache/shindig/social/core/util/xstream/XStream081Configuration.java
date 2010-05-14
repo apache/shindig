@@ -17,6 +17,12 @@
  */
 package org.apache.shindig.social.core.util.xstream;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.shindig.protocol.DataCollection;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.protocol.conversion.xstream.ClassFieldMapping;
@@ -41,6 +47,7 @@ import org.apache.shindig.social.core.util.atom.AtomKeyValue;
 import org.apache.shindig.social.core.util.atom.AtomLinkConverter;
 import org.apache.shindig.social.opensocial.model.Account;
 import org.apache.shindig.social.opensocial.model.Activity;
+import org.apache.shindig.social.opensocial.model.ActivityStream;
 import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.BodyType;
 import org.apache.shindig.social.opensocial.model.ListField;
@@ -68,12 +75,6 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.mapper.AttributeMapper;
 import com.thoughtworks.xstream.mapper.Mapper;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Opensocial 0.81 compliant Xstream binding
@@ -135,6 +136,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("feed", atom)
         .put("person", os)
         .put("activity", os)
+        .put("activityStream", os)
         .put("account", os)
         .put("address", os)
         .put("bodyType", os)
@@ -154,6 +156,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("content", AtomContent.class),
 
         new ClassFieldMapping("activity", Activity.class),
+        new ClassFieldMapping("activityStream", ActivityStream.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
@@ -188,6 +191,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         new ClassFieldMapping("content", AtomContent.class),
 
         new ClassFieldMapping("activity", Activity.class),
+        new ClassFieldMapping("activityStream", ActivityStream.class),
         new ClassFieldMapping("account", Account.class),
         new ClassFieldMapping("address", Address.class),
         new ClassFieldMapping("bodyType", BodyType.class),
@@ -223,6 +227,7 @@ public class XStream081Configuration implements XStreamConfiguration {
         .put("map", ConcurrentHashMap.class)
         .put("appdata", DataCollection.class)
         .put("activity", Activity.class)
+        .put("activityStream", ActivityStream.class)
         .put("account", Account.class)
         .put("address", Address.class)
         .put("bodyType", BodyType.class)
