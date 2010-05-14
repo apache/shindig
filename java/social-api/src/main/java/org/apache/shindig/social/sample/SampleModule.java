@@ -26,10 +26,6 @@ import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
 import org.apache.shindig.social.sample.service.SampleContainerHandler;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
-import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;

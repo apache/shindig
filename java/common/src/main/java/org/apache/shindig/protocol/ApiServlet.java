@@ -17,7 +17,6 @@
  */
 package org.apache.shindig.protocol;
 
-import com.google.inject.Provider;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.InjectedServlet;

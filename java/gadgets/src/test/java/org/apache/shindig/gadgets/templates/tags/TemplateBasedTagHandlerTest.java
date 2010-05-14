@@ -25,10 +25,8 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthModule;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
-import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.apache.shindig.gadgets.templates.TemplateContext;
-import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.templates.TemplateProcessor;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
 

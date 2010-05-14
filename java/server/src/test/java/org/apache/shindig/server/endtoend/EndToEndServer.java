@@ -52,7 +52,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Suite for running the end-to-end tests. The suite is responsible for starting up and shutting

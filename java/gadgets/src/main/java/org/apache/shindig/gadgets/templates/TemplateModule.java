@@ -18,11 +18,7 @@
  */
 package org.apache.shindig.gadgets.templates;
 
-import com.google.common.collect.ImmutableSet;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
 import org.apache.shindig.gadgets.templates.tags.FlashTagHandler;
@@ -32,8 +28,6 @@ import org.apache.shindig.gadgets.templates.tags.RenderTagHandler;
 import org.apache.shindig.gadgets.templates.tags.RepeatTagHandler;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
 import org.apache.shindig.gadgets.templates.tags.VariableTagHandler;
-
-import java.util.Set;
 
 /**
  * Guice Module to provide Template-specific classes

@@ -32,7 +32,6 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.json.JSONArray;

@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.common.servlet;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.util.TimeSource;
 
 import javax.servlet.http.HttpServletRequest;

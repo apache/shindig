@@ -35,12 +35,10 @@ import com.google.caja.reporting.MessageQueue;
 import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
-import com.google.caja.reporting.HtmlSnippetProducer;
 import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;

@@ -33,7 +33,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 
-import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.Map;
 

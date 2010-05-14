@@ -17,11 +17,8 @@
  */
 package org.apache.shindig.protocol;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.servlet.HttpUtil;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 
 import com.google.common.collect.ImmutableMap;
