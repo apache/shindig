@@ -21,5 +21,6 @@
   <name>opensocial-data-context</name>
   <gadget>    
     <script src="datacontext.js"></script>
+    <script src="taming.js"></script>
   </gadget>
 </feature>
