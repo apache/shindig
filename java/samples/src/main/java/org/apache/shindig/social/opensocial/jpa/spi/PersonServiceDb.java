@@ -147,7 +147,9 @@ public class PersonServiceDb implements PersonService {
 
     // all of the above could equally have been placed into a thread to overlay the
     // db wait times.
-    return ImmediateFuture.newInstance(new RestfulCollection<Person>(plist, collectionOptions.getFirst(), totalResults.intValue()));
+    RestfulCollection<Person> restCollection = new RestfulCollection<Person>(
+        plist, collectionOptions.getFirst(), totalResults.intValue(), collectionOptions.getMax());
+    return ImmediateFuture.newInstance(restCollection);
 
   }
 
