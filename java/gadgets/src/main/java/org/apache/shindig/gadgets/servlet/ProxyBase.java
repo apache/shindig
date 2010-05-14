@@ -129,6 +129,11 @@ public abstract class ProxyBase {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval);
+    setResponseContentHeaders(response, results);
+
+  }
+  
+  protected void setResponseContentHeaders(HttpServletResponse response, HttpResponse results) {
 
     // We're skipping the content disposition header for flash due to an issue with Flash player 10
     // This does make some sites a higher value phishing target, but this can be mitigated by

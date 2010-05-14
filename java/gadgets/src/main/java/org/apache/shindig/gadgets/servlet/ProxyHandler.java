@@ -161,7 +161,7 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    setResponseHeaders(request, response, results);
+    setResponseContentHeaders(response, results);
 
     if (results.getHttpStatusCode() != HttpResponse.SC_OK) {
       if (results.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
