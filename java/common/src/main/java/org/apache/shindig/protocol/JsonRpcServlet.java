@@ -190,7 +190,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback+'(');
+    if (callback != null) writer.append(callback).append('(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
@@ -214,7 +214,7 @@ public class JsonRpcServlet extends ApiServlet {
 
     // Generate the output
     Writer writer = servletResponse.getWriter();
-    if (callback != null) writer.append(callback+'(');
+    if (callback != null) writer.append(callback).append('(');
     jsonConverter.append(writer, result);
     if (callback != null) writer.append(");\n");
   }
