@@ -140,7 +140,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertEquals("accel", req.getContainer());
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
-    assertEquals("private,max-age=566", recorder.getHeader("Cache-Control"));
+    assertTrue(recorder.getHeader("Cache-Control").equals("private,max-age=566") 
+        || recorder.getHeader("Cache-Control").equals("private,max-age=567"));
     // Note: due to rounding (MS to S conversion), ttl is down by 1
   }
 
