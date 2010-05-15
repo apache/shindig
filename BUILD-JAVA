@@ -43,7 +43,7 @@ Installing and running the various java servers
   http://localhost:8080/gadgets/ifr?url=http://www.labpixies.com/campaigns/todo/todo.xml
 
   Or you can take a look at the sample container here:
-  http://localhost:8080/gadgets/files/samplecontainer/samplecontainer.html
+  http://localhost:8080/samplecontainer/samplecontainer.html
 
 
 Editing the Shindig code with Eclipse
@@ -88,7 +88,7 @@ Editing the Shindig code with Eclipse
 
     There is a maven-eclipse-plugin bug tracking this issue in MECLIPSE-444.
 
-To remove all eclipse-related metatdata from your shindig source tree, run:
+To remove all eclipse-related metadata from your shindig source tree, run:
 
      mvn eclipse:clean
 
