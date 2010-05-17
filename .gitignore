@@ -206,3 +206,24 @@
 /java/social-api/drop.sql
 /java/social-api/derby.log
 /java/social-api/maven-eclipse.xml
+
+# extras/
+/extras/target
+/extras/work
+/extras/dojo
+/extras/*.iws
+/extras/*.ipr
+/extras/*.iml
+/extras/derby.log
+/extras/maven.log
+/extras/build.xml
+/extras/build-dependency.xml
+/extras/velocity.log*
+/extras/junit*.properties
+/extras/surefire*.properties
+/extras/.project
+/extras/.classpath
+/extras/.settings
+/extras/.deployables
+/extras/.wtpmodules
+/extras/.externalToolBuilders

@@ -19,9 +19,9 @@ specific language governing permissions and limitations under the License.
 <feature>
   <name>org.jquery.core-1.4.2</name>
   <gadget>
-    <script inline="false" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"/>
   </gadget>
   <container>
-    <script inline="false" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"/>
+    <script inline="true" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"/>
   </container>
 </feature>

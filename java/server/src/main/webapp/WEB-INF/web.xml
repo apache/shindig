@@ -35,7 +35,8 @@
       org.apache.shindig.social.sample.SampleModule:
       org.apache.shindig.gadgets.oauth.OAuthModule:
       org.apache.shindig.common.cache.ehcache.EhCacheModule:
-      org.apache.shindig.sample.shiro.ShiroModule
+      org.apache.shindig.sample.shiro.ShiroModule:
+      org.apache.shindig.extras.ShindigExtrasGuiceModule
     </param-value>
   </context-param>
 

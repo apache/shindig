@@ -403,6 +403,7 @@
         <module>java/gadgets</module>
         <module>java/social-api</module>
         <module>java/server</module>
+        <module>extras</module>
       </modules>
     </profile>
 
@@ -506,6 +507,7 @@
         <module>java/social-api</module>
         <module>java/server</module>
         <module>java/samples</module>
+        <module>extras</module>
       </modules>
       <build>
         <plugins>
@@ -798,6 +800,7 @@
         <module>java/social-api</module>
         <module>java/server</module>
         <module>java/samples</module>
+        <module>extras</module>
         <module>assembly</module>
       </modules>
       <build>
@@ -881,6 +884,7 @@
         <module>java/gadgets</module>
         <module>java/social-api</module>
         <module>java/server</module>
+        <module>extras</module>
         <module>assembly</module>
       </modules>
     </profile>
@@ -1342,6 +1346,11 @@
       <dependency>
         <groupId>org.apache.shindig</groupId>
         <artifactId>shindig-social-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.shindig</groupId>
+        <artifactId>shindig-extras</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
