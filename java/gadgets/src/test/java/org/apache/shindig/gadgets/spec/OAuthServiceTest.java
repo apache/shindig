@@ -106,7 +106,7 @@ public class OAuthServiceTest {
 
   @Test(expected=SpecParserException.class)
   public void testParseEndPoint_badurl() throws Exception {
-    String xml = "<Request url='www.example.com' />";
+    String xml = "<Request url='ftp://www.example.com' />";
     service.parseEndPoint("Request", XmlUtil.parse(xml), SPEC_URL);
   }
 
