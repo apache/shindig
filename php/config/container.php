@@ -99,7 +99,7 @@ $shindigConfig = array(
   'base_path' => realpath(dirname(__FILE__) . '/..') . '/',
   'features_path' => realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
   'container_path' => realpath(dirname(__FILE__) . '/../../config') . '/',
-  'javascript_path' => realpath(dirname(__FILE__) . '/../../javascript') . '/',
+  'javascript_path' => realpath(dirname(__FILE__) . '/../../content') . '/',
 
   // The OAuth SSL certificates to use, and the pass phrase for the private key
   'private_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/private.key',
@@ -107,7 +107,7 @@ $shindigConfig = array(
   'private_key_phrase' => 'partuza',
 
   // the path to the json db file, used only if your using the JsonDbOpensocialService example/demo service
-  'jsondb_path' => realpath(dirname(__FILE__) . '/../../javascript/sampledata') . '/canonicaldb.json',
+  'jsondb_path' => realpath(dirname(__FILE__) . '/../../content/sampledata') . '/canonicaldb.json',
 
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
   'forcedJsLibs' => '',

@@ -10,27 +10,27 @@
   -----------
   
   Shindig's svn repository contains both the Java and PHP versions of shindig, and the shared
-  javascript and features code.
+  content and features code.
    
   To make PHP Shindig work from svn, its default file path configurations in 
       <shindig>/php/config/container.php
-  are all configured for a file path layout where the features and javascript code is contained
-  in a directory level above the php folder (ie <shindig>/php/../{features, javascript}), resulting in a 
+  are all configured for a file path layout where the features and content code is contained
+  in a directory level above the php folder (ie <shindig>/php/../{features, content}), resulting in a 
   folder layout like:
   
   shindig/             (contains the shared README, NOTICE, LICENSE, etc files)
-  shindig/javascript   (contains shared javascript code)
+  shindig/content      (contains shared javascript code)
   shindig/features     (contains shared features code)
   shindig/config       (contains the shared configuration)
   shindig/java         (contains the java-shindig implementation)
   shindig/php          (contains the php-shindig implementation)
   
   The release script moves these folders to the top level php folder and makes the php folder the top
-  level folder when building it's archives, so in other words the javascript and features code will be
-  located in <shindig>/{features, javascript}, resulting in the folowing layout:
+  level folder when building it's archives, so in other words the content and features code will be
+  located in <shindig>/{features, content}, resulting in the folowing layout:
 
   shindig/             (contains the php implementation(!) & the php specific README, NOTICE, LICENSE, etc files)
-  shindig/javascript   (contains shared javascript code)
+  shindig/content      (contains shared javascript code)
   shindig/features     (contains shared features code)
   shindig/config       (contains both the shared as wel as php specific configuration)
   .. etc ..
@@ -70,28 +70,28 @@
    2) PHP Shindig's configuration
    
    The file paths of all the shared resources are different between the released and svn versions in the config/container.php config file
-   (notice the extra ../ for the javascript, features and jsondb path's with the SVN version)
+   (notice the extra ../ for the content, features and jsondb path's with the SVN version)
    
    RELEASE
    
   'base_path' => realpath(dirname(__FILE__) . '/..') . '/',
   'features_path' => realpath(dirname(__FILE__) . '/../features/src/main/javascript/features') . '/',
   'container_path' => realpath(dirname(__FILE__) . '/../config') . '/',
-  'javascript_path' => realpath(dirname(__FILE__) . '/../javascript') . '/',
+  'javascript_path' => realpath(dirname(__FILE__) . '/../content') . '/',
   'private_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/private.key',
   'public_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/public.crt',
   'private_key_phrase' => 'SOMEKEY',
-  'jsondb_path' => realpath(dirname(__FILE__) . '/../javascript/sampledata') . '/canonicaldb.json',
+  'jsondb_path' => realpath(dirname(__FILE__) . '/../content/sampledata') . '/canonicaldb.json',
    
    SVN
    
   'base_path' => realpath(dirname(__FILE__) . '/..') . '/',
   'features_path' => realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
   'container_path' => realpath(dirname(__FILE__) . '/../../config') . '/',
-  'javascript_path' => realpath(dirname(__FILE__) . '/../../javascript') . '/',
+  'javascript_path' => realpath(dirname(__FILE__) . '/../../content') . '/',
   'private_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/private.key',
   'public_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/public.crt',
   'private_key_phrase' => 'SOMEKEY',
-  'jsondb_path' => realpath(dirname(__FILE__) . '/../../javascript/sampledata') . '/canonicaldb.json',
+  'jsondb_path' => realpath(dirname(__FILE__) . '/../../content/sampledata') . '/canonicaldb.json',
   
   
