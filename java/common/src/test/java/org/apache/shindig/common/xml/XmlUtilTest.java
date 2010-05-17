@@ -106,9 +106,9 @@ public class XmlUtilTest {
 
   @Test
   public void testHttpUriAttribute() {
-    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, HTTPS_URI_ATTR));
-    assertNull(XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR));
-    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR, HTTPS_URI_VALUE));
+    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, HTTPS_URI_ATTR, null));
+    assertNull(XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR, null));
+    assertEquals(HTTPS_URI_VALUE, XmlUtil.getHttpUriAttribute(node, FTP_URI_ATTR, null, HTTPS_URI_VALUE));
   }
 
   @Test(expected=XmlException.class)

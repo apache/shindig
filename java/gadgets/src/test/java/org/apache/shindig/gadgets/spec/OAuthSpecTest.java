@@ -42,6 +42,21 @@ public class OAuthSpecTest {
   }
 
   @Test
+  public void testOAuthRelativeUrl() throws Exception {
+    String xml = "<OAuth><Service>" +
+      "<Request url='/request'/>" +
+      "<Access url='/access'/>" +
+      "<Authorization url='/authorize'/>" +
+      "</Service></OAuth>";
+    OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);
+    assertEquals(1, oauth.getServices().size());
+    OAuthService service = oauth.getServices().get("");
+    assertEquals(service.getRequestUrl().url.toString(), "http://example.org/request");
+    assertEquals(service.getAuthorizationUrl().toString(), "http://example.org/authorize");
+    assertEquals(service.getAccessUrl().url.toString(), "http://example.org/access");
+  }
+
+  @Test
   public void testOAuthSpec_noservice() throws Exception {
     String xml = "<OAuth/>";
     OAuthSpec oauth = new OAuthSpec(XmlUtil.parse(xml), SPEC_URL);

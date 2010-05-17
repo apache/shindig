@@ -207,7 +207,7 @@ public class OAuthService {
   }
 
   Uri parseAuthorizationUrl(Element child, Uri base) throws SpecParserException {
-    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
+    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR, base);
     if (url == null) {
       throw new SpecParserException("OAuth/Service/Authorization @url is not valid: " +
           child.getAttribute(URL_ATTR));
@@ -217,7 +217,7 @@ public class OAuthService {
 
 
   EndPoint parseEndPoint(String where, Element child, Uri base) throws SpecParserException {
-    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR);
+    Uri url = XmlUtil.getHttpUriAttribute(child, URL_ATTR, base);
     if (url == null) {
       throw new SpecParserException("Not an HTTP url: " + child.getAttribute(URL_ATTR));
     }
