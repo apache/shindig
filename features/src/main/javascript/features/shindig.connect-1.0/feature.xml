@@ -17,7 +17,7 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>shindig-connect</name>
+  <name>shindig.connect-1.0</name>
   <dependency>globals</dependency>
   <dependency>rpc</dependency>
   <dependency>osapi</dependency>

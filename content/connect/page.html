@@ -70,7 +70,7 @@
    font-size:13px;  
  }
 </style>
-<script src="/gadgets/js/shindig-connect.js?c=1&container=default&nocache=1&debug=1"></script>
+<script src="/gadgets/js/shindig.connect-1.0.js?c=1&container=default&nocache=1&debug=1"></script>
 </head>
 
 <body>
@@ -80,12 +80,15 @@ Hello <os:Name></os:Name>
 <br/>
 <script>
   // You can dynamically add things like this..
-  document.write('<os:gadget moduleId="1" url="http://www.google.com/ig/modules/horoscope.xml">Temporary, will be replaced</os:gadget>'); 
+  document.write('<os:gadget url="http://www.google.com/ig/modules/horoscope.xml">Temporary, will be replaced</os:gadget>'); 
 </script>
 <br/>
-<os:gadget moduleId="2" url="http://www.labpixies.com/campaigns/todo/todo.xml"></os:gadget>
+<os:gadget url="http://www.labpixies.com/campaigns/todo/todo.xml"></os:gadget>
 <br/>
-<os:gadget moduleId="3" url="http://localhost/~plindner/login.xml"></os:gadget>
-<os:gadget moduleId="4" url="http://localhost/~plindner/share.xml"></os:gadget>
+<li:login></li:login>
+<li:share></li:share>
+<!-- <os:gadget url="http://localhost/~plindner/login.xml"></os:gadget>
+<os:gadget url="http://localhost/~plindner/share.xml"></os:gadget>
+-->
 </body>
 </html>
