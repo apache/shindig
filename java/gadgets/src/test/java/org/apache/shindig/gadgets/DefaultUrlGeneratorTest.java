@@ -94,7 +94,7 @@ public class DefaultUrlGeneratorTest extends EasyMockTestCase {
 
     // Yikes!
     replay(registry);
-    urlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry, null);
+    urlGenerator = new DefaultUrlGenerator(config, lockedDomainService, registry);
     reset(registry);
   }
 
