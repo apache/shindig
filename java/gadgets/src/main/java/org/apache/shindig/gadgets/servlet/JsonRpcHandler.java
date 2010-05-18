@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.UrlGenerator;
@@ -35,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,13 +55,16 @@ public class JsonRpcHandler {
   protected final ExecutorService executor;
   protected final Processor processor;
   protected final UrlGenerator urlGenerator;
+  protected final ContainerConfig containerConfig;
 
   @Inject
-  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator) {
+  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator, ContainerConfig containerConfig) {
     this.executor = executor;
     this.processor = processor;
     this.urlGenerator = urlGenerator;
+    this.containerConfig = containerConfig;
   }
+
 
   /**
    * Processes a JSON request.
@@ -66,19 +72,23 @@ public class JsonRpcHandler {
    * @param request Original JSON request
    * @return The JSON response.
    */
-  public JSONObject process(JSONObject request) throws RpcException, JSONException {
+  public JSONObject process(HttpServletRequest servletRequest, JSONObject request) throws RpcException, JSONException {
     List<GadgetContext> gadgets;
 
     JSONObject requestContext = request.getJSONObject("context");
     JSONArray requestedGadgets = request.getJSONArray("gadgets");
+
+    // TODO null checks..
 
     // Process all JSON first so that we don't wind up with hanging threads if
     // a JSONException is thrown.
     gadgets = Lists.newArrayListWithCapacity(requestedGadgets.length());
     
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
-      GadgetContext context = new JsonRpcGadgetContext(
-          requestContext, requestedGadgets.getJSONObject(i));
+      // Calculate security token
+      SecurityToken token = generateSecurityToken(servletRequest, requestedGadgets.getJSONObject(i));
+      GadgetContext context = new JsonRpcGadgetContext(requestContext, requestedGadgets.getJSONObject(i), token);
+
       gadgets.add(context);
     }
 
@@ -124,6 +134,17 @@ public class JsonRpcHandler {
     } 
     return response;
   }
+
+  /**
+   * Return a security token for this gadget
+   * @param req
+   * @return
+   */
+  protected SecurityToken generateSecurityToken(HttpServletRequest req, JSONObject j) {
+    // No security token by default..
+    return null;
+  }
+
 
   protected Job createNewJob(GadgetContext context) {
     return new Job(context);
@@ -226,8 +247,11 @@ public class JsonRpcHandler {
                   .put("singleton", prefs.getSingleton())
                   .put("scaling", prefs.getScaling())
                   .put("scrolling", prefs.getScrolling());
-        return gadgetJson;
+
+      gadgetJson.put("st", gadget.getContext().getToken().toString());
+      return gadgetJson;
     }
+
 
     private List<JSONObject> getOrderedEnums(UserPref pref) throws JSONException {
       List<UserPref.EnumValuePair> orderedEnums = pref.getOrderedEnumValues();

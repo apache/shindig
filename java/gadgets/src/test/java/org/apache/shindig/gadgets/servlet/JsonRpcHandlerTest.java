@@ -82,7 +82,7 @@ public class JsonRpcHandlerTest {
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeUrlGenerator urlGenerator = new FakeUrlGenerator();
   private final JsonRpcHandler jsonRpcHandler
-      = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator);
+      = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator, null);
 
   private JSONObject createContext(String lang, String country)
       throws JSONException {
