@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<Module>
+  <ModulePrefs title="OSLite EndToEndTest">
+    <Require feature="osapi"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript" src="/testframework.js"></script>
+      <script type="text/javascript">
+        var assertFriends = function(response) {
+          assertEquals('Wrong friend count - ' + gadgets.json.stringify(response), 4, response.totalResults)
+          assertTrue('No response - ' + gadgets.json.stringify(response), response.list);
+          assertEquals('Wrong friend count - ' + gadgets.json.stringify(response), 4, response.list.length);
+          assertTrue('arg 0 is defined', response.list[0]);
+          assertEquals('Should be Johnny', 'Johnny', response.list[0].displayName);
+          assertTrue('arg 1 is defined', response.list[1]);
+          assertEquals('Should be Janey', 'Janey', response.list[1].displayName);
+          assertTrue('arg 2 is defined', response.list[2]);
+          assertEquals('Should be Georgey', 'Georgey', response.list[2].displayName);
+          assertTrue('arg 3 is defined', response.list[3]);
+          assertEquals('Should be Maija', 'Maija', response.list[3].displayName);
+        };
+
+        var tests = {
+          /** Test fetching the owner's friends, which should be 'canonical' */
+          fetchOwnerFriends: function() {
+            function receivedData(response) {
+              assertFalse('Data error', response.error);
+              assertFriends(response);
+
+              finished();
+            }
+
+            var req = osapi.people.getOwnerFriends({fields : ["id", "displayName"]}).execute(receivedData);
+          },
+
+          /** Test fetching 'maija.m' friends, of which there are none */
+          fetchEmptyFriendsById: function() {
+            function receivedData(response) {
+              assertFalse('Data error', response.error);
+              assertEquals('Wrong friend count - '  + response.error, 0, response.totalResults);
+              finished();
+            }
+
+            osapi.people.get({userId : 'maija.m', groupId : '@friends', fields : ["id", "displayName"]}).execute(receivedData);
+          },
+
+          /** Test fetching friends of a list of users */
+          fetchPluralUsers: function() {
+            function receivedData(response) {
+              assertFalse('Data error', response.error);
+              assertFriends(response);
+              finished();
+            }
+
+            osapi.people.get({userId : ["john.doe", "jane.doe"], groupId : '@friends', fields : ["id", "displayName"]}).execute(receivedData);
+          }
+        };
+      </script>
+    ]]>
+  </Content>
+</Module>

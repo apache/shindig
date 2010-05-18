@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+  <ModulePrefs title="ACTIVITY" author_email="lipengage@gmail.com">
+    <Require feature="opensocial-0.8"></Require>
+    <Require feature="dynamic-height"></Require>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+    <style>
+      div {border: solid 1px green; margin:2px;}
+    </style>
+    <script type="text/javascript">
+var viewer;
+var owner;
+
+function addFinished(activity) {
+  var div = document.getElementById("add_activities");
+  var html = ['title:', activity.title, '<br/>', 'body:', activity.body, '<br/>', div.innerHTML].join('');
+  div.innerHTML = html;
+  gadgets.window.adjustHeight();
+}
+
+function addMoreActivity() {
+  var today = new Date();
+  var activityStamp = today.getTime();
+  var title = Math.floor(Math.random()*100);
+  var body = 'body_' + activityStamp;
+  var templateParams = {};
+  templateParams['Song'] = 'With or without you';
+  templateParams['Artist'] = 'U2';
+  templateParams['Viewer'] = viewer;
+  templateParams['Owner'] = owner;
+  var params = {
+    'titleId': 'allFields titleId: ' + today + ' ' + activityStamp,
+    'title': title,
+    'templateParams': templateParams,
+    'url': 'url_' + activityStamp,
+    'bodyId': 'bodyId_' + activityStamp,
+    'body': body,
+    'externalId': 'externalId_' + activityStamp,
+    'streamTitle': 'streamTitle_' + activityStamp,
+    'streamUrl': 'streamUrl_' + activityStamp,
+    'streamSourceUrl': 'streamSourceUrl_' + activityStamp,
+    'streamFaviconUrl': 'streamFaviconUrl_' + activityStamp,
+    'priority': '1',
+    'id': 'id_' + activityStamp,
+    'userId': 'userId_' + activityStamp,
+    'appId': 'appId_' + activityStamp,
+    'postedTime': activityStamp
+  };
+  var activity = opensocial.newActivity(params);
+  opensocial.requestCreateActivity(
+    activity,
+    opensocial.CreateActivityPriority.HIGH,
+    function() {addFinished({'title':title,'body':body})}
+  );
+}
+function displayGetActivities(activities, div_id) {
+  var div = document.getElementById(div_id);
+  var harr = ['size:'];
+  harr.push(activities.size());
+  harr.push(' total:');
+  harr.push(activities.getTotalSize());
+  harr.push('<br/>');
+  activities.each(
+    function(activity) {
+      harr.push('title:');
+      harr.push(activity.getField('title'));
+      harr.push('<br/>');
+      harr.push('body:');
+      harr.push(activity.getField('body'));
+      harr.push('<br/>');
+    }
+  );
+  div.innerHTML = harr.join('');
+  gadgets.window.adjustHeight();
+}
+
+function getMoreActivities(params, div_id) {
+  var req = opensocial.newDataRequest();
+  var opt_params = params;
+  var idSpec = opensocial.newIdSpec({"userId" : 'OWNER', "groupId" : '@self'});
+  req.add(req.newFetchActivitiesRequest(idSpec, opt_params), 'activities');
+  req.send(function(data) {
+    var activities = data.get('activities').getData();
+    displayGetActivities(activities, div_id);
+  });
+}
+
+function default_activities(div_id) {
+  var params = {}
+  getMoreActivities(params, div_id);
+}
+
+function first_max_activities(div_id) {
+  var params = {};
+  params[opensocial.DataRequest.ActivityRequestFields.FIRST] = document.getElementById('first').value;
+  params[opensocial.DataRequest.ActivityRequestFields.MAX] = document.getElementById('max').value;
+  getMoreActivities(params, div_id);
+}
+
+function _rest(url, div_id) {
+  gadgets.io.makeRequest(
+    url, 
+    function(data) {
+      var tmp = gadgets.json.parse(data.text);
+      var jsonActivities = [];
+      for(var i = 0; i < tmp.entry.length; i++) {
+        jsonActivities.push(new JsonActivity(tmp.entry[i]));
+      }
+      var activities = new opensocial.Collection(jsonActivities, tmp.startIndex, tmp.itemsPerPage);
+      displayGetActivities(activities, div_id);
+    }, 
+    null
+  );
+}
+
+function rest(div_id) {
+  //url format /activities/{userId}/{groupId}/appId/{activityId};
+
+  var content = {};
+  content.type = 'activity';
+  content.first = document.getElementById("_first").value;
+  content.max = document.getElementById("_max").value;
+  content.url = document.getElementById("restUrl").value+'/activities/'+owner.getId()+'/@self';
+  content.key = document.getElementById("consumerKey").value;
+  content.secret = document.getElementById("consumerSecret").value;
+  var params = {};
+  params[gadgets.io.RequestParameters.POST_DATA] = "data=" + gadgets.json.stringify(content);
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  signUrl = document.getElementById("signUrl").value;
+  gadgets.io.makeRequest(
+    signUrl, 
+    function(data){
+      var tmp = gadgets.json.parse(data.text);
+      _rest(tmp.url, div_id);
+    }, 
+    params
+  );
+}
+
+function initData() {
+  var req = opensocial.newDataRequest();
+  req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), 'o');
+  req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), 'v');
+  req.send(function(data) {
+    viewer = data.get('v').getData();
+    owner = data.get('o').getData();
+  });
+  gadgets.window.adjustHeight();
+}
+gadgets.util.registerOnLoadHandler(initData);
+    </script>
+    <div>
+      <input type="button" value="add one activity" onclick="addMoreActivity();"/><br/>
+      <div id="add_activities">
+      </div>
+    </div>
+    <div>
+      <input type="button" value="default activities" onclick="default_activities('default_activities')" /><br/>
+      <div id="default_activities">
+      </div>
+    </div>
+    <div>
+      <input type="button" value="first max activities" onclick="first_max_activities('first_max_activities')" /><br/>
+      first: <input type="text" id="first" style="width:40px;" />
+      max: <input type="text" id="max" style="width:40px;" /><br/>
+      <div id="first_max_activities">
+      </div>
+    </div>
+    <div>
+      <input type="button" value="rest" onclick="rest('rest_first_max_activities')"/><br/>
+      first: <input type="text" id="_first" style="width:50px;" />
+      max: <input type="text" id="_max" style="width:50px;" /><br/>
+      rest url: <br/>
+      <input style="width:400px;" id="restUrl" type="text" value="http://shindig/social/rest"/><br/>
+      sign url: <br/>
+      <input style="width:400px;" id="signUrl" type="text" value="http://shindig/test/misc/sign.php"/><br/>
+      oauth consumer key: <br/>
+      <input style="width:400px;" id="consumerKey" type="text" value=""/><br/>
+      oauth consumer secret: <br/>
+      <input style="width:400px;" id="consumerSecret" type="text" value=""/><br/>
+      <div id="rest_first_max_activities">
+      </div>
+    </div>
+    ]]>
+  </Content>
+</Module>

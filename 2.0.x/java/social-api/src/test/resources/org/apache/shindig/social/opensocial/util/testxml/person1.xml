@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person xmlns="http://ns.opensocial.org/2008/opensocial">
+  <displayName></displayName>
+  <gender>female</gender>
+  <id></id>
+  <name>
+    <formatted>Jane Doe</formatted>
+  </name>
+</person>

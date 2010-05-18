@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+  <ModulePrefs title="invalidation" author_email="panjie.pan@gmail.com">
+    <Require feature="dynamic-height"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript">
+
+function pre_rest() {
+  var content = {}
+  content.type = 'invalidation';
+  content.url = document.getElementById("restUrl").value;
+  content.postdata = stringify();
+  content.key = document.getElementById("consumerKey").value;
+  content.secret = document.getElementById("consumerSecret").value;
+  var params = {};
+  params[gadgets.io.RequestParameters.POST_DATA] = "data=" + gadgets.json.stringify(content);
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  signUrl = document.getElementById("signUrl").value;
+  gadgets.io.makeRequest(signUrl, rest, params);
+}
+
+function rest(obj) {
+  var postdata = stringify();
+  var xhr = new window.XMLHttpRequest();
+  var data = gadgets.json.parse(obj.data);
+  var url = data.url;
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  xhr.send(postdata);
+}
+
+function jsonrpc() {
+  var invalidationKeys = "@viewer";
+  var postdata = stringify();
+  var st = shindig.auth.getSecurityToken();
+  var xhr = new window.XMLHttpRequest();
+  var url = [document.getElementById("rpcUrl").value];
+  url.push("?st=");
+  url.push(encodeURIComponent(st));
+  xhr.open("POST", url.join(""), true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  var jsonRpc = {}
+  jsonRpc.method = "cache.invalidate";
+  jsonRpc.params = {}
+  jsonRpc.params.invalidationKeys = invalidationKeys.split("\n");
+  xhr.send(gadgets.json.stringify(jsonRpc));
+}
+
+function stringify() {
+  var invalidationKeys = document.getElementById("invalidationKeys").value;
+  var result = {};
+  result.invalidationKeys = invalidationKeys.split("\n");
+  return gadgets.json.stringify(result);
+}
+
+function makeRequest() {
+  var url = document.getElementById("makeRequestUrl").value;
+  var params = {};
+  params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
+  gadgets.io.makeRequest(url, makeRequestCallback, params);
+}
+
+function makeRequestCallback(obj) {
+  document.getElementById("makeRequestResult").value = obj.data;
+}
+
+function init() {
+  gadgets.window.adjustHeight();
+}
+
+gadgets.util.registerOnLoadHandler(init);
+      </script>
+    <div>
+    makeRequest url:<br>
+    <textarea style="width:600px;" id="makeRequestUrl">http://shindig/test/misc/invalidation/count.php</textarea><br>
+    <input type="button" value="makeRequest" onClick="makeRequest()"><br>
+    makeRequest result:<br>
+    <textarea style="width:600px;" id="makeRequestResult"></textarea><br>
+    <br><br><br>
+
+    rest url:<br>
+    <textarea style="width:600px;" id="restUrl">http://shindig/gadgets/api/rest/cache/invalidate</textarea><br>
+    rpc url:<br>
+    <textarea style="width:600px;" id="rpcUrl">http://shindig/gadgets/api/rpc</textarea><br>
+    invalidationKeys: <br>
+    <textarea style="width:600px;" id="invalidationKeys"></textarea><br>
+    sign url: <br>
+    <textarea style="width:600px;" id="signUrl">http://shindig/test/misc/sign.php</textarea><br>
+    oauth consumer key: <br>
+    <textarea style="width:600px;" id="consumerKey"></textarea><br>
+    oauth consumer secret: <br>
+    <textarea style="width:600px;" id="consumerSecret"></textarea><br>
+    </div>
+    <input type="button" value="rest invalidate" onClick="pre_rest()">
+    <input type="button" value="jsonrpc invalidate" onClick="jsonrpc()">
+    <div id="main">
+        <div id="message"></div>
+        <div id="logging"></div>
+    </div>
+    ]]>
+  </Content>
+</Module>

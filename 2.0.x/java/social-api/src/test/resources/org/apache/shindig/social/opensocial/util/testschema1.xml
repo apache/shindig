@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person xmlns="http://ns.opensocial.org/2008/opensocial"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://ns.opensocial.org/2008/opensocial classpath:opensocial.xsd">
+  <aboutMe></aboutMe>
+  <accounts>
+    <domain>Domain</domain>
+    <primary>true</primary>
+    <userid>useid</userid>
+    <username>username</username>
+  </accounts>
+  <activities>Activity1</activities>
+  <anniversary>2001-10-26T21:32:52</anniversary>
+  <birthday>2001-10-26T21:32:52</birthday>
+  <bodyType></bodyType>
+  <books></books>
+  <cars></cars>
+  <children></children>
+  <connected></connected>
+  <currentLocation></currentLocation>
+  <displayName></displayName>
+  <drinker></drinker>
+  <emails></emails>
+  <ethnicity></ethnicity>
+  <fashion></fashion>
+  <food></food>
+  <gender></gender>
+  <happiestWhen></happiestWhen>
+  <hasApp>false</hasApp>
+  <heroes></heroes>
+  <humor></humor>
+  <id></id>
+  <ims></ims>
+  <interests></interests>
+  <jobInterests></jobInterests>
+  <languagesSpoken></languagesSpoken>
+  <livingArrangement></livingArrangement>
+  <lookingFor></lookingFor>
+  <movies></movies>
+  <music></music>
+  <name></name>
+  <nickname></nickname>
+  <organizations></organizations>
+  <pets></pets>
+  <phoneNumbers></phoneNumbers>
+  <photos></photos>
+  <politicalViews></politicalViews>
+  <preferredUsername></preferredUsername>
+  <profileSong></profileSong>
+  <profileUrl></profileUrl>
+  <profileVideo></profileVideo>
+  <published>2001-10-26T21:32:52</published>
+  <quotes></quotes>
+  <relationshipStatus></relationshipStatus>
+</person>
+  

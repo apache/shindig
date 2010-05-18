@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<Module>
+  <ModulePrefs title="Album test">
+    <Require feature="dynamic-height"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+    <script type="text/javascript">
+
+$ = function(id) {
+  return document.getElementById(id);
+}
+
+
+function sendRequest(url, method, data) {
+  var xhr = new window.XMLHttpRequest();
+  xhr.open(method, url, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  var body = data ? gadgets.json.stringify(data) : null;
+  xhr.send(body);
+}
+
+function restCreate() {
+  var title = $('create-title');
+  var desc = $('create-description');
+  var data = {};
+  data['title'] = title.value;
+  data['description'] = desc.value;
+  data['mediaType'] = 'IMAGE';
+  var url = $('rest-url').value + '?' + $('param').value;
+  sendRequest(url, 'POST', data);
+}
+
+function jsonCreate() {
+  var title = $('create-title');
+  var desc = $('create-description');
+  var data = {};
+  data['method'] = 'albums.create';
+  data['params'] = {'album' : {'title': title.value, 'description': desc.value, 'mediaType': 'IMAGE'}};
+  data['params']['userId'] = '@me';
+  data['params']['groupId'] = '@self';
+  data['id'] = 'createAlbum';
+  var url = $('json-rpc-url').value + '?' + $('param').value;
+  sendRequest(url, 'POST', data);
+}
+
+function restGet() {
+  var albumId = $('get-album-id').value;
+  var url = '';
+  if (albumId) {
+    url = $('rest-url').value + '/' + albumId + '?' + $('param').value;
+  } else {
+    url = $('rest-url').value + '?' + $('param').value;
+  }
+  var startIndex = $('get-start-index').value;
+  if (startIndex) {
+    url += '&startIndex=' + startIndex;
+  }
+  var count = $('get-count').value;
+  if (count) {
+    url += '&count=' + count;
+  }
+  sendRequest(url, 'GET', null);
+}
+
+function jsonGet() {
+  var data = {'method': 'albums.get', 'id': 'getAlbum'};
+  data['params'] = {'userId': '@me', 'groupId': '@self'};
+  var albumId = $('get-album-id').value;
+  var url = $('json-rpc-url').value + '?' + $('param').value;
+  var id = [];
+  if (albumId) {
+    id = albumId.split(',');
+  }
+  data['params']['albumId'] = id;
+  var startIndex = $('get-start-index').value;
+  if (startIndex) {
+    data['params']['startIndex'] = startIndex;
+  }
+  var count = $('get-count').value;
+  if (count) {
+    data['params']['count'] = count;
+  }
+  sendRequest(url, 'POST', data);
+}
+
+function restDelete() {
+  var albumId = $('delete-album-id').value;
+  var url = $('rest-url').value + '/' + albumId + '?' + $('param').value;
+  sendRequest(url, 'DELETE', null);
+}
+
+function jsonDelete() {
+  var albumId = $('delete-album-id').value;
+  var ids = albumId.split(',');
+  var data = {};
+  data['method'] = 'albums.delete';
+  data['params'] = {'albumId': ids};
+  var url = $('json-rpc-url').value + '?' + $('param').value;
+  sendRequest(url, 'POST', data);
+}
+
+function restUpdate() {
+  var title = $('update-title');
+  var desc = $('update-description');
+  var data = {'title': title.value, 'description': desc.value, 'mediaType': 'IMAGE', 'location':{'latitude':100, 'longitude':200}};
+  var albumId = $('update-album-id').value;
+  var url = $('rest-url').value + '/' + albumId + '?' + $('param').value;
+  sendRequest(url, 'PUT', data);
+}
+
+function jsonUpdate() {
+  var title = $('update-title');
+  var desc = $('update-description');
+  var data = {};
+  data['method'] = 'albums.update';
+  data['params'] = {'album' : {'title': title.value, 'description': desc.value, 'mediaType': 'IMAGE', 'location':{'latitude':100, 'longitude':200}}};
+  data['params']['userId'] = '@me';
+  data['params']['groupId'] = '@self';
+  data['id'] = 'updateAlbum';
+  data['params']['albumId'] = $('update-album-id').value;
+  var url = $('json-rpc-url').value + '?' + $('param').value;
+  sendRequest(url, 'POST', data);
+}
+
+function init() {
+  gadgets.window.adjustHeight();
+}
+
+gadgets.util.registerOnLoadHandler(init);
+    </script>
+      <p>The gadget is used to test the create/update/delete/get albums
+        functionality via the REST and JSON-RPC api.<br/> Please use the firebug to
+        check the request and the response. </p>
+
+      <div>
+        REST URL: <input id="rest-url" style="margin-left:40px" type="text" size=60 value="http://shindig/social/rest/albums/@me/@self"><br/>
+          JSON-RPC URL: <input id="json-rpc-url" type="text" size=60 value="http://shindig/social/rpc"/><br/>
+        Param: <input id="param" style="margin-left:70px" type="text" size=60 value="st=1:1:1:partuza:test.com:1:0"/>
+      </div>
+      <p><b>Create the album</b></p>
+      Title:<input id="create-title" type="text" style="margin-left:50px" size=60 value="default album title"/><br/>
+      Description:<input id="create-description" type="text" size=60 value="the description of the create album"/><br/>
+      <input type="submit" value="REST" onclick=restCreate() />
+      <input type="submit" value="JSON-RPC" onclick=jsonCreate() />
+
+      <p><b>Get the album.</b> </p>
+      Album Id:<input id="get-album-id" size=3 type="text"/>
+      startIndex:<input id="get-start-index" size=3 type="text"/>
+      count:<input id="get-count" size=3 type="text"/>
+
+      <input type="submit" value="REST" onclick=restGet() />
+      <input type="submit" value="JSON-RPC" onclick=jsonGet() /><br/>
+
+      <p><b>Update the album</b></p>
+      Album Id:<input id="update-album-id" size=5 type="text"/><br/>
+      Title:<input id="update-title" type="text" style="margin-left:50px" size=60 value="updated album title"/><br/>
+      Description:<input id="update-description" type="text" size=60 value="updated description"/><br/>
+      <input type="submit" value="REST" onclick=restUpdate() />
+      <input type="submit" value="JSON-RPC" onclick=jsonUpdate() />
+
+      <p><b>Delete the album</b><p>
+      Album Id: <input id="delete-album-id" size=5 type="text"/><br/>
+      <input type="submit" value="REST" onclick=restDelete() />
+      <input type="submit" value="JSON-RPC" onclick=jsonDelete() />
+    ]]>
+  </Content>
+</Module>

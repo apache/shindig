@@ -1,0 +1,85 @@
+FROM 1.0.x TO 2.0.x
+===================
+
+Almost all interfaces have been updated from 1.0.x -> 2.0.x.  The 
+following information is not complete.
+
+
+
+== container.js config changes ==
+
+* gadgets.parentOrigins: Default ["*"] (NEW)
+
+An array of valid origin domains for the container.
+
+* Endpoint Changes for rpc
+
+The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and /social/rpc to just /rpc
+
+
+== Java Dependency Changes ==
+
+Too many to mention.  Check the top-level pom.xml for all the new versions
+
+* servlet-api is upgraded to 2.5
+
+
+== Java Interface Changes ==
+
+* AbstractContainerConfig
+
+Changed signature on getMap() and getList() to use Java
+generics.
+
+* SecurityToken
+
+New methods: getExpiresAt() and isExpired() are now required.  A new AbstractSecurityToken
+base class is available.
+
+* SecurityTokenDecoder 
+
+The interface and implementation are replaced
+with the new SecurityTokenCodec interface and implementations.
+
+You will need to adjust any custom SecurityToken decoders to 
+encode tokens as well as decode them.
+
+* SocialSpiException class is removed, use ProtocolException instead
+
+* GuiceBeanConverter.DuplicateFieldException class is removed 
+
+* RestfulCollection
+
+The constructor RestfulCollection(List<T> entry, int startIndex, int totalResults) is removed.  
+Use the constructor with an items-per-page parameter instead.
+
+
+== Java Guice Changes ==
+
+2.0.x uses Guice 2.0 which allows for @Provides annotations and much more.
+
+* TemplateModule
+
+If you had previously customized the Set of TagHandlers you'll need to start
+using Guice Multibindings instead.  This is much easier than subclassing the
+Guice module.  Here's what you would add to your local module to add a new 
+Tag handler.
+
+  Multibinder.newSetBinder(binder(), TagHandler.class).addBinding().to(MyCustomTagHandler.class);
+
+* SocialApiGuiceModule, DefaultGuiceModule
+
+Configuring a new Rest/RPC handler now uses Multibindings.  Adding a new binding
+is easy, just use the following syntax:
+
+    Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"))
+        .addBinding().toInstance(MyHandler.class);
+
+The long value annotated with the name "org.apache.shindig.serviceExpirationDurationMinutes" has
+been moved to shindig/common/conf/shindig.properties.  Guice 2.0 can inject Long values from Strings
+automatically.
+
+== PHP Changes ==
+
+TBD
+
