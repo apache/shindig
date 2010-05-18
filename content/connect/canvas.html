@@ -1,0 +1,68 @@
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+<html>
+<head>
+<title>Connect Demo</title>
+<style>
+  .shindig-connect-gadget {
+    border: solid 1px #000;
+    margin: 10px;
+    float: left;
+    text-align: center;
+  }
+  .shindig-connect-gadget h2 {
+    background: #ccf;
+    border-bottom: solid 1px #000;
+    margin: 0;
+    padding: 5px;
+  }
+  .shindig-connect-gadget iframe {
+    margin: 5px;
+    border: none;
+    height: 300px;
+  }
+
+  .shindig-connect-chromeless iframe {
+    margin: 1px;
+    border: none;
+  }
+
+  .shindig-connect-chromeless h2 {
+    display: none;
+  }
+</style>
+<script src="/gadgets/js/shindig-connect.js?c=1&container=default&nocache=1&debug=1"></script>
+</head>
+
+<body>
+<os:config country="de" debug="true" nocache="true" view="canvas"></os:config>
+<br/>
+<script>
+  var p = gadgets.util.getUrlParameters();
+  console.log(p);
+  if (p && p.url) {
+    document.write('<os:gadget moduleId="1" url="' + p.url + '"></os:gadget>'); 
+  } else {
+    jQuery('errors').html("No url parameter specified");
+  }
+</script>
+<div id="errors"></div>
+<br/>
+</body>
+</html>
