@@ -50,25 +50,30 @@ my.init = function() {
     onSubscribe: function(sender, channel) {
       log(sender + " subscribes to channel '" + channel + "'");
       // return true to reject the request.
+      return false;
     },
     onUnsubscribe: function(sender, channel) {
       log(sender + " unsubscribes from channel '" + channel + "'");
       // return true to reject the request.
+      return false;
     },
     onPublish: function(sender, channel, message) {
       log(sender + " publishes '" + message + "' to channel '" + channel + "'");
       // return true to reject the request.
+      return false;
     }
   });
   shindig.container.layoutManager = new my.LayoutManager();
 };
 
 my.renderGadgets = function() {
+  shindig.container.setParentUrl("http://localhost:8080/");
   for (var i = 0; i < my.gadgetSpecUrls.length; ++i) {
     var gadget = shindig.container.createGadget(
-        {specUrl: my.gadgetSpecUrls[i], title: (i ? "Subscriber" : "Publisher")});
+        {debug:1,specUrl: my.gadgetSpecUrls[i], title: (i ? "Subscriber" : "Publisher")});
     shindig.container.addGadget(gadget);
     shindig.container.renderGadget(gadget);
+   
   }
 };
 
