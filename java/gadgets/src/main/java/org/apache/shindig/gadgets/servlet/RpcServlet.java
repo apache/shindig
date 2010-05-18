@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.servlet;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.http.HttpRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -102,8 +101,8 @@ public class RpcServlet extends InjectedServlet {
 
   private Result process(HttpServletRequest request, HttpServletResponse response, String body) {
     try {
-      JSONObject jsonreq = new JSONObject(body);
-      JSONObject resp = jsonHandler.process(request, jsonreq);
+      JSONObject req = new JSONObject(body);
+      JSONObject resp = jsonHandler.process(req);
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("application/json; charset=utf-8");
       response.setHeader("Content-Disposition", "attachment;filename=rpc.txt");

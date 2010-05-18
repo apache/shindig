@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -49,14 +48,13 @@ public class JsonRpcGadgetContext extends GadgetContext {
   private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
-  private final SecurityToken token;
 
   /**
    * @param context Request global parameters.
    * @param gadget Values for the gadget being rendered.
    * @throws JSONException If parameters can't be extracted or aren't correctly formed.
    */
-  public JsonRpcGadgetContext(JSONObject context, JSONObject gadget, SecurityToken token) throws JSONException {
+  public JsonRpcGadgetContext(JSONObject context, JSONObject gadget) throws JSONException {
     this.context = context;
     this.gadget = gadget;
 
@@ -69,7 +67,6 @@ public class JsonRpcGadgetContext extends GadgetContext {
     container = context.optString("container");
     debug = context.optBoolean("debug");
     renderingContext = RenderingContext.METADATA;
-    this.token = token;
   }
 
   @Override
@@ -146,13 +143,6 @@ public class JsonRpcGadgetContext extends GadgetContext {
       return super.getView();
     }
     return view;
-  }
-
-  @Override
-  public SecurityToken getToken() {
-    if (token == null)
-      return super.getToken();
-    return token;
   }
 
   /**
