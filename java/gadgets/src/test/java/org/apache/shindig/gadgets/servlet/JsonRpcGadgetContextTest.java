@@ -54,7 +54,7 @@ public class JsonRpcGadgetContextTest extends Assert {
         .put("country", Locale.US.getCountry().toUpperCase())
         .put("context-field", "context-value");
 
-    GadgetContext jsonContext = new JsonRpcGadgetContext(context, gadget);
+    GadgetContext jsonContext = new JsonRpcGadgetContext(context, gadget, null);  // FIXME
     assertEquals(SPEC_URL, jsonContext.getUrl().toString());
     assertEquals(SPEC_ID, jsonContext.getModuleId());
     assertEquals(Locale.US.getLanguage(),

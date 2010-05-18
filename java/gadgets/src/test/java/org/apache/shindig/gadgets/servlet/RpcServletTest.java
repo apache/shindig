@@ -59,7 +59,7 @@ public class RpcServletTest extends Assert {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._({\"GADGETS\":[]})",
         HttpServletResponse.SC_OK);
     JSONObject handlerResponse = new JSONObject("{\"GADGETS\":[]}");
-    expect(handler.process(isA(JSONObject.class))).andReturn(handlerResponse);
+    expect(handler.process(isA(HttpServletRequest.class), isA(JSONObject.class))).andReturn(handlerResponse);
     replay(handler);
     servlet.doGet(request, response);
     verify(response);
@@ -70,7 +70,7 @@ public class RpcServletTest extends Assert {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", "function");
     HttpServletResponse response = createHttpResponse("rpcExceptionMessage",
         HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    expect(handler.process(isA(JSONObject.class))).andThrow(
+    expect(handler.process(isA(HttpServletRequest.class), isA(JSONObject.class))).andThrow(
         new RpcException("rpcExceptionMessage"));
     replay(handler);
     servlet.doGet(request, response);
@@ -82,7 +82,7 @@ public class RpcServletTest extends Assert {
     HttpServletRequest request = createGetRequest("{\"gadgets\":[]}", "function");
     HttpServletResponse response = createHttpResponse("Malformed JSON request.",
         HttpServletResponse.SC_BAD_REQUEST);
-    expect(handler.process(isA(JSONObject.class))).andThrow(new JSONException("json"));
+    expect(handler.process(isA(HttpServletRequest.class), isA(JSONObject.class))).andThrow(new JSONException("json"));
     replay(handler);
     servlet.doGet(request, response);
     verify(response);
