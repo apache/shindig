@@ -103,10 +103,6 @@
 // Only configuration for required features will be used.
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
-  "shindig.connect-1.0" : {
-     "metadataUrl" : "/gadgets/metadata"
-   },
-
   "core.io" : {
     // Note: /proxy is an open proxy. Be careful how you expose this!
     // Note: Here // is replaced with the current protocol http/https

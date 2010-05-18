@@ -59,7 +59,7 @@ features/rpc/feature.xml
 features/security-token/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
-features/shindig.connect-1.0/feature.xml
+features/shindig.connect/feature.xml
 features/shindig.container/feature.xml
 features/skins/feature.xml
 features/swfobject/feature.xml
