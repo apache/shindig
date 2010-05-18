@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableSet;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
@@ -65,12 +64,6 @@ public class JsServlet extends InjectedServlet {
   @Inject
   public void setContainerConfig(ContainerConfig containerConfig) {
     this.containerConfig = containerConfig;
-  }
-
-  private SecurityTokenDecoder tokenCodec;
-  @Inject
-  public void setSecurityTokenCodec(SecurityTokenDecoder tokenCodec) {
-    this.tokenCodec = tokenCodec;
   }
 
   @Override
@@ -138,7 +131,8 @@ public class JsServlet extends InjectedServlet {
     }
 
     if (context == RenderingContext.CONTAINER) {
-      // Inject container data
+      // Append some container specific things
+
       Map<String, Object> features = containerConfig.getMap(ctx.getContainer(), "gadgets.features");
       Map<String, Object> config = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
 
