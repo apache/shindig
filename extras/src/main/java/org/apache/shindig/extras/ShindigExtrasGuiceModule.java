@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.shindig.contrib;
+package org.apache.shindig.extras;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
