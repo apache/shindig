@@ -31,7 +31,7 @@ shindig.connect = function() {
    */
 
   function init(configuration) {
-    config = configuration["shindig.connect-1.0"] || {};
+    config = configuration["shindig.connect"] || {};
   }
 
   var requiredConfig = {
