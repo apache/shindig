@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.HashUtil;
@@ -59,11 +62,13 @@ public class DefaultUrlGenerator implements UrlGenerator {
   private final Map<String, String> oauthCallbackUriTemplates;
 
   private final LockedDomainService lockedDomainService;
+  private final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
   public DefaultUrlGenerator(ContainerConfig config,
                              LockedDomainService lockedDomainService,
-                             FeatureRegistry registry) {
+                             FeatureRegistry registry,
+                             SecurityTokenDecoder securityTokenDecoder) {
     iframeBaseUris = Maps.newHashMap();
     jsUriTemplates = Maps.newHashMap();
     oauthCallbackUriTemplates = Maps.newHashMap();
@@ -75,6 +80,7 @@ public class DefaultUrlGenerator implements UrlGenerator {
     }
 
     this.lockedDomainService = lockedDomainService;
+    this.securityTokenDecoder = securityTokenDecoder;
 
     StringBuilder jsBuf = new StringBuilder();
     for (FeatureResource resource : registry.getAllFeatures()) {
@@ -176,6 +182,19 @@ public class DefaultUrlGenerator implements UrlGenerator {
       }
       uri.addQueryParameter("up_" + pref.getName(), value);
     }
+
+    // Need a security token if we expect server-side templates etc to work
+    try {
+      if (securityTokenDecoder != null && context.getToken() != null) {
+        String tokenVal = securityTokenDecoder.encodeToken(context.getToken());
+        if (StringUtils.isNotEmpty(tokenVal)) {
+          uri.addQueryParameter("st", tokenVal);
+        }
+      }
+    } catch (SecurityTokenException e) {
+      // ignore, fall back to anonymous?
+    }
+
     // add url last to work around browser bugs
     if (type != View.ContentType.URL) {
       uri.addQueryParameter("url", url);
