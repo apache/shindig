@@ -19,8 +19,6 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -58,16 +56,13 @@ public class JsonRpcHandler {
   protected final Processor processor;
   protected final UrlGenerator urlGenerator;
   protected final ContainerConfig containerConfig;
-  protected final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
-  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator, ContainerConfig containerConfig,
-                        SecurityTokenDecoder securityTokenDecoder) {
+  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator, ContainerConfig containerConfig) {
     this.executor = executor;
     this.processor = processor;
     this.urlGenerator = urlGenerator;
     this.containerConfig = containerConfig;
-    this.securityTokenDecoder = securityTokenDecoder;
   }
 
 
@@ -91,7 +86,7 @@ public class JsonRpcHandler {
     
     for (int i = 0, j = requestedGadgets.length(); i < j; ++i) {
       // Calculate security token
-      SecurityToken token = getSecurityTokenForRequest(servletRequest, requestedGadgets.getJSONObject(i));
+      SecurityToken token = generateSecurityToken(servletRequest, requestedGadgets.getJSONObject(i));
       GadgetContext context = new JsonRpcGadgetContext(requestContext, requestedGadgets.getJSONObject(i), token);
 
       gadgets.add(context);
@@ -136,22 +131,20 @@ public class JsonRpcHandler {
       } finally {
         numJobs--;
       }
-    }
-
-    // Add some container info?
-
+    } 
     return response;
   }
 
   /**
-   * Return a security token for this gadget, subclass this to parse your cookies, etc.
+   * Return a security token for this gadget
    * @param req
    * @return
    */
-  protected SecurityToken getSecurityTokenForRequest(HttpServletRequest req, JSONObject j) {
+  protected SecurityToken generateSecurityToken(HttpServletRequest req, JSONObject j) {
     // No security token by default..
     return null;
   }
+
 
   protected Job createNewJob(GadgetContext context) {
     return new Job(context);
@@ -255,17 +248,7 @@ public class JsonRpcHandler {
                   .put("scaling", prefs.getScaling())
                   .put("scrolling", prefs.getScrolling());
 
-      // If there's no security token we don't add one, which forces anonymous
-      SecurityToken token = gadget.getContext().getToken();
-      if (token != null) {
-        try {
-          String tokenVal =  securityTokenDecoder.encodeToken(token);
-          gadgetJson.put("st", tokenVal);
-        } catch (SecurityTokenException e) {
-          //ignore
-        }
-      }
-
+      gadgetJson.put("st", gadget.getContext().getToken().toString());
       return gadgetJson;
     }
 

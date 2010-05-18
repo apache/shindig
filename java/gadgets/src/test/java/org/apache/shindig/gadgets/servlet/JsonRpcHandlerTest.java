@@ -22,9 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.shindig.auth.AnonymousSecurityToken;
-import org.apache.shindig.common.testing.FakeGadgetToken;
-import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.testing.TestExecutorService;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
@@ -49,7 +46,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class JsonRpcHandlerTest {
@@ -86,7 +82,7 @@ public class JsonRpcHandlerTest {
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeUrlGenerator urlGenerator = new FakeUrlGenerator();
   private final JsonRpcHandler jsonRpcHandler
-      = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator, null, new FakeGadgetToken.Decoder());
+      = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator, null);
 
   private JSONObject createContext(String lang, String country)
       throws JSONException {
@@ -116,9 +112,8 @@ public class JsonRpcHandlerTest {
         .put("gadgets", gadgets);
 
     urlGenerator.iframeUrl = SPEC_URL.toString();
-    HttpServletRequest req = new FakeHttpServletRequest();
 
-    JSONObject response = jsonRpcHandler.process(req, input);
+    JSONObject response = jsonRpcHandler.process(input);
 
     JSONArray outGadgets = response.getJSONArray("gadgets");
     JSONObject gadget = outGadgets.getJSONObject(0);
@@ -155,7 +150,6 @@ public class JsonRpcHandlerTest {
 
   @Test
   public void testUnexpectedError() throws Exception {
-    HttpServletRequest req = new FakeHttpServletRequest();
     JSONArray gadgets = new JSONArray()
         .put(createGadget(SPEC_URL.toString(), 0, null));
     JSONObject input = new JSONObject()
@@ -163,7 +157,7 @@ public class JsonRpcHandlerTest {
         .put("gadgets", gadgets);
 
     urlGenerator.throwRandomFault = true;
-    JSONObject resp = jsonRpcHandler.process(req, input);
+    JSONObject resp = jsonRpcHandler.process(input);
     String actual = resp.getJSONArray("gadgets").getJSONObject(0).getJSONArray("errors").getString(0);
     assertEquals("BROKEN", actual);
   }
@@ -172,8 +166,6 @@ public class JsonRpcHandlerTest {
 
   @Test
   public void testMultipleGadgets() throws Exception {
-    HttpServletRequest req = new FakeHttpServletRequest();
-
     JSONArray gadgets = new JSONArray()
         .put(createGadget(SPEC_URL.toString(), 0, null))
         .put(createGadget(SPEC_URL2.toString(), 1, null));
@@ -181,7 +173,7 @@ public class JsonRpcHandlerTest {
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    JSONObject response = jsonRpcHandler.process(req, input);
+    JSONObject response = jsonRpcHandler.process(input);
 
     JSONArray outGadgets = response.getJSONArray("gadgets");
 
@@ -206,8 +198,6 @@ public class JsonRpcHandlerTest {
 
   @Test
   public void testMultipleGadgetsWithAnError() throws Exception {
-    HttpServletRequest req = new FakeHttpServletRequest();
-
     JSONArray gadgets = new JSONArray()
         .put(createGadget(SPEC_URL.toString(), 0, null))
         .put(createGadget(SPEC_URL2.toString(), 1, null));
@@ -218,7 +208,7 @@ public class JsonRpcHandlerTest {
     processor.exceptions.put(SPEC_URL2, 
         new ProcessingException("broken", HttpServletResponse.SC_BAD_REQUEST));
 
-    JSONObject response = jsonRpcHandler.process(req, input);
+    JSONObject response = jsonRpcHandler.process(input);
 
     JSONArray outGadgets = response.getJSONArray("gadgets");
 
