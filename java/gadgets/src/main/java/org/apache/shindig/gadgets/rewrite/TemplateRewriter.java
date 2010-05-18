@@ -115,14 +115,14 @@ public class TemplateRewriter implements GadgetRewriter {
     Map<String, Feature> directFeatures = gadget.getSpec().getModulePrefs()
         .getFeatures();
 
-    Feature f = directFeatures.get(TEMPLATES_FEATURE_NAME);
-    if (f == null && directFeatures.containsKey(OSML_FEATURE_NAME)) {
-      f = directFeatures.get(OSML_FEATURE_NAME);
+    Feature feature = directFeatures.get(TEMPLATES_FEATURE_NAME);
+    if (feature == null && directFeatures.containsKey(OSML_FEATURE_NAME)) {
+      feature = directFeatures.get(OSML_FEATURE_NAME);
     }
     
-    if (f != null && isServerTemplatingEnabled(f)) {
+    if (feature != null && isServerTemplatingEnabled(feature)) {
       try {
-        rewriteImpl(gadget, f, content);
+        rewriteImpl(gadget, feature, content);
       } catch (GadgetException ge) {
         throw new RewritingException(ge, ge.getHttpStatusCode());
       }
@@ -135,11 +135,11 @@ public class TemplateRewriter implements GadgetRewriter {
    *   &lt;Param name="disableAutoProcessing"&gt;true&lt;/Param&gt;
    * </pre>
    */
-  private boolean isServerTemplatingEnabled(Feature f) {
-    return (!"true".equalsIgnoreCase(f.getParam(DISABLE_AUTO_PROCESSING_PARAM)));
+  private boolean isServerTemplatingEnabled(Feature feature) {
+    return (!"true".equalsIgnoreCase(feature.getParam(DISABLE_AUTO_PROCESSING_PARAM)));
   }
 
-  private void rewriteImpl(Gadget gadget, Feature f, MutableContent content)
+  private void rewriteImpl(Gadget gadget, Feature feature, MutableContent content)
       throws GadgetException {   
     List<TagRegistry> registries = Lists.newArrayList();
     List<TemplateLibrary> libraries = Lists.newArrayList();
@@ -163,12 +163,12 @@ public class TemplateRewriter implements GadgetRewriter {
     }
     List<Element> templates = builder.build();
 
-    if (!OSML_FEATURE_NAME.equals(f.getName())) {
+    if (!OSML_FEATURE_NAME.equals(feature.getName())) {
       // User-defined custom tags - Priority 3
       registries.add(registerCustomTags(templates));
 
       // User-defined libraries - Priority 4
-      loadTemplateLibraries(gadget.getContext(), f, registries, libraries);
+      loadTemplateLibraries(gadget.getContext(), feature, registries, libraries);
     }
     
     TagRegistry registry = new CompositeTagRegistry(registries);
@@ -178,7 +178,7 @@ public class TemplateRewriter implements GadgetRewriter {
 
     // Check if a feature param overrides  our guess at whether the client-side    
     // feature is needed.                                                  
-    String clientOverride = f.getParam(CLIENT_SUPPORT_PARAM);            
+    String clientOverride = feature.getParam(CLIENT_SUPPORT_PARAM);            
     if ("true".equalsIgnoreCase(clientOverride)) {                              
       needsFeature = true;                                                      
     } else if ("false".equalsIgnoreCase(clientOverride)) {                      
@@ -230,8 +230,8 @@ public class TemplateRewriter implements GadgetRewriter {
   }
 
   private void loadTemplateLibraries(GadgetContext context,
-      Feature f, List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
-    Collection<String> urls = f.getParams().get(REQUIRE_LIBRARY_PARAM); 
+      Feature feature, List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
+    Collection<String> urls = feature.getParams().get(REQUIRE_LIBRARY_PARAM); 
     if (urls != null) {
       for (String url : urls) {
         Uri uri = Uri.parse(url.trim());
