@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EhCacheCacheProvider implements CacheProvider {
@@ -97,12 +98,16 @@ public class EhCacheCacheProvider implements CacheProvider {
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
     if (name == null) {
-      LOG.fine("Creating anonymous cache");
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Creating anonymous cache");
+      }
       return new EhConfiguredCache<K, V>(name, cacheManager);
     } else {
       Cache<K, V> cache = (Cache<K, V>) caches.get(name);
       if (cache == null) {
-        LOG.fine("Creating cache named " + name);
+        if (LOG.isLoggable(Level.FINE)) {
+          LOG.fine("Creating cache named " + name);
+        }
         cache = new EhConfiguredCache<K, V>(name, cacheManager);
         caches.put(name, cache);
       }
