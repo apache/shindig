@@ -17,15 +17,12 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
-
 import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 /**
  * Base class for content caches. Defines cache expiration rules and
@@ -38,6 +35,10 @@ import org.apache.shindig.gadgets.AuthType;
  */
 public abstract class AbstractHttpCache implements HttpCache {
   private TimeSource clock = new TimeSource();
+
+  private static final String RESIZE_HEIGHT = UriCommon.Param.RESIZE_HEIGHT.getKey();
+  private static final String RESIZE_WIDTH = UriCommon.Param.RESIZE_WIDTH.getKey();
+  private static final String RESIZE_QUALITY = UriCommon.Param.RESIZE_QUALITY.getKey();
 
   /**
    * Subclasses should call this directly or be injected themselves to override.
@@ -152,9 +153,9 @@ public abstract class AbstractHttpCache implements HttpCache {
         .setLegacyParam(6, getInstanceId(request))
         .setLegacyParam(7, getServiceName(request))
         .setLegacyParam(8, getTokenName(request))
-        .setParam("rh", request.getParam(PARAM_RESIZE_HEIGHT))
-        .setParam("rw", request.getParam(PARAM_RESIZE_WIDTH))
-        .setParam("rq", request.getParam(PARAM_RESIZE_QUALITY));
+        .setParam("rh", request.getParam(RESIZE_HEIGHT))
+        .setParam("rw", request.getParam(RESIZE_WIDTH))
+        .setParam("rq", request.getParam(RESIZE_QUALITY));
 
     return keyBuilder.build();
   }
