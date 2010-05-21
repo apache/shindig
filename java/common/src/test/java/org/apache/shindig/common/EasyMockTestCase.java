@@ -19,7 +19,7 @@ package org.apache.shindig.common;
 
 import com.google.common.collect.Lists;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Assert;
 
 import java.lang.reflect.Method;

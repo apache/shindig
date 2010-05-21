@@ -37,8 +37,8 @@ import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestExceptio
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.Test;
 

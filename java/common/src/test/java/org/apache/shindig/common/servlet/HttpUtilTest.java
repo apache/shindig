@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.FakeTimeSource;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Ignore;
 import org.junit.Test;
 

@@ -27,10 +27,10 @@ import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.SECURITY_TO
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.SECURITY_TOKEN_FEATURE_NAME;
 import static org.apache.shindig.gadgets.uri.DefaultIframeUriManager.UNLOCKED_DOMAIN_KEY;
 
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

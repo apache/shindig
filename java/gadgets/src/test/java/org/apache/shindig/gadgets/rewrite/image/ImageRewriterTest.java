@@ -26,7 +26,7 @@ import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
 import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.createControl;
+import static org.easymock.EasyMock.createControl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;

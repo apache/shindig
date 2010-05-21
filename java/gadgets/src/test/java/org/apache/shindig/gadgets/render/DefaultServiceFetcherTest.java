@@ -28,7 +28,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
 import com.google.common.collect.*;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
