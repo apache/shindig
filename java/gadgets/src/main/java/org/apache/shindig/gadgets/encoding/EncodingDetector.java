@@ -32,7 +32,7 @@ public class EncodingDetector {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
- 
+
   public static class FallbackEncodingDetector {
     public Charset detectEncoding(byte[] input) {
       // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.
@@ -51,7 +51,7 @@ public class EncodingDetector {
    *     encoding for HTTP) if the bytes are not valid UTF-8. Only recommended if you can reasonably
    *     expect that other encodings are going to be specified. Full encoding detection is very
    *     expensive!
-   * @param alternateDecoder specify a fallback encoding detection. 
+   * @param alternateDecoder specify a fallback encoding detection.
    *     Only used if assume88591IfNotUtf8 is false.
    * @return The detected encoding.
    */
@@ -103,11 +103,16 @@ public class EncodingDetector {
         return false;
       }
 
+      if (endOfSequence >= j) {
+        // End of sequence reached, not a valid sequence
+        return false;
+      }
+
       while (i < endOfSequence) {
         i++;
         bite = input[i];
         if ((bite & 0xC0) != 0x80) {
-          // High bit not set, not a vlaid sequence
+          // High bit not set, not a valid sequence
           return false;
         }
       }

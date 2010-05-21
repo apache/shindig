@@ -44,7 +44,7 @@ public class EncodingDetectorTest {
     byte[] data = "Hello, world".getBytes("US-ASCII");
     assertEquals("UTF-8", EncodingDetector.detectEncoding(data, true, null).name());
   }
- 
+
   @Test
   public void detectedUtf8WithByteOrderMark() {
     byte[] data = {
@@ -57,7 +57,14 @@ public class EncodingDetectorTest {
   @Test
   public void assumeLatin1OnInvalidUtf8() throws Exception {
     byte[] data = "\u4F60\u597D".getBytes("BIG5");
-    
+
+    assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true, null).name());
+  }
+
+  @Test
+  public void badStreamEnd() throws Exception {
+    byte[] data = { 'd', 'u',  (byte)0xC0 };
+
     assertEquals("ISO-8859-1", EncodingDetector.detectEncoding(data, true, null).name());
   }
 
@@ -68,13 +75,13 @@ public class EncodingDetectorTest {
                    "\u8FBE\u4E0D\u51FA\uFF0C\u6709\u611F\u60C5\u65E0\u6CD5\u503E\u5410")
                    .getBytes("GB18030");
 
-    EncodingDetector.FallbackEncodingDetector detector = 
+    EncodingDetector.FallbackEncodingDetector detector =
       newMockFallbackEncoding(data, "GB18030");
 
     assertEquals("GB18030", EncodingDetector.detectEncoding(data, false, detector).name());
     verify(detector);
   }
-  
+
   // Test the fallback detector:
   @Test
   public void doNotAssumeLatin1OnInvalidUtf8() throws Exception {
@@ -111,7 +118,7 @@ public class EncodingDetectorTest {
 
     assertEquals("UTF-8", detector.detectEncoding(data).name());
   }
-  
+
   @Test(expected=NullPointerException.class)
   public void nullCustomDetector() throws Exception {
     byte[] data = "\u4F60\u597D".getBytes("BIG5");
