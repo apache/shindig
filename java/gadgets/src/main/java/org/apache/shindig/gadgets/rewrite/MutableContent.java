@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 /**
@@ -39,13 +40,15 @@ import com.google.common.collect.Maps;
  * and a consistent view of those contents as an HTML parse tree.
  */
 public class MutableContent {
+  private static final Map<String, Object> EMPTY_MAP = ImmutableMap.of();
+
   private String content;
   private byte[] contentBytes;
   private HttpResponse contentSource;
   private Document document;
   private int numChanges;
   private final GadgetHtmlParser contentParser;
-  private final Map<String, Object> pipelinedData;
+  private Map<String, Object> pipelinedData;
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
 
@@ -63,7 +66,6 @@ public class MutableContent {
     this.contentParser = contentParser;
     this.content = content;
     this.numChanges = 0;
-    this.pipelinedData = Maps.newHashMap();
   }
 
   /**
@@ -73,7 +75,6 @@ public class MutableContent {
   public MutableContent(GadgetHtmlParser contentParser, HttpResponse contentSource) {
     this.contentParser = contentParser;
     this.contentSource = contentSource;
-    this.pipelinedData = Maps.newHashMap();
   }
 
   /**
@@ -221,10 +222,13 @@ public class MutableContent {
   }
   
   public void addPipelinedData(String key, Object value) {
+    if (null == pipelinedData) {
+      pipelinedData = Maps.newHashMap();
+    }
     pipelinedData.put(key, value);
   }
   
   public Map<String, Object> getPipelinedData() {
-    return pipelinedData;
+    return (null == pipelinedData) ? EMPTY_MAP : pipelinedData;
   }
 }
