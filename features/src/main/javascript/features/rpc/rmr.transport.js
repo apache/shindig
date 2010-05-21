@@ -85,10 +85,10 @@ gadgets.rpctx.rmr = function() {
         // contentWindow is null, making it impossible to do so.
         channelFrame.onload = function() {
           processRmrData(opt_frameId);
-        }
+        };
       }
       channelFrame.src = relayUri + '#' + data;
-    }
+    };
 
     if (document.body) {
       appendFn();
@@ -121,7 +121,7 @@ gadgets.rpctx.rmr = function() {
     // The width here is important as RMR
     // makes use of the resize handler for the frame.
     // Do not modify unless you test thoroughly!
-    frameStyle.width = '10px'
+    frameStyle.width = '10px';
     frameStyle.height = '1px';
     channelFrame.id = 'rmrtransport-' + frameId;
     channelFrame.name = channelFrame.id;

@@ -98,7 +98,7 @@ os.convertToCamelCase = function(str) {
       var piece = upper.charAt(index) + words[i].substring(1);
       out.push(piece);
     }
-    index += words[i].length + 1
+    index += words[i].length + 1;
   }
   return out.join('');
 };

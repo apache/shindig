@@ -122,7 +122,7 @@ gadgets.rpc = function() {
                     gadgets.json.stringify(Array.prototype.slice.call(arguments)) +
                     "): call ignored. [caller: " + document.location +
                     ", isChild: " + isChild + "]");
-      }
+      };
     }
     return {
       getCode: function() {
@@ -134,7 +134,7 @@ gadgets.rpc = function() {
       init: logFn("init"),
       setup: logFn("setup"),
       call: logFn("call")
-    }
+    };
   })();
 
   // Load the authentication token for speaking to the container
