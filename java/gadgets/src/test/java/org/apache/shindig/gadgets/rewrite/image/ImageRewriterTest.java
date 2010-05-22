@@ -21,15 +21,12 @@ import static
     org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.CONTENT_TYPE_AND_EXTENSION_MISMATCH;
 import static
     org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.CONTENT_TYPE_AND_MIME_MISMATCH;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.createControl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -125,10 +122,10 @@ public class ImageRewriterTest extends Assert {
   private HttpRequest getMockRequest(Integer width, Integer height, Integer quality, boolean noExpand) {
     HttpRequest request = mockControl.createMock(HttpRequest.class);
     expect(request.getUri()).andReturn(IMAGE_URL);
-    expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
-    expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
-    expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
-    expect(request.getParam(PARAM_NO_EXPAND)).andReturn(noExpand ? "1" : null).anyTimes();
+    expect(request.getParamAsInteger(Param.RESIZE_QUALITY.getKey())).andReturn(quality);
+    expect(request.getParamAsInteger(Param.RESIZE_WIDTH.getKey())).andReturn(width);
+    expect(request.getParamAsInteger(Param.RESIZE_HEIGHT.getKey())).andReturn(height);
+    expect(request.getParam(Param.NO_EXPAND.getKey())).andReturn(noExpand ? "1" : null).anyTimes();
     return request;
   }
 

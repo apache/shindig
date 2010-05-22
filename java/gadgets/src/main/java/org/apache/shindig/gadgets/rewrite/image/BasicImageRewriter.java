@@ -61,6 +61,13 @@ import javax.imageio.ImageWriter;
  */
 public class BasicImageRewriter implements ImageRewriter {
 
+  static final String
+      CONTENT_TYPE_AND_EXTENSION_MISMATCH =
+        "Content is not an image but file extension asserts it is";
+  static final String
+      CONTENT_TYPE_AND_MIME_MISMATCH =
+          "Content is not an image but mime type asserts it is";
+    
   private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
   /** Returned as the output message if a huge image is submitted to be scaled */
   private static final String RESIZE_IMAGE_TOO_LARGE = "The image is too large to resize";
@@ -68,21 +75,15 @@ public class BasicImageRewriter implements ImageRewriter {
   private static final String RESIZE_OUTPUT_FORMAT = "png";
 
   private static final String CONTENT_LENGTH = "Content-Length";
-  /** Parameter used to request image rendering quality */
-  public static final String PARAM_RESIZE_QUALITY = Param.RESIZE_QUALITY.getKey();
-  /** Parameter used to request image width change */
-  public static final String PARAM_RESIZE_WIDTH = Param.RESIZE_WIDTH.getKey();
-  /** Parameter used to request image height change */
-  public static final String PARAM_RESIZE_HEIGHT = Param.RESIZE_HEIGHT.getKey();
-  /** Parameter used to request resizing will not expand image */
-  public static final String PARAM_NO_EXPAND = Param.NO_EXPAND.getKey();
 
-  public static final String
-      CONTENT_TYPE_AND_EXTENSION_MISMATCH =
-        "Content is not an image but file extension asserts it is";
-  public static final String
-      CONTENT_TYPE_AND_MIME_MISMATCH =
-          "Content is not an image but mime type asserts it is";
+  /** Parameter used to request image rendering quality */
+  private static final String PARAM_RESIZE_QUALITY = Param.RESIZE_QUALITY.getKey();
+  /** Parameter used to request image width change */
+  private static final String PARAM_RESIZE_WIDTH = Param.RESIZE_WIDTH.getKey();
+  /** Parameter used to request image height change */
+  private static final String PARAM_RESIZE_HEIGHT = Param.RESIZE_HEIGHT.getKey();
+  /** Parameter used to request resizing will not expand image */
+  private static final String PARAM_NO_EXPAND = Param.NO_EXPAND.getKey();
 
   private static final int DEFAULT_QUALITY = 100;
   private static final int BITS_PER_BYTE = 8;
