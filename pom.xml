@@ -1393,10 +1393,16 @@
         <artifactId>json</artifactId>
         <version>20070829</version>
       </dependency>
+     <dependency>
+       <groupId>caja</groupId>
+       <artifactId>htmlparser</artifactId>
+       <version>r4067</version>
+       <scope>compile</scope>
+     </dependency>
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r3950</version>
+        <version>r4067</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
