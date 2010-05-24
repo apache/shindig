@@ -39,7 +39,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -195,7 +194,7 @@ public class EndToEndTest {
   @Test
   public void testCajaFailUrlGadgets() throws Exception {
     try {
-      HtmlPage page = executePageTest("failCajaUrlTest", null, /* caja */ true);
+      executePageTest("failCajaUrlTest", null, /* caja */ true);
     } catch (FailingHttpStatusCodeException e) {
       assertEquals(HttpServletResponse.SC_BAD_REQUEST, e.getStatusCode());
     }

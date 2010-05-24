@@ -138,6 +138,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     return uri.toUri();
   }
   
+  @SuppressWarnings("deprecation")
   public ProxyUri process(Uri uriIn) throws GadgetException {
     UriStatus status = UriStatus.BAD_URI;
     Uri uri = null;

@@ -316,8 +316,6 @@ public class ProxyRendererTest {
     public HttpRequest getLastHttpRequest() {
       return lastHttpRequest;
     }
-
-    public void normalizeProtocol(HttpRequest request) throws GadgetException { }
   }
 
   private static class FakePipelineExecutor extends PipelineExecutor {

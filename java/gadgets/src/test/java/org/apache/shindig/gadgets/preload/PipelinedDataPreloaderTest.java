@@ -29,7 +29,6 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.expressions.Expressions;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetELResolver;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -508,7 +507,5 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       requests.add(request);
       return response;
     }
-
-    public void normalizeProtocol(HttpRequest request) throws GadgetException {}
   }
 }
