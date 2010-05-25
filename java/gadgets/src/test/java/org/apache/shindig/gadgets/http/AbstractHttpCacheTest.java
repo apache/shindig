@@ -225,7 +225,6 @@ public class AbstractHttpCacheTest {
   @Test
   public void getResponseNotCacheable() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
-    String key = cache.createKey(request);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
     cache.addResponse(request, response);
 

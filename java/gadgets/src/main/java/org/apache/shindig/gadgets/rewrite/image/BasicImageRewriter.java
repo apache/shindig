@@ -35,6 +35,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageIOOutputter;
 import org.apache.shindig.gadgets.rewrite.image.BaseOptimizer.ImageOutputter;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -45,7 +46,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +59,7 @@ import javax.imageio.ImageWriter;
  * <p>Security Note: Uses the Sanselan library to parse image content and metadata to avoid security
  * issues in the ImageIO library. Uses ImageIO for output.
  */
-public class BasicImageRewriter implements ImageRewriter {
+public class BasicImageRewriter implements ResponseRewriter {
 
   static final String
       CONTENT_TYPE_AND_EXTENSION_MISMATCH =
@@ -99,21 +99,16 @@ public class BasicImageRewriter implements ImageRewriter {
 
   private final OptimizerConfig config;
 
-  private final AtomicLong totalSourceImageSize = new AtomicLong();
-  private final AtomicLong totalRewrittenImageBytes = new AtomicLong();
-
   @Inject
   public BasicImageRewriter(OptimizerConfig config) {
     this.config = config;
   }
 
-  public HttpResponse rewrite(HttpRequest request, HttpResponse response) {
-    if (request == null || response == null)
-      return response;
+  public void rewrite(HttpRequest request, HttpResponseBuilder response) {
+    if (request == null || response == null) return;
     
     Uri uri = request.getUri();
-    if (null == uri)
-      return response;
+    if (null == uri) return;
     
     try {
       // Check resizing
@@ -124,28 +119,29 @@ public class BasicImageRewriter implements ImageRewriter {
 
       // If the path or MIME type don't match, continue
       if (!isSupportedContent(response) && !isImage(uri)) {
-        return response;
+        return;
       }
       if (!isUsableParameter(requestedWidth) || !isUsableParameter(requestedHeight) ||
           !isUsableParameter(resizeQuality)) {
-        return response;
+        return;
       }
 
       // Content header checking is fast so this is fine to do for every response.
       ImageFormat imageFormat = Sanselan
-          .guessFormat(new ByteSourceInputStream(response.getResponse(), uri.getPath()));
+          .guessFormat(new ByteSourceInputStream(response.getContentBytes(), uri.getPath()));
 
       if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
-        return enforceUnreadableImageRestrictions(uri, response);
+        enforceUnreadableImageRestrictions(uri, response);
+        return;
       }
 
       // Don't handle very small images, but check after parsing format to
       // detect attacks.
       if (response.getContentLength() < config.getMinThresholdBytes()) {
-        return response;
+        return;
       }
 
-      ImageInfo imageInfo = Sanselan.getImageInfo(response.getResponse(), uri.getPath());
+      ImageInfo imageInfo = Sanselan.getImageInfo(response.getContentBytes(), uri.getPath());
       
       boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
       if (noExpand &&
@@ -157,20 +153,17 @@ public class BasicImageRewriter implements ImageRewriter {
 
       boolean isOversizedImage = isImageTooLarge(imageInfo);
       if (isResizeRequested && isOversizedImage) {
-        HttpResponseBuilder rejectedResponseBuilder = new HttpResponseBuilder()
-            .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
-            .setResponseString(RESIZE_IMAGE_TOO_LARGE);
-        return rejectedResponseBuilder.create();
+        errorResponse(response, HttpResponse.SC_FORBIDDEN, RESIZE_IMAGE_TOO_LARGE);
+        return;
       }
 
       // Don't handle animations.
       // TODO: This doesn't work as current Sanselan doesn't return accurate image counts.
       // See animated GIF detection below.
       if (imageInfo.getNumberOfImages() > 1 || isOversizedImage) {
-        return response;
+        return;
       }
-      int originalContentSize = response.getContentLength();
-      totalSourceImageSize.addAndGet(originalContentSize);
+      
       BufferedImage image = readImage(imageFormat, response);
 
       if (isResizeRequested) {
@@ -220,11 +213,10 @@ public class BasicImageRewriter implements ImageRewriter {
         if (isResizeRequired(requestedWidth, requestedHeight, imageInfo)
             && !isTargetImageTooLarge(requestedWidth, requestedHeight, imageInfo)) {
           image = resizeImage(image, requestedWidth, requestedHeight, widthDelta, heightDelta);
-          response = updateResponse(response, image);
+          updateResponse(response, image);
         }
       }
-      response = getOptimizer(response, imageFormat, image);
-      totalRewrittenImageBytes.addAndGet(response.getContentLength());
+      applyOptimizer(response, imageFormat, image);
     } catch (IOException ioe) {
       log.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
     } catch (RuntimeException re) {
@@ -234,7 +226,6 @@ public class BasicImageRewriter implements ImageRewriter {
     } catch (ImageReadException ire) {
       log.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire.getMessage());
     }
-    return response;
   }
 
   /**
@@ -246,16 +237,15 @@ public class BasicImageRewriter implements ImageRewriter {
    * @param image the resized image that needs to be substituted for the original image from
    *        the response
    */
-  private HttpResponse updateResponse(HttpResponse response, BufferedImage image)
+  private void updateResponse(HttpResponseBuilder response, BufferedImage image)
       throws IOException {
     ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(RESIZE_OUTPUT_FORMAT).next();
     ImageOutputter outputter = new ImageIOOutputter(imageWriter, null);
     byte[] imageBytes = outputter.toBytes(image);
-    HttpResponseBuilder newResponseBuilder = new HttpResponseBuilder(response)
+    response
         .setResponse(imageBytes)
         .setHeader(CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG)
         .setHeader(CONTENT_LENGTH, String.valueOf(imageBytes.length));
-    return newResponseBuilder.create();
   }
 
   private boolean isUsableParameter(Integer parameterValue) {
@@ -330,24 +320,22 @@ public class BasicImageRewriter implements ImageRewriter {
     g2d.setComposite(AlphaComposite.SrcOver);
   }
 
-  private HttpResponse getOptimizer(HttpResponse response, ImageFormat imageFormat,
+  private void applyOptimizer(HttpResponseBuilder response, ImageFormat imageFormat,
       BufferedImage image) throws IOException {
-
     if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
       // Detecting the existence of the NETSCAPE2.0 extension by string comparison
       // is not exactly clean but is good enough to determine if a GIF is animated
       // Remove once Sanselan returns image count
-      if (!response.getResponseAsString().contains("NETSCAPE2.0")) {
-        response = new GIFOptimizer(config, response).rewrite(image);
+      if (!response.create().getResponseAsString().contains("NETSCAPE2.0")) {
+        new GIFOptimizer(config, response).rewrite(image);
       }
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_PNG) {
-      response = new PNGOptimizer(config, response).rewrite(image);
+      new PNGOptimizer(config, response).rewrite(image);
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_JPEG) {
-      response = new JPEGOptimizer(config, response).rewrite(image);
+      new JPEGOptimizer(config, response).rewrite(image);
     } else if (imageFormat == ImageFormat.IMAGE_FORMAT_BMP) {
-      response = new BMPOptimizer(config, response).rewrite(image);
+      new BMPOptimizer(config, response).rewrite(image);
     }
-    return response;
   }
 
   private boolean isImageTooLarge(ImageInfo imageInfo) {
@@ -368,7 +356,7 @@ public class BasicImageRewriter implements ImageRewriter {
     return imageSizeBits > config.getMaxInMemoryBytes() * BITS_PER_BYTE;
   }
 
-  private boolean isSupportedContent(HttpResponse response) {
+  private boolean isSupportedContent(HttpResponseBuilder response) {
     return SUPPORTED_MIME_TYPES.contains(response.getHeader(CONTENT_TYPE));
   }
 
@@ -398,17 +386,16 @@ public class BasicImageRewriter implements ImageRewriter {
    * MIME-type indicate that image content should be available but we failed to read it, then return
    * an error response.
    */
-  HttpResponse enforceUnreadableImageRestrictions(Uri uri, HttpResponse original) {
-    String contentType = original.getHeader(CONTENT_TYPE);
+  void enforceUnreadableImageRestrictions(Uri uri, HttpResponseBuilder response) {
+    String contentType = response.getHeader(CONTENT_TYPE);
     if (contentType != null) {
       contentType = contentType.toLowerCase();
       for (String expected : SUPPORTED_MIME_TYPES) {
         if (contentType.contains(expected)) {
           // MIME type says its a supported image but we can't read it. Reject.
-          return new HttpResponseBuilder(original)
-              .setHttpStatusCode(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE)
-              .setResponseString(CONTENT_TYPE_AND_MIME_MISMATCH)
-              .create();
+          errorResponse(response, HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE,
+              CONTENT_TYPE_AND_MIME_MISMATCH);
+          return;
         }
       }
     }
@@ -417,26 +404,18 @@ public class BasicImageRewriter implements ImageRewriter {
     for (String supportedExtension : SUPPORTED_FILE_EXTENSIONS) {
       if (path.endsWith(supportedExtension)) {
         // The file extension says its a supported image but we can't read it. Reject.
-        return new HttpResponseBuilder(original)
-            .setHttpStatusCode(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE)
-            .setResponseString(CONTENT_TYPE_AND_EXTENSION_MISMATCH)
-            .create();
+        errorResponse(response, HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE,
+            CONTENT_TYPE_AND_EXTENSION_MISMATCH);
+        return;
       }
     }
-    return original;
+  }
+  
+  private void errorResponse(HttpResponseBuilder response, int status, String msg) {
+    response.clearAllHeaders().setHttpStatusCode(status).setResponseString(msg);
   }
 
-  public long getOriginalImageBytes() {
-    // Thread-safe?
-    return totalSourceImageSize.get();
-  }
-
-  public long getRewrittenImageBytes() {
-    // Thread-safe?
-    return totalRewrittenImageBytes.get();
-  }
-
-  protected BufferedImage readImage(ImageFormat imageFormat, HttpResponse response)
+  protected BufferedImage readImage(ImageFormat imageFormat, HttpResponseBuilder response)
       throws ImageReadException, IOException{
     if (imageFormat == ImageFormat.IMAGE_FORMAT_GIF) {
       return readGif(response);
@@ -455,19 +434,19 @@ public class BasicImageRewriter implements ImageRewriter {
   // implement additional security constraints or use their own more efficient
   // image reading mechanisms
 
-  protected BufferedImage readBmp(HttpResponse response) throws ImageReadException, IOException {
-    return BMPOptimizer.readBmp(response.getResponse());
+  protected BufferedImage readBmp(HttpResponseBuilder response) throws ImageReadException, IOException {
+    return BMPOptimizer.readBmp(response.getContentBytes());
   }
 
-  protected BufferedImage readPng(HttpResponse response) throws ImageReadException, IOException {
-    return PNGOptimizer.readPng(response.getResponse());
+  protected BufferedImage readPng(HttpResponseBuilder response) throws ImageReadException, IOException {
+    return PNGOptimizer.readPng(response.getContentBytes());
   }
 
-  protected BufferedImage readGif(HttpResponse response) throws ImageReadException, IOException {
-    return GIFOptimizer.readGif(response.getResponse());
+  protected BufferedImage readGif(HttpResponseBuilder response) throws ImageReadException, IOException {
+    return GIFOptimizer.readGif(response.getContentBytes());
   }
 
-  protected BufferedImage readJpeg(HttpResponse response) throws ImageReadException, IOException {
-    return JPEGOptimizer.readJpeg(response.getResponse());
+  protected BufferedImage readJpeg(HttpResponseBuilder response) throws ImageReadException, IOException {
+    return JPEGOptimizer.readJpeg(response.getContentBytes());
   }
 }

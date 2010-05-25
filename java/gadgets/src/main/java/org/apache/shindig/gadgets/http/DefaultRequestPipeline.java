@@ -25,7 +25,8 @@ import com.google.inject.internal.Nullable;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
-import org.apache.shindig.gadgets.rewrite.image.ImageRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 /**
  * A standard implementation of a request pipeline. Performs request caching and
@@ -36,7 +37,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   private final HttpFetcher httpFetcher;
   private final HttpCache httpCache;
   private final Provider<OAuthRequest> oauthRequestProvider;
-  private final ImageRewriter imageRewriter;
+  private final ResponseRewriterRegistry responseRewriterRegistry;
   private final InvalidationService invalidationService;
   private final HttpResponseMetadataHelper metadataHelper;
 
@@ -44,13 +45,13 @@ public class DefaultRequestPipeline implements RequestPipeline {
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
-                                ImageRewriter imageRewriter,
+                                ResponseRewriterRegistry responseRewriterRegistry,
                                 InvalidationService invalidationService,
                                 @Nullable HttpResponseMetadataHelper metadataHelper) {
     this.httpFetcher = httpFetcher;
     this.httpCache = httpCache;
     this.oauthRequestProvider = oauthRequestProvider;
-    this.imageRewriter = imageRewriter;
+    this.responseRewriterRegistry = responseRewriterRegistry;
     this.invalidationService = invalidationService;
     this.metadataHelper = metadataHelper;
   }
@@ -106,8 +107,13 @@ public class DefaultRequestPipeline implements RequestPipeline {
     }
     
     if (!fetchedResponse.isError() && !request.getIgnoreCache() && request.getCacheTtl() != 0) {
-      fetchedResponse = imageRewriter.rewrite(request, fetchedResponse);
+      try {
+        fetchedResponse = responseRewriterRegistry.rewriteHttpResponse(request, fetchedResponse);
+      } catch (RewritingException e) {
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e, e.getHttpStatusCode());
+      }
     }
+    
     // Set response hash value in metadata (used for url versioning)
     fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
     if (!request.getIgnoreCache() ) {

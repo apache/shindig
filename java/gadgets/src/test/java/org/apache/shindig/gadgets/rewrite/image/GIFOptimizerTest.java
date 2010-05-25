@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -67,7 +68,9 @@ public class GIFOptimizerTest extends BaseOptimizerTest {
 
   protected HttpResponse rewrite(HttpResponse original)
       throws IOException, ImageReadException {
-    return new GIFOptimizer(new OptimizerConfig(), original).rewrite(
+    HttpResponseBuilder builder = new HttpResponseBuilder(original);
+    new GIFOptimizer(new OptimizerConfig(), builder).rewrite(
          Sanselan.getBufferedImage(original.getResponse()));
+    return builder.create();
   }
 }

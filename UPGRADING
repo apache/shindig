@@ -53,6 +53,18 @@ encode tokens as well as decode them.
 The constructor RestfulCollection(List<T> entry, int startIndex, int totalResults) is removed.  
 Use the constructor with an items-per-page parameter instead.
 
+* RequestRewriter, ImageRewriter -> ResponseRewriter
+
+ResponseRewriter is replacing RequestRewriter and ImageRewriter. Its interface method is:
+void rewrite(HttpRequest req, HttpResponseBuilder builder);
+
+HttpResponseBuilder extends MutableContent. RequestRewriters may be migrated by
+mutating builder rather than the previously-passed MutableContent. There is no
+provision for reading "original" HttpResponse headers.
+
+ImageRewriters may be migrated to ResponseRewriters as well by mutating the builder,
+where previously a new HttpResponse was returned.
+
 
 == Java Guice Changes ==
 

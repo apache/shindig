@@ -29,6 +29,7 @@ import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
+import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
 import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
@@ -75,5 +76,12 @@ public class RewriteModule extends AbstractModule {
       CssRequestRewriter cssRewriter,
       SanitizingRequestRewriter sanitizedRewriter) {
     return ImmutableList.of(optimizingRewriter, cssRewriter, sanitizedRewriter);
+  }
+  
+  @Provides
+  @Singleton
+  protected List<ResponseRewriter> provideResponseRewriters(
+      BasicImageRewriter imageRewriter) {
+    return ImmutableList.<ResponseRewriter>of(imageRewriter);
   }
 }

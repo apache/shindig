@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -41,8 +41,8 @@ class PNGOptimizer extends BaseOptimizer {
 
   private boolean useJpeg;
 
-  public PNGOptimizer(OptimizerConfig config, HttpResponse original) {
-    super(config, original);
+  public PNGOptimizer(OptimizerConfig config, HttpResponseBuilder response) {
+    super(config, response);
   }
 
   @Override

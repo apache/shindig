@@ -26,7 +26,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
-import org.apache.shindig.gadgets.rewrite.image.NoOpImageRewriter;
+import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.junit.Test;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public class DefaultRequestPipelineTest {
     }
   };
   private final RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
-      new NoOpImageRewriter(), new NoOpInvalidationService(), helper);
+      new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(), helper);
 
   @Test
   public void authTypeNoneNotCached() throws Exception {
@@ -75,7 +75,7 @@ public class DefaultRequestPipelineTest {
     fetcher.response = new HttpResponse("response");
 
     RequestPipeline pipeline = new DefaultRequestPipeline(fetcher, cache, oauth,
-        new NoOpImageRewriter(), new NoOpInvalidationService(),
+        new DefaultResponseRewriterRegistry(null, null), new NoOpInvalidationService(),
         new HttpResponseMetadataHelper());
     HttpResponse response = pipeline.execute(request);
     assertEquals(1, response.getMetadata().size());
