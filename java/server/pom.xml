@@ -130,7 +130,6 @@
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-extras</artifactId>
-      <optional>true</optional>
     </dependency>
 
     <!-- external dependencies -->
