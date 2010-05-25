@@ -23,6 +23,9 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -53,13 +56,18 @@ public class DefaultIframeUriManager implements IframeUriManager {
   
   private final ContainerConfig config;
   private final LockedDomainPrefixGenerator ldGen;
+  private final SecurityTokenDecoder securityTokenCodec;
+
   private final List<String> ldSuffixes;
-  
+
   @Inject
   public DefaultIframeUriManager(ContainerConfig config,
-                                 LockedDomainPrefixGenerator ldGen) {
+                                 LockedDomainPrefixGenerator ldGen,
+                                 SecurityTokenDecoder securityTokenCodec) {
     this.config = config;
     this.ldGen = ldGen;
+    this.securityTokenCodec = securityTokenCodec;
+    
     Collection<String> containers = config.getContainers();
     List<String> ldSuffixes = Lists.newArrayListWithCapacity(containers.size());
     for (String container : containers) {
@@ -141,7 +149,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
       boolean upInFragment = !view.needsUserPrefSubstitution();
       addParam(uri, UriCommon.USER_PREF_PREFIX + up.getName(), data, useTpl, upInFragment);
     }
-    
+
     if (versioner != null) {
       // Added on the query string, obviously not templated.
       addParam(uri, Param.VERSION.getKey(),
@@ -151,13 +159,32 @@ public class DefaultIframeUriManager implements IframeUriManager {
     if (gadget.getAllFeatures().contains(SECURITY_TOKEN_FEATURE_NAME) ||
         config.getBool(container, SECURITY_TOKEN_ALWAYS_KEY)) {
       boolean securityTokenOnQuery = isTokenNeededForRendering(gadget);
-      String securityToken = null;  // Always templated at the moment, can ignore.
+      
+      String securityToken = wantsSecurityToken(gadget) ? generateSecurityToken(gadget) : null;
       addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, true, !securityTokenOnQuery);
     }
     
     addExtras(uri);
     
     return uri.toUri();
+  }
+
+  protected String generateSecurityToken(Gadget gadget) {
+    // Find a security token in the context
+    try {
+      SecurityToken token = gadget.getContext().getToken();
+
+      if (securityTokenCodec != null && token != null) {
+        return securityTokenCodec.encodeToken(token);
+      }
+    } catch (SecurityTokenException e) {
+      // ignore -- no security token
+    }
+    return null;
+  }
+
+  protected boolean wantsSecurityToken(Gadget gadget) {
+    return true;
   }
   
   // This method should be overridden to provide better caching characteristics

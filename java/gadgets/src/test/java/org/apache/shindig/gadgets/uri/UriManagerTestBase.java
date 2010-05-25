@@ -86,6 +86,7 @@ public class UriManagerTestBase {
     expect(context.getLocale()).andReturn(locale).anyTimes();
     expect(context.getDebug()).andReturn(isDebug).anyTimes();
     expect(context.getIgnoreCache()).andReturn(ignoreCache).anyTimes();
+    expect(context.getToken()).andReturn(null).anyTimes();
     
     // All Features (doesn't distinguish between transitive and not)
     expect(gadget.getAllFeatures()).andReturn(features).anyTimes();
