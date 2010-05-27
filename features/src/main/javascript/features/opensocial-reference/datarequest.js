@@ -523,6 +523,18 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
 };
 
 /**
+ * Creates an item to request albums from the container.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which albms to fetch.
+ * @param {Object.<Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {
+  opt_params = opt_params || {};
+  return opensocial.Container.get().newFetchAlbumsRequest(idSpec, opt_params);
+};
+
+/**
  * Creates an item to request messages from the container.
  */
 opensocial.DataRequest.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {

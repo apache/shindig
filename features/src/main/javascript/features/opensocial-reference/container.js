@@ -313,6 +313,8 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
 opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {};
 
+opensocial.Container.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {};
+
 opensocial.Container.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {};
 opensocial.Container.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {};
 
@@ -349,6 +351,23 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
  */
 opensocial.Container.prototype.newActivity = function(opt_params) {
   return new opensocial.Activity(opt_params);
+};
+
+/**
+ * Get a collection of images, movies, and audio.
+ * Used when creating albums on the server.
+ *
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
+ *    Any other fields that should be set on the album object;
+ *    all of the defined
+ *    <a href="opensocial.Album.Field.html">Field</a>s
+ *    are supported
+ *
+ * @return {opensocial.Album} the album object
+ * @private
+ */
+opensocial.Container.prototype.newAlbum = function(opt_params) {
+  return new opensocial.Album(opt_params);
 };
 
 
