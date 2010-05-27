@@ -65,6 +65,9 @@ provision for reading "original" HttpResponse headers.
 ImageRewriters may be migrated to ResponseRewriters as well by mutating the builder,
 where previously a new HttpResponse was returned.
 
+* MediaItem
+
+Location field changed from String to Address.
 
 == Java Guice Changes ==
 

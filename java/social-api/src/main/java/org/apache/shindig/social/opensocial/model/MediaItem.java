@@ -257,13 +257,13 @@ public interface MediaItem {
    * Get the location corresponding to the media item
    * @return location
    */
-  String getLocation();
+  Address getLocation();
 
   /**
    * Set the location corresponding to the media item
    * @param location
    */
-  void setLocation(String location);
+  void setLocation(Address location);
 
 
   /**

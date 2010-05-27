@@ -22,6 +22,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Activity;
 import org.apache.shindig.social.opensocial.model.MediaItem;
+import org.apache.shindig.social.opensocial.model.Address;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -186,9 +187,9 @@ public class MediaItemDb implements MediaItem, DbObject {
    * model field.
    * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
-  @Basic
-  @Column(name = "location")
-  private String location;
+  @ManyToOne(targetEntity = AddressDb.class, cascade = { PERSIST, MERGE, REFRESH })
+  @JoinColumn(name = "address_id", referencedColumnName = "oid")
+  private Address location;
 
   /**
    * model field.
@@ -442,14 +443,14 @@ public class MediaItemDb implements MediaItem, DbObject {
   /**
    * {@inheritDoc}
    */
-  public String getLocation() {
+  public Address getLocation() {
     return location;
   }
 
   /**
    * {@inheritDoc}
    */
-  public void setLocation(String location) {
+  public void setLocation(Address location) {
     this.location = location;
   }
 
