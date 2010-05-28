@@ -91,6 +91,8 @@ public class CajaContentRewriter implements GadgetRewriter {
       Element cajoledOutput = cajoledCache.getElement(cacheKey);
       if (cajoledOutput != null) {
         cajoledData = doc.adoptNode(cajoledOutput);
+        createContainerFor(doc, cajoledData);
+        mc.documentChanged();        
       }
     }
     
