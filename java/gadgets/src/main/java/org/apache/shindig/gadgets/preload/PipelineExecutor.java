@@ -129,7 +129,7 @@ public class PipelineExecutor {
             
             String id = (String) JsonUtil.getProperty(entry, "id");
 
-            Object data = JsonUtil.getProperty(entry, "data");
+            Object data = JsonUtil.getProperty(entry, "result");
             if (data != null) {
               elResults.put(id, data);
             } else {

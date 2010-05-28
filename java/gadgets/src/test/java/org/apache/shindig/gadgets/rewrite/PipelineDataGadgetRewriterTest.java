@@ -120,7 +120,7 @@ public class PipelineDataGadgetRewriterTest {
     
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask(
-        "key", "{data: {foo: 'bar'}}");
+        "key", "{result: {foo: 'bar'}}");
 
     // One batch with 1 each HTTP and Social preload
     expect(preloader.createPreloadTasks(same(gadget.getContext()),

@@ -121,7 +121,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   public void testSocialPreload() throws Exception {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML);
 
-    String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
+    String socialResult = "[{id:'p', result:1}, {id:'a', result:2}]";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
 
@@ -143,8 +143,8 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     Collection<Object> result = tasks.iterator().next().call().toJson();
     assertEquals(2, result.size());
 
-    JSONObject resultWithKeyP = new JSONObject("{id: 'p', data: 1}");
-    JSONObject resultWithKeyA = new JSONObject("{id: 'a', data: 2}");
+    JSONObject resultWithKeyP = new JSONObject("{id: 'p', result: 1}");
+    JSONObject resultWithKeyA = new JSONObject("{id: 'a', result: 2}");
     Map<String, String> resultsById = getResultsById(result);
     JsonAssert.assertJsonEquals(resultWithKeyA.toString(), resultsById.get("a"));
     JsonAssert.assertJsonEquals(resultWithKeyP.toString(), resultsById.get("p"));
@@ -276,7 +276,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     HttpResponse response = new HttpResponseBuilder()
         .setResponseString("{foo: 'bar'}")
         .create();
-    String expectedResult = "{data: {status: 200, content: {foo: 'bar'}}, id: 'p'}";
+    String expectedResult = "{result: {status: 200, content: {foo: 'bar'}}, id: 'p'}";
 
     verifyHttpPreload(response, expectedResult);
   }
@@ -290,7 +290,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .addHeader("not-ok", "shouldn'tbehere")
         .create();
 
-    String expectedResult = "{data: {status: 200, headers:" +
+    String expectedResult = "{result: {status: 200, headers:" +
         "{'content-type': ['application/json; charset=UTF-8'], 'set-cookie': ['cookiecookie']}," +
         "content: [1, 2]}, id: 'p'}";
 
@@ -320,7 +320,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .create();
 
     JSONObject result = new JSONObject(executeHttpPreload(response, XML_WITH_HTTP_REQUEST));
-    assertFalse(result.has("data"));
+    assertFalse(result.has("result"));
 
     JSONObject error = result.getJSONObject("error");
     assertEquals(HttpResponse.SC_NOT_ACCEPTABLE, error.getInt("code"));
@@ -334,7 +334,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
         .create();
     // Even though the response was actually JSON, @format=text, so the content
     // will be a block of text
-    String expectedResult = "{data: {status: 200, headers:" +
+    String expectedResult = "{result: {status: 200, headers:" +
             "{'content-type': ['application/json; charset=UTF-8']}," +
             "content: '{foo: \\'bar\\'}'}, id: 'p'}";
 
@@ -444,7 +444,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
   public void testSocialPreloadViewResolution() throws Exception {
     GadgetSpec spec = new GadgetSpec(GADGET_URL, XML_IN_DEFAULT_CONTAINER);
 
-    String socialResult = "[{id:'p', data:1}, {id:'a', data:2}]";
+    String socialResult = "[{id:'p', result:1}, {id:'a', result:2}]";
     RecordingRequestPipeline pipeline = new RecordingRequestPipeline(socialResult);
     PipelinedDataPreloader preloader = new PipelinedDataPreloader(pipeline, containerConfig);
 
@@ -488,7 +488,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
     Collection<Object> result = tasks.iterator().next().call().toJson();
     assertEquals(1, result.size());
 
-    JsonAssert.assertObjectEquals("{id: 'p', data: 2}", result.iterator().next());
+    JsonAssert.assertObjectEquals("{id: 'p', result: 2}", result.iterator().next());
   }
 
   private static class RecordingRequestPipeline implements RequestPipeline {

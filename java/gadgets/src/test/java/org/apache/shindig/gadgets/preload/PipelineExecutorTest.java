@@ -105,7 +105,7 @@ public class PipelineExecutorTest {
     Capture<PipelinedData.Batch> batchCapture =
       new Capture<PipelinedData.Batch>();
     
-    JSONObject expectedData = new JSONObject("{data: {foo: 'bar'}}");
+    JSONObject expectedData = new JSONObject("{result: {foo: 'bar'}}");
     
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask("key", expectedData.toString());
@@ -124,7 +124,7 @@ public class PipelineExecutorTest {
     assertTrue(batchCapture.getValue().getPreloads().containsKey("me"));
     assertTrue(batchCapture.getValue().getPreloads().containsKey("json"));
     
-    JsonAssert.assertJsonEquals("[{id: 'key', data: {foo: 'bar'}}]",
+    JsonAssert.assertJsonEquals("[{id: 'key', result: {foo: 'bar'}}]",
         JsonSerializer.serialize(results.results));
     JsonAssert.assertJsonEquals("{foo: 'bar'}",
         JsonSerializer.serialize(results.keyedResults.get("key")));
@@ -152,13 +152,13 @@ public class PipelineExecutorTest {
     Capture<PipelinedData.Batch> firstBatch =
       new Capture<PipelinedData.Batch>();
     Callable<PreloadedData> firstTask = createPreloadTask("json",
-        "{data: {user: 'canonical'}}");
+        "{result: {user: 'canonical'}}");
     
     // Second batch, the user fetch
     Capture<PipelinedData.Batch> secondBatch =
       new Capture<PipelinedData.Batch>();
     Callable<PreloadedData> secondTask = createPreloadTask("me",
-        "{data: {'id':'canonical'}}");
+        "{result: {'id':'canonical'}}");
     
     // First, a batch with an HTTP request
     expect(
@@ -176,8 +176,8 @@ public class PipelineExecutorTest {
     PipelineExecutor.Results results = executor.execute(context,
         ImmutableList.of(pipeline));
 
-    JsonAssert.assertJsonEquals("[{id: 'json', data: {user: 'canonical'}}," +
-        "{id: 'me', data: {id: 'canonical'}}]",
+    JsonAssert.assertJsonEquals("[{id: 'json', result: {user: 'canonical'}}," +
+        "{id: 'me', result: {id: 'canonical'}}]",
         JsonSerializer.serialize(results.results));
     assertEquals(ImmutableSet.of("json", "me"), results.keyedResults.keySet());
     assertTrue(results.remainingPipelines.isEmpty());

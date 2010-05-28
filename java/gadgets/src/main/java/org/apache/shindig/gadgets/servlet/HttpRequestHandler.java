@@ -85,7 +85,7 @@ import com.google.inject.Inject;
  * in the above format. The RPC itself succeeded in these cases. If an RPC error occurred the client
  * should introspect the error message for information as to the cause.
  * 
- * TODO: send errors using "data", not plain content
+ * TODO: send errors using "result", not plain content
  *
  * @see MakeRequestHandler
  */

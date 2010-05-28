@@ -213,14 +213,14 @@ public class EndToEndTest {
       jsonObjects.put(jsonObj.getString("id"), jsonObj);
     }
     
-    JSONObject me = jsonObjects.get("me").getJSONObject("data");
+    JSONObject me = jsonObjects.get("me").getJSONObject("result");
     assertEquals("Digg", me.getJSONObject("name").getString("familyName"));
     
-    JSONObject json = jsonObjects.get("json").getJSONObject("data");
+    JSONObject json = jsonObjects.get("json").getJSONObject("result");
     JSONObject expected = new JSONObject("{content: {key: 'value'}, status: 200}");
     JsonAssert.assertJsonObjectEquals(expected, json);
     
-    JsonAssert.assertObjectEquals("{id: 'var', data: 'value'}", jsonObjects.get("var"));
+    JsonAssert.assertObjectEquals("{id: 'var', result: 'value'}", jsonObjects.get("var"));
   }
 
   // TODO PML - convert this to use junit 4 Theories to simplify this.

@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +68,14 @@ public class JsonRpcServlet extends ApiServlet {
     this.formParser = formParser;
   }
   
+  private String jsonRpcResultField = "result";
+  private boolean jsonRpcBothFields = false;
+  @Inject
+  void setJsonRpcResultField(@Named("shindig.json-rpc.result-field")String jsonRpcResultField) {
+    this.jsonRpcResultField = jsonRpcResultField;
+    jsonRpcBothFields = "both".equals(jsonRpcResultField);
+  }
+
   @Override
   protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
@@ -220,6 +229,17 @@ public class JsonRpcServlet extends ApiServlet {
   }
 
   /**
+   * 
+   */
+  protected void addResult(Map<String,Object> result, Object data) {
+    if (jsonRpcBothFields) {
+      result.put("result", data);
+      result.put("data", data);
+    }
+    result.put(jsonRpcResultField, data);
+  }
+
+  /**
    * Determine if the content contains a batch request
    *
    * @param content json content or null
@@ -248,7 +268,7 @@ public class JsonRpcServlet extends ApiServlet {
     } else {
       Object response = responseItem.getResponse();
       if (response instanceof DataCollection) {
-        result.put("data", ((DataCollection) response).getEntry());
+        addResult(result, ((DataCollection) response).getEntry());
       } else if (response instanceof RestfulCollection) {
         Map<String, Object> map = Maps.newHashMap();
         RestfulCollection<?> collection = (RestfulCollection<?>) response;
@@ -270,9 +290,9 @@ public class JsonRpcServlet extends ApiServlet {
           map.put("sorted", collection.isUpdatedSince());
 
         map.put("list", collection.getEntry());
-        result.put("data", map);
+        addResult(result, map);
       } else {
-        result.put("data", response);
+        addResult(result, response);
       }
 
       // TODO: put "code" for != 200?

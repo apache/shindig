@@ -50,7 +50,7 @@ public class DefaultServiceFetcher {
 
   static final Logger logger = Logger.getLogger(Renderer.class.getName());
 
-  static final String JSON_RESPONSE_WRAPPER_ELEMENT = "data";
+  static final String JSON_RESPONSE_WRAPPER_ELEMENT = "result";
 
   static final String OSAPI_FEATURE_CONFIG = "osapi";
 

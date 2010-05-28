@@ -117,11 +117,11 @@ public class DefaultServiceFetcherTest extends EasyMockTestCase {
   public void testReadConfigWithValidEndpoints() throws Exception {
     List<String> endPoint1Services = ImmutableList.of("do.something", "delete.someting");
     JSONObject service1 = new JSONObject();
-    service1.put("data", endPoint1Services);
+    service1.put("result", endPoint1Services);
 
     List<String> endPoint2Services = ImmutableList.of("weather.get");
     JSONObject service2 = new JSONObject();
-    service2.put("data", endPoint2Services);
+    service2.put("result", endPoint2Services);
 
     EasyMock.expect(mockFetcher.fetch(EasyMock.isA(HttpRequest.class))).andReturn(
         new HttpResponse(service1.toString()));
