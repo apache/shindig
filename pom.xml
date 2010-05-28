@@ -1413,13 +1413,13 @@
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth</artifactId>
-        <version>20090825</version>
+        <version>20100527</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth-provider</artifactId>
-        <version>20090531</version>
+        <version>20100527</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

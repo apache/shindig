@@ -154,6 +154,10 @@
       <artifactId>oauth-httpclient4</artifactId>
     </dependency>
     <dependency>
+      <groupId>net.oauth.core</groupId>
+      <artifactId>oauth-provider</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
     </dependency>
