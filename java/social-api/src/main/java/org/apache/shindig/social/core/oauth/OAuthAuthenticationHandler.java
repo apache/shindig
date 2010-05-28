@@ -25,6 +25,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
+import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
@@ -100,7 +101,8 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
     }
 
     try {
-      message.validateMessage(accessor, new SimpleOAuthValidator());
+      OAuthValidator validator = new SimpleOAuthValidator();
+      validator.validateMessage(message, accessor);
     } catch (OAuthProblemException e) {
       throw e;
     } catch (OAuthException e) {

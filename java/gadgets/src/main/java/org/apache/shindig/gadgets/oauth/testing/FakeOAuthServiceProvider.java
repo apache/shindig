@@ -27,6 +27,7 @@ import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthServiceProvider;
+import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
 import net.oauth.OAuth.Parameter;
 import net.oauth.signature.RSA_SHA1;
@@ -721,7 +722,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   
   private void validateMessage(OAuthAccessor accessor, MessageInfo info, boolean tokenEndpoint)
       throws OAuthException, IOException, URISyntaxException {
-    info.message.validateMessage(accessor, new FakeTimeOAuthValidator());
+    OAuthValidator validator = new FakeTimeOAuthValidator();
+    validator.validateMessage(info.message,accessor);
+    
     String bodyHash = info.message.getParameter("oauth_body_hash");
     if (tokenEndpoint && bodyHash != null) {
       throw new RuntimeException("Can't have body hash on token endpoints");
