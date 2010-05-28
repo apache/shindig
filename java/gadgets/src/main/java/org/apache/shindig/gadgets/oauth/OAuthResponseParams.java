@@ -20,7 +20,6 @@
 package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.collect.Lists;
-import com.google.common.base.Preconditions;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
@@ -41,7 +40,6 @@ import java.util.regex.Pattern;
  * Container for OAuth specific data to include in the response to the client.
  */
 public class OAuthResponseParams {
-
   private static final Logger logger = Logger.getLogger(OAuthResponseParams.class.getName());
 
   // Finds the values of sensitive response params: oauth_token_secret and oauth_session_handle
@@ -80,16 +78,6 @@ public class OAuthResponseParams {
   private String aznUrl;
 
   /**
-   * Error code for the client.
-   */
-  private String error;
-
-  /**
-   * Error text for the client.
-   */
-  private String errorText;
-
-  /**
    * Whether we should include the request trace in the response to the application.
    *
    * It might be nice to make this configurable based on options passed to makeRequest.  For now
@@ -111,18 +99,24 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request.
    */
   public void logDetailedWarning(String note) {
-    logger.log(Level.WARNING, note + '\n' + getDetails());
+    if (logger.isLoggable(Level.WARNING)) {
+      logger.log(Level.WARNING, note + '\n' + getDetails(null));
+    }
   }
 
   /**
    * Log a warning message that includes the details of the request and the thrown exception.
    */
-  public void logDetailedWarning(String note, Throwable cause) {
-    logger.log(Level.WARNING, note + '\n' + getDetails(), cause);
+  public void logDetailedWarning(String note, Throwable e) {
+    if (logger.isLoggable(Level.WARNING)) {
+      logger.log(Level.WARNING, note + '\n' + getDetails(e), e);
+    }
   }
   
-  public void logDetailedInfo(String note, Throwable cause) {
-    logger.log(Level.INFO, note + '\n' + getDetails(), cause);
+  public void logDetailedInfo(String note, Throwable e) {
+    if (logger.isLoggable(Level.INFO)) {    
+      logger.log(Level.INFO, note + '\n' + getDetails(e), e);
+    }
   }
 
   /**
@@ -144,9 +138,21 @@ public class OAuthResponseParams {
     return false;
   }
 
-  private String getDetails() {
-    return "OAuth error [" + error + ", " + errorText + "] for application " +
-        securityToken.getAppUrl() + ".  Request trace:" + getRequestTrace();
+  private String getDetails(Throwable e) {
+    String error = null;
+
+    if (null != e) {
+      if(e instanceof OAuthRequestException) {
+        OAuthRequestException reqException = ((OAuthRequestException) e);
+        error = reqException.getError() + ", " + reqException.getErrorText();
+      }
+      else {
+        error = e.getMessage();
+      }
+    }
+    
+    return "OAuth error [" + error + "] for application "
+        + securityToken.getAppUrl() + ".  Request trace:" + getRequestTrace();
   }
 
   private String getRequestTrace() {
@@ -181,30 +187,31 @@ public class OAuthResponseParams {
   /**
    * Update a response with additional data to be returned to the application.
    */
-  public void addToResponse(HttpResponseBuilder response) {
+  public void addToResponse(HttpResponseBuilder response, OAuthRequestException e) {
     if (!newClientState.isEmpty()) {
       try {
         response.setMetadata(CLIENT_STATE, newClientState.getEncryptedState());
-      } catch (BlobCrypterException e) {
+      } catch (BlobCrypterException cryptException) {
         // Configuration error somewhere, this should never happen.
-        throw new RuntimeException(e);
+        throw new RuntimeException(cryptException);
       }
     }
     if (aznUrl != null) {
       response.setMetadata(APPROVAL_URL, aznUrl);
     }
-    if (error != null) {
-      response.setMetadata(ERROR_CODE, error);
-    }
-    if (errorText != null || sendTraceToClient) {
+
+    if (e != null || sendTraceToClient) {
       StringBuilder verboseError = new StringBuilder();
-      if (errorText != null) {
-        verboseError.append(errorText);
+      
+      if (e != null) {
+        response.setMetadata(ERROR_CODE, e.getError());
+        verboseError.append(e.getErrorText());
       }
       if (sendTraceToClient) {
         verboseError.append('\n');
         verboseError.append(getRequestTrace());
       }
+
       response.setMetadata(ERROR_TEXT, verboseError.toString());
     }
   }
@@ -233,54 +240,5 @@ public class OAuthResponseParams {
 
   public void setSendTraceToClient(boolean sendTraceToClient) {
     this.sendTraceToClient = sendTraceToClient;
-  }
-
-  public String getError() {
-    return error;
-  }
-
-  public OAuthRequestException oauthRequestException(OAuthError error, String errorText) {
-    return oauthRequestException(error.toString(), errorText);
-  }
-
-  public OAuthRequestException oauthRequestException(OAuthError error, String errorText,
-      Throwable cause) {
-    return oauthRequestException(error.toString(), errorText, cause);
-  }
-
-  /**
-   * Create an exception and record information about the exception to be returned to the gadget.
-   */
-  public OAuthRequestException oauthRequestException(String error, String errorText) {
-    this.error = Preconditions.checkNotNull(error);
-    this.errorText = Preconditions.checkNotNull(errorText);
-    return new OAuthRequestException('[' + error + ',' + errorText + ']');
-  }
-
-  /**
-   * Create an exception and record information about the exception to be returned to the gadget.
-   */
-  public OAuthRequestException oauthRequestException(String error, String errorText,
-      Throwable cause) {
-    this.error = Preconditions.checkNotNull(error);
-    this.errorText = Preconditions.checkNotNull(errorText);
-    return new OAuthRequestException('[' + error + ',' + errorText + ']', cause);
-  }
-
-  /**
-   * Superclass for all exceptions thrown from OAuthRequest and friends.
-   *
-   * The constructors are private, use OAuthResponseParams.oauthRequestException to create this
-   * exception.  This makes sure that any exception thrown is also exposed to the calling gadget
-   * in a useful way.
-   */
-  public static class OAuthRequestException extends Exception {
-    private OAuthRequestException(String message) {
-      super(message);
-    }
-
-    private OAuthRequestException(String message, Throwable cause) {
-      super(message, cause);
-    }
   }
 }

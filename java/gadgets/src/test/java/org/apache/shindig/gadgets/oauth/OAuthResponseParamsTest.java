@@ -26,7 +26,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.easymock.EasyMock;
 
 import static org.junit.Assert.assertEquals;
@@ -75,10 +74,10 @@ public class OAuthResponseParamsTest {
   public void testAddParams() {
     params.getNewClientState().setAccessToken("access");
     params.setAznUrl("aznurl");
-    params.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION, "whoa there cowboy");
+    OAuthRequestException e = new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION, "whoa there cowboy");
 
     HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
-    params.addToResponse(responseBuilder);
+    params.addToResponse(responseBuilder, e);
     HttpResponse response = responseBuilder.create();
     assertEquals("BAD_OAUTH_CONFIGURATION", response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
@@ -90,20 +89,19 @@ public class OAuthResponseParamsTest {
 
   @Test
   public void testSendTraceToClient() {
-    params.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION, "whoa there cowboy");
+    OAuthRequestException e = new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION, "whoa there cowboy");
     params.addRequestTrace(null, null);
     params.addRequestTrace(null, null);
-    params.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION, "whoa there cowboy");
 
     HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
-    params.addToResponse(responseBuilder);
+    params.addToResponse(responseBuilder, e);
     HttpResponse response = responseBuilder.create();
 
     String errorText = response.getMetadata().get("oauthErrorText");
     assertEquals("whoa there cowboy", errorText);
 
     params.setSendTraceToClient(true);
-    params.addToResponse(responseBuilder);
+    params.addToResponse(responseBuilder, e);
     response = responseBuilder.create();
     errorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("includes error text", errorText, "whoa there cowboy");
@@ -114,7 +112,7 @@ public class OAuthResponseParamsTest {
   @Test
   public void testAddEmptyParams() {
     HttpResponseBuilder responseBuilder = new HttpResponseBuilder();
-    params.addToResponse(responseBuilder);
+    params.addToResponse(responseBuilder, null);
     HttpResponse response = responseBuilder.create();
     assertTrue(response.getMetadata().isEmpty());
   }
@@ -152,19 +150,19 @@ public class OAuthResponseParamsTest {
     HttpRequest req = new HttpRequest(Uri.parse("http://www"));
     HttpResponse ok = new HttpResponseBuilder().setHttpStatusCode(200).create();
     params.addRequestTrace(req, ok);
-    OAuthRequestException e = params.oauthRequestException("error", "errorText");
+    OAuthRequestException e = new OAuthRequestException("error", "errorText");
     checkStringContains(e.toString(), "[error,errorText]");
     params.addRequestTrace(null, null);
     Throwable cause = new RuntimeException();
-    e = params.oauthRequestException(OAuthError.UNAUTHENTICATED, "errorText", cause);
-    checkStringContains(e.toString(), "[UNAUTHENTICATED,errorText]");
+    e = new OAuthRequestException(OAuthError.UNAUTHENTICATED, "errorText", cause);
+    checkStringContains(e.toString(), "[UNAUTHENTICATED,Unauthenticated OAuth fetch]");
     assertEquals(cause, e.getCause());
   }
 
   @Test
   public void testNullSafe() {
     params.addRequestTrace(null, null);
-    params.oauthRequestException("error", "errorText");
+    new OAuthRequestException("error", "errorText");
     params.logDetailedWarning("wow");
     params.logDetailedWarning("new runtime", new RuntimeException());
   }

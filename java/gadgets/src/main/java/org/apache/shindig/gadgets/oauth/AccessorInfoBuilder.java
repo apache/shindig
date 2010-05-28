@@ -23,7 +23,6 @@ import net.oauth.OAuthAccessor;
 
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
 
 /**
@@ -45,10 +44,10 @@ public class AccessorInfoBuilder {
 
   public AccessorInfo create(OAuthResponseParams responseParams) throws OAuthRequestException {
     if (location == null) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM, "no location");
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM, "no location");
     }
     if (consumer == null) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM, "no consumer");
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM, "no consumer");
     }
 
     OAuthAccessor accessor = new OAuthAccessor(consumer.getConsumer());

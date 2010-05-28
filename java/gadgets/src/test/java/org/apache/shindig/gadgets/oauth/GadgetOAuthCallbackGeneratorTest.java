@@ -33,7 +33,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.easymock.IArgumentMatcher;
@@ -94,7 +93,7 @@ public class GadgetOAuthCallbackGeneratorTest {
       getGenerator().generateCallback(fetcherConfig, "base", request, responseParams);
       fail("Should have thrown");
     } catch (OAuthRequestException e) {
-      assertEquals(OAuthError.UNKNOWN_PROBLEM.toString(), responseParams.getError());
+      assertEquals(OAuthError.UNKNOWN_PROBLEM.name(), e.getError());
     }
     
     control.verify();
@@ -114,7 +113,7 @@ public class GadgetOAuthCallbackGeneratorTest {
       getGenerator().generateCallback(fetcherConfig, "base", request, responseParams);
       fail("Should have thrown");
     } catch (OAuthRequestException e) {
-      assertEquals(OAuthError.UNKNOWN_PROBLEM.toString(), responseParams.getError());
+      assertEquals(OAuthError.UNKNOWN_PROBLEM.name(), e.getError());
     }
     
     control.verify();

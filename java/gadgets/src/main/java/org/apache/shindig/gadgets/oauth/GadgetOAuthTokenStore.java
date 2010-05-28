@@ -24,7 +24,6 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.GadgetSpecFactory;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -105,7 +104,7 @@ public class GadgetOAuthTokenStore {
           securityToken, arguments.getServiceName(), provider);
       accessorBuilder.setConsumer(consumer);
     } catch (GadgetException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Unable to retrieve consumer key", e);
     }
 
@@ -130,13 +129,13 @@ public class GadgetOAuthTokenStore {
     GadgetSpec spec = findSpec(securityToken, arguments, responseParams);
     OAuthSpec oauthSpec = spec.getModulePrefs().getOAuthSpec();
     if (oauthSpec == null) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           "Failed to retrieve OAuth URLs, spec for gadget " +
           securityToken.getAppUrl() + " does not contain OAuth element.");
     }
     OAuthService service = oauthSpec.getServices().get(arguments.getServiceName());
     if (service == null) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           "Failed to retrieve OAuth URLs, spec for gadget does not contain OAuth service " +
           arguments.getServiceName() + ".  Known services: " +
           StringUtils.join(oauthSpec.getServices().keySet(), ',') + '.');
@@ -175,7 +174,7 @@ public class GadgetOAuthTokenStore {
       return new OAuthServiceProvider(requestTokenUrl, authorizationUrl, accessTokenUrl);
     } catch (SpecParserException e) {
       // these exceptions have decent programmer readable messages
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
           e.getMessage());
     }
   }
@@ -189,12 +188,10 @@ public class GadgetOAuthTokenStore {
     try {
       uri = Uri.parse(url);
     } catch (Throwable t) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
-          "Invalid url: " + url);
+      throw new OAuthRequestException(OAuthError.INVALID_URL, url);
     }
     if (!uri.isAbsolute()) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
-          "Invalid url: " + url);
+      throw new OAuthRequestException(OAuthError.INVALID_URL, url);
     }
   }
 
@@ -235,7 +232,7 @@ public class GadgetOAuthTokenStore {
         tokenInfo = store.getTokenInfo(securityToken, consumerInfo,
             arguments.getServiceName(), arguments.getTokenName());
       } catch (GadgetException e) {
-        throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+        throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
             "Unable to retrieve access token", e);
       }
       if (tokenInfo != null && tokenInfo.getAccessToken() != null) {
@@ -263,8 +260,7 @@ public class GadgetOAuthTokenStore {
     case BODY:
       return OAuthParamLocation.POST_BODY;
     }
-    throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
-        "Unknown parameter location " + location);
+    throw new OAuthRequestException(OAuthError.UNKNOWN_PARAMETER_LOCATION);
   }
 
   private HttpMethod getStoreMethod(Method method, OAuthResponseParams responseParams)
@@ -275,7 +271,7 @@ public class GadgetOAuthTokenStore {
     case POST:
       return HttpMethod.POST;
     }
-    throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST, "Unknown method " + method);
+    throw new OAuthRequestException(OAuthError.UNSUPPORTED_HTTP_METHOD, method.toString());
   }
 
   private GadgetSpec findSpec(final SecurityToken securityToken, final OAuthArguments arguments,
@@ -284,10 +280,10 @@ public class GadgetOAuthTokenStore {
       GadgetContext context = new OAuthGadgetContext(securityToken, arguments);
       return specFactory.getGadgetSpec(context);
     } catch (IllegalArgumentException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Could not fetch gadget spec, gadget URI invalid.", e);
     } catch (GadgetException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Could not fetch gadget spec", e);
     }
   }
@@ -302,7 +298,7 @@ public class GadgetOAuthTokenStore {
       store.setTokenInfo(securityToken, consumerInfo, arguments.getServiceName(),
           arguments.getTokenName(), tokenInfo);
     } catch (GadgetException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Unable to store access token", e);
     }
   }
@@ -316,7 +312,7 @@ public class GadgetOAuthTokenStore {
       store.removeToken(securityToken, consumerInfo, arguments.getServiceName(),
           arguments.getTokenName());
     } catch (GadgetException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Unable to remove access token", e);
     }
   }
