@@ -42,7 +42,9 @@ import java.util.Map;
  * 
  * See subclass doc for additional detail.
  */
-public class DomWalker {
+public final class DomWalker {
+  private DomWalker() {}
+
   /**
    * Implemented by classes that do actual manipulation of the DOM
    * while {@code DomWalker.ContentVisitor} walks it. {@code Visitor}

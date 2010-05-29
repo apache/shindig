@@ -25,6 +25,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
  * Various utility functions used by rewriters
  */
 public class RewriterUtils {
+  private RewriterUtils() {}
   
   public static boolean isHtml(HttpRequest request, HttpResponse original) {
     String mimeType = getMimeType(request, original);

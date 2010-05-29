@@ -242,10 +242,7 @@ public class ProxyUriBase {
   }
 
   protected static boolean getBooleanValue(String str) {
-    if (str != null && "1".equals(str)) {
-      return true;
-    }
-    return false;
+    return str != null && "1".equals(str);
   }
   
   protected static Integer getIntegerValue(String str) {

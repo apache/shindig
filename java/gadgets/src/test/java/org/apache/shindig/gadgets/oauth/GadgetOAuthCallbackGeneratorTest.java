@@ -245,7 +245,7 @@ public class GadgetOAuthCallbackGeneratorTest {
   }
 
     public void appendTo(StringBuffer buffer) {
-      buffer.append("GadgetContextMatcher(" + securityToken + ", " + arguments + ')');
+      buffer.append("GadgetContextMatcher(").append(securityToken).append(", ").append(arguments).append(')');
     }
   }
 }

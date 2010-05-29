@@ -32,7 +32,7 @@ import javax.el.ELException;
 /**
  * Default functions in the "os:" namespace prefix.
  */
-public class OpensocialFunctions {
+public final class OpensocialFunctions {
   private OpensocialFunctions() {
   }
   

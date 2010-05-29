@@ -299,7 +299,7 @@ public class PipelineExecutorTest {
     }
     
     public void appendTo(StringBuffer buffer) {
-      buffer.append("eqBuffer[social=" + socialCount + ",http=" + httpCount + ']');
+      buffer.append("eqBuffer[social=").append(socialCount).append(",http=").append(httpCount).append(']');
     }
 
     public boolean matches(Object obj) {

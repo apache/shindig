@@ -28,7 +28,9 @@ import com.ibm.icu.text.CharsetMatch;
  *
  * Highly skewed towards common encodings (UTF-8 and Latin-1).
  */
-public class EncodingDetector {
+public final class EncodingDetector {
+  private EncodingDetector() {}
+  
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 

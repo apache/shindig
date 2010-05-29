@@ -125,7 +125,7 @@ public class OAuthRequestException extends Exception {
 
   @Override
   public String toString() {
-    return "[" + error + "," + errorText + "]";
+    return '[' + error + ',' + errorText + ']';
   }
 
 }

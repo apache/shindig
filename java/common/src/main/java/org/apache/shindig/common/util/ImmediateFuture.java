@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Implements a future that is immediately available.
  */
-public class ImmediateFuture {
+public final class ImmediateFuture {
   private ImmediateFuture() {}
   
   /**

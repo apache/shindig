@@ -211,8 +211,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
         .setIgnoreCache(context.getIgnoreCache())
         .setContainer(context.getContainer());
 
-    HttpResponse results = requestPipeline.execute(request);
-    return results;
+    return requestPipeline.execute(request);
   }
   
   private void respondVerbatim(HttpResponse results, HttpServletResponse response) 
@@ -255,7 +254,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     String paramsStr = null;
     String accelUrl = null;
     // Check for chain param style request:
-    if (path.startsWith(accelServletPrefix + "/")) {
+    if (path.startsWith(accelServletPrefix + '/')) {
       int startQuery = accelServletPrefix.length() + 1;
       int endQuery = path.indexOf('/', startQuery);
       if (endQuery >= startQuery) {

@@ -54,7 +54,7 @@ public class JsServlet extends InjectedServlet {
       "var nm='%s';" +
       "if (typeof window[nm]==='function') {" +
       "window[nm]();" +
-      "}" +
+      '}' +
       "})();";
   private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 

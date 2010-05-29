@@ -28,8 +28,8 @@ import java.util.logging.Logger;
 /**
  * Common mime content types and utilities
  */
-public class ContentTypes {
-
+public final class ContentTypes {
+  private ContentTypes() {}
   private static final Logger logger = Logger.getLogger(ContentTypes.class.getName());
 
   /**

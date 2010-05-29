@@ -686,7 +686,7 @@ public class RenderingGadgetRewriterTest {
     String prefix = "gadgets.config.init(";
     int configIdx = content.indexOf(prefix);
     assertTrue("gadgets.config.init not found in rewritten content", configIdx != -1);
-    int endIdx = content.indexOf(")", configIdx + prefix.length());
+    int endIdx = content.indexOf(')', configIdx + prefix.length());
     assertTrue("unexpected error, gadgets.config.init not closed", endIdx != -1);
     String configJson = content.substring(configIdx + prefix.length(), endIdx);
     JSONObject config = new JSONObject(configJson);

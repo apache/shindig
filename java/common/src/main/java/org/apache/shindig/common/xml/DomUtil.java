@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * Utility functions for navigating DOM
  */
-public class DomUtil {
+public final class DomUtil {
 
   private DomUtil() {}
 

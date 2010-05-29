@@ -151,7 +151,7 @@ public class ProxyRenderer {
     if (userAgent != null) {
       String myIdent = getUAIdent();
       if (myIdent != null) {
-        userAgent = userAgent + " " + myIdent;
+        userAgent = userAgent + ' ' + myIdent;
       }
       request.setHeader("User-Agent", userAgent);
     }

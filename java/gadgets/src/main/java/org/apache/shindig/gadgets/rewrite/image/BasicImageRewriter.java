@@ -258,9 +258,8 @@ public class BasicImageRewriter implements ResponseRewriter {
   /** Gets the feasible resize ratio. */
   private double getResizeRatio(int requestedWidth, int requestedHeight, int origWidth,
       int origHeight) {
-    double ratio = min(requestedWidth / (double) origWidth,
-        requestedHeight / (double) origHeight);
-    return ratio;
+    return min(requestedWidth / (double) origWidth,
+              requestedHeight / (double) origHeight);
   }
 
   /**

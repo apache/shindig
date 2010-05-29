@@ -39,7 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EhCacheCacheProvider implements CacheProvider {
-  private final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
+  private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;
   private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
 

@@ -71,8 +71,6 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
    *
    * @param blacklistFile file containing blacklist entries
    * @throws IOException if reading the file fails
-   * @throws PatternSyntaxException if an invalid regular expression occurs in
-   *    the file
    */
   public BasicGadgetBlacklist(File blacklistFile) throws IOException {
     exactMatches = Sets.newHashSet();
@@ -103,7 +101,7 @@ public class BasicGadgetBlacklist implements GadgetBlacklist {
         if (parts.length == 1) {
           exactMatches.add(line.toLowerCase());
         } else if (parts.length == 2
-                   && parts[0].toUpperCase().equals(REGEXP_PREFIX)) {
+                   && parts[0].equalsIgnoreCase(REGEXP_PREFIX)) {
           // compile will throw PatternSyntaxException on invalid patterns.
           regexpMatches.add(Pattern.compile(parts[1], Pattern.CASE_INSENSITIVE));
         }

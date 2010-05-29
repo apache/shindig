@@ -250,7 +250,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
     return versioner.validate(gadgetUri, container, version);
   }
   
-  public static final String tplKey(String key) {
+  public static String tplKey(String key) {
     return '%' + key + '%';
   }
   

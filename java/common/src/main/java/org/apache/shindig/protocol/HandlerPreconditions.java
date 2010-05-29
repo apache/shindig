@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Utility class for common API call preconditions
  */
-public class HandlerPreconditions {
+public final class HandlerPreconditions {
 
   private HandlerPreconditions() {}
 

@@ -25,7 +25,6 @@ import org.apache.shindig.common.uri.Uri;
 public class HashShaLockedDomainPrefixGenerator implements LockedDomainPrefixGenerator {
   public String getLockedDomainPrefix(Uri gadgetUri) {
     byte[] sha1 = DigestUtils.sha(gadgetUri.toString());
-    String hash = new String(Base32.encodeBase32(sha1));
-    return hash;
+    return new String(Base32.encodeBase32(sha1)); // a hash
   }
 }

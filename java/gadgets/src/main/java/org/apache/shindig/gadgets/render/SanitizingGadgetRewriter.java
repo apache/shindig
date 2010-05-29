@@ -211,7 +211,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   /**
    * Restrict the set of allowed tags and attributes
    */
-  static class BasicElementFilter extends SanitizingWalker {
+  static final class BasicElementFilter extends SanitizingWalker {
     private final Set<String> allowedTags;
     private final Set<String> allowedAttributes;
     
@@ -265,7 +265,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
    * Enfore that all images in the document are rewritten through the proxy.
    * Prevents issues in IE where the image content contains script
    */
-  static class ImageFilter extends SanitizingWalker {
+  static final class ImageFilter extends SanitizingWalker {
     private final SanitizingProxyUriManager imageRewriter;
 
     private ImageFilter(ProxyUriManager proxyUriManager) {
@@ -298,7 +298,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
   /**
    * Pass the contents of style tags through the CSS sanitizer
    */
-  static class StyleFilter implements DomWalker.Visitor {
+  static final class StyleFilter implements DomWalker.Visitor {
     private final SanitizingProxyUriManager imageRewriter;
     private final SanitizingProxyUriManager cssImportRewriter;
     private final CajaCssSanitizer cssSanitizer;
@@ -328,7 +328,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
    * Restrict link tags to stylesheet content only and force the link to
    * be rewritten through the proxy and sanitized
    */
-  static class LinkFilter extends SanitizingWalker {
+  static final class LinkFilter extends SanitizingWalker {
     private final SanitizingProxyUriManager cssImportRewriter;
 
     private LinkFilter(ProxyUriManager proxyUriManager) {

@@ -80,7 +80,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * Rewrite the given CSS content and optionally extract the import references.
    * @param content CSS content
    * @param source Uri of content
-   * @param rewriter Rewrite urls
+   * @param uriMaker a Uri Maker
    * @param writer Output
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
@@ -115,7 +115,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * Rewrite the CSS content in a style DOM node.
    * @param styleNode Rewrite the CSS content of this node
    * @param source Uri of content
-   * @param rewriter Rewrite urls
+   * @param uriMaker a UriMaker
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
    * @return Empty list of extracted import URIs.
@@ -149,7 +149,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * Rewrite the CSS DOM in place.
    * @param styleSheet To rewrite
    * @param source  Uri of content
-   * @param rewriter  Rewrite urls
+   * @param uriMaker a UriMaker
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
    * @return Empty list of extracted import URIs.

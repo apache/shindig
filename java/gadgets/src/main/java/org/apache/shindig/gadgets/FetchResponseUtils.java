@@ -30,7 +30,7 @@ import java.util.Map;
  * Handles converting HttpResponse objects to the format expected by the makeRequest javascript.
  */
 public class FetchResponseUtils {
-
+  private FetchResponseUtils() {}
   /**
    * Convert a response to a JSON object.
    *

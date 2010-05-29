@@ -26,7 +26,9 @@ import java.net.URLEncoder;
  * Performs url encoding / decoding with forced utf-8. Automatically takes care
  * of boilerplate exception handling.
  */
-public class Utf8UrlCoder {
+public final class Utf8UrlCoder {
+
+  private Utf8UrlCoder() {}
 
   public static String encode(String input) {
     try {

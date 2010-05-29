@@ -32,7 +32,9 @@ import com.google.common.collect.Maps;
 /**
  * JSON utilities that are not specific to either serialization or conversion.
  */
-public class JsonUtil {
+public final class JsonUtil {
+  private JsonUtil() {}
+
   private static final Set<String> EXCLUDE_METHODS
       = ImmutableSet.of("getClass", "getDeclaringClass");
 

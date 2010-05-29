@@ -60,7 +60,7 @@ import java.util.logging.Logger;
 public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
-  private final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
+  private static final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
   
   private final Cache<String, Element> cajoledCache;
   private final RequestPipeline requestPipeline;

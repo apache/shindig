@@ -162,11 +162,11 @@ public class OAuthResponseParams {
     trace.append("\n====");
     int i = 1;
     for (Pair<HttpRequest, HttpResponse> event : requestTrace) {
-      trace.append("\n==== Sent request " + i + ":\n");
+      trace.append("\n==== Sent request ").append(i).append(":\n");
       if (event.one != null) {
         trace.append(filterSecrets(event.one.toString()));
       }
-      trace.append("\n==== Received response " + i + ":\n");
+      trace.append("\n==== Received response ").append(i).append(":\n");
       if (event.two != null) {
         trace.append(filterSecrets(event.two.toString()));
       }

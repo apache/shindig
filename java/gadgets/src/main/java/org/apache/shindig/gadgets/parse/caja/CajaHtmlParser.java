@@ -92,7 +92,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       // Newline works around Caja parser issue with certain short-form
       // HTML - the internal Lexer gets confused. A bug has been filed w/ Caja.
       // Even so, adding the newline is innocuous for any HTML.
-      DomParser parser = getDomParser(source + "\n", mq);
+      DomParser parser = getDomParser(source + '\n', mq);
       DocumentFragment fragment = parser.parseFragment();
       // Get rid of the newline, if maintained.
       Node lastChild = fragment != null ? fragment.getLastChild() : null;

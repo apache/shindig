@@ -441,7 +441,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     int proxyEnd = uriStr.indexOf("/proxy/") + "/proxy/".length();
     String paramsUri = uriStr.substring(
         proxyEnd,
-        (endOfPath ? uriStr.indexOf("/", proxyEnd) : uriStr.indexOf("/path")));
+        (endOfPath ? uriStr.indexOf('/', proxyEnd) : uriStr.indexOf("/path")));
     uri = new UriBuilder().setQuery(paramsUri).toUri();
     
     // "Raw" query param verification.
