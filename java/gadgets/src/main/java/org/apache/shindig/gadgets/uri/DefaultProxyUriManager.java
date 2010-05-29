@@ -163,9 +163,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       int start = path.indexOf(containerStr);
       if (start > 0) {
         start += containerStr.length();
-        int end = path.indexOf("&", start);
+        int end = path.indexOf('&', start);
         if (end < start) {
-          end = path.indexOf("/", start);
+          end = path.indexOf('/', start);
         }
         if (end > start) {
           // Looks like chained proxy syntax. Pull out params.

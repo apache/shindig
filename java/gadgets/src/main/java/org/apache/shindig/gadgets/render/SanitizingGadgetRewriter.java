@@ -65,7 +65,7 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
    * @return true if sanitization will be enabled
    */
   public static boolean isSanitizedRenderingRequest(Gadget gadget) {
-    return ("1".equals(gadget.getContext().getParameter("sanitize")));
+    return "1".equals(gadget.getContext().getParameter("sanitize"));
   }
   
   /**

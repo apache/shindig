@@ -53,7 +53,7 @@ public class DataCollectionConverter extends AbstractCollectionConverter {
   // Base API is inherently unchecked
   @SuppressWarnings("unchecked")
   public boolean canConvert(Class clazz) {
-    return (DataCollection.class.isAssignableFrom(clazz));
+    return DataCollection.class.isAssignableFrom(clazz);
   }
 
   /**

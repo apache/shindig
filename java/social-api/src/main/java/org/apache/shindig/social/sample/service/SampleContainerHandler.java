@@ -66,7 +66,7 @@ public class SampleContainerHandler {
   @Operation(httpMethods = "POST", bodyParam = "data")
   public Future<?> create(RequestItem request) throws ProtocolException {
     String type = request.getParameter("type");
-    if (type.equals("setstate")) {
+    if ("setstate".equals(type)) {
       try {
         @SuppressWarnings("unchecked")
         Map<String, String> bodyparams = request.getTypedParameter("data", Map.class);
@@ -76,7 +76,7 @@ public class SampleContainerHandler {
         throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
             "The json state file was not valid json", e);
       }
-    } else if (type.equals("setevilness")) {
+    } else if ("setevilness".equals(type)) {
       throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
           "evil data has not been implemented yet");
     }

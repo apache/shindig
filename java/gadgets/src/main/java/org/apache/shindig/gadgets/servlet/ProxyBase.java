@@ -203,6 +203,6 @@ public abstract class ProxyBase {
     if (ignoreCache == null) {
       return false;
     }
-    return !ignoreCache.equals("0");
+    return !"0".equals(ignoreCache);
   }
 }

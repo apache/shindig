@@ -257,7 +257,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
     // Check for chain param style request:
     if (path.startsWith(accelServletPrefix + "/")) {
       int startQuery = accelServletPrefix.length() + 1;
-      int endQuery = path.indexOf("/", startQuery);
+      int endQuery = path.indexOf('/', startQuery);
       if (endQuery >= startQuery) {
         paramsStr = path.substring(startQuery, endQuery);
         accelUrl = path.substring(endQuery + 1); // + "?" + req.getQueryString();
