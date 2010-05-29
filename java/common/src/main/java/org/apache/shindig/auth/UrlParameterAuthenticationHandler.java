@@ -20,11 +20,8 @@ package org.apache.shindig.auth;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import net.oauth.OAuth;
-import net.oauth.OAuthMessage;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

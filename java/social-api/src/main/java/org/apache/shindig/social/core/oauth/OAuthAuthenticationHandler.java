@@ -18,7 +18,6 @@
 package org.apache.shindig.social.core.oauth;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;

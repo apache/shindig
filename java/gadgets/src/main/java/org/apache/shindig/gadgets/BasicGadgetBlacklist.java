@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * Basic implementation of a {@code GadgetBlacklist}, reading blacklist data
