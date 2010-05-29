@@ -348,7 +348,26 @@
 "title" : "Jane says George likes yoda!",
 "userId" : "jane.doe"
 }]
-
+},
+"activityEntries" : {
+	"john.doe": [{
+		"id": "myEntryId123",
+		"permalink": "http://www.myactivityentry.com",
+		"postedTime": "2010-04-27T06:02:36+0000",
+		"title": "This is my ActivityEntry!",
+		"body": "ActivityStreams are so much fun!",
+		"actor": {
+			"id": "john.doe",
+			"displayName": "John Doe"
+		},
+		"verb": ["play", "post"],
+		"object": {
+				"id": "myObjectId123",
+				"displayName": "My Object",
+				"permalink": "http://www.myobject.com",
+				"objectType": ["article"]
+		}
+	}]
 },
 //
 // ----------------------------- Data ---------------------------------------
