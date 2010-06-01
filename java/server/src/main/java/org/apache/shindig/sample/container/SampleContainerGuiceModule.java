@@ -15,13 +15,18 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.sample.shiro;
+package org.apache.shindig.sample.container;
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import org.apache.shindig.sample.shiro.SampleShiroRealm;
 
-public class ShiroModule extends AbstractModule {
+public class SampleContainerGuiceModule extends AbstractModule {
 
   protected void configure() {
     // We do this so that jsecurity realms can get access to the jsondbservice singleton
-    requestStaticInjection(SampleShiroRealm.class);
+
+    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
+    handlerBinder.addBinding().toInstance(SampleContainerHandler.class);
   }
 }

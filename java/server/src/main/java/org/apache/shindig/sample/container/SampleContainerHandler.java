@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package org.apache.shindig.social.sample.service;
+package org.apache.shindig.sample.container;
 
 import org.apache.shindig.common.util.ImmediateFuture;
 import org.apache.shindig.common.uri.Uri;
