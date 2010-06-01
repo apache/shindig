@@ -156,7 +156,7 @@ shindig.container.GadgetSite.prototype.getActiveGadget = function() {
  * Returns configuration of a feature with a given name. Defaults to current
  * loading or visible gadget if no metadata is passed in.
  * @param {string} name Name of the feature.
- * @param {Object} opt_gadgetInfo Optional gadget info.
+ * @param {Object=} opt_gadgetInfo Optional gadget info.
  * @return {Object} JSON representing the feature.
  */
 shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInfo) {
@@ -168,7 +168,7 @@ shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInf
 /**
  * Returns the loading or visible gadget with the given ID.
  * @param {string} id The iframe ID of gadget to return.
- * @return {shindig.container.GadgetHolder} The gadget. Null, if not exist.
+ * @return {shindig.container.GadgetHolder?} The gadget. Null, if not exist.
  */
 shindig.container.GadgetSite.prototype.getGadgetHolder = function(id) {
   if (this.curGadget_ && this.curGadget_.getIframeId() == id) {

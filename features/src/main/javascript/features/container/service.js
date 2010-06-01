@@ -32,8 +32,8 @@ shindig.container.Service = function(opt_config) {
   /**
    * @type {boolean}
    */
-  this.sameDomain_ = shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.SAME_DOMAIN, true);
+  this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ServiceConfig.SAME_DOMAIN, true));
 
   this.onConstructed(config);
 };
@@ -93,10 +93,12 @@ shindig.container.Service.prototype.processSameDomain_ = function(gadgetInfo) {
 // -----------------------------------------------------------------------------
 
 /**
- * Enumeation of configuration keys for this service. This is specified in
+ * Enumeration of configuration keys for this service. This is specified in
  * JSON to provide extensible configuration.
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
+
 //Toggle to render gadgets in the same domain.
+/** @type {string} */
 shindig.container.ServiceConfig.SAME_DOMAIN = 'sameDomain';
