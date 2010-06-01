@@ -23,10 +23,10 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterUtils;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
@@ -50,7 +50,7 @@ import com.google.inject.Inject;
 /**
  * Rewrite links to referenced content in a stylesheet
  */
-public class CssRequestRewriter implements RequestRewriter {
+public class CssRequestRewriter implements ResponseRewriter {
 
   private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
 
@@ -67,20 +67,18 @@ public class CssRequestRewriter implements RequestRewriter {
     this.proxyingLinkRewriterFactory = proxyingLinkRewriterFactory;
   }
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) throws RewritingException {
-    if (!RewriterUtils.isCss(request, original)) {
-      return false;
+  public void rewrite(HttpRequest request, HttpResponseBuilder response)
+      throws RewritingException {
+    if (!RewriterUtils.isCss(request, response)) {
+      return;
     }
     ContentRewriterFeature.Config feature = rewriterFeatureFactory.get(request);
-    String css = content.getContent();
+    String css = response.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
         proxyingLinkRewriterFactory.create(request.getGadget(), feature,
             request.getContainer(), false, request.getIgnoreCache()), sw, false);
-    content.setContent(sw.toString());
-
-    return true;
+    response.setContent(sw.toString());
   }
 
   /**

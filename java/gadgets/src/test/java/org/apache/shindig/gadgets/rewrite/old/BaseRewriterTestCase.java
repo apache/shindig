@@ -76,7 +76,7 @@ public abstract class BaseRewriterTestCase {
   protected LinkRewriter defaultLinkRewriterNoCacheAndDebug;
   protected GadgetHtmlParser parser;
   protected Injector injector;
-  protected HttpResponse fakeResponse;
+  protected HttpResponseBuilder fakeResponse;
   protected ContentRewriterUris rewriterUris;
   protected IMocksControl control;
   protected ContentRewriterUris defaultContainerRewriterUris;
@@ -107,7 +107,7 @@ public abstract class BaseRewriterTestCase {
     injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
-        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
+        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF});
 
     ContainerConfig config = new AbstractContainerConfig() {
       @Override
@@ -287,7 +287,6 @@ public abstract class BaseRewriterTestCase {
     protected void configure() {
       bind(RequestPipeline.class).toInstance(new RequestPipeline() {
         public HttpResponse execute(HttpRequest request) { return null; }
-        public void normalizeProtocol(HttpRequest request) throws GadgetException {}
       });
 
       bind(GadgetSpecFactory.class).toInstance(new GadgetSpecFactory() {

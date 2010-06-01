@@ -17,10 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import com.google.inject.Inject;
-
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.uri.UriCommon;
 
@@ -34,19 +31,9 @@ import org.apache.shindig.gadgets.uri.UriCommon;
  * of building your own keys from scratch.
  */
 public abstract class AbstractHttpCache implements HttpCache {
-  private TimeSource clock = new TimeSource();
-
   private static final String RESIZE_HEIGHT = UriCommon.Param.RESIZE_HEIGHT.getKey();
   private static final String RESIZE_WIDTH = UriCommon.Param.RESIZE_WIDTH.getKey();
   private static final String RESIZE_QUALITY = UriCommon.Param.RESIZE_QUALITY.getKey();
-
-  /**
-   * Subclasses should call this directly or be injected themselves to override.
-   */
-  @Inject
-  public void setClock(TimeSource clock) {
-    this.clock = clock;
-  }
 
   // Implement these methods to create a concrete HttpCache class.
   protected abstract HttpResponse getResponseImpl(String key);

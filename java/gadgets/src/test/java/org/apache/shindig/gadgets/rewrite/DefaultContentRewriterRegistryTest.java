@@ -38,16 +38,16 @@ import com.google.common.collect.Lists;
 public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   private static final Uri SPEC_URL = Uri.parse("http://example.org/gadget.xml");
   private List<CaptureRewriter> rewriters;
-  private List<RequestRewriter> contentRewriters;
-  private RequestRewriterRegistry registry;
+  private List<ResponseRewriter> contentRewriters;
+  private ResponseRewriterRegistry registry;
 
   @Before
   @Override
   public void setUp() throws Exception {
     super.setUp();
     rewriters = Lists.newArrayList(new CaptureRewriter(), new CaptureRewriter());
-    contentRewriters = Lists.<RequestRewriter>newArrayList(rewriters);
-    registry = new DefaultRequestRewriterRegistry(contentRewriters, parser);
+    contentRewriters = Lists.<ResponseRewriter>newArrayList(rewriters);
+    registry = new DefaultResponseRewriterRegistry(contentRewriters, parser);
   }
 
   @Test
@@ -72,18 +72,18 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
    */
   @Test
   public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() throws Exception {
-    List<RequestRewriter> rewriters = Lists.newArrayList();
+    List<ResponseRewriter> rewriters = Lists.newArrayList();
     rewriters.add(injector.getInstance(HTMLContentRewriter.class));
     rewriters.add(injector.getInstance(CssRequestRewriter.class));
-    registry = new DefaultRequestRewriterRegistry(rewriters, parser);
+    registry = new DefaultResponseRewriterRegistry(rewriters, parser);
 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andStubReturn("unknown");
 
     control.replay();
-    HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse);
+    HttpResponse rewritten = registry.rewriteHttpResponse(req, fakeResponse.create());
     // Assert that response is untouched
-    assertSame(rewritten, fakeResponse);
+    assertSame(rewritten, fakeResponse.create());
     control.verify();
   }
 }

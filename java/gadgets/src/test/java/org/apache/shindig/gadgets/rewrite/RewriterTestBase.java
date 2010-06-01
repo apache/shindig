@@ -65,7 +65,7 @@ public abstract class RewriterTestBase {
   protected ContentRewriterFeature.Factory rewriterFeatureFactory;
   protected GadgetHtmlParser parser;
   protected Injector injector;
-  protected HttpResponse fakeResponse;
+  protected HttpResponseBuilder fakeResponse;
   protected IMocksControl control;
 
   @Before
@@ -78,7 +78,7 @@ public abstract class RewriterTestBase {
     injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
-        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
+        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF});
     control = EasyMock.createControl();
   }
   

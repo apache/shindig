@@ -23,6 +23,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Element;
@@ -44,7 +45,7 @@ import com.google.inject.Inject;
 /**
  * Rewrite links to referenced content in a stylesheet
  */
-public class CssRequestRewriter implements RequestRewriter {
+public class CssRequestRewriter implements ResponseRewriter {
 
   private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
 
@@ -60,20 +61,17 @@ public class CssRequestRewriter implements RequestRewriter {
     this.rewriterFeatureFactory = rewriterFeatureFactory;
   }
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) throws RewritingException {
+  public void rewrite(HttpRequest request, HttpResponseBuilder original) throws RewritingException {
     ContentRewriterFeature.Config config = rewriterFeatureFactory.get(request);
     if (!RewriterUtils.isCss(request, original)) {
-      return false;
+      return;
     }
     
-    String css = content.getContent();
+    String css = original.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
         new UriMaker(proxyUriManager, config), sw, false);
-    content.setContent(sw.toString());
-
-    return true;
+    original.setContent(sw.toString());
   }
 
   /**

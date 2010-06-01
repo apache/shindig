@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.internal.Nullable;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -45,6 +46,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
   public DefaultRequestPipeline(HttpFetcher httpFetcher,
                                 HttpCache httpCache,
                                 Provider<OAuthRequest> oauthRequestProvider,
+                                @Named("shindig.rewriters.response.pre-cache")
                                 ResponseRewriterRegistry responseRewriterRegistry,
                                 InvalidationService invalidationService,
                                 @Nullable HttpResponseMetadataHelper metadataHelper) {

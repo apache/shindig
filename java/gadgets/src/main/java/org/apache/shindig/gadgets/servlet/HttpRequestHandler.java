@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
@@ -95,11 +95,11 @@ public class HttpRequestHandler {
   static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT-ENCODING");
 
   private final RequestPipeline requestPipeline;
-  private final RequestRewriterRegistry contentRewriterRegistry;
+  private final ResponseRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public HttpRequestHandler(RequestPipeline requestPipeline,
-      RequestRewriterRegistry contentRewriterRegistry) {
+      ResponseRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }

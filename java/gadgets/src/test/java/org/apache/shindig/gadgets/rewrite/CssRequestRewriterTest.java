@@ -18,13 +18,11 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.apache.shindig.gadgets.uri.PassthruManager;
@@ -89,14 +87,12 @@ public class CssRequestRewriterTest extends RewriterTestBase {
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
 
-    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
-      .setResponseString(content).create();
-
-    MutableContent mc = new MutableContent(null, content);
-    rewriter.rewrite(request, response, mc);
+    HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+        .setResponseString(content);
+    rewriter.rewrite(request, response);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
-        StringUtils.deleteWhitespace(mc.getContent()));
+        StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
@@ -110,14 +106,12 @@ public class CssRequestRewriterTest extends RewriterTestBase {
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
 
-    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
-      .setResponseString(content).create();
-
-    MutableContent mc = new MutableContent(null, content);
-    rewriterNoOverrideExpires.rewrite(request, response, mc);
+    HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content);
+    rewriterNoOverrideExpires.rewrite(request, response);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
-        StringUtils.deleteWhitespace(mc.getContent()));
+        StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
@@ -132,14 +126,12 @@ public class CssRequestRewriterTest extends RewriterTestBase {
     request.setGadget(SPEC_URL);
     request.setIgnoreCache(true);
 
-    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
-      .setResponseString(content).create();
-
-    MutableContent mc = new MutableContent(null, content);
-    rewriter.rewrite(request, response, mc);
+    HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content);
+    rewriter.rewrite(request, response);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
-        StringUtils.deleteWhitespace(mc.getContent()));
+        StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
@@ -158,33 +150,33 @@ public class CssRequestRewriterTest extends RewriterTestBase {
     request.setGadget(SPEC_URL);
     request.setContainer(MOCK_CONTAINER);
 
-    HttpResponse response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
-      .setResponseString(content).create();
+    HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css")
+      .setResponseString(content);
 
-    MutableContent mc = new MutableContent(null, content);
-    rewriter.rewrite(request, response, mc);
+    rewriter.rewrite(request, response);
 
     assertEquals(StringUtils.deleteWhitespace(expected),
-        StringUtils.deleteWhitespace(mc.getContent()));
+        StringUtils.deleteWhitespace(response.getContent()));
   }
 
   @Test
   public void testNoRewriteUnknownMimeType() throws Exception {
-    MutableContent mc = control.createMock(MutableContent.class); 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
-    assertFalse(rewriter.rewrite(req, fakeResponse, mc));
+    int changesBefore = fakeResponse.getNumChanges();
+    rewriter.rewrite(req, fakeResponse);
+    assertEquals(changesBefore, fakeResponse.getNumChanges());
     control.verify();
   }
 
   private void validateRewritten(String content, Uri base, String expected) throws Exception {
-    MutableContent mc = new MutableContent(null, content);
+    HttpResponseBuilder response = new HttpResponseBuilder().setHeader("Content-Type", "text/css");
+    response.setContent(content);
     HttpRequest request = new HttpRequest(base);
-    rewriter.rewrite(request,
-        new HttpResponseBuilder().setHeader("Content-Type", "text/css").create(), mc);
+    rewriter.rewrite(request, response);
     assertEquals(StringUtils.deleteWhitespace(expected),
-        StringUtils.deleteWhitespace(mc.getContent()));
+        StringUtils.deleteWhitespace(response.getContent()));
   }
 
   private void validateRewritten(String content, String expected) throws Exception {

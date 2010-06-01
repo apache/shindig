@@ -226,11 +226,10 @@ public class ProxyRendererTest {
   @Test
   public void appendUserAgent() throws Exception {
     String expectedUA = USER_AGENT + " Shindig";
-    HttpRequest request = new HttpRequest(EXPECTED_PROXIED_HTML_HREF);
     HttpResponse response = new HttpResponse(PROXIED_HTML_CONTENT);
     pipeline.plainResponses.put(EXPECTED_PROXIED_HTML_HREF, response);
     
-    String content = proxyRenderer.render(makeHrefGadget("none"));
+    proxyRenderer.render(makeHrefGadget("none"));
     String actualUA = pipeline.lastHttpRequest.getHeader("User-Agent");
     assertEquals(expectedUA, actualUA);
   }

@@ -403,11 +403,10 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
 
   @Test
   public void testNoRewriteUnknownMimeType() throws Exception {
-    MutableContent mc = control.createMock(MutableContent.class); 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
-    assertFalse(rewriter.rewrite(req, fakeResponse, mc));
+    rewriter.rewrite(req, fakeResponse);
     control.verify();
   }
 }

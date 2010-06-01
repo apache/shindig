@@ -30,8 +30,6 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.FakeTimeSource;
-import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
@@ -346,10 +344,6 @@ public class AbstractHttpCacheTest {
         .setExpirationTime(expiration)
         .create();
     cache.map.put(key, response);
-
-    TimeSource fakeClock = new FakeTimeSource(expiration + 60L);
-
-    cache.setClock(fakeClock);
 
     // The cache itself still hold and return staled value, 
     // caller responsible to decide what to do about it 

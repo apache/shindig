@@ -31,8 +31,7 @@ import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
 import org.apache.shindig.gadgets.render.old.DefaultSanitizingProxyingLinkRewriterFactory;
 import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
 import org.junit.Test;
 
@@ -44,17 +43,18 @@ public class SanitizingRequestRewriterTest extends BaseRewriterTestCase {
 
   private String rewrite(HttpRequest request, HttpResponse response) throws Exception {
     request.setSanitizationRequested(true);
-    RequestRewriter rewriter = createRewriter(Collections.<String>emptySet(),
+    ResponseRewriter rewriter = createRewriter(Collections.<String>emptySet(),
         Collections.<String>emptySet());
 
-    MutableContent mc = new MutableContent(parser, response);
-    if (!rewriter.rewrite(request, response, mc)) {
+    HttpResponseBuilder hrb = new HttpResponseBuilder(parser, response);
+    rewriter.rewrite(request, hrb);
+    if (hrb.getNumChanges() == 0) {
       return null;
     }
-    return mc.getContent();
+    return hrb.getContent();
   }
 
-  private RequestRewriter createRewriter(Set<String> tags, Set<String> attributes) {
+  private ResponseRewriter createRewriter(Set<String> tags, Set<String> attributes) {
     ContentRewriterFeature.Factory rewriterFeatureFactory =
         new ContentRewriterFeature.Factory(null,
           new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "embed,img,script,link,style", "false", "false"));
