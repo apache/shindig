@@ -19,15 +19,22 @@
 /**
  * @fileoverview Utility methods common container.
  */
-var shindig = shindig || {};
-shindig.container = shindig.container || {};
-shindig.container.util = shindig.container.util || {};
+
+/**
+ * @type {Object}
+ */
+shindig.container = {};
+
+/**
+ * @type {Object}
+ */
+shindig.container.util = {};
 
 
 /**
  * Extract protocol and domain of container page. Valid values:
  * http://www.cnn.com, chrome-extension://www.cnn.com
- * @param {string} url The URL to extract path domain from.
+ * @param {string} uri The URL to extract path domain from.
  * @return {string} The protocol and domain of container page.
  */
 shindig.container.util.parseOrigin = function(uri) {
@@ -39,7 +46,7 @@ shindig.container.util.parseOrigin = function(uri) {
 
 /**
  * Extract prefix path of a URL, not including opt_postfixPath.
- * @param {string} url The URL to extract path from.
+ * @param {string} uri The URL to extract path from.
  * @param {string=} opt_postfixPath The URL postfix to avoid extracting.
  * @return {string} The path in URL, before postfixPath.
  */
@@ -56,7 +63,7 @@ shindig.container.util.parsePrefixPath = function(uri, opt_postfixPath) {
 
 /**
  * Extract path of a URL.
- * @param {string} url The URL to extract path from.
+ * @param {string} uri The URL to extract path from.
  * @return {string} The path in URL.
  */
 shindig.container.util.parsePath = function(uri) {
@@ -81,8 +88,8 @@ shindig.container.util.getParamValue = function(path, paramName) {
  * Return value of json at key, if valid. Otherwise, return defaultValue.
  * @param {Object} json The JSON to look up key param from.
  * @param {string} key Key in config.
- * @param {Object?} defaultValue The default value to return.
- * @return {Object?}
+ * @param {*=} defaultValue The default value to return.
+ * @return {*}
  */
 shindig.container.util.getSafeJsonValue = function(json, key, defaultValue) {
   return (json[key] != undefined && json[key] != null)
@@ -111,7 +118,7 @@ shindig.container.util.mergeJsons = function(json1, json2) {
 /**
  * Extract keys from a JSON to an array.
  * @param {Object} json to extract keys from.
- * @return {array} keys in the json.
+ * @return {Array.<string>} keys in the json.
  */
 shindig.container.util.toArrayOfJsonKeys = function(json) {
   var result = [];
@@ -122,6 +129,7 @@ shindig.container.util.toArrayOfJsonKeys = function(json) {
 };
 
 
+// TODO unused?
 /**
  * Count the number of own/self properties in json.
  * @param {Object} json the JSON to act on.

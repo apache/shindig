@@ -21,8 +21,6 @@
  * HTML element in the container. The API for this is low-level. Use the
  * container APIs to work with gadget sites.
  */
-var shindig = shindig || {};
-shindig.container = shindig.container || {};
 
 
 /**
@@ -48,10 +46,10 @@ shindig.container.GadgetSite = function(service, gadgetEl, opt_bufferEl) {
 
   /**
    * Element holding the loading gadget for 2x buffering.
-   * @type {Element}
+   * @type {Element?}
    * @private
    */
-  this.loadingGadgetEl_ = opt_bufferEl;
+  this.loadingGadgetEl_ = opt_bufferEl || null;
 
   /**
    * Unique ID of this site.
@@ -62,21 +60,21 @@ shindig.container.GadgetSite = function(service, gadgetEl, opt_bufferEl) {
 
   /**
    * ID of parent gadget.
-   * @type {string}
+   * @type {string?}
    * @private
    */
   this.parentId_ = null;
 
   /**
    * Information about the currently visible gadget.
-   * @type {shindig.container.GadgetHolder}
+   * @type {shindig.container.GadgetHolder?}
    * @private
    */
   this.curGadget_ = null;
 
   /**
    * Information about the currently loading gadget.
-   * @type {shindig.container.GadgetHolder}
+   * @type {shindig.container.GadgetHolder?}
    * @private
    */
   this.loadingGadget_ = null;
@@ -184,7 +182,7 @@ shindig.container.GadgetSite.prototype.getGadgetHolder = function(id) {
 
 
 /**
- * @return {string} ID parent element containing this site.
+ * @return {string?} ID parent element containing this site.
  */
 shindig.container.GadgetSite.prototype.getParentId = function() {
   return this.parentId_;
@@ -197,7 +195,7 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
  * @param {Object} gadgetParams View parameters for the gadget.
  * @param {Object} renderParams. Render parameters for the gadget, including:
  *     view, width, height.
- * @param {Function=} opt_callback Function called with gadget info after
+ * @param {function(Object)=} opt_callback Function called with gadget info after
  *     navigation has occurred.
  */
 shindig.container.GadgetSite.prototype.navigateTo = function(gadgetUrl, gadgetParams,
@@ -289,7 +287,7 @@ shindig.container.GadgetSite.prototype.render = function(gadgetInfo, gadgetParam
 /**
  * Sends RPC call to the current/visible gadget.
  * @param {string} serviceName RPC service name to call.
- * @param {Function} callback Function to call upon RPC completion.
+ * @param {function(Object)} callback Function to call upon RPC completion.
  * @param {...number} var_args payload to pass to the recipient.
  */
 shindig.container.GadgetSite.prototype.rpcCall = function(serviceName, callback, var_args) {
@@ -367,6 +365,7 @@ shindig.container.GadgetSite.prototype.onload_ = function() {
   try {
     gadgets.rpc.call(this.loadingGadget_.getIframeId(), 'onLoad', null);
     if (this.resizeOnLoad_) {
+      // TODO need a value for setHeight
       this.setHeight();
     }
   } catch (e) {

@@ -20,8 +20,6 @@
  * @fileoverview This represents the service layer that talks to OSAPI
  * endpoints. All RPC requests should go into this class.
  */
-var shindig = shindig || {};
-shindig.container = shindig.container || {};
 
 
 /**
@@ -55,11 +53,11 @@ shindig.container.Service.prototype.onConstructed = function(opt_config) {};
  * request.sameDomain and request.aspDomain. The appropriate optional
  * callback opt_callback will be called, after a response is received.
  * @param {Object} request JSON object representing the request.
- * @param {Function=} opt_callback function to call upon data receive.
+ * @param {function(Object)=} opt_callback function to call upon data receive.
  */
 shindig.container.Service.prototype.getGadgetMetadata = function(
     request, opt_callback) {
-  var callback = opt_callback || function() {};
+  var callback = opt_callback || function(a) {};
   var self = this;
   osapi.gadgets.getMetadata(request, function(response) {
     if (response.error) {

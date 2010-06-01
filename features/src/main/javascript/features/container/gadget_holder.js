@@ -19,9 +19,6 @@
 /**
  * @fileoverview This represents an HTML element and the associated gadget.
  */
-var shindig = shindig || {};
-shindig.container = shindig.container || {};
-
 
 /**
  * @param {number} siteId The id of site containing this holder.
@@ -45,14 +42,14 @@ shindig.container.GadgetHolder = function(siteId, el) {
 
   /**
    * JSON metadata for gadget
-   * @type {Object}
+   * @type {Object?}
    * @private
    */
   this.gadgetInfo_ = null;
 
   /**
    * View parameters to pass to gadget.
-   * @type {Object}
+   * @type {Object?}
    * @private
    */
   this.gadgetParams_ = null;
@@ -66,28 +63,28 @@ shindig.container.GadgetHolder = function(siteId, el) {
 
   /**
    * Gadget rendering parameters
-   * @type {Object}
+   * @type {Object?}
    * @private
    */
   this.renderParams_ = null;
 
   /**
    * Unique string gadget ID. Used for DOM IDs/names.
-   * @type {string}
+   * @type {string?}
    * @private
    */
   this.iframeId_ = null;
 
   /**
    * Name of current view being rendered.
-   * @type {string}
+   * @type {string?}
    * @private
    */
   this.view_ = null;
 
   /**
    * JSON metadata about current view being rendered.
-   * @type {Object}
+   * @type {Object?}
    * @private
    */
   this.viewInfo_ = null;
@@ -96,7 +93,7 @@ shindig.container.GadgetHolder = function(siteId, el) {
    * A dynamically set social/security token.
    * Social tokens are sent with original view URLs but may need
    * to be refreshed for long lived gadgets.
-   * @type {string}
+   * @type {string?}
    * @private
    */
   this.securityToken_ = null;
@@ -121,7 +118,7 @@ shindig.container.GadgetHolder.prototype.getElement = function() {
 
 
 /**
- * @return {string} The unique string ID for gadget iframe.
+ * @return {string|null} The unique string ID for gadget iframe.
  */
 shindig.container.GadgetHolder.prototype.getIframeId = function() {
   return this.iframeId_;
@@ -129,7 +126,7 @@ shindig.container.GadgetHolder.prototype.getIframeId = function() {
 
 
 /**
- * @return {Object} The metadata of gadget.
+ * @return {Object|null} The metadata of gadget.
  */
 shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
   return this.gadgetInfo_;
@@ -145,7 +142,7 @@ shindig.container.GadgetHolder.prototype.dispose = function() {
 
 
 /**
- * @return {string} The URL of current gadget.
+ * @return {string|null} The URL of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getUrl = function() {
   return (this.gadgetInfo_) ? this.gadgetInfo_['url'] : null;
@@ -153,7 +150,7 @@ shindig.container.GadgetHolder.prototype.getUrl = function() {
 
 
 /**
- * @return {string} The view of current gadget.
+ * @return {string|null} The view of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getView = function() {
   return this.view_;
@@ -161,7 +158,7 @@ shindig.container.GadgetHolder.prototype.getView = function() {
 
 
 /**
- * @return {string} The iframe element containing gadget.
+ * @return {Node} The iframe element containing gadget.
  */
 shindig.container.GadgetHolder.prototype.getIframeElement = function() {
   return this.el_.firstChild;
@@ -291,7 +288,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
     }
   }
 
-  uri = this.addHashParam_(uri, 'mid', this.siteId_);
+  uri = this.addHashParam_(uri, 'mid', String(this.siteId_));
 
   if (this.hasGadgetParams_) {
     var gadgetParamText = gadgets.json.stringify(this.gadgetParams_);
@@ -311,7 +308,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
  */
 shindig.container.GadgetHolder.prototype.updateBooleanParam_ = function(uri, param) {
   if (this.renderParams_[param]) {
-    uri = this.addQueryParam_(uri, param, 1);
+    uri = this.addQueryParam_(uri, param, "1");
   }
   return uri;
 };
@@ -321,7 +318,7 @@ shindig.container.GadgetHolder.prototype.updateBooleanParam_ = function(uri, par
  * Replace user prefs specified in url with only those specified. This will
  * maintain each user prefs existence (or lack of), order (from left to right)
  * and its appearance (in query params or fragment).
- * @param {string} url The URL possibly containing user preferences parameters
+ * @param {string} uri The URL possibly containing user preferences parameters
  *     prefixed by up_.
  * @return {string} The URL with up_ replaced by those specified in userPrefs.
  * @private

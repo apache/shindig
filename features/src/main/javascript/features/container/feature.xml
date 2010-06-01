@@ -19,6 +19,7 @@ under the License.
 -->
 <feature>
   <name>container</name>
+  <dependency>globals</dependency>
   <dependency>core</dependency>
   <dependency>osapi</dependency>
   <dependency>rpc</dependency>

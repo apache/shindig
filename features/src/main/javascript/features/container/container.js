@@ -20,9 +20,6 @@
  * @fileoverview This represents the container for the current window or create
  * the container if none already exists.
  */
-var shindig = shindig || {};
-shindig.container = shindig.container || {};
-
 
 /**
  * @param {Object=} opt_config Configuration JSON.
@@ -45,27 +42,28 @@ shindig.container.Container = function(opt_config) {
   /**
    * @type {boolean}
    */
-  this.renderDebug_ = shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.RENDER_DEBUG, false);
+  this.renderDebug_ = Boolean(shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ContainerConfig.RENDER_DEBUG, false));
 
   /**
    * @type {boolean}
    */
-  this.renderTest_ = shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.RENDER_TEST, false);
+  this.renderTest_ = Boolean(shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ContainerConfig.RENDER_TEST, false));
 
   /**
    * @type {boolean}
    */
-  this.sameDomain_ = shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.SAME_DOMAIN, true);
+  this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ContainerConfig.SAME_DOMAIN, true));
 
   /**
+   * Security token refresh interval (in ms) for debugging.
    * @type {number}
    */
-  this.tokenRefreshInterval_ = shindig.container.util.getSafeJsonValue(config,
+  this.tokenRefreshInterval_ = Number(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
-      30 * 60 * 1000);
+      30 * 60 * 1000));
 
   /**
    * @type {shindig.container.Service}
@@ -73,8 +71,8 @@ shindig.container.Container = function(opt_config) {
   this.service_ = new shindig.container.Service(config);
 
   /**
-   * Security token refresh interval (in ms) for debugging.
-   * @type {Object}
+   * result from calling window.setInterval()
+   * @type {number|null}
    */
   this.tokenRefreshTimer_ = null;
 
@@ -136,7 +134,7 @@ shindig.container.Container.prototype.getGadgetHolder = function(id) {
  * @param {string} gadgetUrl The URI of the gadget
  * @param {Object} gadgetParams view params for the gadget
  * @param {Object} renderParams render parameters, including the view
- * @param {Function=} opt_callback Callback that occurs after gadget is loaded
+ * @param {function(Object)=} opt_callback Callback that occurs after gadget is loaded
  */
 shindig.container.Container.prototype.navigateGadget = function(
     site, gadgetUrl, gadgetParams, renderParams, opt_callback) {
@@ -217,7 +215,7 @@ shindig.container.Container.prototype.onConstructed = function(opt_config) {};
 // -----------------------------------------------------------------------------
 
 /**
- * Enumeation of configuration keys for this container. This is specified in
+ * Enumeration of configuration keys for this container. This is specified in
  * JSON to provide extensible configuration. These enum values are for
  * documentation purposes only, it is expected that clients use the string
  * values.
@@ -322,7 +320,7 @@ shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUr
 /**
  * Collect all URLs of gadgets that require tokens refresh. This comes from both
  * preloaded gadgets and navigated-to gadgets.
- * @return {array} An array of URLs of gadgets.
+ * @return {Array} An array of URLs of gadgets.
  * @private
  */
 shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
