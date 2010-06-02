@@ -171,7 +171,7 @@ IoTest.prototype.testNoMethod_nonDefaultRefresh = function() {
         resp = data;
       },
       {
-        "REFRESH_INTERVAL" : 1800,
+        "REFRESH_INTERVAL" : 1800
       });
   this.assertEquals('some data', resp.text);
 };
@@ -194,7 +194,7 @@ IoTest.prototype.testNoMethod_disableRefresh = function() {
         resp = data;
       },
       {
-        "REFRESH_INTERVAL" : 0,
+        "REFRESH_INTERVAL" : 0
       });
   this.assertEquals('some data', resp.text);
 };
@@ -772,7 +772,7 @@ IoTest.prototype.testServerFailure = function() {
         resp = data;
       },
       {
-        "CONTENT_TYPE" : "JSON",
+        "CONTENT_TYPE" : "JSON"
       });
   this.assertEquals(500, resp.rc);
   this.assertEquals(gadgets.json.stringify(["500 Error"]), gadgets.json.stringify(resp.errors));
@@ -800,7 +800,7 @@ IoTest.prototype.testJsonNonAuthoritative = function() {
         resp = data;
       },
       {
-        "CONTENT_TYPE" : "JSON",
+        "CONTENT_TYPE" : "JSON"
       });
   this.assertEquals(3, resp.data.somejsonparam);
 };
@@ -826,7 +826,7 @@ IoTest.prototype.testJson = function() {
         resp = data;
       },
       {
-        "CONTENT_TYPE" : "JSON",
+        "CONTENT_TYPE" : "JSON"
       });
   this.assertEquals(3, resp.data.somejsonparam);
 };
@@ -852,7 +852,7 @@ IoTest.prototype.testJson_malformed = function() {
         resp = data;
       },
       {
-        "CONTENT_TYPE" : "JSON",
+        "CONTENT_TYPE" : "JSON"
       });
   this.assertEquals("500 Failed to parse JSON", resp.errors[0]);
 };
@@ -865,7 +865,7 @@ IoTest.prototype.testPreload = function() {
       "body" : "preloadedbody",
       "headers": {
         "set-cookie": ["foo=bar","baz=quux"],
-        "location": ["somewhere"],
+        "location": ["somewhere"]
       }
     }
   ];
@@ -907,7 +907,7 @@ IoTest.prototype.testPreloadMiss_postRequest = function() {
     {
       "id": "http://target.example.com/somepage",
       "rc" : 200,
-      "body" : "preloadedbody",
+      "body" : "preloadedbody"
     }
   ];
 
@@ -943,7 +943,7 @@ IoTest.prototype.testPreloadMiss_wrongUrl = function() {
     {
       "id": "http://target.example.com/somepage2",
       "rc" : 200,
-      "body" : "preloadedbody",
+      "body" : "preloadedbody"
     }
   ];
 
@@ -971,7 +971,7 @@ IoTest.prototype.testPreload_error404 = function() {
   gadgets.io.preloaded_ = [
     {
       "id": "http://target.example.com/somepage",
-      "rc" : 404,
+      "rc" : 404
     }
   ];
 
@@ -1010,7 +1010,7 @@ IoTest.prototype.testPreload_oauthApproval = function() {
       "id": "http://target.example.com/somepage",
       "rc" : 200,
       "oauthState" : "stateinfo",
-      "oauthApprovalUrl" : "http://example.com/approve",
+      "oauthApprovalUrl" : "http://example.com/approve"
     }
   ];
 

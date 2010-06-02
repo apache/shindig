@@ -174,7 +174,7 @@ ConfigTest.prototype.testLikeValidator = function() {
     key1: function(data) {
       key1value = data;
       return true;
-    },
+    }
   });
 
   this.assertTrue(validator({key0:"Key0", key1: "Key1"}));
@@ -193,7 +193,7 @@ ConfigTest.prototype.testLikeValidatorWithFailure = function() {
     key1: function(data) {
       key1value = data;
       return true;
-    },
+    }
   });
 
   this.assertFalse(validator({key0:"Key0", key1: "Key1"}));
