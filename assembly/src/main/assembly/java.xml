@@ -26,7 +26,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <outputDirectory>shindig-${project.version}-java</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <includes>
@@ -39,7 +39,7 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <outputDirectory>shindig-${project.version}-java</outputDirectory>
       <directory>../</directory>
       <includes>
         <include>UPGRADING</include>
@@ -51,7 +51,7 @@
       </excludes>
    </fileSet>
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <outputDirectory>shindig-${project.version}-java</outputDirectory>
       <directory>../java</directory>
       <includes>
         <include>LICENSE</include>
@@ -61,12 +61,12 @@
   <files>
     <file>
       <source>../java/README</source>
-      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <outputDirectory>shindig-${project.version}-java</outputDirectory>
       <filtered>true</filtered>
     </file>
     <file>
       <source>../java/NOTICE</source>
-      <outputDirectory>shindig-${pom.version}-java</outputDirectory>
+      <outputDirectory>shindig-${projet.version}-java</outputDirectory>
       <filtered>true</filtered>
     </file>
   </files>

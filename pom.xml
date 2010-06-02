@@ -490,7 +490,7 @@
             <artifactId>maven-jetty-plugin</artifactId>
             <configuration>
               <tempDirectory>${basedir}/java/server/target/work</tempDirectory>
-              <webApp>${basedir}/java/server/target/shindig-server-${pom.version}.war</webApp>
+              <webApp>${basedir}/java/server/target/shindig-server-${project.version}.war</webApp>
               <contextPath>/</contextPath>
             </configuration>
           </plugin>
@@ -554,7 +554,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-site-plugin</artifactId>
             <configuration>
-              <stagingSiteURL>scp://people.apache.org/www/shindig.apache.org/shindig-1.1.x/${pom.version}</stagingSiteURL>
+              <stagingSiteURL>scp://people.apache.org/www/shindig.apache.org/shindig-1.1.x/${project.version}</stagingSiteURL>
             </configuration>
           </plugin>
          <plugin>
@@ -901,7 +901,7 @@
               <xslFile>${basedir}/etc/to-committers.xsl</xslFile>
               <srcIncludes>pom.xml</srcIncludes>
               <srcDir>${basedir}</srcDir>
-              <destDir>${build.directory}</destDir>
+              <destDir>${project.build.directory}</destDir>
               <fileNameRegex>pom.xml</fileNameRegex>
               <fileNameReplacement>COMMITTERS</fileNameReplacement>
             </configuration>
