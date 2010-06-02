@@ -216,6 +216,41 @@ opensocial.Container.prototype.requestData = function(dataRequest, callback) {};
 
 
 /**
+ * Creates a new album and returns the ID of the album created.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {opensocial.Album} album The album to create.
+ * @return {Object} A request object
+ * @private
+ */
+opensocial.Container.prototype.newCreateAlbumRequest = function(idSpec, album) {};
+
+/**
+ * Creates a new media item in the album and returns the ID of the album created.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {string} albumId The ID of album to add the media item to.
+ * @param {openSocial.MediaItem} mediaItem The media item instance to add to the album.
+ * @return {Object} A request object
+ * @private
+ */
+opensocial.Container.prototype.newCreateMediaItemRequest = function(idSpec, albumId,
+    mediaItem) {};
+
+/**
+ * Deletes the album specified.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {string} albumId The ID of the album to create.
+ * @return {Object} A request object
+ * @private
+ */
+opensocial.Container.prototype.newDeleteAlbumRequest = function(idSpec, albumId) {};
+
+/**
  * Request a profile for the specified person id.
  * When processed, returns a Person object.
  *
@@ -297,6 +332,31 @@ opensocial.Container.prototype.newUpdatePersonAppDataRequest = function(
 opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
     keys) {};
 
+/**
+ * Updates the fields for an album specified in the params.
+ * The following fields cannot be set: MEDIA_ITEM_COUNT, OWNER_ID, ID.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
+ *    to own the album.
+ * @param {string} albumId The ID of album to update.
+ * @param {Object.<opensocial.Album.Field, Object>=} opt_params The album fields to update.
+ * @return {Object} A request object
+ */
+opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId, opt_params) {};
+
+/**
+ * Updates the fields for a media item specified in the params.
+ * The following fields cannot be set: ID, CREATED, ALBUM_ID, FILE_SIZE, NUM_COMMENTS.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
+ *    own the album/media item.
+ * @param {string} albumId The ID of the album containing the media item to update.
+ * @param {string} mediaItemId ID of media item to update.
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params The media item fields to update.
+ * @return {Object} A request object
+ */
+opensocial.Container.prototype.newUpdateMediaItemRequest = function(idSpec, albumId,
+    mediaItemId, opt_params) {};
 
 /**
  * Used to request an activity stream from the server.
@@ -312,6 +372,8 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
  */
 opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {};
+
+opensocial.Container.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {};
 
 opensocial.Container.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {};
 opensocial.Container.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {};
@@ -349,6 +411,23 @@ opensocial.Container.prototype.newPerson = function(opt_params, opt_isOwner,
  */
 opensocial.Container.prototype.newActivity = function(opt_params) {
   return new opensocial.Activity(opt_params);
+};
+
+/**
+ * Get a collection of images, movies, and audio.
+ * Used when creating albums on the server.
+ *
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
+ *    Any other fields that should be set on the album object;
+ *    all of the defined
+ *    <a href="opensocial.Album.Field.html">Field</a>s
+ *    are supported
+ *
+ * @return {opensocial.Album} the album object
+ * @private
+ */
+opensocial.Container.prototype.newAlbum = function(opt_params) {
+  return new opensocial.Album(opt_params);
 };
 
 

@@ -47,7 +47,7 @@ public class RestfullCollectionConverter extends AbstractCollectionConverter {
   @SuppressWarnings("unchecked")
   @Override
   public boolean canConvert(Class clazz) {
-    return (RestfulCollection.class.isAssignableFrom(clazz));
+    return RestfulCollection.class.isAssignableFrom(clazz);
   }
 
   /**

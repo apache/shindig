@@ -23,6 +23,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Element;
@@ -44,43 +45,40 @@ import com.google.inject.Inject;
 /**
  * Rewrite links to referenced content in a stylesheet
  */
-public class CssRequestRewriter implements RequestRewriter {
+public class CssResponseRewriter implements ResponseRewriter {
 
-  private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
+  private static final Logger logger = Logger.getLogger(CssResponseRewriter.class.getName());
 
   private final CajaCssLexerParser cssParser;
   private final ProxyUriManager proxyUriManager;
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
 
   @Inject
-  public CssRequestRewriter(CajaCssLexerParser cssParser,
+  public CssResponseRewriter(CajaCssLexerParser cssParser,
       ProxyUriManager proxyUriManager, ContentRewriterFeature.Factory rewriterFeatureFactory) {
     this.cssParser = cssParser;
     this.proxyUriManager = proxyUriManager;
     this.rewriterFeatureFactory = rewriterFeatureFactory;
   }
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) throws RewritingException {
+  public void rewrite(HttpRequest request, HttpResponseBuilder original) throws RewritingException {
     ContentRewriterFeature.Config config = rewriterFeatureFactory.get(request);
     if (!RewriterUtils.isCss(request, original)) {
-      return false;
+      return;
     }
     
-    String css = content.getContent();
+    String css = original.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
         new UriMaker(proxyUriManager, config), sw, false);
-    content.setContent(sw.toString());
-
-    return true;
+    original.setContent(sw.toString());
   }
 
   /**
    * Rewrite the given CSS content and optionally extract the import references.
    * @param content CSS content
    * @param source Uri of content
-   * @param rewriter Rewrite urls
+   * @param uriMaker a Uri Maker
    * @param writer Output
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
@@ -115,7 +113,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * Rewrite the CSS content in a style DOM node.
    * @param styleNode Rewrite the CSS content of this node
    * @param source Uri of content
-   * @param rewriter Rewrite urls
+   * @param uriMaker a UriMaker
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
    * @return Empty list of extracted import URIs.
@@ -149,7 +147,7 @@ public class CssRequestRewriter implements RequestRewriter {
    * Rewrite the CSS DOM in place.
    * @param styleSheet To rewrite
    * @param source  Uri of content
-   * @param rewriter  Rewrite urls
+   * @param uriMaker a UriMaker
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
    * @return Empty list of extracted import URIs.

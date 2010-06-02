@@ -25,7 +25,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
@@ -42,7 +42,9 @@ import java.util.Map;
  * 
  * See subclass doc for additional detail.
  */
-public class DomWalker {
+public final class DomWalker {
+  private DomWalker() {}
+
   /**
    * Implemented by classes that do actual manipulation of the DOM
    * while {@code DomWalker.ContentVisitor} walks it. {@code Visitor}
@@ -104,7 +106,7 @@ public class DomWalker {
    * will be revisited after the entire DOM tree is walked.
    * The DOM tree is walked in depth-first order.
    */
-  public static class Rewriter implements GadgetRewriter, RequestRewriter {
+  public static class Rewriter implements GadgetRewriter, ResponseRewriter {
     private final List<Visitor> visitors;
     
     public Rewriter(List<Visitor> visitors) {
@@ -133,13 +135,12 @@ public class DomWalker {
       rewrite(makeVisitors(gadget, gadget.getSpec().getUrl()), gadget, content);
     }
 
-    public boolean rewrite(HttpRequest request, HttpResponse original,
-        MutableContent content) throws RewritingException {
-      if (RewriterUtils.isHtml(request, original)) {
+    public void rewrite(HttpRequest request, HttpResponseBuilder builder)
+        throws RewritingException {
+      if (RewriterUtils.isHtml(request, builder)) {
         Gadget context = makeGadget(request);
-        return rewrite(makeVisitors(context, request.getGadget()), context, content);
+        rewrite(makeVisitors(context, request.getGadget()), context, builder);
       }
-      return false;
     }
     
     private boolean rewrite(List<Visitor> visitors, Gadget gadget, MutableContent content) 

@@ -32,7 +32,7 @@ import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 
 import java.io.StringReader;
 import java.util.Collections;

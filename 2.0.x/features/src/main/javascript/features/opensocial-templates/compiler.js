@@ -351,7 +351,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
           } else if (outName == 'selected' && to.tagName == 'OPTION') {
             // For the @selected attribute of an option, set the property 
             // instead to allow false values to not mark the option selected.
-            outName = '.selected'
+            outName = '.selected';
           }
 
           // TODO: reuse static array (IE6 perf).

@@ -31,12 +31,13 @@ import com.google.inject.Inject;
 /**
  * Basic registry -- just iterates over rewriters and invokes them sequentially.
  */
-public class DefaultRequestRewriterRegistry implements RequestRewriterRegistry {
-  protected final List<RequestRewriter> rewriters;
+public class DefaultResponseRewriterRegistry implements ResponseRewriterRegistry {
+  protected final List<ResponseRewriter> rewriters;
   protected final GadgetHtmlParser htmlParser;
 
   @Inject
-  public DefaultRequestRewriterRegistry(List<RequestRewriter> rewriters,
+  public DefaultResponseRewriterRegistry(
+      List<ResponseRewriter> rewriters,
       GadgetHtmlParser htmlParser) {
     if (rewriters == null) {
       rewriters = Collections.emptyList();
@@ -48,16 +49,13 @@ public class DefaultRequestRewriterRegistry implements RequestRewriterRegistry {
   /** {@inheritDoc} */
   public HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
       throws RewritingException {
-    MutableContent mc = new MutableContent(htmlParser, resp);
+    HttpResponseBuilder builder = new HttpResponseBuilder(htmlParser, resp);
 
-    boolean wasRewritten = false;
-    for (RequestRewriter rewriter : rewriters) {
-      wasRewritten |= rewriter.rewrite(req, resp, mc);
+    for (ResponseRewriter rewriter : rewriters) {
+      rewriter.rewrite(req, builder);
     }
-
-    if (wasRewritten) {
-      return new HttpResponseBuilder(resp).setResponseString(mc.getContent()).create();
-    }
-    return resp;
+    
+    // Returns the original HttpResponse if no changes have been made.
+    return builder.create();
   }
 }

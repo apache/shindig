@@ -347,6 +347,25 @@ opensocial.newActivity = function(params) {
   return opensocial.Container.get().newActivity(params);
 };
 
+/**
+ * Creates an album.
+ * Represents a collection of images, movies, and audio.
+ * Used when creating albums on the server.
+ *
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
+ *    Any other fields that should be set on the album object;
+ *    all of the defined
+ *    <a href="opensocial.Album.Field.html">Field</a>s
+ *    are supported
+ *
+ * @return {opensocial.Album} The new
+ *    <a href="opensocial.Album.html">album</a> object
+ * @member opensocial
+ */
+opensocial.newAlbum = function(opt_params) {
+  return opensocial.Container.get().newAlbum(opt_params);
+};
+
 
 /**
  * Creates a media item.

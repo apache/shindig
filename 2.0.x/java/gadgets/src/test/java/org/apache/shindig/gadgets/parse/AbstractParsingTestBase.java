@@ -43,11 +43,9 @@ public abstract class AbstractParsingTestBase {
   protected String loadFile(String path) throws IOException {
     InputStream is = this.getClass().getClassLoader().getResourceAsStream(path);
     // ENABLE THIS if you have troubles in your IDE loading resources.
-    /*
-    if (is == null) {
-      is = new FileInputStream(new File("/shindig/base/java/gadgets/src/test/resources/" + path));
-    }
-    */
+    /*if (is == null) {
+      is = new FileInputStream(new File("/path/to/your/files/" + path));
+    }*/
     return IOUtils.toString(is);
   }
 

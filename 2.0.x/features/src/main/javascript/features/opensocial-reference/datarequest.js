@@ -320,6 +320,44 @@ opensocial.DataRequest.prototype.asArray = function(keys) {
 
 
 /**
+ * Creates a new album and returns the ID of the album created.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {opensocial.Album} album The album to create.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newCreateAlbumRequest = function(idSpec, album) {
+  return opensocial.Container.get().newCreateAlbumRequest(idSpec, album);
+};
+
+/**
+ * Creates a new media item in the album and returns the ID of the album created.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {string} albumId The ID of album to add the media item to.
+ * @param {openSocial.MediaItem} mediaItem The MediaItem to add to the album.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newCreateMediaItemRequest = function(idSpec, albumId,
+    mediaItem) {
+  return opensocial.Container.get().newCreateMediaItemRequest(idSpec, albumId, mediaItem)
+};
+
+/**
+ * Deletes the album specified.
+ *
+ * @param {opensocial.IdSpec} idSpec The ID of the used to specify which people/groups
+ *   to create an album for.
+ * @param {string} albumId The ID of the album to create.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newDeleteAlbumRequest = function(idSpec, albumId) {
+  return opensocial.Container.get().newDeleteAlbumRequest(idSpec, albumId);
+};
+
+/**
  * Creates an item to request a profile for the specified person ID.
  * When processed, returns a
  * <a href="opensocial.Person.html"><code>Person</code></a> object.
@@ -379,6 +417,30 @@ opensocial.DataRequest.prototype.newFetchPeopleRequest = function(idSpec,
 /**
  * @static
  * @class
+ * @name opensocial.DataRequest.AlbumRequestFields
+ * @enum {string}
+ */
+opensocial.DataRequest.AlbumRequestFields = {
+  /**
+   * When paginating, the index of the first item to fetch.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.AlbumRequestFields
+   */
+  FIRST : 'first',
+
+  /**
+   * The maximum number of items to fetch; defaults to 20.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.AlbumRequestFields
+   */
+  MAX : 'max'
+};
+
+/**
+ * @static
+ * @class
  * @name opensocial.DataRequest.DataRequestFields
  * @enum {string}
  */
@@ -426,6 +488,37 @@ opensocial.DataRequest.prototype.newFetchPersonAppDataRequest = function(idSpec,
       this.asArray(keys), opt_params);
 };
 
+/**
+ * Updates the fields for an album specified in the params.
+ * The following fields cannot be set: MEDIA_ITEM_COUNT, OWNER_ID, ID.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
+ *    to own the album.
+ * @param {string} albumId The ID of album to update.
+ * @param {Object.<opensocial.Album.Field, Object>=} opt_params The Album Fields to update.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newUpdateAlbumRequest = function(idSpec, albumId,
+    opt_params) {
+  return opensocial.Container.get().newUpdateAlbumRequest(idSpec, albumId, opt_params);
+};
+
+/**
+ * Updates the fields for a media item specified in the params.
+ * The following fields cannot be set: ID, CREATED, ALBUM_ID, FILE_SIZE, NUM_COMMENTS.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
+ *    own the album/media item.
+ * @param {string} albumId The ID of the album containing the media item to update.
+ * @param {string} mediaItemId ID of media item to update.
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params The Album Fields to update.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newUpdateMediaItemRequest = function(idSpec, albumId,
+    mediaItemId, opt_params) {
+  return opensocial.Container.get().newUpdateMediaItemRequest(idSpec, albumId,
+      mediaItemId, opt_params);
+};
 
 /**
  * Creates an item to request an update of an app field for the current VIEWER
@@ -520,6 +613,18 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
 
   return opensocial.Container.get().newFetchActivitiesRequest(idSpec,
       opt_params);
+};
+
+/**
+ * Creates an item to request albums from the container.
+ *
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which albms to fetch.
+ * @param {Object.<Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {
+  opt_params = opt_params || {};
+  return opensocial.Container.get().newFetchAlbumsRequest(idSpec, opt_params);
 };
 
 /**

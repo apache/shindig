@@ -41,7 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * Utility class for simplifying parsing of xml documents. Documents are not validated, and
  * loading of external files (xinclude, external entities, DTDs, etc.) are disabled.
  */
-public class XmlUtil {
+public final class XmlUtil {
   private static final Logger LOG = Logger.getLogger(XmlUtil.class.getName());
   // Handles xml errors so that they're not logged to stderr.
   private static final ErrorHandler errorHandler = new ErrorHandler() {

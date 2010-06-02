@@ -203,6 +203,33 @@ public class HttpResponseBuilderTest {
 
     // Insure that headers are stored in the order they are added
     assertEquals(Joiner.on(",").join(resp.getHeaders("Soup")), Joiner.on(",").join(soupList));
-
+  }
+  
+  @Test
+  public void noModsReturnsSameResponse() {
+    HttpResponseBuilder builder = new HttpResponseBuilder();
+    builder.setHttpStatusCode(HttpResponse.SC_BAD_GATEWAY);
+    builder.setResponseString("foo");
+    HttpResponse response = builder.create();
+    assertSame(response, builder.create());
+  }
+  
+  @Test
+  public void noModsReturnsSameResponseBuilderCtor() {
+    HttpResponseBuilder builder = new HttpResponseBuilder();
+    builder.setHttpStatusCode(HttpResponse.SC_OK);
+    HttpResponseBuilder nextBuilder = new HttpResponseBuilder(builder);
+    assertSame(builder.create(), nextBuilder.create());
+  }
+  
+  @Test
+  public void noModsReturnsSameResponseBaseCtor() {
+    HttpResponse response = new HttpResponse("foo");
+    HttpResponseBuilder builder = new HttpResponseBuilder(response);
+    assertSame(response, builder.create());
+    builder.setHttpStatusCode(HttpResponse.SC_BAD_GATEWAY);
+    HttpResponse newResponse = builder.create();
+    assertNotSame(response, newResponse);
+    assertSame(newResponse, builder.create());
   }
 }

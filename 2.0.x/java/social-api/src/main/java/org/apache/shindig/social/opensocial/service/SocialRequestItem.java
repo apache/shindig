@@ -38,8 +38,8 @@ import com.google.common.collect.ImmutableSet;
  */
 public class SocialRequestItem extends BaseRequestItem {
 
-  String USER_ID = "userId";
-  String GROUP_ID = "groupId";
+  private static final String USER_ID = "userId";
+  private static final String GROUP_ID = "groupId";
 
   public SocialRequestItem(Map<String, String[]> parameters, 
       SecurityToken token, BeanConverter converter, BeanJsonConverter jsonConverter) {

@@ -158,7 +158,7 @@ public class MapConverter extends AbstractCollectionConverter {
   @SuppressWarnings("unchecked")
   // API is not generic
   public boolean canConvert(Class clazz) {
-    return (Map.class.isAssignableFrom(clazz));
+    return Map.class.isAssignableFrom(clazz);
   }
 
 }

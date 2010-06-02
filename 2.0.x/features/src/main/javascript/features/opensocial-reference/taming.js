@@ -27,6 +27,7 @@ tamings___.push(function(imports) {
   ___.grantRead(opensocial, 'EscapeType');
   ___.grantRead(opensocial.Activity, 'Field');
   ___.grantRead(opensocial.Address, 'Field');
+  ___.grantRead(opensocial.Album, 'Field');
   ___.grantRead(opensocial.BodyType, 'Field');
   ___.grantRead(opensocial.DataRequest, 'ActivityRequestFields');
   ___.grantRead(opensocial.DataRequest, 'DataRequestFields');
@@ -69,6 +70,7 @@ tamings___.push(function(imports) {
       [window, 'JsonRpcRequestItem', Object],
       [opensocial, 'Activity', Object],
       [opensocial, 'Address', Object],
+      [opensocial, 'Album', Object],
       [opensocial, 'BodyType', Object],
       [opensocial, 'Container', Object],
       [opensocial, 'Collection', Object],
@@ -93,6 +95,7 @@ tamings___.push(function(imports) {
     [opensocial.Activity, 'getId'],
     [opensocial.Activity, 'setField'],
     [opensocial.Address, 'getField'],
+    [opensocial.Album, 'getField'],
     [opensocial.BodyType, 'getField'],
     [opensocial.Container, 'getEnvironment'],
     [opensocial.Container, 'requestSendMessage'],
@@ -101,12 +104,18 @@ tamings___.push(function(imports) {
     [opensocial.Container, 'hasPermission'],
     [opensocial.Container, 'requestPermission'],
     [opensocial.Container, 'requestData'],
+    [opensocial.Container, 'newCreateAlbumRequest'],
+    [opensocial.Container, 'newCreateMediaItemRequest'],
+    [opensocial.Container, 'newDeleteAlbumRequest'],
     [opensocial.Container, 'newFetchPersonRequest'],
     [opensocial.Container, 'newFetchPeopleRequest'],
     [opensocial.Container, 'newFetchPersonAppDataRequest'],
     [opensocial.Container, 'newUpdatePersonAppDataRequest'],
     [opensocial.Container, 'newRemovePersonAppDataRequest'],
+    [opensocial.Container, 'newUpdateAlbumRequest'],
+    [opensocial.Container, 'newUpdateMediaItemRequest'],
     [opensocial.Container, 'newFetchActivitiesRequest'],
+    [opensocial.Container, 'newFetchAlbumsRequest'],
     [opensocial.Container, 'newFetchMessageCollectionsRequest'],
     [opensocial.Container, 'newFetchMessagesRequest'],
     [opensocial.Container, 'newCollection'],
@@ -128,9 +137,15 @@ tamings___.push(function(imports) {
     [opensocial.Collection, 'getTotalSize'],
     [opensocial.Collection, 'size'],
     [opensocial.DataRequest, 'add'],
+    [opensocial.DataRequest, 'newCreateAlbumRequest'],
+    [opensocial.DataRequest, 'newCreateMediaItemRequest'],
+    [opensocial.DataRequest, 'newDeleteAlbumRequest'],
     [opensocial.DataRequest, 'newFetchActivitiesRequest'],
+    [opensocial.DataRequest, 'newFetchAlbumsRequest'],
     [opensocial.DataRequest, 'newFetchPeopleRequest'],
     [opensocial.DataRequest, 'newFetchPersonAppDataRequest'],
+    [opensocial.DataRequest, 'newUpdateAlbumRequest'],
+    [opensocial.DataRequest, 'newUpdateMediaItemRequest'],
     [opensocial.DataRequest, 'newFetchPersonRequest'],
     [opensocial.DataRequest, 'newRemovePersonAppDataRequest'],
     [opensocial.DataRequest, 'newUpdatePersonAppDataRequest'],

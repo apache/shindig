@@ -167,6 +167,7 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritescriptbasic.html"));
     Document doc = rewriteContent(rewriter, content, "default", false, true).getDocument();
 
+    // TODO: figure out why XPathWrapper can't seem to handle CajaHtmlParser's output (ns issues?)
     XPathWrapper wrapper = new XPathWrapper(doc);
 
     // Second script should contain two concatenated urls with nocache
@@ -402,11 +403,10 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
 
   @Test
   public void testNoRewriteUnknownMimeType() throws Exception {
-    MutableContent mc = control.createMock(MutableContent.class); 
     HttpRequest req = control.createMock(HttpRequest.class);
     EasyMock.expect(req.getRewriteMimeType()).andReturn("unknown");
     control.replay();
-    assertFalse(rewriter.rewrite(req, fakeResponse, mc));
+    rewriter.rewrite(req, fakeResponse);
     control.verify();
   }
 }

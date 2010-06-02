@@ -36,7 +36,7 @@ class FilesServlet extends HttpServlet {
    * but doesn't exist a 404 error is returned
    */
   public function doGet() {
-    $file = str_replace(Config::get('web_prefix') . '/gadgets/files/', '', $_SERVER["REQUEST_URI"]);
+    $file = str_replace(Config::get('web_prefix'), '', $_SERVER["REQUEST_URI"]);
     $file = Config::get('javascript_path') . $file;
     // make sure that the real path name is actually in the javascript_path, so people can't abuse this to read
     // your private data from disk .. otherwise this would be a huge privacy and security issue 

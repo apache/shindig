@@ -21,11 +21,11 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.RequestRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.RewriterUtils;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.View;
@@ -52,7 +52,7 @@ import com.google.inject.Inject;
  * - Moving all style into head and converting @imports into links
  * - Proxying referred content of images and embeds
  */
-public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
+public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
   
   private final static String JS_MIME_TYPE = "text/javascript";
 
@@ -79,15 +79,12 @@ public class HTMLContentRewriter implements GadgetRewriter, RequestRewriter {
     this.proxyingLinkRewriterFactory = proxyingLinkRewriterFactory;
   }
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) throws RewritingException {
-    if (RewriterUtils.isHtml(request, original)) {
+  public void rewrite(HttpRequest request, HttpResponseBuilder response) throws RewritingException {
+    if (RewriterUtils.isHtml(request, response)) {
       ContentRewriterFeature.Config feature = rewriterFeatureFactory.get(request);
-      return rewriteImpl(feature, request.getGadget(), request.getUri(), content,
+      rewriteImpl(feature, request.getGadget(), request.getUri(), response,
           request.getContainer(), false, request.getIgnoreCache());
     }
-    
-    return false;
   }
 
   public void rewrite(Gadget gadget, MutableContent content) throws RewritingException {

@@ -147,7 +147,7 @@ JsEvalContext.prototype.constructor_ = function(opt_data, opt_parent) {
  * inherits them in its vars_.
  * @type Object
  */
-JsEvalContext.globals_ = {}
+JsEvalContext.globals_ = {};
 
 
 /**

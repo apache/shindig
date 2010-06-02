@@ -254,7 +254,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
           je);
     }
   }
-
+  
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       CollectionOptions options, Set<String> fields, SecurityToken token) throws ProtocolException {
     List<Person> result = Lists.newArrayList();
@@ -585,7 +585,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   /**
    * Get the set of user id's from a user and group
    */
-  private Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
+  public Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
       throws JSONException {
     String userId = user.getUserId(token);
 
@@ -615,7 +615,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   /**
    * Get the set of user id's for a set of users and a group
    */
-  private Set<String> getIdSet(Set<UserId> users, GroupId group, SecurityToken token)
+  public Set<String> getIdSet(Set<UserId> users, GroupId group, SecurityToken token)
       throws JSONException {
     Set<String> ids = Sets.newLinkedHashSet();
     for (UserId user : users) {
@@ -630,7 +630,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return new JSONObject(converter.convertToString(activity));
   }
 
-  private <T> T filterFields(JSONObject object, Set<String> fields, Class<T> clz)
+  public <T> T filterFields(JSONObject object, Set<String> fields, Class<T> clz)
       throws JSONException {
     if (!fields.isEmpty()) {
       // Create a copy with just the specified fields

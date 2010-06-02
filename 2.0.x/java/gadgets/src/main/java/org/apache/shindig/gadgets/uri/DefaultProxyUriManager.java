@@ -138,6 +138,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     return uri.toUri();
   }
   
+  @SuppressWarnings("deprecation")
   public ProxyUri process(Uri uriIn) throws GadgetException {
     UriStatus status = UriStatus.BAD_URI;
     Uri uri = null;
@@ -162,9 +163,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       int start = path.indexOf(containerStr);
       if (start > 0) {
         start += containerStr.length();
-        int end = path.indexOf("&", start);
+        int end = path.indexOf('&', start);
         if (end < start) {
-          end = path.indexOf("/", start);
+          end = path.indexOf('/', start);
         }
         if (end > start) {
           // Looks like chained proxy syntax. Pull out params.

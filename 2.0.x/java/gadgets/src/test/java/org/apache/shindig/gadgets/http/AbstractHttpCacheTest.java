@@ -18,7 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -30,12 +30,10 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.auth.BasicSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.util.FakeTimeSource;
-import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.spec.RequestAuthenticationInfo;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.util.Map;
@@ -225,7 +223,6 @@ public class AbstractHttpCacheTest {
   @Test
   public void getResponseNotCacheable() {
     HttpRequest request = new HttpRequest(DEFAULT_URI);
-    String key = cache.createKey(request);
     HttpResponse response = new HttpResponseBuilder().setStrictNoCache().create();
     cache.addResponse(request, response);
 
@@ -347,10 +344,6 @@ public class AbstractHttpCacheTest {
         .setExpirationTime(expiration)
         .create();
     cache.map.put(key, response);
-
-    TimeSource fakeClock = new FakeTimeSource(expiration + 60L);
-
-    cache.setClock(fakeClock);
 
     // The cache itself still hold and return staled value, 
     // caller responsible to decide what to do about it 

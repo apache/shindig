@@ -348,6 +348,6 @@ public class ProxyHandlerTest extends ServletTestFixture {
   @Test
   public void testMimeMatchVarySupport() throws Exception {
     // We use CaptureRewrite which always rewrite - always set encoding
-    expectMime("image/*", "image/gif", "image/gif; charset=UTF-8");
+    expectMime("image/*", "image/gif", "image/gif");
   }
 }

@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -38,8 +38,8 @@ public class GIFOptimizer extends PNGOptimizer {
 
   private boolean usePng;
 
-  public GIFOptimizer(OptimizerConfig config, HttpResponse original) {
-    super(config, original);
+  public GIFOptimizer(OptimizerConfig config, HttpResponseBuilder response) {
+    super(config, response);
   }
 
   @Override

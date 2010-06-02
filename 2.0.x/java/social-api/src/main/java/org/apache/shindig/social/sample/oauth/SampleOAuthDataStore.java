@@ -45,10 +45,10 @@ public class SampleOAuthDataStore implements OAuthDataStore {
   // This needs to be long enough that an attacker can't guess it.  If the attacker can guess this
   // value before they exceed the maximum number of attempts, they can complete a session fixation
   // attack against a user.
-  private final int CALLBACK_TOKEN_LENGTH = 6;
+  private static final int CALLBACK_TOKEN_LENGTH = 6;
   
   // We limit the number of trials before disabling the request token.
-  private final int CALLBACK_TOKEN_ATTEMPTS = 5;
+  private static final int CALLBACK_TOKEN_ATTEMPTS = 5;
   
   // used to get samplecontainer data from canonicaldb.json
   private final JsonDbOpensocialService service;

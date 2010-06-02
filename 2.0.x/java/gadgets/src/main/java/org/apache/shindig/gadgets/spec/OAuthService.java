@@ -55,17 +55,17 @@ public class OAuthService {
         continue;
       }
       String childName = child.getNodeName();
-      if (childName.equals("Request")) {
+      if ("Request".equals(childName)) {
         if (requestUrl != null) {
           throw new SpecParserException("Multiple OAuth/Service/Request elements");
         }
         requestUrl = parseEndPoint("OAuth/Service/Request", (Element)child, base);
-      } else if (childName.equals("Authorization")) {
+      } else if ("Authorization".equals(childName)) {
         if (authorizationUrl != null) {
           throw new SpecParserException("Multiple OAuth/Service/Authorization elements");
         }
         authorizationUrl = parseAuthorizationUrl((Element)child, base);
-      } else if (childName.equals("Access")) {
+      } else if ("Access".equals(childName)) {
         if (accessUrl != null) {
           throw new SpecParserException("Multiple OAuth/Service/Access elements");
         }

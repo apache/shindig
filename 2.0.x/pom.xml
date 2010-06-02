@@ -96,9 +96,9 @@
     </mailingList>
     <mailingList>
       <name>Shindig User List</name>
-      <subscribe>user-subscribe@shindig.apache.org</subscribe>
-      <unsubscribe>user-unsubscribe@shindig.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/shindig-user/</archive>
+      <subscribe>users-subscribe@shindig.apache.org</subscribe>
+      <unsubscribe>users-unsubscribe@shindig.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/shindig-users/</archive>
     </mailingList>
     <mailingList>
       <name>Shindig Commit List</name>
@@ -932,7 +932,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.3.1</version>
           <configuration>
             <source>1.5</source>
             <target>1.5</target>
@@ -973,12 +973,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.3.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.3.1</version>
           <executions>
            <execution>
              <goals>
@@ -1023,7 +1023,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.4.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -1037,7 +1037,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.1</version>
+          <version>2.1.2</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -1241,7 +1241,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.1.2</version>
+        <version>2.2</version>
       </plugin>
     </plugins>
   </reporting>
@@ -1303,13 +1303,7 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.5.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymockclassextension</artifactId>
-      <version>2.4</version>
+      <version>3.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -1399,10 +1393,16 @@
         <artifactId>json</artifactId>
         <version>20070829</version>
       </dependency>
+     <dependency>
+       <groupId>caja</groupId>
+       <artifactId>htmlparser</artifactId>
+       <version>r4067</version>
+       <scope>compile</scope>
+     </dependency>
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r3950</version>
+        <version>r4067</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
@@ -1413,13 +1413,13 @@
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth</artifactId>
-        <version>20090825</version>
+        <version>20100527</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>net.oauth.core</groupId>
         <artifactId>oauth-provider</artifactId>
-        <version>20090531</version>
+        <version>20100527</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
@@ -1570,7 +1570,7 @@
       <dependency>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-web</artifactId>
-        <version>1.0-incubating-SNAPSHOT</version>
+        <version>1.0.0-incubating</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

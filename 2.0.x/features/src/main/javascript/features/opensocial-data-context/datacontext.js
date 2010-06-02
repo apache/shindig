@@ -222,7 +222,7 @@ opensocial.data.DataContext = function() {
      * @param {ResponseItem|Object} obj The data object.
      */
     putDataSet : function(key, obj) {
-      putDataSet(key, obj, true)
+      putDataSet(key, obj, true);
     }, 
     
     /**
@@ -239,7 +239,7 @@ opensocial.data.DataContext = function() {
       }
       fireCallbacks(keys);
     }
-  }
+  };
 }();
 
 

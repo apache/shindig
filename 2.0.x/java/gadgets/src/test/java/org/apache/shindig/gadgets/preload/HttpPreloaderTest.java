@@ -63,8 +63,6 @@ public class HttpPreloaderTest extends PreloaderTestFixture {
       }
       return oauthFetcher.fetch(request);
     }
-
-    public void normalizeProtocol(HttpRequest request) {}
   };
 
   private void checkRequest(HttpRequest request) {

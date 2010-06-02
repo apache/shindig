@@ -42,7 +42,6 @@ public class RpcServlet extends InjectedServlet {
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
 
-  private static final int POST_REQUEST_MAX_SIZE = 1024 * 128;
   private static final Logger logger = Logger.getLogger("org.apache.shindig.gadgets");
 
   private JsonRpcHandler jsonHandler;

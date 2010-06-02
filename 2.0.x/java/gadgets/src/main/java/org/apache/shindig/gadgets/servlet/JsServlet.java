@@ -20,6 +20,8 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.common.collect.ImmutableSet;
 
 import com.google.common.collect.Maps;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.servlet.HttpUtil;
@@ -38,6 +40,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +50,13 @@ import javax.servlet.http.HttpServletResponse;
  * Used by type=URL gadgets in loading JavaScript resources.
  */
 public class JsServlet extends InjectedServlet {
+  static final String ONLOAD_JS_TPL = "(function() {" +
+      "var nm='%s';" +
+      "if (typeof window[nm]==='function') {" +
+      "window[nm]();" +
+      '}' +
+      "})();";
+  private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
   private FeatureRegistry registry;
   @Inject
@@ -146,6 +156,16 @@ public class JsServlet extends InjectedServlet {
         }
         jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
       }
+    }
+    
+    String onloadStr = req.getParameter("onload");
+    if (onloadStr != null) {
+      if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid onload callback: " +
+            onloadStr);
+        return;
+      }
+      jsData.append(String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(onloadStr)));
     }
     
     if (jsData.length() == 0) {

@@ -250,9 +250,7 @@ public class BaseRequestItem implements RequestItem {
     }
     else if (param instanceof List<?>) {
       // Assume it's a list of strings.  This is not type-safe.
-      @SuppressWarnings("unchecked")
-      List<String> listParam = (List<String>) param;
-      return listParam;
+      return (List<String>) param;
     } else if (param instanceof JSONArray) {
       try {
         JSONArray jsonArray = (JSONArray)param;

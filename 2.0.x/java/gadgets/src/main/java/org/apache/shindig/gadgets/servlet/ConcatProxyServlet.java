@@ -30,7 +30,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -63,7 +63,7 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   private RequestPipeline requestPipeline;
   private ConcatUriManager concatUriManager;
-  private RequestRewriterRegistry contentRewriterRegistry;
+  private ResponseRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
@@ -76,7 +76,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
 
   @Inject
-  public void setContentRewriterRegistry(RequestRewriterRegistry contentRewriterRegistry) {
+  public void setContentRewriterRegistry(ResponseRewriterRegistry contentRewriterRegistry) {
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
 

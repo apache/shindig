@@ -399,7 +399,7 @@ public class OAuthRequestTest {
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
     assertEquals(-1, response.getCacheTtl());
-    assertEquals(OAuthError.UNAUTHENTICATED.toString(), response.getMetadata().get("oauthError"));
+    assertEquals(OAuthError.UNAUTHENTICATED.name(), response.getMetadata().get("oauthError"));
   }
 
   @Test
@@ -418,7 +418,7 @@ public class OAuthRequestTest {
       assertEquals("", response.getResponseAsString());
       assertEquals(403, response.getHttpStatusCode());
       assertEquals(-1, response.getCacheTtl());
-      assertEquals(OAuthError.UNAUTHENTICATED.toString(), response.getMetadata().get("oauthError"));
+      assertEquals(OAuthError.UNAUTHENTICATED.name(), response.getMetadata().get("oauthError"));
     }
   }
 
@@ -468,7 +468,7 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.BAD_OAUTH_CONFIGURATION.toString(),
+    assertEquals(OAuthError.BAD_OAUTH_TOKEN_URL.name(),
         response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     assertNotNull(errorText);
@@ -495,7 +495,7 @@ public class OAuthRequestTest {
 
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.BAD_OAUTH_CONFIGURATION.toString(),
+    assertEquals(OAuthError.BAD_OAUTH_TOKEN_URL.name(),
         response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     assertNotNull(errorText);
@@ -518,7 +518,7 @@ public class OAuthRequestTest {
 
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.BAD_OAUTH_CONFIGURATION.toString(),
+    assertEquals(OAuthError.BAD_OAUTH_TOKEN_URL.name(),
         response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     assertNotNull(errorText);
@@ -606,11 +606,11 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.BAD_OAUTH_CONFIGURATION.toString(),
+    assertEquals(OAuthError.INVALID_URL.name(),
         response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     assertNotNull(errorText);
-    checkStringContains("should report invalid url", errorText, "Invalid url: foo");
+    checkStringContains("should report invalid url", errorText, "Invalid URL: foo");
   }
   
   @Test
@@ -627,11 +627,11 @@ public class OAuthRequestTest {
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.BAD_OAUTH_CONFIGURATION.toString(),
+    assertEquals(OAuthError.INVALID_URL.name(),
         response.getMetadata().get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     assertNotNull(errorText);
-    checkStringContains("should report invalid url", errorText, "Invalid url: ");
+    checkStringContains("should report invalid url", errorText, "Invalid URL: ");
   }
   
   @Test
@@ -649,7 +649,7 @@ public class OAuthRequestTest {
     response = friend.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(403, response.getHttpStatusCode());
-    assertEquals(OAuthError.NOT_OWNER.toString(), response.getMetadata().get("oauthError"));
+    assertEquals(OAuthError.NOT_OWNER.name(), response.getMetadata().get("oauthError"));
   }
 
   @Test
@@ -755,7 +755,7 @@ public class OAuthRequestTest {
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
-    assertEquals("parameter_missing", response.getMetadata().get("oauthError"));
+    assertEquals("parameter_absent", response.getMetadata().get("oauthError"));
     assertNull(response.getMetadata().get("oauthApprovalUrl"));
   }
 
@@ -850,7 +850,7 @@ public class OAuthRequestTest {
     assertEquals("", response.getResponseAsString());
     Map<String, String> metadata = response.getMetadata();
     assertNotNull(metadata);
-    assertEquals("UNKNOWN_PROBLEM", metadata.get("oauthError"));
+    assertEquals("MISSING_OAUTH_PARAMETER", metadata.get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("oauthErrorText mismatch", errorText,
         "No oauth_token returned from service provider");
@@ -872,7 +872,7 @@ public class OAuthRequestTest {
     assertEquals("", response.getResponseAsString());
     Map<String, String> metadata = response.getMetadata();
     assertNotNull(metadata);
-    assertEquals("UNKNOWN_PROBLEM", metadata.get("oauthError"));
+    assertEquals("MISSING_OAUTH_PARAMETER", metadata.get("oauthError"));
     String errorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("oauthErrorText mismatch", errorText,
         "No oauth_token_secret returned from service provider");
@@ -907,7 +907,7 @@ public class OAuthRequestTest {
     assertEquals("", response.getResponseAsString());
     Map<String, String> metadata = response.getMetadata();
     assertNotNull(metadata);
-    assertEquals("UNKNOWN_PROBLEM", metadata.get("oauthError"));
+    assertEquals("MISSING_OAUTH_PARAMETER", metadata.get("oauthError"));
     checkStringContains("oauthErrorText mismatch", metadata.get("oauthErrorText"),
         "some vague error");
     checkStringContains("oauthErrorText mismatch", metadata.get("oauthErrorText"),
@@ -1145,6 +1145,7 @@ public class OAuthRequestTest {
     client.getBaseArgs().setRequestTokenSecret("garbage");
 
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
+
     assertEquals("", response.getResponseAsString());
     assertEquals(1, serviceProvider.getRequestTokenCount());
     assertEquals(1, serviceProvider.getAccessTokenCount());
@@ -1457,11 +1458,11 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     String tricky = "%6fpensocial_owner_id=gotcha";
     HttpResponse resp = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL + '?' + tricky);
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name opensocial_owner_id, applications may not override opensocial " +
-        "or oauth parameters");
+        "Invalid parameter name opensocial_owner_id, applications may not override " +
+        "oauth, xoauth, or opensocial parameters");
   }
 
   @Test
@@ -1469,11 +1470,11 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     String tricky = "%6fpensocial_owner_id=gotcha";
     HttpResponse resp = client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, tricky);
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name opensocial_owner_id, applications may not override opensocial " +
-        "or oauth parameters");
+        "Invalid parameter name opensocial_owner_id, applications may not override " +
+        "oauth, xoauth, or opensocial parameters");
   }
 
   @Test
@@ -1557,10 +1558,10 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp =
         client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL + "?opensocial_foo=bar", null);
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name opensocial_foo");
+        "Invalid parameter name opensocial_foo");
   }
 
   @Test
@@ -1568,10 +1569,10 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp =
         client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL + "?oauth_foo=bar", "name=value");
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name oauth_foo");
+        "Invalid parameter name oauth_foo");
   }
 
   @Test
@@ -1579,20 +1580,20 @@ public class OAuthRequestTest {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp =
         client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "opensocial_foo=bar");
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name opensocial_foo");
+        "Invalid parameter name opensocial_foo");
   }
 
   @Test
   public void testStripOAuthParamsFromBody() throws Exception {
     MakeRequestClient client = makeSignedFetchClient("o", "v", "http://www.example.com/app");
     HttpResponse resp = client.sendFormPost(FakeOAuthServiceProvider.RESOURCE_URL, "oauth_foo=bar");
-    assertEquals(OAuthError.INVALID_REQUEST.toString(),
+    assertEquals(OAuthError.INVALID_PARAMETER.name(),
         resp.getMetadata().get(OAuthResponseParams.ERROR_CODE));
     checkStringContains("Wrong error text", resp.getMetadata().get("oauthErrorText"),
-        "invalid parameter name oauth_foo");
+        "Invalid parameter name oauth_foo");
   }
 
   // Test we can refresh an expired access token.
@@ -1867,7 +1868,7 @@ public class OAuthRequestTest {
     serviceProvider.setReturnNull(true);
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
-    assertEquals("UNKNOWN_PROBLEM", response.getMetadata().get("oauthError"));
+    assertEquals("MISSING_SERVER_RESPONSE", response.getMetadata().get("oauthError"));
     assertEquals("", response.getResponseAsString());
     String oauthErrorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("should say no response", oauthErrorText, "No response from server");
@@ -1876,7 +1877,7 @@ public class OAuthRequestTest {
     checkStringContains("should log empty response", oauthErrorText, "Received response 1:\n\n");
     checkLogContains("No response from server");
     checkLogContains("GET /request?param=foo&opensocial_owner_id=owner");
-    checkLogContains("OAuth error [UNKNOWN_PROBLEM, No response from server] for " +
+    checkLogContains("OAuth error [MISSING_SERVER_RESPONSE, No response from server] for " +
         "application http://www.example.com/gadget.xml");
   }
 
@@ -1886,7 +1887,7 @@ public class OAuthRequestTest {
         new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT, "mildly wrong"));
     MakeRequestClient client = makeNonSocialClient("owner", "owner", GADGET_URL);
     HttpResponse response = client.sendGet(FakeOAuthServiceProvider.ACCESS_TOKEN_URL);
-    assertEquals("UNKNOWN_PROBLEM", response.getMetadata().get("oauthError"));
+    assertEquals("MISSING_SERVER_RESPONSE", response.getMetadata().get("oauthError"));
     assertEquals("", response.getResponseAsString());
     String oauthErrorText = response.getMetadata().get("oauthErrorText");
     checkStringContains("should say no response", oauthErrorText, "No response from server");
@@ -1895,7 +1896,7 @@ public class OAuthRequestTest {
     checkStringContains("should log empty response", oauthErrorText, "Received response 1:\n\n");
     checkLogContains("No response from server");
     checkLogContains("GET /request?param=foo&opensocial_owner_id=owner");
-    checkLogContains("OAuth error [UNKNOWN_PROBLEM, No response from server] for " +
+    checkLogContains("OAuth error [MISSING_SERVER_RESPONSE, No response from server] for " +
         "application http://www.example.com/gadget.xml");
     checkLogContains("GadgetException");
     checkLogContains("mildly wrong");
@@ -1913,7 +1914,7 @@ public class OAuthRequestTest {
     }
     checkLogContains("OAuth fetch unexpected fatal erro");
     checkLogContains("GET /request?param=foo&opensocial_owner_id=owner");
-    checkLogContains("OAuth error [null, null] for " +
+    checkLogContains("OAuth error [very, very wrong] for " +
         "application http://www.example.com/gadget.xml");
     checkLogContains("RuntimeException");
     checkLogContains("very, very wrong");

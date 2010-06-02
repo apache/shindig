@@ -46,6 +46,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -72,6 +73,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
 
   private final Map<String, Map<String, Object>> config;
   private final Expressions expressions;
+  private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
 
   /**
    * Creates a new configuration from files.
@@ -253,7 +255,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    * @param base The base object that values will be replaced into.
    * @param merge The object to merge values from.
    *
-   * @throws JSONException if the two objects can't be merged for some reason.
+   * @throws org.json.JSONException if the two objects can't be merged for some reason.
    */
   private JSONObject mergeObjects(JSONObject base, JSONObject merge)
       throws JSONException {
@@ -345,7 +347,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
           location = location.substring(6);
           LOG.info("Loading resources from: " + location);
           if (path.endsWith(".txt")) {
-            loadResources(ResourceLoader.getContent(location).split("[\r\n]+"), all);
+            loadResources(CRLF_PATTERN.split(ResourceLoader.getContent(location)), all);
           } else {
             loadResources(new String[]{location}, all);
           }

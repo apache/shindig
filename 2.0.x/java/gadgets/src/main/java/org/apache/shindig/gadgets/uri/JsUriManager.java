@@ -64,7 +64,7 @@ public interface JsUriManager {
   @ImplementedBy(DefaultJsVersioner.class)
   public interface Versioner {
     /**
-     * @param gadget Gadget for which extern Uri was generated.
+     * @param gadgeUri Gadget for which extern Uri was generated.
      * @param extern Collection of libs externed.
      * @return Version string for the Uri.
      */

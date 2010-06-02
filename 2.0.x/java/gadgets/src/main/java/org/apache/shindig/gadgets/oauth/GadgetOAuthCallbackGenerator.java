@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.servlet.OAuthCallbackServlet;
@@ -118,12 +117,12 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
       Uri activeUrl = Uri.parse(securityToken.getActiveUrl());
       String hostname = activeUrl.getAuthority();
       if (!lockedDomainService.gadgetCanRender(hostname, gadget, securityToken.getContainer())) {
-        throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+        throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
             "Gadget should not be using URL " + activeUrl);
       }
       return activeUrl;
     } catch (ProcessingException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Unable to check if gadget is using locked-domain", e);
     }
   }
@@ -151,7 +150,7 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
       callback.addQueryParameter(OAuthCallbackServlet.CALLBACK_STATE_PARAM,
           state.getEncryptedState());
     } catch (BlobCrypterException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Failure generating callback URL", e);
     }
     return callback.toString();

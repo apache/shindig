@@ -31,8 +31,8 @@ import java.util.Map;
 /**
  * Utility functions for image processing and introspection.
  */
-public class ImageUtils {
-
+public final class ImageUtils {
+  private ImageUtils() {}
   /**
    * Convert an image to a palletized one. Will not create a palette above a fixed
    * number of entries

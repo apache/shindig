@@ -129,7 +129,7 @@ public class BasicOAuthStore implements OAuthStore {
     String keyTypeStr = consumerInfo.getString(KEY_TYPE_KEY);
     KeyType keyType = KeyType.HMAC_SYMMETRIC;
 
-    if (keyTypeStr.equals("RSA_PRIVATE")) {
+    if ("RSA_PRIVATE".equals(keyTypeStr)) {
       keyType = KeyType.RSA_PRIVATE;
       consumerSecret = convertFromOpenSsl(consumerSecret);
     }

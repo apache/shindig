@@ -35,8 +35,9 @@ import java.util.Map.Entry;
  * for cases that are extremely unlikely to happen.  We turn those IOExceptions in to
  * RuntimeExceptions since the caller can't do anything about them anyway.
  */
-public class OAuthUtil {
-
+public final class OAuthUtil {
+  private OAuthUtil() {}
+  
   public static String getParameter(OAuthMessage message, String name) {
     try {
       return message.getParameter(name);

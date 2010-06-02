@@ -27,8 +27,9 @@ import java.nio.charset.Charset;
 /**
  * Utilities for dealing with character set encoding.
  */
-public class CharsetUtil {
-
+public final class CharsetUtil {
+  private CharsetUtil() {}
+  
   /**
    * UTF-8 Charset.
    */

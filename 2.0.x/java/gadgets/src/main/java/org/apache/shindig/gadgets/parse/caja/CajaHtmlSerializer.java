@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.gadgets.parse.caja;
 
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.parse.HtmlSerialization;
+import org.apache.shindig.gadgets.parse.HtmlSerializer;
+import org.w3c.dom.Document;
+
+import com.google.caja.parser.html.Nodes;
+import com.google.caja.render.Concatenator;
+import com.google.caja.reporting.RenderContext;
+
+import java.io.StringWriter;
 
 /**
- * Interface for rewriters that modify request content.
+ * HtmlSerializer using Caja's Nodes.render(...) method under the hood.
  */
-public interface RequestRewriter {
-
-  /**
-   * Rewrite the original content located at source.
-   *
-   * @param request Originating request, as context.
-   * @param original Original HTTP response, for context.
-   * @param content Original content.
-   * @return true if any rewriting occurred
-   */
-  boolean rewrite(HttpRequest request, HttpResponse original, MutableContent content)
-      throws RewritingException;
+public class CajaHtmlSerializer implements HtmlSerializer {
+  public String serialize(Document doc) {
+    StringWriter sw = HtmlSerialization.createWriter(doc);
+    return Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml());
+  }
 }

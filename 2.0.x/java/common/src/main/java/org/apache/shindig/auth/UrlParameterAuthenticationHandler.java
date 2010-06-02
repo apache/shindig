@@ -20,11 +20,8 @@ package org.apache.shindig.auth;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import net.oauth.OAuth;
-import net.oauth.OAuthMessage;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +35,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   private static final String SECURITY_TOKEN_PARAM = "st";
   private static final String OAUTH2_TOKEN_PARAM = "oauth_token";
   private final SecurityTokenDecoder securityTokenDecoder;
+  private static final Pattern COMMAWHITESPACE = Pattern.compile("\\s*,\\s*");
 
   @Inject
   public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder) {
@@ -93,7 +91,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
       for (Enumeration<String> headers = request.getHeaders("Authorization"); headers != null && headers.hasMoreElements();) {
         Matcher m = AUTHORIZATION.matcher(headers.nextElement());
         if (m.matches() && "Token".equalsIgnoreCase(m.group(1))) {
-          for (String nvp : m.group(2).split("\\s*,\\s*")) {
+          for (String nvp : COMMAWHITESPACE.split(m.group(2))) {
             m = NVP.matcher(nvp);
             if (m.matches() && "token".equals(m.group(1))) {
               token = OAuth.decodePercent(m.group(2));

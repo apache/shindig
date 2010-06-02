@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Null object implementation of TemplateLibrary.
  */
-public class NullTemplateLibrary implements TemplateLibrary {
+public final class NullTemplateLibrary implements TemplateLibrary {
   public static final TemplateLibrary INSTANCE = new NullTemplateLibrary();
 
   private final TagRegistry registry = new DefaultTagRegistry(ImmutableSet.<TagHandler>of());

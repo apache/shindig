@@ -31,7 +31,7 @@ import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
@@ -55,13 +55,13 @@ public class ProxyHandler extends ProxyBase {
   
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
-  private final RequestRewriterRegistry contentRewriterRegistry;
+  private final ResponseRewriterRegistry contentRewriterRegistry;
   private final ProxyUriManager proxyUriManager;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
                       LockedDomainService lockedDomainService,
-                      RequestRewriterRegistry contentRewriterRegistry,
+                      ResponseRewriterRegistry contentRewriterRegistry,
                       ProxyUriManager proxyUriManager) {
     this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;

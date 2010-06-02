@@ -159,7 +159,7 @@ gadgets.rpctx.nix = function() {
       if (typeof window[NIX_GET_WRAPPER] !== 'unknown') {
         window[NIX_HANDLE_MESSAGE] = function(data) {
           window.setTimeout(
-              function() { processFn(gadgets.json.parse(data)) }, 0);
+              function() { processFn(gadgets.json.parse(data)); }, 0);
         };
 
         window[NIX_CREATE_CHANNEL] = function(name, channel, token) {

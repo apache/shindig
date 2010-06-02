@@ -45,35 +45,49 @@ public class HttpResponseBuilder extends MutableContent {
   private int httpStatusCode = HttpResponse.SC_OK;
   private final Multimap<String, String> headers = HttpResponse.newHeaderMultimap();
   private final Map<String, String> metadata = Maps.newHashMap();
-
+  
+  // Stores the HttpResponse object, if any, from which this Builder is constructed.
+  // This allows us to avoid creating a new HttpResponse in create() when no changes
+  // have been made.
+  private HttpResponse responseObj;
+  private int responseObjNumChanges;
+  
+  public HttpResponseBuilder(GadgetHtmlParser parser, HttpResponse response) {
+    super(parser, response);
+    if (response != null) {
+      httpStatusCode = response.getHttpStatusCode();
+      headers.putAll(response.getHeaders());
+      metadata.putAll(response.getMetadata());
+    } else {
+      setResponse(null);
+    }
+    responseObj = response;
+    responseObjNumChanges = getNumChanges();
+  }
+  
   public HttpResponseBuilder() {
-    super(unsupportedParser(), (String)null);
-    this.setResponse(null);
+    this(unsupportedParser(), null);
   }
 
   public HttpResponseBuilder(HttpResponseBuilder builder) {
-    super(unsupportedParser(), builder.create());
-    httpStatusCode = builder.httpStatusCode;
-    headers.putAll(builder.headers);
-    metadata.putAll(builder.metadata);
+    this(unsupportedParser(), builder.create());
   }
 
   public HttpResponseBuilder(HttpResponse response) {
     this(unsupportedParser(), response);
-  }
-  
-  public HttpResponseBuilder(GadgetHtmlParser parser, HttpResponse response) {
-    super(parser, response);
-    httpStatusCode = response.getHttpStatusCode();
-    headers.putAll(response.getHeaders());
-    metadata.putAll(response.getMetadata());
   }
 
   /**
    * @return A new HttpResponse.
    */
   public HttpResponse create() {
-    return new HttpResponse(this);
+    if (getNumChanges() != responseObjNumChanges || responseObj == null) {
+      // Short-circuit the creation process: no need to create a
+      // new (immutable) HttpResponse object when no modifications occurred.
+      responseObj = new HttpResponse(this);
+      responseObjNumChanges = getNumChanges();
+    }
+    return responseObj;
   }
 
   /**
@@ -86,21 +100,23 @@ public class HttpResponseBuilder extends MutableContent {
   }
 
   public HttpResponseBuilder setEncoding(Charset charset) {
-
     Collection<String> values = headers.get("Content-Type");
     if (!values.isEmpty()) {
       String contentType = values.iterator().next();
-      String newContentType = "";
+      StringBuilder newContentType = new StringBuilder("");
       // Remove previously set charset:
       String[] parts = StringUtils.split(contentType, ';');
       for (String part : parts) {
         if (!part.contains("charset=")) {
-          newContentType += part + "; ";
+          newContentType.append(part).append("; ");
         }
       }
-      newContentType += "charset=" + charset.name();
+      newContentType.append("charset=").append(charset.name());
       values.clear();
-      values.add(newContentType);
+      values.add(newContentType.toString());
+      if (!(values.size() == 1 && !contentType.equals(newContentType))) {
+        incrementNumChanges();
+      }
     }
     return this;
   }
@@ -130,13 +146,23 @@ public class HttpResponseBuilder extends MutableContent {
   }
 
   public HttpResponseBuilder setHttpStatusCode(int httpStatusCode) {
-    this.httpStatusCode = httpStatusCode;
+    if (this.httpStatusCode != httpStatusCode) {
+      this.httpStatusCode = httpStatusCode;
+      incrementNumChanges();
+    }
+    return this;
+  }
+  
+  public HttpResponseBuilder clearAllHeaders() {
+    incrementNumChanges();
+    headers.clear();
     return this;
   }
 
   public HttpResponseBuilder addHeader(String name, String value) {
     if (name != null) {
       headers.put(name, value);
+      incrementNumChanges();
     }
     return this;
   }
@@ -144,6 +170,7 @@ public class HttpResponseBuilder extends MutableContent {
   public HttpResponseBuilder setHeader(String name, String value) {
     if (name != null) {
       headers.replaceValues(name, Lists.newArrayList(value));
+      incrementNumChanges();
     }
     return this;
   }
@@ -158,6 +185,7 @@ public class HttpResponseBuilder extends MutableContent {
   public HttpResponseBuilder addHeaders(Map<String, String> headers) {
     for (Map.Entry<String,String> entry : headers.entrySet()) {
       this.headers.put(entry.getKey(), entry.getValue());
+      incrementNumChanges();
     }
     return this;
   }
@@ -165,18 +193,24 @@ public class HttpResponseBuilder extends MutableContent {
   public HttpResponseBuilder addAllHeaders(Map<String, ? extends List<String>> headers) {
     for (Map.Entry<String,? extends List<String>> entry : headers.entrySet()) {
       this.headers.putAll(entry.getKey(), entry.getValue());
+      incrementNumChanges();
     }
     return this;
   }
 
   public Collection<String> removeHeader(String name) {
-    return headers.removeAll(name);
+    Collection<String> ret = headers.removeAll(name);
+    if (ret != null) {
+      incrementNumChanges();
+    }
+    return ret;
   }
 
   public HttpResponseBuilder setCacheTtl(int cacheTtl) {
     headers.removeAll("Pragma");
     headers.removeAll("Expires");
     headers.replaceValues("Cache-Control", ImmutableList.of("public,max-age=" + cacheTtl));
+    incrementNumChanges();
     return this;
   }
 
@@ -184,6 +218,7 @@ public class HttpResponseBuilder extends MutableContent {
     headers.removeAll("Cache-Control");
     headers.removeAll("Pragma");
     headers.put("Expires", DateUtil.formatRfc1123Date(expirationTime));
+    incrementNumChanges();
     return this;
   }
 
@@ -195,17 +230,24 @@ public class HttpResponseBuilder extends MutableContent {
     headers.replaceValues("Cache-Control", NO_CACHE_HEADER);
     headers.replaceValues("Pragma", NO_CACHE_HEADER);
     headers.removeAll("Expires");
+    incrementNumChanges();
     return this;
   }
 
   public HttpResponseBuilder setMetadata(String key, String value) {
     metadata.put(key, value);
+    incrementNumChanges();
     return this;
   }
 
   public HttpResponseBuilder setMetadata(Map<String, String> metadata) {
     this.metadata.putAll(metadata);
+    incrementNumChanges();
     return this;
+  }
+  
+  public int getContentLength() {
+    return getResponse().length;
   }
 
   Multimap<String, String> getHeaders() {

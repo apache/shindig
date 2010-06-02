@@ -169,7 +169,8 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
         return;
       }
 
-      result = result.data;
+      // Support old 'data' element and correct 'result' element
+      result = result.result || result.data;
 
       var globalError = false;
       var responseMap = {};
@@ -188,7 +189,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
               ") and response id(" + response.id + ") do not match";
         }
 
-        var rawData = response.data;
+        var rawData = response.result || result.data;
         var error = response.error;
         var errorMessage = "";
 
@@ -234,7 +235,7 @@ var JsonRpcRequestItem = function(rpc, opt_processData) {
       callback) {
     var globalErrorCode =
             JsonRpcContainer.translateHttpError(result.rc
-                    || result.data.error)
+                    || result.result.error || result.data.error)  
                     || opensocial.ResponseItem.Error.INTERNAL_ERROR;
 
     var errorResponseMap = {};

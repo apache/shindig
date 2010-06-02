@@ -117,9 +117,9 @@ gadgets.rpctx.frameElement = function() {
         ready('..', true);
         var ackFn = function() {
           window.setTimeout(function() {
-            gadgets.rpc.call(receiverId, gadgets.rpc.ACK)
+            gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
           }, 500);
-        }
+        };
         // Setup to container always happens before onload.
         // If it didn't, the correct fix would be in gadgets.util.
         gadgets.util.registerOnLoadHandler(ackFn);

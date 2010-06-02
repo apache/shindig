@@ -74,7 +74,8 @@ public class FeatureRegistry {
 
 /**
  *
- * @param featureFiles
+ * @param resourceLoader
+ * @param featuresoo
  * @throws GadgetException
  */
   @Inject
@@ -104,7 +105,7 @@ public class FeatureRegistry {
    * That is, their dependencies must all be valid features as well, and the
    * dependency tree must not contain circular dependencies.
    *
-   * @param resourceKey The file or directory to load the feature from. If feature.xml
+   * @param resourceList The files or directories                                                                                                             to load the feature from. If feature.xml
    *    is passed in directly, it will be loaded as a single feature. If a
    *    directory is passed, any features in that directory (recursively) will
    *    be loaded. If res://*.txt or res:*.txt is passed, we will look for named resources
@@ -474,7 +475,7 @@ public class FeatureRegistry {
     return ImmutableMap.<String, String>builder().putAll(bundleAttribs).putAll(resourceAttribs).build();
   }
   
-  private static class InlineFeatureResource extends FeatureResource.Default {
+  private static final class InlineFeatureResource extends FeatureResource.Default {
     private final String content;
     
     private InlineFeatureResource(String content) {
@@ -490,7 +491,7 @@ public class FeatureRegistry {
     }
   }
 
-  private static class FeatureBundle {
+  private static final class FeatureBundle {
     private final String type;
     private final Map<String, String> attribs;
     private final List<FeatureResource> resources;
@@ -514,7 +515,7 @@ public class FeatureRegistry {
     }
   }
   
-  private static class FeatureNode {
+  private static final class FeatureNode {
     private final String name;
     private final List<FeatureBundle> bundles;
     private final List<String> requestedDeps;
@@ -587,7 +588,7 @@ public class FeatureRegistry {
     }
   }
   
-  private static class FeatureCacheKey {
+  private static final class FeatureCacheKey {
     private final Collection<String> needed;
     private final RenderingContext rCtx;
     private final String container;

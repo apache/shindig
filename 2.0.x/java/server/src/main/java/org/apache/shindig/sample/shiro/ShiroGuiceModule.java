@@ -18,7 +18,7 @@
 package org.apache.shindig.sample.shiro;
 import com.google.inject.AbstractModule;
 
-public class ShiroModule extends AbstractModule {
+public class ShiroGuiceModule extends AbstractModule {
 
   protected void configure() {
     // We do this so that jsecurity realms can get access to the jsondbservice singleton

@@ -27,8 +27,9 @@ import java.util.List;
 /**
  * Utility functions for traversing Caja's CSS DOM
  */
-class CajaCssUtils {
- 
+public final class CajaCssUtils {
+  private CajaCssUtils() {}
+  
   /**
    * Get the immediate children of the passed node with the specified node type
    */

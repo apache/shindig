@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.oauth;
 import com.google.inject.ImplementedBy;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 
 /**
  * Figures out the OAuth callback URL to send service providers.

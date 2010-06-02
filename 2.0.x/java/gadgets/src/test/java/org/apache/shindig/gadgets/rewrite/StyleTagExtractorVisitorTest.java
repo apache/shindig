@@ -18,12 +18,12 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.eq;
-import static org.easymock.classextension.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,7 +34,7 @@ import com.google.inject.internal.ImmutableSet;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.rewrite.CssRequestRewriter.UriMaker;
+import org.apache.shindig.gadgets.rewrite.CssResponseRewriter.UriMaker;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
 import org.apache.shindig.gadgets.uri.PassthruManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -99,7 +99,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   @Test
   public void revisitNothingExtracted() throws Exception {
     Gadget gadget = gadget();
-    CssRequestRewriter cssRewriter = createMock(CssRequestRewriter.class);
+    CssResponseRewriter cssRewriter = createMock(CssResponseRewriter.class);
     replay(cssRewriter);
     
     // Tag name isn't inspected since visit() filters this.
@@ -115,7 +115,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   public void revisitExtractSpecRelative() throws Exception {
     Uri base = GADGET_URI;
     Gadget gadget = gadget();
-    CssRequestRewriter cssRewriter = createMock(CssRequestRewriter.class);
+    CssResponseRewriter cssRewriter = createMock(CssResponseRewriter.class);
     Element elem1 = elem("elem1");
     Element elem2 = elem("elem2");
     String urlStr1 = "http://foo.com/1.css";
@@ -153,7 +153,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   public void revisitExtractViewHrefRelative() throws Exception {
     Uri base = Uri.parse("http://view.com/viewbase.xml");
     Gadget gadget = gadget(true, true, base);
-    CssRequestRewriter cssRewriter = createMock(CssRequestRewriter.class);
+    CssResponseRewriter cssRewriter = createMock(CssResponseRewriter.class);
     Element elem1 = elem("elem1");
     Element elem2 = elem("elem2");
     String urlStr1 = "http://foo.com/1.css";
@@ -191,7 +191,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   public void revisitExtractSpecRelativeDisabled() throws Exception {
     Uri base = GADGET_URI;
     Gadget gadget = gadget();
-    CssRequestRewriter cssRewriter = createMock(CssRequestRewriter.class);
+    CssResponseRewriter cssRewriter = createMock(CssResponseRewriter.class);
     Element elem1 = elem("elem1");
     Element elem2 = elem("elem2");
     List<String> extractedUrls1 = ImmutableList.of();
@@ -222,7 +222,7 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
   }
   
   private boolean getRevisitStatus(
-      Gadget gadget, boolean shouldRewriteUrl, CssRequestRewriter cssRewriter, List<Node> nodes)
+      Gadget gadget, boolean shouldRewriteUrl, CssResponseRewriter cssRewriter, List<Node> nodes)
       throws Exception {
     return new StyleTagExtractorVisitor(
         config(true, true, shouldRewriteUrl), cssRewriter, proxyUriManager)

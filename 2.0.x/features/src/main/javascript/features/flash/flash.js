@@ -159,7 +159,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
         // use this HTML generation for nefarious purposes.
         var propIsHtmlSafe = function(val) {
           return !/["<>]/.test(val);
-        }
+        };
        
         opt_params.movie = swfUrl;
         var attr = {

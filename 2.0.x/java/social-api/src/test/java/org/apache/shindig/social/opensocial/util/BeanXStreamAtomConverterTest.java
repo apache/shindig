@@ -77,7 +77,7 @@ public class BeanXStreamAtomConverterTest extends Assert {
     mediaItem.setMimeType("image/jpg");
     mediaItem.setType(MediaItem.Type.IMAGE);
     mediaItem.setUrl("http://foo.bar");
-    mediaItem.setLocation("CA");
+    mediaItem.setLocation(new AddressImpl("Foo bar address"));
     mediaItem.setNumViews("10000");
 
     activity.setMediaItems(Lists.<MediaItem> newArrayList(mediaItem));
@@ -236,7 +236,9 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
-        + "        <location>CA</location>"
+        + "        <location>"
+        + "           <formatted>Foo bar address</formatted>"
+        + "        </location>"
         + "        <numViews>10000</numViews>"
         + "    </mediaItems>"
         + "    <url>http://foo.com</url>"
@@ -248,7 +250,9 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
-        + "        <location>CA</location>"
+        + "        <location>"
+        + "           <formatted>Foo bar address</formatted>"
+        + "        </location>"
         + "        <numViews>10000</numViews>"
         + "    </mediaItems>"
         + "    <url>http://foo.com</url>"
@@ -260,7 +264,9 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "        <mimeType>image/jpg</mimeType>"
         + "        <type>IMAGE</type>"
         + "        <url>http://foo.bar</url>"
-        + "        <location>CA</location>"
+        + "        <location>"
+        + "           <formatted>Foo bar address</formatted>"
+        + "        </location>"
         + "        <numViews>10000</numViews>"
         + "    </mediaItems>"
         + "    <url>http://foo.com</url>"

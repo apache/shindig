@@ -102,7 +102,7 @@ class FeatureParser {
     return attribs.build();
   }
   
-  static class ParsedFeature {
+  static final class ParsedFeature {
     private final String name;
     private final List<String> deps;
     private final List<Bundle> bundles;
@@ -125,7 +125,7 @@ class FeatureParser {
       return bundles;
     }
     
-    public static class Bundle {
+    public final static class Bundle {
       private final String type;
       private final Map<String, String> attribs;
       private final List<Resource> resources;
@@ -149,7 +149,7 @@ class FeatureParser {
       }
     }
     
-    static class Resource {
+    static final class Resource {
       private final Uri source;
       private final String content;
       private final Map<String, String> attribs;

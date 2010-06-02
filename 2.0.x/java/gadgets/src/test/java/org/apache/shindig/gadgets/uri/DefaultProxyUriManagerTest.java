@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets.uri;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -441,7 +441,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     int proxyEnd = uriStr.indexOf("/proxy/") + "/proxy/".length();
     String paramsUri = uriStr.substring(
         proxyEnd,
-        (endOfPath ? uriStr.indexOf("/", proxyEnd) : uriStr.indexOf("/path")));
+        (endOfPath ? uriStr.indexOf('/', proxyEnd) : uriStr.indexOf("/path")));
     uri = new UriBuilder().setQuery(paramsUri).toUri();
     
     // "Raw" query param verification.

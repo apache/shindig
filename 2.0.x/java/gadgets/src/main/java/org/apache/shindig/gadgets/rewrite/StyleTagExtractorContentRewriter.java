@@ -33,12 +33,12 @@ import java.util.List;
 public class StyleTagExtractorContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;
-  private final CssRequestRewriter cssRewriter;
+  private final CssResponseRewriter cssRewriter;
   
   @Inject
   public StyleTagExtractorContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
       ConcatUriManager concatUriManager, ProxyUriManager proxyUriManager,
-      CssRequestRewriter cssRewriter) {
+      CssResponseRewriter cssRewriter) {
     this.featureConfigFactory = featureConfigFactory;
     this.proxyUriManager = proxyUriManager;
     this.cssRewriter = cssRewriter;
