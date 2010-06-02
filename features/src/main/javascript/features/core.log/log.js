@@ -98,7 +98,7 @@ gadgets['setLogLevel'] = function(logLevel) {
   }
 
   if (level === warning_ && _console.warn) {
-    _console.warn(message)
+    _console.warn(message);
   } else if (level === error_ && _console.error) {
     _console.error(message);
   } else if (_console.log) {

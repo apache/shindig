@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.spi.AppDataService;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
-import org.apache.shindig.social.sample.service.SampleContainerHandler;
 import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 import com.google.inject.AbstractModule;
@@ -48,8 +47,5 @@ public class SampleModule extends AbstractModule {
     bind(MessageService.class).to(JsonDbOpensocialService.class);
     
     bind(OAuthDataStore.class).to(SampleOAuthDataStore.class);
-
-    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
-    handlerBinder.addBinding().toInstance(SampleContainerHandler.class);
   }
 }

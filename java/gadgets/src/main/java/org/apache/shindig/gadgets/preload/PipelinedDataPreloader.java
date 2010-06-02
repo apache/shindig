@@ -60,7 +60,7 @@ public class PipelinedDataPreloader {
   private final RequestPipeline requestPipeline;
   private final ContainerConfig config;
 
-  private static Set<String> HTTP_RESPONSE_HEADERS =
+  private static final Set<String> HTTP_RESPONSE_HEADERS =
     ImmutableSet.of("content-type", "location", "set-cookie");
 
   @Inject
@@ -121,7 +121,7 @@ public class PipelinedDataPreloader {
 
     public VariableTask(String key, Object data) {
       this.result = (data == null) ? ImmutableMap.of("id", (Object) key)
-          : ImmutableMap.of("id", key, "data", data); 
+          : ImmutableMap.of("id", key, "result", data); 
     }
 
     public PreloadedData call() throws Exception {
@@ -284,7 +284,7 @@ public class PipelinedDataPreloader {
           } else {
             // Create {data: {status: [CODE], content: {...}|[...]|"...", headers:{...}}}
             JSONObject data = new JSONObject();
-            wrapper.put("data", data);
+            wrapper.put("result", data);
 
             // Add the status
             data.put("status", response.getHttpStatusCode());
@@ -305,8 +305,8 @@ public class PipelinedDataPreloader {
                   data.put("content", new JSONObject(responseText));
                 }
               } catch (JSONException je) {
-                // JSON parse failed: create a 406 error, and remove the "data" section
-                wrapper.remove("data");
+                // JSON parse failed: create a 406 error, and remove the "result" section
+                wrapper.remove("result");
                 wrapper.put("error", createJsonError(
                     HttpResponse.SC_NOT_ACCEPTABLE, je.getMessage(), response));
               }

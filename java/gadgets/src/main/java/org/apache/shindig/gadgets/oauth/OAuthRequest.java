@@ -42,7 +42,6 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.json.JSONObject;
 
@@ -196,9 +195,9 @@ public class OAuthRequest {
       response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
-      if (OAuthError.UNAUTHENTICATED.toString().equals(responseParams.getError())) {
+      if (OAuthError.UNAUTHENTICATED.toString().equals(e.getError())) {
         responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
-      } else if (OAuthError.INVALID_REQUEST.toString().equals(responseParams.getError())) {
+      } else if (OAuthError.BAD_OAUTH_TOKEN_URL.toString().equals(e.getError())) {
         responseParams.logDetailedInfo("Invalid OAuth fetch request", e);
       } else {
         responseParams.logDetailedWarning("OAuth fetch fatal error", e);
@@ -207,7 +206,7 @@ public class OAuthRequest {
       response = new HttpResponseBuilder()
           .setHttpStatusCode(HttpResponse.SC_FORBIDDEN)
           .setStrictNoCache();
-      responseParams.addToResponse(response);
+      responseParams.addToResponse(response, e);
       return response.create();
     }
 
@@ -220,8 +219,7 @@ public class OAuthRequest {
       responseParams.setSendTraceToClient(true);
     }
 
-    responseParams.addToResponse(response);
-
+    responseParams.addToResponse(response, null);
     return response.create();
   }
 
@@ -242,10 +240,10 @@ public class OAuthRequest {
         retry = handleProtocolException(pe, attempts);
         if (!retry) {
           if (pe.getProblemCode() != null) {
-            throw responseParams.oauthRequestException(pe.getProblemCode(),
+            throw new OAuthRequestException(pe.getProblemCode(),
                 "Service provider rejected request", pe);
           } else {
-            throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+            throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
                 "Service provider rejected request", pe);
           }
         }
@@ -318,14 +316,13 @@ public class OAuthRequest {
     String pageViewer = realRequest.getSecurityToken().getViewerId();
     String stateOwner = clientState.getOwner();
     if (pageOwner == null || pageViewer == null) {
-      throw responseParams.oauthRequestException(OAuthError.UNAUTHENTICATED, "Unauthenticated");
+      throw new OAuthRequestException(OAuthError.UNAUTHENTICATED);
     }
     if (!fetcherConfig.isViewerAccessTokensEnabled() && !pageOwner.equals(pageViewer)) {
-      throw responseParams.oauthRequestException(OAuthError.NOT_OWNER,
-          "Non-Secure Owner Page -- Only page owners can grant OAuth approval");
+      throw new OAuthRequestException(OAuthError.NOT_OWNER);
     }
     if (stateOwner != null && !stateOwner.equals(pageViewer)) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Client state belongs to a different person " +
           "(state owner=" + stateOwner + ", pageViewer=" + pageViewer + ')');
     }
@@ -334,11 +331,11 @@ public class OAuthRequest {
   private void fetchRequestToken() throws OAuthRequestException, OAuthProtocolException {
     OAuthAccessor accessor = accessorInfo.getAccessor();
     HttpRequest request = createRequestTokenRequest(accessor);
-    
+
     List<Parameter> requestTokenParams = Lists.newArrayList();
-    
+
     addCallback(requestTokenParams);
-    
+
     HttpRequest signed = sanitizeAndSign(request, requestTokenParams, true);
 
     OAuthMessage reply = sendOAuthMessage(signed);
@@ -350,8 +347,7 @@ public class OAuthRequest {
   private HttpRequest createRequestTokenRequest(OAuthAccessor accessor)
       throws OAuthRequestException {
     if (accessor.consumer.serviceProvider.requestTokenURL == null) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
-          "No request token URL specified");
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_TOKEN_URL, "request token");
     }
     HttpRequest request = new HttpRequest(
         Uri.parse(accessor.consumer.serviceProvider.requestTokenURL));
@@ -384,9 +380,7 @@ public class OAuthRequest {
       if (allowParam(name)) {
         list.add(p);
       } else {
-        throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
-            "invalid parameter name " + name +
-            ", applications may not override opensocial or oauth parameters");
+        throw new OAuthRequestException(OAuthError.INVALID_PARAMETER, name);
       }
     }
     return list;
@@ -399,35 +393,31 @@ public class OAuthRequest {
         canonParamName.startsWith("opensocial")) &&
         ALLOWED_PARAM_NAME.matcher(canonParamName).matches());
   }
-  
+
   /**
    * This gives a chance to override parameters by passing trusted parameters.
-   * 
+   *
    */
   private void overrideParameters(List<Parameter> authParams)
     throws OAuthRequestException {
     if (trustedParams == null) {
       return;
     }
-    
+
     Map<String, String> paramMap = Maps.newLinkedHashMap();
     for (Parameter param : authParams) {
       paramMap.put(param.getKey(), param.getValue());
     }
     for (Parameter param : trustedParams) {
       if (!isContainerInjectedParameter(param.getKey())) {
-        throw responseParams.oauthRequestException(
-            OAuthError.INVALID_REQUEST,
-            "invalid trusted parameter name " 
-            + param.getKey() 
-            + ", trusted parameter must start with 'oauth' 'xoauth'or 'opensocial' ");         
+        throw new OAuthRequestException(OAuthError.INVALID_TRUSTED_PARAMETER, param.getKey());
       }
-      paramMap.put(param.getKey(), param.getValue());    
+      paramMap.put(param.getKey(), param.getValue());
     }
-    
+
     authParams.clear();
-    for (String key : paramMap.keySet()) {
-      authParams.add(new Parameter(key, paramMap.get(key)));
+    for (Entry<String, String> entry : paramMap.entrySet()) {
+      authParams.add(new Parameter(entry.getKey(), entry.getValue()));
     }
   }
 
@@ -462,7 +452,7 @@ public class OAuthRequest {
     if (appUrl != null) {
       params.add(new Parameter(OPENSOCIAL_APPURL, appUrl));
     }
-    
+
     if (realRequest.getOAuthArguments().isProxiedContentRequest()) {
       params.add(new Parameter(OPENSOCIAL_PROXIED_CONTENT, "1"));
     }
@@ -531,7 +521,7 @@ public class OAuthRequest {
           params.addAll(sanitize(OAuth.decodeForm(base.getPostBodyAsString())));
         } catch (IllegalArgumentException e) {
           // Occurs if OAuth.decodeForm finds an invalid URL to decode.
-          throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
+          throw new OAuthRequestException(OAuthError.INVALID_REQUEST,
               "Could not decode body", e);
         }
         break;
@@ -542,7 +532,7 @@ public class OAuthRequest {
           String b64 = new String(Base64.encodeBase64(hash), CharsetUtil.UTF8.name());
           params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
         } catch (IOException e) {
-          throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+          throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
               "Error taking body hash", e);
         }
         break;
@@ -551,13 +541,13 @@ public class OAuthRequest {
     // authParams are parameters prefixed with 'xoauth' 'oauth' or 'opensocial',
     // trusted parameters have ability to override these parameters.
     List<Parameter> authParams = Lists.newArrayList();
-    
+
     addIdentityParams(authParams);
 
     addSignatureParams(authParams);
-    
+
     overrideParameters(authParams);
-    
+
     params.addAll(authParams);
 
     try {
@@ -568,7 +558,7 @@ public class OAuthRequest {
       oauthHttpRequest.setFollowRedirects(false);
       return oauthHttpRequest;
     } catch (OAuthException e) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
+      throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,
           "Error signing message", e);
     }
   }
@@ -600,8 +590,8 @@ public class OAuthRequest {
       case POST_BODY:
         String contentType = result.getHeader("Content-Type");
         if (!OAuth.isFormEncoded(contentType)) {
-          throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
-              "OAuth param location can only be post_body if post body if of " +
+          throw new OAuthRequestException(OAuthError.INVALID_REQUEST,
+              "OAuth param location can only be post_body if it is of " +
               "type x-www-form-urlencoded");
         }
         String oauthData = OAuthUtil.formEncode(oauthParams);
@@ -640,12 +630,12 @@ public class OAuthRequest {
     reply.addParameters(OAuth.decodeForm(response.getResponseAsString()));
     reply = parseAuthHeader(reply, response);
     if (OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN) == null) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
-          "No oauth_token returned from service provider");
+      throw new OAuthRequestException(OAuthError.MISSING_OAUTH_PARAMETER,
+          OAuth.OAUTH_TOKEN);
     }
     if (OAuthUtil.getParameter(reply, OAuth.OAUTH_TOKEN_SECRET) == null) {
-      throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
-          "No oauth_token_secret returned from service provider");
+      throw new OAuthRequestException(OAuthError.MISSING_OAUTH_PARAMETER,
+          OAuth.OAUTH_TOKEN_SECRET);
     }
     return reply;
   }
@@ -687,8 +677,8 @@ public class OAuthRequest {
     // We add the token, gadget is responsible for the callback URL.
     OAuthAccessor accessor = accessorInfo.getAccessor();
     if (accessor.consumer.serviceProvider.userAuthorizationURL == null) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
-          "No authorization URL specified");
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_TOKEN_URL,
+          "authorization");
     }
     StringBuilder azn = new StringBuilder(
         accessor.consumer.serviceProvider.userAuthorizationURL);
@@ -731,9 +721,9 @@ public class OAuthRequest {
       accessorInfo.getAccessor().accessToken = null;
     }
     OAuthAccessor accessor = accessorInfo.getAccessor();
+
     if (accessor.consumer.serviceProvider.accessTokenURL == null) {
-      throw responseParams.oauthRequestException(OAuthError.BAD_OAUTH_CONFIGURATION,
-          "No access token URL specified.");
+      throw new OAuthRequestException(OAuthError.BAD_OAUTH_TOKEN_URL, "access token");
     }
     Uri accessTokenUri = Uri.parse(accessor.consumer.serviceProvider.accessTokenURL);
     HttpRequest request = new HttpRequest(accessTokenUri);
@@ -752,12 +742,12 @@ public class OAuthRequest {
     if (!StringUtils.isBlank(receivedCallback)) {
       try {
         Uri parsed = Uri.parse(receivedCallback);
-        String verifier = parsed.getQueryParameter(OAuthConstants.OAUTH_VERIFIER);
+        String verifier = parsed.getQueryParameter(OAuth.OAUTH_VERIFIER);
         if (verifier != null) {
-          msgParams.add(new Parameter(OAuthConstants.OAUTH_VERIFIER, verifier));
+          msgParams.add(new Parameter(OAuth.OAUTH_VERIFIER, verifier));
         }
       } catch (IllegalArgumentException e) {
-        throw responseParams.oauthRequestException(OAuthError.INVALID_REQUEST,
+        throw new OAuthRequestException(OAuthError.INVALID_REQUEST,
             "Invalid received callback URL: " + receivedCallback, e);
       }
     }
@@ -856,13 +846,11 @@ public class OAuthRequest {
     try {
       response = fetcher.fetch(request);
       if (response == null) {
-        throw responseParams.oauthRequestException(OAuthError.UNKNOWN_PROBLEM,
-            "No response from server");
+        throw new OAuthRequestException(OAuthError.MISSING_SERVER_RESPONSE);
       }
       return response;
     } catch (GadgetException e) {
-      throw responseParams.oauthRequestException(
-          OAuthError.UNKNOWN_PROBLEM, "No response from server", e);
+      throw new OAuthRequestException(OAuthError.MISSING_SERVER_RESPONSE, "", e);
     } finally {
       responseParams.addRequestTrace(request, response);
     }

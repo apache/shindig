@@ -189,7 +189,7 @@ public final class JsonSerializer {
           String attribute = entry.getKey();
 
           // Common use case isOwner/isViewer should not be set unless true
-          if (!((attribute.equals("isOwner") || attribute.equals("isViewer")) && value.equals(Boolean.FALSE))) {
+          if (!(("isOwner".equals(attribute) || "isViewer".equals(attribute)) && value.equals(Boolean.FALSE))) {
             // Drop null values.
             if (firstDone) {
               buf.append(',');

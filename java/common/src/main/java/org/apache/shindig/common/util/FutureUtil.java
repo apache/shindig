@@ -27,7 +27,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * Utility methods for processing {@link Future} wrapped objects
  */
-public class FutureUtil {
+public final class FutureUtil {
+  private FutureUtil() {}
   /**
    * Process a {@link Future} wrapped {@link RestfulCollection}
    * to return the first (if any) object, as a {@link Future}

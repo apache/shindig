@@ -15,26 +15,18 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite;
+package org.apache.shindig.sample.container;
+import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import org.apache.shindig.sample.shiro.SampleShiroRealm;
 
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+public class SampleContainerGuiceModule extends AbstractModule {
 
-import com.google.inject.ImplementedBy;
+  protected void configure() {
+    // We do this so that jsecurity realms can get access to the jsondbservice singleton
 
-/**
- * Performs rewriting operations by invoking one or more {@link RequestRewriter}s.
- */
-@ImplementedBy(DefaultRequestRewriterRegistry.class)
-public interface RequestRewriterRegistry {
-
-  /**
-   * Rewrites an {@code HttpResponse} object with the given request as context,
-   * using the registered rewriters.
-   * @param req Request object for context.
-   * @param resp Original response object.
-   * @return Rewritten response object, or resp if not modified.
-   */
-  HttpResponse rewriteHttpResponse(HttpRequest req, HttpResponse resp)
-    throws RewritingException;
+    Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
+    handlerBinder.addBinding().toInstance(SampleContainerHandler.class);
+  }
 }

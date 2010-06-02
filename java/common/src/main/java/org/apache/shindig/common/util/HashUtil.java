@@ -25,7 +25,8 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Routines for producing hashes.
  */
-public class HashUtil {
+public final class HashUtil {
+  private HashUtil() {}
   /**
    * Produces a checksum for the given input data.
    *

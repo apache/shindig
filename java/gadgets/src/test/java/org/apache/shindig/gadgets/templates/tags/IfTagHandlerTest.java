@@ -20,14 +20,14 @@ package org.apache.shindig.gadgets.templates.tags;
 
 import static org.easymock.EasyMock.isNull;
 import static org.easymock.EasyMock.same;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.templates.FakeTemplateProcessor;
 import org.apache.shindig.gadgets.templates.tags.IfTagHandler;
 import org.apache.shindig.gadgets.templates.tags.TagHandler;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.DOMImplementation;

@@ -169,7 +169,7 @@ gadgets.io = function() {
     };
 
     if (resp.rc < 200 || resp.rc >= 400){
-    	resp.errors = [resp.rc + " Error"]
+    	resp.errors = [resp.rc + " Error"];
     } else if (resp.text) {
       if (resp.rc >= 300 && resp.rc < 400) {
         // Redirect pages will usually contain arbitrary

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Contains the results of a rendering operation.
  */
-public class RenderingResults {
+public final class RenderingResults {
   private final Status status;
   private final String content;
   private final String errorMessage;

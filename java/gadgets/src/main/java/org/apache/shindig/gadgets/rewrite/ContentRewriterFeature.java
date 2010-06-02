@@ -155,7 +155,8 @@ public class ContentRewriterFeature {
     
     // Lazily computed
     private Integer fingerprint;
-    
+    private static final Pattern COMMA_WHITESPACE_PATTERN = Pattern.compile("\\s*,\\s*");
+
     /**
      * Constructor which takes a gadget spec and container settings
      * as "raw" input strings.
@@ -180,7 +181,7 @@ public class ContentRewriterFeature {
 
       // Parse includeTags
       ImmutableSet.Builder<String> includeTagsBuilder = ImmutableSet.builder();
-      for (String s : paramTrim(defaultTags).toLowerCase().split("\\s*,\\s*")) {
+      for (String s : COMMA_WHITESPACE_PATTERN.split(paramTrim(defaultTags).toLowerCase())) {
         if (s != null && s.length() > 0) {
           includeTagsBuilder.add(s);
         }

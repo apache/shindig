@@ -25,10 +25,12 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
+import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
 import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
 import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
@@ -56,7 +58,8 @@ public class RewriteModule extends AbstractModule {
       SanitizingGadgetRewriter sanitizedRewriter,
       RenderingGadgetRewriter renderingRewriter,
       OpenSocialI18NGadgetRewriter i18nRewriter) {
-    return ImmutableList.of(pipelineRewriter, templateRewriter, optimizingRewriter, cajaRewriter, sanitizedRewriter, renderingRewriter, i18nRewriter);
+    return ImmutableList.of(pipelineRewriter, templateRewriter, optimizingRewriter,
+        cajaRewriter, sanitizedRewriter, renderingRewriter, i18nRewriter);
   }
 
   @Provides
@@ -67,10 +70,29 @@ public class RewriteModule extends AbstractModule {
       CajaContentRewriter cajaRewriter) {
     return ImmutableList.of(optimizingRewriter, cajaRewriter);
   }
+  
+  // TODO: Clean this up. Ideally we would let the ResponseRewriterRegistry
+  // binding create the concrete object instance.
+  @Provides
+  @Singleton
+  @Named("shindig.rewriters.response.pre-cache")
+  protected ResponseRewriterRegistry providePreCacheResponseRewritersRegistry(
+      GadgetHtmlParser parser,
+      @Named("shindig.rewriters.response.pre-cache") List<ResponseRewriter> preCached) {
+    return new DefaultResponseRewriterRegistry(preCached, parser);
+  }
 
   @Provides
   @Singleton
-  protected List<RequestRewriter> provideRequestRewriters(
+  @Named("shindig.rewriters.response.pre-cache")
+  protected List<ResponseRewriter> providePreCacheResponseRewriters(
+      BasicImageRewriter imageRewriter) {
+    return ImmutableList.<ResponseRewriter>of(imageRewriter);
+  }
+
+  @Provides
+  @Singleton
+  protected List<ResponseRewriter> provideResponseRewriters(
       HTMLContentRewriter optimizingRewriter,
       CssRequestRewriter cssRewriter,
       SanitizingRequestRewriter sanitizedRewriter) {

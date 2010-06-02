@@ -88,7 +88,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     assertStyleEquals(
         ".xyz { background: url('http://test.com/proxy/path?url=" +
         "http%3A%2F%2Fwww.example.org%2Fimg.gif" +
-        "&sanitize=1&rewriteMime=image%2F%2A');}", styleSheet);
+        "&sanitize=1&rewriteMime=image%2F%2a');}", styleSheet);
   }
 
   @Test
@@ -97,7 +97,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, importRewriter, imageRewriter);
     assertEquals(".xyz{background:url('http://test.com/proxy/path?url=http%3A%2F%2Fwww.example.org%2F" +
-        "img.gif&sanitize=1&rewriteMime=image%2F%2A');}",
+        "img.gif&sanitize=1&rewriteMime=image%2F%2a');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
 

@@ -26,6 +26,7 @@
   <display-name>Shindig</display-name>
   <!-- configuration -->
   <!-- If you have your own Guice module(s), put them here as a colon-separated list. -->
+  <!-- Note that any extras modules are optional -->
   <context-param>
     <param-name>guice-modules</param-name>
     <param-value>
@@ -35,8 +36,10 @@
       org.apache.shindig.social.sample.SampleModule:
       org.apache.shindig.gadgets.oauth.OAuthModule:
       org.apache.shindig.common.cache.ehcache.EhCacheModule:
-      org.apache.shindig.sample.shiro.ShiroModule:
-      org.apache.shindig.extras.ShindigExtrasGuiceModule
+      org.apache.shindig.sample.shiro.ShiroGuiceModule:
+      org.apache.shindig.sample.container.SampleContainerGuiceModule:
+      org.apache.shindig.extras.ShindigExtrasGuiceModule:
+      org.apache.shindig.extras.as.ActivityStreamsGuiceModule
     </param-value>
   </context-param>
 

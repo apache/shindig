@@ -126,5 +126,5 @@ DataTest.prototype.testListener = function() {
   });
   opensocial.data.DataContext.putDataSet('testKey', {});
   this.assertEquals(true, fired);
-}
+};
 

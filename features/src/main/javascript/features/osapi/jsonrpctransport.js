@@ -39,7 +39,7 @@
           }
         });
       } else {
-        var jsonResponse = response.data;
+        var jsonResponse = response.result || response.data;
         if (jsonResponse.error) {
           callback(jsonResponse);
         } else {

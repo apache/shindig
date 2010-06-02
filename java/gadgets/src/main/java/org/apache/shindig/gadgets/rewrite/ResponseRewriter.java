@@ -15,25 +15,11 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite.image;
+package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
-/**
- * No-op implementation of ImageRewriter
- */
-public final class NoOpImageRewriter implements ImageRewriter {
-
-  public HttpResponse rewrite(HttpRequest request, HttpResponse response) {
-    return response;
-  }
-
-  public long getOriginalImageBytes() {
-    return 0L;
-  }
-
-  public long getRewrittenImageBytes() {
-    return 0L;
-  }
+public interface ResponseRewriter {
+  public void rewrite(HttpRequest request, HttpResponseBuilder response) throws RewritingException;
 }

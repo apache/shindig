@@ -36,7 +36,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 
 import java.io.IOException;
@@ -68,11 +68,11 @@ public class MakeRequestHandler extends ProxyBase {
   public static final String AUTHZ_PARAM = "authz";
 
   private final RequestPipeline requestPipeline;
-  private final RequestRewriterRegistry contentRewriterRegistry;
+  private final ResponseRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public MakeRequestHandler(RequestPipeline requestPipeline,
-      RequestRewriterRegistry contentRewriterRegistry) {
+      ResponseRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }

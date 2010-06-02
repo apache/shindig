@@ -189,7 +189,7 @@ public interface ConcatUriManager {
     
     /**
      * Validate the version of the resource list.
-     * @param resourceUri Uri of a proxied resource
+     * @param resourceUris Uris of a proxied resource
      * @param container Container requesting the resource
      * @param value Version value to validate.
      * @return Status of the version.

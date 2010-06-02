@@ -68,7 +68,7 @@ public class FeatureRegistryTest {
   private static int resourceIdx = 0;
   private FeatureResourceLoader resourceLoader;
   private ResourceMock resourceMock;
-  FeatureRegistry registry;
+  private FeatureRegistry registry;
   private Map<String, String> lastAttribs;
 
   @Before

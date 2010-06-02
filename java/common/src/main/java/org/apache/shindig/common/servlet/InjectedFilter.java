@@ -36,9 +36,13 @@ public abstract class InjectedFilter implements Filter {
     ServletContext context = config.getServletContext();
     injector = (Injector) context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
     if (injector == null) {
-      throw new UnavailableException(
-          "Guice Injector not found! Make sure you registered " +
-          GuiceServletContextListener.class.getName() + " as a listener");
+      injector = (Injector)
+        context.getAttribute(GuiceServletContextListener.INJECTOR_NAME);
+      if (injector == null) {
+        throw new UnavailableException(
+            "Guice Injector not found! Make sure you registered " +
+            GuiceServletContextListener.class.getName() + " as a listener");
+      }
     }
     injector.injectMembers(this);
   }

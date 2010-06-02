@@ -31,7 +31,6 @@ import org.apache.shindig.gadgets.oauth.AccessorInfo.HttpMethod;
 import org.apache.shindig.gadgets.oauth.AccessorInfo.OAuthParamLocation;
 import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret.KeyType;
 import org.apache.shindig.gadgets.oauth.OAuthArguments.UseToken;
-import org.apache.shindig.gadgets.oauth.OAuthResponseParams.OAuthRequestException;
 import org.apache.shindig.gadgets.oauth.OAuthStore.TokenInfo;
 import org.apache.shindig.gadgets.oauth.testing.FakeOAuthServiceProvider;
 import org.junit.Before;
@@ -132,7 +131,7 @@ public class GadgetTokenStoreTest {
       store.getOAuthAccessor(socialToken, arguments, clientState, responseParams, fetcherConfig);
       fail();
     } catch (OAuthRequestException e) {
-      assertEquals("BAD_OAUTH_CONFIGURATION", responseParams.getError());
+      assertEquals("BAD_OAUTH_CONFIGURATION", e.getError());
     }
   }
 
@@ -303,7 +302,7 @@ public class GadgetTokenStoreTest {
       store.getOAuthAccessor(socialToken, arguments, clientState, responseParams, fetcherConfig);
       fail();
     } catch (OAuthRequestException e) {
-      assertEquals("BAD_OAUTH_CONFIGURATION", responseParams.getError());
+      assertEquals("BAD_OAUTH_CONFIGURATION", e.getError());
     }
   }
 

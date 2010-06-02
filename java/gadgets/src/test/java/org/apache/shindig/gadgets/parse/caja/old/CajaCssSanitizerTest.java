@@ -101,7 +101,7 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     String css = ".xyz { background: url('http://www.example.org/img.gif');}";
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, importRewriter, imageRewriter);
-    assertEquals(".xyz{background:url('http://www.example.org/img.gif%26sanitize%3D1%26rewriteMime%3Dimage/%2A');}",
+    assertEquals(".xyz{background:url('http://www.example.org/img.gif%26sanitize%3d1%26rewriteMime%3dimage/%2a');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
 

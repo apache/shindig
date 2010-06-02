@@ -36,7 +36,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.UserDataHandler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -57,25 +56,13 @@ import java.util.Set;
  * rendering, OSML, etc.)
  */
 public class SanitizingGadgetRewriter implements GadgetRewriter {
-
-  /** Key stored as element user-data to bypass sanitization */
-  private static final String BYPASS_SANITIZATION_KEY = "shindig.bypassSanitization";
-
   /**
    * Is the Gadget to be rendered sanitized?
    * @return true if sanitization will be enabled
    */
   public static boolean isSanitizedRenderingRequest(Gadget gadget) {
-    return ("1".equals(gadget.getContext().getParameter("sanitize")));
+    return "1".equals(gadget.getContext().getParameter("sanitize"));
   }
-  
-  private static UserDataHandler copyOnClone = new UserDataHandler() {
-    public void handle(short operation, String key, Object data, Node src, Node dst) {
-      if (operation == NODE_IMPORTED || operation == NODE_CLONED) {
-        dst.setUserData(key, data, copyOnClone);
-      }
-    }
-  };
   
   private final Set<String> allowedTags;
   private final Set<String> allowedAttributes;

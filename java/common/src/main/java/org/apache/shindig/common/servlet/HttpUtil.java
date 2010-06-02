@@ -28,7 +28,9 @@ import java.util.regex.Pattern;
 /**
  * Collection of HTTP utilities
  */
-public class HttpUtil {
+public final class HttpUtil {
+  private HttpUtil() {}
+  
   // 1 year.
   private static int defaultTtl = 60 * 60 * 24 * 365;
 

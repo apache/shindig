@@ -24,6 +24,7 @@
     <script src="opensocial.js"/>
     <script src="activity.js"/>
     <script src="address.js"/>
+    <script src="album.js"/>
     <script src="bodytype.js"/>
     <script src="collection.js"/>
     <script src="container.js"/>

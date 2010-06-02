@@ -40,6 +40,10 @@ import javax.servlet.ServletContextListener;
 public class GuiceServletContextListener implements ServletContextListener {
   public static final String INJECTOR_ATTRIBUTE = "guice-injector";
   public static final String MODULES_ATTRIBUTE = "guice-modules";
+
+  // From guice-servlet-2.0
+  public static final String INJECTOR_NAME = Injector.class.getName();
+
   private boolean jmxInitialized = false;
 
   public void contextInitialized(ServletContextEvent event) {

@@ -20,18 +20,8 @@
 package org.apache.shindig.extras;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import com.google.inject.spi.Message;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.shindig.common.util.ResourceLoader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * Configures the Extra modules in shindig-extras. 

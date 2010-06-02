@@ -30,8 +30,8 @@ import java.io.InputStream;
 /**
  * Handles loading contents from resource and file system files.
  */
-public class ResourceLoader {
-
+public final class ResourceLoader {
+  private ResourceLoader() {}
   /**
    * Opens a given path as either a resource or a file, depending on the path
    * name.

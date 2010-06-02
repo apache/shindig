@@ -32,7 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Cryptographic utility functions.
  */
-public class Crypto {
+public final class Crypto {
   
   /** 
    * Use this random number generator instead of creating your own.  This is

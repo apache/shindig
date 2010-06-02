@@ -29,7 +29,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
@@ -85,7 +85,7 @@ import com.google.inject.Inject;
  * in the above format. The RPC itself succeeded in these cases. If an RPC error occurred the client
  * should introspect the error message for information as to the cause.
  * 
- * TODO: send errors using "data", not plain content
+ * TODO: send errors using "result", not plain content
  *
  * @see MakeRequestHandler
  */
@@ -95,11 +95,11 @@ public class HttpRequestHandler {
   static final Set<String> BAD_HEADERS = ImmutableSet.of("HOST", "ACCEPT-ENCODING");
 
   private final RequestPipeline requestPipeline;
-  private final RequestRewriterRegistry contentRewriterRegistry;
+  private final ResponseRewriterRegistry contentRewriterRegistry;
 
   @Inject
   public HttpRequestHandler(RequestPipeline requestPipeline,
-      RequestRewriterRegistry contentRewriterRegistry) {
+      ResponseRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
   }

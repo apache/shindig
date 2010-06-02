@@ -86,7 +86,7 @@ public class InvalidationHandler {
           }
           resources.add(Uri.parse(key));
         } else {
-          if (key.equals("@viewer")) {
+          if ("@viewer".equals(key)) {
             // Viewer is invalidated by default if available
             continue;
           }

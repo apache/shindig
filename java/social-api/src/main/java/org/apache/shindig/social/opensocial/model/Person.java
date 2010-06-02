@@ -342,14 +342,14 @@ public interface Person {
    * 
    * @return the app data, possibly a subset.
    */
-  Map<String, ? extends Object> getAppData();
+  Map<String, ?> getAppData();
   
   /**
    * Sets app data for the person.
    * 
    * @param appData the app data, possibly a subset 
    */
-  void setAppData(Map<String, ? extends Object> appData);
+  void setAppData(Map<String, ?> appData);
 
   /**
    * Get the person's date of birth, specified as a {@link Date} object. Container support for this

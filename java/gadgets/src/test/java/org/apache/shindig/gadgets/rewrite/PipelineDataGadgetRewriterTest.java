@@ -44,8 +44,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.reportMatcher;
 import static org.easymock.EasyMock.same;
 import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static org.junit.Assert.assertEquals;
@@ -120,7 +120,7 @@ public class PipelineDataGadgetRewriterTest {
     
     // Dummy return results (the "real" return would have two values)
     Callable<PreloadedData> callable = createPreloadTask(
-        "key", "{data: {foo: 'bar'}}");
+        "key", "{result: {foo: 'bar'}}");
 
     // One batch with 1 each HTTP and Social preload
     expect(preloader.createPreloadTasks(same(gadget.getContext()),

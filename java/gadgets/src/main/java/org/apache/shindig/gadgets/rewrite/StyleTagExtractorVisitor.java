@@ -31,11 +31,11 @@ import org.w3c.dom.Node;
 
 public class StyleTagExtractorVisitor implements Visitor {
   private final ContentRewriterFeature.Config config;
-  private final CssRequestRewriter cssRewriter;
+  private final CssResponseRewriter cssRewriter;
   private final ProxyUriManager proxyUriManager;
   
   public StyleTagExtractorVisitor(ContentRewriterFeature.Config config,
-      CssRequestRewriter cssRewriter, ProxyUriManager proxyUriManager) {
+      CssResponseRewriter cssRewriter, ProxyUriManager proxyUriManager) {
     this.config = config;
     this.cssRewriter = cssRewriter;
     this.proxyUriManager = proxyUriManager;
@@ -74,7 +74,7 @@ public class StyleTagExtractorVisitor implements Visitor {
       // Guaranteed safe cast due to reservation logic.
       Element elem = (Element)node;
       List<String> extractedUrls = cssRewriter.rewrite(
-          elem, contentBase, CssRequestRewriter.uriMaker(proxyUriManager, config), true);
+          elem, contentBase, CssResponseRewriter.uriMaker(proxyUriManager, config), true);
       for (String extractedUrl : extractedUrls) {
         // Add extracted urls as link elements to head
         Element newLink = head.getOwnerDocument().createElement("link");

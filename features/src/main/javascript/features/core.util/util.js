@@ -37,15 +37,14 @@ gadgets['util'] = function() {
     // Get settings from url, 'hash' takes precedence over 'search' component
     // don't use document.location.hash due to browser differences.
     var query;
-    var l = url;
-    var queryIdx = l.indexOf("?");
-    var hashIdx = l.indexOf("#");
+    var queryIdx = url.indexOf("?");
+    var hashIdx = url.indexOf("#");
     if (hashIdx === -1) {
-      query = l.substr(queryIdx + 1);
+      query = url.substr(queryIdx + 1);
     } else {
       // essentially replaces "#" with "&"
-      query = [l.substr(queryIdx + 1, hashIdx - queryIdx - 1), "&",
-               l.substr(hashIdx + 1)].join("");
+      query = [url.substr(queryIdx + 1, hashIdx - queryIdx - 1), "&",
+               url.substr(hashIdx + 1)].join("");
     }
     return query.split("&");
   }

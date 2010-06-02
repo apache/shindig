@@ -46,7 +46,7 @@ public class PersonImpl implements Person {
   private List<String> activities;
   private List<Address> addresses;
   private Integer age;
-  private Map<String, ? extends Object> appData;
+  private Map<String, ?> appData;
   private Date birthday;
   private BodyType bodyType;
   private List<String> books;
@@ -160,11 +160,11 @@ public class PersonImpl implements Person {
     this.age = age;
   }
 
-  public Map<String, ? extends Object> getAppData() {
+  public Map<String, ?> getAppData() {
     return this.appData;
   }
 
-  public void setAppData(Map<String, ? extends Object> appData) {
+  public void setAppData(Map<String, ?> appData) {
     this.appData = appData;
   }
 

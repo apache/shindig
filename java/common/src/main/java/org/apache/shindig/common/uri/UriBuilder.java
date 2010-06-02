@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  * Note that the builder will only automatically encode query parameters that are added. Other
  * parameters must be encoded explicitly.
  */
-public class UriBuilder {
+public final class UriBuilder {
   private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)=([^&=]*)");
 
   private String scheme;

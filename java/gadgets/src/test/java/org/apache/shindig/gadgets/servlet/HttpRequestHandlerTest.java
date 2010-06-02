@@ -38,9 +38,9 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
-import org.apache.shindig.gadgets.rewrite.DefaultRequestRewriterRegistry;
-import org.apache.shindig.gadgets.rewrite.RequestRewriter;
-import org.apache.shindig.gadgets.rewrite.RequestRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
@@ -73,8 +73,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
   private final RequestPipeline pipeline = mock(RequestPipeline.class);
   private final CaptureRewriter rewriter = new CaptureRewriter();
-  private final RequestRewriterRegistry rewriterRegistry
-      = new DefaultRequestRewriterRegistry(Arrays.<RequestRewriter>asList(rewriter), null);
+  private final ResponseRewriterRegistry rewriterRegistry
+      = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
 
   private HandlerRegistry registry;
 

@@ -32,7 +32,7 @@ import org.apache.shindig.social.core.model.MessageImpl;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.UserId;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

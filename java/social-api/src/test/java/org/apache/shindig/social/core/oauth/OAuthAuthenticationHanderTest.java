@@ -33,7 +33,7 @@ import org.apache.shindig.common.testing.FakeHttpServletRequest;
 import org.apache.shindig.common.util.CharsetUtil;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.oauth.OAuthEntry;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 

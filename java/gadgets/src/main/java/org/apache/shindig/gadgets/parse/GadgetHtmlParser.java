@@ -34,6 +34,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -180,14 +181,14 @@ public abstract class GadgetHtmlParser {
       prependToNode(head, beforeHead);
       prependToNode(body, beforeBody);
       
-      // One exception. <style> nodes from <body> end up at the end of <head>, since doing so
-      // is HTML compliant and can never break rendering due to ordering concerns.
+      // One exception. <style>/<link rel="stylesheet" nodes from <body> end up at the end of <head>,
+      // since doing so is HTML compliant and can never break rendering due to ordering concerns.
       LinkedList<Node> styleNodes = Lists.newLinkedList();
       NodeList bodyKids = body.getChildNodes();
       for (int i = 0; i < bodyKids.getLength(); ++i) {
         Node bodyKid = bodyKids.item(i);
         if (bodyKid.getNodeType() == Node.ELEMENT_NODE &&
-            "style".equalsIgnoreCase(bodyKid.getNodeName())) {
+            isStyleElement((Element)bodyKid)) {
           styleNodes.add(bodyKid);
         }
       }
@@ -223,6 +224,13 @@ public abstract class GadgetHtmlParser {
     while (!from.isEmpty()) {
       to.insertBefore(from.removeLast(), to.getFirstChild());
     }
+  }
+  
+  private boolean isStyleElement(Element elem) {
+    return "style".equalsIgnoreCase(elem.getNodeName()) ||
+           ("link".equalsIgnoreCase(elem.getNodeName()) &&
+            ("stylesheet".equalsIgnoreCase(elem.getAttribute("rel")) ||
+             elem.getAttribute("type").toLowerCase().contains("css")));
   }
 
   /**

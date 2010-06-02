@@ -61,6 +61,7 @@ public interface PersonService {
    * @param collectionOptions How to filter, sort and paginate the collection being fetched
    * @param fields The profile details to fetch. Empty set implies all
    * @param token The gadget token @return a list of people.
+   * @return Future that returns a RestfulCollection of Person
    */
   Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       CollectionOptions collectionOptions, Set<String> fields, SecurityToken token)

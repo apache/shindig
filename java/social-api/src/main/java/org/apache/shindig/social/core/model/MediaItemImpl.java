@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.social.core.model;
 
+import org.apache.shindig.social.opensocial.model.Address;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 
 /**
@@ -34,7 +35,7 @@ public class MediaItemImpl implements MediaItem {
   private String id;
   private String language;
   private String lastUpdated;
-  private String location;
+  private Address location;
   private String mimeType;
   private String numComments;
   private String numViews;
@@ -153,11 +154,11 @@ public class MediaItemImpl implements MediaItem {
     this.lastUpdated = lastUpdated;
   }
 
-  public String getLocation() {
+  public Address getLocation() {
     return location;
   }
 
-  public void setLocation(String location) {
+  public void setLocation(Address location) {
     this.location = location;
   }
 

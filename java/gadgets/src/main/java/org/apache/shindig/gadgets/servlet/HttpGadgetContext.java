@@ -260,7 +260,7 @@ public class HttpGadgetContext extends GadgetContext {
     if (c == null) {
       return null;
     }
-    return c.equals("1") ? RenderingContext.CONTAINER : RenderingContext.GADGET;
+    return "1".equals(c) ? RenderingContext.CONTAINER : RenderingContext.GADGET;
   }
 
   /**

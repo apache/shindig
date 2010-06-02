@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.commons.io.IOUtils;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import javax.imageio.ImageIO;
 import java.awt.color.ICC_Profile;
@@ -53,8 +53,8 @@ public class JPEGOptimizer extends BaseOptimizer {
 
   private boolean usePng;
 
-  public JPEGOptimizer(OptimizerConfig config, HttpResponse original) {
-    super(config, original);
+  public JPEGOptimizer(OptimizerConfig config, HttpResponseBuilder response) {
+    super(config, response);
   }
 
   @Override
@@ -65,7 +65,7 @@ public class JPEGOptimizer extends BaseOptimizer {
         config.getMinThresholdBytes());
 
     // Output the image as PNG
-    PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, originalResponse);
+    PNGOptimizer pngOptimizer = new PNGOptimizer(pngConfig, response);
     pngOptimizer.rewriteImpl(image);
 
     int pngLength = Integer.MAX_VALUE;

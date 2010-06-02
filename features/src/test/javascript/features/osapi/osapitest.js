@@ -36,8 +36,10 @@ OsapiTest.prototype.testCall = function() {
   var transportCalled = false;
   transport.execute = function(requests, callback) {
     transportCalled = true;
-    callback([{id:"test.method",result:{a:"b"}}]);
-  }
+    callback([
+      {id:"test.method",result:{a:"b"}}
+    ]);
+  };
   var callbackCalled = false;
   osapi.test.method({}).execute(function(result) {
     callbackCalled = true;

@@ -70,5 +70,5 @@
       gadgets.warn("Duplicate osapi method definition " + method);
     }
     last[parts[parts.length - 1]] = apiMethod;
-  }
+  };
 })();

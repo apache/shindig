@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
@@ -42,10 +43,12 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 import org.apache.commons.lang.StringUtils;
-import org.easymock.classextension.EasyMock;
-import org.easymock.classextension.IMocksControl;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 import org.junit.Before;
 
 import java.util.Set;
@@ -73,7 +76,7 @@ public abstract class BaseRewriterTestCase {
   protected LinkRewriter defaultLinkRewriterNoCacheAndDebug;
   protected GadgetHtmlParser parser;
   protected Injector injector;
-  protected HttpResponse fakeResponse;
+  protected HttpResponseBuilder fakeResponse;
   protected ContentRewriterUris rewriterUris;
   protected IMocksControl control;
   protected ContentRewriterUris defaultContainerRewriterUris;
@@ -101,10 +104,10 @@ public abstract class BaseRewriterTestCase {
     defaultLinkRewriterNoCacheAndDebug = new DefaultProxyingLinkRewriterFactory(
         defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
         "default", true, true);
-    injector = Guice.createInjector(new ParseModule(), new PropertiesModule(), new TestModule());
+    injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
-        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF}).create();
+        .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF});
 
     ContainerConfig config = new AbstractContainerConfig() {
       @Override
@@ -124,6 +127,19 @@ public abstract class BaseRewriterTestCase {
     rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
         DEFAULT_CONCAT_BASE);
     control = EasyMock.createControl();
+  }
+  
+  private Module getParseModule() {
+    return Modules.override(new ParseModule()).with(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(GadgetHtmlParser.class).to(getParserClass());
+      }
+    });
+  }
+  
+  protected Class<? extends GadgetHtmlParser> getParserClass() {
+    return NekoSimplifiedHtmlParser.class;
   }
 
   public static GadgetSpec createSpecWithRewrite(String include, String exclude, String expires,
@@ -271,7 +287,6 @@ public abstract class BaseRewriterTestCase {
     protected void configure() {
       bind(RequestPipeline.class).toInstance(new RequestPipeline() {
         public HttpResponse execute(HttpRequest request) { return null; }
-        public void normalizeProtocol(HttpRequest request) throws GadgetException {}
       });
 
       bind(GadgetSpecFactory.class).toInstance(new GadgetSpecFactory() {

@@ -60,7 +60,7 @@ shindig.samplecontainer = {};
   var gadget;
 
   var viewerId = "john.doe";
-  var ownerId = "john.doe";
+  var ownerId = "canonical";
 
   var viewMatches = /[?&]view=((?:[^#&]+|&amp;)+)/.exec(parentUrl);
   var current_view = (viewMatches)

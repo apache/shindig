@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
-import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import com.google.common.collect.ImmutableMap;
@@ -51,7 +50,7 @@ abstract class BaseOptimizer {
       "gif", ImageFormat.IMAGE_FORMAT_GIF,
       "jpeg", ImageFormat.IMAGE_FORMAT_JPEG);
 
-  final HttpResponse originalResponse;
+  final HttpResponseBuilder response;
   final OptimizerConfig config;
 
   protected ImageOutputter outputter;
@@ -60,10 +59,10 @@ abstract class BaseOptimizer {
   int reductionPct;
 
 
-  public BaseOptimizer(OptimizerConfig config, HttpResponse original) {
+  public BaseOptimizer(OptimizerConfig config, HttpResponseBuilder response) {
     this.config = config;
-    this.originalResponse = original;
-    this.minLength = original.getContentLength();
+    this.response = response;
+    this.minLength = response.getContentLength();
     this.outputter = getOutputter();
   }
 
@@ -92,14 +91,14 @@ abstract class BaseOptimizer {
     if (minLength > bytes.length) {
       minBytes = bytes;
       minLength = minBytes.length;
-      reductionPct = ((originalResponse.getContentLength() - minLength) * 100) /
-          originalResponse.getContentLength();
+      reductionPct = ((response.getContentLength() - minLength) * 100) /
+          response.getContentLength();
     }
   }
 
-  public HttpResponse rewrite(BufferedImage image) throws IOException {
+  public void rewrite(BufferedImage image) throws IOException {
     if (outputter == null) {
-      return originalResponse;
+      return;
     }
 
     long time = System.currentTimeMillis();
@@ -108,17 +107,16 @@ abstract class BaseOptimizer {
     if (minBytes != null && minBytes.length != 0) {
       StringBuilder rewriteMsg = new StringBuilder(24);
       rewriteMsg.append("c=").append(
-          ((minBytes.length * 100) / originalResponse.getContentLength()));
+          ((minBytes.length * 100) / response.getContentLength()));
       if (!getOutputContentType().equals(getOriginalContentType())) {
         rewriteMsg.append(";o=").append(getOriginalContentType());
       }
       rewriteMsg.append(";t=").append(time);
-      return new HttpResponseBuilder(originalResponse)
+      response.clearAllHeaders()
           .setHeader("Content-Type", getOutputContentType())
           .setHeader("X-Shindig-Rewrite", rewriteMsg.toString())
-          .setResponse(minBytes).create();
+          .setResponse(minBytes);
     }
-    return originalResponse;
   }
 
   /**

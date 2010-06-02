@@ -114,7 +114,7 @@ public class ShindigTypeConverter implements TypeConverter {
       // Does this object have a "list" property that is an array?
       // TODO: add to specification
       Object childList = json.opt("list");
-      if (childList != null && childList instanceof JSONArray) {
+      if (childList instanceof JSONArray) {
         return coerceToIterable(childList);
       }
       

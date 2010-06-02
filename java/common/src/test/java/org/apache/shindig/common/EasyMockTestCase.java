@@ -19,7 +19,8 @@ package org.apache.shindig.common;
 
 import com.google.common.collect.Lists;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
+import org.easymock.IMockBuilder;
 import org.junit.Assert;
 
 import java.lang.reflect.Method;
@@ -78,14 +79,14 @@ public abstract class EasyMockTestCase extends Assert {
    **/
 
   protected <T> T mock(Class<T> clazz, Method[] methods, boolean strict) {
-    T m = strict ? EasyMock.createMock(clazz, methods)
-         : EasyMock.createNiceMock(clazz, methods);
+    IMockBuilder<T> builder = EasyMock.createMockBuilder(clazz).addMockedMethods(methods);
+
+    T m = strict ? builder.createMock() : builder.createNiceMock();
     mocks.add(m);
 
     return m;
   }
 
-  /**
   /**
    * Sets each mock to replay mode in the order they were created. Call this after setting
    * all of the mock expectations for a test.

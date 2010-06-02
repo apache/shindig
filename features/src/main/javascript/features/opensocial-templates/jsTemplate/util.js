@@ -177,7 +177,7 @@ function bindFully(object, method, var_args) {
   var args = arraySlice(arguments, 2);
   return function() {
     return method.apply(object, args);
-  }
+  };
 }
 
 // Based on <http://www.w3.org/TR/2000/ REC-DOM-Level-2-Core-20001113/

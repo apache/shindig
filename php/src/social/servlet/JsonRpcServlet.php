@@ -114,11 +114,11 @@ class JsonRpcServlet extends ApiServlet {
         // FIXME this is a little hacky because of the field names in the RestfulCollection
         $converted->list = $converted->entry;
         unset($converted->entry);
-        $result['data'] = $converted;
+        $result['result'] = $converted;
       } elseif ($response instanceof DataCollection) {
-        $result["data"] = $converted->getEntry();
+        $result["result"] = $converted->getEntry();
       } else {
-        $result["data"] = $converted;
+        $result["result"] = $converted;
       }
     }
     return $result;

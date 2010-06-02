@@ -20,17 +20,17 @@
  * @fileoverview Standard methods invoked by containers to use the template API.
  *
  * Sample usage:
- *  &lt;script type="text/os-template" tag="os:Button">
- *    <button onclick="alert('Clicked'); return false;">
- *      <os:renderAll/>
- *    </button>
- *  &lt;/script]
+ *  &lt;script type="text/os-template" tag="os:Button"&gt;
+ *    &lt;button onclick="alert('Clicked'); return false;"&gt;
+ *      &lt;os:renderAll/&gt;
+ *    &lt;/button&gt;
+ *  &lt;/script&gt;
  *
- *  &lt;script type="text/os-template"]
- *    <os:Button>
- *      <div>Click me</div>
- *    </os:Button>
- *  &lt;/script]
+ *  &lt;script type="text/os-template"&gt;
+ *    &lt;os:Button&gt;
+ *      &lt;div&gt;Click me&lt;/div&gt;
+ *    &lt;/os:Button&gt;
+ *  &lt;/script&gt;
  *
  * os.Container.registerDocumentTemplates();
  * os.Container.renderInlineTemplates();

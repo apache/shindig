@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -100,7 +101,9 @@ public class JPEGOptimizerTest extends BaseOptimizerTest {
 
   HttpResponse rewrite(HttpResponse original)
       throws IOException, ImageReadException {
-    return new JPEGOptimizer(new OptimizerConfig(), original).rewrite(
+    HttpResponseBuilder builder = new HttpResponseBuilder(original);
+    new JPEGOptimizer(new OptimizerConfig(), builder).rewrite(
         JPEGOptimizer.readJpeg(original.getResponse()));
+    return builder.create();
   }
 }

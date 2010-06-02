@@ -21,18 +21,16 @@ import static
     org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.CONTENT_TYPE_AND_EXTENSION_MISMATCH;
 import static
     org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.CONTENT_TYPE_AND_MIME_MISMATCH;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_HEIGHT;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_QUALITY;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_RESIZE_WIDTH;
-import static org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter.PARAM_NO_EXPAND;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.createControl;
+import static org.easymock.EasyMock.createControl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.easymock.IMocksControl;
 
 import org.junit.Assert;
@@ -73,8 +71,7 @@ public class ImageRewriterTest extends Assert {
 
   private static final Uri IMAGE_URL = Uri.parse("http://www.example.com/image.gif");
 
-  private ImageRewriter rewriter;
-
+  private ResponseRewriter rewriter;
   private IMocksControl mockControl;
 
   @Before
@@ -84,12 +81,11 @@ public class ImageRewriterTest extends Assert {
   }
 
   /** Makes a new {@link HttpResponse} with an image content. */
-  private HttpResponse getImageResponse(String contentType, byte[] imageBytes) {
+  private HttpResponseBuilder getImageResponse(String contentType, byte[] imageBytes) {
     return new HttpResponseBuilder()
         .setHeader(CONTENT_TYPE_HEADER, contentType)
         .setHttpStatusCode(HttpResponse.SC_OK)
-        .setResponse(imageBytes)
-        .create();
+        .setResponse(imageBytes);
   }
 
   /** Extracts an image by its resource name and converts it into a byte array. */
@@ -111,80 +107,83 @@ public class ImageRewriterTest extends Assert {
       String targetContentType, String imageName, Integer width, Integer height, Integer quality,
       boolean noExpand)
       throws Exception {
-    HttpResponse originalResponse = getImageResponse(sourceContentType, getImageBytes(imageName));
+    HttpResponseBuilder response = getImageResponse(sourceContentType, getImageBytes(imageName));
     HttpRequest request = getMockRequest(width, height, quality, noExpand);
 
     mockControl.replay();
-    HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
+    rewriter.rewrite(request, response);
     mockControl.verify();
 
-    assertEquals(targetContentType, rewrittenResponse.getHeader(CONTENT_TYPE_HEADER));
-    return ImageIO.read(rewrittenResponse.getResponse());
+    assertEquals(targetContentType, response.getHeader(CONTENT_TYPE_HEADER));
+    return ImageIO.read(response.getContentBytes());
   }
 
   private HttpRequest getMockRequest(Integer width, Integer height, Integer quality, boolean noExpand) {
     HttpRequest request = mockControl.createMock(HttpRequest.class);
     expect(request.getUri()).andReturn(IMAGE_URL);
-    expect(request.getParamAsInteger(PARAM_RESIZE_QUALITY)).andReturn(quality);
-    expect(request.getParamAsInteger(PARAM_RESIZE_WIDTH)).andReturn(width);
-    expect(request.getParamAsInteger(PARAM_RESIZE_HEIGHT)).andReturn(height);
-    expect(request.getParam(PARAM_NO_EXPAND)).andReturn(noExpand ? "1" : null).anyTimes();
+    expect(request.getParamAsInteger(Param.RESIZE_QUALITY.getKey())).andReturn(quality);
+    expect(request.getParamAsInteger(Param.RESIZE_WIDTH.getKey())).andReturn(width);
+    expect(request.getParamAsInteger(Param.RESIZE_HEIGHT.getKey())).andReturn(height);
+    expect(request.getParam(Param.NO_EXPAND.getKey())).andReturn(noExpand ? "1" : null).anyTimes();
     return request;
   }
 
   @Test
   public void testRewriteValidImageWithValidMimeAndExtn() throws Exception {
     byte[] bytes = getImageBytes("org/apache/shindig/gadgets/rewrite/image/inefficient.png");
-    HttpResponse original = getImageResponse(CONTENT_TYPE_PNG, bytes);
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_PNG, bytes);
+    int originalContentLength = response.getContentLength();
 
-    HttpResponse rewritten = rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), original);
-    assertEquals(HttpResponse.SC_OK, rewritten.getHttpStatusCode());
-    assertTrue(rewritten.getContentLength() < original.getContentLength());
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response);
+    assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
+    assertTrue(response.getContentLength() < originalContentLength);
   }
 
   @Test
   public void testRewriteValidImageWithInvalidMimeAndFileExtn() throws Exception {
     byte[] bytes = getImageBytes("org/apache/shindig/gadgets/rewrite/image/inefficient.png");
-    HttpResponse original = getImageResponse(CONTENT_TYPE_BOGUS, bytes);
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_BOGUS, bytes);
+    int originalContentLength = response.getContentLength();
 
-    HttpResponse rewritten = rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), original);
-    assertEquals(HttpResponse.SC_OK, rewritten.getHttpStatusCode());
-    assertEquals(rewritten.getContentLength(), original.getContentLength());
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response);
+    assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
+    assertEquals(response.getContentLength(), originalContentLength);
   }
 
   @Test
   public void testRewriteInvalidImageContentWithValidMime() throws Exception {
-    HttpResponse original = getImageResponse(CONTENT_TYPE_PNG, "This is not a PNG".getBytes());
-    HttpResponse rewritten = rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), original);
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_PNG, "This is not a PNG".getBytes());
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.junk")), response);
 
-    assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, rewritten.getHttpStatusCode());
-    assertEquals(CONTENT_TYPE_AND_MIME_MISMATCH, rewritten.getResponseAsString());
+    assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, response.getHttpStatusCode());
+    assertEquals(CONTENT_TYPE_AND_MIME_MISMATCH, response.create().getResponseAsString());
   }
 
   @Test
   public void testRewriteInvalidImageContentWithValidFileExtn() throws Exception {
-    HttpResponse original = getImageResponse(CONTENT_TYPE_BOGUS, "This is not an image".getBytes());
-    HttpResponse rewritten = rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), original);
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_BOGUS, "This is not an image".getBytes());
+    rewriter.rewrite(new HttpRequest(Uri.parse("some.png")), response);
 
-    assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, rewritten.getHttpStatusCode());
+    assertEquals(HttpResponse.SC_UNSUPPORTED_MEDIA_TYPE, response.getHttpStatusCode());
     assertEquals(CONTENT_TYPE_AND_EXTENSION_MISMATCH,
-        rewritten.getResponseAsString());
+        response.create().getResponseAsString());
   }
 
   @Test
   public void testNoRewriteAnimatedGIF() throws Exception {
-    HttpResponse original = getImageResponse(CONTENT_TYPE_GIF,
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF,
         getImageBytes("org/apache/shindig/gadgets/rewrite/image/animated.gif"));
-    assertSame(rewriter.rewrite(new HttpRequest(Uri.parse("animated.gif")), original), original);
+    int changesBefore = response.getNumChanges();
+    rewriter.rewrite(new HttpRequest(Uri.parse("animated.gif")), response);
+    assertEquals(changesBefore, response.getNumChanges());
   }
 
   @Test
   public void testRewriteUnAnimatedGIF() throws Exception {
-    HttpResponse original = getImageResponse(CONTENT_TYPE_GIF,
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF,
         getImageBytes("org/apache/shindig/gadgets/rewrite/image/large.gif"));
-    assertEquals(CONTENT_TYPE_PNG,
-        rewriter.rewrite(new HttpRequest(Uri.parse("large.gif")), original)
-            .getHeader(CONTENT_TYPE_HEADER));
+    rewriter.rewrite(new HttpRequest(Uri.parse("large.gif")), response);
+    assertEquals(CONTENT_TYPE_PNG, response.getHeader(CONTENT_TYPE_HEADER));
   }
 
   // Resizing image tests
@@ -276,24 +275,24 @@ public class ImageRewriterTest extends Assert {
 
   @Test
   public void testResize_refuseHugeInputImages() throws Exception {
-    HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, getImageBytes(HUGE_IMAGE));
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF, getImageBytes(HUGE_IMAGE));
     HttpRequest request = getMockRequest(120, 60, null, false);
     mockControl.replay();
-    HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
+    rewriter.rewrite(request, response);
     mockControl.verify();
-    assertEquals(HttpResponse.SC_FORBIDDEN, rewrittenResponse.getHttpStatusCode());
+    assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
   }
 
   @Test
   public void testResize_acceptServeHugeImages() throws Exception {
     byte[] imageBytes = getImageBytes(HUGE_IMAGE);
-    HttpResponse originalResponse = getImageResponse(CONTENT_TYPE_GIF, imageBytes);
+    HttpResponseBuilder response = getImageResponse(CONTENT_TYPE_GIF, imageBytes);
     HttpRequest request = getMockRequest(null, null, null, false);
     mockControl.replay();
-    HttpResponse rewrittenResponse = rewriter.rewrite(request, originalResponse);
+    rewriter.rewrite(request, response);
     mockControl.verify();
-    assertEquals(HttpResponse.SC_OK, rewrittenResponse.getHttpStatusCode());
-    assertTrue(Arrays.equals(imageBytes, IOUtils.toByteArray(rewrittenResponse.getResponse())));
+    assertEquals(HttpResponse.SC_OK, response.getHttpStatusCode());
+    assertTrue(Arrays.equals(imageBytes, IOUtils.toByteArray(response.getContentBytes())));
   }
   
   @Test

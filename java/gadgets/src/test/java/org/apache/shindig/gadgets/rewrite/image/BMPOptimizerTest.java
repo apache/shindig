@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite.image;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -70,7 +71,9 @@ public class BMPOptimizerTest extends BaseOptimizerTest {
 
   protected HttpResponse rewrite(HttpResponse original)
        throws IOException, ImageReadException {
-     return new BMPOptimizer(new OptimizerConfig(), original).rewrite(
+    HttpResponseBuilder builder = new HttpResponseBuilder(original);
+    new BMPOptimizer(new OptimizerConfig(), builder).rewrite(
          Sanselan.getBufferedImage(original.getResponse()));
+    return builder.create();
    }
 }

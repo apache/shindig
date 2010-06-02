@@ -128,7 +128,7 @@ public class SampleOAuthServlet extends InjectedServlet {
     List<Parameter> responseParams = OAuth.newList(OAuth.OAUTH_TOKEN, entry.token,
         OAuth.OAUTH_TOKEN_SECRET, entry.tokenSecret);
     if (callback != null) {
-      responseParams.add(new Parameter(OAuthConstants.OAUTH_CALLBACK_CONFIRMED, "true"));
+      responseParams.add(new Parameter(OAuth.OAUTH_CALLBACK_CONFIRMED, "true"));
     }
     sendResponse(servletResponse, responseParams);
   }
@@ -208,7 +208,7 @@ public class SampleOAuthServlet extends InjectedServlet {
       // Add user_id to the callback
       callback = OAuth.addParameters(callback, "user_id", entry.userId);
       if (entry.callbackToken != null) {
-        callback = OAuth.addParameters(callback, OAuthConstants.OAUTH_VERIFIER,
+        callback = OAuth.addParameters(callback, OAuth.OAUTH_VERIFIER,
             entry.callbackToken);
       }
 
@@ -229,7 +229,7 @@ public class SampleOAuthServlet extends InjectedServlet {
 
     if (entry.callbackToken != null) {
       // We're using the fixed protocol
-      String clientCallbackToken = requestMessage.getParameter(OAuthConstants.OAUTH_VERIFIER);
+      String clientCallbackToken = requestMessage.getParameter(OAuth.OAUTH_VERIFIER);
       if (!entry.callbackToken.equals(clientCallbackToken)) {
         dataStore.disableToken(entry);
         servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "This token is not authorized");

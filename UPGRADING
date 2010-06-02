@@ -19,10 +19,20 @@ The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and
 
 == Java Dependency Changes ==
 
-Too many to mention.  Check the top-level pom.xml for all the new versions
+Too many to mention.  Check the top-level pom.xml for all the new versions.
+Here are some highlights:
 
-* servlet-api is upgraded to 2.5
-
+* caja r3034 -> r4067
+* guice 1.0->2.0
+* guice-multibindings (NEW)
+* nekohtml 1.9.9 -> 1.9.13
+* oauth-* 20080621 -> 20100527 (and others)
+* rome 0.9 -> 1.0
+* rome-modules 0.3.2 (NEW)
+* servlet-api 2.4->2.5
+* ehcache 1.5 -> 1.6.2
+* xstream 1.2 -> 1.3.1
+* xpp3 1.1.3.3 -> 1.1.4c
 
 == Java Interface Changes ==
 
@@ -53,6 +63,21 @@ encode tokens as well as decode them.
 The constructor RestfulCollection(List<T> entry, int startIndex, int totalResults) is removed.  
 Use the constructor with an items-per-page parameter instead.
 
+* RequestRewriter, ImageRewriter -> ResponseRewriter
+
+ResponseRewriter is replacing RequestRewriter and ImageRewriter. Its interface method is:
+void rewrite(HttpRequest req, HttpResponseBuilder builder);
+
+HttpResponseBuilder extends MutableContent. RequestRewriters may be migrated by
+mutating builder rather than the previously-passed MutableContent. There is no
+provision for reading "original" HttpResponse headers.
+
+ImageRewriters may be migrated to ResponseRewriters as well by mutating the builder,
+where previously a new HttpResponse was returned.
+
+* MediaItem
+
+Location field changed from String to Address.
 
 == Java Guice Changes ==
 

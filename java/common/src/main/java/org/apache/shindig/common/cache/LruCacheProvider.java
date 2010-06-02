@@ -27,6 +27,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -84,12 +85,16 @@ public class LruCacheProvider implements CacheProvider {
   public <K, V> Cache<K, V> createCache(String name) {
     int capacity = getCapacity(name);
     if (name == null) {
-      LOG.fine("Creating anonymous cache");
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Creating anonymous cache");
+      }
       return new LruCache<K, V>(capacity);
     } else {
       Cache<K, V> cache = (Cache<K, V>) caches.get(name);
       if (cache == null) {
-        LOG.fine("Creating cache named " + name);
+        if (LOG.isLoggable(Level.FINE)) {
+          LOG.fine("Creating cache named " + name);
+        }
         cache = new LruCache<K, V>(capacity);
         caches.put(name, cache);
       }

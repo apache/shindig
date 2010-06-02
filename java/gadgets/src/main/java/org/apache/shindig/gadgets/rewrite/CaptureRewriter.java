@@ -20,19 +20,17 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 /**
  * Utility rewriter for testing.
  */
-public class CaptureRewriter implements RequestRewriter, GadgetRewriter {
+public class CaptureRewriter implements ResponseRewriter, GadgetRewriter {
   private boolean rewroteView = false;
   private boolean rewroteResponse = false;
 
-  public boolean rewrite(HttpRequest request, HttpResponse original,
-      MutableContent content) {
+  public void rewrite(HttpRequest request, HttpResponseBuilder original) {
     rewroteResponse = true;
-    return true;
   }
 
   public boolean responseWasRewritten() {

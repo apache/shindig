@@ -49,10 +49,9 @@
  * @constructor
  */
 opensocial.Message = function(body_or_params, opt_params) {
-
   if (typeof body_or_params  == 'string') {
     // We have a string
-  this.fields_ = opt_params || {};
+    this.fields_ = opt_params || {};
     this.fields_[opensocial.Message.Field.BODY] = body_or_params;
   } else {
     this.fields_ = body_or_params || {};
