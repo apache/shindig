@@ -38,7 +38,7 @@ public final class JsonUtil {
   private static final Set<String> EXCLUDE_METHODS
       = ImmutableSet.of("getClass", "getDeclaringClass");
 
-  private static final Map<Class<?>, Map<String, Method>> getters = new MapMaker().makeMap();
+  private static final Map<Class<?>, Map<String, Method>> GETTERS = new MapMaker().makeMap();
 
   /**
    * Gets a property of an Object.  Will return a property value if
@@ -78,7 +78,7 @@ public final class JsonUtil {
   static Map<String, Method> getGetters(Object pojo) {
     Class<?> clazz = pojo.getClass();
 
-    Map<String, Method> methods = getters.get(clazz);
+    Map<String, Method> methods = GETTERS.get(clazz);
     if (methods != null) {
       return methods;
     }
@@ -94,7 +94,7 @@ public final class JsonUtil {
       }
     }
 
-    getters.put(clazz, methods);
+    GETTERS.put(clazz, methods);
     return methods;
   }
 

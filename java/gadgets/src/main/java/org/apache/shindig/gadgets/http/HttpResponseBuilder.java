@@ -103,17 +103,17 @@ public class HttpResponseBuilder extends MutableContent {
     Collection<String> values = headers.get("Content-Type");
     if (!values.isEmpty()) {
       String contentType = values.iterator().next();
-      String newContentType = "";
+      StringBuilder newContentType = new StringBuilder("");
       // Remove previously set charset:
       String[] parts = StringUtils.split(contentType, ';');
       for (String part : parts) {
         if (!part.contains("charset=")) {
-          newContentType += part + "; ";
+          newContentType.append(part).append("; ");
         }
       }
-      newContentType += "charset=" + charset.name();
+      newContentType.append("charset=").append(charset.name());
       values.clear();
-      values.add(newContentType);
+      values.add(newContentType.toString());
       if (!(values.size() == 1 && !contentType.equals(newContentType))) {
         incrementNumChanges();
       }

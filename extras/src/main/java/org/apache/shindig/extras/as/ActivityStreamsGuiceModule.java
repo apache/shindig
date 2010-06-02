@@ -25,7 +25,6 @@ import com.google.inject.name.Names;
 import org.apache.shindig.extras.as.opensocial.service.ActivityStreamsHandler;
 import org.apache.shindig.extras.as.opensocial.spi.ActivityStreamService;
 import org.apache.shindig.extras.as.sample.ActivityStreamsJsonDbService;
-import org.apache.shindig.social.sample.spi.JsonDbOpensocialService;
 
 /**
  * Configures the Extra modules in shindig-extras.

@@ -25,7 +25,7 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 /**
  * Various utility functions used by rewriters
  */
-public class RewriterUtils {
+public final class RewriterUtils {
   private RewriterUtils() {}
   
   public static boolean isHtml(HttpRequest request, HttpResponse original) {

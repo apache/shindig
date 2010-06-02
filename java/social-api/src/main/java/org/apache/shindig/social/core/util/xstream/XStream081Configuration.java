@@ -363,6 +363,7 @@ public class XStream081Configuration implements XStreamConfiguration {
     final K defaultval;
 
     public DefaultedEnumMap(Class<K> clz, K defaultkey) {
+      super();
       this.backing = new EnumMap<K,V>(Preconditions.checkNotNull(clz));
       this.defaultval = Preconditions.checkNotNull(defaultkey);
     }

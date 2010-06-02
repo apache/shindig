@@ -98,7 +98,7 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       Node lastChild = fragment != null ? fragment.getLastChild() : null;
       if (lastChild != null && lastChild.getNodeType() == Node.TEXT_NODE) {
         String lastText = lastChild.getTextContent();
-        if (lastText.equals("\n")) {
+        if ("\n".equals(lastText)) {
           fragment.removeChild(lastChild);
         } else if (lastText.endsWith("\n")) {
           lastChild.setTextContent(lastText.substring(0, lastText.length() - 1));

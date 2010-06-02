@@ -60,7 +60,7 @@ public class PipelinedDataPreloader {
   private final RequestPipeline requestPipeline;
   private final ContainerConfig config;
 
-  private static Set<String> HTTP_RESPONSE_HEADERS =
+  private static final Set<String> HTTP_RESPONSE_HEADERS =
     ImmutableSet.of("content-type", "location", "set-cookie");
 
   @Inject

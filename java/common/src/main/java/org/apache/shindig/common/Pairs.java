@@ -20,7 +20,8 @@ package org.apache.shindig.common;
 /**
  * Utility class for creating Pair objects.
  */
-public class Pairs {
+public final class Pairs {
+  private Pairs() {}
   public static <T1, T2> Pair<T1, T2> newPair(T1 one, T2 two) {
     return new Pair<T1, T2>(one, two);
   }

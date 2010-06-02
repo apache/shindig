@@ -416,8 +416,8 @@ public class OAuthRequest {
     }
 
     authParams.clear();
-    for (String key : paramMap.keySet()) {
-      authParams.add(new Parameter(key, paramMap.get(key)));
+    for (Entry<String, String> entry : paramMap.entrySet()) {
+      authParams.add(new Parameter(entry.getKey(), entry.getValue()));
     }
   }
 
