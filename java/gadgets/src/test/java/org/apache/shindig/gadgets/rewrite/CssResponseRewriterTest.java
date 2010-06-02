@@ -40,9 +40,9 @@ import com.google.common.collect.Lists;
 /**
  *
  */
-public class CssRequestRewriterTest extends RewriterTestBase {
-  private CssRequestRewriter rewriter;
-  private CssRequestRewriter rewriterNoOverrideExpires;
+public class CssResponseRewriterTest extends RewriterTestBase {
+  private CssResponseRewriter rewriter;
+  private CssResponseRewriter rewriterNoOverrideExpires;
   private Uri dummyUri;
   private ProxyUriManager proxyUriManager;
   private ContentRewriterFeature.Factory factory;
@@ -61,7 +61,7 @@ public class CssRequestRewriterTest extends RewriterTestBase {
           }
         };
     proxyUriManager = new PassthruManager("www.test.com", "/dir/proxy");
-    rewriterNoOverrideExpires = new CssRequestRewriter(new CajaCssLexerParser(),
+    rewriterNoOverrideExpires = new CssResponseRewriter(new CajaCssLexerParser(),
         proxyUriManager, factoryNoOverrideExpires);
     final ContentRewriterFeature.Config overrideFeature =
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "3600", tags));
@@ -72,7 +72,7 @@ public class CssRequestRewriterTest extends RewriterTestBase {
       }
     };
     
-    rewriter = new CssRequestRewriter(new CajaCssLexerParser(),
+    rewriter = new CssResponseRewriter(new CajaCssLexerParser(),
         proxyUriManager, factory);
     dummyUri = Uri.parse("http://www.w3c.org");
   }
@@ -142,7 +142,7 @@ public class CssRequestRewriterTest extends RewriterTestBase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
     expected = replaceDefaultWithMockServer(expected);
     proxyUriManager = new PassthruManager("www.mock.com", "/dir/proxy");
-    rewriter = new CssRequestRewriter(new CajaCssLexerParser(),
+    rewriter = new CssResponseRewriter(new CajaCssLexerParser(),
         proxyUriManager, factory);
     
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
@@ -210,7 +210,7 @@ public class CssRequestRewriterTest extends RewriterTestBase {
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
-          CssRequestRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
+          CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
     assertEquals(expected, sw.toString());
     assertEquals(stringList, Lists.newArrayList("www.example.org/some.css",
         "www.example.org/someother.css", "www.example.org/another.css"));

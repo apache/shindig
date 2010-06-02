@@ -45,16 +45,16 @@ import com.google.inject.Inject;
 /**
  * Rewrite links to referenced content in a stylesheet
  */
-public class CssRequestRewriter implements ResponseRewriter {
+public class CssResponseRewriter implements ResponseRewriter {
 
-  private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
+  private static final Logger logger = Logger.getLogger(CssResponseRewriter.class.getName());
 
   private final CajaCssLexerParser cssParser;
   private final ProxyUriManager proxyUriManager;
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
 
   @Inject
-  public CssRequestRewriter(CajaCssLexerParser cssParser,
+  public CssResponseRewriter(CajaCssLexerParser cssParser,
       ProxyUriManager proxyUriManager, ContentRewriterFeature.Factory rewriterFeatureFactory) {
     this.cssParser = cssParser;
     this.proxyUriManager = proxyUriManager;

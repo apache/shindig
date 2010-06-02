@@ -39,16 +39,16 @@ import com.google.inject.Inject;
 /**
  * Rewriter that sanitizes CSS and image content.
  */
-public class SanitizingRequestRewriter implements ResponseRewriter {
+public class SanitizingResponseRewriter implements ResponseRewriter {
   private static final Logger logger =
-    Logger.getLogger(SanitizingRequestRewriter.class.getName());
+    Logger.getLogger(SanitizingResponseRewriter.class.getName());
 
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final CajaCssSanitizer cssSanitizer;
   private final ProxyUriManager proxyUriManager;
   
   @Inject
-  public SanitizingRequestRewriter(ContentRewriterFeature.Factory featureConfigFactory,
+  public SanitizingResponseRewriter(ContentRewriterFeature.Factory featureConfigFactory,
       CajaCssSanitizer cssSanitizer,
       ProxyUriManager proxyUriManager) {
     this.featureConfigFactory = featureConfigFactory;

@@ -37,7 +37,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Set;
 
-public class SanitizingRequestRewriterTest extends RewriterTestBase {
+public class SanitizingResponseRewriterTest extends RewriterTestBase {
   private static final Uri CONTENT_URI = Uri.parse("www.example.org/content");
 
   private String rewrite(HttpRequest request, HttpResponse response) throws Exception {
@@ -58,7 +58,7 @@ public class SanitizingRequestRewriterTest extends RewriterTestBase {
         new ContentRewriterFeature.Factory(null,
           new ContentRewriterFeature.DefaultConfig(
             ".*", "", "HTTP", "embed,img,script,link,style", "false", "false"));
-    return new SanitizingRequestRewriter(rewriterFeatureFactory,
+    return new SanitizingResponseRewriter(rewriterFeatureFactory,
         new CajaCssSanitizer(new CajaCssParser()), new PassthruManager());
   }
 
