@@ -755,7 +755,7 @@ public class OAuthRequestTest {
     response = client.sendGet(FakeOAuthServiceProvider.RESOURCE_URL);
     assertEquals("", response.getResponseAsString());
     assertEquals(HttpResponse.SC_FORBIDDEN, response.getHttpStatusCode());
-    assertEquals("parameter_missing", response.getMetadata().get("oauthError"));
+    assertEquals("parameter_absent", response.getMetadata().get("oauthError"));
     assertNull(response.getMetadata().get("oauthApprovalUrl"));
   }
 

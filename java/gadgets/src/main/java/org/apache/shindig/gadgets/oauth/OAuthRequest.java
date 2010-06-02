@@ -742,9 +742,9 @@ public class OAuthRequest {
     if (!StringUtils.isBlank(receivedCallback)) {
       try {
         Uri parsed = Uri.parse(receivedCallback);
-        String verifier = parsed.getQueryParameter(OAuthConstants.OAUTH_VERIFIER);
+        String verifier = parsed.getQueryParameter(OAuth.OAUTH_VERIFIER);
         if (verifier != null) {
-          msgParams.add(new Parameter(OAuthConstants.OAUTH_VERIFIER, verifier));
+          msgParams.add(new Parameter(OAuth.OAUTH_VERIFIER, verifier));
         }
       } catch (IllegalArgumentException e) {
         throw new OAuthRequestException(OAuthError.INVALID_REQUEST,

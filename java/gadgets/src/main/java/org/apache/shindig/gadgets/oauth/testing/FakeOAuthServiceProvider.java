@@ -305,23 +305,23 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       consumer = oauthConsumer;
     } else {
       return makeOAuthProblemReport(
-          OAuthConstants.PROBLEM_CONSUMER_KEY_UNKNOWN, "invalid consumer: " + requestConsumer,
+          OAuth.Problems.CONSUMER_KEY_UNKNOWN, "invalid consumer: " + requestConsumer,
           HttpResponse.SC_FORBIDDEN);
     }
     if (throttled) {
       return makeOAuthProblemReport(
-          OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED, "exceeded quota exhausted",
+          OAuth.Problems.CONSUMER_KEY_REFUSED, "exceeded quota exhausted",
           HttpResponse.SC_FORBIDDEN);
     }
     if (unauthorized) {
       return makeOAuthProblemReport(
-          OAuthConstants.PROBLEM_PERMISSION_DENIED, "user refused access",
+          OAuth.Problems.PERMISSION_DENIED, "user refused access",
           HttpResponse.SC_BAD_REQUEST);
     }
     if (rejectExtraParams) {
       String extra = hasExtraParams(info.message);
       if (extra != null) {
-        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_REJECTED, extra,
+        return makeOAuthProblemReport(OAuth.Problems.PARAMETER_REJECTED, extra,
             HttpResponse.SC_BAD_REQUEST);
       }
     }
@@ -336,7 +336,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
         "oauth_token", requestToken,
         "oauth_token_secret", requestTokenSecret);
     if (callbackUrl != null) {
-      responseParams.add(new Parameter(OAuthConstants.OAUTH_CALLBACK_CONFIRMED, "true"));
+      responseParams.add(new Parameter(OAuth.OAUTH_CALLBACK_CONFIRMED, "true"));
     }
     return new HttpResponse(OAuth.formEncode(responseParams));
   }
@@ -514,7 +514,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     state.setUserData(parsed.getQueryParam("user_data"));
     if (state.callbackUrl != null) {
       UriBuilder callback = UriBuilder.parse(state.callbackUrl);
-      callback.addQueryParameter(OAuthConstants.OAUTH_VERIFIER, state.verifier);
+      callback.addQueryParameter(OAuth.OAUTH_VERIFIER, state.verifier);
       return callback.toString();
     }
     return null;
@@ -572,19 +572,19 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String requestToken = info.message.getParameter("oauth_token");
     TokenState state = tokenState.get(requestToken);
     if (throttled) {
-      return makeOAuthProblemReport(OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED,
+      return makeOAuthProblemReport(OAuth.Problems.CONSUMER_KEY_REFUSED,
           "exceeded quota", HttpResponse.SC_FORBIDDEN);
     } else if (unauthorized) {
-      return makeOAuthProblemReport(OAuthConstants.PROBLEM_PERMISSION_DENIED,
+      return makeOAuthProblemReport(OAuth.Problems.PERMISSION_DENIED,
           "user refused access", HttpResponse.SC_UNAUTHORIZED);
     } else if (state == null) {
-      return makeOAuthProblemReport(OAuthConstants.PROBLEM_TOKEN_REJECTED,
+      return makeOAuthProblemReport(OAuth.Problems.TOKEN_REJECTED,
           "Unknown request token", HttpResponse.SC_UNAUTHORIZED);
     }   
     if (rejectExtraParams) {
       String extra = hasExtraParams(info.message);
       if (extra != null) {
-        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_REJECTED,
+        return makeOAuthProblemReport(OAuth.Problems.PARAMETER_REJECTED,
             extra, HttpResponse.SC_BAD_REQUEST);
       }
     }
@@ -605,7 +605,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       // Verify can refresh
       String sentHandle = info.message.getParameter("oauth_session_handle");
       if (sentHandle == null) {
-        return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_ABSENT,
+        return makeOAuthProblemReport(OAuth.Problems.PARAMETER_ABSENT,
             "no oauth_session_handle", HttpResponse.SC_BAD_REQUEST);
       }
       if (!sentHandle.equals(state.sessionHandle)) {
@@ -614,7 +614,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       }
       state.renewToken();
     } else if (state.getState() == State.REVOKED){
-      return makeOAuthProblemReport(OAuthConstants.PROBLEM_TOKEN_REVOKED,
+      return makeOAuthProblemReport(OAuth.Problems.TOKEN_REVOKED,
           "Revoked access token can't be renewed", HttpResponse.SC_UNAUTHORIZED);
     } else {
       throw new Exception("Token in weird state " + state.getState());
@@ -654,18 +654,18 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     } else if ("container.com".equals(consumerId)) {
       consumer = signedFetchConsumer;
     } else {
-      return makeOAuthProblemReport(OAuthConstants.PROBLEM_PARAMETER_MISSING,
+      return makeOAuthProblemReport(OAuth.Problems.PARAMETER_ABSENT,
           "oauth_consumer_key not found", HttpResponse.SC_BAD_REQUEST);
     }
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     String responseBody = null;
     if (throttled) {
       return makeOAuthProblemReport(
-          OAuthConstants.PROBLEM_CONSUMER_KEY_REFUSED, "exceeded quota", HttpResponse.SC_FORBIDDEN);
+          OAuth.Problems.CONSUMER_KEY_REFUSED, "exceeded quota", HttpResponse.SC_FORBIDDEN);
     }
     if (unauthorized) {
       return makeOAuthProblemReport(
-          OAuthConstants.PROBLEM_PERMISSION_DENIED, "user refused access",
+          OAuth.Problems.PERMISSION_DENIED, "user refused access",
           HttpResponse.SC_UNAUTHORIZED);
     }
     if (consumer == oauthConsumer) {
@@ -674,7 +674,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       TokenState state = tokenState.get(accessToken);
       if (state == null) {
         return makeOAuthProblemReport(
-            OAuthConstants.PROBLEM_TOKEN_REJECTED, "Access token unknown",
+            OAuth.Problems.TOKEN_REJECTED, "Access token unknown",
             HttpResponse.SC_UNAUTHORIZED);
       }
       // Check the signature
@@ -684,7 +684,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
       if (state.getState() != State.APPROVED) {
         return makeOAuthProblemReport(
-            OAuthConstants.PROBLEM_TOKEN_REVOKED, "User revoked permissions",
+            OAuth.Problems.TOKEN_REVOKED, "User revoked permissions",
             HttpResponse.SC_UNAUTHORIZED);
       }
       if (sessionExtension) {
