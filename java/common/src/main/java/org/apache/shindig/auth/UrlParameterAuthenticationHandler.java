@@ -35,6 +35,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
   private static final String SECURITY_TOKEN_PARAM = "st";
   private static final String OAUTH2_TOKEN_PARAM = "oauth_token";
   private final SecurityTokenDecoder securityTokenDecoder;
+  private static final Pattern COMMAWHITESPACE = Pattern.compile("\\s*,\\s*");
 
   @Inject
   public UrlParameterAuthenticationHandler(SecurityTokenDecoder securityTokenDecoder) {
@@ -90,7 +91,7 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
       for (Enumeration<String> headers = request.getHeaders("Authorization"); headers != null && headers.hasMoreElements();) {
         Matcher m = AUTHORIZATION.matcher(headers.nextElement());
         if (m.matches() && "Token".equalsIgnoreCase(m.group(1))) {
-          for (String nvp : m.group(2).split("\\s*,\\s*")) {
+          for (String nvp : COMMAWHITESPACE.split(m.group(2))) {
             m = NVP.matcher(nvp);
             if (m.matches() && "token".equals(m.group(1))) {
               token = OAuth.decodePercent(m.group(2));
