@@ -26,13 +26,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
+import org.apache.shindig.gadgets.uri.JsUriManager;
+import org.apache.shindig.gadgets.uri.UriStatus;
 
 import com.google.inject.Inject;
 
@@ -64,10 +65,10 @@ public class JsServlet extends InjectedServlet {
     this.registry = registry;
   }
   
-  private UrlGenerator urlGenerator;
+  private JsUriManager jsUriManager;
   @Inject
-  public void setUrlGenerator(UrlGenerator urlGenerator) {
-    this.urlGenerator = urlGenerator;
+  public void setUrlGenerator(JsUriManager jsUriManager) {
+    this.jsUriManager = jsUriManager;
   }
 
   private ContainerConfig containerConfig;
@@ -82,10 +83,9 @@ public class JsServlet extends InjectedServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    UrlValidationStatus vstatus = urlGenerator.validateJsUrl(
-        req.getRequestURL().append('?').append(req.getQueryString()).toString());
+    UriStatus vstatus = jsUriManager.processExternJsUri(new UriBuilder(req).toUri()).getStatus();
     if (req.getHeader("If-Modified-Since") != null &&
-        vstatus == UrlValidationStatus.VALID_VERSIONED) {
+        vstatus == UriStatus.VALID_VERSIONED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
@@ -182,7 +182,7 @@ public class JsServlet extends InjectedServlet {
         // Unversioned files get cached for 1 hour.
         HttpUtil.setCachingHeaders(resp, 60 * 60, !isProxyCacheable);
         break;
-      case INVALID:
+      case INVALID_VERSION:
         // URL is invalid in some way, likely version mismatch.
         // Indicate no-cache forcing subsequent requests to regenerate URLs.
         HttpUtil.setNoCache(resp);

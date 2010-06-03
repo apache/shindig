@@ -27,18 +27,17 @@ import com.google.common.collect.Maps;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
+import org.apache.shindig.gadgets.uri.IframeUriManager;
+import org.apache.shindig.gadgets.uri.UriStatus;
 import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.Map;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
@@ -52,7 +51,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   public void setUp() throws Exception {
     servlet = new HtmlAccelServlet();
     servlet.setRequestPipeline(pipeline);
-    servlet.setUrlGenerator(new FakeUrlGenerator());
+    servlet.setIframeUriManager(new FakeIframeUriManager());
     renderer = mock(Renderer.class);
     servlet.setRenderer(renderer);
   }
@@ -251,9 +250,9 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
   private void expectRequest(String extraPath, String url) {
     expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
-    expect(request.getScheme()).andReturn("http").once();
-    expect(request.getServerName()).andReturn("apache.org").once();
-    expect(request.getServerPort()).andReturn(-1).once();    
+    expect(request.getScheme()).andReturn("http").anyTimes();
+    expect(request.getServerName()).andReturn("apache.org").anyTimes();
+    expect(request.getServerPort()).andReturn(-1).anyTimes();    
     expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();    
     expect(request.getRequestURL())
         .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
@@ -262,25 +261,12 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     expect(request.getQueryString()).andReturn(queryParams).anyTimes();
   }
 
-  private static class FakeUrlGenerator implements UrlGenerator {
-
-    public UrlValidationStatus validateJsUrl(String url) {
-      throw new UnsupportedOperationException();
+  private static class FakeIframeUriManager implements IframeUriManager {
+    public UriStatus validateRenderingUri(Uri uri) {
+      return UriStatus.VALID_UNVERSIONED;
     }
 
-    public String getIframeUrl(Gadget gadget) {
-      throw new UnsupportedOperationException();
-    }
-
-    public UrlValidationStatus validateIframeUrl(String url) {
-      return UrlValidationStatus.VALID_UNVERSIONED;
-    }
-
-    public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+    public Uri makeRenderingUri(Gadget gadget) {
       throw new UnsupportedOperationException();
     }
   }

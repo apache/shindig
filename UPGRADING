@@ -75,6 +75,24 @@ provision for reading "original" HttpResponse headers.
 ImageRewriters may be migrated to ResponseRewriters as well by mutating the builder,
 where previously a new HttpResponse was returned.
 
+* UrlManager -> IframeUriManager, JsUriManager, OAuthUriManager
+
+The UrlManager interface has been removed. In its place are IframeUriManager, JsUriManager, and OAuthUriManager,
+producing Uris (equivalent to previous Strings). This change is done to better encapsulate Uri logic, putting
+creation and processing logic in the same place.
+
+@see (now-removed) shim class
+http://svn.apache.org/viewvc/shindig/trunk/java/gadgets/src/main/java/org/apache/shindig/gadgets/uri/GlueUrlGenerator.java?revision=906688&view=markup
+
+...for a schematic on how the previous methods map to new versions. This class was a bridge between the new
+and old interfaces.
+
+Default implementations of each UriManager class are provided in org.apache.shindig.gadgets.uri, each
+named DefaultX, where X = interface. These classes are suitable for subclassing to extend, should you prefer.
+Note that the ContainerConfig values the default implementations use are different (mostly by name/key)
+than those DefaultUrlGenerator used. Specific values are documented in the class comment and statics
+for each impl.
+
 * MediaItem
 
 Location field changed from String to Address.

@@ -20,13 +20,13 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.IframeUriManager;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -51,13 +51,13 @@ import java.util.concurrent.ExecutorService;
 public class JsonRpcHandler {
   protected final ExecutorService executor;
   protected final Processor processor;
-  protected final UrlGenerator urlGenerator;
+  protected final IframeUriManager iframeUriManager;
 
   @Inject
-  public JsonRpcHandler(ExecutorService executor, Processor processor, UrlGenerator urlGenerator) {
+  public JsonRpcHandler(ExecutorService executor, Processor processor, IframeUriManager iframeUriManager) {
     this.executor = executor;
     this.processor = processor;
-    this.urlGenerator = urlGenerator;
+    this.iframeUriManager = iframeUriManager;
   }
 
   /**
@@ -195,7 +195,7 @@ public class JsonRpcHandler {
         // TODO: This should probably just copy all data from
         // ModulePrefs.getAttributes(), but names have to be converted to
         // camel case.
-        gadgetJson.put("iframeUrl", urlGenerator.getIframeUrl(gadget))
+        gadgetJson.put("iframeUrl", iframeUriManager.makeRenderingUri(gadget).toString())
                   .put("url",context.getUrl().toString())
                   .put("moduleId", context.getModuleId())
                   .put("title", prefs.getTitle())

@@ -91,9 +91,18 @@
 //"gadgets.securityTokenType" : "secure",
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
+"defaultShindigTestHost": "http://localhost:9003",
+
+// Default Uri config: these must be overridden - specified here for testing purposes
+"gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",
+"gadgets.uri.iframe.lockedDomainSuffix": "${Cur['defaultShindigTestHost']}",
+
+// Default Js Uri config: also must be overridden.
+"gadgets.uri.js.host": "${Cur['defaultShindigTestHost']}",
+"gadgets.uri.js.path": "/gadgets/js",
 
 // Default concat Uri config; used for testing.
-"gadgets.uri.concat.host" : "localhost:9003",
+"gadgets.uri.concat.host" : "${Cur['defaultShindigTestHost']}",
 "gadgets.uri.concat.path" : "/gadgets/concat",
 
 // This config data will be passed down to javascript. Please

@@ -29,7 +29,6 @@ import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
-import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
@@ -43,6 +42,7 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,7 +99,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected final MessageBundleFactory messageBundleFactory;
   protected final ContainerConfig containerConfig;
   protected final FeatureRegistry featureRegistry;
-  protected final UrlGenerator urlGenerator;
+  protected final JsUriManager jsUriManager;
   protected final RpcServiceLookup rpcServiceLookup;
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
@@ -112,12 +112,12 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
                                  ContainerConfig containerConfig,
                                  FeatureRegistry featureRegistry,
-                                 UrlGenerator urlGenerator,
+                                 JsUriManager jsUriManager,
                                  RpcServiceLookup rpcServiceLookup) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
-    this.urlGenerator = urlGenerator;
+    this.jsUriManager = jsUriManager;
     this.rpcServiceLookup = rpcServiceLookup;
   }
 
@@ -242,7 +242,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     if (!externForcedLibs.isEmpty()) {
-      String jsUrl = urlGenerator.getBundledJsUrl(externForcedLibs, context);
+      String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
       headTag.appendChild(libsTag);
@@ -284,7 +284,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       externGadgetLibs.removeAll(externForcedLibs);
 
       if (!externGadgetLibs.isEmpty()) {
-        String jsUrl = urlGenerator.getBundledJsUrl(externGadgetLibs, context);
+        String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
         libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
         headTag.appendChild(libsTag);

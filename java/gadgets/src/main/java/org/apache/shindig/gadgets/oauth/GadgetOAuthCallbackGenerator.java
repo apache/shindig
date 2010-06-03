@@ -30,11 +30,11 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.LockedDomainService;
-import org.apache.shindig.gadgets.UrlGenerator;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.servlet.OAuthCallbackServlet;
+import org.apache.shindig.gadgets.uri.OAuthUriManager;
 
 /**
  * Generates callback URLs for gadgets using OAuth 1.0a.  There are three relevant callback URLs:
@@ -82,16 +82,16 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
 
   private final Processor processor;
   private final LockedDomainService lockedDomainService;
-  private final UrlGenerator urlGenerator;
+  private final OAuthUriManager oauthUriManager;
   private final BlobCrypter stateCrypter;
 
   @Inject
   public GadgetOAuthCallbackGenerator(Processor processor, LockedDomainService lockedDomainService,
-      UrlGenerator urlGenerator, @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER)
+      OAuthUriManager oauthUriManager, @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER)
       BlobCrypter stateCrypter) {
     this.processor = processor;
     this.lockedDomainService = lockedDomainService;
-    this.urlGenerator = urlGenerator;
+    this.oauthUriManager = oauthUriManager;
     this.stateCrypter = stateCrypter;
   }
   
@@ -128,14 +128,13 @@ public class GadgetOAuthCallbackGenerator implements OAuthCallbackGenerator {
   }
 
   private String getGadgetDomainCallback(SecurityToken securityToken, Uri activeUrl) {
-    String baseCallback = urlGenerator.getGadgetDomainOAuthCallback(
+    Uri gadgetCallback = oauthUriManager.makeOAuthCallbackUri(
         securityToken.getContainer(), activeUrl.getAuthority());
-    if (baseCallback == null) {
+    if (gadgetCallback == null) {
       return null;
     }
-    UriBuilder gadgetCallback = UriBuilder.parse(baseCallback);
     if (StringUtils.isEmpty(gadgetCallback.getScheme())) {
-      gadgetCallback.setScheme(activeUrl.getScheme());
+      gadgetCallback = new UriBuilder(gadgetCallback).setScheme(activeUrl.getScheme()).toUri();
     }
     return gadgetCallback.toString();
   }

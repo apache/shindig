@@ -99,7 +99,8 @@ public class DefaultGuiceModule extends AbstractModule {
    * Sets up the multibinding for extended feature resources
    */
   protected void registerFeatureHandlers() {
-    Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended"));
+    /*Multibinder<String> featureBinder = */
+        Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended"));
   }
 
   /**

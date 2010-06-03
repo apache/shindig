@@ -41,8 +41,6 @@ import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -53,6 +51,7 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.easymock.IAnswer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,7 +95,7 @@ public class RenderingGadgetRewriterTest {
 
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
   private final FakeContainerConfig config = new FakeContainerConfig();
-  private final UrlGenerator urlGenerator = new FakeUrlGenerator();
+  private final JsUriManager jsUriManager = new FakeJsUriManager();
   private final MapGadgetContext context = new MapGadgetContext();
 
   private FeatureRegistry featureRegistry;
@@ -107,7 +106,7 @@ public class RenderingGadgetRewriterTest {
   public void setUp() throws Exception {
     featureRegistry = createMock(FeatureRegistry.class);
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, urlGenerator, null);
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager, null);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
@@ -984,31 +983,12 @@ public class RenderingGadgetRewriterTest {
     }
   }
 
-  private static class FakeUrlGenerator implements UrlGenerator {
-    protected FakeUrlGenerator() {
+  private static class FakeJsUriManager implements JsUriManager {
+    public Uri makeExternJsUri(Gadget gadget, Collection<String> extern) {
+      return Uri.parse("/js/" + Join.join(":", extern));
     }
 
-    public String getBundledJsParam(Collection<String> features, GadgetContext context) {
-      throw new UnsupportedOperationException();
-    }
-    
-    public UrlValidationStatus validateJsUrl(String url) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getIframeUrl(Gadget gadget) {
-      throw new UnsupportedOperationException();
-    }
-    
-    public UrlValidationStatus validateIframeUrl(String url) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
-      return "/js/" + Join.join(":", features);
-    }
-
-    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+    public JsUri processExternJsUri(Uri uri) {
       throw new UnsupportedOperationException();
     }
   }
