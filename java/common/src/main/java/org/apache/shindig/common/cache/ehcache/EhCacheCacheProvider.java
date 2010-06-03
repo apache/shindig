@@ -53,7 +53,7 @@ public class EhCacheCacheProvider implements CacheProvider {
   }
 
   /**
-   * Read the cache conifuration from the specified resource.
+   * Read the cache configuration from the specified resource.
    * This function is intended to be overrideable to allow for programmatic
    * cache configuration.
    * @param configPath
