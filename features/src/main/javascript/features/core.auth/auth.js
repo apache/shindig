@@ -115,7 +115,7 @@ shindig.Auth = function() {
    * We send the expanded auth token in the body of post requests, so we
    * don't run into problems with length there.  (But people who put
    * several hundred characters in their gadget URLs are still lame.)
-   * @param {string} urlParams
+   * @param {Object} urlParams
    */
   function addParamsToToken(urlParams) {
     var args = authToken.split('&');
@@ -155,7 +155,10 @@ shindig.Auth = function() {
     }
   }
 
+  // old incorrect way
   gadgets.config.register("shindig.auth", null, init);
+  // correct way
+  gadgets.config.register("core.auth", null, init);
 
   return /** @scope shindig.auth */ {
 
