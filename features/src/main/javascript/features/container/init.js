@@ -48,23 +48,6 @@
     }
   }
 
-  /**
-   * Call a callback function if specified in &onload= query param. This is
-   * required for dynamic source script inclusion, which is asynchronous.
-   */
-  function runOnloadCallback() {
-    var scriptSrc = getLastScriptSrc();
-    if (scriptSrc) {
-      var onload = shindig.container.util.getParamValue(scriptSrc, 'onload');
-      if (onload) {
-        var re = /(^[A-Za-z0-9_]+$)/;
-        if (re.test(onload) && (typeof window[onload] === "function")) {
-          window[onload]();
-        }
-      }
-    }
-  }
-
   function getLastScriptSrc() {
     var scriptEls = document.getElementsByTagName('script');
     return (scriptEls.length > 0)
@@ -74,5 +57,4 @@
 
   initializeGadgetsConfig();
   initializeGlobalVars();
-  runOnloadCallback();
 })();
