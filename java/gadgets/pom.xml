@@ -105,6 +105,24 @@
     </resources>
   </build>
 
+  <profiles>
+    <profile>
+      <id>reporting</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>clirr-maven-plugin</artifactId>
+            <configuration>
+              <comparisonVersion>1.0.1</comparisonVersion>
+            </configuration>
+            <version>2.2.2</version>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+
   <dependencies>
     <!-- project dependencies -->
     <dependency>
