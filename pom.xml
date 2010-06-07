@@ -725,12 +725,32 @@
             <artifactId>taglist-maven-plugin</artifactId>
             <version>2.4</version>
             <configuration>
-              <tags>
-                <tag>TODO</tag>
-                <tag>FIXME</tag>
-                <tag>@todo</tag>
-                <tag>@deprecated</tag>
-              </tags>
+              <tagListOptions>
+                <tagClasses>
+                  <tagClass>
+                    <displayName>Todo Work</displayName>
+                    <tags>
+                      <tag>
+                        <matchString>todo</matchString>
+                        <matchType>ignoreCase</matchType>
+                      </tag>
+                      <tag>
+                        <matchString>FIXME</matchString>
+                        <matchType>exact</matchType>
+                      </tag>
+                    </tags>
+                  </tagClass>
+                  <tagClass>
+                    <displayName>Deprecated</displayName>
+                    <tags>
+                      <tag>
+                        <matchString>@deprecated</matchString>
+                        <matchType>exact</matchType>
+                      </tag>
+                    </tags>
+                  </tagClass>
+                </tagClasses>
+              </tagListOptions>
               <encoding>${project.build.sourceEncoding}</encoding>
             </configuration>
             <reportSets>
