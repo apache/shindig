@@ -63,8 +63,13 @@ public class MapConverter extends AbstractCollectionConverter {
       MarshallingContext context) {
     Map<?, ?> map = (Map<?, ?>) source;
     for (Entry<?, ?> e : map.entrySet()) {
-      writer.startNode(String.valueOf(e.getKey()));
+      writer.startNode("entry");
+      writer.startNode("key");
+      writer.setValue(String.valueOf(e.getKey()));
+      writer.endNode();
+      writer.startNode("value");
       context.convertAnother(e.getValue());
+      writer.endNode();
       writer.endNode();
     }
   }
