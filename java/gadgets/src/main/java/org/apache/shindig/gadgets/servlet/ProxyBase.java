@@ -60,7 +60,7 @@ public abstract class ProxyBase {
       "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding", "www-authenticate"
   );
 
-  private static final Logger logger = Logger.getLogger(ProxyBase.class.getName());
+  private static final Logger LOG = Logger.getLogger(ProxyBase.class.getName());
   
   /**
    * Validates the given url.
@@ -191,7 +191,7 @@ public abstract class ProxyBase {
         break;
     }
     
-    logger.log(level, "Request failed", e);
+    LOG.log(level, "Request failed", e);
     resp.sendError(responseCode, e.getMessage());
   }
 

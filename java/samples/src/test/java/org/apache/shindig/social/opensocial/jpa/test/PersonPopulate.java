@@ -68,7 +68,7 @@ public class PersonPopulate {
     // TODO Auto-generated constructor stub
   }
 
-  private static final Logger log = Logger.getLogger("shindig-db-test");
+  private static final Logger LOG = Logger.getLogger("shindig-db-test");
 
   public Person createPerson(int i, long key, Random random) {
 
@@ -174,7 +174,7 @@ public class PersonPopulate {
     // TODO: person.setActivities(activities);
     // TODO: person.setAddresses(addresses);
 
-    log.info("Created user ++++++ " + personId);
+    LOG.info("Created user ++++++ " + personId);
 
     return person;
   }

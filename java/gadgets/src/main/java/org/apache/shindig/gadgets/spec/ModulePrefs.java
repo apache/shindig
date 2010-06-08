@@ -655,14 +655,14 @@ public class ModulePrefs {
     private final MutableBoolean oauthMarker;
     private boolean coreIncluded = false;
 
-    private static final Set<String> tags = ImmutableSet.of("Require", "Optional");
+    private static final Set<String> TAGS = ImmutableSet.of("Require", "Optional");
     
     private FeatureVisitor(MutableBoolean oauthMarker) {
       this.oauthMarker = oauthMarker;
     }
 
     public boolean visit (String tag, Element element) throws SpecParserException {
-      if (!tags.contains(tag)) return false;
+      if (!TAGS.contains(tag)) return false;
 
       Feature feature = new Feature(element);
       coreIncluded = coreIncluded || feature.getName().startsWith("core");

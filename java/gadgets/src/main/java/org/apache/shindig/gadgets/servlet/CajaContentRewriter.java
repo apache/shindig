@@ -60,7 +60,7 @@ import java.util.logging.Logger;
 public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
-  private static final Logger logger = Logger.getLogger(CajaContentRewriter.class.getName());
+  private static final Logger LOG = Logger.getLogger(CajaContentRewriter.class.getName());
   
   private final Cache<String, Element> cajoledCache;
   private final RequestPipeline requestPipeline;
@@ -70,7 +70,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   public CajaContentRewriter(CacheProvider cacheProvider, RequestPipeline requestPipeline,
       HtmlSerializer htmlSerializer) {
     this.cajoledCache = cacheProvider.createCache(CAJOLED_DOCUMENTS);
-    logger.info("Cajoled cache created" + cajoledCache);
+    LOG.info("Cajoled cache created" + cajoledCache);
     this.requestPipeline = requestPipeline;
     this.htmlSerializer = htmlSerializer;
   }
@@ -160,7 +160,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     return new PluginEnvironment() {
       public CharProducer loadExternalResource(
           ExternalReference externalReference, String string) {
-        logger.info("Retrieving " + externalReference.toString());
+        LOG.info("Retrieving " + externalReference.toString());
         Uri resourceUri = gadgetUri.resolve(Uri.fromJavaUri(externalReference.getUri()));
         HttpRequest request =
             new HttpRequest(resourceUri).setContainer(container).setGadget(gadgetUri);
@@ -168,7 +168,7 @@ public class CajaContentRewriter implements GadgetRewriter {
           HttpResponse response = requestPipeline.execute(request);
           return CharProducer.Factory.fromString(response.getResponseAsString(), externalReference.getReferencePosition());
         } catch (GadgetException e) {
-          logger.info("Failed to retrieve: " + externalReference.toString());
+          LOG.info("Failed to retrieve: " + externalReference.toString());
           return null;
         }
       }
@@ -244,6 +244,6 @@ public class CajaContentRewriter implements GadgetRewriter {
     for (Message m : mq.getMessages()) {
       errbuilder.append(m.format(mc)).append('\n');
     }
-    logger.info("Unable to cajole gadget: " + errbuilder);
+    LOG.info("Unable to cajole gadget: " + errbuilder);
   }
 }

@@ -43,7 +43,7 @@ public class InterfaceClassMapper extends MapperWrapper {
   /**
    * A logger.
    */
-  private static final Logger log = Logger.getLogger(InterfaceClassMapper.class.getName());
+  private static final Logger LOG = Logger.getLogger(InterfaceClassMapper.class.getName());
   /**
    * A map of element names to classes.
    */
@@ -149,8 +149,8 @@ public class InterfaceClassMapper extends MapperWrapper {
         }
       }
       firstChild.set(clazz);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("First Child set to " + clazz);
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("First Child set to " + clazz);
       }
     }
   }
@@ -187,13 +187,13 @@ public class InterfaceClassMapper extends MapperWrapper {
     if (Collection.class.isAssignableFrom(type) && firstChild.get() != null) {
       // empty list, if this is the first one, then we need to look at the
       // first child setup on startup.
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Converting Child to " + firstChild.get());
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Converting Child to " + firstChild.get());
       }
       type = firstChild.get();
       firstChild.set(null);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("serializedClass(" + type + ") is a collection member "
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("serializedClass(" + type + ") is a collection member "
             + Collection.class.isAssignableFrom(type));
       }
       for (ClassFieldMapping cfm : listElementMappingList) {
@@ -205,13 +205,13 @@ public class InterfaceClassMapper extends MapperWrapper {
     } else {
       // but after we have been asked once, then clear
       firstChild.set(null);
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("serializedClass(" + type + ')');
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("serializedClass(" + type + ')');
       }
       for (ClassFieldMapping cfm : elementMappingList) {
         if (cfm.matches(parentElementName, type)) {
-          if (log.isLoggable(Level.FINE)) {
-            log.fine("From MAP serializedClass(" + type + ")  =="
+          if (LOG.isLoggable(Level.FINE)) {
+            LOG.fine("From MAP serializedClass(" + type + ")  =="
                 + cfm.getElementName());
           }
           return cfm.getElementName();
@@ -221,8 +221,8 @@ public class InterfaceClassMapper extends MapperWrapper {
     }
 
     String fieldName = super.serializedClass(type);
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("--- From Super serializedClass(" + type + ")  ==" + fieldName);
+    if (LOG.isLoggable(Level.FINE)) {
+      LOG.fine("--- From Super serializedClass(" + type + ")  ==" + fieldName);
     }
     return fieldName;
 

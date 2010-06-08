@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class PipelineDataGadgetRewriter implements GadgetRewriter {
 
-  private static final Logger logger = Logger.getLogger(
+  private static final Logger LOG = Logger.getLogger(
       PipelineDataGadgetRewriter.class.getName());
   
   private final PipelineExecutor executor;
@@ -123,7 +123,7 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
         pipelineNodes.put(pipelineData, n);
       } catch (SpecParserException e) {
         // Leave the element to the client
-        logger.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
+        LOG.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
       }
     }
     return pipelineNodes;

@@ -41,7 +41,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class ContainerTagLibraryFactory {
-  private static final Logger logger = Logger.getLogger(
+  private static final Logger LOG = Logger.getLogger(
       ContainerTagLibraryFactory.class.getName());
   
   private final ContainerConfig config;
@@ -81,11 +81,11 @@ public class ContainerTagLibraryFactory {
       return new XmlTemplateLibrary(Uri.parse("#OSML"), XmlUtil.parse(content), 
           content, true);
     } catch (IOException ioe) {
-      logger.log(Level.WARNING, null, ioe);
+      LOG.log(Level.WARNING, null, ioe);
     } catch (XmlException xe) {
-      logger.log(Level.WARNING, null, xe);
+      LOG.log(Level.WARNING, null, xe);
     } catch (GadgetException tpe) {
-      logger.log(Level.WARNING, null, tpe);
+      LOG.log(Level.WARNING, null, tpe);
     }
 
     return NullTemplateLibrary.INSTANCE;

@@ -45,7 +45,7 @@ import com.google.inject.Inject;
 public class PipelineExecutor {
   // TODO: support configuration
   private static final int MAX_BATCH_COUNT = 3;
-  private static final Logger logger = Logger.getLogger(PipelineExecutor.class.getName());
+  private static final Logger LOG = Logger.getLogger(PipelineExecutor.class.getName());
 
   private PipelinedDataPreloader preloader;
   private PreloaderService preloaderService;
@@ -141,7 +141,7 @@ public class PipelineExecutor {
           }
         } catch (PreloadException pe) {
           // This will be thrown in the event of some unexpected exception. We can move on.
-          logger.log(Level.WARNING, "Unexpected error when preloading", pe);
+          LOG.log(Level.WARNING, "Unexpected error when preloading", pe);
         }
       }
 

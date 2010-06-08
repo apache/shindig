@@ -85,7 +85,7 @@ public class TemplateRewriter implements GadgetRewriter {
   /** Enable client support? **/
   static final String CLIENT_SUPPORT_PARAM = "client";
 
-  private static final Logger logger = Logger.getLogger(TemplateRewriter.class.getName());
+  private static final Logger LOG = Logger.getLogger(TemplateRewriter.class.getName());
   
   /**
    * Provider of the processor.  TemplateRewriters are stateless and multithreaded,
@@ -243,7 +243,7 @@ public class TemplateRewriter implements GadgetRewriter {
           libraries.add(library);
         } catch (TemplateParserException te) {
           // Suppress exceptions due to malformed template libraries
-          logger.log(Level.WARNING, null, te);
+          LOG.log(Level.WARNING, null, te);
         }
       }
     }

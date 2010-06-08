@@ -30,7 +30,6 @@ import java.util.logging.Logger;
  */
 public final class ContentTypes {
   private ContentTypes() {}
-  private static final Logger logger = Logger.getLogger(ContentTypes.class.getName());
 
   /**
    * Allowed alternatives to application/json, including types listed

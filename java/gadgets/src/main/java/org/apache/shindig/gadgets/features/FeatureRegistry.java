@@ -61,7 +61,7 @@ public class FeatureRegistry {
   public static final String RESOURCE_SCHEME = "res";
   public static final String FILE_SCHEME = "file";
   
-  private static final Logger logger
+  private static final Logger LOG
       = Logger.getLogger("org.apache.shindig.gadgets");
   
   // Map keyed by FeatureNode object created as a lookup for transitive feature deps.
@@ -131,7 +131,7 @@ public class FeatureRegistry {
             // Accommodate res:// URIs.
             location = location.substring(1);
           }
-          logger.info("Loading resources from: " + uriLoc.toString());
+          LOG.info("Loading resources from: " + uriLoc.toString());
           
           if (location.endsWith(".txt")) {
             // Text file contains a list of other resource files to load
@@ -150,7 +150,7 @@ public class FeatureRegistry {
           loadResources(resources, featureMapBuilder);
         } else {
           // Load files in directory structure.
-          logger.info("Loading files from: " + location);
+          LOG.info("Loading files from: " + location);
           
           loadFile(new File(uriLoc.getPath()), featureMapBuilder);
         }
@@ -394,8 +394,8 @@ public class FeatureRegistry {
   private void loadResources(List<String> resources, Map<String,FeatureNode> featureMapBuilder) throws GadgetException {
     try {
       for (String resource : resources) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Processing resource: " + resource);
+        if (LOG.isLoggable(Level.FINE)) {
+          LOG.fine("Processing resource: " + resource);
         }
         
         String content = getResourceContent(resource);
@@ -424,8 +424,8 @@ public class FeatureRegistry {
         Uri parent = Uri.fromJavaUri(featureFile.toURI());
         loadFeature(parent, content, featureMapBuilder);
       } else {
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest(featureFile.getAbsolutePath() + " doesn't seem to be an XML file.");
+        if (LOG.isLoggable(Level.FINEST)) {
+          LOG.finest(featureFile.getAbsolutePath() + " doesn't seem to be an XML file.");
         }
       }
     }
@@ -443,8 +443,8 @@ public class FeatureRegistry {
     FeatureParser.ParsedFeature parsed = parser.parse(parent, xml);
     // Duplicate feature = OK, just indicate it's being overridden.
     if (featureMapBuilder.containsKey(parsed.getName())) {
-      if (logger.isLoggable(Level.WARNING)) {
-        logger.warning("Overriding feature: " + parsed.getName() + " with def at: " + parent);
+      if (LOG.isLoggable(Level.WARNING)) {
+        LOG.warning("Overriding feature: " + parsed.getName() + " with def at: " + parent);
       }
     }
     

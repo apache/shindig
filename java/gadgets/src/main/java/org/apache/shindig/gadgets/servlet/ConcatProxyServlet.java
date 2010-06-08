@@ -58,7 +58,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
-  private static final Logger logger
+  private static final Logger LOG 
       = Logger.getLogger(ConcatProxyServlet.class.getName());
 
   private RequestPipeline requestPipeline;
@@ -183,7 +183,7 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     // Log the errors here for now. We might want different severity levels
     // for different error codes.
-    logger.log(Level.INFO, "Concat proxy request failed", err);
+    LOG.log(Level.INFO, "Concat proxy request failed", err);
     return err.toString();
   }
   

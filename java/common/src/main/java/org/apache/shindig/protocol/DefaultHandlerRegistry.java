@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class DefaultHandlerRegistry implements HandlerRegistry {
 
-  private static final Logger logger = Logger.getLogger(DefaultHandlerRegistry.class.getName());
+  private static final Logger LOG = Logger.getLogger(DefaultHandlerRegistry.class.getName());
 
   // Map service - > method -> { handler, ...}
   private final Map<String, Map<String, SortedSet<RestPath>>> serviceMethodPathMap =
@@ -215,7 +215,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         }
       }
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No REST binding for " + service.name() + '.' + m.getName());
+      LOG.log(Level.INFO, "No REST binding for " + service.name() + '.' + m.getName());
     }
 
   }
@@ -235,7 +235,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
               new ExecutionListenerWrapper(service.name(), opName, executionListener));
       rpcOperations.put(service.name() + '.' + opName, rpcHandler);
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No RPC binding for " + service.name() + '.' + m.getName());
+      LOG.log(Level.INFO, "No RPC binding for " + service.name() + '.' + m.getName());
     }
   }
 

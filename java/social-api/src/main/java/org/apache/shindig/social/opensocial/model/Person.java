@@ -209,7 +209,7 @@ public interface Person {
      * a Map to convert json string to Field representations.
      */
 
-    private static final Map<String,Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+    private static final Map<String,Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
         Functions.toStringFunction());
 
     /**
@@ -220,7 +220,7 @@ public interface Person {
     /**
      * The set of all fields.
      */
-    public static final Set<String> ALL_FIELDS = lookup.keySet();
+    public static final Set<String> ALL_FIELDS = LOOKUP.keySet();
 
     /**
      * The set of default fields returned fields.
@@ -250,7 +250,7 @@ public interface Person {
     }
 
     public static Field getField(String jsonString) {
-      return lookup.get(jsonString);
+      return LOOKUP.get(jsonString);
     }
 
     /**
@@ -260,7 +260,7 @@ public interface Person {
      * @return The corresponding person field.
      */
     public static Person.Field fromUrlString(String urlString) {
-      return lookup.get(urlString);
+      return LOOKUP.get(urlString);
     }
   }
 

@@ -40,7 +40,7 @@ import com.google.inject.Inject;
  * Rewriter that sanitizes CSS and image content.
  */
 public class SanitizingResponseRewriter implements ResponseRewriter {
-  private static final Logger logger =
+  private static final Logger LOG =
     Logger.getLogger(SanitizingResponseRewriter.class.getName());
 
   private final ContentRewriterFeature.Factory featureConfigFactory;
@@ -61,7 +61,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
     if (request.isSanitizationRequested() &&
         featureConfigFactory.get(request).shouldRewriteURL(request.getUri().toString())) {
       if (StringUtils.isEmpty(request.getRewriteMimeType())) {
-        logger.log(Level.WARNING, "Request to sanitize without content type for "
+        LOG.log(Level.WARNING, "Request to sanitize without content type for "
             + request.getUri());
         resp.setContent("");
       } else if (request.getRewriteMimeType().equalsIgnoreCase("text/css")) {
@@ -69,7 +69,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
       } else if (request.getRewriteMimeType().toLowerCase().startsWith("image/")) {
         rewriteProxiedImage(request, resp);
       } else {
-        logger.log(Level.WARNING, "Request to sanitize unknown content type "
+        LOG.log(Level.WARNING, "Request to sanitize unknown content type "
             + request.getRewriteMimeType()
             + " for " + request.getUri());
         resp.setContent("");
@@ -92,7 +92,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
               .guessFormat(new ByteSourceInputStream(resp.getContentBytes(),
                   request.getUri().getPath()));
           if (imageFormat == ImageFormat.IMAGE_FORMAT_UNKNOWN) {
-            logger.log(Level.INFO, "Unable to sanitize unknown image type "
+            LOG.log(Level.INFO, "Unable to sanitize unknown image type "
                 + request.getUri().toString());
             return;
           }
@@ -103,7 +103,7 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
           throw new RuntimeException(ioe);
         } catch (ImageReadException ire) {
           // Unable to read the image so its not safe
-          logger.log(Level.INFO, "Unable to detect image type for " +request.getUri().toString() +
+          LOG.log(Level.INFO, "Unable to detect image type for " +request.getUri().toString() +
               " for sanitized content", ire);
           return;
         }

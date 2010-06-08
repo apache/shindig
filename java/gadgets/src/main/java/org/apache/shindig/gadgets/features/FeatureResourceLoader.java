@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  * Class that loads FeatureResource objects used to populate JS feature code.
  */
 public class FeatureResourceLoader {
-  private static final Logger logger
+  private static final Logger LOG
       = Logger.getLogger("org.apache.shindig.gadgets");
   
   private HttpFetcher fetcher;
@@ -172,10 +172,10 @@ public class FeatureResourceLoader {
           if (response.getHttpStatusCode() == HttpResponse.SC_OK) {
             content = response.getResponseAsString();
           } else {
-            logger.warning("Unable to retrieve remote library from " + uri);
+            LOG.warning("Unable to retrieve remote library from " + uri);
           }
         } catch (GadgetException e) {
-          logger.warning("Unable to retrieve remote library from " + uri);
+          LOG.warning("Unable to retrieve remote library from " + uri);
         }
       }
       

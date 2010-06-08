@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public class DataServiceServlet extends ApiServlet {
 
-  private static final Logger logger = Logger.getLogger(DataServiceServlet.class.getName());
+  private static final Logger LOG = Logger.getLogger(DataServiceServlet.class.getName());
 
   public static final Set<String> ALLOWED_CONTENT_TYPES =
       new ImmutableSet.Builder<String>().addAll(ContentTypes.ALLOWED_JSON_CONTENT_TYPES)
@@ -92,8 +92,8 @@ public class DataServiceServlet extends ApiServlet {
    */
   void executeRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
       throws IOException {
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("Handling restful request for " + servletRequest.getPathInfo());
+    if (LOG.isLoggable(Level.FINEST)) {
+      LOG.finest("Handling restful request for " + servletRequest.getPathInfo());
     }
 
     setCharacterEncodings(servletRequest, servletResponse);
@@ -207,16 +207,16 @@ public class DataServiceServlet extends ApiServlet {
       formatString = servletRequest.getParameter(FORMAT_PARAM);
     } catch (Throwable t) {
       // this happens while testing
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Unexpected error : format param is null " + t.toString());
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Unexpected error : format param is null " + t.toString());
       }
     }
     try {
       contentType = servletRequest.getContentType();
     } catch (Throwable t) {
       //this happens while testing
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Unexpected error : content type is null " + t.toString());
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.fine("Unexpected error : content type is null " + t.toString());
       }
     }
 
