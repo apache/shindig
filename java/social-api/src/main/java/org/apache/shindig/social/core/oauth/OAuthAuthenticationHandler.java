@@ -70,7 +70,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   public SecurityToken getSecurityTokenFromRequest(HttpServletRequest request)
-      throws InvalidAuthenticationException {
+    throws InvalidAuthenticationException {
     OAuthMessage message = OAuthServlet.getMessage(request, null);
     if (StringUtils.isEmpty(getParameter(message, OAuth.OAUTH_SIGNATURE))) {
       // Is not an oauth request
@@ -88,15 +88,15 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   protected SecurityToken verifyMessage(OAuthMessage message)
-      throws OAuthProblemException {
+    throws OAuthProblemException {
     OAuthEntry entry = getOAuthEntry(message);
     OAuthConsumer authConsumer = getConsumer(message);
 
     OAuthAccessor accessor = new OAuthAccessor(authConsumer);
 
     if (entry != null) {
-      accessor.tokenSecret = entry.tokenSecret;
-      accessor.accessToken = entry.token;
+      accessor.tokenSecret = entry.getTokenSecret();
+      accessor.accessToken = entry.getToken();
     }
 
     try {
@@ -129,7 +129,7 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
         OAuthProblemException e = new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
         e.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, "cannot find token");
         throw e;
-      } else if (entry.type != OAuthEntry.Type.ACCESS) {
+      } else if (entry.getType() != OAuthEntry.Type.ACCESS) {
         OAuthProblemException e = new OAuthProblemException(OAuth.Problems.TOKEN_REJECTED);
         e.setParameter(OAuth.Problems.OAUTH_PROBLEM_ADVICE, "token is not an access token");
         throw e;
@@ -150,10 +150,10 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   protected SecurityToken getTokenFromVerifiedRequest(OAuthMessage message, OAuthEntry entry,
-      OAuthConsumer authConsumer) throws OAuthProblemException {
+                                                      OAuthConsumer authConsumer) throws OAuthProblemException {
     if (entry != null) {
-      return new OAuthSecurityToken(entry.userId, entry.callbackUrl, entry.appId,
-          entry.domain, entry.container, entry.expiresAt().getTime());
+      return new OAuthSecurityToken(entry.getUserId(), entry.getCallbackUrl(), entry.getAppId(),
+                                    entry.getDomain(), entry.getContainer(), entry.expiresAt().getTime());
     } else {
       String userId = getParameter(message, REQUESTOR_ID_PARAM);
       return store.getSecurityTokenForConsumerRequest(authConsumer.consumerKey, userId);
@@ -175,12 +175,12 @@ public class OAuthAuthenticationHandler implements AuthenticationHandler {
   }
 
   public static void verifyBodyHash(HttpServletRequest request, String oauthBodyHash)
-      throws InvalidAuthenticationException {
+    throws InvalidAuthenticationException {
     // we are doing body hash signing which is not permitted for form-encoded data
     if (request.getContentType() != null && request.getContentType().contains(OAuth.FORM_ENCODED)) {
       throw new AuthenticationHandler.InvalidAuthenticationException(
-          "Cannot use oauth_body_hash with a Content-Type of application/x-www-form-urlencoded",
-          null);
+        "Cannot use oauth_body_hash with a Content-Type of application/x-www-form-urlencoded",
+        null);
     } else {
       try {
         byte[] rawBody = readBody(request);
