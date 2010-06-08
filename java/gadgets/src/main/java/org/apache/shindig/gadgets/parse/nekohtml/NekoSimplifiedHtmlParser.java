@@ -456,7 +456,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
    * if the first parsed tags are allowed in a head tag.
    * See https://sourceforge.net/tracker/?func=detail&atid=952178&aid=2870180&group_id=195122
    */
-  private class NekoPatchTagBalancer extends NormalizingTagBalancer {
+  private static class NekoPatchTagBalancer extends NormalizingTagBalancer {
 
     /**
      * Override the document start to record whether HTML, HEAD or BODY have been seen

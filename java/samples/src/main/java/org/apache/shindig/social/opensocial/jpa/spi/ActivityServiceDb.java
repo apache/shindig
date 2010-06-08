@@ -243,7 +243,7 @@ public class ActivityServiceDb implements ActivityService {
     q.setFirstResult(0);
     q.setMaxResults(1);
     List<?> activities = q.getResultList();
-    if ( activities != null && activities.size() > 0 ) {
+    if ( activities != null && !activities.isEmpty()) {
       return (Activity) activities.get(0);
     }
     return null;

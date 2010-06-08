@@ -115,7 +115,7 @@ public class HtmlAccelServlet extends GadgetRenderingServlet {
       public String getParameter(String name) {
         if (requestParams.containsKey(name)) {
           List<String> values = requestParams.get(name);
-          if (values != null && values.size() > 0) return values.get(0);
+          if (values != null && !values.isEmpty()) return values.get(0);
         }
         return null;
       }

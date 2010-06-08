@@ -215,7 +215,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         String messageText = msg.getMessageLevel().name() + ' ' + 
           html(msg.format(mc)) + ':' + snippet;
         Element li = doc.createElement("li");
-        li.appendChild(doc.createTextNode(messageText.toString()));
+        li.appendChild(doc.createTextNode(messageText));
         errElement.appendChild(li);
       }
     }

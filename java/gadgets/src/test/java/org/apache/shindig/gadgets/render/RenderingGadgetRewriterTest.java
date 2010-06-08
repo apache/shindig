@@ -640,7 +640,7 @@ public class RenderingGadgetRewriterTest {
     String oAuthBlock = "";
     String authzAttr = "";
     if (auth != null) {
-      authzAttr = " authz='" + auth + "'";
+      authzAttr = " authz='" + auth + '\'';
       if ("oauth".equals(auth)) {
         if (oauthService != null) {
           oAuthBlock =
@@ -649,10 +649,10 @@ public class RenderingGadgetRewriterTest {
               "<Request url='http://bar' method='GET' />" +
               "<Authorization url='http://baz' />" +
               "</Service></OAuth>";
-          authzAttr += " oauth_service_name='" + oauthService + "'";
+          authzAttr += " oauth_service_name='" + oauthService + '\'';
         }
         if (oauthToken != null) {
-          authzAttr += " oauth_token_name='" + oauthToken + "'";
+          authzAttr += " oauth_token_name='" + oauthToken + '\'';
         }
       }
     }
@@ -665,12 +665,12 @@ public class RenderingGadgetRewriterTest {
       "<Content type='html' href='http://foo.com/bar/baz.html'" + authzAttr + " />" +
       "</Module>";
     
-    String expected = "{" +
+    String expected = '{' +
         (oauthService == null ? "" : "\"oauthService\":\"serviceName\",") +
         "\"contentUrl\":\"http://foo.com/bar/baz.html\"" +
-        (auth == null ? "" : ",\"authorization\":\"" + auth + "\"") +
+        (auth == null ? "" : ",\"authorization\":\"" + auth + '\"') +
         (oauthToken == null ? "" : ",\"oauthTokenName\":\"tokenName\"") +
-        "}";
+        '}';
     
     Gadget gadget = makeGadgetWithSpec(gadgetXml);
     gadget.setCurrentView(gadget.getSpec().getView("default"));

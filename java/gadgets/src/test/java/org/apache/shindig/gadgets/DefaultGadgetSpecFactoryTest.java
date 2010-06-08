@@ -167,7 +167,7 @@ public class DefaultGadgetSpecFactoryTest {
   @Test
   public void specFetchedWithBomChar() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
-    HttpResponse response = new HttpResponse("\uFEFF" + LOCAL_SPEC_XML);
+    HttpResponse response = new HttpResponse('\uFEFF' + LOCAL_SPEC_XML);
     expect(pipeline.execute(request)).andReturn(response);
     replay(pipeline);
 

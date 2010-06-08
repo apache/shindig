@@ -189,7 +189,7 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
             JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()));
             String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
             if (actorId.equals(user)
-              && activityIds.contains(activityEntry.getString(ActivityEntry.Field.ID.toString()).toString())) {
+              && activityIds.contains(activityEntry.getString(ActivityEntry.Field.ID.toString()))) {
             result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
           }
         }

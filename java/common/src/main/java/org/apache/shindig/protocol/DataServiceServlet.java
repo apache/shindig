@@ -176,7 +176,7 @@ public class DataServiceServlet extends ApiServlet {
       String callback =  (HttpUtil.isJSONP(servletRequest) && ContentTypes.OUTPUT_JSON_CONTENT_TYPE.equals(converter.getContentType())) ?
           servletRequest.getParameter("callback") : null;
 
-      if (callback != null) writer.write(callback + "(");
+      if (callback != null) writer.write(callback + '(');
       writer.write(converter.convertToString(response));
       if (callback != null) writer.write(");\n");
     } else {
