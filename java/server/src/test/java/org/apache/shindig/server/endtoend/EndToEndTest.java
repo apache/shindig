@@ -257,13 +257,13 @@ public class EndToEndTest {
 
 
   @Test
-  @Ignore("Problem with taming") // FIXME
+  //@Ignore("Problem with taming") // FIXME
   public void testCajaOsapiAppdata() throws Exception {
     executeAllPageTests("osapi/appdataTest", true /* caja */);
   }
 
   @Test
-  @Ignore("Problem with taming") // FIXME
+  //@Ignore("Problem with taming") // FIXME
   public void testCajaOsapiBatch() throws Exception {
     executeAllPageTests("osapi/batchTest", true /* caja */);
   }

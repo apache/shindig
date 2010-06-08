@@ -21,6 +21,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,16 +38,9 @@ public class BidiSubstituterTest extends Assert {
     assertLeftToRight(BidiSubstituter.LTR);
   }
 
-  @Test
-  @Ignore("Is this valid behaviour?")
+  @Test(expected=SpecParserException.class)
   public void testBidiWithEmpty() throws Exception {
     assertLeftToRight("");
-  }
-
-  @Test
-  @Ignore("Is this valid behaviour?")
-  public void testBidiWithNull() throws Exception {
-    assertLeftToRight(null);
   }
 
   private void assertRightToLeft(String direction) throws Exception {
