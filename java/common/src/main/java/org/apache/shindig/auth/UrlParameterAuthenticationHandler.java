@@ -33,8 +33,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class UrlParameterAuthenticationHandler implements AuthenticationHandler {
   private static final String SECURITY_TOKEN_PARAM = "st";
-  private static final String OAUTH2_TOKEN_PARAM = "oauth_token";
-  private static final String OAUTH_VERSION_PARAM = "oauth_version";
 
   private final SecurityTokenDecoder securityTokenDecoder;
   private static final Pattern COMMAWHITESPACE = Pattern.compile("\\s*,\\s*");
@@ -84,9 +82,9 @@ public class UrlParameterAuthenticationHandler implements AuthenticationHandler 
     }
 
     // OAuth2 token as a param
-    // NOTE: if oauth_version is present then we have a OAuth 1.0 request
-    if (token == null && request.isSecure() && request.getParameter(OAUTH_VERSION_PARAM) == null) {
-      token = request.getParameter(OAUTH2_TOKEN_PARAM);
+    // NOTE: if oauth_signature_method is present then we have a OAuth 1.0 request
+    if (token == null && request.isSecure() && request.getParameter(OAuth.OAUTH_SIGNATURE_METHOD) == null) {
+      token = request.getParameter(OAuth.OAUTH_TOKEN);
     }
 
     // token in authorization header
