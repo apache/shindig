@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
@@ -42,6 +43,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
@@ -53,15 +55,14 @@ import com.google.inject.Inject;
  * - Proxying referred content of images and embeds
  */
 public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
-  
-  private final static String JS_MIME_TYPE = "text/javascript";
 
   public final static Set<String> TAGS = ImmutableSet.of("img", "embed", "link", "script", "style");
 
-  private final static ImmutableMap<String, ImmutableSet<String>> LINKING_TAG_ATTRS = ImmutableMap.of(
-      "img", ImmutableSet.of("src"),
-      "embed", ImmutableSet.of("src")
-  );
+  private final static String JS_MIME_TYPE = "text/javascript";
+  private final static String CSS_MIME_TYPE = "text/css";
+
+  private final static ImmutableMap<String, ImmutableSet<String>> LINKING_TAG_ATTRS =
+      ImmutableMap.of("img", ImmutableSet.of("src"), "embed", ImmutableSet.of("src"));
 
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final CssRequestRewriter cssRewriter;
@@ -122,15 +123,17 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
 
     boolean mutated = false;
 
-
     // 1st step. Rewrite links in all embedded style tags. Convert @import statements into
     // links and add them to the tag list.
     // Move all style and link tags into head and concat the link tags
-    mutated = rewriteStyleTags(head, tagList, feature, gadgetUri, contentBase, container, debug, ignoreCache);
+    mutated = rewriteStyleTags(head, tagList, feature, gadgetUri, contentBase, container,
+        debug, ignoreCache);
     // Concat script links
-    mutated |= rewriteJsTags(tagList, feature, gadgetUri, contentBase, container, debug, ignoreCache);
+    mutated |= rewriteJsTags(tagList, feature, gadgetUri, contentBase, container,
+        debug, ignoreCache);
     // Rewrite links in images, embeds etc
-    mutated |= rewriteContentReferences(tagList, feature, gadgetUri, contentBase, container, debug, ignoreCache);
+    mutated |= rewriteContentReferences(tagList, feature, gadgetUri, contentBase, container,
+        debug, ignoreCache);
 
     if (mutated) {
       MutableContent.notifyEdit(content.getDocument());
@@ -142,10 +145,11 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
   protected boolean rewriteStyleTags(Element head, List<Element> elementList,
       ContentRewriterFeature.Config feature, Uri gadgetUri, Uri contentBase, String container,
       boolean debug, boolean ignoreCache) throws RewritingException {
-    if (!feature.getIncludedTags().contains("style")) {
-      return false;
-    }
     boolean mutated = false;
+    if (!feature.getIncludedTags().contains("style") &&
+        !feature.getIncludedTags().contains("link")) {
+      return mutated;
+    }
 
     // Filter to just style tags
     Iterable<Element> styleTags = Lists.newArrayList(Iterables.filter(elementList,
@@ -171,7 +175,7 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
         // Add extracted urls as link elements to head
         Element newLink = head.getOwnerDocument().createElement("link");
         newLink.setAttribute("rel", "stylesheet");
-        newLink.setAttribute("type", "text/css");
+        newLink.setAttribute("type", CSS_MIME_TYPE);
         newLink.setAttribute("href", extractedUrl);
         head.appendChild(newLink);
         elementList.add(newLink);
@@ -188,7 +192,13 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
           }
         }));
 
-    concatenateTags(feature, linkTags, gadgetUri, contentBase, "text/css", "href", container, debug, ignoreCache);
+    // group link tags based on media attribute and concatenate for each media type
+    Map<String, List<Element>> mediaToElemsMap = groupTagsOnAttribute("media", linkTags);
+    for (Map.Entry<String, List<Element>> entry : mediaToElemsMap.entrySet()) {
+      mutated |= true;
+      concatenateTags(feature, entry.getValue(), gadgetUri, contentBase,
+          CSS_MIME_TYPE, "href", container, debug, ignoreCache);
+    }
 
     return mutated;
   }
@@ -226,15 +236,18 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
         if (nextSciptTag == null ||
             !nextSciptTag.equals(getNextSiblingElement(scriptTag))) {
           // Next tag is not concatenateable
-          concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src", container, debug, ignoreCache);
+          concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src",
+              container, debug, ignoreCache);
           concatenateable.clear();
         }
       } else {
-        concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src", container, debug, ignoreCache);
+        concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src",
+            container, debug, ignoreCache);
         concatenateable.clear();
       }
     }
-    concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src", container, debug, ignoreCache);
+    concatenateTags(feature, concatenateable, gadgetUri, contentBase, JS_MIME_TYPE, "src",
+        container, debug, ignoreCache);
     return mutated;
   }
 
@@ -290,20 +303,19 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
       }
     }
 
-    List<Uri> concatented = concatLinkRewriterFactory.create(gadgetUri,
+    List<Uri> concatenated = concatLinkRewriterFactory.create(gadgetUri,
         feature, container, debug, ignoreCache).rewrite(mimeType, nodeRefList);
     
     for (int i = 0; i < tags.size(); i++) {
-      if (i < concatented.size()) {
+      if (i < concatenated.size()) {
         // Set new URLs into existing tags
-        tags.get(i).setAttribute(attr, concatented.get(i).toString());
+        tags.get(i).setAttribute(attr, concatenated.get(i).toString());
       } else {
         // Remove remainder
         tags.get(i).getParentNode().removeChild(tags.get(i));
       }
     }
   }
-
 
   private Element getNextSiblingElement(Element elem) {
     Node n = elem;
@@ -312,5 +324,26 @@ public class HTMLContentRewriter implements GadgetRewriter, ResponseRewriter {
       n = n.getNextSibling();
     }
     return (Element)n;
+  }
+
+  private Map<String, List<Element>> groupTagsOnAttribute(String attribute,
+      List<Element> linkTags) {
+    Map<String, List<Element>> mediaToLinkElementsMap = Maps.newHashMap();
+    List<Element> tagsOnAttributeList;
+    for (Element tag : linkTags) {
+      // get the attribute value which will be used as key.
+      String attributeValue = tag.getAttribute(attribute);
+
+      // store the tag in the list.
+      if(!mediaToLinkElementsMap.containsKey(attributeValue)) {
+        tagsOnAttributeList = Lists.newLinkedList();
+        mediaToLinkElementsMap.put(attributeValue, tagsOnAttributeList);
+      } else {
+        tagsOnAttributeList = mediaToLinkElementsMap.get(attributeValue);
+      }
+      tagsOnAttributeList.add(tag);
+    }
+
+    return mediaToLinkElementsMap;
   }
 }
