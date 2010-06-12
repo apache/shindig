@@ -20,7 +20,7 @@ specific language governing permissions and limitations under the License.
   <name>analytics</name>
   <dependency>core.legacy</dependency>
   <gadget>
-    <script src="http://www.google-analytics.com/urchin.js"/>
-    <script src="http://www.google.com/ig/lib/libanalytics.js"/>
+    <script inline="true" src="http://www.google-analytics.com/urchin.js"/>
+    <script inline="true" src="http://www.google.com/ig/lib/libanalytics.js"/>
   </gadget>
 </feature>

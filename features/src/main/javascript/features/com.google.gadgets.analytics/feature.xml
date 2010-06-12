@@ -20,7 +20,7 @@ specific language governing permissions and limitations under the License.
   <name>com.google.gadgets.analytics</name>
   <dependency>core.legacy</dependency>
   <gadget>
-    <script src="http://www.google.com/ig/lib/libga.js"/>
+    <script inline="true" src="http://www.google.com/ig/lib/libga.js"/>
     <script src="analytics.js"/>
     <script src="taming.js"/>
   </gadget>
