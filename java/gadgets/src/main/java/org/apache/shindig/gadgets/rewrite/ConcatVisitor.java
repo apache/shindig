@@ -177,16 +177,14 @@ public class ConcatVisitor implements DomWalker.Visitor {
   private void splitBatchOnMedia(List<Element> elements, List<List<Element>> output) {
     // Multimap to hold the ordered list of elements encountered for a given media type.
     Multimap<String, Element> mediaBatchMap = LinkedHashMultimap.create();
-    Iterator<Element> elemIter = elements.iterator();
-    while (elemIter.hasNext()) {
-      Element next = elemIter.next();
+    for (Element element : elements) {
+      Element next = element;
       mediaBatchMap.put(next.getAttribute("media"), next);
     }
     Set<String> mediaTypes = mediaBatchMap.keySet();
-    Iterator<String> mediaTypesIter = mediaTypes.iterator();
-    while (mediaTypesIter.hasNext()) {
-    	Collection<Element> elems = mediaBatchMap.get(mediaTypesIter.next());
-    	output.add(new LinkedList<Element>(elems));
+    for (String mediaType : mediaTypes) {
+      Collection<Element> elems = mediaBatchMap.get(mediaType);
+      output.add(new LinkedList<Element>(elems));
     }
   }
   

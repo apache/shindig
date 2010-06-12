@@ -23,7 +23,6 @@ import org.apache.shindig.gadgets.render.FakeMessageBundleFactory;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BidiSubstituterTest extends Assert {
