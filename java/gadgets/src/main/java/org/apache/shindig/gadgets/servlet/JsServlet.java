@@ -30,6 +30,7 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager;
@@ -75,6 +76,12 @@ public class JsServlet extends InjectedServlet {
   @Inject
   public void setContainerConfig(ContainerConfig containerConfig) {
     this.containerConfig = containerConfig;
+  }
+
+  private Map<String, ConfigContributor> configContributors;
+  @Inject
+  public void setConfigContributors(Map<String, ConfigContributor> configContributors) {
+    this.configContributors = configContributors;
   }
 
   @Override
@@ -143,15 +150,20 @@ public class JsServlet extends InjectedServlet {
     if (context == RenderingContext.CONTAINER) {
       // Append some container specific things
 
-      Map<String, Object> features = containerConfig.getMap(ctx.getContainer(), "gadgets.features");
+      Map<String, Object> features = containerConfig.getMap(container, "gadgets.features");
       Map<String, Object> config = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
 
       if (features != null) {
         // Discard what we don't care about.
         for (String name : registry.getFeatures(needed)) {
           Object conf = features.get(name);
+          // Add from containerConfig
           if (conf != null) {
             config.put(name, conf);
+          }
+          ConfigContributor contributor = configContributors.get(name);
+          if (contributor != null) {
+            contributor.contribute(config, container, req.getHeader("Host"));
           }
         }
         jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");

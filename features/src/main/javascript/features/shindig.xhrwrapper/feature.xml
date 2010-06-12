@@ -17,7 +17,10 @@ KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>xhrwrapper</name>
-  <!-- deprecated usage -->
-  <dependency>shindig.xhrwrapper</dependency>
+  <name>shindig.xhrwrapper</name>
+  <dependency>core.io</dependency>
+  <dependency>xmlutil</dependency>
+  <gadget>
+    <script src="xhrwrapper.js"/>
+  </gadget>
 </feature>

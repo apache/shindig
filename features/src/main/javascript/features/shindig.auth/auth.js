@@ -155,10 +155,7 @@ shindig.Auth = function() {
     }
   }
 
-  // old incorrect way
   gadgets.config.register("shindig.auth", null, init);
-  // correct way
-  gadgets.config.register("core.auth", null, init);
 
   return /** @scope shindig.auth */ {
 

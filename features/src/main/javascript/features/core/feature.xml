@@ -24,7 +24,7 @@
     core.* libs.
   -->
   <name>core</name>
-  <dependency>core.auth</dependency>
+  <dependency>shindig.auth</dependency>
   <dependency>core.config</dependency>
   <dependency>core.json</dependency>
   <dependency>core.legacy</dependency>

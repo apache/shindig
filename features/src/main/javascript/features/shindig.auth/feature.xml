@@ -17,7 +17,7 @@
   specific language governing permissions and limitations under the License.
 -->
 <feature>
-  <name>core.auth</name>
+  <name>shindig.auth</name>
   <dependency>core.config</dependency>
   <dependency>core.util</dependency>
   <gadget>

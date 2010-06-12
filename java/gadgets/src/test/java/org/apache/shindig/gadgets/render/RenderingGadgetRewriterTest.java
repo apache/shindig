@@ -41,6 +41,9 @@ import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.config.ConfigContributor;
+import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
+import org.apache.shindig.gadgets.config.XhrwrapperConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
@@ -105,8 +108,12 @@ public class RenderingGadgetRewriterTest {
   @Before
   public void setUp() throws Exception {
     featureRegistry = createMock(FeatureRegistry.class);
+    Map<String, ConfigContributor> configContributors = ImmutableMap.<String,ConfigContributor>of(
+        "core.util", new CoreUtilConfigContributor(),
+        "shindig.xhrwrapper", new XhrwrapperConfigContributor()
+    );
     rewriter
-        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager, null);
+        = new RenderingGadgetRewriter(messageBundleFactory, config, featureRegistry, jsUriManager, configContributors);
     Injector injector = Guice.createInjector(new ParseModule(), new PropertiesModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
   }
@@ -546,6 +553,7 @@ public class RenderingGadgetRewriterTest {
   public void gadgetsUtilConfigInjected() throws Exception {
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
+      "  <Require feature='core.util'/>" +
       "  <Require feature='foo'>" +
       "    <Param name='bar'>baz</Param>" +
       "  </Require>" +
@@ -659,7 +667,7 @@ public class RenderingGadgetRewriterTest {
 
     String gadgetXml =
       "<Module><ModulePrefs title=''>" +
-      "  <Require feature='xhrwrapper' />" +
+      "  <Require feature='shindig.xhrwrapper' />" +
       oAuthBlock +
       "</ModulePrefs>" +
       "<Content type='html' href='http://foo.com/bar/baz.html'" + authzAttr + " />" +
