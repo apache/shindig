@@ -1,8 +1,10 @@
 package org.apache.shindig.gadgets.config;
 
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 
@@ -15,6 +17,13 @@ import java.util.Map;
  */
 @Singleton
 public class CoreUtilConfigContributor implements ConfigContributor {
+  private final FeatureRegistry registry;
+
+  @Inject
+  public CoreUtilConfigContributor(final FeatureRegistry registry) {
+    this.registry = registry;
+  }
+
 
   /** {@inheritDoc} */
   public void contribute(Map<String, Object> config, Gadget gadget) {
@@ -23,7 +32,10 @@ public class CoreUtilConfigContributor implements ConfigContributor {
     Collection<Feature> features = prefs.getFeatures().values();
     Map<String, Map<String, Object>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
     for (Feature feature : features) {
-
+      // Skip unregistered features
+      if (!registry.getAllFeatureNames().contains(feature.getName())) {
+        continue;
+      }
       // Flatten out the multimap a bit for backwards compatibility:  map keys
       // with just 1 value into the string, treat others as arrays
       Map<String, Object> paramFeaturesInConfig = Maps.newHashMap();

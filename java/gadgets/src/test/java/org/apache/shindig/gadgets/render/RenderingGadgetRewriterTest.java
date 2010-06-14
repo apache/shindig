@@ -32,6 +32,7 @@ import static org.easymock.EasyMock.same;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.PropertiesModule;
@@ -109,7 +110,7 @@ public class RenderingGadgetRewriterTest {
   public void setUp() throws Exception {
     featureRegistry = createMock(FeatureRegistry.class);
     Map<String, ConfigContributor> configContributors = ImmutableMap.<String,ConfigContributor>of(
-        "core.util", new CoreUtilConfigContributor(),
+        "core.util", new CoreUtilConfigContributor(featureRegistry),
         "shindig.xhrwrapper", new XhrwrapperConfigContributor()
     );
     rewriter
@@ -561,6 +562,7 @@ public class RenderingGadgetRewriterTest {
       "    <Param name='bar'>baz</Param>" +
       "    <Param name='bar'>bop</Param>" +
       "  </Require>" +
+      "  <Require feature='unsupported'/>" +
       "</ModulePrefs>" +
       "<Content type='html'/>" +
       "</Module>";
@@ -571,20 +573,22 @@ public class RenderingGadgetRewriterTest {
         ImmutableList.of(inline("foo", "foo-dbg"), inline("foo2", "foo2-dbg")),
         ImmutableSet.<String>of(),
         ImmutableList.<FeatureResource>of());
-    
+
     config.data.put(FEATURES_KEY, ImmutableMap.of("foo", "blah"));
 
     String rewritten = rewrite(gadget, "");
 
     JSONObject json = getConfigJson(rewritten);
     assertEquals("blah", json.get("foo"));
-
+    
     JSONObject util = json.getJSONObject("core.util");
     JSONObject foo = util.getJSONObject("foo");
     assertEquals("baz", foo.get("bar"));
     JSONObject foo2 = util.getJSONObject("foo2");
     JsonAssert.assertObjectEquals(ImmutableList.of("baz", "bop"),
         foo2.get("bar"));
+
+    assertTrue(!util.has("unsupported"));
   }
 
   // TODO: Test for auth token stuff.
@@ -957,6 +961,9 @@ public class RenderingGadgetRewriterTest {
         .andReturn(allFeatures);
     expect(featureRegistry.getFeatures(eq(allFeaturesAndLibs)))
         .andReturn(allFeaturesAndLibs);
+    // Add CoreUtilConfigContributor behavior
+    expect(featureRegistry.getAllFeatureNames()).
+        andReturn(ImmutableSet.of("foo", "foo2", "core.util")).anyTimes();
     replay(featureRegistry);
   }
   
