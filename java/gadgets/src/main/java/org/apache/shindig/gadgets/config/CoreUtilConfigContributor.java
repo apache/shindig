@@ -10,6 +10,7 @@ import org.apache.shindig.gadgets.spec.ModulePrefs;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Populates the core.util configuration, which at present includes the list
@@ -31,9 +32,11 @@ public class CoreUtilConfigContributor implements ConfigContributor {
     ModulePrefs prefs = gadget.getSpec().getModulePrefs();
     Collection<Feature> features = prefs.getFeatures().values();
     Map<String, Map<String, Object>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
+    Set<String> allFeatureNames = registry.getAllFeatureNames();
+
     for (Feature feature : features) {
       // Skip unregistered features
-      if (!registry.getAllFeatureNames().contains(feature.getName())) {
+      if (!allFeatureNames.contains(feature.getName())) {
         continue;
       }
       // Flatten out the multimap a bit for backwards compatibility:  map keys
