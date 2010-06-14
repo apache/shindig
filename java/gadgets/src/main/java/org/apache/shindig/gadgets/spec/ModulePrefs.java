@@ -97,10 +97,6 @@ public class ModulePrefs {
       attributes.put(node.getNodeName(), node.getNodeValue());
     }
 
-    if (getTitle() == null) {
-      throw new SpecParserException("ModulePrefs@title is required.");
-    }
-
     categories = ImmutableList.of(getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
 
     // Eventually use a list of classes
@@ -175,7 +171,8 @@ public class ModulePrefs {
    * User Pref + Message Bundle + Bidi
    */
   public String getTitle() {
-    return getAttribute(ATTR_TITLE);
+    String title = getAttribute(ATTR_TITLE);
+    return title == null ? "" : title;
   }
 
   /**
