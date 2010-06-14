@@ -180,7 +180,8 @@ public abstract class ProxyBase {
     
     int responseCode;
     Level level = Level.FINE;
-    
+
+    // TODO: Recosider if we should be passing on 404 to the user as is.
     switch (e.getCode()) {
       case INTERNAL_SERVER_ERROR:
         responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
