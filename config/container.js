@@ -69,6 +69,7 @@
 // if locked domain is enabled and the implementation supports it.
 // query parameters will be added.
 "gadgets.iframeBaseUri" : "/gadgets/ifr",
+"gadgets.uri.iframe.basePath" : "/gadgets/ifr",
 
 // jsUriTemplate will have %host% and %js% substituted.
 // No locked domain special cases, but jsUriTemplate must
