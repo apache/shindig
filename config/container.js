@@ -59,7 +59,7 @@
 
 // DNS domain on which gadgets should render.
 "gadgets.lockedDomainSuffix" : "-a.example.com:8080",
-
+	
 // Origins for CORS requests and/or Referer validation
 // Indicate a set of origins or an entry with * to indicate that all origins are allowed
 "gadgets.parentOrigins" : ["*"],
@@ -75,6 +75,15 @@
 // never conflict with a lockedDomainSuffix.
 "gadgets.jsUriTemplate" : "http://%host%/gadgets/js/%js%",
 
+//New configuration for iframeUri generation:
+"gadgets.uri.iframe.lockedDomainSuffix" :  "-a.example.com:8080",
+"gadgets.uri.iframe.unlockedDomain" : "www.example.com:8080",
+"gadgets.uri.iframe.basePath" : "/gadgets/ifr",
+
+"gadgets.uri.js.host" : "http://www.example.com/",
+"gadgets.uri.js.path" : "/gadgets/js",
+	
+	
 // Callback URL.  Scheme relative URL for easy switch between https/http.
 "gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback",
 
@@ -91,7 +100,11 @@
 //"gadgets.securityTokenType" : "secure",
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
+// URI for the default shindig test instance.
 "defaultShindigTestHost": "http://localhost:9003",
+
+// Authority (host:port without scheme) for the proxy and concat servlets.
+"defaultShindigProxyConcatAuthority": "localhost:9003",
 
 // Default Uri config: these must be overridden - specified here for testing purposes
 "gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",
@@ -102,8 +115,13 @@
 "gadgets.uri.js.path": "/gadgets/js",
 
 // Default concat Uri config; used for testing.
-"gadgets.uri.concat.host" : "${Cur['defaultShindigTestHost']}",
+"gadgets.uri.concat.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
 "gadgets.uri.concat.path" : "/gadgets/concat",
+"gadgets.uri.concat.js.splitToken" : "false",
+
+// Default proxy Uri config; used for testing.
+"gadgets.uri.proxy.host" : "${Cur['defaultShindigProxyConcatAuthority']}",
+"gadgets.uri.proxy.path" : "/gadgets/proxy",
 
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
