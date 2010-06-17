@@ -350,18 +350,26 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
     public Future<?> execute(Map<String, String[]> parameters, Reader body,
                              SecurityToken token, BeanConverter converter) {
+
+      RequestItem item;
       try {
         // bind the body contents if available
         if (body != null) {
           parameters.put(operation.bodyParam(), new String[]{IOUtils.toString(body)});
         }
-        RequestItem item = methodCaller.getRestRequestItem(parameters, token, converter,
+        item = methodCaller.getRestRequestItem(parameters, token, converter,
             beanJsonConverter);
-        listener.executing(item);
+        } catch (Exception e) {
+          return ImmediateFuture.errorInstance(e);
+        }
 
+      try {
+        listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
         return ImmediateFuture.errorInstance(e);
+      } finally {
+          listener.executed(item);
       }
     }
   }
