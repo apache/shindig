@@ -341,6 +341,7 @@ public class EndToEndTest {
     webClient.setAjaxController(new NicelyResynchronizingAjaxController());
     webClient.waitForBackgroundJavaScript(2000);
     webClient.setHTMLParserListener(HTMLParserListener.LOG_REPORTER);
+    webClient.setTimeout(3000);
 
     alertHandler = new CollectingAlertHandler();
     webClient.setAlertHandler(alertHandler);
