@@ -20,12 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.Inject;
 
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
-
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Rewriter that converts all url's to absolute.
  */
