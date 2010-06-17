@@ -18,7 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -27,9 +27,8 @@ import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.List;
+import java.util.Map;
 
 public class AbsolutePathReferenceVisitor implements Visitor {
   public final static Map<String, String> RESOURCE_TAGS =
@@ -46,22 +45,18 @@ public class AbsolutePathReferenceVisitor implements Visitor {
         .put("object", "src").build();
 
   public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
-    String nodeName = node.getNodeName().toLowerCase();
-    if (node.getNodeType() == Node.ELEMENT_NODE &&
-        RESOURCE_TAGS.containsKey(nodeName)) {
-      Attr attr = (Attr)node.getAttributes().getNamedItem(RESOURCE_TAGS.get(nodeName));
-      String nodeUri = attr != null ? attr.getValue() : null;
-      if (!StringUtils.isEmpty(nodeUri)) {
-        try {
-          Uri prevUri = Uri.parse(nodeUri);
-          Uri resolved = gadget.getSpec().getUrl().resolve(prevUri);
-          if (!resolved.equals(prevUri)) {
-            attr.setValue(resolved.toString());
-            return VisitStatus.MODIFY;
-          }
-        } catch (Uri.UriException e) {
-          // UriException on illegal input. Ignore.
+    Attr nodeAttr = getUriAttributeFromNode(node, RESOURCE_TAGS);
+
+    if (nodeAttr != null) {
+      try {
+        Uri prevUri = Uri.parse(nodeAttr.getValue());
+        Uri resolved = gadget.getSpec().getUrl().resolve(prevUri);
+        if (!resolved.equals(prevUri)) {
+          nodeAttr.setValue(resolved.toString());
+          return VisitStatus.MODIFY;
         }
+      } catch (Uri.UriException e) {
+        // UriException on illegal input. Ignore.
       }
     }
     return VisitStatus.BYPASS;
@@ -72,4 +67,27 @@ public class AbsolutePathReferenceVisitor implements Visitor {
     return false;
   }
 
+  /**
+   * Returns the uri attribute for the given node by looking up the
+   * tag name -> uri attribute map.
+   * NOTE: This function returns the node attribute only if the attribute has a
+   * non empty value.
+   * @param node The node to get uri attribute for.
+   * @param resourceTags Map from tag name -> uri attribute name.
+   * @return Uri attribute for the node.
+   */
+  public static Attr getUriAttributeFromNode(Node node, Map<String, String> resourceTags) {
+    String nodeName = node.getNodeName().toLowerCase();
+    if (node.getNodeType() == Node.ELEMENT_NODE &&
+        resourceTags.containsKey(nodeName)) {
+      Attr attr = (Attr) node.getAttributes().getNamedItem(
+          resourceTags.get(nodeName));
+      String nodeUri = attr != null ? attr.getValue() : null;
+      if (!StringUtils.isEmpty(nodeUri)) {
+        return attr;
+      }
+    }
+
+    return null;
+  }
 }
