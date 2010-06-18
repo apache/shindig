@@ -141,9 +141,8 @@ public class CajaHtmlParser extends GadgetHtmlParser {
     HtmlLexer lexer = new HtmlLexer(CharProducer.Factory.fromString(source, is));
     final Namespaces ns = Namespaces.HTML_DEFAULT;  // Includes OpenSocial
     final boolean needsDebugData = needsDebugData();
-    DomParser parser = new DomParser(lexer, is, ns, mq);
+    DomParser parser = new DomParser(lexer, /* wantsComments */ true, is, ns, mq);
     parser.setDomImpl(documentFactory);
-    parser.setWantsComments(true);
     parser.setNeedsDebugData(needsDebugData);
     return parser;
   }

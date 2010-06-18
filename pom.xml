@@ -1395,13 +1395,13 @@
      <dependency>
        <groupId>caja</groupId>
        <artifactId>htmlparser</artifactId>
-       <version>r4067</version>
+       <version>r4135</version>
        <scope>compile</scope>
      </dependency>
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r4067</version>
+        <version>r4135</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
