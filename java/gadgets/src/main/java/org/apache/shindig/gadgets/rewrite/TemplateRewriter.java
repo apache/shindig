@@ -32,7 +32,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
@@ -52,7 +52,6 @@ import org.apache.shindig.gadgets.templates.tags.TemplateBasedTagHandler;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -155,13 +154,9 @@ public class TemplateRewriter implements GadgetRewriter {
     registries.add(osmlLibrary.getTagRegistry());
     libraries.add(osmlLibrary);
 
-    NodeList templateElements = content.getDocument()
-        .getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG);
-    ImmutableList.Builder<Element> builder = ImmutableList.builder();
-    for (int i = 0; i < templateElements.getLength(); i++) {
-      builder.add((Element) templateElements.item(i));
-    }
-    List<Element> templates = builder.build();
+    List<Element> templateElements = SocialDataTags.getTags(content.getDocument(),
+        SocialDataTags.OSML_TEMPLATE_TAG);
+    List<Element> templates = ImmutableList.copyOf(templateElements);
 
     if (!OSML_FEATURE_NAME.equals(feature.getName())) {
       // User-defined custom tags - Priority 3

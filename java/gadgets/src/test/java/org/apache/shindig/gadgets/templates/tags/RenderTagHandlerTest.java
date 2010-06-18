@@ -24,8 +24,8 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.templates.DefaultTemplateProcessor;
 import org.apache.shindig.gadgets.templates.TagRegistry;
@@ -117,7 +117,7 @@ public class RenderTagHandlerTest {
     String content = "<script type=\"text/os-template\" xmlns:foo=\"" + TEST_NS + 
         "\" xmlns:os=\"" + TagHandler.OPENSOCIAL_NAMESPACE + "\">" + markup + "</script>";
     Document document = parser.parseDom(content);
-    return (Element) document.getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG).item(0);
+    return SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG).get(0);
   }
   
   private String serialize(Node node) throws IOException {

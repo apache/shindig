@@ -17,8 +17,6 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -53,18 +51,6 @@ public abstract class GadgetHtmlParser {
   private Cache<String, DocumentFragment> fragmentCache;
   private Provider<HtmlSerializer> serializerProvider = new DefaultSerializerProvider();
   protected final DOMImplementation documentFactory;
-
-  /**
-   * Allowed tag names for OpenSocial Data and template blocks.
-   */
-  public static final String OSML_DATA_TAG = "OSData";
-  public static final String OSML_TEMPLATE_TAG = "OSTemplate";
-
-  /**
-   * Bi-map of OpenSocial tags to their script type attribute values.
-   */
-  public static final BiMap<String, String> SCRIPT_TYPE_TO_OSML_TAG = ImmutableBiMap.of(
-      "text/os-data", OSML_DATA_TAG, "text/os-template", OSML_TEMPLATE_TAG);
   
   protected GadgetHtmlParser(DOMImplementation documentFactory) {
     this.documentFactory = documentFactory;
@@ -311,7 +297,8 @@ public abstract class GadgetHtmlParser {
       if (next.getNodeType() == Node.ELEMENT_NODE &&
           "script".equalsIgnoreCase(next.getNodeName())) {
         Attr typeAttr = (Attr)next.getAttributes().getNamedItem("type");
-        if (typeAttr != null && SCRIPT_TYPE_TO_OSML_TAG.get(typeAttr.getValue()) != null) {
+        if (typeAttr != null &&
+            SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.get(typeAttr.getValue()) != null) {
           // The underlying parser impl may have already parsed these.
           // Only re-parse with the coalesced text children if that's all there are.
           boolean parseOs = true;

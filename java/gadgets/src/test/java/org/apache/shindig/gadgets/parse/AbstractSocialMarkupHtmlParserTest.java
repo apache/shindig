@@ -21,15 +21,10 @@ package org.apache.shindig.gadgets.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -58,7 +53,7 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
   @Test
   public void testSocialData() {
     // Verify elements are preserved in social data
-    List<Element> scripts = getTags(GadgetHtmlParser.OSML_DATA_TAG);
+    List<Element> scripts = SocialDataTags.getTags(document, SocialDataTags.OSML_DATA_TAG);
     assertEquals(1, scripts.size());
     
     NodeList viewerRequests = scripts.get(0).getElementsByTagNameNS(
@@ -72,7 +67,7 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
   @Test
   public void testSocialTemplate() {
     // Verify elements and text content are preserved in social templates
-    List<Element> scripts = getTags(GadgetHtmlParser.OSML_TEMPLATE_TAG);
+    List<Element> scripts = SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG);
     assertEquals(1, scripts.size());
     
     assertEquals("template-id", scripts.get(0).getAttribute("id"));
@@ -99,12 +94,12 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
   @Test
   public void testJavascript() {
     // Verify text content is unmodified in javascript blocks
-    List<Element> scripts = getTags("script");
+    List<Element> scripts = SocialDataTags.getTags(document, "script");
     
     // Remove any OpenSocial-specific nodes.
     Iterator<Element> scriptIt = scripts.iterator();
     while (scriptIt.hasNext()) {
-      if (isOpenSocialScript(scriptIt.next())) {
+      if (SocialDataTags.isOpenSocialScript(scriptIt.next())) {
         scriptIt.remove();
       }
     }
@@ -160,33 +155,5 @@ public abstract class AbstractSocialMarkupHtmlParserTest extends AbstractParsing
       assertTrue(StringUtils.isEmpty(n.getTextContent()) ||
           StringUtils.isWhitespace(n.getTextContent()));
     }
-  }
-
-  private List<Element> getTags(String tagName) {
-    NodeList list = document.getElementsByTagName(tagName);
-    List<Element> elements = Lists.newArrayListWithExpectedSize(list.getLength());
-    for (int i = 0; i < list.getLength(); i++) {
-      elements.add((Element) list.item(i));
-    }
-    
-    // Add equivalent <script> elements
-    String scriptType = GadgetHtmlParser.SCRIPT_TYPE_TO_OSML_TAG.inverse().get(tagName);
-    if (scriptType != null) {
-      List<Element> scripts =
-          DomUtil.getElementsByTagNameCaseInsensitive(document, ImmutableSet.of("script"));
-      for (Element script : scripts) {
-        Attr typeAttr = (Attr)script.getAttributes().getNamedItem("type");
-        if (typeAttr != null && scriptType.equalsIgnoreCase(typeAttr.getValue())) {
-          elements.add(script);
-        }
-      }
-    }
-    return elements;
-  }
-  
-  private boolean isOpenSocialScript(Element script) {
-    Attr typeAttr = (Attr)script.getAttributes().getNamedItem("type");
-    return (typeAttr != null && typeAttr.getValue() != null &&
-            GadgetHtmlParser.SCRIPT_TYPE_TO_OSML_TAG.containsKey(typeAttr.getValue()));
   }
 }

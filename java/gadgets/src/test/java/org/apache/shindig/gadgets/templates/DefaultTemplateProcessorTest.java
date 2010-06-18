@@ -31,8 +31,8 @@ import org.apache.shindig.expressions.RootELResolver;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.DefaultHtmlSerializer;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.parse.ParseModule;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
 import org.apache.shindig.gadgets.templates.tags.AbstractTagHandler;
@@ -281,7 +281,7 @@ public class DefaultTemplateProcessorTest {
   private Element prepareTemplate(String markup, String extra) throws GadgetException {    
     String content = "<script type=\"text/os-template\"" + extra + '>' + markup + "</script>";
     Document document = parser.parseDom(content);
-    return (Element) document.getElementsByTagName(GadgetHtmlParser.OSML_TEMPLATE_TAG).item(0);
+    return SocialDataTags.getTags(document, SocialDataTags.OSML_TEMPLATE_TAG).get(0);
   }
   
   private String serialize(Node node) throws IOException {
