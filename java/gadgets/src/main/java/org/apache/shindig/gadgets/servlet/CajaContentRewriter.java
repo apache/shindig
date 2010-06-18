@@ -65,7 +65,7 @@ public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
   private static final Logger LOG = Logger.getLogger(CajaContentRewriter.class.getName());
-  
+
   private final Cache<String, Element> cajoledCache;
   private final RequestPipeline requestPipeline;
   private final HtmlSerializer htmlSerializer;
@@ -81,25 +81,25 @@ public class CajaContentRewriter implements GadgetRewriter {
 
   public void rewrite(Gadget gadget, MutableContent mc) {
     if (!cajaEnabled(gadget)) return;
-      
+
     Document doc = mc.getDocument();
-    
+
     // Serialize outside of MutableContent, to prevent a re-parse.
     String docContent = HtmlSerialization.serialize(doc);
-    String cacheKey = HashUtil.rawChecksum(docContent.getBytes());
+    String cacheKey = HashUtil.checksum(docContent.getBytes());
     Node root = doc.createDocumentFragment();
     root.appendChild(doc.getDocumentElement());
-    
+
     Node cajoledData = null;
     if (cajoledCache != null) {
       Element cajoledOutput = cajoledCache.getElement(cacheKey);
       if (cajoledOutput != null) {
         cajoledData = doc.adoptNode(cajoledOutput);
         createContainerFor(doc, cajoledData);
-        mc.documentChanged();        
+        mc.documentChanged();
       }
     }
-    
+
     if (cajoledData == null) {
       UriFetcher fetcher = makeFetcher(gadget);
       UriPolicy policy = makePolicy(gadget);
@@ -109,23 +109,23 @@ public class CajaContentRewriter implements GadgetRewriter {
       DefaultGadgetRewriter rw = new DefaultGadgetRewriter(bi, mq);
       InputSource is = new InputSource(javaGadgetUri);
       boolean safe = false;
-    
+
       try {
         Pair<Node, Element> htmlAndJs =
             rw.rewriteContent(javaGadgetUri, root, fetcher, policy, null);
         Node html = htmlAndJs.a;
         Element script = htmlAndJs.b;
-      
+
         Element cajoledOutput = doc.createElement("div");
         cajoledOutput.setAttribute("id", "cajoled-output");
         cajoledOutput.setAttribute("classes", "g___");
         cajoledOutput.setAttribute("style", "position: relative;");
-      
+
         cajoledOutput.appendChild(doc.adoptNode(html));
         cajoledOutput.appendChild(tameCajaClientApi(doc));
         cajoledOutput.appendChild(doc.adoptNode(script));
-      
-        Element messagesNode = formatErrors(doc, is, docContent, mq, 
+
+        Element messagesNode = formatErrors(doc, is, docContent, mq,
             /* is invisible */ false);
         cajoledOutput.appendChild(messagesNode);
         if (cajoledCache != null) {
@@ -140,7 +140,7 @@ public class CajaContentRewriter implements GadgetRewriter {
       } catch (GadgetRewriteException e) {
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
-        createContainerFor(doc, 
+        createContainerFor(doc,
             formatErrors(doc, is, docContent, mq, true /* visible */));
         logException(e, mq);
         safe = true;
@@ -153,12 +153,12 @@ public class CajaContentRewriter implements GadgetRewriter {
       }
     }
   }
-  
+
   private boolean cajaEnabled(Gadget gadget) {
     return (gadget.getAllFeatures().contains("caja") ||
         "1".equals(gadget.getContext().getParameter("caja")));
   }
-  
+
   private UriFetcher makeFetcher(Gadget gadget) {
     final Uri gadgetUri = gadget.getContext().getUrl();
     final String container = gadget.getContext().getContainer();
@@ -231,7 +231,7 @@ public class CajaContentRewriter implements GadgetRewriter {
       // Ignore LINT messages
       if (MessageLevel.LINT.compareTo(msg.getMessageLevel()) <= 0) {
         String snippet = sp.getSnippet(msg);
-        String messageText = msg.getMessageLevel().name() + ' ' + 
+        String messageText = msg.getMessageLevel().name() + ' ' +
           html(msg.format(mc)) + ':' + snippet;
         Element li = doc.createElement("li");
         li.appendChild(doc.createTextNode(messageText));

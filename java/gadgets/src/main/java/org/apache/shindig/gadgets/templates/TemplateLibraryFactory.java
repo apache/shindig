@@ -40,7 +40,7 @@ import com.google.inject.Inject;
  */
 public class TemplateLibraryFactory {
   private static final String PARSED_XML_CACHE = "parsedXml";
-  
+
   private final RequestPipeline pipeline;
   private final Cache<String, Element> parsedXmlCache;
 
@@ -54,7 +54,7 @@ public class TemplateLibraryFactory {
       this.parsedXmlCache = cacheProvider.createCache(PARSED_XML_CACHE);
     }
   }
-  
+
   public TemplateLibrary loadTemplateLibrary(GadgetContext context, Uri uri) throws GadgetException {
     HttpRequest request = new HttpRequest(uri);
     // 5 minute TTL.
@@ -63,27 +63,27 @@ public class TemplateLibraryFactory {
     if (response.getHttpStatusCode() != HttpResponse.SC_OK) {
       int retcode = response.getHttpStatusCode();
       if (retcode == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-        // Convert external "internal error" to gateway error: 
+        // Convert external "internal error" to gateway error:
         retcode = HttpResponse.SC_BAD_GATEWAY;
       }
       throw new GadgetException(GadgetException.Code.FAILED_TO_RETRIEVE_CONTENT,
           "Unable to retrieve template library xml. HTTP error " +
-          response.getHttpStatusCode(), retcode);      
+          response.getHttpStatusCode(), retcode);
     }
-    
+
     String content = response.getResponseAsString();
     try {
       String key = null;
       Element element = null;
       if (!context.getIgnoreCache()) {
         try {
-          key = HashUtil.rawChecksum(content.getBytes("UTF-8"));
+          key = HashUtil.checksum(content.getBytes("UTF-8"));
           element = parsedXmlCache.getElement(key);
         } catch (UnsupportedEncodingException e) {
           // this won't happen, but if it does, cache won't be used.
         }
       }
-      
+
       if (element == null) {
         element = XmlUtil.parse(content);
         if (key != null) {
@@ -97,5 +97,5 @@ public class TemplateLibraryFactory {
           HttpResponse.SC_BAD_REQUEST);
     }
   }
-  
+
 }

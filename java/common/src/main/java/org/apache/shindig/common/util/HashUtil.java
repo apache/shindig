@@ -34,17 +34,7 @@ public final class HashUtil {
    * @return The checksum.
    */
   public static String checksum(byte[] data) {
-    MessageDigest md;
-    try {
-      md = MessageDigest.getInstance("MD5");
-    } catch (NoSuchAlgorithmException noMD5) {
-      try {
-        md = MessageDigest.getInstance("SHA");
-      } catch (NoSuchAlgorithmException noSha) {
-        throw new RuntimeException("No suitable MessageDigest found!");
-      }
-    }
-    byte[] hash = md.digest(data);
+    byte[] hash = getMessageDigest().digest(data);
     // Convert to hex. possibly change to base64 in the future for smaller
     // signatures.
     StringBuilder hexString = new StringBuilder(hash.length * 2 + 2);
@@ -61,6 +51,10 @@ public final class HashUtil {
    * @return The checksum.
    */
   public static String rawChecksum(byte[] data) {
+    return new String(getMessageDigest().digest(data));
+  }
+
+  private static MessageDigest getMessageDigest() {
     MessageDigest md;
     try {
       md = MessageDigest.getInstance("MD5");
@@ -71,6 +65,6 @@ public final class HashUtil {
         throw new RuntimeException("No suitable MessageDigest found!");
       }
     }
-    return new String(md.digest(data));
+    return md;
   }
 }

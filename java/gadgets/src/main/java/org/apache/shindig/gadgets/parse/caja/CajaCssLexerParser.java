@@ -69,7 +69,7 @@ public class CajaCssLexerParser {
     String key = null;
     if (shouldCache) {
       // TODO - Consider using the source if its under a certain size
-      key = HashUtil.rawChecksum(content.getBytes());
+      key = HashUtil.checksum(content.getBytes());
       parsedCss = parsedCssCache.getElement(key);
     }
     if (parsedCss == null) {
@@ -183,6 +183,7 @@ public class CajaCssLexerParser {
       this.uri = uri;
     }
 
+    @Override
     public String toString() {
       return "@import url('" + uri + "');\n";
     }
@@ -204,6 +205,7 @@ public class CajaCssLexerParser {
       this.uri = uri;
     }
 
+    @Override
     public String toString() {
       return "url('" + uri + "')";
     }

@@ -77,7 +77,7 @@ public class CajaCssParser {
     String key = null;
     if (shouldCache) {
       // TODO - Consider using the source if its under a certain size
-      key = HashUtil.rawChecksum(content.getBytes());
+      key = HashUtil.checksum(content.getBytes());
       parsedCss = parsedCssCache.getElement(key);
     }
     if (parsedCss == null) {
