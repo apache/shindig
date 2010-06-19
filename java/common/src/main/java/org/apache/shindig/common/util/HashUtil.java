@@ -19,6 +19,8 @@
 
 package org.apache.shindig.common.util;
 
+import com.google.common.base.Preconditions;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -26,32 +28,39 @@ import java.security.NoSuchAlgorithmException;
  * Routines for producing hashes.
  */
 public final class HashUtil {
+  private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
   private HashUtil() {}
   /**
-   * Produces a checksum for the given input data.
+   * Produces a checksum for the given input data. Currently uses a hexified
+   * message digest.
    *
    * @param data
    * @return The checksum.
    */
   public static String checksum(byte[] data) {
-    byte[] hash = getMessageDigest().digest(data);
+    byte[] hashBytes = getMessageDigest().digest(Preconditions.checkNotNull(data));
+    char[] hex = new char[2 * hashBytes.length];
+
     // Convert to hex. possibly change to base64 in the future for smaller
     // signatures.
-    StringBuilder hexString = new StringBuilder(hash.length * 2 + 2);
-    for (byte b : hash) {
-      hexString.append(Integer.toHexString(0xFF & b));
+
+    int offset = 0;
+    for (byte b : hashBytes) {
+      hex[offset++] = HEX_CHARS[(b & 0xF0) >>> 4]; // upper 4 bits
+      hex[offset++] = HEX_CHARS[(b & 0x0F)];       // lower 4 bits
     }
-    return hexString.toString();
+    return new String(hex);
   }
 
   /**
-   * Produces a raw checksum for the given input data.
+   * Produces a raw checksum for the given input data.  Currently uses a message digest
    *
    * @param data
    * @return The checksum.
    */
   public static String rawChecksum(byte[] data) {
-    return new String(getMessageDigest().digest(data));
+    return new String(getMessageDigest().digest(Preconditions.checkNotNull(data)));
   }
 
   private static MessageDigest getMessageDigest() {
