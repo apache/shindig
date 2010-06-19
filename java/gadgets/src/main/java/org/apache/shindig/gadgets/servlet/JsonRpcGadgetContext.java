@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Preconditions;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;

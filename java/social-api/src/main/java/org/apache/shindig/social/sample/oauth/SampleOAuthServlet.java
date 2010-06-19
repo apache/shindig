@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
@@ -57,8 +56,6 @@ public class SampleOAuthServlet extends InjectedServlet {
   public static final OAuthValidator VALIDATOR = new SimpleOAuthValidator();
   private OAuthDataStore dataStore;
   private String oauthAuthorizeAction;
-  private boolean enableOAuth10;
-  private boolean enableSignedCallbacks;
 
   @Inject
   public void setDataStore(OAuthDataStore dataStore) {

@@ -173,8 +173,7 @@ public class JsServlet extends InjectedServlet {
     String onloadStr = req.getParameter("onload");
     if (onloadStr != null) {
       if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
-        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid onload callback: " +
-            onloadStr);
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid onload callback specified");
         return;
       }
       jsData.append(String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(onloadStr)));

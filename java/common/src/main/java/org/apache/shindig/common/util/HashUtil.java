@@ -71,7 +71,7 @@ public final class HashUtil {
       try {
         md = MessageDigest.getInstance("SHA");
       } catch (NoSuchAlgorithmException noSha) {
-        throw new RuntimeException("No suitable MessageDigest found!");
+        throw new RuntimeException("No suitable MessageDigest found!", noSha);
       }
     }
     return md;
