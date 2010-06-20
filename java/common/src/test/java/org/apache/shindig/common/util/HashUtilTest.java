@@ -45,7 +45,7 @@ public class HashUtilTest {
 
   @Test
   public void testRawChecksum() throws Exception {
-    assertEquals("Ô\u001DŒÙ\u0000²\u0004é€\t˜ìøB~", HashUtil.rawChecksum(new byte[]{}));
+    assertEquals("Ô\u001DŒÙ\u0000²\u0004é€\t˜ìø", HashUtil.rawChecksum(new byte[]{}));
     assertEquals("¤”¨i\u000Br9\u001B\u0013ÓËâ~Û\\X", HashUtil.rawChecksum(new byte[]{Byte.MAX_VALUE, Byte.MIN_VALUE}));
   }
 }
