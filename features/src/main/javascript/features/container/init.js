@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview Initial configuration/boot-strapping work for common container
  * to operate. This includes setting up gadgets config and global environment
@@ -23,15 +24,18 @@
  */
 (function() {
 
-  function initializeGadgetsConfig() {
+  function initializeConfig() {
     gadgets.config.init({
-        'rpc': {
-          parentRelayUrl: ''
-        },
-        'core.io': {
-          jsonProxyUrl: 'http://%host%/gadgets/makeRequest',
-          proxyUrl: 'http://%host%/gadgets/proxy?refresh=%refresh%&container=%container%%rewriteMime%&gadget=%gadget%/%rawurl%'
-        }
+      'rpc': {
+        parentRelayUrl: ''
+      },
+      'core.io': {
+        jsonProxyUrl: 'http://%host%/gadgets/makeRequest',
+        proxyUrl: 'http://%host%/gadgets/proxy' +
+            '?refresh=%refresh%' +
+            '&container=%container%%rewriteMime%' +
+            '&gadget=%gadget%/%rawurl%'
+      }
     });
   }
 
@@ -55,6 +59,6 @@
         : null;
   }
 
-  initializeGadgetsConfig();
+  initializeConfig();
   initializeGlobalVars();
 })();
