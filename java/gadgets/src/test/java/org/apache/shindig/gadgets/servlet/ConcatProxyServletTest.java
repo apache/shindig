@@ -37,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class ConcatProxyServletTest extends ServletTestFixture {
   private static final String REQUEST_DOMAIN = "example.org";
@@ -57,6 +58,20 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   private final ConcatProxyServlet servlet = new ConcatProxyServlet();
   private TestConcatUriManager uriManager;
   
+  private final Executor sequentialExecutor = new Executor() {
+    public void execute(Runnable r) {
+      // Sequential version of 'execute'.
+      r.run();
+    }
+  }; 
+
+  private final Executor threadedExecutor = new Executor() {
+    public void execute(Runnable r) {
+      // Threaded version of 'execute'.
+      new Thread(r).start();
+    }
+  }; 
+
   @Before
   public void setUp() throws Exception {
     servlet.setRequestPipeline(pipeline);
@@ -104,17 +119,19 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     return '\"' + url + "\":\"" + data +"\",\r\n";
     
   }
-  
+
   /**
-   * Run a concat test
+   * Run a concat test by fetching resources as configured by given Executor
    * @param result - expected concat results
    * @param uris - list of uris to concat
    * @throws Exception
    */
-  private void runConcat(String result, String tok, Uri... uris) throws Exception {
+  private void runConcat(Executor exec, String result, String tok, Uri... uris)
+      throws Exception {
     expectRequestWithUris(Lists.newArrayList(uris), tok);
     
     // Run the servlet
+    servlet.setExecutor(exec);
     servlet.doGet(request, recorder);
     verify();
     assertEquals(result, recorder.getResponseAsString());
@@ -124,16 +141,29 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   @Test
   public void testSimpleConcat() throws Exception {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString());
-    runConcat(results, null, URL1, URL2);
+    runConcat(sequentialExecutor, results, null, URL1, URL2);
   }
 
+  @Test
+  public void testSimpleConcatThreaded() throws Exception {
+    String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString());
+    runConcat(threadedExecutor, results, null, URL1, URL2);
+  }
+  
   @Test
   public void testThreeConcat() throws Exception {
     String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString())
         + addComment(SCRT3, URL3.toString());
-    runConcat(results, null, URL1, URL2, URL3);
+    runConcat(sequentialExecutor, results, null, URL1, URL2, URL3);
   }
 
+  @Test
+  public void testThreeConcatThreaded() throws Exception {
+    String results = addComment(SCRT1, URL1.toString()) + addComment(SCRT2,URL2.toString())
+        + addComment(SCRT3, URL3.toString());
+    runConcat(threadedExecutor, results, null, URL1, URL2, URL3);
+  }
+  
   @Test
   public void testConcatBadException() throws Exception {
     final Uri URL4 = Uri.parse("http://example.org/4.js");
@@ -178,7 +208,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + addVar(URL1.toString(), SCRT1_ESCAPED)
         + addVar(URL2.toString(), SCRT2_ESCAPED)
         + "};\r\n";
-    runConcat(results, "_js", URL1, URL2);
+    runConcat(sequentialExecutor, results, "_js", URL1, URL2);
   }
 
   @Test
@@ -188,7 +218,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + addVar(URL2.toString(), SCRT2_ESCAPED)
         + addVar(URL3.toString(), SCRT3_ESCAPED)
         + "};\r\n";
-    runConcat(results, "_js", URL1, URL2, URL3);
+    runConcat(sequentialExecutor, results, "_js", URL1, URL2, URL3);
   }
   
   @Test
@@ -213,7 +243,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
         + addVar(URL1.toString(), SCRT1_ESCAPED)
         + "/* ---- Error 404 (http://example.org/4.js) ---- */\r\n"
         + "};\r\n";
-    runConcat(results, "_js", URL1, URL4);
+    runConcat(sequentialExecutor, results, "_js", URL1, URL4);
   }
   
   @Test
