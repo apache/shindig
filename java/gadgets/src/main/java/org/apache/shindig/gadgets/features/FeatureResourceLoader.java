@@ -18,9 +18,11 @@
 package org.apache.shindig.gadgets.features;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -39,10 +41,23 @@ public class FeatureResourceLoader {
       = Logger.getLogger("org.apache.shindig.gadgets");
   
   private HttpFetcher fetcher;
+  private TimeSource timeSource = new TimeSource();
+  private int updateCheckFrequency = 0;  // <= 0 -> only load data once, don't check for updates.
 
   @Inject
   public void setHttpFetcher(HttpFetcher fetcher) {
     this.fetcher = fetcher;
+  }
+  
+  @Inject
+  public void setTimeSource(TimeSource timeSource) {
+    this.timeSource = timeSource;
+  }
+  
+  @Inject(optional = true)
+  public void setSupportFileUpdates(
+      @Named("shindig.features.loader.file-update-check-frequency-ms") int updateCheckFrequency) {
+    this.updateCheckFrequency = updateCheckFrequency;
   }
   
   /**
@@ -74,8 +89,7 @@ public class FeatureResourceLoader {
   }
   
   protected FeatureResource loadFile(String path, Map<String, String> attribs) throws IOException {
-    return new DualModeStaticResource(path, getFileContent(new File(getOptPath(path))),
-        getFileContent(new File(path)));
+    return new DualModeFileResource(getOptPath(path), path);
   }
   
   protected String getFileContent(File file) {
@@ -112,6 +126,73 @@ public class FeatureResourceLoader {
       return orig.substring(0, orig.length() - 3) + ".opt.js";
     }
     return orig;
+  }
+  
+  // Overridable for easier testing.
+  protected boolean fileHasChanged(File file, long lastModified) {
+    return file.lastModified() > lastModified;
+  }
+  
+  private class DualModeFileResource extends FeatureResource.Default {
+    private final FileContent optContent;
+    private final FileContent dbgContent;
+    
+    protected DualModeFileResource(String optFilePath, String dbgFilePath) {
+      this.optContent = new FileContent(optFilePath);
+      this.dbgContent = new FileContent(dbgFilePath);
+      if (optContent.get() == null && dbgContent.get() == null) {
+        throw new IllegalArgumentException("Problems reading resource: " + dbgFilePath);
+      }
+    }
+
+    public String getContent() {
+      String opt = optContent.get();
+      return opt != null ? opt : dbgContent.get();
+    }
+
+    public String getDebugContent() {
+      String dbg = dbgContent.get();
+      return dbg != null ? dbg : optContent.get();
+    }
+    
+    private class FileContent {
+      private final String filePath;
+      private long lastModified;
+      private long lastUpdateCheckTime;
+      private String content;
+      
+      private FileContent(String filePath) {
+        this.filePath = filePath;
+        this.lastModified = 0;
+        this.lastUpdateCheckTime = 0;
+      }
+      
+      private String get() {
+        long nowTime = timeSource.currentTimeMillis();
+        if (content == null ||
+            (updateCheckFrequency > 0 &&
+             (lastUpdateCheckTime + updateCheckFrequency) < nowTime)) {
+          // Only check for file updates at preconfigured intervals. This prevents
+          // overwhelming the file system while maintaining a reasonable update rate w/o
+          // implementing a full event-driven mechanism.
+          lastUpdateCheckTime = nowTime;
+          File file = new File(filePath);
+          if (fileHasChanged(file, lastModified)) {
+            // Only reload file content if it's changed (or if it's the first
+            // load, when this check will succeed).
+            String newContent = getFileContent(file);
+            if (newContent != null) {
+              content = newContent;
+              lastModified = file.lastModified();
+            } else if (content != null) {
+              // Content existed before, file removed - log error.
+              LOG.warning("File existed before but is now missing! Name: " + filePath);
+            }
+          }
+        }
+        return content;
+      }
+    }
   }
   
   private static class DualModeStaticResource extends FeatureResource.Default {
