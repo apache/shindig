@@ -54,9 +54,9 @@ public class AccelHandler extends ProxyBase {
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
 
-  private final RequestPipeline requestPipeline;
-  private final ResponseRewriterRegistry contentRewriterRegistry;
-  private final AccelUriManager uriManager;
+  protected final RequestPipeline requestPipeline;
+  protected final ResponseRewriterRegistry contentRewriterRegistry;
+  protected final AccelUriManager uriManager;
 
   @Inject
   public AccelHandler(RequestPipeline requestPipeline,
@@ -116,8 +116,8 @@ public class AccelHandler extends ProxyBase {
    * @return Remote content request based on the parameters sent from the client.
    * @throws GadgetException In case the data could not be fetched.
    */
-  private HttpRequest buildHttpRequest(HttpServletRequest request,
-                                       ProxyUriManager.ProxyUri uriToProxyOrRewrite)
+  protected HttpRequest buildHttpRequest(HttpServletRequest request,
+                                         ProxyUriManager.ProxyUri uriToProxyOrRewrite)
       throws GadgetException {
     Uri tgt = uriToProxyOrRewrite.getResource();
     validateUrl(tgt);
