@@ -56,8 +56,8 @@ public class DefaultConcatUriManager implements ConcatUriManager {
   
   @Inject(optional = true)
   public void setUseStrictParsing(
-      @Named("shindig.uri.concat.use-strict-parsing") String useStrict) {
-    this.strictParsing = Boolean.parseBoolean(useStrict);
+      @Named("shindig.uri.concat.use-strict-parsing") boolean useStrict) {
+    this.strictParsing = useStrict;
   }
 
   public List<ConcatData> make(List<ConcatUri> resourceUris,

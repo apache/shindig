@@ -75,8 +75,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   }
   
   @Inject(optional = true)
-  public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") String useStrict) {
-    this.strictParsing = Boolean.parseBoolean(useStrict);
+  public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") boolean useStrict) {
+    this.strictParsing = useStrict;
   }
   
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {

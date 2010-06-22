@@ -312,7 +312,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     String host = "host.com";
     String path = "/proxy/path";
     DefaultProxyUriManager manager = makeManager("foo" + host, path, null);
-    manager.setUseStrictParsing("true");
+    manager.setUseStrictParsing(true);
     Uri testUri = new UriBuilder().setAuthority(host).setPath(path)
         .addQueryParameter(Param.URL.getKey(), "http://foo.com").toUri();
     manager.process(testUri);

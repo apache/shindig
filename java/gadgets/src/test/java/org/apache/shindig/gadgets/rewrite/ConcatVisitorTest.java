@@ -511,7 +511,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   
   private ContentRewriterFeature.Config config(String exclude, boolean splitJs) {
     return new ContentRewriterFeature.DefaultConfig(".*", exclude == null ? "" : exclude,
-        "0", "", "false", splitJs ? "true" : "false");
+        "0", "", false, splitJs);
   }
   
   private List<Node> seqNodes(Node... nodes) {

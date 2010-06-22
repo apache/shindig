@@ -71,8 +71,7 @@ public abstract class RewriterTestBase {
   @Before
   public void setUp() throws Exception {
     rewriterFeatureFactory = new ContentRewriterFeature.Factory(null,
-        new ContentRewriterFeature.DefaultConfig(".*", "", "86400",
-        TAGS, "false", "false"));
+        new ContentRewriterFeature.DefaultConfig(".*", "", "86400", TAGS, false, false));
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
     injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
