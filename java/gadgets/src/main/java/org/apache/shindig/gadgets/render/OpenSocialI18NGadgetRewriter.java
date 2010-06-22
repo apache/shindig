@@ -109,7 +109,7 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     return localeName;
   }
 
-  private String attemptToLoadDateConstants(String localeName) throws IOException {
+  protected String attemptToLoadDateConstants(String localeName) throws IOException {
     return attemptToLoadResource("DateTimeConstants__" + localeName + ".js");
   }
   
@@ -121,4 +121,3 @@ public class OpenSocialI18NGadgetRewriter implements GadgetRewriter {
     return ResourceLoader.getContent(resource);
   }
 }
-
