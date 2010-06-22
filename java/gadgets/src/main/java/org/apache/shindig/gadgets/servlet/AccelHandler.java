@@ -24,14 +24,17 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.RequestPipeline;
+import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriUtils;
 
 import java.io.IOException;
@@ -74,7 +77,7 @@ public class AccelHandler extends ProxyBase {
 
     // Parse and normalize to get a proxied request uri.
     Uri requestUri = new UriBuilder(request).toUri();
-    ProxyUriManager.ProxyUri proxyUri = uriManager.parseAndNormalize(requestUri);
+    ProxyUriManager.ProxyUri proxyUri = getProxyUri(requestUri);
 
     // Fetch the content of the requested uri.
     HttpRequest req = buildHttpRequest(request, proxyUri);
@@ -106,6 +109,30 @@ public class AccelHandler extends ProxyBase {
     rewriteContentType(req, response);
 
     IOUtils.copy(results.getResponse(), response.getOutputStream());
+  }
+
+  /**
+   * Returns the proxy uri encapsulating the request uri.
+   * @param requestUri The request uri.
+   * @return The proxy uri encapsulating the request uri.
+   * @throws GadgetException In case of errors.
+   */
+  public ProxyUriManager.ProxyUri getProxyUri(Uri requestUri) throws GadgetException {
+    Uri proxiedUri = uriManager.parseAndNormalize(requestUri);
+    String uriString = proxiedUri.getQueryParameter(UriCommon.Param.URL.getKey());
+
+    // Throw BAD_GATEWAY in case parsing of url fails.
+    Uri normalizedUri;
+    try {
+      normalizedUri = Uri.parse(uriString);
+    } catch (Uri.UriException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+                                "Failed to parse uri: " + uriString,
+                                HttpServletResponse.SC_BAD_GATEWAY);
+    }
+
+    Gadget gadget = DomWalker.makeGadget(requestUri);
+    return new ProxyUriManager.ProxyUri(gadget, normalizedUri);
   }
 
   /**

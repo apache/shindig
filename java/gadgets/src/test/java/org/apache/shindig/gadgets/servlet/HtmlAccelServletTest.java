@@ -18,11 +18,12 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -30,6 +31,8 @@ import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
+import org.apache.shindig.gadgets.uri.DefaultAccelUriManager;
+import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
 import static org.easymock.EasyMock.expect;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +43,10 @@ import java.util.Map;
 public class HtmlAccelServletTest extends ServletTestFixture {
 
   private static class FakeContainerConfig extends AbstractContainerConfig {
-    protected final Map<String, Object> data = Maps.newHashMap();
+    protected final Map<String, Object> data = ImmutableMap.<String, Object>builder()
+        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
+        .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/accel")
+        .build();
 
     @Override
     public Object getProperty(String container, String name) {
@@ -70,8 +76,9 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   @Before
   public void setUp() throws Exception {
     servlet = new HtmlAccelServlet();
-    AccelUriManager accelUriManager = new AccelUriManager(
-        new FakeContainerConfig(), null);
+    ContainerConfig config = new FakeContainerConfig();
+    AccelUriManager accelUriManager = new DefaultAccelUriManager(
+        config, new DefaultProxyUriManager(config, null));
 
     rewriter = new FakeCaptureRewriter();
     rewriterRegistry = new DefaultResponseRewriterRegistry(
@@ -193,7 +200,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     expect(request.getRequestURL())
         .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
         .anyTimes();
-    String queryParams = (url == null ? "" : "url=" + url + "&container=accel");
+    String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
+                                             + "&gadget=test");
     expect(request.getQueryString()).andReturn(queryParams).anyTimes();
   }
 }
