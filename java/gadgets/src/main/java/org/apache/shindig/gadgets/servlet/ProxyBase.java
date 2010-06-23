@@ -147,7 +147,8 @@ public abstract class ProxyBase {
     }
   }
 
-  protected void setRequestHeaders(HttpServletRequest servletRequest, HttpRequest req) {
+  protected void setRequestHeaders(HttpServletRequest servletRequest, HttpRequest req)
+      throws GadgetException {
     String xff  = servletRequest.getHeader("X-Forwarded-For");
     String remoteAddr = servletRequest.getRemoteAddr();
     if (!StringUtils.isEmpty(remoteAddr)) {
