@@ -48,6 +48,7 @@ import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRouteBean;
+import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -113,9 +114,13 @@ public class BasicHttpFetcher implements HttpFetcher {
   /**
    * Creates a new fetcher using the default maximum object size and timeout --
    * no limit and 5 seconds.
+   * @param basicHttpFetcherProxy The http proxy to use.
    */
-  public BasicHttpFetcher() {
-    this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
+  @Inject
+  public BasicHttpFetcher(@Named("org.apache.shindig.gadgets.http.basicHttpFetcherProxy")
+                          String basicHttpFetcherProxy) {
+    this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS,
+         basicHttpFetcherProxy);
   }
 
   /**
@@ -126,8 +131,10 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @param maxObjSize          Maximum size, in bytes, of the object we will fetch, 0 if no limit..
    * @param connectionTimeoutMs timeout, in milliseconds, for connecting to hosts.
    * @param readTimeoutMs       timeout, in millseconds, for unresponsive connections
+   * @param basicHttpFetcherProxy The http proxy to use.
    */
-  public BasicHttpFetcher(int maxObjSize, int connectionTimeoutMs, int readTimeoutMs) {
+  public BasicHttpFetcher(int maxObjSize, int connectionTimeoutMs, int readTimeoutMs,
+                          String basicHttpFetcherProxy) {
     // Create and initialize HTTP parameters
     setMaxObjectSizeBytes(maxObjSize);
     setSlowResponseWarning(DEFAULT_SLOW_RESPONSE_WARNING);
@@ -157,8 +164,14 @@ public class BasicHttpFetcher implements HttpFetcher {
     schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
     ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-
     DefaultHttpClient client = new DefaultHttpClient(cm, params);
+
+    // Set proxy if set via guice.
+    if (!StringUtils.isEmpty(basicHttpFetcherProxy)) {
+      String[] splits = basicHttpFetcherProxy.split(":");
+      ConnRouteParams.setDefaultProxy(
+          client.getParams(), new HttpHost(splits[0], Integer.parseInt(splits[1]), "http"));
+    }
 
     // try resending the request once
     client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(1, true));
@@ -198,11 +211,13 @@ public class BasicHttpFetcher implements HttpFetcher {
     });
     client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler() );
 
-    // Use Java's built-in proxy logic
-    ProxySelectorRoutePlanner routePlanner = new ProxySelectorRoutePlanner(
-            client.getConnectionManager().getSchemeRegistry(),
-            ProxySelector.getDefault());
-    client.setRoutePlanner(routePlanner);
+    // Use Java's built-in proxy logic in case no proxy set via guice.
+    if (StringUtils.isEmpty(basicHttpFetcherProxy)) {
+      ProxySelectorRoutePlanner routePlanner = new ProxySelectorRoutePlanner(
+          client.getConnectionManager().getSchemeRegistry(),
+          ProxySelector.getDefault());
+      client.setRoutePlanner(routePlanner);
+    }
 
     FETCHER = client;
   }
@@ -282,11 +297,18 @@ public class BasicHttpFetcher implements HttpFetcher {
             HttpServletResponse.SC_BAD_REQUEST);
       }
     }
-    HttpHost host = new HttpHost(hostparts[0], port, uri.getScheme());   
+
     String requestUri = uri.getPath();
+    // Treat path as / if set as null.
+    if (uri.getPath() == null) {
+      requestUri = "/";
+    }
     if (uri.getQuery() != null) {
       requestUri += '?' + uri.getQuery();
     }
+
+    // Get the http host to connect to.
+    HttpHost host = new HttpHost(hostparts[0], port, uri.getScheme());
 
     try {
       if ("POST".equals(methodType) || "PUT".equals(methodType)) {
@@ -309,8 +331,10 @@ public class BasicHttpFetcher implements HttpFetcher {
         httpMethod.addHeader(entry.getKey(), StringUtils.join(entry.getValue(), ','));
       }
 
-      if (!request.getFollowRedirects())
+      // Disable following redirects.
+      if (!request.getFollowRedirects()) {
         httpMethod.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+      }
 
       // HttpClient doesn't handle all cases when breaking url (specifically '_' in domain)
       // So lets pass it the url parsed:

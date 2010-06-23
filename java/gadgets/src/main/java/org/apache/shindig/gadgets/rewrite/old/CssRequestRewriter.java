@@ -52,7 +52,7 @@ import com.google.inject.Inject;
  */
 public class CssRequestRewriter implements ResponseRewriter {
 
-  private static final Logger logger = Logger.getLogger(CssRequestRewriter.class.getName());
+  private static final Logger LOG = Logger.getLogger(CssRequestRewriter.class.getName());
 
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
   private final CajaCssLexerParser cssParser;
@@ -103,7 +103,7 @@ public class CssRequestRewriter implements ResponseRewriter {
         return stringList;
       } catch (GadgetException ge) {
         if (ge.getCause() instanceof ParseException) {
-          logger.log(Level.WARNING,
+          LOG.log(Level.WARNING,
               "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
           writer.write(original);
           return Collections.emptyList();
@@ -141,7 +141,7 @@ public class CssRequestRewriter implements ResponseRewriter {
       return imports;
     } catch (GadgetException ge) {
       if (ge.getCause() instanceof ParseException) {
-        logger.log(Level.WARNING,
+        LOG.log(Level.WARNING,
               "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
         return Collections.emptyList();
       } else {

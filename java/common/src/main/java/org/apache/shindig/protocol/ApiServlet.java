@@ -48,7 +48,7 @@ import com.google.inject.name.Names;
  */
 public abstract class ApiServlet extends InjectedServlet {
 
-  private static final Logger logger = Logger.getLogger(ApiServlet.class.getName());
+  private static final Logger LOG = Logger.getLogger(ApiServlet.class.getName());
 
   protected static final String FORMAT_PARAM = "format";
   protected static final String JSON_FORMAT = "json";
@@ -140,10 +140,10 @@ public abstract class ApiServlet extends InjectedServlet {
   protected ResponseItem responseItemFromException(Throwable t) {
     if (t instanceof ProtocolException) {
       ProtocolException pe = (ProtocolException) t;
-      logger.log(Level.INFO, "Returning a response error as result of a protocol exception", pe);
+      LOG.log(Level.INFO, "Returning a response error as result of a protocol exception", pe);
       return new ResponseItem(pe.getCode(), pe.getMessage(), pe.getResponse());
     }
-    logger.log(Level.WARNING, "Returning a response error as result of an exception", t);
+    LOG.log(Level.WARNING, "Returning a response error as result of an exception", t);
     return new ResponseItem(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
   }
 

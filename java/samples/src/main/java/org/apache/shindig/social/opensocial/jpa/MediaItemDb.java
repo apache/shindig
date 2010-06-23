@@ -17,15 +17,17 @@
  */
 package org.apache.shindig.social.opensocial.jpa;
 
+import static javax.persistence.CascadeType.MERGE;
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.CascadeType.REFRESH;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import org.apache.shindig.social.opensocial.model.Activity;
-import org.apache.shindig.social.opensocial.model.MediaItem;
 import org.apache.shindig.social.opensocial.model.Address;
+import org.apache.shindig.social.opensocial.model.MediaItem;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -190,7 +192,7 @@ public class MediaItemDb implements MediaItem, DbObject {
    * model field.
    * @see org.apache.shindig.social.opensocial.model.MediaItem
    */
-  @ManyToOne(targetEntity = AddressDb.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+  @ManyToOne(targetEntity = AddressDb.class, cascade = { PERSIST, MERGE, REFRESH })
   @JoinColumn(name = "address_id", referencedColumnName = "oid")
   private Address location;
 

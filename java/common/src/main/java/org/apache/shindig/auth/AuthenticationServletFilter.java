@@ -58,7 +58,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
 
   private List<AuthenticationHandler> handlers;
 
-  private static final Logger logger = Logger.getLogger(
+  private static final Logger LOG = Logger.getLogger(
       AuthenticationServletFilter.class.getName());
 
   @Inject
@@ -97,7 +97,7 @@ public class AuthenticationServletFilter extends InjectedFilter {
       callChain(chain, req, resp);
     } catch (AuthenticationHandler.InvalidAuthenticationException iae) {
       Throwable cause = iae.getCause();
-      logger.log(Level.INFO, iae.getMessage(), cause);
+      LOG.log(Level.INFO, iae.getMessage(), cause);
 
       if (iae.getAdditionalHeaders() != null) {
         for (Map.Entry<String,String> entry : iae.getAdditionalHeaders().entrySet()) {

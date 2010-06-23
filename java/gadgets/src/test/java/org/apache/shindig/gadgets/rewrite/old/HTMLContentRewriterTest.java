@@ -409,4 +409,15 @@ public class HTMLContentRewriterTest extends BaseRewriterTestCase {
     rewriter.rewrite(req, fakeResponse);
     control.verify();
   }
+
+  @Test
+  public void testStyleWithDifferentMedia() throws Exception {
+    String content = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylemedia.html"));
+     String expected = IOUtils.toString(this.getClass().getClassLoader().
+        getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritestylemedia-expected.html"));
+    MutableContent mc = rewriteContent(rewriter, content, "default");
+    assertEquals(StringUtils.deleteWhitespace(mc.getContent()),
+                 StringUtils.deleteWhitespace(expected));
+  }
 }

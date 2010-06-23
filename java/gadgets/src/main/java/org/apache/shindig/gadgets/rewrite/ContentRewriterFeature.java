@@ -133,10 +133,9 @@ public class ContentRewriterFeature {
         @Named("shindig.content-rewrite.exclude-urls")String excludeUrls,
         @Named("shindig.content-rewrite.expires")String expires,
         @Named("shindig.content-rewrite.include-tags")String includeTags,
-        @Named("shindig.content-rewrite.only-allow-excludes")String onlyAllowExcludes,
-        @Named("shindig.content-rewrite.enable-split-js-concat")String enableSplitJsConcat) {
-      super(includeUrls, excludeUrls, expires, includeTags,
-          Boolean.parseBoolean(onlyAllowExcludes), Boolean.parseBoolean(enableSplitJsConcat));
+        @Named("shindig.content-rewrite.only-allow-excludes")boolean onlyAllowExcludes,
+        @Named("shindig.content-rewrite.enable-split-js-concat")boolean enableSplitJsConcat) {
+      super(includeUrls, excludeUrls, expires, includeTags, onlyAllowExcludes, enableSplitJsConcat);
     }
   }
   

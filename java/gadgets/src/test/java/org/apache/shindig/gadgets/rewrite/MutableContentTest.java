@@ -78,7 +78,8 @@ public class MutableContentTest {
   
   @Test
   public void modifyContentReflectedInTreeUtf8() throws Exception {
-    String theContent = "NËW CØNTÈNT";
+    String theContent = "N\uFFFDW C\uFFFDNT\uFFFDNT";
+
     assertEquals(0, mhc.getNumChanges());
     mhc.setContent(theContent);
     assertEquals(1, mhc.getNumChanges());

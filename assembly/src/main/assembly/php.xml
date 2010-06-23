@@ -26,7 +26,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <outputDirectory>shindig-${project.version}-php</outputDirectory>
       <directory>../</directory>
       <includes>
         <include>features/**</include>
@@ -65,7 +65,7 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <outputDirectory>shindig-${project.version}-php</outputDirectory>
       <directory>../php</directory>
       <excludes>
         <exclude>config/**</exclude>
@@ -104,7 +104,7 @@
     <!-- Using the temp container.php created by Maven using Antrun plugin to rewrite
       default configuration to release structure -->
     <fileSet>
-      <outputDirectory>shindig-${pom.version}-php/config</outputDirectory>
+      <outputDirectory>shindig-${project.version}-php/config</outputDirectory>
       <directory>target/php/config</directory>
       <excludes>
         <!-- scm -->
@@ -116,12 +116,12 @@
   <files>
     <file>
       <source>../php/README</source>
-      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <outputDirectory>shindig-${project.version}-php</outputDirectory>
       <filtered>true</filtered>
     </file>
     <file>
       <source>../php/NOTICE</source>
-      <outputDirectory>shindig-${pom.version}-php</outputDirectory>
+      <outputDirectory>shindig-${project.version}-php</outputDirectory>
       <filtered>true</filtered>
     </file>
   </files>

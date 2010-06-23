@@ -58,8 +58,8 @@ public class BeanXmlConverterTest extends Assert {
   }
 
   @Test
-  @Ignore("unknown why this is disabled")
-  public void xxxtestMapsToXml() throws Exception {
+  //@Ignore("unknown why this is disabled")
+  public void testMapsToXml() throws Exception {
     // This is the structure our app data currently takes
     Map<String, Map<String, String>> map = Maps.newTreeMap();
     Map<String, String> item1Map = ImmutableMap.of("value","1");
@@ -76,7 +76,7 @@ public class BeanXmlConverterTest extends Assert {
     // TODO: I don't believe this is the output we are looking for for app
     // data... we will probably have to tweak this.
     String expectedXml =
-        "<treemap>" +
+        "<response>" +
         "<empty>false</empty>" +
         "<entry>" +
           "<key>item1</key>" +
@@ -98,7 +98,7 @@ public class BeanXmlConverterTest extends Assert {
             "</entry>" +
           "</value>" +
         "</entry>" +
-        "</treemap>";
+        "</response>";
     assertEquals(expectedXml, StringUtils.deleteWhitespace(xml));
   }
 

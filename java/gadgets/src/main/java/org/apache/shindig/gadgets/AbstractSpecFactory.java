@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * Automatically updates objects as needed asynchronously to provide optimal throughput.
  */
 public abstract class AbstractSpecFactory<T> {
-  private static final Logger logger = Logger.getLogger(AbstractSpecFactory.class.getName());
+  private static final Logger LOG = Logger.getLogger(AbstractSpecFactory.class.getName());
   private final Class<T> clazz;
   private final ExecutorService executor;
   private final RequestPipeline pipeline;
@@ -216,10 +216,10 @@ public abstract class AbstractSpecFactory<T> {
         cache.addElement(query.specUri, newSpec, refresh);
       } catch (GadgetException e) {
         if (old != null) {
-          logger.log(Level.INFO, "Failed to update {0}. Using cached version.", query.specUri);
+          LOG.log(Level.INFO, "Failed to update {0}. Using cached version.", query.specUri);
           cache.addElement(query.specUri, old, refresh);
         } else {
-          logger.log(Level.INFO, "Failed to update {0}. Applying negative cache.", query.specUri);
+          LOG.log(Level.INFO, "Failed to update {0}. Applying negative cache.", query.specUri);
           cache.addElement(query.specUri, e, refresh);
         }
       }

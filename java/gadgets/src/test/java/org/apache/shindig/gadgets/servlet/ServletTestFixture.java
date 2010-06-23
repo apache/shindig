@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class ServletTestFixture extends EasyMockTestCase {
   public final RequestPipeline pipeline = mock(RequestPipeline.class);
-  public final CaptureRewriter rewriter = new CaptureRewriter();
-  public final ResponseRewriterRegistry rewriterRegistry
+  public CaptureRewriter rewriter = new CaptureRewriter();
+  public ResponseRewriterRegistry rewriterRegistry
       = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
   public final HttpServletRequest request = mock(HttpServletRequest.class);
   public final HttpServletResponse response = mock(HttpServletResponse.class);

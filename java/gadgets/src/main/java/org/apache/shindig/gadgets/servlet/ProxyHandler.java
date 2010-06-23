@@ -47,7 +47,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Singleton
 public class ProxyHandler extends ProxyBase {
-  private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
+  private static final Logger LOG = Logger.getLogger(ProxyHandler.class.getName());
 
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
@@ -95,7 +95,7 @@ public class ProxyHandler extends ProxyBase {
       // in gadget domains.
       String msg = "Embed request for url " + getParameter(request, URL_PARAM, "") +
           " made to wrong domain " + host;
-      logger.info(msg);
+      LOG.info(msg);
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
           HttpResponse.SC_BAD_REQUEST);
     }

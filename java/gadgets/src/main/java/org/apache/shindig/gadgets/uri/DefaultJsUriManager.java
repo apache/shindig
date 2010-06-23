@@ -105,7 +105,7 @@ public class DefaultJsUriManager implements JsUriManager {
     }
     
     // Get config values up front.
-    String jsHost = getReqConfig(container, JS_HOST_PARAM);
+    getReqConfig(container, JS_HOST_PARAM); // validate that it exists
     String jsPrefix = getReqConfig(container, JS_PATH_PARAM);
     
     String host = uri.getAuthority();

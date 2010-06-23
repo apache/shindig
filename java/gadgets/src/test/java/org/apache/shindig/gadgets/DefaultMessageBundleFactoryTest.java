@@ -347,7 +347,5 @@ public class DefaultMessageBundleFactoryTest {
       this.request = request;
       return new HttpResponse(BASIC_BUNDLE);
     }
-
-    public void normalizeProtocol(HttpRequest request) { }
   }
 }

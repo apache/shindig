@@ -59,6 +59,7 @@ import java.util.Map;
  *  --postFile <file path of post body contents>
  *  --paramLocation <URI_QUERY | POST_BODY | AUTH_HEADER>
  *  --bodySigning hash|legacy|none
+ *  --httpProxy=<http proxy to use for fetching>
  */
 public class OAuthCommandLine {
 
@@ -73,6 +74,7 @@ public class OAuthCommandLine {
     for (int i = 0; i < argv.length; i+=2) {
       params.put(argv[i], argv[i+1]);
     }
+    final String httpProxy = params.get("--httpProxy");
     final String consumerKey = params.get("--consumerKey");
     final String consumerSecret = params.get("--consumerSecret");
     final String xOauthRequestor = params.get("--requestorId");
@@ -162,7 +164,7 @@ public class OAuthCommandLine {
     }
     request.setMethod(method);
 
-    HttpFetcher fetcher = new BasicHttpFetcher();
+    HttpFetcher fetcher = new BasicHttpFetcher(httpProxy);
     HttpResponse response = fetcher.fetch(request);
 
     System.out.println("Request ------------------------------");

@@ -82,7 +82,6 @@ public class GadgetTokenStoreTest {
   private OAuthClientState clientState;
   private OAuthResponseParams responseParams;
   private OAuthFetcherConfig fetcherConfig;
-  private OAuthFetcherConfig fetcherConfigSecureOwner;
 
   @Before
   public void setUp() throws Exception {
@@ -106,7 +105,6 @@ public class GadgetTokenStoreTest {
     clientState = new OAuthClientState(stateCrypter);
     responseParams = new OAuthResponseParams(socialToken, null, stateCrypter);
     fetcherConfig = new OAuthFetcherConfig(stateCrypter, store, new FakeTimeSource(), null, false);
-    fetcherConfigSecureOwner = new OAuthFetcherConfig(stateCrypter, store, new FakeTimeSource(), null, true);
   }
 
   @Test

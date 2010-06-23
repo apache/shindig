@@ -66,9 +66,9 @@ public class RewriteModule extends AbstractModule {
   @Singleton
   @Named("shindig.rewriters.accelerate")
   protected List<GadgetRewriter> provideAccelRewriters(
-      HTMLContentRewriter optimizingRewriter,
+      ProxyingContentRewriter proxyingContentRewriter,
       CajaContentRewriter cajaRewriter) {
-    return ImmutableList.of(optimizingRewriter, cajaRewriter);
+    return ImmutableList.of(proxyingContentRewriter, cajaRewriter);
   }
   
   // TODO: Clean this up. Ideally we would let the ResponseRewriterRegistry

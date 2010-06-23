@@ -94,19 +94,9 @@ class SigningFetcher extends RemoteContentFetcher {
       // any OAuth or OpenSocial parameters injected by the client
       $parsedUri = parse_url($url);
       $resource = $url;
-      $queryParams = array();
-      if (isset($parsedUri['query'])) {
-        parse_str($parsedUri['query'], $queryParams);
-        // strip out all opensocial_* and oauth_* params so they can't be spoofed by the client
-        foreach ($queryParams as $key => $val) {
-          if ((strtolower(substr($key, 0, strlen('opensocial_'))) == 'opensocial_') || (strtolower(substr($key, 0, strlen('oauth_'))) == 'oauth_')) {
-            unset($queryParams[$key]);
-          }
-        }
-        $queryParams = $this->sanitize($queryParams);
-      }
       $contentType = $request->getHeader('Content-Type');
       $signBody = (stripos($contentType, 'application/x-www-form-urlencoded') !== false || $contentType == null);
+      $msgParams = array();
       if ($request->getPostBody()) {
         if ($signBody) {
           $postParams = array();
@@ -116,11 +106,9 @@ class SigningFetcher extends RemoteContentFetcher {
         } else {
           // on any other content-type of post (application/{json,xml,xml+atom}) use the body signing hash
           // see http://oauth.googlecode.com/svn/spec/ext/body_hash/1.0/drafts/4/spec.html for details
-          $queryParams['oauth_body_hash'] = base64_encode(sha1($request->getPostBody(), true));
+          $msgParams['oauth_body_hash'] = base64_encode(sha1($request->getPostBody(), true));
         }
       }
-      $msgParams = array();
-      $msgParams = array_merge($msgParams, $queryParams);
       if ($signBody && isset($postParams)) {
         $msgParams = array_merge($msgParams, $postParams);
       }
@@ -151,15 +139,13 @@ class SigningFetcher extends RemoteContentFetcher {
       $newQuery = '';
       foreach ($req_req->get_parameters() as $key => $param) {
         if (! isset($forPost[$key])) {
-          $newQuery .= urlencode($key) . '=' . urlencode($param) . '&';
-        }
-      }
-      // and stick on the original query params too
-      if (isset($parsedUri['query']) && ! empty($parsedUri['query'])) {
-        $oldQuery = array();
-        parse_str($parsedUri['query'], $oldQuery);
-        foreach ($oldQuery as $key => $val) {
-          $newQuery .= urlencode($key) . '=' . urlencode($val) . '&';
+          if (!is_array($param)) {
+            $newQuery .= urlencode($key) . '=' . urlencode($param) . '&';
+          } else {
+            foreach($param as $elem) {
+              $newQuery .= urlencode($key) . '=' . urlencode($elem) . '&';
+            }
+          }
         }
       }
       // Careful here; the OAuth form encoding scheme is slightly different than

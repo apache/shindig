@@ -16,10 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shindig.gadgets;
+package org.apache.shindig.gadgets.rewrite;
 
-public enum UrlValidationStatus {
-  VALID_VERSIONED,
-  VALID_UNVERSIONED,
-  INVALID
+import com.google.inject.Inject;
+
+/**
+ * Rewriter that converts all url's to absolute.
+ */
+public class AbsolutePathReferenceRewriter extends DomWalker.Rewriter {
+  @Inject
+  public AbsolutePathReferenceRewriter() {
+    super(new AbsolutePathReferenceVisitor());
+  }
 }

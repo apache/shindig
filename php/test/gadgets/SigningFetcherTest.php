@@ -42,6 +42,9 @@ nbpJMipy62GBW7yBbG+ypSasgI0=
 -----END CERTIFICATE-----
 EOD;
   }
+  protected function fetch_private_cert(&$request) {
+    ;
+  }
 }
 
 /**

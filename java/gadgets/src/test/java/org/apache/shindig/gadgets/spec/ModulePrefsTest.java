@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.spec;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -220,10 +221,12 @@ public class ModulePrefsTest {
     assertEquals(0, prefs.getIntAttribute("arbitrary"));
   }
 
-  @Test(expected = SpecParserException.class)
-  public void missingTitleThrows() throws Exception {
+  @Test
+  public void missingTitleOkay() throws Exception {
     String xml = "<ModulePrefs/>";
-    new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    ModulePrefs prefs = new ModulePrefs(XmlUtil.parse(xml), SPEC_URL);
+    assertNotNull("Empty ModulePrefs Parses", prefs);
+    assertEquals("Title is empty string", "", prefs.getTitle());
   }
   
   @Test

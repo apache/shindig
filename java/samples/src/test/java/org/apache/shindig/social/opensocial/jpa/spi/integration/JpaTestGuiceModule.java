@@ -60,7 +60,6 @@ import net.oauth.OAuthProblemException;
  * Provides component injection for tests
  * Injects Social API and JPA persistence guice modules
  *
- * @author bens
  */
 public class JpaTestGuiceModule extends AbstractModule {
 

@@ -44,7 +44,6 @@ public class JsonRpcGadgetContext extends GadgetContext {
   private final Boolean ignoreCache;
   private final Locale locale;
   private final Integer moduleId;
-  private final RenderingContext renderingContext;
   private final Uri url;
   private final UserPrefs userPrefs;
   private final String view;
@@ -66,83 +65,53 @@ public class JsonRpcGadgetContext extends GadgetContext {
     ignoreCache = context.optBoolean("ignoreCache");
     container = context.optString("container");
     debug = context.optBoolean("debug");
-    renderingContext = RenderingContext.METADATA;
   }
 
   @Override
   public String getParameter(String name) {
-    if (gadget.has(name)) {
-      return gadget.optString(name);
-    }
-    return context.optString(name, null);
+    return gadget.has(name) ? gadget.optString(name) : context.optString(name, null);
   }
 
   @Override
   public String getContainer() {
-    if (container == null) {
-      return super.getContainer();
-    }
-    return container;
+    return container == null ? super.getContainer() : container;
   }
 
   @Override
   public boolean getDebug() {
-    if (debug == null) {
-      return super.getDebug();
-    }
-    return debug;
+    return debug == null ? super.getDebug() : debug;
   }
   @Override
   public boolean getIgnoreCache() {
-    if (ignoreCache == null) {
-      return super.getIgnoreCache();
-    }
-    return ignoreCache;
+    return ignoreCache == null ? super.getIgnoreCache() : ignoreCache;
   }
 
   @Override
   public Locale getLocale() {
-    if (locale == null) {
-      return super.getLocale();
-    }
-    return locale;
+    return locale == null ? super.getLocale() : locale;
   }
   @Override
   public int getModuleId() {
-    if (moduleId == null) {
-      return super.getModuleId();
-    }
-    return moduleId;
+    return moduleId == null ? super.getModuleId() : moduleId;
   }
 
   @Override
   public RenderingContext getRenderingContext() {
-    if (renderingContext == null) {
-      return super.getRenderingContext();
-    }
-    return renderingContext;
+    return RenderingContext.METADATA;
   }
+
   @Override
   public Uri getUrl() {
-    if (url == null) {
-      return super.getUrl();
-    }
-    return url;
+    return url == null ? super.getUrl() : url;
   }
 
   @Override
   public UserPrefs getUserPrefs() {
-    if (userPrefs == null) {
-      return super.getUserPrefs();
-    }
-    return userPrefs;
+    return userPrefs == null ? super.getUserPrefs() : userPrefs;
   }
   @Override
   public String getView() {
-    if (view == null) {
-      return super.getView();
-    }
-    return view;
+    return view == null ? super.getView() : view;
   }
 
   /**

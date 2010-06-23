@@ -117,7 +117,8 @@ public class OpenSocialI18NGadgetRewriterTest {
     }
 
     @Override
-    protected String attemptToLoadResourceFullyQualified(String resource) throws IOException {
+    protected String attemptToLoadDateConstants(String localeName) throws IOException {
+      String resource = "features/i18n/data/DateTimeConstants__" + localeName + ".js";
       if (resources.containsKey(resource)) {
         return resources.get(resource);
       } else {

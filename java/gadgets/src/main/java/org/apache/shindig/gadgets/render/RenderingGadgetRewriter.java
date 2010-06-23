@@ -18,21 +18,18 @@
  */
 package org.apache.shindig.gadgets.render;
 
-import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.MessageBundleFactory;
 import org.apache.shindig.gadgets.UnsupportedFeatureException;
-import org.apache.shindig.gadgets.UrlGenerator;
+import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.features.FeatureResource;
-import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.preload.PreloadException;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
@@ -40,9 +37,9 @@ import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.MessageBundle;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -51,7 +48,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +58,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -99,8 +94,10 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   protected final MessageBundleFactory messageBundleFactory;
   protected final ContainerConfig containerConfig;
   protected final FeatureRegistry featureRegistry;
-  protected final UrlGenerator urlGenerator;
-  protected final RpcServiceLookup rpcServiceLookup;
+  protected final JsUriManager jsUriManager;
+  protected final Map<String, ConfigContributor> configContributors;
+
+
   protected Set<String> defaultExternLibs = ImmutableSet.of();
 
   protected Boolean externalizeFeatures = false;
@@ -112,13 +109,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   public RenderingGadgetRewriter(MessageBundleFactory messageBundleFactory,
                                  ContainerConfig containerConfig,
                                  FeatureRegistry featureRegistry,
-                                 UrlGenerator urlGenerator,
-                                 RpcServiceLookup rpcServiceLookup) {
+                                 JsUriManager jsUriManager,
+                                 Map<String, ConfigContributor> configContributors) {
     this.messageBundleFactory = messageBundleFactory;
     this.containerConfig = containerConfig;
     this.featureRegistry = featureRegistry;
-    this.urlGenerator = urlGenerator;
-    this.rpcServiceLookup = rpcServiceLookup;
+    this.jsUriManager = jsUriManager;
+    this.configContributors = configContributors;
   }
 
   @Inject
@@ -242,7 +239,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     }
 
     if (!externForcedLibs.isEmpty()) {
-      String jsUrl = urlGenerator.getBundledJsUrl(externForcedLibs, context);
+      String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
       headTag.appendChild(libsTag);
@@ -284,7 +281,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       externGadgetLibs.removeAll(externForcedLibs);
 
       if (!externGadgetLibs.isEmpty()) {
-        String jsUrl = urlGenerator.getBundledJsUrl(externGadgetLibs, context);
+        String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
         libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
         headTag.appendChild(libsTag);
@@ -375,93 +372,16 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         if (conf != null) {
           config.put(name, conf);
         }
-      }
-    }
-
-    addHasFeatureConfig(gadget, config);
-    addOsapiSystemListMethodsConfig(context.getContainer(), config, context.getHost());
-    addSecurityTokenConfig(context, config);
-    addXhrWrapperConfig(gadget, config);
-    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
-  }
-
-  private void addXhrWrapperConfig(Gadget gadget, Map<String, Object> config) {
-    boolean isUsingXhrWrapper = gadget.getAllFeatures().contains("xhrwrapper");
-    if (isUsingXhrWrapper) {
-      Map<String, String> xhrWrapperConfig = Maps.newHashMapWithExpectedSize(2);
-      View view = gadget.getCurrentView();
-      Uri contentsUri = view.getHref();
-      xhrWrapperConfig.put("contentUrl", contentsUri == null ? "" : contentsUri.toString());
-      if (AuthType.OAUTH.equals(view.getAuthType())) {
-        addOAuthConfig(xhrWrapperConfig, view);
-      } else if (AuthType.SIGNED.equals(view.getAuthType())) {
-        xhrWrapperConfig.put("authorization", "signed");
-      }
-      config.put("shindig.xhrwrapper", xhrWrapperConfig);
-    }
-  }
-
-  private void addOAuthConfig(Map<String, String> xhrWrapperConfig, View view) {
-    Map<String, String> oAuthConfig = Maps.newHashMapWithExpectedSize(3);
-    try {
-      OAuthArguments oAuthArguments = new OAuthArguments(view);
-      oAuthConfig.put("authorization", "oauth");
-      oAuthConfig.put("oauthService", oAuthArguments.getServiceName());
-      if (!"".equals(oAuthArguments.getTokenName())) {
-        oAuthConfig.put("oauthTokenName", oAuthArguments.getTokenName());
-      }
-      xhrWrapperConfig.putAll(oAuthConfig);
-    } catch (GadgetException e) {
-      // Do not add any OAuth configuration if an exception was thrown
-    }
-  }
-
-  private void addSecurityTokenConfig(GadgetContext context, Map<String, Object> config) {
-    SecurityToken authToken = context.getToken();
-    if (authToken != null) {
-      Map<String, String> authConfig = Maps.newHashMapWithExpectedSize(2);
-      String updatedToken = authToken.getUpdatedToken();
-      if (updatedToken != null) {
-        authConfig.put("authToken", updatedToken);
-      }
-      String trustedJson = authToken.getTrustedJson();
-      if (trustedJson != null) {
-        authConfig.put("trustedJson", trustedJson);
-      }
-      config.put("shindig.auth", authConfig);
-    }
-  }
-
-  private void addHasFeatureConfig(Gadget gadget, Map<String, Object> config) {
-    // Add gadgets.util support. This is calculated dynamically based on request inputs.
-    ModulePrefs prefs = gadget.getSpec().getModulePrefs();
-    Collection<Feature> features = prefs.getFeatures().values();
-    Map<String, Map<String, Object>> featureMap = Maps.newHashMapWithExpectedSize(features.size());
-    for (Feature feature : features) {
-      
-      // Flatten out the multimap a bit for backwards compatibility:  map keys
-      // with just 1 value into the string, treat others as arrays
-      Map<String, Object> paramFeaturesInConfig = Maps.newHashMap();
-      for (String paramName : feature.getParams().keySet()) {
-        Collection<String> paramValues = feature.getParams().get(paramName);
-        if (paramValues.size() == 1) {
-          paramFeaturesInConfig.put(paramName, paramValues.iterator().next());
-        } else {
-          paramFeaturesInConfig.put(paramName, paramValues);
+        
+        // See if this feature has configuration data
+        ConfigContributor contributor = configContributors.get(name);
+        if (contributor != null) {
+          contributor.contribute(config, gadget);
         }
       }
-      
-      featureMap.put(feature.getName(), paramFeaturesInConfig);
     }
-    config.put("core.util", featureMap);
-  }
 
-  private void addOsapiSystemListMethodsConfig(String container, Map<String, Object> config, 
-      String host) {
-    if (rpcServiceLookup != null) {
-      Multimap<String, String> endpoints = rpcServiceLookup.getServicesFor(container, host);
-      config.put("osapi.services", endpoints);
-    }
+    return "gadgets.config.init(" + JsonSerializer.serialize(config) + ");\n";
   }
 
   /**

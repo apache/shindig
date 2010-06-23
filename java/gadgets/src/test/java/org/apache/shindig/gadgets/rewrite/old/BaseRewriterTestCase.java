@@ -84,8 +84,7 @@ public abstract class BaseRewriterTestCase {
   @Before
   public void setUp() throws Exception {
     rewriterFeatureFactory = new ContentRewriterFeature.Factory(null,
-        new ContentRewriterFeature.DefaultConfig(".*", "", "86400",
-          "embed,img,script,link,style", "false", "false"));
+        new ContentRewriterFeature.DefaultConfig(".*", "", "86400", "embed,img,script,link,style", false, false));
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
     defaultContainerRewriterUris = new ContentRewriterUris(
@@ -266,7 +265,7 @@ public abstract class BaseRewriterTestCase {
     private final ContentRewriterFeature.Config feature;
 
     public FakeRewriterFeatureFactory(ContentRewriterFeature.Config feature) {
-      super(null, new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "", "false", "false"));
+      super(null, new ContentRewriterFeature.DefaultConfig(".*", "", "HTTP", "", false, false));
       this.feature = feature;
     }
 

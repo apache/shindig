@@ -204,7 +204,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   @Test
   public void validateNoContainerStrict() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
-    manager.setUseStrictParsing("true");
+    manager.setUseStrictParsing(true);
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://host.com/path?q=f"));
     assertEquals(UriStatus.BAD_URI, validated.getStatus());
@@ -221,7 +221,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   @Test
   public void validateHostMismatchStrict() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
-    manager.setUseStrictParsing("true");
+    manager.setUseStrictParsing(true);
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://another.com/path?" +
             Param.CONTAINER.getKey() + '=' + CONTAINER + "&type=css"));
@@ -231,7 +231,7 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
   @Test
   public void validatePathMismatchStrict() {
     DefaultConcatUriManager manager = makeManager("host.com", "/path", null, null);
-    manager.setUseStrictParsing("true");
+    manager.setUseStrictParsing(true);
     ConcatUriManager.ConcatUri validated =
         manager.process(Uri.parse("http://host.com/another?" +
             Param.CONTAINER.getKey() + '=' + CONTAINER + "&type=css"));

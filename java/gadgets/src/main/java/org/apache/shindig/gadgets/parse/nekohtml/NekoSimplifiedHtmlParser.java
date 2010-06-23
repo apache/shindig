@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
@@ -70,8 +71,8 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
   static {
     HTMLElements.Element unknown = HTMLElements.getElement(HTMLElements.UNKNOWN);
-    OSML_TEMPLATE_ELEMENT = new HTMLElements.Element(unknown.code, OSML_TEMPLATE_TAG,
-        unknown.flags, HTMLElements.BODY, unknown.closes);
+    OSML_TEMPLATE_ELEMENT = new HTMLElements.Element(unknown.code,
+        SocialDataTags.OSML_TEMPLATE_TAG, unknown.flags, HTMLElements.BODY, unknown.closes);
     // Passing parent in constructor is ignored.
     // Only allow template tags in BODY
     OSML_TEMPLATE_ELEMENT.parent =
@@ -79,14 +80,15 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     // data tags are allowed in BODY only, since Neko disallows HEAD elements from
     // having child elements of their own.
-    OSML_DATA_ELEMENT = new HTMLElements.Element(unknown.code, OSML_TEMPLATE_TAG,
-        unknown.flags, HTMLElements.BODY, unknown.closes);
+    OSML_DATA_ELEMENT = new HTMLElements.Element(unknown.code,
+        SocialDataTags.OSML_TEMPLATE_TAG, unknown.flags, HTMLElements.BODY, unknown.closes);
     OSML_DATA_ELEMENT.parent = new HTMLElements.Element[]{
         HTMLElements.getElement(HTMLElements.BODY)};
   }
 
   private static final Map<String, HTMLElements.Element> OSML_ELEMENTS = ImmutableMap.of(
-      OSML_TEMPLATE_TAG, OSML_TEMPLATE_ELEMENT, OSML_DATA_TAG, OSML_DATA_ELEMENT);
+      SocialDataTags.OSML_TEMPLATE_TAG, OSML_TEMPLATE_ELEMENT,
+      SocialDataTags.OSML_DATA_TAG, OSML_DATA_ELEMENT);
 
   @Inject
   public NekoSimplifiedHtmlParser(DOMImplementation documentFactory) {
@@ -456,7 +458,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
    * if the first parsed tags are allowed in a head tag.
    * See https://sourceforge.net/tracker/?func=detail&atid=952178&aid=2870180&group_id=195122
    */
-  private class NekoPatchTagBalancer extends NormalizingTagBalancer {
+  private static class NekoPatchTagBalancer extends NormalizingTagBalancer {
 
     /**
      * Override the document start to record whether HTML, HEAD or BODY have been seen
@@ -532,7 +534,7 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
       // Convert script tags of an OSML type to OSTemplate/OSData tags
       if ("script".equalsIgnoreCase(elem.rawname)) {
         String value = attrs.getValue("type");
-        String osmlTagName = SCRIPT_TYPE_TO_OSML_TAG.get(value);
+        String osmlTagName = SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.get(value);
         if (osmlTagName != null) {
           if (currentOsmlTag != null) {
             throw new XNIException("Nested OpenSocial script elements");
@@ -550,7 +552,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
       super.startElement(elem, attrs, augs);
     }
-
 
     @Override
     public void endElement(QName element, Augmentations augs) throws XNIException {

@@ -87,4 +87,14 @@ under the License.
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
+
+  <!-- Used to cache cajoled documents based on their content -->
+  <cache name="cajoledDocuments"
+    maxElementsInMemory="1000"
+    eternal="false"
+    timeToIdleSeconds="300"
+    timeToLiveSeconds="600"
+    overflowToDisk="false"
+    diskPersistent="false"
+    memoryStoreEvictionPolicy="LFU"/>
 </ehcache>

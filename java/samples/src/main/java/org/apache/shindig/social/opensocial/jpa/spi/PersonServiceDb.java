@@ -165,7 +165,7 @@ public class PersonServiceDb implements PersonService {
     q.setMaxResults(1);
     List<?> plist = q.getResultList();
     Person person = null;
-    if (plist != null && plist.size() > 0) {
+    if (plist != null && !plist.isEmpty()) {
       person = (Person) plist.get(0);
     }
     return ImmediateFuture.newInstance(person);

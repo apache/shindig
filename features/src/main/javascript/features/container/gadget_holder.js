@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview This represents an HTML element and the associated gadget.
  */
+
 
 /**
  * @param {number} siteId The id of site containing this holder.
@@ -179,10 +181,13 @@ shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
  * Render a gadget into the element.
  * @param {Object} gadgetInfo the JSON gadget description.
  * @param {Object} gadgetParams View parameters for the gadget.
- * @param {Object} renderParams Render parameters for the gadget, including: view, width, height.
+ * @param {Object} renderParams Render parameters for the gadget, including:
+ *     view, width, height.
  */
-shindig.container.GadgetHolder.prototype.render = function(gadgetInfo, gadgetParams, renderParams) {
-  this.iframeId_ = shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ + this.siteId_;
+shindig.container.GadgetHolder.prototype.render = function(
+    gadgetInfo, gadgetParams, renderParams) {
+  this.iframeId_ = shindig.container.GadgetHolder.IFRAME_ID_PREFIX_
+      + this.siteId_;
   this.gadgetInfo_ = gadgetInfo;
   this.gadgetParams_ = gadgetParams;
   this.hasGadgetParams_ = false;
@@ -306,7 +311,8 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
  * @return {string} The URL with param append to.
  * @private
  */
-shindig.container.GadgetHolder.prototype.updateBooleanParam_ = function(uri, param) {
+shindig.container.GadgetHolder.prototype.updateBooleanParam_
+    = function(uri, param) {
   if (this.renderParams_[param]) {
     uri = this.addQueryParam_(uri, param, "1");
   }
@@ -362,7 +368,8 @@ shindig.container.GadgetHolder.prototype.getRpcToken_ = function() {
  * @return {string} The new URI.
  * @private
  */
-shindig.container.GadgetHolder.prototype.addHashParam_ = function(uri, key, value) {
+shindig.container.GadgetHolder.prototype.addHashParam_ = function(
+    uri, key, value) {
   return uri + ((uri.indexOf('#') == -1) ? '#' : '&') + key + '=' + value;
 };
 
@@ -375,7 +382,8 @@ shindig.container.GadgetHolder.prototype.addHashParam_ = function(uri, key, valu
  * @return {string} The new URI.
  * @private
  */
-shindig.container.GadgetHolder.prototype.addQueryParam_ = function(uri, key, value) {
+shindig.container.GadgetHolder.prototype.addQueryParam_ = function(
+    uri, key, value) {
   var hasQuery = uri.indexOf('?') != -1;
   var insertPos = (uri.indexOf('#') != -1) ? uri.indexOf('#') : uri.length;
   return uri.substring(0, insertPos) + (hasQuery ? '&' : '?') +

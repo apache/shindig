@@ -24,7 +24,6 @@ features/auth-refresh/feature.xml
 features/caja/feature.xml
 features/container/feature.xml
 features/content-rewrite/feature.xml
-features/core.auth/feature.xml
 features/core.config/feature.xml
 features/core.io/feature.xml
 features/core.json/feature.xml
@@ -60,8 +59,10 @@ features/rpc/feature.xml
 features/security-token/feature.xml
 features/setprefs/feature.xml
 features/settitle/feature.xml
+features/shindig.auth/feature.xml
 features/shindig.container/feature.xml
 features/shindig.container-1.0/feature.xml
+features/shindig.xhrwrapper/feature.xml
 features/skins/feature.xml
 features/swfobject/feature.xml
 features/tabs/feature.xml

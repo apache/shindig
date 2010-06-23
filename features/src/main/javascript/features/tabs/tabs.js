@@ -230,8 +230,13 @@ gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
     this.saveSelectedTabIndex_();
   }
 
-  if (tabName == this.defaultTabName_ || (!this.defaultTabName_ && tabIndex === 0)) {
-    this.selectTab_(tab);
+  var selectedIndex = parseInt(this.selectedTabIndex_, 10);
+  if (isNaN(selectedIndex)) {
+    if (tabName == this.defaultTabName_ || (!this.defaultTabName_ && tabIndex === 0)) {
+      this.selectTab_(tab);
+    }
+  } else if (selectedIndex == tabIndex) {
+    this.selectTab_(tab, true);
   }
 
   this.tabsAdded_++;

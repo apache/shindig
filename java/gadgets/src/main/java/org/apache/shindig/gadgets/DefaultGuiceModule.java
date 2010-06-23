@@ -23,12 +23,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.apache.shindig.gadgets.config.ConfigContributor;
+import org.apache.shindig.gadgets.config.CoreUtilConfigContributor;
+import org.apache.shindig.gadgets.config.OsapiServicesConfigContributor;
+import org.apache.shindig.gadgets.config.ShindigAuthConfigContributor;
+import org.apache.shindig.gadgets.config.XhrwrapperConfigContributor;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.InvalidationHandler;
 import org.apache.shindig.gadgets.parse.ParseModule;
@@ -62,6 +68,7 @@ public class DefaultGuiceModule extends AbstractModule {
 
     final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
     bind(Executor.class).toInstance(service);
+    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
     Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
@@ -83,6 +90,7 @@ public class DefaultGuiceModule extends AbstractModule {
     requestStaticInjection(HttpResponse.class);
 
     registerGadgetHandlers();
+    registerConfigContributors();
     registerFeatureHandlers();
   }
 
@@ -95,11 +103,20 @@ public class DefaultGuiceModule extends AbstractModule {
     handlerBinder.addBinding().to(HttpRequestHandler.class);
   }
 
+  protected void registerConfigContributors() {
+    MapBinder<String, ConfigContributor> configBinder = MapBinder.newMapBinder(binder(), String.class, ConfigContributor.class);
+    configBinder.addBinding("core.util").to(CoreUtilConfigContributor.class);
+    configBinder.addBinding("osapi").to(OsapiServicesConfigContributor.class);
+    configBinder.addBinding("shindig.auth").to(ShindigAuthConfigContributor.class);
+    configBinder.addBinding("shindig.xhrwrapper").to(XhrwrapperConfigContributor.class);
+
+  }
   /**
    * Sets up the multibinding for extended feature resources
    */
   protected void registerFeatureHandlers() {
-    Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended"));
+    /*Multibinder<String> featureBinder = */
+        Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended"));
   }
 
   /**
@@ -118,8 +135,10 @@ public class DefaultGuiceModule extends AbstractModule {
 
   public static final ThreadFactory DAEMON_THREAD_FACTORY =
     new ThreadFactory() {
+        private final ThreadFactory factory = Executors.defaultThreadFactory();
+	  
         public Thread newThread(Runnable r) {
-            Thread t = Executors.defaultThreadFactory().newThread(r);
+            Thread t = factory.newThread(r);
             t.setDaemon(true);
             return t;
         }

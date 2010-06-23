@@ -129,17 +129,17 @@ public class OAuthRequest {
    * the service provider, such as their URLs and the keys we use to access
    * those URLs.
    */
-  private AccessorInfo accessorInfo;
+  protected AccessorInfo accessorInfo;
 
   /**
    * The request the client really wants to make.
    */
-  private HttpRequest realRequest;
+  protected HttpRequest realRequest;
 
   /**
    * Data returned along with OAuth access token, null if this is not an access token request
    */
-  private Map<String, String> accessTokenData;
+  protected Map<String, String> accessTokenData;
 
   /**
    * @param fetcherConfig configuration options for the fetcher

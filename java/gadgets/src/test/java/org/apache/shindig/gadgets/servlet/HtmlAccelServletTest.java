@@ -18,54 +18,84 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
+import com.google.common.collect.ImmutableMap;
 
-import com.google.common.collect.Maps;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.render.Renderer;
-import org.apache.shindig.gadgets.render.RenderingResults;
-import org.easymock.Capture;
+import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
+import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
+import org.apache.shindig.gadgets.uri.AccelUriManager;
+import org.apache.shindig.gadgets.uri.DefaultAccelUriManager;
+import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
+import static org.easymock.EasyMock.expect;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Map;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
 
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    protected final Map<String, Object> data = ImmutableMap.<String, Object>builder()
+        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
+        .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/accel")
+        .build();
+
+    @Override
+    public Object getProperty(String container, String name) {
+      return data.get(name);
+    }
+  }
+
+  private class FakeCaptureRewriter extends CaptureRewriter {
+    String contentToRewrite;
+
+    public void setContentToRewrite(String s) {
+      contentToRewrite = s;
+    }
+    @Override
+    public void rewrite(HttpRequest request, HttpResponseBuilder original) {
+      super.rewrite(request, original);
+      if (!StringUtils.isEmpty(contentToRewrite)) {
+        original.setResponse(contentToRewrite.getBytes());
+      }
+    }
+  }
+
   private static final String REWRITE_CONTENT = "working rewrite";
   private static final String SERVLET = "/gadgets/accel";
   private HtmlAccelServlet servlet;
-  private Renderer renderer;
 
   @Before
   public void setUp() throws Exception {
     servlet = new HtmlAccelServlet();
-    servlet.setRequestPipeline(pipeline);
-    servlet.setUrlGenerator(new FakeUrlGenerator());
-    renderer = mock(Renderer.class);
-    servlet.setRenderer(renderer);
+    ContainerConfig config = new FakeContainerConfig();
+    AccelUriManager accelUriManager = new DefaultAccelUriManager(
+        config, new DefaultProxyUriManager(config, null));
+
+    rewriter = new FakeCaptureRewriter();
+    rewriterRegistry = new DefaultResponseRewriterRegistry(
+        Arrays.<ResponseRewriter>asList(rewriter), null);
+    servlet.setHandler(new AccelHandler(pipeline, rewriterRegistry,
+                                        accelUriManager));
   }
 
   @Test
   public void testHtmlAccelNoData() throws Exception {
     String url = "http://example.org/data.html";
-    
+
     HttpRequest req = new HttpRequest(Uri.parse(url));
     expect(pipeline.execute(req)).andReturn(null).once();
     expectRequest("", url);
     replay();
-    
+
     servlet.doGet(request, recorder);
     verify();
     assertEquals("Error fetching data", recorder.getResponseAsString());
@@ -76,7 +106,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   public void testHtmlAccelNoHtml() throws Exception {
     String url = "http://example.org/data.xml";
     String data = "<html><body>Hello World</body></html>";
-    
+
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
@@ -86,7 +116,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     expect(pipeline.execute(req)).andReturn(resp).once();
     expectRequest("", url);
     replay();
-    
+
     servlet.doGet(request, recorder);
     verify();
     assertEquals(data, recorder.getResponseAsString());
@@ -96,7 +126,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   public void testHtmlAccelRewriteSimple() throws Exception {
     String url = "http://example.org/data.html";
     String data = "<html><body>Hello World</body></html>";
-    
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
@@ -105,78 +136,21 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
     expectRequest("", url);
-    expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
-    
-    servlet.doGet(request, recorder);
-    verify();
-    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
-    assertEquals(200, recorder.getHttpStatusCode());
-  }
 
-  @Test
-  public void testHtmlAccelRewriteChain() throws Exception {
-    String url = "http://example.org/data.html?id=1";
-    String data = "<html><body>Hello World</body></html>";
-    
-    Capture<HttpRequest> reqCapture = new Capture<HttpRequest>();
-    HttpResponse resp = new HttpResponseBuilder()
-        .setResponse(data.getBytes())
-        .setHeader("Content-Type", "text/html")
-        .setCacheTtl(567)
-        .setHttpStatusCode(200)
-        .create();
-    expect(pipeline.execute(capture(reqCapture))).andReturn(resp).once();
-    expectRequest("//" + url, null);
-    expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
-    replay();
-    
     servlet.doGet(request, recorder);
     verify();
-    HttpRequest req = reqCapture.getValue();
-    assertEquals(url, req.getUri().toString());
-    assertEquals("accel", req.getContainer());
     assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
     assertEquals(200, recorder.getHttpStatusCode());
-    assertTrue(recorder.getHeader("Cache-Control").equals("private,max-age=566") 
-        || recorder.getHeader("Cache-Control").equals("private,max-age=567"));
-    // Note: due to rounding (MS to S conversion), ttl is down by 1
-  }
-
-  @Test
-  public void testHtmlAccelRewriteChainParams() throws Exception {
-    String url = "http://example.org/data.html?id=1";
-    String data = "<html><body>Hello World</body></html>";
-    
-    HttpResponse resp = new HttpResponseBuilder()
-        .setResponse(data.getBytes())
-        .setHeader("Content-Type", "text/html")
-        .setHttpStatusCode(200)
-        .create();
-    Capture<HttpRequest> reqCapture = new Capture<HttpRequest>();
-    expect(pipeline.execute(capture(reqCapture))).andReturn(resp).once();
-    expectRequest("/container=open&refresh=3600/" + url, null);
-    expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
-    replay();
-    
-    servlet.doGet(request, recorder);
-    verify();
-    HttpRequest req = reqCapture.getValue();
-    assertEquals(url, req.getUri().toString());
-    assertEquals("open", req.getContainer());
-    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
-    assertEquals(200, recorder.getHttpStatusCode());
-    assertEquals("private,max-age=3600", recorder.getHeader("Cache-Control"));
+    assertTrue(rewriter.responseWasRewritten());
   }
 
   @Test
   public void testHtmlAccelRewriteErrorCode() throws Exception {
     String url = "http://example.org/data.html";
     String data = "<html><body>This is error page</body></html>";
-    
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(REWRITE_CONTENT);
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
@@ -185,21 +159,21 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
     expectRequest("", url);
-    expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
-    
+
     servlet.doGet(request, recorder);
     verify();
-    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(AccelHandler.ERROR_FETCHING_DATA, recorder.getResponseAsString());
     assertEquals(404, recorder.getHttpStatusCode());
+    assertFalse(rewriter.responseWasRewritten());
   }
 
   @Test
   public void testHtmlAccelRewriteInternalError() throws Exception {
     String url = "http://example.org/data.html";
     String data = "<html><body>This is error page</body></html>";
-    
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
     HttpRequest req = new HttpRequest(Uri.parse(url));
     HttpResponse resp = new HttpResponseBuilder()
         .setResponse(data.getBytes())
@@ -208,82 +182,26 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         .create();
     expect(pipeline.execute(req)).andReturn(resp).once();
     expectRequest("", url);
-    expect(renderer.render(isA(GadgetContext.class)))
-        .andReturn(RenderingResults.ok(REWRITE_CONTENT));
     replay();
-    
+
     servlet.doGet(request, recorder);
     verify();
-    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(AccelHandler.ERROR_FETCHING_DATA, recorder.getResponseAsString());
     assertEquals(502, recorder.getHttpStatusCode());
-  }
-
-  @Test
-  public void testHtmlAccelParams() throws Exception {
-
-    Renderer newRenderer = new Renderer(null, null, null, lockedDomainService) {
-      @Override
-      public RenderingResults render(GadgetContext context) {
-        assertTrue(HtmlAccelServlet.isAccel(context));
-        assertEquals("accel", context.getParameter("container"));
-        return RenderingResults.ok(REWRITE_CONTENT);
-      }
-    };
-    servlet.setRenderer(newRenderer);
-    Map<String,String> paramMap = Maps.newHashMap();
-    paramMap.put("container","accel");
-    servlet.setAddedServletParams(paramMap);
-    
-    String url = "http://example.org/data.html";
-    
-    HttpRequest req = new HttpRequest(Uri.parse(url));
-    HttpResponse resp = new HttpResponseBuilder()
-        .setHeader("Content-Type", "text/html")
-        .setHttpStatusCode(200)
-        .create();
-    expect(pipeline.execute(req)).andReturn(resp).once();
-    expectRequest("", url);
-    replay();
-   
-    servlet.doGet(request, recorder);
-    verify();
+    assertFalse(rewriter.responseWasRewritten());
   }
 
   private void expectRequest(String extraPath, String url) {
     expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
-    expect(request.getScheme()).andReturn("http").once();
-    expect(request.getServerName()).andReturn("apache.org").once();
-    expect(request.getServerPort()).andReturn(-1).once();    
-    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();    
+    expect(request.getScheme()).andReturn("http").anyTimes();
+    expect(request.getServerName()).andReturn("apache.org").anyTimes();
+    expect(request.getServerPort()).andReturn(-1).anyTimes();
+    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();
     expect(request.getRequestURL())
         .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
         .anyTimes();
-    String queryParams = (url == null ? "" : "url=" + url);
+    String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
+                                             + "&gadget=test");
     expect(request.getQueryString()).andReturn(queryParams).anyTimes();
   }
-
-  private static class FakeUrlGenerator implements UrlGenerator {
-
-    public UrlValidationStatus validateJsUrl(String url) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getIframeUrl(Gadget gadget) {
-      throw new UnsupportedOperationException();
-    }
-
-    public UrlValidationStatus validateIframeUrl(String url) {
-      return UrlValidationStatus.VALID_UNVERSIONED;
-    }
-
-    public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-
 }

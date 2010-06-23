@@ -35,11 +35,6 @@ import com.thoughtworks.xstream.mapper.Mapper;
 public class MapConverter extends AbstractCollectionConverter {
 
   /**
-   * If true will use a short form of xml serialization.
-   */
-  private final boolean shortform = false;
-
-  /**
    * Create a MapConverter that use use the supplied mapper.
    *
    * @param mapper
@@ -67,24 +62,15 @@ public class MapConverter extends AbstractCollectionConverter {
   public void marshal(Object source, HierarchicalStreamWriter writer,
       MarshallingContext context) {
     Map<?, ?> map = (Map<?, ?>) source;
-    if (shortform) {
-      for (Entry<?, ?> e : map.entrySet()) {
-        writer.startNode(String.valueOf(e.getKey()));
-        context.convertAnother(e.getValue());
-        writer.endNode();
-      }
-    } else {
-      for (Entry<?, ?> e : map.entrySet()) {
-        writer.startNode("entry");
-        writer.startNode("key");
-        writer.setValue(String.valueOf(e.getKey()));
-        writer.endNode();
-        writer.startNode("value");
-        context.convertAnother(e.getValue());
-        writer.endNode();
-        writer.endNode();
-      }
-
+    for (Entry<?, ?> e : map.entrySet()) {
+      writer.startNode("entry");
+      writer.startNode("key");
+      writer.setValue(String.valueOf(e.getKey()));
+      writer.endNode();
+      writer.startNode("value");
+      context.convertAnother(e.getValue());
+      writer.endNode();
+      writer.endNode();
     }
   }
 

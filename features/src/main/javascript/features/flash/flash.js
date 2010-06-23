@@ -195,6 +195,7 @@ gadgets.flash.embedFlash = function(swfUrl, swfContainer, swfVersion, opt_params
         html += '</object>';
       }
       swfContainer.innerHTML = html;
+      return true;
     }
   }
   return false;

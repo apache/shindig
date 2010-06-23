@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  */
 public class CajaCssSanitizer {
 
-  private static final Logger logger = Logger.getLogger(CajaCssSanitizer.class.getName());
+  private static final Logger LOG = Logger.getLogger(CajaCssSanitizer.class.getName());
 
   private static final Set<String> ALLOWED_URI_SCHEMES = ImmutableSet.of("http", "https");
 
@@ -81,7 +81,7 @@ public class CajaCssSanitizer {
       return parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-      logger.log(Level.INFO, "Failed to parse stylesheet", ge);
+      LOG.log(Level.INFO, "Failed to parse stylesheet", ge);
       return "";
     }
   }
@@ -103,7 +103,7 @@ public class CajaCssSanitizer {
       content = parser.serialize(stylesheet);
     } catch (GadgetException ge) {
       // Failed to parse stylesheet so log and continue
-      logger.log(Level.INFO, "Failed to parse stylesheet", ge);
+      LOG.log(Level.INFO, "Failed to parse stylesheet", ge);
     }
     if (StringUtils.isEmpty(content)) {
       // Remove the owning node
@@ -128,8 +128,8 @@ public class CajaCssSanitizer {
           if (!schema.isPropertyAllowed(((CssTree.Property) ancestorChain.node).
               getPropertyName())) {
             // Remove offending property
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Removing property "
+            if (LOG.isLoggable(Level.FINE)) {
+              LOG.log(Level.FINE, "Removing property "
                   + ((CssTree.Property) ancestorChain.node).getPropertyName());
             }
             clean(ancestorChain);
@@ -137,8 +137,8 @@ public class CajaCssSanitizer {
         } else if (ancestorChain.node instanceof CssTree.FunctionCall) {
           if (!schema.isFunctionAllowed(((CssTree.FunctionCall)ancestorChain.node).getName())) {
             // Remove offending node
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Removing function "
+            if (LOG.isLoggable(Level.FINE)) {
+              LOG.log(Level.FINE, "Removing function "
                   + ((CssTree.FunctionCall) ancestorChain.node).getName());
             }
             clean(ancestorChain);
@@ -152,8 +152,8 @@ public class CajaCssSanitizer {
                 rewriteUri(imageRewriter, uri, linkContext));
           } else {
             // Remove offending node
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Removing invalid URI " + uri);
+            if (LOG.isLoggable(Level.FINE)) {
+              LOG.log(Level.FINE, "Removing invalid URI " + uri);
             }
             clean(ancestorChain);
           }
@@ -163,8 +163,8 @@ public class CajaCssSanitizer {
           if (isValidUri(uri)) {
             importDecl.getUri().setValue(rewriteUri(importRewriter, uri, linkContext));
           } else {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.log(Level.FINE, "Removing invalid URI " + uri);
+            if (LOG.isLoggable(Level.FINE)) {
+              LOG.log(Level.FINE, "Removing invalid URI " + uri);
             }
             clean(ancestorChain);
           }
@@ -197,8 +197,8 @@ public class CajaCssSanitizer {
       return StringUtils.isEmpty(scheme) ||
           ALLOWED_URI_SCHEMES.contains(scheme.toLowerCase());
     } catch (RuntimeException re) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE, "Failed to parse URI in CSS " + uri, re);
+      if (LOG.isLoggable(Level.FINE)) {
+        LOG.log(Level.FINE, "Failed to parse URI in CSS " + uri, re);
       }
     }
     return false;

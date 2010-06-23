@@ -259,6 +259,15 @@ public class AbstractHttpCacheTest {
 
     assertEquals(0, cache.map.size());
   }
+  
+  @Test
+  public void addResponseIfModifiedSince() {
+    HttpRequest request = new HttpRequest(DEFAULT_URI);
+    HttpResponse response = new HttpResponseBuilder().setHttpStatusCode(HttpResponse.SC_NOT_MODIFIED).create();
+    assertFalse(cache.addResponse(request, response));
+
+    assertEquals(0, cache.map.size());
+  }
 
   @Test
   public void addResponseUsingPost() {

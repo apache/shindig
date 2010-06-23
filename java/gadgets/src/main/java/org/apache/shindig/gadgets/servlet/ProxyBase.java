@@ -60,7 +60,7 @@ public abstract class ProxyBase {
       "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding", "www-authenticate"
   );
 
-  private static final Logger logger = Logger.getLogger(ProxyBase.class.getName());
+  private static final Logger LOG = Logger.getLogger(ProxyBase.class.getName());
   
   /**
    * Validates the given url.
@@ -180,7 +180,8 @@ public abstract class ProxyBase {
     
     int responseCode;
     Level level = Level.FINE;
-    
+
+    // TODO: Recosider if we should be passing on 404 to the user as is.
     switch (e.getCode()) {
       case INTERNAL_SERVER_ERROR:
         responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -191,7 +192,7 @@ public abstract class ProxyBase {
         break;
     }
     
-    logger.log(level, "Request failed", e);
+    LOG.log(level, "Request failed", e);
     resp.sendError(responseCode, e.getMessage());
   }
 

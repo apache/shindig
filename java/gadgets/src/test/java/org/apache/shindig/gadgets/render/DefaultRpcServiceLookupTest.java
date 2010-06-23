@@ -39,7 +39,8 @@ public class DefaultRpcServiceLookupTest extends Assert {
 
   @Before
   public void setUp() throws Exception {
-    svcLookup = new DefaultRpcServiceLookup(new DefaultServiceFetcher(null, new BasicHttpFetcher()), 60l);
+    svcLookup = new DefaultRpcServiceLookup(new DefaultServiceFetcher(null, new BasicHttpFetcher(null)),
+                                            60l);
     socialEndpoint = "http://localhost:8080/social/rpc";
     host = "localhost:8080";
   }

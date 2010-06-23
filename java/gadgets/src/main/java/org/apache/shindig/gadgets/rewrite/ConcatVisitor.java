@@ -25,10 +25,15 @@ import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class ConcatVisitor implements DomWalker.Visitor {
   public static class Js extends ConcatVisitor {
@@ -49,7 +54,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
   private final ConcatUriManager.Type type;
   private final ContentRewriterFeature.Config config;
   private final boolean split;
-  
+    
   private ConcatVisitor(ContentRewriterFeature.Config config,
       ConcatUriManager uriManager, ConcatUriManager.Type type) {
     this.uriManager = uriManager;
@@ -98,10 +103,18 @@ public class ConcatVisitor implements DomWalker.Visitor {
     
     // Add leftovers.
     concatBatches.add(curBatch);
+
+    // Split the existing batches based on media types.
+    List<List<Element>> mediaSpecificConcatBatches = Lists.newLinkedList();
+    Iterator<List<Element>> batchesIter = concatBatches.iterator();
+    while (batchesIter.hasNext()) {
+      splitBatchOnMedia(batchesIter.next(), mediaSpecificConcatBatches);
+    }
+    concatBatches = mediaSpecificConcatBatches;
     
     // Prepare batches of Uris to send to generate concat Uris
     List<List<Uri>> uriBatches = Lists.newLinkedList();
-    Iterator<List<Element>> batchesIter = concatBatches.iterator();
+    batchesIter = concatBatches.iterator();
     while (batchesIter.hasNext()) {
       List<Element> batch = batchesIter.next();
       List<Uri> uris = Lists.newLinkedList();
@@ -152,6 +165,27 @@ public class ConcatVisitor implements DomWalker.Visitor {
     }
     
     return true;
+  }
+  
+  /**
+   * Split the given batch of elements (assumed to be sibling nodes that can be concatenated)
+   * into batches with same media types.
+   * 
+   * @param elements
+   * @param output
+   */
+  private void splitBatchOnMedia(List<Element> elements, List<List<Element>> output) {
+    // Multimap to hold the ordered list of elements encountered for a given media type.
+    Multimap<String, Element> mediaBatchMap = LinkedHashMultimap.create();
+    for (Element element : elements) {
+      Element next = element;
+      mediaBatchMap.put(next.getAttribute("media"), next);
+    }
+    Set<String> mediaTypes = mediaBatchMap.keySet();
+    for (String mediaType : mediaTypes) {
+      Collection<Element> elems = mediaBatchMap.get(mediaType);
+      output.add(new LinkedList<Element>(elems));
+    }
   }
   
   private boolean isRewritableExternData(Element elem) {

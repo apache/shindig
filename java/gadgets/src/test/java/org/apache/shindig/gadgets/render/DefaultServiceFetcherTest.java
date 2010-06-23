@@ -18,6 +18,11 @@
  */
 package org.apache.shindig.gadgets.render;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.config.JsonContainerConfig;
 import org.apache.shindig.expressions.Expressions;
@@ -27,7 +32,6 @@ import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 
-import com.google.common.collect.*;
 import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONObject;
