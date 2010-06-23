@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview Initial configuration/boot-strapping work for common container
  * to operate. This includes setting up gadgets config and global environment
@@ -23,15 +24,18 @@
  */
 (function() {
 
-  function initializeGadgetsConfig() {
+  function initializeConfig() {
     gadgets.config.init({
-        'rpc': {
-          parentRelayUrl: ''
-        },
-        'core.io': {
-          jsonProxyUrl: 'http://%host%/gadgets/makeRequest',
-          proxyUrl: 'http://%host%/gadgets/proxy?refresh=%refresh%&container=%container%%rewriteMime%&gadget=%gadget%/%rawurl%'
-        }
+      'rpc': {
+        parentRelayUrl: ''
+      },
+      'core.io': {
+        jsonProxyUrl: 'http://%host%/gadgets/makeRequest',
+        proxyUrl: 'http://%host%/gadgets/proxy' +
+            '?refresh=%refresh%' +
+            '&container=%container%%rewriteMime%' +
+            '&gadget=%gadget%/%rawurl%'
+      }
     });
   }
 
@@ -48,23 +52,6 @@
     }
   }
 
-  /**
-   * Call a callback function if specified in &onload= query param. This is
-   * required for dynamic source script inclusion, which is asynchronous.
-   */
-  function runOnloadCallback() {
-    var scriptSrc = getLastScriptSrc();
-    if (scriptSrc) {
-      var onload = shindig.container.util.getParamValue(scriptSrc, 'onload');
-      if (onload) {
-        var re = /(^[A-Za-z0-9_]+$)/;
-        if (re.test(onload) && (typeof window[onload] === "function")) {
-          window[onload]();
-        }
-      }
-    }
-  }
-
   function getLastScriptSrc() {
     var scriptEls = document.getElementsByTagName('script');
     return (scriptEls.length > 0)
@@ -72,7 +59,6 @@
         : null;
   }
 
-  initializeGadgetsConfig();
+  initializeConfig();
   initializeGlobalVars();
-  runOnloadCallback();
 })();

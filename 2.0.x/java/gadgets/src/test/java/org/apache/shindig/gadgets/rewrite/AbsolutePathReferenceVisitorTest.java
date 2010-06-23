@@ -18,18 +18,19 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
-
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   private static final Uri ABSOLUTE_URI = Uri.parse("http://host.com/path");
@@ -39,51 +40,67 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   private static final Uri PATH_RELATIVE_URI = Uri.parse("path/relative");
   private static final Uri PATH_RELATIVE_RESOLVED_URI = GADGET_URI.resolve(PATH_RELATIVE_URI);
   private static final String INVALID_URI_STRING = "!^|BAD URI|^!";
-  
+
+  AbsolutePathReferenceVisitor visitorForAllTags() {
+    return new AbsolutePathReferenceVisitor(
+        AbsolutePathReferenceVisitor.Tags.RESOURCES,
+        AbsolutePathReferenceVisitor.Tags.HYPERLINKS);
+  }
+
+  AbsolutePathReferenceVisitor visitorForHyperlinks() {
+    return new AbsolutePathReferenceVisitor(
+        AbsolutePathReferenceVisitor.Tags.HYPERLINKS);
+  }
+
+  AbsolutePathReferenceVisitor visitorForResources() {
+    return new AbsolutePathReferenceVisitor(
+        AbsolutePathReferenceVisitor.Tags.RESOURCES);
+  }
+
   @Test
   public void bypassComment() throws Exception {
     Comment comment = doc.createComment("howdy pardner");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(comment));
   }
-  
+
   @Test
   public void bypassText() throws Exception {
     Text text = doc.createTextNode("back scratchah! get ya back scratcha he'yah!");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(text));
   }
-  
+
   @Test
   public void bypassNonSupportedTag() throws Exception {
     Element div = elem("div", "src", RELATIVE_URI.toString(), "href", RELATIVE_URI.toString());
     assertEquals(VisitStatus.BYPASS, getVisitStatus(div));
   }
-  
+
   @Test
   public void bypassTagWithoutAttrib() throws Exception {
     Element a = elem("a");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(a));
   }
-  
+
   @Test
   public void absolutifyTagA() throws Exception {
     checkAbsolutifyStates("a");
   }
-  
+
   @Test
   public void absolutifyTagImg() throws Exception {
     checkAbsolutifyStates("img");
   }
-  
+
   @Test
   public void absolutifyTagLink() throws Exception {
     checkAbsolutifyStates("link");
   }
-  
+
   @Test
   public void absolutifyTagScript() throws Exception {
     checkAbsolutifyStates("script");
   }
-  
+
   @Test
   public void absolutifyTagObject() throws Exception {
     checkAbsolutifyStates("object");
@@ -91,15 +108,63 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
 
   @Test
   public void revisitDoesNothing() throws Exception {
-    assertFalse(new AbsolutePathReferenceVisitor().revisit(gadget(), null));
+    assertFalse(visitorForAllTags().revisit(gadget(), null));
   }
-  
+
+  @Test
+  public void resolveRelativeToBaseTagIfPresent() throws Exception {
+    Element baseTag = elem("base", "href", "http://www.example.org");
+    Element img = elem("img", "src", RELATIVE_URI.toString());
+    Element html = htmlDoc(null, baseTag, img);
+
+    assertEquals(VisitStatus.BYPASS, getVisitStatus(baseTag));
+    assertEquals(VisitStatus.MODIFY, getVisitStatus(img));
+    assertEquals("http://www.example.org" + RELATIVE_URI.toString(),
+                 img.getAttribute("src"));
+  }
+
+  @Test
+  public void getBaseHrefReturnsNullIfBaseTagWithoutHrefAttribute()
+      throws Exception {
+    Element baseTag = elem("base");
+    Element img = elem("img", "src", RELATIVE_URI.toString());
+    Element html = htmlDoc(null, baseTag, img);
+
+    AbsolutePathReferenceVisitor visitor = visitorForAllTags();
+    assertEquals(VisitStatus.BYPASS, getVisitStatus(baseTag));
+    assertEquals(VisitStatus.MODIFY, getVisitStatus(img));
+    assertEquals(RELATIVE_RESOLVED_URI.toString(), img.getAttribute("src"));
+  }
+
+  @Test
+  public void testGetBaseUri() throws Exception {
+    Element baseTag1 = elem("base", "href", "http://www.example1.org");
+    Element baseTag2 = elem("base", "href", "http://www.example2.org");
+
+    Element img = elem("img", "src", RELATIVE_URI.toString());
+    Element a = elem("a", "href", RELATIVE_URI.toString());
+
+    Node[] headNodes = { baseTag1 };
+    Element html = htmlDoc(headNodes, baseTag2, img, a);
+
+    AbsolutePathReferenceVisitor visitor = visitorForAllTags();
+    assertEquals("http://www.example1.org",
+                 visitor.getBaseHref(html.getOwnerDocument()));
+    assertEquals("http://www.example1.org",
+                 visitor.getBaseUri(html.getOwnerDocument()).toString());
+  }
+
   private void checkAbsolutifyStates(String tagName) throws Exception {
     String lcTag = tagName.toLowerCase();
     String ucTag = tagName.toUpperCase();
-    String validAttr = AbsolutePathReferenceVisitor.RESOURCE_TAGS.get(lcTag);
+    Map<String, String> resourceTags = new HashMap<String, String>();
+    resourceTags.putAll(AbsolutePathReferenceVisitor.Tags
+        .RESOURCES.getResourceTags());
+    resourceTags.putAll(AbsolutePathReferenceVisitor.Tags
+        .HYPERLINKS.getResourceTags());
+    String validAttr = resourceTags.get(lcTag);
     String invalidAttr = validAttr + "whoknows";
-    
+
     // lowercase, correct attrib, relative-possible URL
     Element lcValidRelative = elem(lcTag, validAttr, RELATIVE_URI.toString());
     assertEquals(VisitStatus.MODIFY, getVisitStatus(lcValidRelative));
@@ -142,6 +207,6 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   }
   
   private VisitStatus getVisitStatus(Node node) throws Exception {
-    return new AbsolutePathReferenceVisitor().visit(gadget(), node);
+    return visitorForAllTags().visit(gadget(), node);
   }
 }

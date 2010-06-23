@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview This represents the service layer that talks to OSAPI
  * endpoints. All RPC requests should go into this class.
@@ -23,17 +24,50 @@
 
 
 /**
- * @param {Object=} opt_config. Configuration JSON.
+ * @param {Object=} opt_config Configuration JSON.
  * @constructor
  */
 shindig.container.Service = function(opt_config) {
   var config = opt_config || {};
 
   /**
+   * @type {string}
+   */
+  this.apiHost_ = String(google.container.util.getSafeJsonValue(config,
+     shindig.container.ServiceConfig.API_HOST, window.__API_HOST));
+
+  /**
+   * @type {string}
+   */
+  this.apiPrefixPath_ = String(google.container.util.getSafeJsonValue(config,
+      shindig.container.ServiceConfig.API_PREFIX_PATH,
+      window.__API_PREFIX_PATH));
+  
+  /**
+   * @type {string}
+   */
+  this.apiPath_ = String(google.container.util.getSafeJsonValue(config,
+      shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
+  
+  /**
    * @type {boolean}
    */
   this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.SAME_DOMAIN, true));
+      shindig.container.ServiceConfig.SAME_DOMAIN, false));
+
+  /**
+   * Map of gadget URLs to cached gadgetInfo response.
+   * @type {Object}
+   */
+  this.cachedMetadatas_ = {};
+
+  /**
+   * Map of gadget URLs to cached tokenInfo response.
+   * @type {Object}
+   */
+  this.cachedTokens_ = {};
+
+  this.initializeOsapi_(); 
 
   this.onConstructed(config);
 };
@@ -57,21 +91,20 @@ shindig.container.Service.prototype.onConstructed = function(opt_config) {};
  */
 shindig.container.Service.prototype.getGadgetMetadata = function(
     request, opt_callback) {
-  var callback = opt_callback || function(a) {};
+  var callback = opt_callback || function() {};
   var self = this;
-  osapi.gadgets.getMetadata(request, function(response) {
+  osapi.gadgets.metadata.get(request).execute(function(response) {
     if (response.error) {
-      // This hides internal server error.
+      // Hides internal server error.
       callback({
-          error : 'Failed to retrieve gadget.',
+          error : 'Failed to retrieve gadget metadata.',
           errorCode : 'NOLOAD'
       });
     } else {
-      var data = response.data;
-      var gadgetUrls = shindig.container.util.toArrayOfJsonKeys(data);
-      for (var i = 0; i < gadgetUrls.length; i++) {
-        var gadgetInfo = data[gadgetUrls[i]];
+      for (var id in response) {
+        var gadgetInfo = response[id];
         self.processSameDomain_(gadgetInfo);
+        self.cachedMetadatas_[id] = gadgetInfo;
       }
       callback(response);
     }
@@ -80,11 +113,80 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
 
 
 /**
+ * @param {Object} request JSON object representing the request.
+ * @param {function(Object)=} opt_callback function to call upon data receive.
+ */
+shindig.container.Service.prototype.getGadgetToken = function(
+    request, opt_callback) {
+  var callback = opt_callback || function() {};
+  var self = this;
+  osapi.gadgets.token.get(request).execute(function(response) {
+    if (response.error) {
+      // Hides internal server error.
+      callback({
+          error : 'Failed to retrieve gadget token.',
+          errorCode : 'NOLOAD'
+      });
+    } else {
+      for (var id in response) {
+        self.cachedTokens_[id] = response[id];
+      }
+      callback(response);
+    }
+  });
+};
+
+
+/**
+ * @param {string} url gadget URL to use as key to get cached metadata.
+ * @return {string} the gadgetInfo referenced by this URL.
+ */
+shindig.container.Service.prototype.getCachedGadgetMetadata = function(url) {
+  return this.cachedMetadatas_[url];
+};
+
+
+/**
+ * @param {string} url gadget URL to use as key to get cached token.
+ * @return {string} the tokenInfo referenced by this URL.
+ */
+shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
+  return this.cachedTokens_[url];
+};
+
+
+/**
  * @param {Object} gadgetInfo
  * @private
  */
 shindig.container.Service.prototype.processSameDomain_ = function(gadgetInfo) {
-  gadgetInfo['sameDomain'] = this.sameDomain_;
+  if (this.sameDomain_ && gadgetInfo['sameDomain']) {
+    var views = gadgetInfo['views'] || {};
+    for (var view in views) {
+      views[view]['iframeHost'] = this.apiHost_;
+    }
+  }
+};
+
+
+/**
+ * Initialize OSAPI endpoint methods/interfaces.
+ * @private
+ */
+shindig.container.Service.prototype.initializeOsapi_ = function() {
+  var endPoint = this.apiHost_ + this.apiPrefixPath_ + this.apiPath_;
+  
+  var osapiServicesConfig = {};
+  osapiServicesConfig['gadgets.rpc'] = [ 'container.listMethods' ];
+  osapiServicesConfig[endPoint] = [
+    'gadgets.metadata.get',
+    'gadgets.token.get'
+  ];
+
+  gadgets.config.init({
+    'osapi': { 'endPoints': [ endPoint ] },
+    'osapi.services': osapiServicesConfig 
+  });
 };
 
 
@@ -92,13 +194,18 @@ shindig.container.Service.prototype.processSameDomain_ = function(gadgetInfo) {
 // Configuration
 // -----------------------------------------------------------------------------
 
+
 /**
  * Enumeration of configuration keys for this service. This is specified in
  * JSON to provide extensible configuration.
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
-
-//Toggle to render gadgets in the same domain.
-/** @type {string} */
+//Host to fetch gadget information, via XHR. 
+shindig.container.ServiceConfig.API_HOST = 'apiHost';
+// Prefix to path to fetch gadget information, via XHR. 
+shindig.container.ServiceConfig.API_PREFIX_PATH = 'apiPrefixPath';
+// Path (appears after API_PREFIX_PATH) to fetch gadget information, via XHR. 
+shindig.container.ServiceConfig.API_PATH = 'apiPath';
+// Toggle to render gadgets in the same domain. 
 shindig.container.ServiceConfig.SAME_DOMAIN = 'sameDomain';

@@ -89,7 +89,7 @@ public class BasicImageRewriter implements ResponseRewriter {
   private static final int BITS_PER_BYTE = 8;
   private static final Color COLOR_TRANSPARENT = new Color(255, 255, 255, 0);
   private static final String CONTENT_TYPE = "Content-Type";
-  private static final Logger log = Logger.getLogger(BasicImageRewriter.class.getName());
+  private static final Logger LOG = Logger.getLogger(BasicImageRewriter.class.getName());
 
   private static final Set<String> SUPPORTED_MIME_TYPES = ImmutableSet.of(
       "image/gif", CONTENT_TYPE_IMAGE_PNG, "image/jpeg", "image/bmp");
@@ -218,13 +218,13 @@ public class BasicImageRewriter implements ResponseRewriter {
       }
       applyOptimizer(response, imageFormat, image);
     } catch (IOException ioe) {
-      log.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
+      LOG.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
     } catch (RuntimeException re) {
       // This is safe to recover from and necessary because the ImageIO/Sanselan calls can
       // throw a very wide variety of exceptions
-      log.log(Level.INFO, "Unknown error rewriting image " + request.toString(), re);
+      LOG.log(Level.INFO, "Unknown error rewriting image " + request.toString(), re);
     } catch (ImageReadException ire) {
-      log.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire.getMessage());
+      LOG.log(Level.INFO, "Failed to read image. Skipping " + request.toString(), ire.getMessage());
     }
   }
 

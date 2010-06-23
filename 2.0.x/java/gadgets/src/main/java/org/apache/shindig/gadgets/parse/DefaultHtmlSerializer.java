@@ -107,7 +107,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
    * type attribute on output
    */
   private Element substituteElement(Element elem) {
-    String scriptType = GadgetHtmlParser.SCRIPT_TYPE_TO_OSML_TAG.inverse().get(elem.getNodeName());
+    String scriptType = SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.inverse().get(elem.getNodeName());
     if (scriptType != null) {
       Element replacement = elem.getOwnerDocument().createElement("script");
       replacement.setAttribute("type", scriptType);

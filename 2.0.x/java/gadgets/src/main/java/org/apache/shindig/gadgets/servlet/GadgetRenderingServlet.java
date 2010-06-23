@@ -19,12 +19,13 @@ package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
+import org.apache.shindig.gadgets.uri.IframeUriManager;
+import org.apache.shindig.gadgets.uri.UriStatus;
 
 import com.google.inject.Inject;
 
@@ -46,7 +47,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
   private static final Logger LOG = Logger.getLogger(GadgetRenderingServlet.class.getName());
 
   private Renderer renderer;
-  private UrlGenerator urlGenerator;
+  private IframeUriManager iframeUriManager;
 
   @Inject
   public void setRenderer(Renderer renderer) {
@@ -54,11 +55,11 @@ public class GadgetRenderingServlet extends InjectedServlet {
   }
   
   @Inject
-  public void setUrlGenerator(UrlGenerator gadgetUrlGenerator) {
-    this.urlGenerator = gadgetUrlGenerator;
+  public void setIframeUriManager(IframeUriManager iframeUriManager) {
+    this.iframeUriManager = iframeUriManager;
   }
 
-  private void render(HttpServletRequest req, HttpServletResponse resp, UrlValidationStatus urlstatus)
+  private void render(HttpServletRequest req, HttpServletResponse resp, UriStatus urlstatus)
       throws IOException {
     if (req.getHeader(HttpRequest.DOS_PREVENTION_HEADER) != null) {
       // Refuse to render for any request that came from us.
@@ -76,9 +77,9 @@ public class GadgetRenderingServlet extends InjectedServlet {
     switch (results.getStatus()) {
       case OK:
         if (context.getIgnoreCache() ||
-            urlstatus == UrlValidationStatus.INVALID) {
+            urlstatus == UriStatus.INVALID_VERSION) {
           HttpUtil.setCachingHeaders(resp, 0);
-        } else if (urlstatus == UrlValidationStatus.VALID_VERSIONED) {
+        } else if (urlstatus == UriStatus.VALID_VERSIONED) {
           // Versioned files get cached indefinitely
           HttpUtil.setCachingHeaders(resp, true);
         } else {
@@ -113,10 +114,10 @@ public class GadgetRenderingServlet extends InjectedServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    UrlValidationStatus urlstatus = getUrlStatus(req);
+    UriStatus urlstatus = getUrlStatus(req);
     if (req.getHeader("If-Modified-Since") != null &&
         !"1".equals(req.getParameter("nocache")) &&
-        urlstatus == UrlValidationStatus.VALID_VERSIONED) {
+        urlstatus == UriStatus.VALID_VERSIONED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
@@ -128,8 +129,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
     render(req, resp, getUrlStatus(req));
   }
   
-  private UrlValidationStatus getUrlStatus(HttpServletRequest req) {
-    return urlGenerator.validateIframeUrl(
-        req.getRequestURL().append('?').append(req.getQueryString()).toString());
+  private UriStatus getUrlStatus(HttpServletRequest req) {
+    return iframeUriManager.validateRenderingUri(new UriBuilder(req).toUri());
   }
 }

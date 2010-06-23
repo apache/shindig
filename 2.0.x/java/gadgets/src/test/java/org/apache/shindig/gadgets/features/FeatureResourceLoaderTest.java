@@ -29,8 +29,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpFetcher;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -47,23 +49,43 @@ import java.util.Map;
 
 public class FeatureResourceLoaderTest {
   private final static String FILE_JS = "gadgets.test.pattern = function(){};";
+  private final static String UPDATED_FILE_JS = "different.impl.completely = function(){};";
   private final static String UNCOMPRESSED_FILE_JS
       = "/** Some comments* /\n" +
         "gadgets.test.pattern = function() {" +
         "};";
+  private final static String UPDATED_UNCOMPRESSED_FILE_JS
+  = "/** Different comments* /\n" +
+    "different.impl.completely = function() {" +
+    "};";
   private final static String URL_JS = "while(true){alert('hello');}";
   
-  private FeatureResourceLoader loader;
+  private TestFeatureResourceLoader loader;
+  private FakeTimeSource timeSource;
+  
+  private static class TestFeatureResourceLoader extends FeatureResourceLoader {
+    private Map<String, Boolean> forceFileChanged = Maps.newHashMap();
+    
+    @Override
+    protected boolean fileHasChanged(File file, long lastModified) {
+      Boolean changeOverride = forceFileChanged.get(file.getAbsolutePath());
+      return file.lastModified() > lastModified ? true :
+          changeOverride != null && changeOverride;
+    }
+  }
   
   @Before
   public void setUp() {
-    loader = new FeatureResourceLoader();
+    loader = new TestFeatureResourceLoader();
+    timeSource = new FakeTimeSource();
+    timeSource.setCurrentTimeMillis(0);
+    loader.setTimeSource(timeSource);
   }
   
   @Test
   public void loadFileOptOnlyAvailable() throws Exception {
-    Uri optUri = makeFile(".opt.js", FILE_JS);
-    FeatureResource resource = loader.load(optUri, null);
+    Pair<Uri, File> optUri = makeFile(".opt.js", FILE_JS);
+    FeatureResource resource = loader.load(optUri.one, null);
     assertEquals(FILE_JS, resource.getContent());
     assertEquals(FILE_JS, resource.getDebugContent());
     assertFalse(resource.isExternal());
@@ -72,8 +94,8 @@ public class FeatureResourceLoaderTest {
   
   @Test
   public void loadFileDebugOnlyAvailable() throws Exception {
-    Uri dbgUri = makeFile(".js", UNCOMPRESSED_FILE_JS);
-    FeatureResource resource = loader.load(dbgUri, null);
+    Pair<Uri, File> dbgUri = makeFile(".js", UNCOMPRESSED_FILE_JS);
+    FeatureResource resource = loader.load(dbgUri.one, null);
     assertEquals(UNCOMPRESSED_FILE_JS, resource.getContent());
     assertEquals(UNCOMPRESSED_FILE_JS, resource.getDebugContent());
     assertFalse(resource.isExternal());
@@ -82,11 +104,11 @@ public class FeatureResourceLoaderTest {
   
   @Test
   public void loadFileBothModesAvailable() throws Exception {
-    Uri optUri = makeFile(".opt.js", FILE_JS);
-    File dbgFile = new File(optUri.getPath().replace(".opt.js", ".js"));
+    Pair<Uri, File> optUri = makeFile(".opt.js", FILE_JS);
+    File dbgFile = new File(optUri.one.getPath().replace(".opt.js", ".js"));
     dbgFile.createNewFile();
-    Uri dbgUri = makeFile(dbgFile, UNCOMPRESSED_FILE_JS);
-    FeatureResource resource = loader.load(dbgUri, null);
+    Pair<Uri, File> dbgUri = makeFile(dbgFile, UNCOMPRESSED_FILE_JS);
+    FeatureResource resource = loader.load(dbgUri.one, null);
     assertEquals(FILE_JS, resource.getContent());
     assertEquals(UNCOMPRESSED_FILE_JS, resource.getDebugContent());
     assertFalse(resource.isExternal());
@@ -103,10 +125,68 @@ public class FeatureResourceLoaderTest {
   @Test
   public void loadFileNoOptPathCalculable() throws Exception {
     // File doesn't end in .js, so it's loaded for both opt and debug.
-    Uri dbgUri = makeFile(".notjssuffix", UNCOMPRESSED_FILE_JS);
-    FeatureResource resource = loader.load(dbgUri, null);
+    Pair<Uri, File> dbgUri = makeFile(".notjssuffix", UNCOMPRESSED_FILE_JS);
+    FeatureResource resource = loader.load(dbgUri.one, null);
     assertEquals(UNCOMPRESSED_FILE_JS, resource.getContent());
     assertEquals(UNCOMPRESSED_FILE_JS, resource.getDebugContent());
+    assertFalse(resource.isExternal());
+    assertTrue(resource.isProxyCacheable());
+  }
+  
+  @Test
+  public void loadFileUpdateIgnoredIfUpdatesDisabled() throws Exception {
+    Pair<Uri, File> optUri = makeFile(".opt.js", FILE_JS);
+    FeatureResource resource = loader.load(optUri.one, null);
+    assertEquals(FILE_JS, resource.getContent());
+    assertEquals(FILE_JS, resource.getDebugContent());
+    assertFalse(resource.isExternal());
+    assertTrue(resource.isProxyCacheable());
+    setFileContent(optUri.two, UPDATED_FILE_JS);
+    
+    // Advance the time. Update checks disabled by default.
+    timeSource.incrementSeconds(10);
+    
+    // Same asserts.
+    assertEquals(FILE_JS, resource.getContent());
+    assertEquals(FILE_JS, resource.getDebugContent());
+    assertFalse(resource.isExternal());
+    assertTrue(resource.isProxyCacheable());
+  }
+  
+  @Test
+  public void loadFileUpdateBehavior() throws Exception {
+    loader.setSupportFileUpdates(5000);  // set in millis
+    Pair<Uri, File> optUri = makeFile(".opt.js", FILE_JS);
+    File dbgFile = new File(optUri.one.getPath().replace(".opt.js", ".js"));
+    dbgFile.createNewFile();
+    Pair<Uri, File> dbgUri = makeFile(dbgFile, UNCOMPRESSED_FILE_JS);
+    FeatureResource resource = loader.load(dbgUri.one, null);
+    assertEquals(FILE_JS, resource.getContent());
+    assertEquals(UNCOMPRESSED_FILE_JS, resource.getDebugContent());
+    assertFalse(resource.isExternal());
+    assertTrue(resource.isProxyCacheable());
+    
+    // Update file contents.
+    setFileContent(optUri.two, UPDATED_FILE_JS);
+    loader.forceFileChanged.put(optUri.two.getAbsolutePath(), true);
+    setFileContent(dbgUri.two, UPDATED_UNCOMPRESSED_FILE_JS);
+    loader.forceFileChanged.put(dbgUri.two.getAbsolutePath(), true);
+    
+    // Advance the time, but not by 5 seconds.
+    timeSource.incrementSeconds(4);
+    
+    // Same asserts.
+    assertEquals(FILE_JS, resource.getContent());
+    assertEquals(UNCOMPRESSED_FILE_JS, resource.getDebugContent());
+    assertFalse(resource.isExternal());
+    assertTrue(resource.isProxyCacheable());
+    
+    // Advance the time, now beyond 5 seconds.
+    timeSource.incrementSeconds(4);
+    
+    // New content should be reflected.
+    assertEquals(UPDATED_FILE_JS, resource.getContent());
+    assertEquals(UPDATED_UNCOMPRESSED_FILE_JS, resource.getDebugContent());
     assertFalse(resource.isExternal());
     assertTrue(resource.isProxyCacheable());
   }
@@ -168,16 +248,21 @@ public class FeatureResourceLoaderTest {
     assertTrue(resource.isExternal());
   }
   
-  private Uri makeFile(String suffix, String content) throws Exception {
-    return makeFile(File.createTempFile("restmp", suffix), content);
+  private Pair<Uri, File> makeFile(String suffix, String content) throws Exception {
+    File tmpFile = File.createTempFile("restmp", suffix);
+    return makeFile(tmpFile, content);
   }
   
-  private Uri makeFile(File file, String content) throws Exception {
+  private Pair<Uri, File> makeFile(File file, String content) throws Exception {
     file.deleteOnExit();
+    setFileContent(file, content);
+    return Pair.of(new UriBuilder().setScheme("file").setPath(file.getPath()).toUri(), file);
+  }
+  
+  private void setFileContent(File file, String content) throws Exception {
     BufferedWriter out = new BufferedWriter(new FileWriter(file));
     out.write(content);
     out.close();
-    return new UriBuilder().setScheme("file").setPath(file.getPath()).toUri();
   }
   
   private HttpFetcher mockFetcher(Uri toFetch, String content) throws Exception {

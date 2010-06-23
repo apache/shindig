@@ -17,20 +17,38 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+
 import org.apache.commons.lang.mutable.MutableBoolean;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.variables.Substitutions;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.*;
-
-import org.w3c.dom.*;
-
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
-import java.util.*;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the ModulePrefs element of a gadget spec.
@@ -77,10 +95,6 @@ public class ModulePrefs {
     for (int i = 0; i < attributeNodes.getLength(); i++) {
       Node node = attributeNodes.item(i);
       attributes.put(node.getNodeName(), node.getNodeValue());
-    }
-
-    if (getTitle() == null) {
-      throw new SpecParserException("ModulePrefs@title is required.");
     }
 
     categories = ImmutableList.of(getAttribute(ATTR_CATEGORY, ""), getAttribute(ATTR_CATEGORY2, ""));
@@ -157,7 +171,8 @@ public class ModulePrefs {
    * User Pref + Message Bundle + Bidi
    */
   public String getTitle() {
-    return getAttribute(ATTR_TITLE);
+    String title = getAttribute(ATTR_TITLE);
+    return title == null ? "" : title;
   }
 
   /**
@@ -655,14 +670,14 @@ public class ModulePrefs {
     private final MutableBoolean oauthMarker;
     private boolean coreIncluded = false;
 
-    private static final Set<String> tags = ImmutableSet.of("Require", "Optional");
+    private static final Set<String> TAGS = ImmutableSet.of("Require", "Optional");
     
     private FeatureVisitor(MutableBoolean oauthMarker) {
       this.oauthMarker = oauthMarker;
     }
 
     public boolean visit (String tag, Element element) throws SpecParserException {
-      if (!tags.contains(tag)) return false;
+      if (!TAGS.contains(tag)) return false;
 
       Feature feature = new Feature(element);
       coreIncluded = coreIncluded || feature.getName().startsWith("core");

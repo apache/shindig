@@ -36,7 +36,7 @@ import org.junit.Test;
  */
 public abstract class AbstractHttpFetcherTest {
   private static final int ECHO_PORT = 9003;
-  private static final Uri BASE_URL = Uri.parse("http://localhost:9003/");
+  protected static final Uri BASE_URL = Uri.parse("http://localhost:9003/");
   private static EchoServer server;
   protected HttpFetcher fetcher = null;
 

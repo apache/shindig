@@ -56,7 +56,7 @@
           req.add(req.newFetchPersonRequest("canonical"), "canonical");
 
           function receivedData(response) {
-            assertTrue("Expecting error", response.hadError());
+            assertTrue("Expecting error, got " + gadgets.json.stringify(response), response.hadError());
             var dataItem = response.get("canonical");
             assertFalse("Expecting data item", dataItem == undefined);
             assertTrue("Expecting item error", dataItem.hadError());

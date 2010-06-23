@@ -105,6 +105,24 @@
     </resources>
   </build>
 
+  <profiles>
+    <profile>
+      <id>reporting</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>clirr-maven-plugin</artifactId>
+            <configuration>
+              <comparisonVersion>1.0.1</comparisonVersion>
+            </configuration>
+            <version>2.2.2</version>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+
   <dependencies>
     <!-- project dependencies -->
     <dependency>
@@ -190,10 +208,6 @@
       <artifactId>nekohtml</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sourceforge.nekohtml</groupId>
-      <artifactId>nekohtml</artifactId>
-    </dependency>
-    <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
     </dependency>
@@ -232,12 +246,6 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.shindig</groupId>
-      <artifactId>shindig-common</artifactId>
-      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

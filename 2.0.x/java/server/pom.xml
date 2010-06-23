@@ -78,12 +78,6 @@
     </plugins>
     <resources>
       <resource>
-        <directory>${basedir}/../../content/</directory>
-        <includes>
-          <include>**/*.*</include>
-        </includes>
-      </resource>
-      <resource>
         <targetPath>containers/default</targetPath>
         <directory>${basedir}/../../config</directory>
         <includes>

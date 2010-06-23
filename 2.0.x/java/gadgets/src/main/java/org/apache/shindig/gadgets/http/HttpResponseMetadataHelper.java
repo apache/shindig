@@ -36,7 +36,7 @@ public class HttpResponseMetadataHelper {
   public static final String IMAGE_HEIGHT = "ImageHeight";
   public static final String IMAGE_WIDTH = "ImageWidth";
 
-  private static final Logger log =
+  private static final Logger LOG =
     Logger.getLogger(HttpResponseMetadataHelper.class.getName());
 
   /**
@@ -66,10 +66,10 @@ public class HttpResponseMetadataHelper {
       return new String(Base32.encodeBase32(md5val), "UTF-8");
     } catch (NoSuchAlgorithmException e) {
       // Should not happen
-      log.info("Error getting MD5 digest, ignored");
+      LOG.info("Error getting MD5 digest, ignored");
     } catch (UnsupportedEncodingException e) {
       // Should not happen
-      log.info("Error parsing MD5 string as UTF8");
+      LOG.info("Error parsing MD5 string as UTF8");
     }
     return null;
   }

@@ -96,6 +96,11 @@ public abstract class AbstractHttpCache implements HttpCache {
       // Caching was forced. Ignore what the response wants.
       return true;
     }
+    
+    if (response.getHttpStatusCode() == HttpResponse.SC_NOT_MODIFIED) {
+      // Shindig server will serve 304s. Do not cache 304s from the origin server.
+      return false;
+    }
 
     // If the HTTP response allows for it, we can cache.
     return !response.isStrictNoCache();

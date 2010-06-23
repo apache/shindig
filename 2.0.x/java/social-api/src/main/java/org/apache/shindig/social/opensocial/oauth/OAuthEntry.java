@@ -35,28 +35,29 @@ public class OAuthEntry implements Serializable {
     REQUEST, ACCESS, DISABLED
   }
 
-  public String appId;
-  public String callbackUrl;
-  public boolean callbackUrlSigned; // true if consumer supports OAuth 1.0a
-  public String userId;
-  public String token;
-  public String tokenSecret;
+  private String appId;
+  private String callbackUrl;
+  private boolean callbackUrlSigned; // true if consumer supports OAuth 1.0a
+  private String userId;
+  private String token;
+  private String tokenSecret;
 
-  public boolean authorized;
+  private boolean authorized;
 
-  public String consumerKey;
+  private String consumerKey;
 
-  public Type type;
-  public Date issueTime;
+  private Type type;
+  private Date issueTime;
 
-  public String domain;
-  public String container;
-  public String oauthVersion;
-  
-  public String callbackToken;
-  public int callbackTokenAttempts;
+  private String domain;
+  private String container;
+  private String oauthVersion;
+
+  private String callbackToken;
+  private int callbackTokenAttempts;
 
   public OAuthEntry() {}
+
 
   /**
    * A copy constructor
@@ -88,14 +89,194 @@ public class OAuthEntry implements Serializable {
   public Date expiresAt() {
     long expirationTime = issueTime.getTime();
     switch (type) {
-      case REQUEST:
-        expirationTime += FIVE_MINUTES;
-        break;
-      case ACCESS:
-        expirationTime += ONE_YEAR;
-        break;
+    case REQUEST:
+      expirationTime += FIVE_MINUTES;
+      break;
+    case ACCESS:
+      expirationTime += ONE_YEAR;
+      break;
     }
 
     return new Date(expirationTime);
+  }
+
+
+  public String getAppId()
+  {
+    return appId;
+  }
+
+
+  public String getCallbackUrl()
+  {
+    return callbackUrl;
+  }
+
+
+  public boolean isCallbackUrlSigned()
+  {
+    return callbackUrlSigned;
+  }
+
+
+  public String getUserId()
+  {
+    return userId;
+  }
+
+
+  public String getToken()
+  {
+    return token;
+  }
+
+
+  public String getTokenSecret()
+  {
+    return tokenSecret;
+  }
+
+
+  public boolean isAuthorized()
+  {
+    return authorized;
+  }
+
+
+  public String getConsumerKey()
+  {
+    return consumerKey;
+  }
+
+
+  public Type getType()
+  {
+    return type;
+  }
+
+
+  public Date getIssueTime()
+  {
+    return issueTime;
+  }
+
+
+  public String getDomain()
+  {
+    return domain;
+  }
+
+
+  public String getContainer()
+  {
+    return container;
+  }
+
+
+  public String getOauthVersion()
+  {
+    return oauthVersion;
+  }
+
+
+  public String getCallbackToken()
+  {
+    return callbackToken;
+  }
+
+
+  public int getCallbackTokenAttempts()
+  {
+    return callbackTokenAttempts;
+  }
+
+
+  public void setAppId(String appId)
+  {
+    this.appId = appId;
+  }
+
+
+  public void setCallbackUrl(String callbackUrl)
+  {
+    this.callbackUrl = callbackUrl;
+  }
+
+
+  public void setCallbackUrlSigned(boolean callbackUrlSigned)
+  {
+    this.callbackUrlSigned = callbackUrlSigned;
+  }
+
+
+  public void setUserId(String userId)
+  {
+    this.userId = userId;
+  }
+
+
+  public void setToken(String token)
+  {
+    this.token = token;
+  }
+
+
+  public void setTokenSecret(String tokenSecret)
+  {
+    this.tokenSecret = tokenSecret;
+  }
+
+
+  public void setAuthorized(boolean authorized)
+  {
+    this.authorized = authorized;
+  }
+
+
+  public void setConsumerKey(String consumerKey)
+  {
+    this.consumerKey = consumerKey;
+  }
+
+
+  public void setType(Type type)
+  {
+    this.type = type;
+  }
+
+
+  public void setIssueTime(Date issueTime)
+  {
+    this.issueTime = issueTime;
+  }
+
+
+  public void setDomain(String domain)
+  {
+    this.domain = domain;
+  }
+
+
+  public void setContainer(String container)
+  {
+    this.container = container;
+  }
+
+
+  public void setOauthVersion(String oauthVersion)
+  {
+    this.oauthVersion = oauthVersion;
+  }
+
+
+  public void setCallbackToken(String callbackToken)
+  {
+    this.callbackToken = callbackToken;
+  }
+
+
+  public void setCallbackTokenAttempts(int callbackTokenAttempts)
+  {
+    this.callbackTokenAttempts = callbackTokenAttempts;
   }
 }

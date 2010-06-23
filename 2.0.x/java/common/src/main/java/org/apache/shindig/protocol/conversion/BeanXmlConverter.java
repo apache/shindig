@@ -32,7 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BeanXmlConverter implements BeanConverter {
-  private static final Logger logger =
+  private static final Logger LOG =
       Logger.getLogger(BeanXmlConverter.class.getName());
 
   public String getContentType() {
@@ -69,19 +69,19 @@ public class BeanXmlConverter implements BeanConverter {
     try {
       writer.write("response", obj);
       toReturn = outputWriter.toString();
-      if (logger.isLoggable(Level.FINEST)) logger.finest("XML is: " + toReturn + "\n **** \n\n");
+      if (LOG.isLoggable(Level.FINEST)) LOG.finest("XML is: " + toReturn + "\n **** \n\n");
 
     } catch (SAXException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     } catch (IOException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     } catch (IntrospectionException e) {
-      logger.log(Level.SEVERE, e.getMessage(), e);
+      LOG.log(Level.SEVERE, e.getMessage(), e);
     } finally {
       try {
         writer.close();
       } catch (IOException e) {
-        if (logger.isLoggable(Level.FINEST)) logger.log(Level.FINEST, e.getMessage(), e);
+        if (LOG.isLoggable(Level.FINEST)) LOG.log(Level.FINEST, e.getMessage(), e);
       }
     }
 

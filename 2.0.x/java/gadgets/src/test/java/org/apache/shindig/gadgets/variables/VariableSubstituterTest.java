@@ -29,8 +29,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.MessageBundle;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ import java.util.Locale;
 
 public class VariableSubstituterTest {
   private final FakeMessageBundleFactory messageBundleFactory = new FakeMessageBundleFactory();
-  private final VariableSubstituter substituter = new VariableSubstituter(Lists.newArrayList(
+  private final VariableSubstituter substituter = new VariableSubstituter(ImmutableList.<Substituter>of(
     new MessageSubstituter(messageBundleFactory),
     new UserPrefSubstituter(),
     new ModuleSubstituter(),

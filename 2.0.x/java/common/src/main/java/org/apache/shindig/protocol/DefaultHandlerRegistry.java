@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class DefaultHandlerRegistry implements HandlerRegistry {
 
-  private static final Logger logger = Logger.getLogger(DefaultHandlerRegistry.class.getName());
+  private static final Logger LOG = Logger.getLogger(DefaultHandlerRegistry.class.getName());
 
   // Map service - > method -> { handler, ...}
   private final Map<String, Map<String, SortedSet<RestPath>>> serviceMethodPathMap =
@@ -215,7 +215,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
         }
       }
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No REST binding for " + service.name() + '.' + m.getName());
+      LOG.log(Level.INFO, "No REST binding for " + service.name() + '.' + m.getName());
     }
 
   }
@@ -235,7 +235,7 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
               new ExecutionListenerWrapper(service.name(), opName, executionListener));
       rpcOperations.put(service.name() + '.' + opName, rpcHandler);
     } catch (NoSuchMethodException nme) {
-      logger.log(Level.INFO, "No RPC binding for " + service.name() + '.' + m.getName());
+      LOG.log(Level.INFO, "No RPC binding for " + service.name() + '.' + m.getName());
     }
   }
 
@@ -350,18 +350,26 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
 
     public Future<?> execute(Map<String, String[]> parameters, Reader body,
                              SecurityToken token, BeanConverter converter) {
+
+      RequestItem item;
       try {
         // bind the body contents if available
         if (body != null) {
           parameters.put(operation.bodyParam(), new String[]{IOUtils.toString(body)});
         }
-        RequestItem item = methodCaller.getRestRequestItem(parameters, token, converter,
+        item = methodCaller.getRestRequestItem(parameters, token, converter,
             beanJsonConverter);
-        listener.executing(item);
+        } catch (Exception e) {
+          return ImmediateFuture.errorInstance(e);
+        }
 
+      try {
+        listener.executing(item);
         return methodCaller.call(handlerProvider.get(), item);
       } catch (Exception e) {
         return ImmediateFuture.errorInstance(e);
+      } finally {
+          listener.executed(item);
       }
     }
   }

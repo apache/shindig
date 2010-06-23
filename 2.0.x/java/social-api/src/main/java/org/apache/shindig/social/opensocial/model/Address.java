@@ -63,7 +63,7 @@ public interface Address {
     /** the field name for primary. */
     PRIMARY("primary");
 
-    private static final Map<String, Field> lookup = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
+    private static final Map<String, Field> LOOKUP = Maps.uniqueIndex(EnumSet.allOf(Field.class), 
         Functions.toStringFunction());
 
     /**
@@ -91,7 +91,7 @@ public interface Address {
     }
 
     public static Field getField(String jsonString) {
-      return lookup.get(jsonString);
+      return LOOKUP.get(jsonString);
     }
   }
 

@@ -27,12 +27,12 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.UrlGenerator;
-import org.apache.shindig.gadgets.UrlValidationStatus;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.IframeUriManager;
+import org.apache.shindig.gadgets.uri.UriStatus;
 
 import com.google.common.collect.Maps;
 
@@ -42,7 +42,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -80,7 +79,7 @@ public class JsonRpcHandlerTest {
       "</Module>";
 
   private final FakeProcessor processor = new FakeProcessor();
-  private final FakeUrlGenerator urlGenerator = new FakeUrlGenerator();
+  private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
   private final JsonRpcHandler jsonRpcHandler
       = new JsonRpcHandler(new TestExecutorService(), processor, urlGenerator);
 
@@ -111,7 +110,7 @@ public class JsonRpcHandlerTest {
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    urlGenerator.iframeUrl = SPEC_URL.toString();
+    urlGenerator.iframeUrl = SPEC_URL;
 
     JSONObject response = jsonRpcHandler.process(input);
 
@@ -261,37 +260,20 @@ public class JsonRpcHandlerTest {
     }
   }
 
-  protected static class FakeUrlGenerator implements UrlGenerator {
+  protected static class FakeIframeUriManager implements IframeUriManager {
     protected boolean throwRandomFault = false;
-    protected String iframeUrl = "http://example.org/gadgets/foo-does-not-matter";
+    protected Uri iframeUrl = Uri.parse("http://example.org/gadgets/foo-does-not-matter");
 
-    protected FakeUrlGenerator() {
-    }
+    protected FakeIframeUriManager() { }
 
-    public String getBundledJsParam(Collection<String> features, GadgetContext context) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getBundledJsUrl(Collection<String> features, GadgetContext context) {
-      throw new UnsupportedOperationException();
-    }
-    
-    public UrlValidationStatus validateJsUrl(String jsUrl) {
-      throw new UnsupportedOperationException();
-    }
-
-    public String getIframeUrl(Gadget gadget) {
+    public Uri makeRenderingUri(Gadget gadget) {
       if (throwRandomFault) {
         throw new RuntimeException("BROKEN");
       }
       return iframeUrl;
     }
-    
-    public UrlValidationStatus validateIframeUrl(String url) {
-      throw new UnsupportedOperationException();
-    }
 
-    public String getGadgetDomainOAuthCallback(String container, String gadgetHost) {
+    public UriStatus validateRenderingUri(Uri uri) {
       throw new UnsupportedOperationException();
     }
   }

@@ -78,7 +78,7 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
   @Test
   public void testWithRefresh() throws Exception {
     ContentRewriterFeature.Config contentRewriterFeature = new ContentRewriterFeature.DefaultConfig(
-        ".*", "", "3600", "embed,img,script,link,style", "false", "false");
+        ".*", "", "3600", "embed,img,script,link,style", false, false);
     ProxyingLinkRewriter rewriter = new DefaultProxyingLinkRewriterFactory(
         defaultContainerRewriterUris).create(SPEC_URL, contentRewriterFeature,
         "default", false, false);
@@ -90,7 +90,7 @@ public class ProxyingLinkRewriterTest extends BaseRewriterTestCase {
   @Test
   public void testWithBadRefresh() throws Exception {
     ContentRewriterFeature.Config contentRewriterFeature = new ContentRewriterFeature.DefaultConfig(
-        ".*", "", "HTTP", "embed,img,script,link,style", "false", "false");
+        ".*", "", "HTTP", "embed,img,script,link,style", false, false);
     ProxyingLinkRewriter rewriter = new DefaultProxyingLinkRewriterFactory(
         defaultContainerRewriterUris).create(SPEC_URL, contentRewriterFeature,
         "default", false, false);

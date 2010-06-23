@@ -23,14 +23,12 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Common mime content types and utilities
  */
 public final class ContentTypes {
   private ContentTypes() {}
-  private static final Logger logger = Logger.getLogger(ContentTypes.class.getName());
 
   /**
    * Allowed alternatives to application/json, including types listed

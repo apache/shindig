@@ -107,7 +107,7 @@ public class MutableContent {
     }
     return content;
   }
-  
+
   /**
    * Sets the object's content as a raw String. Note, this operation
    * may clear the document if the content has changed
@@ -131,7 +131,7 @@ public class MutableContent {
   public InputStream getContentBytes() {
     return new ByteArrayInputStream(getRawContentBytes());
   }
-  
+
   protected byte[] getRawContentBytes() {
     if (contentBytes == null) {
       if (contentSource != null) {
@@ -144,12 +144,12 @@ public class MutableContent {
       } else if (content != null) {
         contentBytes = CharsetUtil.getUtf8Bytes(content);
       } else if (document != null) {
-        CharsetUtil.getUtf8Bytes(HtmlSerialization.serialize(document));
+        contentBytes = CharsetUtil.getUtf8Bytes(HtmlSerialization.serialize(document));
       }
     }
     return contentBytes;
   }
-  
+
   /**
    * Sets the object's contentBytes as the given raw input.
    * Note, this operation may clear the document if the content has changed.
@@ -180,7 +180,7 @@ public class MutableContent {
       incrementNumChanges();
     }
   }
-  
+
   /**
    * Retrieves the object contents in parsed form, if a
    * {@code GadgetHtmlParser} is configured and is able to parse the string
@@ -204,11 +204,11 @@ public class MutableContent {
     }
     return document;
   }
-  
+
   public int getNumChanges() {
     return numChanges;
   }
-  
+
   protected void incrementNumChanges() {
     ++numChanges;
   }
@@ -220,14 +220,14 @@ public class MutableContent {
   public boolean hasDocument() {
     return (document != null);
   }
-  
+
   public void addPipelinedData(String key, Object value) {
     if (null == pipelinedData) {
       pipelinedData = Maps.newHashMap();
     }
     pipelinedData.put(key, value);
   }
-  
+
   public Map<String, Object> getPipelinedData() {
     return (null == pipelinedData) ? EMPTY_MAP : pipelinedData;
   }

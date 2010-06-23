@@ -144,18 +144,14 @@ public class EndToEndServer {
     rpcServletHolder.setInitParameter("handlers", "org.apache.shindig.handlers");
     context.addServlet(rpcServletHolder, SOCIAL_RPC_BASE);
     context.addFilter(AuthenticationServletFilter.class, SOCIAL_RPC_BASE, 0);
+    context.addServlet(rpcServletHolder, GADGET_RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, GADGET_RPC_BASE, 0);
+    context.addServlet(rpcServletHolder, RPC_BASE);
+    context.addFilter(AuthenticationServletFilter.class, RPC_BASE, 0);
 
     // Attach the ConcatProxyServlet - needed for rewritten JS
     ServletHolder concatHolder = new ServletHolder(new ConcatProxyServlet());
     context.addServlet(concatHolder, CONCAT_BASE);
-
-    // Attach the Gadget 
-    ServletHolder gadgetsJsonRpcServletHolder = new ServletHolder(new JsonRpcServlet());
-    gadgetsJsonRpcServletHolder.setInitParameter("handlers", "org.apache.shindig.handlers");
-    context.addServlet(gadgetsJsonRpcServletHolder, GADGET_RPC_BASE);
-    context.addFilter(AuthenticationServletFilter.class, GADGET_RPC_BASE, 0);
-    context.addServlet(gadgetsJsonRpcServletHolder, RPC_BASE);
-    context.addFilter(AuthenticationServletFilter.class, RPC_BASE, 0);
 
     // Attach the JsServlet - needed for rewritten JS
     ServletHolder jsHolder = new ServletHolder(new JsServlet());

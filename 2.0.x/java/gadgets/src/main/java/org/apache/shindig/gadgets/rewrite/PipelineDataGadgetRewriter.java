@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.common.JsonSerializer;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.apache.shindig.gadgets.preload.PipelineExecutor;
 import org.apache.shindig.gadgets.spec.PipelinedData;
 import org.apache.shindig.gadgets.spec.SpecParserException;
@@ -31,8 +31,8 @@ import com.google.inject.Inject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class PipelineDataGadgetRewriter implements GadgetRewriter {
 
-  private static final Logger logger = Logger.getLogger(
+  private static final Logger LOG = Logger.getLogger(
       PipelineDataGadgetRewriter.class.getName());
   
   private final PipelineExecutor executor;
@@ -114,16 +114,15 @@ public class PipelineDataGadgetRewriter implements GadgetRewriter {
    * Parses pipelined data out of a Document.
    */
   Map<PipelinedData, Node> parsePipelinedData(Gadget gadget, Document doc) {
-    NodeList dataTags = doc.getElementsByTagName(GadgetHtmlParser.OSML_DATA_TAG);
+    List<Element> dataTags = SocialDataTags.getTags(doc, SocialDataTags.OSML_DATA_TAG);
     Map<PipelinedData, Node> pipelineNodes = Maps.newHashMap();
-    for (int i = 0; i < dataTags.getLength(); i++) {
-      Node n = dataTags.item(i);
+    for (Element n : dataTags) {
       try {
-        PipelinedData pipelineData = new PipelinedData((Element) n, gadget.getSpec().getUrl());
+        PipelinedData pipelineData = new PipelinedData(n, gadget.getSpec().getUrl());
         pipelineNodes.put(pipelineData, n);
       } catch (SpecParserException e) {
         // Leave the element to the client
-        logger.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
+        LOG.log(Level.INFO, "Failed to parse preload in " + gadget.getSpec().getUrl(), e);
       }
     }
     return pipelineNodes;

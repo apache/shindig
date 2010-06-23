@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  * Container for OAuth specific data to include in the response to the client.
  */
 public class OAuthResponseParams {
-  private static final Logger logger = Logger.getLogger(OAuthResponseParams.class.getName());
+  private static final Logger LOG = Logger.getLogger(OAuthResponseParams.class.getName());
 
   // Finds the values of sensitive response params: oauth_token_secret and oauth_session_handle
   private static final Pattern REMOVE_SECRETS =
@@ -99,8 +99,8 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request.
    */
   public void logDetailedWarning(String note) {
-    if (logger.isLoggable(Level.WARNING)) {
-      logger.log(Level.WARNING, note + '\n' + getDetails(null));
+    if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note + '\n' + getDetails(null));
     }
   }
 
@@ -108,14 +108,14 @@ public class OAuthResponseParams {
    * Log a warning message that includes the details of the request and the thrown exception.
    */
   public void logDetailedWarning(String note, Throwable e) {
-    if (logger.isLoggable(Level.WARNING)) {
-      logger.log(Level.WARNING, note + '\n' + getDetails(e), e);
+    if (LOG.isLoggable(Level.WARNING)) {
+      LOG.log(Level.WARNING, note + '\n' + getDetails(e), e);
     }
   }
   
   public void logDetailedInfo(String note, Throwable e) {
-    if (logger.isLoggable(Level.INFO)) {    
-      logger.log(Level.INFO, note + '\n' + getDetails(e), e);
+    if (LOG.isLoggable(Level.INFO)) {    
+      LOG.log(Level.INFO, note + '\n' + getDetails(e), e);
     }
   }
 

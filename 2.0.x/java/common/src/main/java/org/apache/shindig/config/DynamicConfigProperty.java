@@ -34,7 +34,7 @@ import javax.el.ValueExpression;
  * Implements CharSequence strictly as a marker. Only toString is supported.
  */
 public class DynamicConfigProperty implements CharSequence {
-  private static final Logger logger = Logger.getLogger(DynamicConfigProperty.class.getName()); 
+  private static final Logger LOG = Logger.getLogger(DynamicConfigProperty.class.getName()); 
   private final ELContext context;
   private final ValueExpression expression;
 
@@ -48,7 +48,7 @@ public class DynamicConfigProperty implements CharSequence {
     try {
       return (String) expression.getValue(context);
     } catch (ELException e) {
-      logger.log(Level.WARNING, "Evaluation of " + expression.getExpressionString() + " failed", e);
+      LOG.log(Level.WARNING, "Evaluation of " + expression.getExpressionString() + " failed", e);
       return "";
     }
   }

@@ -152,7 +152,7 @@ public class DefaultGadgetSpecFactoryTest {
     expect(pipeline.execute(request)).andReturn(response);
     replay(pipeline);
 
-    GadgetSpec spec = specFactory.getGadgetSpec(createContext(SPEC_URL, true));
+    specFactory.getGadgetSpec(createContext(SPEC_URL, true));
   }
 
   @Test(expected = GadgetException.class)
@@ -167,7 +167,7 @@ public class DefaultGadgetSpecFactoryTest {
   @Test
   public void specFetchedWithBomChar() throws Exception {
     HttpRequest request = createIgnoreCacheRequest();
-    HttpResponse response = new HttpResponse("\uFEFF" + LOCAL_SPEC_XML);
+    HttpResponse response = new HttpResponse('\uFEFF' + LOCAL_SPEC_XML);
     expect(pipeline.execute(request)).andReturn(response);
     replay(pipeline);
 
@@ -350,10 +350,6 @@ public class DefaultGadgetSpecFactoryTest {
     public HttpResponse execute(HttpRequest request) {
       this.request = request;
       return new HttpResponse(LOCAL_SPEC_XML);
-    }
-
-    public void normalizeProtocol(HttpRequest request) throws GadgetException {
-      //No Op
     }
   }
 }

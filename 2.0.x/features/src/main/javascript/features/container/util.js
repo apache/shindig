@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
- * @fileoverview Utility methods common container.
+ * @fileoverview Utility methods for common container.
  */
+
 
 /**
  * @type {Object}
  */
 shindig.container = {};
+
 
 /**
  * @type {Object}
@@ -60,6 +63,7 @@ shindig.container.util.parsePrefixPath = function(uri, opt_postfixPath) {
   }
   return path;
 };
+
 
 /**
  * Extract path of a URL.
@@ -126,21 +130,4 @@ shindig.container.util.toArrayOfJsonKeys = function(json) {
     result.push(key);
   }
   return result;
-};
-
-
-// TODO unused?
-/**
- * Count the number of own/self properties in json.
- * @param {Object} json the JSON to act on.
- * @return {number} Number of elements in json.
- */
-shindig.container.util.countProperties = function(json) {
-  var count = 0;
-  for (var key in json) {
-    if (json.hasOwnProperty(key)) {
-      count++;
-    }
-  }
-  return count;
 };

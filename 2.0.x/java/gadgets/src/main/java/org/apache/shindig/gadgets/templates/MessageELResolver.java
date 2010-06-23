@@ -72,7 +72,7 @@ public class MessageELResolver extends ELResolver {
       context.setPropertyResolved(true);
       return bundle;
     } else if (base instanceof MessageBundle) {
-      String text = bundle.getMessages().get(property);
+      String text = bundle.getMessages().get(property.toString());
       if (text == null) {
         context.setPropertyResolved(true);
         return null;

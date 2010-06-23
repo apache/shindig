@@ -60,7 +60,7 @@ import com.google.inject.Inject;
  */
 public class DefaultTemplateProcessor implements TemplateProcessor {
   
-  private static final Logger logger = Logger.getLogger(DefaultTemplateProcessor.class.getName()); 
+  private static final Logger LOG = Logger.getLogger(DefaultTemplateProcessor.class.getName()); 
   
   public static final String PROPERTY_INDEX = "Index";
   public static final String PROPERTY_COUNT = "Count";
@@ -482,7 +482,7 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
       Object result = expr.getValue(elContext);
       return type.cast(result);
     } catch (ELException e) {
-      logger.log(Level.WARNING, "EL failure for gadget {0}: {1}",
+      LOG.log(Level.WARNING, "EL failure for gadget {0}: {1}",
           new Object[]{getTemplateContext().getGadget().getContext().getUrl(),
               e.getMessage()});
       return defaultValue;

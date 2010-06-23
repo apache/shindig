@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview This manages rendering of gadgets in a place holder, within an
  * HTML element in the container. The API for this is low-level. Use the
@@ -198,12 +199,12 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
  * @param {function(Object)=} opt_callback Function called with gadget info after
  *     navigation has occurred.
  */
-shindig.container.GadgetSite.prototype.navigateTo = function(gadgetUrl, gadgetParams,
-    renderParams, opt_callback) {
+shindig.container.GadgetSite.prototype.navigateTo = function(
+    gadgetUrl, gadgetParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
-  var gadgetInfo = osapi.gadgets.getCachedMetadataInfo(gadgetUrl);
-
+  
   // If metadata has been loaded/cached.
+  var gadgetInfo = this.service_.getCachedGadgetMetadata(gadgetUrl);
   if (gadgetInfo) {
     this.render(gadgetInfo, gadgetParams, renderParams);
     callback(gadgetInfo);
@@ -217,9 +218,10 @@ shindig.container.GadgetSite.prototype.navigateTo = function(gadgetUrl, gadgetPa
     var self = this;
     this.service_.getGadgetMetadata(request, function(response) {
       if (!response.error) {
-        var data = response.data;
-        var gadgetInfo = data[gadgetUrl];
+        var gadgetInfo = response[gadgetUrl];
         self.render(gadgetInfo, gadgetParams, renderParams);
+        callback(gadgetInfo);
+      } else {
         callback(response);
       }
     });
@@ -234,8 +236,8 @@ shindig.container.GadgetSite.prototype.navigateTo = function(gadgetUrl, gadgetPa
  * @param {Object} renderParams. Render parameters for the gadget, including:
  *     view, width, height.
  */
-shindig.container.GadgetSite.prototype.render = function(gadgetInfo, gadgetParams,
-    renderParams) {
+shindig.container.GadgetSite.prototype.render = function(
+    gadgetInfo, gadgetParams, renderParams) {
   var curUrl = this.curGadget_ ? this.curGadget_.getUrl() : null;
 
   var previousView = null;
@@ -290,7 +292,8 @@ shindig.container.GadgetSite.prototype.render = function(gadgetInfo, gadgetParam
  * @param {function(Object)} callback Function to call upon RPC completion.
  * @param {...number} var_args payload to pass to the recipient.
  */
-shindig.container.GadgetSite.prototype.rpcCall = function(serviceName, callback, var_args) {
+shindig.container.GadgetSite.prototype.rpcCall = function(
+    serviceName, callback, var_args) {
   if (this.curGadget_) {
     gadgets.rpc.call(this.curGadget_.getIframeId(), serviceName, callback, var_args);
   }
@@ -306,7 +309,7 @@ shindig.container.GadgetSite.prototype.rpcCall = function(serviceName, callback,
  */
 shindig.container.GadgetSite.prototype.updateSecurityToken_
     = function(gadgetInfo, renderParams) {
-  var tokenInfo = osapi.gadgets.getCachedTokenInfo(gadgetInfo['url']);
+  var tokenInfo = this.service_.getCachedGadgetToken(gadgetInfo['url']);
   if (tokenInfo) {
     var token = tokenInfo['token'];
     this.loadingGadget_.setSecurityToken(token);

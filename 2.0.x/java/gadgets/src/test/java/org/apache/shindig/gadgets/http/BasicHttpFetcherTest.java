@@ -17,12 +17,30 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.Test;
 
 public class BasicHttpFetcherTest extends AbstractHttpFetcherTest {
-
   @Before
-  public void setUp() {
-    fetcher = new BasicHttpFetcher();
+  public void setUp() throws Exception {
+    fetcher = new BasicHttpFetcher(null);
+  }
+
+  @Test
+  public void testWithProxy() throws Exception {
+    fetcher = new BasicHttpFetcher(BASE_URL.getAuthority());
+
+    String content = "Hello, Gagan!";
+    Uri uri = new UriBuilder(Uri.parse("http://www.google.com/search"))
+        .addQueryParameter("body", content)
+        .addQueryParameter("status", "201")
+        .toUri();
+    HttpRequest request = new HttpRequest(uri);
+    HttpResponse response = fetcher.fetch(request);
+    assertEquals(201, response.getHttpStatusCode());
+    assertEquals(content, response.getResponseAsString());
   }
 }

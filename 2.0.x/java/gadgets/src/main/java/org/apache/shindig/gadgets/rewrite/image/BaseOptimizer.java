@@ -45,7 +45,7 @@ import javax.imageio.metadata.IIOMetadata;
  */
 abstract class BaseOptimizer {
 
-  static final Map<String, ImageFormat> formatNameToImageFormat = ImmutableMap.of(
+  static final Map<String, ImageFormat> FORMAT_NAME_TO_IMAGE_FORMAT = ImmutableMap.of(
       "png", ImageFormat.IMAGE_FORMAT_PNG,
       "gif", ImageFormat.IMAGE_FORMAT_GIF,
       "jpeg", ImageFormat.IMAGE_FORMAT_JPEG);
@@ -77,7 +77,7 @@ abstract class BaseOptimizer {
       }
       return new ImageIOOutputter(writer, param);
     }
-    return new SanselanOutputter(formatNameToImageFormat.get(getOriginalFormatName()));
+    return new SanselanOutputter(FORMAT_NAME_TO_IMAGE_FORMAT.get(getOriginalFormatName()));
   }
 
   /**

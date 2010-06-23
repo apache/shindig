@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
+
 /**
  * @fileoverview This represents the container for the current window or create
  * the container if none already exists.
  */
+
 
 /**
  * @param {Object=} opt_config Configuration JSON.
@@ -52,17 +54,11 @@ shindig.container.Container = function(opt_config) {
       shindig.container.ContainerConfig.RENDER_TEST, false));
 
   /**
-   * @type {boolean}
-   */
-  this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.SAME_DOMAIN, true));
-
-  /**
    * Security token refresh interval (in ms) for debugging.
    * @type {number}
    */
-  this.tokenRefreshInterval_ = Number(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
+  this.tokenRefreshInterval_ = Number(shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
       30 * 60 * 1000));
 
   /**
@@ -75,7 +71,7 @@ shindig.container.Container = function(opt_config) {
    * @type {number|null}
    */
   this.tokenRefreshTimer_ = null;
-
+  
   this.registerRpcServices_();
 
   this.onConstructed(config);
@@ -86,7 +82,7 @@ shindig.container.Container = function(opt_config) {
  * Create a new gadget site.
  * @param {Element} gadgetEl HTML element into which to render
  * @param {Element=} opt_bufferEl Optional HTML element for double buffering.
- * @return {shindig.container.GadgetSite} site created for application to hold to.
+ * @return {shindig.container.GadgetSite} site created for client to hold to.
  */
 shindig.container.Container.prototype.newGadgetSite = function(
     gadgetEl, opt_bufferEl) {
@@ -99,7 +95,7 @@ shindig.container.Container.prototype.newGadgetSite = function(
 
 /**
  * @param {string} id Iframe ID of gadget site to get.
- * @return {shindig.container.GadgetSite} The gadget site with given holder's iframeId.
+ * @return {shindig.container.GadgetSite} The gadget site with the given id.
  */
 shindig.container.Container.prototype.getGadgetSite = function(id) {
   // TODO: Support getting only the loading/active gadget in 2x buffers.
@@ -130,14 +126,15 @@ shindig.container.Container.prototype.getGadgetHolder = function(id) {
 /**
  * Called when gadget is navigated.
  *
- * @param {shindig.container.GadgetSite} site the site where navigation is ocurring
- * @param {string} gadgetUrl The URI of the gadget
- * @param {Object} gadgetParams view params for the gadget
- * @param {Object} renderParams render parameters, including the view
- * @param {function(Object)=} opt_callback Callback that occurs after gadget is loaded
+ * @param {shindig.container.GadgetSite} site destination gadget to navigate to.
+ * @param {string} gadgetUrl The URI of the gadget.
+ * @param {Object} gadgetParams view params for the gadget.
+ * @param {Object} renderParams render parameters, including the view.
+ * @param {function(Object)=} opt_callback Callback after gadget is loaded.
  */
 shindig.container.Container.prototype.navigateGadget = function(
     site, gadgetUrl, gadgetParams, renderParams, opt_callback) {
+  var callback = opt_callback || function() {};
   if (this.renderDebug_) {
     renderParams['nocache'] = true;
     renderParams['debug'] = true;
@@ -145,26 +142,24 @@ shindig.container.Container.prototype.navigateGadget = function(
   if (this.renderTest_) {
     renderParams['testmode'] = true;
   }
+
   var self = this;
-  var callback = function(response) {
+  // TODO: Lifecycle, add ability for current gadget to cancel nav.
+  site.navigateTo(gadgetUrl, gadgetParams, renderParams, function(response) {
     // TODO: Navigate to error screen on primary gadget load failure
     // TODO: Should display error without doing a standard navigate.
     // TODO: Bad if the error gadget fails to load.
     if (!response.error) {
       self.scheduleRefreshTokens_();
     }
-    if (opt_callback) {
-      opt_callback(response);
-    }
-  };
-  // TODO: Lifecycle, add ability for current gadget to cancel nav.
-  site.navigateTo(gadgetUrl, gadgetParams, renderParams, callback);
+    callback(response);
+  });
 };
 
 
 /**
  * Called when gadget is closed. This may stop refreshing of tokens.
- * @param {shindig.container.GadgetSite} site the site where navigation occurred.
+ * @param {shindig.container.GadgetSite} site navigate gadget to close.
  */
 shindig.container.Container.prototype.closeGadget = function(site) {
   var id = site.getId();
@@ -192,10 +187,8 @@ shindig.container.Container.prototype.preloadGadgets = function(request) {
   var self = this;
   this.service_.getGadgetMetadata(metadataRequest, function(response) {
     if (!response.error) {
-      var data = response.data;
-      var ids = shindig.container.util.toArrayOfJsonKeys(data);
-      for (var i = 0; i < ids.length; i++) {
-        self.addPreloadedGadgetUrl_(ids[i]);
+      for (var id in response) {
+        self.addPreloadedGadgetUrl_(id);
       }
       self.scheduleRefreshTokens_();
     }
@@ -226,10 +219,9 @@ shindig.container.ContainerConfig = {};
 shindig.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
 // Whether test mode is turned on.
 shindig.container.ContainerConfig.RENDER_TEST = 'renderTest';
-// Toggle to render gadgets in the same domain.
-shindig.container.ContainerConfig.SAME_DOMAIN = 'sameDomain';
 // Security token refresh interval (in ms) for debugging.
-shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
+shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL =
+    'tokenRefreshInterval';
 
 
 /**
@@ -312,7 +304,8 @@ shindig.container.Container.prototype.registerRpcServices_ = function() {
  * @param {string} gadgetUrl URL of preloaded gadget.
  * @private
  */
-shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUrl) {
+shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(
+    gadgetUrl) {
   this.preloadedGadgetUrls_[gadgetUrl] = null;
 };
 
@@ -323,7 +316,8 @@ shindig.container.Container.prototype.addPreloadedGadgetUrl_ = function(gadgetUr
  * @return {Array} An array of URLs of gadgets.
  * @private
  */
-shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ = function() {
+shindig.container.Container.prototype.getTokenRefreshableGadgetUrls_ =
+    function() {
   // Uses a JSON to ensure uniqueness. Collect all preloaded gadget URLs.
   var result = shindig.container.util.mergeJsons({}, this.preloadedGadgetUrls_);
 
@@ -352,16 +346,15 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
   };
 
   var self = this;
-  osapi.gadgets.getToken(request, function(response) {
+  this.service_.getGadgetToken(request, function(response) {
     if (!response.error) {
       // Update current (visible) gadgets with new tokens (already stored in
       // cache). Do not need to update pre-loaded gadgets, since new tokens will
       // take effect when they are navigated to.
-      var data = response.data;
       for (var key in self.sites_) {
         var holder = self.sites_[key].getActiveGadget();
         if (holder) {
-          var token = data[holder.getUrl()]['token'];
+          var token = response[holder.getUrl()]['token'];
           gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
               token);
         }
