@@ -1133,6 +1133,7 @@
               <exclude>php/test/misc/*.xml</exclude>
               <exclude>BUILD-JAVA</exclude>
               <exclude>COMMITTERS</exclude>
+              <exclude>UPGRADING</exclude>
               <exclude>**/MANIFEST.MF</exclude>
               <exclude>**/src/test/resources/**/*.html</exclude>
               <exclude>**/src/test/resources/**/*.css</exclude>
