@@ -195,7 +195,7 @@ public class HttpGadgetContext extends GadgetContext {
   private static Boolean getDebug(HttpServletRequest req) {
     String debug = req.getParameter("debug");
     if (debug == null) {
-      return null;
+      return Boolean.FALSE;
     } else if ("0".equals(debug)) {
       return Boolean.FALSE;
     }
@@ -209,7 +209,7 @@ public class HttpGadgetContext extends GadgetContext {
   private static Boolean getIgnoreCache(HttpServletRequest req) {
     String ignoreCache = req.getParameter("nocache");
     if (ignoreCache == null) {
-      return null;
+      return Boolean.FALSE;
     } else if ("0".equals(ignoreCache)) {
       return Boolean.FALSE;
     }
