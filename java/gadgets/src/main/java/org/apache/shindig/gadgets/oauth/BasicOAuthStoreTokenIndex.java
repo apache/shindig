@@ -70,9 +70,12 @@ public class BasicOAuthStoreTokenIndex {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof BasicOAuthStoreTokenIndex)) {
+      return false;
+    }
     final BasicOAuthStoreTokenIndex other = (BasicOAuthStoreTokenIndex) obj;
     if (gadgetUri == null) {
       if (other.gadgetUri != null) return false;

@@ -86,6 +86,10 @@ public class UserId {
   // These are overriden so that EasyMock doesn't throw a fit
   @Override
   public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    }
+    
     if (!(o instanceof UserId)) {
       return false;
     }

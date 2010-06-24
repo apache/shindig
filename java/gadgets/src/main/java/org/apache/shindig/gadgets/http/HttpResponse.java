@@ -528,7 +528,7 @@ public final class HttpResponse implements Externalizable {
   public int hashCode() {
     return httpStatusCode
       ^ headers.hashCode()
-      ^ responseBytes.hashCode();
+      ^ Arrays.hashCode(responseBytes);
   }
 
   @Override
