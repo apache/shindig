@@ -476,27 +476,25 @@ public class HttpRequest {
     return method.hashCode()
       ^ uri.hashCode()
       ^ authType.hashCode()
-      ^ postBody.hashCode()
+      ^ Arrays.hashCode(postBody)
       ^ headers.hashCode();
   }
   
   @Override
   public boolean equals(Object obj) {
-    if (obj == this) {return true;}
-    if (obj instanceof HttpRequest) {
-      HttpRequest req = (HttpRequest)obj;
-      return method.equals(req.method) &&
-             uri.equals(req.uri) &&
-             authType == req.authType &&
-             Arrays.equals(postBody, req.postBody) &&
-             headers.equals(req.headers);
-             // TODO: Verify that other fields aren't meaningful. Especially important to check for
-             // oauth args.
+    if (obj == this) {
+      return true;
     }
-    return false;
+    if (!(obj instanceof HttpRequest)) {
+      return false;
+    }
+    HttpRequest req = (HttpRequest)obj;
+    return method.equals(req.method) &&
+            uri.equals(req.uri) &&
+            authType == req.authType &&
+            Arrays.equals(postBody, req.postBody) &&
+            headers.equals(req.headers);
+    // TODO: Verify that other fields aren't meaningful. Especially important to check for oauth args.
   }
-
-
-
 }
 

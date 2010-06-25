@@ -57,6 +57,19 @@ public class PropertiesModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(this.binder(), getProperties());
+    // This could be generalized to inject any system property...
+    this.binder().bindConstant().annotatedWith(Names.named("shindig.port")).to(getServerPort());
+  }
+
+  /**
+   * Should return the port that the current server is running on.  Useful for testing and working out of the box configs.
+   * Looks for a port in system properties "shindig.port" then "jetty.port", if not set uses fixed value of "8080"
+   * @return an integer port number as a string.
+   */
+  protected String getServerPort() {
+    return System.getProperty("shindig.port") != null ? System.getProperty("shindig.port") :
+           System.getProperty("jetty.port") != null ? System.getProperty("jetty.port") :
+           "8080";
   }
 
   protected static String getDefaultPropertiesPath() {

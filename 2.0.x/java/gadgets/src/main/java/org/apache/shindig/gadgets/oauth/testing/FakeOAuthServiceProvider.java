@@ -121,7 +121,6 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
 
   private class TokenState {
     String tokenSecret;
-    OAuthConsumer consumer;
     State state;
     String userData;
     String sessionHandle;
@@ -129,9 +128,8 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String callbackUrl;
     String verifier;
 
-    public TokenState(String tokenSecret, OAuthConsumer consumer, String callbackUrl) {
+    public TokenState(String tokenSecret, String callbackUrl) {
       this.tokenSecret = tokenSecret;
-      this.consumer = consumer;
       this.state = State.PENDING;
       this.userData = null;
       this.callbackUrl = callbackUrl;
@@ -331,7 +329,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     String requestTokenSecret = Crypto.getRandomString(16);
     String callbackUrl = info.message.getParameter(OAuth.OAUTH_CALLBACK);
     tokenState.put(
-        requestToken, new TokenState(requestTokenSecret, accessor.consumer, callbackUrl));
+        requestToken, new TokenState(requestTokenSecret, callbackUrl));
     List<Parameter> responseParams = OAuth.newList(
         "oauth_token", requestToken,
         "oauth_token_secret", requestTokenSecret);
@@ -539,7 +537,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   public TokenPair getPreapprovedToken(String userData) {
     String requestToken = Crypto.getRandomString(16);
     String requestTokenSecret = Crypto.getRandomString(16);
-    TokenState state = new TokenState(requestTokenSecret, oauthConsumer, null);
+    TokenState state = new TokenState(requestTokenSecret, null);
     state.approveToken();
     state.setUserData(userData);
     tokenState.put(requestToken, state);

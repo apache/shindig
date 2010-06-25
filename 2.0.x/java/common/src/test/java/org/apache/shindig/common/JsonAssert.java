@@ -28,80 +28,80 @@ import org.json.JSONObject;
 public final class JsonAssert {
   private JsonAssert() {}
 
-  public static void assertJsonArrayEquals(JSONArray left, JSONArray right) throws Exception {
-    if (left.length() != right.length()) {
-      assertEquals("Arrays are not of equal length", left.toString(), right.toString());
+  public static void assertJsonArrayEquals(JSONArray expected, JSONArray actual) throws Exception {
+    if (expected.length() != actual.length()) {
+      assertEquals("Arrays are not of equal length", expected.toString(), actual.toString());
     }
 
-    for (int i = 0; i < left.length(); ++i) {
-      Object leftValue = left.opt(i);
-      Object rightValue = right.opt(i);
+    for (int i = 0; i < expected.length(); ++i) {
+      Object expectedValue = expected.opt(i);
+      Object actualValue = actual.opt(i);
 
-      assertSame(left.toString() + " != " + right.toString(),
-                   leftValue.getClass(), rightValue.getClass());
+      assertSame(expected.toString() + " != " + actual.toString(),
+                   expectedValue.getClass(), actualValue.getClass());
 
-      if (leftValue instanceof JSONObject) {
-        assertJsonObjectEquals((JSONObject) leftValue, (JSONObject) rightValue);
-      } else if (leftValue instanceof JSONArray) {
-        assertJsonArrayEquals((JSONArray) leftValue, (JSONArray) rightValue);
+      if (expectedValue instanceof JSONObject) {
+        assertJsonObjectEquals((JSONObject) expectedValue, (JSONObject) actualValue);
+      } else if (expectedValue instanceof JSONArray) {
+        assertJsonArrayEquals((JSONArray) expectedValue, (JSONArray) actualValue);
       } else {
-        assertEquals(leftValue, rightValue);
+        assertEquals(expectedValue, actualValue);
       }
     }
   }
 
-  public static void assertJsonObjectEquals(JSONObject left, JSONObject right) throws Exception {
-    if (left.length() != right.length()) {
-      assertEquals("Objects are not of equal size", left.toString(2), right.toString(2));
+  public static void assertJsonObjectEquals(JSONObject expected, JSONObject actual) throws Exception {
+    if (expected.length() != actual.length()) {
+      assertEquals("Objects are not of equal size", expected.toString(2), actual.toString(2));
     }
 
     // Both are empty so skip
-    if (JSONObject.getNames(left) == null && JSONObject.getNames(right) == null) {
+    if (JSONObject.getNames(expected) == null && JSONObject.getNames(actual) == null) {
       return;
     }
-    for (String name : JSONObject.getNames(left)) {
-      Object leftValue = left.opt(name);
-      Object rightValue = right.opt(name);
+    for (String name : JSONObject.getNames(expected)) {
+      Object expectedValue = expected.opt(name);
+      Object actualValue = actual.opt(name);
 
-      if (leftValue != null) {
-        assertNotNull(left.toString() + " != " + right.toString(), rightValue);
+      if (expectedValue != null) {
+        assertNotNull(expected.toString() + " != " + actual.toString(), actualValue);
       }
-      assertSame(left.toString() + " != " + right.toString(),
-                 leftValue.getClass(), rightValue.getClass());
+      assertSame(expected.toString() + " != " + actual.toString(),
+                 expectedValue.getClass(), actualValue.getClass());
 
-      if (leftValue instanceof JSONObject) {
-        assertJsonObjectEquals((JSONObject) leftValue, (JSONObject) rightValue);
-      } else if (leftValue instanceof JSONArray) {
-        assertJsonArrayEquals((JSONArray) leftValue, (JSONArray) rightValue);
+      if (expectedValue instanceof JSONObject) {
+        assertJsonObjectEquals((JSONObject) expectedValue, (JSONObject) actualValue);
+      } else if (expectedValue instanceof JSONArray) {
+        assertJsonArrayEquals((JSONArray) expectedValue, (JSONArray) actualValue);
       } else {
-        assertEquals(leftValue, rightValue);
+        assertEquals(expectedValue, actualValue);
       }
     }
   }
 
-  public static void assertJsonEquals(String left, String right) throws Exception {
-    switch (left.charAt(0)) {
+  public static void assertJsonEquals(String expected, String actual) throws Exception {
+    switch (expected.charAt(0)) {
       case '{':
-        assertJsonObjectEquals(new JSONObject(left), new JSONObject(right));
+        assertJsonObjectEquals(new JSONObject(expected), new JSONObject(actual));
         break;
       case '[':
-        assertJsonArrayEquals(new JSONArray(left), new JSONArray(right));
+        assertJsonArrayEquals(new JSONArray(expected), new JSONArray(actual));
         break;
       default:
-        assertEquals(left, right);
+        assertEquals(expected, actual);
         break;
     }
   }
 
-  public static void assertObjectEquals(Object left, Object right) throws Exception {
-    if (!(left instanceof String)) {
-      left = JsonSerializer.serialize(left);
+  public static void assertObjectEquals(Object expected, Object actual) throws Exception {
+    if (!(expected instanceof String)) {
+      expected = JsonSerializer.serialize(expected);
     }
 
-    if (!(right instanceof String)){
-      right = JsonSerializer.serialize(right);
+    if (!(actual instanceof String)){
+      actual = JsonSerializer.serialize(actual);
     }
 
-    assertJsonEquals((String) left, (String) right);
+    assertJsonEquals((String) expected, (String) actual);
   }
 }

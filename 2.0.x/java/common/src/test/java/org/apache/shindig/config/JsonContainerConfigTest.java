@@ -193,6 +193,19 @@ public class JsonContainerConfigTest {
   }
 
   @Test
+  public void shindigPortTest() throws Exception {
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
+    json.put("expression", "port=${SERVER_PORT}");
+
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(), Expressions.forTesting());
+
+    assertEquals("port=8080", config.getString(DEFAULT_CONTAINER, "expression"));
+
+  }
+
+  @Test
   public void expressionEvaluationUsingParent() throws Exception {
     // We use a JSON Object here to guarantee that we're well formed up front.
     JSONObject json = new JSONObject();

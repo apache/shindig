@@ -93,8 +93,10 @@ public class AccelHandler extends ProxyBase {
     try {
       results = contentRewriterRegistry.rewriteHttpResponse(req, results);
     } catch (RewritingException e) {
-      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-                                e.getHttpStatusCode());
+      if (!isRecoverable(req, results, e)) {
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+                                  e.getHttpStatusCode());
+      }
     }
 
     // Copy the response headers and status code to the final http servlet
@@ -133,6 +135,28 @@ public class AccelHandler extends ProxyBase {
 
     Gadget gadget = DomWalker.makeGadget(requestUri);
     return new ProxyUriManager.ProxyUri(gadget, normalizedUri);
+  }
+
+  /**
+   * Returns true in case the error encountered while rewriting the content
+   * is recoverable. The rationale behind it is that errors should be thrown
+   * only in case of serious grave errors (defined to be un recoverable).
+   * It should always be preferred to handle errors and return the original
+   * content at least.
+   *
+   * TODO: Think through all cases which are recoverable to enforce minimal
+   * possible set of constraints.
+   * TODO: Log the exception and context around it.
+   *
+   * @param req The http request for fetching the resource.
+   * @param results The result of rewriting.
+   * @param exception Exception caught.
+   * @return True if the error is recoverable, false otherwise.
+   */
+  protected boolean isRecoverable(HttpRequest req, HttpResponse results,
+                                  RewritingException exception) {
+    return !(StringUtils.isEmpty(results.getResponseAsString()) &&
+             results.getHeaders() == null);
   }
 
   /**

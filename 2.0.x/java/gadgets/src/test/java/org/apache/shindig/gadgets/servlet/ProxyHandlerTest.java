@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.uri.Uri;
@@ -234,13 +235,20 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     @Override
     public boolean equals(Object obj) {
-      if (obj instanceof HttpRequest) {
-        HttpRequest req = (HttpRequest)obj;
-        if (req.getCacheTtl() != getCacheTtl() || req.getIgnoreCache() != getIgnoreCache()) {
-          return false;
-        }
+      if (obj == this) {
+        return true;
       }
-      return super.equals(obj);
+      if (!(obj instanceof HttpRequest)) {
+        return false;
+      }
+      HttpRequest req = (HttpRequest)obj;
+      return super.equals(obj) && req.getCacheTtl() == getCacheTtl() &&
+              req.getIgnoreCache() == getIgnoreCache();
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(super.hashCode(), getCacheTtl(), getIgnoreCache());
     }
   }
 
