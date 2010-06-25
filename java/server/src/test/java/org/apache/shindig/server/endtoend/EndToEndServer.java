@@ -105,6 +105,9 @@ public class EndToEndServer {
    * Starts the server for end-to-end tests.
    */
   private Server createServer(int port) throws Exception {
+    System.setProperty("shindig.port", String.valueOf(port));
+    System.setProperty("jetty.port", String.valueOf(port));
+
     Server newServer = new Server(port);
 
     // Attach the test resources in /endtoend as static content for the test

@@ -102,10 +102,10 @@
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
 // URI for the default shindig test instance.
-"defaultShindigTestHost": "http://localhost:9003",
+"defaultShindigTestHost": "http://localhost:${SERVER_PORT}",
 
 // Authority (host:port without scheme) for the proxy and concat servlets.
-"defaultShindigProxyConcatAuthority": "localhost:9003",
+"defaultShindigProxyConcatAuthority": "localhost:${SERVER_PORT}",
 
 // Default Uri config: these must be overridden - specified here for testing purposes
 "gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",

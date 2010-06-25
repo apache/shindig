@@ -259,7 +259,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
     verify();
     String results = "_js={\r\n"
       + addVar(URL1.toString(), SCRT1_ESCAPED)
-      + "FAILED_TO_RETRIEVE_CONTENT concat(http://example.org/4.js) null";
+      + "FAILED_TO_RETRIEVE_CONTENT concat(http://example.org/4.js) null};\r\n";
     assertEquals(results, recorder.getResponseAsString());
     assertEquals(400, recorder.getHttpStatusCode());
   }
@@ -274,7 +274,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
 
     String results = "_js={\r\n"
         + addVar(URL1.toString(), SCRT1_ESCAPED)
-        + "HTML_PARSE_ERROR concat(http://example.org/4.js) null";
+        + "HTML_PARSE_ERROR concat(http://example.org/4.js) null};\r\n";
 
     expectRequestWithUris(Lists.newArrayList(URL1, URL4), "_js");
     
