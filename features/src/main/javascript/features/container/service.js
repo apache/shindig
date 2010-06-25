@@ -33,20 +33,20 @@ shindig.container.Service = function(opt_config) {
   /**
    * @type {string}
    */
-  this.apiHost_ = String(google.container.util.getSafeJsonValue(config,
+  this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
      shindig.container.ServiceConfig.API_HOST, window.__API_HOST));
 
   /**
    * @type {string}
    */
-  this.apiPrefixPath_ = String(google.container.util.getSafeJsonValue(config,
+  this.apiPrefixPath_ = String(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ServiceConfig.API_PREFIX_PATH,
       window.__API_PREFIX_PATH));
   
   /**
    * @type {string}
    */
-  this.apiPath_ = String(google.container.util.getSafeJsonValue(config,
+  this.apiPath_ = String(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
   
   /**

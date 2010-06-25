@@ -116,7 +116,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
       uriBuilder.addQueryParameter(Param.JSON.getKey(), splitParam);
     }
 
-    Integer i = new Integer(START_INDEX);
+    Integer i = Integer.valueOf(START_INDEX);
     for (Uri resource : resourceUris) {
       uriBuilder.addQueryParameter(i.toString(), resource.toString());
       i++;
@@ -170,7 +170,7 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     }
     String splitParam = type == Type.JS ? uri.getQueryParameter(Param.JSON.getKey()) : null;
     
-    Integer i = new Integer(START_INDEX);
+    Integer i = Integer.valueOf(START_INDEX);
     String uriStr = null;
     while ((uriStr = uri.getQueryParameter(i.toString())) != null) {
       try {

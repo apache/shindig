@@ -592,7 +592,7 @@ public class FeatureRegistry {
     private final Collection<String> needed;
     private final RenderingContext rCtx;
     private final String container;
-    private final Boolean useUnsupported;
+    private final boolean useUnsupported;
     
     private FeatureCacheKey(Collection<String> needed, GadgetContext ctx, boolean useUnsupported) {
       this.needed = needed;
@@ -603,6 +603,9 @@ public class FeatureRegistry {
     
     @Override
     public boolean equals(Object other) {
+      if (other == this) {
+        return true;
+      }
       if (!(other instanceof FeatureCacheKey)) {
         return false;
       }

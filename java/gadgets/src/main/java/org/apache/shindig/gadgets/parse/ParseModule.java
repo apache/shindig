@@ -17,12 +17,12 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
+import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Provide parse bindings
@@ -60,8 +60,14 @@ public class ParseModule extends AbstractModule {
               Class.forName("org.apache.xerces.dom.DOMImplementationImpl").
                   getMethod("getDOMImplementation").invoke(null);
         }
-      } catch (Exception ex) {
-        //try another
+      } catch (ClassNotFoundException ex) {
+        // ignore, try another
+      } catch (IllegalAccessException ex) {
+        // ignore, try another
+      } catch (InvocationTargetException ex) {
+        // ignore, try another
+      } catch (NoSuchMethodException ex) {
+        // ignore, try another
       }
       try {
         if (domImpl == null) {

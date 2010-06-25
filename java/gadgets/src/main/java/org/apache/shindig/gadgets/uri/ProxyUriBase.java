@@ -88,6 +88,9 @@ public class ProxyUriBase {
 
   @Override
   public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    }
     if (!(obj instanceof ProxyUriBase)) {
       return false; 
     }
@@ -100,6 +103,12 @@ public class ProxyUriBase {
         && this.noCache == objUri.noCache
         && this.debug == objUri.debug
         && this.sanitizeContent == objUri.sanitizeContent);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(status, refresh, container, gadget, rewriteMimeType,
+            noCache, debug, sanitizeContent);
   }
 
   public ProxyUriBase setRewriteMimeType(String type) {

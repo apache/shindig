@@ -73,17 +73,30 @@ public class JsonContainerConfig extends AbstractContainerConfig {
 
   private final Map<String, Map<String, Object>> config;
   private final Expressions expressions;
+
   private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
 
+  // Used by tests
+  public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
+    this(containers, "8080", expressions);
+  }
   /**
    * Creates a new configuration from files.
    * @throws ContainerConfigException
    */
   @Inject
-  public JsonContainerConfig(@Named("shindig.containers.default") String containers, Expressions expressions)
+  public JsonContainerConfig(@Named("shindig.containers.default") String containers,
+                             @Named("shindig.port") String port,
+                             Expressions expressions)
       throws ContainerConfigException {
     this.expressions = expressions;
-    config = createContainers(loadContainers(containers));
+    JSONObject configJson = loadContainers(containers);
+    try {
+      configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_PORT", port);
+    } catch (JSONException e) {
+      // ignore
+    }
+    config = createContainers(configJson);
     init();
   }
 

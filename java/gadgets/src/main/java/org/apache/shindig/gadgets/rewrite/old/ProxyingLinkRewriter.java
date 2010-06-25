@@ -71,7 +71,7 @@ public class ProxyingLinkRewriter implements LinkRewriter {
         if(ignoreCache)
           result.append("&nocache=1");
         if (rewriterFeature.getExpires() != null &&
-            rewriterFeature.getExpires() != ContentRewriterFeature.EXPIRES_DEFAULT) {
+            !rewriterFeature.getExpires().equals(ContentRewriterFeature.EXPIRES_DEFAULT)) {
           result.append('&').append(ProxyBase.REFRESH_PARAM).append('=').append(rewriterFeature.getExpires().toString());
         }
         return result.toString();

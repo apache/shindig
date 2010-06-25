@@ -169,57 +169,67 @@ public class ConcatProxyServlet extends InjectedServlet {
 
     List<Pair<Uri, FutureTask<RequestContext>>> futureTasks =
         new ArrayList<Pair<Uri, FutureTask<RequestContext>>>();
-    
-    for (Uri resourceUri : concatUri.getBatch()) {
-      try {
-        HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
-        FutureTask<RequestContext> httpFetcher =
-            new FutureTask<RequestContext>(new HttpFetchCallable(httpReq));
-        futureTasks.add(Pairs.newPair(httpReq.getUri(), httpFetcher));
-        executor.execute(httpFetcher);
-      } catch (GadgetException ge) {
-        if (cos.outputError(resourceUri, ge)) {
-          // True returned from outputError indicates a terminal error.
-          return false;
-        }
-      }
-    }
-  
-    for (Pair<Uri, FutureTask<RequestContext>> futureTask : futureTasks) {
-      RequestContext requestCxt = null;
-      try {
+
+    try {
+      for (Uri resourceUri : concatUri.getBatch()) {
         try {
-          requestCxt = futureTask.two.get();
-        } catch (InterruptedException ie) {
-          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, ie);
-        } catch (ExecutionException ee) {
-          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, ee);
-        }
-        if (requestCxt.getGadgetException() != null) {
-          throw requestCxt.getGadgetException();
-        }
-        HttpResponse httpResp = requestCxt.getHttpResp();
-        if (httpResp != null) {
-          if (contentRewriterRegistry != null) {
-            try {
-              httpResp = contentRewriterRegistry.rewriteHttpResponse(requestCxt.getHttpReq(), 
-                  httpResp);
-            } catch (RewritingException e) {
-              throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-                  e.getHttpStatusCode());
-            }
+          HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
+          FutureTask<RequestContext> httpFetcher =
+                  new FutureTask<RequestContext>(new HttpFetchCallable(httpReq));
+          futureTasks.add(Pairs.newPair(httpReq.getUri(), httpFetcher));
+          executor.execute(httpFetcher);
+        } catch (GadgetException ge) {
+          if (cos.outputError(resourceUri, ge)) {
+            // True returned from outputError indicates a terminal error.
+            return false;
           }
-          cos.output(futureTask.one, httpResp);
-        } else {
-          return false;
-        }        
-      } catch (GadgetException ge) {
-        if (cos.outputError(futureTask.one, ge)) {
-          return false;
-        }    
+        }
+      }
+
+      for (Pair<Uri, FutureTask<RequestContext>> futureTask : futureTasks) {
+        RequestContext requestCxt = null;
+        try {
+          try {
+            requestCxt = futureTask.two.get();
+          } catch (InterruptedException ie) {
+            throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, ie);
+          } catch (ExecutionException ee) {
+            throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, ee);
+          }
+          if (requestCxt.getGadgetException() != null) {
+            throw requestCxt.getGadgetException();
+          }
+          HttpResponse httpResp = requestCxt.getHttpResp();
+          if (httpResp != null) {
+            if (contentRewriterRegistry != null) {
+              try {
+                httpResp = contentRewriterRegistry.rewriteHttpResponse(requestCxt.getHttpReq(),
+                        httpResp);
+              } catch (RewritingException e) {
+                throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+                        e.getHttpStatusCode());
+              }
+            }
+            cos.output(futureTask.one, httpResp);
+          } else {
+            return false;
+          }
+        } catch (GadgetException ge) {
+          if (cos.outputError(futureTask.one, ge)) {
+            return false;
+          }
+        }
+      }
+    } finally {
+      if (cos != null) {
+        try {
+          cos.close();
+        } catch (IOException ioe) {
+          // Ignore
+        }
       }
     }
-    cos.close();    
+
     return true;
   }
 
@@ -346,7 +356,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
   
   // Encapsulates the response context of a single resource fetch.
-  private class RequestContext {
+  private static class RequestContext {
     private HttpRequest httpReq;
     private HttpResponse httpResp;
     private GadgetException gadgetException;

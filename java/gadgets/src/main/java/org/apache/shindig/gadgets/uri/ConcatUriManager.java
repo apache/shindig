@@ -139,6 +139,9 @@ public interface ConcatUriManager {
 
     @Override
     public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
       if (!(obj instanceof ConcatUri)) {
         return false; 
       }
@@ -148,7 +151,12 @@ public interface ConcatUriManager {
           && Objects.equal(this.splitParam, objUri.splitParam)
           && Objects.equal(this.type, objUri.type));
     }
-    
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(super.hashCode(), batch, splitParam, type);
+    }
+
     public List<Uri> getBatch() {
       return batch;
     }

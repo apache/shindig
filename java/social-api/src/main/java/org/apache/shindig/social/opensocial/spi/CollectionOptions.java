@@ -159,6 +159,10 @@ public class CollectionOptions {
   // These are overriden so that EasyMock doesn't throw a fit
   @Override
   public boolean equals(final Object o) {
+    if (o == this) {
+      return true;
+    }
+    
     if (!(o instanceof CollectionOptions)) {
       return false;
     }

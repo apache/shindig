@@ -73,9 +73,9 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
         .toInstance(ImmutableSet.<Object>of(ActivityHandler.class, AppDataHandler.class,
             PersonHandler.class, MessageHandler.class));
 
-    bind(String.class).annotatedWith(
-        Names.named("shindig.containers.default"))
-        .toInstance("res://containers/default/container.js");
+    bindConstant().annotatedWith(Names.named("shindig.containers.default"))
+        .to("res://containers/default/container.js");
+    bindConstant().annotatedWith(Names.named("shindig.port")).to("8080");
     bind(ContainerConfig.class).to(JsonContainerConfig.class);
     
     bind(Integer.class).annotatedWith(

@@ -67,6 +67,9 @@ public interface ProxyUriManager {
     
     @Override
     public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
       if (!(obj instanceof ProxyUri)) {
         return false; 
       }
@@ -77,10 +80,15 @@ public interface ProxyUriManager {
           && Objects.equal(this.resizeHeight, objUri.resizeHeight)
           && Objects.equal(this.resizeWidth, objUri.resizeWidth)
           && Objects.equal(this.resizeQuality, objUri.resizeQuality)
-          && Objects.equal(this.resizeWidth, objUri.resizeWidth)
           && this.resizeNoExpand == objUri.resizeNoExpand);
     }
-    
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(super.hashCode(), resource, fallbackUrl, resizeHeight,
+              resizeWidth, resizeQuality, resizeNoExpand);
+    }
+
     /* (non-Javadoc)
      * @see org.apache.shindig.gadgets.uri.ProxyUriBase#setFromUri(org.apache.shindig.common.uri.Uri)
      */
