@@ -95,7 +95,7 @@
       </otherArchives>
     </mailingList>
     <mailingList>
-      <name>Shindig User List</name>
+      <name>Shindig Users List</name>
       <subscribe>users-subscribe@shindig.apache.org</subscribe>
       <unsubscribe>users-unsubscribe@shindig.apache.org</unsubscribe>
       <archive>http://mail-archives.apache.org/mod_mbox/shindig-users/</archive>
