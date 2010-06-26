@@ -21,7 +21,6 @@ import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 
 import org.apache.shindig.social.opensocial.jpa.api.DbObject;
@@ -29,7 +28,6 @@ import org.apache.shindig.social.opensocial.jpa.api.DbObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;

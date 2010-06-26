@@ -25,7 +25,6 @@ import org.apache.shindig.protocol.model.SortOrder;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.spi.CollectionOptions;
 import org.apache.shindig.social.opensocial.spi.GroupId;
-import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.opensocial.spi.UserId;
 import org.apache.shindig.social.opensocial.spi.UserId.Type;
 

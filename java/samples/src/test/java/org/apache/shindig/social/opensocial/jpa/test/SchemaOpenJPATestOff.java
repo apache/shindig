@@ -21,9 +21,6 @@ import org.apache.shindig.social.opensocial.jpa.EmailDb;
 import org.apache.shindig.social.opensocial.jpa.openjpa.Bootstrap;
 import org.apache.shindig.social.opensocial.model.Person;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
