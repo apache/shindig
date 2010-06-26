@@ -199,7 +199,7 @@ public class SpiDatabaseBootstrap {
     }
     
     // Delete all data
-    entityManager.createNativeQuery("delete from FriendDb where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from friend where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from activity_media where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from url where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from template_params where 1 > 0").executeUpdate();
