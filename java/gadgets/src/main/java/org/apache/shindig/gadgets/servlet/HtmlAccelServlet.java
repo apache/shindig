@@ -23,6 +23,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetContext;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +50,9 @@ public class HtmlAccelServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    logger.fine("accel request = " + request.toString());
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("accel request = " + request.toString());
+    }
     accelHandler.fetch(request, response);
   }
 
