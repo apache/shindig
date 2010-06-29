@@ -62,6 +62,7 @@ features/settitle/feature.xml
 features/shindig.auth/feature.xml
 features/shindig.container/feature.xml
 features/shindig.container-1.0/feature.xml
+features/shindig.random/feature.xml
 features/shindig.xhrwrapper/feature.xml
 features/skins/feature.xml
 features/swfobject/feature.xml
