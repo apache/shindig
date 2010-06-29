@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.http;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Nullable;
 import com.google.inject.internal.Preconditions;
 import com.google.inject.name.Named;
 
@@ -117,7 +118,7 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @param basicHttpFetcherProxy The http proxy to use.
    */
   @Inject
-  public BasicHttpFetcher(@Named("org.apache.shindig.gadgets.http.basicHttpFetcherProxy")
+  public BasicHttpFetcher(@Nullable @Named("org.apache.shindig.gadgets.http.basicHttpFetcherProxy")
                           String basicHttpFetcherProxy) {
     this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS,
          basicHttpFetcherProxy);
@@ -227,6 +228,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       super(entity);
     }
 
+    @Override
     public InputStream getContent() throws IOException, IllegalStateException {
       // the wrapped entity's getContent() decides about repeatability
       InputStream wrappedin = wrappedEntity.getContent();
@@ -234,6 +236,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       return new GZIPInputStream(wrappedin);
     }
 
+    @Override
     public long getContentLength() {
       // length of ungzipped content is not known
       return -1;
@@ -245,6 +248,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       super(entity);
     }
 
+    @Override
     public InputStream getContent()
         throws IOException, IllegalStateException {
 
@@ -254,13 +258,14 @@ public class BasicHttpFetcher implements HttpFetcher {
       return new InflaterInputStream(wrappedin, new Inflater(true));
     }
 
+    @Override
     public long getContentLength() {
       // length of ungzipped content is not known
       return -1;
     }
   }
 
-  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request) 
+  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request)
       throws GadgetException {
     HttpUriRequest httpMethod = null;
     Preconditions.checkNotNull(request);
@@ -362,7 +367,7 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       LOG.log(Level.INFO, "Got Exception fetching " + request.getUri() + " - " + (now - started) + "ms", e);
 
-      // Separate shindig error from external error 
+      // Separate shindig error from external error
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } finally {
