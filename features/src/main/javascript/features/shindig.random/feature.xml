@@ -24,6 +24,6 @@ A JavaScript "more-secure-random" implementation.
   <dependency>globals</dependency>
   <container>
     <script src="sha1.js"/>
-    <script src="saferrandom.js"/>
+    <script src="random.js"/>
   </container>
 </feature>
