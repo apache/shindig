@@ -125,10 +125,6 @@
       <artifactId>geronimo-stax-api_1.0_spec</artifactId>
     </dependency>
     <dependency>
-      <groupId>findbugs</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>

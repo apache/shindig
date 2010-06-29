@@ -127,10 +127,6 @@
       <groupId>commons-io</groupId>
     </dependency>
     <dependency>
-        <groupId>findbugs</groupId>
-        <artifactId>annotations</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
     </dependency>

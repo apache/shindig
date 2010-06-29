@@ -27,8 +27,7 @@ import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.google.inject.internal.ImmutableList;
-
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.common.uri.Uri;

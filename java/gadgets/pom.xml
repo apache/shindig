@@ -160,10 +160,6 @@
       <artifactId>htmlparser</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-    </dependency>
-    <dependency>
       <groupId>net.oauth.core</groupId>
       <artifactId>oauth</artifactId>
     </dependency>
@@ -174,6 +170,10 @@
     <dependency>
       <groupId>net.oauth.core</groupId>
       <artifactId>oauth-provider</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.collections</groupId>

@@ -17,11 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Nullable;
-import com.google.inject.internal.Preconditions;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -84,6 +83,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
 /**
