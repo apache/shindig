@@ -312,6 +312,15 @@
       </roles>
     </developer>
     <developer>
+      <id>hsaputra</id>
+      <name>Henry Saputra</name>
+      <email>hsaputra@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>chaowang</id>
       <name>Jacky Wang</name>
       <email>chaowang@apache.org</email>
