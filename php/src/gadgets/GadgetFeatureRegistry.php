@@ -162,7 +162,7 @@ class GadgetFeatureRegistry {
         continue;
       }
       $featureName = strtolower(substr($entry['name'], 0, strlen('core')));
-      if ($featureName != 'core' && $featureName != 'glob') {
+      if ($featureName != 'core' && $featureName != 'glob' && $entry['name'] != 'shindig.auth') {
         $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
       }
     }
