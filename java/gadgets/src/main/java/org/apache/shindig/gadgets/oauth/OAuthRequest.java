@@ -195,9 +195,9 @@ public class OAuthRequest {
       response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
-      if (OAuthError.UNAUTHENTICATED.toString().equals(e.getError())) {
+      if (OAuthError.UNAUTHENTICATED.name().equals(e.getError())) {
         responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
-      } else if (OAuthError.BAD_OAUTH_TOKEN_URL.toString().equals(e.getError())) {
+      } else if (OAuthError.BAD_OAUTH_TOKEN_URL.name().equals(e.getError())) {
         responseParams.logDetailedInfo("Invalid OAuth fetch request", e);
       } else {
         responseParams.logDetailedWarning("OAuth fetch fatal error", e);
