@@ -66,7 +66,10 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
         break;
       }
       case Node.DOCUMENT_NODE: {
-        serialize(((Document)n).getDocumentElement(), output, xmlMode);
+        NodeList children = ((Document)n).getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+          serialize(children.item(i), output, xmlMode);
+        }
         break;
       }
       case Node.ELEMENT_NODE: {
