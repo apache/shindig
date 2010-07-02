@@ -87,7 +87,7 @@ $servletMap = array(Config::get('web_prefix') . '/container' => 'FilesServlet',
     Config::get('web_prefix') . '/gadgets/api/rpc' => 'JsonRpcServlet', 
     Config::get('web_prefix') . '/gadgets/api/rest' => 'DataServiceServlet', 
     Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet', 
-    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet', 
+    Config::get('web_prefix') . '/rpc' => 'JsonRpcServlet', 
     Config::get('web_prefix') . '/public.crt' => 'CertServlet', 
     Config::get('web_prefix') . '/public.cer' => 'CertServlet');
 
