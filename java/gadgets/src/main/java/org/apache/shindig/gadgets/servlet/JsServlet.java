@@ -29,6 +29,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.config.ConfigContributor;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
@@ -78,7 +79,7 @@ public class JsServlet extends InjectedServlet {
     }
     this.registry = registry;
   }
-  
+
   @Inject
   public void setUrlGenerator(JsUriManager jsUriManager) {
     if (initialized) {
@@ -115,7 +116,13 @@ public class JsServlet extends InjectedServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    UriStatus vstatus = jsUriManager.processExternJsUri(new UriBuilder(req).toUri()).getStatus();
+    UriStatus vstatus;
+    try {
+      vstatus = jsUriManager.processExternJsUri(new UriBuilder(req).toUri()).getStatus();
+    } catch (GadgetException e) {
+      resp.sendError(e.getHttpStatusCode(), e.getMessage());
+      return;
+    }
     if (req.getHeader("If-Modified-Since") != null &&
         vstatus == UriStatus.VALID_VERSIONED) {
       resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -142,7 +149,7 @@ public class JsServlet extends InjectedServlet {
     boolean debug = "1".equals(debugStr);
     final RenderingContext context = "1".equals(containerStr) ?
         RenderingContext.CONTAINER : RenderingContext.GADGET;
-    final String container = 
+    final String container =
         containerParam != null ? containerParam : ContainerConfig.DEFAULT_CONTAINER;
 
     GadgetContext ctx = new GadgetContext() {
@@ -150,7 +157,7 @@ public class JsServlet extends InjectedServlet {
       public RenderingContext getRenderingContext() {
         return context;
       }
-      
+
       @Override
       public String getContainer() {
         return container;
@@ -194,7 +201,7 @@ public class JsServlet extends InjectedServlet {
         jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
       }
     }
-    
+
     String onloadStr = req.getParameter("onload");
     if (onloadStr != null) {
       if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
@@ -203,7 +210,7 @@ public class JsServlet extends InjectedServlet {
       }
       jsData.append(String.format(ONLOAD_JS_TPL, StringEscapeUtils.escapeJavaScript(onloadStr)));
     }
-    
+
     if (jsData.length() == 0) {
       resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
       return;
