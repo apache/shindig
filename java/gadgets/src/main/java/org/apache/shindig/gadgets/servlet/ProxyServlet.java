@@ -22,6 +22,8 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,11 +34,24 @@ import com.google.inject.Inject;
  * gadgets.io.getProxyUrl).
  */
 public class ProxyServlet extends InjectedServlet {
-  private ProxyHandler proxyHandler;
+
+  private static final long serialVersionUID = 9085050443492307723L;
+  
+  private transient ProxyHandler proxyHandler;
+  private transient boolean initialized;
 
   @Inject
   public void setProxyHandler(ProxyHandler proxyHandler) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.proxyHandler = proxyHandler;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @Override

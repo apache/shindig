@@ -35,6 +35,8 @@ import org.apache.commons.lang.StringUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,21 +44,37 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet for rendering Gadgets.
  */
 public class GadgetRenderingServlet extends InjectedServlet {
+
+  private static final long serialVersionUID = -5634040113214794888L;
+
   static final int DEFAULT_CACHE_TTL = 60 * 5;
 
   private static final Logger LOG = Logger.getLogger(GadgetRenderingServlet.class.getName());
 
-  private Renderer renderer;
-  private IframeUriManager iframeUriManager;
+  private transient Renderer renderer;
+  private transient IframeUriManager iframeUriManager;
+  private transient boolean initialized;
 
   @Inject
   public void setRenderer(Renderer renderer) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.renderer = renderer;
   }
   
   @Inject
   public void setIframeUriManager(IframeUriManager iframeUriManager) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.iframeUriManager = iframeUriManager;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   private void render(HttpServletRequest req, HttpServletResponse resp, UriStatus urlstatus)

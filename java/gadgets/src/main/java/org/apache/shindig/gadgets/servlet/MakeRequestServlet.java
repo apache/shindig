@@ -22,6 +22,8 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,11 +38,24 @@ import com.google.inject.Inject;
  * makeRequest and open proxy calls.
  */
 public class MakeRequestServlet extends InjectedServlet {
-  private MakeRequestHandler makeRequestHandler;
+
+  private static final long serialVersionUID = -8298705081500283786L;
+  
+  private transient MakeRequestHandler makeRequestHandler;
+  private transient boolean initialized;
 
   @Inject
   public void setMakeRequestHandler(MakeRequestHandler makeRequestHandler) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.makeRequestHandler = makeRequestHandler;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @Override

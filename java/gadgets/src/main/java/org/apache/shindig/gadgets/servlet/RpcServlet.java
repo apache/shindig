@@ -26,6 +26,8 @@ import org.json.JSONObject;
 
 import com.google.inject.Inject;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,16 +41,29 @@ import java.util.logging.Logger;
  * Handles RPC metadata requests.
  */
 public class RpcServlet extends InjectedServlet {
+  
+  private static final long serialVersionUID = 1382573217773582182L;
+  
   static final String GET_REQUEST_REQ_PARAM = "req";
   static final String GET_REQUEST_CALLBACK_PARAM = "callback";
 
   private static final Logger LOG = Logger.getLogger("org.apache.shindig.gadgets");
 
-  private JsonRpcHandler jsonHandler;
+  private transient JsonRpcHandler jsonHandler;
+  private transient boolean initialized;
 
   @Inject
   public void setJsonRpcHandler(JsonRpcHandler jsonHandler) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.jsonHandler = jsonHandler;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @Override

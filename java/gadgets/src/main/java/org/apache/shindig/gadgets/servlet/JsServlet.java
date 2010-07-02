@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,6 +54,9 @@ import javax.servlet.http.HttpServletResponse;
  * Used by type=URL gadgets in loading JavaScript resources.
  */
 public class JsServlet extends InjectedServlet {
+  
+  private static final long serialVersionUID = 6255917470412008175L;
+
   static final String ONLOAD_JS_TPL = "(function() {" +
       "var nm='%s';" +
       "if (typeof window[nm]==='function') {" +
@@ -60,28 +65,48 @@ public class JsServlet extends InjectedServlet {
       "})();";
   private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
-  private FeatureRegistry registry;
+  private transient FeatureRegistry registry;
+  private transient JsUriManager jsUriManager;
+  private transient ContainerConfig containerConfig;
+  private transient Map<String, ConfigContributor> configContributors;
+  private transient boolean initialized;
+
   @Inject
   public void setRegistry(FeatureRegistry registry) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.registry = registry;
   }
   
-  private JsUriManager jsUriManager;
   @Inject
   public void setUrlGenerator(JsUriManager jsUriManager) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.jsUriManager = jsUriManager;
   }
 
-  private ContainerConfig containerConfig;
   @Inject
   public void setContainerConfig(ContainerConfig containerConfig) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.containerConfig = containerConfig;
   }
 
-  private Map<String, ConfigContributor> configContributors;
   @Inject
   public void setConfigContributors(Map<String, ConfigContributor> configContributors) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.configContributors = configContributors;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @Override

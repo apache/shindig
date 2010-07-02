@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,16 +37,29 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HtmlAccelServlet extends InjectedServlet {
 
-  private AccelHandler accelHandler;
-  private static Logger logger = Logger.getLogger(
+  private static final long serialVersionUID = -424353123863813052L;
+
+  private static final Logger logger = Logger.getLogger(
       HtmlAccelServlet.class.getName());
 
   public static final String ACCEL_GADGET_PARAM_NAME = "accelGadget";
   public static final String ACCEL_GADGET_PARAM_VALUE = "true";
 
+  private transient AccelHandler accelHandler;
+  private transient boolean initialized;
+
   @Inject
   public void setHandler(AccelHandler accelHandler) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.accelHandler = accelHandler;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @Override

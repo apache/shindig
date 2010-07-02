@@ -49,6 +49,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,6 +62,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ConcatProxyServlet extends InjectedServlet {
 
+  private static final long serialVersionUID = -4390212150673709895L;
+
   public static final String JSON_PARAM = Param.JSON.getKey();
   private static final Pattern JSON_PARAM_PATTERN = Pattern.compile("^\\w*$");
   
@@ -70,11 +74,12 @@ public class ConcatProxyServlet extends InjectedServlet {
   private static final Logger LOG 
       = Logger.getLogger(ConcatProxyServlet.class.getName());
   
-  private RequestPipeline requestPipeline;
-  private ConcatUriManager concatUriManager;
-  private ResponseRewriterRegistry contentRewriterRegistry;
+  private transient RequestPipeline requestPipeline;
+  private transient ConcatUriManager concatUriManager;
+  private transient ResponseRewriterRegistry contentRewriterRegistry;
+  private transient boolean initialized;
 
-  private Executor executor = new Executor() {
+  private transient Executor executor = new Executor() {
     public void execute(Runnable r) {
       // Sequential version of 'execute' by default.
       r.run();
@@ -83,24 +88,42 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.requestPipeline = requestPipeline;
   }
   
   @Inject
   public void setConcatUriManager(ConcatUriManager concatUriManager) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.concatUriManager = concatUriManager;
   }
 
   @Inject
   public void setContentRewriterRegistry(ResponseRewriterRegistry contentRewriterRegistry) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
   
   @Inject
   public void setExecutor(@Named("shindig.concat.executor") Executor executor) {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
     // Executor is independently named to allow separate configuration of
     // concat fetch parallelism and other Shindig job execution.
     this.executor = executor;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    initialized = true;
   }
 
   @SuppressWarnings("boxing")
