@@ -53,8 +53,8 @@ shindig.random = (function() {
       e = event;
     }
 
-    var ac = (e.screenX ^ e.clientX) << 16;
-    ac += (e.screenY ^ e.clientY);
+    var ac = (e.screenX + e.clientX) << 16;
+    ac += (e.screenY + e.clientY);
     ac *= new Date().getTime() % 1e6;
     start = (start * ac) % m;
     return orig_onmousemove.call(window, Array.prototype.slice.call(arguments));
