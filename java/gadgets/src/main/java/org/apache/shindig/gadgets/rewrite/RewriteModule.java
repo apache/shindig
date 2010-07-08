@@ -105,7 +105,9 @@ public class RewriteModule extends AbstractModule {
   @Singleton
   @Named("shindig.accelerate.response.rewriters")
   protected List<ResponseRewriter> provideAccelResponseRewriters(
+      AbsolutePathReferenceRewriter absolutePathReferenceRewriter,
       ProxyingContentRewriter proxyingContentRewriter) {
-    return ImmutableList.of((ResponseRewriter) proxyingContentRewriter);
+    return ImmutableList.of((ResponseRewriter) absolutePathReferenceRewriter,
+                            (ResponseRewriter) proxyingContentRewriter);
   }
 }
