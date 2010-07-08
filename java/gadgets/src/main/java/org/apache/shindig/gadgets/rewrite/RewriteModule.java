@@ -19,12 +19,11 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.ImmutableList;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
+import com.google.inject.name.Names;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
@@ -44,6 +43,9 @@ public class RewriteModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(ResponseRewriterRegistry.class)
+        .annotatedWith(Names.named("shindig.accelerate.response.rewriter.registry"))
+        .to(AccelResponseRewriterRegistry.class);
   }
 
   @Provides
@@ -97,5 +99,13 @@ public class RewriteModule extends AbstractModule {
       CssRequestRewriter cssRewriter,
       SanitizingRequestRewriter sanitizedRewriter) {
     return ImmutableList.of(optimizingRewriter, cssRewriter, sanitizedRewriter);
+  }
+
+  @Provides
+  @Singleton
+  @Named("shindig.accelerate.response.rewriters")
+  protected List<ResponseRewriter> provideAccelResponseRewriters(
+      ProxyingContentRewriter proxyingContentRewriter) {
+    return ImmutableList.of((ResponseRewriter) proxyingContentRewriter);
   }
 }

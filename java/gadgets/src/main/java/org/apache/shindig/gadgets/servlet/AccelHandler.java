@@ -19,7 +19,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -37,11 +37,10 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriUtils;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Handles requests for accel servlet.
@@ -63,6 +62,7 @@ public class AccelHandler extends ProxyBase {
 
   @Inject
   public AccelHandler(RequestPipeline requestPipeline,
+                      @Named("shindig.accelerate.response.rewriter.registry")
                       ResponseRewriterRegistry contentRewriterRegistry,
                       AccelUriManager accelUriManager) {
     this.requestPipeline = requestPipeline;
