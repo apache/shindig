@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
+import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -473,6 +474,9 @@ public class OAuthRequest {
     params.add(new Parameter(OAuth.OAUTH_VERSION, OAuth.VERSION_1_0));
     params.add(new Parameter(OAuth.OAUTH_TIMESTAMP,
         Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000)));
+    // the oauth.net java code uses a clock to generate nonces, which causes nonce collisions
+    // under heavy load.  A random nonce is more reliable.
+    params.add(new Parameter(OAuth.OAUTH_NONCE, "" + Math.abs(Crypto.RAND.nextLong())));
   }
 
   static String getAuthorizationHeader(List<Map.Entry<String, String>> oauthParams) {
