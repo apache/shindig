@@ -27,6 +27,7 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.GadgetException.Code;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -81,6 +82,9 @@ public class DefaultJsUriManager implements JsUriManager {
     // Pass through debug param for debugging use.
     uri.addQueryParameter(Param.DEBUG.getKey(),
         gadget.getContext().getDebug() ? "1" : "0");
+    
+    uri.addQueryParameter(Param.CONTAINER_MODE.getKey(),
+        gadget.getContext().getRenderingContext() == RenderingContext.CONTAINER ? "1" : "0");
 
     // Pass through gadget Uri
     if (addGadgetUri()) {
@@ -127,14 +131,13 @@ public class DefaultJsUriManager implements JsUriManager {
       issueUriFormatError("Js Uri path invalid, expected prefix: " + jsPrefix + ", is: " + path);
       return INVALID_URI;
     }
-    if (!path.endsWith(JS_SUFFIX)) {
-      issueUriFormatError("Js Uri path invalid, expected suffix: " + JS_SUFFIX + ", is: " + path);
-      return INVALID_URI;
-    }
-
-    // Pull off prefix and suffix strings
     path = path.substring(jsPrefix.length());
-    path = path.substring(0, path.length() - JS_SUFFIX.length());
+    
+    // Convenience suffix: pull off .js if present; leave alone otherwise.
+    if (path.endsWith(JS_SUFFIX)) {
+      path = path.substring(0, path.length() - JS_SUFFIX.length());
+    }
+    
     while (path.startsWith("/")) {
       path = path.substring(1);
     }

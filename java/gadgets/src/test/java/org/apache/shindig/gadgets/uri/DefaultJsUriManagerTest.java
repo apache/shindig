@@ -35,6 +35,7 @@ import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.uri.JsUriManager.JsUri;
 import org.apache.shindig.gadgets.uri.JsUriManager.Versioner;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
@@ -78,6 +79,7 @@ public class DefaultJsUriManagerTest {
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -94,6 +96,7 @@ public class DefaultJsUriManagerTest {
     assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -113,6 +116,7 @@ public class DefaultJsUriManagerTest {
     assertEquals(version, jsUri.getQueryParameter(Param.VERSION.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   @Test
@@ -133,6 +137,24 @@ public class DefaultJsUriManagerTest {
     assertEquals(null, jsUri.getQueryParameter(Param.VERSION.getKey()));
     assertEquals("1", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
     assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
+  }
+  
+  @Test
+  public void makeJsUriWithContainerContext() {
+    ContainerConfig config = mockConfig("http://www.js.org", "/gadgets/js/");
+    TestDefaultJsUriManager manager = makeManager(config, null);
+    Gadget gadget = mockGadget(false, false, true);
+    List<String> extern = Lists.newArrayList("feature", "another");
+    Uri jsUri = manager.makeExternJsUri(gadget, extern);
+    assertFalse(manager.hadError());
+    assertEquals("http", jsUri.getScheme());
+    assertEquals("www.js.org", jsUri.getAuthority());
+    assertEquals("/gadgets/js/" + addJsLibs(extern) + JS_SUFFIX, jsUri.getPath());
+    assertEquals(CONTAINER, jsUri.getQueryParameter(Param.CONTAINER.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.NO_CACHE.getKey()));
+    assertEquals("0", jsUri.getQueryParameter(Param.DEBUG.getKey()));
+    assertEquals("1", jsUri.getQueryParameter(Param.CONTAINER_MODE.getKey()));
   }
 
   // processJsUri tests
@@ -170,28 +192,18 @@ public class DefaultJsUriManagerTest {
     assertSame(DefaultJsUriManager.INVALID_URI, jsUri);
   }
 
-  @Test(expected = GadgetException.class)
-  public void processNoValidJs() throws GadgetException {
-    String targetHost = "target-host.org";
-    ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
-    List<String> extern = Lists.newArrayList("feature", "another");
-    String version = "verstring";
-    DefaultJsUriManager manager = new DefaultJsUriManager(config, null);
-    Uri testUri = Uri.parse("http://target-host.org/gadgets/js?container=" + CONTAINER );
-    JsUri jsUri = manager.processExternJsUri(testUri);
-  }
-
   @Test
-  public void processPathSuffixMismatch() throws GadgetException {
+  public void processPathSuffixNoJs() throws GadgetException {
     String targetHost = "target-host.org";
     ContainerConfig config = mockConfig("http://" + targetHost, "/gadgets/js");
     TestDefaultJsUriManager manager = makeManager(config, null);
-    Uri testUri = Uri.parse("http://target-host.org/gadgets/js/feature.gif?" +
+    Uri testUri = Uri.parse("http://target-host.org/gadgets/js/feature:another?" +
         Param.CONTAINER.getKey() + '=' + CONTAINER);
     JsUri jsUri = manager.processExternJsUri(testUri);
-    assertTrue(manager.hadError());
-    assertEquals(jsUri.getStatus(), UriStatus.BAD_URI);
-    assertSame(DefaultJsUriManager.INVALID_URI, jsUri);
+    assertFalse(manager.hadError());
+    assertEquals(jsUri.getStatus(), UriStatus.VALID_UNVERSIONED);
+    List<String> extern = Lists.newArrayList("feature", "another");
+    assertCollectionEquals(jsUri.getLibs(), extern);
   }
 
   @Test
@@ -338,11 +350,17 @@ public class DefaultJsUriManagerTest {
   }
 
   private Gadget mockGadget(boolean nocache, boolean debug) {
+    return mockGadget(nocache, debug, false);
+  }
+  
+  private Gadget mockGadget(boolean nocache, boolean debug, boolean isContainer) {
     GadgetContext context = createMock(GadgetContext.class);
     expect(context.getContainer()).andReturn(CONTAINER).anyTimes();
     expect(context.getIgnoreCache()).andReturn(nocache).anyTimes();
     expect(context.getDebug()).andReturn(debug).anyTimes();
     expect(context.getUrl()).andReturn(GADGET_URI).anyTimes();
+    expect(context.getRenderingContext()).andReturn(
+        isContainer ? RenderingContext.CONTAINER : RenderingContext.GADGET).anyTimes();
     replay(context);
     return new Gadget().setContext(context);
   }
