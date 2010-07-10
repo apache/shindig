@@ -64,8 +64,6 @@ import java.util.concurrent.TimeUnit;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
 
-
-
   public static final String BODY_ECHO_HEADER = "X-Echoed-Body";
 
   public static final String RAW_BODY_ECHO_HEADER = "X-Echoed-Raw-Body";
@@ -766,7 +764,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
       throw new RuntimeException("Reused nonce, old message = " + previousMessage.obj
           + ", new message " + info.message);
     }
-    nonceCache.addElement(nonceKey, info.message, TimeUnit.MINUTES.toMillis(10));
+    nonceCache.addElement(nonceKey, info.message, TimeUnit.SECONDS.toMillis(10 * 60));
   }
 
   private HttpResponse handleNotFoundUrl(HttpRequest request) throws Exception {
