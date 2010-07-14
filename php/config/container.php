@@ -77,6 +77,23 @@ $shindigConfig = array(
   'default_js_prefix' => '/gadgets/js/',
   'default_iframe_prefix' => '/gadgets/ifr?',
 
+ 'servlet_map' => array( 
+   '/container' => 'FilesServlet', 
+   '/samplecontainer' => 'FilesServlet', 
+   '/gadgets/js' => 'JsServlet', 
+   '/gadgets/proxy' => 'ProxyServlet', 
+   '/gadgets/makeRequest' => 'MakeRequestServlet', 
+   '/gadgets/ifr' => 'GadgetRenderingServlet', 
+   '/gadgets/metadata' => 'MetadataServlet', 
+   '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
+   '/gadgets/api/rpc' => 'JsonRpcServlet', 
+   '/gadgets/api/rest' => 'DataServiceServlet', 
+   '/social/rest' => 'DataServiceServlet', 
+   '/rpc' => 'JsonRpcServlet', 
+   '/public.crt' => 'CertServlet', 
+   '/public.cer' => 'CertServlet', 
+ ), 
+ 
   // The X-XRDS-Location value for your implementing container, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
   'xrds_location' => '',
 
