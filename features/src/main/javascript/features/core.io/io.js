@@ -507,7 +507,7 @@ gadgets.io = function() {
           replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh)).
           replace("%gadget%", encodeURIComponent(urlParams.url)).
-          replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd)).
+          replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd || "default")).
           replace("%rewriteMime%", rewriteMimeParam);
       if (ret.indexOf('//') == 0) {
         ret = window.location.protocol + ret;
