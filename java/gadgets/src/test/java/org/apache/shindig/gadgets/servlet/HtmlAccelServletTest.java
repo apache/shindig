@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
@@ -33,12 +32,13 @@ import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultAccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
-import static org.easymock.EasyMock.expect;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
+
+import static org.easymock.EasyMock.expect;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
 
@@ -75,7 +75,6 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
   @Before
   public void setUp() throws Exception {
-    servlet = new HtmlAccelServlet();
     ContainerConfig config = new FakeContainerConfig();
     AccelUriManager accelUriManager = new DefaultAccelUriManager(
         config, new DefaultProxyUriManager(config, null));
@@ -83,8 +82,9 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     rewriter = new FakeCaptureRewriter();
     rewriterRegistry = new DefaultResponseRewriterRegistry(
         Arrays.<ResponseRewriter>asList(rewriter), null);
+    servlet = new HtmlAccelServlet();
     servlet.setHandler(new AccelHandler(pipeline, rewriterRegistry,
-                                        accelUriManager));
+                                             accelUriManager));
   }
 
   @Test

@@ -18,33 +18,25 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
-
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.GadgetContext;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
  */
 public class HtmlAccelServlet extends InjectedServlet {
-
   private static final long serialVersionUID = -424353123863813052L;
 
   private static final Logger logger = Logger.getLogger(
       HtmlAccelServlet.class.getName());
-
-  public static final String ACCEL_GADGET_PARAM_NAME = "accelGadget";
-  public static final String ACCEL_GADGET_PARAM_VALUE = "true";
-
   private transient AccelHandler accelHandler;
   private transient boolean initialized;
 
@@ -66,13 +58,8 @@ public class HtmlAccelServlet extends InjectedServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("accel request = " + request.toString());
+      logger.fine("Accel request = " + request.toString());
     }
     accelHandler.fetch(request, response);
-  }
-
-  public static boolean isAccel(GadgetContext context) {
-    return context.getParameter(HtmlAccelServlet.ACCEL_GADGET_PARAM_NAME) ==
-        HtmlAccelServlet.ACCEL_GADGET_PARAM_VALUE;
   }
 }
