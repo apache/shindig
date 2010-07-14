@@ -80,7 +80,7 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
 
   private HttpResponseBuilder builder;
 
-  private Map<String,FormDataItem> emptyFormItems;
+  private final Map<String,FormDataItem> emptyFormItems = Collections.emptyMap();
 
   @Before
   public void setUp() throws Exception {
@@ -95,7 +95,6 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object>of(handler));
     builder = new HttpResponseBuilder().setResponseString("CONTENT");
-    emptyFormItems = Collections.emptyMap();
   }
 
   @Test
@@ -114,8 +113,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -153,8 +152,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -178,8 +177,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -304,8 +303,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : {key: 1}}}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : {key: 1}}}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -327,8 +326,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
 
     assertTrue(rewriter.responseWasRewritten());
   }
@@ -355,8 +354,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT', token : updated }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT', token : updated }}",
+        converter.convertToString(httpApiResponse));
 
     assertTrue(rewriter.responseWasRewritten());
   }
@@ -473,8 +472,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 500, content : 'I AM AN ERROR MESSAGE' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 500, content : 'I AM AN ERROR MESSAGE' }}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -494,8 +493,8 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : {}, status : 200, content : 'CONTENT', metadata : { foo : 'CONTENT' }}");
+    JsonAssert.assertJsonEquals("{ headers : {}, status : 200, content : 'CONTENT', metadata : { foo : 'CONTENT' }}",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -516,9 +515,10 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
+    JsonAssert.assertJsonEquals(
         "{ headers : { 'set-cookie' : ['foo=bar; Secure','name=value'] },"
-            + " status : 200, content : 'CONTENT' }");    
+            + " status : 200, content : 'CONTENT' }",
+        converter.convertToString(httpApiResponse));
   }
 
   @Test
@@ -538,9 +538,9 @@ public class HttpRequestHandlerTest extends EasyMockTestCase {
         (HttpRequestHandler.HttpApiResponse)operation.execute(emptyFormItems, token, converter).get();
     verify();
 
-    JsonAssert.assertJsonEquals(converter.convertToString(httpApiResponse),
-        "{ headers : { 'location' : ['here'] },"
-            + " status : 200, content : 'CONTENT' }");
+    JsonAssert.assertJsonEquals("{ headers : { 'location' : ['here'] },"
+            + " status : 200, content : 'CONTENT' }",
+        converter.convertToString(httpApiResponse));
   }
 
   private static HttpRequest eqRequest(HttpRequest request) {

@@ -48,6 +48,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -390,7 +391,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * Injects default values for user prefs into the gadget output.
    */
   protected void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
-    List<UserPref> prefs = gadget.getSpec().getUserPrefs();
+    Collection<UserPref> prefs = gadget.getSpec().getUserPrefs().values();
     Map<String, String> defaultPrefs = Maps.newHashMapWithExpectedSize(prefs.size());
     for (UserPref up : prefs) {
       defaultPrefs.put(up.getName(), up.getDefaultValue());

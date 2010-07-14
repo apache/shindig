@@ -139,7 +139,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
     
     // Add all UserPrefs
     UserPrefs prefs = context.getUserPrefs();
-    for (UserPref up : gadget.getSpec().getUserPrefs()) {
+    for (UserPref up : gadget.getSpec().getUserPrefs().values()) {
       String name = up.getName();
       String data = prefs.getPref(name);
       if (data == null) {

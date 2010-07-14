@@ -31,7 +31,7 @@ public class UserPrefSubstituter implements Substituter {
   public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec) {
     UserPrefs values = context.getUserPrefs();
     
-    for (UserPref pref : spec.getUserPrefs()) {
+    for (UserPref pref : spec.getUserPrefs().values()) {
       String name = pref.getName();
       String value = values.getPref(name);
       if (value == null) {
