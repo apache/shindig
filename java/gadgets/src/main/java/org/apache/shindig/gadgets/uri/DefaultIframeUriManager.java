@@ -160,7 +160,7 @@ public class DefaultIframeUriManager implements IframeUriManager {
       boolean securityTokenOnQuery = isTokenNeededForRendering(gadget);
       
       String securityToken = generateSecurityToken(gadget);
-      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, securityToken != null,
+      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, securityToken == null,
           !securityTokenOnQuery);
     }
     
