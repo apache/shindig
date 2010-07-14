@@ -156,12 +156,12 @@ public class DefaultIframeUriManager implements IframeUriManager {
           versioner.version(gadget.getSpec().getUrl(), container), false, false);
     }
     
-    if (gadget.getAllFeatures().contains(SECURITY_TOKEN_FEATURE_NAME) ||
-        config.getBool(container, SECURITY_TOKEN_ALWAYS_KEY)) {
+    if (wantsSecurityToken(gadget)) {
       boolean securityTokenOnQuery = isTokenNeededForRendering(gadget);
       
-      String securityToken = wantsSecurityToken(gadget) ? generateSecurityToken(gadget) : null;
-      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, true, !securityTokenOnQuery);
+      String securityToken = generateSecurityToken(gadget);
+      addParam(uri, Param.SECURITY_TOKEN.getKey(), securityToken, securityToken != null,
+          !securityTokenOnQuery);
     }
     
     addExtras(uri);
@@ -184,7 +184,8 @@ public class DefaultIframeUriManager implements IframeUriManager {
   }
 
   protected boolean wantsSecurityToken(Gadget gadget) {
-    return true;
+    return gadget.getAllFeatures().contains(SECURITY_TOKEN_FEATURE_NAME) ||
+           config.getBool(gadget.getContext().getContainer(), SECURITY_TOKEN_ALWAYS_KEY);
   }
   
   // This method should be overridden to provide better caching characteristics
