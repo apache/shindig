@@ -16,4 +16,4 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-features/org.jquery.core-1.4.2/feature.xml
+features-extras/org.jquery.core-1.4.2/feature.xml
