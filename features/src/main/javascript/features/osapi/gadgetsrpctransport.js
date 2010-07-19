@@ -95,7 +95,10 @@ if (gadgets && gadgets.rpc) { //Dont bind if gadgets.rpc not defined
         osapi.container.listMethods({}).execute(function(response) {
           if (!response.error) {
             for (var i = 0; i < response.length; i++) {
-              osapi._registerMethod(response[i], transport);
+              // do not rebind container.listMethods implementation
+              if (response[i] != "container.listMethods") {
+                osapi._registerMethod(response[i], transport);
+              }
             }
           }
           // Notify completion
