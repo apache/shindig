@@ -39,7 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 public class ExpressionsTest {
-  private Expressions expressions;
+  public Expressions expressions;
   private ELContext context;
   private Map<String, Object> variables;
   
@@ -133,14 +133,13 @@ public class ExpressionsTest {
   
   @Test
   public void booleanCoercionOfNumbers() throws Exception{
+    // Negation tests have been moved to EL subdir
     addVariable("bool", 0);
     assertFalse(evaluate("${bool}", Boolean.class));
-    assertTrue(evaluate("${!bool}", Boolean.class));
 
     addVariable("bool", 1);
     assertTrue(evaluate("${bool}", Boolean.class));
-    assertFalse(evaluate("${!bool}", Boolean.class));
-  }
+  } 
   
   @Test
   public void booleanCoercionOfNull() throws Exception{
@@ -151,6 +150,7 @@ public class ExpressionsTest {
   
   @Test
   public void booleanCoercionOfStrings() throws Exception{
+    // Negation tests for FALSE and any String have been moved El subdir
     addVariable("bool", "");
     assertFalse(evaluate("${bool}", Boolean.class));
     assertTrue(evaluate("${!bool}", Boolean.class));
@@ -162,7 +162,6 @@ public class ExpressionsTest {
     // Case-sensitive coercion:  FALSE is true
     addVariable("bool", "FALSE");
     assertTrue(evaluate("${bool}", Boolean.class));
-    assertFalse(evaluate("${!bool}", Boolean.class));
 
     addVariable("bool", "true");
     assertTrue(evaluate("${bool}", Boolean.class));
@@ -170,8 +169,8 @@ public class ExpressionsTest {
     
     addVariable("bool", "booga");
     assertTrue(evaluate("${bool}", Boolean.class));
-    assertFalse(evaluate("${!bool}", Boolean.class));
-  }
+  } 
+  
   
   @Test
   public void iterableCoercionOfScalar() throws Exception {
@@ -219,12 +218,12 @@ public class ExpressionsTest {
         ImmutableList.copyOf(evaluate("${iter}", Iterable.class)));
   }
   
-  private <T> T evaluate(String expression, Class<T> type) {
+  public <T> T evaluate(String expression, Class<T> type) {
     ValueExpression expr = expressions.parse(expression, type);
     return type.cast(expr.getValue(context));
   }
 
-  private void addVariable(String key, Object value) {
+  public void addVariable(String key, Object value) {
     variables.put(key, value);
   }
 }

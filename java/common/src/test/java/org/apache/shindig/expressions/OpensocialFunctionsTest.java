@@ -19,6 +19,7 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
+
 import java.util.Map;
 
 import javax.el.ELContext;
@@ -38,7 +39,7 @@ public class OpensocialFunctionsTest extends Assert {
   @Before
   public void setUp() {
     Functions functions = new Functions(OpensocialFunctions.class);
-    expressions = new Expressions(functions, null, new ShindigTypeConverter());
+    expressions = Expressions.forTesting(functions);
     context = expressions.newELContext(new RootELResolver(vars));
   }
 
