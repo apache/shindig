@@ -21,8 +21,10 @@
   <dependency>globals</dependency>
   <gadget>
     <script src="config.js"/>
+    <script src="configgadget.js"/>
   </gadget>
   <container>
     <script src="config.js"/>
+    <script src="configcontainer.js"/>
   </container>
 </feature>

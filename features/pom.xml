@@ -108,6 +108,8 @@
                 <source>../../../../src/test/javascript/features/mocks/xhr.js</source>
                 <source>globals/globals.js</source>
                 <source>core.config/config.js</source>
+                <source>core.config/configcontainer.js</source>
+                <source>core.config/configgadget.js</source>
                 <source>core.json/json.js</source>
                 <source>shindig.auth/auth.js</source>
                 <source>core.util/util.js</source>

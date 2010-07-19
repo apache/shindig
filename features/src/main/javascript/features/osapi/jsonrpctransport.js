@@ -89,7 +89,7 @@
   }
 
   // Do not run this in container mode.
-  if (gadgets.config) {
+  if (gadgets.config && gadgets.config.isGadget) {
     gadgets.config.register("osapi.services", null, init);
   }
 
