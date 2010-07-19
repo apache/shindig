@@ -136,8 +136,8 @@ class DataPipelining {
 
   /**
    * Peforms the actual http fetching of the data-pipelining requests, all social requests
-   * are made to $_SERVER['SERVER_NAME'] (the virtual host name of this server) / (optional) web_prefix / social / rpc, and
-   * the httpRequest's are made to $_SERVER['SERVER_NAME'] (the virtual host name of this server) / (optional) web_prefix / gadgets / makeRequest
+   * are made to $_SERVER['HTTP_HOST'] (the virtual host name of this server) / (optional) web_prefix / social / rpc, and
+   * the httpRequest's are made to $_SERVER['HTTP_HOST'] (the virtual host name of this server) / (optional) web_prefix / gadgets / makeRequest
    * both request types use the current security token ($_GET['st']) when performing the requests so they happen in the correct context
    *
    * @param array $requests
@@ -180,7 +180,7 @@ class DataPipelining {
     }
     if (count($jsonRequests)) {
       // perform social api requests
-      $request = new RemoteContentRequest('http://'.$_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
+      $request = new RemoteContentRequest('http://'.$_SERVER['HTTP_HOST'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
       $request->setMethod('POST');
       $remoteFetcherClass = Config::get('remote_content_fetcher');
       $remoteFetcher = new $remoteFetcherClass();
@@ -191,7 +191,7 @@ class DataPipelining {
     if (count($httpRequests)) {
       $requestQueue = array();
       foreach ($httpRequests as $request) {
-        $req = new RemoteContentRequest($_SERVER['SERVER_NAME'] . Config::get('web_prefix') . '/gadgets/makeRequest?url=' . urlencode($request['url']) . '&st=' . urlencode($securityToken) . (! empty($request['queryStr']) ? '&' . $request['queryStr'] : ''));
+        $req = new RemoteContentRequest($_SERVER['HTTP_HOST'] . Config::get('web_prefix') . '/gadgets/makeRequest?url=' . urlencode($request['url']) . '&st=' . urlencode($securityToken) . (! empty($request['queryStr']) ? '&' . $request['queryStr'] : ''));
         $req->getOptions()->ignoreCache = $context->getIgnoreCache();
         $req->setNotSignedUri($request['url']);
         $requestQueue[] = $req;
