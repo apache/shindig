@@ -60,7 +60,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     }
   }
 
-  private class FakeCaptureRewriter extends CaptureRewriter {
+  private static class FakeCaptureRewriter extends CaptureRewriter {
     String contentToRewrite;
 
     public void setContentToRewrite(String s) {

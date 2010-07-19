@@ -756,7 +756,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     
     // Most OAuth service providers are much laxer than this about checking nonces (rapidly
     // changing server-side state scales badly), but we are very strict in test cases.
-    String nonceKey = info.message.getConsumerKey() + ","
+    String nonceKey = info.message.getConsumerKey() + ','
         + info.message.getParameter("oauth_nonce");
     
     CachedObject<OAuthMessage> previousMessage = nonceCache.getElement(nonceKey);

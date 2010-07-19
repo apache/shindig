@@ -64,6 +64,6 @@ public class StyleTagProxyEmbeddedUrlsVisitor implements DomWalker.Visitor {
           elem, contentBase,
           CssResponseRewriter.uriMaker(proxyUriManager, config), false);
     }
-    return nodes.size() > 0;
+    return !nodes.isEmpty();
   }
 }

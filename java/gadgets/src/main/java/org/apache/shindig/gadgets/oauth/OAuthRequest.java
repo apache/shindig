@@ -476,7 +476,7 @@ public class OAuthRequest {
         Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000)));
     // the oauth.net java code uses a clock to generate nonces, which causes nonce collisions
     // under heavy load.  A random nonce is more reliable.
-    params.add(new Parameter(OAuth.OAUTH_NONCE, "" + Math.abs(Crypto.RAND.nextLong())));
+    params.add(new Parameter(OAuth.OAUTH_NONCE, String.valueOf(Math.abs(Crypto.RAND.nextLong()))));
   }
 
   static String getAuthorizationHeader(List<Map.Entry<String, String>> oauthParams) {
