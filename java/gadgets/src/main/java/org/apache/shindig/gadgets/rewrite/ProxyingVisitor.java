@@ -97,7 +97,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
     for (Node node : nodes) {
       Element element = (Element)node;
       String nodeName = node.getNodeName().toLowerCase();
-      String uriStr = element.getAttribute(RESOURCE_TAGS.get(nodeName));
+      String uriStr = element.getAttribute(RESOURCE_TAGS.get(nodeName)).trim();
       try {
         reservedUris.add(new ProxyUriManager.ProxyUri(gadget, Uri.parse(uriStr)));
       } catch (UriException e) {

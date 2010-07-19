@@ -116,10 +116,11 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     Element e1 = elem("script", "src", scriptSrc);
     Element e2 = elem("script", "src", "^!,,|BLARGH");
     Element e3 = elem("IMG", "src", imgSrc);
-    List<Node> nodes = ImmutableList.<Node>of(e1, e2, e3);
+    Element e4 = elem("script", "src", " " + scriptSrc + " ");
+    List<Node> nodes = ImmutableList.<Node>of(e1, e2, e3, e4);
     ProxyUriManager uriManager = createMock(ProxyUriManager.class);
     Uri rewrittenUri = Uri.parse("http://bar.com/");
-    List<Uri> returned = Lists.newArrayList(rewrittenUri, null, rewrittenUri);
+    List<Uri> returned = Lists.newArrayList(rewrittenUri, null, rewrittenUri, rewrittenUri);
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
     Integer expires = new Integer(3);
     expect(config.getExpires()).andReturn(expires).once();
@@ -134,13 +135,15 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     assertTrue(rewriter.revisit(gadget, nodes));
     verify(config, uriManager);
 
-    assertEquals(3, cap.getValue().size());
+    assertEquals(4, cap.getValue().size());
     assertEquals(Uri.parse(scriptSrc), cap.getValue().get(0).getResource());
     assertNull(cap.getValue().get(1));
     assertEquals(Uri.parse(imgSrc), cap.getValue().get(2).getResource());
+    assertEquals(Uri.parse(scriptSrc), cap.getValue().get(3).getResource());
     assertSame(expires, intCap.getValue());
     assertEquals(rewrittenUri.toString(), e1.getAttribute("src"));
     assertEquals("^!,,|BLARGH", e2.getAttribute("src"));
     assertEquals(rewrittenUri.toString(), e3.getAttribute("src"));
+    assertEquals(rewrittenUri.toString(), e4.getAttribute("src"));
   }
 }
