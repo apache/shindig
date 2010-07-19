@@ -51,6 +51,10 @@ public class HttpRequest {
   private String method = "GET";
   private Uri uri;
   private final Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+
+  // Internal parameters which serve as extra information to pass along the
+  // chain of HttpRequest processing.
+  // NOTE: These are not get/post parameter equivalent of HttpServletRequest.
   private final Map<String, String> params = Maps.newHashMap();
 
   private byte[] postBody = ArrayUtils.EMPTY_BYTE_ARRAY;

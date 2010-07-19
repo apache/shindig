@@ -102,9 +102,9 @@ public class AccelHandler extends ProxyBase {
     // Copy the response headers and status code to the final http servlet
     // response.
     UriUtils.copyResponseHeadersAndStatusCode(
-        results, response,
-        UriUtils.DisallowedResponseHeaders.OUTPUT_TRANSFER_DIRECTIVES,
-        UriUtils.DisallowedResponseHeaders.CLIENT_STATE_DIRECTIVES);
+        results, response, true,
+        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
 
     // Override the content type of the final http response if the input request
     // had the rewrite mime type header.
@@ -160,7 +160,8 @@ public class AccelHandler extends ProxyBase {
   }
 
   /**
-   * Generate a remote content request based on the parameters sent from the client.
+   * Build an HttpRequest object encapsulating the request details as requested
+   * by the user.
    * @param request The http request.
    * @param uriToProxyOrRewrite The parsed uri to proxy or rewrite through
    *   accel servlet.
@@ -173,12 +174,21 @@ public class AccelHandler extends ProxyBase {
     Uri tgt = uriToProxyOrRewrite.getResource();
     validateUrl(tgt);
     HttpRequest req = uriToProxyOrRewrite.makeHttpRequest(tgt);
-    this.setRequestHeaders(request, req);
-
     if (req == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "No url parameter in request", HttpResponse.SC_BAD_REQUEST);
     }
+
+    // Copy the post body if it exists.
+    UriUtils.copyRequestData(request, req);
+
+    // Set and copy headers.
+    this.setRequestHeaders(request, req);
+    UriUtils.copyRequestHeaders(
+        request, req,
+        UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES);
+
+    req.setFollowRedirects(false);
     return req;
   }
 

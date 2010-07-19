@@ -32,12 +32,18 @@ import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.uri.AccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultAccelUriManager;
 import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.ServletInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 
 public class HtmlAccelServletTest extends ServletTestFixture {
@@ -85,6 +91,51 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     servlet = new HtmlAccelServlet();
     servlet.setHandler(new AccelHandler(pipeline, rewriterRegistry,
                                              accelUriManager));
+  }
+
+  private void expectRequest(String extraPath, String url) {
+    expect(request.getMethod()).andReturn("GET").anyTimes();
+    expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
+    expect(request.getScheme()).andReturn("http").anyTimes();
+    expect(request.getServerName()).andReturn("apache.org").anyTimes();
+    expect(request.getServerPort()).andReturn(-1).anyTimes();
+    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();
+    expect(request.getRequestURL())
+        .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
+        .anyTimes();
+    String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
+                                             + "&gadget=test");
+    expect(request.getQueryString()).andReturn(queryParams).anyTimes();
+  }
+
+  private void expectPostRequest(String extraPath, String url,
+                                 final String data)
+      throws IOException {
+    expect(request.getMethod()).andReturn("POST").anyTimes();
+    expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
+    expect(request.getScheme()).andReturn("http").anyTimes();
+    expect(request.getServerName()).andReturn("apache.org").anyTimes();
+    expect(request.getServerPort()).andReturn(-1).anyTimes();
+    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();
+    expect(request.getRequestURL())
+        .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
+        .anyTimes();
+    String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
+                                             + "&gadget=test");
+    expect(request.getQueryString()).andReturn(queryParams).anyTimes();
+
+    ServletInputStream inputStream = mock(ServletInputStream.class);
+    expect(request.getInputStream()).andReturn(inputStream);
+    expect(inputStream.read((byte[]) EasyMock.anyObject()))
+        .andAnswer(new IAnswer<Integer>() {
+          public Integer answer() throws Throwable {
+            byte[] byteArray = (byte[]) EasyMock.getCurrentArguments()[0];
+            System.arraycopy(data.getBytes(), 0, byteArray, 0, data.length());
+            return data.length();
+          }
+        });
+    expect(inputStream.read((byte[]) EasyMock.anyObject()))
+        .andReturn(-1);
   }
 
   @Test
@@ -191,17 +242,27 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertFalse(rewriter.responseWasRewritten());
   }
 
-  private void expectRequest(String extraPath, String url) {
-    expect(request.getServletPath()).andReturn(SERVLET).anyTimes();
-    expect(request.getScheme()).andReturn("http").anyTimes();
-    expect(request.getServerName()).andReturn("apache.org").anyTimes();
-    expect(request.getServerPort()).andReturn(-1).anyTimes();
-    expect(request.getRequestURI()).andReturn(SERVLET + extraPath).anyTimes();
-    expect(request.getRequestURL())
-        .andReturn(new StringBuffer("apache.org" + SERVLET + extraPath))
-        .anyTimes();
-    String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
-                                             + "&gadget=test");
-    expect(request.getQueryString()).andReturn(queryParams).anyTimes();
+  @Test
+  public void testHtmlAccelHandlesPost() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>This is error page</body></html>";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
+    Capture<HttpRequest> req = new Capture<HttpRequest>();
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .create();
+    expect(pipeline.execute(capture(req))).andReturn(resp).once();
+    expectPostRequest("", url, "hello=world");
+    replay();
+
+    servlet.doPost(request, recorder);
+    verify();
+    assertEquals(data, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertTrue(rewriter.responseWasRewritten());
+    assertEquals("POST", req.getValue().getMethod());
+    assertEquals("hello=world", req.getValue().getPostBodyAsString());
   }
 }
