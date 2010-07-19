@@ -43,6 +43,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.RequestAddCookies;
+import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
@@ -211,6 +213,10 @@ public class BasicHttpFetcher implements HttpFetcher {
       }
     });
     client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler() );
+
+    // Disable automatic storage and sending of cookies (see SHINDIG-1382)
+    client.removeRequestInterceptorByClass(RequestAddCookies.class); 
+    client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
 
     // Use Java's built-in proxy logic in case no proxy set via guice.
     if (StringUtils.isEmpty(basicHttpFetcherProxy)) {
