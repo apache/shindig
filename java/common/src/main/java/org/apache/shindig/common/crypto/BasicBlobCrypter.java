@@ -148,7 +148,7 @@ public class BasicBlobCrypter implements BlobCrypter {
       byte[] encoded = serializeAndTimestamp(in);
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);
       byte[] hmac = Crypto.hmacSha1(hmacKey, cipherText);
-      byte[] b64 = Base64.encodeBase64(Crypto.concat(cipherText, hmac));
+      byte[] b64 = Base64.encodeBase64URLSafe(Crypto.concat(cipherText, hmac));
       return new String(b64, UTF8);
     } catch (UnsupportedEncodingException e) {
       throw new BlobCrypterException(e);
