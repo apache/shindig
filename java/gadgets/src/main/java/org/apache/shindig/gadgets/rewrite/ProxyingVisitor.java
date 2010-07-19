@@ -82,7 +82,8 @@ public class ProxyingVisitor implements DomWalker.Visitor {
         continue;
       }
       Element element = (Element)proxyPair.one;
-      element.setAttribute(RESOURCE_TAGS.get(element.getNodeName()), proxyPair.two.toString());
+      String nodeName = element.getNodeName().toLowerCase();
+      element.setAttribute(RESOURCE_TAGS.get(nodeName), proxyPair.two.toString());
       mutated = true;
     }
     
@@ -95,7 +96,8 @@ public class ProxyingVisitor implements DomWalker.Visitor {
     
     for (Node node : nodes) {
       Element element = (Element)node;
-      String uriStr = element.getAttribute(RESOURCE_TAGS.get(element.getNodeName()));
+      String nodeName = node.getNodeName().toLowerCase();
+      String uriStr = element.getAttribute(RESOURCE_TAGS.get(nodeName));
       try {
         reservedUris.add(new ProxyUriManager.ProxyUri(gadget, Uri.parse(uriStr)));
       } catch (UriException e) {

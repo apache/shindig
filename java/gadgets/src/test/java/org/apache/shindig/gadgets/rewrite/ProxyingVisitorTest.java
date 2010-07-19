@@ -112,12 +112,14 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     // Includes one mod and one skip.
     // No need to test invalid nodes since visit() and DomWalker tests preclude this.
     String scriptSrc = "http://script.com/foo.js";
+    String imgSrc = "http://script.com/foo.jpg";
     Element e1 = elem("script", "src", scriptSrc);
     Element e2 = elem("script", "src", "^!,,|BLARGH");
-    List<Node> nodes = ImmutableList.<Node>of(e1, e2);
+    Element e3 = elem("IMG", "src", imgSrc);
+    List<Node> nodes = ImmutableList.<Node>of(e1, e2, e3);
     ProxyUriManager uriManager = createMock(ProxyUriManager.class);
     Uri rewrittenUri = Uri.parse("http://bar.com/");
-    List<Uri> returned = Lists.newArrayList(rewrittenUri, null);
+    List<Uri> returned = Lists.newArrayList(rewrittenUri, null, rewrittenUri);
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
     Integer expires = new Integer(3);
     expect(config.getExpires()).andReturn(expires).once();
@@ -127,16 +129,18 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     expect(uriManager.make(capture(cap), capture(intCap))).andReturn(returned).once();
     replay(config, uriManager);
     Gadget gadget = gadget();
-    
+
     ProxyingVisitor rewriter = new ProxyingVisitor(config, uriManager);
     assertTrue(rewriter.revisit(gadget, nodes));
     verify(config, uriManager);
-    
-    assertEquals(2, cap.getValue().size());
+
+    assertEquals(3, cap.getValue().size());
     assertEquals(Uri.parse(scriptSrc), cap.getValue().get(0).getResource());
     assertNull(cap.getValue().get(1));
+    assertEquals(Uri.parse(imgSrc), cap.getValue().get(2).getResource());
     assertSame(expires, intCap.getValue());
     assertEquals(rewrittenUri.toString(), e1.getAttribute("src"));
     assertEquals("^!,,|BLARGH", e2.getAttribute("src"));
+    assertEquals(rewrittenUri.toString(), e3.getAttribute("src"));
   }
 }
