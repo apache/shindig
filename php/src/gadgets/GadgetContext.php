@@ -117,9 +117,10 @@ class GadgetContext {
   private function instanceRegistry() {
     // feature parsing is very resource intensive so by caching the result this saves upto 30% of the processing time
     $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
-    if (! ($registry = $featureCache->get(md5(Config::get('features_path'))))) {
+    $key = md5(implode(',', Config::get('features_path')));
+    if (! ($registry = $featureCache->get($key))) {
       $registry = new GadgetFeatureRegistry(Config::get('features_path'));
-      $featureCache->set(md5(Config::get('features_path')), $registry);
+      $featureCache->set($key, $registry);
     }
     return $registry;
   }

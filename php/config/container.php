@@ -114,7 +114,10 @@ $shindigConfig = array(
 
   // The locations of the various required components on disk. If you did a normal svn checkout there's no need to change these
   'base_path' => realpath(dirname(__FILE__) . '/..') . '/',
-  'features_path' => realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
+  'features_path' => array(
+    realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
+    realpath(dirname(__FILE__) . '/../../extras/src/main/javascript/features-extras') . '/',
+  ),
   'container_path' => realpath(dirname(__FILE__) . '/../../config') . '/',
   'javascript_path' => realpath(dirname(__FILE__) . '/../../content') . '/',
 
