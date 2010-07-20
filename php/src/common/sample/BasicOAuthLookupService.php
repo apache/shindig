@@ -24,7 +24,7 @@
  */
 class BasicOAuthLookupService extends OAuthLookupService {
 
-  public function getSecurityToken($oauthRequest, $appUrl, $userId) {
+  public function getSecurityToken($oauthRequest, $appUrl, $userId, $contentType) {
     return new OAuthSecurityToken($userId, $appUrl, $this->getAppId($appUrl), "samplecontainer");
   }
 
