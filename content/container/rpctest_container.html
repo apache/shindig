@@ -54,10 +54,10 @@
       var uabackward = window.location.search.indexOf('&uabackward=1') !== -1;
 
       // Useful per-page variables.
-      var gadgeturl = gadgethost + '/gadgets/files/container/rpctest_gadget.xml';
+      var gadgeturl = gadgethost + '/container/rpctest_gadget.xml';
       var cachebust = 'cachebust=' + Math.random();
       var gadgetrenderingurl = gadgethost + '/gadgets/ifr?url=' + gadgeturl + '&libs=rpc&parent=' + window.location.protocol + '//' + window.location.host + '&debug=1&' + cachebust;
-      var gadgetrelay = gadgethost + '/gadgets/files/container/rpc_relay.uncompressed.html';
+      var gadgetrelay = gadgethost + '/container/rpc_relay.uncompressed.html';
 
       // Set up faux gadgets.config(...)
       var gadgets = {};
@@ -76,7 +76,7 @@
 
       // Include rpctest_perf.js JS test helper, also with cachebusting.
       document.write('<scr' + 'ipt language="JavaScript" type="text/javascript" src="' +
-                     '/gadgets/files/container/rpctest_perf.js?' + cachebust + '"></scr' + 'ipt>');
+                     '/container/rpctest_perf.js?' + cachebust + '"></scr' + 'ipt>');
     </script>
     <!-- need a script break to allow rpc.js to load before calling referenced methods -->
     <script>
