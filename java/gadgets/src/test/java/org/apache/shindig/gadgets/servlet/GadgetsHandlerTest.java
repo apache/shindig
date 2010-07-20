@@ -1,36 +1,33 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.TestExecutorService;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
@@ -46,98 +43,111 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
-import static org.easymock.EasyMock.expect;
+import javax.servlet.http.HttpServletResponse;
 
 public class GadgetsHandlerTest extends EasyMockTestCase {
-  private final RequestPipeline pipeline = mock(RequestPipeline.class);
+  private static final String GADGET1_URL = FakeProcessor.SPEC_URL.toString();
+  private static final String GADGET2_URL = FakeProcessor.SPEC_URL2 .toString();
+  private static final String CONTAINER = "container";
+  private static final String TOKEN = "_nekot_";
+
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
-  private final Map<String,FormDataItem> emptyFormItems = Collections.emptyMap();
+  private final Map<String, FormDataItem> emptyFormItems = Collections.emptyMap();
 
+  private Injector injector;
   private BeanJsonConverter converter;
   private HandlerRegistry registry;
   private FakeGadgetToken token;
 
-
   @Before
   public void setUp() throws Exception {
-    Injector injector = Guice.createInjector();
+    injector = Guice.createInjector();
     converter = new BeanJsonConverter(injector);
-
-    GadgetsHandler gadgetsHandler = new GadgetsHandler(new TestExecutorService(),
-        processor,
-        urlGenerator);
-
-    registry = new DefaultHandlerRegistry(injector, converter,
-        new HandlerExecutionListener.NoOpHandler());
-    registry.addHandlers(ImmutableSet.<Object>of(gadgetsHandler));
-
     token = new FakeGadgetToken();
     token.setAppUrl("http://www.example.com/gadget.xml");
-
   }
 
-  private JSONObject createContext(String lang, String country)
+  private void registerGadgetsHandler(SecurityTokenDecoder decoder) {
+    GadgetsHandler handler =
+        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, decoder);
+    registry = new DefaultHandlerRegistry(
+        injector, converter, new HandlerExecutionListener.NoOpHandler());
+    registry.addHandlers(ImmutableSet.<Object> of(handler));
+  }
+
+  private JSONObject makeMetadataRequest(String lang, String country, String... uris)
       throws JSONException {
-    return new JSONObject().put("language", lang).put("country", country);
-  }
-
-  private JSONObject makeMetadataRequest(String lang, String country, Collection<String> uris) throws JSONException {
-    JSONObject req = new JSONObject()
-        .put("method", "gadgets.metadata")
-        .put("id", "req1")
-        .put("params", new JSONObject().put("ids", uris));
-
+    JSONObject req =
+        new JSONObject().put("method", "gadgets.metadata").put("id", "req1").put("params",
+            new JSONObject().put("ids", ImmutableList.of(uris)).put("container", CONTAINER));
     if (lang != null) req.put("language", lang);
     if (country != null) req.put("country", country);
     return req;
   }
-  
+
+  private JSONObject makeTokenRequest(String... uris) throws JSONException {
+    JSONObject req =
+        new JSONObject().put("method", "gadgets.token").put("id", "req1").put("params",
+            new JSONObject().put("ids", ImmutableList.of(uris)).put("container", CONTAINER));
+    return req;
+  }
+
   @Test
   public void testMetadataEmptyRequest() throws Exception {
-    JSONObject emptyrequest = makeMetadataRequest(null, null, Collections.<String>emptyList());
-
-    RpcHandler operation = registry.getRpcHandler(emptyrequest);
-
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest(null, null);
+    RpcHandler operation = registry.getRpcHandler(request);
     Object empty = operation.execute(emptyFormItems, token, converter).get();
     JsonAssert.assertJsonEquals("{}", converter.convertToString(empty));
   }
 
-  @Test(expected=ExecutionException.class)
+  @Test
+  public void testTokenEmptyRequest() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeTokenRequest();
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object empty = operation.execute(emptyFormItems, token, converter).get();
+    JsonAssert.assertJsonEquals("{}", converter.convertToString(empty));
+  }
+
+  @Test(expected = ExecutionException.class)
   public void testMetadataInvalidUrl() throws Exception {
-    JSONObject invalidRequest = makeMetadataRequest(null, null, ImmutableList.of("[moo]"));
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest(null, null, "[moo]");
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object empty = operation.execute(emptyFormItems, token, converter).get();
+  }
 
-    RpcHandler operation = registry.getRpcHandler(invalidRequest);
-
+  @Test(expected = ExecutionException.class)
+  public void testTokenInvalidUrl() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeTokenRequest("[moo]");
+    RpcHandler operation = registry.getRpcHandler(request);
     Object empty = operation.execute(emptyFormItems, token, converter).get();
   }
 
   @Test
   public void testMetadataOneGadget() throws Exception {
-    JSONObject oneGadget = makeMetadataRequest(null, null, ImmutableList.of(FakeProcessor.SPEC_URL.toString()));
-
-    RpcHandler operation = registry.getRpcHandler(oneGadget);
-
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest(null, null, GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
-    JSONObject gadget = response.getJSONObject(FakeProcessor.SPEC_URL.toString());
+    JSONObject gadget = response.getJSONObject(GADGET1_URL);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), gadget.getString("iframeUrl"));
     assertEquals(FakeProcessor.SPEC_TITLE, gadget.getJSONObject("modulePrefs").getString("title"));
 
     JSONObject view = gadget.getJSONObject("views").getJSONObject(GadgetSpec.DEFAULT_VIEW);
     assertEquals(FakeProcessor.PREFERRED_HEIGHT, view.getInt("preferredHeight"));
     assertEquals(FakeProcessor.PREFERRED_WIDTH, view.getInt("preferredWidth"));
-    assertEquals(FakeProcessor.LINK_HREF, gadget.getJSONObject("modulePrefs").getJSONObject("links")
-        .getJSONObject(FakeProcessor.LINK_REL).getString("href"));
+    assertEquals(FakeProcessor.LINK_HREF, gadget.getJSONObject("modulePrefs")
+        .getJSONObject("links").getJSONObject(FakeProcessor.LINK_REL).getString("href"));
 
     JSONObject userPrefs = gadget.getJSONObject("userPrefs");
     assertNotNull(userPrefs);
@@ -162,63 +172,105 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   @Test
-  public void testMetadataUnexpectedError() throws Exception {
-    JSONObject oneGadget = makeMetadataRequest(null, null, ImmutableList.of(FakeProcessor.SPEC_URL.toString()));
+  public void testTokenOneGadget() throws Exception {
+    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
+    EasyMock.expect(decoder.encodeToken(token)).andReturn(TOKEN);
+    replay(decoder);
 
+    registerGadgetsHandler(decoder);
+    JSONObject request = makeTokenRequest(GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject gadget = response.getJSONObject(GADGET1_URL);
+    assertEquals(TOKEN, gadget.getString("token"));
+    assertFalse(gadget.has("error"));
+  }
+
+  @Test
+  public void testMetadataOneGadgetFailure() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest(null, null, GADGET1_URL);
     urlGenerator.throwRandomFault = true;
-
-    RpcHandler operation = registry.getRpcHandler(oneGadget);
+    RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
-    String actual = response.getJSONObject(FakeProcessor.SPEC_URL.toString()).getString("error");
-    assertEquals("BROKEN", actual);
+    JSONObject gadget = response.getJSONObject(GADGET1_URL);
+    assertEquals(GadgetsHandler.FAILURE_METADATA, gadget.getString("error"));
   }
 
   @Test
-  public void testMultipleGadgets() throws Exception {
-    JSONObject metadataRequest = makeMetadataRequest("en", "US",
-        ImmutableList.of(FakeProcessor.SPEC_URL.toString(),
-                         FakeProcessor.SPEC_URL2.toString()));
+  public void testTokenOneGadgetFailure() throws Exception {
+    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
+    EasyMock.expect(decoder.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    replay(decoder);
 
-    RpcHandler operation = registry.getRpcHandler(metadataRequest);
+    registerGadgetsHandler(decoder);
+    JSONObject request = makeTokenRequest(GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
-    JSONObject gadget;
-
-    // First gadget..
-    gadget = response.getJSONObject(FakeProcessor.SPEC_URL.toString());
-    assertNotNull("got gadget1", gadget);
-    assertEquals(FakeProcessor.SPEC_TITLE, gadget.getJSONObject("modulePrefs").getString("title"));
-
-    gadget = response.getJSONObject(FakeProcessor.SPEC_URL2.toString());
-    assertNotNull("got gadget2", gadget);
-    assertEquals(FakeProcessor.SPEC_TITLE2, gadget.getJSONObject("modulePrefs").getString("title"));
+    JSONObject gadget = response.getJSONObject(GADGET1_URL);
+    assertFalse(gadget.has("token"));
+    assertEquals(GadgetsHandler.FAILURE_TOKEN, gadget.getString("error"));
   }
 
   @Test
-  public void testMultipleGadgetsWithAnError() throws Exception {
-    JSONObject metadataRequest = makeMetadataRequest("en", "US",
-        ImmutableList.of(FakeProcessor.SPEC_URL.toString(),
-                         FakeProcessor.SPEC_URL2.toString()));
-
-    processor.exceptions.put(FakeProcessor.SPEC_URL2,
-        new ProcessingException("broken", HttpServletResponse.SC_BAD_REQUEST));
-
-    RpcHandler operation = registry.getRpcHandler(metadataRequest);
+  public void testMetadataMultipleGadgets() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest("en", "US", GADGET1_URL, GADGET2_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
-    JSONObject gadget;
+    JSONObject modulePrefs1 = response.getJSONObject(GADGET1_URL).getJSONObject("modulePrefs");
+    assertEquals(FakeProcessor.SPEC_TITLE, modulePrefs1.getString("title"));
 
-    // First gadget..
-    gadget = response.getJSONObject(FakeProcessor.SPEC_URL.toString());
-    assertNotNull("got gadget1", gadget);
-    assertEquals(FakeProcessor.SPEC_TITLE, gadget.getJSONObject("modulePrefs").getString("title"));
+    JSONObject modulePrefs2 = response.getJSONObject(GADGET2_URL).getJSONObject("modulePrefs");
+    assertEquals(FakeProcessor.SPEC_TITLE2, modulePrefs2.getString("title"));
+  }
 
-    gadget = response.getJSONObject(FakeProcessor.SPEC_URL2.toString());
-    assertNotNull("got gadget2", gadget);
-    assertEquals("broken", gadget.getString("error"));
+  @Test
+  public void testTokenMultipleGadgetsWithSuccessAndFailure() throws Exception {
+    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
+    EasyMock.expect(decoder.encodeToken(token)).andReturn(TOKEN);
+    EasyMock.expect(decoder.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    replay(decoder);
+
+    registerGadgetsHandler(decoder);
+    JSONObject request = makeTokenRequest(GADGET1_URL, GADGET2_URL);
+
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject gadget1 = response.getJSONObject(GADGET1_URL);
+    assertEquals(TOKEN, gadget1.getString("token"));
+    assertFalse(gadget1.has("error"));
+
+    JSONObject gadget2 = response.getJSONObject(GADGET2_URL);
+    assertFalse(gadget2.has("token"));
+    assertEquals(GadgetsHandler.FAILURE_TOKEN, gadget2.getString("error"));
+  }
+
+  @Test
+  public void testMetadataMultipleGadgetsWithFailure() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataRequest("en", "US", GADGET1_URL, GADGET2_URL);
+    processor.exceptions.put(FakeProcessor.SPEC_URL2, new ProcessingException("broken",
+        HttpServletResponse.SC_BAD_REQUEST));
+    RpcHandler operation = registry.getRpcHandler(request);
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+
+    JSONObject modulePrefs1 = response.getJSONObject(GADGET1_URL).getJSONObject("modulePrefs");
+    assertEquals(FakeProcessor.SPEC_TITLE, modulePrefs1.getString("title"));
+
+    JSONObject gadget2 = response.getJSONObject(GADGET2_URL);
+    assertNotNull("got gadget2", gadget2);
+    assertEquals(GadgetsHandler.FAILURE_METADATA, gadget2.getString("error"));
   }
 }

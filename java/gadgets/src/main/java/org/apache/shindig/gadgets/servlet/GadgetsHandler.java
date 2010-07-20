@@ -18,17 +18,18 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.auth.SecurityTokenDecoder;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.UserPrefs;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
@@ -41,8 +42,6 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -52,127 +51,194 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Service(name = "gadgets")
 public class GadgetsHandler {
-  Set<String> ALL_METADATA_FIELDS = ImmutableSet.of("iframeUrl", "userPrefs", "modulePrefs", "views", "views.name", "views.type",
-      "views.type", "views.href", "views.quirks", "views.content", "views.preferredHeight", "views.preferredWidth",
+  @VisibleForTesting
+  static final String FAILURE_METADATA = "Failed to get gadget metadata.";
+  @VisibleForTesting
+  static final String FAILURE_TOKEN = "Failed to get gadget token.";
+
+  private static final Set<String> ALL_METADATA_FIELDS = ImmutableSet.of(
+      "iframeUrl", "userPrefs", "modulePrefs", "views", "views.name", "views.type",
+      "views.type", "views.href", "views.quirks", "views.content",
+      "views.preferredHeight", "views.preferredWidth",
       "views.needsUserPrefsSubstituted", "views.attributes");
-  Set<String> DEFAULT_METADATA_FIELDS = ImmutableSet.of("iframeUrl", "userPrefs", "modulePrefs", "views");
+  private static final Set<String> DEFAULT_METADATA_FIELDS = ImmutableSet.of(
+      "iframeUrl", "userPrefs", "modulePrefs", "views");
 
   protected final ExecutorService executor;
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
+  protected final SecurityTokenDecoder securityTokenDecoder;
 
   @Inject
-  public GadgetsHandler(ExecutorService executor, Processor processor, IframeUriManager iframeUriManager) {
+  public GadgetsHandler(
+      ExecutorService executor,
+      Processor processor,
+      IframeUriManager iframeUriManager,
+      SecurityTokenDecoder securityTokenDecoder) {
     this.executor = executor;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
+    this.securityTokenDecoder = securityTokenDecoder;
   }
 
-  @Operation(httpMethods = {"POST","GET"}, path = "/metadata/{view}")
-  public Map<String,MetadataGadgetSpec> metadata(BaseRequestItem request) throws ProtocolException {
-    Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
-
-    if (gadgetUrls.isEmpty())
-      return ImmutableMap.of();
-
-    Set<String> fields = request.getFields(DEFAULT_METADATA_FIELDS);
-
-    CompletionService<MetadataGadgetSpec> completionService =  new ExecutorCompletionService<MetadataGadgetSpec>(executor);
-
-    for (String gadgetUri : gadgetUrls) {
-      completionService.submit(createNewJob(new MetadataGadgetContext(gadgetUri,request), fields));
-    }
-
-    int numJobs = gadgetUrls.size();
-    Map<String,MetadataGadgetSpec> response = Maps.newHashMap();
-
-    while (numJobs > 0) {
-      try {
-        MetadataGadgetSpec spec = completionService.take().get();
-        response.put(spec.getUrl(), spec);
-      } catch (InterruptedException e) {
-        throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Processing interrupted", e);
-      } catch (ExecutionException ee) {
-        if (!(ee.getCause() instanceof RpcException)) {
-          throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Processing error", ee);
-        }
-        RpcException e = (RpcException)ee.getCause();
-        // Just one gadget failed; mark it as such.
-        GadgetContext context = e.getContext();
-        if (context != null) {
-          response.put(context.getUrl().toString(), new MetadataGadgetSpec().setError(e.getCause().getLocalizedMessage()));
-        }
-      } finally {
-        numJobs--;
+  @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
+  public Map<String, MetadataResponse> metadata(BaseRequestItem request)
+      throws ProtocolException {
+    return new AbstractExecutor<MetadataResponse>() {
+      @Override
+      protected Callable<MetadataResponse> createJob(String url, BaseRequestItem request) {
+        return createMetadataJob(url, request);
       }
-    }
-    return response;
+    }.execute(request);
   }
 
-  @Operation(httpMethods = "GET", path="/@supportedFields")
+  @Operation(httpMethods = {"POST", "GET"}, path = "token.get")
+  public Map<String, TokenResponse> token(BaseRequestItem request)
+      throws ProtocolException {
+    return new AbstractExecutor<TokenResponse>() {
+      @Override
+      protected Callable<TokenResponse> createJob(String url, BaseRequestItem request) {
+        return createTokenJob(url, request);
+      }
+    }.execute(request);
+  }
+
+  @Operation(httpMethods = "GET", path="/@metadata.supportedFields")
   public Set<String> supportedFields(RequestItem request) {
     return ALL_METADATA_FIELDS;
   }
 
-  protected MetadataJob createNewJob(GadgetContext context, Set<String> fields) {
-    return new MetadataJob(context, fields);
+  private abstract class AbstractExecutor<R extends BaseResponse> {
+    @SuppressWarnings("unchecked")
+    public Map<String, R> execute(BaseRequestItem request) {
+      Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
+      if (gadgetUrls.isEmpty()) {
+        return ImmutableMap.of();
+      }
+
+      CompletionService<R> completionService = new ExecutorCompletionService<R>(executor);
+      for (String gadgetUrl : gadgetUrls) {
+        Callable<R> job = createJob(gadgetUrl, request);
+        completionService.submit(job);
+      }
+
+      ImmutableMap.Builder<String, R> builder = ImmutableMap.builder();
+      for (int numJobs = gadgetUrls.size(); numJobs > 0; numJobs--) {
+        R response;
+        try {
+          response = completionService.take().get();
+          builder.put(response.getUrl(), response);
+        } catch (InterruptedException e) {
+          throw new ProtocolException(
+              HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              "Processing interrupted.", e);
+        } catch (ExecutionException e) {
+          if (!(e.getCause() instanceof RpcException)) {
+            throw new ProtocolException(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Processing error.", e);
+          }
+          RpcException cause = (RpcException) e.getCause();
+          GadgetContext context = cause.getContext();
+          if (context != null) {
+            String url = context.getUrl().toString();
+            R errorResponse = (R) new BaseResponse(url, cause.getMessage());
+            builder.put(url, errorResponse);
+          }
+        }
+      }
+      return builder.build();
+    }
+
+    protected abstract Callable<R> createJob(String url, BaseRequestItem request);
   }
 
-  protected class MetadataJob implements Callable<MetadataGadgetSpec> {
-    protected final GadgetContext context;
-    protected final Set<String> fields;
-
-    public MetadataJob(GadgetContext context, Set<String> fields) {
-      this.context = context;
-      this.fields = fields;
-    }
-
-    public MetadataGadgetSpec call() throws RpcException {
-      try {
-        Gadget gadget = processor.process(context);
-        String iframeUrl =  fields.contains("iframeUrl") ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
-
-        FilteringGadgetSpec spec = new FilteringGadgetSpec(gadget.getSpec(), iframeUrl, fields);
-        spec.setUrl(context.getUrl().toString());
-        return spec;
-      } catch (Exception e) {
-        throw new RpcException(context, e);
+  // Hook to override in sub-class.
+  protected Callable<MetadataResponse> createMetadataJob(String url, BaseRequestItem request) {
+    final GadgetContext context = new MetadataGadgetContext(url, request);
+    final Set<String> fields = request.getFields(DEFAULT_METADATA_FIELDS);
+    return new Callable<MetadataResponse>() {
+      public MetadataResponse call() throws Exception {
+        try {
+          Gadget gadget = processor.process(context);
+          String iframeUrl = fields.contains("iframeUrl")
+              ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
+          return new MetadataResponse(context.getUrl().toString(), gadget.getSpec(),
+              iframeUrl, fields);
+        } catch (Exception e) {
+          // Note: this error message is publicly visible in JSON-RPC response.
+          throw new RpcException(context, FAILURE_METADATA, e);
+        }
       }
-    }
+    };
+  }
+
+  // Hook to override in sub-class.
+  protected Callable<TokenResponse> createTokenJob(String url, BaseRequestItem request) {
+    final TokenGadgetContext context = new TokenGadgetContext(url, request);
+    return new Callable<TokenResponse>() {
+      public TokenResponse call() throws Exception {
+        try {
+          String token = securityTokenDecoder.encodeToken(context.getToken());
+          return new TokenResponse(context.getUrl().toString(), token);
+        } catch (Exception e) {
+          // Note: this error message is publicly visible in JSON-RPC response.
+          throw new RpcException(context, FAILURE_TOKEN, e);
+        }
+      }
+    };
   }
 
   /**
-   * Localized implementation of GadgetContext that uses information from the request.
+   * Gadget context classes used to translate JSON BaseRequestItem into a
+   * more meaningful model objects that Java can work with.
    */
-  private static class MetadataGadgetContext extends GadgetContext {
-    final BaseRequestItem request;
-    final Uri uri;
-    final Locale locale;
-    final boolean ignoreCache;
-    final boolean debug;
-    final String container;
 
-    public MetadataGadgetContext(String uri, BaseRequestItem request) {
+  private abstract class AbstractGadgetContext extends GadgetContext {
+    protected final Uri uri;
+    protected final String container;
+    protected final BaseRequestItem request;
+
+    public AbstractGadgetContext(String url, BaseRequestItem request) {
+      this.uri = Uri.parse(Preconditions.checkNotNull(url));
       this.request = Preconditions.checkNotNull(request);
-      this.uri = Uri.parse(Preconditions.checkNotNull(uri));
-
-      String lang = request.getParameter("language");
-      String country = request.getParameter("country");
-
-      this.locale = (lang != null && country != null) ? new Locale(lang,country) :
-                    (lang != null) ? new Locale(lang) :
-                    GadgetSpec.DEFAULT_LOCALE;
-
-      this.ignoreCache = Boolean.valueOf(request.getParameter("ignoreCache"));
-      this.debug = Boolean.valueOf(request.getParameter("debug"));
-      this.container = request.getToken().getContainer();
+      this.container = Preconditions.checkNotNull(request.getParameter("container"));
     }
 
     @Override
     public Uri getUrl() {
       return uri;
+    }
+
+    @Override
+    public String getContainer() {
+      return container;
+    }
+
+    @Override
+    public RenderingContext getRenderingContext() {
+      return RenderingContext.METADATA;
+    }
+  }
+
+  protected class MetadataGadgetContext extends AbstractGadgetContext {
+    protected final Locale locale;
+    protected final boolean ignoreCache;
+    protected final boolean debug;
+
+    public MetadataGadgetContext(String url, BaseRequestItem request) {
+      super(url, request);
+      String lang = request.getParameter("language");
+      String country = request.getParameter("country");
+      this.locale = (lang != null && country != null) ? new Locale(lang,country) :
+                    (lang != null) ? new Locale(lang) :
+                    GadgetSpec.DEFAULT_LOCALE;
+      this.ignoreCache = Boolean.valueOf(request.getParameter("ignoreCache"));
+      this.debug = Boolean.valueOf(request.getParameter("debug"));
     }
 
     @Override
@@ -186,18 +252,8 @@ public class GadgetsHandler {
     }
 
     @Override
-    public RenderingContext getRenderingContext() {
-      return RenderingContext.METADATA;
-    }
-
-    @Override
     public boolean getIgnoreCache() {
       return ignoreCache;
-    }
-
-    @Override
-    public String getContainer() {
-      return container;
     }
 
     @Override
@@ -211,9 +267,14 @@ public class GadgetsHandler {
     }
 
     @Override
-    public UserPrefs getUserPrefs() {
-            // TODO
-      return new UserPrefs(Maps.<String,String>newHashMap());
+    public SecurityToken getToken() {
+      return request.getToken();
+    }
+  }
+
+  protected class TokenGadgetContext extends AbstractGadgetContext {
+    public TokenGadgetContext(String url, BaseRequestItem request) {
+      super(url, request);
     }
 
     @Override
@@ -222,9 +283,87 @@ public class GadgetsHandler {
     }
   }
 
+  /**
+   * Response classes to represent data structure returned in JSON to common
+   * container JS. They must be public for reflection to work.
+   */
 
-  // has to be public for reflection to work.
-  public static final class FilteringView {
+  public static class BaseResponse {
+    private final String url;
+    private final String error;
+
+    // Call this to indicate an error.
+    public BaseResponse(String url, String error) {
+      this.url = url;
+      this.error = error;
+    }
+
+    // Have sub-class call this to indicate a success response.
+    protected BaseResponse(String url) {
+      this(url, null);
+    }
+
+    public String getUrl() {
+      return url;
+    }
+
+    public String getError() {
+      return error;
+    }
+  }
+
+  public static class MetadataResponse extends BaseResponse {
+    private final GadgetSpec spec;
+    private final String iframeUrl;
+    private final Map<String, ViewResponse> views;
+    private final Set<String> fields;
+
+    public MetadataResponse(String url, GadgetSpec spec, String iframeUrl, Set<String> fields) {
+      super(url);
+      this.spec = spec;
+      this.iframeUrl = iframeUrl;
+      this.fields = fields;
+
+      // Do we need view data?
+      boolean viewsRequested = fields.contains("views");
+      for (String f: fields) {
+        if (f.startsWith("views")) {
+          viewsRequested = true;
+        }
+      }
+      if (viewsRequested) {
+        ImmutableMap.Builder<String, ViewResponse> builder = ImmutableMap.builder();
+        for (Map.Entry<String,View> entry : spec.getViews().entrySet()) {
+          builder.put(entry.getKey(), new ViewResponse(entry.getValue(), fields));
+        }
+        views = builder.build();
+      } else {
+        views = null;
+      }
+    }
+
+    public String getIframeUrl() {
+      return fields.contains("iframeUrl") ? iframeUrl : null;
+    }
+
+    public String getChecksum() {
+      return fields.contains("checksum") ? spec.getChecksum() : null;
+    }
+
+    public ModulePrefs getModulePrefs() {
+      return fields.contains("modulePrefs") ? spec.getModulePrefs() : null;
+    }
+
+    public Map<String, UserPref> getUserPrefs() {
+      return fields.contains("userPrefs") ? spec.getUserPrefs() : null;
+    }
+
+    public Map<String, ViewResponse> getViews() {
+      return views;
+    }
+  }
+
+  public static class ViewResponse {
     private final View view;
     private final Set<String> fields;
 
@@ -239,7 +378,7 @@ public class GadgetsHandler {
       return (fields.contains("views") || fields.contains(param)) ? item : null;
     }
 
-    public FilteringView(View view, Set<String> fields) {
+    public ViewResponse(View view, Set<String> fields) {
       this.view = view;
       this.fields = fields;
     }
@@ -281,75 +420,17 @@ public class GadgetsHandler {
     }
   }
 
-  // has to be public for reflection to work..
-  public static class MetadataGadgetSpec {
-    private String msg = null;
-    private String url = null;
+  public static class TokenResponse extends BaseResponse {
+    private final String token;
 
-    public MetadataGadgetSpec setError(String msg) {
-      this.msg = msg;
-      return this;
+    public TokenResponse(String url, String token) {
+      super(url);
+      this.token = token;
     }
-    public MetadataGadgetSpec setUrl(String url) {
-      this.url = url;
-      return this;
-    }
-    public String getError() {
-      return msg;  
-    }
-    public String getUrl() {
-      return url;
+
+    public String getToken() {
+      return token;
     }
   }
-  
-  // has to be public for reflection to work.
-  public static final class FilteringGadgetSpec extends MetadataGadgetSpec {
-    private final GadgetSpec spec;
-    private final String iframeUrl;
-    private final Map<String,FilteringView> views;
-    private final Set<String> fields;
 
-    public FilteringGadgetSpec(GadgetSpec spec, String iframeUrl, Set<String> fields) {
-      this.spec = Preconditions.checkNotNull(spec);
-      this.iframeUrl = iframeUrl; // can be null
-      this.fields = Preconditions.checkNotNull(fields);
-
-      // Do we need view data?
-      boolean viewsRequested = fields.contains("views");
-      for (String f: fields) {
-        if (f.startsWith("views")) {
-          viewsRequested = true;
-        }
-      }
-      if (viewsRequested) {
-        ImmutableMap.Builder<String,FilteringView> builder = ImmutableMap.builder();
-        for (Map.Entry<String,View> entry : spec.getViews().entrySet()) {
-          builder.put(entry.getKey(), new FilteringView(entry.getValue(), fields));
-        }
-        views = builder.build();
-      } else {
-        views = null;
-      }
-    }
-
-    public String getIframeUrl() {
-      return fields.contains("iframeUrl") ? iframeUrl : null;
-    }
-
-    public String getChecksum() {
-      return fields.contains("checksum") ? spec.getChecksum() : null;
-    }
-
-    public ModulePrefs getModulePrefs() {
-      return fields.contains("modulePrefs") ? spec.getModulePrefs() : null;
-    }
-
-    public Map<String,UserPref> getUserPrefs() {
-      return fields.contains("userPrefs") ? spec.getUserPrefs() : null;
-    }
-
-    public Map<String, FilteringView> getViews() {
-      return views;
-    }
-  }
 }
