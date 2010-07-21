@@ -75,15 +75,19 @@ public class ProxyHandlerTest extends ServletTestFixture {
       throws Exception {
     setupProxyRequestBase(host);
     expect(request.getHeader("Host")).andReturn(host);
-    String query = (url != null ? "url=" + Utf8UrlCoder.encode(url) + '&' : "")
-        + "container=default";
+    StringBuffer query = new StringBuffer("");
+    if (null != url) {
+      query.append("url=").append(Utf8UrlCoder.encode(url)).append('&');
+    }
+    query.append("container=default");
     String[] params = extraParams;
     if (params != null && params.length > 0) {
       for (int i = 0; i < params.length; i += 2) {
-        query += '&' + params[i] + '=' + Utf8UrlCoder.encode(params[i+1]);
+        query.append('&').append(params[i]).append('=').append(
+            Utf8UrlCoder.encode(params[i+1]));
       }
     }
-    expect(request.getQueryString()).andReturn(query);
+    expect(request.getQueryString()).andReturn(query.toString());
   }
 
   private void setupFailedProxyRequestMock(String host, String url) throws Exception {

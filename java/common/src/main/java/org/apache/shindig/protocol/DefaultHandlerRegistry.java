@@ -26,6 +26,7 @@ import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -620,6 +621,22 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
       return new RestInvocationWrapper(parsedParams, handler);
     }
 
+    @Override
+    public boolean equals(Object other) {
+      if (other instanceof RestPath) {
+        RestPath that = (RestPath)other;
+        return (this.constCount == that.constCount &&
+            this.lastConstIndex == that.lastConstIndex &&
+            Objects.equal(this.operationPath, that.operationPath));
+      }
+      return false;
+    }
+    
+    @Override
+    public int hashCode() {
+      return this.constCount ^ this.lastConstIndex ^ operationPath.hashCode();
+    }
+    
     /**
      * Rank based on the number of consant parts they accept, where the constant parts occur
      * and lexical ordering.
