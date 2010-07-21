@@ -66,10 +66,12 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProxySelector;
@@ -464,11 +466,72 @@ public class BasicHttpFetcher implements HttpFetcher {
       return HttpResponse.badrequest("Exceeded maximum number of bytes - " + maxObjSize);
     }
 
-    byte[] responseBytes = (entity == null) ? null : EntityUtils.toByteArray(entity);
+    byte[] responseBytes = (entity == null) ? null : toByteArraySafe(entity);
 
     return builder
         .setHttpStatusCode(response.getStatusLine().getStatusCode())
         .setResponse(responseBytes)
         .create();
+  }
+
+  /**
+   * This method is Safe replica version of org.apache.http.util.EntityUtils.toByteArray.
+   * The try block embedding 'instream.read' has a corresponding catch block for 'EOFException'
+   * (that's Ignored) and all other IOExceptions are let pass.
+   *
+   * @param entity
+   * @return byte array containing the entity content. May be empty/null.
+   * @throws IOException if an error occurs reading the input stream
+   */
+  public byte[] toByteArraySafe(final HttpEntity entity) throws IOException {
+    if (entity == null) {
+      return null;
+    }
+
+    InputStream instream = entity.getContent();
+    if (instream == null) {
+      return new byte[] {};
+    }
+    if (entity.getContentLength() > Integer.MAX_VALUE) {
+      throw new IllegalArgumentException("HTTP entity too large to be buffered in memory");
+    }
+
+    // The raw data stream (inside JDK) is read in a buffer of size '512'. The original code
+    // org.apache.http.util.EntityUtils.toByteArray reads the unzipped data in a buffer of
+    // 4096 byte. For any data stream that has a compression ratio lesser than 1/8, this may
+    // result in the buffer/array overflow. Increasing the buffer size to '16384'. It's highly
+    // unlikely to get data compression ratios lesser than 1/32 (3%).
+    final int bufferLength = 16384;
+    int i = (int)entity.getContentLength();
+    if (i < 0) {
+      i = bufferLength;
+    }
+    ByteArrayBuffer buffer = new ByteArrayBuffer(i);
+    try {
+      byte[] tmp = new byte[bufferLength];
+      int l;
+      while((l = instream.read(tmp)) != -1) {
+        buffer.append(tmp, 0, l);
+      }
+    } catch (EOFException eofe) {
+      // Ref: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4040920
+      // Due to a bug in JDK ZLIB (InflaterInputStream), unexpected EOF error can occur.
+      // In such cases, even if the input stream is finished reading, the
+      // 'Inflater.finished()' call erroneously returns 'false' and
+      // 'java.util.zip.InflaterInputStream.fill' throws the 'EOFException'.
+      // So for such case, ignore the Exception in case Exception Cause is
+      // 'Unexpected end of ZLIB input stream'.
+      // For all other cases, re-throw the (EOF) Exception.
+      if ((instream.available() == 0) &&
+           eofe.getMessage().equals("Unexpected end of ZLIB input stream")) {
+        // Ignore
+      } else {
+        throw eofe;
+      }
+    }
+    finally {
+      instream.close();
+    }
+    return buffer.toByteArray();
   }
 }
