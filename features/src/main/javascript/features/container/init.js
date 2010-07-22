@@ -43,8 +43,6 @@
     var scriptSrc = getLastScriptSrc();
     if (scriptSrc) {
       window.__API_HOST = shindig.container.util.parseOrigin(scriptSrc);
-      window.__API_PREFIX_PATH = shindig.container.util.parsePrefixPath(
-          scriptSrc, '/gadgets/js/container.js');
       window.__CONTAINER = shindig.container.util.getParamValue(
           scriptSrc, 'container');
       window.__CONTAINER_HOST = shindig.container.util.parseOrigin(
