@@ -20,7 +20,7 @@ package org.apache.shindig.auth;
 
 /**
  * An abstract representation of a signing token.
- * Use in conjunction with @code SecurityTokenDecoder.
+ * Use in conjunction with @code SecurityTokenCodec.
  */
 public interface SecurityToken {
 

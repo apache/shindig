@@ -34,9 +34,9 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Tests of DefaultSecurityTokenDecoder
+ * Tests of DefaultSecurityTokenCodec
  */
-public class DefaultSecurityTokenDecoderTest {
+public class DefaultSecurityTokenCodecTest {
 
   private static class FakeContainerConfig extends AbstractContainerConfig {
     private final String tokenType;
@@ -65,12 +65,12 @@ public class DefaultSecurityTokenDecoderTest {
 
   @Test
   public void testBasicDecoder() throws Exception {
-    DefaultSecurityTokenDecoder decoder = new DefaultSecurityTokenDecoder(
+    DefaultSecurityTokenCodec codec = new DefaultSecurityTokenCodec(
         new FakeContainerConfig("insecure"));
     String token = "o:v:app:domain:appurl:12345:container";
     Map<String, String> parameters = Collections.singletonMap(
-        SecurityTokenDecoder.SECURITY_TOKEN_NAME, token);
-    SecurityToken st = decoder.createToken(parameters);
+        SecurityTokenCodec.SECURITY_TOKEN_NAME, token);
+    SecurityToken st = codec.createToken(parameters);
     assertEquals("o", st.getOwnerId());
     assertEquals("v", st.getViewerId());
     assertEquals("appurl", st.getAppUrl());
@@ -80,7 +80,7 @@ public class DefaultSecurityTokenDecoderTest {
   @Test
   public void testInvalidDecoder() throws Exception {
     try {
-      new DefaultSecurityTokenDecoder(new FakeContainerConfig("garbage"));
+      new DefaultSecurityTokenCodec(new FakeContainerConfig("garbage"));
       fail("Should have thrown");
     } catch (RuntimeException e) {
       assertTrue("exception should contain garbage: " + e, e.getMessage().contains("garbage"));
@@ -90,7 +90,7 @@ public class DefaultSecurityTokenDecoderTest {
   @Test
   public void testNullDecoder() throws Exception {
     try {
-      new DefaultSecurityTokenDecoder(new FakeContainerConfig(null));
+      new DefaultSecurityTokenCodec(new FakeContainerConfig(null));
       fail("Should have thrown");
     } catch (RuntimeException e) {
       assertTrue("exception should contain null: " + e, e.getMessage().contains("null"));
@@ -101,7 +101,7 @@ public class DefaultSecurityTokenDecoderTest {
   public void testRealDecoder() throws Exception {
     // Just verifies that "secure" tokens get routed to the right decoder class.
     try {
-      new DefaultSecurityTokenDecoder(new FakeContainerConfig("secure"));
+      new DefaultSecurityTokenCodec(new FakeContainerConfig("secure"));
       fail("Should have thrown");
     } catch (RuntimeException e) {
       assertTrue("root cause should have been FileNotFoundException: " + e,

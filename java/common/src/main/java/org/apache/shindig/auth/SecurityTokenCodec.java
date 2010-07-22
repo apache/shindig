@@ -25,8 +25,8 @@ import java.util.Map;
 /**
  *  Handles verification of gadget security tokens.
  */
-@ImplementedBy(DefaultSecurityTokenDecoder.class)
-public interface SecurityTokenDecoder {
+@ImplementedBy(DefaultSecurityTokenCodec.class)
+public interface SecurityTokenCodec {
 
   /**
    * The security token value must be passed on a map value referenced by this key. Additional

@@ -70,7 +70,7 @@ public class BlobCrypterSecurityToken extends AbstractSecurityToken implements S
   }
 
   /**
-   * Decrypt and verify a token.  Note this is not public, use BlobCrypterSecurityTokenDecoder
+   * Decrypt and verify a token.  Note this is not public, use BlobCrypterSecurityTokenCodec
    * instead.
    *
    * @param crypter crypter to use for decryption

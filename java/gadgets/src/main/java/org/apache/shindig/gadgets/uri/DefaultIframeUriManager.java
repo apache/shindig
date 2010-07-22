@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -56,14 +56,14 @@ public class DefaultIframeUriManager implements IframeUriManager {
   
   private final ContainerConfig config;
   private final LockedDomainPrefixGenerator ldGen;
-  private final SecurityTokenDecoder securityTokenCodec;
+  private final SecurityTokenCodec securityTokenCodec;
 
   private final List<String> ldSuffixes;
 
   @Inject
   public DefaultIframeUriManager(ContainerConfig config,
                                  LockedDomainPrefixGenerator ldGen,
-                                 SecurityTokenDecoder securityTokenCodec) {
+                                 SecurityTokenCodec securityTokenCodec) {
     this.config = config;
     this.ldGen = ldGen;
     this.securityTokenCodec = securityTokenCodec;

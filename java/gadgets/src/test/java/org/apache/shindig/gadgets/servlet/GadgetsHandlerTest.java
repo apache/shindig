@@ -21,8 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
@@ -72,9 +71,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     token.setAppUrl("http://www.example.com/gadget.xml");
   }
 
-  private void registerGadgetsHandler(SecurityTokenDecoder decoder) {
+  private void registerGadgetsHandler(SecurityTokenCodec codec) {
     GadgetsHandler handler =
-        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, decoder);
+        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, codec);
     registry = new DefaultHandlerRegistry(
         injector, converter, new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object> of(handler));
@@ -173,11 +172,11 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testTokenOneGadget() throws Exception {
-    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
-    EasyMock.expect(decoder.encodeToken(token)).andReturn(TOKEN);
-    replay(decoder);
+    SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
+    EasyMock.expect(codec.encodeToken(token)).andReturn(TOKEN);
+    replay(codec);
 
-    registerGadgetsHandler(decoder);
+    registerGadgetsHandler(codec);
     JSONObject request = makeTokenRequest(GADGET1_URL);
     RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
@@ -203,11 +202,11 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testTokenOneGadgetFailure() throws Exception {
-    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
-    EasyMock.expect(decoder.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
-    replay(decoder);
+    SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
+    EasyMock.expect(codec.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    replay(codec);
 
-    registerGadgetsHandler(decoder);
+    registerGadgetsHandler(codec);
     JSONObject request = makeTokenRequest(GADGET1_URL);
     RpcHandler operation = registry.getRpcHandler(request);
     Object responseObj = operation.execute(emptyFormItems, token, converter).get();
@@ -235,12 +234,12 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testTokenMultipleGadgetsWithSuccessAndFailure() throws Exception {
-    SecurityTokenDecoder decoder = EasyMock.createMock(SecurityTokenDecoder.class);
-    EasyMock.expect(decoder.encodeToken(token)).andReturn(TOKEN);
-    EasyMock.expect(decoder.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
-    replay(decoder);
+    SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
+    EasyMock.expect(codec.encodeToken(token)).andReturn(TOKEN);
+    EasyMock.expect(codec.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    replay(codec);
 
-    registerGadgetsHandler(decoder);
+    registerGadgetsHandler(codec);
     JSONObject request = makeTokenRequest(GADGET1_URL, GADGET2_URL);
 
     RpcHandler operation = registry.getRpcHandler(request);

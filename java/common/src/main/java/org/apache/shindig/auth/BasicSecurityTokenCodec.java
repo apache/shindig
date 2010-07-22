@@ -28,11 +28,11 @@ import com.google.inject.Singleton;
 import java.util.Map;
 
 /**
- * A SecurityTokenDecoder implementation that just provides dummy data to satisfy
+ * A SecurityTokenCodec implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
  */
 @Singleton
-public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
+public class BasicSecurityTokenCodec implements SecurityTokenCodec {
 
   private static final int OWNER_INDEX = 0;
   private static final int VIEWER_INDEX = 1;
@@ -68,7 +68,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
   public SecurityToken createToken(Map<String, String> parameters)
       throws SecurityTokenException {
 
-    final String token = parameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
+    final String token = parameters.get(SecurityTokenCodec.SECURITY_TOKEN_NAME);
     if (token == null || token.trim().length() == 0) {
       // No token is present, assume anonymous access
       return new AnonymousSecurityToken();
@@ -88,7 +88,7 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
           Utf8UrlCoder.decode(tokens[APP_URL_INDEX]),
           Utf8UrlCoder.decode(tokens[MODULE_ID_INDEX]),
           Utf8UrlCoder.decode(tokens[CONTAINER_ID_INDEX]),
-          parameters.get(SecurityTokenDecoder.ACTIVE_URL_NAME),
+          parameters.get(SecurityTokenCodec.ACTIVE_URL_NAME),
           null);
     } catch (BlobCrypterException e) {
       throw new SecurityTokenException(e);
@@ -100,6 +100,6 @@ public class BasicSecurityTokenDecoder implements SecurityTokenDecoder {
   /**
    * Creates a signer with 24 hour token expiry
    */
-  public BasicSecurityTokenDecoder() {
+  public BasicSecurityTokenCodec() {
   }
 }

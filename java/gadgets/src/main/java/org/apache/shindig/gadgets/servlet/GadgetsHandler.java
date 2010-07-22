@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -71,18 +71,18 @@ public class GadgetsHandler {
   protected final ExecutorService executor;
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
-  protected final SecurityTokenDecoder securityTokenDecoder;
+  protected final SecurityTokenCodec securityTokenCodec;
 
   @Inject
   public GadgetsHandler(
       ExecutorService executor,
       Processor processor,
       IframeUriManager iframeUriManager,
-      SecurityTokenDecoder securityTokenDecoder) {
+      SecurityTokenCodec securityTokenCodec) {
     this.executor = executor;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
-    this.securityTokenDecoder = securityTokenDecoder;
+    this.securityTokenCodec = securityTokenCodec;
   }
 
   @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
@@ -183,7 +183,7 @@ public class GadgetsHandler {
     return new Callable<TokenResponse>() {
       public TokenResponse call() throws Exception {
         try {
-          String token = securityTokenDecoder.encodeToken(context.getToken());
+          String token = securityTokenCodec.encodeToken(context.getToken());
           return new TokenResponse(context.getUrl().toString(), token);
         } catch (Exception e) {
           // Note: this error message is publicly visible in JSON-RPC response.

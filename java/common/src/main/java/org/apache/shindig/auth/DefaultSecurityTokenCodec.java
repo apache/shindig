@@ -36,24 +36,24 @@ import java.util.Map;
  * Example configuration in container.js for blob crypter based security tokens:
  *    gadgets.securityTokenType = secure
  *
- * The insecure implementation is BasicSecurityTokenDecoder.
+ * The insecure implementation is BasicSecurityTokenCodec.
  *
- * The secure implementation is BlobCrypterSecurityTokenDecoder.
+ * The secure implementation is BlobCrypterSecurityTokenCodec.
  */
 @Singleton
-public class DefaultSecurityTokenDecoder implements SecurityTokenDecoder {
+public class DefaultSecurityTokenCodec implements SecurityTokenCodec {
 
   private static final String SECURITY_TOKEN_TYPE = "gadgets.securityTokenType";
 
-  private final SecurityTokenDecoder decoder;
+  private final SecurityTokenCodec codec;
 
   @Inject
-  public DefaultSecurityTokenDecoder(ContainerConfig config) {
+  public DefaultSecurityTokenCodec(ContainerConfig config) {
     String tokenType = config.getString(ContainerConfig.DEFAULT_CONTAINER, SECURITY_TOKEN_TYPE);
     if ("insecure".equals(tokenType)) {
-      decoder = new BasicSecurityTokenDecoder();
+      codec = new BasicSecurityTokenCodec();
     } else if ("secure".equals(tokenType)) {
-      decoder = new BlobCrypterSecurityTokenDecoder(config);
+      codec = new BlobCrypterSecurityTokenCodec(config);
     } else {
       throw new RuntimeException("Unknown security token type specified in " +
           ContainerConfig.DEFAULT_CONTAINER + " container configuration. " +
@@ -63,13 +63,13 @@ public class DefaultSecurityTokenDecoder implements SecurityTokenDecoder {
 
   public SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException {
-    return decoder.createToken(tokenParameters);
+    return codec.createToken(tokenParameters);
   }
 
   public String encodeToken(SecurityToken token) throws SecurityTokenException {
     if (token == null) {
       return null;
     }
-    return decoder.encodeToken(token);
+    return codec.encodeToken(token);
   }
 }

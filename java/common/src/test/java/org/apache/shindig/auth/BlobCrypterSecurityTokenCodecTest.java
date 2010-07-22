@@ -41,11 +41,11 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Tests for BlobCrypterSecurityTokenDecoder
+ * Tests for BlobCrypterSecurityTokenCodec
  */
-public class BlobCrypterSecurityTokenDecoderTest {
+public class BlobCrypterSecurityTokenCodecTest {
 
-  private BlobCrypterSecurityTokenDecoder decoder;
+  private BlobCrypterSecurityTokenCodec codec;
   private final FakeTimeSource timeSource = new FakeTimeSource();
 
   @Before
@@ -53,10 +53,10 @@ public class BlobCrypterSecurityTokenDecoderTest {
     ContainerConfig config = new AbstractContainerConfig() {
       @Override
       public Object getProperty(String container, String name) {
-        if (BlobCrypterSecurityTokenDecoder.SECURITY_TOKEN_KEY_FILE.equals(name)) {
+        if (BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE.equals(name)) {
           return getContainerKey(container);
         }
-        if (BlobCrypterSecurityTokenDecoder.SIGNED_FETCH_DOMAIN.equals(name)) {
+        if (BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN.equals(name)) {
           return container + ".com";
         }
         throw new RuntimeException("Mock not smart enough, unknown name " + name);
@@ -67,7 +67,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
         return Lists.newArrayList("container", "example");
       }
     };
-    decoder = new DecoderWithLoadStubbedOut(config);
+    codec = new CodecWithLoadStubbedOut(config);
   }
 
   protected String getContainerKey(String container) {
@@ -83,9 +83,9 @@ public class BlobCrypterSecurityTokenDecoderTest {
   /**
    * Stubs out loading the key file.
    */
-  private class DecoderWithLoadStubbedOut extends BlobCrypterSecurityTokenDecoder {
+  private class CodecWithLoadStubbedOut extends BlobCrypterSecurityTokenCodec {
 
-    public DecoderWithLoadStubbedOut(ContainerConfig config) {
+    public CodecWithLoadStubbedOut(ContainerConfig config) {
       super(config);
     }
 
@@ -112,8 +112,8 @@ public class BlobCrypterSecurityTokenDecoderTest {
     t.setTrustedJson("trusted");
     String encrypted = t.encrypt();
 
-    SecurityToken t2 = decoder.createToken(
-        ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+    SecurityToken t2 = codec.createToken(
+        ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
 
     assertEquals("http://www.example.com/gadget.xml", t2.getAppId());
     assertEquals("http://www.example.com/gadget.xml", t2.getAppUrl());
@@ -137,7 +137,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     encrypted = encrypted.replace("container:", "other:");
 
     try {
-      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
       fail("should have reported that container was unknown");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Unknown container"));
@@ -157,7 +157,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     encrypted = encrypted.replace("container:", "example:");
 
     try {
-      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
       fail("should have tried to decrypt with wrong key");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Invalid token signature"));
@@ -177,7 +177,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
 
     timeSource.incrementSeconds(3600 + 181); // one hour plus clock skew
     try {
-      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, encrypted));
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, encrypted));
       fail("should have expired");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Blob expired"));
@@ -187,7 +187,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
   @Test
   public void testMalformed() throws Exception {
     try {
-      decoder.createToken(ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "foo"));
+      codec.createToken(ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, "foo"));
       fail("should have tried to decrypt with wrong key");
     } catch (SecurityTokenException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Invalid security token foo"));
@@ -196,12 +196,12 @@ public class BlobCrypterSecurityTokenDecoderTest {
 
   @Test
   public void testAnonymous() throws Exception {
-    SecurityToken t = decoder.createToken(
-        ImmutableMap.of(SecurityTokenDecoder.SECURITY_TOKEN_NAME, "   "));
+    SecurityToken t = codec.createToken(
+        ImmutableMap.of(SecurityTokenCodec.SECURITY_TOKEN_NAME, "   "));
     assertTrue(t.isAnonymous());
 
     Map<String, String> empty = ImmutableMap.of();
-    t = decoder.createToken(empty);
+    t = codec.createToken(empty);
     assertTrue(t.isAnonymous());
   }
 
@@ -210,10 +210,10 @@ public class BlobCrypterSecurityTokenDecoderTest {
     ContainerConfig config = new AbstractContainerConfig() {
       @Override
       public Object getProperty(String container, String name) {
-        if (BlobCrypterSecurityTokenDecoder.SECURITY_TOKEN_KEY_FILE.equals(name)) {
+        if (BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE.equals(name)) {
           return getContainerKey(container);
         }
-        if (BlobCrypterSecurityTokenDecoder.SIGNED_FETCH_DOMAIN.equals(name)) {
+        if (BlobCrypterSecurityTokenCodec.SIGNED_FETCH_DOMAIN.equals(name)) {
           return container + ".com";
         }
         throw new RuntimeException("Mock not smart enough, unknown name " + name);
@@ -226,7 +226,7 @@ public class BlobCrypterSecurityTokenDecoderTest {
     };
 
     try {
-      new DecoderWithLoadStubbedOut(config);
+      new CodecWithLoadStubbedOut(config);
       fail("Should have failed to load crypter");
     } catch (RuntimeException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("Load failed"));

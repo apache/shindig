@@ -46,7 +46,7 @@ import java.util.Map;
  * Wire format is "&lt;container&gt;:&lt;encrypted-and-signed-token&gt;"
  */
 @Singleton
-public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
+public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec {
 
   public static final String SECURITY_TOKEN_KEY_FILE = "gadgets.securityTokenKeyFile";
 
@@ -63,7 +63,7 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
   protected final Map<String, String> domains = Maps.newHashMap();
 
   @Inject
-  public BlobCrypterSecurityTokenDecoder(ContainerConfig config) {
+  public BlobCrypterSecurityTokenCodec(ContainerConfig config) {
     try {
       for (String container : config.getContainers()) {
         String keyFile = config.getString(container, SECURITY_TOKEN_KEY_FILE);
@@ -94,7 +94,7 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
    */
   public SecurityToken createToken(Map<String, String> tokenParameters)
       throws SecurityTokenException {
-    String token = tokenParameters.get(SecurityTokenDecoder.SECURITY_TOKEN_NAME);
+    String token = tokenParameters.get(SecurityTokenCodec.SECURITY_TOKEN_NAME);
     if (StringUtils.isBlank(token)) {
       // No token is present, assume anonymous access
       return new AnonymousSecurityToken();
@@ -109,7 +109,7 @@ public class BlobCrypterSecurityTokenDecoder implements SecurityTokenDecoder {
       throw new SecurityTokenException("Unknown container " + token);
     }
     String domain = domains.get(container);
-    String activeUrl = tokenParameters.get(SecurityTokenDecoder.ACTIVE_URL_NAME);
+    String activeUrl = tokenParameters.get(SecurityTokenCodec.ACTIVE_URL_NAME);
     String crypted = fields[1];
     try {
       return BlobCrypterSecurityToken.decrypt(crypter, container, domain, crypted, activeUrl);

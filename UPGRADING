@@ -123,6 +123,12 @@ The long value annotated with the name "org.apache.shindig.serviceExpirationDura
 been moved to shindig/common/conf/shindig.properties.  Guice 2.0 can inject Long values from Strings
 automatically.
 
+* Rename SecurityTokenDecoder to SecurityTokenCodec
+
+This class is renamed to provide a single place to capture both encoding and decoding work
+for gadget security tokens. This also affects classes previously implementing SecurityTokenDecoder
+and previously extending DefaultSecurityTokenDecoder.
+
 == PHP Changes ==
 
 TBD
