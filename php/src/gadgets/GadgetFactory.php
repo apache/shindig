@@ -197,6 +197,24 @@ class GadgetFactory {
     foreach ($gadget->getLocales() as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
+         $parsedUri = parse_url($locale['messages']);
+         if (empty($parsedUri['host'])) {
+           // relative path's in the locale spec uri
+           // check against valid chars so that we can make sure that the given
+           // relative url is valid and does not try to fetch files outside of
+           // gadget scope (e.g. /../../../usr/bin... )
+           $pattern = '%^(([a-zA-Z0-9\-_](?<!\.)){1,2}([a-zA-Z0-9\.\-_](?<!\.\.))*/?)+$%';
+           if (preg_match($pattern, $locale['messages'])){
+             $gadgetUrl = $this->context->getUrl();
+             $gadgetUrl = substr($gadgetUrl, 0, strrpos($gadgetUrl, '/') + 1);
+             $locale['messages'] = $gadgetUrl . str_replace('..', '', $locale['messages']);
+           } else {
+             // remove any locales that are not applicable to this context
+             unset($gadget->gadgetSpec->locales[$key]);
+             continue;
+           }
+         }
+
         if (! empty($locale['messages'])) {
           // locale matches the current context, add it to the requests queue
           $request = new RemoteContentRequest($locale['messages']);
