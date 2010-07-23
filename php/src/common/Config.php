@@ -32,9 +32,9 @@ class Config {
     global $shindigConfig;
     if (! self::$config) {
       // load default configuration
-      include_once 'config/container.php';
+      include_once realpath(dirname(__FILE__) . "/../../config") . '/container.php';
       self::$config = $shindigConfig;
-      $localConfigPath = realpath(dirname(__FILE__) . "/../../config/local.php");
+      $localConfigPath = realpath(dirname(__FILE__) . "/../../config") . '/local.php';
       if (file_exists($localConfigPath)) {
         // include local.php if it exists and merge the config arrays.
         // the second array values overwrites the first one's
@@ -61,7 +61,7 @@ class Config {
     if (isset(self::$config[$key])) {
       return self::$config[$key];
     } else {
-      throw new ConfigException("Invalid Config Key");
+      throw new ConfigException("Invalid Config Key " . $key);
     }
   }
 
