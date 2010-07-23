@@ -59,6 +59,7 @@ public class PropertiesModule extends AbstractModule {
     Names.bindProperties(this.binder(), getProperties());
     // This could be generalized to inject any system property...
     this.binder().bindConstant().annotatedWith(Names.named("shindig.port")).to(getServerPort());
+    this.binder().bindConstant().annotatedWith(Names.named("shindig.host")).to(getServerHostname());
   }
 
   /**
@@ -70,6 +71,18 @@ public class PropertiesModule extends AbstractModule {
     return System.getProperty("shindig.port") != null ? System.getProperty("shindig.port") :
            System.getProperty("jetty.port") != null ? System.getProperty("jetty.port") :
            "8080";
+  }
+
+  /*
+   * Should return the hostname that the current server is running on.  Useful for testing and working out of the box configs.
+   * Looks for a hostname in system properties "shindig.host", if not set uses fixed value of "localhost"
+   * @return a hostname
+   */
+
+  protected String getServerHostname() {
+    return System.getProperty("shindig.host") != null ? System.getProperty("shindig.host") :
+    return System.getProperty("jetty.host") != null ? System.getProperty("jetty.host") :
+      "localhost";
   }
 
   protected static String getDefaultPropertiesPath() {

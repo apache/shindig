@@ -80,7 +80,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
 
   // Used by tests
   public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
-    this(containers, "8080", expressions);
+    this(containers, "localhost", "8080", expressions);
   }
   /**
    * Creates a new configuration from files.
@@ -88,6 +88,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    */
   @Inject
   public JsonContainerConfig(@Named("shindig.containers.default") String containers,
+                             @Nullable @Named("shindig.host") String host,
                              @Nullable @Named("shindig.port") String port,
                              Expressions expressions)
       throws ContainerConfigException {
@@ -95,6 +96,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
     JSONObject configJson = loadContainers(containers);
     try {
       configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_PORT", port);
+      configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_HOST", host);
     } catch (JSONException e) {
       // ignore
     }
