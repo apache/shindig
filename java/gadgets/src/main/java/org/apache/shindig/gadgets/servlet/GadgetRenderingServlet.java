@@ -77,6 +77,26 @@ public class GadgetRenderingServlet extends InjectedServlet {
     initialized = true;
   }
 
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    // If an If-Modified-Since header is ever provided, we always say
+    // not modified. This is because when there actually is a change,
+    // cache busting should occur.
+    UriStatus urlStatus = getUrlStatus(req);
+    if (req.getHeader("If-Modified-Since") != null &&
+        !"1".equals(req.getParameter("nocache")) &&
+        urlStatus == UriStatus.VALID_VERSIONED) {
+      resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
+    render(req, resp, urlStatus);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    render(req, resp, getUrlStatus(req));
+  }
+
   private void render(HttpServletRequest req, HttpServletResponse resp, UriStatus urlstatus)
       throws IOException {
     if (req.getHeader(HttpRequest.DOS_PREVENTION_HEADER) != null) {
@@ -92,62 +112,111 @@ public class GadgetRenderingServlet extends InjectedServlet {
 
     GadgetContext context = new HttpGadgetContext(req);
     RenderingResults results = renderer.render(context);
-    switch (results.getStatus()) {
+
+    // process the rendering results
+    postGadgetRendering(new PostGadgetRenderingParams(req, resp, urlstatus, context, results));
+  }
+
+  /**
+   * Implementations that extend this class are strongly discouraged from overriding this method.
+   * To customize the behavior please override the hook methods for each of the
+   * RenderingResults.Status enum values instead. 
+   */
+  protected void postGadgetRendering(PostGadgetRenderingParams params) throws IOException {
+    switch (params.getResults().getStatus()) {
       case OK:
-        if (context.getIgnoreCache() ||
-            urlstatus == UriStatus.INVALID_VERSION) {
-          HttpUtil.setCachingHeaders(resp, 0);
-        } else if (urlstatus == UriStatus.VALID_VERSIONED) {
-          // Versioned files get cached indefinitely
-          HttpUtil.setCachingHeaders(resp, true);
-        } else {
-          // Unversioned files get cached for 5 minutes by default, but this can be overridden
-          // with a query parameter.
-          int ttl = DEFAULT_CACHE_TTL;
-          String ttlStr = req.getParameter(ProxyBase.REFRESH_PARAM);
-          if (!StringUtils.isEmpty(ttlStr)) {
-            try {
-              ttl = Integer.parseInt(ttlStr);
-            } catch (NumberFormatException e) {
-              // Ignore malformed TTL value
-              LOG.info("Bad TTL value '" + ttlStr + "' was ignored");
-            }
-          }
-          HttpUtil.setCachingHeaders(resp, ttl, true);
-        }
-        resp.getWriter().print(results.getContent());
+        onOkRenderingResultsStatus(params);
         break;
       case ERROR:
-        resp.setStatus(results.getHttpStatusCode());
-        resp.getWriter().print(StringEscapeUtils.escapeHtml(results.getErrorMessage()));
+        onErrorRenderingResultsStatus(params);
         break;
       case MUST_REDIRECT:
-        resp.sendRedirect(results.getRedirect().toString());
+        onMustRedirectRenderingResultsStatus(params);
         break;
     }
   }
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // If an If-Modified-Since header is ever provided, we always say
-    // not modified. This is because when there actually is a change,
-    // cache busting should occur.
-    UriStatus urlstatus = getUrlStatus(req);
-    if (req.getHeader("If-Modified-Since") != null &&
-        !"1".equals(req.getParameter("nocache")) &&
-        urlstatus == UriStatus.VALID_VERSIONED) {
-      resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-      return;
+  protected void onOkRenderingResultsStatus(PostGadgetRenderingParams params)
+      throws IOException {
+    UriStatus urlStatus = params.getUrlStatus();
+    HttpServletResponse resp = params.getResponse();
+    if (params.getContext().getIgnoreCache() ||
+        urlStatus == UriStatus.INVALID_VERSION) {
+      HttpUtil.setCachingHeaders(resp, 0);
+    } else if (urlStatus == UriStatus.VALID_VERSIONED) {
+      // Versioned files get cached indefinitely
+      HttpUtil.setCachingHeaders(resp, true);
+    } else {
+      // Unversioned files get cached for 5 minutes by default, but this can be overridden
+      // with a query parameter.
+      int ttl = DEFAULT_CACHE_TTL;
+      String ttlStr = params.getRequest().getParameter(ProxyBase.REFRESH_PARAM);
+      if (!StringUtils.isEmpty(ttlStr)) {
+        try {
+          ttl = Integer.parseInt(ttlStr);
+        } catch (NumberFormatException e) {
+          // Ignore malformed TTL value
+          LOG.info("Bad TTL value '" + ttlStr + "' was ignored");
+        }
+      }
+      HttpUtil.setCachingHeaders(resp, ttl, true);
     }
-    render(req, resp, urlstatus);
+    resp.getWriter().print(params.getResults().getContent());
   }
 
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    render(req, resp, getUrlStatus(req));
+  protected void onErrorRenderingResultsStatus(PostGadgetRenderingParams params)
+      throws IOException {
+    HttpServletResponse resp = params.getResponse();
+    resp.setStatus(params.getResults().getHttpStatusCode());
+    resp.getWriter().print(StringEscapeUtils.escapeHtml(params.getResults().getErrorMessage()));
   }
-  
+
+  protected void onMustRedirectRenderingResultsStatus(PostGadgetRenderingParams params)
+      throws IOException {
+     params.getResponse().sendRedirect(params.getResults().getRedirect().toString());
+  }
+
   private UriStatus getUrlStatus(HttpServletRequest req) {
     return iframeUriManager.validateRenderingUri(new UriBuilder(req).toUri());
+  }
+
+  /**
+   * Contains the input parameters for post rendering methods.
+   */
+  protected static class PostGadgetRenderingParams {
+    private HttpServletRequest req;
+    private HttpServletResponse resp;
+    private UriStatus urlStatus;
+    private GadgetContext context;
+    private RenderingResults results;
+
+    public PostGadgetRenderingParams (HttpServletRequest req, HttpServletResponse resp,
+      UriStatus urlStatus, GadgetContext context, RenderingResults results) {
+      this.req = req;
+      this.resp = resp;
+      this.urlStatus = urlStatus;
+      this.context = context;
+      this.results = results;
+    }
+
+    public HttpServletRequest getRequest() {
+      return req;
+    }
+
+    public HttpServletResponse getResponse() {
+      return resp;
+    }
+
+    public UriStatus getUrlStatus() {
+      return urlStatus;
+    }
+
+    public GadgetContext getContext() {
+      return context;
+    }
+
+    public RenderingResults getResults() {
+      return results;
+    }
   }
 }
