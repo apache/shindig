@@ -81,8 +81,8 @@ public class PropertiesModule extends AbstractModule {
 
   protected String getServerHostname() {
     return System.getProperty("shindig.host") != null ? System.getProperty("shindig.host") :
-    return System.getProperty("jetty.host") != null ? System.getProperty("jetty.host") :
-      "localhost";
+           System.getProperty("jetty.host") != null ? System.getProperty("jetty.host") :
+           "localhost";
   }
 
   protected static String getDefaultPropertiesPath() {
