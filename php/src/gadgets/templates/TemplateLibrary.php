@@ -247,7 +247,7 @@ class TemplateLibraryEntry {
    * @param unknown_type $style
    */
   public function addStyle(TemplateLibraryContent $style) {
-    $this->style[] = new TemplateLibraryContent($style);
+    $this->style[] = $style;
   }
 
   /**
