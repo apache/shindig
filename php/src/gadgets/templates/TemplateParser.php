@@ -138,6 +138,7 @@ class TemplateParser {
         if (isset($childNode->tagName) && ! empty($childNode->tagName)) {
           $nodeParam = ($pos = strpos($childNode->tagName, ':')) ? trim(substr($childNode->tagName, $pos + 1)) : trim($childNode->tagName);
           $this->dataContext['_os_render_nodes'][$nodeParam] = $childNode;
+          $myContext[$nodeParam] = $this->nodeAttributesToScope($childNode);
         }
       }
     }
