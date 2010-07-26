@@ -108,6 +108,8 @@ public class UriUtils {
    *   response.
    * @param data The http response when fetching the requested accel uri.
    * @param resp The servlet response to return back to client.
+   * @param remapInternalServerError If true, then SC_INTERNAL_SERVER_ERROR is
+   *   remapped to SC_BAD_GATEWAY.
    * @param setHeaders If true, then setHeader method of HttpServletResponse is
    *   called, otherwise addHeader is called for every header.
    * @param disallowedResponseHeaders Disallowed response headers to omit from the response
@@ -116,6 +118,7 @@ public class UriUtils {
    */
   public static void copyResponseHeadersAndStatusCode(
       HttpResponse data, HttpServletResponse resp,
+      boolean remapInternalServerError,
       boolean setHeaders,
       DisallowedHeaders... disallowedResponseHeaders)
       throws IOException {
@@ -138,9 +141,11 @@ public class UriUtils {
       }
     }
 
-    // External "internal error" should be mapped to gateway error.
-    if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-      resp.sendError(HttpResponse.SC_BAD_GATEWAY);
+    if (remapInternalServerError) {
+      // External "internal error" should be mapped to gateway error.
+      if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+        resp.setStatus(HttpResponse.SC_BAD_GATEWAY);
+      }
     }
   }
 

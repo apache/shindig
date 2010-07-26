@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
@@ -59,15 +60,19 @@ public class AccelHandler extends ProxyBase {
   protected final RequestPipeline requestPipeline;
   protected final ResponseRewriterRegistry contentRewriterRegistry;
   protected final AccelUriManager uriManager;
+  protected final boolean remapInternalServerError;
 
   @Inject
   public AccelHandler(RequestPipeline requestPipeline,
                       @Named("shindig.accelerate.response.rewriter.registry")
                       ResponseRewriterRegistry contentRewriterRegistry,
-                      AccelUriManager accelUriManager) {
+                      AccelUriManager accelUriManager,
+                      @Named("shindig.accelerate.remapInternalServerError")
+                      Boolean remapInternalServerError) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.uriManager = accelUriManager;
+    this.remapInternalServerError = remapInternalServerError;
   }
 
   @Override
@@ -83,26 +88,25 @@ public class AccelHandler extends ProxyBase {
     HttpRequest req = buildHttpRequest(request, proxyUri);
     HttpResponse results = requestPipeline.execute(req);
 
-    if (!handleErrors(results, response)) {
-      // In case of errors where we want to short circuit the rewriting and
-      // throw appropriate gadget exception.
-      return;
-    }
-
-    // Rewrite the content.
-    try {
-      results = contentRewriterRegistry.rewriteHttpResponse(req, results);
-    } catch (RewritingException e) {
-      if (!isRecoverable(req, results, e)) {
-        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-                                  e.getHttpStatusCode());
+    HttpResponse errorResponse = handleErrors(results);
+    if (errorResponse == null) {
+      // No error. Lets rewrite the content.
+      try {
+        results = contentRewriterRegistry.rewriteHttpResponse(req, results);
+      } catch (RewritingException e) {
+        if (!isRecoverable(req, results, e)) {
+          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+                                    e.getHttpStatusCode());
+        }
       }
+    } else {
+      results = errorResponse;
     }
 
     // Copy the response headers and status code to the final http servlet
     // response.
     UriUtils.copyResponseHeadersAndStatusCode(
-        results, response, true,
+        results, response, remapInternalServerError, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
 
@@ -110,6 +114,7 @@ public class AccelHandler extends ProxyBase {
     // had the rewrite mime type header.
     rewriteContentType(req, response);
 
+    // Copy the content.
     IOUtils.copy(results.getResponse(), response.getOutputStream());
   }
 
@@ -210,27 +215,23 @@ public class AccelHandler extends ProxyBase {
   }
 
   /**
-   * Process errors when fetching uri using request pipeline by throwing
-   * GadgetException in error cases.
+   * Process errors when fetching uri using request pipeline and return the
+   * error response to be returned to the user if any.
    * @param results The http response returned by request pipeline.
-   * @param response The http servlet response to be returned to the user.
-   * @return True if there is no error, false otherwise.
-   * @throws IOException In case of errors.
+   * @return An HttpResponse instance encapsulating error message and status
+   *   code to be returned to the user in case of errors, null otherwise.
    */
-  protected boolean handleErrors(HttpResponse results, HttpServletResponse response)
-      throws IOException {
+  protected HttpResponse handleErrors(HttpResponse results) {
     if (results == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERROR_FETCHING_DATA);
-      return false;
+      return new HttpResponseBuilder()
+          .setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND)
+          .setResponse(ERROR_FETCHING_DATA.getBytes())
+          .create();
     }
-    if (results.getHttpStatusCode() == HttpServletResponse.SC_NOT_FOUND) {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND, ERROR_FETCHING_DATA);
-      return false;
-    } else if (results.isError()) {
-      response.sendError(HttpServletResponse.SC_BAD_GATEWAY, ERROR_FETCHING_DATA);
-      return false;
+    if (results.isError()) {
+      return results;
     }
 
-    return true;
+    return null;
   }
 }

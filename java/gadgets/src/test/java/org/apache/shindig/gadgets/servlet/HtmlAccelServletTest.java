@@ -90,7 +90,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         Arrays.<ResponseRewriter>asList(rewriter), null);
     servlet = new HtmlAccelServlet();
     servlet.setHandler(new AccelHandler(pipeline, rewriterRegistry,
-                                             accelUriManager));
+                                        accelUriManager, true));
   }
 
   private void expectRequest(String extraPath, String url) {
@@ -149,28 +149,9 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     verify();
-    assertEquals("Error fetching data", recorder.getResponseAsString());
-    assertEquals(400, recorder.getHttpStatusCode());
-  }
-
-  @Test
-  public void testHtmlAccelNoHtml() throws Exception {
-    String url = "http://example.org/data.xml";
-    String data = "<html><body>Hello World</body></html>";
-
-    HttpRequest req = new HttpRequest(Uri.parse(url));
-    HttpResponse resp = new HttpResponseBuilder()
-        .setResponse(data.getBytes())
-        .setHeader("Content-Type", "text/xml")
-        .setHttpStatusCode(200)
-        .create();
-    expect(pipeline.execute(req)).andReturn(resp).once();
-    expectRequest("", url);
-    replay();
-
-    servlet.doGet(request, recorder);
-    verify();
-    assertEquals(data, recorder.getResponseAsString());
+    assertEquals(AccelHandler.ERROR_FETCHING_DATA,
+                 recorder.getResponseAsString());
+    assertEquals(404, recorder.getHttpStatusCode());
   }
 
   @Test
@@ -197,7 +178,33 @@ public class HtmlAccelServletTest extends ServletTestFixture {
   }
 
   @Test
-  public void testHtmlAccelRewriteErrorCode() throws Exception {
+  public void testHtmlAccelRewriteDoesNotFollowRedirects() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>Moved to new page</body></html>";
+    String redirectLocation = "http://example-redirected.org/data.html";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHeader("Location", redirectLocation)
+        .setHttpStatusCode(302)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+    verify();
+    assertEquals(data, recorder.getResponseAsString());
+    assertEquals(redirectLocation, recorder.getHeader("Location"));
+    assertEquals(302, recorder.getHttpStatusCode());
+    assertTrue(rewriter.responseWasRewritten());
+  }
+
+  @Test
+  public void testHtmlAccelReturnsOriginal404MessageAndCode() throws Exception {
     String url = "http://example.org/data.html";
     String data = "<html><body>This is error page</body></html>";
 
@@ -214,7 +221,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     verify();
-    assertEquals(AccelHandler.ERROR_FETCHING_DATA, recorder.getResponseAsString());
+    assertEquals(data, recorder.getResponseAsString());
     assertEquals(404, recorder.getHttpStatusCode());
     assertFalse(rewriter.responseWasRewritten());
   }
@@ -237,7 +244,7 @@ public class HtmlAccelServletTest extends ServletTestFixture {
 
     servlet.doGet(request, recorder);
     verify();
-    assertEquals(AccelHandler.ERROR_FETCHING_DATA, recorder.getResponseAsString());
+    assertEquals(data, recorder.getResponseAsString());
     assertEquals(502, recorder.getHttpStatusCode());
     assertFalse(rewriter.responseWasRewritten());
   }
@@ -264,5 +271,28 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     assertTrue(rewriter.responseWasRewritten());
     assertEquals("POST", req.getValue().getMethod());
     assertEquals("hello=world", req.getValue().getPostBodyAsString());
+  }
+
+  @Test
+  public void testHtmlAccelReturnsSameStatusCodeAndMessageWhenError() throws Exception {
+    String url = "http://example.org/data.html";
+    String data = "<html><body>This is error page</body></html>";
+
+    ((FakeCaptureRewriter) rewriter).setContentToRewrite(data);
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponse(data.getBytes())
+        .setHeader("Content-Type", "text/html")
+        .setHttpStatusCode(5001)
+        .create();
+    expect(pipeline.execute(req)).andReturn(resp).once();
+    expectRequest("", url);
+    replay();
+
+    servlet.doGet(request, recorder);
+    verify();
+    assertEquals(data, recorder.getResponseAsString());
+    assertEquals(5001, recorder.getHttpStatusCode());
+    assertFalse(rewriter.responseWasRewritten());
   }
 }

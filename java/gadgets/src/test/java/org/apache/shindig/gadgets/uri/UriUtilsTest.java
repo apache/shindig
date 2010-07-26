@@ -75,7 +75,7 @@ public class UriUtilsTest extends EasyMockTestCase {
     
 
     replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, false,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
     verify();
@@ -103,7 +103,63 @@ public class UriUtilsTest extends EasyMockTestCase {
 
 
     replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, true,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, true,
+        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
+    verify();
+  }
+
+  @Test
+  public void testCopyResponseHeadersAndStatusCode_RemapTrue() throws Exception {
+    HttpResponse resp = new HttpResponseBuilder()
+        .setHttpStatusCode(500)
+        .addHeader("hello", "world1")
+        .addHeader("hello", "world2")
+        .addHeader("hello\\u2297", "bad header")
+        .addHeader("Content-length", "10")
+        .addHeader("vary", "1")
+        .create();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    response.setStatus(502);
+    EasyMock.expectLastCall().once();
+
+    response.setHeader("hello", "world1");
+    EasyMock.expectLastCall().once();
+    response.setHeader("hello", "world2");
+    EasyMock.expectLastCall().once();
+
+
+    replay();
+    UriUtils.copyResponseHeadersAndStatusCode(resp, response, true, true,
+        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
+    verify();
+  }
+
+  @Test
+  public void testCopyResponseHeadersAndStatusCode_RemapFalse() throws Exception {
+    HttpResponse resp = new HttpResponseBuilder()
+        .setHttpStatusCode(500)
+        .addHeader("hello", "world1")
+        .addHeader("hello", "world2")
+        .addHeader("hello\\u2297", "bad header")
+        .addHeader("Content-length", "10")
+        .addHeader("vary", "1")
+        .create();
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    response.setStatus(500);
+    EasyMock.expectLastCall().once();
+
+    response.setHeader("hello", "world1");
+    EasyMock.expectLastCall().once();
+    response.setHeader("hello", "world2");
+    EasyMock.expectLastCall().once();
+
+
+    replay();
+    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
     verify();
