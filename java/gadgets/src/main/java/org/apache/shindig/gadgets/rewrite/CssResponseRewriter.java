@@ -24,7 +24,7 @@ import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Element;
 
@@ -39,6 +39,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.caja.lexer.ParseException;
+import com.google.caja.parser.AbstractParseTreeNode;
+import com.google.caja.parser.AncestorChain;
+import com.google.caja.parser.Visitor;
+import com.google.caja.parser.css.CssTree;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -49,12 +53,12 @@ public class CssResponseRewriter implements ResponseRewriter {
 
   private static final Logger LOG = Logger.getLogger(CssResponseRewriter.class.getName());
 
-  private final CajaCssLexerParser cssParser;
+  private final CajaCssParser cssParser;
   private final ProxyUriManager proxyUriManager;
   private final ContentRewriterFeature.Factory rewriterFeatureFactory;
 
   @Inject
-  public CssResponseRewriter(CajaCssLexerParser cssParser,
+  public CssResponseRewriter(CajaCssParser cssParser,
       ProxyUriManager proxyUriManager, ContentRewriterFeature.Factory rewriterFeatureFactory) {
     this.cssParser = cssParser;
     this.proxyUriManager = proxyUriManager;
@@ -89,7 +93,7 @@ public class CssResponseRewriter implements ResponseRewriter {
     try {
       String original = IOUtils.toString(content);
       try {
-        List<Object> stylesheet = cssParser.parse(original);
+        CssTree.StyleSheet stylesheet = cssParser.parseDom(original, source);
         List<String> stringList = rewrite(stylesheet, source, uriMaker, extractImports);
         // Serialize the stylesheet
         cssParser.serialize(stylesheet, writer);
@@ -121,7 +125,8 @@ public class CssResponseRewriter implements ResponseRewriter {
   public List<String> rewrite(Element styleNode, Uri source,
       UriMaker uriMaker, boolean extractImports) throws RewritingException {
     try {
-      List<Object> stylesheet = cssParser.parse(styleNode.getTextContent());
+      CssTree.StyleSheet stylesheet =
+        cssParser.parseDom(styleNode.getTextContent(), source);
       List<String> imports = rewrite(stylesheet, source, uriMaker, extractImports);
       // Write the rewritten CSS back into the element
       String content = cssParser.serialize(stylesheet);
@@ -152,26 +157,35 @@ public class CssResponseRewriter implements ResponseRewriter {
    *            referenced URIs.
    * @return Empty list of extracted import URIs.
    */
-  public static List<String> rewrite(List<Object> styleSheet, final Uri source,
+  public static List<String> rewrite(CssTree.StyleSheet styleSheet, final Uri source,
       final UriMaker uriMaker, final boolean extractImports) {
     final List<String> imports = Lists.newLinkedList();
-
-    for (int i = styleSheet.size() - 1; i >= 0; i--) {
-      if (styleSheet.get(i) instanceof CajaCssLexerParser.ImportDecl) {
-        if (extractImports) {
-          imports.add(0, ((CajaCssLexerParser.ImportDecl)styleSheet.get(i)).getUri());
-          styleSheet.remove(i);
-        } else {
-          CajaCssLexerParser.ImportDecl importDecl = (CajaCssLexerParser.ImportDecl) styleSheet
-              .get(i);
-          importDecl.setUri(rewriteUri(uriMaker, importDecl.getUri(), source));
+    final List<CssTree.UriLiteral> skip = Lists.newLinkedList();
+    
+    styleSheet.acceptPreOrder(new Visitor() {
+      public boolean visit(AncestorChain<?> chain) {
+        System.err.println("Entering rewrite chain.node=" + chain.node);
+        if (chain.node instanceof CssTree.Import) {
+          CssTree.Import importNode = (CssTree.Import) chain.node;
+          CssTree.UriLiteral uriLiteral = importNode.getUri();
+          System.err.println("Import: uriLiteral.getValue() ");
+          skip.add(importNode.getUri());
+          if (extractImports) {
+            imports.add(uriLiteral.getValue());
+            ((AbstractParseTreeNode) chain.getParentNode()).removeChild(chain.node);
+          } else {
+            String rewritten = rewriteUri(uriMaker, uriLiteral.getValue(), source);
+            uriLiteral.setValue(rewritten);
+          }
+        } else if (chain.node instanceof CssTree.UriLiteral &&
+            !skip.contains(chain.node)) {
+          CssTree.UriLiteral uriDecl = (CssTree.UriLiteral) chain.node;
+          String rewritten = rewriteUri(uriMaker, uriDecl.getValue(), source);
+          uriDecl.setValue(rewritten);
         }
-      } else if (styleSheet.get(i) instanceof CajaCssLexerParser.UriDecl) {
-        CajaCssLexerParser.UriDecl uriDecl = (CajaCssLexerParser.UriDecl) styleSheet
-              .get(i);
-          uriDecl.setUri(rewriteUri(uriMaker, uriDecl.getUri(), source));
-      }
-    }
+        return true;
+      }}, null);
+
     return imports;
   }
   

@@ -21,6 +21,7 @@ package org.apache.shindig.gadgets.rewrite;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
@@ -61,8 +62,8 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
   public void testImportsAndBackgroundUrlsInStyleTag() throws Exception {
     String html = "<html><head>"
                   + "<style>"
-                  + "P {color:blue;}"
                   + "@import url(/1.css);"
+                  + "P {color:blue;}"
                   + "P {color:red;}"
                   + "A {background: url(/2.jpg);}"
                   + "</style>"
@@ -70,10 +71,11 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
                   + "</body></html>";
     String expected =
         "<html><head>"
-        + "<style>P {color:blue;}"
+        + "<style>"
         + "@import url('//localhost:8080/gadgets/proxy?container=default&"
         + "gadget=http%3A%2F%2F1.com%2F&debug=0&nocache=0"
         + "&url=http%3A%2F%2F1.com%2F1.css');\n"
+        + "P {color:blue;}"
         + "P {color:red;}"
         + "A {background: url('//localhost:8080/gadgets/proxy?container=default"
         + "&gadget=http%3A%2F%2F1.com%2F&debug=0&nocache=0"
@@ -96,6 +98,7 @@ public class StyleTagProxyEmbeddedUrlsVisitorTest extends DomWalkerTestBase {
     visitor.revisit(gadget, ImmutableList.of(list.item(0)));
     EasyMock.verify();
 
-    assertEquals(expected, serializer.serialize(doc));
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(serializer.serialize(doc)));
   }
 }
