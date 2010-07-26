@@ -29,8 +29,10 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -148,7 +150,13 @@ public final class DomWalker {
       Map<Visitor, List<Node>> reservations = Maps.newHashMap();
         
       LinkedList<Node> toVisit = Lists.newLinkedList();
-      toVisit.add(content.getDocument().getDocumentElement());
+      Document doc = content.getDocument();
+      if (doc == null) {
+        throw new RewritingException("content.getDocument is null. Content: "
+                                     + content.getContent(),
+                                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      }
+      toVisit.add(doc.getDocumentElement());
       boolean mutated = false;
       while (!toVisit.isEmpty()) {
         Node visiting = toVisit.removeFirst();

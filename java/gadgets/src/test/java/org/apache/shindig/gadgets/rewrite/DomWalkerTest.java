@@ -18,23 +18,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import com.google.common.collect.Lists;
-
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.rewrite.MutableContent;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.w3c.dom.Node;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DomWalkerTest extends DomWalkerTestBase {
   private Node root;
@@ -245,7 +240,30 @@ public class DomWalkerTest extends DomWalkerTestBase {
     // As before, MutableContent verification is the test.
     verify(mc);
   }
-  
+
+  @Test
+  public void rewriteThrowsRewritingExceptionIfGetDocumentIsNull() throws Exception {
+    DomWalker.Visitor visitor1 = createMock(DomWalker.Visitor.class);
+    DomWalker.Rewriter rewriter = getRewriter(visitor1);
+
+    MutableContent mc = createMock(MutableContent.class);
+    expect(mc.getDocument()).andReturn(null);
+    expect(mc.getContent()).andReturn("hello!");
+    replay(mc);
+
+    Gadget gadget = gadget();
+    boolean exceptionCaught = false;
+    try {
+      rewriter.rewrite(gadget, mc);
+    } catch (RewritingException e) {
+      assertEquals(e.getHttpStatusCode(),
+                   HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      exceptionCaught = true;
+    }
+
+    assertTrue(exceptionCaught);
+  }
+
   private DomWalker.Rewriter getRewriter(DomWalker.Visitor... visitors) {
     return new DomWalker.Rewriter(Lists.newArrayList(visitors));
   }
