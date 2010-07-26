@@ -90,13 +90,14 @@ public abstract class GadgetHtmlParser {
     if (document == null) {
       try {
         document = parseDomImpl(source);
-      } catch (GadgetException e) {
-        throw e;
       } catch (DOMException e) {
         // DOMException is a RuntimeException
         document = errorDom(e);
         HtmlSerialization.attach(document, serializerProvider.get(), source);
         return document;
+      } catch (NullPointerException e) {
+        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
+                                  "Caught exception in parseDomImpl", e);
       }
 
       HtmlSerialization.attach(document, serializerProvider.get(), source);
