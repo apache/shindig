@@ -147,7 +147,7 @@ class SigningFetcher extends RemoteContentFetcher {
             }
           }
         }
->       $newQuery = implode('&', $newQueryParts);
+        $newQuery = implode('&', $newQueryParts);
       }
       // Careful here; the OAuth form encoding scheme is slightly different than
       // the normal form encoding scheme, so we have to use the OAuth library
