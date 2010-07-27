@@ -41,7 +41,6 @@ import org.apache.shindig.gadgets.uri.UriUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Handles requests for accel servlet.
@@ -49,8 +48,6 @@ import java.util.logging.Logger;
  */
 @Singleton
 public class AccelHandler extends ProxyBase {
-  private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
-
   static final String ERROR_FETCHING_DATA = "Error fetching data";
 
   // TODO: parameterize these.
