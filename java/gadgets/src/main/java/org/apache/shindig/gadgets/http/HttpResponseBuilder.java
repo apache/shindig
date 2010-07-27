@@ -94,8 +94,7 @@ public class HttpResponseBuilder extends MutableContent {
    * @param body The response string.  Converted to UTF-8 bytes and copied when set.
    */
   public HttpResponseBuilder setResponseString(String body) {
-    setContentBytes(CharsetUtil.getUtf8Bytes(body));
-    setEncoding(CharsetUtil.UTF8);
+    setContentBytes(CharsetUtil.getUtf8Bytes(body), CharsetUtil.UTF8);
     return this;
   }
 
@@ -108,10 +107,18 @@ public class HttpResponseBuilder extends MutableContent {
       String[] parts = StringUtils.split(contentType, ';');
       for (String part : parts) {
         if (!part.contains("charset=")) {
-          newContentTypeBuilder.append(part).append("; ");
+          if (newContentTypeBuilder.length() > 0) {
+            newContentTypeBuilder.append("; ");
+          }
+          newContentTypeBuilder.append(part);
         }
       }
-      newContentTypeBuilder.append("charset=").append(charset.name());
+      if (charset != null) {
+        if (newContentTypeBuilder.length() > 0) {
+          newContentTypeBuilder.append("; ");
+        }
+        newContentTypeBuilder.append("charset=").append(charset.name());
+      }
       values.clear();
       String newContentType = newContentTypeBuilder.toString();
       values.add(newContentType);
@@ -266,6 +273,22 @@ public class HttpResponseBuilder extends MutableContent {
 
   public int getHttpStatusCode() {
     return httpStatusCode;
+  }
+  
+  /**
+   * Ensures that, when setting content bytes, the bytes' encoding is reflected
+   * in the current Content-Type header.
+   * Note, this method does NOT override existing Content-Type values if newEncoding is null.
+   * This allows charset to be set by header only, along with a byte array -- a very typical,
+   * and important, pattern when creating an HttpResponse in an HttpFetcher.
+   */
+  @Override
+  protected void setContentBytesState(byte[] newBytes, Charset newEncoding) {
+    super.setContentBytesState(newBytes, newEncoding);
+    
+    // Set the new encoding of the raw bytes, in order to ensure that
+    // Content-Type headers are in sync w/ the content's encoding.
+    if (newEncoding != null) setEncoding(newEncoding);
   }
   
   private static GadgetHtmlParser unsupportedParser() {

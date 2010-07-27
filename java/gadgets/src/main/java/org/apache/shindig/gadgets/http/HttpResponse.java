@@ -163,10 +163,12 @@ public final class HttpResponse implements Externalizable {
   HttpResponse(HttpResponseBuilder builder) {
     httpStatusCode = builder.getHttpStatusCode();
     Multimap<String, String> headerCopy = HttpResponse.newHeaderMultimap();
-    headerCopy.putAll(builder.getHeaders());
 
     // Always safe, HttpResponseBuilder won't modify the body.
     responseBytes = builder.getResponse();
+    
+    // Copy headers after builder.getResponse(), since that can modify Content-Type.
+    headerCopy.putAll(builder.getHeaders());
 
     Map<String, String> metadataCopy = Maps.newHashMap(builder.getMetadata());
     metadata = Collections.unmodifiableMap(metadataCopy);
@@ -221,6 +223,13 @@ public final class HttpResponse implements Externalizable {
   public String getEncoding() {
     return encoding.name();
   }
+  
+  /**
+   * @return The Charset of the response body's encoding, if we were able to determine it.
+   */
+  public Charset getEncodingCharset() {
+    return encoding;
+  }
 
   /**
    * @return the content length
@@ -246,8 +255,8 @@ public final class HttpResponse implements Externalizable {
   public String getResponseAsString() {
     if (responseString == null) {
       responseString = encoding.decode(ByteBuffer.wrap(responseBytes)).toString();
-
-      // Strip BOM if present
+      
+      // Strip BOM if present.
       if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
         responseString = responseString.substring(1);
       }

@@ -50,7 +50,6 @@ public class HttpResponseTest extends Assert {
 
   private static final String BIG5_STRING = "\u4F60\u597D";
 
-
   private static int roundToSeconds(long ts) {
     return (int)(ts / 1000);
   }
@@ -124,6 +123,15 @@ public class HttpResponseTest extends Assert {
         .setResponse(BIG5_DATA)
         .create();
     assertEquals(BIG5_STRING, response.getResponseAsString());
+    assertEquals("text/plain; charset=BIG5", response.getHeader("Content-Type"));
+    
+    HttpResponseBuilder subResponseBuilder = new HttpResponseBuilder(response);
+    subResponseBuilder.setContent(response.getResponseAsString());
+    HttpResponse subResponse = subResponseBuilder.create();
+    // Same string.
+    assertEquals("text/plain; charset=UTF-8", subResponse.getHeader("Content-Type"));
+    assertEquals(BIG5_STRING, subResponse.getResponseAsString());
+    // New encoding.
   }
 
   @Test
