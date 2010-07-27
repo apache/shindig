@@ -88,8 +88,8 @@
     }
   }
 
-  // Do not run this in container mode.
-  if (gadgets.config && gadgets.config.isGadget) {
+  // We do run this in the container mode in the new common container
+  if (gadgets.config) {
     gadgets.config.register("osapi.services", null, init);
   }
 
