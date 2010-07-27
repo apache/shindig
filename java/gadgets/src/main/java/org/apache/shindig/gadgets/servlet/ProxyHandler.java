@@ -52,7 +52,7 @@ public class ProxyHandler extends ProxyBase {
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
-  
+
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
   private final ResponseRewriterRegistry contentRewriterRegistry;
@@ -99,11 +99,11 @@ public class ProxyHandler extends ProxyBase {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
           HttpResponse.SC_BAD_REQUEST);
     }
-    
+
     // Parse request uri:
     ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(
         new UriBuilder(request).toUri());
-    
+
     try {
       HttpUtil.setCachingHeaders(response,
           proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
@@ -115,10 +115,10 @@ public class ProxyHandler extends ProxyBase {
     HttpRequest rcr = buildHttpRequest(request, proxyUri, proxyUri.getResource());
     if (rcr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "No url paramater in request", HttpResponse.SC_BAD_REQUEST);      
+          "No url paramater in request", HttpResponse.SC_BAD_REQUEST);
     }
     HttpResponse results = requestPipeline.execute(rcr);
-    
+
     if (results.isError()) {
       // Error: try the fallback. Particularly useful for proxied images.
       Uri fallbackUri = proxyUri.getFallbackUri();
@@ -127,7 +127,7 @@ public class ProxyHandler extends ProxyBase {
         results = requestPipeline.execute(fallbackRcr);
       }
     }
-    
+
     if (contentRewriterRegistry != null) {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
@@ -140,7 +140,12 @@ public class ProxyHandler extends ProxyBase {
     for (Map.Entry<String, String> entry : results.getHeaders().entries()) {
       String name = entry.getKey();
       if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
+        try {
           response.addHeader(name, entry.getValue());
+        } catch (IllegalArgumentException e) {
+          // Skip illegal header
+          LOG.info("Skipping illegal header:  " + name + ":" + entry.getValue());
+        }
       }
     }
 

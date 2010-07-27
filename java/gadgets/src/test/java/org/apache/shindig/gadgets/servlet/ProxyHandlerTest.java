@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.isA;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
+import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -63,7 +64,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
     HttpResponse resp = new HttpResponseBuilder().addAllHeaders(headers).create();
     expect(pipeline.execute(req)).andReturn(resp);
   }
-  
+
   private void setupProxyRequestBase(String host) {
     expect(request.getServerName()).andReturn(host).anyTimes();
     expect(request.getScheme()).andReturn("http").anyTimes();
@@ -170,9 +171,12 @@ public class ProxyHandlerTest extends ServletTestFixture {
     String domain = "example.org";
     String contentType = "text/evil; charset=UTF-8";
     String magicGarbage = "fadfdfdfd";
+    final String badHeader = "Caching Server";
+    String badValue ="server";
     Map<String, List<String>> headers = Maps.newHashMap();
     headers.put("Content-Type", Arrays.asList(contentType));
     headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
+    headers.put(badHeader, Arrays.asList(badValue));
 
     expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
     setupProxyRequestMock(domain, url);
@@ -180,13 +184,23 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
     replay();
 
-    proxyHandler.fetch(request, recorder);
+    HttpServletResponseRecorder newRecorder = new HttpServletResponseRecorder(response) {
+      @Override
+      public void addHeader(String name, String value) {
+        if (name.equals(badHeader)) {
+          throw new IllegalArgumentException("Bad header");
+        }
+        super.addHeader(name, value);
+      }
+    };
+    proxyHandler.fetch(request, newRecorder);
 
-    assertEquals(contentType, recorder.getHeader("Content-Type"));
-    assertEquals(magicGarbage, recorder.getHeader("X-Magic-Garbage"));
+    assertEquals(contentType, newRecorder.getHeader("Content-Type"));
+    assertEquals(magicGarbage, newRecorder.getHeader("X-Magic-Garbage"));
+    assertNull("Blocked header", newRecorder.getHeader(badHeader));
     assertTrue(rewriter.responseWasRewritten());
   }
-  
+
   @Test
   public void testGetFallback() throws Exception {
     String url = "http://example.org/file.evil";
