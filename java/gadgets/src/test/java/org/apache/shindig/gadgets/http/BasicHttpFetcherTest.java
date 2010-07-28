@@ -17,20 +17,21 @@
  */
 package org.apache.shindig.gadgets.http;
 
-import java.io.InputStream;
-import java.io.EOFException;
-import java.io.IOException;
-
 import org.apache.http.HttpEntity;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.easymock.EasyMock;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class BasicHttpFetcherTest {
   private static final int ECHO_PORT = 9003;
@@ -59,13 +60,12 @@ public class BasicHttpFetcherTest {
     fetcher = new BasicHttpFetcher(BASE_URL.getAuthority());
 
     mockInputStream = EasyMock.createMock(InputStream.class);
-    //EasyMock.expect(mockInputStream.available()).andReturn(0).anyTimes();
     EasyMock.expect(mockInputStream.available()).andReturn(0);
     mockInputStream.close();
 
     mockEntity = EasyMock.createMock(HttpEntity.class);
     EasyMock.expect(mockEntity.getContent()).andReturn(mockInputStream);
-    EasyMock.expect(mockEntity.getContentLength()).andReturn(new Long(16384)).anyTimes();
+    EasyMock.expect(mockEntity.getContentLength()).andReturn(16384L).anyTimes();
   }
 
   @Test
@@ -83,17 +83,24 @@ public class BasicHttpFetcherTest {
 
   @Test
   public void testToByteArraySafeThrowsException1() throws Exception {
+    EasyMock.reset(mockInputStream);
+    mockInputStream.close();
+
     String exceptionMessage = "IO Exception and Any Random Cause";
     IOException e = new IOException(exceptionMessage);
     EasyMock.expect(mockInputStream.read(EasyMock.isA(byte[].class))).andThrow(e).anyTimes();
 
     EasyMock.replay(mockEntity, mockInputStream);
+    boolean exceptionCaught = false;
 
     try {
       fetcher.toByteArraySafe(mockEntity);
     } catch (IOException ioe) {
       assertEquals(exceptionMessage, ioe.getMessage());
+      exceptionCaught = true;
     }
+    assertTrue(exceptionCaught);
+    EasyMock.verify(mockEntity, mockInputStream);
   }
 
   @Test
@@ -103,16 +110,23 @@ public class BasicHttpFetcherTest {
     EasyMock.expect(mockInputStream.read(EasyMock.isA(byte[].class))).andThrow(e).anyTimes();
 
     EasyMock.replay(mockEntity, mockInputStream);
+    boolean exceptionCaught = false;
 
     try {
       fetcher.toByteArraySafe(mockEntity);
     } catch (EOFException eofe) {
       assertEquals(exceptionMessage, eofe.getMessage());
+      exceptionCaught = true;
     }
+    assertTrue(exceptionCaught);
+    EasyMock.verify(mockEntity, mockInputStream);
   }
 
   @Test
   public void testToByteArraySafeThrowsException3() throws Exception {
+    EasyMock.reset(mockInputStream);
+    mockInputStream.close();
+
     // Return non-zero for 'InputStream.available()'. This should violate the other condition.
     EasyMock.expect(mockInputStream.available()).andReturn(1);
     String exceptionMessage = "Unexpected end of ZLIB input stream";
@@ -120,12 +134,16 @@ public class BasicHttpFetcherTest {
     EasyMock.expect(mockInputStream.read(EasyMock.isA(byte[].class))).andThrow(e).anyTimes();
 
     EasyMock.replay(mockEntity, mockInputStream);
+    boolean exceptionCaught = false;
 
     try {
       fetcher.toByteArraySafe(mockEntity);
     } catch (EOFException eofe) {
       assertEquals(exceptionMessage, eofe.getMessage());
+      exceptionCaught = true;
     }
+    EasyMock.verify(mockEntity, mockInputStream);
+    assertTrue(exceptionCaught);
   }
 
   @Test
@@ -141,5 +159,21 @@ public class BasicHttpFetcherTest {
     } catch (EOFException eofe) {
       fail("Exception Should have been caught");
     }
+    EasyMock.verify(mockEntity, mockInputStream);
+  }
+
+  @Test
+  public void testToByteArraySafeHandlesExceptionWithNoMessage() throws Exception {
+    EOFException e = new EOFException();
+    EasyMock.expect(mockInputStream.read(EasyMock.isA(byte[].class))).andThrow(e).anyTimes();
+
+    EasyMock.replay(mockEntity, mockInputStream);
+
+    try {
+      fetcher.toByteArraySafe(mockEntity);
+    } catch (EOFException eofe) {
+      fail("Exception Should have been caught");
+    }
+    EasyMock.verify(mockEntity, mockInputStream);
   }
 }

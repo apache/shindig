@@ -513,17 +513,24 @@ public class BasicHttpFetcher implements HttpFetcher {
         buffer.append(tmp, 0, l);
       }
     } catch (EOFException eofe) {
-      // Ref: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4040920
-      // Due to a bug in JDK ZLIB (InflaterInputStream), unexpected EOF error can occur.
-      // In such cases, even if the input stream is finished reading, the
-      // 'Inflater.finished()' call erroneously returns 'false' and
-      // 'java.util.zip.InflaterInputStream.fill' throws the 'EOFException'.
-      // So for such case, ignore the Exception in case Exception Cause is
-      // 'Unexpected end of ZLIB input stream'.
-      // For all other cases, re-throw the (EOF) Exception.
-      if ((instream.available() == 0) &&
-           eofe.getMessage().equals("Unexpected end of ZLIB input stream")) {
-        // Ignore
+      /**
+       * Ref: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4040920
+       * Due to a bug in JDK ZLIB (InflaterInputStream), unexpected EOF error can occur.
+       * In such cases, even if the input stream is finished reading, the
+       * 'Inflater.finished()' call erroneously returns 'false' and
+       * 'java.util.zip.InflaterInputStream.fill' throws the 'EOFException'.
+       * So for such case, ignore the Exception in case Exception Cause is
+       * 'Unexpected end of ZLIB input stream'.
+       *
+       * Also, ignore this exception in case the exception has no message
+       * body as this is the case where {@link GZIPInputStream#readUByte}
+       * throws EOFException with empty message. A bug has been filed with Sun
+       * and will be mentioned here once it is accepted.
+       */
+      if (instream.available() == 0 &&
+          (eofe.getMessage() == null ||
+           eofe.getMessage().equals("Unexpected end of ZLIB input stream"))) {
+        LOG.log(Level.FINE, "EOFException: ", eofe);
       } else {
         throw eofe;
       }
