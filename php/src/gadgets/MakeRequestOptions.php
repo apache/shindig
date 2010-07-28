@@ -247,11 +247,10 @@ class MakeRequestOptions {
             ->setOAuthUseToken($request->getParameter('oauth_use_token'))
             ->setOAuthReceivedCallback($request->getParameter('oauth_received_callback'))
             ->setOAuthClientState($request->getParameter('oauth_state')) // Not in osapi.http spec, but nice to support
-            ->setSecurityTokenString(urlencode(base64_encode($request->getToken()->toSerialForm())));
+            ->setSecurityTokenString($request->getToken()->toSerialForm());
 
-    return $options;
-  }
-
+   return $options;
+ }
   /**
    * Gets the configured URL.
    *
