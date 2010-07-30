@@ -100,6 +100,35 @@ shindig.uri = (function() {
       return fragment_;
     }
 
+    function getQP(key) {
+      qparms_ = qparms_ || parseParams(query_);
+      return getParam(qparms_, key);
+    }
+
+    function getFP(key) {
+      fparms_ = fparms_ || parseParams(fragment_);
+      return getParam(fparms_, key);
+    }
+
+    function setQP(argOne, argTwo) {
+      qparms_ = setParams(qparms_ || parseParams(query_), argOne, argTwo);
+      return bundle;
+    }
+
+    function setFP(argOne, argTwo) {
+      fparms_ = setParams(fparms_ || parseParams(fragment_), argOne, argTwo);
+      return bundle;
+    }
+    
+    function getOrigin() {
+      return [
+          schema_,
+          schema_ !== "" ? ":" : "",
+          authority_ !== "" ? "//" : "",
+          authority_
+      ].join("");
+    }
+
     /**
      * Returns a readable representation of the URL.
      * 
@@ -109,10 +138,7 @@ shindig.uri = (function() {
       var query = getQuery();
       var fragment = getFragment();
       return [
-        schema_,
-        schema_ !== "" ? ":" : "",
-        authority_ !== "" ? "//" : "",
-        authority_,
+        getOrigin(),
         path_,
         query !== "" ? "?" : "",
         query,
@@ -191,17 +217,12 @@ shindig.uri = (function() {
       // Getters
       getSchema: function() { return schema_; },
       getAuthority: function() { return authority_; },
+      getOrigin: getOrigin,
       getPath: function() { return path_; },
       getQuery: getQuery,
       getFragment: getFragment,
-      getQP: function(key) {
-        qparms_ = qparms_ || parseParams(query_);
-        return getParam(qparms_, key);
-      },
-      getFP: function(key) {
-        fparms_ = fparms_ || parseParams(fragment_);
-        return getParam(fparms_, key);
-      },
+      getQP: getQP,
+      getFP: getFP,
 
       // Setters
       setSchema: function(schema) { schema_ = schema; return bundle; },
@@ -209,12 +230,15 @@ shindig.uri = (function() {
       setPath: function(path) { path_ = (path[0] === "/" ? "" : "/") + path; return bundle; },
       setQuery: function(query) { qparms_ = null; query_ = stripPrefix(query, '?'); return bundle; },
       setFragment: function(fragment) { fparms_ = null; fragment_ = stripPrefix(fragment, '#'); return bundle; },
-      setQP: function(argOne, argTwo) {
-        qparms_ = setParams(qparms_ || parseParams(query_), argOne, argTwo);
-        return bundle;
-      },
-      setFP: function(argOne, argTwo) {
-        fparms_ = setParams(fparms_ || parseParams(fragment_), argOne, argTwo);
+      setQP: setQP,
+      setFP: setFP,
+      setExistingP: function(key, val) {
+        if (getQP(key, val) !== undefined) {
+          setQP(key, val);
+        }
+        if (getFP(key, val) !== undefined) {
+          setFP(key, val);
+        }
         return bundle;
       },
 

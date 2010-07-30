@@ -29,7 +29,7 @@
  */
 shindig.container.GadgetHolder = function(siteId, el) {
   /**
-   * Unique numeric gadget ID. Should be the same as siteId.
+   * Unique numeric gadget ID.
    * @type {number}
    * @private
    */
@@ -198,10 +198,13 @@ shindig.container.GadgetHolder.prototype.render = function(
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
   // container. Assumes container has set up forwarding to gmodules at /gadgets.
-  gadgets.rpc.setRelayUrl(this.iframeId_, this.gadgetInfo_['iframeHost'] +
-      '/gadgets/files/container/rpc_relay.html');
-  // Pull RPC token from gadget URI
-  gadgets.rpc.setAuthToken(this.iframeId_, this.getRpcToken_());
+  var iframeUri = shindig.uri(this.gadgetInfo_['iframeUrl']);
+  var relayUri = shindig.uri()
+      .setSchema(iframeUri.getSchema())
+      .setAuthority(iframeUri.getAuthority())
+      .setPath('/gadgets/files/container/rpc_relay.html');
+  gadgets.rpc.setRelayUrl(this.iframeId_, relayUri.toString());
+  gadgets.rpc.setAuthToken(this.iframeId_, iframeUri.getFP('rpctoken'));
 };
 
 
@@ -262,51 +265,31 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
  * @private
  */
 shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
-  var uri = this.gadgetInfo_['iframeUrl'];
-  uri = shindig.container.util.updateQueryParam(uri, 'view', this.view_);
-  uri = this.updateBooleanQueryParam_(uri, 'debug');
-  uri = this.updateBooleanQueryParam_(uri, 'nocache');
-  uri = this.updateBooleanQueryParam_(uri, 'testmode');
-  uri = this.updateUserPrefParams_(uri);
+  var uri = shindig.uri(this.gadgetInfo_['iframeUrl']);
+  uri.setQP('debug', this.renderParams_['debug'] ? '1' : '0');
+  uri.setQP('nocache', this.renderParams_['nocache'] ? '1' : '0');
+  uri.setQP('testmode', this.renderParams_['testmode'] ? '1' : '0');
+  uri.setQP('view', this.view_);
+  this.updateUserPrefParams_(uri);
 
   // TODO: Share this base container logic
   // TODO: Two SD base URIs - one for container, one for gadgets
   // Need to add parent at end of query due to gadgets parsing bug
-  var parent = shindig.container.util.parseOrigin(document.location.href);
-  uri = shindig.container.util.addQueryParam(uri, 'parent', parent);
+  uri.setQP('parent', window.__CONTAINER_HOST);
 
   // Remove existing social token if we have a new one
   if (this.securityToken_) {
-    var securityTokenMatch = uri.match(/([&#?])(st=[^&#]*)/);
-    if (securityTokenMatch) {
-      uri = uri.replace(securityTokenMatch[0], securityTokenMatch[1] +
-          'st=' + encodeURIComponent(this.securityToken_));
-    }
+    uri.setExistingP('st', this.securityToken_);
   }
-
-  uri = shindig.container.util.addFragmentParam(uri, 'mid',
-      String(this.siteId_));
+  
+  uri.setFP('mid', String(this.siteId_));
 
   if (this.hasGadgetParams_) {
     var gadgetParamText = gadgets.json.stringify(this.gadgetParams_);
-    uri = shindig.container.util.addFragmentParam(uri, 'view-params',
-        gadgetParamText);
+    uri.setFP('view-params', gadgetParamText);
   }
-  return uri;
-};
 
-
-/**
- * Updates query params of interest.
- * @param {string} uri The URL to append query param to.
- * @param {string} param The query param to update uri with.
- * @return {string} The URL with param append to.
- * @private
- */
-shindig.container.GadgetHolder.prototype.updateBooleanQueryParam_
-    = function(uri, param) {
-  var value = this.renderParams_[param] ? "1" : "0";
-  return shindig.container.util.updateQueryParam(uri, param, value);
+  return uri.toString();
 };
 
 
@@ -314,8 +297,8 @@ shindig.container.GadgetHolder.prototype.updateBooleanQueryParam_
  * Replace user prefs specified in url with only those specified. This will
  * maintain each user prefs existence (or lack of), order (from left to right)
  * and its appearance (in query params or fragment).
- * @param {string} uri The URL possibly containing user preferences parameters
- *     prefixed by up_.
+ * @param {shindig.uri} uri The URL possibly containing user preferences
+ *     parameters prefixed by up_.
  * @return {string} The URL with up_ replaced by those specified in userPrefs.
  * @private
  */
@@ -323,29 +306,12 @@ shindig.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
   var userPrefs = this.renderParams_['userPrefs'];
   if (userPrefs) {
     for (var up in userPrefs) {
-      // Maybe more efficient to have a pre-compiled regex that looks for
-      // up_ANY_TEXT and match all instances.
-      var re = new RegExp('([&#?])up_' + up + '[^&#]*');
-      if (re) {
-        var key = encodeURIComponent('up_' + up);
-        var val = userPrefs[up];
-        if (val instanceof Array) {
-          val = val.join('|');
-        }
-        val = encodeURIComponent(val);
-        uri = uri.replace(re, '$1' + key + '=' + val);
+      var upKey = 'up_' + up;
+      var upValue = userPrefs[up];
+      if (upValue instanceof Array) {
+        upValue = upValue.join('|');
       }
+      uri.setExistingP(upKey, upValue);
     }
   }
-  return uri;
-};
-
-
-/**
- * @return {string} The current RPC token.
- * @private
- */
-shindig.container.GadgetHolder.prototype.getRpcToken_ = function() {
-  return shindig.container.util.getParamValue(
-      this.gadgetInfo_['iframeUrl'], 'rpctoken');
 };

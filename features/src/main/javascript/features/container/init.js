@@ -40,20 +40,18 @@
   }
 
   function initializeGlobalVars() {
-    var scriptSrc = getLastScriptSrc();
-    if (scriptSrc) {
-      window.__API_HOST = shindig.container.util.parseOrigin(scriptSrc);
-      window.__CONTAINER = shindig.container.util.getParamValue(
-          scriptSrc, 'container');
-      window.__CONTAINER_HOST = shindig.container.util.parseOrigin(
-          document.location.href);
+    var scriptUri = getLastScriptUri();
+    if (scriptUri) {
+      window.__API_HOST = scriptUri.getOrigin();
+      window.__CONTAINER = scriptUri.getQP('container');
     }
+    window.__CONTAINER_HOST = shindig.uri(document.location.href).getOrigin();
   }
 
-  function getLastScriptSrc() {
+  function getLastScriptUri() {
     var scriptEls = document.getElementsByTagName('script');
     return (scriptEls.length > 0)
-        ? scriptEls[scriptEls.length - 1].src
+        ? shindig.uri(scriptEls[scriptEls.length - 1].src)
         : null;
   }
 

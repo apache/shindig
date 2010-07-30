@@ -35,6 +35,7 @@ ShindigUriTest.prototype.testParseFullUri = function() {
 
   this.assertEquals("http", uri.getSchema());
   this.assertEquals("www.example.com", uri.getAuthority());
+  this.assertEquals("http://www.example.com", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
   this.assertEquals("qk1=qv1&qk2=qv2", uri.getQuery());
   this.assertEquals("fk1=fv1&fk2=fv2", uri.getFragment());
@@ -57,6 +58,7 @@ ShindigUriTest.prototype.testParseQuerylessUri = function() {
 
   this.assertEquals("http", uri.getSchema());
   this.assertEquals("www.example.com", uri.getAuthority());
+  this.assertEquals("http://www.example.com", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
   this.assertEquals("fk1=fv1&fk2=fv2", uri.getFragment());
   this.assertEquals("fv1", uri.getFP("fk1"));
@@ -75,6 +77,7 @@ ShindigUriTest.prototype.testParseFragmentlessUri = function() {
 
   this.assertEquals("http", uri.getSchema());
   this.assertEquals("www.example.com", uri.getAuthority());
+  this.assertEquals("http://www.example.com", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
   this.assertEquals("qk1=qv1&qk2=qv2", uri.getQuery());
   this.assertEquals("qv1", uri.getQP("qk1"));
@@ -93,6 +96,7 @@ ShindigUriTest.prototype.testParseSchemalessUri = function() {
 
   this.assertEquals("", uri.getSchema());
   this.assertEquals("www.example.com", uri.getAuthority());
+  this.assertEquals("//www.example.com", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
   this.assertEquals("qk1=qv1&qk2=qv2", uri.getQuery());
   this.assertEquals("fk1=fv1&fk2=fv2", uri.getFragment());
@@ -115,6 +119,7 @@ ShindigUriTest.prototype.testParseAuthoritylessUri = function() {
 
   this.assertEquals("", uri.getSchema());
   this.assertEquals("", uri.getAuthority());
+  this.assertEquals("", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
   this.assertEquals("qk1=qv1&qk2=qv2", uri.getQuery());
   this.assertEquals("fk1=fv1&fk2=fv2", uri.getFragment());
@@ -137,6 +142,7 @@ ShindigUriTest.prototype.testParsePathlessUri = function() {
 
   this.assertEquals("http", uri.getSchema());
   this.assertEquals("www.example.com", uri.getAuthority());
+  this.assertEquals("http://www.example.com", uri.getOrigin());
   this.assertEquals("qk1=qv1&qk2=qv2", uri.getQuery());
   this.assertEquals("fk1=fv1&fk2=fv2", uri.getFragment());
   this.assertEquals("qv1", uri.getQP("qk1"));
@@ -158,6 +164,7 @@ ShindigUriTest.prototype.testParsePathOnly = function() {
 
   this.assertEquals("", uri.getSchema());
   this.assertEquals("", uri.getAuthority());
+  this.assertEquals("", uri.getOrigin());
   this.assertEquals("/my/path", uri.getPath());
 
   this.assertEquals(str, uri.toString());
@@ -314,6 +321,15 @@ ShindigUriTest.prototype.testBuildFragment = function() {
   this.assertEquals("three", uri.getFP("three"));
   uri.setFP("two", null);
   this.assertEquals("#one=one&three=three&two", uri.toString());
+};
+
+ShindigUriTest.prototype.testReplaceExistingQuery = function() {
+  var uri = shindig.uri().setQuery("one=two")
+                         .setFragment("three=four")
+                         .setExistingP("one", "111")
+                         .setExistingP("three", "333")
+                         .setExistingP("xxx", "yyy");
+  this.assertEquals("?one=111#three=333", uri.toString());
 };
 
 ShindigUriTest.prototype.testBuildWithOverrides = function() {
