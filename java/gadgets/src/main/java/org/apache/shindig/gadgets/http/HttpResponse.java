@@ -126,6 +126,10 @@ public final class HttpResponse implements Externalizable {
 
   static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
+  // At what point you don't trust remote server date stamp on response (in milliseconds)
+  // (Should be less then DEFAULT_TTL)
+  static final long DEFAULT_DRIFT_LIMIT_MS = 3L * 60L * 1000L;
+
   @Inject(optional = true) @Named("shindig.cache.http.negativeCacheTtl")
   private static long negativeCacheTtl = DEFAULT_NEGATIVE_CACHE_TTL;
 
@@ -139,7 +143,10 @@ public final class HttpResponse implements Externalizable {
   @Inject(optional = true)
   private static EncodingDetector.FallbackEncodingDetector customEncodingDetector =
       new EncodingDetector.FallbackEncodingDetector();
-  
+
+  @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
+  private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
+
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = new MapMaker().makeMap();
 
@@ -166,7 +173,7 @@ public final class HttpResponse implements Externalizable {
 
     // Always safe, HttpResponseBuilder won't modify the body.
     responseBytes = builder.getResponse();
-    
+
     // Copy headers after builder.getResponse(), since that can modify Content-Type.
     headerCopy.putAll(builder.getHeaders());
 
@@ -197,7 +204,7 @@ public final class HttpResponse implements Externalizable {
   public static HttpResponse badrequest(String msg) {
     return new HttpResponse(SC_BAD_REQUEST, msg);
   }
-  
+
   public static HttpResponse timeout() {
     return new HttpResponse(SC_GATEWAY_TIMEOUT, "");
   }
@@ -223,7 +230,7 @@ public final class HttpResponse implements Externalizable {
   public String getEncoding() {
     return encoding.name();
   }
-  
+
   /**
    * @return The Charset of the response body's encoding, if we were able to determine it.
    */
@@ -255,7 +262,7 @@ public final class HttpResponse implements Externalizable {
   public String getResponseAsString() {
     if (responseString == null) {
       responseString = encoding.decode(ByteBuffer.wrap(responseBytes)).toString();
-      
+
       // Strip BOM if present.
       if (responseString.length() > 0 && responseString.codePointAt(0) == 0xFEFF) {
         responseString = responseString.substring(1);
@@ -443,16 +450,21 @@ public final class HttpResponse implements Externalizable {
   private static long getAndUpdateDate(Multimap<String, String> headers) {
     // Validate the Date header. Must conform to the HTTP date format.
     long timestamp = -1;
+    long currentTime = System.currentTimeMillis();
     Collection<String> dates = headers.get("Date");
 
     if (!dates.isEmpty()) {
       Date d = DateUtil.parseRfc1123Date(dates.iterator().next());
       if (d != null) {
         timestamp = d.getTime();
+        if (Math.abs(currentTime - timestamp) > responseDateDriftLimit) {
+          // Do not trust the date from response if it is too old (server time out of sync)
+          timestamp = -1;
+        }
       }
     }
     if (timestamp == -1) {
-      timestamp = System.currentTimeMillis();
+      timestamp = currentTime;
       headers.put("Date", DateUtil.formatRfc1123Date(timestamp));
     }
     return timestamp;
@@ -464,7 +476,7 @@ public final class HttpResponse implements Externalizable {
    * @return milliseconds of the ttl
    */
   public long getDefaultTtl() {
-    return defaultTtl;  
+    return defaultTtl;
   }
 
   /**
@@ -496,7 +508,7 @@ public final class HttpResponse implements Externalizable {
           if (charset.length() >= 2 && charset.startsWith("\"") && charset.endsWith("\"")) {
             charset = charset.substring(1, charset.length() - 1);
           }
-          
+
           try {
             return charsetForName(charset);
           } catch (IllegalArgumentException e) {
@@ -529,10 +541,10 @@ public final class HttpResponse implements Externalizable {
       charset = Charset.forName(encoding);
       encodingToCharset.put(encoding, charset);
     }
-    
+
     return charset;
   }
-  
+
   @Override
   public int hashCode() {
     return httpStatusCode
@@ -600,7 +612,7 @@ public final class HttpResponse implements Externalizable {
    	 bodyLength -= cnt;
     }
     if (offset != responseBytes.length) {
-    	throw new IOException("Invalid body! Expected length = " + responseBytes.length + ", bytes readed = " + offset + '.'); 
+    	throw new IOException("Invalid body! Expected length = " + responseBytes.length + ", bytes readed = " + offset + '.');
     }
 
     date = getAndUpdateDate(headerCopy);

@@ -124,7 +124,7 @@ public class HttpResponseTest extends Assert {
         .create();
     assertEquals(BIG5_STRING, response.getResponseAsString());
     assertEquals("text/plain; charset=BIG5", response.getHeader("Content-Type"));
-    
+
     HttpResponseBuilder subResponseBuilder = new HttpResponseBuilder(response);
     subResponseBuilder.setContent(response.getResponseAsString());
     HttpResponse subResponse = subResponseBuilder.create();
@@ -171,7 +171,7 @@ public class HttpResponseTest extends Assert {
         .create();
     assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding());
   }
-  
+
   @Test
   public void testEncodingDetectionUtf8WithBomNoContentHeader() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -256,7 +256,7 @@ public class HttpResponseTest extends Assert {
     assertEquals(expected, expires);
     assertTrue(response.getCacheTtl() <= response.getDefaultTtl() && response.getCacheTtl() > 0);
   }
-  
+
   @Test
   public void testCachingHeadersIgnoredOnError() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -297,13 +297,13 @@ public class HttpResponseTest extends Assert {
     // Second rounding makes this n-1.
     assertTtlOk(maxAge, response);
   }
-  
+
   @Test
   public void testExpiresZeroValue() throws Exception {
     HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "0").create();
     assertEquals(0, roundToSeconds(response.getCacheExpiration()));
   }
-  
+
   @Test
   public void testExpiresUnknownValue() throws Exception {
     HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "howdy").create();
@@ -359,6 +359,32 @@ public class HttpResponseTest extends Assert {
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time))
         .create();
+    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
+        roundToSeconds(response.getCacheExpiration()));
+    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
+  }
+
+  @Test
+  public void testFixedDateOld() throws Exception {
+    int time = roundToSeconds(System.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            - 1000 - HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
+        .create();
+    // Verify that the old time is ignored:
+    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
+        roundToSeconds(response.getCacheExpiration()));
+    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
+  }
+
+  @Test
+  public void testFixedDateNew() throws Exception {
+    int time = roundToSeconds(System.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            + 1000 + HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
+        .create();
+    // Verify that the old time is ignored:
     assertEquals(time + roundToSeconds(response.getDefaultTtl()),
         roundToSeconds(response.getCacheExpiration()));
     assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
