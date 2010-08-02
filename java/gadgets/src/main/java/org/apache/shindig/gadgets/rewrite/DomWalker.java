@@ -140,7 +140,7 @@ public final class DomWalker {
 
     public void rewrite(HttpRequest request, HttpResponseBuilder builder)
         throws RewritingException {
-      if (RewriterUtils.isHtml(request, builder) && !StringUtils.isEmpty(builder.getContent())) {
+      if (RewriterUtils.isHtml(request, builder)) {
         Gadget context = makeGadget(request);
         rewrite(makeVisitors(context, request.getGadget()), context, builder);
       }

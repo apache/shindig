@@ -19,10 +19,7 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.Lists;
-import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.http.HttpRequest;
-import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
@@ -266,21 +263,6 @@ public class DomWalkerTest extends DomWalkerTestBase {
     }
 
     assertTrue(exceptionCaught);
-  }
-
-  // Throws UnsupportedOperationException if rewrite() method does not stop
-  // on seeing empty content.
-  @Test
-  public void rewriteDoesNothingWhenContentIsEmpty() throws Exception {
-    DomWalker.Rewriter rewriter = getRewriter();
-
-    HttpRequest req = new HttpRequest(Uri.parse("http://www.example.org"));
-    HttpResponseBuilder builder = new HttpResponseBuilder()
-        .setResponse(null)
-        .addHeader("Content-Type", "text/html");
-    rewriter.rewrite(req, builder);
-
-    assertEquals("", builder.getContent());
   }
 
   private DomWalker.Rewriter getRewriter(DomWalker.Visitor... visitors) {
