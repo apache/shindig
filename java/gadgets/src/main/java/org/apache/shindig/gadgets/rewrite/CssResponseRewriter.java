@@ -164,11 +164,9 @@ public class CssResponseRewriter implements ResponseRewriter {
     
     styleSheet.acceptPreOrder(new Visitor() {
       public boolean visit(AncestorChain<?> chain) {
-        System.err.println("Entering rewrite chain.node=" + chain.node);
         if (chain.node instanceof CssTree.Import) {
           CssTree.Import importNode = (CssTree.Import) chain.node;
           CssTree.UriLiteral uriLiteral = importNode.getUri();
-          System.err.println("Import: uriLiteral.getValue() ");
           skip.add(importNode.getUri());
           if (extractImports) {
             imports.add(uriLiteral.getValue());

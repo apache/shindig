@@ -57,7 +57,6 @@ public class StyleTagProxyEmbeddedUrlsVisitor implements DomWalker.Visitor {
 
   public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
     Uri contentBase = gadget.getSpec().getUrl();
-    System.err.println("Entering revist");
 
     for (Node node: nodes) {
       Element elem = (Element) node;
