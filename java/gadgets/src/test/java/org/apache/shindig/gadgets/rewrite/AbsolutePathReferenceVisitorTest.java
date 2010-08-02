@@ -76,6 +76,13 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void bypassObjectTag() throws Exception {
+    Element objectElement = elem("object", "src", RELATIVE_URI.toString());
+    assertEquals("Element with object tag should be bypassed",
+                 VisitStatus.BYPASS, getVisitStatus(objectElement));
+  }
+
+  @Test
   public void bypassTagWithoutAttrib() throws Exception {
     Element a = elem("a");
     assertEquals(VisitStatus.BYPASS, getVisitStatus(a));
@@ -92,6 +99,16 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
+  public void absolutifyTagInput() throws Exception {
+    checkAbsolutifyStates("input");
+  }
+
+  @Test
+  public void absolutifyTagBody() throws Exception {
+    checkAbsolutifyStates("body");
+  }
+
+  @Test
   public void absolutifyTagLink() throws Exception {
     checkAbsolutifyStates("link");
   }
@@ -99,11 +116,6 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
   @Test
   public void absolutifyTagScript() throws Exception {
     checkAbsolutifyStates("script");
-  }
-
-  @Test
-  public void absolutifyTagObject() throws Exception {
-    checkAbsolutifyStates("object");
   }
 
   @Test

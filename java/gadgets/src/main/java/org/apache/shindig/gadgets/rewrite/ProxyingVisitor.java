@@ -41,15 +41,15 @@ import java.util.Map;
 public class ProxyingVisitor implements DomWalker.Visitor {
   public final static Map<String, String> RESOURCE_TAGS =
     ImmutableMap.of(
+        "body", "background",
         "img", "src",
-        "embed", "src",
+        "input", "src",
         "link", "href",
-        "script", "src",
-        "object", "src");
-  
+        "script", "src");
+
   private final ContentRewriterFeature.Config featureConfig;
   private final ProxyUriManager uriManager;
- 
+
   public ProxyingVisitor(ContentRewriterFeature.Config featureConfig,
                               ProxyUriManager uriManager) {
     this.featureConfig = featureConfig;

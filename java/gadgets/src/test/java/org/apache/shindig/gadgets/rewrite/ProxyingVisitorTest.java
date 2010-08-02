@@ -54,10 +54,20 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   public void imgVisitReserved() throws Exception {
     checkVisitReserved("img", true);
   }
-  
+
+  @Test
+  public void inputVisitReserved() throws Exception {
+    checkVisitReserved("input", true);
+  }
+
+  @Test
+  public void bodyVisitReserved() throws Exception {
+    checkVisitReserved("body", true);
+  }
+
   @Test
   public void embedVisitReserved() throws Exception {
-    checkVisitReserved("embed", true);
+    checkVisitReserved("embed", false);
   }
   
   @Test
@@ -72,7 +82,7 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   
   @Test
   public void objectVisitReserved() throws Exception {
-    checkVisitReserved("object", true);
+    checkVisitReserved("object", false);
   }
   
   @Test
