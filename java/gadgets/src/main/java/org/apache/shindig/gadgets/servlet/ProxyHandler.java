@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +35,7 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -57,16 +59,20 @@ public class ProxyHandler extends ProxyBase {
   private final LockedDomainService lockedDomainService;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final ProxyUriManager proxyUriManager;
+  protected final boolean remapInternalServerError;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
                       LockedDomainService lockedDomainService,
                       ResponseRewriterRegistry contentRewriterRegistry,
-                      ProxyUriManager proxyUriManager) {
+                      ProxyUriManager proxyUriManager,
+                      @Named("shindig.proxy.remapInternalServerError")
+                      Boolean remapInternalServerError) {
     this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.proxyUriManager = proxyUriManager;
+    this.remapInternalServerError = remapInternalServerError;
   }
 
   /**
@@ -137,46 +143,20 @@ public class ProxyHandler extends ProxyBase {
       }
     }
 
-    for (Map.Entry<String, String> entry : results.getHeaders().entries()) {
-      String name = entry.getKey();
-      if (!DISALLOWED_RESPONSE_HEADERS.contains(name.toLowerCase())) {
-        try {
-          response.addHeader(name, entry.getValue());
-        } catch (IllegalArgumentException e) {
-          // Skip illegal header
-          LOG.info("Skipping illegal header:  " + name + ":" + entry.getValue());
-        }
-      }
-    }
+    // Copy the response headers and status code to the final http servlet
+    // response.
+    UriUtils.copyResponseHeadersAndStatusCode(
+        results, response, remapInternalServerError, false,
+        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CACHING_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
 
-    String responseType = results.getHeader("Content-Type");
-    if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
-      String requiredType = rcr.getRewriteMimeType();
-      // Use a 'Vary' style check on the response
-      if (requiredType.endsWith("/*") &&
-          !StringUtils.isEmpty(responseType)) {
-        requiredType = requiredType.substring(0, requiredType.length() - 2);
-        if (!responseType.toLowerCase().startsWith(requiredType.toLowerCase())) {
-          response.setContentType(requiredType);
-          responseType = requiredType;
-        }
-      } else {
-        response.setContentType(requiredType);
-        responseType = requiredType;
-      }
-    }
+    // Override the content type of the final http response if the input request
+    // had the rewrite mime type header.
+    UriUtils.maybeRewriteContentType(rcr, response);
 
     setResponseContentHeaders(response, results);
 
-    if (results.isError()) {
-      if (results.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-        // External "internal error" should be mapped to gateway error
-        response.sendError(HttpResponse.SC_BAD_GATEWAY);
-      } else {
-        response.sendError(results.getHttpStatusCode());
-      }
-    } else {
-      IOUtils.copy(results.getResponse(), response.getOutputStream());
-    }
+    IOUtils.copy(results.getResponse(), response.getOutputStream());
   }
 }

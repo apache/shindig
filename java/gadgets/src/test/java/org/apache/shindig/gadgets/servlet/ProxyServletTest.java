@@ -47,7 +47,7 @@ public class ProxyServletTest extends ServletTestFixture {
 
   private final ProxyUriManager passthruManager = new PassthruManager();
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, lockedDomainService, null, passthruManager);
+      = new ProxyHandler(pipeline, lockedDomainService, null, passthruManager, true);
   private final ProxyServlet servlet = new ProxyServlet();
   private final HttpRequest internalRequest = new HttpRequest(REQUEST_URL);
   private final HttpResponse internalResponse = new HttpResponse(RESPONSE_BODY);

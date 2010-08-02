@@ -109,7 +109,7 @@ public class AccelHandler extends ProxyBase {
 
     // Override the content type of the final http response if the input request
     // had the rewrite mime type header.
-    rewriteContentType(req, response);
+    UriUtils.maybeRewriteContentType(req, response);
 
     // Copy the content.
     IOUtils.copy(results.getResponse(), response.getOutputStream());
@@ -192,23 +192,6 @@ public class AccelHandler extends ProxyBase {
 
     req.setFollowRedirects(false);
     return req;
-  }
-
-  /**
-   * Rewrite the content type of the final http response if the request has the
-   * rewrite-mime-type param.
-   * @param req The http request.
-   * @param response The final http response to be returned to user.
-   */
-  protected void rewriteContentType(HttpRequest req, HttpServletResponse response) {
-    String contentType = response.getContentType();
-    String requiredType = req.getRewriteMimeType();
-    if (!StringUtils.isEmpty(requiredType)) {
-      if (requiredType.endsWith("/*") && !StringUtils.isEmpty(contentType)) {
-        requiredType = requiredType.substring(0, requiredType.length() - 2);
-      }
-      response.setContentType(requiredType);
-    }
   }
 
   /**

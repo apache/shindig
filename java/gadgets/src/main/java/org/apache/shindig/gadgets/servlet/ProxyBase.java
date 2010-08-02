@@ -55,11 +55,6 @@ public abstract class ProxyBase {
   public static final String REWRITE_MIME_TYPE_PARAM = Param.REWRITE_MIME_TYPE.getKey();
   public static final String SANITIZE_CONTENT_PARAM = Param.SANITIZE.getKey();
 
-  protected static final Set<String> DISALLOWED_RESPONSE_HEADERS = ImmutableSet.of(
-      "set-cookie", "content-length", "content-encoding", "etag", "last-modified" ,"accept-ranges",
-      "vary", "expires", "date", "pragma", "cache-control", "transfer-encoding", "www-authenticate"
-  );
-
   private static final Logger LOG = Logger.getLogger(ProxyBase.class.getName());
   
   /**

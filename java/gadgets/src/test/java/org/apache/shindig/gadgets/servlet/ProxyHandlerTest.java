@@ -50,7 +50,7 @@ public class ProxyHandlerTest extends ServletTestFixture {
 
   private final ProxyUriManager passthruManager = new PassthruManager();
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry, passthruManager);
+      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry, passthruManager, true);
 
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -243,6 +243,35 @@ public class ProxyHandlerTest extends ServletTestFixture {
     verify();
   }
 
+  @Test
+  public void testInvalidHeaderDropped() throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+
+    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
+    setupProxyRequestMock(domain, url);
+
+    HttpRequest req = new HttpRequest(Uri.parse(url));
+    String contentType = "text/html; charset=UTF-8";
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("Hello")
+        .addHeader("Content-Type", contentType)
+        .addHeader("Content-Length", "200")  // Disallowed header.
+        .addHeader(":", "someDummyValue") // Invalid header name.
+        .create();
+
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    proxyHandler.fetch(request, recorder);
+
+    verify();
+    assertNull(recorder.getHeader(":"));
+    assertNull(recorder.getHeader("Content-Length"));
+    assertEquals(recorder.getHeader("Content-Type"), contentType);
+  }
+  
   /**
    * Override HttpRequest equals to check for cache control fields
    */

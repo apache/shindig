@@ -25,6 +25,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.servlet.ServletTestFixture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.junit.Before;
@@ -40,7 +41,7 @@ import static org.easymock.EasyMock.expect;
 /**
  * Tests for UriUtils.
  */
-public class UriUtilsTest extends EasyMockTestCase {
+public class UriUtilsTest extends ServletTestFixture {
   @Before
   public void setUp() throws Exception {
   }
@@ -51,6 +52,67 @@ public class UriUtilsTest extends EasyMockTestCase {
       vector.addAll(Arrays.asList(args));
     }
     return vector.elements();
+  }
+
+  private void verifyMime(String requestMime, String responseMime, String expectedMime)
+      throws Exception {
+    String url = "http://example.org/foo";
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setRewriteMimeType(requestMime);
+    recorder.setContentType(responseMime);
+
+    UriUtils.maybeRewriteContentType(req, recorder);
+    assertEquals(expectedMime, recorder.getContentType());
+  }
+
+  @Test
+  public void testMimeMatchPass() throws Exception {
+    verifyMime("text/css", "text/css", "text/css");
+  }
+
+  @Test
+  public void testMimeMatchPassWithAdditionalAttributes() throws Exception {
+    verifyMime("text/css", "text/css; charset=UTF-8", "text/css");
+  }
+
+  @Test
+  public void testNonMatchingMime() throws Exception {
+    verifyMime("text/css", "image/png; charset=UTF-8", "text/css");
+  }
+
+  @Test
+  public void testNonMatchingMimeWithSamePrefix() throws Exception {
+    verifyMime("text/html", "text/plain", "text/html");
+  }
+
+  @Test
+  public void testNonMatchingMimeWithWildCard() throws Exception {
+    verifyMime("text/*", "image/png", "text/*");
+  }
+
+  @Test
+  public void testNonMatchingMimeWithDifferentPrefix() throws Exception {
+    verifyMime("text/*", "text123/html", "text/*");
+  }
+
+  @Test
+  public void testMimeMatchVarySupport() throws Exception {
+    verifyMime("image/*", "image/gif", "image/gif");
+  }
+
+  @Test
+  public void testNullRequestMime() throws Exception {
+    verifyMime(null, "image/png; charset=UTF-8", "image/png; charset=UTF-8");
+  }
+
+  @Test
+  public void testEmptyRequestMime() throws Exception {
+    verifyMime("", "image/png; charset=UTF-8", "image/png; charset=UTF-8");
+  }
+
+  @Test
+  public void testNullResponseMime() throws Exception {
+    verifyMime("text/*", null, "text/*");
   }
 
   @Test

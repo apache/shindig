@@ -22,10 +22,12 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.logging.Logger;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.Set;
  * Utility functions related to URI and Http servlet response management.
  */
 public class UriUtils {
+  private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
   /**
    * Enum of disallowed response headers that should not be passed on as is to
    * the user. The webserver serving out the response should be responsible
@@ -47,7 +50,7 @@ public class UriUtils {
         "accept-ranges")),
 
     CACHING_DIRECTIVES(ImmutableSet.of("vary", "expires", "date", "pragma",
-                                       "cache-control")),
+                                       "cache-control", "etag", "last-modified")),
 
     CLIENT_STATE_DIRECTIVES(ImmutableSet.of("set-cookie", "www-authenticate")),
 
@@ -73,7 +76,9 @@ public class UriUtils {
 
   /**
    * Returns true if the header name is valid.
-   * NOTE: RFC 822 section 3.1.2 describes the structure of header fields. 
+   * NOTE: RFC 822 section 3.1.2 describes the structure of header fields.
+   * According to the RFC, a header name (or field-name) must be composed of printable ASCII
+   * characters (i.e., characters that have values between 33. and 126. decimal, except colon).
    * @param name The header name.
    * @return True if the header name is valid, false otherwise.
    */
@@ -95,11 +100,24 @@ public class UriUtils {
   /**
    * Returns true if the header value is valid.
    * NOTE: RFC 822 section 3.1.2 describes the structure of header fields.
+   * According to the RFC, a header value (or field-body) may be composed of any ASCII characters,
+   * except CR or LF.
    * @param val The header value.
    * @return True if the header value is valid, false otherwise.
    */
   public static boolean isValidHeaderValue(String val) {
-    // TODO: complete this.
+    char[] dst = new char[val.length()];
+    val.getChars(0, val.length(), dst, 0);
+
+    for (char c : dst) {
+      if (c == 13 || c == 10) {
+        // CR and LF.
+        return false;
+      }
+      if (c > 127) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -133,10 +151,15 @@ public class UriUtils {
     for (Map.Entry<String, String> entry : data.getHeaders().entries()) {
       if (isValidHeaderName(entry.getKey()) && isValidHeaderValue(entry.getValue()) &&
           !allDisallowedHeaders.contains(entry.getKey().toLowerCase())) {
-        if (setHeaders) {
-          resp.setHeader(entry.getKey(), entry.getValue());
-        } else {
-          resp.addHeader(entry.getKey(), entry.getValue());
+        try {
+          if (setHeaders) {
+            resp.setHeader(entry.getKey(), entry.getValue());
+          } else {
+            resp.addHeader(entry.getKey(), entry.getValue());
+          }
+        } catch (IllegalArgumentException e) {
+          // Skip illegal header
+          LOG.warning("Skipping illegal header:  " + entry.getKey() + ":" + entry.getValue());
         }
       }
     }
@@ -208,6 +231,30 @@ public class UriUtils {
       }
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    }
+  }
+
+  /**
+   * Rewrite the content type of the final http response if the request has the
+   * rewrite-mime-type param.
+   * @param req The http request.
+   * @param response The final http response to be returned to user.
+   */
+  public static void maybeRewriteContentType(HttpRequest req, HttpServletResponse response) {
+    String responseType = response.getContentType();
+    String requiredType = req.getRewriteMimeType();
+    if (!StringUtils.isEmpty(requiredType)) {
+      // Use a 'Vary' style check on the response
+      if (requiredType.endsWith("/*") && !StringUtils.isEmpty(responseType)) {
+        String requiredTypePrefix = requiredType.substring(0, requiredType.length() - 1);
+        if (!responseType.toLowerCase().startsWith(requiredTypePrefix.toLowerCase())) {
+          // TODO: We are currently setting the content type to something like x/* (e.g. text/*)
+          // which is not a valid content type. Need to fix this.
+          response.setContentType(requiredType);
+        }
+      } else {
+        response.setContentType(requiredType);
+      }
     }
   }
 }
