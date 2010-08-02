@@ -26,6 +26,7 @@ import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.inject.Inject;
 
@@ -150,7 +151,7 @@ public class GadgetRenderingServlet extends InjectedServlet {
       // Unversioned files get cached for 5 minutes by default, but this can be overridden
       // with a query parameter.
       int ttl = DEFAULT_CACHE_TTL;
-      String ttlStr = params.getRequest().getParameter(ProxyBase.REFRESH_PARAM);
+      String ttlStr = params.getRequest().getParameter(Param.REFRESH.getKey());
       if (!StringUtils.isEmpty(ttlStr)) {
         try {
           ttl = Integer.parseInt(ttlStr);

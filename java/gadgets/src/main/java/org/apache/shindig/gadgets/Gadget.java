@@ -19,10 +19,10 @@ package org.apache.shindig.gadgets;
 
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.preload.PreloadedData;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.LocaleSpec;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.uri.UriCommon;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -149,6 +149,6 @@ public class Gadget {
   public boolean sanitizeOutput() {
     return (getCurrentView() != null &&
         getCurrentView().getType() == View.ContentType.HTML_SANITIZED) ||
-        "1".equals(getContext().getParameter(ProxyBase.SANITIZE_CONTENT_PARAM));
+        "1".equals(getContext().getParameter(UriCommon.Param.SANITIZE.getKey()));
   }
 }

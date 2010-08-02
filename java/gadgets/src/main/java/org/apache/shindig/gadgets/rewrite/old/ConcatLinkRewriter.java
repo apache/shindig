@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -86,7 +86,8 @@ public class ConcatLinkRewriter {
           if (ignoreCache)
             builder.append("nocache=1&");
           if (rewriterFeature.getExpires() != null) {
-            builder.append(ProxyBase.REFRESH_PARAM).append('=').append(rewriterFeature.getExpires().toString()).append('&');
+            builder.append(Param.REFRESH.getKey()).append('=')
+                   .append(rewriterFeature.getExpires().toString()).append('&');
           }
         } else {
           builder.append('&');
@@ -108,7 +109,7 @@ public class ConcatLinkRewriter {
       String mimeType, String container) {
     String concatBaseNoGadget = rewriterUris.getConcatBase(container);
     return concatBaseNoGadget
-        + ProxyBase.REWRITE_MIME_TYPE_PARAM
+        + Param.REWRITE_MIME_TYPE.getKey()
         + '='
         + mimeType
         + ((gadgetUri == null) ? "" : "&gadget="

@@ -22,7 +22,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.parse.caja.old.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.caja.parser.css.CssTree;
 import org.junit.Before;
@@ -45,12 +45,12 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     sanitizer = new CajaCssSanitizer(parser);
     importRewriter = new LinkRewriter() {
       public String rewrite(String link, Uri context) {
-        return link + '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=text/css";
+        return link + '&' + Param.SANITIZE.getKey() + "=1&rewriteMime=text/css";
       }
     };
     imageRewriter = new LinkRewriter() {
       public String rewrite(String link, Uri context) {
-        return link + '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1&rewriteMime=image/*";
+        return link + '&' + Param.SANITIZE.getKey() + "=1&rewriteMime=image/*";
       }
     };
   }

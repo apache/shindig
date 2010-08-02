@@ -31,6 +31,7 @@ import org.apache.shindig.gadgets.render.Renderer;
 import org.apache.shindig.gadgets.render.RenderingResults;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import org.easymock.IMocksControl;
 import org.easymock.EasyMock;
@@ -74,7 +75,7 @@ public class GadgetRenderingServletTest {
     servlet.setRenderer(renderer);
     expect(renderer.render(isA(GadgetContext.class)))
         .andReturn(RenderingResults.ok("working"));
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120");
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("120");
     control.replay();
     servlet.doGet(request, recorder);
     assertEquals("private,max-age=120", recorder.getHeader("Cache-Control"));
@@ -85,7 +86,7 @@ public class GadgetRenderingServletTest {
     servlet.setRenderer(renderer);
     expect(renderer.render(isA(GadgetContext.class)))
         .andReturn(RenderingResults.ok("working"));
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("");
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("");
     control.replay();
     servlet.doGet(request, recorder);
     assertEquals("private,max-age=300", recorder.getHeader("Cache-Control"));

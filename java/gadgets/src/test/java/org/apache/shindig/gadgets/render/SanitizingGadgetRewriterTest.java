@@ -29,9 +29,9 @@ import org.apache.shindig.gadgets.rewrite.RewriterTestBase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.PassthruManager;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -53,7 +53,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
   private final GadgetContext sanitaryGadgetContext = new GadgetContext() {
     @Override
     public String getParameter(String name) {
-      return ProxyBase.SANITIZE_CONTENT_PARAM.equals(name) ? "1" : null;
+      return Param.SANITIZE.getKey().equals(name) ? "1" : null;
     }
     
     @Override
