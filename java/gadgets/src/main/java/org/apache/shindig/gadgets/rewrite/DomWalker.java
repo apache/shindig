@@ -28,6 +28,7 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
+import org.apache.commons.lang.StringUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -139,7 +140,7 @@ public final class DomWalker {
 
     public void rewrite(HttpRequest request, HttpResponseBuilder builder)
         throws RewritingException {
-      if (RewriterUtils.isHtml(request, builder)) {
+      if (RewriterUtils.isHtml(request, builder) && !StringUtils.isEmpty(builder.getContent())) {
         Gadget context = makeGadget(request);
         rewrite(makeVisitors(context, request.getGadget()), context, builder);
       }
