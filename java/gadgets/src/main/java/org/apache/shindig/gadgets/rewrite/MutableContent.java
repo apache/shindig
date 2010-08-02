@@ -35,6 +35,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Object that maintains a String representation of arbitrary contents
@@ -59,6 +61,7 @@ public class MutableContent {
   private Map<String, Object> pipelinedData;
 
   private static final String MUTABLE_CONTENT_LISTENER = "MutableContentListener";
+  private static final Logger logger = Logger.getLogger(MutableContent.class.getName());
 
   public static void notifyEdit(Document doc) {
     MutableContent mc = (MutableContent) doc.getUserData(MUTABLE_CONTENT_LISTENER);
@@ -236,7 +239,7 @@ public class MutableContent {
       document = contentParser.parseDom(getContent());
       document.setUserData(MUTABLE_CONTENT_LISTENER, this, null);
     } catch (GadgetException e) {
-      // TODO: emit info message
+      logger.log(Level.WARNING, "Got GadgetException when parsing content", e);
       return null;
     }
     return document;
