@@ -23,7 +23,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
 import org.apache.shindig.gadgets.rewrite.old.ProxyingLinkRewriter;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 /**
  * Forcible rewrite the link through the proxy and force sanitization with
@@ -49,8 +49,8 @@ public class SanitizingProxyingLinkRewriter extends ProxyingLinkRewriter {
       return "about:blank";
     }
     String rewritten = super.rewrite(link, context);
-    rewritten += '&' + ProxyBase.SANITIZE_CONTENT_PARAM + "=1";
-    rewritten += '&' + ProxyBase.REWRITE_MIME_TYPE_PARAM + '=' + expectedMime;
+    rewritten += '&' + Param.SANITIZE.getKey() + "=1";
+    rewritten += '&' + Param.REWRITE_MIME_TYPE.getKey() + '=' + expectedMime;
     return rewritten;
   }
 }

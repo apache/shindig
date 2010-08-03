@@ -21,7 +21,7 @@ package org.apache.shindig.gadgets.rewrite.old;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 /**
  * Simple link rewriter that will rewrite a link to the form http://www.host.com/proxy/url=<url
@@ -72,7 +72,8 @@ public class ProxyingLinkRewriter implements LinkRewriter {
           result.append("&nocache=1");
         if (rewriterFeature.getExpires() != null &&
             !rewriterFeature.getExpires().equals(ContentRewriterFeature.EXPIRES_DEFAULT)) {
-          result.append('&').append(ProxyBase.REFRESH_PARAM).append('=').append(rewriterFeature.getExpires().toString());
+          result.append('&').append(Param.REFRESH.getKey()).append('=')
+                .append(rewriterFeature.getExpires().toString());
         }
         return result.toString();
       } else {
