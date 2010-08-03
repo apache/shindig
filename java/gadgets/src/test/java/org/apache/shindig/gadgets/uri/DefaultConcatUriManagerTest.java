@@ -186,12 +186,14 @@ public class DefaultConcatUriManagerTest extends UriManagerTestBase {
     manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), false);
   }
   
-  @Test(expected = RuntimeException.class)
+  @Test
   public void typeJsMissingSplitTokenConfig() throws Exception {
     Gadget gadget = mockGadget(false, false);
     DefaultConcatUriManager manager = makeManager("host.com", "/foo", null, null);
     List<List<Uri>> resourceUris = ImmutableList.<List<Uri>>of(ImmutableList.of(RESOURCE_1));
-    manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), false);
+    List<ConcatData> concatUris = manager.make(fromList(gadget, resourceUris, ConcatUriManager.Type.JS), false);
+    assertEquals(1, concatUris.size());
+    assertNull(concatUris.get(0).getUri().getQueryParameter(Param.JSON.getKey()));
   }
   
   @Test
