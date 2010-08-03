@@ -34,6 +34,8 @@ gadgets.window = gadgets.window || {};
    * @member gadgets.window
    */
   gadgets.window.getViewportDimensions = function() {
+    var x = 0;
+    var y = 0;
     if (self.innerHeight) {
       // all except Explorer
       x = self.innerWidth;
@@ -47,9 +49,6 @@ gadgets.window = gadgets.window || {};
       // other Explorers
       x = document.body.clientWidth;
       y = document.body.clientHeight;
-    } else {
-      x = 0;
-      y = 0;
     }
     return {width: x, height: y};
   };
