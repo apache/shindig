@@ -24,18 +24,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.uri.PassthruManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.EasyMock;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
 import java.util.List;
 
 import com.google.common.collect.Lists;

@@ -50,13 +50,6 @@ public class RenderModule extends AbstractModule {
 
   @Provides
   @Singleton
-  @org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter.AllowedTags
-  protected Set<String> provideOldAllowedTags() {
-    return provideAllowedTags();
-  }
-
-  @Provides
-  @Singleton
   @SanitizingGadgetRewriter.AllowedAttributes
   protected Set<String> provideAllowedAttributes() {
     return ImmutableSet.of("abbr", "align", "alt", "axis", "bgcolor", "border",
@@ -66,12 +59,5 @@ public class RenderModule extends AbstractModule {
         "noshade", "nowrap", "rel", "rev", "rowspan", "rules", "scope", "shape", "size", "span",
         "src", "start", "style", "summary", "title", "type", "usemap", "valign", "value",
         "vspace", "width");
-  }
-
-  @Provides
-  @Singleton
-  @org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter.AllowedAttributes
-  protected Set<String> provideOldAllowedAttributes() {
-    return provideAllowedAttributes();
   }
 }

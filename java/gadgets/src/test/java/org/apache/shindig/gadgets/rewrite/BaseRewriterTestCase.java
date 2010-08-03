@@ -15,12 +15,10 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.apache.shindig.gadgets.rewrite.old;
+package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.config.AbstractContainerConfig;
-import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
@@ -35,9 +33,6 @@ import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.rewrite.old.ContentRewriterUris;
-import org.apache.shindig.gadgets.rewrite.old.DefaultProxyingLinkRewriterFactory;
-import org.apache.shindig.gadgets.rewrite.old.LinkRewriter;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 import com.google.inject.AbstractModule;
@@ -71,15 +66,10 @@ public abstract class BaseRewriterTestCase {
   protected Set<String> tags;
   protected ContentRewriterFeature.Config defaultRewriterFeature;
   protected ContentRewriterFeature.Factory rewriterFeatureFactory;
-  protected LinkRewriter defaultLinkRewriter;
-  protected LinkRewriter defaultLinkRewriterNoCache;
-  protected LinkRewriter defaultLinkRewriterNoCacheAndDebug;
   protected GadgetHtmlParser parser;
   protected Injector injector;
   protected HttpResponseBuilder fakeResponse;
-  protected ContentRewriterUris rewriterUris;
   protected IMocksControl control;
-  protected ContentRewriterUris defaultContainerRewriterUris;
 
   @Before
   public void setUp() throws Exception {
@@ -87,44 +77,10 @@ public abstract class BaseRewriterTestCase {
         new ContentRewriterFeature.DefaultConfig(".*", "", "86400", "embed,img,script,link,style", false, false));
     defaultRewriterFeature = rewriterFeatureFactory.getDefault();
     tags = defaultRewriterFeature.getIncludedTags();
-    defaultContainerRewriterUris = new ContentRewriterUris(
-        new AbstractContainerConfig() {
-          @Override
-          public Object getProperty(String container, String name) {
-            return null;
-          }
-        }, DEFAULT_PROXY_BASE, DEFAULT_CONCAT_BASE);
-    defaultLinkRewriter = new DefaultProxyingLinkRewriterFactory(
-        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
-        "default", false, false);
-    defaultLinkRewriterNoCache = new DefaultProxyingLinkRewriterFactory(
-        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
-        "default", false, true);
-    defaultLinkRewriterNoCacheAndDebug = new DefaultProxyingLinkRewriterFactory(
-        defaultContainerRewriterUris).create(SPEC_URL, defaultRewriterFeature,
-        "default", true, true);
     injector = Guice.createInjector(getParseModule(), new PropertiesModule(), new TestModule());
     parser = injector.getInstance(GadgetHtmlParser.class);
     fakeResponse = new HttpResponseBuilder().setHeader("Content-Type", "unknown")
         .setResponse(new byte[]{ (byte)0xFE, (byte)0xFF});
-
-    ContainerConfig config = new AbstractContainerConfig() {
-      @Override
-      public Object getProperty(String container, String name) {
-        if (MOCK_CONTAINER.equals(container)) {
-          if (ContentRewriterUris.PROXY_BASE_CONFIG_PROPERTY.equals(name)) {
-            return MOCK_PROXY_BASE;
-          } else if (ContentRewriterUris.CONCAT_BASE_CONFIG_PROPERTY.equals(name)) {
-            return MOCK_CONCAT_BASE;
-          }
-        }
-
-        return null;
-      }
-    };
-
-    rewriterUris = new ContentRewriterUris(config, DEFAULT_PROXY_BASE,
-        DEFAULT_CONCAT_BASE);
     control = EasyMock.createControl();
   }
   

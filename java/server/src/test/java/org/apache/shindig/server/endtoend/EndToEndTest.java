@@ -46,7 +46,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -315,7 +314,8 @@ public class EndToEndTest {
   @Test
   public void testTemplateLibrary() throws Exception {
     HtmlPage page = executeAllPageTests("templateLibrary");
-    assertTrue(page.asXml().contains("p {color: red}"));
+    String pageXml = page.asXml();
+    assertTrue(pageXml.replaceAll("[\n\r ]", "").contains("p{color:red}"));
     
     Node paragraph = page.getElementsByTagName("p").item(0);
     assertEquals("Hello world", paragraph.getTextContent().trim());
