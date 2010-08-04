@@ -33,6 +33,8 @@ import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.RpcHandler;
+import org.apache.shindig.protocol.conversion.BeanDelegator;
+import org.apache.shindig.protocol.conversion.BeanFilter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
 import org.easymock.EasyMock;
@@ -73,7 +75,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
     GadgetsHandler handler =
-        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, codec);
+        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, codec,
+          new BeanFilter());
     registry = new DefaultHandlerRegistry(
         injector, converter, new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object> of(handler));
@@ -272,4 +275,16 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     assertNotNull("got gadget2", gadget2);
     assertEquals(GadgetsHandler.FAILURE_METADATA, gadget2.getString("error"));
   }
+
+  // Next test verify that the API data classes are configured correctly.
+  // The mapping is done using reflection in runtime, so this test verify mapping is complete
+  // this test will prevent from not intended change to the API.
+  // DO NOT REMOVE TEST
+  @Test
+  public void testHandlerDataDelegation() throws Exception {
+    BeanDelegator delegator = new BeanDelegator(
+        GadgetsHandler.apiClasses, GadgetsHandler.enumConversionMap);
+    delegator.validate();
+  }
+
 }

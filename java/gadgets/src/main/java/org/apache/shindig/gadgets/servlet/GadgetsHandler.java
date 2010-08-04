@@ -31,16 +31,21 @@ import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
 import org.apache.shindig.gadgets.process.Processor;
+import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
+import org.apache.shindig.gadgets.spec.LinkSpec;
 import org.apache.shindig.gadgets.spec.ModulePrefs;
 import org.apache.shindig.gadgets.spec.UserPref;
 import org.apache.shindig.gadgets.spec.View;
+import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
 import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RequestItem;
 import org.apache.shindig.protocol.Service;
+import org.apache.shindig.protocol.conversion.BeanDelegator;
+import org.apache.shindig.protocol.conversion.BeanFilter;
 
 import java.util.Locale;
 import java.util.Map;
@@ -60,59 +65,98 @@ public class GadgetsHandler {
   @VisibleForTesting
   static final String FAILURE_TOKEN = "Failed to get gadget token.";
 
-  private static final Set<String> ALL_METADATA_FIELDS = ImmutableSet.of(
-      "iframeUrl", "userPrefs", "modulePrefs", "views", "views.name", "views.type",
-      "views.type", "views.href", "views.quirks", "views.content",
-      "views.preferredHeight", "views.preferredWidth",
-      "views.needsUserPrefsSubstituted", "views.attributes");
-  private static final Set<String> DEFAULT_METADATA_FIELDS = ImmutableSet.of(
-      "iframeUrl", "userPrefs", "modulePrefs", "views");
+  private static final Set<String> DEFAULT_METADATA_FIELDS =
+      ImmutableSet.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*", "token");
 
   protected final ExecutorService executor;
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
   protected final SecurityTokenCodec securityTokenCodec;
 
+  protected final BeanDelegator beanDelegator;
+  protected final BeanFilter beanFilter;
+
+  // Map shindig data class to API interfaces
+  @VisibleForTesting
+  static final Map<Class<?>, Class<?>> apiClasses =
+      new ImmutableMap.Builder<Class<?>, Class<?>>()
+          .put(BaseResponseData.class, GadgetsHandlerApi.BaseResponse.class)
+          .put(MetadataResponseData.class, GadgetsHandlerApi.MetadataResponse.class)
+          .put(TokenResponseData.class, GadgetsHandlerApi.TokenResponse.class)
+          .put(View.class, GadgetsHandlerApi.View.class)
+          .put(UserPref.class, GadgetsHandlerApi.UserPref.class)
+          .put(EnumValuePair.class, GadgetsHandlerApi.EnumValuePair.class)
+          .put(ModulePrefs.class, GadgetsHandlerApi.ModulePrefs.class)
+          .put(Feature.class, GadgetsHandlerApi.Feature.class)
+          .put(LinkSpec.class, GadgetsHandlerApi.LinkSpec.class)
+          // Enums
+          .put(View.ContentType.class, GadgetsHandlerApi.ViewContentType.class)
+          .put(UserPref.DataType.class, GadgetsHandlerApi.UserPrefDataType.class)
+          .build();
+
+  // Provide mapping for internal enums to api enums
+  @VisibleForTesting
+  static final Map<Enum<?>, Enum<?>> enumConversionMap =
+      new ImmutableMap.Builder<Enum<?>, Enum<?>>()
+          // View.ContentType mapping
+          .putAll(BeanDelegator.createDefaultEnumMap(View.ContentType.class,
+              GadgetsHandlerApi.ViewContentType.class))
+          // UserPref.DataType mapping
+          .putAll(BeanDelegator.createDefaultEnumMap(UserPref.DataType.class,
+              GadgetsHandlerApi.UserPrefDataType.class))
+          .build();
+
   @Inject
-  public GadgetsHandler(
-      ExecutorService executor,
-      Processor processor,
-      IframeUriManager iframeUriManager,
-      SecurityTokenCodec securityTokenCodec) {
+  public GadgetsHandler(ExecutorService executor, Processor processor,
+      IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
+      BeanFilter beanFilter) {
     this.executor = executor;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
     this.securityTokenCodec = securityTokenCodec;
+    this.beanFilter = beanFilter;
+
+    // TODO: maybe make this injectable
+    this.beanDelegator = new BeanDelegator(apiClasses, enumConversionMap);
   }
 
   @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
-  public Map<String, MetadataResponse> metadata(BaseRequestItem request)
+  public Map<String, GadgetsHandlerApi.MetadataResponse> metadata(BaseRequestItem request)
       throws ProtocolException {
-    return new AbstractExecutor<MetadataResponse>() {
+    return new AbstractExecutor<GadgetsHandlerApi.MetadataResponse>() {
       @Override
-      protected Callable<MetadataResponse> createJob(String url, BaseRequestItem request) {
+      protected Callable<GadgetsHandlerApi.MetadataResponse> createJob(String url,
+          BaseRequestItem request) {
         return createMetadataJob(url, request);
       }
     }.execute(request);
   }
 
   @Operation(httpMethods = {"POST", "GET"}, path = "token.get")
-  public Map<String, TokenResponse> token(BaseRequestItem request)
+  public Map<String, GadgetsHandlerApi.TokenResponse> token(BaseRequestItem request)
       throws ProtocolException {
-    return new AbstractExecutor<TokenResponse>() {
+    return new AbstractExecutor<GadgetsHandlerApi.TokenResponse>() {
       @Override
-      protected Callable<TokenResponse> createJob(String url, BaseRequestItem request) {
+      protected Callable<GadgetsHandlerApi.TokenResponse> createJob(String url,
+          BaseRequestItem request) {
         return createTokenJob(url, request);
       }
     }.execute(request);
   }
 
-  @Operation(httpMethods = "GET", path="/@metadata.supportedFields")
+  @Operation(httpMethods = "GET", path = "/@metadata.supportedFields")
   public Set<String> supportedFields(RequestItem request) {
-    return ALL_METADATA_FIELDS;
+    return ImmutableSet.copyOf(beanFilter
+        .getBeanFields(GadgetsHandlerApi.MetadataResponse.class, 5));
   }
 
-  private abstract class AbstractExecutor<R extends BaseResponse> {
+  @Operation(httpMethods = "GET", path = "/@token.supportedFields")
+  public Set<String> tokenSupportedFields(RequestItem request) {
+    return ImmutableSet.copyOf(
+        beanFilter.getBeanFields(GadgetsHandlerApi.TokenResponse.class, 5));
+  }
+
+  private abstract class AbstractExecutor<R extends GadgetsHandlerApi.BaseResponse> {
     @SuppressWarnings("unchecked")
     public Map<String, R> execute(BaseRequestItem request) {
       Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
@@ -133,20 +177,19 @@ public class GadgetsHandler {
           response = completionService.take().get();
           builder.put(response.getUrl(), response);
         } catch (InterruptedException e) {
-          throw new ProtocolException(
-              HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
               "Processing interrupted.", e);
         } catch (ExecutionException e) {
           if (!(e.getCause() instanceof RpcException)) {
-            throw new ProtocolException(
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Processing error.", e);
           }
           RpcException cause = (RpcException) e.getCause();
           GadgetContext context = cause.getContext();
           if (context != null) {
             String url = context.getUrl().toString();
-            R errorResponse = (R) new BaseResponse(url, cause.getMessage());
+            R errorResponse =
+                (R) beanDelegator.createDelegator(new BaseResponseData(url, cause.getMessage()));
             builder.put(url, errorResponse);
           }
         }
@@ -158,17 +201,22 @@ public class GadgetsHandler {
   }
 
   // Hook to override in sub-class.
-  protected Callable<MetadataResponse> createMetadataJob(String url, BaseRequestItem request) {
+  protected Callable<GadgetsHandlerApi.MetadataResponse> createMetadataJob(String url,
+      BaseRequestItem request) {
     final GadgetContext context = new MetadataGadgetContext(url, request);
-    final Set<String> fields = request.getFields(DEFAULT_METADATA_FIELDS);
-    return new Callable<MetadataResponse>() {
-      public MetadataResponse call() throws Exception {
+    final Set<String> fields =
+        beanFilter.processBeanFields(request.getFields(DEFAULT_METADATA_FIELDS));
+    return new Callable<GadgetsHandlerApi.MetadataResponse>() {
+      public GadgetsHandlerApi.MetadataResponse call() throws Exception {
         try {
           Gadget gadget = processor.process(context);
-          String iframeUrl = fields.contains("iframeUrl")
-              ? iframeUriManager.makeRenderingUri(gadget).toString() : null;
-          return new MetadataResponse(context.getUrl().toString(), gadget.getSpec(),
-              iframeUrl, fields);
+          String iframeUrl =
+              fields.contains("iframeurl") ? iframeUriManager.makeRenderingUri(gadget).toString()
+                  : null;
+          MetadataResponseData response =
+              new MetadataResponseData(context.getUrl().toString(), gadget.getSpec(), iframeUrl);
+          return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(beanDelegator
+              .createDelegator(response), fields);
         } catch (Exception e) {
           // Note: this error message is publicly visible in JSON-RPC response.
           throw new RpcException(context, FAILURE_METADATA, e);
@@ -178,13 +226,18 @@ public class GadgetsHandler {
   }
 
   // Hook to override in sub-class.
-  protected Callable<TokenResponse> createTokenJob(String url, BaseRequestItem request) {
+  protected Callable<GadgetsHandlerApi.TokenResponse> createTokenJob(String url,
+      BaseRequestItem request) {
     final TokenGadgetContext context = new TokenGadgetContext(url, request);
-    return new Callable<TokenResponse>() {
-      public TokenResponse call() throws Exception {
+    final Set<String> fields =
+        beanFilter.processBeanFields(request.getFields(DEFAULT_METADATA_FIELDS));
+    return new Callable<GadgetsHandlerApi.TokenResponse>() {
+      public GadgetsHandlerApi.TokenResponse call() throws Exception {
         try {
           String token = securityTokenCodec.encodeToken(context.getToken());
-          return new TokenResponse(context.getUrl().toString(), token);
+          TokenResponseData response = new TokenResponseData(context.getUrl().toString(), token);
+          return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(beanDelegator
+              .createDelegator(response), fields);
         } catch (Exception e) {
           // Note: this error message is publicly visible in JSON-RPC response.
           throw new RpcException(context, FAILURE_TOKEN, e);
@@ -194,8 +247,8 @@ public class GadgetsHandler {
   }
 
   /**
-   * Gadget context classes used to translate JSON BaseRequestItem into a
-   * more meaningful model objects that Java can work with.
+   * Gadget context classes used to translate JSON BaseRequestItem into a more
+   * meaningful model objects that Java can work with.
    */
 
   private abstract class AbstractGadgetContext extends GadgetContext {
@@ -234,9 +287,9 @@ public class GadgetsHandler {
       super(url, request);
       String lang = request.getParameter("language");
       String country = request.getParameter("country");
-      this.locale = (lang != null && country != null) ? new Locale(lang,country) :
-                    (lang != null) ? new Locale(lang) :
-                    GadgetSpec.DEFAULT_LOCALE;
+      this.locale =
+          (lang != null && country != null) ? new Locale(lang, country) : (lang != null)
+              ? new Locale(lang) : GadgetSpec.DEFAULT_LOCALE;
       this.ignoreCache = Boolean.valueOf(request.getParameter("ignoreCache"));
       this.debug = Boolean.valueOf(request.getParameter("debug"));
     }
@@ -288,18 +341,18 @@ public class GadgetsHandler {
    * container JS. They must be public for reflection to work.
    */
 
-  public static class BaseResponse {
+  public static class BaseResponseData {
     private final String url;
     private final String error;
 
     // Call this to indicate an error.
-    public BaseResponse(String url, String error) {
+    public BaseResponseData(String url, String error) {
       this.url = url;
       this.error = error;
     }
 
     // Have sub-class call this to indicate a success response.
-    protected BaseResponse(String url) {
+    protected BaseResponseData(String url) {
       this(url, null);
     }
 
@@ -312,118 +365,42 @@ public class GadgetsHandler {
     }
   }
 
-  public static class MetadataResponse extends BaseResponse {
+  public static class MetadataResponseData extends BaseResponseData {
     private final GadgetSpec spec;
     private final String iframeUrl;
-    private final Map<String, ViewResponse> views;
-    private final Set<String> fields;
 
-    public MetadataResponse(String url, GadgetSpec spec, String iframeUrl, Set<String> fields) {
+    public MetadataResponseData(String url, GadgetSpec spec, String iframeUrl) {
       super(url);
       this.spec = spec;
       this.iframeUrl = iframeUrl;
-      this.fields = fields;
-
-      // Do we need view data?
-      boolean viewsRequested = fields.contains("views");
-      for (String f: fields) {
-        if (f.startsWith("views")) {
-          viewsRequested = true;
-        }
-      }
-      if (viewsRequested) {
-        ImmutableMap.Builder<String, ViewResponse> builder = ImmutableMap.builder();
-        for (Map.Entry<String,View> entry : spec.getViews().entrySet()) {
-          builder.put(entry.getKey(), new ViewResponse(entry.getValue(), fields));
-        }
-        views = builder.build();
-      } else {
-        views = null;
-      }
     }
 
     public String getIframeUrl() {
-      return fields.contains("iframeUrl") ? iframeUrl : null;
+      return iframeUrl;
     }
 
     public String getChecksum() {
-      return fields.contains("checksum") ? spec.getChecksum() : null;
+      return spec.getChecksum();
     }
 
     public ModulePrefs getModulePrefs() {
-      return fields.contains("modulePrefs") ? spec.getModulePrefs() : null;
+      return spec.getModulePrefs();
     }
 
     public Map<String, UserPref> getUserPrefs() {
-      return fields.contains("userPrefs") ? spec.getUserPrefs() : null;
+      return spec.getUserPrefs();
     }
 
-    public Map<String, ViewResponse> getViews() {
-      return views;
-    }
-  }
-
-  public static class ViewResponse {
-    private final View view;
-    private final Set<String> fields;
-
-    /**
-     * Return the actual item if the requested fields contains "views" or param
-     * @param item any item
-     * @param param a field to test for
-     * @param <T> any type
-     * @return Returns item if fields contains "views" or param
-     */
-    private <T> T filter(T item, String param) {
-      return (fields.contains("views") || fields.contains(param)) ? item : null;
-    }
-
-    public ViewResponse(View view, Set<String> fields) {
-      this.view = view;
-      this.fields = fields;
-    }
-
-    public String getName() {
-      return filter(view.getName(), "views.name");
-    }
-
-    public View.ContentType getType() {
-      return filter(view.getType(), "views.type");
-    }
-
-    public Uri getHref() {
-      return filter(view.getHref(), "views.href");
-    }
-
-    public Boolean getQuirks() {
-      return filter(view.getQuirks(), "views.quirks");
-    }
-
-    public String getContent() {
-      return fields.contains("views.content") ? view.getContent() : null;
-    }
-
-    public Integer getPreferredHeight() {
-      return filter(view.getPreferredHeight(), "views.preferredHeight");
-    }
-
-    public Integer getPreferredWidth() {
-      return filter(view.getPreferredWidth(), "views.preferredWidth");
-    }
-
-    public Boolean needsUserPrefSubstitution() {
-      return filter(view.needsUserPrefSubstitution(), "views.needsUserPrefSubstitution");
-    }
-
-    public Map<String, String> getAttributes() {
-      return filter(view.getAttributes(), "views.attributes");
+    public Map<String, View> getViews() {
+      return spec.getViews();
     }
   }
 
-  public static class TokenResponse extends BaseResponse {
+
+  public static class TokenResponseData extends BaseResponseData {
     private final String token;
 
-    public TokenResponse(String url, String token) {
+    public TokenResponseData(String url, String token) {
       super(url);
       this.token = token;
     }
