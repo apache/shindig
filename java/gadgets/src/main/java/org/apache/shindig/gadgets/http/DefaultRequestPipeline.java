@@ -118,7 +118,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
     
     // Set response hash value in metadata (used for url versioning)
     fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
-    if (!request.getIgnoreCache() ) {
+    if (!request.getIgnoreCache()) {
       // Mark the response with invalidation information prior to caching
       if (fetchedResponse.getCacheTtl() > 0) {
         fetchedResponse = invalidationService.markResponse(request, fetchedResponse);
