@@ -20,7 +20,6 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
@@ -33,12 +32,17 @@ import org.w3c.dom.Node;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Simple visitor that, when plugged into a DomWalker, rewrites
  * resource links to proxied versions of the same.
  */
 public class ProxyingVisitor implements DomWalker.Visitor {
+  private static final Logger logger = Logger.getLogger(
+      ProxyUriManager.class.getName());
+
   public final static Map<String, String> RESOURCE_TAGS =
     ImmutableMap.of(
         "body", "background",
@@ -93,16 +97,21 @@ public class ProxyingVisitor implements DomWalker.Visitor {
   private List<Pair<Node, Uri>> getProxiedUris(Gadget gadget, List<Node> nodes) {
     List<ProxyUriManager.ProxyUri> reservedUris =
         Lists.newArrayListWithCapacity(nodes.size());
+    List<Node> reservedNodes =
+        Lists.newArrayListWithCapacity(nodes.size());
     
     for (Node node : nodes) {
       Element element = (Element)node;
       String nodeName = node.getNodeName().toLowerCase();
       String uriStr = element.getAttribute(RESOURCE_TAGS.get(nodeName)).trim();
       try {
-        reservedUris.add(new ProxyUriManager.ProxyUri(gadget, Uri.parse(uriStr)));
+        ProxyUriManager.ProxyUri proxiedUri = new ProxyUriManager.ProxyUri(
+            gadget, Uri.parse(uriStr));
+        reservedUris.add(proxiedUri);
+        reservedNodes.add(node);
       } catch (UriException e) {
-        // Uri parse exception, add null.
-        reservedUris.add(null);
+        // Uri parse exception, ignore.
+        logger.log(Level.WARNING, "Uri exception when parsing: " + uriStr, e);
       }
     }
     
@@ -113,7 +122,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
     List<Pair<Node, Uri>> proxiedUris = Lists.newArrayListWithCapacity(nodes.size());
     
     Iterator<Uri> uriIt = resourceUris.iterator();
-    for (Node node : nodes) {
+    for (Node node : reservedNodes) {
       proxiedUris.add(Pair.of(node, uriIt.next()));
     }
     

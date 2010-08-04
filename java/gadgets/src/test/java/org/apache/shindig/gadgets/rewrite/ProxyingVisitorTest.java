@@ -17,32 +17,21 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.Capture;
 import org.junit.Test;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
 import java.util.List;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Test of proxying rewriter
@@ -130,9 +119,9 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     List<Node> nodes = ImmutableList.<Node>of(e1, e2, e3, e4);
     ProxyUriManager uriManager = createMock(ProxyUriManager.class);
     Uri rewrittenUri = Uri.parse("http://bar.com/");
-    List<Uri> returned = Lists.newArrayList(rewrittenUri, null, rewrittenUri, rewrittenUri);
+    List<Uri> returned = Lists.newArrayList(rewrittenUri, rewrittenUri, rewrittenUri);
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
-    Integer expires = new Integer(3);
+    Integer expires = 3;
     expect(config.getExpires()).andReturn(expires).once();
     expect(config);
     Capture<List<ProxyUriManager.ProxyUri>> cap = new Capture<List<ProxyUriManager.ProxyUri>>();
@@ -145,11 +134,10 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     assertTrue(rewriter.revisit(gadget, nodes));
     verify(config, uriManager);
 
-    assertEquals(4, cap.getValue().size());
+    assertEquals(3, cap.getValue().size());
     assertEquals(Uri.parse(scriptSrc), cap.getValue().get(0).getResource());
-    assertNull(cap.getValue().get(1));
-    assertEquals(Uri.parse(imgSrc), cap.getValue().get(2).getResource());
-    assertEquals(Uri.parse(scriptSrc), cap.getValue().get(3).getResource());
+    assertEquals(Uri.parse(imgSrc), cap.getValue().get(1).getResource());
+    assertEquals(Uri.parse(scriptSrc), cap.getValue().get(2).getResource());
     assertSame(expires, intCap.getValue());
     assertEquals(rewrittenUri.toString(), e1.getAttribute("src"));
     assertEquals("^!,,|BLARGH", e2.getAttribute("src"));
