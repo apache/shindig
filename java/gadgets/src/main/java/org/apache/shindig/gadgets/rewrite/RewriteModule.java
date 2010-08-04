@@ -56,7 +56,6 @@ public class RewriteModule extends AbstractModule {
       StyleTagExtractorContentRewriter styleTagExtractorRewriter,
       StyleAdjacencyContentRewriter styleAdjacencyRewriter,
       ProxyingContentRewriter proxyingRewriter,
-      CssResponseRewriter cssRewriter,
       CajaContentRewriter cajaRewriter,
       SanitizingGadgetRewriter sanitizedRewriter,
       RenderingGadgetRewriter renderingRewriter,
