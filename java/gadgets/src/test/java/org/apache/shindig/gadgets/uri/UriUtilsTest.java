@@ -18,34 +18,22 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableMap;
-import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.servlet.ServletTestFixture;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
-import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-
-import static org.easymock.EasyMock.expect;
 
 /**
  * Tests for UriUtils.
  */
-public class UriUtilsTest extends ServletTestFixture {
-  @Before
-  public void setUp() throws Exception {
-  }
-
+public class UriUtilsTest {
   Enumeration<String> makeEnumeration(String... args) {
     Vector<String> vector = new Vector<String>();
     if (args != null) {
@@ -59,10 +47,11 @@ public class UriUtilsTest extends ServletTestFixture {
     String url = "http://example.org/foo";
     HttpRequest req = new HttpRequest(Uri.parse(url))
         .setRewriteMimeType(requestMime);
-    recorder.setContentType(responseMime);
+    HttpResponseBuilder builder = new HttpResponseBuilder()
+        .setHeader("Content-Type", responseMime);
 
-    UriUtils.maybeRewriteContentType(req, recorder);
-    assertEquals(expectedMime, recorder.getContentType());
+    UriUtils.maybeRewriteContentType(req, builder);
+    assertEquals(expectedMime, builder.getHeader("Content-Type"));
   }
 
   @Test
@@ -121,26 +110,25 @@ public class UriUtilsTest extends ServletTestFixture {
         .setHttpStatusCode(5000)
         .addHeader("hello", "world1")
         .addHeader("hello", "world2")
-        .addHeader("hello\\u2297", "bad header")
+        .addHeader("hello\u2297", "bad header")
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    HttpServletResponse response = mock(HttpServletResponse.class);
-
-    response.setStatus(5000);
-    EasyMock.expectLastCall().once();
-
-    response.addHeader("hello", "world1");
-    EasyMock.expectLastCall().once();
-    response.addHeader("hello", "world2");
-    EasyMock.expectLastCall().once();
     
+    HttpResponseBuilder builder = new HttpResponseBuilder();
 
-    replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, false,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, builder, false, false,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
-    verify();
+    
+    HttpResponse response = builder.create();
+    
+    // Date is added by HttpResponse.
+    assertEquals(3, response.getHeaders().size());
+    Iterator<String> headers = response.getHeaders("hello").iterator();
+    assertEquals("world1", headers.next());
+    assertEquals("world2", headers.next());
+    assertEquals(5000, response.getHttpStatusCode());
   }
 
   @Test
@@ -149,26 +137,21 @@ public class UriUtilsTest extends ServletTestFixture {
         .setHttpStatusCode(5000)
         .addHeader("hello", "world1")
         .addHeader("hello", "world2")
-        .addHeader("hello\\u2297", "bad header")
+        .addHeader("hello\u2297", "bad header")
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    HttpServletResponse response = mock(HttpServletResponse.class);
+    
+    HttpResponseBuilder builder = new HttpResponseBuilder();
 
-    response.setStatus(5000);
-    EasyMock.expectLastCall().once();
-
-    response.setHeader("hello", "world1");
-    EasyMock.expectLastCall().once();
-    response.setHeader("hello", "world2");
-    EasyMock.expectLastCall().once();
-
-
-    replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, true,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, builder, false, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
-    verify();
+
+    HttpResponse response = builder.create();
+    assertEquals(2, response.getHeaders().size());
+    assertEquals("world2", response.getHeader("hello"));
+    assertEquals(5000, response.getHttpStatusCode());
   }
 
   @Test
@@ -177,26 +160,21 @@ public class UriUtilsTest extends ServletTestFixture {
         .setHttpStatusCode(500)
         .addHeader("hello", "world1")
         .addHeader("hello", "world2")
-        .addHeader("hello\\u2297", "bad header")
+        .addHeader("hello\u2297", "bad header")
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    HttpServletResponse response = mock(HttpServletResponse.class);
 
-    response.setStatus(502);
-    EasyMock.expectLastCall().once();
+    HttpResponseBuilder builder = new HttpResponseBuilder();
 
-    response.setHeader("hello", "world1");
-    EasyMock.expectLastCall().once();
-    response.setHeader("hello", "world2");
-    EasyMock.expectLastCall().once();
-
-
-    replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, true, true,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, builder, true, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
-    verify();
+
+    HttpResponse response = builder.create();
+    assertEquals(2, response.getHeaders().size());
+    assertEquals("world2", response.getHeader("hello"));
+    assertEquals(502, response.getHttpStatusCode());
   }
 
   @Test
@@ -205,45 +183,37 @@ public class UriUtilsTest extends ServletTestFixture {
         .setHttpStatusCode(500)
         .addHeader("hello", "world1")
         .addHeader("hello", "world2")
-        .addHeader("hello\\u2297", "bad header")
+        .addHeader("hello\u2297", "bad header")
         .addHeader("Content-length", "10")
         .addHeader("vary", "1")
         .create();
-    HttpServletResponse response = mock(HttpServletResponse.class);
 
-    response.setStatus(500);
-    EasyMock.expectLastCall().once();
+    HttpResponseBuilder builder = new HttpResponseBuilder();
 
-    response.setHeader("hello", "world1");
-    EasyMock.expectLastCall().once();
-    response.setHeader("hello", "world2");
-    EasyMock.expectLastCall().once();
-
-
-    replay();
-    UriUtils.copyResponseHeadersAndStatusCode(resp, response, false, true,
+    UriUtils.copyResponseHeadersAndStatusCode(resp, builder, false, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
         UriUtils.DisallowedHeaders.CACHING_DIRECTIVES);
-    verify();
+
+    HttpResponse response = builder.create();
+    assertEquals(2, response.getHeaders().size());
+    assertEquals("world2", response.getHeader("hello"));
+    assertEquals(500, response.getHttpStatusCode());
   }
 
   @Test
   public void testCopyRequestHeaders() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpRequest origRequest = new HttpRequest(Uri.parse("http://www.example.org/data.html"));
 
-    EasyMock.expect(request.getHeaderNames())
-        .andReturn(makeEnumeration("h1", "h2", "hello\\u2297",
-                                   "unchanged_header", "Content-Length"));
-    EasyMock.expect(request.getHeaders("h1"))
-        .andReturn(makeEnumeration("v1", "v2"));
-    EasyMock.expect(request.getHeaders("h2"))
-        .andReturn(makeEnumeration("v3", "v4"));
-    EasyMock.expect(request.getHeaders("hello\\u2297"))
-        .andReturn(makeEnumeration("v5", "v6"));
-    EasyMock.expect(request.getHeaders("unchanged_header"))
-        .andReturn(makeEnumeration());
-    EasyMock.expect(request.getHeaders("Content-Length"))
-        .andReturn(makeEnumeration("50", "100"));
+    Map<String, List<String>> addedHeaders =
+        ImmutableMap.<String, List<String>>builder()
+          .put("h1", ImmutableList.of("v1", "v2"))
+          .put("h2", ImmutableList.of("v3", "v4"))
+          .put("hello\u2297", ImmutableList.of("v5", "v6"))
+          .put("unchanged_header", ImmutableList.<String>of())
+          .put("Content-Length", ImmutableList.of("50", "100"))
+          .build();
+    
+    origRequest.addAllHeaders(addedHeaders);
 
     HttpRequest req = new HttpRequest(Uri.parse(
         "http://www.example.org/data.html"));
@@ -252,18 +222,16 @@ public class UriUtilsTest extends ServletTestFixture {
     req.addHeader("Content-Length", "10");
     req.addHeader("unchanged_header", "original_value");
 
-    replay();
-    UriUtils.copyRequestHeaders(request, req,
+    UriUtils.copyRequestHeaders(origRequest, req,
         UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES);
-    verify();
 
     Map<String, List<String>> headers =
         ImmutableMap.<String, List<String>>builder()
         .put("h1", ImmutableList.of("v1", "v2"))
         .put("h2", ImmutableList.of("v3", "v4"))
-        .put("hello\\u2297", ImmutableList.of("v5", "v6"))
         .put("unchanged_header", ImmutableList.of("original_value"))
         .put("Content-Length", ImmutableList.of("10"))
+        .put(HttpRequest.DOS_PREVENTION_HEADER, ImmutableList.of("on"))
         .build();
 
     assertEquals(headers, req.getHeaders());
@@ -271,34 +239,16 @@ public class UriUtilsTest extends ServletTestFixture {
 
   @Test
   public void testCopyRequestData() throws Exception {
-    HttpServletRequest request = mock(HttpServletRequest.class);
-
-    expect(request.getMethod()).andReturn("Post").anyTimes();
-
-    final String data = "hello world";
-    ServletInputStream inputStream = mock(ServletInputStream.class);
-    expect(request.getInputStream()).andReturn(inputStream);
-    expect(inputStream.read((byte[]) EasyMock.anyObject()))
-        .andAnswer(new IAnswer<Integer>() {
-          public Integer answer() throws Throwable {
-            byte[] byteArray = (byte[]) EasyMock.getCurrentArguments()[0];
-            System.arraycopy(data.getBytes(), 0, byteArray, 0, data.length());
-            return data.length();
-          }
-        });
-    expect(inputStream.read((byte[]) EasyMock.anyObject()))
-        .andAnswer(new IAnswer<Integer>() {
-          public Integer answer() throws Throwable {
-            return -1;
-          }
-        });
-
+    HttpRequest origRequest = new HttpRequest(Uri.parse("http://www.example.com"));
+    origRequest.setMethod("Post");
+    
+    String data = "hello world";
+    origRequest.setPostBody(data.getBytes());
+    
     HttpRequest req = new HttpRequest(Uri.parse(
         "http://www.example.org/data.html"));
 
-    replay();
-    UriUtils.copyRequestData(request, req);
-    verify();
+    UriUtils.copyRequestData(origRequest, req);
 
     assertEquals(data, req.getPostBodyAsString());
   }

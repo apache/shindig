@@ -20,111 +20,90 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriUtils;
+import org.apache.shindig.gadgets.uri.UriUtils.DisallowedHeaders;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles open proxy requests.
  */
 @Singleton
-public class ProxyHandler extends ProxyBase {
+public class ProxyHandler {
   private static final Logger LOG = Logger.getLogger(ProxyHandler.class.getName());
 
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
-
+  
   private final RequestPipeline requestPipeline;
   private final LockedDomainService lockedDomainService;
   private final ResponseRewriterRegistry contentRewriterRegistry;
   private final ProxyUriManager proxyUriManager;
-  protected final boolean remapInternalServerError;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
                       LockedDomainService lockedDomainService,
                       ResponseRewriterRegistry contentRewriterRegistry,
-                      ProxyUriManager proxyUriManager,
-                      @Named("shindig.proxy.remapInternalServerError")
-                      Boolean remapInternalServerError) {
+                      ProxyUriManager proxyUriManager) {
     this.requestPipeline = requestPipeline;
     this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.proxyUriManager = proxyUriManager;
-    this.remapInternalServerError = remapInternalServerError;
   }
 
   /**
    * Generate a remote content request based on the parameters sent from the client.
    */
-  private HttpRequest buildHttpRequest(HttpServletRequest request,
+  private HttpRequest buildHttpRequest(HttpRequest request,
       ProxyUriManager.ProxyUri uriCtx, Uri tgt) throws GadgetException {
-    validateUrl(tgt);
+    ServletUtil.validateUrl(tgt);
     HttpRequest req = uriCtx.makeHttpRequest(tgt);
-    this.setRequestHeaders(request, req);
+    ServletUtil.setXForwardedForHeader(request, req);
     return req;
   }
 
-  @Override
-  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
+  public HttpResponse fetch(HttpRequest request)
       throws IOException, GadgetException {
-    if (request.getHeader("If-Modified-Since") != null) {
-      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-      return;
-    }
+    // Parse request uri:
+    ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(request.getUri());
 
     // TODO: Consider removing due to redundant logic.
     String host = request.getHeader("Host");
     if (!lockedDomainService.isSafeForOpenProxy(host)) {
       // Force embedded images and the like to their own domain to avoid XSS
       // in gadget domains.
-      String msg = "Embed request for url " + getParameter(request, URL_PARAM, "") +
-          " made to wrong domain " + host;
+      Uri resourceUri = proxyUri.getResource();
+      String msg = "Embed request for url " +
+          (resourceUri != null ? resourceUri.toString() : "n/a") + " made to wrong domain " + host;
       LOG.info(msg);
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
           HttpResponse.SC_BAD_REQUEST);
     }
 
-    // Parse request uri:
-    ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(
-        new UriBuilder(request).toUri());
-
-    try {
-      HttpUtil.setCachingHeaders(response,
-          proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
-    } catch (GadgetException gex) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, gex.getMessage());
-      return;
-    }
-
     HttpRequest rcr = buildHttpRequest(request, proxyUri, proxyUri.getResource());
     if (rcr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "No url paramater in request", HttpResponse.SC_BAD_REQUEST);
+          "No url parameter in request", HttpResponse.SC_BAD_REQUEST);      
     }
+    
     HttpResponse results = requestPipeline.execute(rcr);
-
+    
     if (results.isError()) {
       // Error: try the fallback. Particularly useful for proxied images.
       Uri fallbackUri = proxyUri.getFallbackUri();
@@ -133,7 +112,7 @@ public class ProxyHandler extends ProxyBase {
         results = requestPipeline.execute(fallbackRcr);
       }
     }
-
+    
     if (contentRewriterRegistry != null) {
       try {
         results = contentRewriterRegistry.rewriteHttpResponse(rcr, results);
@@ -142,21 +121,63 @@ public class ProxyHandler extends ProxyBase {
             e.getHttpStatusCode());
       }
     }
-
-    // Copy the response headers and status code to the final http servlet
-    // response.
-    UriUtils.copyResponseHeadersAndStatusCode(
-        results, response, remapInternalServerError, false,
-        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
-        UriUtils.DisallowedHeaders.CACHING_DIRECTIVES,
-        UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
-
-    // Override the content type of the final http response if the input request
-    // had the rewrite mime type header.
-    UriUtils.maybeRewriteContentType(rcr, response);
-
+    
+    HttpResponseBuilder response = new HttpResponseBuilder(results);
+    
+    try {
+      ServletUtil.setCachingHeaders(response,
+          proxyUri.translateStatusRefresh(LONG_LIVED_REFRESH, DEFAULT_REFRESH), false);
+    } catch (GadgetException gex) {
+      return ServletUtil.errorResponse(gex);
+    }
+    
+    UriUtils.copyResponseHeadersAndStatusCode(results, response, true, true,
+        DisallowedHeaders.CACHING_DIRECTIVES,  // Proxy sets its own caching headers.
+        DisallowedHeaders.CLIENT_STATE_DIRECTIVES,  // Overridden or irrelevant to proxy.
+        DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES
+        );
+    
+    // Set Content-Type and Content-Disposition. Do this after copy results headers,
+    // in order to prevent those from overwriting the correct values.
     setResponseContentHeaders(response, results);
+    
+    response.setHeader("Content-Type", getContentType(rcr, response));
+    
+    // TODO: replace this with streaming APIs when ready
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    IOUtils.copy(results.getResponse(), baos);
+    response.setResponse(baos.toByteArray());
+    return response.create();
+  }
+  
+  private String getContentType(HttpRequest rcr, HttpResponseBuilder results) {
+    String contentType = results.getHeader("Content-Type");
+    if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
+      String requiredType = rcr.getRewriteMimeType();
+      // Use a 'Vary' style check on the response
+      if (requiredType.endsWith("/*") &&
+          !StringUtils.isEmpty(contentType)) {
+        requiredType = requiredType.substring(0, requiredType.length() - 2);
+        if (!contentType.toLowerCase().startsWith(requiredType.toLowerCase())) {
+          contentType = requiredType;
+        }
+      } else {
+        contentType = requiredType;
+      }
+    }
+    return contentType;
+  }
 
-    IOUtils.copy(results.getResponse(), response.getOutputStream());
+  private void setResponseContentHeaders(HttpResponseBuilder response, HttpResponse results) {
+    // We're skipping the content disposition header for flash due to an issue with Flash player 10
+    // This does make some sites a higher value phishing target, but this can be mitigated by
+    // additional referer checks.
+    if (!"application/x-shockwave-flash".equalsIgnoreCase(results.getHeader("Content-Type")) &&
+        !"application/x-shockwave-flash".equalsIgnoreCase(response.getHeader("Content-Type"))) {
+      response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    }
+    if (results.getHeader("Content-Type") == null) {
+      response.setHeader("Content-Type", "application/octet-stream");
+    }
   }
 }

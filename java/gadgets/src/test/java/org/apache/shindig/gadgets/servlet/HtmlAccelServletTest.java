@@ -42,6 +42,7 @@ import javax.servlet.ServletInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Vector;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
@@ -106,6 +107,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
     String queryParams = (url == null ? "" : "url=" + url + "&container=accel"
                                              + "&gadget=test");
     expect(request.getQueryString()).andReturn(queryParams).anyTimes();
+    Vector<String> headerNames = new Vector<String>();
+    expect(request.getHeaderNames()).andReturn(headerNames.elements());
   }
 
   private void expectPostRequest(String extraPath, String url,
@@ -136,6 +139,8 @@ public class HtmlAccelServletTest extends ServletTestFixture {
         });
     expect(inputStream.read((byte[]) EasyMock.anyObject()))
         .andReturn(-1);
+    Vector<String> headerNames = new Vector<String>();
+    expect(request.getHeaderNames()).andReturn(headerNames.elements());
   }
 
   @Test

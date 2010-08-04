@@ -19,17 +19,16 @@
 package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
-import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -135,13 +134,13 @@ public class UriUtils {
    * @throws IOException In case the http response was not successful.
    */
   public static void copyResponseHeadersAndStatusCode(
-      HttpResponse data, HttpServletResponse resp,
+      HttpResponse data, HttpResponseBuilder resp,
       boolean remapInternalServerError,
       boolean setHeaders,
       DisallowedHeaders... disallowedResponseHeaders)
       throws IOException {
     // Pass original return code:
-    resp.setStatus(data.getHttpStatusCode());
+    resp.setHttpStatusCode(data.getHttpStatusCode());
 
     Set<String> allDisallowedHeaders = new HashSet<String>();
     for (DisallowedHeaders h : disallowedResponseHeaders) {
@@ -167,19 +166,19 @@ public class UriUtils {
     if (remapInternalServerError) {
       // External "internal error" should be mapped to gateway error.
       if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-        resp.setStatus(HttpResponse.SC_BAD_GATEWAY);
+        resp.setHttpStatusCode(HttpResponse.SC_BAD_GATEWAY);
       }
     }
   }
 
   /**
    * Copies headers from HttpServletRequest object to HttpRequest object.
-   * @param data Servlet request to copy headers from.
+   * @param origRequest Servlet request to copy headers from.
    * @param req The HttpRequest object to copy headers to.
    * @param disallowedRequestHeaders Disallowed request headers to omit from
    *   the servlet request
    */
-  public static void copyRequestHeaders(HttpServletRequest data,
+  public static void copyRequestHeaders(HttpRequest origRequest,
                                         HttpRequest req,
                                         DisallowedHeaders... disallowedRequestHeaders) {
     Set<String> allDisallowedHeaders = new HashSet<String>();
@@ -187,29 +186,18 @@ public class UriUtils {
       allDisallowedHeaders.addAll(h.getDisallowedHeaders());
     }
 
-    Enumeration headerNames = data.getHeaderNames();
-    if (headerNames != null) {
-      while (headerNames.hasMoreElements()) {
-        Object headerObj = headerNames.nextElement();
-        if (!(headerObj instanceof String)) {
-          continue;
-        }
-
-        String header = (String) headerObj;
-        Enumeration headerValues = data.getHeaders(header);
-        if (headerValues != null && headerValues.hasMoreElements() &&
-            isValidHeaderName(header) &&
-            !allDisallowedHeaders.contains(header.toLowerCase())) {
-          // Remove existing values of this header.
-          req.removeHeader(header);
-
-          while (headerValues.hasMoreElements()) {
-            Object valueObj = headerValues.nextElement();
-            if (valueObj != null && valueObj instanceof String &&
-                isValidHeaderValue((String) valueObj)) {
-              // Add this header to data.
-              req.addHeader(header, (String) valueObj);
-            }
+    for (Map.Entry<String, List<String>> inHeader : origRequest.getHeaders().entrySet()) {
+      String header = inHeader.getKey();
+      List<String> headerValues = inHeader.getValue();
+      
+      if (headerValues != null && headerValues.size() > 0 &&
+          isValidHeaderName(header) &&
+          !allDisallowedHeaders.contains(header.toLowerCase())) {
+        // Remove existing values of this header.
+        req.removeHeader(header);
+        for (String headerVal : headerValues) {
+          if (isValidHeaderValue(headerVal)) {
+            req.addHeader(header, headerVal);
           }
         }
       }
@@ -218,16 +206,16 @@ public class UriUtils {
 
   /**
    * Copies the post data from HttpServletRequest object to HttpRequest object.
-   * @param request Servlet request to copy post data from.
+   * @param origRequest Request to copy post data from.
    * @param req The HttpRequest object to copy post data to.
    * @throws GadgetException In case of errors.
    */
-  public static void copyRequestData(HttpServletRequest request,
+  public static void copyRequestData(HttpRequest origRequest,
                                      HttpRequest req) throws GadgetException {
-    req.setMethod(request.getMethod());
+    req.setMethod(origRequest.getMethod());
     try {
-      if (request.getMethod().toLowerCase().equals("post")) {
-        req.setPostBody(request.getInputStream());
+      if (origRequest.getMethod().toLowerCase().equals("post")) {
+        req.setPostBody(origRequest.getPostBody());
       }
     } catch (IOException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
@@ -240,8 +228,8 @@ public class UriUtils {
    * @param req The http request.
    * @param response The final http response to be returned to user.
    */
-  public static void maybeRewriteContentType(HttpRequest req, HttpServletResponse response) {
-    String responseType = response.getContentType();
+  public static void maybeRewriteContentType(HttpRequest req, HttpResponseBuilder response) {
+    String responseType = response.getHeader("Content-Type");
     String requiredType = req.getRewriteMimeType();
     if (!StringUtils.isEmpty(requiredType)) {
       // Use a 'Vary' style check on the response
@@ -250,10 +238,10 @@ public class UriUtils {
         if (!responseType.toLowerCase().startsWith(requiredTypePrefix.toLowerCase())) {
           // TODO: We are currently setting the content type to something like x/* (e.g. text/*)
           // which is not a valid content type. Need to fix this.
-          response.setContentType(requiredType);
+          response.setHeader("Content-Type", requiredType);
         }
       } else {
-        response.setContentType(requiredType);
+        response.setHeader("Content-Type", requiredType);
       }
     }
   }

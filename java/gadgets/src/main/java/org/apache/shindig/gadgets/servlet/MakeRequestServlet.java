@@ -19,6 +19,7 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
 
@@ -61,7 +62,15 @@ public class MakeRequestServlet extends InjectedServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    makeRequestHandler.fetch(request, response);
+    try {
+      makeRequestHandler.fetch(request, response);
+    } catch (GadgetException e) {
+      int responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+      if (e.getCode() != GadgetException.Code.INTERNAL_SERVER_ERROR) {
+        responseCode = HttpServletResponse.SC_BAD_REQUEST;
+      }
+      response.sendError(responseCode, e.getMessage() != null ? e.getMessage() : "");
+    }
   }
 
   @Override

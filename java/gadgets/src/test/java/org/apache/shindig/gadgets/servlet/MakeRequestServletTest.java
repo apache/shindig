@@ -26,6 +26,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +62,7 @@ public class MakeRequestServletTest extends ServletTestFixture {
     expect(request.getHeaderNames()).andReturn(EMPTY_ENUM).anyTimes();
     expect(request.getParameter(MakeRequestHandler.METHOD_PARAM))
         .andReturn("GET").anyTimes();
-    expect(request.getParameter(ProxyBase.URL_PARAM))
+    expect(request.getParameter(Param.URL.getKey()))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 

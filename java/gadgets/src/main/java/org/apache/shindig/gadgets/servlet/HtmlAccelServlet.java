@@ -19,6 +19,9 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -55,12 +58,21 @@ public class HtmlAccelServlet extends InjectedServlet {
   }
 
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+  protected void doGet(HttpServletRequest request, HttpServletResponse servletResponse)
       throws IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Accel request = " + request.toString());
     }
-    accelHandler.fetch(request, response);
+    
+    HttpRequest req = ServletUtil.fromHttpServletRequest(request);
+    HttpResponse response = null;
+    try {
+      response = accelHandler.fetch(req);
+    } catch (GadgetException e) {
+      response = ServletUtil.errorResponse(e);
+    }
+    
+    ServletUtil.copyResponseToServlet(response, servletResponse);
   }
 
   @Override

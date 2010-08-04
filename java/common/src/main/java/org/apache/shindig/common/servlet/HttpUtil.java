@@ -18,11 +18,16 @@
  */
 package org.apache.shindig.common.servlet;
 
+import org.apache.shindig.common.Pair;
+import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.TimeSource;
+
+import com.google.common.collect.Lists;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -91,18 +96,28 @@ public final class HttpUtil {
    * @param noProxy True if you don't want the response to be cacheable by proxies.
    */
   public static void setCachingHeaders(HttpServletResponse response, int ttl, boolean noProxy) {
-    response.setDateHeader("Expires", timeSource.currentTimeMillis() + (1000L * ttl));
+    for (Pair<String, String> header : getCachingHeadersToSet(ttl, noProxy)) {
+      response.setHeader(header.one, header.two);
+    }
+  }
+  
+  public static List<Pair<String, String>> getCachingHeadersToSet(int ttl, boolean noProxy) {
+    List<Pair<String, String>> cachingHeaders = Lists.newArrayListWithExpectedSize(3);
+    cachingHeaders.add(Pair.of("Expires",
+        DateUtil.formatRfc1123Date(timeSource.currentTimeMillis() + (1000L * ttl))));
 
-    if (ttl == 0) {
-      response.setHeader("Pragma", "no-cache");
-      response.setHeader("Cache-Control", "no-cache");
+    if (ttl <= 0) {
+      cachingHeaders.add(Pair.of("Pragma", "no-cache"));
+      cachingHeaders.add(Pair.of("Cache-Control", "no-cache"));
     } else {
       if (noProxy) {
-        response.setHeader("Cache-Control", "private,max-age=" + Integer.toString(ttl));
+        cachingHeaders.add(Pair.of("Cache-Control", "private,max-age=" + Integer.toString(ttl)));
       } else {
-        response.setHeader("Cache-Control", "public,max-age=" + Integer.toString(ttl));
+        cachingHeaders.add(Pair.of("Cache-Control", "public,max-age=" + Integer.toString(ttl)));
       }
     }
+    
+    return cachingHeaders;
   }
 
   public static int getDefaultTtl() {

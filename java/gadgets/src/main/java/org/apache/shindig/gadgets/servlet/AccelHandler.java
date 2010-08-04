@@ -23,7 +23,6 @@ import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -38,8 +37,7 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
@@ -47,7 +45,7 @@ import java.io.IOException;
  * The objective is to accelerate web pages.
  */
 @Singleton
-public class AccelHandler extends ProxyBase {
+public class AccelHandler {
   static final String ERROR_FETCHING_DATA = "Error fetching data";
 
   // TODO: parameterize these.
@@ -72,14 +70,11 @@ public class AccelHandler extends ProxyBase {
     this.remapInternalServerError = remapInternalServerError;
   }
 
-  @Override
-  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
-      throws IOException, GadgetException {
+  protected HttpResponse fetch(HttpRequest request) throws IOException, GadgetException {
     // TODO: Handle if modified since headers.
 
     // Parse and normalize to get a proxied request uri.
-    Uri requestUri = new UriBuilder(request).toUri();
-    ProxyUriManager.ProxyUri proxyUri = getProxyUri(requestUri);
+    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request.getUri());
 
     // Fetch the content of the requested uri.
     HttpRequest req = buildHttpRequest(request, proxyUri);
@@ -102,6 +97,7 @@ public class AccelHandler extends ProxyBase {
 
     // Copy the response headers and status code to the final http servlet
     // response.
+    HttpResponseBuilder response = new HttpResponseBuilder();
     UriUtils.copyResponseHeadersAndStatusCode(
         results, response, remapInternalServerError, true,
         UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
@@ -112,7 +108,11 @@ public class AccelHandler extends ProxyBase {
     UriUtils.maybeRewriteContentType(req, response);
 
     // Copy the content.
-    IOUtils.copy(results.getResponse(), response.getOutputStream());
+    // TODO: replace this with streaming APIs when ready
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    IOUtils.copy(results.getResponse(), baos);
+    response.setResponseNoCopy(baos.toByteArray());
+    return response.create();
   }
 
   /**
@@ -132,7 +132,7 @@ public class AccelHandler extends ProxyBase {
     } catch (Uri.UriException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
                                 "Failed to parse uri: " + uriString,
-                                HttpServletResponse.SC_BAD_GATEWAY);
+                                HttpResponse.SC_BAD_GATEWAY);
     }
 
     Gadget gadget = DomWalker.makeGadget(requestUri);
@@ -170,11 +170,10 @@ public class AccelHandler extends ProxyBase {
    * @return Remote content request based on the parameters sent from the client.
    * @throws GadgetException In case the data could not be fetched.
    */
-  protected HttpRequest buildHttpRequest(HttpServletRequest request,
+  protected HttpRequest buildHttpRequest(HttpRequest request,
                                          ProxyUriManager.ProxyUri uriToProxyOrRewrite)
       throws GadgetException {
     Uri tgt = uriToProxyOrRewrite.getResource();
-    validateUrl(tgt);
     HttpRequest req = uriToProxyOrRewrite.makeHttpRequest(tgt);
     if (req == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
@@ -185,7 +184,8 @@ public class AccelHandler extends ProxyBase {
     UriUtils.copyRequestData(request, req);
 
     // Set and copy headers.
-    this.setRequestHeaders(request, req);
+    ServletUtil.setXForwardedForHeader(request, req);
+    
     UriUtils.copyRequestHeaders(
         request, req,
         UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES);
@@ -204,7 +204,7 @@ public class AccelHandler extends ProxyBase {
   protected HttpResponse handleErrors(HttpResponse results) {
     if (results == null) {
       return new HttpResponseBuilder()
-          .setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND)
+          .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
           .setResponse(ERROR_FETCHING_DATA.getBytes())
           .create();
     }

@@ -25,8 +25,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.Utf8UrlCoder;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.FeedProcessor;
 import org.apache.shindig.gadgets.FetchResponseUtils;
@@ -38,6 +40,8 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.oauth.OAuthArguments;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
+import org.apache.shindig.gadgets.uri.UriCommon;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -53,13 +57,12 @@ import javax.servlet.http.HttpServletResponse;
  * Unlike ProxyHandler, this may perform operations such as OAuth or signed fetch.
  */
 @Singleton
-public class MakeRequestHandler extends ProxyBase {
+public class MakeRequestHandler {
   // Relaxed visibility for ease of integration. Try to avoid relying on these.
   public static final String UNPARSEABLE_CRUFT = "throw 1; < don't be evil' >";
   public static final String POST_DATA_PARAM = "postData";
   public static final String METHOD_PARAM = "httpMethod";
   public static final String HEADERS_PARAM = "headers";
-  public static final String NOCACHE_PARAM = "nocache";
   public static final String CONTENT_TYPE_PARAM = "contentType";
   public static final String NUM_ENTRIES_PARAM = "numEntries";
   public static final String DEFAULT_NUM_ENTRIES = "3";
@@ -80,8 +83,7 @@ public class MakeRequestHandler extends ProxyBase {
   /**
    * Executes a request, returning the response as JSON to be handled by makeRequest.
    */
-  @Override
-  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
+  public void fetch(HttpServletRequest request, HttpServletResponse response)
       throws GadgetException, IOException {
     HttpRequest rcr = buildHttpRequest(request);
 
@@ -116,18 +118,18 @@ public class MakeRequestHandler extends ProxyBase {
    * @throws GadgetException
    */
   protected HttpRequest buildHttpRequest(HttpServletRequest request) throws GadgetException {
-    String urlStr = request.getParameter(URL_PARAM);
+    String urlStr = request.getParameter(Param.URL.getKey());
     if (urlStr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          URL_PARAM + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
+          Param.URL.getKey() + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
     }
     
     Uri url = null;
     try {
-      url = validateUrl(Uri.parse(urlStr));
+      url = ServletUtil.validateUrl(Uri.parse(urlStr));
     } catch (IllegalArgumentException e) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-          "Invalid " + URL_PARAM + " parameter", HttpResponse.SC_BAD_REQUEST);
+          "Invalid " + Param.URL.getKey() + " parameter", HttpResponse.SC_BAD_REQUEST);
     }
 
     HttpRequest req = new HttpRequest(url)
@@ -157,18 +159,18 @@ public class MakeRequestHandler extends ProxyBase {
       req.addHeader("Content-Type", "application/x-www-form-urlencoded");
     }
 
-    req.setIgnoreCache("1".equals(request.getParameter(NOCACHE_PARAM)));
+    req.setIgnoreCache("1".equals(request.getParameter(Param.NO_CACHE.getKey())));
 
-    if (request.getParameter(GADGET_PARAM) != null) {
-      req.setGadget(Uri.parse(request.getParameter(GADGET_PARAM)));
+    if (request.getParameter(Param.GADGET.getKey()) != null) {
+      req.setGadget(Uri.parse(request.getParameter(Param.GADGET.getKey())));
     }
 
     // If the proxy request specifies a refresh param then we want to force the min TTL for
     // the retrieved entry in the cache regardless of the headers on the content when it
     // is fetched from the original source.
-    if (request.getParameter(REFRESH_PARAM) != null) {
+    if (request.getParameter(Param.REFRESH.getKey()) != null) {
       try {
-        req.setCacheTtl(Integer.parseInt(request.getParameter(REFRESH_PARAM)));
+        req.setCacheTtl(Integer.parseInt(request.getParameter(Param.REFRESH.getKey())));
       } catch (NumberFormatException nfe) {
         // Ignore
       }
@@ -176,7 +178,7 @@ public class MakeRequestHandler extends ProxyBase {
     // Allow the rewriter to use an externally forced mime type. This is needed
     // allows proper rewriting of <script src="x"/> where x is returned with
     // a content type like text/html which unfortunately happens all too often
-    req.setRewriteMimeType(request.getParameter(REWRITE_MIME_TYPE_PARAM));
+    req.setRewriteMimeType(request.getParameter(Param.REWRITE_MIME_TYPE.getKey()));
 
     // Figure out whether authentication is required
     AuthType auth = AuthType.parse(getParameter(request, AUTHZ_PARAM, null));
@@ -186,7 +188,7 @@ public class MakeRequestHandler extends ProxyBase {
       req.setOAuthArguments(new OAuthArguments(auth, request));
     }
 
-    this.setRequestHeaders(request, req);
+    ServletUtil.setXForwardedForHeader(request, req);
     return req;
   }
 
@@ -220,7 +222,7 @@ public class MakeRequestHandler extends ProxyBase {
       HttpResponse results) throws GadgetException {
     boolean getFullHeaders =
         Boolean.parseBoolean(getParameter(request, GET_FULL_HEADERS_PARAM, "false"));
-    String originalUrl = request.getParameter(ProxyBase.URL_PARAM);
+    String originalUrl = request.getParameter(Param.URL.getKey());
     String body = results.getResponseAsString();
     if (body.length() > 0) {
       if ("FEED".equals(request.getParameter(CONTENT_TYPE_PARAM))) {
@@ -266,5 +268,54 @@ public class MakeRequestHandler extends ProxyBase {
     boolean getSummaries = Boolean.parseBoolean(getParameter(req, GET_SUMMARIES_PARAM, "false"));
     int numEntries = Integer.parseInt(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
     return new FeedProcessor().process(url, xml, getSummaries, numEntries).toString();
+  }
+  
+  /**
+   * Extracts the container name from the request.
+   */
+  @SuppressWarnings("deprecation")
+  static String getContainer(HttpServletRequest request) {
+    String container = request.getParameter(Param.CONTAINER.getKey());
+    if (container == null) {
+      container = request.getParameter(Param.SYND.getKey());
+    }
+    return container != null ? container : ContainerConfig.DEFAULT_CONTAINER;
+  }
+  
+  /**
+   * getParameter helper method, returning default value if param not present.
+   */
+  static String getParameter(HttpServletRequest request, String key, String defaultValue) {
+    String ret = request.getParameter(key);
+    return ret != null ? ret : defaultValue;
+  }
+  
+  /**
+   * Sets cache control headers for the response.
+   */
+  @SuppressWarnings("boxing")
+  static void setResponseHeaders(HttpServletRequest request,
+      HttpServletResponse response, HttpResponse results) throws GadgetException {
+    int refreshInterval = 0;
+    if (results.isStrictNoCache() || "1".equals(request.getParameter(UriCommon.Param.NO_CACHE.getKey()))) {
+      refreshInterval = 0;
+    } else if (request.getParameter(UriCommon.Param.REFRESH.getKey()) != null) {
+      try {
+        refreshInterval =  Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
+      } catch (NumberFormatException nfe) {
+        throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+            "refresh parameter is not a number");
+      }
+    } else {
+      refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
+    }
+    HttpUtil.setCachingHeaders(response, refreshInterval, false);
+    
+    // Always set Content-Disposition header as XSS prevention mechanism.
+    response.setHeader("Content-Disposition", "attachment;filename=p.txt");
+    
+    if (response.getContentType() == null) {
+      response.setContentType("application/octet-stream");
+    }
   }
 }
