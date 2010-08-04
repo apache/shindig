@@ -57,8 +57,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
- *
- * @see org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter
  */
 public class ConcatProxyServlet extends InjectedServlet {
 
