@@ -19,11 +19,15 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -39,21 +43,41 @@ import com.google.inject.Inject;
 public class ProxyServlet extends InjectedServlet {
   private static final long serialVersionUID = 9085050443492307723L;
   
+  private static final Logger LOG = Logger.getLogger(ProxyServlet.class.getName());
+  
+  private transient ProxyUriManager proxyUriManager;
+  private transient LockedDomainService lockedDomainService;
   private transient ProxyHandler proxyHandler;
   private transient boolean initialized;
 
   @Inject
   public void setProxyHandler(ProxyHandler proxyHandler) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.proxyHandler = proxyHandler;
+  }
+  
+  @Inject
+  public void setProxyUriManager(ProxyUriManager proxyUriManager) {
+    checkInitialized();
+    this.proxyUriManager = proxyUriManager;
+  }
+  
+  @Inject
+  public void setLockedDomainService(LockedDomainService lockedDomainService) {
+    checkInitialized();
+    this.lockedDomainService = lockedDomainService;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     initialized = true;
+  }
+  
+  private void checkInitialized() {
+    if (initialized) {
+      throw new IllegalStateException("Servlet already initialized");
+    }
   }
 
   @Override
@@ -63,11 +87,27 @@ public class ProxyServlet extends InjectedServlet {
       servletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
-    
-    HttpRequest req = ServletUtil.fromHttpServletRequest(request);
+
+    Uri reqUri = new UriBuilder(request).toUri();
     HttpResponse response = null;
     try {
-      response = proxyHandler.fetch(req);
+      // Parse request uri:
+      ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(reqUri);
+
+      // TODO: Consider removing due to redundant logic.
+      String host = request.getHeader("Host");
+      if (!lockedDomainService.isSafeForOpenProxy(host)) {
+        // Force embedded images and the like to their own domain to avoid XSS
+        // in gadget domains.
+        Uri resourceUri = proxyUri.getResource();
+        String msg = "Embed request for url " +
+            (resourceUri != null ? resourceUri.toString() : "n/a") + " made to wrong domain " + host;
+        LOG.info(msg);
+        throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
+            HttpResponse.SC_BAD_REQUEST);
+      }
+      
+      response = proxyHandler.fetch(proxyUri);
     } catch (GadgetException e) {
       response = ServletUtil.errorResponse(new GadgetException(e.getCode(), e.getMessage(),
           HttpServletResponse.SC_BAD_REQUEST));

@@ -122,7 +122,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     registerGadgetsHandler(null);
     JSONObject request = makeMetadataRequest(null, null, "[moo]");
     RpcHandler operation = registry.getRpcHandler(request);
-    Object empty = operation.execute(emptyFormItems, token, converter).get();
+    operation.execute(emptyFormItems, token, converter).get();
   }
 
   @Test(expected = ExecutionException.class)
@@ -130,7 +130,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     registerGadgetsHandler(null);
     JSONObject request = makeTokenRequest("[moo]");
     RpcHandler operation = registry.getRpcHandler(request);
-    Object empty = operation.execute(emptyFormItems, token, converter).get();
+    operation.execute(emptyFormItems, token, converter).get();
   }
 
   @Test

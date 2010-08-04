@@ -27,10 +27,8 @@ import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -39,12 +37,10 @@ import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
-import org.apache.shindig.gadgets.uri.PassthruManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -55,21 +51,14 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private final static String URL_ONE = "http://www.example.org/test.html";
   private final static String DATA_ONE = "hello world";
 
-  private final ProxyUriManager passthruManager = new PassthruManager();
-  public final LockedDomainService lockedDomainService = mock(LockedDomainService.class);
   public final RequestPipeline pipeline = mock(RequestPipeline.class);
   public CaptureRewriter rewriter = new CaptureRewriter();
   public ResponseRewriterRegistry rewriterRegistry
       = new DefaultResponseRewriterRegistry(Arrays.<ResponseRewriter>asList(rewriter), null);
-  private HttpRequest request;
+  private ProxyUriManager.ProxyUri request;
   
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, lockedDomainService, rewriterRegistry, passthruManager);
-
-  @Before
-  public void setUp() {
-    request = new HttpRequest(Uri.parse(URL_ONE)); 
-  }
+      = new ProxyHandler(pipeline, rewriterRegistry);
   
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -84,36 +73,23 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     expect(pipeline.execute(req)).andReturn(resp);
   }
   
-  private UriBuilder setupProxyRequestBase(String host) {
-    UriBuilder builder = new UriBuilder().setScheme("http").setAuthority(host);
-    request.setHeader("Host", host);
-    return builder;
+  private void setupProxyRequestMock(String host, String url,
+      boolean noCache, int refresh, String rewriteMime, String fallbackUrl) throws Exception {
+    request = new ProxyUriManager.ProxyUri(
+        refresh, false, noCache, ContainerConfig.DEFAULT_CONTAINER, null, Uri.parse(url));
+    request.setFallbackUrl(fallbackUrl);
+    request.setRewriteMimeType(rewriteMime);
   }
 
-  private void setupProxyRequestMock(String host, String url, String... params)
-      throws Exception {
-    UriBuilder builder = setupProxyRequestBase(host);
-    if (url != null) {
-      builder.addQueryParameter(Param.URL.getKey(), url);
-    }
-    builder.addQueryParameter(Param.CONTAINER.getKey(), ContainerConfig.DEFAULT_CONTAINER);
-    if (params != null && params.length > 0) {
-      for (int i = 0; i < params.length; i += 2) {
-        builder.addQueryParameter(params[i], params[i+1]);
-      }
-    }
-    request.setUri(builder.toUri());
-  }
-
-  private void setupFailedProxyRequestMock(String host, String url) throws Exception {
-    UriBuilder builder = setupProxyRequestBase(host);
-    request.setUri(builder.toUri());
+  private void setupNoArgsProxyRequestMock(String host, String url) throws Exception {
+    request = new ProxyUriManager.ProxyUri(
+        -1, false, false, ContainerConfig.DEFAULT_CONTAINER, null,
+        url != null ? Uri.parse(url) : null);
   }
 
   @Test
   public void testLockedDomainEmbed() throws Exception {
-    setupProxyRequestMock("www.example.com", URL_ONE);
-    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
+    setupNoArgsProxyRequestMock("www.example.com", URL_ONE);
     expectGetAndReturnData(URL_ONE, DATA_ONE.getBytes());
    
     replay();
@@ -126,8 +102,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
 
   @Test(expected=GadgetException.class)
   public void testNoUrl() throws Exception {
-    setupProxyRequestMock("www.example.com", null);
-    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
+    setupNoArgsProxyRequestMock("www.example.com", null);
     replay();
 
     proxyHandler.fetch(request);
@@ -136,8 +111,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
 
   @Test
   public void testHttpRequestFillsParentAndContainer() throws Exception {
-    setupProxyRequestMock("www.example.com", URL_ONE);
-    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(true);
+    setupNoArgsProxyRequestMock("www.example.com", URL_ONE);
     //HttpRequest req = new HttpRequest(Uri.parse(URL_ONE));
     HttpResponse resp = new HttpResponseBuilder().setResponse(DATA_ONE.getBytes()).create();
 
@@ -156,15 +130,6 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     assertTrue(rewriter.responseWasRewritten());
   }
 
-  @Test(expected=GadgetException.class)
-  public void testLockedDomainFailedEmbed() throws Exception {
-    setupFailedProxyRequestMock("www.example.com", URL_ONE);
-    expect(lockedDomainService.isSafeForOpenProxy("www.example.com")).andReturn(false);
-    replay();
-
-    proxyHandler.fetch(request);
-  }
-
   @Test
   public void testHeadersPreserved() throws Exception {
     // Some headers may be blacklisted. These are OK.
@@ -176,8 +141,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     headers.put("Content-Type", Arrays.asList(contentType));
     headers.put("X-Magic-Garbage", Arrays.asList(magicGarbage));
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
+    setupNoArgsProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, headers);
 
     replay();
@@ -194,8 +158,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
+    setupNoArgsProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, Maps.<String, List<String>>newHashMap());
 
     replay();
@@ -215,8 +178,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     Map<String, List<String>> headers = Maps.newHashMap();
     headers.put("Content-Type", Arrays.asList("application/x-shockwave-flash"));
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url);
+    setupNoArgsProxyRequestMock(domain, url);
     expectGetAndReturnHeaders(url, headers);
 
     replay();
@@ -234,9 +196,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String domain = "example.org";
     String fallback_url = "http://fallback.com/fallback.png";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url, Param.NO_CACHE.getKey(), "1",
-        Param.FALLBACK_URL_PARAM.getKey(), fallback_url);
+    setupProxyRequestMock(domain, url, true, -1, null, fallback_url);
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = HttpResponse.error();
@@ -254,8 +214,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url, Param.NO_CACHE.getKey(), "1");
+    setupProxyRequestMock(domain, url, true, -1, null, null);
 
     HttpRequest req = new HttpRequest(Uri.parse(url)).setIgnoreCache(true);
     HttpResponse resp = new HttpResponse("Hello");
@@ -298,9 +257,8 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url, Param.REFRESH.getKey(), "120");
-
+    setupProxyRequestMock(domain, url, false, 120, null, null);
+    
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(120).setIgnoreCache(false);
     HttpResponse resp = new HttpResponse("Hello");
     expect(pipeline.execute(req)).andReturn(resp);
@@ -315,32 +273,10 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     String url = "http://example.org/file.evil";
     String domain = "example.org";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url, Param.REFRESH.getKey(), "foo");
-
+    setupProxyRequestMock(domain, url, false, -1, null, null);
+    
     HttpRequest req = new HttpRequestCache(Uri.parse(url)).setCacheTtl(-1).setIgnoreCache(false);
     HttpResponse resp = new HttpResponse("Hello");
-    expect(pipeline.execute(req)).andReturn(resp);
-
-    replay();
-    proxyHandler.fetch(request);
-    verify();
-  }
-
-  @Test
-  public void testXForwardedFor() throws Exception {
-    String url = "http://example.org/";
-    String domain = "example.org";
-
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    request.setHeader("X-Forwarded-For", "127.0.0.1");
-    setupProxyRequestMock(domain, url);
-
-    HttpRequest req = new HttpRequest(Uri.parse(url));
-    req.setHeader("X-Forwarded-For", "127.0.0.1");
-
-    HttpResponse resp = new HttpResponse("Hello");
-
     expect(pipeline.execute(req)).andReturn(resp);
 
     replay();
@@ -354,9 +290,8 @@ public class ProxyHandlerTest extends EasyMockTestCase {
         '=' + expectedMime;
     String domain = "example.org";
 
-    expect(lockedDomainService.isSafeForOpenProxy(domain)).andReturn(true).atLeastOnce();
-    setupProxyRequestMock(domain, url, Param.REWRITE_MIME_TYPE.getKey(), expectedMime);
-
+    setupProxyRequestMock(domain, url, false, -1, expectedMime, null);
+    
     HttpRequest req = new HttpRequest(Uri.parse(url))
         .setRewriteMimeType(expectedMime);
 

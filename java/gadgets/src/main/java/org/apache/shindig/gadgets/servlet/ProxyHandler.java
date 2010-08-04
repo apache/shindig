@@ -25,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.LockedDomainService;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
@@ -38,65 +37,40 @@ import org.apache.shindig.gadgets.uri.UriUtils.DisallowedHeaders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Handles open proxy requests.
  */
 @Singleton
 public class ProxyHandler {
-  private static final Logger LOG = Logger.getLogger(ProxyHandler.class.getName());
-
   // TODO: parameterize these.
   static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
   static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
   
   private final RequestPipeline requestPipeline;
-  private final LockedDomainService lockedDomainService;
   private final ResponseRewriterRegistry contentRewriterRegistry;
-  private final ProxyUriManager proxyUriManager;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
-                      LockedDomainService lockedDomainService,
-                      ResponseRewriterRegistry contentRewriterRegistry,
-                      ProxyUriManager proxyUriManager) {
+                      ResponseRewriterRegistry contentRewriterRegistry) {
     this.requestPipeline = requestPipeline;
-    this.lockedDomainService = lockedDomainService;
     this.contentRewriterRegistry = contentRewriterRegistry;
-    this.proxyUriManager = proxyUriManager;
   }
 
   /**
    * Generate a remote content request based on the parameters sent from the client.
    */
-  private HttpRequest buildHttpRequest(HttpRequest request,
+  private HttpRequest buildHttpRequest(
       ProxyUriManager.ProxyUri uriCtx, Uri tgt) throws GadgetException {
     ServletUtil.validateUrl(tgt);
     HttpRequest req = uriCtx.makeHttpRequest(tgt);
-    ServletUtil.setXForwardedForHeader(request, req);
+    req.setRewriteMimeType(uriCtx.getRewriteMimeType());
     return req;
   }
 
-  public HttpResponse fetch(HttpRequest request)
+  public HttpResponse fetch(ProxyUriManager.ProxyUri proxyUri)
       throws IOException, GadgetException {
-    // Parse request uri:
-    ProxyUriManager.ProxyUri proxyUri = proxyUriManager.process(request.getUri());
-
-    // TODO: Consider removing due to redundant logic.
-    String host = request.getHeader("Host");
-    if (!lockedDomainService.isSafeForOpenProxy(host)) {
-      // Force embedded images and the like to their own domain to avoid XSS
-      // in gadget domains.
-      Uri resourceUri = proxyUri.getResource();
-      String msg = "Embed request for url " +
-          (resourceUri != null ? resourceUri.toString() : "n/a") + " made to wrong domain " + host;
-      LOG.info(msg);
-      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER, msg,
-          HttpResponse.SC_BAD_REQUEST);
-    }
-
-    HttpRequest rcr = buildHttpRequest(request, proxyUri, proxyUri.getResource());
+    HttpRequest rcr = buildHttpRequest(proxyUri, proxyUri.getResource());
     if (rcr == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "No url parameter in request", HttpResponse.SC_BAD_REQUEST);      
@@ -108,7 +82,7 @@ public class ProxyHandler {
       // Error: try the fallback. Particularly useful for proxied images.
       Uri fallbackUri = proxyUri.getFallbackUri();
       if (fallbackUri != null) {
-        HttpRequest fallbackRcr = buildHttpRequest(request, proxyUri, fallbackUri);
+        HttpRequest fallbackRcr = buildHttpRequest(proxyUri, fallbackUri);
         results = requestPipeline.execute(fallbackRcr);
       }
     }
