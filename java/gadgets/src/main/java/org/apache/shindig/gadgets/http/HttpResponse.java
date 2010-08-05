@@ -18,6 +18,7 @@
 package org.apache.shindig.gadgets.http;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
@@ -28,7 +29,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.encoding.EncodingDetector;
 
 import java.io.ByteArrayInputStream;
@@ -146,6 +149,14 @@ public final class HttpResponse implements Externalizable {
 
   @Inject(optional = true) @Named("shindig.http.date-drift-limit-ms")
   private static long responseDateDriftLimit = DEFAULT_DRIFT_LIMIT_MS;
+
+  public static void setTimeSource(TimeSource timeSource) {
+    HttpUtil.setTimeSource(timeSource);
+  }
+
+  public static TimeSource getTimeSource() {
+    return HttpUtil.getTimeSource();
+  }
 
   // Holds character sets for fast conversion
   private static final Map<String, Charset> encodingToCharset = new MapMaker().makeMap();
@@ -358,7 +369,7 @@ public final class HttpResponse implements Externalizable {
   public long getCacheTtl() {
     long expiration = getCacheExpiration();
     if (expiration != -1) {
-      return expiration - System.currentTimeMillis();
+      return expiration - getTimeSource().currentTimeMillis();
     }
     return -1;
   }
@@ -450,7 +461,7 @@ public final class HttpResponse implements Externalizable {
   private static long getAndUpdateDate(Multimap<String, String> headers) {
     // Validate the Date header. Must conform to the HTTP date format.
     long timestamp = -1;
-    long currentTime = System.currentTimeMillis();
+    long currentTime = getTimeSource().currentTimeMillis();
     Collection<String> dates = headers.get("Date");
 
     if (!dates.isEmpty()) {
@@ -465,7 +476,7 @@ public final class HttpResponse implements Externalizable {
     }
     if (timestamp == -1) {
       timestamp = currentTime;
-      headers.put("Date", DateUtil.formatRfc1123Date(timestamp));
+      headers.replaceValues("Date", ImmutableList.of(DateUtil.formatRfc1123Date(timestamp)));
     }
     return timestamp;
   }
