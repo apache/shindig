@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  */
 public final class HttpUtil {
   private HttpUtil() {}
-  
+
   // 1 year.
   private static int defaultTtl = 60 * 60 * 24 * 365;
 
@@ -47,6 +47,10 @@ public final class HttpUtil {
 
   public static void setTimeSource(TimeSource timeSource) {
     HttpUtil.timeSource = timeSource;
+  }
+
+  public static TimeSource getTimeSource() {
+    return timeSource;
   }
 
   /**
@@ -81,7 +85,7 @@ public final class HttpUtil {
   public static void setCachingHeaders(HttpServletResponse response, int ttl) {
     setCachingHeaders(response, ttl, false);
   }
-  
+
   public static void setNoCache(HttpServletResponse response) {
     setCachingHeaders(response, 0, false);
   }
@@ -137,7 +141,7 @@ public final class HttpUtil {
     // Must be a GET
     if (!"GET".equals(request.getMethod()))
       return false;
-    
+
     // No callback specified
     if (callback == null) return false;
 
