@@ -1412,13 +1412,13 @@
      <dependency>
        <groupId>caja</groupId>
        <artifactId>htmlparser</artifactId>
-       <version>r4135</version>
+       <version>r4209</version>
        <scope>compile</scope>
      </dependency>
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r4135</version>
+        <version>r4209</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
