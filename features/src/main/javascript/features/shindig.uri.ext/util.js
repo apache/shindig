@@ -35,8 +35,7 @@ shindig.uri = (function() {
    * @return {boolean} Whether the Uris have the same origin.
    */
   function hasSameOrigin(self, other) {
-    return self.getSchema() == other.getSchema() &&
-           self.getAuthority() == self.getAuthority();
+    return self.getOrigin() == other.getOrigin();
   }
 
   /**
@@ -45,7 +44,7 @@ shindig.uri = (function() {
    * @param {Uri} self The base Uri.
    * @param {Uri} base The Uri to resolve.
    */
-  function fullyQualify(self, base) {
+  function resolve(self, base) {
     if (self.getSchema() == '') {
       self.setSchema(base.getSchema());
     }
@@ -68,8 +67,8 @@ shindig.uri = (function() {
     self.hasSameOrigin = function(other) {
       return hasSameOrigin(self, other);
     };
-    self.fullyQualify = function(other) {
-      return fullyQualify(self, other);
+    self.resolve = function(other) {
+      return resolve(self, other);
     };
     return self;
   };
