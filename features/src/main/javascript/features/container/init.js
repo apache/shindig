@@ -50,9 +50,13 @@
 
   function getLastScriptUri() {
     var scriptEls = document.getElementsByTagName('script');
-    return (scriptEls.length > 0)
-        ? shindig.uri(scriptEls[scriptEls.length - 1].src)
-        : null;
+    var uri = null;
+    if (scriptEls.length > 0) {
+      uri = shindig.uri(scriptEls[scriptEls.length - 1].src)
+      // In case script URI is relative, resolve it against window.location
+      uri.resolve(shindig.uri(window.location));
+    }
+    return uri;
   }
 
   initializeConfig();

@@ -22,7 +22,7 @@ under the License.
   <dependency>globals</dependency>
   <dependency>core.log</dependency>
   <dependency>shindig.auth</dependency>
-  <dependency>shindig.uri</dependency>
+  <dependency>shindig.uri.ext</dependency>
   <dependency>core.util</dependency>
   <dependency>osapi</dependency>
   <dependency>rpc</dependency>
