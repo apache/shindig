@@ -5,7 +5,6 @@ Almost all interfaces have been updated from 1.0.x -> 2.0.x.  The
 following information is not complete.
 
 
-
 == container.js config changes ==
 
 * gadgets.parentOrigins: Default ["*"] (NEW)
@@ -16,6 +15,7 @@ An array of valid origin domains for the container.
 
 The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and /social/rpc to just /rpc
 
+* css for tabs/minimessage is now included in container.js
 
 == Java Dependency Changes ==
 
