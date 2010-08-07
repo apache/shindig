@@ -25,6 +25,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.render.CajaResponseRewriter;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
 import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
@@ -101,10 +102,11 @@ public class RewriteModule extends AbstractModule {
       StyleAdjacencyContentRewriter styleAdjacencyRewriter,
       ProxyingContentRewriter proxyingRewriter,
       CssResponseRewriter cssRewriter,
-      SanitizingResponseRewriter sanitizedRewriter) {
+      SanitizingResponseRewriter sanitizedRewriter,
+      CajaResponseRewriter cajaRewriter) {
     return ImmutableList.of(
         absolutePathRewriter, styleTagExtractorRewriter, styleAdjacencyRewriter, proxyingRewriter,
-        cssRewriter, sanitizedRewriter);
+        cssRewriter, sanitizedRewriter, cajaRewriter);
   }
 
   @Provides
@@ -115,7 +117,7 @@ public class RewriteModule extends AbstractModule {
       StyleTagProxyEmbeddedUrlsRewriter styleTagProxyEmbeddedUrlsRewriter,
       ProxyingContentRewriter proxyingContentRewriter) {
     return ImmutableList.of((ResponseRewriter) absolutePathReferenceRewriter,
-                            (ResponseRewriter) styleTagProxyEmbeddedUrlsRewriter,
-                            (ResponseRewriter) proxyingContentRewriter);
+        (ResponseRewriter) styleTagProxyEmbeddedUrlsRewriter,
+        (ResponseRewriter) proxyingContentRewriter);
   }
 }

@@ -39,6 +39,7 @@ public interface UriCommon {
     TYPE("type"),
     REWRITE_MIME_TYPE("rewriteMime"),
     SANITIZE("sanitize"),
+    CAJOLE("cajole"),    
     CONTAINER_MODE("c"),
     
     // Proxy resize params:

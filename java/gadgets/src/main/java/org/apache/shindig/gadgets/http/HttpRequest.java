@@ -69,6 +69,9 @@ public class HttpRequest {
   // Sanitization
   private boolean sanitizationRequested;
 
+  // Caja
+  private boolean cajaRequested;
+
   // Whether to follow redirects
   private boolean followRedirects = true;
 
@@ -218,6 +221,18 @@ public class HttpRequest {
 
   public void setSanitizationRequested(boolean sanitizationRequested) {
     this.sanitizationRequested = sanitizationRequested;
+  }
+
+    /**
+   * Should content fetched in response to this request
+   * be sanitized based on the specified mime-type
+   */
+  public boolean isCajaRequested() {
+    return cajaRequested;
+  }
+
+  public void setCajaRequested(boolean cajaRequested) {
+    this.cajaRequested = cajaRequested;
   }
 
   /**
