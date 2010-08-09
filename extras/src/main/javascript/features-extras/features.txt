@@ -17,3 +17,4 @@
 #  under the License.
 
 features-extras/org.jquery.core-1.4.2/feature.xml
+features-extras/wave/feature.xml
