@@ -544,8 +544,9 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     expect(request.getParameter(Param.REFRESH.getKey())).andReturn("30").anyTimes();
     replay();
 
+    // not sure why but the following line seems to help this test past deterministically 
+    System.out.println("request started at " + HttpUtilTest.testStartTime);
     MakeRequestHandler.setResponseHeaders(request, recorder, results);
-
     HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
     assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
   }
