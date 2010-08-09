@@ -27,12 +27,14 @@ class GadgetSpecException extends Exception {
  */
 class GadgetSpecParser {
 
+  protected $context;
+
   /**
    * Parses the $xmlContent into a Gadget class
    *
    * @param string $xmlContent
    */
-  public function parse($xmlContent) {
+  public function parse($xmlContent, GadgetContext $context) {
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($xmlContent, LIBXML_NOCDATA)) {
@@ -41,7 +43,8 @@ class GadgetSpecParser {
     //TODO: we could do a XSD schema validation here, but both the schema and most of the gadgets seem to have some form of schema
     // violatons, so it's not really practical yet (and slow)
     // $doc->schemaValidate('gadget.xsd');
-    $gadget = new GadgetSpec();
+    $gadgetSpecClass = Config::get('gadget_spec_class');
+    $gadget = new $gadgetSpecClass();
     $gadget->checksum = md5($xmlContent);
     $this->parseModulePrefs($doc, $gadget);
     $this->parseUserPrefs($doc, $gadget);

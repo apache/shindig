@@ -92,7 +92,8 @@ abstract class DataRequestHandler {
    *  @param parameters url parameters to get request type(people/activity)
    */
   public function getSupportedFields($parameters) {
-    $context = new GadgetContext('GADGET');
+    $contextClass = Config::get('gadget_context_class');
+    $context = new $contextClass('GADGET');
     $container = $context->getContainer();
     $containerConfig = new ContainerConfig(Config::get('container_path'));
     $config = $containerConfig->getConfig($container, 'gadgets.features');

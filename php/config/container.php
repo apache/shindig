@@ -146,6 +146,14 @@ $shindigConfig = array(
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
 
+  'gadget_class' => 'Gadget',
+  'gadget_context_class' => 'GadgetContext',
+  'gadget_factory_class' => 'GadgetFactory',
+  'gadget_spec_parser' => 'GadgetSpecParser',
+  'gadget_spec_class' => 'GadgetSpec',
+  'substitution_class' => 'Substitutions',
+  'proxy_handler' => 'ProxyHandler',
+  
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript

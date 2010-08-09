@@ -382,6 +382,33 @@ class RemoteContentRequest {
   }
 }
 
+
+/**
+ * transforms a possible relative url to a absolute url from the gadget xml root
+ * @param string $url
+ * @param string $gadgetUrl
+ * @return mixed url or false
+ */
+public static function transformRelativeUrl($url, $gadgetUrl)
+{
+  $parsedUri = parse_url($url);
+  if (empty($parsedUri['host'])) {
+    // relative path's in the locale spec uri
+    // check against valid chars so that we can make sure that the given
+    // relative url is valid and does not try to fetch files outside of
+    // gadget scope (e.g. /../../../usr/bin... )
+    $pattern = '%^(([a-zA-Z0-9\-_](?<!\.)){1,2}([a-zA-Z0-9\.\-_](?<!\.\.))*/?)+$%';
+    if (preg_match($pattern, $url)) {
+      $gadgetUrl = substr($gadgetUrl, 0, strrpos($gadgetUrl, '/') + 1);
+      $url = $gadgetUrl . str_replace('..', '', $url);
+    } else {
+      return false;
+    }
+  }
+  return $url;
+}
+
+
 /**
  * Bag of options for making a request.
  *
