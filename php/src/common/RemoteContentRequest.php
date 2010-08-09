@@ -377,11 +377,9 @@ class RemoteContentRequest {
           return true;
         }
       }
-    }
-    return false;
-  }
-}
-
+   }
+   return false;
+ }
 
 /**
  * transforms a possible relative url to a absolute url from the gadget xml root
