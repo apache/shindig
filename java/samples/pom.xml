@@ -33,9 +33,9 @@
   <description>Provides Sample implementations of the SPI and API's inside the core of Shindig.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2/java/samples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2/java/samples</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0-RC2/java/samples</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0-RC2</url>
   </scm>
 
   <repositories>
