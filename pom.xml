@@ -1060,11 +1060,6 @@
           <artifactId>maven-war-plugin</artifactId>
           <version>2.1-beta-1</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.rat</groupId>
-          <artifactId>apache-rat-plugin</artifactId>
-          <version>0.7</version>
-        </plugin>
 
         <!-- Mojo -->
         <plugin>
