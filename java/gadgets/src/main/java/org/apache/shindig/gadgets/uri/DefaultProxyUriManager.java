@@ -32,6 +32,7 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -80,20 +81,21 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   }
   
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
-    List<Uri> result = Lists.newArrayListWithCapacity(resources.size());
-    
     if (resources.isEmpty()) {
-      return result;
+      return Collections.emptyList();
     }
-    
+
     List<Uri> resourceUris = Lists.newArrayListWithCapacity(resources.size());
     
     for (ProxyUri puc : resources) {
       resourceUris.add(puc.getResource());
     }
     
-    Map<Uri, String> versions = Maps.newHashMap();
-    if (versioner != null) {
+    Map<Uri, String> versions;
+    if (versioner == null) {
+      versions = Collections.emptyMap();
+    } else {
+      versions = Maps.newHashMapWithExpectedSize(resources.size());
       List<String> versionList = versioner.version(resourceUris, resources.get(0).getContainer());
       if (versionList != null && versionList.size() == resources.size()) {
         // This should always be the case.
@@ -105,6 +107,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       }
     }
     
+    List<Uri> result = Lists.newArrayListWithCapacity(resources.size());
     for (ProxyUri puc : resources) {
       result.add(makeProxiedUri(puc, forcedRefresh, versions.get(puc.getResource())));
     }
@@ -117,6 +120,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
     String container = puc.getContainer();
     UriBuilder uri = new UriBuilder();
+    // TODO need to decide http vs https
+    uri.setScheme("http");
     uri.setAuthority(getReqConfig(container, PROXY_HOST_PARAM));
     
     // Chained vs. query-style syntax is determined by the presence of CHAINED_PARAMS_TOKEN
