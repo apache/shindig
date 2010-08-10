@@ -74,8 +74,9 @@
     }
 
     if (last[parts[parts.length - 1]]) {
-      gadgets.warn("Duplicate osapi method definition " + method);
+      gadgets.warn("Skipping duplicate osapi method definition " + method + " on transport " + transport.name);
+    } else {
+      last[parts[parts.length - 1]] = apiMethod;
     }
-    last[parts[parts.length - 1]] = apiMethod;
   };
 })();
