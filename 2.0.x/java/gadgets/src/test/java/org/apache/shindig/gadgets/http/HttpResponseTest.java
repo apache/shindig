@@ -18,9 +18,11 @@
 package org.apache.shindig.gadgets.http;
 
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.common.util.FakeTimeSource;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -50,9 +52,14 @@ public class HttpResponseTest extends Assert {
 
   private static final String BIG5_STRING = "\u4F60\u597D";
 
-
   private static int roundToSeconds(long ts) {
     return (int)(ts / 1000);
+  }
+
+  private static FakeTimeSource timeSource = new FakeTimeSource(System.currentTimeMillis());
+  @Before
+  public void setUp() {
+    HttpResponse.setTimeSource(timeSource);
   }
 
   @Test
@@ -124,6 +131,15 @@ public class HttpResponseTest extends Assert {
         .setResponse(BIG5_DATA)
         .create();
     assertEquals(BIG5_STRING, response.getResponseAsString());
+    assertEquals("text/plain; charset=BIG5", response.getHeader("Content-Type"));
+
+    HttpResponseBuilder subResponseBuilder = new HttpResponseBuilder(response);
+    subResponseBuilder.setContent(response.getResponseAsString());
+    HttpResponse subResponse = subResponseBuilder.create();
+    // Same string.
+    assertEquals("text/plain; charset=UTF-8", subResponse.getHeader("Content-Type"));
+    assertEquals(BIG5_STRING, subResponse.getResponseAsString());
+    // New encoding.
   }
 
   @Test
@@ -163,7 +179,7 @@ public class HttpResponseTest extends Assert {
         .create();
     assertEquals(HttpResponse.DEFAULT_ENCODING.name(), response.getEncoding());
   }
-  
+
   @Test
   public void testEncodingDetectionUtf8WithBomNoContentHeader() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -243,12 +259,12 @@ public class HttpResponseTest extends Assert {
         .addHeader("Pragma", "junk")
         .create();
     assertFalse(response.isStrictNoCache());
-    int expected = roundToSeconds(System.currentTimeMillis() + response.getDefaultTtl());
+    int expected = roundToSeconds(timeSource.currentTimeMillis() + response.getDefaultTtl());
     int expires = roundToSeconds(response.getCacheExpiration());
     assertEquals(expected, expires);
     assertTrue(response.getCacheTtl() <= response.getDefaultTtl() && response.getCacheTtl() > 0);
   }
-  
+
   @Test
   public void testCachingHeadersIgnoredOnError() throws Exception {
     HttpResponse response = new HttpResponseBuilder()
@@ -281,7 +297,7 @@ public class HttpResponseTest extends Assert {
   @Test
   public void testExpires() throws Exception {
     int maxAge = 10;
-    int time = roundToSeconds(System.currentTimeMillis()) + maxAge;
+    int time = roundToSeconds(timeSource.currentTimeMillis()) + maxAge;
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Expires", DateUtil.formatRfc1123Date(1000L * time))
         .create();
@@ -289,13 +305,13 @@ public class HttpResponseTest extends Assert {
     // Second rounding makes this n-1.
     assertTtlOk(maxAge, response);
   }
-  
+
   @Test
   public void testExpiresZeroValue() throws Exception {
     HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "0").create();
     assertEquals(0, roundToSeconds(response.getCacheExpiration()));
   }
-  
+
   @Test
   public void testExpiresUnknownValue() throws Exception {
     HttpResponse response = new HttpResponseBuilder().addHeader("Expires", "howdy").create();
@@ -306,7 +322,7 @@ public class HttpResponseTest extends Assert {
   public void testMaxAgeNoDate() throws Exception {
     int maxAge = 10;
     // Guess time.
-    int expected = roundToSeconds(System.currentTimeMillis()) + maxAge;
+    int expected = roundToSeconds(timeSource.currentTimeMillis()) + maxAge;
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Cache-Control", "public, max-age=" + maxAge)
         .create();
@@ -320,8 +336,7 @@ public class HttpResponseTest extends Assert {
   public void testMaxAgeInvalidDate() throws Exception {
     int maxAge = 10;
     // Guess time.
-    int expected = roundToSeconds(System.currentTimeMillis()) + maxAge;
-
+    int expected = roundToSeconds(timeSource.currentTimeMillis()) + maxAge;
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", "Wed, 09 Jul 2008 19:18:33 EDT")
         .addHeader("Cache-Control", "public, max-age=" + maxAge)
@@ -335,7 +350,7 @@ public class HttpResponseTest extends Assert {
   @Test
   public void testMaxAgeWithDate() throws Exception {
     int maxAge = 10;
-    int now = roundToSeconds(System.currentTimeMillis());
+    int now = roundToSeconds(timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", DateUtil.formatRfc1123Date(1000L * now))
         .addHeader("Cache-Control", "public, max-age=" + maxAge)
@@ -347,10 +362,40 @@ public class HttpResponseTest extends Assert {
 
   @Test
   public void testFixedDate() throws Exception {
-    int time = roundToSeconds(System.currentTimeMillis());
+    int time = roundToSeconds(timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time))
         .create();
+    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
+        roundToSeconds(response.getCacheExpiration()));
+    assertEquals(DateUtil.formatRfc1123Date(timeSource.currentTimeMillis()),
+        response.getHeader("Date"));
+    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
+  }
+
+  @Test
+  public void testFixedDateOld() throws Exception {
+    int time = roundToSeconds(timeSource.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            - 1000 - HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
+        .create();
+    // Verify that the old time is ignored:
+    assertEquals(time + roundToSeconds(response.getDefaultTtl()),
+        roundToSeconds(response.getCacheExpiration()));
+    assertEquals(DateUtil.formatRfc1123Date(timeSource.currentTimeMillis()),
+        response.getHeader("Date"));
+    assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
+  }
+
+  @Test
+  public void testFixedDateNew() throws Exception {
+    int time = roundToSeconds(timeSource.currentTimeMillis());
+    HttpResponse response = new HttpResponseBuilder()
+        .addHeader("Date", DateUtil.formatRfc1123Date(1000L * time
+            + 1000 + HttpResponse.DEFAULT_DRIFT_LIMIT_MS))
+        .create();
+    // Verify that the old time is ignored:
     assertEquals(time + roundToSeconds(response.getDefaultTtl()),
         roundToSeconds(response.getCacheExpiration()));
     assertTtlOk(roundToSeconds(response.getDefaultTtl()), response);
@@ -359,11 +404,11 @@ public class HttpResponseTest extends Assert {
   @Test
   public void testNegativeCaching() {
     assertTrue("Bad HTTP responses must be cacheable!",
-        HttpResponse.error().getCacheExpiration() > System.currentTimeMillis());
+        HttpResponse.error().getCacheExpiration() > timeSource.currentTimeMillis());
     assertTrue("Bad HTTP responses must be cacheable!",
-        HttpResponse.notFound().getCacheExpiration() > System.currentTimeMillis());
+        HttpResponse.notFound().getCacheExpiration() > timeSource.currentTimeMillis());
     assertTrue("Bad HTTP responses must be cacheable!",
-        HttpResponse.timeout().getCacheExpiration() > System.currentTimeMillis());
+        HttpResponse.timeout().getCacheExpiration() > timeSource.currentTimeMillis());
     long ttl = HttpResponse.error().getCacheTtl();
     assertTrue(ttl <= HttpResponse.DEFAULT_TTL && ttl > 0);
   }
@@ -412,7 +457,7 @@ public class HttpResponseTest extends Assert {
 
   @Test
   public void testSetNoCache() {
-    int time = roundToSeconds(System.currentTimeMillis());
+    int time = roundToSeconds(timeSource.currentTimeMillis());
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Expires", DateUtil.formatRfc1123Date(1000L * time))
         .setStrictNoCache()
@@ -479,7 +524,7 @@ public class HttpResponseTest extends Assert {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectOutputStream out = new ObjectOutputStream(baos);
 
-    long now = System.currentTimeMillis();
+    long now = timeSource.currentTimeMillis();
 
     HttpResponse response = new HttpResponseBuilder()
         .addHeader("Foo", "bar")

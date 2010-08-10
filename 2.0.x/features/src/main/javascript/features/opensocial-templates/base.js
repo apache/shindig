@@ -140,7 +140,7 @@ os.compileTemplate = function(node, opt_id) {
  */
 os.compileTemplateString = function(src, opt_id, opt_container) {
   src = opensocial.xmlutil.prepareXML(src, opt_container);
-  var doc = opensocial.xmlutil.parseXML(src);
+  var doc = gadgets.jsondom.parse(src, opt_id);
   return os.compileXMLDoc(doc, opt_id);
 };
 

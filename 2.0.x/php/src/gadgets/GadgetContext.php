@@ -55,11 +55,11 @@ class GadgetContext {
     //NOTE All classes are initialized when called (aka lazy loading) because we don't need all of them in every situation
   }
 
-  private function getRefreshIntervalParam() {
+  protected function getRefreshIntervalParam() {
     return isset($_GET['refresh']) ? $_GET['refresh'] : Config::get('default_refresh_interval');
   }
 
-  private function getContainerParam() {
+  protected function getContainerParam() {
     $container = 'default';
     if (! empty($_GET['container'])) {
       $container = $_GET['container'];
@@ -74,16 +74,16 @@ class GadgetContext {
     return $container;
   }
 
-  private function getIgnoreCacheParam() {
+  protected function getIgnoreCacheParam() {
     // Support both the old Orkut style &bpc and new standard style &nocache= params
     return (isset($_GET['nocache']) && intval($_GET['nocache']) == 1) || (isset($_GET['bpc']) && intval($_GET['bpc']) == 1);
   }
 
-  private function getForcedJsLibsParam() {
+  protected function getForcedJsLibsParam() {
     return isset($_GET['libs']) ? trim($_GET['libs']) : null;
   }
 
-  private function getUrlParam() {
+  protected function getUrlParam() {
     if (! empty($_GET['url'])) {
       return $_GET['url'];
     } elseif (! empty($_POST['url'])) {
@@ -92,15 +92,15 @@ class GadgetContext {
     return null;
   }
 
-  private function getModuleIdParam() {
+  protected function getModuleIdParam() {
     return isset($_GET['mid']) && is_numeric($_GET['mid']) ? intval($_GET['mid']) : 0;
   }
 
-  private function getViewParam() {
+  protected function getViewParam() {
     return ! empty($_GET['view']) ? $_GET['view'] : self::DEFAULT_VIEW;
   }
 
-  private function instanceBlacklist() {
+  protected function instanceBlacklist() {
     $blackListClass = Config::get('blacklist_class');
     if (! empty($blackListClass)) {
       return new $blackListClass();
@@ -109,29 +109,30 @@ class GadgetContext {
     }
   }
 
-  private function instanceHttpFetcher() {
+  protected function instanceHttpFetcher() {
     $remoteContent = Config::get('remote_content');
     return new $remoteContent();
   }
 
-  private function instanceRegistry() {
+  protected function instanceRegistry() {
     // feature parsing is very resource intensive so by caching the result this saves upto 30% of the processing time
     $featureCache = Cache::createCache(Config::get('feature_cache'), 'FeatureCache');
-    if (! ($registry = $featureCache->get(md5(Config::get('features_path'))))) {
+    $key = md5(implode(',', Config::get('features_path')));
+    if (! ($registry = $featureCache->get($key))) {
       $registry = new GadgetFeatureRegistry(Config::get('features_path'));
-      $featureCache->set(md5(Config::get('features_path')), $registry);
+      $featureCache->set($key, $registry);
     }
     return $registry;
   }
 
-  private function instanceLocale() {
+  protected function instanceLocale() {
     // Get language and country params, try the GET params first, if their not set try the POST, else use 'all' as default
     $language = ! empty($_GET['lang']) ? $_GET['lang'] : (! empty($_POST['lang']) ? $_POST['lang'] : 'all');
     $country = ! empty($_GET['country']) ? $_GET['country'] : (! empty($_POST['country']) ? $_POST['country'] : 'all');
     return array('lang' => strtolower($language), 'country' => strtoupper($country));
   }
 
-  private function instanceContainerConfig() {
+  protected function instanceContainerConfig() {
     return new ContainerConfig(Config::get('container_path'));
   }
 
@@ -284,9 +285,6 @@ class GadgetContext {
    * @return SecurityToken An object representation of the token data.
    */
   public function validateToken($token, $signer) {
-    if (count(explode(':', $token)) < 7) {
-      $token = urldecode(base64_decode($token));
-    }
     if (empty($token)) {
       throw new Exception("Missing or invalid security token");
     }

@@ -48,6 +48,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,7 +122,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
     if (StringUtils.isNotBlank(forcedLibs)) {
-      defaultExternLibs = ImmutableSortedSet.of(StringUtils.split(forcedLibs, ':'));
+      defaultExternLibs = ImmutableSortedSet.copyOf(StringUtils.split(forcedLibs, ':'));
     }
   }
 
@@ -141,29 +142,21 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
       Element head = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "head");
 
-      // Remove all the elements currently in head and add them back after we inject content
-      NodeList children = head.getChildNodes();
-      List<Node> existingHeadContent = Lists.newArrayListWithExpectedSize(children.getLength());
-      for (int i = 0; i < children.getLength(); i++) {
-        existingHeadContent.add(children.item(i));
-      }
-
-      for (Node n : existingHeadContent) {
-        head.removeChild(n);
-      }
+      // Insert new content before any of the existing children of the head element
+      Node firstHeadChild = head.getFirstChild();
 
       // Only inject default styles if no doctype was specified.
       if (document.getDoctype() == null) {
         Element defaultStyle = document.createElement("style");
         defaultStyle.setAttribute("type", "text/css");
-        head.appendChild(defaultStyle);
+        head.insertBefore(defaultStyle, firstHeadChild);
         defaultStyle.appendChild(defaultStyle.getOwnerDocument().
             createTextNode(DEFAULT_CSS));
       }
 
       injectBaseTag(gadget, head);
-      injectGadgetBeacon(gadget, head);
-      injectFeatureLibraries(gadget, head);
+      injectGadgetBeacon(gadget, head, firstHeadChild);
+      injectFeatureLibraries(gadget, head, firstHeadChild);
 
       // This can be one script block.
       Element mainScriptTag = document.createElement("script");
@@ -175,16 +168,11 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       injectPreloads(gadget, mainScriptTag);
 
       // We need to inject our script before any developer scripts.
-      head.appendChild(mainScriptTag);
+      head.insertBefore(mainScriptTag, firstHeadChild);
 
       Element body = (Element)DomUtil.getFirstNamedChildNode(document.getDocumentElement(), "body");
 
       body.setAttribute("dir", bundle.getLanguageDirection());
-
-      // re append head content
-      for (Node node : existingHeadContent) {
-        head.appendChild(node);
-      }
 
       injectOnLoadHandlers(body);
 
@@ -215,16 +203,18 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         "gadgets.util.runOnLoadHandlers();"));
   }
   
-  protected void injectGadgetBeacon(Gadget gadget, Node headTag) throws GadgetException {
+  protected void injectGadgetBeacon(Gadget gadget, Node headTag, Node firstHeadChild)
+          throws GadgetException {
     Element beaconNode = headTag.getOwnerDocument().createElement("script");
     beaconNode.setTextContent(IS_GADGET_BEACON);
-    headTag.appendChild(beaconNode);
+    headTag.insertBefore(beaconNode, firstHeadChild);
   }
 
   /**
    * Injects javascript libraries needed to satisfy feature dependencies.
    */
-  protected void injectFeatureLibraries(Gadget gadget, Node headTag) throws GadgetException {
+  protected void injectFeatureLibraries(Gadget gadget, Node headTag, Node firstHeadChild)
+          throws GadgetException {
     // TODO: If there isn't any js in the document, we can skip this. Unfortunately, that means
     // both script tags (easy to detect) and event handlers (much more complex).
     GadgetContext context = gadget.getContext();
@@ -242,7 +232,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
       libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
-      headTag.appendChild(libsTag);
+      headTag.insertBefore(libsTag, firstHeadChild);
     }
 
     List<String> unsupported = Lists.newLinkedList();
@@ -284,7 +274,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
         String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
         libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
-        headTag.appendChild(libsTag);
+        headTag.insertBefore(libsTag, firstHeadChild);
       }
     } else {
       inlineResources.addAll(gadgetResources);
@@ -323,13 +313,13 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (resource.isExternal()) {
         if (inlineJs.length() > 0) {
           Element inlineTag = headTag.getOwnerDocument().createElement("script");
-          headTag.appendChild(inlineTag);
+          headTag.insertBefore(inlineTag, firstHeadChild);
           inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
           inlineJs.setLength(0);
         }
         Element referenceTag = headTag.getOwnerDocument().createElement("script");
         referenceTag.setAttribute("src", StringUtils.replace(theContent, "&", "&amp;"));
-        headTag.appendChild(referenceTag);
+        headTag.insertBefore(referenceTag, firstHeadChild);
       } else {
         inlineJs.append(theContent).append(";\n");
       }
@@ -339,7 +329,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
 
     if (inlineJs.length() > 0) {
       Element inlineTag = headTag.getOwnerDocument().createElement("script");
-      headTag.appendChild(inlineTag);
+      headTag.insertBefore(inlineTag, firstHeadChild);
       inlineTag.appendChild(headTag.getOwnerDocument().createTextNode(inlineJs.toString()));
     }
   }
@@ -401,7 +391,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
    * Injects default values for user prefs into the gadget output.
    */
   protected void injectDefaultPrefs(Gadget gadget, Node scriptTag) {
-    List<UserPref> prefs = gadget.getSpec().getUserPrefs();
+    Collection<UserPref> prefs = gadget.getSpec().getUserPrefs().values();
     Map<String, String> defaultPrefs = Maps.newHashMapWithExpectedSize(prefs.size());
     for (UserPref up : prefs) {
       defaultPrefs.put(up.getName(), up.getDefaultValue());

@@ -24,9 +24,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
-import org.apache.shindig.gadgets.rewrite.old.BaseRewriterTestCase;
-import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
-import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,16 +63,20 @@ public class DefaultContentRewriterRegistryTest extends BaseRewriterTestCase {
   }
 
   /**
-   * This test ensures that we dont call HttpRespose.getResponseAsString for content types
-   * that are not rewriteable by the default set of content rewriters. This is important
+   * This test ensures that we dont call HttpResponse.getResponseAsString if no content
+   * rewriter does so either. This is important
    * from a performance and content consistency standpoint. Because HttpResponse is final
    * we test that no new response object was created.
    */
   @Test
   public void testNoDecodeHttpResponseForUnRewriteableMimeTypes() throws Exception {
     List<ResponseRewriter> rewriters = Lists.newArrayList();
-    rewriters.add(injector.getInstance(HTMLContentRewriter.class));
-    rewriters.add(injector.getInstance(CssRequestRewriter.class));
+    rewriters.add(new ResponseRewriter() {
+      public void rewrite(HttpRequest request, HttpResponseBuilder response)
+          throws RewritingException {
+        // Do nothing.
+      } 
+    });
     registry = new DefaultResponseRewriterRegistry(rewriters, parser);
 
     HttpRequest req = control.createMock(HttpRequest.class);

@@ -147,7 +147,7 @@ public class JsonRpcServlet extends ApiServlet {
       throws ContentTypes.InvalidContentTypeException, IOException {
     String content = null;
 
-    checkContentTypes(ALLOWED_CONTENT_TYPES, request.getContentType());
+    ContentTypes.checkContentTypes(ALLOWED_CONTENT_TYPES, request.getContentType());
 
     if (formParser.isMultipartContent(request)) {
       for (FormDataItem item : formParser.parse(request)) {
@@ -157,7 +157,7 @@ public class JsonRpcServlet extends ApiServlet {
           // field or file item will not be parsed out, but will be exposed via getFormItem
           // method of RequestItem.
           if (!StringUtils.isEmpty(item.getContentType())) {
-            checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
+            ContentTypes.checkContentTypes(ContentTypes.ALLOWED_JSON_CONTENT_TYPES, item.getContentType());
           }
           content = item.getAsString();
         } else {

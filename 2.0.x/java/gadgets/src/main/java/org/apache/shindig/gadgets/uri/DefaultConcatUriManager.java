@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.uri;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.internal.Nullable;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -30,6 +29,7 @@ import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -111,16 +111,18 @@ public class DefaultConcatUriManager implements ConcatUriManager {
     List<Uri> resourceUris = ctx.getBatch();
     Map<Uri, String> snippets = Maps.newHashMapWithExpectedSize(resourceUris.size());
     
-    String splitParam = getReqVal(ctx.getContainer(), CONCAT_JS_SPLIT_PARAM);
-    if (!isAdjacent) {
+    String splitParam = config.getString(ctx.getContainer(), CONCAT_JS_SPLIT_PARAM);
+    boolean doSplit = false;
+    if (!isAdjacent && splitParam != null && !"false".equalsIgnoreCase(splitParam)) {
       uriBuilder.addQueryParameter(Param.JSON.getKey(), splitParam);
+      doSplit = true;
     }
 
     Integer i = Integer.valueOf(START_INDEX);
     for (Uri resource : resourceUris) {
       uriBuilder.addQueryParameter(i.toString(), resource.toString());
       i++;
-      if (!isAdjacent) {
+      if (doSplit) {
         snippets.put(resource, getJsSnippet(splitParam, resource));
       }
     }

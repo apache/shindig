@@ -21,8 +21,8 @@ package org.apache.shindig.gadgets.render;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.collect.Lists;
 
@@ -52,9 +52,9 @@ public class SanitizingProxyUriManager implements ProxyUriManager {
       
     for (Uri origUri : origUris) {
       UriBuilder newUri = new UriBuilder(origUri);
-      newUri.addQueryParameter(ProxyBase.SANITIZE_CONTENT_PARAM, "1");
+      newUri.addQueryParameter(Param.SANITIZE.getKey(), "1");
       if (expectedMime != null) {
-        newUri.addQueryParameter(ProxyBase.REWRITE_MIME_TYPE_PARAM, expectedMime);
+        newUri.addQueryParameter(Param.REWRITE_MIME_TYPE.getKey(), expectedMime);
       }
       sanitizedUris.add(newUri.toUri());
     }

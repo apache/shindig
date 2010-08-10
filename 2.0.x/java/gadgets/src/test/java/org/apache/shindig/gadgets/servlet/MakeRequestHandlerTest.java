@@ -23,16 +23,20 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.apache.shindig.auth.AuthInfo;
 import org.apache.shindig.auth.SecurityToken;
+import org.apache.shindig.common.servlet.HttpUtilTest;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
 import org.easymock.IAnswer;
 import org.json.JSONArray;
@@ -41,9 +45,11 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -94,7 +100,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
   @Before
   public void setUp() {
     expect(request.getMethod()).andReturn("POST").anyTimes();
-    expect(request.getParameter(ProxyBase.URL_PARAM))
+    expect(request.getParameter(Param.URL.getKey()))
         .andReturn(REQUEST_URL.toString()).anyTimes();
   }
 
@@ -131,7 +137,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   @Test
   public void testGetRequestWithRefresh() throws Exception {
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("120").anyTimes();
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("120").anyTimes();
 
     Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
     expect(pipeline.execute(capture(requestCapture))).andReturn(new HttpResponse(RESPONSE_BODY));
@@ -147,14 +153,18 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
 
   @Test
   public void testGetRequestWithBadTtl() throws Exception {
-    expect(request.getParameter(ProxyBase.REFRESH_PARAM)).andReturn("foo").anyTimes();
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("foo").anyTimes();
 
     Capture<HttpRequest> requestCapture = new Capture<HttpRequest>();
     expect(pipeline.execute(capture(requestCapture))).andReturn(new HttpResponse(RESPONSE_BODY));
 
     replay();
 
-    handler.fetch(request, recorder);
+    try {
+      handler.fetch(request, recorder);
+    } catch (GadgetException e) {
+      // Expected - catch now occurs at the MakeRequestServlet level.
+    }
 
     HttpRequest httpRequest = requestCapture.getValue();
     assertEquals(null, recorder.getHeader("Cache-Control"));
@@ -422,7 +432,7 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
         .andReturn(AuthType.SIGNED.toString()).atLeastOnce();
     replay();
 
-    handler.doFetch(request, recorder);
+    handler.fetch(request, recorder);
   }
 
   @Test
@@ -485,5 +495,116 @@ public class MakeRequestHandlerTest extends ServletTestFixture {
     assertNotNull(locations);
     assertEquals(1, locations.length());
     assertEquals("somewhere else", locations.get(0));
+  }
+
+  @Test
+  public void testSetResponseHeaders() throws Exception {
+    HttpResponse results = new HttpResponseBuilder().create();
+    replay();
+
+    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+
+    // Just verify that they were set. Specific values are configurable.
+    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
+    assertNotNull("Cache-Control header not set", recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+  }
+
+  @Test
+  public void testSetContentTypeHeader() throws Exception {
+    HttpResponse results = new HttpResponseBuilder()
+        .create();
+    replay();
+    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+
+    assertEquals("application/octet-stream", recorder.getHeader("Content-Type"));
+  }
+
+  @Test
+  public void testSetResponseHeadersNoCache() throws Exception {
+    Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    headers.put("Pragma", Arrays.asList("no-cache"));
+    HttpResponse results = new HttpResponseBuilder()
+        .addHeader("Pragma", "no-cache")
+        .create();
+    replay();
+
+    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+
+    // Just verify that they were set. Specific values are configurable.
+    assertNotNull("Expires header not set", recorder.getHeader("Expires"));
+    assertEquals("no-cache", recorder.getHeader("Pragma"));
+    assertEquals("no-cache", recorder.getHeader("Cache-Control"));
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+  }
+
+  @Test
+  public void testSetResponseHeadersForceParam() throws Exception {
+    HttpResponse results = new HttpResponseBuilder().create();
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("30").anyTimes();
+    replay();
+
+    // not sure why but the following line seems to help this test past deterministically 
+    System.out.println("request started at " + HttpUtilTest.testStartTime);
+    MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    HttpUtilTest.checkCacheControlHeaders(HttpUtilTest.testStartTime, recorder, 30, false);
+    assertEquals("attachment;filename=p.txt", recorder.getHeader("Content-Disposition"));
+  }
+
+  @Test
+  public void testSetResponseHeadersForceParamInvalid() throws Exception {
+    HttpResponse results = new HttpResponseBuilder().create();
+    expect(request.getParameter(Param.REFRESH.getKey())).andReturn("foo").anyTimes();
+    replay();
+
+    try {
+      MakeRequestHandler.setResponseHeaders(request, recorder, results);
+    } catch (GadgetException e) {
+      assertEquals(GadgetException.Code.INVALID_PARAMETER, e.getCode());
+    }
+  }
+
+  @Test
+  public void testGetParameter() {
+    expect(request.getParameter("foo")).andReturn("bar");
+    replay();
+
+    assertEquals("bar", MakeRequestHandler.getParameter(request, "foo", "not foo"));
+  }
+
+  @Test
+  public void testGetParameterWithNullValue() {
+    expect(request.getParameter("foo")).andReturn(null);
+    replay();
+
+    assertEquals("not foo", MakeRequestHandler.getParameter(request, "foo", "not foo"));
+  }
+
+  @Test
+  public void testGetContainerWithContainer() {
+    expect(request.getParameter(Param.CONTAINER.getKey())).andReturn("bar");
+    replay();
+
+    assertEquals("bar", MakeRequestHandler.getContainer(request));
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testGetContainerWithSynd() {
+    expect(request.getParameter(Param.CONTAINER.getKey())).andReturn(null);
+    expect(request.getParameter(Param.SYND.getKey())).andReturn("syndtainer");
+    replay();
+
+    assertEquals("syndtainer", MakeRequestHandler.getContainer(request));
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testGetContainerNoParam() {
+    expect(request.getParameter(Param.CONTAINER.getKey())).andReturn(null);
+    expect(request.getParameter(Param.SYND.getKey())).andReturn(null);
+    replay();
+
+    assertEquals(ContainerConfig.DEFAULT_CONTAINER, MakeRequestHandler.getContainer(request));
   }
 }

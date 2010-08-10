@@ -20,13 +20,13 @@ package org.apache.shindig.gadgets.uri;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.collect.Lists;
-import com.google.inject.internal.ImmutableList;
 
 public class PassthruManager implements ProxyUriManager {
   private UriStatus expectStatus = UriStatus.VALID_VERSIONED;

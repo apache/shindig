@@ -58,7 +58,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 
@@ -199,7 +198,7 @@ public class SpiDatabaseBootstrap {
     }
     
     // Delete all data
-    entityManager.createNativeQuery("delete from FriendDb where 1 > 0").executeUpdate();
+    entityManager.createNativeQuery("delete from friend where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from activity_media where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from url where 1 > 0").executeUpdate();
     entityManager.createNativeQuery("delete from template_params where 1 > 0").executeUpdate();

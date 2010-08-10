@@ -19,7 +19,7 @@
 package org.apache.shindig.auth;
 
 /**
- * Exceptions thrown by SecurityTokenDecoder implementations.
+ * Exceptions thrown by SecurityTokenCodec implementations.
  */
 public class SecurityTokenException extends Exception {
   public SecurityTokenException(String message) {

@@ -138,6 +138,7 @@ class TemplateParser {
         if (isset($childNode->tagName) && ! empty($childNode->tagName)) {
           $nodeParam = ($pos = strpos($childNode->tagName, ':')) ? trim(substr($childNode->tagName, $pos + 1)) : trim($childNode->tagName);
           $this->dataContext['_os_render_nodes'][$nodeParam] = $childNode;
+          $myContext[$nodeParam] = $this->nodeAttributesToScope($childNode);
         }
       }
     }
@@ -154,7 +155,6 @@ class TemplateParser {
         $importedNode = $ownerDocument->importNode($childNode, true);
         $importedNode = $node->parentNode->insertBefore($importedNode, $node);
       }
-      $node->parentNode->removeChild($node);
     }
   }
 
@@ -286,6 +286,7 @@ class TemplateParser {
         }
       }
     }
+
     // if a repeat attribute was found, don't recurse on it's child nodes, the repeat handling already did that
     if (isset($node->childNodes) && $node->childNodes->length > 0) {
       $removeNodes = array();
@@ -392,14 +393,17 @@ class TemplateParser {
 
       case 'os:name':
         $this->parseLibrary('os:Name', $node);
+        return $node;
         break;
 
       case 'os:badge':
         $this->parseLibrary('os:Badge', $node);
+        return $node;
         break;
 
       case 'os:peopleselector':
         $this->parseLibrary('os:PeopleSelector', $node);
+        return $node;
         break;
 
       case 'os:html':

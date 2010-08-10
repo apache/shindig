@@ -102,10 +102,10 @@
 //"gadgets.securityTokenKeyFile" : "/path/to/key/file.txt",
 
 // URI for the default shindig test instance.
-"defaultShindigTestHost": "http://localhost:${SERVER_PORT}",
+"defaultShindigTestHost": "http://${SERVER_HOST}:${SERVER_PORT}",
 
 // Authority (host:port without scheme) for the proxy and concat servlets.
-"defaultShindigProxyConcatAuthority": "localhost:${SERVER_PORT}",
+"defaultShindigProxyConcatAuthority": "${SERVER_HOST}:${SERVER_PORT}",
 
 // Default Uri config: these must be overridden - specified here for testing purposes
 "gadgets.uri.iframe.unlockedDomain": "${Cur['defaultShindigTestHost']}",
@@ -149,6 +149,74 @@
       "aliases" : ["FULL_PAGE"]
     }
   },
+  "tabs": {
+    "css" : [
+      ".tablib_table {",
+      "width: 100%;",
+      "border-collapse: separate;",
+      "border-spacing: 0px;",
+      "empty-cells: show;",
+      "font-size: 11px;",
+      "text-align: center;",
+    "}",
+    ".tablib_emptyTab {",
+      "border-bottom: 1px solid #676767;",
+      "padding: 0px 1px;",
+    "}",
+    ".tablib_spacerTab {",
+      "border-bottom: 1px solid #676767;",
+      "padding: 0px 1px;",
+      "width: 1px;",
+    "}",
+    ".tablib_selected {",
+      "padding: 2px;",
+      "background-color: #ffffff;",
+      "border: 1px solid #676767;",
+      "border-bottom-width: 0px;",
+      "color: #3366cc;",
+      "font-weight: bold;",
+      "width: 80px;",
+      "cursor: default;",
+    "}",
+    ".tablib_unselected {",
+      "padding: 2px;",
+      "background-color: #dddddd;",
+      "border: 1px solid #aaaaaa;",
+      "border-bottom-color: #676767;",
+      "color: #000000;",
+      "width: 80px;",
+      "cursor: pointer;",
+    "}",
+    ".tablib_navContainer {",
+      "width: 10px;",
+      "vertical-align: middle;",
+    "}",
+    ".tablib_navContainer a:link, ",
+    ".tablib_navContainer a:visited, ",
+    ".tablib_navContainer a:hover {",
+      "color: #3366aa;",
+      "text-decoration: none;",
+    "}"
+    ]
+  },
+  "minimessage": {
+      "css": [
+        ".mmlib_table {",
+        "width: 100%;",
+        "font: bold 9px arial,sans-serif;",
+        "background-color: #fff4c2;",
+        "border-collapse: separate;",
+        "border-spacing: 0px;",
+        "padding: 1px 0px;",
+      "}",
+      ".mmlib_xlink {",
+        "font: normal 1.1em arial,sans-serif;",
+        "font-weight: bold;",
+        "color: #0000cc;",
+        "cursor: pointer;",
+      "}"
+     ]
+  },
   "rpc" : {
     // Path to the relay file. Automatically appended to the parent
     // parameter if it passes input validation and is not null.
@@ -188,7 +256,7 @@
     // Specifying a binding to "container.listMethods" instructs osapi to dynamicaly introspect the services
     // provided by the container and delay the gadget onLoad handler until that introspection is
     // complete.
-    // Alternatively a container can directly configure services here rather than having them 
+    // Alternatively a container can directly configure services here rather than having them
     // introspected. Simply list out the available servies and omit "container.listMethods" to
     // avoid the initialization delay caused by gadgets.rpc
     // E.g. "gadgets.rpc" : ["activities.requestCreate", "messages.requestSend", "requestShareApp", "requestPermission"]
@@ -196,7 +264,7 @@
   },
   "osapi" : {
     // The endpoints to query for available JSONRPC/REST services
-    "endPoints" : [ "http://%host%/rpc" ]                   
+    "endPoints" : [ "http://%host%/rpc" ]
   },
   "osml": {
     // OSML library resource.  Can be set to null or the empty string to disable OSML

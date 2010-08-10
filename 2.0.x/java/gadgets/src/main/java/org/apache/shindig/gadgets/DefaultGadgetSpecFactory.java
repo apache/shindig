@@ -66,10 +66,6 @@ public class DefaultGadgetSpecFactory extends AbstractSpecFactory<GadgetSpec>
       try 
       {
         Uri uri = RAW_GADGET_URI;
-        // For accelerate page, pass in page url instead of fake one:
-        if (HtmlAccelServlet.isAccel(context)) {
-          uri = context.getUrl();
-        }
         return new GadgetSpec(uri, XmlUtil.parse(rawxml), rawxml);
       } catch (XmlException e) {
         throw new SpecParserException(e);

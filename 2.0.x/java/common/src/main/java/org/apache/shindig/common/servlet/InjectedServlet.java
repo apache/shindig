@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.servlet;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 
 import javax.servlet.ServletConfig;
@@ -32,21 +33,29 @@ import javax.servlet.http.HttpServlet;
  */
 public abstract class InjectedServlet extends HttpServlet {
   protected Injector injector;
+  protected transient boolean initialized = false;
 
-  @Override public void init(ServletConfig config) throws ServletException {
-   super.init(config);
-   ServletContext context = config.getServletContext();
-    injector = (Injector)
-       context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
-   if (injector == null) {
-     injector = (Injector)
-       context.getAttribute(GuiceServletContextListener.INJECTOR_NAME);
-     if (injector == null) {
-       throw new UnavailableException(
-           "Guice Injector not found! Make sure you registered " +
-           GuiceServletContextListener.class.getName() + " as a listener");
-     }
-   }
-   injector.injectMembers(this);
- }
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    ServletContext context = config.getServletContext();
+    injector = (Injector) context.getAttribute(GuiceServletContextListener.INJECTOR_ATTRIBUTE);
+    if (injector == null) {
+      injector = (Injector) context.getAttribute(GuiceServletContextListener.INJECTOR_NAME);
+      if (injector == null) {
+        throw new UnavailableException(
+            "Guice Injector not found! Make sure you registered " +
+                GuiceServletContextListener.class.getName() + " as a listener");
+      }
+    }
+    injector.injectMembers(this);
+    initialized = true;
+  }
+
+  /**
+   * Called in each guice injected method to insure we are not initialized twice
+   */
+  protected void checkInitialized() {
+    Preconditions.checkState(!initialized, "Servlet already initialized");
+  }
 }

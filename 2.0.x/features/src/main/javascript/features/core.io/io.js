@@ -132,9 +132,16 @@ gadgets.io = function() {
       return;
     }
     var txt = xobj.responseText;
+    
     // remove unparseable cruft used to prevent cross-site script inclusion
-    txt = txt.substr(UNPARSEABLE_CRUFT.length);
-    // We are using eval directly here because the outer response comes from a
+    var offset = txt.indexOf(UNPARSEABLE_CRUFT) + UNPARSEABLE_CRUFT.length;
+
+    // If no cruft then just return without a callback - avoid JS errors
+    // TODO craft an error response?
+    if (offset < UNPARSEABLE_CRUFT.length) return;
+    txt = txt.substr(offset)
+
+    // We are using eval directly here  because the outer response comes from a
     // trusted source, and json parsing is slow in IE.
     var data = eval("(" + txt + ")");
     data = data[url];
@@ -507,7 +514,7 @@ gadgets.io = function() {
           replace("%rawurl%", url).
           replace("%refresh%", encodeURIComponent(refresh)).
           replace("%gadget%", encodeURIComponent(urlParams.url)).
-          replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd)).
+          replace("%container%", encodeURIComponent(urlParams.container || urlParams.synd || "default")).
           replace("%rewriteMime%", rewriteMimeParam);
       if (ret.indexOf('//') == 0) {
         ret = window.location.protocol + ret;

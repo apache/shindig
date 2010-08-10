@@ -29,9 +29,9 @@ import org.apache.shindig.gadgets.rewrite.RewriterTestBase;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
 import org.apache.shindig.gadgets.rewrite.MutableContent;
-import org.apache.shindig.gadgets.servlet.ProxyBase;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.PassthruManager;
+import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -53,7 +53,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
   private final GadgetContext sanitaryGadgetContext = new GadgetContext() {
     @Override
     public String getParameter(String name) {
-      return ProxyBase.SANITIZE_CONTENT_PARAM.equals(name) ? "1" : null;
+      return Param.SANITIZE.getKey().equals(name) ? "1" : null;
     }
     
     @Override
@@ -82,12 +82,12 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     super.setUp();
     
     gadget = new Gadget().setContext(unsanitaryGadgetContext);
-    gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+    gadget.setSpec(new GadgetSpec(Uri.parse("http://www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
     gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
 
     gadgetNoCacheAndDebug = new Gadget().setContext(unsanitaryGadgetContextNoCacheAndDebug);
-    gadgetNoCacheAndDebug.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+    gadgetNoCacheAndDebug.setSpec(new GadgetSpec(Uri.parse("http://www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='x-html-sanitized'/></Module>"));
     gadgetNoCacheAndDebug.setCurrentView(gadgetNoCacheAndDebug.getSpec().getViews().values().iterator().next());
   }
@@ -207,7 +207,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     // since this does not work in IE
     String sanitized = 
         "<html><head><style>"
-      + "@import url('http://host.com/proxy?url=www.example.org%2Fwww.evil.com%2Fx.js&"
+      + "@import url('http://host.com/proxy?url=http%3A%2F%2Fwww.example.org%2Fwww.evil.com%2Fx.js&"
       + "sanitize=1&rewriteMime=text%2Fcss');"
       + "</style></head><body></body></html>";
     String rewritten = rewrite(gadget, markup, set("style"), set());
@@ -222,7 +222,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
     // since this does not work in IE
     String sanitized = 
         "<html><head><style>"
-      + "@import url('http://host.com/proxy?url=www.example.org%2Fwww.evil.com%2Fx.js&sanitize=1"
+      + "@import url('http://host.com/proxy?url=http%3A%2F%2Fwww.example.org%2Fwww.evil.com%2Fx.js&sanitize=1"
       + "&rewriteMime=text%2Fcss');</style></head><body></body></html>";
     String rewritten = rewrite(gadgetNoCacheAndDebug, markup, set("style"), set());
     assertEquals(sanitized, rewritten);
@@ -381,7 +381,7 @@ public class SanitizingGadgetRewriterTest extends RewriterTestBase {
         "<b>bold text</b></p><b>Bold text</b></body></html>";
 
     Gadget gadget = new Gadget().setContext(sanitaryGadgetContext);
-    gadget.setSpec(new GadgetSpec(Uri.parse("www.example.org/gadget.xml"),
+    gadget.setSpec(new GadgetSpec(Uri.parse("http://www.example.org/gadget.xml"),
         "<Module><ModulePrefs title=''/><Content type='html'/></Module>"));
     gadget.setCurrentView(gadget.getSpec().getViews().values().iterator().next());
     assertEquals(sanitized, rewrite(gadget, markup, set("p", "b", "style"), set()));

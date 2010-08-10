@@ -32,21 +32,18 @@
         ${My.person.name.formatted}
       </os:If>
       <a href="${My.person.profileUrl}" if="${My.person.profileUrl}">${My.person.name.formatted}</a>
-    </div> 
+    </div>
   </Template>
   <TemplateDef tag="os:PeopleSelector">
     <Template>
-      <select onchange="os_PeopleSelector_onchange(this)" 
-          name="${My.inputName}" 
-          multiple="${My.multiple}"
-          x-var="${My.var}"
-          x-max="${My.max}"
-          x-onselect="${My.onselect}">
-        <option repeat="${My.group}" value="${Cur.id}" selected="${Cur.id == My.selected}">${Cur.name.formatted}</option>          
+      <select onchange="os_PeopleSelector_onchange(this, '${My.var}', ${My.max ? My.max : 0}, '${My.onselect}')"
+          name="${My.inputName}"
+          multiple="${My.multiple}">
+        <option repeat="${My.group}" value="${Cur.id}" selected="${Cur.id == My.selected}">${Cur.name.formatted}</option>
       </select>
     </Template>
     <JavaScript><![CDATA[
-        function os_PeopleSelector_onchange(select) {
+        function os_PeopleSelector_onchange(select, varAttr, maxAttr, onSelectAttr) {
           var selected;
           if (!select.multiple) {
             selected = select.options[select.selectedIndex].value;
@@ -57,13 +54,12 @@
                 selected.push(select.options[i].value);
               }
             }
-            var max = select.getAttribute("x-max");
             try {
-              max = 1*max;
+              maxAttr = 1*maxAttr;
             } catch (e) {
-              max = 0;
+              maxAttr = 0;
             }
-            if (max && selected.length > max && select['x-selected']) {
+            if (maxAttr && selected.length > maxAttr && select['x-selected']) {
               selected = select['x-selected'];
               for (var i = 0; i < select.options.length; i++) {
                 select.options[i].selected = false;
@@ -76,20 +72,19 @@
               }
             }
           }
-          select['x-selected'] = selected;          
-          var varAttr = select.getAttribute("x-var");
+          select['x-selected'] = selected;
           if (varAttr) {
             if (opensocial.data) {
               opensocial.data.getDataContext().putDataSet(varAttr, selected);
             }
           }
-          var onSelect = select.getAttribute("x-onselect");
-          if (onSelect) {
-            if (window[onSelect] && typeof(window[onSelect]) == 'function') {
-              window[onSelect](selected);
+
+          if (onSelectAttr) {
+            if (window[onSelectAttr] && typeof(window[onSelectAttr]) == 'function') {
+              window[onSelectAttr](selected);
             } else {
               if (!select['x-onselect-fn']) {
-                select['x-onselect-fn'] = new Function(onSelect);
+                select['x-onselect-fn'] = new Function(onSelectAttr);
               }
               select['x-onselect-fn'].apply(select);
             }

@@ -232,8 +232,11 @@ public class PipelinedDataTest {
     String xml = "<Content><ActivitiesRequest xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" "
         + " key=\"key\""
         + " userId=\"@owner,@viewer\""
+        + " startIndex=\"10\""
+        + " count=\"20\""
         + " fields=\"foo,bar\""
         + "/></Content>";
+
 
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), null);
     assertTrue(socialData.needsOwner());
@@ -241,6 +244,8 @@ public class PipelinedDataTest {
 
     JSONObject expected = new JSONObject("{method: 'activities.get', id: 'key', params:"
         + "{userId: ['@owner','@viewer'],"
+        + "startIndex: 10,"
+        + "count: 20,"
         + "fields: ['foo','bar']"
         + "}}");
 

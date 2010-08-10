@@ -18,43 +18,62 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
-
 import org.apache.shindig.common.servlet.InjectedServlet;
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
+import org.apache.shindig.gadgets.http.HttpResponse;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
  */
 public class HtmlAccelServlet extends InjectedServlet {
+  private static final long serialVersionUID = -424353123863813052L;
 
-  private AccelHandler accelHandler;
-  private static Logger logger = Logger.getLogger(
+  private static final Logger logger = Logger.getLogger(
       HtmlAccelServlet.class.getName());
-
-  public static final String ACCEL_GADGET_PARAM_NAME = "accelGadget";
-  public static final String ACCEL_GADGET_PARAM_VALUE = "true";
+  private transient AccelHandler accelHandler;
 
   @Inject
   public void setHandler(AccelHandler accelHandler) {
+    checkInitialized();
     this.accelHandler = accelHandler;
   }
 
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
-    logger.fine("accel request = " + request.toString());
-    accelHandler.fetch(request, response);
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
   }
 
-  public static boolean isAccel(GadgetContext context) {
-    return context.getParameter(HtmlAccelServlet.ACCEL_GADGET_PARAM_NAME) ==
-        HtmlAccelServlet.ACCEL_GADGET_PARAM_VALUE;
+  @Override
+  protected void doGet(HttpServletRequest request, HttpServletResponse servletResponse)
+      throws IOException {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Accel request = " + request.toString());
+    }
+    
+    HttpRequest req = ServletUtil.fromHttpServletRequest(request);
+    HttpResponse response = null;
+    try {
+      response = accelHandler.fetch(req);
+    } catch (GadgetException e) {
+      response = ServletUtil.errorResponse(e);
+    }
+    
+    ServletUtil.copyResponseToServlet(response, servletResponse);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    doGet(request, response);
   }
 }

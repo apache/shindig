@@ -210,24 +210,11 @@ gadgets.MiniMessage.prototype.dismissMessage = function(message) {
 };
 
 // Injects the default stylesheet for mini-messages.
-gadgets.MiniMessage.addCSS_([
-  '.mmlib_table {',
-    'width: 100%;',
-    'font: bold 9px arial,sans-serif;',
-    'background-color: #fff4c2;',
-    'border-collapse: separate;',
-    'border-spacing: 0px;',
-    'padding: 1px 0px;',
-  '}',
-  '.mmlib_xlink {',
-    'font: normal 1.1em arial,sans-serif;',
-    'font-weight: bold;',
-    'color: #0000cc;',
-    'cursor: pointer;',
-  '}'
-].join(''));
+gadgets.config.register("minimessage", {}, function (configuration) { 
+  // Injects the default stylesheet for mini-messages 
+  gadgets.MiniMessage.addCSS_( configuration.minimessage.css.join('')); 
+}); 
 
 // Alias for legacy code
-
 var _IG_MiniMessage = gadgets.MiniMessage;
 

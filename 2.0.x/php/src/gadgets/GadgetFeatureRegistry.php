@@ -25,13 +25,19 @@
  *
  */
 class GadgetFeatureRegistry {
-  public $features;
-  private $coreDone = false;
-  private $coreFeaturs;
+  public $features = array();
+  private $coreFeatures;
   private $sortedFeatures;
   
   public function __construct($featurePath) {
-    $this->registerFeatures($featurePath);
+    if (is_array($featurePath)) {
+      foreach ($featurePath as $path) {
+        $this->registerFeatures($path);
+      }
+    } else {
+      $this->registerFeatures($featurePath);
+    }
+    $this->processFeatures();
   }
 
   public function getFeaturesContent($features, GadgetContext $context, $isGadgetContext) {
@@ -134,7 +140,6 @@ class GadgetFeatureRegistry {
    * @param string $featurePath path to scan
    */
   private function registerFeatures($featurePath) {
-    $this->features = array();
     // Load the features from the shindig/features/features.txt file
     $featuresFile = $featurePath . '/features.txt';
     if (File::exists($featuresFile)) {
@@ -149,6 +154,12 @@ class GadgetFeatureRegistry {
         }
       }
     }
+  }
+
+  /**
+   * gets core features and sorts features
+   */
+  private function processFeatures() {
     // Determine the core features
     $this->coreFeatures = array();
     foreach ($this->features as $entry) {
@@ -162,7 +173,7 @@ class GadgetFeatureRegistry {
         continue;
       }
       $featureName = strtolower(substr($entry['name'], 0, strlen('core')));
-      if ($featureName != 'core' && $featureName != 'glob') {
+      if ($featureName != 'core' && $featureName != 'glob' && $entry['name'] != 'shindig.auth') {
         $this->features[$key]['deps'] = array_merge($entry['deps'], $this->coreFeatures);
       }
     }

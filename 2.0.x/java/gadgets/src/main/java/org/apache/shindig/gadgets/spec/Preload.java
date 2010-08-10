@@ -62,7 +62,7 @@ public class Preload implements RequestAuthenticationInfo {
     if (viewNames.length() == 0) {
       this.views = ImmutableSet.of();
     } else {
-      this.views = ImmutableSet.of(viewNames.trim().split("\\s*,+\\s*"));
+      this.views = ImmutableSet.copyOf(viewNames.trim().split("\\s*,+\\s*"));
     }
 
     auth = AuthType.parse(XmlUtil.getAttribute(preload, "authz"));

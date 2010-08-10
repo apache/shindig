@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.conversion.BeanConverter;
@@ -54,12 +55,9 @@ public class SocialRequestItem extends BaseRequestItem {
   public Set<UserId> getUsers() {
     List<String> ids = getListParameter(USER_ID);
     if (ids.isEmpty()) {
-      if (token.getViewerId() != null) {
-        // Assume @me
-        return ImmutableSet.of(UserId.fromJson("@me"));
-      } else {
-        throw new IllegalArgumentException("No userId provided and viewer not available");
-      }
+      Preconditions.checkArgument(token.getViewerId() != null, "No userId provided and viewer not available");
+      // Assume @me
+      return ImmutableSet.of(UserId.fromJson("@me"));
     }
     ImmutableSet.Builder<UserId> userIds = ImmutableSet.builder();
     for (String id : ids) {

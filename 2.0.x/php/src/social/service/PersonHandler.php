@@ -20,11 +20,11 @@
 
 class PersonHandler extends DataRequestHandler {
 
-  private static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
-  private static $DEFAULT_FIELDS = array('id', 'displayName', 'gender', 'thumbnailUrl');
+  protected static $PEOPLE_PATH = "/people/{userId}/{groupId}/{personId}";
+  protected static $DEFAULT_FIELDS = array('id', 'displayName', 'gender', 'thumbnailUrl');
 
-  private static $ANONYMOUS_ID_TYPE = array('viewer', 'me');
-  private static $ANONYMOUS_VIEWER = array(
+  protected static $ANONYMOUS_ID_TYPE = array('viewer', 'me');
+  protected static $ANONYMOUS_VIEWER = array(
       'isOwner' => false,
       'isViewer' => true,
       'name' => 'anonymous_user',

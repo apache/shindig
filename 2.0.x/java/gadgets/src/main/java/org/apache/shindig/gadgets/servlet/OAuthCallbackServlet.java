@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,10 +52,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class OAuthCallbackServlet extends InjectedServlet {
 
+  private static final long serialVersionUID = 7126255229334669172L;
+  
   public static final String CALLBACK_STATE_PARAM = "cs";
-  
   public static final String REAL_DOMAIN_PARAM = "d";
-  
   private static final int ONE_HOUR_IN_SECONDS = 3600;
   
   // This bit of magic passes the entire callback URL into the opening gadget for later use.
@@ -78,12 +80,17 @@ public class OAuthCallbackServlet extends InjectedServlet {
     "</body>\n" +
     "</html>\n";
 
-  private BlobCrypter stateCrypter;
-  
+  private transient BlobCrypter stateCrypter;
+
   @Inject
-  public void setStateCrypter(
-      @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter) {
+  public void setStateCrypter(@Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter) {
+    checkInitialized();
     this.stateCrypter = stateCrypter;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
   }
 
   @Override

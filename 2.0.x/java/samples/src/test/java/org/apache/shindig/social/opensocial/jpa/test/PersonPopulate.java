@@ -246,6 +246,7 @@ public class PersonPopulate {
     return list;
   }
 
+  @SuppressWarnings("unused")
   private Organization getDbOrganization(int i, String type) {
 
     String targetOrg = "Organization_" + (i % 10);

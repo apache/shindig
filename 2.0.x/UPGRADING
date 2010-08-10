@@ -5,7 +5,6 @@ Almost all interfaces have been updated from 1.0.x -> 2.0.x.  The
 following information is not complete.
 
 
-
 == container.js config changes ==
 
 * gadgets.parentOrigins: Default ["*"] (NEW)
@@ -16,13 +15,15 @@ An array of valid origin domains for the container.
 
 The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and /social/rpc to just /rpc
 
+* css for tabs/minimessage is now included in container.js
 
 == Java Dependency Changes ==
 
 Too many to mention.  Check the top-level pom.xml for all the new versions.
 Here are some highlights:
 
-* caja r3034 -> r4067
+* guava replaces google-collections
+* caja r3034 -> r4209
 * guice 1.0->2.0
 * guice-multibindings (NEW)
 * nekohtml 1.9.9 -> 1.9.13
@@ -33,6 +34,7 @@ Here are some highlights:
 * ehcache 1.5 -> 1.6.2
 * xstream 1.2 -> 1.3.1
 * xpp3 1.1.3.3 -> 1.1.4c
+* commons-coded 1.3 -> 1.4
 
 == Java Interface Changes ==
 
@@ -121,6 +123,12 @@ is easy, just use the following syntax:
 The long value annotated with the name "org.apache.shindig.serviceExpirationDurationMinutes" has
 been moved to shindig/common/conf/shindig.properties.  Guice 2.0 can inject Long values from Strings
 automatically.
+
+* Rename SecurityTokenDecoder to SecurityTokenCodec
+
+This class is renamed to provide a single place to capture both encoding and decoding work
+for gadget security tokens. This also affects classes previously implementing SecurityTokenDecoder
+and previously extending DefaultSecurityTokenDecoder.
 
 == PHP Changes ==
 

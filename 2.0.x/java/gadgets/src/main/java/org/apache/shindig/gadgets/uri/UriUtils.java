@@ -19,54 +19,65 @@
 package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableSet;
-
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import java.io.IOException;
+import java.util.logging.Logger;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Utility functions related to URI and Http servlet response management.
  */
 public class UriUtils {
+  private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
   /**
    * Enum of disallowed response headers that should not be passed on as is to
    * the user. The webserver serving out the response should be responsible
    * for filling these.
    */
-  public enum DisallowedResponseHeaders {
+  public enum DisallowedHeaders {
     // Directives controlled by the serving infrastructure.
     OUTPUT_TRANSFER_DIRECTIVES(ImmutableSet.of(
         "content-length", "transfer-encoding", "content-encoding", "server",
         "accept-ranges")),
 
     CACHING_DIRECTIVES(ImmutableSet.of("vary", "expires", "date", "pragma",
-                                       "cache-control")),
+                                       "cache-control", "etag", "last-modified")),
 
-    CLIENT_STATE_DIRECTIVES(ImmutableSet.of("set-cookie", "www-authenticate"));
+    CLIENT_STATE_DIRECTIVES(ImmutableSet.of("set-cookie", "www-authenticate")),
+
+    // Headers that the fetcher itself would like to fill. For example,
+    // httpclient library crashes if Content-Length header is set in the
+    // request being fetched.
+    POST_INCOMPATIBLE_DIRECTIVES(ImmutableSet.of("content-length"));
 
     // Miscellaneous headers we should take care of, but are left for now.
     // "set-cookie", "content-length", "content-encoding", "etag",
     // "last-modified" ,"accept-ranges", "vary", "expires", "date",
     // "pragma", "cache-control", "transfer-encoding", "www-authenticate"
 
-    private Set<String> responseHeaders;
-    DisallowedResponseHeaders(Set<String> responseHeaders) {
-      this.responseHeaders = responseHeaders;
+    private Set<String> disallowedHeaders;
+    DisallowedHeaders(Set<String> disallowedHeaders) {
+      this.disallowedHeaders = disallowedHeaders;
     }
 
-    public Set<String> getResponseHeaders() {
-      return responseHeaders;
+    public Set<String> getDisallowedHeaders() {
+      return disallowedHeaders;
     }
   }
 
   /**
    * Returns true if the header name is valid.
-   * NOTE: RFC 822 section 3.1.2 describes the structure of header fields. 
+   * NOTE: RFC 822 section 3.1.2 describes the structure of header fields.
+   * According to the RFC, a header name (or field-name) must be composed of printable ASCII
+   * characters (i.e., characters that have values between 33. and 126. decimal, except colon).
    * @param name The header name.
    * @return True if the header name is valid, false otherwise.
    */
@@ -88,11 +99,24 @@ public class UriUtils {
   /**
    * Returns true if the header value is valid.
    * NOTE: RFC 822 section 3.1.2 describes the structure of header fields.
+   * According to the RFC, a header value (or field-body) may be composed of any ASCII characters,
+   * except CR or LF.
    * @param val The header value.
    * @return True if the header value is valid, false otherwise.
    */
   public static boolean isValidHeaderValue(String val) {
-    // TODO: complete this.
+    char[] dst = new char[val.length()];
+    val.getChars(0, val.length(), dst, 0);
+
+    for (char c : dst) {
+      if (c == 13 || c == 10) {
+        // CR and LF.
+        return false;
+      }
+      if (c > 127) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -101,32 +125,124 @@ public class UriUtils {
    *   response.
    * @param data The http response when fetching the requested accel uri.
    * @param resp The servlet response to return back to client.
-   * @param disallowedResponseHeaderses Disallowed response headers to omit from the response
+   * @param remapInternalServerError If true, then SC_INTERNAL_SERVER_ERROR is
+   *   remapped to SC_BAD_GATEWAY.
+   * @param setHeaders If true, then setHeader method of HttpServletResponse is
+   *   called, otherwise addHeader is called for every header.
+   * @param disallowedResponseHeaders Disallowed response headers to omit from the response
    *   returned to the user. 
    * @throws IOException In case the http response was not successful.
    */
   public static void copyResponseHeadersAndStatusCode(
-      HttpResponse data, HttpServletResponse resp,
-      DisallowedResponseHeaders... disallowedResponseHeaderses)
+      HttpResponse data, HttpResponseBuilder resp,
+      boolean remapInternalServerError,
+      boolean setHeaders,
+      DisallowedHeaders... disallowedResponseHeaders)
       throws IOException {
     // Pass original return code:
-    resp.setStatus(data.getHttpStatusCode());
+    resp.setHttpStatusCode(data.getHttpStatusCode());
 
     Set<String> allDisallowedHeaders = new HashSet<String>();
-    for (DisallowedResponseHeaders h : disallowedResponseHeaderses) {
-      allDisallowedHeaders.addAll(h.getResponseHeaders());
+    for (DisallowedHeaders h : disallowedResponseHeaders) {
+      allDisallowedHeaders.addAll(h.getDisallowedHeaders());
     }
 
     for (Map.Entry<String, String> entry : data.getHeaders().entries()) {
       if (isValidHeaderName(entry.getKey()) && isValidHeaderValue(entry.getValue()) &&
           !allDisallowedHeaders.contains(entry.getKey().toLowerCase())) {
-        resp.setHeader(entry.getKey(), entry.getValue());
+        try {
+          if (setHeaders) {
+            resp.setHeader(entry.getKey(), entry.getValue());
+          } else {
+            resp.addHeader(entry.getKey(), entry.getValue());
+          }
+        } catch (IllegalArgumentException e) {
+          // Skip illegal header
+          LOG.warning("Skipping illegal header:  " + entry.getKey() + ":" + entry.getValue());
+        }
       }
     }
 
-    // External "internal error" should be mapped to gateway error.
-    if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
-      resp.sendError(HttpResponse.SC_BAD_GATEWAY);
+    if (remapInternalServerError) {
+      // External "internal error" should be mapped to gateway error.
+      if (data.getHttpStatusCode() == HttpResponse.SC_INTERNAL_SERVER_ERROR) {
+        resp.setHttpStatusCode(HttpResponse.SC_BAD_GATEWAY);
+      }
+    }
+  }
+
+  /**
+   * Copies headers from HttpServletRequest object to HttpRequest object.
+   * @param origRequest Servlet request to copy headers from.
+   * @param req The HttpRequest object to copy headers to.
+   * @param disallowedRequestHeaders Disallowed request headers to omit from
+   *   the servlet request
+   */
+  public static void copyRequestHeaders(HttpRequest origRequest,
+                                        HttpRequest req,
+                                        DisallowedHeaders... disallowedRequestHeaders) {
+    Set<String> allDisallowedHeaders = new HashSet<String>();
+    for (DisallowedHeaders h : disallowedRequestHeaders) {
+      allDisallowedHeaders.addAll(h.getDisallowedHeaders());
+    }
+
+    for (Map.Entry<String, List<String>> inHeader : origRequest.getHeaders().entrySet()) {
+      String header = inHeader.getKey();
+      List<String> headerValues = inHeader.getValue();
+      
+      if (headerValues != null && headerValues.size() > 0 &&
+          isValidHeaderName(header) &&
+          !allDisallowedHeaders.contains(header.toLowerCase())) {
+        // Remove existing values of this header.
+        req.removeHeader(header);
+        for (String headerVal : headerValues) {
+          if (isValidHeaderValue(headerVal)) {
+            req.addHeader(header, headerVal);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Copies the post data from HttpServletRequest object to HttpRequest object.
+   * @param origRequest Request to copy post data from.
+   * @param req The HttpRequest object to copy post data to.
+   * @throws GadgetException In case of errors.
+   */
+  public static void copyRequestData(HttpRequest origRequest,
+                                     HttpRequest req) throws GadgetException {
+    req.setMethod(origRequest.getMethod());
+    try {
+      if (origRequest.getMethod().toLowerCase().equals("post")) {
+        req.setPostBody(origRequest.getPostBody());
+      }
+    } catch (IOException e) {
+      throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e);
+    }
+  }
+
+  /**
+   * Rewrite the content type of the final http response if the request has the
+   * rewrite-mime-type param.
+   * @param req The http request.
+   * @param response The final http response to be returned to user.
+   */
+  public static void maybeRewriteContentType(HttpRequest req, HttpResponseBuilder response) {
+    String responseType = response.getHeader("Content-Type");
+    String requiredType = req.getRewriteMimeType();
+    if (!StringUtils.isEmpty(requiredType)) {
+      // Use a 'Vary' style check on the response
+      if (requiredType.endsWith("/*") && !StringUtils.isEmpty(responseType)) {
+        String requiredTypePrefix = requiredType.substring(0, requiredType.length() - 1);
+        if (!responseType.toLowerCase().startsWith(requiredTypePrefix.toLowerCase())) {
+          // TODO: We are currently setting the content type to something like x/* (e.g. text/*)
+          // which is not a valid content type. Need to fix this.
+          response.setHeader("Content-Type", requiredType);
+        }
+      } else {
+        response.setHeader("Content-Type", requiredType);
+      }
     }
   }
 }

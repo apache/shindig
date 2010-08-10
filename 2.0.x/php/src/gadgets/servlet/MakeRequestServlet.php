@@ -34,7 +34,8 @@ class MakeRequestServlet extends HttpServlet {
   public function doGet() {
     try {
       $this->noHeaders = true;
-      $context = new GadgetContext('GADGET');
+      $contextClass = Config::get('gadget_context_class');
+      $context = new $contextClass('GADGET');
       $makeRequestParams = MakeRequestOptions::fromCurrentRequest();
       $makeRequestHandler = new MakeRequestHandler($context);
       $makeRequestHandler->fetchJson($makeRequestParams);

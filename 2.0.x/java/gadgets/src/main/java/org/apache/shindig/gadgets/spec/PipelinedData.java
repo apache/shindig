@@ -314,9 +314,11 @@ public class PipelinedData {
     // TODO: SHINDIG-711 should be activityIds?
     copyAttribute("activityId", child, expression, JSONArray.class);
     copyAttribute("fields", child, expression, JSONArray.class);
+    copyAttribute("startIndex", child, expression, Integer.class);
+    copyAttribute("count", child, expression, Integer.class);
 
     // TODO: add activity paging support
-
+    
     return expression;
   }
 

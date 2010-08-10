@@ -39,6 +39,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
 import org.apache.shindig.auth.OAuthUtil.SignatureType;
+import org.apache.shindig.common.cache.LruCache;
+import org.apache.shindig.common.cache.SoftExpiringCache;
+import org.apache.shindig.common.cache.SoftExpiringCache.CachedObject;
 import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -57,10 +60,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 public class FakeOAuthServiceProvider implements HttpFetcher {
-
-
 
   public static final String BODY_ECHO_HEADER = "X-Echoed-Body";
 
@@ -182,6 +184,7 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
   private final OAuthConsumer signedFetchConsumer;
   private final OAuthConsumer oauthConsumer;
   private final TimeSource clock;
+  private final SoftExpiringCache<String, OAuthMessage> nonceCache;
 
   private boolean unauthorized = false;
   private boolean throttled = false;
@@ -222,6 +225,9 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
     tokenState = Maps.newHashMap();
     validParamLocations = Sets.newHashSet();
     validParamLocations.add(OAuthParamLocation.URI_QUERY);
+    nonceCache =
+        new SoftExpiringCache<String, OAuthMessage>(new LruCache<String, OAuthMessage>(10000));
+    nonceCache.setTimeSource(clock);
   }
 
   public void setVagueErrors(boolean vagueErrors) {
@@ -747,6 +753,18 @@ public class FakeOAuthServiceProvider implements HttpFetcher {
           throw new RuntimeException("oauth_body_hash mismatch");
         }
     }
+    
+    // Most OAuth service providers are much laxer than this about checking nonces (rapidly
+    // changing server-side state scales badly), but we are very strict in test cases.
+    String nonceKey = info.message.getConsumerKey() + ','
+        + info.message.getParameter("oauth_nonce");
+    
+    CachedObject<OAuthMessage> previousMessage = nonceCache.getElement(nonceKey);
+    if (previousMessage != null) {
+      throw new RuntimeException("Reused nonce, old message = " + previousMessage.obj
+          + ", new message " + info.message);
+    }
+    nonceCache.addElement(nonceKey, info.message, TimeUnit.SECONDS.toMillis(10 * 60));
   }
 
   private HttpResponse handleNotFoundUrl(HttpRequest request) throws Exception {

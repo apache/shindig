@@ -20,7 +20,7 @@ package org.apache.shindig.gadgets.http;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Nullable;
+import javax.annotation.Nullable;
 import com.google.inject.name.Named;
 
 import org.apache.shindig.common.util.Utf8UrlCoder;
@@ -118,7 +118,7 @@ public class DefaultRequestPipeline implements RequestPipeline {
     
     // Set response hash value in metadata (used for url versioning)
     fetchedResponse = HttpResponseMetadataHelper.updateHash(fetchedResponse, metadataHelper);
-    if (!request.getIgnoreCache() ) {
+    if (!request.getIgnoreCache()) {
       // Mark the response with invalidation information prior to caching
       if (fetchedResponse.getCacheTtl() > 0) {
         fetchedResponse = invalidationService.markResponse(request, fetchedResponse);

@@ -176,7 +176,7 @@ public final class Uri {
       result = new UriBuilder(this);
       result.setFragment(relative.fragment);
       result.setQuery(relative.query);
-      String relativePath = (relative.path == null) ? "" : relative.path;
+      String relativePath = Objects.firstNonNull(relative.path, "");;
       if (relativePath.startsWith("/")) { //$NON-NLS-1$
         result.setPath(relativePath);
       } else {

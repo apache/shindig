@@ -73,11 +73,11 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(srcDir + '/osapi/jsonrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/gadgetsrpctransport.js'));
   eval(JsUtil.prototype.include(srcDir + '/osapi/peoplehelpers.js'));
+  eval(JsUtil.prototype.include(srcDir + '/shindig.uri/uri.js'));
   eval(JsUtil.prototype.include(testToolsDir + "/JsUnit.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/authtest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/config-test.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core/prefstest.js"));
-  eval(JsUtil.prototype.include(testSrcDir + "/core/utiltest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/core.io/iotest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-base/jsonactivitytest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/opensocial-reference/activitytest.js"));
@@ -93,6 +93,7 @@ if (!this.JsUtil) {
   eval(JsUtil.prototype.include(testSrcDir + "/osapi/jsonrpctransporttest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/views/urltemplatetest.js"));
   eval(JsUtil.prototype.include(testSrcDir + "/xhrwrapper/xhrwrappertest.js"));
+  eval(JsUtil.prototype.include(testSrcDir + '/shindig.uri/uritest.js'));
 }
 
 function AllTests() {

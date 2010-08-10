@@ -68,6 +68,7 @@ public abstract class ApiServlet extends InjectedServlet {
   protected BeanJsonConverter jsonConverter;
   protected BeanConverter xmlConverter;
   protected BeanConverter atomConverter;
+  protected ContainerConfig containerConfig;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -90,8 +91,6 @@ public abstract class ApiServlet extends InjectedServlet {
   public void setHandlerRegistry(HandlerRegistry dispatcher) {
     this.dispatcher = dispatcher;
   }
-
-  protected ContainerConfig containerConfig;
 
   @Inject
   public void setContainerConfig(ContainerConfig containerConfig) {
@@ -153,10 +152,5 @@ public abstract class ApiServlet extends InjectedServlet {
       servletRequest.setCharacterEncoding(DEFAULT_ENCODING);
     }
     servletResponse.setCharacterEncoding(DEFAULT_ENCODING);
-  }
-
-  public void checkContentTypes(Set<String> allowedContentTypes,
-      String contentType) throws ContentTypes.InvalidContentTypeException {
-    ContentTypes.checkContentTypes(allowedContentTypes, contentType);
   }
 }

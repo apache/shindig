@@ -40,8 +40,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.shindig.auth.BasicSecurityTokenDecoder;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.BasicSecurityTokenCodec;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
@@ -69,7 +69,7 @@ public class DefaultIframeUriManagerTest extends UriManagerTestBase {
     }
   };
 
-  private static final SecurityTokenDecoder tokenCodec = new BasicSecurityTokenDecoder();
+  private static final SecurityTokenCodec tokenCodec = new BasicSecurityTokenCodec();
   
   @Test
   public void typeHtmlBasicOptions() {

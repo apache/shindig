@@ -76,6 +76,7 @@ public class SocialApiTestsGuiceModule extends AbstractModule {
     bindConstant().annotatedWith(Names.named("shindig.containers.default"))
         .to("res://containers/default/container.js");
     bindConstant().annotatedWith(Names.named("shindig.port")).to("8080");
+    bindConstant().annotatedWith(Names.named("shindig.host")).to("localhost");
     bind(ContainerConfig.class).to(JsonContainerConfig.class);
     
     bind(Integer.class).annotatedWith(

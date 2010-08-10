@@ -21,7 +21,7 @@ package org.apache.shindig.common.testing;
 import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 
 import com.google.common.collect.Maps;
 import org.apache.shindig.auth.SecurityTokenException;
@@ -208,11 +208,11 @@ public class FakeGadgetToken extends AbstractSecurityToken implements SecurityTo
   }
 
   /**
-   * SecurityTokenDecoder for testing - this allows passing around a
+   * SecurityTokenCodec for testing - this allows passing around a
    * security token of format key=value&key2=value2, where key is one of:
    * ownerId, viewerId, domain, appUrl, appId, trustedJson, module
    */
-  public static class Decoder implements SecurityTokenDecoder {
+  public static class Codec implements SecurityTokenCodec {
     public SecurityToken createToken(Map<String, String> tokenParameters)  {
       return FakeGadgetToken.createToken(tokenParameters);
     }

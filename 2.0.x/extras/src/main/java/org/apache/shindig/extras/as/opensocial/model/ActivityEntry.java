@@ -25,6 +25,11 @@ import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
 
 import com.google.inject.ImplementedBy;
 
+/*
+ * TODO: comment a description for this class
+ * TODO: ensure verbs are up to date
+ * TODO: comment all classes
+ */
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
 public interface ActivityEntry {
@@ -33,16 +38,17 @@ public interface ActivityEntry {
 	 * Fields that represent JSON elements for an activity entry.
 	 */
 	public static enum Field {
-		ID("id"),
-		STREAM_FAVICON_("streamFavicon"),
-		POSTED_TIME("postedTime"),
+		ICON("icon"),
+		TIME("time"),
 		ACTOR("actor"),
 		VERB("verb"),
 		OBJECT("object"),
 		TARGET("target"),
-		PERMALINK_("permalink"),
+		GENERATOR("generator"),
+		SERVICE_PROVIDER("serviceProvider"),
 		TITLE("title"),
-		BODY("body");
+		BODY("body"),
+		STANDARD_LINK("standardLink");
 		
 		/*
 		 * The name of the JSON element.
@@ -108,43 +114,47 @@ public interface ActivityEntry {
 		}
 	}
 	
-	void setId(String id);
-	
-	String getId();
-	
-	void setStreamFavicon(String streamFavicon);
-	
-	String getStreamFavicon();
-	
-	void setPostedTime(String postedTime);
-	
-	String getPostedTime();
-	
-	void setActor(ActivityObject actor);
-	
+	String getIcon();
+
+	void setIcon(String icon);
+
+	String getTime();
+
+	void setTime(String time);
+
 	ActivityObject getActor();
-	
-	void setVerb(List<String> verb);
-	
+
+	void setActor(ActivityObject actor);
+
 	List<String> getVerb();
-	
-	void setObject(ActivityObject object);
-	
+
+	void setVerb(List<String> verb);
+
 	ActivityObject getObject();
-	
-	void setTarget(ActivityObject target);
+
+	void setObject(ActivityObject object);
 	
 	ActivityObject getTarget();
 	
-	void setPermalink(String permalink);
+	void setTarget(ActivityObject target);
 	
-	String getPermalink();
-	
-	void setTitle(String title);
-	
+	ActivityObject getGenerator();
+
+	void setGenerator(ActivityObject generator);
+
+	ActivityObject getServiceProvider();
+
+	void setServiceProvider(ActivityObject serviceProvider);
+
 	String getTitle();
-	
-	void setBody(String body);
-	
+
+	void setTitle(String title);
+
 	String getBody();
+
+	void setBody(String body);
+
+	List<String> getStandardLink();
+
+	void setStandardLink(List<String> standardLink);
 }

@@ -57,7 +57,7 @@
 
 /** @namespace */
 gadgets.config = function() {
-  var components = [];
+  var components = {};
   var configuration;
 
   return {

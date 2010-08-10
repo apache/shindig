@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.common.base.Objects;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.conversion.BeanConverter;
@@ -174,7 +175,7 @@ public class BaseRequestItem implements RequestItem {
 
   public String getFilterValue() {
     String filterValue = getParameter(FILTER_VALUE);
-    return filterValue == null ? "" : filterValue;
+    return Objects.firstNonNull(filterValue, "");
   }
 
   public Set<String> getFields() {

@@ -76,20 +76,13 @@ function __autoload($className) {
   }
 }
 
-$servletMap = array(Config::get('web_prefix') . '/container' => 'FilesServlet', 
-    Config::get('web_prefix') . '/samplecontainer' => 'FilesServlet', 
-    Config::get('web_prefix') . '/gadgets/js' => 'JsServlet', 
-    Config::get('web_prefix') . '/gadgets/proxy' => 'ProxyServlet', 
-    Config::get('web_prefix') . '/gadgets/makeRequest' => 'MakeRequestServlet', 
-    Config::get('web_prefix') . '/gadgets/ifr' => 'GadgetRenderingServlet', 
-    Config::get('web_prefix') . '/gadgets/metadata' => 'MetadataServlet', 
-    Config::get('web_prefix') . '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
-    Config::get('web_prefix') . '/gadgets/api/rpc' => 'JsonRpcServlet', 
-    Config::get('web_prefix') . '/gadgets/api/rest' => 'DataServiceServlet', 
-    Config::get('web_prefix') . '/social/rest' => 'DataServiceServlet', 
-    Config::get('web_prefix') . '/social/rpc' => 'JsonRpcServlet', 
-    Config::get('web_prefix') . '/public.crt' => 'CertServlet', 
-    Config::get('web_prefix') . '/public.cer' => 'CertServlet');
+//get servlet map and prefix the servlet paths 
+$configServletMap = Config::get('servlet_map'); 
+$webPrefix = Config::get('web_prefix'); 
+$servletMap = array(); 
+foreach ($configServletMap as $path => $servlet) { 
+ $servletMap[$webPrefix . $path] = $servlet; 
+} 
 
 // Try to match the request url to our servlet mapping
 $servlet = false;
@@ -98,7 +91,7 @@ foreach ($servletMap as $url => $class) {
   if (substr($uri, 0, strlen($url)) == $url) {
     //FIXME temporary hack to support both /proxy and /makeRequest with the same event handler
     // /makeRequest == /proxy?output=js
-    if ($url == Config::get('web_prefix') . '/gadgets/makeRequest') {
+    if ($url == $webPrefix . '/gadgets/makeRequest') { 
       $_GET['output'] = 'js';
     }
     $servlet = $class;

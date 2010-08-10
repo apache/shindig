@@ -18,20 +18,23 @@
  */
 package org.apache.shindig.expressions;
 
-import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
-import org.apache.shindig.common.cache.NullCache;
+import org.apache.shindig.expressions.juel.JuelProvider;
+import org.apache.shindig.expressions.juel.JuelTypeConverter;
 
 import java.util.Map;
 
 import javax.el.ArrayELResolver;
 import javax.el.CompositeELResolver;
 import javax.el.ELContext;
+import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.el.FunctionMapper;
 import javax.el.ListELResolver;
 import javax.el.MapELResolver;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
@@ -39,43 +42,46 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.odysseus.el.ExpressionFactoryImpl;
-import de.odysseus.el.misc.TypeConverter;
-import de.odysseus.el.tree.Tree;
-import de.odysseus.el.tree.TreeCache;
-import de.odysseus.el.tree.TreeStore;
-import de.odysseus.el.tree.impl.Builder;
 
 /**
  * A facade to the expressions functionality.
  */
 @Singleton
 public class Expressions {
-  private static final String EXPRESSION_CACHE = "expressions";
   
   private final ExpressionFactory factory;
   private final ELContext parseContext;
   private final ELResolver defaultELResolver;
   private final Functions functions;
-  private final TypeConverter typeConverter;
+  private final ELTypeConverter typeConverter;
 
   /** 
    * Returns an instance of Expressions that doesn't require
    * any functions or perform any caching.  Use only for testing.
    */
+  public static Expressions forTesting(Functions functions) {
+    return new Expressions(functions, null, new JuelTypeConverter(), new JuelProvider());
+  }
+  
+  /** 
+   * Returns an instance of Expressions that doesn't require
+   * any functions or perform any caching.  Use only for testing.
+   */
   public static Expressions forTesting() {
-    return new Expressions(null, null, new ShindigTypeConverter());
+    return new Expressions(null, null, new JuelTypeConverter(), new JuelProvider());
   }
   
   @Inject
   public Expressions(Functions functions, CacheProvider cacheProvider,
-      ShindigTypeConverter typeConverter) {
+      ELTypeConverter typeConverter, ExpressionProvider expProvider) {
     this.functions = functions;
     this.typeConverter = typeConverter;
-    factory = newExpressionFactory(cacheProvider);
+    factory = newExpressionFactory(expProvider, cacheProvider);
     // Stub context with no FunctionMapper, used only to parse expressions
     parseContext = new Context(null);
     defaultELResolver = createDefaultELResolver();
+   
+  
   }
 
   /**
@@ -100,40 +106,31 @@ public class Expressions {
    * @return a ValueExpression corresponding to the expression
    */
   public ValueExpression parse(String expression, Class<?> type) {
-    return factory.createValueExpression(parseContext, expression, type);
+    boolean shouldConvert = typeConverter.isPostConvertible(type);
+    if (shouldConvert) {
+      return new ValueExpressionWrapper(factory.createValueExpression(
+          parseContext, expression, Object.class), typeConverter, type);
+    }
+    else {
+      return factory.createValueExpression(parseContext, expression, type);
+    }
   }
   
   public ValueExpression constant(Object value, Class<?> type) {
-    return factory.createValueExpression(value, type);
-  }
-  
-  /**
-   * Create a JUEL cache of expressions.
-   */
-  private TreeCache createTreeCache(CacheProvider cacheProvider) {
-    Cache<String, Tree> treeCache;
-    if (cacheProvider == null) {
-      treeCache = new NullCache<String, Tree>();
-    } else {
-      treeCache = cacheProvider.createCache(EXPRESSION_CACHE);
+    boolean shouldConvert = typeConverter.isPostConvertible(type);
+    if (shouldConvert) {
+      return new ValueExpressionWrapper(factory.createValueExpression(value, Object.class), typeConverter, type);
     }
-
-    final Cache<String, Tree> resolvedTreeCache = treeCache;
-    return new TreeCache() {
-      public Tree get(String expression) {
-        return resolvedTreeCache.getElement(expression);
-      }
-
-      public void put(String expression, Tree tree) {
-        resolvedTreeCache.addElement(expression, tree);
-      }
-    };
+    else {
+      return factory.createValueExpression(value, type);
+    }
+   
   }
   
   
-  private ExpressionFactory newExpressionFactory(CacheProvider cacheProvider) {
-    TreeStore store = new TreeStore(new Builder(), createTreeCache(cacheProvider));
-    return new ExpressionFactoryImpl(store, typeConverter);
+  private ExpressionFactory newExpressionFactory(
+      ExpressionProvider expProvider, CacheProvider cacheProvider) {
+    return expProvider.newExpressionFactory(cacheProvider, typeConverter);
   }
   
   /**
@@ -200,4 +197,71 @@ public class Expressions {
     }
     
   }
+  
+  private class ValueExpressionWrapper extends ValueExpression {
+
+    private static final long serialVersionUID = 2135607228206570229L;
+    private ValueExpression expression = null;
+    private Class<?> type = null;
+    private ELTypeConverter converter = null;
+
+    public ValueExpressionWrapper(ValueExpression ve,
+        ELTypeConverter converter, Class<?> type) {
+      expression = ve;
+      this.type = type;
+      this.converter = converter;
+    }
+
+    @Override
+    public Object getValue(ELContext context) throws NullPointerException,
+        PropertyNotFoundException, ELException {
+        return converter.convert(expression.getValue(context), type);
+    }
+
+    @Override
+    public Class<?> getExpectedType() {
+      return expression.getExpectedType();
+    }
+
+    @Override
+    public Class<?> getType(ELContext context) throws NullPointerException,
+        PropertyNotFoundException, ELException {
+      return expression.getType(context);
+    }
+
+    @Override
+    public boolean isReadOnly(ELContext context) throws NullPointerException,
+        PropertyNotFoundException, ELException {
+      return expression.isReadOnly(context);
+    }
+
+    @Override
+    public void setValue(ELContext context, Object value)
+        throws NullPointerException, PropertyNotFoundException,
+        PropertyNotWritableException, ELException {
+      expression.setValue(context, value);
+
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return expression.equals(obj);
+    }
+
+    @Override
+    public String getExpressionString() {
+      return expression.getExpressionString();
+    }
+
+    @Override
+    public int hashCode() {
+      return expression.hashCode();
+    }
+
+    @Override
+    public boolean isLiteralText() {
+      return expression.isLiteralText();
+    }
+  }
+
 }

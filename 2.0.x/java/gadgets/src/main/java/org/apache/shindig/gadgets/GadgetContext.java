@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;

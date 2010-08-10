@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.preload.PreloaderService;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
-import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.View;
 import org.junit.Before;
@@ -59,20 +58,9 @@ public class HtmlRendererTest {
     }
   };
 
-  private static final GadgetContext ACCEL_CONTEXT = new GadgetContext() {
-    @Override
-    public String getParameter(String name) {
-      if (name == HtmlAccelServlet.ACCEL_GADGET_PARAM_NAME) {
-        return HtmlAccelServlet.ACCEL_GADGET_PARAM_VALUE;
-      }
-      return super.getParameter(name);
-    }
-  };
-
   private final FakePreloaderService preloaderService = new FakePreloaderService();
   private final FakeProxyRenderer proxyRenderer = new FakeProxyRenderer();
   private final CaptureRewriter captureRewriter = new CaptureRewriter();
-  private final CaptureRewriter accelRewriter = new CaptureRewriter();
   private HtmlRenderer renderer;
 
   private Gadget makeGadget(String content) throws GadgetException {
@@ -96,8 +84,7 @@ public class HtmlRendererTest {
   @Before
   public void setUp() throws Exception {
     renderer = new HtmlRenderer(preloaderService, proxyRenderer,
-        new GadgetRewritersProvider(ImmutableList.of((GadgetRewriter) captureRewriter),
-            ImmutableList.of((GadgetRewriter) accelRewriter)),
+        new GadgetRewritersProvider(ImmutableList.of((GadgetRewriter) captureRewriter)),
         null);
     
   }
@@ -124,13 +111,6 @@ public class HtmlRendererTest {
   public void doRewriting() throws Exception {
     renderer.render(makeGadget(BASIC_HTML_CONTENT));
     assertTrue("Rewriting not performed.", captureRewriter.viewWasRewritten());
-  }
-
-  @Test
-  public void doAccelRewriting() throws Exception {
-    renderer.render(makeGadget(BASIC_HTML_CONTENT).setContext(ACCEL_CONTEXT));
-    assertTrue("Rewriting should not be not performed.", !captureRewriter.viewWasRewritten());
-    assertTrue("Rewriting not performed.", accelRewriter.viewWasRewritten());
   }
 
   private static class FakeProxyRenderer extends ProxyRenderer {

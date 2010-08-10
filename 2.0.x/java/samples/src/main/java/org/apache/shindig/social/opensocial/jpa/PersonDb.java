@@ -128,6 +128,7 @@ public class PersonDb implements Person, DbObject {
       FilterOperation.startsWith };
   private static final FilterOperation[] NUMERIC_FILTEROPTIONS = new FilterOperation[] {
       FilterOperation.equals, FilterOperation.present };
+  @SuppressWarnings("unused")
   private static final FilterOperation[] EQUALS_FILTEROPTIONS =
     new FilterOperation[] { FilterOperation.equals };
 

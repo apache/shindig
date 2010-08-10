@@ -35,60 +35,6 @@ shindig.container.util = {};
 
 
 /**
- * Extract protocol and domain of container page. Valid values:
- * http://www.cnn.com, chrome-extension://www.cnn.com
- * @param {string} uri The URL to extract path domain from.
- * @return {string} The protocol and domain of container page.
- */
-shindig.container.util.parseOrigin = function(uri) {
-  var indexAtStartOfAuthority = uri.indexOf('//') + 2;
-  var indexAtEndOfAuthority = uri.indexOf('/', indexAtStartOfAuthority);
-  return uri.substring(0, indexAtEndOfAuthority);
-};
-
-
-/**
- * Extract prefix path of a URL, not including opt_postfixPath.
- * @param {string} uri The URL to extract path from.
- * @param {string=} opt_postfixPath The URL postfix to avoid extracting.
- * @return {string} The path in URL, before postfixPath.
- */
-shindig.container.util.parsePrefixPath = function(uri, opt_postfixPath) {
-  var path = shindig.container.util.parsePath(uri);
-  if (path && opt_postfixPath) {
-    var endIndex = path.length - opt_postfixPath.length;
-    if (path.lastIndexOf(opt_postfixPath) == endIndex) {
-      return path.substring(0, endIndex);
-    }
-  }
-  return path;
-};
-
-
-/**
- * Extract path of a URL.
- * @param {string} uri The URL to extract path from.
- * @return {string} The path in URL.
- */
-shindig.container.util.parsePath = function(uri) {
-  var match = uri.match(new RegExp("//[^/]+(/[^?#]*)"));
-  return match ? match[1] : null;
-};
-
-
-/**
- * Extract the parameter value in path with name paramName.
- * @param {string} path The path to extract parameter from.
- * @param {string} paramName The name of parameter to exact value from.
- * @return {string} The value of the parameter. Null otherwise.
- */
-shindig.container.util.getParamValue = function(path, paramName) {
-  var match = path.match(new RegExp("[?&]" + paramName + "=([^&#]+)"));
-  return match ? match[1] : null;
-};
-
-
-/**
  * Return value of json at key, if valid. Otherwise, return defaultValue.
  * @param {Object} json The JSON to look up key param from.
  * @param {string} key Key in config.

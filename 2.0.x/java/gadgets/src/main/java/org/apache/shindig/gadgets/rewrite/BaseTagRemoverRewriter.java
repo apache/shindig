@@ -25,6 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -41,9 +42,9 @@ public class BaseTagRemoverRewriter implements GadgetRewriter, ResponseRewriter 
       Element baseElement = (Element) list.item(i);
       baseElement.getParentNode().removeChild(baseElement);
 
-      if (baseElement.hasAttribute("href")) {
+      if (baseElement.hasAttribute("href") && logger.isLoggable(Level.FINE)) {
         logger.fine("Removing base tag pointing to: "
-                    + baseElement.getAttribute("href") + "for gadget: "
+                    + baseElement.getAttribute("href") + " for gadget: "
                     + gadget.getContext().getUrl().toString());
       }
     }

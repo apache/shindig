@@ -39,7 +39,8 @@ public class FilterSpecification {
    */
   public FilterSpecification(String finalProperty, FilterOperation[] filterOptions) {
     this.finalProperty = finalProperty;
-    this.filterOptions = filterOptions;
+    this.filterOptions = new FilterOperation[filterOptions.length];
+    System.arraycopy(filterOptions, 0, this.filterOptions, 0, filterOptions.length);
     this.special = false;
   }
 

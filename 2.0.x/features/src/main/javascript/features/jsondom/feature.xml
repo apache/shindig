@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements. See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership. The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+-->
+<feature>
+  <!-- 
+    jsondom (Read Only DOM) is implemented in both JavaScript
+    and server-side code. Its JavaScript-only implementation
+    provides a DOM parser that uses underlying browser objects.
+    This is, however, not Caja-compatible.
+
+    Therefore a server-side DOM-to-JSON parser mode is provided
+    to support this use case, where either explicitly required
+    (Caja context) or otherwise directly requested.
+  -->
+  <name>jsondom</name>
+  <dependency>globals</dependency>
+  <dependency>xmlutil</dependency>
+  <gadget>
+    <script src="jsondom.js"/>
+  </gadget>
+</feature>

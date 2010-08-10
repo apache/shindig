@@ -58,6 +58,7 @@ import org.apache.shindig.social.opensocial.model.Organization;
 import org.apache.shindig.social.opensocial.model.Person;
 import org.apache.shindig.social.opensocial.model.Url;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableList;
@@ -295,7 +296,7 @@ public class XStream081Configuration implements XStreamConfiguration {
   }
 
   private static Multimap<String, Class<?>> getOmitMap(ConverterSet c) {
-    return firstNonNull(omitMap.get(c), omitMap.get(ConverterSet.DEFAULT));
+    return Objects.firstNonNull(omitMap.get(c), omitMap.get(ConverterSet.DEFAULT));
   }
 
 
@@ -376,16 +377,12 @@ public class XStream081Configuration implements XStreamConfiguration {
     @SuppressWarnings("unchecked")
     public V get(Object o) {
       K key = (K)o;
-      return firstNonNull(backing.get(key), backing.get(defaultval));
+      return Objects.firstNonNull(backing.get(key), backing.get(defaultval));
     }
 
     @Override
     protected Map<K,V> delegate() {
       return backing;
     }
-  }
-
-  public static <T> T firstNonNull(T first, T second) {
-    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

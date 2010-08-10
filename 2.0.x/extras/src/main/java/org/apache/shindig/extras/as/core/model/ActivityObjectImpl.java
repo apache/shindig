@@ -20,46 +20,42 @@ package org.apache.shindig.extras.as.core.model;
 
 import java.util.List;
 
+import org.apache.shindig.extras.as.opensocial.model.ActionLink;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
+import org.apache.shindig.extras.as.opensocial.model.MediaLink;
 
 public class ActivityObjectImpl implements ActivityObject {
 	
 	private String id;
-	private String displayName;
+	private String name;
 	private String summary;
+	private MediaLink media;
 	private String permalink;
-	private String image;
-	private List<String> objectType;
-	private String content;
-	private String audioStream;
-	private String videoStream;
-	private String playerApplet;
-	private String bookmarkTarget;
-	private String thumbnail;
-	private String subject;
-	private String description;
-	private String rating;
-	private String icon;
+	private List<String> type;
 	private ActivityObject inReplyTo;
+	private List<ActivityObject> attached;
+	private List<ActivityObject> reply;
+	private List<ActivityObject> reaction;
+	private ActionLink action;
+	private List<String> upstreamDuplicateId;
+	private List<String> downstreamDuplicateId;
+	private String standardLink;
 	
 	public ActivityObjectImpl() {
 		this.id = null;
-		this.displayName = null;
+		this.name = null;
 		this.summary = null;
+		this.media = null;
 		this.permalink = null;
-		this.image = null;
-		this.content = null;
-		this.audioStream = null;
-		this.videoStream = null;
-		this.playerApplet = null;
-		this.bookmarkTarget = null;
-		this.thumbnail = null;
-		this.subject = null;
-		this.description = null;
-		this.rating = null;
-		this.icon = null;
-		this.objectType = null;
+		this.type = null;
 		this.inReplyTo = null;
+		this.attached = null;
+		this.reply = null;
+		this.reaction = null;
+		this.action = null;
+		this.upstreamDuplicateId = null;
+		this.downstreamDuplicateId = null;
+		this.standardLink = null;
 	}
 
 	public String getId() {
@@ -70,12 +66,12 @@ public class ActivityObjectImpl implements ActivityObject {
 		this.id = id;
 	}
 
-	public String getDisplayName() {
-		return displayName;
+	public String getName() {
+		return name;
 	}
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getSummary() {
@@ -86,6 +82,14 @@ public class ActivityObjectImpl implements ActivityObject {
 		this.summary = summary;
 	}
 
+	public MediaLink getMedia() {
+		return media;
+	}
+
+	public void setMedia(MediaLink media) {
+		this.media = media;
+	}
+
 	public String getPermalink() {
 		return permalink;
 	}
@@ -94,100 +98,12 @@ public class ActivityObjectImpl implements ActivityObject {
 		this.permalink = permalink;
 	}
 
-	public String getImage() {
-		return image;
+	public List<String> getType() {
+		return type;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public String getAudioStream() {
-		return audioStream;
-	}
-
-	public void setAudioStream(String audioStream) {
-		this.audioStream = audioStream;
-	}
-
-	public String getVideoStream() {
-		return videoStream;
-	}
-
-	public void setVideoStream(String videoStream) {
-		this.videoStream = videoStream;
-	}
-
-	public String getPlayerApplet() {
-		return playerApplet;
-	}
-
-	public void setPlayerApplet(String playerApplet) {
-		this.playerApplet = playerApplet;
-	}
-
-	public String getBookmarkTarget() {
-		return bookmarkTarget;
-	}
-
-	public void setBookmarkTarget(String bookmarkTarget) {
-		this.bookmarkTarget = bookmarkTarget;
-	}
-
-	public String getThumbnail() {
-		return thumbnail;
-	}
-
-	public void setThumbnail(String thumbnail) {
-		this.thumbnail = thumbnail;
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getRating() {
-		return rating;
-	}
-
-	public void setRating(String rating) {
-		this.rating = rating;
-	}
-
-	public String getIcon() {
-		return icon;
-	}
-
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
-
-	public List<String> getObjectType() {
-		return objectType;
-	}
-
-	public void setObjectType(List<String> objectType) {
-		this.objectType = objectType;
+	public void setType(List<String> type) {
+		this.type = type;
 	}
 
 	public ActivityObject getInReplyTo() {
@@ -196,5 +112,61 @@ public class ActivityObjectImpl implements ActivityObject {
 
 	public void setInReplyTo(ActivityObject inReplyTo) {
 		this.inReplyTo = inReplyTo;
+	}
+
+	public List<ActivityObject> getAttached() {
+		return attached;
+	}
+
+	public void setAttached(List<ActivityObject> attached) {
+		this.attached = attached;
+	}
+
+	public List<ActivityObject> getReply() {
+		return reply;
+	}
+
+	public void setReply(List<ActivityObject> reply) {
+		this.reply = reply;
+	}
+
+	public List<ActivityObject> getReaction() {
+		return reaction;
+	}
+
+	public void setReaction(List<ActivityObject> reaction) {
+		this.reaction = reaction;
+	}
+
+	public ActionLink getAction() {
+		return action;
+	}
+
+	public void setAction(ActionLink action) {
+		this.action = action;
+	}
+
+	public List<String> getUpstreamDuplicateId() {
+		return upstreamDuplicateId;
+	}
+
+	public void setUpstreamDuplicateId(List<String> upstreamDuplicateId) {
+		this.upstreamDuplicateId = upstreamDuplicateId;
+	}
+
+	public List<String> getDownstreamDuplicateId() {
+		return downstreamDuplicateId;
+	}
+
+	public void setDownstreamDuplicateId(List<String> downstreamDuplicateId) {
+		this.downstreamDuplicateId = downstreamDuplicateId;
+	}
+
+	public String getStandardLink() {
+		return standardLink;
+	}
+
+	public void setStandardLink(String standardLink) {
+		this.standardLink = standardLink;
 	}
 }

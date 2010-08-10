@@ -23,6 +23,7 @@ import java.util.Collections;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetException;
 
 import com.google.inject.ImplementedBy;
 
@@ -33,34 +34,34 @@ public interface JsUriManager {
    * @return The uri for the externed javascript that includes all listed extern libraries.
    */
   Uri makeExternJsUri(Gadget gadget, Collection<String> extern);
-  
+
   /**
    * Processes the inbound URL, for use by serving code in determining which JS to serve
    * and with what caching properties.
-   * 
+   *
    * @param uri Generated extern JS Uri
    * @return Processed status of the provided Uri.
    */
-  JsUri processExternJsUri(Uri uri);
-  
+  JsUri processExternJsUri(Uri uri) throws GadgetException;
+
   public static class JsUri {
     private final UriStatus status;
     private final Collection<String> libs;
-    
+
     public JsUri(UriStatus status, Collection<String> libs) {
       this.status = status;
       this.libs = libs;
     }
-    
+
     public UriStatus getStatus() {
       return status;
     }
-    
+
     public Collection<String> getLibs() {
       return Collections.unmodifiableCollection(libs);
     }
   }
-  
+
   @ImplementedBy(DefaultJsVersioner.class)
   public interface Versioner {
     /**
@@ -69,7 +70,7 @@ public interface JsUriManager {
      * @return Version string for the Uri.
      */
     String version(Uri gadgetUri, String container, Collection<String> extern);
-    
+
     /**
      * @param gadgetUri Gadget for which extern Uri was generated.
      * @param extern Collection of libs externed.

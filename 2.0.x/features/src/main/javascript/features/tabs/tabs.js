@@ -123,55 +123,14 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
   this.mainContainer_ = this.createMainContainer_(opt_container);
   this.tabTable_ = this.createTabTable_();
   this.displayTabs(false);
-  gadgets.TabSet.addCSS_([
-    '.tablib_table {',
-      'width: 100%;',
-      'border-collapse: separate;',
-      'border-spacing: 0px;',
-      'empty-cells: show;',
-      'font-size: 11px;',
-      'text-align: center;',
-    '}',
-    '.tablib_emptyTab {',
-      'border-bottom: 1px solid #676767;',
-      'padding: 0px 1px;',
-    '}',
-    '.tablib_spacerTab {',
-      'border-bottom: 1px solid #676767;',
-      'padding: 0px 1px;',
-      'width: 1px;',
-    '}',
-    '.tablib_selected {',
-      'padding: 2px;',
-      'background-color: #ffffff;',
-      'border: 1px solid #676767;',
-      'border-bottom-width: 0px;',
-      'color: #3366cc;',
-      'font-weight: bold;',
-      'width: 80px;',
-      'cursor: default;',
-    '}',
-    '.tablib_unselected {',
-      'padding: 2px;',
-      'background-color: #dddddd;',
-      'border: 1px solid #aaaaaa;',
-      'border-bottom-color: #676767;',
-      'color: #000000;',
-      'width: 80px;',
-      'cursor: pointer;',
-    '}',
-    '.tablib_navContainer {',
-      'width: 10px;',
-      'vertical-align: middle;',
-    '}',
-    '.tablib_navContainer a:link, ',
-    '.tablib_navContainer a:visited, ',
-    '.tablib_navContainer a:hover {',
-      'color: #3366aa;',
-      'text-decoration: none;',
-    '}'
-  ].join(''));
+  //  gadgets.TabSet.addCSS_([  ].join(''));
 };
+
+gadgets.config.register("tabset", {}, function (configuration) { 
+  // Injects the default stylesheet for tabs 
+  gadgets.TabSet.addCSS_( configuration.tabs.css.join('')); 
+}); 
+ 
 
 /**
  * Adds a new tab based on the name-value pairs specified in opt_params.

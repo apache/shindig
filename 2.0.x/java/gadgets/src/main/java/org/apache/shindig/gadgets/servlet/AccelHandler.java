@@ -19,15 +19,15 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import com.google.inject.name.Named;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
@@ -37,20 +37,15 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
  */
 @Singleton
-public class AccelHandler extends ProxyBase {
-  private static final Logger logger = Logger.getLogger(ProxyHandler.class.getName());
-
+public class AccelHandler {
   static final String ERROR_FETCHING_DATA = "Error fetching data";
 
   // TODO: parameterize these.
@@ -60,57 +55,64 @@ public class AccelHandler extends ProxyBase {
   protected final RequestPipeline requestPipeline;
   protected final ResponseRewriterRegistry contentRewriterRegistry;
   protected final AccelUriManager uriManager;
+  protected final boolean remapInternalServerError;
 
   @Inject
   public AccelHandler(RequestPipeline requestPipeline,
+                      @Named("shindig.accelerate.response.rewriter.registry")
                       ResponseRewriterRegistry contentRewriterRegistry,
-                      AccelUriManager accelUriManager) {
+                      AccelUriManager accelUriManager,
+                      @Named("shindig.accelerate.remapInternalServerError")
+                      Boolean remapInternalServerError) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
     this.uriManager = accelUriManager;
+    this.remapInternalServerError = remapInternalServerError;
   }
 
-  @Override
-  protected void doFetch(HttpServletRequest request, HttpServletResponse response)
-      throws IOException, GadgetException {
+  protected HttpResponse fetch(HttpRequest request) throws IOException, GadgetException {
     // TODO: Handle if modified since headers.
 
     // Parse and normalize to get a proxied request uri.
-    Uri requestUri = new UriBuilder(request).toUri();
-    ProxyUriManager.ProxyUri proxyUri = getProxyUri(requestUri);
+    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request.getUri());
 
     // Fetch the content of the requested uri.
     HttpRequest req = buildHttpRequest(request, proxyUri);
     HttpResponse results = requestPipeline.execute(req);
 
-    if (!handleErrors(results, response)) {
-      // In case of errors where we want to short circuit the rewriting and
-      // throw appropriate gadget exception.
-      return;
-    }
-
-    // Rewrite the content.
-    try {
-      results = contentRewriterRegistry.rewriteHttpResponse(req, results);
-    } catch (RewritingException e) {
-      if (!isRecoverable(req, results, e)) {
-        throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
-                                  e.getHttpStatusCode());
+    HttpResponse errorResponse = handleErrors(results);
+    if (errorResponse == null) {
+      // No error. Lets rewrite the content.
+      try {
+        results = contentRewriterRegistry.rewriteHttpResponse(req, results);
+      } catch (RewritingException e) {
+        if (!isRecoverable(req, results, e)) {
+          throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
+                                    e.getHttpStatusCode());
+        }
       }
+    } else {
+      results = errorResponse;
     }
 
     // Copy the response headers and status code to the final http servlet
     // response.
+    HttpResponseBuilder response = new HttpResponseBuilder();
     UriUtils.copyResponseHeadersAndStatusCode(
-        results, response,
-        UriUtils.DisallowedResponseHeaders.OUTPUT_TRANSFER_DIRECTIVES,
-        UriUtils.DisallowedResponseHeaders.CLIENT_STATE_DIRECTIVES);
+        results, response, remapInternalServerError, true,
+        UriUtils.DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES,
+        UriUtils.DisallowedHeaders.CLIENT_STATE_DIRECTIVES);
 
     // Override the content type of the final http response if the input request
     // had the rewrite mime type header.
-    rewriteContentType(req, response);
+    UriUtils.maybeRewriteContentType(req, response);
 
-    IOUtils.copy(results.getResponse(), response.getOutputStream());
+    // Copy the content.
+    // TODO: replace this with streaming APIs when ready
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    IOUtils.copy(results.getResponse(), baos);
+    response.setResponseNoCopy(baos.toByteArray());
+    return response.create();
   }
 
   /**
@@ -130,7 +132,7 @@ public class AccelHandler extends ProxyBase {
     } catch (Uri.UriException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
                                 "Failed to parse uri: " + uriString,
-                                HttpServletResponse.SC_BAD_GATEWAY);
+                                HttpResponse.SC_BAD_GATEWAY);
     }
 
     Gadget gadget = DomWalker.makeGadget(requestUri);
@@ -160,67 +162,56 @@ public class AccelHandler extends ProxyBase {
   }
 
   /**
-   * Generate a remote content request based on the parameters sent from the client.
+   * Build an HttpRequest object encapsulating the request details as requested
+   * by the user.
    * @param request The http request.
    * @param uriToProxyOrRewrite The parsed uri to proxy or rewrite through
    *   accel servlet.
    * @return Remote content request based on the parameters sent from the client.
    * @throws GadgetException In case the data could not be fetched.
    */
-  protected HttpRequest buildHttpRequest(HttpServletRequest request,
+  protected HttpRequest buildHttpRequest(HttpRequest request,
                                          ProxyUriManager.ProxyUri uriToProxyOrRewrite)
       throws GadgetException {
     Uri tgt = uriToProxyOrRewrite.getResource();
-    validateUrl(tgt);
     HttpRequest req = uriToProxyOrRewrite.makeHttpRequest(tgt);
-    this.setRequestHeaders(request, req);
-
     if (req == null) {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "No url parameter in request", HttpResponse.SC_BAD_REQUEST);
     }
+
+    // Copy the post body if it exists.
+    UriUtils.copyRequestData(request, req);
+
+    // Set and copy headers.
+    ServletUtil.setXForwardedForHeader(request, req);
+    
+    UriUtils.copyRequestHeaders(
+        request, req,
+        UriUtils.DisallowedHeaders.POST_INCOMPATIBLE_DIRECTIVES);
+
+    req.setFollowRedirects(false);
     return req;
   }
 
   /**
-   * Rewrite the content type of the final http response if the request has the
-   * rewrite-mime-type param.
-   * @param req The http request.
-   * @param response The final http response to be returned to user.
-   */
-  protected void rewriteContentType(HttpRequest req, HttpServletResponse response) {
-    String contentType = response.getContentType();
-    String requiredType = req.getRewriteMimeType();
-    if (!StringUtils.isEmpty(requiredType)) {
-      if (requiredType.endsWith("/*") && !StringUtils.isEmpty(contentType)) {
-        requiredType = requiredType.substring(0, requiredType.length() - 2);
-      }
-      response.setContentType(requiredType);
-    }
-  }
-
-  /**
-   * Process errors when fetching uri using request pipeline by throwing
-   * GadgetException in error cases.
+   * Process errors when fetching uri using request pipeline and return the
+   * error response to be returned to the user if any.
    * @param results The http response returned by request pipeline.
-   * @param response The http servlet response to be returned to the user.
-   * @return True if there is no error, false otherwise.
-   * @throws IOException In case of errors.
+   * @return An HttpResponse instance encapsulating error message and status
+   *   code to be returned to the user in case of errors, null otherwise.
    */
-  protected boolean handleErrors(HttpResponse results, HttpServletResponse response)
-      throws IOException {
+  protected HttpResponse handleErrors(HttpResponse results) {
     if (results == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST, ERROR_FETCHING_DATA);
-      return false;
+      return new HttpResponseBuilder()
+          .setHttpStatusCode(HttpResponse.SC_NOT_FOUND)
+          .setResponse(ERROR_FETCHING_DATA.getBytes())
+          .create();
     }
-    if (results.getHttpStatusCode() == HttpServletResponse.SC_NOT_FOUND) {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND, ERROR_FETCHING_DATA);
-      return false;
-    } else if (results.isError()) {
-      response.sendError(HttpServletResponse.SC_BAD_GATEWAY, ERROR_FETCHING_DATA);
-      return false;
+    if (results.isError()) {
+      return results;
     }
 
-    return true;
+    return null;
   }
 }

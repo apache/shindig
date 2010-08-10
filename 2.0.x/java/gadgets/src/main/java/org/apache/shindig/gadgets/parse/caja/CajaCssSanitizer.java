@@ -75,7 +75,7 @@ public class CajaCssSanitizer {
   public String sanitize(String content, Uri linkContext, ProxyUriManager importRewriter,
       ProxyUriManager imageRewriter) {
     try {
-      CssTree.StyleSheet stylesheet = parser.parseDom(content);
+      CssTree.StyleSheet stylesheet = parser.parseDom(content, linkContext);
       sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       return parser.serialize(stylesheet);
@@ -97,7 +97,8 @@ public class CajaCssSanitizer {
       ProxyUriManager imageRewriter) {
     String content = null;
     try {
-      CssTree.StyleSheet stylesheet = parser.parseDom(styleElem.getTextContent());
+      CssTree.StyleSheet stylesheet =
+        parser.parseDom(styleElem.getTextContent(), linkContext);
       sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       content = parser.serialize(stylesheet);

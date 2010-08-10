@@ -39,6 +39,7 @@ public class ProxyUriBase {
   private String gadget = null;
   private String rewriteMimeType = null;
   private boolean sanitizeContent = false;
+  private boolean cajoleContent = false;
   
   protected ProxyUriBase(Gadget gadget) {
     this(null,  // Meaningless in "context" mode. translateStatusRefresh invalid here.
@@ -83,6 +84,7 @@ public class ProxyUriBase {
       gadget = uri.getQueryParameter(Param.GADGET.getKey());
       rewriteMimeType = uri.getQueryParameter(Param.REWRITE_MIME_TYPE.getKey());
       sanitizeContent = getBooleanValue(uri.getQueryParameter(Param.SANITIZE.getKey()));
+      cajoleContent = getBooleanValue(uri.getQueryParameter(Param.CAJOLE.getKey()));      
     }  
   }
 
@@ -102,13 +104,15 @@ public class ProxyUriBase {
         && Objects.equal(this.rewriteMimeType, objUri.rewriteMimeType)
         && this.noCache == objUri.noCache
         && this.debug == objUri.debug
-        && this.sanitizeContent == objUri.sanitizeContent);
+        && this.sanitizeContent == objUri.sanitizeContent
+        && this.cajoleContent == objUri.cajoleContent);
+
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(status, refresh, container, gadget, rewriteMimeType,
-            noCache, debug, sanitizeContent);
+            noCache, debug, sanitizeContent, cajoleContent);
   }
 
   public ProxyUriBase setRewriteMimeType(String type) {
@@ -118,6 +122,11 @@ public class ProxyUriBase {
   
   public ProxyUriBase setSanitizeContent(boolean sanitize) {
     this.sanitizeContent = sanitize;
+    return this;
+  }
+
+  public ProxyUriBase setCajoleContent(boolean cajole) {
+    this.cajoleContent = cajole;
     return this;
   }
   
@@ -153,6 +162,10 @@ public class ProxyUriBase {
     return sanitizeContent;
   }
 
+  public boolean cajoleContent() {
+    return cajoleContent;
+  }
+
   public HttpRequest makeHttpRequest(Uri targetUri) throws GadgetException {
     HttpRequest req = new HttpRequest(targetUri)
         .setIgnoreCache(isNoCache())
@@ -177,6 +190,7 @@ public class ProxyUriBase {
       req.setRewriteMimeType(getRewriteMimeType());
     }
     req.setSanitizationRequested(sanitizeContent());
+    req.setCajaRequested(cajoleContent());    
 
     return req;
   }
@@ -212,6 +226,9 @@ public class ProxyUriBase {
     }
     if (sanitizeContent) {
       queryBuilder.addQueryParameter(Param.SANITIZE.getKey(), "1");
+    }
+    if (cajoleContent) {
+      queryBuilder.addQueryParameter(Param.CAJOLE.getKey(), "1");
     }
     return queryBuilder;
   }

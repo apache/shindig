@@ -17,32 +17,21 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.Capture;
 import org.junit.Test;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
 import java.util.List;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Test of proxying rewriter
@@ -54,10 +43,20 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   public void imgVisitReserved() throws Exception {
     checkVisitReserved("img", true);
   }
-  
+
+  @Test
+  public void inputVisitReserved() throws Exception {
+    checkVisitReserved("input", true);
+  }
+
+  @Test
+  public void bodyVisitReserved() throws Exception {
+    checkVisitReserved("body", true);
+  }
+
   @Test
   public void embedVisitReserved() throws Exception {
-    checkVisitReserved("embed", true);
+    checkVisitReserved("embed", false);
   }
   
   @Test
@@ -72,7 +71,7 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   
   @Test
   public void objectVisitReserved() throws Exception {
-    checkVisitReserved("object", true);
+    checkVisitReserved("object", false);
   }
   
   @Test
@@ -112,14 +111,17 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     // Includes one mod and one skip.
     // No need to test invalid nodes since visit() and DomWalker tests preclude this.
     String scriptSrc = "http://script.com/foo.js";
+    String imgSrc = "http://script.com/foo.jpg";
     Element e1 = elem("script", "src", scriptSrc);
     Element e2 = elem("script", "src", "^!,,|BLARGH");
-    List<Node> nodes = ImmutableList.<Node>of(e1, e2);
+    Element e3 = elem("IMG", "src", imgSrc);
+    Element e4 = elem("script", "src", " " + scriptSrc + " ");
+    List<Node> nodes = ImmutableList.<Node>of(e1, e2, e3, e4);
     ProxyUriManager uriManager = createMock(ProxyUriManager.class);
     Uri rewrittenUri = Uri.parse("http://bar.com/");
-    List<Uri> returned = Lists.newArrayList(rewrittenUri, null);
+    List<Uri> returned = Lists.newArrayList(rewrittenUri, rewrittenUri, rewrittenUri);
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
-    Integer expires = new Integer(3);
+    Integer expires = 3;
     expect(config.getExpires()).andReturn(expires).once();
     expect(config);
     Capture<List<ProxyUriManager.ProxyUri>> cap = new Capture<List<ProxyUriManager.ProxyUri>>();
@@ -127,16 +129,19 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     expect(uriManager.make(capture(cap), capture(intCap))).andReturn(returned).once();
     replay(config, uriManager);
     Gadget gadget = gadget();
-    
+
     ProxyingVisitor rewriter = new ProxyingVisitor(config, uriManager);
     assertTrue(rewriter.revisit(gadget, nodes));
     verify(config, uriManager);
-    
-    assertEquals(2, cap.getValue().size());
+
+    assertEquals(3, cap.getValue().size());
     assertEquals(Uri.parse(scriptSrc), cap.getValue().get(0).getResource());
-    assertNull(cap.getValue().get(1));
+    assertEquals(Uri.parse(imgSrc), cap.getValue().get(1).getResource());
+    assertEquals(Uri.parse(scriptSrc), cap.getValue().get(2).getResource());
     assertSame(expires, intCap.getValue());
     assertEquals(rewrittenUri.toString(), e1.getAttribute("src"));
     assertEquals("^!,,|BLARGH", e2.getAttribute("src"));
+    assertEquals(rewrittenUri.toString(), e3.getAttribute("src"));
+    assertEquals(rewrittenUri.toString(), e4.getAttribute("src"));
   }
 }

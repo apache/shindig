@@ -77,6 +77,23 @@ $shindigConfig = array(
   'default_js_prefix' => '/gadgets/js/',
   'default_iframe_prefix' => '/gadgets/ifr?',
 
+ 'servlet_map' => array( 
+   '/container' => 'FilesServlet', 
+   '/samplecontainer' => 'FilesServlet', 
+   '/gadgets/js' => 'JsServlet', 
+   '/gadgets/proxy' => 'ProxyServlet', 
+   '/gadgets/makeRequest' => 'MakeRequestServlet', 
+   '/gadgets/ifr' => 'GadgetRenderingServlet', 
+   '/gadgets/metadata' => 'MetadataServlet', 
+   '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
+   '/gadgets/api/rpc' => 'JsonRpcServlet', 
+   '/gadgets/api/rest' => 'DataServiceServlet', 
+   '/social/rest' => 'DataServiceServlet', 
+   '/rpc' => 'JsonRpcServlet', 
+   '/public.crt' => 'CertServlet', 
+   '/public.cer' => 'CertServlet', 
+ ), 
+ 
   // The X-XRDS-Location value for your implementing container, see http://code.google.com/p/partuza/source/browse/trunk/Library/XRDS.php for an example
   'xrds_location' => '',
 
@@ -97,7 +114,10 @@ $shindigConfig = array(
 
   // The locations of the various required components on disk. If you did a normal svn checkout there's no need to change these
   'base_path' => realpath(dirname(__FILE__) . '/..') . '/',
-  'features_path' => realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
+  'features_path' => array(
+    realpath(dirname(__FILE__) . '/../../features/src/main/javascript/features') . '/',
+    realpath(dirname(__FILE__) . '/../../extras/src/main/javascript/features-extras') . '/',
+  ),
   'container_path' => realpath(dirname(__FILE__) . '/../../config') . '/',
   'javascript_path' => realpath(dirname(__FILE__) . '/../../content') . '/',
 
@@ -126,6 +146,14 @@ $shindigConfig = array(
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
 
+  'gadget_class' => 'Gadget',
+  'gadget_context_class' => 'GadgetContext',
+  'gadget_factory_class' => 'GadgetFactory',
+  'gadget_spec_parser' => 'GadgetSpecParser',
+  'gadget_spec_class' => 'GadgetSpec',
+  'substitution_class' => 'Substitutions',
+  'proxy_handler' => 'ProxyHandler',
+  
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript

@@ -40,23 +40,23 @@
   }
 
   function initializeGlobalVars() {
-    var scriptSrc = getLastScriptSrc();
-    if (scriptSrc) {
-      window.__API_HOST = shindig.container.util.parseOrigin(scriptSrc);
-      window.__API_PREFIX_PATH = shindig.container.util.parsePrefixPath(
-          scriptSrc, '/gadgets/js/container.js');
-      window.__CONTAINER = shindig.container.util.getParamValue(
-          scriptSrc, 'container');
-      window.__CONTAINER_HOST = shindig.container.util.parseOrigin(
-          document.location.href);
+    var scriptUri = getLastScriptUri();
+    if (scriptUri) {
+      window.__API_HOST = scriptUri.getOrigin();
+      window.__CONTAINER = scriptUri.getQP('container');
     }
+    window.__CONTAINER_HOST = shindig.uri(document.location.href).getOrigin();
   }
 
-  function getLastScriptSrc() {
+  function getLastScriptUri() {
     var scriptEls = document.getElementsByTagName('script');
-    return (scriptEls.length > 0)
-        ? scriptEls[scriptEls.length - 1].src
-        : null;
+    var uri = null;
+    if (scriptEls.length > 0) {
+      uri = shindig.uri(scriptEls[scriptEls.length - 1].src)
+      // In case script URI is relative, resolve it against window.location
+      uri.resolve(shindig.uri(window.location));
+    }
+    return uri;
   }
 
   initializeConfig();

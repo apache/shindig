@@ -34,22 +34,19 @@ public interface ActivityObject {
 	 */
 	public static enum Field {
 		ID("id"),
-		DISPLAY_NAME("displayName"),
+		NAME("name"),
 		SUMMARY("summary"),
+		MEDIA("media"),
 		PERMALINK("permalink"),
-		IMAGE("image"),
-		CONTENT("content"),
-		AUDIO_STREAM("audioStream"),
-		VIDEO_STREAM("videoStream"),
-		PLAYER_APPLET("playerApplet"),
-		BOOKMARK_TARGET("bookmarkTarget"),
-		THUMBNAIL("thumbnail"),
-		SUBJECT("subject"),
-		DESCRIPTION("description"),
-		RATING("rating"),
-		ICON("icon"),
+		TYPE("type"),
 		IN_REPLY_TO("inReplyTo"),
-		OBJECT_TYPE("objectType");
+		ATTACHED("attached"),
+		REPLY("reply"),
+		REACTION("reaction"),
+		ACTION("action"),
+		UPSTREAM_DUPLICATE_ID("upstreamDuplicateId"),
+		DOWNSTREAM_DUPLICATE_ID("downstreamDuplicateId"),
+		STANDARD_LINK("standardLink");
 		
 		/*
 		 * The name of the JSON element.
@@ -79,67 +76,55 @@ public interface ActivityObject {
 
 	void setId(String id);
 
-	String getDisplayName();
+	String getName();
 
-	void setDisplayName(String displayName);
+	void setName(String name);
 
 	String getSummary();
 
 	void setSummary(String summary);
 
+	MediaLink getMedia();
+
+	void setMedia(MediaLink media);
+
 	String getPermalink();
 
 	void setPermalink(String permalink);
 
-	String getImage();
+	List<String> getType();
 
-	void setImage(String image);
-
-	String getContent();
-
-	void setContent(String content);
-
-	String getAudioStream();
-
-	void setAudioStream(String audioStream);
-
-	String getVideoStream();
-
-	void setVideoStream(String videoStream);
-
-	String getPlayerApplet();
-
-	void setPlayerApplet(String playerApplet);
-
-	String getBookmarkTarget();
-
-	void setBookmarkTarget(String bookmarkTarget);
-	
-	String getThumbnail();
-
-	void setThumbnail(String thumbnail);
-
-	String getSubject();
-
-	void setSubject(String subject);
-
-	String getDescription();
-
-	void setDescription(String description);
-
-	String getRating();
-
-	void setRating(String rating);
-
-	String getIcon();
-
-	void setIcon(String icon);
-
-	List<String> getObjectType();
-
-	void setObjectType(List<String> objectType);
+	void setType(List<String> type);
 
 	ActivityObject getInReplyTo();
 
 	void setInReplyTo(ActivityObject inReplyTo);
+
+	List<ActivityObject> getAttached();
+
+	void setAttached(List<ActivityObject> attached);
+
+	List<ActivityObject> getReply();
+
+	void setReply(List<ActivityObject> reply);
+
+	List<ActivityObject> getReaction();
+
+	void setReaction(List<ActivityObject> reaction);
+
+	ActionLink getAction();
+
+	void setAction(ActionLink action);
+
+	List<String> getUpstreamDuplicateId();
+
+	void setUpstreamDuplicateId(List<String> upstreamDuplicateId);
+
+	List<String> getDownstreamDuplicateId();
+
+	void setDownstreamDuplicateId(List<String> downstreamDuplicateId);
+
+	String getStandardLink();
+
+	void setStandardLink(String standardLink);
 }

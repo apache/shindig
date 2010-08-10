@@ -66,9 +66,11 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
   public Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
 	      Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
 	try {
-	  JSONObject jsonObject = convertFromActivityEntry(activityEntry, fields);
-	  if (!jsonObject.has(ActivityEntry.Field.ID.toString())) {
-	    jsonObject.put(ActivityEntry.Field.ID.toString(), System.currentTimeMillis());
+	  JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
+	  JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
+	  if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
+		  jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+		  jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
 	  }
 
 	  // TODO: bug fixed: jsonArray will not be null; will throw exception!
@@ -81,7 +83,7 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
 		  jsonArray = new JSONArray();
 		  db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
 	  }
-	  jsonArray.put(jsonObject);
+	  jsonArray.put(jsonEntry);
 	  return ImmediateFuture.newInstance(null);
 	} catch (JSONException je) {
 	  throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
@@ -100,7 +102,7 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
 	      JSONArray newList = new JSONArray();
 	      for (int i = 0; i < activityEntries.length(); i++) {
 	        JSONObject activityEntry = activityEntries.getJSONObject(i);
-	        if (!activityIds.contains(activityEntry.getString(ActivityEntry.Field.ID.toString()))) {
+	        if (!activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()))) {
 	          newList.put(activityEntry);
 	        }
 	      }
@@ -123,16 +125,16 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
   public Future<ActivityEntry> getActivityEntry(UserId userId, GroupId groupId,
 		  String appId, Set<String> fields, String activityId, SecurityToken token)
 		  throws ProtocolException {
-    try {
+    try {	   	
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
         JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
         for (int i = 0; i < activityEntries.length(); i++) {
           JSONObject activityEntry = activityEntries.getJSONObject(i);
-          JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()).toString());
+          JSONObject actor = activityEntry.getJSONObject(ActivityEntry.Field.ACTOR.toString());
           String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
           if (actorId.equals(user)
-              && activityEntry.get(ActivityEntry.Field.ID.toString()).toString().equals(activityId)) {
+              && activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).get(ActivityObject.Field.ID.toString()).toString().equals(activityId)) {
             return ImmediateFuture.newInstance(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
          }
         }
@@ -144,13 +146,29 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
           je);
     }
   }
-
+	
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
 		  Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields,
 		  CollectionOptions options, SecurityToken token)
 		  throws ProtocolException {
       List<ActivityEntry> result = Lists.newArrayList();
-
+      
+//    	// Retrieve activities from Lotus Connections
+//		FeedParser parser;
+//		try {
+//			parser = new FeedParser();
+//		    ArrayList<JSONObject> activityEntries = parser.parseFeed("http://w3.ibm.com/connections/news/atom/stories/public");
+//		    for(JSONObject activityEntry : activityEntries) {
+//		    	result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
+//		    }
+//		} catch (ParserConfigurationException e) {
+//			e.printStackTrace();
+//		} catch (SAXException e) {
+//			e.printStackTrace();
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
+		
       try {
         Set<String> idSet = jsonDb.getIdSet(userIds, groupId, token);
         for (String id : idSet) {
@@ -161,9 +179,9 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
               result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
               // TODO: ActivityStreams don't have appIds
 //	              if (appId == null || !activitystream.has(ActivityStream.Field.APP_ID.toString())) {
-//	                result.add(filterFields(activitystream, fields, ActivityStream.class));
+//	                result.add(jsonDb.filterFields(activitystream, fields, ActivityStream.class));
 //	              } else if (activitystream.get(ActivityStream.Field.APP_ID.toString()).equals(appId)) {
-//	                result.add(filterFields(activitystream, fields, ActivityStream.class));
+//	                result.add(jsonDb.filterFields(activitystream, fields, ActivityStream.class));
 //	              }
             }
           }
@@ -174,7 +192,7 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
           je);
     }
   }
-
+	
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
 		  UserId userId, GroupId groupId, String appId, Set<String> fields,
 		  CollectionOptions options, Set<String> activityIds, SecurityToken token)
@@ -189,7 +207,7 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
             JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()));
             String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
             if (actorId.equals(user)
-              && activityIds.contains(activityEntry.getString(ActivityEntry.Field.ID.toString()))) {
+              && activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()).toString())) {
             result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
           }
         }
