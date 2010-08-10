@@ -1,0 +1,143 @@
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<html>
+  <head>
+    <title>OpenSocial templates JsUnit tests</title>
+    <script src="jsunit/app/jsUnitCore.js"></script>
+    <script src="jsunit/app/jsUnitMockTimeout.js"></script>
+    <!-- the set of js files that make up opensocial-templates feature, as they appear in feature.xml -->
+    <script src="http://google-jstemplate.googlecode.com/svn/trunk/util.js"></script>
+    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jsevalcontext.js"></script>
+    <script src="http://google-jstemplate.googlecode.com/svn/trunk/jstemplate.js"></script>
+    <script src="jstemplate_debug.js"></script>
+    <script src="base.js"></script>
+    <script src="namespaces.js"></script>
+    <script src="util.js"></script>
+    <script src="template.js"></script>
+    <script src="compiler.js"></script>
+    <script src="loader.js"></script>
+    <script src="container.js"></script>
+    <script src="os.js"></script>
+    <script src="data.js"></script>
+    <!-- the JsUnit tests -->
+    <script src="domutil.js"></script>
+    <script type="text/javascript" src="compiler_test.js"></script>
+    <script type="text/javascript" src="data_test.js"></script>
+    <script type="text/javascript" src="container_test.js"></script>
+    <script type="text/javascript" src="loader_test.js"></script>
+    <script type="text/javascript" src="os_test.js"></script>
+    <script type="text/javascript" src="util_test.js"></script>
+    <script type="text/javascript" src="template_test.js"></script>
+    <!-- JsUnit work-around for non-FireFox browsers -->
+    <script type="text/javascript">
+      function exposeTestFunctionNames() {
+        var testSource = typeof RuntimeObject != 'undefined' ?
+                         RuntimeObject('test' + '*') : self;
+        var testFunctionNames = new Array();
+        for (i in testSource) {
+          if (i.substring(0, 4) == 'test' && typeof(testSource[i]) == 'function')
+            push(testFunctionNames, i);
+        }
+        return testFunctionNames;
+      }
+ 
+      os.createNamespace("test", "http://www.google.com/#test");
+    </script>
+  </head>
+  <body>
+    <script type="text/os-template" tag="os:Test">tag template</script>
+    <script type="text/os-template">
+      <div id="test"><os:Test/></div>
+    </script>
+
+    <div style="display: none">
+      <div id="domSource">
+        <ul>
+          <li>one</li>
+          <li>two</li>
+        </ul>
+        <b>bold</b>
+      </div>
+      <div id="domTarget">
+      </div>
+    </div>
+
+    <xmp id="_T_Substitution_attribute" style="display: none">
+      <button id="${id}" style="color: ${color}" a1="value ${A1}">${text}</button>
+    </xmp>
+    <xmp id="my:user" style="display: none">
+      <a href="${url}">${name}</a> (${$my.foo})
+    </xmp>
+    <xmp id="my:record" style="display: none">
+      <b style="color: ${$my.color}">${title}</b>: <my:user context="user" foo="${$my.foo}"/>
+    </xmp>
+    <xmp id="_T_Substitution_nested" style="display: none">
+      <div repeat="users">
+        <my:record color="${color}" foo="${user.id}"/>
+      </div>
+    </xmp>
+
+    <xmp id="_T_Conditional_Number" style="display: none">
+      <span if="42==42">TRUE</span>
+      <span if="!(42==42)">FALSE</span>
+    </xmp>
+    <xmp id="_T_Conditional_String" style="display: none">
+      <span if="'101'=='101'">TRUE</span>
+      <span if="'101'!='101'">FALSE</span>
+    </xmp>
+    <xmp id="_T_Conditional_Mixed" style="display: none">
+      <span if="'101'>42">TRUE</span>
+      <span if="!('101'>42)">FALSE</span>
+    </xmp>
+
+    <xmp id="_T_Repeat" style="display: none">
+      <div repeat="entries">
+        ${data}
+      </div>
+    </xmp>
+
+    <xmp id="_T_Options" style="display: none">
+      <select id="options">
+        <option repeat="options" value="${value}">${value}</option>
+      </select>
+    </xmp>
+
+    <xmp id="custom:list" style="display: none">
+      <div repeat="$my.item"><os:renderAll content="title"/><os:renderAll content="body"/></div>
+    </xmp>
+
+    <xmp id="_T_List" style="display: none">
+      <custom:list>
+        <item>
+          <title>hello</title>
+          <body>world</body>
+        </item>
+      </custom:list>
+    </xmp>  
+
+    <xmp id="_T_Tag_input" style="display: none">
+      <!-- Uses a controller to grab the value ${def} as the default -->
+      <custom:input value="data"/>
+    </xmp>
+    <xmp id="_T_Tag_blink" style="display: none">
+      <custom:blink>blink text</custom:blink>
+    </xmp>
+  </body>
+</html>

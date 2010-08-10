@@ -1,0 +1,18 @@
+To have working oauth & signed requests you need a private and public key.
+
+You can generate these using the 'openssl' command by doing the following:
+
+Goto the certs directory:
+# cd shindig/php/certs
+
+Generate the private key:
+# openssl genrsa -out private.key -des3 1024
+
+Enter a pass phrase, and make sure to put this in 'private_key_phrase' in 
+config/container.php
+
+Generate the public key:
+# openssl req -new -x509 -nodes -sha1 -days 365 -key private.key > public.crt
+
+Enter the pass phrase again, and your host's information
+

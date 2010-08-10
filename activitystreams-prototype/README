@@ -1,0 +1,69 @@
+                          Apache Shindig
+
+  What is it?
+  -----------
+
+  Shindig is a JavaScript container and implementations of the backend APIs
+  and proxy required for hosting OpenSocial applications.
+
+  Documentation
+  -------------
+
+  The most up-to-date documentation can be found at http://shindig.apache.org.
+
+  Read BUILD-JAVA for instructions on how to build and run the Java server.
+
+  Read java/README for instructions on how to run a Java gadget server.
+
+  Read php/README for instructions on how to run a php gadget server.
+
+  Read javascript/README for instructions for using the Shindig Gadget Container 
+  JavaScript to enable your page to render Gadgets.
+
+  Read features/README for instructions on how to use features.
+
+  Licensing
+  ---------
+
+  Please see the file called LICENSE in the java and php directories.
+
+  Shindig URLS
+  ------------
+
+  Home Page:          http://shindig.apache.org/
+  Downloads:          http://shindig.apache.org/download/index.html
+  Mailing Lists:      http://shindig.apache.org/mail-lists.html
+  Source Code:        http://svn.apache.org/repos/asf/shindig
+  Issue Tracking:     https://issues.apache.org/jira/browse/SHINDIG
+  Wiki:               http://cwiki.apache.org/confluence/display/SHINDIG/
+
+
+This distribution includes cryptographic software.  The country in
+which you currently reside may have restrictions on the import,
+possession, use, and/or re-export to another country, of
+encryption software.  BEFORE using any encryption software, please
+check your country's laws, regulations and policies concerning the
+import, possession, or use, and re-export of encryption software, to
+see if this is permitted.  See <http://www.wassenaar.org/> for more
+information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and
+Security (BIS), has classified this software as Export Commodity
+Control Number (ECCN) 5D002.C.1, which includes information security
+software using or performing cryptographic functions with asymmetric
+algorithms.  The form and manner of this Apache Software Foundation
+distribution makes it eligible for export under the License Exception
+ENC Technology Software Unrestricted (TSU) exception (see the BIS
+Export Administration Regulations, Section 740.13) for both object
+code and source code.
+
+The following provides more details on the included cryptographic
+software:
+
+    Apache Shindig PHP interfaces with the mcrypt API
+    <http://mcrypt.sourceforge.net/> to provide encryption
+    of messages using the AES standard.
+
+    Apache Shindig interfaces with the Java JCE APIs to provide
+    encryption of messages using the AES standard.
+

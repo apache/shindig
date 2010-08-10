@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+        RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+        # NOTE: If you added a web_prefix to config, add it here too, e.g.:
+        #RewriteRule (.*) /shindig/php/index.php [L]
+        RewriteRule (.*) index.php [L]
+</IfModule>

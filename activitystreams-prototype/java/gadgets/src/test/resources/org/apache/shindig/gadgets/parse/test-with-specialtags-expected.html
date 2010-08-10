@@ -1,0 +1,33 @@
+<html><head><title>An example</title><style type="text/css">
+  <!--
+  #mymap #header {
+    background: #FF9700;
+    clear: both;
+    padding: 2px 0 1px;
+    position: relative;
+    width: 640px;
+  }
+
+  -->
+</style></head><body><script type="text/javascript">document.write("&&&")</script><script src="http://www.example.org/1.js" type="text/javascript"></script><script>
+  // scripts with no old comment hack should be preserved.
+  function a1() {
+    var v1 = 0;
+    alert(" this whitespace should be preserved.");
+  }
+</script><div><table><TBODY><tr><td>a cell</td></tr></TBODY></table></div><script type="text/javascript">
+  <!--
+  // script with old comment hack should be preserved.
+  function MM_goToURL() {
+    var i, args = MM_goToURL.arguments;
+    document.MM_returnValue = false;
+    for (i = 0; i < (args.length - 1); i += 2) eval(args[i] + ".location='" + args[i + 1] + "'");
+  }
+  //-->
+</script><p>Lorem ipsum</p><a href="/test.html" title="">link</a><pre>
+ This is a preformatted block of text,
+ and whitespaces should be preserved.
+ </pre><form action="/test/submit"><div><input type="hidden" value="something"><input type="text"><textarea>
+      This is a preformatted block of text,
+      and whitespaces should be preserved too.
+    </textarea></div></form></body></html>

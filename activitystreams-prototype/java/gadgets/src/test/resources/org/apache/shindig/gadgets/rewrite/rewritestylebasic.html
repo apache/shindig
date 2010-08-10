@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="http://www.example.org/linkedstyle1.css">
+    <link rel="stylesheet" type="text/css" href="http://www.example.org/excluded/linkedstyle2.css">
+    <link rel="stylesheet" type="text/css" href="http://www.example.org/linkedstyle3.css">
+  </head>
+  <body>
+    <style>
+      @import url("/importedstyle1.css");
+      @import url("/excluded/importedstyle2.css");
+      @import url("/importedstyle3.css");
+    </style>
+    <div>somecontent</div>
+    <style>
+      @import url("/importedstyle4.css");
+      div { color : black; }
+    </style>
+  </body>
+</html>

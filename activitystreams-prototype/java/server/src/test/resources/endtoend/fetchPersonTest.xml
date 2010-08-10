@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<Module>
+  <ModulePrefs title="EndToEndTest">
+    <Require feature="opensocial-0.9" />
+    <Require feature="views" />
+    <Optional feature="content-rewrite">
+      <Param name="exclude-urls">.*</Param>
+    </Optional>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript" src="/testframework.js"></script>
+      <script type="text/javascript">
+        var tests = {
+          /** Test fetching a specific ID */
+          fetchId: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical"), "canonical");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the owner, which should be "canonical" */
+          fetchOwner: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "owner");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "owner");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the viewer, which should be "john.doe" */
+          fetchViewer: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), "viewer");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "viewer");
+              assertEquals("Names don't match",
+                "Johnny", user.getDisplayName());
+
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching the owner and viewer as a batch */
+          fetchOwnerAndViewer: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "owner");
+            req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), "viewer");
+
+            function receivedData(response) {
+              var user = getAndCheckError(response, "owner");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+
+              user = getAndCheckError(response, "viewer");
+              assertEquals("Names don't match",
+                "Johnny", user.getDisplayName());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          fetchPersonNotFound: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("not.a.real.id"), "bad");
+
+            function receivedData(response) {
+              assertTrue("No data error", response.hadError());
+              var dataItem = response.get("bad");
+              assertTrue("No data item error", dataItem.hadError());
+              assertEquals("Not a badRequest", "badRequest", dataItem.getErrorCode());
+              assertEquals("Not null data", null, dataItem.getData());
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+          
+          /** Test fetching app data */
+          fetchAppData: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical",
+                {appData: '*'}), "canonical");
+
+            var receivedData = function(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              assertEquals("Wrong app data returned", "2", user.getAppData("count"));
+              assertEquals("Wrong app data returned", "100", user.getAppData("size"));
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+
+          /** Test fetching app data via the array */
+          fetchTwoProperties: function() {
+            var req = opensocial.newDataRequest();
+
+            // Request the "canonical" viewer
+            req.add(req.newFetchPersonRequest("canonical",
+                {appData: ['count', 'notThere']}), "canonical");
+
+            var receivedData = function(response) {
+              var user = getAndCheckError(response, "canonical");
+              assertEquals("Names don't match",
+                "Shin Digg", user.getDisplayName());
+              assertEquals("Wrong app data returned", "2", user.getAppData("count"));
+              assertEquals("Too much app data returned", undefined, user.getAppData("size"));
+              assertEquals("App data that shouldn't exist returned", undefined, user.getAppData("notThere"));
+              finished();
+            }
+
+            // Send the request
+            req.send(receivedData);
+          },
+        };
+
+        function getAndCheckError(response, key) {
+          assertFalse("Data error", response.hadError());
+          var dataItem = response.get(key);
+          assertFalse("Data item error for " + key, dataItem.hadError());
+          return dataItem.getData();
+        }
+      </script>
+    ]]>
+  </Content>
+</Module>

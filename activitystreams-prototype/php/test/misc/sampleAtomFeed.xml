@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Example Feed</title>
+  <subtitle>A subtitle.</subtitle>
+  <link href="http://example.org/feed/" rel="self" />
+  <link href="http://example.org/" />
+  <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
+  <updated>2009-01-03T18:30:02Z</updated>
+  <author>
+    <name>John Doe</name>
+    <email>johndoe@example.com</email>
+  </author>
+  <entry>
+    <title>Atom-Powered Robots Run Amok</title>
+    <link href="http://example.org/entry1" />
+    <id>urn:uuid:11111111-1111-1111-1111-111111111111</id>
+    <updated>2009-01-01T18:30:02Z</updated>
+    <summary>This is the first sample atom entry.</summary>
+  </entry>
+  <entry>
+    <title>Atom-Powered Robots Now OK</title>
+    <link href="http://example.org/entry2" />
+    <id>urn:uuid:22222222-2222-2222-2222-222222222222</id>
+    <updated>2009-01-02T18:30:02Z</updated>
+    <summary>This is the second sample atom entry.</summary>
+  </entry>
+  <entry>
+    <title>Atom Feed Samples Interesting, Scientists Say</title>
+    <link href="http://example.org/entry3" />
+    <id>urn:uuid:333333333-3333-3333-3333-333333333333</id>
+    <updated>2009-01-03T18:30:02Z</updated>
+    <summary>This is the third sample atom entry.</summary>
+  </entry>
+</feed>

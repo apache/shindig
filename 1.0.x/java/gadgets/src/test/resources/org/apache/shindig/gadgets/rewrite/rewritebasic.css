@@ -1,0 +1,12 @@
+
+// Rewrite various url forms in input statements, absolute and host/path relative.
+// Test exclusions
+@import url(http://www.example.org/other1.css);
+DiV {
+  font: arial;
+}
+
+@import url("relative/other2.css");
+@import url('/hostrelative/excluded/other1.css');
+
+// A comment?

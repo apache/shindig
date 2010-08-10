@@ -1,0 +1,68 @@
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+
+<html>
+  <head>
+    <title>gadgets.rpc Performance Tests: Gadget</title>
+    <script src="../../js/rpc.js?c=1&debug=1"></script>
+    <script src="rpctest_perf.js"></script>
+    <script>
+      var containerRelay = window.location.search.substring(1);
+      gadgets.rpc.setRelayUrl(null, containerRelay);
+    </script>
+  </head>
+  <body onload="initPerfTest();">
+    <div>gadgets.rpc Performance: "Gadget" page</div><hr/>
+    <div>Test<br/>
+      <ul>
+        <li>Number of messages to send:
+          <select name="num_msgs" id="num_msgs">
+            <option value="1">1</option>
+            <option value="10">10</option>
+            <option value="100" selected>100</option>
+            <option value="1000">1000</option>
+          </select>
+        </li>
+        <li>Message size:
+          <select name="msg_size" id="msg_size">
+            <option value="10">10 B</option>
+            <option value="100">100 B</option>
+            <option value="1024" selected>1 kB</option>
+            <option value="10240">10 kB</option>
+            <option value="102400">100 kB</option>
+            <option value="1048576">1 MB</option>
+          </select>
+        </li>
+        <li>
+          <input type="button" value="Start The Test!" onclick="runPerfTest();" />
+        </li>
+      </ul>
+    </div>
+    <div id="test_running" style="display:none;">
+      Running test...
+    </div>
+    <div id="results" style="display:none;">
+      Results: Gadget-to-Container<br/>
+      Messages: <span id="results_num_received"></span>, Bytes: <span id="results_bytes_received"></span> <span id="in_or_out"></span><br/>
+      Time elapsed for test run: <span id="results_time_used"></span><br/>
+      Messages/second: <span id="results_msgs_per_sec"></span><br/>
+      Bytes/second: <span id="results_bytes_per_sec"></span>
+    </div>
+  </body>
+</html>

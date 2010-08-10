@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<Module>
+  <ModulePrefs title="EndToEndTest">
+    <Require feature="osapi" />
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript" src="/testframework.js"></script>
+      <script type="text/javascript">
+        var tests = {
+          /** Test fetching a specific ID's appdata */
+          fetchId: function() {
+            function receivedData(response) {
+              assertFalse("Should not have error", response.error);
+              assertEquals("Should have 0 appdata items", undefined, response.length);
+              finished();
+            }
+
+            osapi.appdata.get({ userId : 'canonical', keys : ['gifts']}).execute(receivedData);
+          },
+          /** Test creating appdata, retrieving appdata and deleting appdata */
+          appdataWrite: function() {
+            function assertNoErrorAndEmptyResponse(response) {
+              assertFalse("Should not have error", response.error);
+              assertEquals("Should have 0 appdata items", undefined, response.length);
+            }
+
+            function getEmptyResponse(response) {
+              assertNoErrorAndEmptyResponse(response);
+              finished();
+            }
+ 
+            function deletedResponse(response) {
+              assertNoErrorAndEmptyResponse(response);
+              osapi.appdata.get({userId: '@viewer', keys: ['pet']}).execute(getEmptyResponse);
+            }
+
+            function getPopulatedResponse(data) {
+              assertFalse("Should not have error", data.error);
+              assertEquals("Should have 1 user key", data.length);
+              for (var id in data) if (data.hasOwnProperty(id)) {
+                var mydata = data[id];
+                break;
+              }
+              var pet = mydata["pet"];
+              assertEquals("Pet should match", "crazed monkey", pet);
+              osapi.appdata["delete"]({userId: '@viewer', keys: ['pet']}).execute(deletedResponse);
+            }
+
+            function updateResponse(response) {
+              assertNoErrorAndEmptyResponse(response);
+              osapi.appdata.get({userId: '@viewer', keys: ['pet']}).execute(getPopulatedResponse);
+            }
+
+            osapi.appdata.update({userId: '@viewer', data: {pet: "crazed monkey"}}).execute(
+                updateResponse);
+          }
+        };
+      </script>
+    ]]>
+  </Content>
+</Module>
