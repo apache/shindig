@@ -126,7 +126,8 @@ class MediaItemHandler extends DataRequestHandler {
       throw new SocialSpiException("The content type " . $response->getContentType() .
         " fetched from $uri is not valid.", ResponseError::$BAD_REQUEST);
     }
-    return $this->writeBinaryContent($response->getResponseContent(), $response->getContentType());
+    $content = $response->getResponseContent();
+    return $this->writeBinaryContent($content, $response->getContentType());
   }
 
   /**
@@ -159,7 +160,8 @@ class MediaItemHandler extends DataRequestHandler {
     } else if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
       // The REST api supports to post the file using the content type 'image/*', 'video/*' or 'audio/*'.
       if ($this->isValidContentType($_SERVER['CONTENT_TYPE'])) {
-        $file = $this->writeBinaryContent($GLOBALS['HTTP_RAW_POST_DATA'], $_SERVER['CONTENT_TYPE']);
+        $postData = $GLOBALS['HTTP_RAW_POST_DATA'];
+        $file = $this->writeBinaryContent($postData, $_SERVER['CONTENT_TYPE']);
       }
     }
     return $file;
