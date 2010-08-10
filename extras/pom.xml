@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.shindig</groupId>
     <artifactId>shindig-project</artifactId>
-    <version>2.0.0-RC2</version>
+    <version>2.0.0-RC3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -33,9 +33,9 @@
   <description>Provides extra, deprecated or extended functionality. The items here have unstable APIs and could change at any time.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2/java/extras</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0-RC2/java/extras</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0-RC2/java/extras</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/extras</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/extras</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk/java/extras</url>
   </scm>
 
   <build>
