@@ -48,9 +48,9 @@
   <!-- S C M                                                                  -->
   <!-- ====================================================================== -->
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.0.x</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.0.x</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/branches/2.0.x</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/trunk</url>
   </scm>
 
   <!-- ====================================================================== -->
