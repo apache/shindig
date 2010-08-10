@@ -70,44 +70,34 @@ public class JsServlet extends InjectedServlet {
   private transient JsUriManager jsUriManager;
   private transient ContainerConfig containerConfig;
   private transient Map<String, ConfigContributor> configContributors;
-  private transient boolean initialized;
 
   @Inject
   public void setRegistry(FeatureRegistry registry) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.registry = registry;
   }
 
   @Inject
   public void setUrlGenerator(JsUriManager jsUriManager) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.jsUriManager = jsUriManager;
   }
 
   @Inject
   public void setContainerConfig(ContainerConfig containerConfig) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.containerConfig = containerConfig;
   }
 
   @Inject
   public void setConfigContributors(Map<String, ConfigContributor> configContributors) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.configContributors = configContributors;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override
@@ -140,7 +130,7 @@ public class JsServlet extends InjectedServlet {
           0, resourceName.length() - ".js".length());
     }
 
-    Set<String> needed = ImmutableSet.of(StringUtils.split(resourceName, ':'));
+    Set<String> needed = ImmutableSet.copyOf(StringUtils.split(resourceName, ':'));
 
     String debugStr = req.getParameter("debug");
     String containerParam = req.getParameter("container");

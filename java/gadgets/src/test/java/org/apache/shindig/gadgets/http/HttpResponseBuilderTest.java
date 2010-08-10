@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -136,7 +137,7 @@ public class HttpResponseBuilderTest {
   public void setEncoding() {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/html; charset=Big5")
-        .setEncoding(CharsetUtil.UTF8);
+        .setEncoding(Charsets.UTF_8);
     
     Multimap<String, String> headers = builder.getHeaders();
     assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        
@@ -146,7 +147,7 @@ public class HttpResponseBuilderTest {
   public void setEncodingEmpty() {
     HttpResponseBuilder builder = new HttpResponseBuilder()
         .addHeader("Content-Type", "text/html")
-        .setEncoding(CharsetUtil.UTF8);
+        .setEncoding(Charsets.UTF_8);
     
     Multimap<String, String> headers = builder.getHeaders();
     assertEquals("text/html; charset=UTF-8", headers.get("Content-Type").iterator().next());        

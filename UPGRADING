@@ -22,7 +22,8 @@ The default RPC endpoints used for json-rpc were moved from /gadgets/api/rpc and
 Too many to mention.  Check the top-level pom.xml for all the new versions.
 Here are some highlights:
 
-* caja r3034 -> r4067
+* guava replaces google-collections
+* caja r3034 -> r4209
 * guice 1.0->2.0
 * guice-multibindings (NEW)
 * nekohtml 1.9.9 -> 1.9.13

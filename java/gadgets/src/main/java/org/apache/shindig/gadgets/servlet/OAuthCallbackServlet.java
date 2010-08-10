@@ -81,21 +81,16 @@ public class OAuthCallbackServlet extends InjectedServlet {
     "</html>\n";
 
   private transient BlobCrypter stateCrypter;
-  private transient boolean initialized;
-  
+
   @Inject
-  public void setStateCrypter(
-      @Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+  public void setStateCrypter(@Named(OAuthFetcherConfig.OAUTH_STATE_CRYPTER) BlobCrypter stateCrypter) {
+    checkInitialized();
     this.stateCrypter = stateCrypter;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override

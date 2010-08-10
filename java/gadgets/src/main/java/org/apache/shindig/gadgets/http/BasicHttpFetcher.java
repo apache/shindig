@@ -491,9 +491,7 @@ public class BasicHttpFetcher implements HttpFetcher {
     if (instream == null) {
       return new byte[] {};
     }
-    if (entity.getContentLength() > Integer.MAX_VALUE) {
-      throw new IllegalArgumentException("HTTP entity too large to be buffered in memory");
-    }
+    Preconditions.checkArgument(entity.getContentLength() < Integer.MAX_VALUE, "HTTP entity too large to be buffered in memory");
 
     // The raw data stream (inside JDK) is read in a buffer of size '512'. The original code
     // org.apache.http.util.EntityUtils.toByteArray reads the unzipped data in a buffer of

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Preconditions;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
@@ -48,7 +49,6 @@ public class ProxyServlet extends InjectedServlet {
   private transient ProxyUriManager proxyUriManager;
   private transient LockedDomainService lockedDomainService;
   private transient ProxyHandler proxyHandler;
-  private transient boolean initialized;
 
   @Inject
   public void setProxyHandler(ProxyHandler proxyHandler) {
@@ -71,15 +71,8 @@ public class ProxyServlet extends InjectedServlet {
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
   
-  private void checkInitialized() {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
-  }
-
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse servletResponse)
       throws IOException {

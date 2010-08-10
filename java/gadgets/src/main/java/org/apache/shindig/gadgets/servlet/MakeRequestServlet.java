@@ -43,20 +43,16 @@ public class MakeRequestServlet extends InjectedServlet {
   private static final long serialVersionUID = -8298705081500283786L;
   
   private transient MakeRequestHandler makeRequestHandler;
-  private transient boolean initialized;
 
   @Inject
   public void setMakeRequestHandler(MakeRequestHandler makeRequestHandler) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.makeRequestHandler = makeRequestHandler;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -77,7 +78,7 @@ public class MutableContent {
     this.contentParser = contentParser;
     this.content = content;
     this.numChanges = 0;
-    this.contentEncoding = CharsetUtil.UTF8;
+    this.contentEncoding = Charsets.UTF_8;
   }
 
   /**
@@ -111,7 +112,7 @@ public class MutableContent {
       } else if (document != null) {
         content = HtmlSerialization.serialize(document);
       } else if (contentBytes != null) {
-        Charset useEncoding = contentEncoding != null ? contentEncoding : CharsetUtil.UTF8;
+        Charset useEncoding = contentEncoding != null ? contentEncoding : Charsets.UTF_8;
         content = useEncoding.decode(ByteBuffer.wrap(contentBytes)).toString();
       }
     }
@@ -158,10 +159,10 @@ public class MutableContent {
         // In the case of HttpResponseBuilder, this re-sets charset in Content-Type
         // to UTF-8 rather than whatever it was before. We do this to standardize
         // on UTF-8 for all String handling.
-        setContentBytesState(CharsetUtil.getUtf8Bytes(content), CharsetUtil.UTF8);
+        setContentBytesState(CharsetUtil.getUtf8Bytes(content), Charsets.UTF_8);
       } else if (document != null) {
         setContentBytesState(
-            CharsetUtil.getUtf8Bytes(HtmlSerialization.serialize(document)), CharsetUtil.UTF8);
+            CharsetUtil.getUtf8Bytes(HtmlSerialization.serialize(document)), Charsets.UTF_8);
       }
     }
     return contentBytes;

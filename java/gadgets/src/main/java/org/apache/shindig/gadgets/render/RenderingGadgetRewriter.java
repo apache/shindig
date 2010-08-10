@@ -122,7 +122,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
   @Inject
   public void setDefaultForcedLibs(@Named("shindig.gadget-rewrite.default-forced-libs")String forcedLibs) {
     if (StringUtils.isNotBlank(forcedLibs)) {
-      defaultExternLibs = ImmutableSortedSet.of(StringUtils.split(forcedLibs, ':'));
+      defaultExternLibs = ImmutableSortedSet.copyOf(StringUtils.split(forcedLibs, ':'));
     }
   }
 

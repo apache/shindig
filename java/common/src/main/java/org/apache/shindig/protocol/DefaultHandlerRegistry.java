@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.protocol;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.SecurityToken;
@@ -102,10 +103,9 @@ public class DefaultHandlerRegistry implements HandlerRegistry {
           }
         };
       }
-      if (!handlerType.isAnnotationPresent(Service.class)) {
-        throw new IllegalStateException("Attempt to bind unannotated service implementation " +
-            handlerType.getName());
-      }
+      Preconditions.checkState(handlerType.isAnnotationPresent(Service.class),
+          "Attempt to bind unannotated service implementation %s",handlerType.getName());
+
       Service service = handlerType.getAnnotation(Service.class);
 
       for (Method m : handlerType.getMethods()) {

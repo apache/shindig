@@ -54,28 +54,22 @@ public class GadgetRenderingServlet extends InjectedServlet {
 
   private transient Renderer renderer;
   private transient IframeUriManager iframeUriManager;
-  private transient boolean initialized;
 
   @Inject
   public void setRenderer(Renderer renderer) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.renderer = renderer;
   }
   
   @Inject
   public void setIframeUriManager(IframeUriManager iframeUriManager) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.iframeUriManager = iframeUriManager;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override

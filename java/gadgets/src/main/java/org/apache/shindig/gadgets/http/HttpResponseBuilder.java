@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -94,7 +95,7 @@ public class HttpResponseBuilder extends MutableContent {
    * @param body The response string.  Converted to UTF-8 bytes and copied when set.
    */
   public HttpResponseBuilder setResponseString(String body) {
-    setContentBytes(CharsetUtil.getUtf8Bytes(body), CharsetUtil.UTF8);
+    setContentBytes(CharsetUtil.getUtf8Bytes(body), Charsets.UTF_8);
     return this;
   }
 

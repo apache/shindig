@@ -86,7 +86,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
       throws JSONException {
     JSONObject req =
         new JSONObject().put("method", "gadgets.metadata").put("id", "req1").put("params",
-            new JSONObject().put("ids", ImmutableList.of(uris)).put("container", CONTAINER));
+            new JSONObject().put("ids", ImmutableList.copyOf(uris)).put("container", CONTAINER));
     if (lang != null) req.put("language", lang);
     if (country != null) req.put("country", country);
     return req;
@@ -95,7 +95,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private JSONObject makeTokenRequest(String... uris) throws JSONException {
     JSONObject req =
         new JSONObject().put("method", "gadgets.token").put("id", "req1").put("params",
-            new JSONObject().put("ids", ImmutableList.of(uris)).put("container", CONTAINER));
+            new JSONObject().put("ids", ImmutableList.copyOf(uris)).put("container", CONTAINER));
     return req;
   }
 

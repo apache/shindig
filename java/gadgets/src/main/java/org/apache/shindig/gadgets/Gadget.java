@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets;
 
+import com.google.common.base.Preconditions;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.preload.PreloadedData;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
@@ -97,12 +98,8 @@ public class Gadget {
   private List<String> allGadgetFeatures;
   public synchronized List<String> getAllFeatures() {
     if (allGadgetFeatures == null) {
-      if (featureRegistry != null) {
-        allGadgetFeatures = featureRegistry.getFeatures(Lists.newArrayList(directFeatureDeps));
-      } else {
-        throw new IllegalStateException(
-            "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");
-      }
+      Preconditions.checkState(featureRegistry != null, "setGadgetFeatureRegistry must be called before Gadget.getAllFeatures()");
+      allGadgetFeatures = featureRegistry.getFeatures(Lists.newArrayList(directFeatureDeps));
     }
     return allGadgetFeatures;
   }

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.servlet;
 
+import com.google.common.base.Preconditions;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.util.DateUtil;
 import org.apache.shindig.common.util.TimeSource;
@@ -145,10 +146,10 @@ public final class HttpUtil {
     // No callback specified
     if (callback == null) return false;
 
-    if (!GET_REQUEST_CALLBACK_PATTERN.matcher(callback).matches()) {
-       throw new IllegalArgumentException("Wrong format for parameter 'callback' specified. Must match: " +
+    Preconditions.checkArgument(GET_REQUEST_CALLBACK_PATTERN.matcher(callback).matches(),
+        "Wrong format for parameter 'callback' specified. Must match: " +
             GET_REQUEST_CALLBACK_PATTERN.toString());
-    }
+
     return true;
   }
 

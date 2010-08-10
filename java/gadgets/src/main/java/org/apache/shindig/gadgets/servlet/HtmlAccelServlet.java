@@ -41,20 +41,16 @@ public class HtmlAccelServlet extends InjectedServlet {
   private static final Logger logger = Logger.getLogger(
       HtmlAccelServlet.class.getName());
   private transient AccelHandler accelHandler;
-  private transient boolean initialized;
 
   @Inject
   public void setHandler(AccelHandler accelHandler) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.accelHandler = accelHandler;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override

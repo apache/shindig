@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -95,7 +96,7 @@ public class MutableContentTest {
   @Test
   public void modifyBytesReflectedInContentAndTree() throws Exception {
     assertEquals(0, mhc.getNumChanges());
-    mhc.setContentBytes("NEW CONTENT".getBytes("UTF8"), CharsetUtil.UTF8);
+    mhc.setContentBytes("NEW CONTENT".getBytes("UTF8"), Charsets.UTF_8);
     assertEquals(1, mhc.getNumChanges());
     Document document = mhc.getDocument();
     assertEquals(1, document.getChildNodes().getLength());

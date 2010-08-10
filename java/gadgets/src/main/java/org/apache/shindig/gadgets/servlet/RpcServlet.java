@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
@@ -50,20 +51,16 @@ public class RpcServlet extends InjectedServlet {
   private static final Logger LOG = Logger.getLogger("org.apache.shindig.gadgets");
 
   private transient JsonRpcHandler jsonHandler;
-  private transient boolean initialized;
 
   @Inject
   public void setJsonRpcHandler(JsonRpcHandler jsonHandler) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.jsonHandler = jsonHandler;
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @Override
@@ -107,9 +104,7 @@ public class RpcServlet extends InjectedServlet {
   private String validateParameterValue(HttpServletRequest request, String parameter)
       throws IllegalArgumentException {
     String result = request.getParameter(parameter);
-    if (result == null) {
-      throw new IllegalArgumentException("No parameter '" + parameter + "' specified.");
-    }
+    Preconditions.checkArgument(result != null, "No parameter '%s' specified", parameter);
     return result;
   }
 

@@ -75,7 +75,6 @@ public class ConcatProxyServlet extends InjectedServlet {
   private transient RequestPipeline requestPipeline;
   private transient ConcatUriManager concatUriManager;
   private transient ResponseRewriterRegistry contentRewriterRegistry;
-  private transient boolean initialized;
 
   private transient Executor executor = new Executor() {
     public void execute(Runnable r) {
@@ -86,33 +85,25 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.requestPipeline = requestPipeline;
   }
   
   @Inject
   public void setConcatUriManager(ConcatUriManager concatUriManager) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.concatUriManager = concatUriManager;
   }
 
   @Inject
   public void setContentRewriterRegistry(ResponseRewriterRegistry contentRewriterRegistry) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
   
   @Inject
   public void setExecutor(@Named("shindig.concat.executor") Executor executor) {
-    if (initialized) {
-      throw new IllegalStateException("Servlet already initialized");
-    }
+    checkInitialized();
     // Executor is independently named to allow separate configuration of
     // concat fetch parallelism and other Shindig job execution.
     this.executor = executor;
@@ -121,7 +112,6 @@ public class ConcatProxyServlet extends InjectedServlet {
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    initialized = true;
   }
 
   @SuppressWarnings("boxing")
