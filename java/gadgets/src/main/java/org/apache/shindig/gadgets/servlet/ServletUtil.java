@@ -44,7 +44,9 @@ import javax.servlet.http.HttpServletResponse;
 public class ServletUtil {
   public static final String REMOTE_ADDR_KEY = "RemoteAddress";
   public static final String DATA_URI_KEY = "dataUri";
-  
+
+  private ServletUtil() {}
+
   public static HttpRequest fromHttpServletRequest(HttpServletRequest servletReq) throws IOException {
     HttpRequest req = new HttpRequest(new UriBuilder(servletReq).toUri());
     Enumeration<?> headerNames = servletReq.getHeaderNames();

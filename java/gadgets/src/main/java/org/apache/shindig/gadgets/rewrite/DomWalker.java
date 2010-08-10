@@ -28,7 +28,6 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
-import org.apache.commons.lang.StringUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

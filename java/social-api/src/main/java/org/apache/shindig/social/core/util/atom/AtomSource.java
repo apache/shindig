@@ -19,7 +19,6 @@ package org.apache.shindig.social.core.util.atom;
 
 import org.apache.shindig.social.opensocial.model.Activity;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
 /**
  * This represents atom:entry/atom:source for the Activity object.

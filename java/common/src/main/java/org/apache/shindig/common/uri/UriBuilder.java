@@ -337,7 +337,7 @@ public final class UriBuilder {
     return toString().equals(obj.toString());
   }
   
-  private static class ParamString {
+  private static final class ParamString {
     private final Map<String, List<String>> params;
     private String str;
     

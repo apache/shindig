@@ -155,7 +155,7 @@ public class FeatureResourceLoader {
       return dbg != null ? dbg : optContent.get();
     }
     
-    private class FileContent {
+    private final class FileContent {
       private final String filePath;
       private long lastModified;
       private long lastUpdateCheckTime;
@@ -195,7 +195,7 @@ public class FeatureResourceLoader {
     }
   }
   
-  private static class DualModeStaticResource extends FeatureResource.Default {
+  private static final class DualModeStaticResource extends FeatureResource.Default {
     private final String content;
     private final String debugContent;
     
@@ -214,7 +214,7 @@ public class FeatureResourceLoader {
     }
   }
   
-  private static class UriResource implements FeatureResource {
+  private static final class UriResource implements FeatureResource {
     private final HttpFetcher fetcher;
     private final Uri uri;
     private final boolean isInline;

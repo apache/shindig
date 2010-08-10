@@ -30,6 +30,6 @@ import com.google.inject.Scopes;
 public class JasperConversionModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(ELTypeConverter.class).to(JasperTypeConverter.class).in(Scopes.SINGLETON);;
+    bind(ELTypeConverter.class).to(JasperTypeConverter.class).in(Scopes.SINGLETON);
   }
 }

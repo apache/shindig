@@ -24,7 +24,6 @@ import com.google.inject.name.Named;
 
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.rewrite.GadgetRewriter;
-import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 
 import java.util.List;
 

@@ -156,7 +156,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
     }
   }
   
-  private static class VersionMatcher {
+  private static final class VersionMatcher {
     private static final Op[] OPS = {
       new Op("^") {
         public boolean match(String in, String key) {
@@ -214,7 +214,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       return false;
     }
     
-    private static VersionNumber num(String str) {
+    private static final VersionNumber num(String str) {
       return new VersionNumber(str);
     }
     

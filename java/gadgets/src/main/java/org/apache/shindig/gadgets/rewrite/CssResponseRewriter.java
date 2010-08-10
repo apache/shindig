@@ -207,7 +207,7 @@ public class CssResponseRewriter implements ResponseRewriter {
     return new UriMaker(wrapped, config);
   }
   
-  public static class UriMaker {
+  public static final class UriMaker {
     private final ProxyUriManager wrapped;
     private final ContentRewriterFeature.Config config;
     

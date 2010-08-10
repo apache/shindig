@@ -637,7 +637,7 @@ public class ModulePrefs {
   /**
    * Process ModulePrefs/OAuth
    */
-  private class OAuthVisitor implements ElementVisitor {
+  private final class OAuthVisitor implements ElementVisitor {
     private OAuthSpec oauthSpec = null;
     private final MutableBoolean oauthMarker;
     
@@ -665,7 +665,7 @@ public class ModulePrefs {
   /**
    * Processes ModulePrefs/Require and ModulePrefs/Optional
    */
-  private static class FeatureVisitor implements ElementVisitor {
+  private static final class FeatureVisitor implements ElementVisitor {
     private final Map<String, Feature> features = Maps.newHashMap();
     private final MutableBoolean oauthMarker;
     private boolean coreIncluded = false;

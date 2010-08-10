@@ -29,6 +29,6 @@ import com.google.inject.Scopes;
 public class JuelModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(ExpressionProvider.class).to(JuelProvider.class).in(Scopes.SINGLETON);;
+    bind(ExpressionProvider.class).to(JuelProvider.class).in(Scopes.SINGLETON);
   }
 }
