@@ -34,9 +34,9 @@
     all javascript required by the OpenSocial specification.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/trunk/java/gadgets</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/trunk/java/gadgets</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/trunk/java/gadgets</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/branches/2.0.x/java/gadgets</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/branches/2.0.x/java/gadgets</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/branches/2.0.x/java/gadgets</url>
   </scm>
 
   <build>
