@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
+import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -45,19 +46,17 @@ import com.google.inject.Inject;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URI;
 import java.util.Collections;
 
 /** A CSS DOM parser using Caja. */
 public class CajaCssParser {
 
   /**
-   * Dummy URI that is never read from. Needed to construct Caja parser
+   * Fake URI source if one is not provided by the calling context.
    */
-  private static final URI FAKE_SOURCE = URI.create("http://a.dummy.url");
+  private static final Uri FAKE_SOURCE = Uri.parse("http://a.dummy.url");
 
-  // Switch to "parsedCss" once CajaCssLexerParser is removed. See ehCacheConfig
-  private static final String PARSED_CSS = "parsedCssDom";
+  private static final String PARSED_CSS = "parsedCss";
 
   private Cache<String, CssTree.StyleSheet> parsedCssCache;
 
@@ -72,6 +71,12 @@ public class CajaCssParser {
    * @return A parsed stylesheet
    */
   public CssTree.StyleSheet parseDom(String content) throws GadgetException {
+    // Use a fake source if the real source is unknown
+    return parseDom(content, FAKE_SOURCE);
+  }
+  
+  public CssTree.StyleSheet parseDom(String content, Uri source)
+      throws GadgetException {
     CssTree.StyleSheet parsedCss = null;
     boolean shouldCache = shouldCache();
     String key = null;
@@ -82,7 +87,7 @@ public class CajaCssParser {
     }
     if (parsedCss == null) {
       try {
-        parsedCss = parseImpl(content);
+        parsedCss = parseImpl(content, source);
         if (shouldCache) {
           parsedCssCache.addElement(key, parsedCss);
         }
@@ -98,8 +103,9 @@ public class CajaCssParser {
     return parsedCss;
   }
 
-  private CssTree.StyleSheet parseImpl(String css) throws ParseException {
-    InputSource inputSource = new InputSource(FAKE_SOURCE);
+  private CssTree.StyleSheet parseImpl(String css, Uri source)
+      throws ParseException {
+    InputSource inputSource = new InputSource(source.toJavaUri());
     CharProducer producer = CharProducer.Factory.create(new StringReader(css),
         inputSource);
     TokenStream<CssTokenType> lexer = new CssLexer(producer);

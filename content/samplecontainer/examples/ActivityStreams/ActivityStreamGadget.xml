@@ -25,115 +25,46 @@
 	</ModulePrefs>
 	
 	<Content type="html">
-	<![CDATA[	 
-		<script type="text/javascript" src="OpenSocialAPI.js"></script>
+	<![CDATA[
+		<script type="text/javascript" src="OpenSocialWrapper.js"></script>
+		<script type="text/javascript" src="ActivityStreamsRender.js"></script>
 		
 		<script type="text/javascript">
-			// HTML for rendering
-			var htmlWelcome = "";
-			var htmlActivities = "";
-			var htmlActivityEntries = "";
-			var htmlCreateActivityEntry = "";
-			var htmlDeleteActivityEntry = "";
-			var htmlActivityEntryId = "";
+			social = new OpenSocialWrapper();
+			render = new ActivityStreamsRender();
 			
-			var viewer = null;
-			var owner = null;
+			// TODO: move this stuff into ActivityStreamRender (if you can...)
+			// Renders retrieval of an ActivityEntry by ID
+			function renderActivityEntryId(div, callback) {
+				var html = "<h2>Work with an ActivityEntry</h2>";
+				html += "ActivityEntry ID: <input type='text' size=40 id='activityEntryId'>";
+				html += "<input type='button' value='Retrieve' onclick='retrieveActivityEntryId()'>";
+				html += "<input type='button' value='Delete' onclick='deleteActivityEntryId()'><br>";
+				html += "Note: you must be the owner of the ActivityEntry to retrieve it.";
+				html += "<textarea id='activityEntryText' cols=75 rows=10>No entry to display...</textarea><br>";
+				document.getElementById(div).innerHTML = html;
+				callback();
+			}
 			
-			// ================= PEOPLE =================
-			function displayWelcome() {
-				OpenSocialAPI.loadPeople(function(response) {
-					viewer = response.viewer;
-					owner = response.owner;
-					var viewerFriends = response.viewerFriends;
-					var ownerFriends = response.ownerFriends;
-					
-					htmlWelcome = "<h1>Welcome " + viewer.name.formatted + "!</h1>";
-					htmlWelcome += "You are viewing " + owner.name.formatted + "'s data. <br><br>";
-					htmlWelcome += "Here is a list of your friends: <br>";
-					htmlWelcome += "<lu>";
-					for(i = 0; i < viewerFriends.list.length; i++) {
-						htmlWelcome += "<li>" + viewerFriends.list[i].name.formatted + "</li>";
-					}
-					htmlWelcome += "</lu>";
-					refreshHTML();
+			// Deletes the activity entry
+			function deleteActivityEntryId() {
+				social.deleteActivityEntryById(document.getElementById('activityEntryId').value, function(response) {
+					document.getElementById('activityEntryText').value = 'No entry to display...';
+					render.renderActivityEntries('activityEntryies', refresh);
 				});
 			}
 			
-			// ================= ACTIVITIES =================
-			function displayActivities() {
-				OpenSocialAPI.loadActivities(function(response) {
-					var viewerActivities = response.viewerActivities.list;
-					var ownerActivities = response.ownerActivities.list;
-					
-					htmlActivities = "<h1>Activities</h1>";
-					htmlActivities += "Demonstrates use of the Activities service in Apache Shindig.  The ActivityStreams service does not interfere with this service.<br><br>";
-					htmlActivities += "Activities for you and " + owner.name.formatted + ":<br>";
-					htmlActivities += "<table border='1'>";
-					htmlActivities += "<tr>";
-					htmlActivities += "<td>Name</td>";
-					htmlActivities += "<td>Title</td>";
-					htmlActivities += "<td>Body</td>";
-					htmlActivities += "<td>Images</td>";
-					htmlActivities += "</tr>"
-					processActivities(viewerActivities);
-					processActivities(ownerActivities);
-					htmlActivities += "</table>";
-					refreshHTML();
+			// Retrieves the activity entry
+			function retrieveActivityEntryId() {
+				social.getActivityEntryById(document.getElementById('activityEntryId').value, function(response) {
+					document.getElementById('activityEntryText').value = JSON.stringify(response);
 				});
 			}
-			function processActivities(activities) {
-				for(idx = 0; idx < activities.length; idx++) {
-					htmlActivities += "<tr>";
-					htmlActivities += "<td>" + activities[idx].userId + "</td>";
-					htmlActivities += "<td>" + activities[idx].title + "</td>";
-					htmlActivities += "<td>" + activities[idx].body + "</td>";
-					var mediaItems = activities[idx].mediaItems;
-					if(mediaItems != null) {
-						for(itemIdx = 0; itemIdx < mediaItems.length; itemIdx++) {
-							if(mediaItems[itemIdx].type == "image") {
-								htmlActivities += "<td><img src='" + mediaItems[itemIdx].url + "' width=150 height=150/></td>";
-							}
-						}
-					}
-					htmlActivities += "</tr>";
-				}
-			}
 			
-			// ================= ACTIVITYSTREAMS =================
-			function displayActivityEntries() {
-				OpenSocialAPI.loadActivityEntries(function(response) {
-					viewerEntries = response.viewerEntries.list;
-					ownerEntries = response.ownerEntries.list;
-					htmlActivityEntries = "<h2>ActivityEntries</h2>";
-					processActivityEntries(viewerEntries);
-					processActivityEntries(ownerEntries);
-					if (viewerEntries.length + ownerEntries.length == 0) {
-						htmlActivityEntries += "<tr><td>No entries to show!</td></tr>";
-					}
-					htmlActivityEntries += "</table><br><br>";
-					refreshHTML();
-				});
-			}
-			function processActivityEntries(entries) {
-				for(idx = 0; idx < entries.length; idx++) {
-					if(entries[idx].permalink && entries[idx].permalink != "null") {
-						htmlActivityEntries += "<h3><a href='" + entries[idx].permalink + "'>" + entries[idx].title + "</a></h3>";
-					} else {
-						htmlActivityEntries += "<h3>" + entries[idx].title + "</h3>";
-					}
-					htmlActivityEntries += "ID: " + entries[idx].id + "<br>";
-					htmlActivityEntries += "Actor: " + entries[idx].actor.displayName + "<br>";
-					htmlActivityEntries += "Posted: " + entries[idx].postedTime + "<br>";
-					if(entries[idx].body && entries[idx].body != "null") {
-						htmlActivityEntries += "Body: " + entries[idx].body + "<br>";
-					}
-				}
-			}
-			
-			function displayCreateActivityEntry() {
-				htmlCreateActivityEntry = "<h1>ActivityStreams</h1>";
-				htmlCreateActivityEntry += "Demonstrates use of the ActivityStream service in Apache Shindig.  This implementation follows the current JSON draft specfication: http://activitystrea.ms/head/json-activity.html<br>";
+			// Creation form for activity entry
+			function renderCreateActivityEntry(div, callback) {
+				var htmlCreateActivityEntry = "<h1>ActivityStreams</h1>";
+				htmlCreateActivityEntry += "Demonstrates use of the ActivityStream service in Apache Shindig.  This implementation follows the JSON draft specfication: http://activitystrea.ms/head/json-activity.html<br>";
 				htmlCreateActivityEntry += "<h2>Create an ActivityEntry</h2>";
 				htmlCreateActivityEntry += "<table>";
 				htmlCreateActivityEntry += "<tr>";
@@ -145,12 +76,12 @@
 				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityEntryBody'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
-				htmlCreateActivityEntry += "<td>Permalink</td>";
-				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityEntryPermalink'></td>"
+				htmlCreateActivityEntry += "<td>Standard Link</td>";
+				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityEntryStandardLink'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
-				htmlCreateActivityEntry += "<td>Object Display Name</td>";
-				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectDisplayName'></td>"
+				htmlCreateActivityEntry += "<td>Object Name</td>";
+				htmlCreateActivityEntry += "<td><input type='text' size=50 id='activityObjectName'></td>"
 				htmlCreateActivityEntry += "</tr>";
 				htmlCreateActivityEntry += "<tr>";
 				htmlCreateActivityEntry += "<td>Object Summary</td>";
@@ -207,6 +138,8 @@
 				htmlCreateActivityEntry += "</table>";
 				htmlCreateActivityEntry += "<input type='button' value='Submit' onclick='createActivityEntry()'>";
 				htmlCreateActivityEntry += "<br><br>";
+				document.getElementById(div).innerHTML = htmlCreateActivityEntry;
+				callback();
 			}
 			function createActivityEntry() {
 				// Gather selected verbs
@@ -233,62 +166,42 @@
 				
 				var title = blankToNull(document.getElementById('activityEntryTitle').value);
 				var body = blankToNull(document.getElementById('activityEntryBody').value)
-				var permalink = blankToNull(document.getElementById('activityEntryPermalink').value);
-				var objectDisplayName = blankToNull(document.getElementById('activityObjectDisplayName').value);
+				var standardLink = blankToNull(document.getElementById('activityEntryStandardLink').value);
+				var objectName = blankToNull(document.getElementById('activityObjectName').value);
 				var objectSummary = blankToNull(document.getElementById('activityObjectSummary').value);
 				var objectImage = blankToNull(document.getElementById('activityObjectImage').value);
 				var objectPermalink = blankToNull(document.getElementById('activityObjectPermalink').value);
-				OpenSocialAPI.postActivityEntry(title, body, permalink, selVerbs, viewer.id, viewer.name.formatted,
-												objectDisplayName, objectSummary, objectImage, objectPermalink, selTypes,
+				social.postActivityEntry(title, body, standardLink, selVerbs, viewer.id, viewer.name.formatted,
+												objectName, objectSummary, objectImage, objectPermalink, selTypes,
 												function(response) {
-					displayActivityEntries();
+					render.renderActivityEntries('activityEntries', refresh);
 				});
 			}
 			function blankToNull(str) {
 				return (str == '' ? null : str);
 			}
-			
-						
-			function displayActivityEntryId() {
-				htmlActivityEntryId = "<h2>Work with an ActivityEntry</h2>";
-				htmlActivityEntryId += "ActivityEntry ID: <input type='text' size=40 id='activityEntryId'>";
-				htmlActivityEntryId += "<input type='button' value='Retrieve' onclick='retrieveActivityEntryId()'>";
-				htmlActivityEntryId += "<input type='button' value='Delete' onclick='deleteActivityEntryId()'><br>";
-				htmlActivityEntryId += "Note: you must be the owner of the ActivityEntry to retrieve it.";
-				htmlActivityEntryId += "<textarea id='activityEntryText' cols=75 rows=10>No entry to display...</textarea><br>";
-			}
-			function deleteActivityEntryId() {
-				OpenSocialAPI.deleteActivityEntryById(document.getElementById('activityEntryId').value, function(response) {
-					displayActivityEntries();
-					document.getElementById('activityEntryText').value = 'No entry to display...';
-				});
-			}
-			function retrieveActivityEntryId() {
-				OpenSocialAPI.getActivityEntryById(document.getElementById('activityEntryId').value, function(response) {
-					document.getElementById('activityEntryText').value = JSON.stringify(response);
-				});
-			}
 		
-			// ================= SET UP =================
-			// Rewrites the HTML content
-			function refreshHTML() {
-				document.getElementById('message').innerHTML = htmlWelcome + htmlActivities + htmlCreateActivityEntry + htmlActivityEntryId + htmlActivityEntries;
+			// Adjusts the window height
+			function refresh() {
 				gadgets.window.adjustHeight();
 			}
 		
 			// Initializes the gadget
 			function init() {
-				displayWelcome();
-				displayActivities();
-				displayCreateActivityEntry();
-				displayActivityEntryId();
-				displayActivityEntries();
-				refreshHTML();
+				render.renderWelcome('welcome', refresh);
+				render.renderActivities('activities', refresh);
+				render.renderActivityEntries('activityEntries', refresh);
+				renderActivityEntryId('htmlGetEntry', refresh);
+				renderCreateActivityEntry('htmlCreateEntry', refresh);
 			}
 			
 			gadgets.util.registerOnLoadHandler(init);
 		</script>
-		<div id='message'></div>
+		<div id='welcome'></div>
+		<div id='activities'></div>
+		<div id='htmlCreateEntry'></div>
+		<div id='htmlGetEntry'></div>
+		<div id='activityEntries'></div>
 	]]>
 	</Content>
 </Module>

@@ -19,6 +19,7 @@
 
 package org.apache.shindig.common.util;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.nio.ByteBuffer;
@@ -31,18 +32,13 @@ public final class CharsetUtil {
   private CharsetUtil() {}
   
   /**
-   * UTF-8 Charset.
-   */
-  public static final Charset UTF8 = Charset.forName("UTF-8");
-
-  /**
    * @return UTF-8 byte array for the input string.
    */
   public static byte[] getUtf8Bytes(String s) {
     if (s == null) {
       return ArrayUtils.EMPTY_BYTE_ARRAY;
     }
-    ByteBuffer bb = UTF8.encode(s);
+    ByteBuffer bb = Charsets.UTF_8.encode(s);
     return ArrayUtils.subarray(bb.array(), 0, bb.limit());
     
   }

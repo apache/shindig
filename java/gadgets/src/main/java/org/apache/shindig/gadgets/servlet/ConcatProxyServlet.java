@@ -49,16 +49,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet which concatenates the content of several proxied HTTP responses
- *
- * @see org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter
  */
 public class ConcatProxyServlet extends InjectedServlet {
+
+  private static final long serialVersionUID = -4390212150673709895L;
 
   public static final String JSON_PARAM = Param.JSON.getKey();
   private static final Pattern JSON_PARAM_PATTERN = Pattern.compile("^\\w*$");
@@ -70,11 +72,11 @@ public class ConcatProxyServlet extends InjectedServlet {
   private static final Logger LOG 
       = Logger.getLogger(ConcatProxyServlet.class.getName());
   
-  private RequestPipeline requestPipeline;
-  private ConcatUriManager concatUriManager;
-  private ResponseRewriterRegistry contentRewriterRegistry;
+  private transient RequestPipeline requestPipeline;
+  private transient ConcatUriManager concatUriManager;
+  private transient ResponseRewriterRegistry contentRewriterRegistry;
 
-  private Executor executor = new Executor() {
+  private transient Executor executor = new Executor() {
     public void execute(Runnable r) {
       // Sequential version of 'execute' by default.
       r.run();
@@ -83,24 +85,33 @@ public class ConcatProxyServlet extends InjectedServlet {
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
+    checkInitialized();
     this.requestPipeline = requestPipeline;
   }
   
   @Inject
   public void setConcatUriManager(ConcatUriManager concatUriManager) {
+    checkInitialized();
     this.concatUriManager = concatUriManager;
   }
 
   @Inject
   public void setContentRewriterRegistry(ResponseRewriterRegistry contentRewriterRegistry) {
+    checkInitialized();
     this.contentRewriterRegistry = contentRewriterRegistry;
   }
   
   @Inject
   public void setExecutor(@Named("shindig.concat.executor") Executor executor) {
+    checkInitialized();
     // Executor is independently named to allow separate configuration of
     // concat fetch parallelism and other Shindig job execution.
     this.executor = executor;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
   }
 
   @SuppressWarnings("boxing")

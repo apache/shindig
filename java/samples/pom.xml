@@ -119,20 +119,16 @@
       <version>1.2.2</version>
     </dependency>
     <dependency>
-      <artifactId>commons-collections</artifactId>
-      <groupId>commons-collections</groupId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <artifactId>commons-io</artifactId>
       <groupId>commons-io</groupId>
     </dependency>
     <dependency>
-        <groupId>findbugs</groupId>
-        <artifactId>annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>net.oauth.core</groupId>
@@ -173,10 +169,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.odysseus.juel</groupId>
-      <artifactId>juel-api</artifactId>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>el-api</artifactId>
       <scope>test</scope>
-    </dependency>
+    </dependency> 
     <dependency>
       <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-common</artifactId>

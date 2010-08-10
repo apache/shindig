@@ -35,13 +35,6 @@ shindig.container.Service = function(opt_config) {
    */
   this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
      shindig.container.ServiceConfig.API_HOST, window.__API_HOST));
-
-  /**
-   * @type {string}
-   */
-  this.apiPrefixPath_ = String(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.API_PREFIX_PATH,
-      window.__API_PREFIX_PATH));
   
   /**
    * @type {string}
@@ -174,7 +167,7 @@ shindig.container.Service.prototype.processSameDomain_ = function(gadgetInfo) {
  * @private
  */
 shindig.container.Service.prototype.initializeOsapi_ = function() {
-  var endPoint = this.apiHost_ + this.apiPrefixPath_ + this.apiPath_;
+  var endPoint = this.apiHost_ + this.apiPath_;
   
   var osapiServicesConfig = {};
   osapiServicesConfig['gadgets.rpc'] = [ 'container.listMethods' ];
@@ -201,11 +194,9 @@ shindig.container.Service.prototype.initializeOsapi_ = function() {
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
-//Host to fetch gadget information, via XHR. 
+// Host to fetch gadget information, via XHR. 
 shindig.container.ServiceConfig.API_HOST = 'apiHost';
-// Prefix to path to fetch gadget information, via XHR. 
-shindig.container.ServiceConfig.API_PREFIX_PATH = 'apiPrefixPath';
-// Path (appears after API_PREFIX_PATH) to fetch gadget information, via XHR. 
+// Path to fetch gadget information, via XHR. 
 shindig.container.ServiceConfig.API_PATH = 'apiPath';
 // Toggle to render gadgets in the same domain. 
 shindig.container.ServiceConfig.SAME_DOMAIN = 'sameDomain';

@@ -24,10 +24,10 @@
  */
 class BasicSecurityToken extends SecurityToken {
   /** serialized form of the token */
-  private $token;
+  protected $token;
 
   /** data from the token */
-  private $tokenData;
+  protected $tokenData;
 
   /** tool to use for signing and encrypting the token */
   protected $crypter;
@@ -40,7 +40,7 @@ class BasicSecurityToken extends SecurityToken {
   private $MODULE_KEY = "m";
   private $CONTAINER_KEY = "c";
 
-  private $authenticationMode;
+  protected $authenticationMode;
 
   /**
    * {@inheritDoc}

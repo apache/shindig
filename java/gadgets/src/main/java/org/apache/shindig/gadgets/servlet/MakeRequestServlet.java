@@ -19,9 +19,12 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.servlet.InjectedServlet;
+import org.apache.shindig.gadgets.GadgetException;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,17 +39,34 @@ import com.google.inject.Inject;
  * makeRequest and open proxy calls.
  */
 public class MakeRequestServlet extends InjectedServlet {
-  private MakeRequestHandler makeRequestHandler;
+
+  private static final long serialVersionUID = -8298705081500283786L;
+  
+  private transient MakeRequestHandler makeRequestHandler;
 
   @Inject
   public void setMakeRequestHandler(MakeRequestHandler makeRequestHandler) {
+    checkInitialized();
     this.makeRequestHandler = makeRequestHandler;
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    makeRequestHandler.fetch(request, response);
+    try {
+      makeRequestHandler.fetch(request, response);
+    } catch (GadgetException e) {
+      int responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+      if (e.getCode() != GadgetException.Code.INTERNAL_SERVER_ERROR) {
+        responseCode = HttpServletResponse.SC_BAD_REQUEST;
+      }
+      response.sendError(responseCode, e.getMessage() != null ? e.getMessage() : "");
+    }
   }
 
   @Override

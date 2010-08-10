@@ -36,12 +36,6 @@ public class Bootstrap {
   private static final String DB_PASSWORD = "db.password";
   private static final String DB_MIN_WRITE = "db.write.min";
   private static final String DB_MIN_NUM_READ = "db.read.min";
-  private String minWrite;
-  private String minRead;
-  private String dbPassword;
-  private String dbUser;
-  private String dbUrl;
-  private String dbDriver;
   private EntityManager entityManager;
 
   @Inject
@@ -52,12 +46,6 @@ public class Bootstrap {
   String dbPassword, @Named(DB_MIN_NUM_READ)
   String minRead, @Named(DB_MIN_WRITE)
   String minWrite) {
-    this.dbDriver = dbDriver;
-    this.dbUrl = dbUrl;
-    this.dbUser = dbUser;
-    this.dbPassword = dbPassword == null || dbPassword.length() == 0 ? " " : dbPassword;
-    this.minRead = minRead;
-    this.minWrite = minWrite;
 
   }
 

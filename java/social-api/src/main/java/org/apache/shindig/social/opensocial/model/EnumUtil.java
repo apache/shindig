@@ -18,6 +18,7 @@
 
 package org.apache.shindig.social.opensocial.model;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
@@ -46,10 +47,7 @@ public final class EnumUtil {
     }
     Set<String> result = builder.build();
 
-    if (result.size() != vals.length) {
-      throw new IllegalArgumentException("Enum names are not disjoint set");
-    }
-
+    Preconditions.checkArgument(result.size() == vals.length, "Enum names are not disjoint set");
     return result;
   }
 }

@@ -24,7 +24,7 @@ import com.google.inject.Singleton;
 
 import org.apache.shindig.auth.AnonymousSecurityToken;
 import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenDecoder;
+import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
@@ -35,10 +35,10 @@ import java.util.Map;
 @Singleton
 public class ShindigAuthConfigContributor implements ConfigContributor {
 
-  private SecurityTokenDecoder securityTokenCodec;
+  private SecurityTokenCodec securityTokenCodec;
 
   @Inject
-  public ShindigAuthConfigContributor(SecurityTokenDecoder codec) {
+  public ShindigAuthConfigContributor(SecurityTokenCodec codec) {
     this.securityTokenCodec = codec;
   }
 

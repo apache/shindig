@@ -30,8 +30,8 @@ class BasicBlobCrypter extends BlobCrypter {
 
 
   // Labels for key derivation
-  private $CIPHER_KEY_LABEL = 0;
-  private $HMAC_KEY_LABEL = 1;
+  protected $CIPHER_KEY_LABEL = 0;
+  protected $HMAC_KEY_LABEL = 1;
 
   /** Key used for time stamp (in seconds) of data */
   public $TIMESTAMP_KEY = "t";
@@ -40,9 +40,9 @@ class BasicBlobCrypter extends BlobCrypter {
   public $MASTER_KEY_MIN_LEN = 16;
 
   /** allow three minutes for clock skew */
-  private $CLOCK_SKEW_ALLOWANCE = 180;
+  protected $CLOCK_SKEW_ALLOWANCE = 180;
 
-  private $UTF8 = "UTF-8";
+  protected $UTF8 = "UTF-8";
 
   protected $cipherKey;
   protected $hmacKey;
@@ -69,7 +69,7 @@ class BasicBlobCrypter extends BlobCrypter {
     return $b64;
   }
 
-  private function serializeAndTimestamp(Array $in) {
+  protected function serializeAndTimestamp(Array $in) {
     $encoded = "";
     foreach ($in as $key => $val) {
       $encoded .= urlencode($key) . "=" . urlencode($val) . "&";
@@ -119,9 +119,9 @@ class BasicBlobCrypter extends BlobCrypter {
    *
    * Parses the security token
    */
-  private function parseToken($stringToken) {
+  protected function parseToken($stringToken) {
     $data = explode(":", $stringToken);
-	$url_number = count($data)-6;
+       $url_number = count($data)-6;
 
 	//get array elements conrresponding to broken url - http://host:port/gadget.xml -> ["http","//host","port/gadget.xml"]
 	$url_array = array_slice($data,4,$url_number) ;
@@ -130,13 +130,13 @@ class BasicBlobCrypter extends BlobCrypter {
     return $data;
   }
 
-  private function deserialize($plain) {
+  protected function deserialize($plain) {
     $map = array();
     parse_str($plain, $map);
     return $map;
   }
 
-  private function checkTimestamp(Array $out, $maxAge) {
+  protected function checkTimestamp(Array $out, $maxAge) {
     $minTime = (int)$out[$this->TIMESTAMP_KEY] - $this->CLOCK_SKEW_ALLOWANCE;
     $maxTime = (int)$out[$this->TIMESTAMP_KEY] + $maxAge + $this->CLOCK_SKEW_ALLOWANCE;
     $now = time();

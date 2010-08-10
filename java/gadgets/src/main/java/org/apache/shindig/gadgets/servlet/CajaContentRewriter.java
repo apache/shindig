@@ -18,7 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FetchedData;
 import com.google.caja.lexer.InputSource;

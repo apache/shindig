@@ -137,7 +137,7 @@ public class OAuthModule extends AbstractModule {
             "     -out testkey.pem -subj '/CN=mytestkey'\n" +
             "  openssl pkcs8 -in testkey.pem -out oauthkey.pem -topk8 -nocrypt -outform PEM\n" +
             '\n' +
-            "Then edit gadgets.properties and add these lines:\n" +
+            "Then edit shindig.properties and add these lines:\n" +
             OAUTH_SIGNING_KEY_FILE + "=<path-to-oauthkey.pem>\n" +
             OAUTH_SIGNING_KEY_NAME + "=mykey\n");
       }

@@ -240,6 +240,6 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
   }
   
   private boolean revisit(Node... nodes) throws Exception {
-    return new StyleAdjacencyVisitor().revisit(gadget(), ImmutableList.<Node>of(nodes));
+    return new StyleAdjacencyVisitor().revisit(gadget(), ImmutableList.<Node>copyOf(nodes));
   }
 }

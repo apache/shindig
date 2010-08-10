@@ -409,7 +409,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(orig, proxyUri.getResource());
     assertEquals(debug, proxyUri.isDebug());
     assertEquals(noCache, proxyUri.isNoCache());
-    assertEquals(noCache ? new Integer(0) : refresh, proxyUri.getRefresh());
+    assertEquals(noCache ? Integer.valueOf(0) : refresh, proxyUri.getRefresh());
     assertEquals(CONTAINER, proxyUri.getContainer());
     assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
     

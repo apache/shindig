@@ -24,7 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
-import org.apache.shindig.gadgets.parse.caja.CajaCssLexerParser;
+import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
 import org.apache.shindig.gadgets.uri.PassthruManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.EasyMock;
@@ -61,7 +61,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
           }
         };
     proxyUriManager = new PassthruManager("www.test.com", "/dir/proxy");
-    rewriterNoOverrideExpires = new CssResponseRewriter(new CajaCssLexerParser(),
+    rewriterNoOverrideExpires = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factoryNoOverrideExpires);
     final ContentRewriterFeature.Config overrideFeature =
         rewriterFeatureFactory.get(createSpecWithRewrite(".*", ".*exclude.*", "3600", tags));
@@ -72,7 +72,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
       }
     };
     
-    rewriter = new CssResponseRewriter(new CajaCssLexerParser(),
+    rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     dummyUri = Uri.parse("http://www.w3c.org");
   }
@@ -142,7 +142,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
     expected = replaceDefaultWithMockServer(expected);
     proxyUriManager = new PassthruManager("www.mock.com", "/dir/proxy");
-    rewriter = new CssResponseRewriter(new CajaCssLexerParser(),
+    rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
@@ -211,8 +211,23 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
           CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
-    assertEquals(expected, sw.toString());
-    assertEquals(stringList, Lists.newArrayList("www.example.org/some.css",
-        "www.example.org/someother.css", "www.example.org/another.css"));
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(sw.toString()));
+    assertEquals(Lists.newArrayList("www.example.org/some.css",
+        "www.example.org/someother.css", "www.example.org/another.css"), stringList);
+  }
+
+  @Test
+  public void testMalformedImport() throws Exception {
+    String original = " @import \"www.example.org/some.css\";\n" +
+        " span { color: red; }";
+    String expected = " span { color: red; }";
+    StringWriter sw = new StringWriter();
+    List<String> stringList = rewriter
+        .rewrite(new StringReader(original), dummyUri,
+          CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
+    assertEquals(StringUtils.deleteWhitespace(expected),
+        StringUtils.deleteWhitespace(sw.toString()));
+    assertEquals(Lists.newArrayList("www.example.org/some.css"), stringList);
   }
 }

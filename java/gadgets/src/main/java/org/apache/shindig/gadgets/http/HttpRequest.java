@@ -51,6 +51,10 @@ public class HttpRequest {
   private String method = "GET";
   private Uri uri;
   private final Map<String, List<String>> headers = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+
+  // Internal parameters which serve as extra information to pass along the
+  // chain of HttpRequest processing.
+  // NOTE: These are not get/post parameter equivalent of HttpServletRequest.
   private final Map<String, String> params = Maps.newHashMap();
 
   private byte[] postBody = ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -64,6 +68,9 @@ public class HttpRequest {
 
   // Sanitization
   private boolean sanitizationRequested;
+
+  // Caja
+  private boolean cajaRequested;
 
   // Whether to follow redirects
   private boolean followRedirects = true;
@@ -214,6 +221,18 @@ public class HttpRequest {
 
   public void setSanitizationRequested(boolean sanitizationRequested) {
     this.sanitizationRequested = sanitizationRequested;
+  }
+
+    /**
+   * Should content fetched in response to this request
+   * be sanitized based on the specified mime-type
+   */
+  public boolean isCajaRequested() {
+    return cajaRequested;
+  }
+
+  public void setCajaRequested(boolean cajaRequested) {
+    this.cajaRequested = cajaRequested;
   }
 
   /**

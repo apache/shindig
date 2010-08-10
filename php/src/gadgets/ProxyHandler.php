@@ -137,7 +137,8 @@ class ProxyHandler extends ProxyBase {
     // make sure our context returns the gadget url and not the proxied document url
     $this->context->setUrl($gadgetUrl);
     // and create & return the gadget
-    $gadgetSpecFactory = new GadgetFactory($this->context, null);
+    $factoryClass = Config::get('gadget_factory_class');
+    $gadgetSpecFactory = new $factoryClass($this->context, null);
     $gadget = $gadgetSpecFactory->createGadget();
     return $gadget;
   }

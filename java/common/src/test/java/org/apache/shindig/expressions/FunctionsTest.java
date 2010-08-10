@@ -70,7 +70,7 @@ public class FunctionsTest extends Assert {
 
   @Test
   public void testExpressionEvaluation() {
-    Expressions expressions = new Expressions(functions, null, new ShindigTypeConverter());
+    Expressions expressions = Expressions.forTesting(functions);
     ELContext context = expressions.newELContext();
     ValueExpression expression = expressions.parse("${other:bonjour()}", String.class);
     

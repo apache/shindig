@@ -145,8 +145,8 @@ public class BasicImageRewriter implements ResponseRewriter {
       
       boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
       if (noExpand &&
-          imageInfo.getHeight() <= requestedHeight &&
-          imageInfo.getWidth() <= requestedWidth) {
+          (requestedHeight == null || imageInfo.getHeight() <= requestedHeight) &&
+          (requestedWidth == null || imageInfo.getWidth() <= requestedWidth)) {
         // Don't do anything, since the current image fits within the bounding area.
         isResizeRequested = false;
       }

@@ -16,6 +16,7 @@
  */
 package org.apache.shindig.gadgets.oauth;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -32,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.auth.OAuthConstants;
 import org.apache.shindig.auth.OAuthUtil;
+import org.apache.shindig.common.crypto.Crypto;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.common.util.CharsetUtil;
@@ -195,9 +197,9 @@ public class OAuthRequest {
       response = fetchWithRetry();
     } catch (OAuthRequestException e) {
       // No data for us.
-      if (OAuthError.UNAUTHENTICATED.toString().equals(e.getError())) {
+      if (OAuthError.UNAUTHENTICATED.name().equals(e.getError())) {
         responseParams.logDetailedInfo("Unauthenticated OAuth fetch", e);
-      } else if (OAuthError.BAD_OAUTH_TOKEN_URL.toString().equals(e.getError())) {
+      } else if (OAuthError.BAD_OAUTH_TOKEN_URL.name().equals(e.getError())) {
         responseParams.logDetailedInfo("Invalid OAuth fetch request", e);
       } else {
         responseParams.logDetailedWarning("OAuth fetch fatal error", e);
@@ -473,6 +475,9 @@ public class OAuthRequest {
     params.add(new Parameter(OAuth.OAUTH_VERSION, OAuth.VERSION_1_0));
     params.add(new Parameter(OAuth.OAUTH_TIMESTAMP,
         Long.toString(fetcherConfig.getClock().currentTimeMillis() / 1000)));
+    // the oauth.net java code uses a clock to generate nonces, which causes nonce collisions
+    // under heavy load.  A random nonce is more reliable.
+    params.add(new Parameter(OAuth.OAUTH_NONCE, String.valueOf(Math.abs(Crypto.RAND.nextLong()))));
   }
 
   static String getAuthorizationHeader(List<Map.Entry<String, String>> oauthParams) {
@@ -529,7 +534,7 @@ public class OAuthRequest {
         try {
           byte[] body = IOUtils.toByteArray(base.getPostBody());
           byte[] hash = DigestUtils.sha(body);
-          String b64 = new String(Base64.encodeBase64(hash), CharsetUtil.UTF8.name());
+          String b64 = new String(Base64.encodeBase64(hash), Charsets.UTF_8.name());
           params.add(new Parameter(OAuthConstants.OAUTH_BODY_HASH, b64));
         } catch (IOException e) {
           throw new OAuthRequestException(OAuthError.UNKNOWN_PROBLEM,

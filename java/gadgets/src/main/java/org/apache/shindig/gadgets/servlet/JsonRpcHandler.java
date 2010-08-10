@@ -182,7 +182,7 @@ public class JsonRpcHandler {
         JSONObject userPrefs = new JSONObject();
 
         // User pref specs
-        for (UserPref pref : spec.getUserPrefs()) {
+        for (UserPref pref : spec.getUserPrefs().values()) {
           JSONObject up = new JSONObject()
               .put("displayName", pref.getDisplayName())
               .put("type", pref.getDataType().toString().toLowerCase())

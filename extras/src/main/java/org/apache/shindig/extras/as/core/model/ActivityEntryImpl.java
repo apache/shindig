@@ -25,107 +25,117 @@ import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
 
 public class ActivityEntryImpl implements ActivityEntry {
 
-	private String id;
-	private String streamFavicon;
-	private String postedTime;
+	private String icon;
+	private String time;
 	private ActivityObject actor;
 	private List<String> verb;
 	private ActivityObject object;
 	private ActivityObject target;
-	private String permalink;
+	private ActivityObject generator;
+	private ActivityObject serviceProvider;
 	private String title;
 	private String body;
+	private List<String> standardLink;
 	
 	public ActivityEntryImpl() {
-		this.id = null;
-		this.streamFavicon = null;
-		this.postedTime = null;
+		this.icon = null;
+		this.time = null;
 		this.actor = null;
 		this.verb = null;
 		this.object = null;
 		this.target = null;
-		this.permalink = null;
+		this.generator = null;
+		this.serviceProvider = null;
 		this.title = null;
 		this.body = null;
+		this.standardLink = null;
 	}
-	
-	public void setId(String id) {
-		this.id = id;
+
+	public String getIcon() {
+		return icon;
 	}
-	
-	public String getId() {
-		return id;
+
+	public void setIcon(String icon) {
+		this.icon = icon;
 	}
-	
-	public void setStreamFavicon(String streamFavicon) {
-		this.streamFavicon = streamFavicon;
+
+	public String getTime() {
+		return time;
 	}
-	
-	public String getStreamFavicon() {
-		return streamFavicon;
+
+	public void setTime(String time) {
+		this.time = time;
 	}
-	
-	public void setPostedTime(String postedTime) {
-		this.postedTime = postedTime;
-	}
-	
-	public String getPostedTime() {
-		return postedTime;
-	}
-	
-	public void setActor(ActivityObject actor) {
-		this.actor = actor;
-	}
-	
+
 	public ActivityObject getActor() {
 		return actor;
 	}
-	
-	public void setVerb(List<String> verb) {
-		this.verb = verb;
+
+	public void setActor(ActivityObject actor) {
+		this.actor = actor;
 	}
-	
+
 	public List<String> getVerb() {
 		return verb;
 	}
-	
-	public void setObject(ActivityObject object) {
-		this.object = object;
+
+	public void setVerb(List<String> verb) {
+		this.verb = verb;
 	}
-	
+
 	public ActivityObject getObject() {
 		return object;
 	}
-	
-	public void setTarget(ActivityObject target) {
-		this.target = target;
+
+	public void setObject(ActivityObject object) {
+		this.object = object;
 	}
-	
+
 	public ActivityObject getTarget() {
 		return target;
 	}
-	
-	public void setPermalink(String permalink) {
-		this.permalink = permalink;
+
+	public void setTarget(ActivityObject target) {
+		this.target = target;
 	}
-	
-	public String getPermalink() {
-		return permalink;
+
+	public ActivityObject getGenerator() {
+		return generator;
 	}
-	
-	public void setTitle(String title) {
-		this.title = title;
+
+	public void setGenerator(ActivityObject generator) {
+		this.generator = generator;
 	}
-	
+
+	public ActivityObject getServiceProvider() {
+		return serviceProvider;
+	}
+
+	public void setServiceProvider(ActivityObject serviceProvider) {
+		this.serviceProvider = serviceProvider;
+	}
+
 	public String getTitle() {
 		return title;
 	}
-		
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
 	public void setBody(String body) {
 		this.body = body;
 	}
-	
-	public String getBody() {
-		return body;
+
+	public List<String> getStandardLink() {
+		return standardLink;
+	}
+
+	public void setStandardLink(List<String> standardLink) {
+		this.standardLink = standardLink;
 	}
 }

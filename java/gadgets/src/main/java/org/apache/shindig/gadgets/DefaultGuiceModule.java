@@ -41,6 +41,7 @@ import org.apache.shindig.gadgets.parse.ParseModule;
 import org.apache.shindig.gadgets.preload.PreloadModule;
 import org.apache.shindig.gadgets.render.RenderModule;
 import org.apache.shindig.gadgets.rewrite.RewriteModule;
+import org.apache.shindig.gadgets.servlet.GadgetsHandler;
 import org.apache.shindig.gadgets.servlet.HttpRequestHandler;
 import org.apache.shindig.gadgets.templates.TemplateModule;
 import org.apache.shindig.gadgets.uri.UriModule;
@@ -101,6 +102,7 @@ public class DefaultGuiceModule extends AbstractModule {
     Multibinder<Object> handlerBinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("org.apache.shindig.handlers"));
     handlerBinder.addBinding().to(InvalidationHandler.class);
     handlerBinder.addBinding().to(HttpRequestHandler.class);
+    handlerBinder.addBinding().to(GadgetsHandler.class);
   }
 
   protected void registerConfigContributors() {

@@ -59,7 +59,7 @@ public class DefaultAccelUriManagerTest {
   @Test
   public void testParseAndNormalizeNonAccelUri() throws Exception {
     Uri uri = Uri.parse("http://www.example.org/index.html");
-    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=default"
+    assertEquals(Uri.parse("http://apache.org/gadgets/accel?container=default"
                  + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
                  + "&debug=0&nocache=0&refresh=0"
                  + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
@@ -71,7 +71,7 @@ public class DefaultAccelUriManagerTest {
     Uri uri = Uri.parse("http://apache.org/gadgets/accel?container=proxy"
                         + "&gadget=http%3A%2F%2Fwww.1.com%2Fa.html"
                         + "&url=http%3A%2F%2Fwww.example.org%2Findex.html");
-    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=proxy"
+    assertEquals(Uri.parse("http://apache.org/gadgets/accel?container=proxy"
                  + "&gadget=http%3A%2F%2Fwww.1.com%2Fa.html"
                  + "&debug=0&nocache=0&refresh=0"
                  + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),

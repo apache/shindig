@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.crypto;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.google.common.base.Preconditions;
 
@@ -79,7 +80,7 @@ public class BasicBlobCrypter implements BlobCrypter {
     try {
       FileInputStream openFile = new FileInputStream(keyfile);
       reader = new BufferedReader(
-          new InputStreamReader(openFile, CharsetUtil.UTF8));
+          new InputStreamReader(openFile, Charsets.UTF_8));
       String line = reader.readLine();
       if (line == null) {
         throw new IOException("Unexpectedly empty keyfile:" + keyfile);
@@ -148,7 +149,7 @@ public class BasicBlobCrypter implements BlobCrypter {
       byte[] encoded = serializeAndTimestamp(in);
       byte[] cipherText = Crypto.aes128cbcEncrypt(cipherKey, encoded);
       byte[] hmac = Crypto.hmacSha1(hmacKey, cipherText);
-      byte[] b64 = Base64.encodeBase64(Crypto.concat(cipherText, hmac));
+      byte[] b64 = Base64.encodeBase64URLSafe(Crypto.concat(cipherText, hmac));
       return new String(b64, UTF8);
     } catch (UnsupportedEncodingException e) {
       throw new BlobCrypterException(e);

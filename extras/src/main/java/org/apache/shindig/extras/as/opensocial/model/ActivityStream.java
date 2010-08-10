@@ -15,13 +15,13 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package org.apache.shindig.extras.as.opensocial.model;
 
 import java.util.List;
 
-import org.apache.shindig.protocol.model.Exportablebean;
 import org.apache.shindig.extras.as.core.model.ActivityStreamImpl;
+
+import org.apache.shindig.protocol.model.Exportablebean;
 
 import com.google.inject.ImplementedBy;
 

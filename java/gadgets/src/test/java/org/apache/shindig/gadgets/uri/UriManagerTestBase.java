@@ -110,15 +110,15 @@ public class UriManagerTestBase {
     expect(gadget.getAllFeatures()).andReturn(features).anyTimes();
     
     // User prefs
-    List<UserPref> specPrefList = Lists.newLinkedList();
+    Map<String,UserPref> specPrefMap = Maps.newLinkedHashMap();
     for (Map.Entry<String, String> specPref : specPrefs.entrySet()) {
       UserPref up = createMock(UserPref.class);
       expect(up.getName()).andReturn(specPref.getKey()).anyTimes();
       expect(up.getDefaultValue()).andReturn(specPref.getValue()).anyTimes();
       replay(up);
-      specPrefList.add(up);
+      specPrefMap.put(up.getName(),up);
     }
-    expect(spec.getUserPrefs()).andReturn(specPrefList).anyTimes();
+    expect(spec.getUserPrefs()).andReturn(specPrefMap).anyTimes();
     UserPrefs ctxPrefs = new UserPrefs(inPrefs);
     expect(context.getUserPrefs()).andReturn(ctxPrefs).anyTimes();
     expect(context.getParameter(Param.REFRESH.getKey())).andReturn(null).anyTimes();

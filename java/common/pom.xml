@@ -101,10 +101,9 @@
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-jmx</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
@@ -135,6 +134,10 @@
       <artifactId>oauth</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+    <dependency>
       <artifactId>commons-betwixt</artifactId>
       <groupId>commons-betwixt</groupId>
     </dependency>
@@ -151,9 +154,12 @@
       <artifactId>juel-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.odysseus.juel</groupId>
-      <artifactId>juel-api</artifactId>
-      <scope>provided</scope>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>jasper-el</artifactId>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>

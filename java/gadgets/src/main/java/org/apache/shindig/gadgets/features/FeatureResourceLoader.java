@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.features;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -140,9 +141,8 @@ public class FeatureResourceLoader {
     protected DualModeFileResource(String optFilePath, String dbgFilePath) {
       this.optContent = new FileContent(optFilePath);
       this.dbgContent = new FileContent(dbgFilePath);
-      if (optContent.get() == null && dbgContent.get() == null) {
-        throw new IllegalArgumentException("Problems reading resource: " + dbgFilePath);
-      }
+      Preconditions.checkArgument(optContent.get() != null || dbgContent.get() != null,
+        "Problems reading resource: %s", dbgFilePath);
     }
 
     public String getContent() {
@@ -202,9 +202,7 @@ public class FeatureResourceLoader {
     private DualModeStaticResource(String path, String content, String debugContent) {
       this.content = content != null ? content : debugContent;
       this.debugContent = debugContent != null ? debugContent : content;
-      if (this.content == null) {
-        throw new IllegalArgumentException("Problems reading resource: " + path);
-      }
+      Preconditions.checkArgument(this.content != null, "Problems reading resource: %s", path);
     }
 
     public String getContent() {

@@ -132,8 +132,8 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -176,8 +176,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.odysseus.juel</groupId>
-      <artifactId>juel-api</artifactId>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>el-api</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

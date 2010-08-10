@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.features;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -384,9 +385,7 @@ public class FeatureRegistry {
     if (!problems.isEmpty()) {
       StringBuilder sb = new StringBuilder();
       sb.append("Problems found processing features:\n");
-      for (String problem : problems) {
-        sb.append(problem).append('\n');
-      }
+      Joiner.on('\n').appendTo(sb, problems);
       throw new GadgetException(GadgetException.Code.INVALID_CONFIG, sb.toString());
     }
   }

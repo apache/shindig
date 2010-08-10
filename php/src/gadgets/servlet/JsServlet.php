@@ -54,7 +54,8 @@ class JsServlet extends HttpServlet {
     }
     $found = array();
     $missing = array();
-    $context = new GadgetContext('GADGET');
+    $contextClass = Config::get('gadget_context_class');
+    $context = new $contextClass('GADGET');
     $registry = new GadgetFeatureRegistry(Config::get('features_path'));
     if ($registry->resolveFeatures($needed, $found, $missing)) {
       $isGadgetContext = !isset($_GET["c"]) || $_GET['c'] == 0 ? true : false;

@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.encoding;
 
 import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 
@@ -31,10 +32,6 @@ import com.ibm.icu.text.CharsetMatch;
 public final class EncodingDetector {
   private EncodingDetector() {}
   
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
-  private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
-
-
   public static class FallbackEncodingDetector {
     public Charset detectEncoding(byte[] input) {
       // Fall back to the incredibly slow ICU. It might be better to just skip this entirely.
@@ -60,11 +57,11 @@ public final class EncodingDetector {
   public static Charset detectEncoding(byte[] input, boolean assume88591IfNotUtf8,
       FallbackEncodingDetector alternateDecoder) {
     if (looksLikeValidUtf8(input)) {
-      return UTF_8;
+      return Charsets.UTF_8;
     }
 
     if (assume88591IfNotUtf8) {
-      return ISO_8859_1;
+      return Charsets.ISO_8859_1;
     }
 
     // Fall back encoding:

@@ -174,18 +174,27 @@ shindig.container.Container.prototype.closeGadget = function(site) {
 
 
 /**
+ * Pre-load one gadget metadata information. More details on preloadGadgets().
+ * @param {string} gadgetUrl gadget URI to preload.
+ */
+shindig.container.Container.prototype.preloadGadget = function(gadgetUrl) {
+  this.preloadGadgets([gadgetUrl]);
+};
+
+
+/**
  * Pre-load gadgets metadata information. This is done by priming the cache,
  * and making an immediate call to fetch metadata of gadgets fully specified at
  * gadgetUrls. This will not render, and do additional callback operations.
- * @param {Object} request JSON containing ids of gadgets URIs to preload.
+ * @param {Array} gadgetUrls gadgets URIs to preload.
  */
-shindig.container.Container.prototype.preloadGadgets = function(request) {
-  var metadataRequest = {
+shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls) {
+  var request = {
       'container' : window.__CONTAINER,
-      'ids' : request['ids']
+      'ids' : gadgetUrls
   };
   var self = this;
-  this.service_.getGadgetMetadata(metadataRequest, function(response) {
+  this.service_.getGadgetMetadata(request, function(response) {
     if (!response.error) {
       for (var id in response) {
         self.addPreloadedGadgetUrl_(id);
@@ -194,6 +203,22 @@ shindig.container.Container.prototype.preloadGadgets = function(request) {
     }
   });
 };
+
+
+/**
+ * Fetch the gadget metadata commonly used by container for user preferences.
+ * @param {string} gadgetUrl gadgets URI to fetch metadata for. to preload.
+ * @param {function(Object)} callback Function called with gadget metadata.
+ */
+shindig.container.Container.prototype.getGadgetMetadata = function(
+    gadgetUrl, callback) {
+  var request = {
+      'container' : window.__CONTAINER,
+      'ids' : [ gadgetUrl ]
+  };
+  this.service_.getGadgetMetadata(request, callback);
+};
+
 
 /**
  * Callback that occurs after instantiation/construction of this. Override to

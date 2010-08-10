@@ -19,20 +19,18 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.ImmutableList;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
+import com.google.inject.name.Names;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.render.CajaResponseRewriter;
 import org.apache.shindig.gadgets.render.OpenSocialI18NGadgetRewriter;
 import org.apache.shindig.gadgets.render.RenderingGadgetRewriter;
-import org.apache.shindig.gadgets.render.old.SanitizingGadgetRewriter;
-import org.apache.shindig.gadgets.render.old.SanitizingRequestRewriter;
+import org.apache.shindig.gadgets.render.SanitizingGadgetRewriter;
+import org.apache.shindig.gadgets.render.SanitizingResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.image.BasicImageRewriter;
-import org.apache.shindig.gadgets.rewrite.old.CssRequestRewriter;
-import org.apache.shindig.gadgets.rewrite.old.HTMLContentRewriter;
 import org.apache.shindig.gadgets.servlet.CajaContentRewriter;
 
 import java.util.List;
@@ -44,6 +42,9 @@ public class RewriteModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(ResponseRewriterRegistry.class)
+        .annotatedWith(Names.named("shindig.accelerate.response.rewriter.registry"))
+        .to(AccelResponseRewriterRegistry.class);
   }
 
   @Provides
@@ -52,13 +53,16 @@ public class RewriteModule extends AbstractModule {
   protected List<GadgetRewriter> provideGadgetRewriters(
       PipelineDataGadgetRewriter pipelineRewriter,
       TemplateRewriter templateRewriter,
-      HTMLContentRewriter optimizingRewriter,
-      CssRequestRewriter cssRewriter,
+      AbsolutePathReferenceRewriter absolutePathRewriter,
+      StyleTagExtractorContentRewriter styleTagExtractorRewriter,
+      StyleAdjacencyContentRewriter styleAdjacencyRewriter,
+      ProxyingContentRewriter proxyingRewriter,
       CajaContentRewriter cajaRewriter,
       SanitizingGadgetRewriter sanitizedRewriter,
       RenderingGadgetRewriter renderingRewriter,
       OpenSocialI18NGadgetRewriter i18nRewriter) {
-    return ImmutableList.of(pipelineRewriter, templateRewriter, optimizingRewriter,
+    return ImmutableList.of(pipelineRewriter, templateRewriter,
+        absolutePathRewriter, styleTagExtractorRewriter, styleAdjacencyRewriter, proxyingRewriter,
         cajaRewriter, sanitizedRewriter, renderingRewriter, i18nRewriter);
   }
 
@@ -93,9 +97,27 @@ public class RewriteModule extends AbstractModule {
   @Provides
   @Singleton
   protected List<ResponseRewriter> provideResponseRewriters(
-      HTMLContentRewriter optimizingRewriter,
-      CssRequestRewriter cssRewriter,
-      SanitizingRequestRewriter sanitizedRewriter) {
-    return ImmutableList.of(optimizingRewriter, cssRewriter, sanitizedRewriter);
+      AbsolutePathReferenceRewriter absolutePathRewriter,
+      StyleTagExtractorContentRewriter styleTagExtractorRewriter,
+      StyleAdjacencyContentRewriter styleAdjacencyRewriter,
+      ProxyingContentRewriter proxyingRewriter,
+      CssResponseRewriter cssRewriter,
+      SanitizingResponseRewriter sanitizedRewriter,
+      CajaResponseRewriter cajaRewriter) {
+    return ImmutableList.of(
+        absolutePathRewriter, styleTagExtractorRewriter, styleAdjacencyRewriter, proxyingRewriter,
+        cssRewriter, sanitizedRewriter, cajaRewriter);
+  }
+
+  @Provides
+  @Singleton
+  @Named("shindig.accelerate.response.rewriters")
+  protected List<ResponseRewriter> provideAccelResponseRewriters(
+      AbsolutePathReferenceRewriter absolutePathReferenceRewriter,
+      StyleTagProxyEmbeddedUrlsRewriter styleTagProxyEmbeddedUrlsRewriter,
+      ProxyingContentRewriter proxyingContentRewriter) {
+    return ImmutableList.of((ResponseRewriter) absolutePathReferenceRewriter,
+        (ResponseRewriter) styleTagProxyEmbeddedUrlsRewriter,
+        (ResponseRewriter) proxyingContentRewriter);
   }
 }

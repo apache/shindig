@@ -19,6 +19,7 @@
 package org.apache.shindig.common;
 
 import org.apache.shindig.common.util.DateUtil;
+import org.apache.shindig.common.uri.Uri;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +32,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -150,6 +152,8 @@ public final class JsonSerializer {
       buf.append(value.toString());
     } else if (value instanceof CharSequence ||
                value instanceof DateTime ||
+               value instanceof Locale ||
+               value instanceof Uri ||
                value.getClass().isEnum()) {
       // String-like Primitives
       appendString(buf, value.toString());
@@ -284,7 +288,7 @@ public final class JsonSerializer {
    *
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
-  public static void appendMap(Appendable buf, Map<String, ?> map) throws IOException {
+  public static void appendMap(final Appendable buf, final Map<String, ?> map) throws IOException {
     buf.append('{');
     boolean firstDone = false;
     for (Map.Entry<String, ?> entry : map.entrySet()) {
@@ -295,7 +299,9 @@ public final class JsonSerializer {
         } else {
           firstDone = true;
         }
-        appendString(buf, entry.getKey());
+        Object key = entry.getKey();
+
+        appendString(buf, key.toString());
         buf.append(':');
         append(buf, value);
       }
@@ -309,7 +315,7 @@ public final class JsonSerializer {
    * @throws IOException If {@link Appendable#append(char)} throws an exception.
    */
   public static void appendMultimap(Appendable buf, Multimap<String, Object> map) throws IOException {
-	appendMap(buf, map.asMap());
+    appendMap(buf, map.asMap());
   }
   
   /**

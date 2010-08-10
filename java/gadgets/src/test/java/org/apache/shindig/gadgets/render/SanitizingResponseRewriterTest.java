@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.Set;
 
 public class SanitizingResponseRewriterTest extends RewriterTestBase {
-  private static final Uri CONTENT_URI = Uri.parse("www.example.org/content");
+  private static final Uri CONTENT_URI = Uri.parse("http://www.example.org/content");
 
   private String rewrite(HttpRequest request, HttpResponse response) throws Exception {
     request.setSanitizationRequested(true);

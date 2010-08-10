@@ -28,8 +28,8 @@ class GadgetFactory {
   /**
    * @var GadgetContext
    */
-  private $context;
-  private $token;
+  protected $context;
+  protected $token;
 
   public function __construct(GadgetContext $context, $token) {
     $this->context = $context;
@@ -48,9 +48,11 @@ class GadgetFactory {
     }
     // Fetch the gadget's content and create a GadgetSpec
     $gadgetContent = $this->fetchGadget($gadgetUrl);
-    $gadgetSpecParser = new GadgetSpecParser();
-    $gadgetSpec = $gadgetSpecParser->parse($gadgetContent);
-    $gadget = new Gadget($gadgetSpec, $this->context);
+    $gadgetSpecParserClass = Config::get('gadget_spec_parser');
+    $gadgetSpecParser = new $gadgetSpecParserClass();
+    $gadgetSpec = $gadgetSpecParser->parse($gadgetContent, $this->context);
+    $gadgetClass = Config::get('gadget_class');
+    $gadget = new $gadgetClass($gadgetSpec, $this->context);
 
     // Process the gadget: fetching remote resources, processing & applying the correct translations, user prefs and feature resolving
     $this->fetchResources($gadget);
@@ -68,7 +70,7 @@ class GadgetFactory {
    *
    * @param Gadget $gadget
    */
-  private function parseFeatures(Gadget &$gadget) {
+  protected function parseFeatures(Gadget &$gadget) {
     $found = $missing = array();
     if (! $this->context->getRegistry()->resolveFeatures(
         array_merge($gadget->gadgetSpec->requiredFeatures, $gadget->gadgetSpec->optionalFeatures),
@@ -93,7 +95,7 @@ class GadgetFactory {
    * Applies the substitutions to the complex types (preloads, user prefs, etc). Simple
    * types (author, title, etc) are translated on the fly in the gadget's getFoo() functions
    */
-  private function applySubstitutions(Gadget &$gadget) {
+  protected function applySubstitutions(Gadget &$gadget) {
     // Apply the substitutions to the UserPrefs
     foreach ($gadget->gadgetSpec->userPrefs as $key => $pref) {
       $gadget->gadgetSpec->userPrefs[$key]['name'] = $gadget->substitutions->substitute($pref['name']);
@@ -118,8 +120,9 @@ class GadgetFactory {
   /**
    * Seeds the substitutions class with the user prefs, messages, bidi and module id
    */
-  private function addSubstitutions(Gadget &$gadget) {
-    $gadget->substitutions = new Substitutions();
+  protected function addSubstitutions(Gadget &$gadget) {
+    $substiutionClass = Config::get('substitution_class');
+    $gadget->substitutions = new $substiutionClass();
     if ($this->token) {
       $gadget->substitutions->addSubstitution('MODULE', "ID", $this->token->getModuleId());
     } else {
@@ -142,7 +145,7 @@ class GadgetFactory {
    *
    * @param Gadget $gadget
    */
-  private function parseUserPrefs(Gadget &$gadget) {
+  protected function parseUserPrefs(Gadget &$gadget) {
     foreach ($gadget->gadgetSpec->userPrefs as $key => $pref) {
       $queryKey = 'up_' . $pref['name'];
       $gadget->gadgetSpec->userPrefs[$key]['value'] = isset($_GET[$queryKey]) ? trim(urldecode($_GET[$queryKey])) : $pref['defaultValue'];
@@ -158,7 +161,7 @@ class GadgetFactory {
    *
    * @param Gadget $gadget
    */
-  private function mergeLocales(Gadget $gadget) {
+  protected function mergeLocales(Gadget $gadget) {
     if (count($gadget->gadgetSpec->locales)) {
       $contextLocale = $this->context->getLocale();
       $locales = $gadget->gadgetSpec->locales;
@@ -191,16 +194,24 @@ class GadgetFactory {
    * @param Gadget $gadget
    * @param GadgetContext $context
    */
-  private function fetchResources(Gadget &$gadget) {
+  protected function fetchResources(Gadget &$gadget) {
     $contextLocale = $this->context->getLocale();
     $unsignedRequests = $signedRequests = array();
-    foreach ($gadget->getLocales() as $key => $locale) {
+    foreach ($gadget->gadgetSpec->locales as $key => $locale) {
       // Only fetch the locales that match the current context's language and country
       if (($locale['country'] == 'all' && $locale['lang'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == 'all') || ($locale['lang'] == $contextLocale['lang'] && $locale['country'] == $contextLocale['country'])) {
         if (! empty($locale['messages'])) {
+          $transformedUrl = RemoteContentRequest::transformRelativeUrl($locale['messages'], $this->context->getUrl());
+          if (! $transformedUrl) {
+             // remove any locales that are not applicable to this context
+             unset($gadget->gadgetSpec->locales[$key]);
+             continue;
+          } else {
+            $gadget->gadgetSpec->locales[$key]['messages'] = $transformedUrl;
+           }
           // locale matches the current context, add it to the requests queue
-          $request = new RemoteContentRequest($locale['messages']);
-          $request->createRemoteContentRequestWithUri($locale['messages']);
+          $request = new RemoteContentRequest($gadget->gadgetSpec->locales[$key]['messages'] );
+          $request->createRemoteContentRequestWithUri($gadget->gadgetSpec->locales[$key]['messages'] );
           $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
           $unsignedRequests[] = $request;
         }
@@ -239,9 +250,15 @@ class GadgetFactory {
       }
       // Add template libraries to the request queue
       if ($gadget->gadgetSpec->templatesRequireLibraries) {
-        foreach ($gadget->gadgetSpec->templatesRequireLibraries as $libraryUrl) {
-        	$request = new RemoteContentRequest($libraryUrl);
-          $request->createRemoteContentRequestWithUri($libraryUrl);
+        foreach ($gadget->gadgetSpec->templatesRequireLibraries as $key => $libraryUrl) {
+               $request = new RemoteContentRequest($libraryUrl);
+          $transformedUrl = RemoteContentRequest::transformRelativeUrl($libraryUrl, $this->context->getUrl());
+          if (! $transformedUrl) {
+            continue;
+          } else {
+            $gadget->gadgetSpec->templatesRequireLibraries[$key] = $transformedUrl;
+          }
+          $request->createRemoteContentRequestWithUri($gadget->gadgetSpec->templatesRequireLibraries[$key]);
           $request->getOptions()->ignoreCache = $this->context->getIgnoreCache();
           $unsignedRequests[] = $request;
         }
@@ -258,6 +275,7 @@ class GadgetFactory {
             'rc' => $response->getHttpCode());
       }
     }
+
     // Perform the signed requests
     if (count($signedRequests)) {
       $signingFetcherFactory = new SigningFetcherFactory(Config::get("private_key_file"));
@@ -303,7 +321,7 @@ class GadgetFactory {
    * @param string $messageBundleData
    * @return array (MessageBundle)
    */
-  private function parseMessageBundle($messageBundleData) {
+  protected function parseMessageBundle($messageBundleData) {
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     if (! $doc->loadXML($messageBundleData, LIBXML_NOCDATA)) {

@@ -17,6 +17,7 @@
  */
 package org.apache.shindig.gadgets.spec;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.AuthType;
@@ -112,8 +113,8 @@ public class View implements RequestAuthenticationInfo {
     this.needsUserPrefSubstitution = this.content.contains("__UP_");
     this.quirks = quirks;
     this.href = href;
-    this.rawType = contentType == null ? "html" : contentType;
-    this.type = type == null ? ContentType.HTML : type;
+    this.rawType = Objects.firstNonNull(contentType, "html");
+    this.type = Objects.firstNonNull(type, ContentType.HTML);
     this.preferredHeight = preferredHeight;
     this.preferredWidth = preferredWidth;
     this.attributes = Collections.unmodifiableMap(attributes);
@@ -249,11 +250,12 @@ public class View implements RequestAuthenticationInfo {
   }
 
   /**
-   * Whether or not the content section has any __UP_ hangman variables.
+   * Whether or not the content section has any __UP_ hangman variables,
+   * or is type=url.
    */
   private final boolean needsUserPrefSubstitution;
   public boolean needsUserPrefSubstitution() {
-    return needsUserPrefSubstitution;
+    return needsUserPrefSubstitution || type == ContentType.URL;
   }
 
   /**

@@ -31,5 +31,6 @@ A map of view names to view attributes. Examples:
     <script src="util.js"/>
     <script src="cookies.js"/>
     <script src="shindig-container.js"/>
+    <script src="osapi.js"/>
   </container>
 </feature>

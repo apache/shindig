@@ -479,6 +479,8 @@ public class DefaultTemplateProcessor implements TemplateProcessor {
   public <T> T evaluate(String expression, Class<T> type, T defaultValue) {
     try {
       ValueExpression expr = expressions.parse(expression, type);
+      // Workaround for inability of Jasper-EL resolvers to access VariableMapper
+      elContext.putContext(TemplateContext.class, elContext);
       Object result = expr.getValue(elContext);
       return type.cast(result);
     } catch (ELException e) {

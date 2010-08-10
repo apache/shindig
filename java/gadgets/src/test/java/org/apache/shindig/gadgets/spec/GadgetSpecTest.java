@@ -40,7 +40,7 @@ public class GadgetSpecTest extends Assert {
     GadgetSpec spec = new GadgetSpec(SPEC_URL, xml);
     assertEquals("title", spec.getModulePrefs().getTitle());
     assertEquals(UserPref.DataType.STRING,
-        spec.getUserPrefs().get(0).getDataType());
+        spec.getUserPrefs().get("foo").getDataType());
     assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
   }
 
@@ -55,7 +55,7 @@ public class GadgetSpecTest extends Assert {
     GadgetSpec spec = new GadgetSpec(SPEC_URL, XmlUtil.parse(xml), xml);
     assertEquals("title", spec.getModulePrefs().getTitle());
     assertEquals(UserPref.DataType.STRING,
-        spec.getUserPrefs().get(0).getDataType());
+        spec.getUserPrefs().get("foo").getDataType());
     assertEquals("Hello!", spec.getView(GadgetSpec.DEFAULT_VIEW).getContent());
 
     assertEquals(HashUtil.checksum(xml.getBytes()), spec.getChecksum());

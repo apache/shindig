@@ -59,7 +59,7 @@ public class DataServiceServlet extends ApiServlet {
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     try {
-      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
+      ContentTypes.checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
       executeRequest(servletRequest, servletResponse);
     } catch (ContentTypes.InvalidContentTypeException icte) {
       sendError(servletResponse,
@@ -79,7 +79,7 @@ public class DataServiceServlet extends ApiServlet {
       HttpServletResponse servletResponse)
       throws ServletException, IOException {
     try {
-      checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
+      ContentTypes.checkContentTypes(ALLOWED_CONTENT_TYPES, servletRequest.getContentType());
       executeRequest(servletRequest, servletResponse);
     } catch (ContentTypes.InvalidContentTypeException icte) {
       sendError(servletResponse,

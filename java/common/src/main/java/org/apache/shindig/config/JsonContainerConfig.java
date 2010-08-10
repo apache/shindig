@@ -48,6 +48,8 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ValueExpression;
@@ -78,7 +80,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
 
   // Used by tests
   public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
-    this(containers, "8080", expressions);
+    this(containers, "localhost", "8080", expressions);
   }
   /**
    * Creates a new configuration from files.
@@ -86,13 +88,15 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    */
   @Inject
   public JsonContainerConfig(@Named("shindig.containers.default") String containers,
-                             @Named("shindig.port") String port,
+                             @Nullable @Named("shindig.host") String host,
+                             @Nullable @Named("shindig.port") String port,
                              Expressions expressions)
       throws ContainerConfigException {
     this.expressions = expressions;
     JSONObject configJson = loadContainers(containers);
     try {
       configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_PORT", port);
+      configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_HOST", host);
     } catch (JSONException e) {
       // ignore
     }
@@ -119,7 +123,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
       configEntry.setValue(value);
     }
   }
-  
+
   @Override
   public Collection<String> getContainers() {
     return Collections.unmodifiableSet(config.keySet());
@@ -389,7 +393,7 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   public String toString() {
     return JsonSerializer.serialize(config);
   }
-  
+
   private Object evaluateAll(Object value) {
     if (value instanceof CharSequence) {
       return value.toString();
@@ -399,14 +403,14 @@ public class JsonContainerConfig extends AbstractContainerConfig {
       for (Map.Entry<?, ?> entry : mapValue.entrySet()) {
         newMap.put(entry.getKey(), evaluateAll(entry.getValue()));
       }
-      
+
       return newMap.build();
     } else if (value instanceof List<?>) {
-      ImmutableList.Builder<Object> newList = ImmutableList.builder(); 
+      ImmutableList.Builder<Object> newList = ImmutableList.builder();
       for (Object entry : (List<?>) value) {
         newList.add(evaluateAll(entry));
       }
-      
+
       return newList.build();
     } else {
       return value;

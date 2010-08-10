@@ -17,10 +17,10 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Preconditions;
 import com.google.inject.name.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +43,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.RequestAddCookies;
+import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
@@ -64,10 +66,11 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.util.ByteArrayBuffer;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProxySelector;
@@ -83,6 +86,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -117,7 +121,7 @@ public class BasicHttpFetcher implements HttpFetcher {
    * @param basicHttpFetcherProxy The http proxy to use.
    */
   @Inject
-  public BasicHttpFetcher(@Named("org.apache.shindig.gadgets.http.basicHttpFetcherProxy")
+  public BasicHttpFetcher(@Nullable @Named("org.apache.shindig.gadgets.http.basicHttpFetcherProxy")
                           String basicHttpFetcherProxy) {
     this(DEFAULT_MAX_OBJECT_SIZE, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS,
          basicHttpFetcherProxy);
@@ -211,6 +215,10 @@ public class BasicHttpFetcher implements HttpFetcher {
     });
     client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler() );
 
+    // Disable automatic storage and sending of cookies (see SHINDIG-1382)
+    client.removeRequestInterceptorByClass(RequestAddCookies.class); 
+    client.removeResponseInterceptorByClass(ResponseProcessCookies.class);
+
     // Use Java's built-in proxy logic in case no proxy set via guice.
     if (StringUtils.isEmpty(basicHttpFetcherProxy)) {
       ProxySelectorRoutePlanner routePlanner = new ProxySelectorRoutePlanner(
@@ -227,6 +235,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       super(entity);
     }
 
+    @Override
     public InputStream getContent() throws IOException, IllegalStateException {
       // the wrapped entity's getContent() decides about repeatability
       InputStream wrappedin = wrappedEntity.getContent();
@@ -234,6 +243,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       return new GZIPInputStream(wrappedin);
     }
 
+    @Override
     public long getContentLength() {
       // length of ungzipped content is not known
       return -1;
@@ -245,6 +255,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       super(entity);
     }
 
+    @Override
     public InputStream getContent()
         throws IOException, IllegalStateException {
 
@@ -254,13 +265,14 @@ public class BasicHttpFetcher implements HttpFetcher {
       return new InflaterInputStream(wrappedin, new Inflater(true));
     }
 
+    @Override
     public long getContentLength() {
       // length of ungzipped content is not known
       return -1;
     }
   }
 
-  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request) 
+  public HttpResponse fetch(org.apache.shindig.gadgets.http.HttpRequest request)
       throws GadgetException {
     HttpUriRequest httpMethod = null;
     Preconditions.checkNotNull(request);
@@ -362,7 +374,7 @@ public class BasicHttpFetcher implements HttpFetcher {
 
       LOG.log(Level.INFO, "Got Exception fetching " + request.getUri() + " - " + (now - started) + "ms", e);
 
-      // Separate shindig error from external error 
+      // Separate shindig error from external error
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR, e,
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } finally {
@@ -453,11 +465,77 @@ public class BasicHttpFetcher implements HttpFetcher {
       return HttpResponse.badrequest("Exceeded maximum number of bytes - " + maxObjSize);
     }
 
-    byte[] responseBytes = (entity == null) ? null : EntityUtils.toByteArray(entity);
+    byte[] responseBytes = (entity == null) ? null : toByteArraySafe(entity);
 
     return builder
         .setHttpStatusCode(response.getStatusLine().getStatusCode())
         .setResponse(responseBytes)
         .create();
+  }
+
+  /**
+   * This method is Safe replica version of org.apache.http.util.EntityUtils.toByteArray.
+   * The try block embedding 'instream.read' has a corresponding catch block for 'EOFException'
+   * (that's Ignored) and all other IOExceptions are let pass.
+   *
+   * @param entity
+   * @return byte array containing the entity content. May be empty/null.
+   * @throws IOException if an error occurs reading the input stream
+   */
+  public byte[] toByteArraySafe(final HttpEntity entity) throws IOException {
+    if (entity == null) {
+      return null;
+    }
+
+    InputStream instream = entity.getContent();
+    if (instream == null) {
+      return new byte[] {};
+    }
+    Preconditions.checkArgument(entity.getContentLength() < Integer.MAX_VALUE, "HTTP entity too large to be buffered in memory");
+
+    // The raw data stream (inside JDK) is read in a buffer of size '512'. The original code
+    // org.apache.http.util.EntityUtils.toByteArray reads the unzipped data in a buffer of
+    // 4096 byte. For any data stream that has a compression ratio lesser than 1/8, this may
+    // result in the buffer/array overflow. Increasing the buffer size to '16384'. It's highly
+    // unlikely to get data compression ratios lesser than 1/32 (3%).
+    final int bufferLength = 16384;
+    int i = (int)entity.getContentLength();
+    if (i < 0) {
+      i = bufferLength;
+    }
+    ByteArrayBuffer buffer = new ByteArrayBuffer(i);
+    try {
+      byte[] tmp = new byte[bufferLength];
+      int l;
+      while((l = instream.read(tmp)) != -1) {
+        buffer.append(tmp, 0, l);
+      }
+    } catch (EOFException eofe) {
+      /**
+       * Ref: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4040920
+       * Due to a bug in JDK ZLIB (InflaterInputStream), unexpected EOF error can occur.
+       * In such cases, even if the input stream is finished reading, the
+       * 'Inflater.finished()' call erroneously returns 'false' and
+       * 'java.util.zip.InflaterInputStream.fill' throws the 'EOFException'.
+       * So for such case, ignore the Exception in case Exception Cause is
+       * 'Unexpected end of ZLIB input stream'.
+       *
+       * Also, ignore this exception in case the exception has no message
+       * body as this is the case where {@link GZIPInputStream#readUByte}
+       * throws EOFException with empty message. A bug has been filed with Sun
+       * and will be mentioned here once it is accepted.
+       */
+      if (instream.available() == 0 &&
+          (eofe.getMessage() == null ||
+           eofe.getMessage().equals("Unexpected end of ZLIB input stream"))) {
+        LOG.log(Level.FINE, "EOFException: ", eofe);
+      } else {
+        throw eofe;
+      }
+    }
+    finally {
+      instream.close();
+    }
+    return buffer.toByteArray();
   }
 }

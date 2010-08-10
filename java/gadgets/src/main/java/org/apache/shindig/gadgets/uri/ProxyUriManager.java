@@ -56,7 +56,7 @@ public interface ProxyUriManager {
 
     public ProxyUri(Integer refresh, boolean debug, boolean noCache,
         String container, String gadget, Uri resource) {
-      super(null, refresh, debug, noCache, container, gadget);
+      super(UriStatus.VALID_UNVERSIONED, refresh, debug, noCache, container, gadget);
       this.resource = resource;
     }
 

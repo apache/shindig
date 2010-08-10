@@ -136,17 +136,18 @@ class SigningFetcher extends RemoteContentFetcher {
           $postData = implode("&", $postData);
         }
       }
-      $newQuery = '';
+      $newQueryParts = array();
       foreach ($req_req->get_parameters() as $key => $param) {
         if (! isset($forPost[$key])) {
           if (!is_array($param)) {
-            $newQuery .= urlencode($key) . '=' . urlencode($param) . '&';
+            $newQueryParts[] = urlencode($key) . '=' . urlencode($param);
           } else {
             foreach($param as $elem) {
-              $newQuery .= urlencode($key) . '=' . urlencode($elem) . '&';
+              $newQueryParts[] = urlencode($key) . '=' . urlencode($elem);
             }
           }
         }
+        $newQuery = implode('&', $newQueryParts);
       }
       // Careful here; the OAuth form encoding scheme is slightly different than
       // the normal form encoding scheme, so we have to use the OAuth library

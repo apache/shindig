@@ -47,9 +47,9 @@ public class PipelineExecutor {
   private static final int MAX_BATCH_COUNT = 3;
   private static final Logger LOG = Logger.getLogger(PipelineExecutor.class.getName());
 
-  private PipelinedDataPreloader preloader;
-  private PreloaderService preloaderService;
-  private Expressions expressions;
+  private final PipelinedDataPreloader preloader;
+  private final PreloaderService preloaderService;
+  private final Expressions expressions;
 
   @Inject
   public PipelineExecutor(PipelinedDataPreloader preloader,
@@ -59,7 +59,7 @@ public class PipelineExecutor {
     this.preloaderService = preloaderService;
     this.expressions = expressions;
   }
-  
+
   /**
    * Results from a full pipeline execution.
    */
@@ -69,17 +69,17 @@ public class PipelineExecutor {
      * evaluated.
      */
     public final Collection<PipelinedData> remainingPipelines;
-    
+
     /**
      * Results in the form of a full JSON-RPC batch response.
      */
     public final Collection<? extends Object> results;
-    
+
     /**
      * Results in the form of a Map from id to a JSON-serializable object.
      */
     public final Map<String, ? extends Object> keyedResults;
-    
+
     public Results(Collection<PipelinedData> remainingPipelines,
         Collection<? extends Object> results,
         Map<String, ? extends Object> keyedResults) {
@@ -101,13 +101,13 @@ public class PipelineExecutor {
     CompositeELResolver rootObjects = new CompositeELResolver();
     rootObjects.add(new GadgetELResolver(context));
     rootObjects.add(new RootELResolver(elResults));
-    
+
     List<PipelineState> pipelineStates = Lists.newArrayList();
     for (PipelinedData pipeline : pipelines) {
       PipelinedData.Batch batch = pipeline.getBatch(expressions, rootObjects);
       pipelineStates.add(new PipelineState(pipeline, batch));
     }
-    
+
     int batchCount = 0;
     while (true) {
       List<Callable<PreloadedData>> tasks = Lists.newArrayList();
@@ -116,7 +116,7 @@ public class PipelineExecutor {
           tasks.addAll(preloader.createPreloadTasks(context, pipeline.batch));
         }
       }
-      
+
       if (tasks.isEmpty()) {
         break;
       }
@@ -126,10 +126,14 @@ public class PipelineExecutor {
         try {
           for (Object entry : preloaded.toJson()) {
             results.add(entry);
-            
+
             String id = (String) JsonUtil.getProperty(entry, "id");
 
             Object data = JsonUtil.getProperty(entry, "result");
+            if (data == null) {
+              // For backward compatiblity, check maybe return old 'data' field:
+              data = JsonUtil.getProperty(entry, "data");
+            }
             if (data != null) {
               elResults.put(id, data);
             } else {
@@ -151,20 +155,20 @@ public class PipelineExecutor {
           pipeline.batch = pipeline.batch.getNextBatch(rootObjects);
         }
       }
-      
+
       batchCount++;
       if (batchCount == MAX_BATCH_COUNT) {
         break;
       }
     }
-    
+
     List<PipelinedData> remainingPipelines = Lists.newArrayList();
     for (PipelineState pipeline : pipelineStates) {
       if (pipeline.batch != null) {
         remainingPipelines.add(pipeline.pipeline);
       }
     }
-    
+
     return new Results(remainingPipelines, results, elResults);
   }
 
@@ -176,6 +180,6 @@ public class PipelineExecutor {
     }
 
     public final PipelinedData pipeline;
-    public PipelinedData.Batch batch;    
+    public PipelinedData.Batch batch;
   }
 }

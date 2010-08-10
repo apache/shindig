@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.parse.nekohtml;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.GadgetException;
@@ -37,7 +38,6 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.ImmutableMap;
 import org.cyberneko.html.HTMLConfiguration;
 import org.cyberneko.html.HTMLElements;
 import org.cyberneko.html.HTMLEntities;

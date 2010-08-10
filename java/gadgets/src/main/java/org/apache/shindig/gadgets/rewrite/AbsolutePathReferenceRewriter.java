@@ -26,6 +26,6 @@ import com.google.inject.Inject;
 public class AbsolutePathReferenceRewriter extends DomWalker.Rewriter {
   @Inject
   public AbsolutePathReferenceRewriter() {
-    super(new AbsolutePathReferenceVisitor());
+    super(new AbsolutePathReferenceVisitor(AbsolutePathReferenceVisitor.Tags.RESOURCES));
   }
 }

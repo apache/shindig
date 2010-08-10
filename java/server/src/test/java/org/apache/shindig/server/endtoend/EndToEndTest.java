@@ -18,7 +18,7 @@
 package org.apache.shindig.server.endtoend;
 
 import org.apache.shindig.auth.BasicSecurityToken;
-import org.apache.shindig.auth.BasicSecurityTokenDecoder;
+import org.apache.shindig.auth.BasicSecurityTokenCodec;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.crypto.BlobCrypterException;
@@ -46,7 +46,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -315,7 +314,8 @@ public class EndToEndTest {
   @Test
   public void testTemplateLibrary() throws Exception {
     HtmlPage page = executeAllPageTests("templateLibrary");
-    assertTrue(page.asXml().contains("p {color: red}"));
+    String pageXml = page.asXml();
+    assertTrue(pageXml.replaceAll("[\n\r ]", "").contains("p{color:red}"));
     
     Node paragraph = page.getElementsByTagName("p").item(0);
     assertEquals("Hello world", paragraph.getTextContent().trim());
@@ -398,8 +398,8 @@ public class EndToEndTest {
 
     String gadgetUrl = EndToEndServer.SERVER_URL + '/' + testName;
     String url = EndToEndServer.GADGET_BASEURL + "?url=" + URLEncoder.encode(gadgetUrl, "UTF-8");
-    BasicSecurityTokenDecoder decoder = new BasicSecurityTokenDecoder();
-    url += "&st=" + URLEncoder.encode(decoder.encodeToken(token), "UTF-8");
+    BasicSecurityTokenCodec codec = new BasicSecurityTokenCodec();
+    url += "&st=" + URLEncoder.encode(codec.encodeToken(token), "UTF-8");
     if (testMethod != null) {
       url += "&testMethod=" + URLEncoder.encode(testMethod, "UTF-8");
     }

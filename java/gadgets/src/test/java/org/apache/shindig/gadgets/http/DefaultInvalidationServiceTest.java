@@ -68,8 +68,6 @@ public class DefaultInvalidationServiceTest extends Assert {
     appyToken.setOwnerId("OwnerY");
     appyToken.setViewerId("ViewerY");
 
-    control = EasyMock.createNiceControl();
-
     signedRequest = new HttpRequest(URI);
     signedRequest.setAuthType(AuthType.SIGNED);
     signedRequest.setSecurityToken(appxToken);

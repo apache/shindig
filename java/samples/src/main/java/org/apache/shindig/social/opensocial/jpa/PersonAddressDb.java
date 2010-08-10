@@ -26,9 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import static javax.persistence.CascadeType.PERSIST;
-import static javax.persistence.CascadeType.MERGE;
-import static javax.persistence.CascadeType.REFRESH;
 
 /**
  *

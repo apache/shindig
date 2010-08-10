@@ -49,7 +49,8 @@ class HttpHandler extends DataRequestHandler {
       // complain.  
       $options = MakeRequestOptions::fromRpcRequestItem($requestItem);
       $makeRequest = new MakeRequest();
-      $context = new GadgetContext('GADGET');
+      $contextClass = Config::get('gadget_context_class');
+      $context = new $contextClass('GADGET');
       $response = $makeRequest->fetch($context, $options);
 
       $result = array(

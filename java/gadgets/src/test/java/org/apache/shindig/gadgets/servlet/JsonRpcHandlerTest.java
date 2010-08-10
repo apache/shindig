@@ -23,23 +23,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.shindig.common.testing.TestExecutorService;
-import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.process.ProcessingException;
-import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.View;
-import org.apache.shindig.gadgets.uri.IframeUriManager;
-import org.apache.shindig.gadgets.uri.UriStatus;
-
-import com.google.common.collect.Maps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -48,36 +37,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 public class JsonRpcHandlerTest {
-  private static final Uri SPEC_URL = Uri.parse("http://example.org/g.xml");
-  private static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");
-  private static final String SPEC_TITLE = "JSON-TEST";
-  private static final String SPEC_TITLE2 = "JSON-TEST2";
-  private static final int PREFERRED_HEIGHT = 100;
-  private static final int PREFERRED_WIDTH = 242;
-  private static final String LINK_REL = "rel";
-  private static final String LINK_HREF = "http://example.org/foo";
-  private static final String SPEC_XML =
-      "<Module>" +
-      "<ModulePrefs title=\"" + SPEC_TITLE + "\">" +
-      "  <Link rel='" + LINK_REL + "' href='" + LINK_HREF + "'/>" +
-      "</ModulePrefs>" +
-      "<UserPref name=\"up_one\">" +
-      "  <EnumValue value=\"val1\" display_value=\"disp1\"/>" +
-      "  <EnumValue value=\"abc\" display_value=\"disp2\"/>" +
-      "  <EnumValue value=\"z_xabc\" display_value=\"disp3\"/>" +
-      "  <EnumValue value=\"foo\" display_value=\"disp4\"/>" +
-      "</UserPref>" +
-      "<Content type=\"html\"" +
-      " preferred_height = \"" + PREFERRED_HEIGHT + '\"' +
-      " preferred_width = \"" + PREFERRED_WIDTH + '\"' +
-      ">Hello, world</Content>" +
-      "</Module>";
-  private static final String SPEC_XML2 =
-      "<Module>" +
-      "<ModulePrefs title=\"" + SPEC_TITLE2 + "\"/>" +
-      "<Content type=\"html\">Hello, world</Content>" +
-      "</Module>";
-
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
   private final JsonRpcHandler jsonRpcHandler
@@ -86,12 +45,6 @@ public class JsonRpcHandlerTest {
   private JSONObject createContext(String lang, String country)
       throws JSONException {
     return new JSONObject().put("language", lang).put("country", country);
-  }
-
-  @Before
-  public void setUp() {
-    processor.gadgets.put(SPEC_URL, SPEC_XML);
-    processor.gadgets.put(SPEC_URL2, SPEC_XML2);
   }
 
   private JSONObject createGadget(String url, int moduleId, Map<String, String> prefs)
@@ -105,25 +58,25 @@ public class JsonRpcHandlerTest {
   @Test
   public void testSimpleRequest() throws Exception {
     JSONArray gadgets = new JSONArray()
-        .put(createGadget(SPEC_URL.toString(), 0, null));
+        .put(createGadget(FakeProcessor.SPEC_URL.toString(), 0, null));
     JSONObject input = new JSONObject()
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    urlGenerator.iframeUrl = SPEC_URL;
+    urlGenerator.iframeUrl = FakeProcessor.SPEC_URL;
 
     JSONObject response = jsonRpcHandler.process(input);
 
     JSONArray outGadgets = response.getJSONArray("gadgets");
     JSONObject gadget = outGadgets.getJSONObject(0);
-    assertEquals(SPEC_URL.toString(), gadget.getString("iframeUrl"));
-    assertEquals(SPEC_TITLE, gadget.getString("title"));
+    assertEquals(FakeProcessor.SPEC_URL.toString(), gadget.getString("iframeUrl"));
+    assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
     assertEquals(0, gadget.getInt("moduleId"));
 
     JSONObject view = gadget.getJSONObject("views").getJSONObject(GadgetSpec.DEFAULT_VIEW);
-    assertEquals(PREFERRED_HEIGHT, view.getInt("preferredHeight"));
-    assertEquals(PREFERRED_WIDTH, view.getInt("preferredWidth"));
-    assertEquals(LINK_HREF, gadget.getJSONObject("links").getString(LINK_REL));
+    assertEquals(FakeProcessor.PREFERRED_HEIGHT, view.getInt("preferredHeight"));
+    assertEquals(FakeProcessor.PREFERRED_WIDTH, view.getInt("preferredWidth"));
+    assertEquals(FakeProcessor.LINK_HREF, gadget.getJSONObject("links").getString(FakeProcessor.LINK_REL));
 
     JSONObject userPrefs = gadget.getJSONObject("userPrefs");
     assertNotNull(userPrefs);
@@ -150,7 +103,7 @@ public class JsonRpcHandlerTest {
   @Test
   public void testUnexpectedError() throws Exception {
     JSONArray gadgets = new JSONArray()
-        .put(createGadget(SPEC_URL.toString(), 0, null));
+        .put(createGadget(FakeProcessor.SPEC_URL.toString(), 0, null));
     JSONObject input = new JSONObject()
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
@@ -166,8 +119,8 @@ public class JsonRpcHandlerTest {
   @Test
   public void testMultipleGadgets() throws Exception {
     JSONArray gadgets = new JSONArray()
-        .put(createGadget(SPEC_URL.toString(), 0, null))
-        .put(createGadget(SPEC_URL2.toString(), 1, null));
+        .put(createGadget(FakeProcessor.SPEC_URL.toString(), 0, null))
+        .put(createGadget(FakeProcessor.SPEC_URL2.toString(), 1, null));
     JSONObject input = new JSONObject()
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
@@ -180,12 +133,12 @@ public class JsonRpcHandlerTest {
     boolean second = false;
     for (int i = 0, j = outGadgets.length(); i < j; ++i) {
       JSONObject gadget = outGadgets.getJSONObject(i);
-      if (gadget.getString("url").equals(SPEC_URL.toString())) {
-        assertEquals(SPEC_TITLE, gadget.getString("title"));
+      if (gadget.getString("url").equals(FakeProcessor.SPEC_URL.toString())) {
+        assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
         assertEquals(0, gadget.getInt("moduleId"));
         first = true;
       } else {
-        assertEquals(SPEC_TITLE2, gadget.getString("title"));
+        assertEquals(FakeProcessor.SPEC_TITLE2, gadget.getString("title"));
         assertEquals(1, gadget.getInt("moduleId"));
         second = true;
       }
@@ -198,13 +151,13 @@ public class JsonRpcHandlerTest {
   @Test
   public void testMultipleGadgetsWithAnError() throws Exception {
     JSONArray gadgets = new JSONArray()
-        .put(createGadget(SPEC_URL.toString(), 0, null))
-        .put(createGadget(SPEC_URL2.toString(), 1, null));
+        .put(createGadget(FakeProcessor.SPEC_URL.toString(), 0, null))
+        .put(createGadget(FakeProcessor.SPEC_URL2.toString(), 1, null));
     JSONObject input = new JSONObject()
         .put("context", createContext("en", "US"))
         .put("gadgets", gadgets);
 
-    processor.exceptions.put(SPEC_URL2, 
+    processor.exceptions.put(FakeProcessor.SPEC_URL2,
         new ProcessingException("broken", HttpServletResponse.SC_BAD_REQUEST));
 
     JSONObject response = jsonRpcHandler.process(input);
@@ -215,8 +168,8 @@ public class JsonRpcHandlerTest {
     boolean second = false;
     for (int i = 0, j = outGadgets.length(); i < j; ++i) {
       JSONObject gadget = outGadgets.getJSONObject(i);
-      if (gadget.getString("url").equals(SPEC_URL.toString())) {
-        assertEquals(SPEC_TITLE, gadget.getString("title"));
+      if (gadget.getString("url").equals(FakeProcessor.SPEC_URL.toString())) {
+        assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
         assertEquals(0, gadget.getInt("moduleId"));
         first = true;
       } else {
@@ -231,50 +184,4 @@ public class JsonRpcHandlerTest {
     assertTrue("Second gadget not returned!", second);
   }
 
-  private static class FakeProcessor extends Processor {
-    protected final Map<Uri, ProcessingException> exceptions = Maps.newHashMap();
-    protected final Map<Uri, String> gadgets = Maps.newHashMap();
-
-    public FakeProcessor() {
-      super(null, null, null, null, null);
-    }
-
-    @Override
-    public Gadget process(GadgetContext context) throws ProcessingException {
-
-      ProcessingException exception = exceptions.get(context.getUrl());
-      if (exception != null) {
-        throw exception;
-      }
-
-      try {
-        GadgetSpec spec = new GadgetSpec(Uri.parse("#"), gadgets.get(context.getUrl()));
-        View view = spec.getView(context.getView());
-        return new Gadget()
-            .setContext(context)
-            .setSpec(spec)
-            .setCurrentView(view);
-      } catch (GadgetException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  protected static class FakeIframeUriManager implements IframeUriManager {
-    protected boolean throwRandomFault = false;
-    protected Uri iframeUrl = Uri.parse("http://example.org/gadgets/foo-does-not-matter");
-
-    protected FakeIframeUriManager() { }
-
-    public Uri makeRenderingUri(Gadget gadget) {
-      if (throwRandomFault) {
-        throw new RuntimeException("BROKEN");
-      }
-      return iframeUrl;
-    }
-
-    public UriStatus validateRenderingUri(Uri uri) {
-      throw new UnsupportedOperationException();
-    }
-  }
 }

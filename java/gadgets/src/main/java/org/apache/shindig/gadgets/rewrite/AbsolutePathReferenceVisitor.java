@@ -44,13 +44,11 @@ public class AbsolutePathReferenceVisitor implements Visitor {
   public enum Tags {
     // Resources which would be fetched by the browser when rendering the page.
     RESOURCES(ImmutableMap.<String, String>builder()
+        .put("body", "background")
         .put("img", "src")
         .put("input", "src")
-        .put("body", "background")
-        .put("embed", "src")
         .put("link", "href")
-        .put("script", "src")
-        .put("object", "src").build()),
+        .put("script", "src").build()),
 
     // Hyperlinks that the user clicks on to navigate pages.
     HYPERLINKS(ImmutableMap.<String, String>builder()

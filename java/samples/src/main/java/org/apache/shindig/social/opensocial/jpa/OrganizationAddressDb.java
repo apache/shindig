@@ -26,10 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.ManyToOne;
-import static javax.persistence.CascadeType.PERSIST;
-import static javax.persistence.CascadeType.MERGE;
-import static javax.persistence.CascadeType.REFRESH;
 
 /**
  * This object connects to a single Address, and to a single organization, defining the

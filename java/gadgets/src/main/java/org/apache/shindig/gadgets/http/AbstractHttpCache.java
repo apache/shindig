@@ -17,6 +17,8 @@
  */
 package org.apache.shindig.gadgets.http;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.gadgets.AuthType;
 import org.apache.shindig.gadgets.uri.UriCommon;
@@ -155,10 +157,9 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected static String getOwnerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignOwner()) {
-      if (request.getSecurityToken() == null)
-        throw new IllegalArgumentException("No Security Token set for request");
+      Preconditions.checkState(request.getSecurityToken() != null, "No Security Token set for request");
       String ownerId = request.getSecurityToken().getOwnerId();
-      return ownerId == null ? "" : ownerId;
+      return Objects.firstNonNull(ownerId, "");
     }
     // Requests that don't use authentication can share the result.
     return null;
@@ -167,10 +168,9 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected static String getViewerId(HttpRequest request) {
     if (request.getAuthType() != AuthType.NONE &&
         request.getOAuthArguments().getSignViewer()) {
-      if (request.getSecurityToken() == null)
-        throw new IllegalArgumentException("No Security Token set for request");
+      Preconditions.checkState(request.getSecurityToken() != null, "No Security Token set for request");
       String viewerId = request.getSecurityToken().getViewerId();
-      return viewerId == null ? "" : viewerId;
+      return Objects.firstNonNull(viewerId, "");
     }
     // Requests that don't use authentication can share the result.
     return null;

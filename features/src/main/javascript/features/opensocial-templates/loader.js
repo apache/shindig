@@ -145,7 +145,7 @@ os.Loader.loadUrls = function(urls, callback) {
  * Processes the XML markup of a Template Library.
  */
 os.Loader.loadContent = function(xmlString, url) {
-  var doc = opensocial.xmlutil.parseXML(xmlString);
+  var doc = gadgets.jsondom.parse(xmlString, url);
   var templatesNode = doc.firstChild;
   os.Loader.processTemplatesNode(templatesNode);
   os.Loader.loadedUrls_[url] = true;

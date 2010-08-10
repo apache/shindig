@@ -91,7 +91,9 @@ public class TemplateELResolver extends ELResolver {
            
       // Check variables.
       if (property instanceof String) {
-        ValueExpression valueExp = context.getVariableMapper().resolveVariable((String) property);
+        // Workaround for inability of Jasper-EL resolvers to access VariableMapper
+        ELContext elContext = (ELContext)context.getContext(TemplateContext.class);
+        ValueExpression valueExp = elContext.getVariableMapper().resolveVariable((String) property);
         if (valueExp != null) {
           context.setPropertyResolved(true);
           return valueExp.getValue(context);
