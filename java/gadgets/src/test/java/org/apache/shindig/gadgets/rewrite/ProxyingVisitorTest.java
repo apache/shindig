@@ -17,8 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
@@ -28,10 +38,11 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Test of proxying rewriter
@@ -60,10 +71,25 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   }
   
   @Test
-  public void linkVisitReserved() throws Exception {
-    checkVisitReserved("link", true);
+  public void csslinkVisitReserved() throws Exception {
+    checkVisitReserved("link", true, "rel", "stylesheet", "type", "text/css");
   }
-  
+
+  @Test
+  public void linkWithNoRelVisitReserved() throws Exception {
+    checkVisitReserved("link", false, "type", "text/css");
+  }
+
+  @Test
+  public void linkWithNoTypeVisitReserved() throws Exception {
+    checkVisitReserved("link", false, "rel", "stylesheet");
+  }
+
+  @Test
+  public void altlinkVisitReserved() throws Exception {
+    checkVisitReserved("link", false, "rel", "alternate", "hreflang", "el");
+  }
+
   @Test
   public void scriptVisitReserved() throws Exception {
     checkVisitReserved("script", true);
@@ -78,30 +104,50 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   public void otherVisitNotReserved() throws Exception {
     checkVisitReserved("other", false);
   }
-  
-  private void checkVisitReserved(String tag, boolean result) throws Exception {
-    tag = tag.toLowerCase();
-    assertEquals(result, ProxyingVisitor.RESOURCE_TAGS.containsKey(tag));
-    assertEquals(result, getVisitReserved(tag, true, true));
-    assertEquals(result, getVisitReserved(tag.toUpperCase(), true, true));
-    assertFalse(getVisitReserved(tag, false, true));
-    assertFalse(getVisitReserved(tag, true, false));
-    assertFalse(getVisitReserved(tag, false, false));
-  }
-  
-  private boolean getVisitReserved(String tag, boolean resUrl, boolean resTag) throws Exception {
-    // Reserved when lower-case and both URL and Tag reserved.
-    String attrName = ProxyingVisitor.RESOURCE_TAGS.get(tag.toLowerCase());
-    Node node = elem(tag, attrName != null ? attrName : "src", URL_STRING);
+
+  @Test
+  public void imgWithEmptySrc() throws Exception {
+    Node node = elem("img", "src", "");
     ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
-    expect(config.shouldRewriteURL(URL_STRING)).andReturn(resUrl).anyTimes();
-    expect(config.shouldRewriteTag(tag.toLowerCase())).andReturn(resTag).anyTimes();
-    replay(config);    
-    
+    expect(config.shouldRewriteURL("")).andReturn(true).anyTimes();
+    expect(config.shouldRewriteTag("img")).andReturn(true).anyTimes();
+    replay(config);
+
     ProxyingVisitor rewriter = new ProxyingVisitor(config, null);
     VisitStatus status = rewriter.visit(null, node);
     verify(config);
-        
+
+    assertEquals("Empty attribute should not be rewritten", VisitStatus.BYPASS, status);
+  }
+
+  private void checkVisitReserved(String tag, boolean result, String ... attrs) throws Exception {
+    tag = tag.toLowerCase();
+    assertEquals(result, getVisitReserved(tag, true, true, attrs));
+    assertEquals(result, getVisitReserved(tag.toUpperCase(), true, true, attrs));
+    assertFalse(getVisitReserved(tag, false, true, attrs));
+    assertFalse(getVisitReserved(tag, true, false, attrs));
+    assertFalse(getVisitReserved(tag, false, false, attrs));
+  }
+
+  private boolean getVisitReserved(String tag, boolean resUrl, boolean resTag, String ... attrs) throws Exception {
+    // Reserved when lower-case and both URL and Tag reserved.
+    String attrName = ProxyingVisitor.RESOURCE_TAGS.get(tag.toLowerCase());
+    attrName = attrName != null ? attrName : "src";
+
+    ArrayList <String> attrsList = Lists.newArrayList(attrs);
+    attrsList.add(0, attrName);
+    attrsList.add(1, URL_STRING);
+    attrs = attrsList.toArray(attrs);
+    Node node = elem(tag, attrs);
+    ContentRewriterFeature.Config config = createMock(ContentRewriterFeature.Config.class);
+    expect(config.shouldRewriteURL(URL_STRING)).andReturn(resUrl).anyTimes();
+    expect(config.shouldRewriteTag(tag.toLowerCase())).andReturn(resTag).anyTimes();
+    replay(config);
+
+    ProxyingVisitor rewriter = new ProxyingVisitor(config, null);
+    VisitStatus status = rewriter.visit(null, node);
+    verify(config);
+
     return status != VisitStatus.BYPASS;
   }
   

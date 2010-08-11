@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
@@ -65,11 +66,20 @@ public class ProxyingVisitor implements DomWalker.Visitor {
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         RESOURCE_TAGS.containsKey(nodeName) &&
         featureConfig.shouldRewriteTag(nodeName)) {
+      if (nodeName.equals("link")) {
+        // Rewrite link only when it is for css.
+        String type = ((Element)node).getAttribute("type");
+        String rel = ((Element)node).getAttribute("rel");
+        if (!"stylesheet".equalsIgnoreCase(rel) || !"text/css".equalsIgnoreCase(type)) {
+          return VisitStatus.BYPASS;
+        }
+      }
+
       Attr attr = (Attr)node.getAttributes().getNamedItem(
           RESOURCE_TAGS.get(nodeName));
       if (attr != null) {
         String urlValue = attr.getValue();
-        if (featureConfig.shouldRewriteURL(urlValue)) {
+        if (!StringUtils.isEmpty(urlValue) && featureConfig.shouldRewriteURL(urlValue)) {
           return VisitStatus.RESERVE_NODE;
         }
       }

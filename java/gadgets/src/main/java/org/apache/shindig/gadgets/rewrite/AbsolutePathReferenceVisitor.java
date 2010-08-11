@@ -31,6 +31,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,14 @@ public class AbsolutePathReferenceVisitor implements Visitor {
     String nodeName = node.getNodeName().toLowerCase();
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         resourceTags.containsKey(nodeName)) {
+      if (nodeName.equals("link")) {
+        // Rewrite link only when it is for css.
+        String type = ((Element)node).getAttribute("type");
+        String rel = ((Element)node).getAttribute("rel");
+        if (!"stylesheet".equalsIgnoreCase(rel) || !"text/css".equalsIgnoreCase(type)) {
+          return null;
+        }
+      }
       Attr attr = (Attr) node.getAttributes().getNamedItem(
           resourceTags.get(nodeName));
       String nodeUri = attr != null ? attr.getValue() : null;
