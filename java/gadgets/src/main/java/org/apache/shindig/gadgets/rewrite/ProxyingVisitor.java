@@ -30,6 +30,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,27 +45,60 @@ public class ProxyingVisitor implements DomWalker.Visitor {
   private static final Logger logger = Logger.getLogger(
       ProxyUriManager.class.getName());
 
-  public final static Map<String, String> RESOURCE_TAGS =
-    ImmutableMap.of(
-        "body", "background",
-        "img", "src",
-        "input", "src",
-        "link", "href",
-        "script", "src");
+  /**
+   * Enum for resource tags and associated attributes that should be
+   * proxied through shindig.
+   */
+  public enum Tags {
+    // Javascript resources requested by the current page.
+    SCRIPT(ImmutableMap.of("script", "src")),
 
+    // Css stylesheet resources requested by the current page.
+    STYLESHEET(ImmutableMap.of("link", "href")),
+
+    // Other embedded resources requested on the same page.
+    EMBEDDED_IMAGES(ImmutableMap.of("body", "background",
+                                    "img", "src",
+                                    "input", "src")),
+
+    // All resources that possibly be rewritten. Useful for testing.
+    ALL_RESOURCES(ImmutableMap.<String, String>builder()
+        .putAll(SCRIPT.getResourceTags())
+        .putAll(STYLESHEET.getResourceTags())
+        .putAll(EMBEDDED_IMAGES.getResourceTags())
+        .build());
+
+    private Map<String, String> resourceTags;
+    private Tags(Map<String, String> resourceTags) {
+      this.resourceTags = resourceTags;
+    }
+
+    public Map<String, String> getResourceTags() {
+      return resourceTags;
+    }
+  }
+
+  // Map of tag name to attribute of resources to rewrite.
+  private final Map<String, String> resourceTags;
   private final ContentRewriterFeature.Config featureConfig;
   private final ProxyUriManager uriManager;
 
   public ProxyingVisitor(ContentRewriterFeature.Config featureConfig,
-                              ProxyUriManager uriManager) {
+                         ProxyUriManager uriManager,
+                         Tags... resourceTags) {
     this.featureConfig = featureConfig;
     this.uriManager = uriManager;
+
+    this.resourceTags = new HashMap<String, String>();
+    for (Tags r : resourceTags) {
+      this.resourceTags.putAll(r.getResourceTags());
+    }
   }
 
   public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
     String nodeName = node.getNodeName().toLowerCase();
     if (node.getNodeType() == Node.ELEMENT_NODE &&
-        RESOURCE_TAGS.containsKey(nodeName) &&
+        resourceTags.containsKey(nodeName) &&
         featureConfig.shouldRewriteTag(nodeName)) {
       if (nodeName.equals("link")) {
         // Rewrite link only when it is for css.
@@ -76,7 +110,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
       }
 
       Attr attr = (Attr)node.getAttributes().getNamedItem(
-          RESOURCE_TAGS.get(nodeName));
+          resourceTags.get(nodeName));
       if (attr != null) {
         String urlValue = attr.getValue();
         if (!StringUtils.isEmpty(urlValue) && featureConfig.shouldRewriteURL(urlValue)) {
@@ -97,7 +131,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
       }
       Element element = (Element)proxyPair.one;
       String nodeName = element.getNodeName().toLowerCase();
-      element.setAttribute(RESOURCE_TAGS.get(nodeName), proxyPair.two.toString());
+      element.setAttribute(resourceTags.get(nodeName), proxyPair.two.toString());
       mutated = true;
     }
     
@@ -113,7 +147,7 @@ public class ProxyingVisitor implements DomWalker.Visitor {
     for (Node node : nodes) {
       Element element = (Element)node;
       String nodeName = node.getNodeName().toLowerCase();
-      String uriStr = element.getAttribute(RESOURCE_TAGS.get(nodeName)).trim();
+      String uriStr = element.getAttribute(resourceTags.get(nodeName)).trim();
       try {
         ProxyUriManager.ProxyUri proxiedUri = new ProxyUriManager.ProxyUri(
             gadget, Uri.parse(uriStr));

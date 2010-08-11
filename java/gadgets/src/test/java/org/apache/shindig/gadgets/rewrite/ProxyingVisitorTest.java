@@ -17,18 +17,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
@@ -38,18 +28,21 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Test of proxying rewriter
  */
 public class ProxyingVisitorTest extends DomWalkerTestBase {
   private static final String URL_STRING = "http://www.foo.com/";
-  
+  private static final Map<String, String> ALL_RESOURCES = ProxyingVisitor.Tags
+      .ALL_RESOURCES.getResourceTags();
+
   @Test
   public void imgVisitReserved() throws Exception {
     checkVisitReserved("img", true);
@@ -69,7 +62,7 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   public void embedVisitReserved() throws Exception {
     checkVisitReserved("embed", false);
   }
-  
+
   @Test
   public void csslinkVisitReserved() throws Exception {
     checkVisitReserved("link", true, "rel", "stylesheet", "type", "text/css");
@@ -94,12 +87,12 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
   public void scriptVisitReserved() throws Exception {
     checkVisitReserved("script", true);
   }
-  
+
   @Test
   public void objectVisitReserved() throws Exception {
     checkVisitReserved("object", false);
   }
-  
+
   @Test
   public void otherVisitNotReserved() throws Exception {
     checkVisitReserved("other", false);
@@ -113,7 +106,10 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     expect(config.shouldRewriteTag("img")).andReturn(true).anyTimes();
     replay(config);
 
-    ProxyingVisitor rewriter = new ProxyingVisitor(config, null);
+    ProxyingVisitor rewriter = new ProxyingVisitor(config, null,
+        ProxyingVisitor.Tags.SCRIPT,
+        ProxyingVisitor.Tags.STYLESHEET,
+        ProxyingVisitor.Tags.EMBEDDED_IMAGES);
     VisitStatus status = rewriter.visit(null, node);
     verify(config);
 
@@ -131,7 +127,7 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
 
   private boolean getVisitReserved(String tag, boolean resUrl, boolean resTag, String ... attrs) throws Exception {
     // Reserved when lower-case and both URL and Tag reserved.
-    String attrName = ProxyingVisitor.RESOURCE_TAGS.get(tag.toLowerCase());
+    String attrName = ALL_RESOURCES.get(tag.toLowerCase());
     attrName = attrName != null ? attrName : "src";
 
     ArrayList <String> attrsList = Lists.newArrayList(attrs);
@@ -144,7 +140,10 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     expect(config.shouldRewriteTag(tag.toLowerCase())).andReturn(resTag).anyTimes();
     replay(config);
 
-    ProxyingVisitor rewriter = new ProxyingVisitor(config, null);
+    ProxyingVisitor rewriter = new ProxyingVisitor(config, null,
+        ProxyingVisitor.Tags.SCRIPT,
+        ProxyingVisitor.Tags.STYLESHEET,
+        ProxyingVisitor.Tags.EMBEDDED_IMAGES);
     VisitStatus status = rewriter.visit(null, node);
     verify(config);
 
@@ -176,7 +175,10 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     replay(config, uriManager);
     Gadget gadget = gadget();
 
-    ProxyingVisitor rewriter = new ProxyingVisitor(config, uriManager);
+    ProxyingVisitor rewriter = new ProxyingVisitor(config, uriManager,
+        ProxyingVisitor.Tags.SCRIPT,
+        ProxyingVisitor.Tags.STYLESHEET,
+        ProxyingVisitor.Tags.EMBEDDED_IMAGES);
     assertTrue(rewriter.revisit(gadget, nodes));
     verify(config, uriManager);
 
