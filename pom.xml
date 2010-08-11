@@ -1280,11 +1280,6 @@
       <id>java.net</id>
       <url>http://download.java.net/maven/2/</url>
     </repository>
-    <repository>
-      <id>mortbay-release-repo</id>
-      <name>MortBay Release Repo</name>
-      <url>http://jetty.mortbay.org/maven2/release</url>
-    </repository>
   </repositories>
 
   <!-- ====================================================================== -->
