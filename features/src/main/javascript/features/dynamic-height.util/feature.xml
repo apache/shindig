@@ -22,4 +22,7 @@ specific language governing permissions and limitations under the License.
   <gadget>
     <script src="dynamic-height-util.js"/>
   </gadget>
+  <container>
+    <script src="dynamic-height-util.js"/>
+  </container>
 </feature>
