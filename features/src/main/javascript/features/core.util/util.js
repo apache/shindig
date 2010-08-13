@@ -119,12 +119,12 @@ gadgets['util'] = function() {
      * @private Implementation detail.
      */
     'getUrlParameters' : function (opt_url) {
-      if (parameters !== null && typeof opt_url === "undefined") {
+      var no_opt_url = typeof opt_url === "undefined";
+      if (parameters !== null && no_opt_url) {
         // "parameters" is a cache of current window params only.
         return parameters;
       }
       var parsed = {};
-      parameters = {};
       var pairs = parseUrlParams(opt_url || document.location.href);
       var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
       for (var i = 0, j = pairs.length; i < j; ++i) {
@@ -140,7 +140,7 @@ gadgets['util'] = function() {
         value = value.replace(/\+/g, " ");
         parsed[argName] = unesc(value);
       }
-      if (typeof opt_url === "undefined") {
+      if (no_opt_url) {
         // Cache current-window params in parameters var.
         parameters = parsed;
       }
@@ -189,8 +189,8 @@ gadgets['util'] = function() {
      * @private Implementation detail.
      */
     'makeEnum' : function (values) {
-      var obj = {};
-      for (var i = 0, v; (v = values[i]); ++i) {
+      var i, v, obj = {};
+      for (i = 0; (v = values[i]); ++i) {
         obj[v] = v;
       }
       return obj;
