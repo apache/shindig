@@ -261,22 +261,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         }
         if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
           $person['isOwner'] = true;
-        }
-        if ($fields && $fields[0] != '@all') {
-          $newPerson = array();
-          $newPerson['id'] = $id;
-          $newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
-          $newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
-          $newPerson['name'] = $person['name'];
-          $newPerson['displayName'] = $person['displayName'];
-          foreach ($fields as $field => $present) {
-            $present = strtolower($present);
-            if (isset($person[$present]) && ! isset($newPerson[$present])) {
-              $newPerson[$present] = $person[$present];
-            }
-          }
-          $person = $newPerson;
-        }
+        }   
+
         $people[] = $person;
       }
     }
@@ -288,6 +274,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
       $people = $this->filterResults($people, $options);
     } catch (Exception $e) {
       $people['filtered'] = 'false';
+    }
+    
+   if ($fields) { 
+        $people = self::adjustFields($people, $fields);
     }
 
     //TODO: The samplecontainer doesn't support any filters yet. We should fix this.
