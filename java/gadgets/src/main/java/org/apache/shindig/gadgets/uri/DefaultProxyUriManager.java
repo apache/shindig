@@ -120,8 +120,6 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
     String container = puc.getContainer();
     UriBuilder uri = new UriBuilder();
-    // TODO need to decide http vs https
-    uri.setScheme("http");
     uri.setAuthority(getReqConfig(container, PROXY_HOST_PARAM));
     
     // Chained vs. query-style syntax is determined by the presence of CHAINED_PARAMS_TOKEN
