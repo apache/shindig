@@ -30,8 +30,9 @@
       <directory>../</directory>
       <includes>
         <include>features/**</include>
-        <include>javascript/**</include>
+        <include>content/**</include>
         <include>config/**</include>
+        <include>extras/src/main/javascript/**</include>
       </includes>
       <excludes>
         <exclude>site/**</exclude>
