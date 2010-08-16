@@ -32,14 +32,13 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class ServletUtil {
   public static final String REMOTE_ADDR_KEY = "RemoteAddress";
@@ -47,13 +46,35 @@ public class ServletUtil {
 
   private ServletUtil() {}
 
+  /**
+   * Returns an HttpRequest object encapsulating the servlet request.
+   * NOTE: Request parameters are not explicitly taken care of, instead we copy
+   * the InputStream and query parameters separately.
+   *
+   * @param servletReq The http servlet request.
+   * @return An HttpRequest object with all the information provided by the
+   *   servlet request.
+   * @throws IOException In case of errors.
+   */
   public static HttpRequest fromHttpServletRequest(HttpServletRequest servletReq) throws IOException {
     HttpRequest req = new HttpRequest(new UriBuilder(servletReq).toUri());
+
     Enumeration<?> headerNames = servletReq.getHeaderNames();
     while (headerNames.hasMoreElements()) {
-      String headerName = (String)headerNames.nextElement();
-      req.addHeader(headerName, servletReq.getHeader(headerName));
+      Object obj = headerNames.nextElement();
+      if (obj instanceof String) {
+        String headerName = (String) obj;
+
+        Enumeration<?> headerValues = servletReq.getHeaders(headerName);
+        while (headerValues.hasMoreElements()) {
+          obj = headerValues.nextElement();
+          if (obj instanceof String) {
+            req.addHeader(headerName, (String) obj);
+          }
+        }
+      }
     }
+
     req.setMethod(servletReq.getMethod());
     if ("POST".equalsIgnoreCase(req.getMethod())) {
       req.setPostBody(servletReq.getInputStream());
