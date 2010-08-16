@@ -42,6 +42,7 @@ class MockSigningFetcherFactory {
    * @here will create a private key.
    */
   public function __construct() {
+    $_SERVER["HTTP_HOST"] = 'localhost';
     $privkey = openssl_pkey_new();
     $phrase = Config::get('private_key_phrase') != '' ? (Config::get('private_key_phrase')) : null;
     openssl_pkey_export($privkey, $rsa_private_key, $phrase);

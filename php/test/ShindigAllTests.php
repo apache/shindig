@@ -21,15 +21,15 @@
 /*
  * This file is meant to be run through a php command line or cruiscontrol build, and not called directly
  * through the web browser. To run these tests from the command line:
- * # cd /path/to/shindig
- * # phpunit ShindigAllTests php/test/ShindigAllTests.php   
+ * # cd /path/to/shindig/php
+ * # phpunit ShindigAllTests test/ShindigAllTests.php   
  */
 
 function __autoload($className) {
-  $basePath = realpath('./php');
+  $basePath = realpath('./');
   $locations = array('src/common', 'src/common/sample', 'src/gadgets', 'src/gadgets/http', 'src/gadgets/oauth', 
-      'src/gadgets/sample', 'src/social', 'src/social/http', 'src/social/service', 
-      'src/social/converters', 'src/social/opensocial', 'src/social/spi', 'src/social/model', 
+      'src/gadgets/sample', 'src/gadgets/render', 'src/gadgets/rewrite', 'src/gadgets/templates', 'src/social', 'src/social/http', 'src/social/service',
+      'src/social/converters', 'src/social/opensocial', 'src/social/spi', 'src/social/model', 'src/social/servlet',
       'src/social/sample', 'src/social/oauth');
   $extension_class_paths = Config::get('extension_class_paths');
   if (! empty($extension_class_paths)) {
@@ -45,11 +45,11 @@ function __autoload($className) {
   }
 }
 
-set_include_path(get_include_path() . PATH_SEPARATOR . realpath('./php') . PATH_SEPARATOR . realpath('./php/external'));
+set_include_path(get_include_path() . PATH_SEPARATOR . realpath('.') . PATH_SEPARATOR . realpath('./external'));
 error_reporting(E_ALL | E_STRICT);
 require_once 'src/common/Config.php';
+Config::loadConfig('test');
 require_once 'test/TestContext.php';
-
 if (defined('PHPUnit_MAIN_METHOD') === false) {
   define('PHPUnit_MAIN_METHOD', 'ShindigAllTests::main');
 }
@@ -63,7 +63,7 @@ class ShindigAllTests {
   public static function suite() {
     $suite = new PHPUnit_Framework_TestSuite();
     $suite->setName('Shindig');
-    $path = realpath('./php/test/');
+    $path = realpath('./test/');
     $testTypes = array('common', 'gadgets', 'social');
     foreach ($testTypes as $type) {
       foreach (glob("$path/{$type}/*Test.php") as $file) {

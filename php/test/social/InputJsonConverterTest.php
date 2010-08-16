@@ -121,17 +121,17 @@ class InputJsonConverterTest extends PHPUnit_Framework_TestCase {
   
   public function testConvertMediaItem() {
     $json = '{ "id" : "11223344",
-               "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png",
+               "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
                "mimeType" : "image/png",
                "type" : "image",
-               "url" : "http://pages.example.org/images/11223344.png",
+               "url" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
                "albumId" : "44332211"
              }';
     $mediaItem = $this->inputJsonConverter->convertMediaItems($json);
     $this->assertEquals('11223344', $mediaItem['id']);
-    $this->assertEquals('http://pages.example.org/images/11223344-tn.png', $mediaItem['thumbnailUrl']);
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $mediaItem['thumbnailUrl']);
     $this->assertEquals('44332211', $mediaItem['albumId']);
-    $this->assertEquals('http://pages.example.org/images/11223344.png', $mediaItem['url']);
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $mediaItem['url']);
     $this->assertEquals('image/png', $mediaItem['mimeType']);
   }
 }

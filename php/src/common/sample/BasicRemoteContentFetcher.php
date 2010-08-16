@@ -83,7 +83,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
    * @param RemoteContentRequest $request
    * @param string $content
    */
-  private function parseResult(RemoteContentRequest $request, $content) {
+  protected function parseResult(RemoteContentRequest $request, $content) {
     $headers = '';
     $body = '';
     $httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);

@@ -24,32 +24,34 @@
  */
 class RestBase extends PHPUnit_Framework_TestCase {
   
-  /* Modify this if you want to test in a different social graph then partuza. The security token
-   * only works if ALLOW_PLAINTEXT_TOKEN is set to true in the file shindig/php/config/containerphp
-   * The format of the plain text token is owner:viewer:appId:domain:appUrl:moduleId:containerId
-   */
-  private $securityToken = '1:1:1:partuza:test.com:1:0';
+  private $securityToken;
   // The server to test against. You may need to add shindig to 127.0.0.1 mapping in /etc/hosts.
   private $restUrl = '';
 
   public function __construct() {
-    $this->restUrl = 'http://' . $_SERVER["HTTP_HOST"] . Config::get('web_prefix') . '/social/rest';
+    $db = new JsonDbOpensocialService();
+    $db->resetDb();
+    $this->securityToken = BasicSecurityToken::createFromValues(1, 1, 1, 'partuza', 'test.com', 1, 0)->toSerialForm();
+    $this->securityToken = urldecode($this->securityToken);
+    $this->restUrl = 'http://localhost' . Config::get('web_prefix') . '/social/rest';
   }
 
-  protected function curlRest($url, $postData, $contentType, $method = 'POST') {
-    $ch = curl_init();
-    if (substr($url, 0, 1) != '/') {
-      $url = '/' . $url;
-    }
+  protected function curlRest($url, $postData, $contentType = 'application/json', $method = 'POST') {
+    $_SERVER['CONTENT_TYPE'] = $contentType;
     $sep = strpos($url, '?') !== false ? '&' : '?';
-    curl_setopt($ch, CURLOPT_URL, $this->restUrl . $url . $sep . 'st=' . $this->securityToken);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: $contentType"));
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $ret = curl_exec($ch);
-    curl_close($ch);
+    $_SERVER["REQUEST_URI"] = $this->restUrl . $url . $sep . 'st=' . $this->securityToken;
+    $parsedUrl = parse_url($_SERVER["REQUEST_URI"]);
+    $GLOBALS['HTTP_RAW_POST_DATA'] = $postData ? $postData : null;
+    $_SERVER['REQUEST_METHOD'] = $method;
+    $_SERVER['QUERY_STRING'] = $parsedUrl['query'];
+    $_SERVER['HTTP_HOST'] = $parsedUrl['host'];
+    $_GET = array('st' => $this->securityToken);
+    $servlet = new DataServiceServlet();
+    $servletMethod = 'do' . ucfirst(strtolower($method));
+    ob_start();
+    $servlet->$servletMethod();
+    $ret = ob_get_clean();
+    //var_dump($ret);
     return $ret;
   }
 

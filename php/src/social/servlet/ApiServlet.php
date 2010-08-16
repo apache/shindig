@@ -18,30 +18,30 @@
  * under the License.
  */
 
-require 'src/social/service/DataRequestHandler.php';
-require 'src/common/SecurityToken.php';
-require 'src/common/BlobCrypter.php';
-require 'src/social/converters/InputConverter.php';
-require 'src/social/converters/InputJsonConverter.php';
-require 'src/social/converters/OutputConverter.php';
-require 'src/social/converters/OutputJsonConverter.php';
-require 'src/social/service/RequestItem.php';
-require 'src/social/service/RestRequestItem.php';
-require 'src/social/service/RpcRequestItem.php';
-require 'src/social/spi/GroupId.php';
-require 'src/social/spi/UserId.php';
-require 'src/social/spi/CollectionOptions.php';
-require 'src/common/Cache.php';
-require 'src/social/model/ComplexField.php';
-require 'src/social/model/Name.php';
-require 'src/social/model/Enum.php';
-require 'src/social/model/Person.php';
-require 'src/social/model/ListField.php';
-require 'src/social/model/Photo.php';
-require 'src/social/spi/RestfulCollection.php';
-require 'src/social/spi/DataCollection.php';
-require 'src/social/service/ResponseItem.php';
-require 'src/common/ShindigOAuth.php';
+require_once 'src/social/service/DataRequestHandler.php';
+require_once 'src/common/SecurityToken.php';
+require_once 'src/common/BlobCrypter.php';
+require_once 'src/social/converters/InputConverter.php';
+require_once 'src/social/converters/InputJsonConverter.php';
+require_once 'src/social/converters/OutputConverter.php';
+require_once 'src/social/converters/OutputJsonConverter.php';
+require_once 'src/social/service/RequestItem.php';
+require_once 'src/social/service/RestRequestItem.php';
+require_once 'src/social/service/RpcRequestItem.php';
+require_once 'src/social/spi/GroupId.php';
+require_once 'src/social/spi/UserId.php';
+require_once 'src/social/spi/CollectionOptions.php';
+require_once 'src/common/Cache.php';
+require_once 'src/social/model/ComplexField.php';
+require_once 'src/social/model/Name.php';
+require_once 'src/social/model/Enum.php';
+require_once 'src/social/model/Person.php';
+require_once 'src/social/model/ListField.php';
+require_once 'src/social/model/Photo.php';
+require_once 'src/social/spi/RestfulCollection.php';
+require_once 'src/social/spi/DataCollection.php';
+require_once 'src/social/service/ResponseItem.php';
+require_once 'src/common/ShindigOAuth.php';
 
 /**
  * Common base class for API servlets.

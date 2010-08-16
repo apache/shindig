@@ -24,7 +24,7 @@ class MediaItemRestTest extends RestBase {
   
   protected function setUp() {
     $postData = '{ "id" : "44332211",
-       "thumbnailUrl" : "http://pages.example.org/albums/4433221-tn.png",
+       "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
        "title" : "Example Album",
        "description" : "This is an example album, and this text is an example description",
        "location" : { "latitude": 0, "longitude": 0 },
@@ -45,16 +45,6 @@ class MediaItemRestTest extends RestBase {
 //    $this->assertTrue(empty($ret), "Delete the created album failed. Response: $ret");
   }
   
-  private function curlGet($url) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $ret = curl_exec($ch);
-    curl_close($ch);
-    return $ret;
-  }
-  
   private function verifyLifeCycle($postData, $postDataFormat) {
     $url = '/mediaitems/1/@self/' . $this->album['id'];
     $ret = $this->curlRest($url, $postData, $postDataFormat);
@@ -65,10 +55,8 @@ class MediaItemRestTest extends RestBase {
     $this->assertFalse(empty($ret));
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'][0];
-    $data = $this->curlGet($fetched['url']);
-    $this->assertTrue(substr($data, 0, strlen('GIF')) == 'GIF');
-    $this->assertEquals('http://pages.example.org/images/11223344-tn.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
-    $this->assertEquals('image/gif', $fetched['mimeType'], "mimeType should be same.");
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
+    $this->assertEquals('image/png', $fetched['mimeType'], "mimeType should be same.");
     $this->assertEquals('IMAGE', $fetched['type'], "type should be same.");
     $fetched['thumbnailUrl'] = 'http://changed.com/tn.png';
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), json_encode($fetched), 'application/json', 'PUT');
@@ -77,7 +65,7 @@ class MediaItemRestTest extends RestBase {
     $fetched = json_decode($ret, true);
     $fetched = $fetched['entry'][0];
     $this->assertEquals('http://changed.com/tn.png', $fetched['thumbnailUrl'], "thumbnailUrl should be same.");
-    $this->assertEquals('image/gif', $fetched['mimeType'], "mimeType should be same.");
+    $this->assertEquals('image/png', $fetched['mimeType'], "mimeType should be same.");
     $this->assertEquals('IMAGE', $fetched['type'], "type should be same.");
     
     $ret = $this->curlRest($url . '/' . urlencode($mediaItem['id']), '', 'application/json', 'DELETE');
@@ -91,7 +79,7 @@ class MediaItemRestTest extends RestBase {
   
   public function testLifeCycleInJson() {
     $postData = '{ "id" : "11223344",
-                   "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png",
+                   "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
                    "mimeType" : "image/png",
                    "type" : "image",
                    "url" : "http://www.google.com/intl/en_ALL/images/logo.gif",
@@ -104,7 +92,7 @@ class MediaItemRestTest extends RestBase {
     $postData = '<?xml version="1.0" encoding="UTF-8"?>
                  <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
                    <id>11223344</id>
-                   <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
+                   <thumbnailUrl>http://www.libpng.org/pub/png/img_png/pngnow.png</thumbnailUrl>
                    <mimeType>image/png</mimeType>
                    <type>image</type>
                    <url>http://www.google.com/intl/en_ALL/images/logo.gif</url>
@@ -118,7 +106,7 @@ class MediaItemRestTest extends RestBase {
                    <content type="application/xml">
                      <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
                        <id>11223344</id>
-                       <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
+                       <thumbnailUrl>http://www.libpng.org/pub/png/img_png/pngnow.png</thumbnailUrl>
                        <mimeType>image/png</mimeType>
                        <type>image</type>
                        <url>http://www.google.com/intl/en_ALL/images/logo.gif</url>
@@ -136,10 +124,10 @@ class MediaItemRestTest extends RestBase {
   public function testLifeCycleWithActivity() {
     // Creates the media item.
     $postData = '{ "id" : "11223344",
-               "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png",
+               "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
                "mimeType" : "image/png",
                "type" : "image",
-               "url" : "http://pages.example.org/images/11223344.png",
+               "url" : "http://www.libpng.org/pub/png/img_png/pngnow.png",
                "albumId" : "' . $this->album['id'] . '"
              }';
     $url = '/mediaitems/1/@self/' . $this->album['id'];

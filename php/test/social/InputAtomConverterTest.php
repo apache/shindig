@@ -151,7 +151,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
             <content type="application/xml">
               <album xmlns="http://ns.opensocial.org/2008/opensocial">
                 <id>44332211</id>
-                <thumbnailUrl>http://pages.example.org/albums/4433221-tn.png</thumbnailUrl>
+                <thumbnailUrl>http://www.libpng.org/pub/png/img_png/pngnow.png</thumbnailUrl>
                 <caption>Example Album</caption>
                 <description>This is an example album, and this text is an example description</description>
                 <location>
@@ -168,7 +168,7 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
             </entry>';
     $album = $this->inputAtomConverter->convertAlbums($xml);
     $this->assertEquals('44332211', $album['id']);
-    $this->assertEquals('http://pages.example.org/albums/4433221-tn.png', $album['thumbnailUrl']);
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $album['thumbnailUrl']);
     $this->assertEquals('This is an example album, and this text is an example description', $album['description']);
     $this->assertEquals('Example Album', $album['title']);
     $this->assertEquals('example.org:55443322', $album['ownerId']);
@@ -182,10 +182,10 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
               <content type="application/xml">
                 <mediaItem xmlns="http://ns.opensocial.org/2008/opensocial">
                   <id>11223344</id>
-                  <thumbnailUrl>http://pages.example.org/images/11223344-tn.png</thumbnailUrl>
+                  <thumbnailUrl>http://www.libpng.org/pub/png/img_png/pngnow.png</thumbnailUrl>
                   <mimeType>image/png</mimeType>
                   <type>image</type>
-                  <url>http://pages.example.org/images/11223344.png</url>
+                  <url>http://www.libpng.org/pub/png/img_png/pngnow.png</url>
                   <albumId>44332211</albumId>
                 </mediaItem>
               </content>
@@ -196,9 +196,9 @@ class InputAtomConverterTest extends PHPUnit_Framework_TestCase {
             </entry>';
     $mediaItem = $this->inputAtomConverter->convertMediaItems($xml);
     $this->assertEquals('11223344', $mediaItem['id']);
-    $this->assertEquals('http://pages.example.org/images/11223344-tn.png', $mediaItem['thumbnailUrl']);
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $mediaItem['thumbnailUrl']);
     $this->assertEquals('44332211', $mediaItem['albumId']);
-    $this->assertEquals('http://pages.example.org/images/11223344.png', $mediaItem['url']);
+    $this->assertEquals('http://www.libpng.org/pub/png/img_png/pngnow.png', $mediaItem['url']);
     $this->assertEquals('image/png', $mediaItem['mimeType']);
   }
 }

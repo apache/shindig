@@ -27,6 +27,7 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
     parent::setUp();
   }
 

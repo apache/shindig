@@ -69,7 +69,8 @@ class ContainerConfigTest extends PHPUnit_Framework_TestCase {
 "gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback"
 }
 EOD;
-    $uncommented = ContainerConfig::removeComments($jsFile);
+    $containerConfig = new ContainerConfig(Config::get('container_path'));
+    $uncommented = $containerConfig->removeComments($jsFile);
     $jsonObj = json_decode($uncommented, true);
     $this->assertNotEquals($uncommented, $jsonObj);
     $this->assertEquals(array("default"), $jsonObj["gadgets.container"]);

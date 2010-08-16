@@ -32,6 +32,8 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    $_SERVER["HTTP_HOST"] = 'localhost';
     parent::setUp();
     $this->OutputAtomConverter = new OutputAtomConverter();
   }
