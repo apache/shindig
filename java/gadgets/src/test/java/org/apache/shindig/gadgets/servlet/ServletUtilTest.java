@@ -130,6 +130,11 @@ public class ServletUtilTest {
     checkOutputDataUri("text/bar; charset=ISO-8859-1", "text/bar", "ISO-8859-1");
   }
   
+  @Test
+  public void testOutputDataUriWithEmptyCharset() throws Exception {
+    checkOutputDataUri("text/bar; charset=", "text/bar", "UTF-8");
+  }
+
   private void checkOutputDataUri(String contentType, String expectedType,
       String expectedEncoding) throws Exception {
     String theData = "this is the data";

@@ -181,9 +181,9 @@ public class ServletUtil {
     String contentType = response.getHeader("Content-Type");
     if (contentType == null) {
       contentType = "";
+    } else if (contentType.contains(";")) {
+      contentType = StringUtils.split(contentType, ';')[0].trim();
     }
-    contentType = contentType.split(";")[0].trim();
- 
     // First and most importantly, emit dataUri.
     // Do so in streaming fashion, to avoid needless buffering.
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -216,9 +216,9 @@ public class ServletUtil {
       }
       first = false;
       pw.write("'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getKey()).replaceAll("'", "\\'"));
+      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getKey()).replace("'", "\'"));
       pw.write("':'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getValue()).replaceAll("'", "\\'"));
+      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getValue()).replace("'", "\'"));
       pw.write("'");
     }
     pw.write("\n}");
