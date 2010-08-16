@@ -101,7 +101,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
-    expected = expected.replaceAll("refresh=3600", "refresh=86400");
+    expected = expected.replace("refresh=3600", "refresh=86400");
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
@@ -120,7 +120,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
-    expected = expected.replaceAll("fp=1150739864", "fp=1150739864&nocache=1");
+    expected = expected.replace("fp=1150739864", "fp=1150739864&nocache=1");
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
     request.setMethod("GET");
     request.setGadget(SPEC_URL);

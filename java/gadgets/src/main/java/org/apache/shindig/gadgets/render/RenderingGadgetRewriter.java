@@ -230,7 +230,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
     if (!externForcedLibs.isEmpty()) {
       String jsUrl = jsUriManager.makeExternJsUri(gadget, externForcedLibs).toString();
       Element libsTag = headTag.getOwnerDocument().createElement("script");
-      libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
+      libsTag.setAttribute("src", jsUrl.replace("&", "&amp;"));
       headTag.insertBefore(libsTag, firstHeadChild);
     }
 
@@ -272,7 +272,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
       if (!externGadgetLibs.isEmpty()) {
         String jsUrl = jsUriManager.makeExternJsUri(gadget, externGadgetLibs).toString();
         Element libsTag = headTag.getOwnerDocument().createElement("script");
-        libsTag.setAttribute("src", StringUtils.replace(jsUrl, "&", "&amp;"));
+        libsTag.setAttribute("src", jsUrl.replace("&", "&amp;"));
         headTag.insertBefore(libsTag, firstHeadChild);
       }
     } else {
@@ -317,7 +317,7 @@ public class RenderingGadgetRewriter implements GadgetRewriter {
           inlineJs.setLength(0);
         }
         Element referenceTag = headTag.getOwnerDocument().createElement("script");
-        referenceTag.setAttribute("src", StringUtils.replace(theContent, "&", "&amp;"));
+        referenceTag.setAttribute("src", theContent.replace("&", "&amp;"));
         headTag.insertBefore(referenceTag, firstHeadChild);
       } else {
         inlineJs.append(theContent).append(";\n");

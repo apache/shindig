@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
@@ -236,7 +235,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     // Should be left with a single JS node child to parent.
     assertEquals(1, parent.getChildNodes().getLength());
     Element concatNode = (Element)parent.getChildNodes().item(0);
-    Uri concatUri = Uri.parse(StringUtils.replace(concatNode.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri = Uri.parse(concatNode.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());
@@ -260,7 +259,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     // Should be left with a single JS node child to parent.
     assertEquals(1, parent.getChildNodes().getLength());
     Element concatNode = (Element)parent.getChildNodes().item(0);
-    Uri concatUri = Uri.parse(StringUtils.replace(concatNode.getAttribute("href"), "&amp;", "&"));
+    Uri concatUri = Uri.parse(concatNode.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());
@@ -287,7 +286,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     // Should have been independently concatenated.
     assertEquals(1, parent1.getChildNodes().getLength());
     Element cn1 = (Element)parent1.getChildNodes().item(0);
-    Uri concatUri1 = Uri.parse(StringUtils.replace(cn1.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
@@ -297,7 +296,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     
     assertEquals(1, parent2.getChildNodes().getLength());
     Element cn2 = (Element)parent2.getChildNodes().item(0);
-    Uri concatUri2 = Uri.parse(StringUtils.replace(cn2.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
@@ -324,7 +323,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     // Should have been independently concatenated.
     assertEquals(1, parent1.getChildNodes().getLength());
     Element cn1 = (Element)parent1.getChildNodes().item(0);
-    Uri concatUri1 = Uri.parse(StringUtils.replace(cn1.getAttribute("href"), "&amp;", "&"));
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
@@ -334,7 +333,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     
     assertEquals(3, parent2.getChildNodes().getLength());
     Element cn2 = (Element)parent2.getChildNodes().item(0);
-    Uri concatUri2 = Uri.parse(StringUtils.replace(cn2.getAttribute("href"), "&amp;", "&"));
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
@@ -345,7 +344,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals("", cn2.getAttribute("media"));
     
     Element cn3 = (Element)parent2.getChildNodes().item(1);
-    Uri concatUri3 = Uri.parse(StringUtils.replace(cn3.getAttribute("href"), "&amp;", "&"));
+    Uri concatUri3 = Uri.parse(cn3.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri3.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri3.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri3.getPath());
@@ -355,7 +354,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals("print", cn3.getAttribute("media"));
   
     Element cn4 = (Element)parent2.getChildNodes().item(2);
-    Uri concatUri4 = Uri.parse(StringUtils.replace(cn4.getAttribute("href"), "&amp;", "&"));
+    Uri concatUri4 = Uri.parse(cn4.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri4.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri4.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri4.getPath());
@@ -387,7 +386,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     // Should have been independently concatenated. Batches #1 and #2 are OK. Middle skipped.
     assertEquals(1, parent1.getChildNodes().getLength());
     Element cn1 = (Element)parent1.getChildNodes().item(0);
-    Uri concatUri1 = Uri.parse(StringUtils.replace(cn1.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
@@ -400,7 +399,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     
     assertEquals(1, parent2.getChildNodes().getLength());
     Element cn2 = (Element)parent2.getChildNodes().item(0);
-    Uri concatUri2 = Uri.parse(StringUtils.replace(cn2.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
@@ -423,7 +422,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(3, parent.getChildNodes().getLength());
     Element jsConcat = (Element)parent.getChildNodes().item(0);
     assertEquals("script", jsConcat.getTagName());
-    Uri concatUri = Uri.parse(StringUtils.replace(jsConcat.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri = Uri.parse(jsConcat.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());
@@ -465,7 +464,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(7, parent.getChildNodes().getLength());
     Element jsConcat = (Element)parent.getChildNodes().item(1);
     assertEquals("script", jsConcat.getTagName());
-    Uri concatUri = Uri.parse(StringUtils.replace(jsConcat.getAttribute("src"), "&amp;", "&"));
+    Uri concatUri = Uri.parse(jsConcat.getAttribute("src").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri.getPath());

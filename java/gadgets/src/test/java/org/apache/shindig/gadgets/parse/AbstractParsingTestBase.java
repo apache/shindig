@@ -52,7 +52,7 @@ public abstract class AbstractParsingTestBase {
   protected void parseAndCompareBalanced(String content, String expected, GadgetHtmlParser parser)
       throws Exception {
     Document document = parser.parseDom(content);
-    expected = StringUtils.replace(expected, EOL, "\n");
+    expected = expected.replace(EOL, "\n");
     String serialized = HtmlSerialization.serialize(document);
     assertHtmlEquals(expected, serialized);
   }
