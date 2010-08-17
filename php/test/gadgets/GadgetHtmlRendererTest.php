@@ -86,7 +86,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     $this->gadget = $gadgetSpecFactory->createGadget();
 
     // init gadgetRenderer;
-    $this->GadgetHtmlRenderer = new GadgetHtmlRenderer($this->gadgetContext);
+    $this->gadgetHtmlRenderer = new GadgetHtmlRenderer($this->gadgetContext);
 
     // init $this->doc
     $this->domDocument = new DOMDocument(null, 'utf-8');
@@ -105,7 +105,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
   protected function tearDown() {
     $this->gadget = null;
     $this->gadgetContext = null;
-    $this->GadgetHtmlRenderer = null;
+    $this->gadgetHtmlRenderer = null;
     $this->view = null;
     $this->domDocument = null;
     $this->domElement = null;
@@ -118,7 +118,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    */
   public function testRenderGadget() {
     ob_start();
-    $this->GadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
     ob_end_clean();
   }
 
@@ -126,7 +126,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    * Tests GadgetHtmlRenderer->addBodyTags()
    */
   public function testAddBodyTags() {
-    $this->GadgetHtmlRenderer->addBodyTags($this->domElement, $this->domDocument);
+    $this->gadgetHtmlRenderer->addBodyTags($this->domElement, $this->domDocument);
     $tmpNodeList = $this->domElement->getElementsByTagName("script");
     foreach($tmpNodeList as $tmpNode) {
       $this->assertEquals('gadgets.util.runOnLoadHandlers();', $tmpNode->nodeValue);
@@ -138,13 +138,13 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    */
   public function testAddHeadTags() {
     ob_start();
-    $this->GadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
     ob_end_clean();
-    $this->GadgetHtmlRenderer->addHeadTags($this->domElement, $this->domDocument);
+    $this->gadgetHtmlRenderer->addHeadTags($this->domElement, $this->domDocument);
 
     // TODO: currently we just test the script part
     $tmpNodeList = $this->domElement->getElementsByTagName("script");
-    $scripts = $this->GadgetHtmlRenderer->getJavaScripts();
+    $scripts = $this->gadgetHtmlRenderer->getJavaScripts();
 
     $idx = 0;
     foreach($tmpNodeList as $tmpNode) {
