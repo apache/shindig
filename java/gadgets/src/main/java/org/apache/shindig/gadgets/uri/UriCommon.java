@@ -48,6 +48,7 @@ public interface UriCommon {
     RESIZE_QUALITY("resize_q"),
     NO_EXPAND("no_expand"),
     FALLBACK_URL_PARAM("fallback_url"),
+    RETURN_ORIGINAL_CONTENT_ON_ERROR("rooe"),
     
     // This is a legacy param, superseded by container.
     @Deprecated
