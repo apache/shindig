@@ -133,7 +133,8 @@ class GadgetContext {
   }
 
   protected function instanceContainerConfig() {
-    return new ContainerConfig(Config::get('container_path'));
+    $containerConfigClass = Config::get('container_config_class');
+    return new $containerConfigClass(Config::get('container_path'));
   }
 
   public function getContainer() {

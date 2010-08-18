@@ -95,7 +95,8 @@ abstract class DataRequestHandler {
     $contextClass = Config::get('gadget_context_class');
     $context = new $contextClass('GADGET');
     $container = $context->getContainer();
-    $containerConfig = new ContainerConfig(Config::get('container_path'));
+    $containerConfigClass = Config::get('container_config_class');
+    $containerConfig = new $containerConfigClass(Config::get('container_path'));
     $config = $containerConfig->getConfig($container, 'gadgets.features');
     $version = $this->getOpenSocialVersion($config);
     $supportedFields = $config[$version]['supportedFields'];

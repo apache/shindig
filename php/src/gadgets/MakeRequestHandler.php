@@ -35,7 +35,8 @@ class MakeRequestHandler extends ProxyBase {
    */
   public function __construct(GadgetContext $context) {
     $this->context = $context;
-    $this->makeRequest = new MakeRequest();
+    $makeRequestClass = Config::get('makerequest_class');
+    $this->makeRequest = new $makeRequestClass();
   }
 
   /**

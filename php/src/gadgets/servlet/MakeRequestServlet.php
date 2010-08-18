@@ -37,7 +37,8 @@ class MakeRequestServlet extends HttpServlet {
       $contextClass = Config::get('gadget_context_class');
       $context = new $contextClass('GADGET');
       $makeRequestParams = MakeRequestOptions::fromCurrentRequest();
-      $makeRequestHandler = new MakeRequestHandler($context);
+      $makeRequestHandlerClass = Config::get('makerequest_handler');
+      $makeRequestHandler = new $makeRequestHandlerClass($context);
       $makeRequestHandler->fetchJson($makeRequestParams);
     } catch (MakeRequestParameterException $e) {
       // Something was misconfigured in the request

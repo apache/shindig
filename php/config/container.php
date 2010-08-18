@@ -153,7 +153,10 @@ $shindigConfig = array(
   'gadget_spec_class' => 'GadgetSpec',
   'substitution_class' => 'Substitutions',
   'proxy_handler' => 'ProxyHandler',
-  
+  'makerequest_handler' => 'MakeRequestHandler',
+  'makerequest_class' => 'MakeRequest',
+  'container_config_class' => 'ContainerConfig',
+
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript
