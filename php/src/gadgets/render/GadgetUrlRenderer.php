@@ -30,7 +30,7 @@ class GadgetUrlRenderer extends GadgetRenderer {
    * @param Array $view
    */
   public function renderGadget(Gadget $gadget, $view) {
-    $redirURI = $this->getSubstitutedUrl($gadgt, $view);
+    $redirURI = $this->getSubstitutedUrl($gadget, $view);
     header('Location: ' . $redirURI);
   }
 
