@@ -20,9 +20,9 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.apache.commons.io.IOUtils;
+import com.google.inject.name.Named;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -50,12 +50,16 @@ public class ProxyHandler {
 
   private final RequestPipeline requestPipeline;
   private final ResponseRewriterRegistry contentRewriterRegistry;
+  protected final boolean remapInternalServerError;
 
   @Inject
   public ProxyHandler(RequestPipeline requestPipeline,
-                      ResponseRewriterRegistry contentRewriterRegistry) {
+                      ResponseRewriterRegistry contentRewriterRegistry,
+                      @Named("shindig.proxy.remapInternalServerError")
+                      Boolean remapInternalServerError) {
     this.requestPipeline = requestPipeline;
     this.contentRewriterRegistry = contentRewriterRegistry;
+    this.remapInternalServerError = remapInternalServerError;
   }
 
   /**
@@ -102,6 +106,7 @@ public class ProxyHandler {
     }
 
     HttpResponseBuilder response = new HttpResponseBuilder(results);
+    response.clearAllHeaders();
 
     try {
       ServletUtil.setCachingHeaders(response,
@@ -110,7 +115,7 @@ public class ProxyHandler {
       return ServletUtil.errorResponse(gex);
     }
 
-    UriUtils.copyResponseHeadersAndStatusCode(results, response, true, true,
+    UriUtils.copyResponseHeadersAndStatusCode(results, response, remapInternalServerError, true,
         DisallowedHeaders.CACHING_DIRECTIVES,  // Proxy sets its own caching headers.
         DisallowedHeaders.CLIENT_STATE_DIRECTIVES,  // Overridden or irrelevant to proxy.
         DisallowedHeaders.OUTPUT_TRANSFER_DIRECTIVES
@@ -120,31 +125,13 @@ public class ProxyHandler {
     // in order to prevent those from overwriting the correct values.
     setResponseContentHeaders(response, results);
 
-    response.setHeader("Content-Type", getContentType(rcr, response));
+    UriUtils.maybeRewriteContentType(rcr, response);
 
     // TODO: replace this with streaming APIs when ready
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     IOUtils.copy(results.getResponse(), baos);
     response.setResponse(baos.toByteArray());
     return response.create();
-  }
-
-  private String getContentType(HttpRequest rcr, HttpResponseBuilder results) {
-    String contentType = results.getHeader("Content-Type");
-    if (!StringUtils.isEmpty(rcr.getRewriteMimeType())) {
-      String requiredType = rcr.getRewriteMimeType();
-      // Use a 'Vary' style check on the response
-      if (requiredType.endsWith("/*") &&
-          !StringUtils.isEmpty(contentType)) {
-        requiredType = requiredType.substring(0, requiredType.length() - 2);
-        if (!contentType.toLowerCase().startsWith(requiredType.toLowerCase())) {
-          contentType = requiredType;
-        }
-      } else {
-        contentType = requiredType;
-      }
-    }
-    return contentType;
   }
 
   private void setResponseContentHeaders(HttpResponseBuilder response, HttpResponse results) {

@@ -61,7 +61,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private ProxyUriManager.ProxyUri request;
   
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, rewriterRegistry);
+      = new ProxyHandler(pipeline, rewriterRegistry, true);
   
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -105,6 +105,35 @@ public class ProxyHandlerTest extends EasyMockTestCase {
         throw new RewritingException("sad", 404);
       }
     };
+  }
+
+  @Test
+  public void testInvalidHeaderDropped() throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+
+    setupProxyRequestMock(domain, url, true, -1, null, null);
+
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setIgnoreCache(true);
+    String contentType = "text/html; charset=UTF-8";
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("Hello")
+        .addHeader("Content-Type", contentType)
+        .addHeader("Content-Length", "200")  // Disallowed header.
+        .addHeader(":", "someDummyValue") // Invalid header name.
+        .create();
+
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    HttpResponse recorder = proxyHandler.fetch(request);
+
+    verify();
+    assertNull(recorder.getHeader(":"));
+    assertNull(recorder.getHeader("Content-Length"));
+    assertEquals(recorder.getHeader("Content-Type"), contentType);
   }
 
   @Test
@@ -269,7 +298,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
 
     request.setReturnOriginalContentOnError(true);
     HttpResponse recorder = proxyHandler.fetch(request);
@@ -306,7 +335,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     ResponseRewriterRegistry rewriterRegistry =
         new DefaultResponseRewriterRegistry(
             Arrays.<ResponseRewriter>asList(rewriter), null);
-    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
 
     boolean exceptionCaught = false;
     try {
