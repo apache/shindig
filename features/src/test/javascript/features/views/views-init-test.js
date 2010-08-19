@@ -80,10 +80,9 @@ ViewsInitTest.prototype.testRewriteLinksIe = function() {
     attachEvent: function() {
       name = arguments[0];
       func = arguments[1];
+    
     },
-    addEventListener: function() {
-      self.fail("Tried to call addEventListener in IE.");
-    }
+    addEventListener: undefined
   };
 
   gadgets.config.init({views:{rewriteLinks: true}});
