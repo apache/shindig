@@ -22,7 +22,7 @@
  * This file is meant to be run through a php command line or cruiscontrol build, and not called directly
  * through the web browser. To run these tests from the command line:
  * # cd /path/to/shindig/php
- * # phpunit ShindigAllTests test/ShindigAllTests.php   
+ * # php/external/phpunit.php ShindigAllTests php/test/ShindigAllTests.php
  */
 
 function __autoload($className) {
