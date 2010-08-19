@@ -131,7 +131,7 @@ $shindigConfig = array(
 
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
   'forcedJsLibs' => '',
-
+ 
   // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an
   // unknown custom class, this is particuarly useful for when intergrating shindig into an existing framework that also depends on autoloading
   'extension_autoloader' => false,
@@ -146,6 +146,36 @@ $shindigConfig = array(
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
 
+ 
+  // handler for ApiServlet
+  'service_handler' => array(
+    'people' => 'PersonHandler',
+    'activities' => 'ActivityHandler',
+    'appdata' => 'AppDataHandler',
+    'groups' => 'GroupHandler',
+    'messages' => 'MessagesHandler',
+    'cache'  => 'InvalidateHandler',
+    'system' => 'SystemHandler',
+    'albums' => 'AlbumHandler',
+    'mediaitems' => 'MediaItemHandler',
+    'http' => 'HttpHandler',
+  ),
+ 
+  // class is the name of the concrete input converter class
+  // targetField is the name of the field where the decoded array will be inserted
+  // into the params array or null if you want to overwrite params with the decoded
+  // array or false if you do not want to add the decoded params
+  'service_input_converter' => array(
+    'people' => array('class' => 'InputPeopleConverter', 'targetField' => false),
+    'activities' => array('class' => 'InputActivitiesConverter', 'targetField' => 'activity'),
+    'appdata' => array('class' => 'InputAppDataConverter', 'targetField' => 'data'),
+    'messages' => array('class' => 'InputMessagesConverter', 'targetField' => 'entity'),
+    'cache'  => array('class' => 'InputInvalidateConverter', 'targetField' => null),
+    'albums' => array('class' => 'InputAlbumsConverter', 'targetField' => 'album'),
+    'mediaitems' => array('class' => 'InputMediaItemsConverter', 'targetField' => 'mediaItem'),
+  ),
+ 
+ 
   'gadget_class' => 'Gadget',
   'gadget_context_class' => 'GadgetContext',
   'gadget_factory_class' => 'GadgetFactory',

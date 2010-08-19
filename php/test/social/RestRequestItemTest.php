@@ -53,11 +53,10 @@ class RestRequestItemTest extends PHPUnit_Framework_TestCase {
       $urlencodedParams[] = $key . '=' . urlencode($value);
     }
     $url = '/people/1/@self?' . join('&', $urlencodedParams);
-    $inputConverter = new InputJsonConverter();
     $outputConverter = new OutputJsonConverter();
     $servletRequest = array('url' => $url);
     $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
-    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, 'convertJson', $outputConverter);
     $params = $requestItem->getParameters();
     $this->assertEquals($expectedParams, $params);
   }

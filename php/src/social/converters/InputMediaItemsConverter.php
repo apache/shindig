@@ -18,19 +18,25 @@
  * under the License.
  */
 
-/**
- * Abstract class for the conversion of the RESTful API input
- * Since the data layout between json and atom is completely
- * different (since the structure in atom has a atom meaning
- * and a social data meaning), we have the need to put the
- * hoisting rules somewhere..
- */
-abstract class InputConverter {
+class InputMediaItemsConverter extends InputConverter
+{
+    public function convertAtom($requestParam) {
+        $xml = InputBasicXmlConverter::loadString($requestParam);
+        return InputBasicXmlConverter::convertMediaItems($xml, $xml->content->mediaItem);
+    }
 
-  abstract public function convertAtom($requestParam);
+    public function convertJson($requestParam) {
+        $ret = json_decode($requestParam, true);
+        if ($ret == $requestParam) {
+            // The content upload specification allows the content-type in the post
+            // body to be the binary data of the content.
+            return null;
+        }
+        return $ret;
+    }
 
-  abstract public function convertJson($requestParam);
-
-  abstract public function convertXml($requestParam);
-
+    public function convertXml($requestParam) {
+        $xml = InputBasicXmlConverter::loadString($requestParam);
+        return InputBasicXmlConverter::convertMediaItems($xml, $xml);
+    }
 }

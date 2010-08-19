@@ -48,9 +48,9 @@ class DataServiceServlet extends ApiServlet {
         $this->sendSecurityError();
         return;
       }
-      $inputConverter = $this->getInputConverterForRequest();
+      $inputConverterMethod = $this->getInputConverterMethodForRequest();
       $outputConverter = $this->getOutputConverterForRequest();
-      $this->handleSingleRequest($token, $inputConverter, $outputConverter);
+      $this->handleSingleRequest($token, $inputConverterMethod, $outputConverter);
     } catch (Exception $e) {
       $code = '500 Internal Server Error';
       header("HTTP/1.0 $code", true);
@@ -100,7 +100,7 @@ class DataServiceServlet extends ApiServlet {
   /**
    * Handler for non-batch requests (REST only has non-batch requests)
    */
-  private function handleSingleRequest(SecurityToken $token, $inputConverter, $outputConverter) {
+  private function handleSingleRequest(SecurityToken $token, $inputConverterMethod, $outputConverter) {
     //uri example: /social/rest/people/@self   /gadgets/api/rest/cache/invalidate
     $servletRequest = array(
         'url' => substr($_SERVER["REQUEST_URI"], strpos($_SERVER["REQUEST_URI"], '/rest') + 5));
@@ -118,7 +118,7 @@ class DataServiceServlet extends ApiServlet {
       }
     }
     $servletRequest['params'] = array_merge($_GET, $_POST);
-    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverterMethod, $outputConverter);
     $responseItem = $this->getResponseItem($this->handleRequestItem($requestItem));
     if ($responseItem->getError() == null) {
       $response = $responseItem->getResponse();
@@ -173,19 +173,19 @@ class DataServiceServlet extends ApiServlet {
   }
 
   /**
-   * Returns the input converter to use
+   * Returns the input converter method to use
    *
-   * @return InputConverter
+   * @return string
    */
-  private function getInputConverterForRequest() {
+  private function getInputConverterMethodForRequest() {
     $inputFormat = $this->getInputRequestFormat();
     switch ($inputFormat) {
       case 'xml':
-        return new InputXmlConverter();
+        return 'convertXml';
       case 'atom':
-        return new InputAtomConverter();
+        return 'convertAtom';
       case 'json':
-        return new InputJsonConverter();
+        return 'convertJson';
       default:
         throw new Exception("Unknown format param: $inputFormat");
     }

@@ -18,19 +18,17 @@
  * under the License.
  */
 
-/**
- * Abstract class for the conversion of the RESTful API input
- * Since the data layout between json and atom is completely
- * different (since the structure in atom has a atom meaning
- * and a social data meaning), we have the need to put the
- * hoisting rules somewhere..
- */
-abstract class InputConverter {
+class InputPeopleConverter extends InputConverter
+{
+    public function convertAtom($requestParam) {
+        throw new SocialSpiException("Operation not supported", ResponseError::$NOT_IMPLEMENTED);
+    }
 
-  abstract public function convertAtom($requestParam);
+    public function convertJson($requestParam) {
+        throw new SocialSpiException("Operation not supported", ResponseError::$NOT_IMPLEMENTED);
+    }
 
-  abstract public function convertJson($requestParam);
-
-  abstract public function convertXml($requestParam);
-
+    public function convertXml($requestParam) {
+        throw new SocialSpiException("Operation not supported", ResponseError::$NOT_IMPLEMENTED);
+    }
 }
