@@ -46,6 +46,7 @@ class HttpServletTest extends PHPUnit_Framework_TestCase {
     $this->HttpServlet->setNoCache($this->noCache);
     $this->HttpServlet->setContentType($this->contentType);
     $this->HttpServlet->setCacheTime($this->cacheTime);
+    $this->HttpServlet->noHeaders = true;
   }
 
   /**
@@ -54,7 +55,6 @@ class HttpServletTest extends PHPUnit_Framework_TestCase {
   
   protected function tearDown() {
     $this->HttpServlet = null;
-    ob_end_clean();
     parent::tearDown();
   }
 

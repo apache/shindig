@@ -117,6 +117,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    * Tests GadgetHtmlRenderer->renderGadget()
    */
   public function testRenderGadget() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
     ob_start();
     $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
     ob_end_clean();

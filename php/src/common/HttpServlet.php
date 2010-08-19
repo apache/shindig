@@ -77,6 +77,9 @@ class HttpServlet {
         }
       }
     }
+    else {
+      ob_end_flush();
+    }
   }
 
   public function getCharset() {

@@ -48,6 +48,7 @@ class RestBase extends PHPUnit_Framework_TestCase {
     $_GET = array('st' => $this->securityToken);
     $servlet = new DataServiceServlet();
     $servletMethod = 'do' . ucfirst(strtolower($method));
+    $servlet->noHeaders = true; // prevents "modify header information" errors
     ob_start();
     $servlet->$servletMethod();
     $ret = ob_get_clean();

@@ -36,6 +36,7 @@ class MockMakeRequestFetcher extends RemoteContentFetcher {
    */
   public function __construct() {
     $_SERVER["HTTP_HOST"] = 'localhost';
+    date_default_timezone_set('GMT');
     $this->responses = array();
     $this->requests = array();
   }
