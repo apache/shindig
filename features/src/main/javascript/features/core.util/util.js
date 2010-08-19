@@ -326,6 +326,44 @@ gadgets['util'] = function() {
     'unescapeString' : function(str) {
       if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
+    },
+
+
+    /**
+     * Attach an event listener to given DOM element (Not a gadget standard)
+     * 
+     * @param {object} elem  DOM element on which to attach event.
+     * @param {string} eventName  Event type to listen for.
+     * @param {function} callback  Invoked when specified event occurs.
+     * @param {boolean} useCapture  If true, initiates capture.
+     */
+    'attachBrowserEvent': function(elem, eventName, callback, useCapture) {
+      if (typeof elem.addEventListener != 'undefined') {
+        elem.addEventListener(eventName, callback, useCapture);
+      } else if (typeof elem.attachEvent != 'undefined') {
+        elem.attachEvent('on' + eventName, callback);
+      } else {
+        gadgets.warn("cannot attachBrowserEvent: " + eventName);
+      }
+    },
+
+    /**
+     * Remove event listener. (Shindig internal implementation only)
+     * 
+     * @param {object} elem  DOM element from which to remove event.
+     * @param {string} eventName  Event type to remove.
+     * @param {function} callback  Listener to remove.
+     * @param {boolean} useCapture  Specifies whether listener being removed was added with
+     *                              capture enabled.
+     */
+    'removeBrowserEvent': function(elem, eventName, callback, useCapture) {
+      if (elem.removeEventListener) {
+        elem.removeEventListener(eventName, callback, useCapture);
+      } else if (elem.detachEvent){
+        elem.detachEvent('on' + eventName, callback);
+      } else {
+        gadgets.warn("cannot removeBrowserEvent: " + eventName);
+      }
     }
   };
 }();

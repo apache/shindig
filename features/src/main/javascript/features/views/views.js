@@ -115,11 +115,7 @@ gadgets.views = function() {
     currentView = supportedViews[urlParams.view] || supportedViews["default"];
 
     if (conf.rewriteLinks) {
-      if (document.attachEvent) {
-        document.attachEvent("onclick", forceNavigate);
-      } else {
-        document.addEventListener("click", forceNavigate, false);
-      }
+      gadgets.util.attachBrowserEvent(document, "click", forceNavigate, false);
     }
   }
 
