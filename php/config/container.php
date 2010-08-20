@@ -130,8 +130,14 @@ $shindigConfig = array(
   'jsondb_path' => realpath(dirname(__FILE__) . '/../../content/sampledata') . '/canonicaldb.json',
 
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
+  // these libraries will be included regardless of the features the gadget requests
+  // example: 'dynamic-height:views' includes the features dynamic-height and views
   'forcedJsLibs' => '',
- 
+
+  // Force these js libraries to be appended to each gadget regardless if the gadget requested them or not
+  // This can be useful to overwrite existing methods of other javascript packages
+  'forcedAppendedJsLibs' => array(),
+
   // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an
   // unknown custom class, this is particuarly useful for when intergrating shindig into an existing framework that also depends on autoloading
   'extension_autoloader' => false,

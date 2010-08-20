@@ -29,6 +29,8 @@ class MockHtmlGadgetFactory extends GadgetFactory {
   <ModulePrefs title="title">
     <Require feature="opensocial-0.8" />
     <Require feature="dynamic-height" />
+    <Require feature="flash" />
+    <Require feature="minimessage" />
   </ModulePrefs>
   <Content type="html" view="home">
   <![CDATA[
@@ -111,6 +113,57 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     $this->domElement = null;
 
     parent::tearDown();
+  }
+
+  public function testGetJavaScriptsExternal() {
+    $oldForcedJsLibs = Config::get('forcedJsLibs');
+    $oldForcedAppendJsLibs = Config::get('forcedAppendedJsLibs');
+    Config::set('forcedJsLibs', 'dynamic-height:views');
+    Config::set('forcedAppendedJsLibs', array('flash'));
+    $this->gadgetHtmlRenderer->dataContext = array(
+        'Msg' => array(
+            'message1' => 'one',
+            'message2' => 'two',
+         ),
+        'UserPrefs' => array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+         ),
+    );
+    $this->gadgetHtmlRenderer->gadget = $this->gadget;
+    $javaScripts = $this->gadgetHtmlRenderer->getJavaScripts();
+    Config::set('forcedJsLibs', $oldForcedJsLibs);
+    Config::set('forcedAppendedJsLibs', $oldForcedAppendJsLibs);
+    $hasExtern = false;
+    $hasInline = false;
+    foreach ($javaScripts as $script) {
+        switch ($script['type']) {
+            case 'extern':
+                if ($hasExtern) {
+                    $this->fail('two entries with script type extern');
+                }
+                $hasExtern = true;
+                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/dynamic-height:views.js?'));
+                break;
+            case 'inline':
+                if ($hasInline) {
+                    $this->fail('two entries with script type inline');
+                }
+                //this is from dynamic height and should not be included
+                $this->assertFalse(strpos($script['content'], 'gadgets.window=gadgets.window||{};'));
+                //minimessage should be included
+                $miniMessagePos = strpos($script['content'], 'gadgets.MiniMessage=function');
+                $this->assertTrue($miniMessagePos > 0);
+                //we force flash to be appended, so it should be after minimessage
+                $this->assertTrue(strpos($script['content'], 'gadgets.flash=gadgets.flash||{};') > $miniMessagePos);
+                $hasInline = true;
+                break;
+            default:
+                $this->fail('invalid script type ' . $script['type']);
+        }
+    }
+    $this->assertTrue($hasExtern);
+    $this->assertTrue($hasInline);
   }
 
   /**
