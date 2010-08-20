@@ -32,14 +32,14 @@ class Config {
     global $shindigConfig;
     if (! self::$config) {
       // load default configuration
-      include_once realpath(dirname(__FILE__) . "/../../config") . '/container.php';
+      require realpath(dirname(__FILE__) . "/../../config") . '/container.php';
       self::$config = $shindigConfig;
       if ($local) {
         $localConfigPath = realpath(dirname(__FILE__) . "/../../config") . '/' . $local . '.php';
         if (file_exists($localConfigPath)) {
           // include local.php if it exists and merge the config arrays.
           // the second array values overwrites the first one's
-          include_once $localConfigPath;
+          require $localConfigPath;
           self::$config = array_merge(self::$config, $shindigConfig);
         }
       }
