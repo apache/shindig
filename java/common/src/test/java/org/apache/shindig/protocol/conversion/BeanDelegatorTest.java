@@ -23,10 +23,11 @@ import com.google.common.collect.ImmutableMap;
 
 import junit.framework.Assert;
 
-import org.apache.shindig.protocol.conversion.BeanFilter.Required;
+import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.beans.BeanInfo;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class BeanDelegatorTest extends Assert {
     public Style getStyle();
 
     // Test of required
-    @Required
+    @Unfiltered
     public String getRequired();
   }
 
@@ -195,6 +196,26 @@ public class BeanDelegatorTest extends Assert {
     Map<String, SimpleBeanInterface> interMap = proxy.getBeanMap();
     assertEquals(1, interMap.size());
     assertEquals(item.getS(), interMap.get("item").getS());
+  }
+
+  class TokenData {
+    public String getId() { return "id"; }
+  }
+
+  interface TokenInter {
+    public String getId();
+    public String getContainer();
+  }
+
+  @Test
+  public void testExtraFields() {
+    TokenData data = new TokenData();
+    String container = "data";
+    TokenInter p = beanDelegator.createDelegator(data, TokenInter.class,
+        ImmutableMap.<String, Object>of("container", container));
+
+    assertSame(data.getId(), p.getId());
+    assertSame(container, p.getContainer());
   }
 
   // Make sure validate will actually fail

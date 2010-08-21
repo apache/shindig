@@ -19,10 +19,11 @@
 package org.apache.shindig.gadgets.servlet;
 
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.protocol.conversion.BeanFilter.Required;
+import org.apache.shindig.protocol.conversion.BeanFilter.Unfiltered;
 // Keep imports clean, so it is clear what is used by API
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -33,10 +34,33 @@ import java.util.Map;
  */
 public class GadgetsHandlerApi {
 
+  public interface BaseRequest {
+    public Uri getUrl();
+    public String getContainer();
+    public List<String> getFields();
+  }
+
+  public interface MetadataRequest extends BaseRequest {
+    public Locale getLocale();
+    public boolean getIgnoreCache();
+    public boolean getDebug();
+    public String getView();
+    public TokenData getToken();
+  }
+
+  public interface TokenData {
+    public String getOwnerId();
+    public String getViewerId();
+  }
+
+  public interface TokenRequest extends BaseRequest {
+    public TokenData getToken();
+  }
+
   public interface BaseResponse {
-    @Required
-    public String getUrl();
-    @Required
+    @Unfiltered
+    public Uri getUrl();
+    @Unfiltered
     public String getError();
   }
 

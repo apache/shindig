@@ -21,6 +21,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
@@ -33,10 +35,10 @@ import org.apache.shindig.protocol.DefaultHandlerRegistry;
 import org.apache.shindig.protocol.HandlerExecutionListener;
 import org.apache.shindig.protocol.HandlerRegistry;
 import org.apache.shindig.protocol.RpcHandler;
-import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
 import org.apache.shindig.protocol.multipart.FormDataItem;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,9 +76,11 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
+    BeanFilter beanFilter = new BeanFilter();
+    GadgetsHandlerService service =
+        new GadgetsHandlerService(processor, urlGenerator, codec, beanFilter);
     GadgetsHandler handler =
-        new GadgetsHandler(new TestExecutorService(), processor, urlGenerator, codec,
-          new BeanFilter());
+        new GadgetsHandler(new TestExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
         injector, converter, new HandlerExecutionListener.NoOpHandler());
     registry.addHandlers(ImmutableSet.<Object> of(handler));
@@ -176,7 +180,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   @Test
   public void testTokenOneGadget() throws Exception {
     SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
-    EasyMock.expect(codec.encodeToken(token)).andReturn(TOKEN);
+    Capture<SecurityToken> tokenCapture = new Capture<SecurityToken>();
+    EasyMock.expect(codec.encodeToken(EasyMock.capture(tokenCapture))).andReturn(TOKEN);
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -188,6 +193,12 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
     assertEquals(TOKEN, gadget.getString("token"));
     assertFalse(gadget.has("error"));
+    // next checks verify all fiels that canbe used for token generation are passed in
+    assertEquals("container", tokenCapture.getValue().getContainer());
+    assertEquals(GADGET1_URL, tokenCapture.getValue().getAppId());
+    assertEquals(GADGET1_URL, tokenCapture.getValue().getAppUrl());
+    assertSame(token.getOwnerId(), tokenCapture.getValue().getOwnerId());
+    assertSame(token.getViewerId(), tokenCapture.getValue().getViewerId());
   }
 
   @Test
@@ -206,7 +217,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   @Test
   public void testTokenOneGadgetFailure() throws Exception {
     SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
-    EasyMock.expect(codec.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class)))
+        .andThrow(new SecurityTokenException("blah"));
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -238,8 +250,10 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   @Test
   public void testTokenMultipleGadgetsWithSuccessAndFailure() throws Exception {
     SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
-    EasyMock.expect(codec.encodeToken(token)).andReturn(TOKEN);
-    EasyMock.expect(codec.encodeToken(token)).andThrow(new SecurityTokenException("blah"));
+    EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class)))
+        .andReturn(TOKEN);
+    EasyMock.expect(codec.encodeToken(EasyMock.isA(SecurityToken.class)))
+        .andThrow(new SecurityTokenException("blah"));
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -275,16 +289,4 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     assertNotNull("got gadget2", gadget2);
     assertEquals(GadgetsHandler.FAILURE_METADATA, gadget2.getString("error"));
   }
-
-  // Next test verify that the API data classes are configured correctly.
-  // The mapping is done using reflection in runtime, so this test verify mapping is complete
-  // this test will prevent from not intended change to the API.
-  // DO NOT REMOVE TEST
-  @Test
-  public void testHandlerDataDelegation() throws Exception {
-    BeanDelegator delegator = new BeanDelegator(
-        GadgetsHandler.apiClasses, GadgetsHandler.enumConversionMap);
-    delegator.validate();
-  }
-
 }
