@@ -250,7 +250,23 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
   private function initCurlHandle($url) {
     $handle = curl_init();
     curl_setopt($handle, CURLOPT_URL, $url);
-    curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 1);
+    // CURLOPT_FOLLOWLOCATION doesn't work with PHP safemode and openbasedir turned on
+    $isOpenBasedir = false;
+    $isSafeMode = false;
+    try {
+      $isOpenBasedir = @ini_get('open_basedir');
+      $isSafeMode = @ini_get('safe_mode');
+      $isOpenBasedir = !empty($isOpenBasedir);
+      $isSafeMode = !empty($isSafeMode);
+    } catch (Exception $e) {
+      $isOpenBasedir = false;
+      $isSafeMode = false;
+    }
+    if(!$isOpenBasedir && !$isSafeMode) {
+      curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 1);
+    } else {
+      curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 0);
+    }
     curl_setopt($handle, CURLOPT_BINARYTRANSFER, 1);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($handle, CURLOPT_AUTOREFERER, 1);
