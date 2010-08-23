@@ -103,14 +103,16 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     }
     if ($isTextType && function_exists('mb_convert_encoding')) {
       // try to retrieve content type out of
-      if (0 == preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $charset) && //http header or html meta tags
-          0 == preg_match("/encoding\s*=\s*[\'\"]([^\"' >]*)/ix",$content, $charset)) { //xml declaration
-        $charset = 'UTF-8';
-      } else {
-   		$charset = trim($charset[1]);
-   		if (($pos = strpos($charset, "\n")) !== false) {
-   		  $charset = trim(substr($charset, 0, $pos));
-   		}
+      $charset = 'UTF-8';
+      $matchedCharset = array();
+      if (0 != preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $matchedCharset) || //http header or html meta tags
+          0 != preg_match("/encoding\s*=\s*[\'\"]([^\"' >]*)/ix",$content, $matchedCharset)) { //xml declaration
+        if (trim($matchedCharset[1])) {
+   		  $charset = trim($matchedCharset[1]);
+   		  if (($pos = strpos($charset, "\n")) !== false) {
+   		    $charset = trim(substr($charset, 0, $pos));
+   		  }
+        }
    	  }
    	  // the xml and json parsers get very upset if there are invalid UTF8 sequences in the string, by recoding it any bad chars will be filtered out
       $content = mb_convert_encoding($content, 'UTF-8', $charset);
