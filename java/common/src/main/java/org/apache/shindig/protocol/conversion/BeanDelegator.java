@@ -49,7 +49,7 @@ import java.util.Map;
 public class BeanDelegator {
 
   /** Indicate NULL value for a field (To overcome shortcome of immutable map) */
-  public static final String NULL = "NULL";
+  public static final String NULL = "<NULL sentinel>";
 
   private static final Map<String, Object> EMPTY_FIELDS = ImmutableMap.of();
 
@@ -64,7 +64,7 @@ public class BeanDelegator {
 
   public BeanDelegator() {
     this(ImmutableMap.<Class<?>, Class<?>>of(),
-        ImmutableMap.<Enum<?>, Enum<?>>of());
+         ImmutableMap.<Enum<?>, Enum<?>>of());
   }
 
   public BeanDelegator(Map<Class<?>, Class<?>> delegatedClasses,
@@ -154,14 +154,14 @@ public class BeanDelegator {
     private final Map<String, Object> extraFields;
 
     public DelegateInvocationHandler(Object source) {
-      this(source, EMPTY_FIELDS);
+      this(source, null);
     }
 
     public DelegateInvocationHandler(Object source, Map<String, Object> extraFields) {
       Preconditions.checkNotNull(source);
-      Preconditions.checkNotNull(extraFields);
+
       this.source = source;
-      this.extraFields = extraFields;
+      this.extraFields = (extraFields == null ? EMPTY_FIELDS : extraFields);
     }
 
     /**
