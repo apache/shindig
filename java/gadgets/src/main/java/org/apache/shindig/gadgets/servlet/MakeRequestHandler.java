@@ -266,7 +266,13 @@ public class MakeRequestHandler {
   private String processFeed(String url, HttpServletRequest req, String xml)
       throws GadgetException {
     boolean getSummaries = Boolean.parseBoolean(getParameter(req, GET_SUMMARIES_PARAM, "false"));
-    int numEntries = Integer.parseInt(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
+    int numEntries;
+    try {
+      numEntries = Integer.valueOf(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
+    } catch (NumberFormatException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "numEntries paramater is not a number", HttpResponse.SC_BAD_REQUEST);
+    }
     return new FeedProcessor().process(url, xml, getSummaries, numEntries).toString();
   }
 
@@ -304,7 +310,7 @@ public class MakeRequestHandler {
         refreshInterval =  Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "refresh parameter is not a number");
+            "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
       }
     } else {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));

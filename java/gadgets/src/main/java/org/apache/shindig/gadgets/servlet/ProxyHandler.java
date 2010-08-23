@@ -32,7 +32,6 @@ import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
 import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
-import org.apache.shindig.gadgets.uri.UriCommon;
 import org.apache.shindig.gadgets.uri.UriUtils;
 import org.apache.shindig.gadgets.uri.UriUtils.DisallowedHeaders;
 
@@ -134,7 +133,7 @@ public class ProxyHandler {
     return response.create();
   }
 
-  private void setResponseContentHeaders(HttpResponseBuilder response, HttpResponse results) {
+  protected void setResponseContentHeaders(HttpResponseBuilder response, HttpResponse results) {
     // We're skipping the content disposition header for flash due to an issue with Flash player 10
     // This does make some sites a higher value phishing target, but this can be mitigated by
     // additional referer checks.
