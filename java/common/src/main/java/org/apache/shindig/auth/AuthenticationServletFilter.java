@@ -22,7 +22,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import org.apache.shindig.common.servlet.InjectedFilter;
-import org.apache.shindig.common.util.CharsetUtil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

@@ -111,7 +111,8 @@ class MakeRequest {
           break;
       }
     }
-    if (strpos($result->getResponseContent(), '\u')) {
+    if ((strpos($result->getContentType(), 'text') !== false || strpos($result->getContentType(), 'application') !== false)
+            && strpos($result->getResponseContent(), '\u')) {
     	$result->setResponseContent($this->decodeUtf8($result->getResponseContent()));
     }
 

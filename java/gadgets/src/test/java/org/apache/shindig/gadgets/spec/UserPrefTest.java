@@ -106,6 +106,6 @@ public class UserPrefTest extends Assert {
         + "<EnumValue value=\"0\" display_value=\"__MSG_dv__\"/>"
         + "</UserPref>";
     UserPref userPref = new UserPref(XmlUtil.parse(xml));
-    assertEquals(xml, userPref.toString().replaceAll("\n", ""));
+    assertEquals(xml, userPref.toString().replace("\n", ""));
   }
 }

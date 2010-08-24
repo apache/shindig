@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
  * irrespective whether this conversion occurred, ensuring that
  * data pipelining and templating can work with any parser.
  */
-public class SocialDataTags {
+public final class SocialDataTags {
   private SocialDataTags() { }
   
   /**

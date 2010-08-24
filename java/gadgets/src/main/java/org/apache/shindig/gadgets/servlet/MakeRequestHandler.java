@@ -123,7 +123,7 @@ public class MakeRequestHandler {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           Param.URL.getKey() + " parameter is missing.", HttpResponse.SC_BAD_REQUEST);
     }
-    
+
     Uri url = null;
     try {
       url = ServletUtil.validateUrl(Uri.parse(urlStr));
@@ -137,7 +137,7 @@ public class MakeRequestHandler {
         .setContainer(getContainer(request));
 
     setPostData(request,req);
-    
+
     String headerData = getParameter(request, HEADERS_PARAM, "");
     if (headerData.length() > 0) {
       String[] headerList = StringUtils.split(headerData, '&');
@@ -211,7 +211,7 @@ public class MakeRequestHandler {
       // that we must always honor. For now, we return SC_BAD_REQUEST since
       // the encoding parameter could theoretically be anything.
       throw new GadgetException(Code.HTML_PARSE_ERROR, e, HttpResponse.SC_BAD_REQUEST);
-    }    
+    }
   }
 
   /**
@@ -266,35 +266,41 @@ public class MakeRequestHandler {
   private String processFeed(String url, HttpServletRequest req, String xml)
       throws GadgetException {
     boolean getSummaries = Boolean.parseBoolean(getParameter(req, GET_SUMMARIES_PARAM, "false"));
-    int numEntries = Integer.parseInt(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
+    int numEntries;
+    try {
+      numEntries = Integer.valueOf(getParameter(req, NUM_ENTRIES_PARAM, DEFAULT_NUM_ENTRIES));
+    } catch (NumberFormatException e) {
+      throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
+          "numEntries paramater is not a number", HttpResponse.SC_BAD_REQUEST);
+    }
     return new FeedProcessor().process(url, xml, getSummaries, numEntries).toString();
   }
-  
+
   /**
    * Extracts the container name from the request.
    */
   @SuppressWarnings("deprecation")
-  static String getContainer(HttpServletRequest request) {
+  protected static String getContainer(HttpServletRequest request) {
     String container = request.getParameter(Param.CONTAINER.getKey());
     if (container == null) {
       container = request.getParameter(Param.SYND.getKey());
     }
     return container != null ? container : ContainerConfig.DEFAULT_CONTAINER;
   }
-  
+
   /**
    * getParameter helper method, returning default value if param not present.
    */
-  static String getParameter(HttpServletRequest request, String key, String defaultValue) {
+  protected static String getParameter(HttpServletRequest request, String key, String defaultValue) {
     String ret = request.getParameter(key);
     return ret != null ? ret : defaultValue;
   }
-  
+
   /**
    * Sets cache control headers for the response.
    */
   @SuppressWarnings("boxing")
-  static void setResponseHeaders(HttpServletRequest request,
+  protected static void setResponseHeaders(HttpServletRequest request,
       HttpServletResponse response, HttpResponse results) throws GadgetException {
     int refreshInterval = 0;
     if (results.isStrictNoCache() || "1".equals(request.getParameter(UriCommon.Param.NO_CACHE.getKey()))) {
@@ -304,16 +310,16 @@ public class MakeRequestHandler {
         refreshInterval =  Integer.valueOf(request.getParameter(UriCommon.Param.REFRESH.getKey()));
       } catch (NumberFormatException nfe) {
         throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
-            "refresh parameter is not a number");
+            "refresh parameter is not a number", HttpResponse.SC_BAD_REQUEST);
       }
     } else {
       refreshInterval = Math.max(60 * 60, (int)(results.getCacheTtl() / 1000L));
     }
     HttpUtil.setCachingHeaders(response, refreshInterval, false);
-    
+
     // Always set Content-Disposition header as XSS prevention mechanism.
     response.setHeader("Content-Disposition", "attachment;filename=p.txt");
-    
+
     if (response.getContentType() == null) {
       response.setContentType("application/octet-stream");
     }

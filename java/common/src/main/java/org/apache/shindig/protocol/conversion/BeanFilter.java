@@ -24,7 +24,6 @@ import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +61,7 @@ public class BeanFilter {
   /** Annotation for required field that should not be filtered */
   @Target(ElementType.METHOD)
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Required {}
+  public @interface Unfiltered {}
 
   /**
    * Create a proxy object that filter object fields according to set of fields.
@@ -132,7 +132,7 @@ public class BeanFilter {
           // Do not filter out primitive types, it will result in NPE
           && !method.getReturnType().isPrimitive()) {
         // Look for Required annotation
-        boolean required = (method.getAnnotation(Required.class) != null);
+        boolean required = (method.getAnnotation(Unfiltered.class) != null);
         fieldName = prefix + method.getName().substring(3).toLowerCase();
         if (!required && !fields.contains(fieldName)) {
           return null;
@@ -158,7 +158,7 @@ public class BeanFilter {
     }
   }
 
-  public Set<String> processBeanFields(Set<String> fields) {
+  public Set<String> processBeanFields(Collection<String> fields) {
     ImmutableSet.Builder<String> builder = ImmutableSet.builder();
     for (String field : fields) {
       builder.add(field.toLowerCase());

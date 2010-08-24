@@ -22,6 +22,7 @@ import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -29,24 +30,15 @@ import org.junit.Test;
  */
 public class EhCacheCacheProviderTest {
 
-  @Test
-  public void getAnonCache() throws Exception {
-    CacheProvider defaultProvider = new EhCacheCacheProvider(
+  static CacheProvider defaultProvider;
+  @BeforeClass
+  public static void setup() throws Exception {
+    defaultProvider = new EhCacheCacheProvider(
         "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
-    Cache<String, String> cache = defaultProvider.createCache(null);
-    Assert.assertNotNull(cache);
-    Assert.assertNull(cache.getElement("test"));
-    cache.addElement("test", "value1");
-    Assert.assertEquals("value1", cache.getElement("test"));
-    cache.removeElement("test");
-    Assert.assertNull(cache.getElement("test"));
-
-  }
+  }  	
 
   @Test
   public void getNamedCache() throws Exception {
-    CacheProvider defaultProvider = new EhCacheCacheProvider(
-        "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
     Cache<String, String> cache = defaultProvider.createCache("testcache");
     Cache<String, String> cache2 = defaultProvider.createCache("testcache");
     Assert.assertNotNull(cache);

@@ -300,12 +300,12 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
   public function getJavaScripts() {
     $registry = $this->context->getRegistry();
     $forcedJsLibs = $this->getForcedJsLibs();
-    $externFeatures = array();
+    $forcedAppendJsLibs = Config::get('forcedAppendedJsLibs');
+    $externFeatures = $forcedJsLibs;
     $inlineFeatures = array();
     foreach ($this->gadget->features as $feature) {
-      if (in_array($feature, $forcedJsLibs)) {
-        $externFeatures[] = $feature;
-      } else {
+      if (! in_array($feature, $forcedJsLibs) &&
+          ! in_array($feature, $forcedAppendJsLibs)) {
         $inlineFeatures[] = $feature;
       }
     }
@@ -313,7 +313,13 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     $sortedInlineFeatures = array();
     $registry->sortFeatures($externFeatures, $sortedExternFeatures);
     $registry->sortFeatures($inlineFeatures, $sortedInlineFeatures);
-    
+
+    // append additional js libs from config to the end of the javascript block
+    // this allows custom overloading of other javascript libraries
+    foreach ($forcedAppendJsLibs as $jsLib) {
+      $sortedInlineFeatures[] = $jsLib;
+    }
+
     // if some of the feature libraries are externalized (through a browser cachable <script src="/gadgets/js/opensocial-0.9:settitle.js"> type url)
     // we inject the tag and don't inline those libs (and their dependencies)
     $scripts = array();

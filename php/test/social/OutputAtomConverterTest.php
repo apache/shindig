@@ -32,6 +32,8 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    $_SERVER["HTTP_HOST"] = 'localhost';
     parent::setUp();
     $this->OutputAtomConverter = new OutputAtomConverter();
   }
@@ -48,11 +50,10 @@ class OutputAtomConverterTest extends PHPUnit_Framework_TestCase {
    * Tests OutputAtomConverter->outputResponse()
    */
   public function testOutputResponse() {
-    $inputConverter = new InputAtomConverter();
     $outputConverter = new OutputAtomConverter();
     $servletRequest = array('url' => '/people/1/@self');
     $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
-    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, 'convertAtom', $outputConverter);
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
     $entry = array('isOwner' => false, 'isViewer' => false,
                    'displayName' => '1 1', 'id' => '1');

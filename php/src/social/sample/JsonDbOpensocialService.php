@@ -124,6 +124,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     }
   }
 
+  public function resetDb() {
+    @unlink(sys_get_temp_dir() . '/' . $this->jsonDbFileName);
+  }
+
   private function getAllPeople() {
     $db = $this->getDb();
     $peopleTable = $db[self::$PEOPLE_TABLE];
@@ -261,22 +265,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
         }
         if (! $token->isAnonymous() && $id == $token->getOwnerId()) {
           $person['isOwner'] = true;
-        }
-        if ($fields && $fields[0] != '@all') {
-          $newPerson = array();
-          $newPerson['id'] = $id;
-          $newPerson['isOwner'] = isset($person['isOwner']) ? $person['isOwner'] : false;
-          $newPerson['isViewer'] = isset($person['isViewer']) ? $person['isViewer'] : false;
-          $newPerson['name'] = $person['name'];
-          $newPerson['displayName'] = $person['displayName'];
-          foreach ($fields as $field => $present) {
-            $present = strtolower($present);
-            if (isset($person[$present]) && ! isset($newPerson[$present])) {
-              $newPerson[$present] = $person[$present];
-            }
-          }
-          $person = $newPerson;
-        }
+        }   
+
         $people[] = $person;
       }
     }
@@ -288,6 +278,10 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
       $people = $this->filterResults($people, $options);
     } catch (Exception $e) {
       $people['filtered'] = 'false';
+    }
+    
+   if ($fields) { 
+        $people = self::adjustFields($people, $fields);
     }
 
     //TODO: The samplecontainer doesn't support any filters yet. We should fix this.
@@ -784,7 +778,7 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   public function updateAlbum($userId, $groupId, $album, $token) {
     $all = $this->getAllAlbums();
-    if (! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$album['id']]) {
+    if (! $album['id'] || ! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$album['id']]) {
       throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
     }
     $origin = $all[$userId->getUserId($token)][$album['id']];
@@ -807,7 +801,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   public function deleteAlbum($userId, $groupId, $albumId, $token) {
     $all = $this->getAllAlbums();
-    if (! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$albumId]) {
+    $albumId = $albumId[0];
+    if (! $albumId || ! $all[$userId->getUserId($token)] || ! $all[$userId->getUserId($token)][$albumId]) {
       throw new SocialSpiException("Album not found.", ResponseError::$BAD_REQUEST);
     }
     if ($all[$userId->getUserId($token)][$albumId]['ownerId'] != $userId->getUserId($token)) {
@@ -846,6 +841,8 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $id = isset($all[$albumId]) ? (count($all[$albumId]) + 1) : 0;
     $mediaItem['id'] = $id;
     $mediaItem['lastUpdated'] = time();
+    $mediaItem['created'] = $mediaItem['lastUpdated'];
+    $mediaItem['numComments'] = 0;
     if (isset($mediaItem['type'])) {
       $mediaItem['type'] = strtoupper($mediaItem['type']);
       if (! in_array($mediaItem['type'], MediaItem::$TYPES)) {
@@ -871,7 +868,6 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
     $origin = $all[$mediaItem['albumId']][$mediaItem['id']];
     $mediaItem['lastUpdated'] = time();
     $mediaItem['created'] = $origin['created'];
-    $mediaItem['fileSize'] = $orgin['fileSize'];
     $mediaItem['numComments'] = $origin['numComments'];
     if (isset($mediaItem['type'])) {
       $mediaItem['type'] = strtoupper($mediaItem['type']);

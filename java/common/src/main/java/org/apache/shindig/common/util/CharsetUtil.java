@@ -23,7 +23,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 /**
  * Utilities for dealing with character set encoding.

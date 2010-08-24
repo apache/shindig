@@ -83,7 +83,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
    * @param RemoteContentRequest $request
    * @param string $content
    */
-  private function parseResult(RemoteContentRequest $request, $content) {
+  protected function parseResult(RemoteContentRequest $request, $content) {
     $headers = '';
     $body = '';
     $httpCode = curl_getinfo($request->handle, CURLINFO_HTTP_CODE);
@@ -91,23 +91,36 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     // Attempt to magically convert all text'ish responses to UTF8, especially the xml and json parsers get upset if invalid UTF8 is encountered
     $textTypes = array('text', 'html', 'json', 'xml', 'atom');
     $isTextType = false;
+    $isXml = false;
     foreach ($textTypes as $textType) {
-    	if (strpos($contentType, $textType) !== false) {
-    		$isTextType = true;
-    		break;
-    	}
+      if (strpos($contentType, $textType) !== false) {
+        if ($textType === 'xml') {
+          $isXml = true;
+        }
+        $isTextType = true;
+    	break;
+      }
     }
     if ($isTextType && function_exists('mb_convert_encoding')) {
-      if (0 == preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $charset)) {
-        $charset = 'UTF-8';
-      } else {
-   			$charset = trim($charset[1]);
-   			if (($pos = strpos($charset, "\n")) !== false) {
-   			  $charset = trim(substr($charset, 0, $pos));
-   			}
-   		}
-   		// the xml and json parsers get very upset if there are invalid UTF8 sequences in the string, by recoding it any bad chars will be filtered out
+      // try to retrieve content type out of
+      $charset = 'UTF-8';
+      $matchedCharset = array();
+      if (0 != preg_match("/charset\s*=\s*([^\"' >]*)/ix",$content, $matchedCharset) || //http header or html meta tags
+          0 != preg_match("/encoding\s*=\s*[\'\"]([^\"' >]*)/ix",$content, $matchedCharset)) { //xml declaration
+        if (trim($matchedCharset[1])) {
+   		  $charset = trim($matchedCharset[1]);
+   		  if (($pos = strpos($charset, "\n")) !== false) {
+   		    $charset = trim(substr($charset, 0, $pos));
+   		  }
+        }
+   	  }
+   	  // the xml and json parsers get very upset if there are invalid UTF8 sequences in the string, by recoding it any bad chars will be filtered out
       $content = mb_convert_encoding($content, 'UTF-8', $charset);
+      // if original charset is not utf-8 we now try to rewrite any xml declarations
+      if ($isXml === true && strtoupper($charset) !== 'UTF-8') {
+        $pattern =  'encoding=\s*([\'"])' . $charset . '\s*\1';
+        $content = mb_ereg_replace($pattern, 'encoding="UTF-8"', $content, "i");
+      }
   	}
     // on redirects and such we get multiple headers back from curl it seems, we really only want the last one
     while (substr($content, 0, strlen('HTTP')) == 'HTTP' && strpos($content, "\r\n\r\n") !== false) {
@@ -131,7 +144,7 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
     if (curl_errno($request->handle)) {
       $httpCode = '500';
       $body = 'Curl error: ' . curl_error($request->handle);
-    }   
+    }
 
     $request->setHttpCode($httpCode);
     $request->setHttpCodeMsg($this->resolveHttpCode($httpCode));
@@ -239,7 +252,23 @@ class BasicRemoteContentFetcher extends RemoteContentFetcher {
   private function initCurlHandle($url) {
     $handle = curl_init();
     curl_setopt($handle, CURLOPT_URL, $url);
-    curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 1);
+    // CURLOPT_FOLLOWLOCATION doesn't work with PHP safemode and openbasedir turned on
+    $isOpenBasedir = false;
+    $isSafeMode = false;
+    try {
+      $isOpenBasedir = @ini_get('open_basedir');
+      $isSafeMode = @ini_get('safe_mode');
+      $isOpenBasedir = !empty($isOpenBasedir);
+      $isSafeMode = !empty($isSafeMode);
+    } catch (Exception $e) {
+      $isOpenBasedir = false;
+      $isSafeMode = false;
+    }
+    if(!$isOpenBasedir && !$isSafeMode) {
+      curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 1);
+    } else {
+      curl_setopt($handle, CURLOPT_FOLLOWLOCATION, 0);
+    }
     curl_setopt($handle, CURLOPT_BINARYTRANSFER, 1);
     curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($handle, CURLOPT_AUTOREFERER, 1);

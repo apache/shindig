@@ -32,6 +32,7 @@ class OutputJsonConverterTest extends PHPUnit_Framework_TestCase {
    * Prepares the environment before running a test.
    */
   protected function setUp() {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
     parent::setUp();
     $this->OutputJsonConverter = new OutputJsonConverter();
   }
@@ -48,11 +49,10 @@ class OutputJsonConverterTest extends PHPUnit_Framework_TestCase {
    * Tests OutputJsonConverter->outputResponse()
    */
   public function testOutputResponse() {
-    $inputConverter = new InputJsonConverter();
     $outputConverter = new OutputJsonConverter();
     $servletRequest = array('url' => '/people/1/@self');
     $token = BasicSecurityToken::createFromValues('owner', 'viewer', 'app', 'domain', 'appUrl', '1', 'default');
-    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, $inputConverter, $outputConverter);
+    $requestItem = RestRequestItem::createWithRequest($servletRequest, $token, 'convertJson', $outputConverter);
     $requestItem->applyUrlTemplate("/people/{userId}/{groupId}/{personId}");
     $response = array(
         'entry' => array('isOwner' => false, 'isViewer' => false, 'displayName' => '1 1', 

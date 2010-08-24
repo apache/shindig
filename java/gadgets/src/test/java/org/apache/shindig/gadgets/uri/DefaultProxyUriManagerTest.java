@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -44,17 +45,17 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private static final Uri RESOURCE_1 = Uri.parse("http://example.com/one.dat?param=value");
   private static final Uri RESOURCE_2 = Uri.parse("http://gadgets.com/two.dat");
   private static final Uri RESOURCE_3 = Uri.parse("http://foobar.com/three.dat");
-  
+
   @Test
   public void basicProxyQueryStyle() throws Exception {
     checkQueryStyle(false, false, null);
   }
-  
+
   @Test
   public void altParamsProxyQueryStyle() throws Exception {
     checkQueryStyle(true, true, "version");
   }
-  
+
   private void checkQueryStyle(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/path";
@@ -88,7 +89,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     List<ProxyUri> proxyUris = Lists.newLinkedList();
     proxyUris.add(new ProxyUri(refresh, debug, noCache, CONTAINER, SPEC_URI.toString(),
         RESOURCE_1));
-    
+
     List<Uri> uris = manager.make(proxyUris, null);
     assertEquals(1, uris.size());
     verifyQueryUriWithRefresh(RESOURCE_1, uris.get(0), debug, noCache,
@@ -126,7 +127,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(null, uris.get(1).getQueryParameter("resize_q"));
     assertEquals(null, uris.get(1).getQueryParameter("no_expand"));
   }
-  
+
   @Test
   public void verifyAddedParamsChained() throws Exception {
     String host = "host.com";
@@ -138,7 +139,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         RESOURCE_1);
     pUri.setResize(100, 10, 90, true);
     proxyUris.add(pUri);
-    
+
     List<Uri> uris = manager.make(proxyUris, null);
     assertEquals(1, uris.size());
     verifyChainedUri(RESOURCE_1, uris.get(0), false, true,
@@ -155,10 +156,10 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     ProxyUri uri = new ProxyUri(null, false, false, "open", "http://example.com/gadget",
         Uri.parse("http://example.com/resource"));
     uri.setFallbackUrl("http://example.com/fallback");
-    
+
     assertEquals("http://example.com/fallback", uri.getFallbackUri().toString());
   }
-  
+
   @Test(expected = GadgetException.class)
   public void testBadFallbackUrl() throws Exception {
     ProxyUri uri = new ProxyUri(null, false, false, "open", "http://example.com/gadget",
@@ -166,17 +167,17 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     uri.setFallbackUrl("bad url");
     uri.getFallbackUri(); // throws exception!
   }
-  
+
   @Test
   public void basicProxyChainedStyle() throws Exception {
     checkChainedStyle(false, false, null);
   }
-  
+
   @Test
   public void altParamsProxyChainedStyle() throws Exception {
     checkChainedStyle(true, true, "version");
   }
-  
+
   private void checkChainedStyle(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path";
@@ -185,17 +186,17 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(1, uris.size());
     verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, false, host, path);
   }
-  
+
   @Test
   public void basicProxyChainedStyleEndOfPath() throws Exception {
     checkChainedStyleEndOfPath(false, false, null);
   }
-  
+
   @Test
   public void altParamsProxyChainedStyleEndOfPath() throws Exception {
     checkChainedStyleEndOfPath(true, true, "version");
   }
-  
+
   private void checkChainedStyleEndOfPath(boolean debug, boolean noCache, String version) throws Exception {
     String host = "host.com";
     String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN;
@@ -204,7 +205,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(1, uris.size());
     verifyChainedUri(RESOURCE_1, uris.get(0), debug, noCache, version, true, host, path);
   }
-  
+
   @Test
   public void batchedProxyQueryStyle() throws Exception {
     String host = "host.com";
@@ -217,7 +218,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
       verifyQueryUri(resources.get(i), uris.get(i), true, true, versions[i], host, path);
     }
   }
-  
+
   @Test
   public void batchedProxyChainedStyle() throws Exception {
     String host = "host.com";
@@ -248,24 +249,24 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     // Validate tests also serve as end-to-end tests: create, unpack.
     checkValidate("/proxy/path", UriStatus.VALID_UNVERSIONED, null);
   }
-  
+
   @Test
   public void validateChainedStyleUnversioned() throws Exception {
     checkValidate("/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path",
         UriStatus.VALID_UNVERSIONED, null);
   }
-  
+
   @Test
   public void validateQueryStyleVersioned() throws Exception {
     checkValidate("/proxy/path", UriStatus.VALID_VERSIONED, "version");
   }
-  
+
   @Test
   public void validateChainedStyleVersioned() throws Exception {
     checkValidate("/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN + "/path",
         UriStatus.VALID_VERSIONED, "version");
   }
-  
+
   private void checkValidate(String path, UriStatus status, String version) throws Exception {
     String host = "host.com";
     // Pass null for status if version is null, since null version shouldn't result
@@ -286,7 +287,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(false, proxyUri.isDebug());
     assertEquals(false, proxyUri.isNoCache());
   }
-  
+
   @Test
   public void containerFallsBackToSynd() throws Exception {
     String host = "host.com";
@@ -306,7 +307,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(false, proxyUri.isDebug());
     assertEquals(false, proxyUri.isNoCache());
   }
-  
+
   @Test(expected = GadgetException.class)
   public void mismatchedHostStrict() throws Exception {
     String host = "host.com";
@@ -317,7 +318,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         .addQueryParameter(Param.URL.getKey(), "http://foo.com").toUri();
     manager.process(testUri);
   }
-  
+
   @Test
   public void mismatchedHostNonStrict() throws Exception {
     String host = "host.com";
@@ -328,7 +329,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER).toUri();
     manager.process(testUri);
   }
-  
+
   @Test(expected = GadgetException.class)
   public void missingContainerParamQuery() throws Exception {
     String host = "host.com";
@@ -338,7 +339,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         .addQueryParameter(Param.URL.getKey(), "http://foo.com").toUri();
     manager.process(testUri);
   }
-  
+
   @Test(expected = GadgetException.class)
   public void missingContainerParamChained() throws Exception {
     String host = "host.com";
@@ -348,7 +349,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         "/proxy/refresh=123/path/http://foo.com").toUri();
     manager.process(testUri);
   }
-  
+
   @Test(expected = GadgetException.class)
   public void missingUrlQuery() throws Exception {
     String host = "host.com";
@@ -358,7 +359,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER).toUri();
     manager.process(testUri);
   }
-  
+
   @Test(expected = GadgetException.class)
   public void missingUrlChained() throws Exception {
     String host = "host.com";
@@ -369,7 +370,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         CONTAINER + "/path/").toUri();
     manager.process(testUri);
   }
-  
+
   @Test(expected = GadgetException.class)
   public void invalidUrlParamQuery() throws Exception {
     // Only test query style, since chained style should be impossible.
@@ -386,7 +387,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
       List<Uri> resources, String... version) {
     return makeAndGetWithRefresh(host, path, debug, noCache, resources, 123, version);
   }
-  
+
   private List<Uri> makeAndGetWithRefresh(String host, String path, boolean debug,
       boolean noCache, List<Uri> resources, Integer refresh, String... version) {
     ProxyUriManager.Versioner versioner = makeVersioner(null, version);
@@ -400,7 +401,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
       String host, String path) throws Exception {
     verifyQueryUriWithRefresh(orig, uri, debug, noCache, version, 123, host, path);
   }
-  
+
   private void verifyQueryUriWithRefresh(Uri orig, Uri uri, boolean debug, boolean noCache,
       String version, Integer refresh, String host, String path) throws Exception {
     // Make sure the manager can parse out results.
@@ -412,7 +413,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(noCache ? Integer.valueOf(0) : refresh, proxyUri.getRefresh());
     assertEquals(CONTAINER, proxyUri.getContainer());
     assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
-    
+
     // "Raw" query param verification.
     assertEquals(noCache || refresh == null ? null : refresh.toString(),
         uri.getQueryParameter(Param.REFRESH.getKey()));
@@ -433,24 +434,68 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     assertEquals(noCache ? 0 : 123, (int)proxyUri.getRefresh());
     assertEquals(CONTAINER, proxyUri.getContainer());
     assertEquals(SPEC_URI.toString(), proxyUri.getGadget());
-    
+
     // URI should end with the proxied content.
     String uriStr = uri.toString();
     assertTrue(uriStr.endsWith(orig.toString()));
-    
+
     int proxyEnd = uriStr.indexOf("/proxy/") + "/proxy/".length();
     String paramsUri = uriStr.substring(
         proxyEnd,
         (endOfPath ? uriStr.indexOf('/', proxyEnd) : uriStr.indexOf("/path")));
     uri = new UriBuilder().setQuery(paramsUri).toUri();
-    
+
     // "Raw" query param verification.
     assertEquals(noCache ? null : "123", uri.getQueryParameter(Param.REFRESH.getKey()));
     if (version != null) {
       assertEquals(version, uri.getQueryParameter(Param.VERSION.getKey()));
     }
   }
-  
+
+  @Test
+  public void testProxyGadgetsChainDecode() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN;
+    DefaultProxyUriManager uriManager = makeManager(host, path, null);
+    Uri uri = Uri.parse("http://host.com/gadgets/proxy/refresh%3d55%26container%3dcontainer/"
+        + "http://www.cnn.com/news?refresh=45");
+    ProxyUri pUri = uriManager.process(uri);
+    assertEquals(new Integer(55), pUri.getRefresh());
+    assertEquals("http://www.cnn.com/news?refresh=45", pUri.getResource().toString());
+    assertEquals(CONTAINER, pUri.getContainer());
+  }
+
+  @Test
+  public void testProxyGadgetsChainDecodeGif() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN;
+    DefaultProxyUriManager uriManager = makeManager(host, path, null);
+    Uri uri = Uri.parse("http://host.com/gadgets/proxy/container%3dcontainer%26" +
+        "gadget%3dhttp%3A%2F%2Fwww.orkut.com%2Fcss%2Fgen%2Fbase054.css.int%26" +
+        "debug%3d0%26nocache%3d0/http://www.orkut.com/img/castro/i%5freply.gif");
+    ProxyUri pUri = uriManager.process(uri);
+    assertEquals(false, pUri.isDebug());
+    assertEquals("http://www.orkut.com/img/castro/i%5freply.gif", pUri.getResource().toString());
+    assertEquals(CONTAINER, pUri.getContainer());
+    assertEquals("http://www.orkut.com/css/gen/base054.css.int", pUri.getGadget());
+  }
+
+  @Test
+  public void testProxyGadgetsChainGif() throws Exception {
+
+    String host = "host.com";
+    String path = "/proxy/" + DefaultProxyUriManager.CHAINED_PARAMS_TOKEN;
+    DefaultProxyUriManager uriManager = makeManager(host, path, null);
+    Uri uri = Uri.parse("http://host.com/gadgets/proxy/container=container&" +
+        "gadget=http%3A%2F%2Fwww.orkut.com%2Fcss%2Fgen%2Fbase054.css.int&" +
+        "debug=0&nocache=0/http://www.orkut.com/img/castro/i_reply.gif");
+    ProxyUri pUri = uriManager.process(uri);
+    assertEquals(false, pUri.isDebug());
+    assertEquals("http://www.orkut.com/img/castro/i_reply.gif", pUri.getResource().toString());
+    assertEquals(CONTAINER, pUri.getContainer());
+    assertEquals("http://www.orkut.com/css/gen/base054.css.int", pUri.getGadget());
+  }
+
   private DefaultProxyUriManager makeManager(String host, String path,
       ProxyUriManager.Versioner versioner) {
     ContainerConfig config = createMock(ContainerConfig.class);
@@ -461,7 +506,7 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     replay(config);
     return new DefaultProxyUriManager(config, versioner);
   }
-  
+
   @SuppressWarnings("unchecked")
   private ProxyUriManager.Versioner makeVersioner(UriStatus status, String... versions) {
     ProxyUriManager.Versioner versioner = createMock(ProxyUriManager.Versioner.class);

@@ -724,11 +724,11 @@ public class FeatureRegistryTest {
     for (Map.Entry<String, String> entry : resourceAttribs.entrySet()) {
       sbRes.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\" ");
     }
-    return tpl.replaceAll("%type%", type)
-        .replaceAll("%uri%", uri != null ? "src=\"" + uri + '\"' : "")
-        .replaceAll("%content%", content != null ? content : "")
-        .replaceAll("%type_attribs%", sb.toString())
-        .replaceAll("%res_attribs%", sbRes.toString());
+    return tpl.replace("%type%", type)
+        .replace("%uri%", uri != null ? "src=\"" + uri + '\"' : "")
+        .replace("%content%", content != null ? content : "")
+        .replace("%type_attribs%", sb.toString())
+        .replace("%res_attribs%", sbRes.toString());
   }
   
   private static Uri makeFile(String content) throws Exception {

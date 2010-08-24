@@ -42,12 +42,6 @@ public class LruCacheProviderTest {
     assertEquals(10, getCache(provider, "foo").capacity);
   }
 
-  @Test
-  public void defaultCapacityForAnonCache() throws Exception {
-    LruCacheProvider provider = new LruCacheProvider(10);
-    assertEquals(10, getCache(provider, null).capacity);
-  }
-
   LruCacheProvider createProvider(final String name, final String capacity, int defaultCapacity) {
     Module module = new AbstractModule() {
       @Override

@@ -19,7 +19,6 @@ package org.apache.shindig.sample.container;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import org.apache.shindig.sample.shiro.SampleShiroRealm;
 
 public class SampleContainerGuiceModule extends AbstractModule {
 

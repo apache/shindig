@@ -34,6 +34,7 @@
         <include>org.apache.shindig:shindig-features</include>
         <include>org.apache.shindig:shindig-gadgets</include>
         <include>org.apache.shindig:shindig-social-api</include>
+        <include>org.apache.shindig:shindig-extras</include>
       </includes>
     </dependencySet>
   </dependencySets>
@@ -66,7 +67,7 @@
     </file>
     <file>
       <source>../java/NOTICE</source>
-      <outputDirectory>shindig-${projet.version}-java</outputDirectory>
+      <outputDirectory>shindig-${project.version}-java</outputDirectory>
       <filtered>true</filtered>
     </file>
   </files>

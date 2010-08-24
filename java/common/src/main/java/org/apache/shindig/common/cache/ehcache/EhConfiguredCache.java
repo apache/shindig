@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
+import com.google.common.base.Preconditions;
+import net.sf.ehcache.ObjectExistsException;
 import org.apache.shindig.common.cache.Cache;
 
 import net.sf.ehcache.CacheManager;
@@ -32,11 +34,8 @@ public class EhConfiguredCache<K, V> implements Cache<K, V> {
   private net.sf.ehcache.Cache cache;
 
   public EhConfiguredCache(String cacheName, CacheManager cacheManager) {
-    if (cacheName == null) {
-      cacheName = "default";
-    }
     synchronized (cacheManager) {
-      cache = cacheManager.getCache(cacheName);
+      cache = cacheManager.getCache(Preconditions.checkNotNull(cacheName));
       if (cache == null) {
         cacheManager.addCache(cacheName);
         cache = cacheManager.getCache(cacheName);

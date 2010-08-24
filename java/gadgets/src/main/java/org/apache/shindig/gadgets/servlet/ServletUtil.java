@@ -32,26 +32,49 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public class ServletUtil {
   public static final String REMOTE_ADDR_KEY = "RemoteAddress";
   public static final String DATA_URI_KEY = "dataUri";
-  
+
+  private ServletUtil() {}
+
+  /**
+   * Returns an HttpRequest object encapsulating the servlet request.
+   * NOTE: Request parameters are not explicitly taken care of, instead we copy
+   * the InputStream and query parameters separately.
+   *
+   * @param servletReq The http servlet request.
+   * @return An HttpRequest object with all the information provided by the
+   *   servlet request.
+   * @throws IOException In case of errors.
+   */
   public static HttpRequest fromHttpServletRequest(HttpServletRequest servletReq) throws IOException {
     HttpRequest req = new HttpRequest(new UriBuilder(servletReq).toUri());
+
     Enumeration<?> headerNames = servletReq.getHeaderNames();
     while (headerNames.hasMoreElements()) {
-      String headerName = (String)headerNames.nextElement();
-      req.addHeader(headerName, servletReq.getHeader(headerName));
+      Object obj = headerNames.nextElement();
+      if (obj instanceof String) {
+        String headerName = (String) obj;
+
+        Enumeration<?> headerValues = servletReq.getHeaders(headerName);
+        while (headerValues.hasMoreElements()) {
+          obj = headerValues.nextElement();
+          if (obj instanceof String) {
+            req.addHeader(headerName, (String) obj);
+          }
+        }
+      }
     }
+
     req.setMethod(servletReq.getMethod());
     if ("POST".equalsIgnoreCase(req.getMethod())) {
       req.setPostBody(servletReq.getInputStream());
@@ -158,9 +181,9 @@ public class ServletUtil {
     String contentType = response.getHeader("Content-Type");
     if (contentType == null) {
       contentType = "";
+    } else if (contentType.contains(";")) {
+      contentType = StringUtils.split(contentType, ';')[0].trim();
     }
-    contentType = contentType.split(";")[0].trim();
- 
     // First and most importantly, emit dataUri.
     // Do so in streaming fashion, to avoid needless buffering.
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -193,9 +216,9 @@ public class ServletUtil {
       }
       first = false;
       pw.write("'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getKey()).replaceAll("'", "\\'"));
+      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getKey()).replace("'", "\'"));
       pw.write("':'");
-      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getValue()).replaceAll("'", "\\'"));
+      pw.write(StringEscapeUtils.escapeJavaScript(metaEntry.getValue()).replace("'", "\'"));
       pw.write("'");
     }
     pw.write("\n}");

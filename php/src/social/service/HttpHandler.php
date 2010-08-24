@@ -48,7 +48,8 @@ class HttpHandler extends DataRequestHandler {
       // here from RequestItem->RpcRequestItem, but PHP doesn't seem to
       // complain.  
       $options = MakeRequestOptions::fromRpcRequestItem($requestItem);
-      $makeRequest = new MakeRequest();
+      $makeRequestClass = Config::get('makerequest_class');
+      $makeRequest = new $makeRequestClass();
       $contextClass = Config::get('gadget_context_class');
       $context = new $contextClass('GADGET');
       $response = $makeRequest->fetch($context, $options);

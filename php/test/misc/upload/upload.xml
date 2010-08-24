@@ -27,7 +27,7 @@
 
 function initData() {
   var jsonInput = document.getElementById("json-input");
-  jsonInput.value = ' [ { "method":"mediaitems.create", "params": {"albumId":"1", "mediaItem": { "id" : "11223344", "thumbnailUrl" : "http://pages.example.org/images/11223344-tn.png", "mimeType" : "image/png", "type" : "image", "url" : "@field:1.jpg", "albumId" : "1" } } } ]';
+  jsonInput.value = ' [ { "method":"mediaitems.create", "params": {"albumId":"1", "mediaItem": { "id" : "11223344", "thumbnailUrl" : "http://www.libpng.org/pub/png/img_png/pngnow.png", "mimeType" : "image/png", "type" : "image", "url" : "@field:1.jpg", "albumId" : "1" } } } ]';
   gadgets.window.adjustHeight();
 }
 

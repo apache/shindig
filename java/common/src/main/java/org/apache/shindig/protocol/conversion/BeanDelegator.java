@@ -48,6 +48,11 @@ import java.util.Map;
  */
 public class BeanDelegator {
 
+  /** Indicate NULL value for a field (To overcome shortcome of immutable map) */
+  public static final String NULL = "<NULL sentinel>";
+
+  private static final Map<String, Object> EMPTY_FIELDS = ImmutableMap.of();
+
   /** List of Classes that are considered primitives and are not proxied **/
   public static final ImmutableSet<Class<?>> PRIMITIVE_TYPE_CLASSES = ImmutableSet.of(
     String.class, Integer.class, Long.class, Boolean.class, Uri.class);
@@ -56,6 +61,11 @@ public class BeanDelegator {
   private final Map<Class<?>, Class<?>> delegatedClasses;
 
   private final Map<Enum<?>, Enum<?>> enumConvertionMap;
+
+  public BeanDelegator() {
+    this(ImmutableMap.<Class<?>, Class<?>>of(),
+         ImmutableMap.<Enum<?>, Enum<?>>of());
+  }
 
   public BeanDelegator(Map<Class<?>, Class<?>> delegatedClasses,
                        Map<Enum<?>, Enum<?>> enumConvertionMap) {
@@ -69,7 +79,7 @@ public class BeanDelegator {
    * @return proxied object according to map of classes to proxy
    */
   public Object createDelegator(Object source) {
-    if (source == null || delegatedClasses == null || delegatedClasses.size() == 0) {
+    if (source == null || delegatedClasses == null) {
       return null;
     }
 
@@ -113,10 +123,21 @@ public class BeanDelegator {
     if (delegatedClasses.containsKey(source.getClass())) {
       Class<?> apiInterface = delegatedClasses.get(source.getClass());
 
-      return Proxy.newProxyInstance( apiInterface.getClassLoader(),
-          new Class[] { apiInterface }, new DelegateInvocationHandler(source));
+      return createDelegator(source, apiInterface);
     }
     return source;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T createDelegator(Object source, Class<T> apiInterface) {
+    return createDelegator(source, apiInterface, EMPTY_FIELDS);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T createDelegator(Object source, Class<T> apiInterface,
+                               Map<String, Object> extraFields) {
+    return (T) Proxy.newProxyInstance( apiInterface.getClassLoader(),
+      new Class[] { apiInterface }, new DelegateInvocationHandler(source, extraFields));
   }
 
   public Enum<?> convertEnum(Enum<?> value) {
@@ -129,10 +150,18 @@ public class BeanDelegator {
   protected class DelegateInvocationHandler implements InvocationHandler {
     /** Proxied object */
     private final Object source;
+    /** Use the next values instead of proxying source */
+    private final Map<String, Object> extraFields;
 
     public DelegateInvocationHandler(Object source) {
+      this(source, null);
+    }
+
+    public DelegateInvocationHandler(Object source, Map<String, Object> extraFields) {
       Preconditions.checkNotNull(source);
+
       this.source = source;
+      this.extraFields = (extraFields == null ? EMPTY_FIELDS : extraFields);
     }
 
     /**
@@ -141,6 +170,14 @@ public class BeanDelegator {
      */
     public Object invoke(Object proxy, Method method, Object[] args) {
       Class<?> sourceClass = source.getClass();
+      // Return proxy fields if available
+      if (!extraFields.isEmpty() && method.getName().startsWith("get")) {
+        String field = method.getName().substring(3).toLowerCase();
+        if (extraFields.containsKey(field)) {
+          Object data = extraFields.get(field);
+          return (data == NULL ? null : data);
+        }
+      }
       try {
         Method sourceMethod = sourceClass.getMethod(
             method.getName(), method.getParameterTypes());
@@ -162,6 +199,7 @@ public class BeanDelegator {
   /**
    * Validate all proxied classes to see that all required functions are implemented.
    * Throws exception if failed validation.
+   * Note that it ignore the extra fields support.
    * @throws SecurityException
    * @throws NoSuchMethodException
    * @throws NoSuchFieldException

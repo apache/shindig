@@ -29,6 +29,8 @@ class MockHtmlGadgetFactory extends GadgetFactory {
   <ModulePrefs title="title">
     <Require feature="opensocial-0.8" />
     <Require feature="dynamic-height" />
+    <Require feature="flash" />
+    <Require feature="minimessage" />
   </ModulePrefs>
   <Content type="html" view="home">
   <![CDATA[
@@ -86,7 +88,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     $this->gadget = $gadgetSpecFactory->createGadget();
 
     // init gadgetRenderer;
-    $this->GadgetHtmlRenderer = new GadgetHtmlRenderer($this->gadgetContext);
+    $this->gadgetHtmlRenderer = new GadgetHtmlRenderer($this->gadgetContext);
 
     // init $this->doc
     $this->domDocument = new DOMDocument(null, 'utf-8');
@@ -105,7 +107,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
   protected function tearDown() {
     $this->gadget = null;
     $this->gadgetContext = null;
-    $this->GadgetHtmlRenderer = null;
+    $this->gadgetHtmlRenderer = null;
     $this->view = null;
     $this->domDocument = null;
     $this->domElement = null;
@@ -113,12 +115,64 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
     parent::tearDown();
   }
 
+  public function testGetJavaScriptsExternal() {
+    $oldForcedJsLibs = Config::get('forcedJsLibs');
+    $oldForcedAppendJsLibs = Config::get('forcedAppendedJsLibs');
+    Config::set('forcedJsLibs', 'dynamic-height:views');
+    Config::set('forcedAppendedJsLibs', array('flash'));
+    $this->gadgetHtmlRenderer->dataContext = array(
+        'Msg' => array(
+            'message1' => 'one',
+            'message2' => 'two',
+         ),
+        'UserPrefs' => array(
+            'key1' => 'value1',
+            'key2' => 'value2',
+         ),
+    );
+    $this->gadgetHtmlRenderer->gadget = $this->gadget;
+    $javaScripts = $this->gadgetHtmlRenderer->getJavaScripts();
+    Config::set('forcedJsLibs', $oldForcedJsLibs);
+    Config::set('forcedAppendedJsLibs', $oldForcedAppendJsLibs);
+    $hasExtern = false;
+    $hasInline = false;
+    foreach ($javaScripts as $script) {
+        switch ($script['type']) {
+            case 'extern':
+                if ($hasExtern) {
+                    $this->fail('two entries with script type extern');
+                }
+                $hasExtern = true;
+                $this->assertEquals(0, strpos($script['content'], '/gadgets/js/dynamic-height:views.js?'));
+                break;
+            case 'inline':
+                if ($hasInline) {
+                    $this->fail('two entries with script type inline');
+                }
+                //this is from dynamic height and should not be included
+                $this->assertFalse(strpos($script['content'], 'gadgets.window=gadgets.window||{};'));
+                //minimessage should be included
+                $miniMessagePos = strpos($script['content'], 'gadgets.MiniMessage=function');
+                $this->assertTrue($miniMessagePos > 0);
+                //we force flash to be appended, so it should be after minimessage
+                $this->assertTrue(strpos($script['content'], 'gadgets.flash=gadgets.flash||{};') > $miniMessagePos);
+                $hasInline = true;
+                break;
+            default:
+                $this->fail('invalid script type ' . $script['type']);
+        }
+    }
+    $this->assertTrue($hasExtern);
+    $this->assertTrue($hasInline);
+  }
+
   /**
    * Tests GadgetHtmlRenderer->renderGadget()
    */
   public function testRenderGadget() {
+    Config::set('P3P', ''); // prevents "modify header information" errors
     ob_start();
-    $this->GadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
     ob_end_clean();
   }
 
@@ -126,7 +180,7 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    * Tests GadgetHtmlRenderer->addBodyTags()
    */
   public function testAddBodyTags() {
-    $this->GadgetHtmlRenderer->addBodyTags($this->domElement, $this->domDocument);
+    $this->gadgetHtmlRenderer->addBodyTags($this->domElement, $this->domDocument);
     $tmpNodeList = $this->domElement->getElementsByTagName("script");
     foreach($tmpNodeList as $tmpNode) {
       $this->assertEquals('gadgets.util.runOnLoadHandlers();', $tmpNode->nodeValue);
@@ -138,13 +192,13 @@ class GadgetHtmlRendererTest extends PHPUnit_Framework_TestCase {
    */
   public function testAddHeadTags() {
     ob_start();
-    $this->GadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
+    $this->gadgetHtmlRenderer->renderGadget($this->gadget, $this->view);
     ob_end_clean();
-    $this->GadgetHtmlRenderer->addHeadTags($this->domElement, $this->domDocument);
+    $this->gadgetHtmlRenderer->addHeadTags($this->domElement, $this->domDocument);
 
     // TODO: currently we just test the script part
     $tmpNodeList = $this->domElement->getElementsByTagName("script");
-    $scripts = $this->GadgetHtmlRenderer->getJavaScripts();
+    $scripts = $this->gadgetHtmlRenderer->getJavaScripts();
 
     $idx = 0;
     foreach($tmpNodeList as $tmpNode) {

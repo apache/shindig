@@ -39,6 +39,7 @@ class GadgetContext {
   protected $containerConfig = null;
   protected $container = null;
   protected $refreshInterval;
+  protected $rawToken;
 
   public function __construct($renderingContext) {
     // Rendering context is set by the calling event handler (either GADGET or CONTAINER)
@@ -133,7 +134,8 @@ class GadgetContext {
   }
 
   protected function instanceContainerConfig() {
-    return new ContainerConfig(Config::get('container_path'));
+    $containerConfigClass = Config::get('container_config_class');
+    return new $containerConfigClass(Config::get('container_path'));
   }
 
   public function getContainer() {
@@ -260,6 +262,22 @@ class GadgetContext {
   }
 
   /**
+   * returns raw encoded token
+   * 
+   * @return string
+   */
+  public function getRawToken() {
+    if (! $this->rawToken) {
+        $this->rawToken = isset($_GET["st"]) ? $_GET["st"] : '';
+    }
+    if (! $this->rawToken) {
+      $this->rawToken = isset($_POST['st']) ? $_POST['st'] : '';
+    }
+
+    return $this->rawToken;
+  }
+
+  /**
    * Extracts the 'st' token from the GET or POST params and calls the
    * signer to validate the token
    *
@@ -270,10 +288,9 @@ class GadgetContext {
     if ($signer == null) {
       return null;
     }
-    $token = isset($_GET["st"]) ? $_GET["st"] : '';
-    if (! isset($token) || $token == '') {
-      $token = isset($_POST['st']) ? $_POST['st'] : '';
-    }
+
+    $token = $this->getRawToken();
+
     return $this->validateToken($token, $signer);
   }
 

@@ -119,12 +119,12 @@ gadgets['util'] = function() {
      * @private Implementation detail.
      */
     'getUrlParameters' : function (opt_url) {
-      if (parameters !== null && typeof opt_url === "undefined") {
+      var no_opt_url = typeof opt_url === "undefined";
+      if (parameters !== null && no_opt_url) {
         // "parameters" is a cache of current window params only.
         return parameters;
       }
       var parsed = {};
-      parameters = {};
       var pairs = parseUrlParams(opt_url || document.location.href);
       var unesc = window.decodeURIComponent ? decodeURIComponent : unescape;
       for (var i = 0, j = pairs.length; i < j; ++i) {
@@ -140,7 +140,7 @@ gadgets['util'] = function() {
         value = value.replace(/\+/g, " ");
         parsed[argName] = unesc(value);
       }
-      if (typeof opt_url === "undefined") {
+      if (no_opt_url) {
         // Cache current-window params in parameters var.
         parameters = parsed;
       }
@@ -189,8 +189,8 @@ gadgets['util'] = function() {
      * @private Implementation detail.
      */
     'makeEnum' : function (values) {
-      var obj = {};
-      for (var i = 0, v; (v = values[i]); ++i) {
+      var i, v, obj = {};
+      for (i = 0; (v = values[i]); ++i) {
         obj[v] = v;
       }
       return obj;
@@ -326,6 +326,44 @@ gadgets['util'] = function() {
     'unescapeString' : function(str) {
       if (!str) return str;
       return str.replace(/&#([0-9]+);/g, unescapeEntity);
+    },
+
+
+    /**
+     * Attach an event listener to given DOM element (Not a gadget standard)
+     * 
+     * @param {object} elem  DOM element on which to attach event.
+     * @param {string} eventName  Event type to listen for.
+     * @param {function} callback  Invoked when specified event occurs.
+     * @param {boolean} useCapture  If true, initiates capture.
+     */
+    'attachBrowserEvent': function(elem, eventName, callback, useCapture) {
+      if (typeof elem.addEventListener != 'undefined') {
+        elem.addEventListener(eventName, callback, useCapture);
+      } else if (typeof elem.attachEvent != 'undefined') {
+        elem.attachEvent('on' + eventName, callback);
+      } else {
+        gadgets.warn("cannot attachBrowserEvent: " + eventName);
+      }
+    },
+
+    /**
+     * Remove event listener. (Shindig internal implementation only)
+     * 
+     * @param {object} elem  DOM element from which to remove event.
+     * @param {string} eventName  Event type to remove.
+     * @param {function} callback  Listener to remove.
+     * @param {boolean} useCapture  Specifies whether listener being removed was added with
+     *                              capture enabled.
+     */
+    'removeBrowserEvent': function(elem, eventName, callback, useCapture) {
+      if (elem.removeEventListener) {
+        elem.removeEventListener(eventName, callback, useCapture);
+      } else if (elem.detachEvent){
+        elem.detachEvent('on' + eventName, callback);
+      } else {
+        gadgets.warn("cannot removeBrowserEvent: " + eventName);
+      }
     }
   };
 }();

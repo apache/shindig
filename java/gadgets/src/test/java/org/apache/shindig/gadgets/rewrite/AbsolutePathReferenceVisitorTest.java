@@ -110,7 +110,32 @@ public class AbsolutePathReferenceVisitorTest extends DomWalkerTestBase {
 
   @Test
   public void absolutifyTagLink() throws Exception {
-    checkAbsolutifyStates("link");
+    Element cssLink = elem("link", "href", RELATIVE_URI.toString(),
+                           "rel", "stylesheet", "type", "text/css");
+    assertEquals("CSS link tag should not be bypassed",
+                 VisitStatus.MODIFY, getVisitStatus(cssLink));
+  }
+
+  @Test
+  public void bypassTagLinkWithNoRel() throws Exception {
+    Element cssLink = elem("link", "href", RELATIVE_URI.toString(), "type", "text/css");
+    assertEquals("CSS link tag should be bypassed",
+                 VisitStatus.BYPASS, getVisitStatus(cssLink));
+  }
+
+  @Test
+  public void bypassTagLinkWithNoType() throws Exception {
+    Element cssLink = elem("link", "href", RELATIVE_URI.toString(), "rel", "stylesheet");
+    assertEquals("CSS link tag should be bypassed",
+                 VisitStatus.BYPASS, getVisitStatus(cssLink));
+  }
+
+  @Test
+  public void bypassTagLinkAlternate() throws Exception {
+    Element cssLink = elem("link", "href", RELATIVE_URI.toString(),
+                           "rel", "alternate", "hreflang", "el");
+    assertEquals("CSS link tag should be bypassed",
+                 VisitStatus.BYPASS, getVisitStatus(cssLink));
   }
 
   @Test

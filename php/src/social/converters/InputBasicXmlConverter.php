@@ -19,7 +19,7 @@
  */
 
 /**
- * Basic methods for InputAtomConverter and InputXmlConverter.
+ * Basic methods for converting Atom and XML
  */
 class InputBasicXmlConverter {
 

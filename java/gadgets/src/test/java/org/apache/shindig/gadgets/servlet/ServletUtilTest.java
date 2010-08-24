@@ -18,13 +18,6 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Vector;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shindig.common.servlet.HttpServletResponseRecorder;
 import org.apache.shindig.common.servlet.HttpUtil;
@@ -35,13 +28,20 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.easymock.EasyMock;
-
 import org.json.JSONObject;
 import org.junit.Test;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ServletUtilTest {
   @Test
@@ -130,6 +130,11 @@ public class ServletUtilTest {
     checkOutputDataUri("text/bar; charset=ISO-8859-1", "text/bar", "ISO-8859-1");
   }
   
+  @Test
+  public void testOutputDataUriWithEmptyCharset() throws Exception {
+    checkOutputDataUri("text/bar; charset=", "text/bar", "UTF-8");
+  }
+
   private void checkOutputDataUri(String contentType, String expectedType,
       String expectedEncoding) throws Exception {
     String theData = "this is the data";
@@ -172,8 +177,10 @@ public class ServletUtilTest {
     headerNames.add("Header1");
     headerNames.add("Header2");
     EasyMock.expect(original.getHeaderNames()).andReturn(headerNames.elements());
-    EasyMock.expect(original.getHeader("Header1")).andReturn("HVal1");
-    EasyMock.expect(original.getHeader("Header2")).andReturn("HVal2");
+    EasyMock.expect(original.getHeaders("Header1"))
+        .andReturn(makeEnumeration("HVal1", "HVal3"));
+    EasyMock.expect(original.getHeaders("Header2"))
+        .andReturn(makeEnumeration("HVal2", "HVal4"));
     EasyMock.expect(original.getMethod()).andReturn("post");
     final ByteArrayInputStream bais = new ByteArrayInputStream("post body".getBytes());
     ServletInputStream sis = new ServletInputStream() {
@@ -192,8 +199,10 @@ public class ServletUtilTest {
     assertEquals(Uri.parse("https://www.example.org:444/path/foo?one=two&three=four"),
         request.getUri());
     assertEquals(3, request.getHeaders().size());
-    assertEquals("HVal1", request.getHeader("Header1"));
-    assertEquals("HVal2", request.getHeader("Header2"));
+    assertEquals("HVal1", request.getHeaders("Header1").get(0));
+    assertEquals("HVal3", request.getHeaders("Header1").get(1));
+    assertEquals("HVal2", request.getHeaders("Header2").get(0));
+    assertEquals("HVal4", request.getHeaders("Header2").get(1));
     assertEquals("post", request.getMethod());
     assertEquals("post body", request.getPostBodyAsString());
     assertEquals("1.2.3.4", request.getParam(ServletUtil.REMOTE_ADDR_KEY));
@@ -235,5 +244,11 @@ public class ServletUtilTest {
     assertEquals("v2", recorder.getHeader("h2"));
     assertEquals("no-cache", recorder.getHeader("Pragma"));
     assertEquals("no-cache", recorder.getHeader("Cache-Control"));
+  }
+
+  Enumeration<String> makeEnumeration(String... args) {
+    Vector<String> vector = new Vector<String>();
+    vector.addAll(Arrays.asList(args));
+    return vector.elements();
   }
 }

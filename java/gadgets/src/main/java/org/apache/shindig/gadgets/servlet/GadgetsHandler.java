@@ -20,25 +20,14 @@ package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
-import org.apache.shindig.auth.SecurityToken;
-import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.process.Processor;
-import org.apache.shindig.gadgets.spec.Feature;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
-import org.apache.shindig.gadgets.spec.LinkSpec;
-import org.apache.shindig.gadgets.spec.ModulePrefs;
-import org.apache.shindig.gadgets.spec.UserPref;
-import org.apache.shindig.gadgets.spec.View;
-import org.apache.shindig.gadgets.spec.UserPref.EnumValuePair;
-import org.apache.shindig.gadgets.uri.IframeUriManager;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
@@ -47,6 +36,7 @@ import org.apache.shindig.protocol.Service;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
 import org.apache.shindig.protocol.conversion.BeanFilter;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -65,63 +55,29 @@ public class GadgetsHandler {
   @VisibleForTesting
   static final String FAILURE_TOKEN = "Failed to get gadget token.";
 
-  private static final Set<String> DEFAULT_METADATA_FIELDS =
-      ImmutableSet.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*", "token");
+  private static final List<String> DEFAULT_METADATA_FIELDS =
+      ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*", "token");
+
+  private static final List<String> DEFAULT_TOKEN_FIELDS = ImmutableList.of("token");
 
   protected final ExecutorService executor;
-  protected final Processor processor;
-  protected final IframeUriManager iframeUriManager;
-  protected final SecurityTokenCodec securityTokenCodec;
+  protected final GadgetsHandlerService handlerService;
 
-  protected final BeanDelegator beanDelegator;
   protected final BeanFilter beanFilter;
-
-  // Map shindig data class to API interfaces
-  @VisibleForTesting
-  static final Map<Class<?>, Class<?>> apiClasses =
-      new ImmutableMap.Builder<Class<?>, Class<?>>()
-          .put(BaseResponseData.class, GadgetsHandlerApi.BaseResponse.class)
-          .put(MetadataResponseData.class, GadgetsHandlerApi.MetadataResponse.class)
-          .put(TokenResponseData.class, GadgetsHandlerApi.TokenResponse.class)
-          .put(View.class, GadgetsHandlerApi.View.class)
-          .put(UserPref.class, GadgetsHandlerApi.UserPref.class)
-          .put(EnumValuePair.class, GadgetsHandlerApi.EnumValuePair.class)
-          .put(ModulePrefs.class, GadgetsHandlerApi.ModulePrefs.class)
-          .put(Feature.class, GadgetsHandlerApi.Feature.class)
-          .put(LinkSpec.class, GadgetsHandlerApi.LinkSpec.class)
-          // Enums
-          .put(View.ContentType.class, GadgetsHandlerApi.ViewContentType.class)
-          .put(UserPref.DataType.class, GadgetsHandlerApi.UserPrefDataType.class)
-          .build();
-
-  // Provide mapping for internal enums to api enums
-  @VisibleForTesting
-  static final Map<Enum<?>, Enum<?>> enumConversionMap =
-      new ImmutableMap.Builder<Enum<?>, Enum<?>>()
-          // View.ContentType mapping
-          .putAll(BeanDelegator.createDefaultEnumMap(View.ContentType.class,
-              GadgetsHandlerApi.ViewContentType.class))
-          // UserPref.DataType mapping
-          .putAll(BeanDelegator.createDefaultEnumMap(UserPref.DataType.class,
-              GadgetsHandlerApi.UserPrefDataType.class))
-          .build();
+  protected final BeanDelegator beanDelegator;
 
   @Inject
-  public GadgetsHandler(ExecutorService executor, Processor processor,
-      IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
-      BeanFilter beanFilter) {
+  public GadgetsHandler(ExecutorService executor, GadgetsHandlerService handlerService,
+                        BeanFilter beanFilter) {
     this.executor = executor;
-    this.processor = processor;
-    this.iframeUriManager = iframeUriManager;
-    this.securityTokenCodec = securityTokenCodec;
+    this.handlerService = handlerService;
     this.beanFilter = beanFilter;
 
-    // TODO: maybe make this injectable
-    this.beanDelegator = new BeanDelegator(apiClasses, enumConversionMap);
+    this.beanDelegator = new BeanDelegator();
   }
 
   @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
-  public Map<String, GadgetsHandlerApi.MetadataResponse> metadata(BaseRequestItem request)
+  public Map<String, GadgetsHandlerApi.BaseResponse> metadata(BaseRequestItem request)
       throws ProtocolException {
     return new AbstractExecutor<GadgetsHandlerApi.MetadataResponse>() {
       @Override
@@ -133,7 +89,7 @@ public class GadgetsHandler {
   }
 
   @Operation(httpMethods = {"POST", "GET"}, path = "token.get")
-  public Map<String, GadgetsHandlerApi.TokenResponse> token(BaseRequestItem request)
+  public Map<String, GadgetsHandlerApi.BaseResponse> token(BaseRequestItem request)
       throws ProtocolException {
     return new AbstractExecutor<GadgetsHandlerApi.TokenResponse>() {
       @Override
@@ -158,7 +114,7 @@ public class GadgetsHandler {
 
   private abstract class AbstractExecutor<R extends GadgetsHandlerApi.BaseResponse> {
     @SuppressWarnings("unchecked")
-    public Map<String, R> execute(BaseRequestItem request) {
+    public Map<String, GadgetsHandlerApi.BaseResponse> execute(BaseRequestItem request) {
       Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
       if (gadgetUrls.isEmpty()) {
         return ImmutableMap.of();
@@ -170,12 +126,12 @@ public class GadgetsHandler {
         completionService.submit(job);
       }
 
-      ImmutableMap.Builder<String, R> builder = ImmutableMap.builder();
+      ImmutableMap.Builder<String, GadgetsHandlerApi.BaseResponse> builder = ImmutableMap.builder();
       for (int numJobs = gadgetUrls.size(); numJobs > 0; numJobs--) {
         R response;
         try {
           response = completionService.take().get();
-          builder.put(response.getUrl(), response);
+          builder.put(response.getUrl().toString(), response);
         } catch (InterruptedException e) {
           throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
               "Processing interrupted.", e);
@@ -187,10 +143,10 @@ public class GadgetsHandler {
           RpcException cause = (RpcException) e.getCause();
           GadgetContext context = cause.getContext();
           if (context != null) {
-            String url = context.getUrl().toString();
-            R errorResponse =
-                (R) beanDelegator.createDelegator(new BaseResponseData(url, cause.getMessage()));
-            builder.put(url, errorResponse);
+            Uri url = context.getUrl();
+            GadgetsHandlerApi.BaseResponse errorResponse =
+                handlerService.createBaseResponse(url, cause.getMessage());
+            builder.put(url.toString(), errorResponse);
           }
         }
       }
@@ -203,23 +159,14 @@ public class GadgetsHandler {
   // Hook to override in sub-class.
   protected Callable<GadgetsHandlerApi.MetadataResponse> createMetadataJob(String url,
       BaseRequestItem request) {
-    final GadgetContext context = new MetadataGadgetContext(url, request);
-    final Set<String> fields =
-        beanFilter.processBeanFields(request.getFields(DEFAULT_METADATA_FIELDS));
+    final MetadataRequestData metadataRequest = new MetadataRequestData(url, request);
     return new Callable<GadgetsHandlerApi.MetadataResponse>() {
       public GadgetsHandlerApi.MetadataResponse call() throws Exception {
         try {
-          Gadget gadget = processor.process(context);
-          String iframeUrl =
-              fields.contains("iframeurl") ? iframeUriManager.makeRenderingUri(gadget).toString()
-                  : null;
-          MetadataResponseData response =
-              new MetadataResponseData(context.getUrl().toString(), gadget.getSpec(), iframeUrl);
-          return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(beanDelegator
-              .createDelegator(response), fields);
+          return handlerService.getMetadata(metadataRequest);
         } catch (Exception e) {
-          // Note: this error message is publicly visible in JSON-RPC response.
-          throw new RpcException(context, FAILURE_METADATA, e);
+          sendError(metadataRequest.getUrl(), e, FAILURE_METADATA);
+          return null;
         }
       }
     };
@@ -228,63 +175,87 @@ public class GadgetsHandler {
   // Hook to override in sub-class.
   protected Callable<GadgetsHandlerApi.TokenResponse> createTokenJob(String url,
       BaseRequestItem request) {
-    final TokenGadgetContext context = new TokenGadgetContext(url, request);
-    final Set<String> fields =
-        beanFilter.processBeanFields(request.getFields(DEFAULT_METADATA_FIELDS));
+    final TokenRequestData tokenRequest = new TokenRequestData(url, request);
     return new Callable<GadgetsHandlerApi.TokenResponse>() {
       public GadgetsHandlerApi.TokenResponse call() throws Exception {
         try {
-          String token = securityTokenCodec.encodeToken(context.getToken());
-          TokenResponseData response = new TokenResponseData(context.getUrl().toString(), token);
-          return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(beanDelegator
-              .createDelegator(response), fields);
+          return handlerService.getToken(tokenRequest);
         } catch (Exception e) {
-          // Note: this error message is publicly visible in JSON-RPC response.
-          throw new RpcException(context, FAILURE_TOKEN, e);
+          sendError(tokenRequest.getUrl(), e, FAILURE_TOKEN);
+          return null;
         }
       }
     };
+  }
+
+  private void sendError(final Uri url, Exception e, String msg)
+      throws RpcException {
+    GadgetContext context = new GadgetContext() {
+      @Override
+      public Uri getUrl() { return url; }
+    };
+    // Note: this error message is publicly visible in JSON-RPC response.
+    throw new RpcException(context, msg, e);
   }
 
   /**
    * Gadget context classes used to translate JSON BaseRequestItem into a more
    * meaningful model objects that Java can work with.
    */
-
-  private abstract class AbstractGadgetContext extends GadgetContext {
+  private abstract class AbstractRequest implements GadgetsHandlerApi.BaseRequest {
     protected final Uri uri;
     protected final String container;
+    protected final List<String> fields;
     protected final BaseRequestItem request;
 
-    public AbstractGadgetContext(String url, BaseRequestItem request) {
+    public AbstractRequest(String url, BaseRequestItem request, List<String> defaultFields) {
       this.uri = Uri.parse(Preconditions.checkNotNull(url));
       this.request = Preconditions.checkNotNull(request);
       this.container = Preconditions.checkNotNull(request.getParameter("container"));
+      this.fields = processFields(request, defaultFields);
     }
 
-    @Override
     public Uri getUrl() {
       return uri;
     }
 
-    @Override
     public String getContainer() {
       return container;
     }
 
-    @Override
-    public RenderingContext getRenderingContext() {
-      return RenderingContext.METADATA;
+    public List<String> getFields() {
+      return fields;
+    }
+
+    private List<String> processFields(BaseRequestItem request, List<String> defaultList) {
+      List<String> value = request.getListParameter(BaseRequestItem.FIELDS);
+      return ((value == null || value.size() == 0) ? defaultList : value);
     }
   }
 
-  protected class MetadataGadgetContext extends AbstractGadgetContext {
+
+  protected class TokenRequestData extends AbstractRequest
+      implements GadgetsHandlerApi.TokenRequest {
+
+    public TokenRequestData(String url, BaseRequestItem request) {
+      super(url, request, DEFAULT_TOKEN_FIELDS);
+    }
+
+    public GadgetsHandlerApi.TokenData getToken() {
+      return beanDelegator.createDelegator(
+          request.getToken(), GadgetsHandlerApi.TokenData.class);
+    }
+  }
+
+
+  protected class MetadataRequestData extends AbstractRequest
+      implements GadgetsHandlerApi.MetadataRequest {
     protected final Locale locale;
     protected final boolean ignoreCache;
     protected final boolean debug;
 
-    public MetadataGadgetContext(String url, BaseRequestItem request) {
-      super(url, request);
+    public MetadataRequestData(String url, BaseRequestItem request) {
+      super(url, request, DEFAULT_METADATA_FIELDS);
       String lang = request.getParameter("language");
       String country = request.getParameter("country");
       this.locale =
@@ -294,120 +265,29 @@ public class GadgetsHandler {
       this.debug = Boolean.valueOf(request.getParameter("debug"));
     }
 
-    @Override
     public int getModuleId() {
       return 1; // TODO calculate?
     }
 
-    @Override
     public Locale getLocale() {
       return locale;
     }
 
-    @Override
     public boolean getIgnoreCache() {
       return ignoreCache;
     }
 
-    @Override
     public boolean getDebug() {
       return debug;
     }
 
-    @Override
     public String getView() {
       return request.getParameter("view", "default");
     }
 
-    @Override
-    public SecurityToken getToken() {
-      return request.getToken();
+    public GadgetsHandlerApi.TokenData getToken() {
+      return beanDelegator.createDelegator(
+        request.getToken(), GadgetsHandlerApi.TokenData.class);
     }
   }
-
-  protected class TokenGadgetContext extends AbstractGadgetContext {
-    public TokenGadgetContext(String url, BaseRequestItem request) {
-      super(url, request);
-    }
-
-    @Override
-    public SecurityToken getToken() {
-      return request.getToken();
-    }
-  }
-
-  /**
-   * Response classes to represent data structure returned in JSON to common
-   * container JS. They must be public for reflection to work.
-   */
-
-  public static class BaseResponseData {
-    private final String url;
-    private final String error;
-
-    // Call this to indicate an error.
-    public BaseResponseData(String url, String error) {
-      this.url = url;
-      this.error = error;
-    }
-
-    // Have sub-class call this to indicate a success response.
-    protected BaseResponseData(String url) {
-      this(url, null);
-    }
-
-    public String getUrl() {
-      return url;
-    }
-
-    public String getError() {
-      return error;
-    }
-  }
-
-  public static class MetadataResponseData extends BaseResponseData {
-    private final GadgetSpec spec;
-    private final String iframeUrl;
-
-    public MetadataResponseData(String url, GadgetSpec spec, String iframeUrl) {
-      super(url);
-      this.spec = spec;
-      this.iframeUrl = iframeUrl;
-    }
-
-    public String getIframeUrl() {
-      return iframeUrl;
-    }
-
-    public String getChecksum() {
-      return spec.getChecksum();
-    }
-
-    public ModulePrefs getModulePrefs() {
-      return spec.getModulePrefs();
-    }
-
-    public Map<String, UserPref> getUserPrefs() {
-      return spec.getUserPrefs();
-    }
-
-    public Map<String, View> getViews() {
-      return spec.getViews();
-    }
-  }
-
-
-  public static class TokenResponseData extends BaseResponseData {
-    private final String token;
-
-    public TokenResponseData(String url, String token) {
-      super(url);
-      this.token = token;
-    }
-
-    public String getToken() {
-      return token;
-    }
-  }
-
 }

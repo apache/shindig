@@ -198,7 +198,7 @@ public class Expressions {
     
   }
   
-  private class ValueExpressionWrapper extends ValueExpression {
+  private static class ValueExpressionWrapper extends ValueExpression {
 
     private static final long serialVersionUID = 2135607228206570229L;
     private ValueExpression expression = null;

@@ -34,7 +34,8 @@ class ProxyBase {
     if (isset($makeRequest)) {
       $this->makeRequest = $makeRequest;
     } else {
-      $this->makeRequest = new MakeRequest();
+      $makeRequestClass = Config::get('makerequest_class');
+      $this->makeRequest = new $makeRequestClass();
     }
   }
 

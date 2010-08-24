@@ -448,11 +448,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
     var adjustNavigationFn = function() {
       me.adjustNavigation_();
     };
-    if (window.addEventListener) {
-      window.addEventListener('resize', adjustNavigationFn, false);
-    } else if (window.attachEvent) {
-      window.attachEvent('onresize', adjustNavigationFn);
-    }
+    gadgets.util.attachBrowserEvent(window, "resize", adjustNavigationFn, false);
   }
 
   this.navTable_ = navTable;

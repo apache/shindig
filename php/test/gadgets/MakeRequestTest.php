@@ -35,6 +35,8 @@ class MockMakeRequestFetcher extends RemoteContentFetcher {
    * Constructor.
    */
   public function __construct() {
+    $_SERVER["HTTP_HOST"] = 'localhost';
+    date_default_timezone_set('GMT');
     $this->responses = array();
     $this->requests = array();
   }
@@ -161,7 +163,7 @@ class MakeRequestTest extends PHPUnit_Framework_TestCase {
     $params = new MakeRequestOptions('http://www.example.com');
     $params->setAuthz('SIGNED')
            ->setNoCache(true)
-           ->setSecurityTokenString(urlencode(base64_encode($token->toSerialForm())));
+           ->setSecurityTokenString(urldecode($token->toSerialForm()));
 
     $request = $this->catchRequest($params, $this->response);
 
@@ -183,7 +185,7 @@ class MakeRequestTest extends PHPUnit_Framework_TestCase {
     $params->setAuthz('SIGNED')
            ->setNoCache(true)
            ->setSignViewer(false)
-           ->setSecurityTokenString(urlencode(base64_encode($token->toSerialForm())));
+           ->setSecurityTokenString(urldecode($token->toSerialForm()));
 
     $request = $this->catchRequest($params, $this->response);
 

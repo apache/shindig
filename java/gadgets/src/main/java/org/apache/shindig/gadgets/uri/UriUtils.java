@@ -37,6 +37,9 @@ import java.util.Set;
  */
 public class UriUtils {
   private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
+
+  private UriUtils() {}
+  
   /**
    * Enum of disallowed response headers that should not be passed on as is to
    * the user. The webserver serving out the response should be responsible
@@ -214,7 +217,7 @@ public class UriUtils {
                                      HttpRequest req) throws GadgetException {
     req.setMethod(origRequest.getMethod());
     try {
-      if (origRequest.getMethod().toLowerCase().equals("post")) {
+      if (origRequest.getMethod().equalsIgnoreCase("post")) {
         req.setPostBody(origRequest.getPostBody());
       }
     } catch (IOException e) {

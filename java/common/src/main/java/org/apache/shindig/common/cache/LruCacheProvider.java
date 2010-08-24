@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.cache;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
@@ -83,22 +84,15 @@ public class LruCacheProvider implements CacheProvider {
 
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
-    int capacity = getCapacity(name);
-    if (name == null) {
+    int capacity = getCapacity(Preconditions.checkNotNull(name));
+    Cache<K, V> cache = (Cache<K, V>) caches.get(name);
+    if (cache == null) {
       if (LOG.isLoggable(Level.FINE)) {
-        LOG.fine("Creating anonymous cache");
+        LOG.fine("Creating cache named " + name);
       }
-      return new LruCache<K, V>(capacity);
-    } else {
-      Cache<K, V> cache = (Cache<K, V>) caches.get(name);
-      if (cache == null) {
-        if (LOG.isLoggable(Level.FINE)) {
-          LOG.fine("Creating cache named " + name);
-        }
-        cache = new LruCache<K, V>(capacity);
-        caches.put(name, cache);
-      }
-      return cache;
+      cache = new LruCache<K, V>(capacity);
+      caches.put(name, cache);
     }
+    return cache;
   }
 }

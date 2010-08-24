@@ -130,7 +130,13 @@ $shindigConfig = array(
   'jsondb_path' => realpath(dirname(__FILE__) . '/../../content/sampledata') . '/canonicaldb.json',
 
   // Force these libraries to be external (included through <script src="..."> tags), this way they could be cached by the browser
+  // these libraries will be included regardless of the features the gadget requests
+  // example: 'dynamic-height:views' includes the features dynamic-height and views
   'forcedJsLibs' => '',
+
+  // Force these js libraries to be appended to each gadget regardless if the gadget requested them or not
+  // This can be useful to overwrite existing methods of other javascript packages
+  'forcedAppendedJsLibs' => array(),
 
   // After checking the internal __autoload function, shindig can also call the 'extension_autoloader' function to load an
   // unknown custom class, this is particuarly useful for when intergrating shindig into an existing framework that also depends on autoloading
@@ -146,6 +152,36 @@ $shindigConfig = array(
   // The OAuth Store is used to store the (gadgets/)oauth proxy credentials it obtained on behalf of the user/gadget combo
   'oauth_store' => 'BasicOAuthStore',
 
+ 
+  // handler for ApiServlet
+  'service_handler' => array(
+    'people' => 'PersonHandler',
+    'activities' => 'ActivityHandler',
+    'appdata' => 'AppDataHandler',
+    'groups' => 'GroupHandler',
+    'messages' => 'MessagesHandler',
+    'cache'  => 'InvalidateHandler',
+    'system' => 'SystemHandler',
+    'albums' => 'AlbumHandler',
+    'mediaitems' => 'MediaItemHandler',
+    'http' => 'HttpHandler',
+  ),
+ 
+  // class is the name of the concrete input converter class
+  // targetField is the name of the field where the decoded array will be inserted
+  // into the params array or null if you want to overwrite params with the decoded
+  // array or false if you do not want to add the decoded params
+  'service_input_converter' => array(
+    'people' => array('class' => 'InputPeopleConverter', 'targetField' => false),
+    'activities' => array('class' => 'InputActivitiesConverter', 'targetField' => 'activity'),
+    'appdata' => array('class' => 'InputAppDataConverter', 'targetField' => 'data'),
+    'messages' => array('class' => 'InputMessagesConverter', 'targetField' => 'entity'),
+    'cache'  => array('class' => 'InputInvalidateConverter', 'targetField' => null),
+    'albums' => array('class' => 'InputAlbumsConverter', 'targetField' => 'album'),
+    'mediaitems' => array('class' => 'InputMediaItemsConverter', 'targetField' => 'mediaItem'),
+  ),
+ 
+ 
   'gadget_class' => 'Gadget',
   'gadget_context_class' => 'GadgetContext',
   'gadget_factory_class' => 'GadgetFactory',
@@ -153,7 +189,10 @@ $shindigConfig = array(
   'gadget_spec_class' => 'GadgetSpec',
   'substitution_class' => 'Substitutions',
   'proxy_handler' => 'ProxyHandler',
-  
+  'makerequest_handler' => 'MakeRequestHandler',
+  'makerequest_class' => 'MakeRequest',
+  'container_config_class' => 'ContainerConfig',
+
   // Caching back-end's to use. Shindig ships with CacheStorageFile, CacheStorageApc and CacheStorageMemcache support
   // The data cache is primarily used for remote content (proxied files, gadget spec, etc)
   // and the feature_cache is used to cache the parsed features xml structure and javascript

@@ -26,6 +26,7 @@ import com.google.inject.name.Named;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
+import org.apache.shindig.common.util.Utf8UrlCoder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -39,22 +40,22 @@ import java.util.Map;
 
 /**
  * Generates URIs for use by the Shindig proxy service.
- * 
+ *
  * URIs are generated on the host specified in ContainerConfig at key
  * "gadgets.uri.proxy.host".
- * 
+ *
  * The remainder of the URL may reference either chained or query-style
  * proxy syntax. The former is used when "gadgets.uri.proxy.path" has token
  * "%chained_params%" in it.
- * 
+ *
  * Chained: Returned URI contains query params in its path, with the proxied
  * resource's URI appended verbatim to the end. This enables proxied SWFs
  * to perform proxied, relative-URI resource loads. Example:
  * http://www.example.com/gadgets/proxy/refresh=1&.../http://www.foo.com/img.gif
- * 
+ *
  * Query param: All params are provided on the query string. Example:
  * http://www.example.com/gadgets/proxy?refresh=1&url=http://www.foo.com/img.gif&...
- * 
+ *
  * This implementation supports batched versioning as well. The old-style "fp"
  * (fingerprint) parameter is not supported any longer; its functionality is assumed
  * to be subsumed into the version param.
@@ -67,30 +68,30 @@ public class DefaultProxyUriManager implements ProxyUriManager {
   private final ContainerConfig config;
   private final Versioner versioner;
   private boolean strictParsing = false;
-  
+
   @Inject
   public DefaultProxyUriManager(ContainerConfig config,
                                 @Nullable Versioner versioner) {
     this.config = config;
     this.versioner = versioner;
   }
-  
+
   @Inject(optional = true)
   public void setUseStrictParsing(@Named("shindig.uri.proxy.use-strict-parsing") boolean useStrict) {
     this.strictParsing = useStrict;
   }
-  
+
   public List<Uri> make(List<ProxyUri> resources, Integer forcedRefresh) {
     if (resources.isEmpty()) {
       return Collections.emptyList();
     }
 
     List<Uri> resourceUris = Lists.newArrayListWithCapacity(resources.size());
-    
+
     for (ProxyUri puc : resources) {
       resourceUris.add(puc.getResource());
     }
-    
+
     Map<Uri, String> versions;
     if (versioner == null) {
       versions = Collections.emptyMap();
@@ -106,12 +107,12 @@ public class DefaultProxyUriManager implements ProxyUriManager {
         }
       }
     }
-    
+
     List<Uri> result = Lists.newArrayListWithCapacity(resources.size());
     for (ProxyUri puc : resources) {
       result.add(makeProxiedUri(puc, forcedRefresh, versions.get(puc.getResource())));
     }
-    
+
     return result;
   }
 
@@ -120,10 +121,8 @@ public class DefaultProxyUriManager implements ProxyUriManager {
 
     String container = puc.getContainer();
     UriBuilder uri = new UriBuilder();
-    // TODO need to decide http vs https
-    uri.setScheme("http");
     uri.setAuthority(getReqConfig(container, PROXY_HOST_PARAM));
-    
+
     // Chained vs. query-style syntax is determined by the presence of CHAINED_PARAMS_TOKEN
     String path = getReqConfig(container, PROXY_PATH_PARAM);
     if (path.contains(CHAINED_PARAMS_TOKEN)) {
@@ -134,20 +133,20 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       String curUri = uriStr + (!uriStr.endsWith("/") ? "/" : "") + puc.getResource().toString();
       return Uri.parse(curUri);
     }
-    
+
     // Query-style syntax. Use path as normal and append query params at the end.
     queryBuilder.addQueryParameter(Param.URL.getKey(), puc.getResource().toString());
     uri.setQuery(queryBuilder.getQuery());
     uri.setPath(path);
-    
+
     return uri.toUri();
   }
-  
+
   @SuppressWarnings("deprecation")
   public ProxyUri process(Uri uriIn) throws GadgetException {
     UriStatus status = UriStatus.BAD_URI;
     Uri uri = null;
-    
+
     // First determine if the URI is chained-syntax or query-style.
     String container = uriIn.getQueryParameter(Param.CONTAINER.getKey());
     if (container == null) {
@@ -165,6 +164,12 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       // Check for chained query string in the path.
       String containerStr = Param.CONTAINER.getKey() + '=';
       String path = uriIn.getPath();
+      // It is possible to get decoded url ('=' converted to %3d)
+      // for example from CssResponseRewriter, so we should support it
+      boolean doDecode = (!path.contains(containerStr));
+      if (doDecode) {
+        path = Utf8UrlCoder.decode(path);
+      }
       int start = path.indexOf(containerStr);
       if (start > 0) {
         start += containerStr.length();
@@ -179,8 +184,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
         if (container != null) {
           String proxyPath = config.getString(container, PROXY_PATH_PARAM);
           if (proxyPath != null) {
-            String[] chainedChunks = StringUtils.splitByWholeSeparatorPreserveAllTokens(proxyPath, CHAINED_PARAMS_TOKEN);
-            
+            String[] chainedChunks = StringUtils.splitByWholeSeparatorPreserveAllTokens(
+                proxyPath, CHAINED_PARAMS_TOKEN);
+
             // Parse out the URI of the actual resource. This URI is found as the
             // substring of the "full" URI, after the chained proxy prefix. We
             // first search for the pre- and post-fixes of the original /pre/%chained_params%/post
@@ -190,24 +196,28 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             if (chainedChunks.length == 2 && chainedChunks[1].length() > 0) {
               endToken = chainedChunks[1];
             }
-            
+
             // Pull URI out of original inUri's full representation.
             String fullProxyUri = uriIn.toString();
             int startIx = fullProxyUri.indexOf(startToken) + startToken.length();
             int endIx = fullProxyUri.indexOf(endToken, startIx);
             if (startIx > 0 && endIx > 0) {
-              queryUri = new UriBuilder().setQuery(fullProxyUri.substring(startIx,endIx)).toUri();
+              String chainedQuery = fullProxyUri.substring(startIx, endIx);
+              if (doDecode) {
+                chainedQuery = Utf8UrlCoder.decode(chainedQuery);
+              }
+              queryUri = new UriBuilder().setQuery(chainedQuery).toUri();
               uriStr = fullProxyUri.substring(endIx + endToken.length());
               while (uriStr.startsWith("/")) {
                 uriStr = uriStr.substring(1);
               }
-              
+
             }
           }
         }
       }
     }
-    
+
     if (!strictParsing && container != null && StringUtils.isEmpty(uriStr)) {
       // Query-style despite the container being configured for chained style.
       uriStr = uriIn.getQueryParameter(Param.URL.getKey());
@@ -222,7 +232,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
           (StringUtils.isEmpty(container) ? ' ' + Param.CONTAINER.getKey() : ""),
           HttpResponse.SC_BAD_REQUEST);
     }
-    
+
     String queryHost = config.getString(container, PROXY_HOST_PARAM);
     if (strictParsing) {
       if (queryHost == null || !queryHost.equalsIgnoreCase(uriIn.getAuthority())) {
@@ -230,7 +240,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
             HttpResponse.SC_BAD_REQUEST);
       }
     }
-    
+
     try {
       uri = Uri.parse(uriStr);
     } catch (Exception e) {
@@ -238,7 +248,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       throw new GadgetException(GadgetException.Code.INVALID_PARAMETER,
           "Invalid " + Param.URL.getKey() + ": " + uriStr, HttpResponse.SC_BAD_REQUEST);
     }
-    
+
     // URI is valid.
     status = UriStatus.VALID_UNVERSIONED;
 
@@ -246,7 +256,7 @@ public class DefaultProxyUriManager implements ProxyUriManager {
     if (versioner != null && version != null) {
       status = versioner.validate(uri, container, version);
     }
-    
+
     return new ProxyUri(status, uri, queryUri);
   }
 

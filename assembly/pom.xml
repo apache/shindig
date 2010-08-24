@@ -146,6 +146,11 @@ year=${year}
     </dependency>
     <dependency>
       <groupId>org.apache.shindig</groupId>
+      <artifactId>shindig-extras</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shindig</groupId>
       <artifactId>shindig-server</artifactId>
       <version>${project.version}</version>
       <type>war</type>

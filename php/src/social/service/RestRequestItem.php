@@ -26,9 +26,9 @@ class RestRequestItem extends RequestItem {
   private $params;
   
   /**
-   * @var InputConverter
+   * @var string
    */
-  private $inputConverter;
+  private $inputConverterMethod;
   
   /**
    * @var OutputConverter
@@ -36,17 +36,17 @@ class RestRequestItem extends RequestItem {
   private $outputConverter;
   private $postData;
 
-  public function __construct($service, $method, SecurityToken $token, $inputConverter, $outputConverter) {
+  public function __construct($service, $method, SecurityToken $token, $inputConverterMethod, $outputConverter) {
     parent::__construct($service, $method, $token);
-    $this->inputConverter = $inputConverter;
+    $this->inputConverterMethod = $inputConverterMethod;
     $this->outputConverter = $outputConverter;
   }
 
   /**
    * @return RestRequestItem
    */
-  public static function createWithRequest($servletRequest, $token, $inputConverter, $outputConverter) {
-    $restfulRequestItem = new RestRequestItem(self::getServiceFromPath($servletRequest['url']), self::getMethod(), $token, $inputConverter, $outputConverter);
+  public static function createWithRequest($servletRequest, $token, $inputConverterMethod, $outputConverter) {
+    $restfulRequestItem = new RestRequestItem(self::getServiceFromPath($servletRequest['url']), self::getMethod(), $token, $inputConverterMethod, $outputConverter);
     $restfulRequestItem->setUrl($servletRequest['url']);
     if (isset($servletRequest['params'])) {
       $restfulRequestItem->setParams($servletRequest['params']);
@@ -75,41 +75,21 @@ class RestRequestItem extends RequestItem {
   public function setPostData($postData) {
     $this->postData = $postData;
     $service = $this->getServiceFromPath($this->url);
-    switch ($service) {
-      case ApiServlet::$PEOPLE_ROUTE:
-        // in our current implementation this will throw a SocialSPIException since we don't support 
-        // adding people/friendships in our API yet, but this might be added some day
-        $data = $this->inputConverter->convertPeople($this->postData);
-        break;
-      case ApiServlet::$ACTIVITY_ROUTE:
-        $data = $this->inputConverter->convertActivities($this->postData);
-        $this->params['activity'] = $data;
-        break;
-      case ApiServlet::$APPDATA_ROUTE:
-        $data = $this->inputConverter->convertAppData($this->postData);
-        $this->params['data'] = $data;
-        break;
-      case ApiServlet::$MESSAGE_ROUTE:
-        $data = $this->inputConverter->convertMessages($this->postData);
-        // 'entity' may be a message or a message collection.
-        $this->params['entity'] = $data;
-        break;
-      case ApiServlet::$INVALIDATE_ROUTE:
-        $this->params = json_decode($this->postData, true);
-        break;
-      case ApiServlet::$ALBUM_ROUTE:
-        $data = $this->inputConverter->convertAlbums($this->postData);
-        $this->params['album'] = $data;
-        break;
-      case ApiServlet::$MEDIA_ITEM_ROUTE:
-        $data = $this->inputConverter->convertMediaItems($this->postData);
-        if (isset($data)) {
-          $this->params['mediaItem'] = $data;
+    $inputConverterConfig = Config::get('service_input_converter');
+    if (isset($inputConverterConfig[$service])) {
+      $class = $inputConverterConfig[$service]['class'];
+      $inputConverter = new $class();
+      $data   = $inputConverter->{$this->inputConverterMethod}($this->postData);
+      $targetField = $inputConverterConfig[$service]['targetField'];
+      if ($targetField !== false && isset($data)) {
+        if ($targetField !== null) {
+          $this->params[$targetField] = $data;
+        } else {
+          $this->params = $data;
         }
-        break;
-      default:
+        }
+    } else {
         throw new Exception("Invalid or unknown service endpoint: $service");
-        break;
     }
   
   }

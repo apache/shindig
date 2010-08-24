@@ -18,16 +18,13 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -35,12 +32,18 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.http.RequestPipeline;
 import org.apache.shindig.gadgets.rewrite.CaptureRewriter;
 import org.apache.shindig.gadgets.rewrite.DefaultResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.DomWalker;
+import org.apache.shindig.gadgets.rewrite.MutableContent;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriterRegistry;
+import org.apache.shindig.gadgets.rewrite.RewritingException;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.easymock.Capture;
-
+import org.easymock.EasyMock;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -58,7 +61,7 @@ public class ProxyHandlerTest extends EasyMockTestCase {
   private ProxyUriManager.ProxyUri request;
   
   private final ProxyHandler proxyHandler
-      = new ProxyHandler(pipeline, rewriterRegistry);
+      = new ProxyHandler(pipeline, rewriterRegistry, true);
   
   private void expectGetAndReturnData(String url, byte[] data) throws Exception {
     HttpRequest req = new HttpRequest(Uri.parse(url));
@@ -85,6 +88,52 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     request = new ProxyUriManager.ProxyUri(
         -1, false, false, ContainerConfig.DEFAULT_CONTAINER, null,
         url != null ? Uri.parse(url) : null);
+  }
+
+  private ResponseRewriter getResponseRewriterThatThrowsExceptions(
+      final StringBuilder stringBuilder) {
+    return new DomWalker.Rewriter() {
+      public void rewrite(Gadget gadget, MutableContent content)
+          throws RewritingException {
+        stringBuilder.append("exceptionThrown");
+        throw new RewritingException("sad", 404);
+      }
+
+      public void rewrite(HttpRequest request, HttpResponseBuilder builder)
+          throws RewritingException {
+        stringBuilder.append("exceptionThrown");
+        throw new RewritingException("sad", 404);
+      }
+    };
+  }
+
+  @Test
+  public void testInvalidHeaderDropped() throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+
+    setupProxyRequestMock(domain, url, true, -1, null, null);
+
+    HttpRequest req = new HttpRequest(Uri.parse(url))
+        .setIgnoreCache(true);
+    String contentType = "text/html; charset=UTF-8";
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("Hello")
+        .addHeader("Content-Type", contentType)
+        .addHeader("Content-Length", "200")  // Disallowed header.
+        .addHeader(":", "someDummyValue") // Invalid header name.
+        .create();
+
+    expect(pipeline.execute(req)).andReturn(resp);
+
+    replay();
+
+    HttpResponse recorder = proxyHandler.fetch(request);
+
+    verify();
+    assertNull(recorder.getHeader(":"));
+    assertNull(recorder.getHeader("Content-Length"));
+    assertEquals(recorder.getHeader("Content-Type"), contentType);
   }
 
   @Test
@@ -223,6 +272,80 @@ public class ProxyHandlerTest extends EasyMockTestCase {
     replay();
     proxyHandler.fetch(request);
     verify();
+  }
+
+  // ProxyHandler throws INTERNAL_SERVER_ERRORS without isRecoverable() check.
+  @Test
+  public void testRecoverableRewritingException() throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+
+    setupProxyRequestMock(domain, url, true, -1, null, null);
+
+    String contentType = "text/html; charset=UTF-8";
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("Hello")
+        .addHeader("Content-Type", contentType)
+        .create();
+
+    expect(pipeline.execute((HttpRequest) EasyMock.anyObject())).andReturn(resp);
+
+    replay();
+
+    final StringBuilder stringBuilder = new StringBuilder("");
+    ResponseRewriter rewriter = getResponseRewriterThatThrowsExceptions(stringBuilder);
+
+    ResponseRewriterRegistry rewriterRegistry =
+        new DefaultResponseRewriterRegistry(
+            Arrays.<ResponseRewriter>asList(rewriter), null);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
+
+    request.setReturnOriginalContentOnError(true);
+    HttpResponse recorder = proxyHandler.fetch(request);
+
+    verify();
+
+    // Ensure that original content is returned.
+    assertEquals(recorder.getHeader("Content-Type"), contentType);
+    assertEquals("Hello", recorder.getResponseAsString());
+    assertEquals("exceptionThrown", stringBuilder.toString());
+  }
+
+  @Test
+  public void testThrowExceptionIfReturnOriginalContentOnErrorNotSet()
+      throws Exception {
+    String url = "http://example.org/mypage.html";
+    String domain = "example.org";
+
+    setupProxyRequestMock(domain, url, true, -1, null, null);
+
+    String contentType = "text/html; charset=UTF-8";
+    HttpResponse resp = new HttpResponseBuilder()
+        .setResponseString("Hello")
+        .addHeader("Content-Type", contentType)
+        .create();
+
+    expect(pipeline.execute((HttpRequest) EasyMock.anyObject())).andReturn(resp);
+
+    replay();
+
+    final StringBuilder stringBuilder = new StringBuilder("");
+    ResponseRewriter rewriter = getResponseRewriterThatThrowsExceptions(stringBuilder);
+
+    ResponseRewriterRegistry rewriterRegistry =
+        new DefaultResponseRewriterRegistry(
+            Arrays.<ResponseRewriter>asList(rewriter), null);
+    ProxyHandler proxyHandler = new ProxyHandler(pipeline, rewriterRegistry, true);
+
+    boolean exceptionCaught = false;
+    try {
+      proxyHandler.fetch(request);
+    } catch (GadgetException e) {
+      exceptionCaught = true;
+      assertEquals(404, e.getHttpStatusCode());
+    }
+    assertTrue(exceptionCaught);
+    assertEquals("exceptionThrown", stringBuilder.toString());
   }
 
   /**

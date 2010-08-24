@@ -26,7 +26,9 @@ class CacheStorageApc extends CacheStorage {
   }
 
   public function store($key, $value) {
-    return @apc_store($this->storageKey($key), $value);
+    if (($ret = @apc_fetch($key)) === false) {
+      return @apc_store($this->storageKey($key), $value);
+    }
   }
 
   public function fetch($key) {

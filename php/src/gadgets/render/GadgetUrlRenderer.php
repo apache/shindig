@@ -30,28 +30,45 @@ class GadgetUrlRenderer extends GadgetRenderer {
    * @param Array $view
    */
   public function renderGadget(Gadget $gadget, $view) {
+    $redirURI = $this->getSubstitutedUrl($gadget, $view);
+    header('Location: ' . $redirURI);
+  }
+
+  /**
+   * retrieves url of content tag and substitutes it
+   *
+   * @param Gadget $gadget
+   * @param string $view
+   * @return string
+   */
+  public function getSubstitutedUrl(Gadget $gadget, $view) {
     // Preserve existing query string parameters.
     $redirURI = $view['href'];
-    $queryStr = strpos($redirURI, '?') !== false ? substr($redirURI, strpos($redirURI, '?')) : '';
-    $query = $queryStr;
-    $query .= $this->getPrefsQueryString($gadget->gadgetSpec->userPrefs);
-    
+    $query = $this->getPrefsQueryString($gadget->gadgetSpec->userPrefs);
+
     // deal with features
     $registry = $this->context->getRegistry();
     // since the URL mode doesn't actually have the gadget XML body, it can't inline
     // the javascript content anyway - thus could us just ignore the 'forcedJsLibs' part.
     $sortedFeatures = array();
     $registry->sortFeatures($gadget->features, $sortedFeatures);
-    
+
     $query .= $this->appendLibsToQuery($sortedFeatures);
     $query .= '&lang=' . urlencode(isset($_GET['lang']) ? $_GET['lang'] : 'en');
     $query .= '&country=' . urlencode(isset($_GET['country']) ? $_GET['country'] : 'US');
-    if (substr($query, 0, 1) == '&') {
-      $query = '?' . substr($query, 1);
+
+    $redirURI = $gadget->substitutions->substituteUri(null, $redirURI);
+    if (strpos($redirURI, '?') !== false) {
+      $redirURI = $redirURI . $query;
+    } elseif (substr($query, 0, 1) == '&') {
+      $redirURI = $redirURI . '?' . substr($query, 1);
+    } else {
+      $redirURI = $redirURI . '?' . $query;
     }
-    $redirURI .= $query;
-    header('Location: ' . $redirURI);
+    
+    return $redirURI;
   }
+
 
   /**
    * Returns the requested libs (from getjsUrl) with the libs_param_name prepended

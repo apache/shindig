@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.common.cache.ehcache;
 
+import com.google.common.base.Preconditions;
 import org.apache.shindig.common.cache.Cache;
 import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.ResourceLoader;
@@ -35,13 +36,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EhCacheCacheProvider implements CacheProvider {
   private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;
-  private final Map<String, Cache<?, ?>> caches = new MapMaker().makeMap();
+  private final ConcurrentMap<String, Cache<?, ?>> caches = new MapMaker().makeMap();
 
   @Inject
   public EhCacheCacheProvider(@Named("shindig.cache.ehcache.config") String configPath,
@@ -97,22 +99,12 @@ public class EhCacheCacheProvider implements CacheProvider {
 
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> createCache(String name) {
-    if (name == null) {
+    if (!caches.containsKey(Preconditions.checkNotNull(name))) {
       if (LOG.isLoggable(Level.FINE)) {
-        LOG.fine("Creating anonymous cache");
+        LOG.fine("Creating cache named " + name);
       }
-      return new EhConfiguredCache<K, V>(name, cacheManager);
-    } else {
-      Cache<K, V> cache = (Cache<K, V>) caches.get(name);
-      if (cache == null) {
-        if (LOG.isLoggable(Level.FINE)) {
-          LOG.fine("Creating cache named " + name);
-        }
-        cache = new EhConfiguredCache<K, V>(name, cacheManager);
-        caches.put(name, cache);
-      }
-      return cache;
+      caches.putIfAbsent(name, new EhConfiguredCache<K, V>(name, cacheManager));
     }
+    return (Cache<K, V>) caches.get(Preconditions.checkNotNull(name));
   }
-
 }

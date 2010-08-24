@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.inject.Inject;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
@@ -51,6 +50,9 @@ public class ProxyingContentRewriter extends DomWalker.Rewriter {
     return Arrays.<Visitor>asList(
         new ConcatVisitor.Js(config, concatUriManager),
         new ConcatVisitor.Css(config, concatUriManager),
-        new ProxyingVisitor(config, proxyUriManager));
+        new ProxyingVisitor(config, proxyUriManager,
+                            ProxyingVisitor.Tags.SCRIPT,
+                            ProxyingVisitor.Tags.STYLESHEET,
+                            ProxyingVisitor.Tags.EMBEDDED_IMAGES));
   }
 }

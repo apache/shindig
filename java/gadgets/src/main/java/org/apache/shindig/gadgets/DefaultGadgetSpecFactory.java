@@ -28,7 +28,6 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.xml.XmlException;
 import org.apache.shindig.common.xml.XmlUtil;
 import org.apache.shindig.gadgets.http.RequestPipeline;
-import org.apache.shindig.gadgets.servlet.HtmlAccelServlet;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.gadgets.spec.SpecParserException;
 import org.w3c.dom.Element;
