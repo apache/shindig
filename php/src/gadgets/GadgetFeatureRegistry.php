@@ -274,23 +274,34 @@ class GadgetFeatureRegistry {
         $content = (string)$script;
       } else {
         $content = trim($attributes['src']);
+        $url = parse_url($content);
 
-        // Make html-santitization work see SHINDIG-346
-        if ($content == 'res://com/google/caja/plugin/html-sanitizer-minified.js') { 
-          $content= 'http://google-caja.googlecode.com/svn/trunk/src/com/google/caja/plugin/html-sanitizer.js'; 
-        } 
-
-        if (strtolower(substr($content, 0, strlen("http://"))) == "http://" || strtolower(substr($content, 0, strlen("https://"))) == "https://") {
-          $type = 'URL';
-        } else {
+        if (! isset($url['scheme']) || ! isset($url['path']) || ! isset($url['host'])) {
           $type = 'FILE';
-          // skip over any java resource files (res://) since we don't support them
-          if (substr($content, 0, 6) == 'res://') {
-            continue;
-          }
           $content = $content;
+        } else {
+          $type = false;
+          switch ($url['scheme']) {
+            case 'res':
+              $type = 'URL';
+              $scheme = (! isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http' : 'https';
+              $content = $scheme . '://' . (Config::get('http_host') ? Config::get('http_host') : $_SERVER['HTTP_HOST']) . '/gadgets/resources/' . $url['host'] . $url['path'];
+              break;
+            case 'http':
+            case 'https':
+              $type = 'URL';
+              break;
+            default:
+              $type = 'FILE';
+              $content = $content;
+          }
         }
       }
+
+      if (! $type) {
+        continue;
+      }
+
       $library = array('type' => $type, 'content' => $content);
       if ($library != null) {
         if ($isContainer) {
