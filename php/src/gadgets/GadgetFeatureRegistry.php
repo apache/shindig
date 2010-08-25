@@ -72,9 +72,9 @@ class GadgetFeatureRegistry {
         case 'URL':
           $request = new RemoteContentRequest($entry['content']);
           $request->getOptions()->ignoreCache = $context->getIgnoreCache();
-          $context->getHttpFetcher()->fetch($request);
-          if ($request->getHttpCode() == '200') {
-            $ret .= $request->getResponseContent()."\n";
+          $response = $context->getHttpFetcher()->fetch($request);
+          if ($response->getHttpCode() == '200') {
+            $ret .= $response->getResponseContent()."\n";
           }
           break;
         case 'FILE':
