@@ -82,35 +82,73 @@ public class ConcatVisitor implements DomWalker.Visitor {
     
     return VisitStatus.BYPASS;
   }
-  
+
+  /**
+   * For css:
+   * Link tags are first split into buckets separated by tags with mediaType == "all"
+   * / title attribute different from their previous link tag / nodes that are 
+   * not 'link' tags. 
+   * This ensures that the buckets can be processed separately without losing title /
+   * "all" mediaType information.
+   *
+   * Link tags with same mediaType are concatenated within each bucket.
+   * This exercise ensures that css information is loaded in the same relative order
+   * as that of the original html page, and that the css information within
+   * mediaType=="all" is retained and applies to all media types.
+   *
+   * Look at the areLinkNodesBucketable method for details on mediaType=="all" and
+   * title attribute
+   *
+   * Example: Assume we have the following node list. (all have same parent,
+   * nodes between Node6 and Node12 are non link nodes, and hence did not come
+   * to revisit() call)
+   *    <link href="1.css" rel="stylesheet" type="text/css" media="screen">       -- Node1
+   *    <link href="2.css" rel="stylesheet" type="text/css" media="print">        -- Node2
+   *    <link href="3.css" rel="stylesheet" type="text/css" media="screen">       -- Node3
+   *    <link href="4.css" rel="stylesheet" type="text/css" media="all">          -- Node4
+   *    <link href="5.css" rel="stylesheet" type="text/css" media="all">          -- Node5
+   *    <link href="6.css" rel="stylesheet" type="text/css" media="screen">       -- Node6
+   *    <link href="12.css" rel="stylesheet" type="text/css" media="screen">      -- Node12
+   *    <link href="13.css" rel="stylesheet" type="text/css" media="screen">      -- Node13
+   *
+   *    First we split to buckets bassed on the adjacency and other conditions.
+   *    buckets - [ [ Node1, Node2, Node3 ], [ Node4, Node 5 ], [ Node6 ], [ Node12, Node13 ]
+   *    Within each bucket we group them based on media type.
+   *    batches - [ Node1, Node2, Node3 ] --> [ [Node1, Node3], [Node2] ]
+   *            - [ Node4, Node 5 ] --> [ [ Node4, Node 5 ] ]
+   *            - [ Node6 ] --> [ [ Node6 ] ]
+   *            - [ Node12, Node13 ] --> [ [ Node12, Node13 ] ]
+   *
+   * Refer Tests for more examples.
+   */
   public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
-    // Collate Elements into batches to be concatenated. 
-    List<List<Element>> concatBatches = Lists.newLinkedList();
-    List<Element> curBatch = Lists.newLinkedList();
+    // Collate Elements into Buckets.
+    List<List<Element>> concatBuckets = Lists.newLinkedList();
+    List<Element> curBucket = Lists.newLinkedList();
     Iterator<Node> nodeIter = nodes.iterator();
     Element cur = (Element)nodeIter.next();
-    curBatch.add(cur);
+    curBucket.add(cur);
     while (nodeIter.hasNext()) {
       Element next = (Element)nodeIter.next();
-      if (!split && cur != getSibling(next, true)) {
-        // Break off current batch and add to list of all.
-        concatBatches.add(curBatch);
-        curBatch = Lists.newLinkedList();
+      if ((!split && cur != getSibling(next, true)) ||
+          (type == ConcatUriManager.Type.CSS && !areLinkNodesBucketable(cur, next))) {
+        // Break off current bucket and add to list of all.
+        concatBuckets.add(curBucket);
+        curBucket = Lists.newLinkedList();
       }
-      curBatch.add(next);
+      curBucket.add(next);
       cur = next;
     }
     
     // Add leftovers.
-    concatBatches.add(curBatch);
+    concatBuckets.add(curBucket);
 
-    // Split the existing batches based on media types.
-    List<List<Element>> mediaSpecificConcatBatches = Lists.newLinkedList();
-    Iterator<List<Element>> batchesIter = concatBatches.iterator();
+    // Split the existing buckets based on media types into concat batches.
+    List<List<Element>> concatBatches = Lists.newLinkedList();
+    Iterator<List<Element>> batchesIter = concatBuckets.iterator();
     while (batchesIter.hasNext()) {
-      splitBatchOnMedia(batchesIter.next(), mediaSpecificConcatBatches);
+      splitBatchOnMedia(batchesIter.next(), concatBatches);
     }
-    concatBatches = mediaSpecificConcatBatches;
     
     // Prepare batches of Uris to send to generate concat Uris
     List<List<Uri>> uriBatches = Lists.newLinkedList();
@@ -178,8 +216,8 @@ public class ConcatVisitor implements DomWalker.Visitor {
     // Multimap to hold the ordered list of elements encountered for a given media type.
     Multimap<String, Element> mediaBatchMap = LinkedHashMultimap.create();
     for (Element element : elements) {
-      Element next = element;
-      mediaBatchMap.put(next.getAttribute("media"), next);
+      String mediaType = element.getAttribute("media");
+      mediaBatchMap.put(mediaType.isEmpty() ? "screen" : mediaType, element);
     }
     Set<String> mediaTypes = mediaBatchMap.keySet();
     for (String mediaType : mediaTypes) {
@@ -195,9 +233,9 @@ public class ConcatVisitor implements DomWalker.Visitor {
       return false;
     }
     if (type == ConcatUriManager.Type.CSS) {
-      // rel="stylesheet" and type="css" also required.
-      return ("stylesheet".equalsIgnoreCase(elem.getAttribute("rel")) ||
-              elem.getAttribute("type").contains("css"));
+      // rel="stylesheet" and type="text/css" also required.
+      return ("stylesheet".equalsIgnoreCase(elem.getAttribute("rel")) &&
+              "text/css".equalsIgnoreCase(elem.getAttribute("type")));
     }
     return true;
   }
@@ -233,4 +271,31 @@ public class ConcatVisitor implements DomWalker.Visitor {
     return true;
   }
 
+  /**
+   * Checks if the css link tags can be put into the same bucket.
+   */
+  private boolean areLinkNodesBucketable(Element current, Element next) {
+    boolean areLinkNodesCompatible = false;
+    // All link tags with media='all' should be placed in their own buckets.
+    // Except for adjacent css links with media='all', which can belong to the 
+    // same bucket.
+    String currMediaType = current.getAttribute("media");
+    String nextMediaType = next.getAttribute("media");
+    if (("all".equalsIgnoreCase(currMediaType) && "all".equalsIgnoreCase(nextMediaType)) ||
+        (!"all".equalsIgnoreCase(currMediaType) && !"all".equalsIgnoreCase(nextMediaType))) {
+      areLinkNodesCompatible = true;
+    }
+    
+    // we can't keep the link tags with different 'title' attribute in same 
+    // bucket.
+    // An example that proves the above comment.
+    // <link rel="stylesheet" type="text/css" href="a.css" />
+    // <link rel="stylesheet" type="text/css" href="b.css" title="small font"/>
+    // <link rel="stylesheet" type="text/css" href="c.css" />
+    // <link rel="alternate stylesheet" type="text/css" href="d.css" title="large font"/>
+    // Since browser allows to switch between the perferred styles 'small font' and 'large font',
+    // we should not batch across the links with title attribute, as it will lead to reordering of
+    // styles.
+    return areLinkNodesCompatible && current.getAttribute("title").equals(next.getAttribute("title"));
+  }
 }

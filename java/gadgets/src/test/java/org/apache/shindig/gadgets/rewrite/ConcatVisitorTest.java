@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ConcatVisitorTest extends DomWalkerTestBase {
-  private static final String JS1_URL_STR = "http://one.com/foo.js";
+  private static final String JS1_URL_STR = "http://one.com/foo.js?test=1&ui=2";
   private Node js1;
   
   private static final String JS2_URL_STR = "http://two.com/foo.js";
@@ -85,7 +85,16 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   
   private static final String CSS9_URL_STR = "http://nine.com/foo.js";
   private Node css9;
-  
+
+  private static final String CSS10_URL_STR = "http://ten.com/foo.js";
+  private Node css10;
+
+  private static final String CSS11_URL_STR = "http://eleven.com/foo.js";
+  private Node css11;
+
+  private static final String CSS12_URL_STR = "http://twelve.com/foo.js";
+  private Node css12;
+
   private static final Uri CONCAT_BASE_URI = Uri.parse("http://test.com/proxy");
   
   @Before
@@ -97,7 +106,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     js4 = elem("script", "src", JS4_URL_STR);
     js5 = elem("script", "src", JS5_URL_STR);
     js6 = elem("script", "src", JS6_URL_STR);
-    css1 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS1_URL_STR);
+    css1 = elem("link", "rel", "Stylesheet", "type", "Text/css", "href", CSS1_URL_STR);
     css2 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS2_URL_STR);
     css3 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS3_URL_STR);
     css4 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS4_URL_STR);
@@ -107,7 +116,9 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     css7 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "screen", "href", CSS7_URL_STR);
     css8 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "screen", "href", CSS8_URL_STR);
     css9 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS9_URL_STR);
-  
+    css10 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "all", "href", CSS10_URL_STR);
+    css11 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "all", "href", CSS11_URL_STR);
+    css12 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "all", "href", CSS12_URL_STR);
   }
   
   @Test
@@ -161,19 +172,49 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(VisitStatus.BYPASS, getVisitStatusJs(config, sep2));
     assertEquals(VisitStatus.BYPASS, getVisitStatusJs(config, js3));
   }
-  
+
   @Test
-  public void visitRelFreeCss() throws Exception {
+  public void visitValidCss() throws Exception {
+    Node textNode = doc.createTextNode("");
+    Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
+    seqNodes(node, textNode, css1);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void dontVisitCssSeperatedByNonEmptyTextNode() throws Exception {
+    Node textNode = doc.createTextNode("Data\n");
+    Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
+    seqNodes(node, textNode, css1);
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void dontVisitRelFreeCss() throws Exception {
     Node node = elem("link", "type", "text/css", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
   }
   
   @Test
-  public void visitTypeCssFreeCss() throws Exception {
+  public void dontVisitTypeCssFreeCss() throws Exception {
     Node node = elem("link", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, css1);
-    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void dontVisitTypeCssWrongRelAttributes() throws Exception {
+    Node node = elem("link", "rel", "alternate", "type", "text/css", "href", CSS1_URL_STR);
+    seqNodes(node, css1);
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void dontVisitTypeCssWrongTypeAttributes() throws Exception {
+    Node node = elem("link", "rel", "stylesheet", "type", "text/javascript", "href", CSS1_URL_STR);
+    seqNodes(node, css1);
+    assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
   }
   
   @Test
@@ -331,7 +372,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(CSS2_URL_STR, concatUri1.getQueryParameter("2"));
     assertNull(concatUri1.getQueryParameter("3"));
     
-    assertEquals(3, parent2.getChildNodes().getLength());
+    assertEquals(2, parent2.getChildNodes().getLength());
     Element cn2 = (Element)parent2.getChildNodes().item(0);
     Uri concatUri2 = Uri.parse(cn2.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
@@ -339,8 +380,10 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
     assertEquals(CSS3_URL_STR, concatUri2.getQueryParameter("1"));
     assertEquals(CSS4_URL_STR, concatUri2.getQueryParameter("2"));
-    assertEquals(CSS9_URL_STR, concatUri2.getQueryParameter("3"));
-    assertNull(concatUri2.getQueryParameter("4"));
+    assertEquals(CSS7_URL_STR, concatUri2.getQueryParameter("3"));
+    assertEquals(CSS8_URL_STR, concatUri2.getQueryParameter("4"));
+    assertEquals(CSS9_URL_STR, concatUri2.getQueryParameter("5"));
+    assertNull(concatUri2.getQueryParameter("6"));
     assertEquals("", cn2.getAttribute("media"));
     
     Element cn3 = (Element)parent2.getChildNodes().item(1);
@@ -352,18 +395,90 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     assertEquals(CSS6_URL_STR, concatUri3.getQueryParameter("2"));
     assertNull(concatUri3.getQueryParameter("3"));
     assertEquals("print", cn3.getAttribute("media"));
-  
-    Element cn4 = (Element)parent2.getChildNodes().item(2);
+  }
+
+  @Test
+  public void concatMultiBatchCssWithAllMediaTypeAndTitle() throws Exception {
+  List<Node> fullListCss = Lists.newArrayList();
+    // modify few node to have the title attriblue.
+    ((Element) css2).setAttribute("title", "one");
+    ((Element) css3).setAttribute("title", "two");
+    ((Element) css4).setAttribute("title", "two");
+    ((Element) css10).setAttribute("title", "two");
+    fullListCss.addAll(seqNodes(css1, css2, css3, css4, css10, css11, css12, css7, css8, css9));
+    Node parent1 = css1.getParentNode();
+    assertEquals(10, parent1.getChildNodes().getLength());
+
+    SimpleConcatUriManager mgr = simpleMgr();
+    ConcatVisitor.Css rewriter = new ConcatVisitor.Css(config(null, false), mgr);
+    assertTrue(rewriter.revisit(gadget(), fullListCss));
+
+    // Should have been split across 'all' media type and then batches should be independently
+    // concatenated.
+    Element cn1 = (Element)parent1.getChildNodes().item(0);
+    Uri concatUri1 = Uri.parse(cn1.getAttribute("href").replace("&amp;", "&"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri1.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri1.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri1.getPath());
+    assertEquals(CSS1_URL_STR, concatUri1.getQueryParameter("1"));
+    assertNull(concatUri1.getQueryParameter("2"));
+    assertEquals("", cn1.getAttribute("media"));
+
+    Element cn2 = (Element)parent1.getChildNodes().item(1);
+    Uri concatUri2 = Uri.parse(cn2.getAttribute("href").replace("&amp;", "&"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri2.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri2.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri2.getPath());
+    assertEquals(CSS2_URL_STR, concatUri2.getQueryParameter("1"));
+    assertNull(concatUri2.getQueryParameter("2"));
+    assertEquals("", cn2.getAttribute("media"));
+    assertEquals("one", cn2.getAttribute("title"));
+
+    Element cn3 = (Element)parent1.getChildNodes().item(2);
+    Uri concatUri3 = Uri.parse(cn3.getAttribute("href").replace("&amp;", "&"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri3.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri3.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri3.getPath());
+    assertEquals(CSS3_URL_STR, concatUri3.getQueryParameter("1"));
+    assertEquals(CSS4_URL_STR, concatUri3.getQueryParameter("2"));
+    assertNull(concatUri3.getQueryParameter("3"));
+    assertEquals("", cn3.getAttribute("media"));
+    assertEquals("two", cn3.getAttribute("title"));
+
+    Element cn4 = (Element)parent1.getChildNodes().item(3);
     Uri concatUri4 = Uri.parse(cn4.getAttribute("href").replace("&amp;", "&"));
     assertEquals(CONCAT_BASE_URI.getScheme(), concatUri4.getScheme());
     assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri4.getAuthority());
     assertEquals(CONCAT_BASE_URI.getPath(), concatUri4.getPath());
-    assertEquals(CSS7_URL_STR, concatUri4.getQueryParameter("1"));
-    assertEquals(CSS8_URL_STR, concatUri4.getQueryParameter("2"));
-    assertNull(concatUri4.getQueryParameter("3"));
-    assertEquals("screen", cn4.getAttribute("media"));
+    assertEquals(CSS10_URL_STR, concatUri4.getQueryParameter("1"));
+    assertNull(concatUri4.getQueryParameter("2"));
+    assertEquals("all", cn4.getAttribute("media"));
+    assertEquals("two", cn4.getAttribute("title"));
+
+    Element cn5 = (Element)parent1.getChildNodes().item(4);
+    Uri concatUri5 = Uri.parse(cn5.getAttribute("href").replace("&amp;", "&"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri5.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri5.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri5.getPath());
+    assertEquals(CSS11_URL_STR, concatUri5.getQueryParameter("1"));
+    assertEquals(CSS12_URL_STR, concatUri5.getQueryParameter("2"));
+    assertNull(concatUri5.getQueryParameter("3"));
+    assertEquals("all", cn5.getAttribute("media"));
+    assertEquals("", cn5.getAttribute("title"));
+
+    Element cn6 = (Element)parent1.getChildNodes().item(5);
+    Uri concatUri6 = Uri.parse(cn6.getAttribute("href").replace("&amp;", "&"));
+    assertEquals(CONCAT_BASE_URI.getScheme(), concatUri6.getScheme());
+    assertEquals(CONCAT_BASE_URI.getAuthority(), concatUri6.getAuthority());
+    assertEquals(CONCAT_BASE_URI.getPath(), concatUri6.getPath());
+    assertEquals(CSS7_URL_STR, concatUri6.getQueryParameter("1"));
+    assertEquals(CSS8_URL_STR, concatUri6.getQueryParameter("2"));
+    assertEquals(CSS9_URL_STR, concatUri6.getQueryParameter("3"));
+    assertNull(concatUri6.getQueryParameter("4"));
+    assertEquals("screen", cn6.getAttribute("media"));
+    assertEquals("", cn6.getAttribute("title"));
   }
-  
+
   @Test
   public void concatMultiBatchJsBadBatch() throws Exception {
     List<Node> fullListJs = Lists.newArrayList();
