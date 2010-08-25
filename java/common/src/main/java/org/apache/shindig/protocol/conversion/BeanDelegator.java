@@ -51,6 +51,11 @@ public class BeanDelegator {
   /** Indicate NULL value for a field (To overcome shortcome of immutable map) */
   public static final String NULL = "<NULL sentinel>";
 
+  /** Gate a value to use NULL constant instead of null pointer */
+  public static Object nullable(Object o) {
+    return (o != null ? o : NULL);
+  }
+
   private static final Map<String, Object> EMPTY_FIELDS = ImmutableMap.of();
 
   /** List of Classes that are considered primitives and are not proxied **/
