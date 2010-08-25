@@ -47,11 +47,6 @@ import java.io.IOException;
 @Singleton
 public class AccelHandler {
   static final String ERROR_FETCHING_DATA = "Error fetching data";
-
-  // TODO: parameterize these.
-  static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
-  static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
-
   protected final RequestPipeline requestPipeline;
   protected final ResponseRewriterRegistry contentRewriterRegistry;
   protected final AccelUriManager uriManager;
@@ -74,7 +69,7 @@ public class AccelHandler {
     // TODO: Handle if modified since headers.
 
     // Parse and normalize to get a proxied request uri.
-    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request.getUri());
+    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request);
 
     // Fetch the content of the requested uri.
     HttpRequest req = buildHttpRequest(request, proxyUri);
@@ -117,12 +112,12 @@ public class AccelHandler {
 
   /**
    * Returns the proxy uri encapsulating the request uri.
-   * @param requestUri The request uri.
+   * @param httpRequest The http request.
    * @return The proxy uri encapsulating the request uri.
    * @throws GadgetException In case of errors.
    */
-  public ProxyUriManager.ProxyUri getProxyUri(Uri requestUri) throws GadgetException {
-    Uri proxiedUri = uriManager.parseAndNormalize(requestUri);
+  public ProxyUriManager.ProxyUri getProxyUri(HttpRequest httpRequest) throws GadgetException {
+    Uri proxiedUri = uriManager.parseAndNormalize(httpRequest);
     String uriString = proxiedUri.getQueryParameter(UriCommon.Param.URL.getKey());
 
     // Throw BAD_GATEWAY in case parsing of url fails.
@@ -135,7 +130,7 @@ public class AccelHandler {
                                 HttpResponse.SC_BAD_GATEWAY);
     }
 
-    Gadget gadget = DomWalker.makeGadget(requestUri);
+    Gadget gadget = DomWalker.makeGadget(httpRequest);
     return new ProxyUriManager.ProxyUri(gadget, normalizedUri);
   }
 

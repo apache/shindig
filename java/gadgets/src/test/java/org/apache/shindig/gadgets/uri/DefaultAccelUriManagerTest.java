@@ -19,31 +19,40 @@
 package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.AbstractContainerConfig;
 import org.apache.shindig.config.ContainerConfig;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for DefaultAccelUriManager.
  */
 public class DefaultAccelUriManagerTest {
   private static class FakeContainerConfig extends AbstractContainerConfig {
-    protected final Map<String, Object> data = ImmutableMap.<String, Object>builder()
+    protected final Map<String, Object> defaultConfig = ImmutableMap.<String, Object>builder()
+        .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
+        .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/proxy")
+        .build();
+    protected final Map<String, Object> accelConfig = ImmutableMap.<String, Object>builder()
         .put(AccelUriManager.PROXY_HOST_PARAM, "apache.org")
         .put(AccelUriManager.PROXY_PATH_PARAM, "/gadgets/accel")
         .build();
 
+    protected final Map<String, Map<String, Object>> data =
+        ImmutableMap.<String, Map<String, Object>>builder()
+            .put("default", defaultConfig)
+            .put("accel", accelConfig)
+            .build();
+
     @Override
     public Object getProperty(String container, String name) {
-      return data.get(name);
+      return data.get(container) != null ? data.get(container).get(name) : null;
     }
   }
 
@@ -59,28 +68,39 @@ public class DefaultAccelUriManagerTest {
   @Test
   public void testParseAndNormalizeNonAccelUri() throws Exception {
     Uri uri = Uri.parse("http://www.example.org/index.html");
-    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=default"
+    HttpRequest req = new HttpRequest(uri);
+    assertEquals(Uri.parse("//apache.org/gadgets/proxy?container=default"
                  + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
                  + "&debug=0&nocache=0&refresh=0"
                  + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
-                 uriManager.parseAndNormalize(uri));
+                 uriManager.parseAndNormalize(req));
+
+    uri = Uri.parse("http://www.example.org/index.html");
+    req = new HttpRequest(uri);
+    req.setContainer("accel");
+    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=accel"
+                 + "&gadget=http%3A%2F%2Fwww.example.org%2Findex.html"
+                 + "&debug=0&nocache=0&refresh=0"
+                 + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
+                 uriManager.parseAndNormalize(req));
   }
 
   @Test
   public void testParseAndNormalizeAccelUri() throws Exception {
-    Uri uri = Uri.parse("http://apache.org/gadgets/accel?container=proxy"
+    Uri uri = Uri.parse("http://apache.org/gadgets/accel?container=accel"
                         + "&gadget=http%3A%2F%2Fwww.1.com%2Fa.html"
                         + "&url=http%3A%2F%2Fwww.example.org%2Findex.html");
-    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=proxy"
+    HttpRequest req = new HttpRequest(uri);
+    assertEquals(Uri.parse("//apache.org/gadgets/accel?container=accel"
                  + "&gadget=http%3A%2F%2Fwww.1.com%2Fa.html"
                  + "&debug=0&nocache=0&refresh=0"
                  + "&url=http%3A%2F%2Fwww.example.org%2Findex.html"),
-                 uriManager.parseAndNormalize(uri));
+                 uriManager.parseAndNormalize(req));
   }
 
   @Test
   public void testLooksLikeAccelUri() throws Exception {
-    Uri uri = Uri.parse("http://apache.org/gadgets/accel?container=proxy"
+    Uri uri = Uri.parse("http://apache.org/gadgets/accel?container=accel"
                         + "&gadget=http%3A%2F%2Fwww.1.com%2Fa.html"
                         + "&url=http%3A%2F%2Fwww.example.org%2Findex.html");
     assertTrue(uriManager.looksLikeAccelUri(uri));

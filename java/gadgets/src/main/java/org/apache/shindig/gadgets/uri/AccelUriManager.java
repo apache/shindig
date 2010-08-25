@@ -19,9 +19,9 @@
 package org.apache.shindig.gadgets.uri;
 
 import com.google.inject.ImplementedBy;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
 
 /**
  * UriManager for Accel servlet.
@@ -30,12 +30,14 @@ import org.apache.shindig.gadgets.GadgetException;
 public interface AccelUriManager {
   public static final String PROXY_HOST_PARAM = DefaultProxyUriManager.PROXY_HOST_PARAM;
   public static final String PROXY_PATH_PARAM = DefaultProxyUriManager.PROXY_PATH_PARAM;
+  public static final String CONTAINER = "accel";
 
   /**
-   * Parses and normalizes the given uri to be proxied through accel.
-   * @param requestUri The uri to proxy through accel. @return Accel proxied uri.
-   * @return Normalized uri to be proxied through accel.
+   * Parses and normalizes the given request uri to be proxied through accel.
+   *
+   * @param httpRequest The http request.
+   * @return Normalized uri which is proxied through accel.
    * @throws GadgetException In case of errors.
    */
-  public Uri parseAndNormalize(Uri requestUri) throws GadgetException;
+  public Uri parseAndNormalize(HttpRequest httpRequest) throws GadgetException;
 }

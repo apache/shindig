@@ -20,12 +20,12 @@ package org.apache.shindig.gadgets.uri;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 
 /**
@@ -33,7 +33,6 @@ import org.apache.shindig.gadgets.rewrite.DomWalker;
  * TODO: Add support for multiple accel hosts.
  */
 public class DefaultAccelUriManager implements AccelUriManager {
-  public static final String CONTAINER = "default";
   final String accelHost;
   final String accelPath;
 
@@ -47,11 +46,11 @@ public class DefaultAccelUriManager implements AccelUriManager {
     accelPath = config.getString(CONTAINER, PROXY_PATH_PARAM);
   }
 
-  public Uri parseAndNormalize(Uri requestUri) throws GadgetException {
-    Gadget gadget = DomWalker.makeGadget(requestUri);
-    ProxyUriManager.ProxyUri proxied = looksLikeAccelUri(requestUri) ?
-        proxyUriManager.process(requestUri) : new ProxyUriManager.ProxyUri(
-        gadget, requestUri);
+  public Uri parseAndNormalize(HttpRequest httpRequest) throws GadgetException {
+    Gadget gadget = DomWalker.makeGadget(httpRequest);
+    ProxyUriManager.ProxyUri proxied = looksLikeAccelUri(httpRequest.getUri()) ?
+        proxyUriManager.process(httpRequest.getUri()) : new ProxyUriManager.ProxyUri(
+        gadget, httpRequest.getUri());
     return proxyUriManager.make(ImmutableList.of(proxied), 0).get(0);
   }
 
