@@ -42,19 +42,19 @@ public class ConcatVisitor implements DomWalker.Visitor {
       super(config, uriManager, ConcatUriManager.Type.JS);
     }
   }
-  
+
   public static class Css extends ConcatVisitor {
     public Css(ContentRewriterFeature.Config config,
                ConcatUriManager uriManager) {
       super(config, uriManager, ConcatUriManager.Type.CSS);
     }
   }
-  
+
   private final ConcatUriManager uriManager;
   private final ConcatUriManager.Type type;
   private final ContentRewriterFeature.Config config;
   private final boolean split;
-    
+
   private ConcatVisitor(ContentRewriterFeature.Config config,
       ConcatUriManager uriManager, ConcatUriManager.Type type) {
     this.uriManager = uriManager;
@@ -70,7 +70,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
         !node.getNodeName().equalsIgnoreCase(type.getTagName())) {
       return VisitStatus.BYPASS;
     }
-    
+
     Element element = (Element)node;
     if (isRewritableExternData(element)) {
       if (split ||
@@ -79,15 +79,15 @@ public class ConcatVisitor implements DomWalker.Visitor {
         return VisitStatus.RESERVE_NODE;
       }
     }
-    
+
     return VisitStatus.BYPASS;
   }
 
   /**
    * For css:
    * Link tags are first split into buckets separated by tags with mediaType == "all"
-   * / title attribute different from their previous link tag / nodes that are 
-   * not 'link' tags. 
+   * / title attribute different from their previous link tag / nodes that are
+   * not 'link' tags.
    * This ensures that the buckets can be processed separately without losing title /
    * "all" mediaType information.
    *
@@ -139,7 +139,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       curBucket.add(next);
       cur = next;
     }
-    
+
     // Add leftovers.
     concatBuckets.add(curBucket);
 
@@ -149,7 +149,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
     while (batchesIter.hasNext()) {
       splitBatchOnMedia(batchesIter.next(), concatBatches);
     }
-    
+
     // Prepare batches of Uris to send to generate concat Uris
     List<List<Uri>> uriBatches = Lists.newLinkedList();
     batchesIter = concatBatches.iterator();
@@ -162,29 +162,29 @@ public class ConcatVisitor implements DomWalker.Visitor {
       }
       uriBatches.add(uris);
     }
-    
+
     if (uriBatches.isEmpty()) {
       return false;
     }
-    
+
     // Generate the ConcatUris, then correlate with original elements.
     List<ConcatUriManager.ConcatData> concatUris =
         uriManager.make(
           ConcatUriManager.ConcatUri.fromList(gadget, uriBatches, type), !split);
-    
+
     Iterator<List<Element>> elemBatchIt = concatBatches.iterator();
     Iterator<List<Uri>> uriBatchIt = uriBatches.iterator();
     for (ConcatUriManager.ConcatData concatUri : concatUris) {
       List<Element> sourceBatch = elemBatchIt.next();
       List<Uri> sourceUris = uriBatchIt.next();
-      
+
       // Regardless what happens, inject a copy of the first node,
       // with new (concat) URI, immediately ahead of the first elem.
       Element firstElem = sourceBatch.get(0);
       Element elemConcat = (Element)firstElem.cloneNode(true);
       elemConcat.setAttribute(type.getSrcAttrib(), concatUri.getUri().toString().replace("&", "&amp;"));
       firstElem.getParentNode().insertBefore(elemConcat, firstElem);
-      
+
       // Now for all Elements, either A) remove them or B) replace each
       // with a <script> node with snippet of code configuring/evaluating
       // the resultant inserted code. This is useful for split-JS in particular,
@@ -201,14 +201,14 @@ public class ConcatVisitor implements DomWalker.Visitor {
         elem.getParentNode().removeChild(elem);
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * Split the given batch of elements (assumed to be sibling nodes that can be concatenated)
    * into batches with same media types.
-   * 
+   *
    * @param elements
    * @param output
    */
@@ -217,7 +217,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
     Multimap<String, Element> mediaBatchMap = LinkedHashMultimap.create();
     for (Element element : elements) {
       String mediaType = element.getAttribute("media");
-      mediaBatchMap.put(mediaType.isEmpty() ? "screen" : mediaType, element);
+      mediaBatchMap.put(StringUtils.isEmpty(mediaType) ? "screen" : mediaType, element);
     }
     Set<String> mediaTypes = mediaBatchMap.keySet();
     for (String mediaType : mediaTypes) {
@@ -225,7 +225,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
       output.add(new LinkedList<Element>(elems));
     }
   }
-  
+
   private boolean isRewritableExternData(Element elem) {
     String uriStr = elem != null ? elem.getAttribute(type.getSrcAttrib()) : null;
     if (StringUtils.isEmpty(uriStr) ||
@@ -239,7 +239,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
     }
     return true;
   }
-  
+
   private Element getSibling(Element root, boolean isPrev) {
     Node cur = root;
     while ((cur = getNext(cur, isPrev)) != null) {
@@ -253,11 +253,11 @@ public class ConcatVisitor implements DomWalker.Visitor {
     }
     return null;
   }
-  
+
   private Node getNext(Node node, boolean isPrev) {
     return isPrev ? node.getPreviousSibling() : node.getNextSibling();
   }
-  
+
   private boolean getUris(ConcatUriManager.Type type, List<Element> elems, List<Uri> uris) {
     for (Element elem : elems) {
       String uriStr = elem.getAttribute(type.getSrcAttrib());
@@ -277,7 +277,7 @@ public class ConcatVisitor implements DomWalker.Visitor {
   private boolean areLinkNodesBucketable(Element current, Element next) {
     boolean areLinkNodesCompatible = false;
     // All link tags with media='all' should be placed in their own buckets.
-    // Except for adjacent css links with media='all', which can belong to the 
+    // Except for adjacent css links with media='all', which can belong to the
     // same bucket.
     String currMediaType = current.getAttribute("media");
     String nextMediaType = next.getAttribute("media");
@@ -285,8 +285,8 @@ public class ConcatVisitor implements DomWalker.Visitor {
         (!"all".equalsIgnoreCase(currMediaType) && !"all".equalsIgnoreCase(nextMediaType))) {
       areLinkNodesCompatible = true;
     }
-    
-    // we can't keep the link tags with different 'title' attribute in same 
+
+    // we can't keep the link tags with different 'title' attribute in same
     // bucket.
     // An example that proves the above comment.
     // <link rel="stylesheet" type="text/css" href="a.css" />
