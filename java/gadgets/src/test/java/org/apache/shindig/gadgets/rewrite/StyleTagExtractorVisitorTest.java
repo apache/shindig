@@ -122,9 +122,9 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     List<String> extractedUrls1 = ImmutableList.of(urlStr1);
     String urlStr2 = "http://bar.com/1.css";
     List<String> extractedUrls2 = ImmutableList.of(urlStr2);
-    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls1).once();
-    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
     
@@ -160,9 +160,9 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     List<String> extractedUrls1 = ImmutableList.of(urlStr1);
     String urlStr2 = "http://bar.com/1.css";
     List<String> extractedUrls2 = ImmutableList.of(urlStr2);
-    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls1).once();
-    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
     
@@ -196,9 +196,9 @@ public class StyleTagExtractorVisitorTest extends DomWalkerTestBase {
     Element elem2 = elem("elem2");
     List<String> extractedUrls1 = ImmutableList.of();
     List<String> extractedUrls2 = ImmutableList.of();
-    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem1), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls1).once();
-    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true)))
+    expect(cssRewriter.rewrite(eq(elem2), eq(base), isA(UriMaker.class), eq(true), eq(gadget.getContext())))
         .andReturn(extractedUrls2).once();
     replay(cssRewriter);
     

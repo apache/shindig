@@ -213,52 +213,45 @@ public final class DomWalker {
       return mutated;
     }
   }
-  
+
   // TODO: Remove these lame hacks by changing Gadget to a proper general Context object.
-  public static Gadget makeGadget(final Uri context) {
+  public static Gadget makeGadget(GadgetContext context) {
     try {
-      final GadgetSpec spec = new GadgetSpec(context,
-        "<Module><ModulePrefs author=\"a\" title=\"t\"></ModulePrefs>" +
-        "<Content></Content></Module>");
-      return new Gadget() {
-        @Override
-        public GadgetSpec getSpec() {
-          return spec;
-        }
-      }.setContext(new GadgetContext() {
-        @Override
-        public Uri getUrl() {
-          return context;
-        }
-      });
+      final GadgetSpec spec = new GadgetSpec(context.getUrl(),
+          "<Module><ModulePrefs author=\"a\" title=\"t\"></ModulePrefs>" +
+          "<Content></Content></Module>");
+      return new Gadget().setSpec(spec).setContext(context);
     } catch (Exception e) {
       throw new RuntimeException("Unexpected boilerplate parse failure");
     }
   }
-  
+
   public static Gadget makeGadget(final HttpRequest request) {
-    Gadget gadget = makeGadget(request.getUri());
-    gadget.setContext(new GadgetContext(gadget.getContext()) {
+    return makeGadget(new GadgetContext() {
+      @Override
+      public Uri getUrl() {
+        return request.getUri();
+      }
+
       @Override
       public String getParameter(String key) {
         return request.getParam(key);
       }
-      
+
       @Override
       public boolean getIgnoreCache() {
         return request.getIgnoreCache();
       }
-      
+
       @Override
       public String getContainer() {
         return request.getContainer();
       }
-      
+
       @Override
       public boolean getDebug() {
         return "1".equalsIgnoreCase(getParameter(Param.DEBUG.getKey()));
       }
     });
-    return gadget;
   }
 }

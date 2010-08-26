@@ -74,7 +74,7 @@ public class StyleTagExtractorVisitor implements Visitor {
       // Guaranteed safe cast due to reservation logic.
       Element elem = (Element)node;
       List<String> extractedUrls = cssRewriter.rewrite(
-          elem, contentBase, CssResponseRewriter.uriMaker(proxyUriManager, config), true);
+          elem, contentBase, CssResponseRewriter.uriMaker(proxyUriManager, config), true, gadget.getContext());
       for (String extractedUrl : extractedUrls) {
         // Add extracted urls as link elements to head
         Element newLink = head.getOwnerDocument().createElement("link");
@@ -88,5 +88,4 @@ public class StyleTagExtractorVisitor implements Visitor {
     
     return mutated;
   }
-
 }

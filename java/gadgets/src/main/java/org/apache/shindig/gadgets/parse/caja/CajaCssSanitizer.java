@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -175,7 +176,7 @@ public class CajaCssSanitizer {
     }, null);
   }
   
-  private static String rewriteUri(ProxyUriManager proxyUriManager, String input, Uri context) {
+  private static String rewriteUri(ProxyUriManager proxyUriManager, String input, final Uri context) {
     Uri inboundUri = null;
     try {
       inboundUri = Uri.parse(input);
@@ -187,7 +188,13 @@ public class CajaCssSanitizer {
       inboundUri = context.resolve(inboundUri);
     }
     List<ProxyUriManager.ProxyUri> uris = ImmutableList.of(
-        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(context), inboundUri));
+        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(new GadgetContext() {
+          // TODO: Refactor this method to pass on the container as well.          
+          @Override
+          public Uri getUrl() {
+            return context;
+          }
+        }), inboundUri));
     List<Uri> rewritten = proxyUriManager.make(uris, null);
     return rewritten.get(0).toString();
   }

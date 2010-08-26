@@ -62,7 +62,7 @@ public class StyleTagProxyEmbeddedUrlsVisitor implements DomWalker.Visitor {
       Element elem = (Element) node;
       cssRewriter.rewrite(
           elem, contentBase,
-          CssResponseRewriter.uriMaker(proxyUriManager, config), false);
+          CssResponseRewriter.uriMaker(proxyUriManager, config), false, gadget.getContext());
     }
     return !nodes.isEmpty();
   }

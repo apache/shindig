@@ -96,7 +96,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
     InputSource is = new InputSource(contextUri.toJavaUri());
 
     PluginMeta pluginMeta = new PluginMeta(
-            proxyFetcher(req, contextUri), proxyUriPolicy(contextUri));
+            proxyFetcher(req, contextUri), proxyUriPolicy(req));
     PluginCompiler compiler = new PluginCompiler(BuildInfo.getInstance(),
             pluginMeta, mq);
     compiler.setMessageContext(mc);
@@ -148,8 +148,9 @@ public class CajaResponseRewriter implements ResponseRewriter {
     }
   }
 
-  private UriPolicy proxyUriPolicy(final Uri contextUri) {
-    final Gadget stubGadget = DomWalker.makeGadget(contextUri);
+  private UriPolicy proxyUriPolicy(HttpRequest request) {
+    final Uri contextUri = request.getUri();
+    final Gadget stubGadget = DomWalker.makeGadget(request);
 
     return new UriPolicy() {
       public String rewriteUri(ExternalReference ref, UriEffect effect,
