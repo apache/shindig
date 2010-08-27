@@ -68,9 +68,9 @@ public class DefaultGuiceModule extends AbstractModule {
   protected void configure() {
 
     final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
-    bind(Executor.class).toInstance(service);
-    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
+    bind(ExecutorService.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
             service.shutdownNow();
