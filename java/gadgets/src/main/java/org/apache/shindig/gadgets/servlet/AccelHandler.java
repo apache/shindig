@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -121,9 +122,9 @@ public class AccelHandler {
     String uriString = proxiedUri.getQueryParameter(UriCommon.Param.URL.getKey());
 
     // Throw BAD_GATEWAY in case parsing of url fails.
-    Uri normalizedUri;
+    Uri requestedResource;
     try {
-      normalizedUri = Uri.parse(uriString);
+      requestedResource = Uri.parse(uriString);
     } catch (Uri.UriException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
                                 "Failed to parse uri: " + uriString,
@@ -131,7 +132,10 @@ public class AccelHandler {
     }
 
     Gadget gadget = DomWalker.makeGadget(httpRequest);
-    return new ProxyUriManager.ProxyUri(gadget, normalizedUri);
+    ProxyUriManager.ProxyUri proxyUri = new ProxyUriManager.ProxyUri(gadget, requestedResource);
+    proxyUri.setHtmlTagContext(proxiedUri.getQueryParameter(
+        UriCommon.Param.HTML_TAG_CONTEXT.getKey()));
+    return proxyUri;
   }
 
   /**

@@ -257,7 +257,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       status = versioner.validate(uri, container, version);
     }
 
-    return new ProxyUri(status, uri, queryUri);
+    ProxyUri proxied = new ProxyUri(status, uri, queryUri);
+    proxied.setHtmlTagContext(uriIn.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
+    return proxied;
   }
 
   private String getReqConfig(String container, String key) {

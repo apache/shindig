@@ -383,6 +383,27 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
     manager.process(testUri);
   }
 
+  @Test
+  public void testHtmlTagContext() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    DefaultProxyUriManager manager = makeManager(host, path, null);
+    Uri testUri = new UriBuilder().setAuthority(host).setPath(path)
+        .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER)
+        .addQueryParameter(Param.URL.getKey(), "http://www.example.org/")
+        .addQueryParameter(Param.HTML_TAG_CONTEXT.getKey(), "htmlTag")
+        .toUri();
+    ProxyUri proxyUri = manager.process(testUri);
+    assertEquals("htmlTag", proxyUri.getHtmlTagContext());
+
+    Uri targetUri = Uri.parse("http://www.example2.org/");
+    HttpRequest req = proxyUri.makeHttpRequest(targetUri);
+    assertEquals("htmlTag", req.getParam(Param.HTML_TAG_CONTEXT.getKey()));
+
+    UriBuilder builder = proxyUri.makeQueryParams(1, "2");
+    assertEquals("htmlTag", builder.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
+  }
+
   private List<Uri> makeAndGet(String host, String path, boolean debug, boolean noCache,
       List<Uri> resources, String... version) {
     return makeAndGetWithRefresh(host, path, debug, noCache, resources, 123, version);

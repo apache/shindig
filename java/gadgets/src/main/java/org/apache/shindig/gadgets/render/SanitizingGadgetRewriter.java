@@ -283,8 +283,10 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
           "src".equalsIgnoreCase(attr.getName())) {
         try {
           Uri uri = Uri.parse(attr.getValue());
-          attr.setValue(imageRewriter.make(
-              ProxyUriManager.ProxyUri.fromList(gadget, ImmutableList.of(uri)), null)
+          ProxyUriManager.ProxyUri proxiedUri = ProxyUriManager.ProxyUri.fromList(
+              gadget, ImmutableList.of(uri)).get(0);
+          proxiedUri.setHtmlTagContext(attr.getOwnerElement().getNodeName().toLowerCase());
+          attr.setValue(imageRewriter.make(ImmutableList.of(proxiedUri), null)
                 .get(0).toString());
         } catch (IllegalArgumentException e) {
           // Invalid Uri, remove.
@@ -348,9 +350,11 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
           hasType |= "text/css".equalsIgnoreCase(attr.getValue());
         } else if ("href".equalsIgnoreCase(attr.getName())) {
           try {
-            attr.setValue(cssImportRewriter.make(
-                ProxyUriManager.ProxyUri.fromList(gadget,
-                  ImmutableList.of(Uri.parse(attr.getValue()))), null).get(0).toString());
+            ProxyUriManager.ProxyUri proxiedUri = ProxyUriManager.ProxyUri.fromList(gadget,
+                  ImmutableList.of(Uri.parse(attr.getValue()))).get(0);
+            proxiedUri.setHtmlTagContext(elem.getNodeName().toLowerCase());
+            attr.setValue(cssImportRewriter.make(ImmutableList.of(proxiedUri), null)
+                .get(0).toString());
           } catch (IllegalArgumentException e) {
             return true;
           }

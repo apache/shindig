@@ -151,6 +151,9 @@ public class ProxyingVisitor implements DomWalker.Visitor {
       try {
         ProxyUriManager.ProxyUri proxiedUri = new ProxyUriManager.ProxyUri(
             gadget, Uri.parse(uriStr));
+
+        // Set the html tag context as the current node being processed.
+        proxiedUri.setHtmlTagContext(nodeName);
         reservedUris.add(proxiedUri);
         reservedNodes.add(node);
       } catch (UriException e) {

@@ -53,7 +53,10 @@ public interface ProxyUriManager {
     // If "true" then the original content should be returned to the user
     // instead of internal server errors.
     private String returnOriginalContentOnError;
-    
+
+    // The html tag that requested this ProxyUri.
+    private String htmlTagContext;
+
     public ProxyUri(Gadget gadget, Uri resource) {
       super(gadget);
       this.resource = resource;
@@ -74,7 +77,14 @@ public interface ProxyUriManager {
     public void setReturnOriginalContentOnError(boolean returnOriginalContentOnError) {
       this.returnOriginalContentOnError = returnOriginalContentOnError ? "1" : null;
     }
-    
+
+    public void setHtmlTagContext(String htmlTagContext) {
+      this.htmlTagContext = htmlTagContext;
+    }
+    public String getHtmlTagContext() {
+      return htmlTagContext;
+    }
+
     @Override
     public boolean equals(Object obj) {
       if (obj == this) {
@@ -91,13 +101,15 @@ public interface ProxyUriManager {
           && Objects.equal(this.resizeWidth, objUri.resizeWidth)
           && Objects.equal(this.resizeQuality, objUri.resizeQuality)
           && Objects.equal(this.resizeNoExpand, objUri.resizeNoExpand)
-          && Objects.equal(this.returnOriginalContentOnError, objUri.returnOriginalContentOnError));
+          && Objects.equal(this.returnOriginalContentOnError, objUri.returnOriginalContentOnError)
+          && Objects.equal(this.htmlTagContext, objUri.htmlTagContext));
     }
 
     @Override
     public int hashCode() {
       return Objects.hashCode(super.hashCode(), resource, fallbackUrl, resizeHeight,
-              resizeWidth, resizeQuality, resizeNoExpand, returnOriginalContentOnError);
+              resizeWidth, resizeQuality, resizeNoExpand, returnOriginalContentOnError,
+              htmlTagContext);
     }
 
     /* (non-Javadoc)
@@ -114,6 +126,7 @@ public interface ProxyUriManager {
         resizeNoExpand = getBooleanValue(uri.getQueryParameter(Param.NO_EXPAND.getKey()));
         returnOriginalContentOnError = uri.getQueryParameter(
             Param.RETURN_ORIGINAL_CONTENT_ON_ERROR.getKey());
+        htmlTagContext = uri.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey());
       }
     }
 
@@ -171,9 +184,13 @@ public interface ProxyUriManager {
       if (fallbackUrl != null) {
         builder.addQueryParameter(Param.FALLBACK_URL_PARAM.getKey(), fallbackUrl);
       }
+
       if (returnOriginalContentOnError != null) {
         builder.addQueryParameter(Param.RETURN_ORIGINAL_CONTENT_ON_ERROR.getKey(),
                                   returnOriginalContentOnError);
+      }
+      if (htmlTagContext != null) {
+        builder.addQueryParameter(Param.HTML_TAG_CONTEXT.getKey(), htmlTagContext);
       }
       return builder;
     }
@@ -187,10 +204,15 @@ public interface ProxyUriManager {
       req.setParam(Param.RESIZE_WIDTH.getKey(), resizeWidth);
       req.setParam(Param.RESIZE_QUALITY.getKey(), resizeQuality);
       req.setParam(Param.NO_EXPAND.getKey(), resizeNoExpand ? "1" : "0");
+
+      req.setParam(Param.RETURN_ORIGINAL_CONTENT_ON_ERROR.getKey(),
+                   returnOriginalContentOnError);
+      req.setParam(Param.HTML_TAG_CONTEXT.getKey(), htmlTagContext);
       return req;
     }
     
-    
+    // Creates new ProxyUri's for the given list of resource uri's. Note that
+    // the proxy uri's will have default values for internal parameters.
     public static List<ProxyUri> fromList(Gadget gadget, List<Uri> uris) {
       List<ProxyUri> res = Lists.newArrayListWithCapacity(uris.size());
       for (Uri uri : uris) {

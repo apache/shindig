@@ -48,8 +48,12 @@ public interface UriCommon {
     RESIZE_QUALITY("resize_q"),
     NO_EXPAND("no_expand"),
     FALLBACK_URL_PARAM("fallback_url"),
+
     RETURN_ORIGINAL_CONTENT_ON_ERROR("rooe"),
-    
+    // The html tag which requested this proxy uri. For example, "script" when
+    // "<script src='blah.js'></script>" is being proxied.
+    HTML_TAG_CONTEXT("html_tag_context"),
+
     // This is a legacy param, superseded by container.
     @Deprecated
     SYND("synd");
