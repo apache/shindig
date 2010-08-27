@@ -43,11 +43,15 @@ public class GuiceServletContextListener implements ServletContextListener {
 
   // From guice-servlet-2.0
   public static final String INJECTOR_NAME = Injector.class.getName();
-
+  
+  //HNN- constant name matched system.properties <contextparam> specified in the web.xml
+  private static final String SYSTEM_PROPERTIES = "system.properties";
   private boolean jmxInitialized = false;
 
   public void contextInitialized(ServletContextEvent event) {
     ServletContext context = event.getServletContext();
+    //HNN setting all system.properties specified in the web.xml
+    setSystemProperties(context);     
     String moduleNames = context.getInitParameter(MODULES_ATTRIBUTE);
     List<Module> modules = Lists.newLinkedList();
     if (moduleNames != null) {
@@ -83,5 +87,29 @@ public class GuiceServletContextListener implements ServletContextListener {
     ServletContext context = event.getServletContext();
     context.removeAttribute(INJECTOR_ATTRIBUTE);
   }
+  
+  /**
+   * This method sets all the (key,value) properties specified in the web.xml <contextparam> system.properties element
+   * if they are not empty.
+   * @param context
+   */
+  private void setSystemProperties(ServletContext context){
+    String systemProperties = context.getInitParameter(SYSTEM_PROPERTIES);
+    String key=null;
+    String value=null;
+    if(systemProperties!=null && systemProperties.trim().length()>0){
+      for (String aProperty : StringUtils.split(systemProperties, '\n')){
+    	String[] keyAndvalue = StringUtils.split(aProperty.trim(), "=",2);
+        if(keyAndvalue.length==2){
+    	  key=keyAndvalue[0];
+          value=keyAndvalue[1];
+          //set the system property if they are not empty
+          if(key!=null && key.trim().length()>0 && value!=null && value.trim().length()>0){
+            System.setProperty(key,value);
+          }
+        }
+      }
+    }
+  }  
 }
 
