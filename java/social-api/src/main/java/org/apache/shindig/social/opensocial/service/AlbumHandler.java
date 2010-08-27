@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
@@ -39,8 +40,6 @@ import com.google.inject.Inject;
 
 /*
  * Receives and delegates requests to the OpenSocial Album service.
- * 
- * TODO: test cases
  */
 @Service(name = "albums", path = "/{userId}+/{groupId}/{albumId}+")
 public class AlbumHandler {
@@ -173,13 +172,9 @@ public class AlbumHandler {
     */
   @Operation(httpMethods = "GET", path = "/@supportedFields")
   public List<Object> supportedFields(RequestItem request) {
-    String container = firstNonNull(request.getToken().getContainer(),
+    String container = Objects.firstNonNull(request.getToken().getContainer(),
         ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
         "${Cur['gadgets.features'].opensocial.supportedFields.album}");
-  }
-
-  private static <T> T firstNonNull(T first, T second) {
-    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

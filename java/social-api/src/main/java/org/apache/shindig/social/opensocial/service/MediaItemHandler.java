@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.protocol.HandlerPreconditions;
 import org.apache.shindig.protocol.Operation;
@@ -190,13 +191,9 @@ public class MediaItemHandler {
   @Operation(httpMethods = "GET", path = "/@supportedFields")
   public List<Object> supportedFields(RequestItem request) {
     // TODO: Would be nice if name in config matched name of service.
-    String container = firstNonNull(request.getToken().getContainer(),
+    String container = Objects.firstNonNull(request.getToken().getContainer(),
         ContainerConfig.DEFAULT_CONTAINER);
     return config.getList(container,
         "${Cur['gadgets.features'].opensocial.supportedFields.mediaItem}");
-  }
-
-  private static <T> T firstNonNull(T first, T second) {
-    return first != null ? first : Preconditions.checkNotNull(second);
   }
 }

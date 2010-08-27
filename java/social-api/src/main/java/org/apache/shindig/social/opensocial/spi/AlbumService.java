@@ -20,15 +20,19 @@ package org.apache.shindig.social.opensocial.spi;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.google.inject.ImplementedBy;
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Album;
 
+import javax.servlet.http.HttpServletResponse;
+
 /*
  * The AlbumService interface defines the service provider interface for
  * creating, retrieving, updating, and deleting OpenSocial albums.
  */
+@ImplementedBy(AlbumService.NotImplementedAlbumService.class)
 public interface AlbumService {
 
   /*
@@ -118,4 +122,30 @@ public interface AlbumService {
     */
   Future<Void> updateAlbum(UserId userId, String appId, Album album,
                            String albumId, SecurityToken token) throws ProtocolException;
+
+  public static class NotImplementedAlbumService implements AlbumService {
+    public Future<Album> getAlbum(UserId userId, String appId, Set<String> fields, String albumId, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<Album>> getAlbums(UserId userId, String appId, Set<String> fields, CollectionOptions options, Set<String> albumIds, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<Album>> getAlbums(Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> deleteAlbum(UserId userId, String appId, String albumId, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> createAlbum(UserId userId, String appId, Album album, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> updateAlbum(UserId userId, String appId, Album album, String albumId, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+  }
 }

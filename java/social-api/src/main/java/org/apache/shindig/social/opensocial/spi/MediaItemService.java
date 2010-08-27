@@ -8,6 +8,8 @@ import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.MediaItem;
 
+import javax.servlet.http.HttpServletResponse;
+
 /*
  * The MediaItemService interface defines the service provider interface for
  * creating, retrieving, updating, and deleting OpenSocial MediaItems.
@@ -126,4 +128,34 @@ public interface MediaItemService {
   Future<Void> updateMediaItem(UserId userId, String appId, String albumId,
                                String mediaItemId, MediaItem mediaItem, SecurityToken token)
       throws ProtocolException;
+
+  public class NotImplementedMediaItemService implements MediaItemService {
+    public Future<MediaItem> getMediaItem(UserId userId, String appId, String albumId, String mediaItemId, Set<String> fields, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<MediaItem>> getMediaItems(UserId userId, String appId, String albumId, Set<String> mediaItemIds, Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<MediaItem>> getMediaItems(UserId userId, String appId, String albumId, Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<RestfulCollection<MediaItem>> getMediaItems(Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> deleteMediaItem(UserId userId, String appId, String albumId, String mediaItemId, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> createMediaItem(UserId userId, String appId, String albumId, MediaItem mediaItem, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+
+    public Future<Void> updateMediaItem(UserId userId, String appId, String albumId, String mediaItemId, MediaItem mediaItem, SecurityToken token) throws ProtocolException {
+      throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "Not Implemented");
+    }
+  }
 }
