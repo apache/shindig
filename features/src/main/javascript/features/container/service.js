@@ -34,7 +34,7 @@ shindig.container.Service = function(opt_config) {
    * @type {string}
    */
   this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
-     shindig.container.ServiceConfig.API_HOST, window.__API_HOST));
+     shindig.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
   
   /**
    * @type {string}

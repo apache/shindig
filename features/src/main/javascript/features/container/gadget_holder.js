@@ -275,7 +275,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   // TODO: Share this base container logic
   // TODO: Two SD base URIs - one for container, one for gadgets
   // Need to add parent at end of query due to gadgets parsing bug
-  uri.setQP('parent', window.__CONTAINER_HOST);
+  uri.setQP('parent', window.__CONTAINER_URI.getOrigin());
 
   // Remove existing social token if we have a new one
   if (this.securityToken_) {

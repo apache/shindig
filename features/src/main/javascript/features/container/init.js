@@ -40,12 +40,11 @@
   }
 
   function initializeGlobalVars() {
-    var scriptUri = getLastScriptUri();
-    if (scriptUri) {
-      window.__API_HOST = scriptUri.getOrigin();
-      window.__CONTAINER = scriptUri.getQP('container');
-    }
-    window.__CONTAINER_HOST = shindig.uri(document.location.href).getOrigin();
+    window.__API_URI = getLastScriptUri();
+    window.__CONTAINER = window.__API_URI
+        ? window.__API_URI.getQP('container')
+        : 'default';
+    window.__CONTAINER_URI = shindig.uri(document.location.href);
   }
 
   function getLastScriptUri() {
