@@ -26,7 +26,13 @@ import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Group;
 
 public interface GroupService {
-
-	public Future<RestfulCollection<Group>> getGroups(UserId userId, CollectionOptions options, Set<String> fields, SecurityToken token);
+  /**
+   * @param userId  a userId object
+   * @param options search/sort/filtering options
+   * @param fields  Field search/sort
+   * @param token   a valid security token
+   * @return a collection of groups for a specific userId
+   */
+  public Future<RestfulCollection<Group>> getGroups(UserId userId, CollectionOptions options, Set<String> fields, SecurityToken token);
 
 }

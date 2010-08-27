@@ -32,25 +32,25 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import com.google.inject.Inject;
 
 
-@Service(name = "groups", path="/{userId}")
+@Service(name = "groups", path = "/{userId}")
 public class GroupHandler {
 
-	private final GroupService service;
+  private final GroupService service;
 
-	 @Inject
-	 public GroupHandler(GroupService service){
-		 this.service = service;
-	 }
+  @Inject
+  public GroupHandler(GroupService service) {
+    this.service = service;
+  }
 
-	 @Operation(httpMethods="GET")
-	  public Future<?> get(SocialRequestItem request) throws ProtocolException {
-		 Set<UserId> userIds = request.getUsers();
-		 CollectionOptions options = new CollectionOptions(request);
+  @Operation(httpMethods = "GET")
+  public Future<?> get(SocialRequestItem request) throws ProtocolException {
+    Set<UserId> userIds = request.getUsers();
+    CollectionOptions options = new CollectionOptions(request);
 
-		 // Preconditions
-		 HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
-		 HandlerPreconditions.requireSingular(userIds, "Only one userId must be specified");
+    // Preconditions
+    HandlerPreconditions.requireNotEmpty(userIds, "No userId specified");
+    HandlerPreconditions.requireSingular(userIds, "Only one userId must be specified");
 
-		 return service.getGroups(userIds.iterator().next(), options, request.getFields(), request.getToken());
-	 }
+    return service.getGroups(userIds.iterator().next(), options, request.getFields(), request.getToken());
+  }
 }

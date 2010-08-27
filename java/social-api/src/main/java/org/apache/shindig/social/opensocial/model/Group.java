@@ -38,46 +38,78 @@ import com.google.inject.ImplementedBy;
 @Exportablebean
 public interface Group {
 
-	 public static enum Field {
-		    /** Unique ID for this group Required. */
-		    ID("Id"),
-		    /** Title of group Required. */
-		    TITLE("title"),
-		    /** Description of group Optional. */
-		    DESCRIPTION("description");
+  public static enum Field {
+    /**
+     * Unique ID for this group Required.
+     */
+    ID("Id"),
+    /**
+     * Title of group Required.
+     */
+    TITLE("title"),
+    /**
+     * Description of group Optional.
+     */
+    DESCRIPTION("description");
 
-		    /**
-		     * The json field that the instance represents.
-		     */
-		    private final String jsonString;
+    /**
+     * The json field that the instance represents.
+     */
+    private final String jsonString;
 
-		    /**
-		     * create a field base on the a json element.
-		     *
-		     * @param jsonString the name of the element
-		     */
-		    private Field(String jsonString) {
-		      this.jsonString = jsonString;
-		    }
+    /**
+     * create a field base on the a json element.
+     *
+     * @param jsonString the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
 
-		    /**
-		     * emit the field as a json element.
-		     *
-		     * @return the field name
-		     */
-		    @Override
-		    public String toString() {
-		      return jsonString;
-		    }
-	 }
+    /**
+     * emit the field as a json element.
+     *
+     * @return the field name
+     */
+    @Override
+    public String toString() {
+      return jsonString;
+    }
+  }
 
-	 GroupId getId();
-	 void setId(GroupId id);
+  /**
+   * @return a groupId for this group
+   */
+  GroupId getId();
 
-	 String getTitle();
-	 void setTitle(String title);
+  /**
+   * Set the default group id
+   *
+   * @param id a valid GroupId
+   */
+  void setId(GroupId id);
 
-	 String getDescription();
-	 void setDescription(String description);
+  /**
+   * @return the title of the group
+   */
+  String getTitle();
 
+  /**
+   * Sets the title of this group
+   *
+   * @param title a valid title
+   */
+  void setTitle(String title);
+
+  /**
+   * @return the description of this group
+   */
+  String getDescription();
+
+  /**
+   * Sets the description of this group
+   *
+   * @param description a valid description
+   */
+  void setDescription(String description);
 }
