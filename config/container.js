@@ -250,7 +250,13 @@
     "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
-       "activity" : ["id", "title"]
+       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority", 
+                     "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
+                     "url", "userId"],
+       "album" : ["id", "thumbnailUrl", "title", "description", "location", "ownerId"],
+       "mediaItem" : ["album_id", "created", "description", "duration", "file_size", "id", "language", "last_updated",
+                      "location", "mime_type", "num_comments", "num_views", "num_votes", "rating", "start_time",
+                      "tagged_people", "tags", "thumbnail_url", "title", "type", "url"]
     }
   },
   "osapi.services" : {
