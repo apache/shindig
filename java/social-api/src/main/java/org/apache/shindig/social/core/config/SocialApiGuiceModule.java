@@ -18,6 +18,9 @@
 
 package org.apache.shindig.social.core.config;
 
+import java.util.List;
+import java.util.Set;
+
 import org.apache.shindig.auth.AnonymousAuthenticationHandler;
 import org.apache.shindig.auth.AuthenticationHandler;
 import org.apache.shindig.common.servlet.ParameterFetcher;
@@ -30,12 +33,11 @@ import org.apache.shindig.social.core.oauth.AuthenticationHandlerProvider;
 import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
 import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 import org.apache.shindig.social.opensocial.service.ActivityHandler;
+import org.apache.shindig.social.opensocial.service.AlbumHandler;
 import org.apache.shindig.social.opensocial.service.AppDataHandler;
+import org.apache.shindig.social.opensocial.service.MediaItemHandler;
 import org.apache.shindig.social.opensocial.service.MessageHandler;
 import org.apache.shindig.social.opensocial.service.PersonHandler;
-
-import java.util.List;
-import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -83,6 +85,6 @@ public class SocialApiGuiceModule extends AbstractModule {
    */
   protected Set<Class<?>> getHandlers() {
     return ImmutableSet.<Class<?>>of(ActivityHandler.class, AppDataHandler.class,
-        PersonHandler.class, MessageHandler.class);
+        PersonHandler.class, MessageHandler.class, AlbumHandler.class, MediaItemHandler.class);
   }
 }
