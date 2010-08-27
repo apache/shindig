@@ -671,7 +671,7 @@ shindig.IfrGadget.prototype.refresh = function() {
  */
 shindig.Container = function() {
   this.gadgets_ = {};
-  this.parentUrl_ = 'http://' + document.location.host;
+  this.parentUrl_ = document.location.href + '://' + document.location.host;
   this.country_ = 'ALL';
   this.language_ = 'ALL';
   this.view_ = 'default';
