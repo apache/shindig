@@ -17,9 +17,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -41,10 +40,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
 
 /**
- *
+ * Tests for CssResponseRewriter.
  */
 public class CssResponseRewriterTest extends RewriterTestBase {
   private static class FakeContainerConfig extends AbstractContainerConfig {
@@ -77,6 +76,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
   private CssResponseRewriter rewriter;
   private CssResponseRewriter rewriterNoOverrideExpires;
   private Uri dummyUri;
+  private GadgetContext gadgetContext;
   private ProxyUriManager proxyUriManager;
   private ContentRewriterFeature.Factory factory;
 
@@ -109,6 +109,12 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     dummyUri = Uri.parse("http://www.w3c.org");
+    gadgetContext = new GadgetContext() {
+      @Override
+      public Uri getUrl() {
+        return dummyUri;
+      }
+    };
   }
 
   @Test
@@ -248,12 +254,8 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
-            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true, new GadgetContext() {
-              @Override
-              public Uri getUrl() {
-                return dummyUri;
-              }
-            });
+            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw,
+            true, gadgetContext);
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(sw.toString()));
     assertEquals(Lists.newArrayList("www.example.org/some.css",
@@ -268,12 +270,8 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
-            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true, new GadgetContext() {
-              @Override
-              public Uri getUrl() {
-                return dummyUri;
-              }
-            });
+            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw,
+            true, gadgetContext);
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(sw.toString()));
     assertEquals(Lists.newArrayList("www.example.org/some.css"), stringList);

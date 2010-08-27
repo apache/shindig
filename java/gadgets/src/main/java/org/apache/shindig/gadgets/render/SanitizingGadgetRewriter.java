@@ -314,8 +314,8 @@ public class SanitizingGadgetRewriter extends DomWalker.Rewriter {
     public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
       if (node.getNodeType() == Node.ELEMENT_NODE &&
           "style".equalsIgnoreCase(node.getNodeName())) {
-        cssSanitizer.sanitize(
-            (Element)node, gadget.getSpec().getUrl(), cssImportRewriter, imageRewriter);
+        cssSanitizer.sanitize((Element) node, gadget.getSpec().getUrl(),
+            gadget.getContext(), cssImportRewriter, imageRewriter);
         return VisitStatus.MODIFY;
       }
       return VisitStatus.BYPASS;
