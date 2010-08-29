@@ -128,8 +128,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertStyleEquals(".xyz { " +
-        "background: url('//www.mock.com/dir/proxy?gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&container=mockContainer&nocache=0&debug=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif&" +
+        "background: url('//www.mock.com/dir/proxy?container=mockContainer&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
+        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif&" +
         "sanitize=1&rewriteMime=image%2F%2a');}", styleSheet);
   }
 
@@ -139,8 +139,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
     CssTree.StyleSheet styleSheet = parser.parseDom(css);
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertEquals(".xyz{" +
-        "background:url('//www.mock.com/dir/proxy?gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&container=mockContainer&nocache=0&debug=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
+        "background:url('//www.mock.com/dir/proxy?container=mockContainer&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
+        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
         "&sanitize=1&rewriteMime=image%2F%2a');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }
@@ -158,8 +158,8 @@ public class CajaCssSanitizerTest extends EasyMockTestCase {
 
     sanitizer.sanitize(styleSheet, DUMMY, gadgetContext, importRewriter, imageRewriter);
     assertEquals(".xyz{" +
-        "background:url('//www.test.com/dir/proxy?gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
-        "&container=default&nocache=0&debug=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
+        "background:url('//www.test.com/dir/proxy?container=default&gadget=http%3A%2F%2Fwww.example.org%2Fbase" +
+        "&debug=0&nocache=0&url=http%3A%2F%2Fwww.example.org%2Fimg.gif" +
         "&sanitize=1&rewriteMime=image%2F%2a');}",
         parser.serialize(styleSheet).replaceAll("\\s", ""));
   }

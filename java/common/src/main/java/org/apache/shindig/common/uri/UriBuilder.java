@@ -304,7 +304,7 @@ public final class UriBuilder {
     if (query == null) {
       return Collections.emptyMap();
     }
-    Map<String, List<String>> params = Maps.newHashMap();
+    Map<String, List<String>> params = Maps.newLinkedHashMap();
     Matcher paramMatcher = QUERY_PATTERN.matcher(query);
     while (paramMatcher.find()) {
       String name = Utf8UrlCoder.decode(paramMatcher.group(1));
