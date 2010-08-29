@@ -80,9 +80,7 @@
                 [main]
                 shindigSampleRealm = org.apache.shindig.sample.shiro.SampleShiroRealm
                 securityManager.realm = $shindigSampleRealm
-
-                [filters]
-                shiro.loginUrl = /login.jsp
+                authc.loginUrl = /login.jsp
 
                 [urls]
                 # The /login.jsp is not restricted to authenticated users (otherwise no one could log in!), but
