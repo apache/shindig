@@ -44,7 +44,62 @@ gadgets.rpctx = gadgets.rpctx || {};
 if (!gadgets.rpctx.wpm) {  // make lib resilient to double-inclusion
 
 gadgets.rpctx.wpm = function() {
-  var ready;
+  var process, ready;
+  var postMessage;
+  var pmSync = false;
+  var pmEventDomain = false;
+
+  // Some browsers (IE, Opera) have an implementation of postMessage that is
+  // synchronous, although HTML5 specifies that it should be asynchronous.  In
+  // order to make all browsers behave consistently, we run a small test to detect
+  // if postMessage is asynchronous or not.  If not, we wrap calls to postMessage
+  // in a setTimeout with a timeout of 0.
+  // Also, Opera's "message" event does not have an "origin" property (at least,
+  // it doesn't in version 9.64;  presumably, it will in version 10).  If
+  // event.origin does not exist, use event.domain.  The other difference is that
+  // while event.origin looks like <scheme>://<hostname>:<port>, event.domain
+  // consists only of <hostname>.
+  //
+  function testPostMessage() {
+    var hit = false;
+    
+    function receiveMsg(event) {
+      if (event.data == "postmessage.test") {
+        hit = true;
+        if (typeof event.origin === "undefined") {
+          pmEventDomain = true;
+        }
+      }
+    }
+    
+    gadgets.util.attachBrowserEvent(window, "message", receiveMsg, false);
+    window.postMessage("postmessage.test", "*");
+    
+    // if 'hit' is true here, then postMessage is synchronous
+    if (hit) {
+      pmSync = true;
+    }
+    
+    gadgets.util.removeBrowserEvent(window, "message", receiveMsg, false);
+  }
+
+  function onmessage(packet) {
+    var rpc = gadgets.json.parse(packet.data);
+    if (!rpc || !rpc.f) {
+      return;
+    }
+    
+    // for security, check origin against expected value
+    var origRelay = gadgets.rpc.getRelayUrl(rpc.f) ||
+                    gadgets.util.getUrlParameters()["parent"];
+    var origin = gadgets.rpc.getOrigin(origRelay);
+    if (!pmEventDomain ? packet.origin !== origin :
+                         packet.domain !== /^.+:\/\/([^:]+).*/.exec( origin )[1]) {
+      return;
+    }
+
+    process(rpc);
+  }
 
   return {
     getCode: function() {
@@ -56,11 +111,21 @@ gadgets.rpctx.wpm = function() {
     },
 
     init: function(processFn, readyFn) {
+      process = processFn;
       ready = readyFn;
-      var onmessage = function(packet) {
-        // TODO validate packet.domain for security reasons
-        processFn(gadgets.json.parse(packet.data));
-      };
+
+      testPostMessage();
+      if (!pmSync) {
+        postMessage = function(win, msg, origin) {
+          win.postMessage(msg, origin);
+        };
+      } else {
+        postMessage = function(win, msg, origin) {
+          window.setTimeout( function() {
+            win.postMessage(msg, origin);
+          }, 0);
+        };
+      }
  
       // Set up native postMessage handler.
       gadgets.util.attachBrowserEvent(window, 'message', onmessage, false);
@@ -69,11 +134,15 @@ gadgets.rpctx.wpm = function() {
       return true;
     },
 
-    setup: function(receiverId, token) {
+    setup: function(receiverId, token, forcesecure) {
       // If we're a gadget, send an ACK message to indicate to container
       // that we're ready to receive messages.
       if (receiverId === '..') {
-        gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
+        if (forcesecure) {
+          gadgets.rpc._createRelayIframe(token);
+        } else {
+          gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
+        }
       }
       return true;
     },
@@ -85,12 +154,16 @@ gadgets.rpctx.wpm = function() {
                       gadgets.util.getUrlParameters()["parent"];
       var origin = gadgets.rpc.getOrigin(origRelay);
       if (origin) {
-        targetWin.postMessage(gadgets.json.stringify(rpc), origin);
+        postMessage(targetWin, gadgets.json.stringify(rpc), origin);
       } else {
         gadgets.error("No relay set (used as window.postMessage targetOrigin)" +
             ", cannot send cross-domain message");
       }
       return true;
+    },
+
+    relayOnload: function(receiverId, data) {
+      ready(receiverId, true);
     }
   };
 }();
