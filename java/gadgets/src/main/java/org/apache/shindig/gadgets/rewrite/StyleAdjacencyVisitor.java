@@ -42,8 +42,8 @@ public class StyleAdjacencyVisitor implements Visitor {
         ("style".equalsIgnoreCase(node.getNodeName()) ||
          ("link".equalsIgnoreCase(node.getNodeName()) &&
           ("stylesheet".equalsIgnoreCase(getAttrib(node, "rel")) ||
-           (getAttrib(node, "type").toLowerCase().contains("css")))))) {
-      // Reserve <style...>, <link rel="stylesheet"...>, or <link type="*css*"...>
+           ("text/css".equalsIgnoreCase(getAttrib(node, "type"))))))) {
+      // Reserve <style...>, <link rel="stylesheet"...>, or <link type="text/css"...>
       return VisitStatus.RESERVE_TREE;
     }
     
@@ -59,10 +59,19 @@ public class StyleAdjacencyVisitor implements Visitor {
       // Should never occur; do for paranoia's sake.
       return false;
     }
-    
-    for (Node node : nodes) {
-      // Append all at the end of head. Relative order is maintained.
-      head.appendChild(node.getParentNode().removeChild(node));
+
+    Node firstChild = head.getFirstChild();
+    for (int i = nodes.size() - 1; i >= 0; i--) {
+      // Insert all in the top of the head. Relative order is maintained.
+      Node currentNode = nodes.get(i);
+      currentNode.getParentNode().removeChild(currentNode);
+      if (firstChild == null) {
+        head.appendChild(currentNode);
+      } else {
+        head.insertBefore(currentNode, firstChild);
+      }
+
+      firstChild = currentNode;
     }
     
     return true;

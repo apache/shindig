@@ -60,7 +60,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
   public void visitLinkCaseInsensitive() throws Exception {
     Node node = elem("lINK", "REL", "stYlEsheet");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
-    node = elem("LINk", "tyPe", "csS");
+    node = elem("LINk", "tyPe", "text/csS");
     assertEquals(VisitStatus.RESERVE_TREE, visit(node));
   }
   
@@ -81,7 +81,13 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     Node node = elem("link");
     assertEquals(VisitStatus.BYPASS, visit(node));
   }
-  
+
+  @Test
+  public void bypassLinkWithWrongAttribs() throws Exception {
+    Node node = elem("link", "type", "somecss");
+    assertEquals(VisitStatus.BYPASS, visit(node));
+  }
+
   @Test
   public void bypassText() throws Exception {
     Node node = doc.createTextNode("text");
@@ -110,7 +116,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     
     // Reshuffling validation.
     assertEquals(4, head.getChildNodes().getLength());
-    assertSame(style, head.getChildNodes().item(3)); // Last.
+    assertSame(style, head.getChildNodes().item(0)); // First.
   }
   
   @Test
@@ -129,10 +135,37 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     
     // Reshuffling validation.
     assertEquals(2, head.getChildNodes().getLength());
-    assertSame(style, head.getChildNodes().item(1)); // Last.
+    assertSame(style, head.getChildNodes().item(0)); // First.
     assertEquals(3, body.getChildNodes().getLength());
   }
-  
+
+  @Test
+  public void reshuffleMultipleStyleNodesWithNoChildernInHead() throws Exception {
+    Node style1 = elem("style");
+    Node style2 = elem("style");
+    Node style3 = elem("style");
+
+    // Some in head, some in body.
+    Node html = htmlDoc(new Node[] {}, elem("script"), style1, elem("foo"),
+        doc.createTextNode("text1"), style2, doc.createComment("comment"), elem("div"),
+        style3);
+    assertTrue(revisit(style1, style2, style3));
+
+    // Document structure sanity tests.
+    assertEquals(2, html.getChildNodes().getLength());
+    Node head = html.getFirstChild();
+    assertEquals("head", head.getNodeName());
+    Node body = html.getLastChild();
+    assertEquals("body", body.getNodeName());
+
+    // Reshuffling validation.
+    assertEquals(3, head.getChildNodes().getLength());
+    assertSame(style1, head.getChildNodes().item(0));
+    assertSame(style2, head.getChildNodes().item(1));
+    assertSame(style3, head.getChildNodes().item(2));
+    assertEquals(5, body.getChildNodes().getLength());
+  }
+
   @Test
   public void reshuffleMultipleStyleNodes() throws Exception {
     Node style1 = elem("style");
@@ -154,9 +187,9 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     
     // Reshuffling validation.
     assertEquals(5, head.getChildNodes().getLength());
-    assertSame(style1, head.getChildNodes().item(2));
-    assertSame(style2, head.getChildNodes().item(3));
-    assertSame(style3, head.getChildNodes().item(4));
+    assertSame(style1, head.getChildNodes().item(0));
+    assertSame(style2, head.getChildNodes().item(1));
+    assertSame(style3, head.getChildNodes().item(2));
     assertEquals(3, body.getChildNodes().getLength());
   }
   
@@ -167,7 +200,7 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     Node link3 = elem("link", "rel", "stylesheet");
     
     // Some in head, some in body.
-    Node html = htmlDoc(new Node[] { elem("script"), link1, elem("foo") },
+    Node html = htmlDoc(new Node[] { link1, elem("script"), elem("foo") },
         doc.createTextNode("text1"), link2, doc.createComment("comment"), elem("div"),
         link3);
     assertTrue(revisit(link1, link2, link3));
@@ -181,9 +214,9 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     
     // Reshuffling validation.
     assertEquals(5, head.getChildNodes().getLength());
-    assertSame(link1, head.getChildNodes().item(2));
-    assertSame(link2, head.getChildNodes().item(3));
-    assertSame(link3, head.getChildNodes().item(4));
+    assertSame(link1, head.getChildNodes().item(0));
+    assertSame(link2, head.getChildNodes().item(1));
+    assertSame(link3, head.getChildNodes().item(2));
     assertEquals(3, body.getChildNodes().getLength());
   }
   
@@ -211,10 +244,10 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     
     // Reshuffling validation.
     assertEquals(8, head.getChildNodes().getLength());
-    assertSame(style1, head.getChildNodes().item(4));
-    assertSame(link1, head.getChildNodes().item(5));
-    assertSame(style2, head.getChildNodes().item(6));
-    assertSame(link2, head.getChildNodes().item(7));
+    assertSame(style1, head.getChildNodes().item(0));
+    assertSame(link1, head.getChildNodes().item(1));
+    assertSame(style2, head.getChildNodes().item(2));
+    assertSame(link2, head.getChildNodes().item(3));
     assertEquals(0, div.getChildNodes().getLength());
     assertEquals(3, body.getChildNodes().getLength());
   }
