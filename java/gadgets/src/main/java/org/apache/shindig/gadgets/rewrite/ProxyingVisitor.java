@@ -18,22 +18,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.Pair;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.Uri.UriException;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,108 +37,23 @@ import java.util.logging.Logger;
  * Simple visitor that, when plugged into a DomWalker, rewrites
  * resource links to proxied versions of the same.
  */
-public class ProxyingVisitor implements DomWalker.Visitor {
+public class ProxyingVisitor extends ResourceMutateVisitor {
   private static final Logger logger = Logger.getLogger(
       ProxyUriManager.class.getName());
-
-  /**
-   * Enum for resource tags and associated attributes that should be
-   * proxied through shindig.
-   */
-  public enum Tags {
-    // Javascript resources requested by the current page.
-    SCRIPT(ImmutableMap.of("script", "src")),
-
-    // Css stylesheet resources requested by the current page.
-    STYLESHEET(ImmutableMap.of("link", "href")),
-
-    // Other embedded resources requested on the same page.
-    EMBEDDED_IMAGES(ImmutableMap.of("body", "background",
-                                    "img", "src",
-                                    "input", "src")),
-
-    // All resources that possibly be rewritten. Useful for testing.
-    ALL_RESOURCES(ImmutableMap.<String, String>builder()
-        .putAll(SCRIPT.getResourceTags())
-        .putAll(STYLESHEET.getResourceTags())
-        .putAll(EMBEDDED_IMAGES.getResourceTags())
-        .build());
-
-    private Map<String, String> resourceTags;
-    private Tags(Map<String, String> resourceTags) {
-      this.resourceTags = resourceTags;
-    }
-
-    public Map<String, String> getResourceTags() {
-      return resourceTags;
-    }
-  }
-
-  // Map of tag name to attribute of resources to rewrite.
-  private final Map<String, String> resourceTags;
-  private final ContentRewriterFeature.Config featureConfig;
   private final ProxyUriManager uriManager;
 
   public ProxyingVisitor(ContentRewriterFeature.Config featureConfig,
                          ProxyUriManager uriManager,
                          Tags... resourceTags) {
-    this.featureConfig = featureConfig;
+    super(featureConfig, resourceTags);
     this.uriManager = uriManager;
-
-    this.resourceTags = new HashMap<String, String>();
-    for (Tags r : resourceTags) {
-      this.resourceTags.putAll(r.getResourceTags());
-    }
   }
 
-  public VisitStatus visit(Gadget gadget, Node node) throws RewritingException {
-    String nodeName = node.getNodeName().toLowerCase();
-    if (node.getNodeType() == Node.ELEMENT_NODE &&
-        resourceTags.containsKey(nodeName) &&
-        featureConfig.shouldRewriteTag(nodeName)) {
-      if (nodeName.equals("link")) {
-        // Rewrite link only when it is for css.
-        String type = ((Element)node).getAttribute("type");
-        String rel = ((Element)node).getAttribute("rel");
-        if (!"stylesheet".equalsIgnoreCase(rel) || !"text/css".equalsIgnoreCase(type)) {
-          return VisitStatus.BYPASS;
-        }
-      }
-
-      Attr attr = (Attr)node.getAttributes().getNamedItem(
-          resourceTags.get(nodeName));
-      if (attr != null) {
-        String urlValue = attr.getValue();
-        if (!StringUtils.isEmpty(urlValue) && featureConfig.shouldRewriteURL(urlValue)) {
-          return VisitStatus.RESERVE_NODE;
-        }
-      }
-    }
-    return VisitStatus.BYPASS;
-  }
-
-  public boolean revisit(Gadget gadget, List<Node> nodes) throws RewritingException {
-    List<Pair<Node, Uri>> proxiedUris = getProxiedUris(gadget, nodes);
-    
-    boolean mutated = false;
-    for (Pair<Node, Uri> proxyPair : proxiedUris) {
-      if (proxyPair.two == null) {
-        continue;
-      }
-      Element element = (Element)proxyPair.one;
-      String nodeName = element.getNodeName().toLowerCase();
-      element.setAttribute(resourceTags.get(nodeName), proxyPair.two.toString());
-      mutated = true;
-    }
-    
-    return mutated;
-  }
-  
-  private List<Pair<Node, Uri>> getProxiedUris(Gadget gadget, List<Node> nodes) {
+  @Override
+  protected Collection<Pair<Node, Uri>> mutateUris(Gadget gadget, Collection<Node> nodes) {
     List<ProxyUriManager.ProxyUri> reservedUris =
         Lists.newArrayListWithCapacity(nodes.size());
-    List<Node> reservedNodes =
-        Lists.newArrayListWithCapacity(nodes.size());
+    List<Node> reservedNodes = Lists.newArrayListWithCapacity(nodes.size());
     
     for (Node node : nodes) {
       Element element = (Element)node;
