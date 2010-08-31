@@ -204,6 +204,8 @@ gadgets.rpc = function() {
   // ("unload" event).
   //  NOTE: The use of the "unload" handler here and for the relay iframe
   // prevents the use of the in-memory page cache in modern browsers.
+  // See: https://developer.mozilla.org/en/using_firefox_1.5_caching
+  // See: http://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
   var mainPageUnloading = false,
       hookedUnload = false;
   
@@ -657,7 +659,7 @@ gadgets.rpc = function() {
    * @param {string} targetId
    * @param {string=} opt_receiverurl
    * @param {string=} opt_authtoken
-   * @param {string=} opt_forcesecure
+   * @param {boolean=} opt_forcesecure
    */
   function setupReceiver(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure) {
     if (targetId === '..') {
@@ -802,10 +804,6 @@ gadgets.rpc = function() {
       // Attempt to make call via a cross-domain transport.
       // Retrieve the transport for the given target - if one
       // target is misconfigured, it won't affect the others.
-      // TODO Since 'transport' is always set (on load of rpc.js), channel will never
-      //    be null (and earlyRpcQueue will never be used).  Only use
-      //    receiverTx[targetId].
-      //      var channel = receiverTx[targetId] ? receiverTx[targetId] : transport;
       var channel = receiverTx[targetId];
 
       if (!channel) {
@@ -991,9 +989,9 @@ gadgets.rpc = function() {
 
     RPC_ID: rpcId,
     
-    LOAD_TIMEOUT: LOAD_TIMEOUT,
-    FRAME_PHISH: FRAME_PHISH,
-    FORGED_MSG : FORGED_MSG
+    SEC_ERROR_LOAD_TIMEOUT: LOAD_TIMEOUT,
+    SEC_ERROR_FRAME_PHISH: FRAME_PHISH,
+    SEC_ERROR_FORGED_MSG : FORGED_MSG
   };
 }();
 

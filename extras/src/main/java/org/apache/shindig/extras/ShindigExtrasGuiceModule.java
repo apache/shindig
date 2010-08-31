@@ -34,7 +34,7 @@ public class ShindigExtrasGuiceModule extends AbstractModule {
 
   protected void configureExtraFeatures() {
     // This is how you add search paths for features.
-    Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features")); 
+    Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended")); 
     featureBinder.addBinding().toInstance("res://features-extras/features.txt");
   }
 }

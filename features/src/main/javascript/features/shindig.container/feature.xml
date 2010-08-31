@@ -27,6 +27,7 @@ A map of view names to view attributes. Examples:
   <dependency>globals</dependency>
   <dependency>rpc</dependency>
   <dependency>osapi</dependency>
+  <dependency>shindig.uri.ext</dependency>
   <container>
     <script src="util.js"/>
     <script src="cookies.js"/>

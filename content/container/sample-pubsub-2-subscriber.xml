@@ -35,10 +35,8 @@
 <script>
 var subId;
 
-var g = gadgets.byId(__MODULE_ID__);
-
 // Example of setting a parameter to the HubClient used by pubsub-2 feature.
-g.PubSubSettings.params.HubClient.onSecurityAlert = function(alertSource, alertType) {
+gadgets.HubSettings.params.HubClient.onSecurityAlert = function(alertSource, alertType) {
   alert("SECURITY ERROR!");
   window.location.href = "about:blank";
 };
@@ -50,11 +48,11 @@ function callback(topic, data, subscriberData) {
 }
 
 function subscribe() {
-  subId = g.PubSub.subscribe("org.apache.shindig.random-number", callback);
+  subId = gadgets.Hub.subscribe("org.apache.shindig.random-number", callback);
 }
 
 function unsubscribe() {
-  g.PubSub.unsubscribe(subId);
+  gadgets.Hub.unsubscribe(subId);
   document.getElementById("output").innerHTML = "";
 }
 

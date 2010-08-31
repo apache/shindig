@@ -26,10 +26,10 @@ OpenAjax.gadgets.rpctx = OpenAjax.gadgets.rpctx || {};
     // For now, we only use "oaaConfig" for the global "gadgets" object.  If the "gadgets" global
     // already exists, then there is no reason to check for "oaaConfig".  In the future, if we use
     // "oaaConfig" for other purposes, we'll need to remove the check for "!window.gadgets".
-    if (!window.gadgets) {
+    if (typeof gadgets === 'undefined') {
         // "oaaConfig" can be specified as a global object.  If not found, then look for it as an
         // attribute on the script line for the OpenAjax Hub JS file.
-        if (!window.oaaConfig) {
+        if (typeof oaaConfig === 'undefined') {
             var scripts = document.getElementsByTagName("script");
             // match "OpenAjax-mashup.js", "OpenAjaxManagedHub-all*.js", "OpenAjaxManagedHub-core*.js"
             var reHub = /openajax(?:managedhub-(?:all|core).*|-mashup)\.js$/i;
@@ -44,7 +44,7 @@ OpenAjax.gadgets.rpctx = OpenAjax.gadgets.rpctx || {};
                     var config = scripts[i].getAttribute( "oaaConfig" );
                     if ( config ) {
                         try {
-                            window.oaaConfig = eval( "({ " + config + " })" );
+                            oaaConfig = eval( "({ " + config + " })" );
                         } catch (e) {}
                     }
                     break;
@@ -52,8 +52,8 @@ OpenAjax.gadgets.rpctx = OpenAjax.gadgets.rpctx || {};
             }
         }
         
-        if (window.oaaConfig && window.oaaConfig.gadgetsGlobal) {
-            window.gadgets = OpenAjax.gadgets;
+        if (typeof oaaConfig !== 'undefined' && oaaConfig.gadgetsGlobal) {
+            gadgets = OpenAjax.gadgets;
         }
     }
 })();
@@ -529,13 +529,16 @@ OpenAjax.hub.IframeHubClient = function( params )
         }
         
         OpenAjax.hub.IframeContainer._rpcRouter.add( "..", this );
-//        securityToken = generateSecurityToken( params, scope, log );    // XXX still necessary?
+// XXX The RPC layer initializes immediately on load, in the child (IframeHubClient). So it is too
+//    late here to specify a security token for the RPC layer.  At the moment, only the NIX
+//    transport requires a child token (IFPC [aka FIM] is not supported).
+//        securityToken = generateSecurityToken( params, scope, log );
 
         var internalID = OpenAjax.gadgets.rpc.RPC_ID;
         if ( ! internalID ) {
             throw new Error( OpenAjax.hub.Error.WrongProtocol );
         }
-        clientID = decodeURIComponent( internalID.substr( internalID.indexOf("_") + 1 ) );
+        clientID = internalID.substr( internalID.indexOf("_") + 1 );
     };
     
   /*** HubClient interface ***/
@@ -802,7 +805,6 @@ OpenAjax.hub.IframeContainer._rpcRouter = function() {
                     return;
                 }
                 
-                id = encodeURIComponent( id );
                 do {
                     // a client with the specified ID already exists on this page;
                     // create a unique ID
@@ -818,9 +820,9 @@ OpenAjax.hub.IframeContainer._rpcRouter = function() {
                 securityCallback: onSecurityAlert
             });
 
-            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.LOAD_TIMEOUT ] = OpenAjax.hub.SecurityAlert.LoadTimeout;
-            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.FRAME_PHISH ] = OpenAjax.hub.SecurityAlert.FramePhish;
-            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.FORGED_MSG ] = OpenAjax.hub.SecurityAlert.ForgedMsg;
+            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.SEC_ERROR_LOAD_TIMEOUT ] = OpenAjax.hub.SecurityAlert.LoadTimeout;
+            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.SEC_ERROR_FRAME_PHISH ] = OpenAjax.hub.SecurityAlert.FramePhish;
+            rpcErrorsToOAA[ OpenAjax.gadgets.rpc.SEC_ERROR_FORGED_MSG ] = OpenAjax.hub.SecurityAlert.ForgedMsg;
             
             this.add = _add;
             return _add( id, receiver );
@@ -836,7 +838,7 @@ var rpcErrorsToOAA = {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function generateSecurityToken( params, scope, log, overrideTokenLength ) {
+function generateSecurityToken( params, scope, log ) {
     if ( ! OpenAjax.hub.IframeContainer._prng ) {
         // create pseudo-random number generator with a default seed
         var seed = new Date().getTime() + Math.random() + document.cookie;
@@ -854,7 +856,7 @@ function generateSecurityToken( params, scope, log, overrideTokenLength ) {
         }
     }
     
-    var tokenLength = overrideTokenLength || (p && p.tokenLength) || 6;
+    var tokenLength = (p && p.tokenLength) || 6;
     return OpenAjax.hub.IframeContainer._prng.nextRandomB64Str( tokenLength );
 }
 
