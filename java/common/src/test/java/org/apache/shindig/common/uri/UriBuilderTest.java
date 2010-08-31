@@ -365,7 +365,7 @@ public class UriBuilderTest {
 
   @Test
   public void constructFromUriAndBack() {
-    Uri uri = Uri.parse("http://apache.org/foo/bar?foo=bar#foo");
+    Uri uri = Uri.parse("http://apache.org/foo/bar?foo=bar&a=b&c=d&y=z&foo=zoo#foo");
     UriBuilder builder = new UriBuilder(uri);
 
     assertEquals(uri, builder.toUri());
