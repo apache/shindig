@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor.VisitStatus;
 
 import org.w3c.dom.Node;
@@ -267,7 +268,27 @@ public class StyleAdjacencyVisitorTest extends DomWalkerTestBase {
     assertEquals(1, html.getChildNodes().getLength());
     assertSame(body, html.getFirstChild());
   }
-  
+
+  @Test
+  public void singleStyleNodeInHead() throws Exception {
+    Node style = elem("style", "type", "text/css");
+    Node head = elem("head");
+    head.appendChild(style);
+
+    Node html = elem("html");
+    html.appendChild(head);
+    html.appendChild(elem("body"));
+    doc.appendChild(html);
+
+    assertTrue(revisit(style));
+
+    // Document structure sanity tests.
+    assertEquals(2, html.getChildNodes().getLength());
+    assertSame(head, html.getFirstChild());
+  }
+
+
+
   private VisitStatus visit(Node node) throws Exception {
     return new StyleAdjacencyVisitor().visit(gadget(), node);
   }

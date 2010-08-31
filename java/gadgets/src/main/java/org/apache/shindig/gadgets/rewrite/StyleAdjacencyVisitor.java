@@ -18,6 +18,8 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
@@ -60,20 +62,24 @@ public class StyleAdjacencyVisitor implements Visitor {
       return false;
     }
 
-    Node firstChild = head.getFirstChild();
-    for (int i = nodes.size() - 1; i >= 0; i--) {
-      // Insert all in the top of the head. Relative order is maintained.
-      Node currentNode = nodes.get(i);
-      currentNode.getParentNode().removeChild(currentNode);
-      if (firstChild == null) {
-        head.appendChild(currentNode);
-      } else {
-        head.insertBefore(currentNode, firstChild);
-      }
-
-      firstChild = currentNode;
+    // Detach nodes
+    for (Node n : nodes) {
+      n.getParentNode().removeChild(n);
     }
-    
+
+    // Add nodes back to DOM
+    if (head.getFirstChild() == null) {
+      // add each node to head
+      for (Node n : nodes) {
+        head.appendChild(n);
+      }
+    } else {
+      // existing nodes in head, inject all nodes before the first one
+      Node firstChild = head.getFirstChild();
+      for (Node n : nodes)
+        head.insertBefore(n, firstChild);
+    }
+
     return true;
   }
 
@@ -87,6 +93,6 @@ public class StyleAdjacencyVisitor implements Visitor {
         break;
       }
     }
-    return value == null ? "" : value;
+    return Objects.firstNonNull(value, "");
   }
 }
