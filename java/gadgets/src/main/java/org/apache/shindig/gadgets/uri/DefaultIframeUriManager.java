@@ -40,6 +40,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Default implementetion of an IframeUriManager which references the /ifr endpoint.
+ */
 public class DefaultIframeUriManager implements IframeUriManager {
   // By default, fills in values that could otherwise be templated for client population.
   private static final boolean DEFAULT_USE_TEMPLATES = false;

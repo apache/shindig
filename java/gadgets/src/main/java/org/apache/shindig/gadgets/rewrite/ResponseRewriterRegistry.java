@@ -23,7 +23,9 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import com.google.inject.ImplementedBy;
 
 /**
- * Performs rewriting operations by invoking one or more {@link ResponseRewriter}s.
+ * Performs rewriting operations by invoking one or more {@link org.apache.shindig.gadgets.rewrite.ResponseRewriter}s.
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(DefaultResponseRewriterRegistry.class)
 public interface ResponseRewriterRegistry {

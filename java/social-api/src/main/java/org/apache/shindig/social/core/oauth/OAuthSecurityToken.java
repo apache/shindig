@@ -21,6 +21,9 @@ import org.apache.shindig.auth.AbstractSecurityToken;
 import org.apache.shindig.auth.AuthenticationMode;
 import org.apache.shindig.auth.SecurityToken;
 
+/**
+ * A SecurityToken that represents two/three legged OAuth requests
+ */
 public class OAuthSecurityToken extends AbstractSecurityToken implements SecurityToken {
   private final String userId;
   private final String appUrl;

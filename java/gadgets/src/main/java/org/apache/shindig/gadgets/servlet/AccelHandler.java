@@ -44,6 +44,8 @@ import java.io.IOException;
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class AccelHandler {

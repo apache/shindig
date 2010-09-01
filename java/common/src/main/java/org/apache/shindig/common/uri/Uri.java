@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* Represents a Uniform Resource Identifier (URI) reference as defined by <a
-* href="http://tools.ietf.org/html/rfc3986">RFC 3986</a>.
-*
-* Assumes that all url components are UTF-8 encoded.
-*/
+ * Represents a Uniform Resource Identifier (URI) reference as defined by <a
+ * href="http://tools.ietf.org/html/rfc3986">RFC 3986</a>.
+ *
+ * Assumes that all url components are UTF-8 encoded.
+ */
 public final class Uri {
   private final String text;
   private final String scheme;

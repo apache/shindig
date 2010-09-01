@@ -30,6 +30,8 @@ import java.util.List;
 /**
  * Visitor that replaces urls (@import + background) in
  * &lt;style&gt; ... &lt;/style&gt; with their proxied versions.
+ *
+ * @since 2.0.0
  */
 public class StyleTagProxyEmbeddedUrlsVisitor implements DomWalker.Visitor {
   protected final ContentRewriterFeature.Config config;

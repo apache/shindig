@@ -33,6 +33,8 @@ import com.google.inject.ImplementedBy;
  * <p>
  * From http://opensocial-resources.googlecode.com/svn/spec/1.0/Social-Data.xml#Group
  * </p>
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(GroupImpl.class)
 @Exportablebean

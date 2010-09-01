@@ -40,6 +40,8 @@ import com.google.inject.Inject;
 
 /**
  * Rewriter that sanitizes CSS and image content.
+ *
+ * @since 2.0.0
  */
 public class SanitizingResponseRewriter implements ResponseRewriter {
   private static final Logger LOG =

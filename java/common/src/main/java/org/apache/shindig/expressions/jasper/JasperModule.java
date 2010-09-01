@@ -25,6 +25,8 @@ import com.google.inject.Scopes;
 
 /**
  * Creates a module to supply a Jasper Provider
+ *
+ * @since 2.0.0
  */
 public class JasperModule extends AbstractModule {
   @Override

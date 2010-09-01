@@ -45,6 +45,8 @@ import java.util.Map;
  * warn us if actual implementation change and break the API.
  * Delegation support composition, and will create a proxy for fields according
  * To table of classes to proxy.
+ *
+ * @since 2.0.0
  */
 public class BeanDelegator {
 
@@ -96,7 +98,7 @@ public class BeanDelegator {
     // Proxy each item in a map (map key is not proxied)
     if (source instanceof Map<?, ?>) {
       Map<?, ?> mapSource = (Map<?, ?>) source;
-      if (mapSource.size() > 0 && delegatedClasses.containsKey(
+      if (!mapSource.isEmpty() && delegatedClasses.containsKey(
           mapSource.values().iterator().next().getClass())) {
         // Convert Map:
         ImmutableMap.Builder<Object, Object> mapBuilder = ImmutableMap.builder();
@@ -112,7 +114,7 @@ public class BeanDelegator {
     // Proxy each item in a list
     if (source instanceof List<?>) {
       List<?> listSource = (List<?>) source;
-      if (listSource.size() > 0 && delegatedClasses.containsKey(
+      if (!listSource.isEmpty() && delegatedClasses.containsKey(
         listSource.get(0).getClass())) {
         // Convert Map:
         ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();

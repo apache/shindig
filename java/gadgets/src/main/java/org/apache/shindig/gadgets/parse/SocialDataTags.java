@@ -39,6 +39,8 @@ import org.w3c.dom.Document;
  * This class provides a helper to select all OSData or OSTemplate tags,
  * irrespective whether this conversion occurred, ensuring that
  * data pipelining and templating can work with any parser.
+ *
+ * @since 2.0.0
  */
 public final class SocialDataTags {
   private SocialDataTags() { }

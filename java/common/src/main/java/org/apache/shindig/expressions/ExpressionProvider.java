@@ -25,6 +25,10 @@ import org.apache.shindig.expressions.juel.JuelProvider;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ * Provider for an expression handler Juel or Jasper
+ * @since 2.0.0
+ */
 @ImplementedBy(JuelProvider.class)
 public interface ExpressionProvider {
 

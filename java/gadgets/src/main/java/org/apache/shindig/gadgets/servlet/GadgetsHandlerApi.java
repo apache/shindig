@@ -31,6 +31,8 @@ import java.util.Map;
  * Classes in here specify the API data.
  * Please do not reference run time classes, instead create new interface (keep imports clean!).
  * Please avoid changes if possible, you might break external system that depend on the API.
+ *
+ * @since 2.0.0
  */
 public class GadgetsHandlerApi {
 

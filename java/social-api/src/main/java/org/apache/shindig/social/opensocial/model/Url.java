@@ -64,12 +64,14 @@ public interface Url extends ListField {
 
   /**
    * Get the text associated with the link.
+   *
    * @return the link text
    */
   String getLinkText();
 
   /**
    * Set the Link text associated with the link.
+   *
    * @param linkText the link text
    */
   void setLinkText(String linkText);

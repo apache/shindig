@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 /**
  * Simple visitor that, when plugged into a DomWalker, rewrites
  * resource links to proxied versions of the same.
+ *
+ * @since 2.0.0
  */
 public class ProxyingVisitor extends ResourceMutateVisitor {
   private static final Logger logger = Logger.getLogger(

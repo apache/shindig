@@ -25,6 +25,11 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.protocol.RestfulCollection;
 import org.apache.shindig.social.opensocial.model.Group;
 
+/**
+ * A service for gathering group information for specific users.
+ * 
+ * @since 2.0.0
+ */
 public interface GroupService {
   /**
    * @param userId  a userId object

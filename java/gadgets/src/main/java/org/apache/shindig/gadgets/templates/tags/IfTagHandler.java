@@ -24,6 +24,9 @@ import org.w3c.dom.Node;
 
 import com.google.inject.Inject;
 
+/**
+ * Handles the os:If tag for osml.
+ */
 public class IfTagHandler extends AbstractTagHandler {
 
   static final String TAG_IF = "If";

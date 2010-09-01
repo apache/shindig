@@ -35,6 +35,8 @@ import java.util.List;
  * in all but the most pathological (JS manipulating CSS through stylesheets
  * in an order-dependent way) cases while reducing browser reflows and making
  * CSS concatenated-proxying more likely.
+ *
+ * @since 2.0.0
  */
 public class StyleAdjacencyVisitor implements Visitor {
   

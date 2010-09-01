@@ -67,6 +67,8 @@ import java.util.logging.Logger;
 
 /**
  * Rewriter that cajoles Javascript.
+ *
+ * @since 2.0.0
  */
 public class CajaResponseRewriter implements ResponseRewriter {
   private static final Logger LOG = Logger.getLogger(CajaResponseRewriter.class.getName());

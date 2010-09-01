@@ -74,7 +74,6 @@ import java.util.Map;
  *  &lt;/msg&gt;
  *  &lt;/messagebundle&gt;
  * </pre></code>
- *
  */
 @ImplementedBy(ActivityImpl.class)
 @Exportablebean

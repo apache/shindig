@@ -19,7 +19,9 @@
 package org.apache.shindig.expressions;
 
 /**
- * Expression Language type conversion interface.  
+ * Expression Language type conversion interface.
+ *
+ * @since 2.0.0
  */
 import javax.el.ELException;
 

@@ -40,6 +40,11 @@ import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 
+/**
+ * Jtility routines for dealing with servlets.
+ *
+ * @since 2.0.0
+ */
 public final class ServletUtil {
   public static final String REMOTE_ADDR_KEY = "RemoteAddress";
   public static final String DATA_URI_KEY = "dataUri";

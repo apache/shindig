@@ -42,7 +42,7 @@ import com.google.inject.Inject;
  * of method names.
  * <p>
  * The default Guice instance of the Functions class has the
- * {@link OpensocialFunctions} methods registered. 
+ * {@link OpensocialFunctions} methods registered.
  */
 @ImplementedBy(Functions.DefaultFunctions.class)
 public class Functions extends FunctionMapper {

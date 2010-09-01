@@ -28,9 +28,11 @@ import org.apache.shindig.social.opensocial.model.Album;
 
 import javax.servlet.http.HttpServletResponse;
 
-/*
+/**
  * The AlbumService interface defines the service provider interface for
  * creating, retrieving, updating, and deleting OpenSocial albums.
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(AlbumService.NotImplementedAlbumService.class)
 public interface AlbumService {

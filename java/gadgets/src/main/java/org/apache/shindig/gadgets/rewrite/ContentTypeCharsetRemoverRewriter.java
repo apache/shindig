@@ -22,7 +22,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 /**
- * Removes charset information from <meta http-equip="Content-Type">
+ * Removes charset information from &lt;meta http-equip="Content-Type"%gt; tags
+ *
+ * @since 2.0.0
  */
 public class ContentTypeCharsetRemoverRewriter extends DomWalker.Rewriter {
   @Inject

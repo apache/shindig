@@ -28,6 +28,11 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Rewrites gadget content to force resources through the /proxy endpoint.
+ *
+ * @since 2.0.0
+ */
 public class ProxyingContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;

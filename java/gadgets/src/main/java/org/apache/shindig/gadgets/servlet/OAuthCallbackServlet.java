@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet to act as our OAuth callback URL.  When gadget authors register a consumer key with an
  * OAuth service provider, they can provide a URL pointing to this servlet as their callback URL.
- * 
+ *
  * Protocol flow:
  * - gadget discovers it needs approval to access data at OAuth SP.
  * - gadget opens popup window to approval URL, passing URL to this servlet as the oauth_callback

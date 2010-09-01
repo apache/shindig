@@ -41,8 +41,10 @@ import java.util.Map;
 /**
  * Framework-in-a-framework facilitating the common Visitor case
  * in which a DOM tree is walked in order to manipulate it.
- * 
+ *
  * See subclass doc for additional detail.
+ *
+ * @since 2.0.0
  */
 public final class DomWalker {
   private DomWalker() {}

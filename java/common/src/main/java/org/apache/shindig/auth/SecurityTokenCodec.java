@@ -24,6 +24,8 @@ import java.util.Map;
 
 /**
  *  Handles verification of gadget security tokens.
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(DefaultSecurityTokenCodec.class)
 public interface SecurityTokenCodec {

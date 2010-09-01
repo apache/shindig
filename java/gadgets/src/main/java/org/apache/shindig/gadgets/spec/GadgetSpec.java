@@ -38,6 +38,7 @@ import java.util.Map;
 
 /**
  * Represents a gadget specification root element (Module).
+ *
  * @see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadget-spec">gadgets spec</a>
  */
 public class GadgetSpec {

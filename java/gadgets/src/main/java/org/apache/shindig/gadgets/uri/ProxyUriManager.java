@@ -32,6 +32,10 @@ import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
 import java.util.List;
 
+/**
+ * Generates Uris used by the /proxy servlet
+ * @since 2.0.0
+ */
 public interface ProxyUriManager {
   /**
    * Generate a Uri that proxies the given resource Uri.

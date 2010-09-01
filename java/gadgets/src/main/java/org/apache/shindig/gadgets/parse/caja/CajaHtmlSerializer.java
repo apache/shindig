@@ -30,6 +30,8 @@ import java.io.StringWriter;
 
 /**
  * HtmlSerializer using Caja's Nodes.render(...) method under the hood.
+ *
+ * @since 2.0.0
  */
 public class CajaHtmlSerializer implements HtmlSerializer {
   public String serialize(Document doc) {

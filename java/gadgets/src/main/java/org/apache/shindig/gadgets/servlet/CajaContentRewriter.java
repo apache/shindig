@@ -69,6 +69,9 @@ import java.net.URI;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * A GadgetRewriter based on caja technology
+ */
 public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 

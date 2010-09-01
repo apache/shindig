@@ -31,7 +31,6 @@ import java.util.Date;
  *
  * see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Organization">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Organization</a>
- *
  */
 
 @ImplementedBy(OrganizationImpl.class)

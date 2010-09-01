@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * Class to handle OAuth fetcher state stored client side.  The state is
- * stored as a signed, encrypted, time stamped blob. 
+ * stored as a signed, encrypted, time stamped blob.
  */
 public class OAuthClientState {
   /**

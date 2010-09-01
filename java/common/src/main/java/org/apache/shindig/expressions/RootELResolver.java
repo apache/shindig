@@ -31,9 +31,9 @@ import com.google.common.collect.ImmutableMap;
  * ELResolver implementation that adds a map of top-level variables.
  * New variables can be inserted after creation with:
  * {@code context.getELResolver().setValue(context, null, name, value);}
- * 
+ *
  * TODO: should this be read-only?
- * 
+ *
  * @see Expressions#newELContext(ELResolver...)
  */
 public class RootELResolver extends ELResolver {

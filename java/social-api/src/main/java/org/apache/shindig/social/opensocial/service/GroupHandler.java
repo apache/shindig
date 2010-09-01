@@ -32,6 +32,10 @@ import org.apache.shindig.social.opensocial.spi.UserId;
 import com.google.inject.Inject;
 
 
+/**
+ * RPC/REST handler for groups requests
+ * @since 2.0.0
+ */
 @Service(name = "groups", path = "/{userId}")
 public class GroupHandler {
 

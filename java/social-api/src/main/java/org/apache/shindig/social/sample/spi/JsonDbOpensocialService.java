@@ -129,6 +129,13 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
    */
   private static final String PASSWORDS_TABLE = "passwords";
 
+  /**
+   * Initializes the JsonDbOpensocialService using Guice
+   *
+   * @param jsonLocation location of the json data provided by the shindig.canonical.json.db parameter
+   * @param converter an injected BeanConverter
+   * @throws java.lang.Exception if any
+   */
   @Inject
   public JsonDbOpensocialService(@Named("shindig.canonical.json.db")
   String jsonLocation, @Named("shindig.bean.converter.json")
@@ -138,14 +145,24 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     this.converter = converter;
   }
 
+  /**
+   * Allows access to the underlying json db.
+   *
+   * @return a reference to the json db
+   */
   public JSONObject getDb() {
     return db;
   }
 
+  /**
+   * override the json database
+   * @param db a {@link org.json.JSONObject}.
+   */
   public void setDb(JSONObject db) {
     this.db = db;
   }
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<Activity>> getActivities(Set<UserId> userIds, GroupId groupId,
       String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
       throws ProtocolException {
@@ -172,6 +189,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<Activity>> getActivities(UserId userId, GroupId groupId,
       String appId, Set<String> fields, CollectionOptions options, Set<String> activityIds,
       SecurityToken token) throws ProtocolException {
@@ -195,6 +213,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Activity> getActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token) throws ProtocolException {
     try {
@@ -217,6 +236,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> deleteActivities(UserId userId, GroupId groupId, String appId,
       Set<String> activityIds, SecurityToken token) throws ProtocolException {
     try {
@@ -247,6 +267,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> createActivity(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Activity activity, SecurityToken token) throws ProtocolException {
     // Are fields really needed here?
@@ -270,6 +291,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
   
+  /** {@inheritDoc} */
   public Future<RestfulCollection<Person>> getPeople(Set<UserId> userIds, GroupId groupId,
       CollectionOptions options, Set<String> fields, SecurityToken token) throws ProtocolException {
     List<Person> result = Lists.newArrayList();
@@ -320,6 +342,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Person> getPerson(UserId id, Set<String> fields, SecurityToken token)
       throws ProtocolException {
     try {
@@ -380,6 +403,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<DataCollection> getPersonData(Set<UserId> userIds, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token) throws ProtocolException {
     try {
@@ -417,6 +441,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> deletePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, SecurityToken token) throws ProtocolException {
     try {
@@ -444,6 +469,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> updatePersonData(UserId userId, GroupId groupId, String appId,
       Set<String> fields, Map<String, String> values, SecurityToken token)
       throws ProtocolException {
@@ -471,15 +497,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   /**
+   * {@inheritDoc}
+   *
    * Post a message for a set of users.
-   * 
-   * @param userId
-   *            The user sending the message.
-   * @param appId
-   *            The application sending the message.
-   * @param msgCollId
-   * @param message
-   *            The message to post.
    */
   public Future<Void> createMessage(UserId userId, String appId, String msgCollId, Message message,
       SecurityToken token) throws ProtocolException {
@@ -501,6 +521,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     return ImmediateFuture.newInstance(null);
   }
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<MessageCollection>> getMessageCollections(UserId userId,
       Set<String> fields, CollectionOptions options, SecurityToken token) throws ProtocolException {
     try {
@@ -524,6 +545,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> deleteMessages(UserId userId, String msgCollId, List<String> ids,
       SecurityToken token) throws ProtocolException {
     throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
@@ -531,6 +553,8 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   }
 
   /**
+   * {@inheritDoc}
+   *
    * Gets the messsages in an user's queue.
    */
   public Future<RestfulCollection<Message>> getMessages(UserId userId, String msgCollId,
@@ -562,24 +586,28 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
+  /** {@inheritDoc} */
   public Future<MessageCollection> createMessageCollection(UserId userId,
       MessageCollection msgCollection, SecurityToken token) throws ProtocolException {
     throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
         "this functionality is not yet available");
   }
 
+  /** {@inheritDoc} */
   public Future<Void> modifyMessage(UserId userId, String msgCollId, String messageId,
       Message message, SecurityToken token) throws ProtocolException {
     throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
         "this functionality is not yet available");
   }
 
+  /** {@inheritDoc} */
   public Future<Void> modifyMessageCollection(UserId userId, MessageCollection msgCollection,
       SecurityToken token) throws ProtocolException {
     throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
         "this functionality is not yet available");
   }
 
+  /** {@inheritDoc} */
   public Future<Void> deleteMessageCollection(UserId userId, String msgCollId, SecurityToken token)
       throws ProtocolException {
     throw new ProtocolException(HttpServletResponse.SC_NOT_IMPLEMENTED,
@@ -588,6 +616,9 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   /**
    * Public methods for use with Authentication Classes
+   *
+   * @param username a {@link java.lang.String} object.
+   * @return a {@link java.lang.String} object.
    */
   public String getPassword(String username) {
     try {
@@ -597,10 +628,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
     }
   }
 
-  /**
-   * Get the set of user id's from a user and group
-   */
-  public Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
+  private Set<String> getIdSet(UserId user, GroupId group, SecurityToken token)
       throws JSONException {
     String userId = user.getUserId(token);
 
@@ -629,6 +657,12 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   /**
    * Get the set of user id's for a set of users and a group
+   *
+   * @param users set of UserIds
+   * @param group the group
+   * @param token a token
+   * @return set of Id strings
+   * @throws org.json.JSONException if errors in Json
    */
   public Set<String> getIdSet(Set<UserId> users, GroupId group, SecurityToken token)
       throws JSONException {
@@ -641,6 +675,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Album> getAlbum(UserId userId, String appId, Set<String> fields,
                                 String albumId, SecurityToken token) throws ProtocolException {
     try {
@@ -672,6 +707,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<Album>> getAlbums(UserId userId, String appId,
                                                     Set<String> fields, CollectionOptions options, Set<String> albumIds,
                                                     SecurityToken token) throws ProtocolException {
@@ -722,6 +758,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<Album>> getAlbums(Set<UserId> userIds,
                                                     GroupId groupId, String appId, Set<String> fields,
                                                     CollectionOptions options, SecurityToken token)
@@ -752,6 +789,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> deleteAlbum(UserId userId, String appId, String albumId,
                                   SecurityToken token) throws ProtocolException {
     try {
@@ -793,6 +831,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
   // TODO: userId and album's ownerId don't have to match - potential problem
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> createAlbum(UserId userId, String appId, Album album,
                                   SecurityToken token) throws ProtocolException {
     try {
@@ -825,6 +864,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> updateAlbum(UserId userId, String appId, Album album,
                                   String albumId, SecurityToken token) throws ProtocolException {
     try {
@@ -860,6 +900,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<MediaItem> getMediaItem(UserId userId, String appId,
                                         String albumId, String mediaItemId, Set<String> fields,
                                         SecurityToken token) throws ProtocolException {
@@ -892,6 +933,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<MediaItem>> getMediaItems(UserId userId,
                                                             String appId, String albumId, Set<String> mediaItemIds,
                                                             Set<String> fields, CollectionOptions options, SecurityToken token)
@@ -943,6 +985,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<MediaItem>> getMediaItems(UserId userId,
                                                             String appId, String albumId, Set<String> fields,
                                                             CollectionOptions options, SecurityToken token)
@@ -981,6 +1024,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<RestfulCollection<MediaItem>> getMediaItems(
       Set<UserId> userIds, GroupId groupId, String appId,
       Set<String> fields, CollectionOptions options, SecurityToken token)
@@ -1008,6 +1052,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> deleteMediaItem(UserId userId, String appId,
                                       String albumId, String mediaItemId, SecurityToken token)
       throws ProtocolException {
@@ -1050,6 +1095,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> createMediaItem(UserId userId, String appId,
                                       String albumId, MediaItem mediaItem, SecurityToken token)
       throws ProtocolException {
@@ -1080,6 +1126,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
 
   // TODO: not using appId
 
+  /** {@inheritDoc} */
   public Future<Void> updateMediaItem(UserId userId, String appId,
                                       String albumId, String mediaItemId, MediaItem mediaItem,
                                       SecurityToken token) throws ProtocolException {

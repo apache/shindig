@@ -36,6 +36,9 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Servlet used to process REST requests (/rest/* etc.)
+ */
 public class DataServiceServlet extends ApiServlet {
 
   private static final Logger LOG = Logger.getLogger(DataServiceServlet.class.getName());

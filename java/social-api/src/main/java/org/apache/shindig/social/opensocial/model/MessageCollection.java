@@ -25,12 +25,10 @@ import java.util.Set;
 import java.util.Date;
 
 /**
- *
  * Base interface for all message collection objects.
  *
  * see
  * http://code.google.com/apis/opensocial/docs/0.7/reference/opensocial.MessageCollection.html
- *
  */
 
 @ImplementedBy(MessageCollectionImpl.class)

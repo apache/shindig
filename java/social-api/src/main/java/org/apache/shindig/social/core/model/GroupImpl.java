@@ -21,6 +21,11 @@ package org.apache.shindig.social.core.model;
 import org.apache.shindig.social.opensocial.model.Group;
 import org.apache.shindig.social.opensocial.spi.GroupId;
 
+/**
+ * Default Implementation of the {@link org.apache.shindig.social.opensocial.model.Group} model.
+ *
+ * @since 2.0.0
+ */
 public class GroupImpl implements Group {
 
   private GroupId groupId;
@@ -31,6 +36,7 @@ public class GroupImpl implements Group {
     return title;
   }
 
+  /** {@inheritDoc} */
   public void setTitle(String title) {
     this.title = title;
   }
@@ -39,10 +45,12 @@ public class GroupImpl implements Group {
     return description;
   }
 
+  /** {@inheritDoc} */
   public void setDescription(String description) {
     this.description = description;
   }
 
+  /** {@inheritDoc} */
   public void setId(GroupId groupId) {
     this.groupId = groupId;
   }

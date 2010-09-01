@@ -48,7 +48,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 
-/** A CSS DOM parser using Caja. */
+/**
+ * A CSS DOM parser using Caja.
+ */
 public class CajaCssParser {
 
   /**

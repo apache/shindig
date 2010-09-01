@@ -26,7 +26,6 @@ import com.google.inject.ImplementedBy;
  * Base interface for all body type objects. see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field.BODY_TYPE">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Person.Field.BODY_TYPE</a>
- *
  */
 @ImplementedBy(BodyTypeImpl.class)
 @Exportablebean

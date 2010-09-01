@@ -34,6 +34,8 @@ import java.util.logging.Logger;
 
 /**
  * Utility functions related to URI and Http servlet response management.
+ *
+ * @since 2.0.0
  */
 public final class UriUtils {
   public static final String CHARSET = "charset";

@@ -39,6 +39,9 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
+/**
+ * RPC/REST handler for all /people requests
+ */
 @Service(name = "people", path = "/{userId}+/{groupId}/{personId}+")
 public class PersonHandler {
   private final PersonService personService;

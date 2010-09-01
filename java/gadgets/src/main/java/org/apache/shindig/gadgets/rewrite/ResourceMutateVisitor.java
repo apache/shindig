@@ -40,6 +40,8 @@ import java.util.Map;
  * proxying resources, making url's absolute, prefetching images etc.
  *
  * TODO: Refactor AbsolutePathReferenceVisitor to extend ResourceMutateVisitor.
+ *
+ * @since 2.0.0
  */
 public abstract class ResourceMutateVisitor implements DomWalker.Visitor {
   /**

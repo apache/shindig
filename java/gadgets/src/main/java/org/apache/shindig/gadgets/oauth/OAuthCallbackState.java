@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * Handles state passed on the OAuth callback URL.
- * 
+ *
  * TODO: there's probably an abstract superclass that can be reused by OAuthClientState and this
  * class.
  */

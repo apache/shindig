@@ -29,6 +29,11 @@ import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * REwrites scripts.
+ *
+ * @since 2.0.0
+ */
 public class ScriptConcatContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ConcatUriManager concatUriManager;

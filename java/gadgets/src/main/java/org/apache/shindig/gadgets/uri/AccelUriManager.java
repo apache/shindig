@@ -25,6 +25,8 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 
 /**
  * UriManager for Accel servlet.
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(DefaultAccelUriManager.class)
 public interface AccelUriManager {

@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
+ *
+ * @since 2.0.0
  */
 public class HtmlAccelServlet extends InjectedServlet {
   private static final long serialVersionUID = -424353123863813052L;

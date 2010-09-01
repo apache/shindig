@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+/**
+ * Common class used for all Uri params.  Makes it very easy to find classes that
+ * use an affected parameter and to insure against duplicates.
+ */
 public interface UriCommon {
   public static final String USER_PREF_PREFIX = "up_";
   public enum Param {

@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 /**
  * ContentRewriter that resolves opensocial-data elements on the server.
- * 
+ *
  * This rewriter cannot be used currently without the SocialMarkupHtmlParser.
  */
 public class PipelineDataGadgetRewriter implements GadgetRewriter {

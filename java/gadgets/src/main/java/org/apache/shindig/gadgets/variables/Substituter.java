@@ -24,6 +24,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 /**
  * Substituter that provides variables to {@link VariableSubstituter}.
+ *
+ * @since 2.0.0
  */
 public interface Substituter {
 

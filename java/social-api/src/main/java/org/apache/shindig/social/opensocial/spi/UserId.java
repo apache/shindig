@@ -24,6 +24,9 @@ import com.google.common.base.Objects;
 
 import java.util.Map;
 
+/**
+ * Data structure representing a userid
+ */
 public class UserId {
   public enum Type {
     me, viewer, owner, userId;

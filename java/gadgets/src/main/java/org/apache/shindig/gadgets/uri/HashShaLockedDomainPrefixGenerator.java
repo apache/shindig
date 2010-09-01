@@ -22,6 +22,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shindig.common.util.Base32;
 import org.apache.shindig.common.uri.Uri;
 
+/**
+ * A simple implementation of locked domain that hashes the gadgeturi as the prefix.
+ */
 public class HashShaLockedDomainPrefixGenerator implements LockedDomainPrefixGenerator {
   public String getLockedDomainPrefix(Uri gadgetUri) {
     byte[] sha1 = DigestUtils.sha(gadgetUri.toString());

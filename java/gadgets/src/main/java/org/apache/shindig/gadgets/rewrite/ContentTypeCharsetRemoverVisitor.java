@@ -26,7 +26,9 @@ import org.w3c.dom.Node;
 import java.util.List;
 
 /**
- * Removes charset information from <meta http-equip="Content-Type">
+ * Removes charset information from &lt;meta http-equip="Content-Type"&gt;
+ *
+ * @since 2.0.0
  */
 public class ContentTypeCharsetRemoverVisitor implements DomWalker.Visitor {
   public final static String CONTENT = "content";

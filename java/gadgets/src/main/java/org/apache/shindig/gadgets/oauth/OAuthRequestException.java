@@ -18,6 +18,10 @@ package org.apache.shindig.gadgets.oauth;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * Thrown by OAuth request routines.
+ * @since 2.0.0
+ */
 public class OAuthRequestException extends Exception {
 
   /**
@@ -127,5 +131,4 @@ public class OAuthRequestException extends Exception {
   public String toString() {
     return '[' + error + ',' + errorText + ']';
   }
-
 }

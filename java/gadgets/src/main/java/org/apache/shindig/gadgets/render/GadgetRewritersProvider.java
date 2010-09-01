@@ -29,8 +29,9 @@ import java.util.List;
 
 /**
  * Class to provide list of rewriters according to gadget request.
- * Provide different list of rewriters fro html accelerate request
+ * Provide different list of rewriters for html accelerate request
  *
+ * @since 2.0.0
  */
 public class GadgetRewritersProvider {
   private final List<GadgetRewriter> renderRewriters;

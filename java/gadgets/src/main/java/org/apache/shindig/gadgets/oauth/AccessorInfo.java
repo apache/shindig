@@ -21,6 +21,9 @@ import net.oauth.OAuthAccessor;
 
 import org.apache.shindig.gadgets.oauth.OAuthStore.ConsumerInfo;
 
+/**
+ * OAuth related data accessor
+ */
 public class AccessorInfo {
   
   public static enum HttpMethod {

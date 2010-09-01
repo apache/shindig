@@ -20,7 +20,8 @@ package org.apache.shindig.auth;
 
 /**
  * A base class for SecurityToken Implementations.  Currently provides an isExpired() method
- * 
+ *
+ * @since 2.0.0
  */
 public abstract class AbstractSecurityToken implements SecurityToken {
 

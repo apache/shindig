@@ -19,6 +19,9 @@ package org.apache.shindig.protocol;
 
 import java.util.Map;
 
+/**
+ * Wrapper class used for data responses.
+ */
 public class DataCollection {
   private Map<String, Map<String, String>> entry;
   

@@ -59,6 +59,8 @@ import java.util.Map;
  * This implementation supports batched versioning as well. The old-style "fp"
  * (fingerprint) parameter is not supported any longer; its functionality is assumed
  * to be subsumed into the version param.
+ *
+ * @since 2.0.0
  */
 public class DefaultProxyUriManager implements ProxyUriManager {
   public static final String PROXY_HOST_PARAM = "gadgets.uri.proxy.host";

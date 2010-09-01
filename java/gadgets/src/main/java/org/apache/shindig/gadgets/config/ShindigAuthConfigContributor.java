@@ -33,6 +33,11 @@ import org.apache.shindig.gadgets.config.ConfigContributor;
 import java.util.Map;
 
 @Singleton
+/**
+ * Injects auth configuration information for gadgets.config
+ *
+ * @since 2.0.0
+ */
 public class ShindigAuthConfigContributor implements ConfigContributor {
 
   private SecurityTokenCodec securityTokenCodec;

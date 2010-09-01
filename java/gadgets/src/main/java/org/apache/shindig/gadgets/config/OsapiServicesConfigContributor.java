@@ -34,6 +34,8 @@ import java.util.Map;
  * TODO osapi.services as a configuration parameter does not
  * match a specific feature.  It would be better to store this as
  * 'osapi:{services: {...}}}
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class OsapiServicesConfigContributor implements ConfigContributor {

@@ -19,6 +19,9 @@
 
 package org.apache.shindig.auth;
 
+/**
+ * OAuth constants not found in the upstream OAuth library
+ */
 public final class OAuthConstants {
   private OAuthConstants() {}
   public static final String OAUTH_SESSION_HANDLE = "oauth_session_handle";

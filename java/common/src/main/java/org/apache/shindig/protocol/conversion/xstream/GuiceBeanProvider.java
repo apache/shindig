@@ -36,7 +36,7 @@ import com.google.inject.Injector;
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
 /**
- *
+ * GuiceBeanProvider class.
  */
 public class GuiceBeanProvider {
 

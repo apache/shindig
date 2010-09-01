@@ -27,6 +27,8 @@ import org.apache.shindig.gadgets.spec.MessageBundle;
 
 /**
  * Provides static hangman substitutions for message bundles.
+ *
+ * @since 2.0.0
  */
 public class MessageSubstituter implements Substituter {
   private final MessageBundleFactory messageBundleFactory;

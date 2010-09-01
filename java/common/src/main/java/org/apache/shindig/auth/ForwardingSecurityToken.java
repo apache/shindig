@@ -21,6 +21,8 @@ package org.apache.shindig.auth;
 /**
  * A SecurityToken that forwards all methods calls to another token. Subclasses should override
  * one or more methods to change or add behavior.
+ *
+ * @since 2.0.0
  */
 public abstract class ForwardingSecurityToken implements SecurityToken {
   SecurityToken delegate;

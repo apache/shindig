@@ -27,6 +27,9 @@ import org.apache.shindig.gadgets.GadgetException;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ * Interface defining methods used to generate Uris for the /js servlet.
+ */
 public interface JsUriManager {
   /**
    * @param gadget The gadget in which the requested JS will be externed.

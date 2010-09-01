@@ -18,6 +18,9 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+/**
+ * Contains all states of a Uri - versioned/unversioned, etc.
+ */
 public enum UriStatus {
   VALID_VERSIONED,
   VALID_UNVERSIONED,

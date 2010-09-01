@@ -27,12 +27,14 @@ import java.util.List;
 /**
  * <p>
  * The Album API describes the collection of MediaItems of images, movies, and audio.
- * </p> 
+ * </p>
  * <p>
  * Please see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v09/OpenSocial-Specification.html#opensocial.Album.Field">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v09/OpenSocial-Specification.html#opensocial.Album.Field</a>
  * for details about the supported fields.
  * </p>
+ *
+ * @since 2.0.0
  */
 @ImplementedBy(AlbumImpl.class)
 @Exportablebean
@@ -107,7 +109,7 @@ public interface Album {
 
   /**
    * Get address location of this album.
-   * 
+   *
    * @return an Address specifying the location of this album.
    */
   Address getLocation();

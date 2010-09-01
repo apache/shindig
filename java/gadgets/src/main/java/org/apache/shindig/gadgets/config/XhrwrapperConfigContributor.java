@@ -31,6 +31,8 @@ import java.util.Map;
 
 /**
  * Provides config support for the xhrwrapper feature.
+ *
+ * @since 2.0.0
  */
 
 @Singleton

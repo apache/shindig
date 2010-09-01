@@ -29,6 +29,10 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * Visits nodes in the dom extracting style tags.
+ * @since 2.0.0
+ */
 public class StyleTagExtractorVisitor implements Visitor {
   private final ContentRewriterFeature.Config config;
   private final CssResponseRewriter cssRewriter;

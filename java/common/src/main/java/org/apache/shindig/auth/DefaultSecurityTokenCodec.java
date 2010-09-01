@@ -39,6 +39,8 @@ import java.util.Map;
  * The insecure implementation is BasicSecurityTokenCodec.
  *
  * The secure implementation is BlobCrypterSecurityTokenCodec.
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class DefaultSecurityTokenCodec implements SecurityTokenCodec {

@@ -47,6 +47,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Service that interfaces with the system to provide information about gadgets.
+ *
+ * @since 2.0.0
+ */
 public class GadgetsHandlerService {
 
   // Map shindig data class to API interfaces

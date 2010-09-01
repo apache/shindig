@@ -22,6 +22,10 @@ import org.apache.shindig.gadgets.Gadget;
 
 import java.util.Map;
 
+/**
+ * Interface used by java classes that can inject javascript configuration information
+ * @since 2.0.0
+ */
 public interface ConfigContributor {
   /**
    * Contribute configuration values for a specific gadget in an iframe.

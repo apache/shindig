@@ -24,7 +24,6 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
  * see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v09/OpenSocial-Specification.html#opensocial.MediaItem.Field">
  * opensocial.MediaItem.Field</a>
- *
  */
 public class MediaItemImpl implements MediaItem {
   private String albumId;
@@ -62,6 +61,7 @@ public class MediaItemImpl implements MediaItem {
     return mimeType;
   }
 
+  /** {@inheritDoc} */
   public void setMimeType(String mimeType) {
     this.mimeType = mimeType;
   }
@@ -78,6 +78,7 @@ public class MediaItemImpl implements MediaItem {
     return url;
   }
 
+  /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
   }
@@ -86,6 +87,7 @@ public class MediaItemImpl implements MediaItem {
     return this.thumbnailUrl;
   }
 
+  /** {@inheritDoc} */
   public void setThumbnailUrl(String url) {
     this.thumbnailUrl = url;
   }
@@ -94,6 +96,7 @@ public class MediaItemImpl implements MediaItem {
     return albumId;
   }
 
+  /** {@inheritDoc} */
   public void setAlbumId(String albumId) {
     this.albumId = albumId;
   }
@@ -102,6 +105,7 @@ public class MediaItemImpl implements MediaItem {
     return created;
   }
 
+  /** {@inheritDoc} */
   public void setCreated(String created) {
     this.created = created;
   }
@@ -110,6 +114,7 @@ public class MediaItemImpl implements MediaItem {
     return description;
   }
 
+  /** {@inheritDoc} */
   public void setDescription(String description) {
     this.description = description;
   }
@@ -118,6 +123,7 @@ public class MediaItemImpl implements MediaItem {
     return duration;
   }
 
+  /** {@inheritDoc} */
   public void setDuration(String duration) {
     this.duration = duration;
   }
@@ -126,6 +132,7 @@ public class MediaItemImpl implements MediaItem {
     return fileSize;
   }
   
+  /** {@inheritDoc} */
   public void setFileSize(String fileSize) {
     this.fileSize = fileSize;
   }
@@ -134,6 +141,7 @@ public class MediaItemImpl implements MediaItem {
     return id;
   }
 
+  /** {@inheritDoc} */
   public void setId(String id) {
     this.id = id;
   }
@@ -142,6 +150,7 @@ public class MediaItemImpl implements MediaItem {
     return language;
   }
 
+  /** {@inheritDoc} */
   public void setLanguage(String language) {
     this.language = language;
   }
@@ -150,6 +159,7 @@ public class MediaItemImpl implements MediaItem {
     return lastUpdated;
   }
 
+  /** {@inheritDoc} */
   public void setLastUpdated(String lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
@@ -158,6 +168,7 @@ public class MediaItemImpl implements MediaItem {
     return location;
   }
 
+  /** {@inheritDoc} */
   public void setLocation(Address location) {
     this.location = location;
   }
@@ -166,6 +177,7 @@ public class MediaItemImpl implements MediaItem {
     return numComments;
   }
   
+  /** {@inheritDoc} */
   public void setNumComments(String numComments) {
     this.numComments = numComments;
   }
@@ -174,6 +186,7 @@ public class MediaItemImpl implements MediaItem {
     return numViews;
   }
 
+  /** {@inheritDoc} */
   public void setNumViews(String numViews) {
     this.numViews = numViews;
   }
@@ -182,6 +195,7 @@ public class MediaItemImpl implements MediaItem {
     return numVotes;
   }
 
+  /** {@inheritDoc} */
   public void setNumVotes(String numVotes) {
     this.numVotes = numVotes;
   }
@@ -190,6 +204,7 @@ public class MediaItemImpl implements MediaItem {
     return rating;
   }
 
+  /** {@inheritDoc} */
   public void setRating(String rating) {
     this.rating = rating;
   }
@@ -198,6 +213,7 @@ public class MediaItemImpl implements MediaItem {
     return startTime;
   }
 
+  /** {@inheritDoc} */
   public void setStartTime(String startTime) {
     this.startTime = startTime;
   }
@@ -206,6 +222,7 @@ public class MediaItemImpl implements MediaItem {
     return taggedPeople;
   }
 
+  /** {@inheritDoc} */
   public void setTaggedPeople(String taggedPeople) {
     this.taggedPeople = taggedPeople;
   }
@@ -214,6 +231,7 @@ public class MediaItemImpl implements MediaItem {
     return tags;
   }
 
+  /** {@inheritDoc} */
   public void setTags(String tags) {
     this.tags = tags;
   }
@@ -221,6 +239,7 @@ public class MediaItemImpl implements MediaItem {
   public String getTitle() {
     return title;
   }
+  /** {@inheritDoc} */
   public void setTitle(String title) {
     this.title = title;
   }

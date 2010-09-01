@@ -40,7 +40,9 @@ import java.util.concurrent.ConcurrentMap;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthServiceProvider;
 
-// Sample implementation for OAuth data store
+/**
+ * Sample implementation for OAuth data store
+ */
 public class SampleOAuthDataStore implements OAuthDataStore {
   // This needs to be long enough that an attacker can't guess it.  If the attacker can guess this
   // value before they exceed the maximum number of attempts, they can complete a session fixation

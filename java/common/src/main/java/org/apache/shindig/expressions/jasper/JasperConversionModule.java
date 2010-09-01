@@ -26,6 +26,8 @@ import com.google.inject.Scopes;
 
 /**
  * Creates a module to supply a Jasper Type Converter
+ *
+ * @since 2.0.0
  */
 public class JasperConversionModule extends AbstractModule {
   @Override

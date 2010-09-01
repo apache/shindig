@@ -25,6 +25,9 @@ import com.google.common.base.Objects;
 
 import java.util.Date;
 
+/**
+ * Data structure representing many of the RPC/REST requests we receive.
+ */
 public class CollectionOptions {
   private String sortBy;
   private SortOrder sortOrder;

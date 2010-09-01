@@ -23,6 +23,9 @@ import java.util.Date;
 import org.apache.shindig.social.opensocial.model.Message;
 import org.apache.shindig.social.opensocial.model.Url;
 
+/**
+ * Default implementation for a {@link org.apache.shindig.social.opensocial.model.Message}
+ */
 public final class MessageImpl implements Message {
 
   private String appUrl;

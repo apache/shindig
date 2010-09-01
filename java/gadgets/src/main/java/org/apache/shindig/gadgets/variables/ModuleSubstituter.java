@@ -23,6 +23,8 @@ import org.apache.shindig.gadgets.spec.GadgetSpec;
 
 /**
  * Provides hangman substitution variables related to the Module (i.e. __MODULE_ID__)
+ *
+ * @since 2.0.0
  */
 public class ModuleSubstituter implements Substituter {
   public void addSubstitutions(Substitutions substituter, GadgetContext context, GadgetSpec spec)

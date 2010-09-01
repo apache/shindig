@@ -22,6 +22,9 @@ import com.google.inject.name.Named;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * Handled Anonymous Authentication, including returning an "anonymous" security token.
+ */
 public class AnonymousAuthenticationHandler implements AuthenticationHandler {
   public static final String ALLOW_UNAUTHENTICATED = "shindig.allowUnauthenticated";
   private final boolean allowUnauthenticated;

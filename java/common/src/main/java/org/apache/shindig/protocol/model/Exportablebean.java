@@ -24,7 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
+ * Annotation used by {@link org.apache.shindig.protocol.conversion.xstream.GuiceBeanConverter} to
+ * determine whether data from a getter is exposed.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

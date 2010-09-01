@@ -40,6 +40,8 @@ import java.util.Map;
 /**
  * Visitor that resolves relative paths relative to the
  * base tag (only if present) / current page url and marks urls as absolute.
+ *
+ * @since 2.0.0
  */
 public class AbsolutePathReferenceVisitor implements Visitor {
   public enum Tags {

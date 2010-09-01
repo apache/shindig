@@ -50,9 +50,6 @@ package org.apache.shindig.protocol.conversion.xstream;
  *
  *
  */
-/**
- *
- */
 public class ClassFieldMapping {
 
   /**

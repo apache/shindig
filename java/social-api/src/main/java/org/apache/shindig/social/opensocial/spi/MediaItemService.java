@@ -10,9 +10,11 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 
 import javax.servlet.http.HttpServletResponse;
 
-/*
+/**
  * The MediaItemService interface defines the service provider interface for
  * creating, retrieving, updating, and deleting OpenSocial MediaItems.
+ *
+ * @since 2.0.0
  */
 public interface MediaItemService {
 

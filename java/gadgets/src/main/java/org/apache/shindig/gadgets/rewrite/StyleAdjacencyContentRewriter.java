@@ -20,6 +20,11 @@ package org.apache.shindig.gadgets.rewrite;
 
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 
+/**
+ * Merges adjacent style tags.
+ *
+ * @since 2.0.0
+ */
 public class StyleAdjacencyContentRewriter extends DomWalker.Rewriter {
   public StyleAdjacencyContentRewriter() {
     super(new StyleAdjacencyVisitor());

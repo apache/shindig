@@ -20,10 +20,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
-/*
+/**
  * Receives and delegates requests to the OpenSocial MediaItems service.
- * 
- * TODO: test cases
+ *
+ * @since 2.0.0
  */
 @Service(name = "mediaItems", path = "/{userId}+/{groupId}/{albumId}/{mediaItemId}+")
 public class MediaItemHandler {

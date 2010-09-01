@@ -18,7 +18,7 @@
 package org.apache.shindig.social.opensocial.model;
 
 /**
-   * public java.lang.Enum for opensocial.Enum.LookingFor.
+ * public java.lang.Enum for opensocial.Enum.LookingFor.
  */
 public enum LookingFor implements org.apache.shindig.protocol.model.Enum.EnumKey {
   /** Interested in dating. */

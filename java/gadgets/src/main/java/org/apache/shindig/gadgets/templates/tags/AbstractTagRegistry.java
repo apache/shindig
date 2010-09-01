@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets.templates.tags;
 import org.apache.shindig.gadgets.templates.TagRegistry;
 import org.w3c.dom.Element;
 
+/**
+ * Base class for handling tags
+ */
 public abstract class AbstractTagRegistry implements TagRegistry {
 
   public final TagHandler getHandlerFor(Element element) {
@@ -29,5 +32,4 @@ public abstract class AbstractTagRegistry implements TagRegistry {
     }  
     return getHandlerFor(new NSName(element.getNamespaceURI(), element.getLocalName()));
   }
-  
 }

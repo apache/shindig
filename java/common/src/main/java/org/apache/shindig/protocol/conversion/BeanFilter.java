@@ -52,6 +52,8 @@ import java.util.Set;
  * Note this code create a new object for each filtered object.
  * Filtering can be done also using cglib.InterfaceMaker and reflect.Proxy.makeProxyInstance
  * That results with an object that have same finger print as source, but cannot be cast to it.
+ *
+ * @since 2.0.0
  */
 public class BeanFilter {
 

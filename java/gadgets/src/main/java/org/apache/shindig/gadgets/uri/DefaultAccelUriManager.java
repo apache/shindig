@@ -31,6 +31,8 @@ import org.apache.shindig.gadgets.rewrite.DomWalker;
 /**
  * Default UriManager for Accel servlet.
  * TODO: Add support for multiple accel hosts.
+ *
+ * @since 2.0.0
  */
 public class DefaultAccelUriManager implements AccelUriManager {
   final String accelHost;

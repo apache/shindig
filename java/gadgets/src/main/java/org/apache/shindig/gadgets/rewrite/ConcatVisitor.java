@@ -35,6 +35,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * DOM mutator that concatenates resources using the concat servlet
+ * @since 2.0.0
+ */
 public class ConcatVisitor implements DomWalker.Visitor {
   public static class Js extends ConcatVisitor {
     public Js(ContentRewriterFeature.Config config,

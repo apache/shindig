@@ -37,8 +37,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
-/*
+/**
  * Receives and delegates requests to the OpenSocial Album service.
+ *
+ * @since 2.0.0
  */
 @Service(name = "albums", path = "/{userId}+/{groupId}/{albumId}+")
 public class AlbumHandler {

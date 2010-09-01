@@ -49,6 +49,8 @@ import com.google.inject.Inject;
 
 /**
  * Rewrite links to referenced content in a stylesheet
+ *
+ * @since 2.0.0
  */
 public class CssResponseRewriter implements ResponseRewriter {
 
