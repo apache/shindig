@@ -87,7 +87,7 @@
 	
 	
 // Callback URL.  Scheme relative URL for easy switch between https/http.
-"gadgets.oauthGadgetCallbackTemplate" : "//%host%/gadgets/oauthcallback",
+"gadgets.uri.oauth.callbackTemplate" : "//%host%/gadgets/oauthcallback",
 
 // Use an insecure security token by default
 "gadgets.securityTokenType" : "insecure",
