@@ -79,17 +79,6 @@
     </plugins>
     <resources>
       <resource>
-        <!-- duplicated here for the jar build. -->
-        <!-- TODO: Eliminate duplicate copies in WAR output -->
-        <!-- this is relative to the pom.xml directory -->
-        <directory>${basedir}/../../content/</directory>
-        <targetPath>files</targetPath>
-        <includes>
-          <include>**/*.*</include>
-        </includes>
-      </resource>
-    
-      <resource>
         <targetPath>config</targetPath>
         <directory>${basedir}/../../config</directory>
         <includes>
@@ -234,7 +223,6 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.0.1</version>
     </dependency>
 
     <!-- test -->
