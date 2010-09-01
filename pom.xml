@@ -1030,6 +1030,9 @@
               <link>http://junit.sourceforge.net/javadoc/</link>
             </links>
             <fixTags>since,param,return,throws</fixTags>
+            <fixMethodComment>true</fixMethodComment>
+            <fixClassComment>true</fixClassComment>
+            <fixFieldComment>false</fixFieldComment>
           </configuration>
         </plugin>
         <plugin>
