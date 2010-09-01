@@ -26,16 +26,17 @@ import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Utility functions related to URI and Http servlet response management.
  */
 public class UriUtils {
+  public static final String CHARSET = "charset";
   private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
 
   private UriUtils() {}
@@ -247,5 +248,28 @@ public class UriUtils {
         response.setHeader("Content-Type", requiredType);
       }
     }
+  }
+
+  /**
+   * Parses the value of content-type header and returns the content type header
+   * without the 'charset' attribute.
+   * @param content The content type header value.
+   * @return Content type header value without charset.
+   */
+  public static String getContentTypeWithoutCharset(String content) {
+    String contentTypeWithoutCharset = content;
+    String[] parts = StringUtils.split(content, ';');
+    if (parts.length >= 2) {
+      contentTypeWithoutCharset = parts[0];
+      for (int i = 1; i < parts.length; i++) {
+        String parameterAndValue = parts[i].trim().toLowerCase();
+        String[] splits = StringUtils.split(parameterAndValue, '=');
+        if (splits.length > 0 && !splits[0].trim().equals(CHARSET)) {
+          contentTypeWithoutCharset += ";" + parts[i];
+        }
+      }
+    }
+
+    return contentTypeWithoutCharset;
   }
 }

@@ -18,8 +18,6 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableMap;
 import org.apache.shindig.common.uri.Uri;
@@ -29,6 +27,8 @@ import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.junit.Test;
 
 import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for UriUtils.
@@ -251,5 +251,21 @@ public class UriUtilsTest {
     UriUtils.copyRequestData(origRequest, req);
 
     assertEquals(data, req.getPostBodyAsString());
+  }
+
+  @Test
+  public void testGetContentTypeWithoutCharset() {
+    assertEquals("text/html",
+                 UriUtils.getContentTypeWithoutCharset("text/html"));
+    assertEquals("text/html;",
+                 UriUtils.getContentTypeWithoutCharset("text/html;"));
+    assertEquals("text/html",
+                 UriUtils.getContentTypeWithoutCharset("text/html; charset=hello"));
+    assertEquals("text/html; hello=world",
+                 UriUtils.getContentTypeWithoutCharset("text/html; charset=hello; hello=world"));
+    assertEquals("text/html; pharset=hello; hello=world",
+                 UriUtils.getContentTypeWithoutCharset("text/html; pharset=hello; hello=world"));
+    assertEquals("text/html; charsett=utf; hello=world",
+                 UriUtils.getContentTypeWithoutCharset("text/html; charsett=utf; ; hello=world"));
   }
 }
