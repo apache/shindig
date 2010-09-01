@@ -23,7 +23,6 @@ import com.google.common.collect.Lists;
 
 import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.common.Pair;
-import org.apache.shindig.common.Pairs;
 import org.apache.shindig.common.crypto.BlobCrypter;
 import org.apache.shindig.common.crypto.BlobCrypterException;
 import org.apache.shindig.gadgets.http.HttpRequest;
@@ -123,7 +122,7 @@ public class OAuthResponseParams {
    * Add a request/response pair to our trace of actions associated with this request.
    */
   public void addRequestTrace(HttpRequest request, HttpResponse response) {
-    this.requestTrace.add(Pairs.newPair(request, response));
+    this.requestTrace.add(Pair.of(request, response));
   }
 
   /**

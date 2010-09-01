@@ -25,7 +25,7 @@ public class PairTest {
 
   @Test
   public void testPair() {
-    Pair<String, Integer> p = Pairs.newPair("one", new Integer(1));
+    Pair<String, Integer> p = Pair.of("one", new Integer(1));
     assertEquals("one", p.one);
     assertEquals(new Integer(1), p.two);
   }

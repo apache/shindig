@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.Pair;
-import org.apache.shindig.common.Pairs;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -185,7 +184,7 @@ public class ConcatProxyServlet extends InjectedServlet {
           HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
           FutureTask<RequestContext> httpFetcher =
                   new FutureTask<RequestContext>(new HttpFetchCallable(httpReq));
-          futureTasks.add(Pairs.newPair(httpReq.getUri(), httpFetcher));
+          futureTasks.add(Pair.of(httpReq.getUri(), httpFetcher));
           executor.execute(httpFetcher);
         } catch (GadgetException ge) {
           if (cos.outputError(resourceUri, ge)) {
