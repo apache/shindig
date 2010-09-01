@@ -743,7 +743,7 @@
             <artifactId>maven-surefire-report-plugin</artifactId>
             <version>2.5</version>
             <configuration>
-              <parallel>classes</parallel>
+              <parallel>both</parallel>
             </configuration>
           </plugin>
           <plugin>
