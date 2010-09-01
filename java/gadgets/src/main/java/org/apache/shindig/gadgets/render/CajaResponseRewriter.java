@@ -109,7 +109,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
       ParseTreeNode input = new Parser(tq, mq).parse();
       tq.expectEmpty();
 
-      compiler.addInput(AncestorChain.instance(input), contextUri.toJavaUri());
+      compiler.addInput(AncestorChain.instance(input).node, contextUri.toJavaUri());
     } catch (ParseException e) {
       // Don't bother continuing.
       resp.setContent("");

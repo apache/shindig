@@ -381,7 +381,7 @@ public class BasicHttpFetcher implements HttpFetcher {
       // cleanup any outstanding resources..
       if (httpMethod != null) try {
         httpMethod.abort();
-      } catch (Exception e) {
+      } catch (UnsupportedOperationException e) {
         // ignore
       }
     }

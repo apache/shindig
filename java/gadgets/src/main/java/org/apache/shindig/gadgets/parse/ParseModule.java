@@ -50,7 +50,11 @@ public class ParseModule extends AbstractModule {
         DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
         // Require the traversal API
         domImpl = registry.getDOMImplementation("XML 1.0 Traversal 2.0");
-      } catch (Exception e) {
+      } catch (ClassNotFoundException e) {
+        // Try another
+      } catch (InstantiationException e) {
+        // Try another
+      } catch (IllegalAccessException e) {
         // Try another
       }
       // This is ugly but effective

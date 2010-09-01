@@ -19,7 +19,6 @@
 package org.apache.shindig.gadgets.rewrite;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
@@ -76,8 +75,9 @@ public class StyleAdjacencyVisitor implements Visitor {
     } else {
       // existing nodes in head, inject all nodes before the first one
       Node firstChild = head.getFirstChild();
-      for (Node n : nodes)
+      for (Node n : nodes) {
         head.insertBefore(n, firstChild);
+      }
     }
 
     return true;

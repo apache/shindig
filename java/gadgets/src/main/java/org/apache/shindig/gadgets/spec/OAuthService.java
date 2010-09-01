@@ -151,7 +151,7 @@ public class OAuthService {
     URL("uri-query"),
     BODY("post-body");
 
-    private static Map<String, Location> LOCATIONS;
+    private static final Map<String, Location> LOCATIONS;
 
     static {
       LOCATIONS = Maps.newHashMap();

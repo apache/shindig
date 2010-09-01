@@ -645,7 +645,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
                                 String albumId, SecurityToken token) throws ProtocolException {
     try {
       // First ensure user has a table
-      String user = userId.getUserId((token));
+      String user = userId.getUserId(token);
       if (db.getJSONObject(ALBUMS_TABLE).has(user)) {
         // Retrieve user's albums
         JSONArray userAlbums = db.getJSONObject(ALBUMS_TABLE).getJSONArray(user);
@@ -865,7 +865,7 @@ public class JsonDbOpensocialService implements ActivityService, PersonService, 
                                         SecurityToken token) throws ProtocolException {
     try {
       // First ensure user has a table
-      String user = userId.getUserId((token));
+      String user = userId.getUserId(token);
       if (db.getJSONObject(MEDIAITEMS_TABLE).has(user)) {
         // Retrieve user's MediaItems
         JSONArray userMediaItems = db.getJSONObject(MEDIAITEMS_TABLE).getJSONArray(user);

@@ -27,7 +27,6 @@ import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.parser.html.Dom;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
-import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
 import com.google.caja.plugin.UriFetcher;

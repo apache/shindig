@@ -121,7 +121,7 @@ public class AbsolutePathReferenceVisitor implements Visitor {
     String nodeName = node.getNodeName().toLowerCase();
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         resourceTags.containsKey(nodeName)) {
-      if (nodeName.equals("link")) {
+      if ("link".equals(nodeName)) {
         // Rewrite link only when it is for css.
         String type = ((Element)node).getAttribute("type");
         String rel = ((Element)node).getAttribute("rel");

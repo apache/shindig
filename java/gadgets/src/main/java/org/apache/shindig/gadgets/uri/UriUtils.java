@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 /**
  * Utility functions related to URI and Http servlet response management.
  */
-public class UriUtils {
+public final class UriUtils {
   public static final String CHARSET = "charset";
   private static final Logger LOG = Logger.getLogger(UriUtils.class.getName());
 

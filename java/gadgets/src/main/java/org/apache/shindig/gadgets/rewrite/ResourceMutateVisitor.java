@@ -97,7 +97,7 @@ public abstract class ResourceMutateVisitor implements DomWalker.Visitor {
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         resourceTags.containsKey(nodeName) &&
         featureConfig.shouldRewriteTag(nodeName)) {
-      if (nodeName.equals("link")) {
+      if ("link".equals(nodeName)) {
         // Rewrite link only when it is for css.
         String type = ((Element)node).getAttribute("type");
         String rel = ((Element)node).getAttribute("rel");
