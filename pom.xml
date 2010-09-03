@@ -347,6 +347,16 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>gagan</id>
+      <name>Gagandeep Singh</name>
+      <email>gagan@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+
     <!-- Mentors -->
     <developer>
       <id>fitz</id>
