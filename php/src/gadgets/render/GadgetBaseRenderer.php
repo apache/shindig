@@ -144,12 +144,12 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
       if (isset($val['id'])) {
         $key = $val['id'];
         // Pick up only the actual data part of the response, so we can do direct variable resolution
-        if (isset($val['data']['list'])) {
-          $this->dataContext[$key] = $val['data']['list'];
-        } elseif (isset($val['data']['entry'])) {
-          $this->dataContext[$key] = $val['data']['entry'];
-        } elseif (isset($val['data'])) {
-          $this->dataContext[$key] = $val['data'];
+        if (isset($val['result']['list'])) {
+          $this->dataContext[$key] = $val['result']['list'];
+        } elseif (isset($val['result']['entry'])) {
+          $this->dataContext[$key] = $val['result']['entry'];
+        } elseif (isset($val['result'])) {
+          $this->dataContext[$key] = $val['result'];
         } else {
           $this->dataContext[$key] = $val;
         }
@@ -342,7 +342,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
     if (count($this->dataInserts)) {
       foreach ($this->dataInserts as $data) {
         $key = $data['id'];
-        $data = json_encode($data['data']);
+        $data = json_encode($data['result']);
         $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
       }
     }
@@ -447,7 +447,7 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
       // this should really be set in config/container.js, but if not, we build a complete default set so at least most of it works out-of-the-box
       $gadgetConfig['osapi.services'] = array(
           'gadgets.rpc' => array('container.listMethods'),
-          'http://%host%/social/rpc' => array("messages.update", "albums.update",
+          'http://%host%/rpc' => array("messages.update", "albums.update",
               "activities.delete", "activities.update",
               "activities.supportedFields", "albums.get",
               "activities.get", "mediaitems.update",
