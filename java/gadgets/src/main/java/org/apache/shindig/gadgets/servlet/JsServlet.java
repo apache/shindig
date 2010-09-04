@@ -17,32 +17,18 @@
  */
 package org.apache.shindig.gadgets.servlet;
 
-import com.google.common.collect.ImmutableSet;
-
-import com.google.common.collect.Maps;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.JsonSerializer;
+
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.uri.UriBuilder;
-import org.apache.shindig.config.ContainerConfig;
-import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
-import org.apache.shindig.gadgets.RenderingContext;
-import org.apache.shindig.gadgets.config.ConfigContributor;
-import org.apache.shindig.gadgets.features.FeatureRegistry;
-import org.apache.shindig.gadgets.features.FeatureResource;
 import org.apache.shindig.gadgets.uri.JsUriManager;
 import org.apache.shindig.gadgets.uri.UriStatus;
 
 import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -66,15 +52,13 @@ public class JsServlet extends InjectedServlet {
       "})();";
   private static final Pattern ONLOAD_FN_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
-  private transient FeatureRegistry registry;
+  private transient JsHandler jsHandler;
   private transient JsUriManager jsUriManager;
-  private transient ContainerConfig containerConfig;
-  private transient Map<String, ConfigContributor> configContributors;
 
   @Inject
-  public void setRegistry(FeatureRegistry registry) {
+  public void setJsHandler(JsHandler jsHandler) {
     checkInitialized();
-    this.registry = registry;
+    this.jsHandler = jsHandler;
   }
 
   @Inject
@@ -82,19 +66,7 @@ public class JsServlet extends InjectedServlet {
     checkInitialized();
     this.jsUriManager = jsUriManager;
   }
-
-  @Inject
-  public void setContainerConfig(ContainerConfig containerConfig) {
-    checkInitialized();
-    this.containerConfig = containerConfig;
-  }
-
-  @Inject
-  public void setConfigContributors(Map<String, ConfigContributor> configContributors) {
-    checkInitialized();
-    this.configContributors = configContributors;
-  }
-
+  
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -106,7 +78,7 @@ public class JsServlet extends InjectedServlet {
     // If an If-Modified-Since header is ever provided, we always say
     // not modified. This is because when there actually is a change,
     // cache busting should occur.
-    UriStatus vstatus;
+    UriStatus vstatus = null;
     try {
       vstatus = jsUriManager.processExternJsUri(new UriBuilder(req).toUri()).getStatus();
     } catch (GadgetException e) {
@@ -119,79 +91,12 @@ public class JsServlet extends InjectedServlet {
       return;
     }
 
-    // Use the last component as filename; prefix is ignored
-    String uri = req.getRequestURI();
-    // We only want the file name part. There will always be at least 1 slash
-    // (the server root), so this is always safe.
-    String resourceName = uri.substring(uri.lastIndexOf('/') + 1);
-    if (resourceName.endsWith(".js")) {
-      // Lop off the suffix for lookup purposes
-      resourceName = resourceName.substring(
-          0, resourceName.length() - ".js".length());
-    }
+    // Get JavaScript content from features aliases request.
+    JsHandler.JsHandlerResponse handlerResponse = jsHandler.getJsContent(req);
+    StringBuilder jsData = handlerResponse.getJsData();
+    boolean isProxyCacheable = handlerResponse.isProxyCacheable();
 
-    Set<String> needed = ImmutableSet.copyOf(StringUtils.split(resourceName, ':'));
-
-    String debugStr = req.getParameter("debug");
-    String containerParam = req.getParameter("container");
-    String containerStr = req.getParameter("c");
-
-    boolean debug = "1".equals(debugStr);
-    final RenderingContext context = "1".equals(containerStr) ?
-        RenderingContext.CONTAINER : RenderingContext.GADGET;
-    final String container =
-        containerParam != null ? containerParam : ContainerConfig.DEFAULT_CONTAINER;
-
-    GadgetContext ctx = new GadgetContext() {
-      @Override
-      public RenderingContext getRenderingContext() {
-        return context;
-      }
-
-      @Override
-      public String getContainer() {
-        return container;
-      }
-    };
-
-    Collection<? extends FeatureResource> resources = registry.getFeatureResources(ctx, needed, null);
-    StringBuilder jsData = new StringBuilder();
-    boolean isProxyCacheable = true;
-    for (FeatureResource featureResource : resources) {
-      String content = debug ? featureResource.getDebugContent() : featureResource.getContent();
-      if (!featureResource.isExternal()) {
-        jsData.append(content);
-      } else {
-        // Support external/type=url feature serving through document.write()
-        jsData.append("document.write('<script src=\"").append(content).append("\"></script>')");
-      }
-      isProxyCacheable = isProxyCacheable && featureResource.isProxyCacheable();
-      jsData.append(";\n");
-    }
-
-    if (context == RenderingContext.CONTAINER) {
-      // Append some container specific things
-
-      Map<String, Object> features = containerConfig.getMap(container, "gadgets.features");
-      Map<String, Object> config = Maps.newHashMapWithExpectedSize(features == null ? 2 : features.size() + 2);
-
-      if (features != null) {
-        // Discard what we don't care about.
-        for (String name : registry.getFeatures(needed)) {
-          Object conf = features.get(name);
-          // Add from containerConfig
-          if (conf != null) {
-            config.put(name, conf);
-          }
-          ConfigContributor contributor = configContributors.get(name);
-          if (contributor != null) {
-            contributor.contribute(config, container, req.getHeader("Host"));
-          }
-        }
-        jsData.append("gadgets.config.init(").append(JsonSerializer.serialize(config)).append(");\n");
-      }
-    }
-
+    // Add onload handler to add callback function.
     String onloadStr = req.getParameter("onload");
     if (onloadStr != null) {
       if (!ONLOAD_FN_PATTERN.matcher(onloadStr).matches()) {
@@ -206,6 +111,25 @@ public class JsServlet extends InjectedServlet {
       return;
     }
 
+    // post JavaScript content fetching
+    postJsContentProcessing(resp, vstatus, isProxyCacheable);
+
+    resp.setContentType("text/javascript; charset=utf-8");
+    byte[] response = jsData.toString().getBytes("UTF-8");
+    resp.setContentLength(response.length);
+    resp.getOutputStream().write(response);
+  }
+
+  /**
+   * Provides post JavaScript content processing. The default behavior will check the UriStatus and
+   * update the response header with cache option.
+   * 
+   * @param resp The HttpServeltResponse object.
+   * @param vstatus The UriStatus object.
+   * @param isProxyCacheable boolean true if content is cacheable and false otherwise.
+   */
+  protected void postJsContentProcessing(HttpServletResponse resp, UriStatus vstatus,
+      boolean isProxyCacheable) {
     switch (vstatus) {
       case VALID_VERSIONED:
         // Versioned files get cached indefinitely
@@ -221,9 +145,5 @@ public class JsServlet extends InjectedServlet {
         HttpUtil.setNoCache(resp);
         break;
     }
-    resp.setContentType("text/javascript; charset=utf-8");
-    byte[] response = jsData.toString().getBytes("UTF-8");
-    resp.setContentLength(response.length);
-    resp.getOutputStream().write(response);
   }
 }
