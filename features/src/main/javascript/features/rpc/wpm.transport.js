@@ -48,6 +48,7 @@ gadgets.rpctx.wpm = function() {
   var postMessage;
   var pmSync = false;
   var pmEventDomain = false;
+  var isForceSecure = false;
 
   // Some browsers (IE, Opera) have an implementation of postMessage that is
   // synchronous, although HTML5 specifies that it should be asynchronous.  In
@@ -85,19 +86,20 @@ gadgets.rpctx.wpm = function() {
 
   function onmessage(packet) {
     var rpc = gadgets.json.parse(packet.data);
-    if (!rpc || !rpc.f) {
-      return;
-    }
+    if (isForceSecure) {
+      if (!rpc || !rpc.f) {
+        return;
+      }
     
-    // for security, check origin against expected value
-    var origRelay = gadgets.rpc.getRelayUrl(rpc.f) ||
-                    gadgets.util.getUrlParameters()["parent"];
-    var origin = gadgets.rpc.getOrigin(origRelay);
-    if (!pmEventDomain ? packet.origin !== origin :
-                         packet.domain !== /^.+:\/\/([^:]+).*/.exec( origin )[1]) {
-      return;
+      // for security, check origin against expected value
+      var origRelay = gadgets.rpc.getRelayUrl(rpc.f) ||
+                      gadgets.util.getUrlParameters()["parent"];
+      var origin = gadgets.rpc.getOrigin(origRelay);
+      if (!pmEventDomain ? packet.origin !== origin :
+                           packet.domain !== /^.+:\/\/([^:]+).*/.exec( origin )[1]) {
+        return;
+      }
     }
-
     process(rpc);
   }
 
@@ -134,11 +136,12 @@ gadgets.rpctx.wpm = function() {
       return true;
     },
 
-    setup: function(receiverId, token, forcesecure) {
+    setup: function(receiverId, token, forceSecure) {
+      isForceSecure = forceSecure;
       // If we're a gadget, send an ACK message to indicate to container
       // that we're ready to receive messages.
       if (receiverId === '..') {
-        if (forcesecure) {
+        if (isForceSecure) {
           gadgets.rpc._createRelayIframe(token);
         } else {
           gadgets.rpc.call(receiverId, gadgets.rpc.ACK);
