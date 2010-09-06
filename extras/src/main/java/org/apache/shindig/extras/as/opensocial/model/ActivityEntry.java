@@ -25,136 +25,248 @@ import org.apache.shindig.extras.as.core.model.ActivityEntryImpl;
 
 import com.google.inject.ImplementedBy;
 
-/*
+/**
+ * <p>ActivityEntry interface.</p>
  * TODO: comment a description for this class
  * TODO: ensure verbs are up to date
  * TODO: comment all classes
  */
+
 @ImplementedBy(ActivityEntryImpl.class)
 @Exportablebean
 public interface ActivityEntry {
-	
-	/*
-	 * Fields that represent JSON elements for an activity entry.
-	 */
-	public static enum Field {
-		ICON("icon"),
-		TIME("time"),
-		ACTOR("actor"),
-		VERB("verb"),
-		OBJECT("object"),
-		TARGET("target"),
-		GENERATOR("generator"),
-		SERVICE_PROVIDER("serviceProvider"),
-		TITLE("title"),
-		BODY("body"),
-		STANDARD_LINK("standardLink");
-		
-		/*
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
-		
-		/*
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Field(String jsonString) {
-			this.jsonString = jsonString;
-		}
-		
-		/*
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
-	
-	/*
-	 * Possible verbs for an activity stream entry.
-	 */
-	public static enum Verb {
-		MARK_AS_FAVORITE("markAsFavorite"),
-		START_FOLLOWING("startFollowing"),
-		MARK_AS_LIKED("markAsLiked"),
-		MAKE_FRIEND("makeFriend"),
-		JOIN("join"),
-		PLAY("play"),
-		POST("post"),
-		SAVE("save"),
-		SHARE("share"),
-		TAG("tag"),
-		UPDATE("update");
-		
-		/*
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
-		
-		/*
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Verb(String jsonString) {
-			this.jsonString = jsonString;
-		}
-		
-		/*
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
-	
-	String getIcon();
+  
+  /**
+   * Fields that represent JSON elements for an activity entry.
+   */
+  public static enum Field {
+    ICON("icon"),
+    TIME("time"),
+    ACTOR("actor"),
+    VERB("verb"),
+    OBJECT("object"),
+    TARGET("target"),
+    GENERATOR("generator"),
+    SERVICE_PROVIDER("serviceProvider"),
+    TITLE("title"),
+    BODY("body"),
+    STANDARD_LINK("standardLink");
+    
+    /**
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+    
+    /**
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+    
+    /**
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+  
+  /**
+   * Possible verbs for an activity stream entry.
+   */
+  public static enum Verb {
+    MARK_AS_FAVORITE("markAsFavorite"),
+    START_FOLLOWING("startFollowing"),
+    MARK_AS_LIKED("markAsLiked"),
+    MAKE_FRIEND("makeFriend"),
+    JOIN("join"),
+    PLAY("play"),
+    POST("post"),
+    SAVE("save"),
+    SHARE("share"),
+    TAG("tag"),
+    UPDATE("update");
+    
+    /**
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+    
+    /**
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString the name of the element
+     */
+    private Verb(String jsonString) {
+      this.jsonString = jsonString;
+    }
+    
+    /**
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+  
+  /**
+   * <p>getIcon</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getIcon();
 
-	void setIcon(String icon);
+  /**
+   * <p>setIcon</p>
+   *
+   * @param icon a {@link java.lang.String} object.
+   */
+  void setIcon(String icon);
 
-	String getTime();
+  /**
+   * <p>getTime</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getTime();
 
-	void setTime(String time);
+  /**
+   * <p>setTime</p>
+   *
+   * @param time a {@link java.lang.String} object.
+   */
+  void setTime(String time);
 
-	ActivityObject getActor();
+  /**
+   * <p>getActor</p>
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getActor();
 
-	void setActor(ActivityObject actor);
+  /**
+   * <p>setActor</p>
+   *
+   * @param actor a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  void setActor(ActivityObject actor);
 
-	List<String> getVerb();
+  /**
+   * <p>getVerb</p>
+   *
+   * @return a {@link java.util.List} object.
+   */
+  List<String> getVerb();
 
-	void setVerb(List<String> verb);
+  /**
+   * <p>setVerb</p>
+   *
+   * @param verb a {@link java.util.List} object.
+   */
+  void setVerb(List<String> verb);
 
-	ActivityObject getObject();
+  /**
+   * <p>getObject</p>
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getObject();
 
-	void setObject(ActivityObject object);
-	
-	ActivityObject getTarget();
-	
-	void setTarget(ActivityObject target);
-	
-	ActivityObject getGenerator();
+  /**
+   * <p>setObject</p>
+   *
+   * @param object a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  void setObject(ActivityObject object);
+  
+  /**
+   * <p>getTarget</p>
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getTarget();
+  
+  /**
+   * <p>setTarget</p>
+   *
+   * @param target a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  void setTarget(ActivityObject target);
+  
+  /**
+   * <p>getGenerator</p>
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getGenerator();
 
-	void setGenerator(ActivityObject generator);
+  /**
+   * <p>setGenerator</p>
+   *
+   * @param generator a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  void setGenerator(ActivityObject generator);
 
-	ActivityObject getServiceProvider();
+  /**
+   * <p>getServiceProvider</p>
+   *
+   * @return a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  ActivityObject getServiceProvider();
 
-	void setServiceProvider(ActivityObject serviceProvider);
+  /**
+   * <p>setServiceProvider</p>
+   *
+   * @param serviceProvider a {@link org.apache.shindig.extras.as.opensocial.model.ActivityObject} object.
+   */
+  void setServiceProvider(ActivityObject serviceProvider);
 
-	String getTitle();
+  /**
+   * <p>getTitle</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getTitle();
 
-	void setTitle(String title);
+  /**
+   * <p>setTitle</p>
+   *
+   * @param title a {@link java.lang.String} object.
+   */
+  void setTitle(String title);
 
-	String getBody();
+  /**
+   * <p>getBody</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getBody();
 
-	void setBody(String body);
+  /**
+   * <p>setBody</p>
+   *
+   * @param body a {@link java.lang.String} object.
+   */
+  void setBody(String body);
 
-	List<String> getStandardLink();
+  /**
+   * <p>getStandardLink</p>
+   *
+   * @return a {@link java.util.List} object.
+   */
+  List<String> getStandardLink();
 
-	void setStandardLink(List<String> standardLink);
+  /**
+   * <p>setStandardLink</p>
+   *
+   * @param standardLink a {@link java.util.List} object.
+   */
+  void setStandardLink(List<String> standardLink);
 }

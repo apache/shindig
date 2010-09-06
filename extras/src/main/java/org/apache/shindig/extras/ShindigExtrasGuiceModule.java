@@ -24,14 +24,18 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 /**
- * Configures the Extra modules in shindig-extras. 
+ * Configures the Extra modules in shindig-extras.
  */
 public class ShindigExtrasGuiceModule extends AbstractModule {
+  /** {@inheritDoc} */
   @Override
   protected void configure() {
     configureExtraFeatures();
   }
 
+  /**
+   * Adds the features-extras directory to the search path
+   */
   protected void configureExtraFeatures() {
     // This is how you add search paths for features.
     Multibinder<String> featureBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("org.apache.shindig.features-extended")); 

@@ -25,46 +25,70 @@ import com.google.inject.ImplementedBy;
 /*
  * TODO: comment this class.
  */
+/**
+ * <p>ActionLink interface.</p>
+ *
+ */
 @ImplementedBy(ActionLinkImpl.class)
 @Exportablebean
 public interface ActionLink {
-	
-	/*
-	 * Fields that represent JSON elements for an activity entry.
-	 */
-	public static enum Field {
-		TARGET("target"),
-		CAPTION("caption");
-		
-		/*
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
-		
-		/*
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Field(String jsonString) {
-			this.jsonString = jsonString;
-		}
-		
-		/*
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
-	
-	String getTarget();
+  
+  /**
+   * Fields that represent JSON elements for an activity entry.
+   */
+  public static enum Field {
+    TARGET("target"),
+    CAPTION("caption");
+    
+    /*
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+    
+    /*
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+    
+    /*
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+  
+  /**
+   * Get the target of this action link
+   *
+   * @return a target
+   */
+  String getTarget();
 
-	void setTarget(String target);
+  /**
+   * Set the target of this action link
+   *
+   * @param target a target
+   */
+  void setTarget(String target);
 
-	String getCaption();
+  /**
+   * Get the caption for this action link.
+   *
+   * @return a caption
+   */
+  String getCaption();
 
-	void setCaption(String caption);
+  /**
+   * Set the caption for this action link.
+   *
+   * @param caption a caption
+   */
+  void setCaption(String caption);
 }

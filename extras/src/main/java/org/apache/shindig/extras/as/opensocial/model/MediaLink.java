@@ -24,61 +24,115 @@ import com.google.inject.ImplementedBy;
 /*
  * TODO: comment this class.
  */
+/**
+ * <p>MediaLink interface.</p>
+ *
+ */
 @ImplementedBy(MediaLinkImpl.class)
 @Exportablebean
 public interface MediaLink {
 
-	/*
-	 * Fields that represent the JSON elements.
-	 */
-	public static enum Field {
-		TARGET("target"),
-		TYPE("type"),
-		WIDTH("width"),
-		HEIGHT("height"),
-		DURATION("duration");
-		
-		/*
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
-		
-		/*
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Field(String jsonString) {
-			this.jsonString = jsonString;
-		}
-		
-		/*
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
-	
-	String getTarget();
+  /**
+   * Fields that represent the JSON elements.
+   */
+  public static enum Field {
+    TARGET("target"),
+    TYPE("type"),
+    WIDTH("width"),
+    HEIGHT("height"),
+    DURATION("duration");
+    
+    /**
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+    
+    /**
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+    
+    /**
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+  
+  /**
+   * Returns the target of this MediaLink
+   *
+   * @return a target
+   */
+  String getTarget();
 
-	void setTarget(String target);
+  /**
+   * Sets the target for this MediaLink
+   *
+   * @param target a target linke
+   */
+  void setTarget(String target);
 
-	String getType();
+  /**
+   * Returns the type of the MediaLink
+   *
+   * @return a type
+   */
+  String getType();
 
-	void setType(String type);
+  /**
+   * Sets the type of the MediaLink
+   *
+   * @param type a type
+   */
+  void setType(String type);
 
-	String getWidth();
+  /**
+   * <p>getWidth</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
+  String getWidth();
 
-	void setWidth(String width);
+  /**
+   * Sets the Width of this mediaLink
+   *
+   * @param width a width
+   */
+  void setWidth(String width);
 
-	String getHeight();
+  /**
+   * Sets the Height of this mediaLink
+   *
+   * @return a height
+   */
+  String getHeight();
 
-	void setHeight(String height);
+  /**
+   * Sets the Height of this mediaLink
+   *
+   * @param height a height
+   */
+  void setHeight(String height);
 
-	String getDuration();
+  /**
+   * Returns the duration of this mediaLink
+   *
+   * @return a duration
+   */
+  String getDuration();
 
-	void setDuration(String duration);
+  /**
+   * Sets the duration of this mediaLink
+   *
+   * @param duration a duration
+   */
+  void setDuration(String duration);
 }

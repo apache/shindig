@@ -41,11 +41,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+/**
+ * Sample Implementation of the ActivityStreams Service using a JSON 
+ * database.
+ */
 public class ActivityStreamsJsonDbService implements ActivityStreamService {
   JsonDbOpensocialService jsonDb;
   JSONObject db;
   BeanConverter converter;
 
+  /**
+   * Create a new ActivityStreamsJsonDbService instance via Guice injection
+   *
+   * @param jsonDb a {@link org.apache.shindig.social.sample.spi.JsonDbOpensocialService} object.
+   * @param converter a {@link org.apache.shindig.protocol.conversion.BeanConverter} object
+   *     annotated with "shindig.bean.converter.json".
+   */
   @Inject
   public ActivityStreamsJsonDbService(JsonDbOpensocialService jsonDb,
                                       @Named("shindig.bean.converter.json")
@@ -63,69 +74,70 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
 
 
   // Are fields really needed here?
+  /** {@inheritDoc} */
   public Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
-	      Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
-	try {
-	  JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
-	  JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
-	  if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
-		  jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
-		  jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
-	  }
+        Set<String> fields, ActivityEntry activityEntry, SecurityToken token) throws ProtocolException {
+    try {
+      JSONObject jsonEntry = convertFromActivityEntry(activityEntry, fields);
+      JSONObject jsonEntryObject = jsonEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString());
+      if (!jsonEntryObject.has(ActivityObject.Field.ID.toString())) {
+        jsonEntryObject.put(ActivityObject.Field.ID.toString(), System.currentTimeMillis());
+        jsonEntry.put(ActivityEntry.Field.OBJECT.toString(), jsonEntryObject);
+      }
 
-	  // TODO: bug fixed: jsonArray will not be null; will throw exception!
-	  // Fix in createActivity()
-	  JSONArray jsonArray;
-	  if(db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
-		  jsonArray = db.getJSONObject(ACTIVITYSTREAMS_TABLE)
-	      				.getJSONArray(userId.getUserId(token));
-	  } else {
-		  jsonArray = new JSONArray();
-		  db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
-	  }
-	  jsonArray.put(jsonEntry);
-	  return ImmediateFuture.newInstance(null);
-	} catch (JSONException je) {
-	  throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-	      je);
-	}
+      // TODO: bug fixed: jsonArray will not be null; will throw exception!
+      // Fix in createActivity()
+      JSONArray jsonArray;
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(userId.getUserId(token))) {
+        jsonArray = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(userId.getUserId(token));
+      } else {
+        jsonArray = new JSONArray();
+        db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(userId.getUserId(token), jsonArray);
+      }
+      jsonArray.put(jsonEntry);
+      return ImmediateFuture.newInstance(null);
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
   }
 
+  /** {@inheritDoc} */
   public Future<Void> deleteActivityEntries(UserId userId, GroupId groupId,
-		  String appId, Set<String> activityIds, SecurityToken token)
-		  throws ProtocolException {
-	try {
-	  String user = userId.getUserId(token);
-	  if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
-	    JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
-	    if (activityEntries != null) {
-	      JSONArray newList = new JSONArray();
-	      for (int i = 0; i < activityEntries.length(); i++) {
-	        JSONObject activityEntry = activityEntries.getJSONObject(i);
-	        if (!activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()))) {
-	          newList.put(activityEntry);
-	        }
-	      }
-	      db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(user, newList);
-	      // TODO: This seems very odd that we return no useful response in this
-	      // case
-	      // There is no way to represent not-found
-	      // if (found) { ??
-	      // }
+      String appId, Set<String> activityIds, SecurityToken token) throws ProtocolException {
+    try {
+      String user = userId.getUserId(token);
+
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
+        JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+
+        if (activityEntries != null) {
+          JSONArray newList = new JSONArray();
+          for (int i = 0; i < activityEntries.length(); i++) {
+            JSONObject activityEntry = activityEntries.getJSONObject(i);
+            if (!activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()))) {
+              newList.put(activityEntry);
+            }
+          }
+          db.getJSONObject(ACTIVITYSTREAMS_TABLE).put(user, newList);
+          // TODO: This seems very odd that we return no useful response in this
+          // case
+          // There is no way to represent not-found
+          // if (found) { ??
+          // }
         }
-	  }
-	  // What is the appropriate response here??
-	  return ImmediateFuture.newInstance(null);
-      } catch (JSONException je) {
-	      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-	          je);
-	  }
+      }
+      // What is the appropriate response here??
+      return ImmediateFuture.newInstance(null);
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
   }
 
+  /** {@inheritDoc} */
   public Future<ActivityEntry> getActivityEntry(UserId userId, GroupId groupId,
-		  String appId, Set<String> fields, String activityId, SecurityToken token)
-		  throws ProtocolException {
-    try {	   	
+      String appId, Set<String> fields, String activityId, SecurityToken token)
+      throws ProtocolException {
+    try {       
       String user = userId.getUserId(token);
       if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
         JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
@@ -136,93 +148,70 @@ public class ActivityStreamsJsonDbService implements ActivityStreamService {
           if (actorId.equals(user)
               && activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).get(ActivityObject.Field.ID.toString()).toString().equals(activityId)) {
             return ImmediateFuture.newInstance(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
-         }
+          }
         }
       }
 
       throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST, "ActivityEntry not found");
     } catch (JSONException je) {
-      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-          je);
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
   }
-	
+  
+  /** {@inheritDoc} */
   public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
-		  Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields,
-		  CollectionOptions options, SecurityToken token)
-		  throws ProtocolException {
+      Set<UserId> userIds, GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, SecurityToken token)
+      throws ProtocolException {
       List<ActivityEntry> result = Lists.newArrayList();
       
-//    	// Retrieve activities from Lotus Connections
-//		FeedParser parser;
-//		try {
-//			parser = new FeedParser();
-//		    ArrayList<JSONObject> activityEntries = parser.parseFeed("http://w3.ibm.com/connections/news/atom/stories/public");
-//		    for(JSONObject activityEntry : activityEntries) {
-//		    	result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
-//		    }
-//		} catch (ParserConfigurationException e) {
-//			e.printStackTrace();
-//		} catch (SAXException e) {
-//			e.printStackTrace();
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-		
-      try {
-        Set<String> idSet = jsonDb.getIdSet(userIds, groupId, token);
-        for (String id : idSet) {
-          if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(id)) {
-            JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(id);
-            for (int i = 0; i < activityEntries.length(); i++) {
-              JSONObject activityEntry = activityEntries.getJSONObject(i);
-              result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
-              // TODO: ActivityStreams don't have appIds
-//	              if (appId == null || !activitystream.has(ActivityStream.Field.APP_ID.toString())) {
-//	                result.add(jsonDb.filterFields(activitystream, fields, ActivityStream.class));
-//	              } else if (activitystream.get(ActivityStream.Field.APP_ID.toString()).equals(appId)) {
-//	                result.add(jsonDb.filterFields(activitystream, fields, ActivityStream.class));
-//	              }
-            }
-          }
-        }
-        return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
-    } catch (JSONException je) {
-      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-          je);
-    }
-  }
-	
-  public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
-		  UserId userId, GroupId groupId, String appId, Set<String> fields,
-		  CollectionOptions options, Set<String> activityIds, SecurityToken token)
-		  throws ProtocolException {
-	  List<ActivityEntry> result = Lists.newArrayList();
-      try {
-        String user = userId.getUserId(token);
-        if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
-          JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+    try {
+      Set<String> idSet = jsonDb.getIdSet(userIds, groupId, token);
+      for (String id : idSet) {
+        if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(id)) {
+          JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(id);
           for (int i = 0; i < activityEntries.length(); i++) {
             JSONObject activityEntry = activityEntries.getJSONObject(i);
-            JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()));
-            String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
-            if (actorId.equals(user)
-              && activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()).toString())) {
+            result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
+            // TODO: ActivityStreams don't have appIds
+          }
+        }
+      }
+      return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
+    } catch (JSONException je) {
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
+    }
+  }
+  
+  /** {@inheritDoc} */
+  public Future<RestfulCollection<ActivityEntry>> getActivityEntries(
+      UserId userId, GroupId groupId, String appId, Set<String> fields,
+      CollectionOptions options, Set<String> activityIds, SecurityToken token)
+      throws ProtocolException {
+    List<ActivityEntry> result = Lists.newArrayList();
+    try {
+      String user = userId.getUserId(token);
+      if (db.getJSONObject(ACTIVITYSTREAMS_TABLE).has(user)) {
+        JSONArray activityEntries = db.getJSONObject(ACTIVITYSTREAMS_TABLE).getJSONArray(user);
+        for (int i = 0; i < activityEntries.length(); i++) {
+          JSONObject activityEntry = activityEntries.getJSONObject(i);
+          JSONObject actor = new JSONObject(activityEntry.get(ActivityEntry.Field.ACTOR.toString()));
+          String actorId = actor.get(ActivityObject.Field.ID.toString()).toString();
+          if (actorId.equals(user)
+            && activityIds.contains(activityEntry.getJSONObject(ActivityEntry.Field.OBJECT.toString()).getString(ActivityObject.Field.ID.toString()).toString())) {
             result.add(jsonDb.filterFields(activityEntry, fields, ActivityEntry.class));
           }
         }
       }
       return ImmediateFuture.newInstance(new RestfulCollection<ActivityEntry>(result));
     } catch (JSONException je) {
-      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(),
-          je);
+      throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, je.getMessage(), je);
     }
   }
 
   private JSONObject convertFromActivityEntry(ActivityEntry activityEntry, Set<String> fields)
-  throws JSONException {
-	// TODO Not using fields yet
-	return new JSONObject(converter.convertToString(activityEntry));
+    throws JSONException {
+    // TODO Not using fields yet
+    return new JSONObject(converter.convertToString(activityEntry));
   }
-
 }

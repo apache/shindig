@@ -38,12 +38,22 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
+/**
+ * <p>ActivityStreamsHandler class.</p>
+ *
+ */
 @Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activitystream}/{activityEntryId}+")
 public class ActivityStreamsHandler {
 
   private final ActivityStreamService service;
   private final ContainerConfig config;
 
+  /**
+   * <p>Constructor for ActivityStreamsHandler.</p>
+   *
+   * @param service a {@link org.apache.shindig.extras.as.opensocial.spi.ActivityStreamService} object.
+   * @param config a {@link org.apache.shindig.config.ContainerConfig} object.
+   */
   @Inject
   public ActivityStreamsHandler(ActivityStreamService service, ContainerConfig config) {
     this.service = service;
@@ -54,6 +64,10 @@ public class ActivityStreamsHandler {
    * Allowed end-points /activities/{userId}/@self/{actvityId}+
    *
    * examples: /activities/john.doe/@self/1
+   *
+   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
+   * @return a {@link java.util.concurrent.Future} object.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   @Operation(httpMethods="DELETE")
   public Future<?> delete(SocialRequestItem request)
@@ -73,8 +87,12 @@ public class ActivityStreamsHandler {
    * Allowed end-points /activities/{userId}/@self
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
-   * 
+   *
    * TODO: REST end-point
+   *
+   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
+   * @return a {@link java.util.concurrent.Future} object.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   @Operation(httpMethods="PUT", bodyParam = "activityEntry")
   public Future<?> update(SocialRequestItem request) throws ProtocolException {
@@ -85,8 +103,12 @@ public class ActivityStreamsHandler {
    * Allowed end-points /activities/{userId}/@self
    *
    * examples: /activities/john.doe/@self - postBody is an activity object
-   * 
+   *
    * TODO: REST end-point
+   *
+   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
+   * @return a {@link java.util.concurrent.Future} object.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   @Operation(httpMethods="POST", bodyParam = "activityEntry")
   public Future<?> create(SocialRequestItem request) throws ProtocolException {
@@ -110,6 +132,10 @@ public class ActivityStreamsHandler {
    *
    * examples: /activities/john.doe/@self/1 /activities/john.doe/@self
    * /activities/john.doe,jane.doe/@friends
+   *
+   * @param request a {@link org.apache.shindig.social.opensocial.service.SocialRequestItem} object.
+   * @return a {@link java.util.concurrent.Future} object.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   @Operation(httpMethods="GET")
   public Future<?> get(SocialRequestItem request)
@@ -143,6 +169,12 @@ public class ActivityStreamsHandler {
         request.getFields(), options, request.getToken());
   }
 
+  /**
+   * Return a list of supported fields for the ActivityStreams endpoint
+   *
+   * @param request a {@link org.apache.shindig.protocol.RequestItem} object.
+   * @return a List of supported fields
+   */
   @Operation(httpMethods = "GET", path="/@supportedFields")
   public List<Object> supportedFields(RequestItem request) {
     // TODO: Would be nice if name in config matched name of service.

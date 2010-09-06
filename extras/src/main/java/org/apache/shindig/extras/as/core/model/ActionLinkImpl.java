@@ -19,29 +19,39 @@ package org.apache.shindig.extras.as.core.model;
 
 import org.apache.shindig.extras.as.opensocial.model.ActionLink;
 
+/**
+ * A simple implementation of an ActionLink used by ActivityStreams.
+ */
 public class ActionLinkImpl implements ActionLink {
 
-	private String target;
-	private String caption;
-	
-	public ActionLinkImpl() {
-		this.target = null;
-		this.caption = null;
-	}
+  private String target;
+  private String caption;
+  
+  /**
+   * Construct an empty ActionLinkImpl
+   */
+  public ActionLinkImpl() {
+    this.target = null;
+    this.caption = null;
+  }
 
-	public String getTarget() {
-		return target;
-	}
+  /** {@inheritDoc} */
+  public String getTarget() {
+    return target;
+  }
 
-	public void setTarget(String target) {
-		this.target = target;
-	}
+  /** {@inheritDoc} */
+  public void setTarget(String target) {
+    this.target = target;
+  }
 
-	public String getCaption() {
-		return caption;
-	}
+  /** {@inheritDoc} */
+  public String getCaption() {
+    return caption;
+  }
 
-	public void setCaption(String caption) {
-		this.caption = caption;
-	}
+  /** {@inheritDoc} */
+  public void setCaption(String caption) {
+    this.caption = caption;
+  }
 }

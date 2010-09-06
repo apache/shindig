@@ -25,7 +25,7 @@ import org.apache.shindig.protocol.model.Exportablebean;
 
 import com.google.inject.ImplementedBy;
 
-/*
+/**
  * Interface for an Activity Stream.
  * <p>
  * See the Activity Streams specification for more detail:
@@ -34,58 +34,106 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ActivityStreamImpl.class)
 @Exportablebean
 public interface ActivityStream {
-	
-	/*
-	 * Fields that represent JSON elements for an activity entry.
-	 */
-	public static enum Field {
-		DISPLAY_NAME("displayName"),
-		LANGUAGE("language"),
-		ENTRIES("entries"),
-		ID("id"),
-		SUBJECT("subject");
-		
-		/*
-		 * The name of the JSON element.
-		 */
-		private final String jsonString;
-		
-		/*
-		 * Constructs the field base for the JSON element.
-		 * 
-		 * @param jsonString the name of the element
-		 */
-		private Field(String jsonString) {
-			this.jsonString = jsonString;
-		}
-		
-		/*
-		 * Returns the name of the JSON element.
-		 * 
-		 * @return String the name of the JSON element
-		 */
-		public String toString() {
-			return jsonString;
-		}
-	}
-	
-	void setId(String id);
-	
-	String getId();
-	
-	void setEntries(List<ActivityEntry> entries);
-	
-	List<ActivityEntry> getEntries();
-	
-	void setLanguage(String language);
-	
-	String getLanguage();
-	
-	void setSubject(String subject);
-	
-	String getSubject();
-	
-	void setDisplayName(String displayName);
-	
-	String getDisplayName();
+  
+  /*
+   * Fields that represent JSON elements for an activity entry.
+   */
+  public static enum Field {
+    DISPLAY_NAME("displayName"),
+    LANGUAGE("language"),
+    ENTRIES("entries"),
+    ID("id"),
+    SUBJECT("subject");
+    
+    /*
+     * The name of the JSON element.
+     */
+    private final String jsonString;
+    
+    /*
+     * Constructs the field base for the JSON element.
+     * 
+     * @param jsonString the name of the element
+     */
+    private Field(String jsonString) {
+      this.jsonString = jsonString;
+    }
+    
+    /*
+     * Returns the name of the JSON element.
+     * 
+     * @return String the name of the JSON element
+     */
+    public String toString() {
+      return jsonString;
+    }
+  }
+  
+  /**
+   * Sets the Id for this stream
+   * @param id a string
+   */
+  void setId(String id);
+  
+  /**
+         * Return the id string
+   *
+   * @return a string
+   */
+  String getId();
+  
+  /**
+   * Set the list of ActivityEntry objects
+   * @param entries a list of ActivityEntry
+   */
+  void setEntries(List<ActivityEntry> entries);
+  
+  /**
+   * Get the list of ActivityEntry objects
+   *
+   * @return a list of ActivityEntry
+   */
+  List<ActivityEntry> getEntries();
+  
+  /**
+   * Set the language for this stream
+   *
+   * @param language a language string
+   */
+  void setLanguage(String language);
+  
+  /**
+   * Get the language for this stream
+   *
+   * @return a language string
+   */
+  String getLanguage();
+  
+  /**
+   * Set the subject for this stream
+   *
+   * @param subject a subject string
+   */
+  void setSubject(String subject);
+  
+  /**
+   * Get the subject for this stream
+   *
+   * @return a subject string
+   */
+  String getSubject();
+  
+  /**
+   * Get the display name for this stream
+   *
+   * @param displayName a display name
+   */
+  void setDisplayName(String displayName);
+  
+  /**
+   * Get the human readable name for this stream
+   *
+   * @return a display name
+   */
+  String getDisplayName();
 }

@@ -30,6 +30,7 @@ import org.apache.shindig.extras.as.sample.ActivityStreamsJsonDbService;
  * Configures the Extra modules in shindig-extras.
  */
 public class ActivityStreamsGuiceModule extends AbstractModule {
+  /** {@inheritDoc} */
   @Override
   protected void configure() {
     bind(ActivityStreamService.class).to(ActivityStreamsJsonDbService.class);
