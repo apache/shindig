@@ -170,7 +170,7 @@ public class OAuthResponseParamsTest {
   @Test
   public void testStripSensitiveFromResponse() {
     verifyStrip("oauth_token=dbce9de6d6da692b99b39cdcde60fd83&oauth_token_secret=60c1aabe0f6db96" +
-    		"f2719956168c08d9d");
+        "f2719956168c08d9d");
 
     String out = verifyStrip("oauth_token=dbce9de6d6da692b99b39cdcde60fd83&oauth_token_secret" +
               "=60c1aabe0f6db96f2719956168c08d9d&oauth_session_handle=ABCDEFGH");
@@ -203,11 +203,11 @@ public class OAuthResponseParamsTest {
   public void testStripSecretsFromRequestHeader() {
     HttpRequest req = new HttpRequest(Uri.parse("http://www.example.com/foo"));
     req.setHeader("Authorization", "OAuth opensocial_owner_id=\"owner\", opensocial_viewer_id=" +
-    		"\"owner\", opensocial_app_id=\"app\", opensocial_app_url=\"http%3A%2F%2Fwww.examp" +
-    		"le.com%2Fheader.xml\", oauth_version=\"1.0\", oauth_timestamp=\"1231461306\", oau" +
-    		"th_consumer_key=\"consumer\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce" +
-    		"=\"1231461308333563000\", oauth_session_handle=\"w0zAI1yN5ZRvmBX5kcVdra5%2BbZE%" +
-    		"3D\"");
+        "\"owner\", opensocial_app_id=\"app\", opensocial_app_url=\"http%3A%2F%2Fwww.examp" +
+        "le.com%2Fheader.xml\", oauth_version=\"1.0\", oauth_timestamp=\"1231461306\", oau" +
+        "th_consumer_key=\"consumer\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce" +
+        "=\"1231461308333563000\", oauth_session_handle=\"w0zAI1yN5ZRvmBX5kcVdra5%2BbZE%" +
+        "3D\"");
     String filtered = OAuthResponseParams.filterSecrets(req.toString());
     checkStringContains(filtered, "oauth_session_handle=REMOVED");
   }
@@ -215,11 +215,11 @@ public class OAuthResponseParamsTest {
   @Test
   public void testStripSecretsFromRequestUrl() {
     HttpRequest req = new HttpRequest(Uri.parse("http://www.example.com/access?param=foo&openso" +
-    		"cial_owner_id=owner&opensocial_viewer_id=owner&opensocial_app_id=app&" +
-    		"oauth_session_handle" +
-    		"=http%3A%2F%2Fwww.example.com%2Fgadget.xml&oauth_version=1.0&oauth_timestamp=12" +
-    		"31461132&oauth_consumer_key=consumer&oauth_signature_method=HMAC-SHA1&oauth_nonce=1" +
-    		"231461160262578000&oauth_signature=HuFQ%2BRYTrRzcgsi3al6ld9Msvoo%3D"));
+        "cial_owner_id=owner&opensocial_viewer_id=owner&opensocial_app_id=app&" +
+        "oauth_session_handle" +
+        "=http%3A%2F%2Fwww.example.com%2Fgadget.xml&oauth_version=1.0&oauth_timestamp=12" +
+        "31461132&oauth_consumer_key=consumer&oauth_signature_method=HMAC-SHA1&oauth_nonce=1" +
+        "231461160262578000&oauth_signature=HuFQ%2BRYTrRzcgsi3al6ld9Msvoo%3D"));
     String filtered = OAuthResponseParams.filterSecrets(req.toString());
     checkStringContains(filtered, "oauth_session_handle=REMOVED");
   }

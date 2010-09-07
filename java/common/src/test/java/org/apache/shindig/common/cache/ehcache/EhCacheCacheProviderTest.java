@@ -35,7 +35,7 @@ public class EhCacheCacheProviderTest {
   public static void setup() throws Exception {
     defaultProvider = new EhCacheCacheProvider(
         "res://org/apache/shindig/common/cache/ehcache/ehcacheConfig.xml", true, true);
-  }  	
+  }
 
   @Test
   public void getNamedCache() throws Exception {

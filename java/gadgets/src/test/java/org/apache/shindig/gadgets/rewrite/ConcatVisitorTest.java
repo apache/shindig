@@ -111,8 +111,7 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
     css3 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS3_URL_STR);
     css4 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS4_URL_STR);
     css5 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "print", "href", CSS5_URL_STR);
-    css6 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "print", "href",
-    		    CSS6_URL_STR);
+    css6 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "print", "href", CSS6_URL_STR);
     css7 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "screen", "href", CSS7_URL_STR);
     css8 = elem("link", "rel", "stylesheet", "type", "text/css", "media", "screen", "href", CSS8_URL_STR);
     css9 = elem("link", "rel", "stylesheet", "type", "text/css", "href", CSS9_URL_STR);

@@ -43,10 +43,10 @@ public class MediaItemHandler {
     *
     * Allowed end-points: /mediaItems/{userId}+/{groupId}/{albumId}/{mediaItemId}+
     *
-    * Examples:	/mediaItems/john.doe/@self
-    * 				/mediaItems/john.doe,jane.doe/@self
-    * 				/mediaItems/john.doe/@self/album123
-    * 				/mediaItems/john.doe/@self/album123/1,2,3
+    * Examples: /mediaItems/john.doe/@self
+    *           /mediaItems/john.doe,jane.doe/@self
+    *           /mediaItems/john.doe/@self/album123
+    *           /mediaItems/john.doe/@self/album123/1,2,3
     */
   @Operation(httpMethods = "GET")
   public Future<?> get(SocialRequestItem request) throws ProtocolException {

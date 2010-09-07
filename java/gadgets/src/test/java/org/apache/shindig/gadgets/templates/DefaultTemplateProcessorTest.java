@@ -97,7 +97,7 @@ public class DefaultTemplateProcessorTest {
     variables.put("toys", new JSONObject("{ list: [{name: 'Ball'}, {name: 'Car'}]}"));
     variables.put("countries", new JSONArray("['Ireland','France']"));
     variables.put("xss", new JSONObject("{ script: '<script>alert();</script>'," +
-    		"quote:'\"><script>alert();</script>'}"));
+        "quote:'\"><script>alert();</script>'}"));
   }
 
   @Test
@@ -210,7 +210,7 @@ public class DefaultTemplateProcessorTest {
   @Test
   public void testBooleanAttributes() throws Exception {
     String output = executeTemplate("<input class=\"${1 == 2}\" readonly=\"${1 == 2}\"" +
-    		"disabled=\"${1 == 1}\">");
+        "disabled=\"${1 == 1}\">");
     assertEquals("<input class=\"false\" disabled=\"disabled\">", output);
   }
 

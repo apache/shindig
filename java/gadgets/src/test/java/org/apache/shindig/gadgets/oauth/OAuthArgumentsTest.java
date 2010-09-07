@@ -43,13 +43,13 @@ public class OAuthArgumentsTest {
   @Test
   public void testInitFromPreload() throws Exception {
     String xml = "<Preload href='http://www.example.com' " +
-    		"oauth_service_name='service' " +
-    		"OAUTH_TOKEN_NAME='token' " +
-    		"OAUTH_REQuest_token='requesttoken' " +
-    		"oauth_request_token_secret='tokensecret' " +
-    		"OAUTH_USE_TOKEN='never' " +
-    		"random='stuff'" +
-    		"/>";
+        "oauth_service_name='service' " +
+        "OAUTH_TOKEN_NAME='token' " +
+        "OAUTH_REQuest_token='requesttoken' " +
+        "oauth_request_token_secret='tokensecret' " +
+        "OAUTH_USE_TOKEN='never' " +
+        "random='stuff'" +
+        "/>";
 
     Preload preload = new Preload(XmlUtil.parse(xml), Uri.parse(""));
     OAuthArguments params = new OAuthArguments(preload);

@@ -40,11 +40,11 @@ public interface AlbumService {
   /*
     * Retrieves a single album for the given user with the given album ID.
     *
-    * @param userId	Identifies the person to retrieve the album from
-    * @param appId		Identifies the application to retrieve the album from
-    * @param fields	Indicates the fields to return.  Empty set implies all
-    * @param albumId	Identifies the album to retrieve
-    * @param token		A valid SecurityToken
+    * @param userId  Identifies the person to retrieve the album from
+    * @param appId    Identifies the application to retrieve the album from
+    * @param fields  Indicates the fields to return.  Empty set implies all
+    * @param albumId  Identifies the album to retrieve
+    * @param token    A valid SecurityToken
     *
     * @return a response item with the requested album
     */
@@ -54,12 +54,12 @@ public interface AlbumService {
   /*
     * Retrieves albums for the given user with the given album IDs.
     *
-    * @param userId	Identifies the person to retrieve albums for
-    * @param appId		Identifies the application to retrieve albums from
-    * @param fields	The fields to return; empty set implies all
-    * @param options	The sorting/filtering/pagination options
-    * @param albumIds	The set of album ids to fetch
-    * @param token		A valid SecurityToken
+    * @param userId  Identifies the person to retrieve albums for
+    * @param appId    Identifies the application to retrieve albums from
+    * @param fields  The fields to return; empty set implies all
+    * @param options  The sorting/filtering/pagination options
+    * @param albumIds  The set of album ids to fetch
+    * @param token    A valid SecurityToken
     *
     * @return a response item with requested albums
     */
@@ -70,12 +70,12 @@ public interface AlbumService {
   /*
     * Retrieves albums for the given user and group.
     *
-    * @param userIds	Identifies the users to retrieve albums from
-    * @param groupId	Identifies the group to retrieve albums from
-    * @param appId		Identifies the application to retrieve albums from
-    * @param fields	The fields to return.  Empty set implies all
-    * @param options	The sorting/filtering/pagination options
-    * @param token		A valid SecurityToken
+    * @param userIds  Identifies the users to retrieve albums from
+    * @param groupId  Identifies the group to retrieve albums from
+    * @param appId    Identifies the application to retrieve albums from
+    * @param fields   The fields to return.  Empty set implies all
+    * @param options  The sorting/filtering/pagination options
+    * @param token    A valid SecurityToken
     *
     * @return a response item with the requested albums
     */
@@ -87,10 +87,10 @@ public interface AlbumService {
   /*
     * Deletes a single album for the given user with the given album ID.
     *
-    * @param userId	Identifies the user to delete the album from
-    * @param appId		Identifies the application to delete the album from
-    * @param albumId	Identifies the album to delete
-    * @param token		A valid SecurityToken
+    * @param userId   Identifies the user to delete the album from
+    * @param appId    Identifies the application to delete the album from
+    * @param albumId  Identifies the album to delete
+    * @param token    A valid SecurityToken
     *
     * @return a response item containing any errors
     */
@@ -100,10 +100,10 @@ public interface AlbumService {
   /*
     * Creates an album for the given user.
     *
-    * @param userId	Identifies the user to create the album for
-    * @param appId		Identifies the application to create the album in
-    * @param album		The album to create
-    * @param token		A valid SecurityToken
+    * @param userId   Identifies the user to create the album for
+    * @param appId    Identifies the application to create the album in
+    * @param album    The album to create
+    * @param token    A valid SecurityToken
     *
     * @return a response containing any errors
     */
@@ -114,11 +114,11 @@ public interface AlbumService {
     * Updates an album for the given user.  The album ID specified in the REST
     * end-point is used, even if the album also defines an ID.
     *
-    * @param userId	Identifies the user to update the album for
-    * @param appId		Identifies the application to update the album in
-    * @param album		Defines the updated album
-    * @param albumId	Identifies the ID of the album to update
-    * @param token		A valid SecurityToken
+    * @param userId   Identifies the user to update the album for
+    * @param appId    Identifies the application to update the album in
+    * @param album    Defines the updated album
+    * @param albumId  Identifies the ID of the album to update
+    * @param token    A valid SecurityToken
     *
     * @return a response containing any errors
     */

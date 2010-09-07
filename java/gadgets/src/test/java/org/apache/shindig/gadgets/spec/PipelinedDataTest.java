@@ -282,8 +282,8 @@ public class PipelinedDataTest {
   @Test
   public void testBatching() throws Exception {
     String xml = "<Content xmlns=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\">"
-    		+ "<PeopleRequest key=\"key\" userId=\"${userId}\"/>"
-            + "<HttpRequest key=\"key2\" href=\"${key}\"/>"
+        + "<PeopleRequest key=\"key\" userId=\"${userId}\"/>"
+        + "<HttpRequest key=\"key2\" href=\"${key}\"/>"
         + "</Content>";
 
     PipelinedData socialData = new PipelinedData(XmlUtil.parse(xml), GADGET_URI);

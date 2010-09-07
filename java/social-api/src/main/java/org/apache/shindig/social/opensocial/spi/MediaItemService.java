@@ -21,12 +21,12 @@ public interface MediaItemService {
   /*
     * Retrieves a MediaItem by ID.
     *
-    * @param userId		Identifies the owner of the MediaItem to retrieve
-    * @param appId			Identifies the application of the MeiaItem to retrieve
-    * @param albumId		Identifies the album containing the MediaItem
-    * @param mediaItemId	Identifies the MediaItem to retrieve
-    * @param fields		Indicates fields to be returned; empty set implies all
-    * @param token			A valid SecurityToken
+    * @param userId    Identifies the owner of the MediaItem to retrieve
+    * @param appId      Identifies the application of the MeiaItem to retrieve
+    * @param albumId    Identifies the album containing the MediaItem
+    * @param mediaItemId  Identifies the MediaItem to retrieve
+    * @param fields    Indicates fields to be returned; empty set implies all
+    * @param token      A valid SecurityToken
     *
     * @return a response item with the requested MediaItem
     */
@@ -37,13 +37,13 @@ public interface MediaItemService {
   /*
     * Retrieves MediaItems by IDs.
     *
-    * @param userId		Identifies the owner of the MediaItems
-    * @param appId			Identifies the application of the MediaItems
-    * @param albumId		Identifies the album containing the MediaItems
-    * @param mediaItemIds	Identifies the MediaItems to retrieve
-    * @param fields		Specifies the fields to return; empty set implies all
-    * @param options		Sorting/filtering/pagination options
-    * @param token			A valid SecurityToken
+    * @param userId    Identifies the owner of the MediaItems
+    * @param appId      Identifies the application of the MediaItems
+    * @param albumId    Identifies the album containing the MediaItems
+    * @param mediaItemIds  Identifies the MediaItems to retrieve
+    * @param fields    Specifies the fields to return; empty set implies all
+    * @param options    Sorting/filtering/pagination options
+    * @param token      A valid SecurityToken
     *
     * @return a response item with the requested MediaItems
     */
@@ -55,12 +55,12 @@ public interface MediaItemService {
   /*
     * Retrieves MediaItems by Album.
     *
-    * @param userId	Identifies the owner of the MediaItems
-    * @param appId		Identifies the application of the MediaItems
-    * @param albumId	Identifies the Album containing the MediaItems
-    * @param fields	Specifies the fields to return; empty set implies all
-    * @param options	Sorting/filtering/pagination options
-    * @param token		A valid SecurityToken
+    * @param userId  Identifies the owner of the MediaItems
+    * @param appId    Identifies the application of the MediaItems
+    * @param albumId  Identifies the Album containing the MediaItems
+    * @param fields  Specifies the fields to return; empty set implies all
+    * @param options  Sorting/filtering/pagination options
+    * @param token    A valid SecurityToken
     *
     * @return a response item with the requested MediaItems
     */
@@ -72,12 +72,12 @@ public interface MediaItemService {
   /*
     * Retrieves MediaItems by users and groups.
     *
-    * @param userIds	Identifies the users that this request is relative to
-    * @param groupId	Identifies the users' groups to retrieve MediaItems from
-    * @param appId		Identifies the application to retrieve MediaItems from
-    * @param fields	The fields to return; empty set implies all
-    * @param options	Sorting/filtering/pagination options
-    * @param token		A valid SecurityToken
+    * @param userIds  Identifies the users that this request is relative to
+    * @param groupId  Identifies the users' groups to retrieve MediaItems from
+    * @param appId    Identifies the application to retrieve MediaItems from
+    * @param fields  The fields to return; empty set implies all
+    * @param options  Sorting/filtering/pagination options
+    * @param token    A valid SecurityToken
     *
     * @return a response item with the requested MediaItems
     */
@@ -89,11 +89,11 @@ public interface MediaItemService {
   /*
     * Deletes a MediaItem by ID.
     *
-    * @param userId		Identifies the owner of the MediaItem to delete
-    * @param appId			Identifies the application hosting the MediaItem
-    * @param albumId		Identifies the parent album of the MediaItem
-    * @param mediaItemId	Identifies the MediaItem to delete
-    * @param token			A valid SecurityToken
+    * @param userId    Identifies the owner of the MediaItem to delete
+    * @param appId      Identifies the application hosting the MediaItem
+    * @param albumId    Identifies the parent album of the MediaItem
+    * @param mediaItemId  Identifies the MediaItem to delete
+    * @param token      A valid SecurityToken
     *
     * @return a response item containing any errors
     */
@@ -103,11 +103,11 @@ public interface MediaItemService {
   /*
     * Create a MediaItem in the given album for the given user.
     *
-    * @param userId		Identifies the owner of the MediaItem to create
-    * @param appId			Identifies the application hosting the MediaItem
-    * @param albumId		Identifies the album to contain the MediaItem
-    * @param mediaItem		The MediaItem to create
-    * @param token			A valid SecurityToken
+    * @param userId    Identifies the owner of the MediaItem to create
+    * @param appId      Identifies the application hosting the MediaItem
+    * @param albumId    Identifies the album to contain the MediaItem
+    * @param mediaItem    The MediaItem to create
+    * @param token      A valid SecurityToken
     *
     * @return a response containing any errors
     */
@@ -118,12 +118,12 @@ public interface MediaItemService {
     * Updates a MediaItem for the given user.  The MediaItem ID specified in
     * the REST end-point is used, even if the MediaItem also defines an ID.
     *
-    * @param userId		Identifies the owner of the MediaItem to update
-    * @param appId			Identifies the application hosting the MediaItem
-    * @param albumId		Identifies the album containing the MediaItem
-    * @param mediaItemId	Identifies the MediaItem to update
-    * @param mediaItem		The updated MediaItem to persist
-    * @param token			A valid SecurityToken
+    * @param userId    Identifies the owner of the MediaItem to update
+    * @param appId      Identifies the application hosting the MediaItem
+    * @param albumId    Identifies the album containing the MediaItem
+    * @param mediaItemId  Identifies the MediaItem to update
+    * @param mediaItem    The updated MediaItem to persist
+    * @param token      A valid SecurityToken
     *
     * @return a response containing any errors
     */

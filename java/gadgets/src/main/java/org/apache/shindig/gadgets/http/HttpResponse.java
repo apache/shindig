@@ -619,11 +619,11 @@ public final class HttpResponse implements Externalizable {
     responseBytes = new byte[bodyLength];
     int cnt, offset = 0;
     while ((cnt = in.read(responseBytes, offset, bodyLength)) > 0) {
-   	 offset += cnt;
-   	 bodyLength -= cnt;
+      offset += cnt;
+      bodyLength -= cnt;
     }
     if (offset != responseBytes.length) {
-    	throw new IOException("Invalid body! Expected length = " + responseBytes.length + ", bytes readed = " + offset + '.');
+      throw new IOException("Invalid body! Expected length = " + responseBytes.length + ", bytes readed = " + offset + '.');
     }
 
     date = getAndUpdateDate(headerCopy);

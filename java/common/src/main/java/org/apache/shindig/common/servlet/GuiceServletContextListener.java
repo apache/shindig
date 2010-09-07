@@ -99,9 +99,9 @@ public class GuiceServletContextListener implements ServletContextListener {
     String value=null;
     if(systemProperties!=null && systemProperties.trim().length()>0){
       for (String aProperty : StringUtils.split(systemProperties, '\n')){
-    	String[] keyAndvalue = StringUtils.split(aProperty.trim(), "=",2);
+      String[] keyAndvalue = StringUtils.split(aProperty.trim(), "=",2);
         if(keyAndvalue.length==2){
-    	  key=keyAndvalue[0];
+        key=keyAndvalue[0];
           value=keyAndvalue[1];
           //set the system property if they are not empty
           if(key!=null && key.trim().length()>0 && value!=null && value.trim().length()>0){

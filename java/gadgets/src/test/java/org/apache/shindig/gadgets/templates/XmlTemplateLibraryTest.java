@@ -106,8 +106,8 @@ public class XmlTemplateLibraryTest {
     // with the first tag for the whole library
     handlerWithNoResources.process(result, tag, processor);
     assertEquals("<STYLE>libstyle\nlibstyle2</STYLE>" +
-    		"<JAVASCRIPT>libscript\nlibscript2</JAVASCRIPT>",
-    		serializeResources(context));
+                 "<JAVASCRIPT>libscript\nlibscript2</JAVASCRIPT>",
+                 serializeResources(context));
 
     // Now script and style elements for the tag should get registered
     handlerWithResources.process(result, tag, processor);

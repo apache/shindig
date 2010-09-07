@@ -84,10 +84,10 @@ public class VariableSubstituterTest {
   @Test
   public void userPrefsSubstituted() throws Exception {
     String xml = "<Module>" +
-    		         "<ModulePrefs title='I heart __UP_foo__'/>" +
-    		         "<UserPref name='foo'/>" +
-    		         "<Content/>" +
-    		         "</Module>";
+                 "<ModulePrefs title='I heart __UP_foo__'/>" +
+                 "<UserPref name='foo'/>" +
+                 "<Content/>" +
+                 "</Module>";
     GadgetSpec spec = new GadgetSpec(Uri.parse("#"), xml);
     GadgetContext context = new GadgetContext() {
       @Override

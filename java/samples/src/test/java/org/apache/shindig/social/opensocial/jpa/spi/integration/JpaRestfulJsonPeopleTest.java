@@ -55,6 +55,6 @@ public class JpaRestfulJsonPeopleTest extends RestfulJsonPeopleTest {
   @After
   public void tearDown() throws Exception {
     this.bootstrap.tearDown();
-  }	
+  }
   
 }
