@@ -42,24 +42,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <webResources>
-            <resource>
-              <!-- this is relative to the pom.xml directory -->
-              <directory>${basedir}/../../content/</directory>
-              <targetPath>files</targetPath>
-              <includes>
-                <include>**/*.*</include>
-              </includes>
-            </resource>
-          </webResources>
-         </configuration>
-         <executions>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins </groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
       </plugin>
@@ -90,6 +72,15 @@
       <resource>
         <directory>src/main/resources</directory>
         <filtering>false</filtering>
+      </resource>
+      <resource>
+        <!-- TODO: eliminate this inclusion -->
+        <!-- this is relative to the pom.xml directory -->
+        <directory>${basedir}/../../content/</directory>
+        <targetPath>files</targetPath>
+        <includes>
+          <include>container/rpc_relay.html</include>
+        </includes>
       </resource>
     </resources>
   </build>
