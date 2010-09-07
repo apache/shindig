@@ -238,7 +238,7 @@ public class UserPref {
    * Simple data structure representing a value/displayValue pair
    * for UserPref enums. Value is EnumValue@value, and DisplayValue is EnumValue@displayValue.
    */
-  public static class EnumValuePair {
+  public static final class EnumValuePair {
     private final String value;
     private final String displayValue;
 

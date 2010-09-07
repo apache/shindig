@@ -402,7 +402,7 @@ public final class Uri {
    * Interim typed, but not checked, exception facilitating migration
    * of Uri methods to throwing a checked UriException later.
    */
-  public static class UriException extends IllegalArgumentException {
+  public static final class UriException extends IllegalArgumentException {
     private UriException(Exception e) {
       super(e);
     }

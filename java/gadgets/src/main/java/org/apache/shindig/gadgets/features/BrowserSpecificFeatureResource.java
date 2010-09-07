@@ -236,7 +236,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       public abstract boolean match(String in, String key);
     }
     
-    private static class VersionNumber {
+    private static final class VersionNumber {
       private final int[] parts;
       
       private VersionNumber(String str) {
