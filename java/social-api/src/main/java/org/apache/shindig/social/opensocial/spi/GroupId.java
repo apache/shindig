@@ -22,6 +22,9 @@ import com.google.common.base.Objects;
 
 import java.util.Map;
 
+/**
+ * A group id used for grouping of people resources (as opposed to groups used by the GroupsHandler)
+ */
 public class GroupId {
   public enum Type {
     all, friends, self, deleted, groupId;

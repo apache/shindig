@@ -369,6 +369,25 @@
 		}
 	}]
 },
+"albums" : {
+	"john.doe": [{
+		"id" : "album123",
+		"ownerId" : "john.doe",
+  		"thumbnailUrl" : "http://pages.example.org/albums/4433221-tn.png",
+  		"title" : "Example Album",
+  		"description" : "This is an example album, and this text is an example description",
+  		"location" : { "latitude": 0, "longitude": 0 }
+	}]
+},
+"mediaItems" : {
+	"john.doe": [{
+		"id" : "mediaItem123",
+		"albumId" : "album123",
+		"mimeType" : "image/jpeg",
+		"type" : "image",
+		"url" : "http://animals.nationalgeographic.com/staticfiles/NGS/Shared/StaticFiles/animals/images/primary/black-spider-monkey.jpg"
+	}]
+},
 //
 // ----------------------------- Data ---------------------------------------
 //

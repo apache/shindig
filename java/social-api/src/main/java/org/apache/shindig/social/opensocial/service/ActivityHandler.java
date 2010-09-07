@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+/**
+ * Rest/RPC handler for all activites related requests
+ */
 @Service(name = "activities", path="/{userId}+/{groupId}/{appId}/{activityId}+")
 public class ActivityHandler  {
 

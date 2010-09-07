@@ -30,6 +30,8 @@ import com.google.inject.Inject;
 
 /**
  * Basic registry -- just iterates over rewriters and invokes them sequentially.
+ *
+ * @since 2.0.0
  */
 public class DefaultResponseRewriterRegistry implements ResponseRewriterRegistry {
   protected final List<ResponseRewriter> rewriters;

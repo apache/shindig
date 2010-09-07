@@ -48,6 +48,11 @@ import java.util.concurrent.ExecutorService;
 
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Provides endpoints for gadget metadata lookup and more.
+ *
+ * @since 2.0.0
+ */
 @Service(name = "gadgets")
 public class GadgetsHandler {
   @VisibleForTesting

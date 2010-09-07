@@ -27,6 +27,11 @@ import org.apache.shindig.gadgets.Gadget;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Generates concat servlet specific uris. 
+ *
+ * @since 2.0.0
+ */
 public interface ConcatUriManager {
   public enum Type {
     JS("text/javascript", "src", "js", "script"), // JavaScript

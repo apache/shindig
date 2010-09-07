@@ -97,9 +97,9 @@ class SigningFetcher extends RemoteContentFetcher {
       $contentType = $request->getHeader('Content-Type');
       $signBody = (stripos($contentType, 'application/x-www-form-urlencoded') !== false || $contentType == null);
       $msgParams = array();
+      $postParams = array();
       if ($request->getPostBody()) {
         if ($signBody) {
-          $postParams = array();
           // on normal application/x-www-form-urlencoded type post's encode and parse the post vars
           parse_str($request->getPostBody(), $postParams);
           $postParams = $this->sanitize($postParams);

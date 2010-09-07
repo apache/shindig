@@ -40,7 +40,12 @@ import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 
-public class ServletUtil {
+/**
+ * Jtility routines for dealing with servlets.
+ *
+ * @since 2.0.0
+ */
+public final class ServletUtil {
   public static final String REMOTE_ADDR_KEY = "RemoteAddress";
   public static final String DATA_URI_KEY = "dataUri";
 
@@ -196,14 +201,18 @@ public class ServletUtil {
     pw.write(response.getEncoding());
     pw.write(",");
     pw.flush();
-    
+
     // Stream out the base64-encoded data.
     // Ctor args indicate to encode w/o line breaks.
     Base64InputStream b64input = new Base64InputStream(response.getResponse(), true, 0, null);
     byte[] buf = new byte[1024];
     int read = -1;
-    while ((read = b64input.read(buf, 0, 1024)) > 0) {
-      os.write(buf, 0, read);
+    try {
+      while ((read = b64input.read(buf, 0, 1024)) > 0) {
+        os.write(buf, 0, read);
+      }
+    } finally {
+      IOUtils.closeQuietly(b64input);
     }
     
     // Complete the JSON object.

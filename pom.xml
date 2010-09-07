@@ -347,6 +347,16 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>gagan</id>
+      <name>Gagandeep Singh</name>
+      <email>gagan@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+
     <!-- Mentors -->
     <developer>
       <id>fitz</id>
@@ -736,12 +746,15 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.5</version>
+            <version>2.6</version>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-report-plugin</artifactId>
-            <version>2.5</version>
+            <version>2.6</version>
+            <configuration>
+              <parallel>both</parallel>
+            </configuration>
           </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -1027,6 +1040,9 @@
               <link>http://junit.sourceforge.net/javadoc/</link>
             </links>
             <fixTags>since,param,return,throws</fixTags>
+            <fixMethodComment>true</fixMethodComment>
+            <fixClassComment>true</fixClassComment>
+            <fixFieldComment>false</fixFieldComment>
           </configuration>
         </plugin>
         <plugin>
@@ -1072,7 +1088,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.1-beta-1</version>
+          <version>2.1</version>
         </plugin>
 
         <!-- Mojo -->
@@ -1111,7 +1127,7 @@
         <plugin>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.24</version>
+          <version>6.1.25</version>
         </plugin>
         <plugin>
           <groupId>org.apache.geronimo.genesis.plugins</groupId>
@@ -1428,7 +1444,7 @@
       <dependency>
         <groupId>caja</groupId>
         <artifactId>caja</artifactId>
-        <version>r4209</version>
+        <version>r4251</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
@@ -1480,7 +1496,7 @@
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
-        <version>6.1.22</version>
+        <version>6.1.25</version>
       </dependency>
       <dependency>
         <groupId>joda-time</groupId>
@@ -1560,7 +1576,7 @@
       <dependency>
         <groupId>org.apache.tomcat</groupId>
         <artifactId>el-api</artifactId>
-        <version>6.0.26</version>
+        <version>6.0.29</version>
       </dependency>
       <dependency>
         <groupId>org.apache.tomcat</groupId>
@@ -1577,11 +1593,6 @@
             <artifactId>juel-api</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>net.sf.ezmorph</groupId>
-        <artifactId>ezmorph</artifactId>
-        <version>1.0.4</version>
       </dependency>
       <dependency>
         <groupId>xml-apis</groupId>

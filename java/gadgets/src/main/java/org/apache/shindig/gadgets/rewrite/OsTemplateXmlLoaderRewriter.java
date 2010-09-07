@@ -42,6 +42,10 @@ import org.w3c.dom.Text;
 
 import java.util.List;
 
+/**
+ * Rewrites the gadget to include template and xml information
+ * @since 2.0.0
+ */
 public class OsTemplateXmlLoaderRewriter extends DomWalker.Rewriter {
   public static final String OS_TEMPLATE_MIME = "os/template";
   public static final String OS_TEMPLATES_FEATURE_NAME = "opensocial-templates";

@@ -33,6 +33,8 @@ import java.util.Set;
 /**
  * Populates the core.util configuration, which at present includes the list
  * of features that are supported.
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class CoreUtilConfigContributor implements ConfigContributor {

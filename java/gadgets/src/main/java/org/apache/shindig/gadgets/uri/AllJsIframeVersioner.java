@@ -30,12 +30,12 @@ import com.google.inject.Inject;
  * Simple, but naive, implementation of an IFRAME version generator that
  * returns the same version value for all renders: the hash of all JS in the
  * feature system. This serves as an implicit version of the whole build.
- * 
+ *
  * While often a reasonable heuristic, use of this versioner completely
  * ignores code changes. For instance, a rewriter may be deployed, yet
  * if no JS changed, it would never run since a generated/versioned URL
  * would cache the previously-generated render.
- * 
+ *
  * More sophisticated Versioner implementations may take these sorts of
  * scenarios into consideration, and even go further, retrieving the
  * referenced gadget from the GadgetSpecFactory. Such an implementation's

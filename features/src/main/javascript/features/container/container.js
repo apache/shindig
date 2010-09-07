@@ -42,11 +42,21 @@ shindig.container.Container = function(opt_config) {
   this.sites_ = {};
 
   /**
+   * @type {string}
+   */
+  this.renderDebugParam_ = String(shindig.container.util.getSafeJsonValue(
+      config, shindig.container.ContainerConfig.RENDER_DEBUG_PARAM,
+      shindig.container.ContainerConfig.RENDER_DEBUG));
+
+  /**
    * @type {boolean}
    */
-  this.renderDebug_ = Boolean(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ContainerConfig.RENDER_DEBUG, false));
-
+  var param = window.__CONTAINER_URI.getQP(this.renderDebugParam_);
+  this.renderDebug_ = (typeof param === 'undefined')
+      ? Boolean(shindig.container.util.getSafeJsonValue(config,
+          shindig.container.ContainerConfig.RENDER_DEBUG, false))
+      : (param === '1');
+    
   /**
    * @type {boolean}
    */
@@ -163,11 +173,7 @@ shindig.container.Container.prototype.navigateGadget = function(
  */
 shindig.container.Container.prototype.closeGadget = function(site) {
   var id = site.getId();
-  var el = this.siteEls_[id];
   site.close();
-  if (el) {
-    el.parentNode.removeChild(el);
-  }
   delete this.sites_[id];
   this.unscheduleRefreshTokens_();
 };
@@ -242,6 +248,8 @@ shindig.container.Container.prototype.onConstructed = function(opt_config) {};
 shindig.container.ContainerConfig = {};
 // Whether debug mode is turned on.
 shindig.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
+// The debug param name to look for in container URL for per-request debugging.
+shindig.container.ContainerConfig.RENDER_DEBUG_PARAM = 'renderDebugParam';
 // Whether test mode is turned on.
 shindig.container.ContainerConfig.RENDER_TEST = 'renderTest';
 // Security token refresh interval (in ms) for debugging.

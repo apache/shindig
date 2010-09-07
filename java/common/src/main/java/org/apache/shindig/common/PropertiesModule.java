@@ -43,6 +43,7 @@ public class PropertiesModule extends AbstractModule {
   private final Properties properties;
 
   public PropertiesModule() {
+    super();
     this.properties = readPropertyFile(getDefaultPropertiesPath());
   }
 

@@ -32,6 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.inject.Inject;
 
+/**
+ * Handles REST/RPC requests for AppData
+ */
 @Service(name = "appdata", path = "/{userId}+/{groupId}/{appId}")
 public class AppDataHandler {
 

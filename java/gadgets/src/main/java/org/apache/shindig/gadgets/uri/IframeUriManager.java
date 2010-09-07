@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets.uri;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 
+/**
+ * Interface defining methods needed to generate iframe URL for the /ifr servlet.
+ */
 public interface IframeUriManager {
   /**
    * Generates iframe urls for meta data service.

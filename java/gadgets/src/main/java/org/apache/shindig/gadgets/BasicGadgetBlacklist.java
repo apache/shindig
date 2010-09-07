@@ -55,7 +55,6 @@ import java.util.regex.Pattern;
  *
  *   # Block all gadgets from the baz.com domain (including subdomains)
  *   REGEXP http://[^/]*baz.com/.*
- *
  */
 @Singleton
 public class BasicGadgetBlacklist implements GadgetBlacklist {

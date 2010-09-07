@@ -224,8 +224,8 @@ public class TemplateRewriter implements GadgetRewriter {
     }
   }
 
-  private void loadTemplateLibraries(GadgetContext context,
-      Feature feature, List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
+  private void loadTemplateLibraries(GadgetContext context, Feature feature,
+      List<TagRegistry> registries, List<TemplateLibrary> libraries)  throws GadgetException {
     Collection<String> urls = feature.getParams().get(REQUIRE_LIBRARY_PARAM); 
     if (urls != null) {
       for (String url : urls) {

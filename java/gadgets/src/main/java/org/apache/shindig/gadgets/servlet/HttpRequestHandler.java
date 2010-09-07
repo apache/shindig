@@ -84,7 +84,7 @@ import com.google.inject.Inject;
  * It's important to note that requests which generate HTTP error responses such as 500 are returned
  * in the above format. The RPC itself succeeded in these cases. If an RPC error occurred the client
  * should introspect the error message for information as to the cause.
- * 
+ *
  * TODO: send errors using "result", not plain content
  *
  * @see MakeRequestHandler

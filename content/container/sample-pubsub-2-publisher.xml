@@ -34,11 +34,9 @@
 <Content type="html">
 <![CDATA[
 <script>
-var g = gadgets.byId(__MODULE_ID__);
-
 function publish() {
   var message = Math.random();
-  g.PubSub.publish("org.apache.shindig.random-number", message);
+  gadgets.Hub.publish("org.apache.shindig.random-number", message);
   document.getElementById("output").innerHTML = message;
 }
 

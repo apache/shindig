@@ -74,7 +74,7 @@ public class PipelinedDataPreloaderTest extends PreloaderTestFixture {
       + "refreshInterval=\"60\" method=\"POST\"/>" + "</Content></Module>";
 
   private static final String XML_WITH_VARIABLE = "<Module " +
-  		"xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" " +
+      "xmlns:os=\"" + PipelinedData.OPENSOCIAL_NAMESPACE + "\" " +
         "xmlns:osx=\"" + PipelinedData.EXTENSION_NAMESPACE + "\">"
     + "<ModulePrefs title=\"Title\"/>"
     + "<Content href=\"http://example.org/proxied.php\" view=\"profile\">"

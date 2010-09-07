@@ -25,6 +25,9 @@ import org.apache.shindig.social.opensocial.model.Person;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+/**
+ * Interface that defines how shindig gathers people information.
+ */
 public interface PersonService {
 
   /**

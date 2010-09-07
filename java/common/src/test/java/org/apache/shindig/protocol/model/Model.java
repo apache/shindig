@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 /**
  * Limited model to fully exercise data binding
  */
-public class TestModel {
+public class Model {
 
   public static class Car {
     public static final String DEFAULT_JSON =
@@ -37,22 +37,22 @@ public class TestModel {
     public static final String DEFAULT_XML =
         "<response>" +
             "<engine>" +
-              "<EnumImpl><value><declaringClass>org.apache.shindig.protocol.model.TestModel$Engine</declaringClass><displayValue>Gas</displayValue></value></EnumImpl>" +
-              "<EnumImpl><value><declaringClass>org.apache.shindig.protocol.model.TestModel$Engine</declaringClass><displayValue>Hybrid</displayValue></value></EnumImpl>" +
+              "<EnumImpl><value><declaringClass>org.apache.shindig.protocol.model.Model$Engine</declaringClass><displayValue>Gas</displayValue></value></EnumImpl>" +
+              "<EnumImpl><value><declaringClass>org.apache.shindig.protocol.model.Model$Engine</declaringClass><displayValue>Hybrid</displayValue></value></EnumImpl>" +
             "</engine>" +
             "<parkingTickets>" +
               "<entry><key>TOKYO</key><value>250Y</value></entry>" +
               "<entry><key>BERKELEY</key><value>$120</value></entry>" +
             "</parkingTickets>" +
             "<passengers>" +
-              "<TestModelPassenger>" +
-                "<gender><declaringClass>org.apache.shindig.protocol.model.TestModel$Gender</declaringClass></gender>" +
+              "<ModelPassenger>" +
+                "<gender><declaringClass>org.apache.shindig.protocol.model.Model$Gender</declaringClass></gender>" +
                 "<name>Dick Dastardly</name>" +
-              "</TestModelPassenger>" +
-              "<TestModelPassenger>" +
-                "<gender><declaringClass>org.apache.shindig.protocol.model.TestModel$Gender</declaringClass></gender>" +
+              "</ModelPassenger>" +
+              "<ModelPassenger>" +
+                "<gender><declaringClass>org.apache.shindig.protocol.model.Model$Gender</declaringClass></gender>" +
                 "<name>Speed Racer</name>" +
-              "</TestModelPassenger>" +
+              "</ModelPassenger>" +
             "</passengers></response>";
 
     private List<Enum<Engine>> engine;

@@ -40,6 +40,8 @@ import java.util.Map;
 /**
  * Visitor that resolves relative paths relative to the
  * base tag (only if present) / current page url and marks urls as absolute.
+ *
+ * @since 2.0.0
  */
 public class AbsolutePathReferenceVisitor implements Visitor {
   public enum Tags {
@@ -121,7 +123,7 @@ public class AbsolutePathReferenceVisitor implements Visitor {
     String nodeName = node.getNodeName().toLowerCase();
     if (node.getNodeType() == Node.ELEMENT_NODE &&
         resourceTags.containsKey(nodeName)) {
-      if (nodeName.equals("link")) {
+      if ("link".equals(nodeName)) {
         // Rewrite link only when it is for css.
         String type = ((Element)node).getAttribute("type");
         String rel = ((Element)node).getAttribute("rel");

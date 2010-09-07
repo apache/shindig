@@ -18,7 +18,7 @@
 package org.apache.shindig.protocol.conversion.xstream;
 
 /**
- *
+ * Maps of Interfaces to Aliases used by {@link org.apache.shindig.protocol.conversion.BeanXStreamConverter}
  */
 public class InterfaceFieldAliasMapping {
 

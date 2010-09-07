@@ -18,7 +18,7 @@
 package org.apache.shindig.social.opensocial.model;
 
 /**
-   * public java.lang.Enum for opensocial.Enum.Drinker.
+ * public java.lang.Enum for opensocial.Enum.Drinker.
  */
 public enum Drinker implements org.apache.shindig.protocol.model.Enum.EnumKey {
   /** Heavy drinker. */

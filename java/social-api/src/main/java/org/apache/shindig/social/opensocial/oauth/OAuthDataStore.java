@@ -28,7 +28,6 @@ import org.apache.shindig.auth.SecurityToken;
  * access tokens, and providing a way to upgrade tokens to
  * authorized values.
  */
-
 public interface OAuthDataStore {
   /**
    * Get the OAuthEntry that corresponds to the oauthToken.

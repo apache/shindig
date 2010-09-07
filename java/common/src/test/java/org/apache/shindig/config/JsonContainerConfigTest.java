@@ -19,12 +19,6 @@
 
 package org.apache.shindig.config;
 
-import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;
-import static org.apache.shindig.config.JsonContainerConfig.CONTAINER_KEY;
-import static org.apache.shindig.config.JsonContainerConfig.PARENT_KEY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.apache.shindig.expressions.Expressions;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -36,6 +30,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.shindig.config.ContainerConfig.DEFAULT_CONTAINER;
+import static org.apache.shindig.config.JsonContainerConfig.CONTAINER_KEY;
+import static org.apache.shindig.config.JsonContainerConfig.PARENT_KEY;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class JsonContainerConfigTest {
 
@@ -199,10 +199,27 @@ public class JsonContainerConfigTest {
     json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER});
     json.put("expression", "port=${SERVER_PORT}");
 
-    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(), Expressions.forTesting());
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(),
+        Expressions.forTesting());
 
     assertEquals("port=8080", config.getString(DEFAULT_CONTAINER, "expression"));
+  }
 
+  @Test
+  public void testCommonEnvironmentAddedToAllContainers() throws Exception {
+    // We use a JSON Object here to guarantee that we're well formed up front.
+    JSONObject json = new JSONObject();
+    json.put(CONTAINER_KEY, new String[]{DEFAULT_CONTAINER, "testContainer"});
+    json.put("port", "${SERVER_PORT}");
+    json.put("host", "${SERVER_HOST}");
+
+    ContainerConfig config = new JsonContainerConfig(createContainer(json).getAbsolutePath(),
+        Expressions.forTesting());
+
+    assertEquals("8080", config.getString(DEFAULT_CONTAINER, "port"));
+    assertEquals("8080", config.getString("testContainer", "port"));
+    assertEquals("localhost", config.getString(DEFAULT_CONTAINER, "host"));
+    assertEquals("localhost", config.getString("testContainer", "host"));
   }
 
   @Test

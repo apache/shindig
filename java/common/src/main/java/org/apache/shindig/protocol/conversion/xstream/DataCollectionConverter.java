@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 
 /**
  * This converter changes the way in which a collection is serialized
- *
  */
 public class DataCollectionConverter extends AbstractCollectionConverter {
 

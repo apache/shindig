@@ -22,6 +22,9 @@ import org.apache.shindig.social.opensocial.model.Organization;
 
 import java.util.Date;
 
+/**
+ * Default implementation of an Organization
+ */
 public class OrganizationImpl implements Organization {
   private Address address;
   private String description;

@@ -22,6 +22,8 @@ import com.google.inject.Inject;
 
 /**
  * Rewriter that converts all url's to absolute.
+ *
+ * @since 2.0.0
  */
 public class AbsolutePathReferenceRewriter extends DomWalker.Rewriter {
   @Inject

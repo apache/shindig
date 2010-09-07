@@ -90,10 +90,15 @@ shindig.samplecontainer = {};
   }
 
   SampleContainerGadget = function(opt_params) {
-    shindig.IfrGadget.call(this, opt_params);
+    shindig.BaseIfrGadget.call(this, opt_params);
+
+    // mix-in IfrGadget functions
+    for (var name in shindig.IfrGadget) if (shindig.IfrGadget.hasOwnProperty(name)) {
+      SampleContainerGadget[name] = shindig.IfrGadget[name];
+    }
   };
 
-  SampleContainerGadget.inherits(shindig.IfrGadget);
+  SampleContainerGadget.inherits(shindig.BaseIfrGadget);
 
   SampleContainerGadget.prototype.getAdditionalParams = function() {
     var params = '';

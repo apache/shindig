@@ -23,7 +23,6 @@ import org.apache.shindig.social.opensocial.model.BodyType;
  * see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.BodyType</a>.
- *
  */
 public class BodyTypeImpl implements BodyType {
 
@@ -37,6 +36,7 @@ public class BodyTypeImpl implements BodyType {
     return build;
   }
 
+  /** {@inheritDoc} */
   public void setBuild(String build) {
     this.build = build;
   }
@@ -45,6 +45,7 @@ public class BodyTypeImpl implements BodyType {
     return eyeColor;
   }
 
+  /** {@inheritDoc} */
   public void setEyeColor(String eyeColor) {
     this.eyeColor = eyeColor;
   }
@@ -53,6 +54,7 @@ public class BodyTypeImpl implements BodyType {
     return hairColor;
   }
 
+  /** {@inheritDoc} */
   public void setHairColor(String hairColor) {
     this.hairColor = hairColor;
   }
@@ -61,6 +63,7 @@ public class BodyTypeImpl implements BodyType {
     return height;
   }
 
+  /** {@inheritDoc} */
   public void setHeight(Float height) {
     this.height = height;
   }
@@ -69,6 +72,7 @@ public class BodyTypeImpl implements BodyType {
     return weight;
   }
 
+  /** {@inheritDoc} */
   public void setWeight(Float weight) {
     this.weight = weight;
   }

@@ -22,7 +22,7 @@ package org.apache.shindig.gadgets.oauth;
 import com.google.common.base.Objects;
 
 /**
- *
+ * Simple class representing oauth token store
  */
 public class BasicOAuthStoreTokenIndex {
 

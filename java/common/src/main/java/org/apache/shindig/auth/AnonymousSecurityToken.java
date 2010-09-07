@@ -22,7 +22,6 @@ import org.apache.shindig.config.ContainerConfig;
 
 /**
  * A special class of Token representing the anonymous viewer/owner
- *
  */
 public class AnonymousSecurityToken extends AbstractSecurityToken implements SecurityToken {
   private final String container;

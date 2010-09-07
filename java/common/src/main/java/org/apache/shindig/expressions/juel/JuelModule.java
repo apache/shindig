@@ -25,6 +25,8 @@ import com.google.inject.Scopes;
 
 /**
  * Creates a module to supply a Juel Provider
+ *
+ * @since 2.0.0
  */
 public class JuelModule extends AbstractModule {
   @Override

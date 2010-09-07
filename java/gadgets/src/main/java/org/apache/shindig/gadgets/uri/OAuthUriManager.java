@@ -20,6 +20,9 @@ package org.apache.shindig.gadgets.uri;
 
 import org.apache.shindig.common.uri.Uri;
 
+/**
+ * Methods used by the oauth proxy, currently only used for an OAuth callback.
+ */
 public interface OAuthUriManager {
   /**
    * @return the OAuth Callback Uri on the provided host.

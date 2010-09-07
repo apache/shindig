@@ -29,6 +29,8 @@ import java.util.List;
 /**
  * Rewriter that replaces urls (@import + background) in
  * &lt;style&gt; ... &lt;/style&gt; with their proxied versions.
+ *
+ * @since 2.0.0
  */
 public class StyleTagProxyEmbeddedUrlsRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;

@@ -19,6 +19,9 @@ package org.apache.shindig.social.core.model;
 
 import org.apache.shindig.social.opensocial.model.Name;
 
+/**
+ * Default implementation of the {@link org.apache.shindig.social.opensocial.model.Name} model.
+ */
 public class NameImpl implements Name {
 
   private String additionalName;

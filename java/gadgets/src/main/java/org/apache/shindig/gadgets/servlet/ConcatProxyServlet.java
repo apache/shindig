@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.servlet.HttpUtil;
 import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.common.Pair;
-import org.apache.shindig.common.Pairs;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.gadgets.GadgetException;
@@ -43,7 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,12 +76,8 @@ public class ConcatProxyServlet extends InjectedServlet {
   private transient ConcatUriManager concatUriManager;
   private transient ResponseRewriterRegistry contentRewriterRegistry;
 
-  private transient Executor executor = new Executor() {
-    public void execute(Runnable r) {
-      // Sequential version of 'execute' by default.
-      r.run();
-    }
-  };
+  // Sequential version of 'execute' by default.
+  private transient ExecutorService executor = Executors.newSingleThreadExecutor();
 
   @Inject
   public void setRequestPipeline(RequestPipeline requestPipeline) {
@@ -102,7 +98,7 @@ public class ConcatProxyServlet extends InjectedServlet {
   }
   
   @Inject
-  public void setExecutor(@Named("shindig.concat.executor") Executor executor) {
+  public void setExecutor(@Named("shindig.concat.executor") ExecutorService executor) {
     checkInitialized();
     // Executor is independently named to allow separate configuration of
     // concat fetch parallelism and other Shindig job execution.
@@ -187,7 +183,7 @@ public class ConcatProxyServlet extends InjectedServlet {
           HttpRequest httpReq = concatUri.makeHttpRequest(resourceUri);
           FutureTask<RequestContext> httpFetcher =
                   new FutureTask<RequestContext>(new HttpFetchCallable(httpReq));
-          futureTasks.add(Pairs.newPair(httpReq.getUri(), httpFetcher));
+          futureTasks.add(Pair.of(httpReq.getUri(), httpFetcher));
           executor.execute(httpFetcher);
         } catch (GadgetException ge) {
           if (cos.outputError(resourceUri, ge)) {

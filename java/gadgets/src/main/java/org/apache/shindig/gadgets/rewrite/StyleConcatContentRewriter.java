@@ -29,6 +29,11 @@ import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Merges adjacent styles
+ *
+ * @since 2.0.0
+ */
 public class StyleConcatContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ConcatUriManager concatUriManager;

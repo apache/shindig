@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import java.util.Collection;
 
 /**
- *
+ * Bean converter that uses Guice bindings to correctly convert
  */
 public class GuiceBeanConverter implements Converter {
   private Mapper mapper;
@@ -52,7 +52,7 @@ public class GuiceBeanConverter implements Converter {
    * need stricter checks, subclass JavaBeanConverter
    */
   // Base API is inherently unchecked
-  @SuppressWarnings("unchecked")
+
   public boolean canConvert(Class type) {
     while (true) {
       if (type == null) {

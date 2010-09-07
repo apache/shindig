@@ -19,7 +19,6 @@
 package org.apache.shindig.common.cache.ehcache;
 
 import com.google.common.base.Preconditions;
-import net.sf.ehcache.ObjectExistsException;
 import org.apache.shindig.common.cache.Cache;
 
 import net.sf.ehcache.CacheManager;

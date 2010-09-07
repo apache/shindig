@@ -30,6 +30,8 @@ import java.util.Map;
 /**
  * A SecurityTokenCodec implementation that just provides dummy data to satisfy
  * tests and API calls. Do not use this for any security applications.
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class BasicSecurityTokenCodec implements SecurityTokenCodec {

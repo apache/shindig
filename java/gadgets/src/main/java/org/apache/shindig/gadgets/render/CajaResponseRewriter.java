@@ -67,6 +67,8 @@ import java.util.logging.Logger;
 
 /**
  * Rewriter that cajoles Javascript.
+ *
+ * @since 2.0.0
  */
 public class CajaResponseRewriter implements ResponseRewriter {
   private static final Logger LOG = Logger.getLogger(CajaResponseRewriter.class.getName());
@@ -96,7 +98,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
     InputSource is = new InputSource(contextUri.toJavaUri());
 
     PluginMeta pluginMeta = new PluginMeta(
-            proxyFetcher(req, contextUri), proxyUriPolicy(contextUri));
+            proxyFetcher(req, contextUri), proxyUriPolicy(req));
     PluginCompiler compiler = new PluginCompiler(BuildInfo.getInstance(),
             pluginMeta, mq);
     compiler.setMessageContext(mc);
@@ -109,7 +111,7 @@ public class CajaResponseRewriter implements ResponseRewriter {
       ParseTreeNode input = new Parser(tq, mq).parse();
       tq.expectEmpty();
 
-      compiler.addInput(AncestorChain.instance(input), contextUri.toJavaUri());
+      compiler.addInput(AncestorChain.instance(input).node, contextUri.toJavaUri());
     } catch (ParseException e) {
       // Don't bother continuing.
       resp.setContent("");
@@ -148,8 +150,9 @@ public class CajaResponseRewriter implements ResponseRewriter {
     }
   }
 
-  private UriPolicy proxyUriPolicy(final Uri contextUri) {
-    final Gadget stubGadget = DomWalker.makeGadget(contextUri);
+  private UriPolicy proxyUriPolicy(HttpRequest request) {
+    final Uri contextUri = request.getUri();
+    final Gadget stubGadget = DomWalker.makeGadget(request);
 
     return new UriPolicy() {
       public String rewriteUri(ExternalReference ref, UriEffect effect,

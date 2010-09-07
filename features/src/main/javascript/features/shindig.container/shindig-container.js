@@ -46,7 +46,11 @@ shindig.callAsyncAndJoin = function(functions, continuation, opt_this) {
     // we need a wrapper here because i changes and we need one index
     // variable per closure
     var wrapper = function(index) {
-      functions[index].call(opt_this, function(result) {
+      var fn = functions[index];
+      if (typeof fn === 'string') {
+        fn = opt_this[fn];
+      }
+      fn.call(opt_this, function(result) {
         results[index] = result;
         if (--pending === 0) {
           continuation(results);
@@ -418,15 +422,15 @@ shindig.Gadget.prototype.render = function(chrome) {
     var gadget = this;
     this.getContent(function(content) {
       chrome.innerHTML = content;
-      window.frames[gadget.getIframeId()].location = gadget.getIframeUrl();
+      gadget.finishRender(chrome);
     });
   }
 };
 
 shindig.Gadget.prototype.getContent = function(continuation) {
   shindig.callAsyncAndJoin([
-      this.getTitleBarContent, this.getUserPrefsDialogContent,
-      this.getMainContent], function(results) {
+      'getTitleBarContent', 'getUserPrefsDialogContent',
+      'getMainContent'], function(results) {
         continuation(results.join(''));
       }, this);
 };
@@ -458,6 +462,10 @@ shindig.Gadget.prototype.getMainContent = function(continuation) {
   throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
 };
 
+shindig.Gadget.prototype.finishRender = function(chrome) {
+  throw Error(shindig.errors.SUBCLASS_RESPONSIBILITY);
+};
+
 /*
  * Gets additional parameters to append to the iframe url
  * Override this method if you need any custom params.
@@ -470,32 +478,33 @@ shindig.Gadget.prototype.getAdditionalParams = function() {
 // ---------
 // IfrGadget
 
-shindig.IfrGadget = function(opt_params) {
+shindig.BaseIfrGadget = function(opt_params) {
   shindig.Gadget.call(this, opt_params);
   this.serverBase_ = '/gadgets/'; // default gadget server
+  this.queryIfrGadgetType_();
 };
 
-shindig.IfrGadget.inherits(shindig.Gadget);
+shindig.BaseIfrGadget.inherits(shindig.Gadget);
 
-shindig.IfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
+shindig.BaseIfrGadget.prototype.GADGET_IFRAME_PREFIX_ = 'remote_iframe_';
 
-shindig.IfrGadget.prototype.CONTAINER = 'default';
+shindig.BaseIfrGadget.prototype.CONTAINER = 'default';
 
-shindig.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
-shindig.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
-shindig.IfrGadget.prototype.cssClassTitle = 'gadgets-gadget-title';
-shindig.IfrGadget.prototype.cssClassTitleButtonBar =
+shindig.BaseIfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
+shindig.BaseIfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
+shindig.BaseIfrGadget.prototype.cssClassTitle = 'gadgets-gadget-title';
+shindig.BaseIfrGadget.prototype.cssClassTitleButtonBar =
     'gadgets-gadget-title-button-bar';
-shindig.IfrGadget.prototype.cssClassGadgetUserPrefsDialog =
+shindig.BaseIfrGadget.prototype.cssClassGadgetUserPrefsDialog =
     'gadgets-gadget-user-prefs-dialog';
-shindig.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
+shindig.BaseIfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
     'gadgets-gadget-user-prefs-dialog-action-bar';
-shindig.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
-shindig.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
-shindig.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
-shindig.IfrGadget.prototype.rpcRelay = '../container/rpc_relay.html';
+shindig.BaseIfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
+shindig.BaseIfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
+shindig.BaseIfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
+shindig.BaseIfrGadget.prototype.rpcRelay = '../container/rpc_relay.html';
 
-shindig.IfrGadget.prototype.getTitleBarContent = function(continuation) {
+shindig.BaseIfrGadget.prototype.getTitleBarContent = function(continuation) {
   var settingsButton = this.hasViewablePrefs_() ?
       '<a href="#" onclick="shindig.container.getGadget(' + this.id +
           ').handleOpenUserPrefsDialog();return false;" class="' + this.cssClassTitleButton +
@@ -511,62 +520,36 @@ shindig.IfrGadget.prototype.getTitleBarContent = function(continuation) {
       '">toggle</a></span></div>');
 };
 
-shindig.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
+shindig.BaseIfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
   continuation('<div id="' + this.getUserPrefsDialogId() + '" class="' +
       this.cssClassGadgetUserPrefsDialog + '"></div>');
 };
 
-shindig.IfrGadget.prototype.setServerBase = function(url) {
+shindig.BaseIfrGadget.prototype.setServerBase = function(url) {
   this.serverBase_ = url;
 };
 
-shindig.IfrGadget.prototype.getServerBase = function() {
+shindig.BaseIfrGadget.prototype.getServerBase = function() {
   return this.serverBase_;
 };
 
-shindig.IfrGadget.prototype.getMainContent = function(continuation) {
-  var iframeId = this.getIframeId();
-  gadgets.rpc.setRelayUrl(iframeId, this.serverBase_ + this.rpcRelay);
-  gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
-  continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
-      iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
-      '" src="about:blank' +
-      '" frameborder="no" scrolling="no"' +
-      (this.height ? ' height="' + this.height + '"' : '') +
-      (this.width ? ' width="' + this.width + '"' : '') +
-      '></iframe></div>');
+shindig.BaseIfrGadget.prototype.getMainContent = function(continuation) {
+  // proper sub-class has not been mixed-in yet
+  var gadget = this;
+  window.setTimeout( function() {
+    gadget.getMainContent(continuation);
+  }, 0);
 };
 
-shindig.IfrGadget.prototype.getIframeId = function() {
+shindig.BaseIfrGadget.prototype.getIframeId = function() {
   return this.GADGET_IFRAME_PREFIX_ + this.id;
 };
 
-shindig.IfrGadget.prototype.getUserPrefsDialogId = function() {
+shindig.BaseIfrGadget.prototype.getUserPrefsDialogId = function() {
   return this.getIframeId() + '_userPrefsDialog';
 };
 
-shindig.IfrGadget.prototype.getIframeUrl = function() {
-  return this.serverBase_ + 'ifr?' +
-      'container=' + this.CONTAINER +
-      '&mid=' +  this.id +
-      '&nocache=' + shindig.container.nocache_ +
-      '&country=' + shindig.container.country_ +
-      '&lang=' + shindig.container.language_ +
-      '&view=' + shindig.container.view_ +
-      (this.specVersion ? '&v=' + this.specVersion : '') +
-      (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
-      (this.debug ? '&debug=1' : '') +
-      this.getAdditionalParams() +
-      this.getUserPrefsParams() +
-      (this.secureToken ? '&st=' + this.secureToken : '') +
-      '&url=' + encodeURIComponent(this.specUrl) +
-      '#rpctoken=' + this.rpcToken +
-      (this.viewParams ?
-          '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
-      (this.hashData ? '&' + this.hashData : '');
-};
-
-shindig.IfrGadget.prototype.getUserPrefsParams = function() {
+shindig.BaseIfrGadget.prototype.getUserPrefsParams = function() {
   var params = '';
   for(var name in this.getUserPrefs()) {
     params += '&up_' + encodeURIComponent(name) + '=' +
@@ -575,7 +558,7 @@ shindig.IfrGadget.prototype.getUserPrefsParams = function() {
   return params;
 };
 
-shindig.IfrGadget.prototype.handleToggle = function() {
+shindig.BaseIfrGadget.prototype.handleToggle = function() {
   var gadgetIframe = document.getElementById(this.getIframeId());
   if (gadgetIframe) {
     var gadgetContent = gadgetIframe.parentNode;
@@ -585,7 +568,7 @@ shindig.IfrGadget.prototype.handleToggle = function() {
 };
 
 
-shindig.IfrGadget.prototype.hasViewablePrefs_ = function() {
+shindig.BaseIfrGadget.prototype.hasViewablePrefs_ = function() {
   for(var name in this.getUserPrefs()) {
     var pref = this.userPrefs[name];
     if (pref.type != 'hidden') {
@@ -596,7 +579,7 @@ shindig.IfrGadget.prototype.hasViewablePrefs_ = function() {
 };
 
 
-shindig.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
+shindig.BaseIfrGadget.prototype.handleOpenUserPrefsDialog = function() {
   if (this.userPrefsDialogContentLoaded) {
     this.showUserPrefsDialog();
   } else {
@@ -615,7 +598,7 @@ shindig.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
   }
 };
 
-shindig.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
+shindig.BaseIfrGadget.prototype.buildUserPrefsDialog = function(content) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
   userPrefsDialog.innerHTML = content +
       '<div class="' + this.cssClassGadgetUserPrefsDialogActionBar +
@@ -625,17 +608,17 @@ shindig.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
   userPrefsDialog.childNodes[0].style.display = '';
 };
 
-shindig.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
+shindig.BaseIfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
   var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
   userPrefsDialog.style.display = (opt_show || opt_show === undefined)
       ? '' : 'none';
 };
 
-shindig.IfrGadget.prototype.hideUserPrefsDialog = function() {
+shindig.BaseIfrGadget.prototype.hideUserPrefsDialog = function() {
   this.showUserPrefsDialog(false);
 };
 
-shindig.IfrGadget.prototype.handleSaveUserPrefs = function() {
+shindig.BaseIfrGadget.prototype.handleSaveUserPrefs = function() {
   this.hideUserPrefsDialog();
 
   var numFields = document.getElementById('m_' + this.id +
@@ -652,13 +635,174 @@ shindig.IfrGadget.prototype.handleSaveUserPrefs = function() {
   this.refresh();
 };
 
-shindig.IfrGadget.prototype.handleCancelUserPrefs = function() {
+shindig.BaseIfrGadget.prototype.handleCancelUserPrefs = function() {
   this.hideUserPrefsDialog();
 };
 
-shindig.IfrGadget.prototype.refresh = function() {
+shindig.BaseIfrGadget.prototype.refresh = function() {
   var iframeId = this.getIframeId();
   document.getElementById(iframeId).src = this.getIframeUrl();
+};
+
+shindig.BaseIfrGadget.prototype.queryIfrGadgetType_ = function() {
+  // Get the gadget metadata and check if the gadget requires the 'pubsub-2'
+  // feature.  If so, then we use OpenAjax Hub in order to create and manage
+  // the iframe.  Otherwise, we create the iframe ourselves.
+  var request = {
+    context: {
+      country: "default",
+      language: "default",
+      view: "default",
+      container: "default"
+    },
+    gadgets: [{
+      url: this.specUrl,
+      moduleId: 1
+    }]
+  };
+
+  var makeRequestParams = {
+    "CONTENT_TYPE" : "JSON",
+    "METHOD" : "POST",
+    "POST_DATA" : gadgets.json.stringify(request)
+  };
+
+  var url = this.serverBase_+"metadata?st=" + this.secureToken;
+
+  gadgets.io.makeNonProxiedRequest(url,
+    handleJSONResponse,
+    makeRequestParams,
+    "application/javascript"
+  );
+  
+  var gadget = this;
+  function handleJSONResponse(obj) {
+    var requiresPubSub2 = false;
+    var arr = obj.data.gadgets[0].features;
+    for(var i = 0; i < arr.length; i++) {
+      if (arr[i] === "pubsub-2") {
+        requiresPubSub2 = true;
+        break;
+      }
+    }
+    var subClass = requiresPubSub2 ? shindig.OAAIfrGadget : shindig.IfrGadget;
+    for (var name in subClass) if (subClass.hasOwnProperty(name)) {
+      gadget[name] = subClass[name];
+    }
+  }
+};
+
+// ---------
+// IfrGadget
+
+shindig.IfrGadget = {
+  getMainContent: function(continuation) {
+    var iframeId = this.getIframeId();
+    gadgets.rpc.setRelayUrl(iframeId, this.serverBase_ + this.rpcRelay);
+    gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
+    continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
+        iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
+        '" src="about:blank' +
+        '" frameborder="no" scrolling="no"' +
+        (this.height ? ' height="' + this.height + '"' : '') +
+        (this.width ? ' width="' + this.width + '"' : '') +
+        '></iframe></div>');
+  },
+  
+  finishRender: function(chrome) {
+    window.frames[this.getIframeId()].location = this.getIframeUrl();
+  },
+  
+  getIframeUrl: function() {
+    return this.serverBase_ + 'ifr?' +
+        'container=' + this.CONTAINER +
+        '&mid=' +  this.id +
+        '&nocache=' + shindig.container.nocache_ +
+        '&country=' + shindig.container.country_ +
+        '&lang=' + shindig.container.language_ +
+        '&view=' + shindig.container.view_ +
+        (this.specVersion ? '&v=' + this.specVersion : '') +
+        (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
+        (this.debug ? '&debug=1' : '') +
+        this.getAdditionalParams() +
+        this.getUserPrefsParams() +
+        (this.secureToken ? '&st=' + this.secureToken : '') +
+        '&url=' + encodeURIComponent(this.specUrl) +
+        '#rpctoken=' + this.rpcToken +
+        (this.viewParams ?
+            '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+        (this.hashData ? '&' + this.hashData : '');
+  }
+};
+
+
+// ---------
+// OAAIfrGadget
+
+shindig.OAAIfrGadget = {
+  getMainContent: function(continuation) {
+    continuation('<div id="' + this.cssClassGadgetContent + '-' + this.id +
+        '" class="' + this.cssClassGadgetContent + '"></div>');
+  },
+  
+  finishRender: function(chrome) {
+    var iframeAttrs = {
+      className: this.cssClassGadget,
+      frameborder: "no",
+      scrolling: "no"
+    };
+    if (this.height) {
+      iframeAttrs.height = this.height;
+    }
+    if (this.width) {
+      iframeAttrs.width = this.width;
+    }
+    
+    new OpenAjax.hub.IframeContainer(
+      gadgets.pubsub2router.hub,
+      this.getIframeId(),
+      {
+        Container: {
+          onSecurityAlert: function( source, alertType) {
+                gadgets.error("Security error for container " + source.getClientID() + " : " + alertType);
+                source.getIframe().src = "about:blank"; 
+// for debugging
+   //          },
+   //          onConnect: function( container ) {
+   //            gadgets.log("++ connected: " + container.getClientID());
+            }
+        },
+        IframeContainer: {
+          parent: document.getElementById(this.cssClassGadgetContent + '-' + this.id),
+          uri: this.getIframeUrl(),
+          tunnelURI: shindig.uri(this.serverBase_ + this.rpcRelay).resolve(shindig.uri(window.location.href)),
+          iframeAttrs: iframeAttrs
+        }
+      }
+    );
+  },
+  
+  getIframeUrl: function() {
+    return this.serverBase_ + 'ifr?' +
+        'container=' + this.CONTAINER +
+        '&mid=' +  this.id +
+        '&nocache=' + shindig.container.nocache_ +
+        '&country=' + shindig.container.country_ +
+        '&lang=' + shindig.container.language_ +
+        '&view=' + shindig.container.view_ +
+        (this.specVersion ? '&v=' + this.specVersion : '') +
+   //      (shindig.container.parentUrl_ ? '&parent=' + encodeURIComponent(shindig.container.parentUrl_) : '') +
+        (this.debug ? '&debug=1' : '') +
+        this.getAdditionalParams() +
+        this.getUserPrefsParams() +
+        (this.secureToken ? '&st=' + this.secureToken : '') +
+        '&url=' + encodeURIComponent(this.specUrl) +
+   //      '#rpctoken=' + this.rpcToken +
+        (this.viewParams ?
+            '&view-params=' +  encodeURIComponent(gadgets.json.stringify(this.viewParams)) : '') +
+   //      (this.hashData ? '&' + this.hashData : '');
+        (this.hashData ? '#' + this.hashData : '');
+  }
 };
 
 
@@ -671,7 +815,7 @@ shindig.IfrGadget.prototype.refresh = function() {
  */
 shindig.Container = function() {
   this.gadgets_ = {};
-  this.parentUrl_ = 'http://' + document.location.host;
+  this.parentUrl_ = document.location.href + '://' + document.location.host;
   this.country_ = 'ALL';
   this.language_ = 'ALL';
   this.view_ = 'default';
@@ -793,7 +937,7 @@ shindig.IfrContainer = function() {
 
 shindig.IfrContainer.inherits(shindig.Container);
 
-shindig.IfrContainer.prototype.gadgetClass = shindig.IfrGadget;
+shindig.IfrContainer.prototype.gadgetClass = shindig.BaseIfrGadget;
 
 shindig.IfrContainer.prototype.gadgetService = new shindig.IfrGadgetService();
 

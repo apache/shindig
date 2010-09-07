@@ -27,6 +27,9 @@ import org.apache.shindig.auth.UrlParameterAuthenticationHandler;
 
 import java.util.List;
 
+/**
+ * Guice provider of an ordered list of Auntentication Providers
+ */
 public class AuthenticationHandlerProvider implements Provider<List<AuthenticationHandler>> {
   protected List<AuthenticationHandler> handlers;
 

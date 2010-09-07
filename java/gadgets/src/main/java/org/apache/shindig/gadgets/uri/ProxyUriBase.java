@@ -30,6 +30,11 @@ import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 
+/**
+ * Represents state/config information for the proxy.
+ *
+ * @since 2.0.0
+ */
 public class ProxyUriBase {
   private UriStatus status = null;
   private Integer refresh = null;

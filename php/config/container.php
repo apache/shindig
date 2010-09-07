@@ -78,8 +78,9 @@ $shindigConfig = array(
   'default_iframe_prefix' => '/gadgets/ifr?',
 
  'servlet_map' => array( 
-   '/container' => 'FilesServlet', 
-   '/samplecontainer' => 'FilesServlet', 
+   '/container' => 'ContentFilesServlet',
+   '/samplecontainer' => 'ContentFilesServlet',
+   '/gadgets/resources' => 'ResourcesFilesServlet',
    '/gadgets/js' => 'JsServlet', 
    '/gadgets/proxy' => 'ProxyServlet', 
    '/gadgets/makeRequest' => 'MakeRequestServlet', 
@@ -88,7 +89,8 @@ $shindigConfig = array(
    '/gadgets/oauthcallback' => 'OAuthCallbackServlet', 
    '/gadgets/api/rpc' => 'JsonRpcServlet', 
    '/gadgets/api/rest' => 'DataServiceServlet', 
-   '/social/rest' => 'DataServiceServlet', 
+   '/social/rest' => 'DataServiceServlet',
+   '/social/rpc' => 'CompatibilityJsonRpcServlet',
    '/rpc' => 'JsonRpcServlet', 
    '/public.crt' => 'CertServlet', 
    '/public.cer' => 'CertServlet', 
@@ -120,6 +122,7 @@ $shindigConfig = array(
   ),
   'container_path' => realpath(dirname(__FILE__) . '/../../config') . '/',
   'javascript_path' => realpath(dirname(__FILE__) . '/../../content') . '/',
+  'resources_path' => realpath(dirname(__FILE__) . '/../external/resources') . '/',
 
   // The OAuth SSL certificates to use, and the pass phrase for the private key
   'private_key_file' => realpath(dirname(__FILE__) . '/../certs') . '/private.key',

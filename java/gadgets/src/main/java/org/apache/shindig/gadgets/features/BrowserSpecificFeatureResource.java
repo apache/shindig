@@ -33,28 +33,28 @@ import java.util.Map;
 
 /**
  * A FeatureResource that supports being supplied only to certain browsers.
- * 
+ *
  * This is optional functionality, activated by the browser="..." attribute on
  * a &lt;script&gt; element. That attribute's value is interpreted as a
  * comma-separated list of BROWSER-versionKey matchers.
- * 
+ *
  * BROWSER must match (case-insensitive) the list of UserAgent.Browser enum values
  * eg. "MSIE" or "FIREFOX".
- * 
+ *
  * versionKey is OPERATORversionNumber, where OPERATOR may be one of:
  * ^ - regex
  * = - exact match
  * >, >=, <, <= - greater than/less than matches
  * [no operator] - exact match
- * 
+ *
  * If no browser="..." attribute is specified, the resource always matches. Otherwise,
  * if ANY of the browser-versionKey matchers match, the resource matches. In such case,
  * the delegate FeatureResource's content methods are consulted. Otherwise, "" is returned
  * for content.
- * 
+ *
  * Example:
  * browser="FireFox->=3, MSIE-6.0 would match FireFox 3.x.y (any) and IE 6.0 (only).
- * 
+ *
  * To activate this capability, you may use the provided Loader class and bind it
  * as your FeatureResourceLoader implementation; or build your own that wraps its resources
  * in BrowserSpecificFeatureResource.
@@ -236,7 +236,7 @@ public class BrowserSpecificFeatureResource implements FeatureResource {
       public abstract boolean match(String in, String key);
     }
     
-    private static class VersionNumber {
+    private static final class VersionNumber {
       private final int[] parts;
       
       private VersionNumber(String str) {

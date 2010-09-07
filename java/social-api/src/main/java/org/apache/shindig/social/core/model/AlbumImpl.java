@@ -24,7 +24,9 @@ import org.apache.shindig.social.opensocial.model.MediaItem;
 import java.util.List;
 
 /**
- * Default Implementation of the Album object in the model.
+ * Default Implementation of the {@link org.apache.shindig.social.opensocial.model.Album} object in the model.
+ *
+ * @since 2.0.0
  */
 public class AlbumImpl implements Album {
   private String description;
@@ -44,6 +46,7 @@ public class AlbumImpl implements Album {
     return description;
   }
 
+  /** {@inheritDoc} */
   public void setDescription(String description) {
     this.description = description;
   }
@@ -52,6 +55,7 @@ public class AlbumImpl implements Album {
     return id;
   }
 
+  /** {@inheritDoc} */
   public void setId(String id) {
     this.id = id;
   }
@@ -60,6 +64,7 @@ public class AlbumImpl implements Album {
     return location;
   }
 
+  /** {@inheritDoc} */
   public void setLocation(Address location) {
     this.location = location;
   }
@@ -68,6 +73,7 @@ public class AlbumImpl implements Album {
     return mediaItemCount;
   }
 
+  /** {@inheritDoc} */
   public void setMediaItemCount(Integer mediaItemCount) {
     this.mediaItemCount = mediaItemCount;
   }
@@ -76,6 +82,7 @@ public class AlbumImpl implements Album {
     return mediaMimeType;
   }
 
+  /** {@inheritDoc} */
   public void setMediaMimeType(List<String> mediaMimeType) {
     this.mediaMimeType = mediaMimeType;
   }
@@ -84,6 +91,7 @@ public class AlbumImpl implements Album {
     return mediaType;
   }
 
+  /** {@inheritDoc} */
   public void setMediaType(List<MediaItem.Type> mediaType) {
     this.mediaType = mediaType;
   }
@@ -92,6 +100,7 @@ public class AlbumImpl implements Album {
     return ownerId;
   }
 
+  /** {@inheritDoc} */
   public void setOwnerId(String ownerId) {
     this.ownerId = ownerId;
   }
@@ -100,6 +109,7 @@ public class AlbumImpl implements Album {
     return thumbnailUrl;
   }
 
+  /** {@inheritDoc} */
   public void setThumbnailUrl(String thumbnailUrl) {
     this.thumbnailUrl = thumbnailUrl;
   }
@@ -108,6 +118,7 @@ public class AlbumImpl implements Album {
     return title;
   }
 
+  /** {@inheritDoc} */
   public void setTitle(String title) {
     this.title = title;
   }

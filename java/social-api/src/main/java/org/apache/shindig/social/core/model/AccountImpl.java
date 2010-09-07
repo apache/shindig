@@ -19,6 +19,9 @@ package org.apache.shindig.social.core.model;
 
 import org.apache.shindig.social.opensocial.model.Account;
 
+/**
+ * Default Implementation of an {@link org.apache.shindig.social.opensocial.model.Account}
+ */
 public class AccountImpl implements Account {
   private String domain;
   private String userId;
@@ -36,6 +39,7 @@ public class AccountImpl implements Account {
     return domain;
   }
 
+  /** {@inheritDoc} */
   public void setDomain(String domain) {
     this.domain = domain;
   }
@@ -44,6 +48,7 @@ public class AccountImpl implements Account {
     return userId;
   }
 
+  /** {@inheritDoc} */
   public void setUserId(String userId) {
     this.userId = userId;
   }
@@ -52,6 +57,7 @@ public class AccountImpl implements Account {
     return username;
   }
 
+  /** {@inheritDoc} */
   public void setUsername(String username) {
     this.username = username;
   }

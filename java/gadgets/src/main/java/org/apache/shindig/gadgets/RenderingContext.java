@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.gadgets;
 
+/**
+ * Defines where the gadget is being rendered.
+ */
 public enum RenderingContext {
   // Used when rendering gadgets (iframes or inline).
   // TODO: rename this to "RENDER_GADGET"?

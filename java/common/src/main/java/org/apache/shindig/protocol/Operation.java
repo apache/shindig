@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 /**
  * Annotates a method on a ServiceHandler which expose a REST/RPC operation
  * The name of the annotated method is the literal name of the method for JSON-RPC
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

@@ -21,19 +21,27 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.caja.lexer.ExternalReference;
 import com.google.caja.lexer.FetchedData;
 import com.google.caja.lexer.InputSource;
+import com.google.caja.lexer.TokenConsumer;
 import com.google.caja.lexer.escaping.Escaping;
-import com.google.caja.opensocial.DefaultGadgetRewriter;
 import com.google.caja.opensocial.GadgetRewriteException;
+import com.google.caja.parser.html.Dom;
+import com.google.caja.parser.html.Namespaces;
+import com.google.caja.parser.js.CajoledModule;
+import com.google.caja.plugin.PluginCompiler;
+import com.google.caja.plugin.PluginMeta;
 import com.google.caja.plugin.UriFetcher;
 import com.google.caja.plugin.UriPolicy;
+import com.google.caja.render.Concatenator;
+import com.google.caja.render.JsMinimalPrinter;
+import com.google.caja.render.JsPrettyPrinter;
 import com.google.caja.reporting.BuildInfo;
 import com.google.caja.reporting.Message;
 import com.google.caja.reporting.MessageContext;
 import com.google.caja.reporting.MessageLevel;
 import com.google.caja.reporting.MessageQueue;
+import com.google.caja.reporting.RenderContext;
 import com.google.caja.reporting.SimpleMessageQueue;
 import com.google.caja.reporting.SnippetProducer;
-import com.google.caja.util.Pair;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
@@ -43,6 +51,7 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.common.util.HashUtil;
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -60,6 +69,9 @@ import java.net.URI;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * A GadgetRewriter based on caja technology
+ */
 public class CajaContentRewriter implements GadgetRewriter {
   public static final String CAJOLED_DOCUMENTS = "cajoledDocuments";
 
@@ -81,6 +93,8 @@ public class CajaContentRewriter implements GadgetRewriter {
   public void rewrite(Gadget gadget, MutableContent mc) {
     if (!cajaEnabled(gadget)) return;
 
+    GadgetContext gadgetContext = gadget.getContext();
+    boolean debug = gadgetContext.getDebug();
     Document doc = mc.getDocument();
 
     // Serialize outside of MutableContent, to prevent a re-parse.
@@ -90,7 +104,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     root.appendChild(doc.getDocumentElement());
 
     Node cajoledData = null;
-    if (cajoledCache != null) {
+    if (cajoledCache != null && !debug) {
       Element cajoledOutput = cajoledCache.getElement(cacheKey);
       if (cajoledOutput != null) {
         cajoledData = doc.adoptNode(cajoledOutput);
@@ -102,18 +116,54 @@ public class CajaContentRewriter implements GadgetRewriter {
     if (cajoledData == null) {
       UriFetcher fetcher = makeFetcher(gadget);
       UriPolicy policy = makePolicy(gadget);
-      URI javaGadgetUri = gadget.getContext().getUrl().toJavaUri();
+      URI javaGadgetUri = gadgetContext.getUrl().toJavaUri();
       MessageQueue mq = new SimpleMessageQueue();
-      BuildInfo bi = BuildInfo.getInstance();
-      DefaultGadgetRewriter rw = new DefaultGadgetRewriter(bi, mq);
+      MessageContext context = new MessageContext();
+      PluginMeta meta = new PluginMeta(fetcher, policy);
+      PluginCompiler compiler = makePluginCompiler(meta, mq);
+
+      compiler.setMessageContext(context);
+
+      /**
+       * TODO(jasvir): This can provide support for debugging with 
+       * cajita-debugmode.js but cajita-debugmode.js should be loaded
+       * iff url param debug=1
+       * 
+       *      if (debug) {
+       *        compiler.setGoals(compiler.getGoals()
+       *            .without(PipelineMaker.ONE_CAJOLED_MODULE)
+       *            .with(PipelineMaker.ONE_CAJOLED_MODULE_DEBUG));
+       *      }
+       */
+      
       InputSource is = new InputSource(javaGadgetUri);
       boolean safe = false;
 
+      compiler.addInput(new Dom(root), javaGadgetUri);
+
       try {
-        Pair<Node, Element> htmlAndJs =
-            rw.rewriteContent(javaGadgetUri, root, fetcher, policy, null);
-        Node html = htmlAndJs.a;
-        Element script = htmlAndJs.b;
+        if (!compiler.run()) {
+          throw new GadgetRewriteException("Gadget has compile errors");
+        }
+        StringBuilder scriptBody = new StringBuilder();
+        CajoledModule cajoled = compiler.getJavascript();
+        TokenConsumer tc = debug
+            ? new JsPrettyPrinter(new Concatenator(scriptBody))
+            : new JsMinimalPrinter(new Concatenator(scriptBody));
+        cajoled.render(new RenderContext(tc)
+          .withAsciiOnly(true)
+          .withEmbeddable(true));
+
+        tc.noMoreTokens();
+        
+        Node html = compiler.getStaticHtml();
+
+        Element script = doc.createElementNS(
+            Namespaces.HTML_NAMESPACE_URI, "script");
+        script.setAttributeNS(
+            Namespaces.HTML_NAMESPACE_URI, "type", "text/javascript");
+        script.appendChild(doc.createTextNode(scriptBody.toString()));
+        
 
         Element cajoledOutput = doc.createElement("div");
         cajoledOutput.setAttribute("id", "cajoled-output");
@@ -127,7 +177,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         Element messagesNode = formatErrors(doc, is, docContent, mq,
             /* is invisible */ false);
         cajoledOutput.appendChild(messagesNode);
-        if (cajoledCache != null) {
+        if (cajoledCache != null && !debug) {
           cajoledCache.addElement(cacheKey, cajoledOutput);
         }
         safe = true;
@@ -264,4 +314,12 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
     LOG.info("Unable to cajole gadget: " + errbuilder);
   }
+  
+  protected PluginCompiler makePluginCompiler(
+      PluginMeta meta, MessageQueue mq) {
+    PluginCompiler compiler = new PluginCompiler(
+        BuildInfo.getInstance(), meta, mq);
+    return compiler;
+  }
+
 }

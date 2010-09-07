@@ -22,6 +22,9 @@ import org.apache.shindig.common.uri.Uri;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ *  Interface that defines how to lookup a prefix from a gadget uri.
+ */
 @ImplementedBy(HashShaLockedDomainPrefixGenerator.class)
 public interface LockedDomainPrefixGenerator {
   String getLockedDomainPrefix(Uri gadgetUri);

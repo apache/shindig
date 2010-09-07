@@ -29,6 +29,8 @@ import com.google.inject.name.Names;
 
 /**
  * Guice bindings for the variables package.
+ *
+ * @since 2.0.0
  */
 public class SubstituterModule extends AbstractModule {
 

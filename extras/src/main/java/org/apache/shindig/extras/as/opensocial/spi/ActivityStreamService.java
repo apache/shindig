@@ -44,6 +44,7 @@ public interface ActivityStreamService {
    * @param options The sorting/filtering/pagination options
    * @param token   A valid SecurityToken
    * @return a response item with the list of activities.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   Future<RestfulCollection<ActivityEntry>> getActivityEntries(Set<UserId> userIds,
       GroupId groupId, String appId, Set<String> fields, CollectionOptions options, SecurityToken token)
@@ -57,10 +58,11 @@ public interface ActivityStreamService {
    * @param groupId     Indicates whether to fetch activities for a group.
    * @param appId       The app id.
    * @param fields      The fields to return. Empty set implies all
-   * @param options The sorting/filtering/pagination options
+   * @param options     The sorting/filtering/pagination options
    * @param activityIds The set of activity ids to fetch.
    * @param token       A valid SecurityToken
    * @return a response item with the list of activities.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   Future<RestfulCollection<ActivityEntry>> getActivityEntries(UserId userId, GroupId groupId,
       String appId, Set<String> fields, CollectionOptions options, Set<String> activityIds, SecurityToken token)
@@ -78,6 +80,7 @@ public interface ActivityStreamService {
    * @param activityId The activity id to fetch.
    * @param token      A valid SecurityToken
    * @return a response item with the list of activities.
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   Future<ActivityEntry> getActivityEntry(UserId userId, GroupId groupId, String appId,
       Set<String> fields, String activityId, SecurityToken token)
@@ -92,6 +95,7 @@ public interface ActivityStreamService {
    * @param activityIds A list of activity ids to delete.
    * @param token       A valid SecurityToken.
    * @return a response item containing any errors
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   Future<Void> deleteActivityEntries(UserId userId, GroupId groupId, String appId,
       Set<String> activityIds, SecurityToken token) throws ProtocolException;
@@ -107,6 +111,7 @@ public interface ActivityStreamService {
    * @param activity The activity to create.
    * @param token    A valid SecurityToken
    * @return a response item containing any errors
+   * @throws org.apache.shindig.protocol.ProtocolException if any.
    */
   Future<Void> createActivityEntry(UserId userId, GroupId groupId, String appId,
       Set<String> fields, ActivityEntry activity, SecurityToken token) throws ProtocolException;

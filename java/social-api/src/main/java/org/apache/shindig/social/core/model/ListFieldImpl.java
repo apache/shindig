@@ -19,6 +19,9 @@ package org.apache.shindig.social.core.model;
 
 import org.apache.shindig.social.opensocial.model.ListField;
 
+/**
+ * ListField data structure
+ */
 public class ListFieldImpl implements ListField {
   private String type;
   private String value;
@@ -35,6 +38,7 @@ public class ListFieldImpl implements ListField {
     return type;
   }
 
+  /** {@inheritDoc} */
   public void setType(String type) {
     this.type = type;
   }
@@ -43,6 +47,7 @@ public class ListFieldImpl implements ListField {
     return value;
   }
 
+  /** {@inheritDoc} */
   public void setValue(String value) {
     this.value = value;
   }
@@ -51,6 +56,7 @@ public class ListFieldImpl implements ListField {
     return primary;
   }
 
+  /** {@inheritDoc} */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }

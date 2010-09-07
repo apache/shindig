@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
@@ -48,6 +49,8 @@ import com.google.inject.Inject;
 
 /**
  * Rewrite links to referenced content in a stylesheet
+ *
+ * @since 2.0.0
  */
 public class CssResponseRewriter implements ResponseRewriter {
 
@@ -70,11 +73,12 @@ public class CssResponseRewriter implements ResponseRewriter {
     if (!RewriterUtils.isCss(request, original)) {
       return;
     }
-    
+
     String css = original.getContent();
     StringWriter sw = new StringWriter((css.length() * 110) / 100);
     rewrite(new StringReader(css), request.getUri(),
-        new UriMaker(proxyUriManager, config), sw, false);
+        new UriMaker(proxyUriManager, config), sw, false,
+            DomWalker.makeGadget(request).getContext());
     original.setContent(sw.toString());
   }
 
@@ -86,15 +90,18 @@ public class CssResponseRewriter implements ResponseRewriter {
    * @param writer Output
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
+   * @param gadgetContext The gadgetContext
+   *
    * @return Empty list of extracted import URIs.
    */
-  public List<String> rewrite(Reader content, Uri source,
-      UriMaker uriMaker, Writer writer, boolean extractImports) throws RewritingException {
+  public List<String> rewrite(Reader content, Uri source, UriMaker uriMaker, Writer writer,
+      boolean extractImports, GadgetContext gadgetContext) throws RewritingException {
     try {
       String original = IOUtils.toString(content);
       try {
         CssTree.StyleSheet stylesheet = cssParser.parseDom(original, source);
-        List<String> stringList = rewrite(stylesheet, source, uriMaker, extractImports);
+        List<String> stringList = rewrite(stylesheet, source, uriMaker, extractImports,
+            gadgetContext);
         // Serialize the stylesheet
         cssParser.serialize(stylesheet, writer);
         return stringList;
@@ -120,14 +127,15 @@ public class CssResponseRewriter implements ResponseRewriter {
    * @param uriMaker a UriMaker
    * @param extractImports If true remove the import statements from the output and return their
    *            referenced URIs.
+   * @param gadgetContext The gadgetContext
    * @return Empty list of extracted import URIs.
    */
-  public List<String> rewrite(Element styleNode, Uri source,
-      UriMaker uriMaker, boolean extractImports) throws RewritingException {
+  public List<String> rewrite(Element styleNode, Uri source, UriMaker uriMaker,
+      boolean extractImports, GadgetContext gadgetContext) throws RewritingException {
     try {
       CssTree.StyleSheet stylesheet =
         cssParser.parseDom(styleNode.getTextContent(), source);
-      List<String> imports = rewrite(stylesheet, source, uriMaker, extractImports);
+      List<String> imports = rewrite(stylesheet, source, uriMaker, extractImports, gadgetContext);
       // Write the rewritten CSS back into the element
       String content = cssParser.serialize(stylesheet);
       if (StringUtils.isEmpty(content) || StringUtils.isWhitespace(content)) {
@@ -140,7 +148,7 @@ public class CssResponseRewriter implements ResponseRewriter {
     } catch (GadgetException ge) {
       if (ge.getCause() instanceof ParseException) {
         LOG.log(Level.WARNING,
-              "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
+            "Caja CSS parse failure: " + ge.getCause().getMessage() + " for " + source);
         return Collections.emptyList();
       } else {
         throw new RewritingException(ge, ge.getHttpStatusCode());
@@ -158,10 +166,10 @@ public class CssResponseRewriter implements ResponseRewriter {
    * @return Empty list of extracted import URIs.
    */
   public static List<String> rewrite(CssTree.StyleSheet styleSheet, final Uri source,
-      final UriMaker uriMaker, final boolean extractImports) {
+      final UriMaker uriMaker, final boolean extractImports, final GadgetContext gadgetContext) {
     final List<String> imports = Lists.newLinkedList();
     final List<CssTree.UriLiteral> skip = Lists.newLinkedList();
-    
+
     styleSheet.acceptPreOrder(new Visitor() {
       public boolean visit(AncestorChain<?> chain) {
         if (chain.node instanceof CssTree.Import) {
@@ -172,13 +180,13 @@ public class CssResponseRewriter implements ResponseRewriter {
             imports.add(uriLiteral.getValue());
             ((AbstractParseTreeNode) chain.getParentNode()).removeChild(chain.node);
           } else {
-            String rewritten = rewriteUri(uriMaker, uriLiteral.getValue(), source);
+            String rewritten = rewriteUri(uriMaker, uriLiteral.getValue(), source, gadgetContext);
             uriLiteral.setValue(rewritten);
           }
         } else if (chain.node instanceof CssTree.UriLiteral &&
             !skip.contains(chain.node)) {
           CssTree.UriLiteral uriDecl = (CssTree.UriLiteral) chain.node;
-          String rewritten = rewriteUri(uriMaker, uriDecl.getValue(), source);
+          String rewritten = rewriteUri(uriMaker, uriDecl.getValue(), source, gadgetContext);
           uriDecl.setValue(rewritten);
         }
         return true;
@@ -186,8 +194,9 @@ public class CssResponseRewriter implements ResponseRewriter {
 
     return imports;
   }
-  
-  private static String rewriteUri(UriMaker uriMaker, String input, Uri context) {
+
+  private static String rewriteUri(UriMaker uriMaker, String input, Uri context,
+      GadgetContext gadgetContext) {
     Uri inboundUri = null;
     try {
       inboundUri = Uri.parse(input);
@@ -199,23 +208,23 @@ public class CssResponseRewriter implements ResponseRewriter {
       inboundUri = context.resolve(inboundUri);
     }
     ProxyUriManager.ProxyUri proxyUri =
-        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(context), inboundUri);
+        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(gadgetContext), inboundUri);
     return uriMaker.make(proxyUri, context).toString();
   }
-  
+
   public static UriMaker uriMaker(ProxyUriManager wrapped, ContentRewriterFeature.Config config) {
     return new UriMaker(wrapped, config);
   }
-  
+
   public static final class UriMaker {
     private final ProxyUriManager wrapped;
     private final ContentRewriterFeature.Config config;
-    
+
     private UriMaker(ProxyUriManager wrapped, ContentRewriterFeature.Config config) {
       this.wrapped = wrapped;
       this.config = config;
     }
-    
+
     public Uri make(ProxyUriManager.ProxyUri uri, Uri context) {
       if (config.shouldRewriteURL(uri.getResource().toString())) {
         List<ProxyUriManager.ProxyUri> puris = Lists.newArrayList(uri);
@@ -226,4 +235,3 @@ public class CssResponseRewriter implements ResponseRewriter {
     }
   }
 }
-

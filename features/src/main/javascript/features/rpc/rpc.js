@@ -112,6 +112,11 @@ gadgets.rpc = function() {
   // shadowing of window.name by a "var name" declaration, or similar.
   var rpcId = window.name;
 
+  var securityCallback = function() {};
+  var LOAD_TIMEOUT = 0;
+  var FRAME_PHISH = 1;
+  var FORGED_MSG = 2;
+
   // Fallback transport is simply a dummy impl that emits no errors
   // and logs info on calls it receives, to avoid undesired side-effects
   // from falling back to IFPC or some other transport.
@@ -142,13 +147,6 @@ gadgets.rpc = function() {
   if (gadgets.util) {
     params = gadgets.util.getUrlParameters();
   }
-
-  // Indicates whether to support early-message queueing, which is designed
-  // to ensure that all messages sent by gadgets.rpc.call, irrespective
-  // when they were made (before/after setupReceiver, before/after transport
-  // setup complete), are sent. Hiding behind a query param to allow opt-in
-  // for a time while this technique is proven.
-  var useEarlyQueueing = (params['rpc_earlyq'] === "1");
 
   /**
    * Return a transport representing the best available cross-domain
@@ -189,8 +187,7 @@ gadgets.rpc = function() {
     receiverTx[receiverId] = tx;
 
     // If there are any early-queued messages, send them now directly through
-    // the needed transport. This queue will only have contents if
-    // useEarlyQueueing === true (see call method).
+    // the needed transport.
     var earlyQueue = earlyRpcQueue[receiverId] || [];
     for (var i = 0; i < earlyQueue.length; ++i) {
       var rpc = earlyQueue[i];
@@ -201,6 +198,45 @@ gadgets.rpc = function() {
 
     // Clear the queue so it won't be sent again.
     earlyRpcQueue[receiverId] = [];
+  }
+
+  //  Track when this main page is closed or navigated to a different location
+  // ("unload" event).
+  //  NOTE: The use of the "unload" handler here and for the relay iframe
+  // prevents the use of the in-memory page cache in modern browsers.
+  // See: https://developer.mozilla.org/en/using_firefox_1.5_caching
+  // See: http://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+  var mainPageUnloading = false,
+      hookedUnload = false;
+  
+  function hookMainPageUnload() {
+    if ( hookedUnload ) {
+      return;
+    }
+    function onunload() {
+      mainPageUnloading = true;
+    }
+    gadgets.util.attachBrowserEvent(window, 'unload', onunload, false);
+    hookedUnload = true;
+  }
+
+  function relayOnload(targetId, sourceId, token, data, relayWindow) {
+    // Validate auth token.
+    if (!authToken[sourceId] || authToken[sourceId] !== token) {
+      gadgets.error("Invalid auth token. " + authToken[sourceId] + " vs " + token);
+      securityCallback(sourceId, FORGED_MSG);
+    }
+    
+    relayWindow.onunload = function() {
+      if (setup[sourceId] && !mainPageUnloading) {
+        securityCallback(sourceId, FRAME_PHISH);
+        gadgets.rpc.removeReceiver(sourceId);
+      }
+    };
+    hookMainPageUnload();
+    
+    data = gadgets.json.parse(decodeURIComponent(data));
+    transport.relayOnload(sourceId, data);
   }
 
   /**
@@ -225,8 +261,8 @@ gadgets.rpc = function() {
         // We don't do type coercion here because all entries in the authToken
         // object are strings, as are all url params. See setupReceiver(...).
         if (authToken[rpc.f] !== rpc.t) {
-          throw new Error("Invalid auth token. " +
-              authToken[rpc.f] + " vs " + rpc.t);
+          gadgets.error("Invalid auth token. " + authToken[rpc.f] + " vs " + rpc.t);
+          securityCallback(rpc.f, FORGED_MSG);
         }
       }
 
@@ -371,7 +407,7 @@ gadgets.rpc = function() {
    * RPC mechanism. Gadgets, in turn, will complete the setup
    * of the channel once they send their first messages.
    */
-  function setupFrame(frameId, token) {
+  function setupFrame(frameId, token, forcesecure) {
     if (setup[frameId] === true) {
       return;
     }
@@ -382,7 +418,7 @@ gadgets.rpc = function() {
 
     var tgtFrame = document.getElementById(frameId);
     if (frameId === '..' || tgtFrame != null) {
-      if (transport.setup(frameId, token) === true) {
+      if (transport.setup(frameId, token, forcesecure) === true) {
         setup[frameId] = true;
         return;
       }
@@ -390,7 +426,7 @@ gadgets.rpc = function() {
 
     if (setup[frameId] !== true && setup[frameId]++ < SETUP_FRAME_MAX_TRIES) {
       // Try again in a bit, assuming that frame will soon exist.
-      window.setTimeout(function() { setupFrame(frameId, token) },
+      window.setTimeout(function() { setupFrame(frameId, token, forcesecure) },
                         SETUP_FRAME_TIMEOUT);
     } else {
       // Fail: fall back for this gadget.
@@ -451,6 +487,17 @@ gadgets.rpc = function() {
    * @deprecated
    */
   function setRelayUrl(targetId, url, opt_useLegacy) {
+    // make URL absolute if necessary
+    if (!/http(s)?:\/\/.+/.test(url)) {
+      if (url.indexOf("//") == 0) {
+        url = window.location.protocol + url;
+      } else if (url.charAt(0) == '/') {
+        url = window.location.protocol + "//" + window.location.host + url;
+      } else if (url.indexOf("://") == -1) {
+        // Assumed to be schemaless. Default to current protocol.
+        url = window.location.protocol + "//" + url;
+      }
+    }
     relayUrl[targetId] = url;
     useLegacyProtocol[targetId] = !!opt_useLegacy;
   }
@@ -474,7 +521,7 @@ gadgets.rpc = function() {
    * @member gadgets.rpc
    * @deprecated
    */
-  function setAuthToken(targetId, token) {
+  function setAuthToken(targetId, token, forcesecure) {
     token = token || "";
 
     // Coerce token to a String, ensuring that all authToken values
@@ -482,10 +529,10 @@ gadgets.rpc = function() {
     // in the process(rpc) method.
     authToken[targetId] = String(token);
 
-    setupFrame(targetId, token);
+    setupFrame(targetId, token, forcesecure);
   }
 
-  function setupContainerGadgetContext(rpctoken) {
+  function setupContainerGadgetContext(rpctoken, opt_forcesecure) {
     /**
      * Initializes gadget to container RPC params from the provided configuration.
      */
@@ -525,7 +572,8 @@ gadgets.rpc = function() {
       }
 
       // Sets the auth token and signals transport to setup connection to container.
-      setAuthToken('..', rpctoken);
+      var forceSecure = opt_forcesecure || params.forcesecure || false;
+      setAuthToken('..', rpctoken, forceSecure);
     }
 
     var requiredConfig = {
@@ -534,19 +582,20 @@ gadgets.rpc = function() {
     gadgets.config.register("rpc", requiredConfig, init);
   }
 
-  function setupContainerGenericIframe(rpctoken, opt_parent) {
+  function setupContainerGenericIframe(rpctoken, opt_parent, opt_forcesecure) {
     // Generic child IFRAME setting up connection w/ its container.
     // Use the opt_parent param if provided, or the "parent" query param
     // if found -- otherwise, do nothing since this call might be initiated
     // automatically at first, then actively later in IFRAME code.
+    var forcesecure = opt_forcesecure || params.forcesecure || false;
     var parent = opt_parent || params.parent;
     if (parent) {
       setRelayUrl('..', parent);
-      setAuthToken('..', rpctoken);
+      setAuthToken('..', rpctoken, forcesecure);
     }
   }
 
-  function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken) {
+  function setupChildIframe(gadgetId, opt_frameurl, opt_authtoken, opt_forcesecure) {
     if (!gadgets.util) {
       return;
     }
@@ -564,7 +613,8 @@ gadgets.rpc = function() {
     // The auth token is parsed from child params (rpctoken) or overridden.
     var childParams = gadgets.util.getUrlParameters(childIframe.src);
     var rpctoken = opt_authtoken || childParams.rpctoken;
-    setAuthToken(gadgetId, rpctoken);
+    var forcesecure = opt_forcesecure || childParams.forcesecure;
+    setAuthToken(gadgetId, rpctoken, forcesecure);
   }
 
   /**
@@ -609,23 +659,30 @@ gadgets.rpc = function() {
    * @param {string} targetId
    * @param {string=} opt_receiverurl
    * @param {string=} opt_authtoken
+   * @param {boolean=} opt_forcesecure
    */
-  function setupReceiver(targetId, opt_receiverurl, opt_authtoken) {
+  function setupReceiver(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure) {
     if (targetId === '..') {
       // Gadget/IFRAME to container.
       var rpctoken = opt_authtoken || params.rpctoken || params.ifpctok || "";
       if (window['__isgadget'] === true) {
-        setupContainerGadgetContext(rpctoken);
+        setupContainerGadgetContext(rpctoken, opt_forcesecure);
       } else {
-        setupContainerGenericIframe(rpctoken, opt_receiverurl);
+        setupContainerGenericIframe(rpctoken, opt_receiverurl, opt_forcesecure);
       }
     } else {
       // Container to child.
-      setupChildIframe(targetId, opt_receiverurl, opt_authtoken);
+      setupChildIframe(targetId, opt_receiverurl, opt_authtoken, opt_forcesecure);
     }
   }
 
   return /** @scope gadgets.rpc */ {
+    config: function(config) {
+      if (typeof config.securityCallback === 'function') {
+        securityCallback = config.securityCallback;
+      }
+    },
+    
     /**
      * Registers an RPC service.
      * @param {string} serviceName Service name to register.
@@ -747,7 +804,7 @@ gadgets.rpc = function() {
       // Attempt to make call via a cross-domain transport.
       // Retrieve the transport for the given target - if one
       // target is misconfigured, it won't affect the others.
-      var channel = receiverTx[targetId] ? receiverTx[targetId] : transport;
+      var channel = receiverTx[targetId];
 
       if (!channel) {
         // Not set up yet. Enqueue the rpc for such time as it is.
@@ -797,6 +854,16 @@ gadgets.rpc = function() {
     setAuthToken: setAuthToken,
     setupReceiver: setupReceiver,
     getAuthToken: getAuthToken,
+    
+    // Note: Does not delete iframe
+    removeReceiver: function(receiverId) {
+      delete relayUrl[receiverId];
+      delete useLegacyProtocol[receiverId];
+      delete authToken[receiverId];
+      delete setup[receiverId];
+      delete sameDomain[receiverId];
+      delete receiverTx[receiverId];
+    },
 
     /**
      * Gets the RPC relay mechanism.
@@ -820,10 +887,12 @@ gadgets.rpc = function() {
      * @member gadgets.rpc
      * @deprecated
      */
-    receive: function(fragment) {
+    receive: function(fragment, otherWindow) {
       if (fragment.length > 4) {
         process(gadgets.json.parse(
             decodeURIComponent(fragment[fragment.length - 1])));
+      } else {
+        relayOnload.apply(null, fragment.concat(otherWindow));
       }
     },
 
@@ -844,6 +913,21 @@ gadgets.rpc = function() {
     // see docs above
     getOrigin: getOrigin,
 
+    getReceiverOrigin: function(receiverId) {
+      var channel = receiverTx[receiverId];
+      if (!channel) {
+        // not set up yet
+        return null;
+      }
+      if (!channel.isParentVerifiable(receiverId)) {
+        // given transport cannot verify receiver origin
+        return null;
+      }
+      var origRelay = gadgets.rpc.getRelayUrl(receiverId) ||
+                      gadgets.util.getUrlParameters().parent;
+      return gadgets.rpc.getOrigin(origRelay);
+    },
+
     /**
      * Internal-only method used to initialize gadgets.rpc.
      * @member gadgets.rpc
@@ -863,9 +947,51 @@ gadgets.rpc = function() {
     /** Returns the window keyed by the ID. null/".." for parent, else child */
     _getTargetWin: getTargetWin,
 
+    /** Create an iframe for loading the relay URL. Used by child only. */ 
+    _createRelayIframe: function(token, data) {
+      var relay = gadgets.rpc.getRelayUrl('..');
+      if (!relay) {
+        return;
+      }
+      
+      // Format: #targetId & sourceId & authToken & data
+      var src = relay + '#..&' + rpcId + '&' + token + '&' +
+          encodeURIComponent(gadgets.json.stringify(data));
+  
+      var iframe = document.createElement('iframe');
+      iframe.style.border = iframe.style.width = iframe.style.height = '0px';
+      iframe.style.visibility = 'hidden';
+      iframe.style.position = 'absolute';
+
+      function appendFn() {
+        // Append the iframe.
+        document.body.appendChild(iframe);
+  
+        // Set the src of the iframe to 'about:blank' first and then set it
+        // to the relay URI. This prevents the iframe from maintaining a src
+        // to the 'old' relay URI if the page is returned to from another.
+        // In other words, this fixes the bfcache issue that causes the iframe's
+        // src property to not be updated despite us assigning it a new value here.
+        iframe.src = 'javascript:"<html></html>"';
+        iframe.src = src;
+      }
+      
+      if (document.body) {
+        appendFn();
+      } else {
+        gadgets.util.registerOnLoadHandler(function() { appendFn(); });
+      }
+      
+      return iframe;
+    },
+
     ACK: ACK,
 
-    RPC_ID: rpcId
+    RPC_ID: rpcId,
+    
+    SEC_ERROR_LOAD_TIMEOUT: LOAD_TIMEOUT,
+    SEC_ERROR_FRAME_PHISH: FRAME_PHISH,
+    SEC_ERROR_FORGED_MSG : FORGED_MSG
   };
 }();
 

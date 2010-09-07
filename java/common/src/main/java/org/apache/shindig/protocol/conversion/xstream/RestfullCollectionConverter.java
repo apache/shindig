@@ -28,7 +28,6 @@ import com.thoughtworks.xstream.mapper.Mapper;
 
 /**
  * This converter changes the way in which a collection is serialized
- *
  */
 public class RestfullCollectionConverter extends AbstractCollectionConverter {
 

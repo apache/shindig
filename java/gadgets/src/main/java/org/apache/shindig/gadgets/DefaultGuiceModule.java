@@ -50,7 +50,6 @@ import org.apache.shindig.gadgets.variables.SubstituterModule;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -68,9 +67,9 @@ public class DefaultGuiceModule extends AbstractModule {
   protected void configure() {
 
     final ExecutorService service = Executors.newCachedThreadPool(DAEMON_THREAD_FACTORY);
-    bind(Executor.class).toInstance(service);
-    bind(Executor.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
     bind(ExecutorService.class).toInstance(service);
+    bind(ExecutorService.class).annotatedWith(Names.named("shindig.concat.executor")).toInstance(service);
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
             service.shutdownNow();
@@ -138,7 +137,7 @@ public class DefaultGuiceModule extends AbstractModule {
   public static final ThreadFactory DAEMON_THREAD_FACTORY =
     new ThreadFactory() {
         private final ThreadFactory factory = Executors.defaultThreadFactory();
-	  
+
         public Thread newThread(Runnable r) {
             Thread t = factory.newThread(r);
             t.setDaemon(true);

@@ -19,8 +19,7 @@
 package org.apache.shindig.gadgets.oauth;
 
 /**
- * @author beaton@google.com (Your Name Here)
- *
+ * Data structure representing and OAuth consumer key and secret
  */
 public class BasicOAuthStoreConsumerKeyAndSecret {
 

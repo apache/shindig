@@ -27,7 +27,6 @@ import com.google.inject.ImplementedBy;
  * see
  * <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Name">
  * http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/opensocial-reference#opensocial.Name</a>
- * 
  */
 
 @ImplementedBy(NameImpl.class)

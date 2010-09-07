@@ -18,28 +18,23 @@
  */
 package org.apache.shindig.gadgets.uri;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.common.uri.UriBuilder;
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetException;
+import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.uri.ProxyUriManager.ProxyUri;
 import org.apache.shindig.gadgets.uri.UriCommon.Param;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DefaultProxyUriManagerTest extends UriManagerTestBase {
   private static final Uri RESOURCE_1 = Uri.parse("http://example.com/one.dat?param=value");
@@ -381,6 +376,27 @@ public class DefaultProxyUriManagerTest extends UriManagerTestBase {
         .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER)
         .addQueryParameter(Param.URL.getKey(), "!^!").toUri();
     manager.process(testUri);
+  }
+
+  @Test
+  public void testHtmlTagContext() throws Exception {
+    String host = "host.com";
+    String path = "/proxy/path";
+    DefaultProxyUriManager manager = makeManager(host, path, null);
+    Uri testUri = new UriBuilder().setAuthority(host).setPath(path)
+        .addQueryParameter(Param.CONTAINER.getKey(), CONTAINER)
+        .addQueryParameter(Param.URL.getKey(), "http://www.example.org/")
+        .addQueryParameter(Param.HTML_TAG_CONTEXT.getKey(), "htmlTag")
+        .toUri();
+    ProxyUri proxyUri = manager.process(testUri);
+    assertEquals("htmlTag", proxyUri.getHtmlTagContext());
+
+    Uri targetUri = Uri.parse("http://www.example2.org/");
+    HttpRequest req = proxyUri.makeHttpRequest(targetUri);
+    assertEquals("htmlTag", req.getParam(Param.HTML_TAG_CONTEXT.getKey()));
+
+    UriBuilder builder = proxyUri.makeQueryParams(1, "2");
+    assertEquals("htmlTag", builder.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
   }
 
   private List<Uri> makeAndGet(String host, String path, boolean debug, boolean noCache,

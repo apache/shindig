@@ -25,6 +25,10 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.expressions.ELTypeConverter;
 import org.apache.shindig.expressions.ExpressionProvider;
 
+/**
+ * A Provider for Jasper Expression processing
+ * @since 2.0.0
+ */
 public class JasperProvider implements ExpressionProvider {
 
   public ExpressionFactory newExpressionFactory(CacheProvider cacheProvider,

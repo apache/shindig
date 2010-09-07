@@ -20,6 +20,11 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 
+/**
+ * Base interface used by response rewriter implementations.
+ *
+ * @since 2.0.0
+ */
 public interface ResponseRewriter {
   public void rewrite(HttpRequest request, HttpResponseBuilder response) throws RewritingException;
 }

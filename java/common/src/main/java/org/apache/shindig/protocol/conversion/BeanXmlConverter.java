@@ -31,6 +31,9 @@ import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Converts to/from XML format using betwixt
+ */
 public class BeanXmlConverter implements BeanConverter {
   private static final Logger LOG =
       Logger.getLogger(BeanXmlConverter.class.getName());

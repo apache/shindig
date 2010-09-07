@@ -22,6 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Data structure representing gadget user preferences.
+ */
 public class UserPrefs {
   /**
    * Convenience representation of an empty pref set.

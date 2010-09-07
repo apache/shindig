@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.protocol.model;
 
+/**
+ * Implementation of the Enum interface
+ */
 public final class EnumImpl<E extends Enum.EnumKey> implements Enum<E> {
   private String displayValue;
   private E value = null;
@@ -55,5 +58,4 @@ public final class EnumImpl<E extends Enum.EnumKey> implements Enum<E> {
   public void setValue(E value) {
     this.value = value;
   }
-
 }

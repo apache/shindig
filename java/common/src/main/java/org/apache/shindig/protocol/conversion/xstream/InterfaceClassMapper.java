@@ -37,7 +37,6 @@ import java.util.logging.Level;
  * as the reference class and then ArrayList and Set would both be mapped to the
  * same element.
  */
-
 public class InterfaceClassMapper extends MapperWrapper {
 
   /**

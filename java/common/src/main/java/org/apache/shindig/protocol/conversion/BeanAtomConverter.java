@@ -32,6 +32,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // TODO: This does not produce valid atom sytnax yet
+/**
+ * Converts a Bean into Atom-like syntax.
+ */
 public class BeanAtomConverter implements BeanConverter {
   private static final Logger LOG =
       Logger.getLogger(BeanAtomConverter.class.getName());

@@ -19,6 +19,9 @@ package org.apache.shindig.common.cache;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ * Interface for Shindig caches.
+ */
 @ImplementedBy(LruCacheProvider.class)
 public interface CacheProvider {
   /**

@@ -33,6 +33,10 @@ import org.apache.shindig.common.cache.CacheProvider;
 import org.apache.shindig.expressions.ELTypeConverter;
 import org.apache.shindig.expressions.ExpressionProvider;
 
+/**
+ * A provider for a Juel based Expression Implementation
+ * @since 2.0.0
+ */
 public class JuelProvider implements ExpressionProvider {
 
   private static final String EXPRESSION_CACHE = "expressions";

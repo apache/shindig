@@ -25,7 +25,19 @@ require 'src/common/HttpServlet.php';
  * so that the shindig examples and javascript files would work out of the box with
  * the php version too
  */
-class FilesServlet extends HttpServlet {
+abstract class FilesServlet extends HttpServlet {
+
+  /**
+   * @return string
+   */
+  abstract protected function getPath();
+
+  /**
+   * @return string
+   */
+  protected function getRequestUri() {
+    return $_SERVER['REQUEST_URI'];
+  }
 
   /**
    * Handles the get file request, if the file exists and is in the correct
@@ -36,11 +48,11 @@ class FilesServlet extends HttpServlet {
    * but doesn't exist a 404 error is returned
    */
   public function doGet() {
-    $file = str_replace(Config::get('web_prefix'), '', $_SERVER["REQUEST_URI"]);
-    $file = Config::get('javascript_path') . $file;
+    $file = str_replace(Config::get('web_prefix'), '', $this->getRequestUri());
+    $file = $this->getPath() . $file;
     // make sure that the real path name is actually in the javascript_path, so people can't abuse this to read
     // your private data from disk .. otherwise this would be a huge privacy and security issue 
-    if (substr(realpath($file), 0, strlen(realpath(Config::get('javascript_path')))) != realpath(Config::get('javascript_path'))) {
+    if (substr(realpath($file), 0, strlen(realpath($this->getPath()))) != realpath($this->getPath())) {
       header("HTTP/1.0 400 Bad Request", true);
       echo "<html><body><h1>400 - Bad Request</h1></body></html>";
       die();

@@ -23,59 +23,75 @@ import java.util.List;
 import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
 import org.apache.shindig.extras.as.opensocial.model.ActivityStream;
 
+/**
+ * A simple, bean-based version of an ActivityStream
+ */
 public class ActivityStreamImpl implements ActivityStream {
 
-	private String displayName;
-	private String language;
-	private List<ActivityEntry> entries;
-	private String id;
-	private String subject;
-	
-	public ActivityStreamImpl() {
-		this.displayName = null;
-		this.language = null;
-		this.entries = null;
-		this.id = null;
-		this.subject = null;
-	}
+  private String displayName;
+  private String language;
+  private List<ActivityEntry> entries;
+  private String id;
+  private String subject;
+  
+  /**
+   * Create a new empty ActivityStream
+   */
+  public ActivityStreamImpl() {
+    this.displayName = null;
+    this.language = null;
+    this.entries = null;
+    this.id = null;
+    this.subject = null;
+  }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+  /** {@inheritDoc} */
+  public String getDisplayName() {
+    return displayName;
+  }
 
-	public List<ActivityEntry> getEntries() {
-		return entries;
-	}
+  /** {@inheritDoc} */
+  public List<ActivityEntry> getEntries() {
+    return entries;
+  }
 
-	public String getId() {
-		return id;
-	}
+  /** {@inheritDoc} */
+  public String getId() {
+    return id;
+  }
 
-	public String getLanguage() {
-		return language;
-	}
+  /** {@inheritDoc} */
+  public String getLanguage() {
+    return language;
+  }
 
-	public String getSubject() {
-		return subject;
-	}
+  /** {@inheritDoc} */
+  public String getSubject() {
+    return subject;
+  }
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+  /** {@inheritDoc} */
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
-	public void setEntries(List<ActivityEntry> entries) {
-		this.entries = entries;
-	}
+  /** {@inheritDoc} */
+  public void setEntries(List<ActivityEntry> entries) {
+    this.entries = entries;
+  }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  /** {@inheritDoc} */
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	public void setLanguage(String language) {
-		this.language = language;
-	}
+  /** {@inheritDoc} */
+  public void setLanguage(String language) {
+    this.language = language;
+  }
 
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+  /** {@inheritDoc} */
+  public void setSubject(String subject) {
+    this.subject = subject;
+  }
 }

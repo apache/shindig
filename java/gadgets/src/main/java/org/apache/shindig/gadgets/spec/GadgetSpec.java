@@ -32,13 +32,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
  * Represents a gadget specification root element (Module).
+ *
  * @see <a href="http://www.opensocial.org/Technical-Resources/opensocial-spec-v08/gadget-spec">gadgets spec</a>
  */
 public class GadgetSpec {

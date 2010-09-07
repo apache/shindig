@@ -29,6 +29,10 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * Visits nodes in the dom extracting style tags.
+ * @since 2.0.0
+ */
 public class StyleTagExtractorVisitor implements Visitor {
   private final ContentRewriterFeature.Config config;
   private final CssResponseRewriter cssRewriter;
@@ -74,7 +78,7 @@ public class StyleTagExtractorVisitor implements Visitor {
       // Guaranteed safe cast due to reservation logic.
       Element elem = (Element)node;
       List<String> extractedUrls = cssRewriter.rewrite(
-          elem, contentBase, CssResponseRewriter.uriMaker(proxyUriManager, config), true);
+          elem, contentBase, CssResponseRewriter.uriMaker(proxyUriManager, config), true, gadget.getContext());
       for (String extractedUrl : extractedUrls) {
         // Add extracted urls as link elements to head
         Element newLink = head.getOwnerDocument().createElement("link");
@@ -88,5 +92,4 @@ public class StyleTagExtractorVisitor implements Visitor {
     
     return mutated;
   }
-
 }

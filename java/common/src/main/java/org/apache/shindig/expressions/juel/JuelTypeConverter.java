@@ -24,6 +24,10 @@ import org.apache.shindig.expressions.ShindigTypeConverter;
 
 import de.odysseus.el.misc.TypeConverter;
 
+/**
+ * A converter used by Juel
+ * @since 2.0.0
+ */
 public class JuelTypeConverter extends ShindigTypeConverter implements
     TypeConverter {
 

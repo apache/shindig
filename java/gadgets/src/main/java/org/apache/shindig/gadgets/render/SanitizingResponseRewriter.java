@@ -23,10 +23,12 @@ import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.byteSources.ByteSourceInputStream;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssSanitizer;
 import org.apache.shindig.gadgets.rewrite.ContentRewriterFeature;
+import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.ResponseRewriter;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 
@@ -38,6 +40,8 @@ import com.google.inject.Inject;
 
 /**
  * Rewriter that sanitizes CSS and image content.
+ *
+ * @since 2.0.0
  */
 public class SanitizingResponseRewriter implements ResponseRewriter {
   private static final Logger LOG =
@@ -129,8 +133,10 @@ public class SanitizingResponseRewriter implements ResponseRewriter {
             new SanitizingProxyUriManager(proxyUriManager, "image/*");
         SanitizingProxyUriManager cssImportRewriter =
             new SanitizingProxyUriManager(proxyUriManager, "text/css");
+
+        GadgetContext gadgetContext = DomWalker.makeGadget(request).getContext();
         sanitized = cssSanitizer.sanitize(resp.getContent(), request.getUri(),
-            cssImportRewriter, cssImageRewriter);
+            gadgetContext, cssImportRewriter, cssImageRewriter);
       }
       return;
     } finally {

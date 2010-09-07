@@ -247,8 +247,8 @@ public class BeanXStreamConverterTest extends Assert {
         + "</list.container>"
         + "</response>";
     expectedXml = XSDValidator.insertSchema(expectedXml, XMLSCHEMA, true);
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
   @Test

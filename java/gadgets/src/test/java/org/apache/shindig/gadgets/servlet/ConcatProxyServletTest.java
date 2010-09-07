@@ -37,7 +37,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ConcatProxyServletTest extends ServletTestFixture {
   private static final String REQUEST_DOMAIN = "example.org";
@@ -58,19 +61,8 @@ public class ConcatProxyServletTest extends ServletTestFixture {
   private final ConcatProxyServlet servlet = new ConcatProxyServlet();
   private TestConcatUriManager uriManager;
   
-  private final Executor sequentialExecutor = new Executor() {
-    public void execute(Runnable r) {
-      // Sequential version of 'execute'.
-      r.run();
-    }
-  }; 
-
-  private final Executor threadedExecutor = new Executor() {
-    public void execute(Runnable r) {
-      // Threaded version of 'execute'.
-      new Thread(r).start();
-    }
-  }; 
+  private final ExecutorService sequentialExecutor = Executors.newSingleThreadExecutor();
+  private final ExecutorService threadedExecutor = Executors.newCachedThreadPool();
 
   @Before
   public void setUp() throws Exception {
@@ -126,7 +118,7 @@ public class ConcatProxyServletTest extends ServletTestFixture {
    * @param uris - list of uris to concat
    * @throws Exception
    */
-  private void runConcat(Executor exec, String result, String tok, Uri... uris)
+  private void runConcat(ExecutorService exec, String result, String tok, Uri... uris)
       throws Exception {
     expectRequestWithUris(Lists.newArrayList(uris), tok);
     

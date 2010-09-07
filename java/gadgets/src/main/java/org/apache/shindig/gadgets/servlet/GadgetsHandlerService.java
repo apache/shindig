@@ -29,6 +29,7 @@ import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
+import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.process.Processor;
 import org.apache.shindig.gadgets.spec.Feature;
@@ -46,6 +47,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Service that interfaces with the system to provide information about gadgets.
+ *
+ * @since 2.0.0
+ */
 public class GadgetsHandlerService {
 
   // Map shindig data class to API interfaces
@@ -104,12 +110,22 @@ public class GadgetsHandlerService {
    */
   public GadgetsHandlerApi.MetadataResponse getMetadata(GadgetsHandlerApi.MetadataRequest request)
       throws ProcessingException {
+    if (request.getUrl() == null) {
+      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getContainer() == null) {
+      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getFields() == null) {
+      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
+    }
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
+
     GadgetContext context = new MetadataGadgetContext(request);
     Gadget gadget = processor.process(context);
     String iframeUrl =
-        fields.contains("iframeurl") ? iframeUriManager.makeRenderingUri(gadget).toString()
-            : null;
+        (fields.contains("iframeurl") || fields.contains(BeanFilter.ALL_FIELDS)) ?
+            iframeUriManager.makeRenderingUri(gadget).toString() : null;
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl, fields);
   }
 
@@ -120,7 +136,16 @@ public class GadgetsHandlerService {
    * @throws SecurityTokenException
    */
   public GadgetsHandlerApi.TokenResponse getToken(GadgetsHandlerApi.TokenRequest request)
-      throws SecurityTokenException {
+      throws SecurityTokenException, ProcessingException {
+    if (request.getUrl() == null) {
+      throw new ProcessingException("Missing url paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getContainer() == null) {
+      throw new ProcessingException("Missing container paramater", HttpResponse.SC_BAD_REQUEST);
+    }
+    if (request.getFields() == null) {
+      throw new ProcessingException("Missing fields paramater", HttpResponse.SC_BAD_REQUEST);
+    }
     Set<String> fields = beanFilter.processBeanFields(request.getFields());
 
     SecurityToken tokenData = convertToken(request.getToken(), request.getContainer(),
@@ -191,6 +216,9 @@ public class GadgetsHandlerService {
 
   private SecurityToken convertToken(GadgetsHandlerApi.TokenData token,
       String container, String url) {
+    if (token == null) {
+      return null;
+    }
     return beanDelegator.createDelegator(token, SecurityToken.class,
         ImmutableMap.<String, Object>of("container", container,
             "appid", url, "appurl", url));
@@ -205,16 +233,18 @@ public class GadgetsHandlerService {
       Uri url, GadgetSpec spec, String iframeUrl, Set<String> fields) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
-            ImmutableMap.<String, Object>of("url", url, "error", BeanDelegator.NULL,
-                "iframeurl", iframeUrl)),
+            ImmutableMap.<String, Object>of(
+                "url", url, "error", BeanDelegator.NULL,
+                "iframeurl", BeanDelegator.nullable(iframeUrl))),
         fields);
   }
 
   private GadgetsHandlerApi.TokenResponse createTokenResponse(
       Uri url, String token, Set<String> fields) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
-        beanDelegator.createDelegator(token, GadgetsHandlerApi.TokenResponse.class,
-            ImmutableMap.<String, Object>of("url", url, "error", BeanDelegator.NULL, "token", token)),
+        beanDelegator.createDelegator("empty", GadgetsHandlerApi.TokenResponse.class,
+            ImmutableMap.<String, Object>of("url", url, "error", BeanDelegator.NULL,
+                "token", BeanDelegator.nullable(token))),
         fields);
   }
 }

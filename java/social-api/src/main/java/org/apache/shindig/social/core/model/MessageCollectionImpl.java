@@ -23,6 +23,9 @@ import org.apache.shindig.social.opensocial.model.Url;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Default representation of a MessageCollection
+ */
 public class MessageCollectionImpl implements MessageCollection {
 
   private String id;

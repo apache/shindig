@@ -31,6 +31,8 @@ import java.util.List;
 /**
  * Forcible rewrite the link through the proxy and force sanitization with
  * an expected mime type.
+ *
+ * @since 2.0.0
  */
 public class SanitizingProxyUriManager implements ProxyUriManager {
   private final ProxyUriManager wrapped;

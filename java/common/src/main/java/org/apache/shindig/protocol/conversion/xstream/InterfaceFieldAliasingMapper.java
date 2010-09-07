@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Maps Interfaces to Aliases used by {@link org.apache.shindig.protocol.conversion.BeanXStreamConverter}
  */
 public class InterfaceFieldAliasingMapper extends MapperWrapper {
 

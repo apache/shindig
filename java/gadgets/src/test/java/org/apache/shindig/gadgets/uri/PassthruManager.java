@@ -63,8 +63,10 @@ public class PassthruManager implements ProxyUriManager {
 
   public ProxyUri process(Uri uri) throws GadgetException {
     String proxied = uri.getQueryParameter(Param.URL.getKey());
-    return new ProxyUri(expectStatus,
+    ProxyUri proxyUri = new ProxyUri(expectStatus,
         proxied != null ? Uri.parse(proxied) : null, uri);
+    proxyUri.setHtmlTagContext(uri.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
+    return proxyUri;
   }
   
   public void expectStatus(UriStatus status) {

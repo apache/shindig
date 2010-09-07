@@ -19,6 +19,7 @@ package org.apache.shindig.gadgets.parse.caja;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -69,14 +70,16 @@ public class CajaCssSanitizer {
    * Sanitize the CSS content of a style tag.
    * @param content to sanitize
    * @param linkContext url of containing content
+   * @param gadgetContext The gadget context.
    * @param importRewriter to rewrite @imports to sanitizing proxy
-   * @param importRewriter to rewrite images to sanitizing proxy
+   * @param imageRewriter to rewrite images to sanitizing proxy
+   * @return Sanitized css.
    */
-  public String sanitize(String content, Uri linkContext, ProxyUriManager importRewriter,
-      ProxyUriManager imageRewriter) {
+  public String sanitize(String content, Uri linkContext, GadgetContext gadgetContext,
+                         ProxyUriManager importRewriter, ProxyUriManager imageRewriter) {
     try {
       CssTree.StyleSheet stylesheet = parser.parseDom(content, linkContext);
-      sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
+      sanitize(stylesheet, linkContext, gadgetContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       return parser.serialize(stylesheet);
     } catch (GadgetException ge) {
@@ -90,16 +93,17 @@ public class CajaCssSanitizer {
    * Sanitize the CSS content of a style tag.
    * @param styleElem to sanitize
    * @param linkContext url of containing content
+   * @param gadgetContext The gadget context.
    * @param importRewriter to rewrite @imports to sanitizing proxy
-   * @param importRewriter to rewrite images to sanitizing proxy
+   * @param imageRewriter to rewrite images to sanitizing proxy
    */
-  public void sanitize(Element styleElem, Uri linkContext, ProxyUriManager importRewriter,
-      ProxyUriManager imageRewriter) {
+  public void sanitize(Element styleElem, Uri linkContext, GadgetContext gadgetContext,
+                       ProxyUriManager importRewriter, ProxyUriManager imageRewriter) {
     String content = null;
     try {
       CssTree.StyleSheet stylesheet =
         parser.parseDom(styleElem.getTextContent(), linkContext);
-      sanitize(stylesheet, linkContext, importRewriter, imageRewriter);
+      sanitize(stylesheet, linkContext, gadgetContext, importRewriter, imageRewriter);
       // Write the rewritten CSS back into the element
       content = parser.serialize(stylesheet);
     } catch (GadgetException ge) {
@@ -118,11 +122,12 @@ public class CajaCssSanitizer {
    * Sanitize the given CSS tree in-place by removing all non-whitelisted function calls
    * @param css DOM root
    * @param linkContext url of containing content
+   * @param gadgetContext The gadget context.
    * @param importRewriter to rewrite links to sanitizing proxy
    * @param imageRewriter to rewrite links to the sanitizing proxy
    */
-  public void sanitize(CssTree css, final Uri linkContext, final ProxyUriManager importRewriter,
-      final ProxyUriManager imageRewriter) {
+  public void sanitize(CssTree css, final Uri linkContext, final GadgetContext gadgetContext,
+                       final ProxyUriManager importRewriter, final ProxyUriManager imageRewriter) {
     css.acceptPreOrder(new Visitor() {
       public boolean visit(AncestorChain<?> ancestorChain) {
         if (ancestorChain.node instanceof CssTree.Property) {
@@ -150,7 +155,7 @@ public class CajaCssSanitizer {
           if (isValidUri(uri)) {
             // Assume the URI is for an image. Rewrite it using the image link rewriter
             ((CssTree.UriLiteral)ancestorChain.node).setValue(
-                rewriteUri(imageRewriter, uri, linkContext));
+                rewriteUri(imageRewriter, uri, linkContext, gadgetContext));
           } else {
             // Remove offending node
             if (LOG.isLoggable(Level.FINE)) {
@@ -162,7 +167,8 @@ public class CajaCssSanitizer {
           CssTree.Import importDecl = (CssTree.Import) ancestorChain.node;
           String uri = importDecl.getUri().getValue();
           if (isValidUri(uri)) {
-            importDecl.getUri().setValue(rewriteUri(importRewriter, uri, linkContext));
+            importDecl.getUri().setValue(rewriteUri(importRewriter, uri, linkContext,
+                gadgetContext));
           } else {
             if (LOG.isLoggable(Level.FINE)) {
               LOG.log(Level.FINE, "Removing invalid URI " + uri);
@@ -175,7 +181,8 @@ public class CajaCssSanitizer {
     }, null);
   }
   
-  private static String rewriteUri(ProxyUriManager proxyUriManager, String input, Uri context) {
+  private static String rewriteUri(ProxyUriManager proxyUriManager, String input,
+                                   final Uri context, GadgetContext gadgetContext) {
     Uri inboundUri = null;
     try {
       inboundUri = Uri.parse(input);
@@ -186,8 +193,14 @@ public class CajaCssSanitizer {
     if (context != null) {
       inboundUri = context.resolve(inboundUri);
     }
+
     List<ProxyUriManager.ProxyUri> uris = ImmutableList.of(
-        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(context), inboundUri));
+        new ProxyUriManager.ProxyUri(DomWalker.makeGadget(new GadgetContext(gadgetContext) {
+          @Override
+          public Uri getUrl() {
+            return context;
+          }
+        }), inboundUri));
     List<Uri> rewritten = proxyUriManager.make(uris, null);
     return rewritten.get(0).toString();
   }

@@ -122,12 +122,12 @@ class DataPipelining {
       if (isset($val['id'])) {
         $key = $val['id'];
         // Pick up only the actual data part of the response, so we can do direct variable resolution
-        if (isset($val['data']['list'])) {
-          $dataContext[$key] = $val['data']['list'];
-        } elseif (isset($val['data']['entry'])) {
-          $dataContext[$key] = $val['data']['entry'];
-        } elseif (isset($val['data'])) {
-          $dataContext[$key] = $val['data'];
+        if (isset($val['result']['list'])) {
+          $dataContext[$key] = $val['result']['list'];
+        } elseif (isset($val['result']['entry'])) {
+          $dataContext[$key] = $val['result']['entry'];
+        } elseif (isset($val['result'])) {
+          $dataContext[$key] = $val['result'];
         }
       }
     }
@@ -180,7 +180,7 @@ class DataPipelining {
     }
     if (count($jsonRequests)) {
       // perform social api requests
-      $request = new RemoteContentRequest('http://'.$_SERVER['HTTP_HOST'] . Config::get('web_prefix') . '/social/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
+      $request = new RemoteContentRequest('http://'.$_SERVER['HTTP_HOST'] . Config::get('web_prefix') . '/rpc?st=' . urlencode($securityToken) . '&format=json', "Content-Type: application/json\n", json_encode($jsonRequests));
       $request->setMethod('POST');
       $remoteFetcherClass = Config::get('remote_content_fetcher');
       $remoteFetcher = new $remoteFetcherClass();
@@ -225,15 +225,15 @@ class DataPipelining {
               'error' => array(
                 'code' => $statusCode,
                 'message' => $statusCodeMessage,
-                'data' => array(
+                'result' => array(
                   'content' => $content,
                   'headers' => $headers
                 )
               )
             );
           }
-          //$toAdd[$id] = array('id' => $id, 'data' => $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body']);
-          $decodedResponse[] = array('id' => $id, 'data' => $toAdd);
+          //$toAdd[$id] = array('id' => $id, 'result' => $httpRequests[$url]['format'] == 'json' ? json_decode($resp[$url]['body'], true) : $resp[$url]['body']);
+          $decodedResponse[] = array('id' => $id, 'result' => $toAdd);
         }
       }
     }
@@ -282,12 +282,12 @@ class DataPipelining {
     foreach ($array as $val) {
       if (isset($val['id'])) {
         $key = $val['id'];
-        if (isset($val['data']['list'])) {
-          $result[$key] = $val['data']['list'];
-        } elseif (isset($val['data']['entry'])) {
-          $result[$key] = $val['data']['entry'];
-        } elseif (isset($val['data'])) {
-          $result[$key] = $val['data'];
+        if (isset($val['result']['list'])) {
+          $result[$key] = $val['result']['list'];
+        } elseif (isset($val['result']['entry'])) {
+          $result[$key] = $val['result']['entry'];
+        } elseif (isset($val['result'])) {
+          $result[$key] = $val['result'];
         }
       }
     }

@@ -18,7 +18,7 @@
 package org.apache.shindig.social.opensocial.model;
 
 /**
-   * public java.lang.Enum for opensocial.Enum.NetworkPresence.
+ * public java.lang.Enum for opensocial.Enum.NetworkPresence.
  */
 public enum NetworkPresence implements org.apache.shindig.protocol.model.Enum.EnumKey {
   /** Currently Online. */

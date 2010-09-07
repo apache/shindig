@@ -22,6 +22,7 @@ import org.apache.shindig.common.servlet.InjectedServlet;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
+import org.apache.shindig.gadgets.uri.AccelUriManager;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -34,6 +35,8 @@ import java.util.logging.Logger;
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
+ *
+ * @since 2.0.0
  */
 public class HtmlAccelServlet extends InjectedServlet {
   private static final long serialVersionUID = -424353123863813052L;
@@ -61,6 +64,7 @@ public class HtmlAccelServlet extends InjectedServlet {
     }
     
     HttpRequest req = ServletUtil.fromHttpServletRequest(request);
+    req.setContainer(AccelUriManager.CONTAINER);
     HttpResponse response = null;
     try {
       response = accelHandler.fetch(req);

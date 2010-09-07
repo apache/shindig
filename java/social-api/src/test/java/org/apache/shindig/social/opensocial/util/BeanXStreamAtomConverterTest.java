@@ -163,8 +163,8 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + " <osearch:startIndex>0</osearch:startIndex> "
         + " <osearch:totalResults>2</osearch:totalResults> "
         + " <osearch:itemsPerPage>2</osearch:itemsPerPage></feed> ";
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
   @Test
@@ -185,8 +185,8 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "  <osearch:startIndex>0</osearch:startIndex>"
         + "  <osearch:totalResults>2</osearch:totalResults>"
         + "  <osearch:itemsPerPage>2</osearch:itemsPerPage></feed>";
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
   @Test
@@ -200,8 +200,8 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
 
     List<List<String>> emptyLists = Lists.newArrayList();
     List<String> emptyList = Lists.newArrayList();
@@ -216,8 +216,8 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage></feed>";
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 
   @Test
@@ -276,7 +276,7 @@ public class BeanXStreamAtomConverterTest extends Assert {
         + "<osearch:startIndex>0</osearch:startIndex>"
         + "<osearch:totalResults>1</osearch:totalResults>"
         + "<osearch:itemsPerPage>1</osearch:itemsPerPage>" + "</feed>";
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLAssert.assertXMLEqual(expectedXml, xml);
+    XMLUnit.setIgnoreWhitespace(true);
+    XMLAssert.assertXMLEqual(expectedXml, xml);
   }
 }

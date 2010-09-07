@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
+import com.google.common.base.Objects;
 import org.apache.shindig.common.xml.DomUtil;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
@@ -34,6 +35,8 @@ import java.util.List;
  * in all but the most pathological (JS manipulating CSS through stylesheets
  * in an order-dependent way) cases while reducing browser reflows and making
  * CSS concatenated-proxying more likely.
+ *
+ * @since 2.0.0
  */
 public class StyleAdjacencyVisitor implements Visitor {
   
@@ -42,8 +45,8 @@ public class StyleAdjacencyVisitor implements Visitor {
         ("style".equalsIgnoreCase(node.getNodeName()) ||
          ("link".equalsIgnoreCase(node.getNodeName()) &&
           ("stylesheet".equalsIgnoreCase(getAttrib(node, "rel")) ||
-           (getAttrib(node, "type").toLowerCase().contains("css")))))) {
-      // Reserve <style...>, <link rel="stylesheet"...>, or <link type="*css*"...>
+           ("text/css".equalsIgnoreCase(getAttrib(node, "type"))))))) {
+      // Reserve <style...>, <link rel="stylesheet"...>, or <link type="text/css"...>
       return VisitStatus.RESERVE_TREE;
     }
     
@@ -59,12 +62,26 @@ public class StyleAdjacencyVisitor implements Visitor {
       // Should never occur; do for paranoia's sake.
       return false;
     }
-    
-    for (Node node : nodes) {
-      // Append all at the end of head. Relative order is maintained.
-      head.appendChild(node.getParentNode().removeChild(node));
+
+    // Detach nodes
+    for (Node n : nodes) {
+      n.getParentNode().removeChild(n);
     }
-    
+
+    // Add nodes back to DOM
+    if (head.getFirstChild() == null) {
+      // add each node to head
+      for (Node n : nodes) {
+        head.appendChild(n);
+      }
+    } else {
+      // existing nodes in head, inject all nodes before the first one
+      Node firstChild = head.getFirstChild();
+      for (Node n : nodes) {
+        head.insertBefore(n, firstChild);
+      }
+    }
+
     return true;
   }
 
@@ -78,6 +95,6 @@ public class StyleAdjacencyVisitor implements Visitor {
         break;
       }
     }
-    return value == null ? "" : value;
+    return Objects.firstNonNull(value, "");
   }
 }

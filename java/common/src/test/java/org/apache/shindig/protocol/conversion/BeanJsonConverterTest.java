@@ -17,7 +17,7 @@
  */
 package org.apache.shindig.protocol.conversion;
 
-import org.apache.shindig.protocol.model.TestModel;
+import org.apache.shindig.protocol.model.Model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -113,19 +113,19 @@ public class BeanJsonConverterTest extends Assert {
     String carJson = "{engine:[{value:DIESEL},{value:TURBO}],parkingTickets:{SF:$137,NY:'$301'}," +
             "passengers:[{gender:female,name:'Mum'}, {gender:male,name:'Dad'}]}";
 
-    TestModel.Car car = beanJsonConverter.convertToObject(carJson, TestModel.Car.class);
-    ArrayList<TestModel.Engine> engineInfo = Lists.newArrayList(TestModel.Engine.DIESEL,
-        TestModel.Engine.TURBO);
+    Model.Car car = beanJsonConverter.convertToObject(carJson, Model.Car.class);
+    ArrayList<Model.Engine> engineInfo = Lists.newArrayList(Model.Engine.DIESEL,
+        Model.Engine.TURBO);
     for (int i = 0; i < car.getEngine().size(); i++) {
       assertEquals(car.getEngine().get(i).getValue(), engineInfo.get(i));
     }
 
     assertEquals(car.getParkingTickets(), ImmutableMap.of("SF", "$137", "NY", "$301"));
-    TestModel.Passenger mum = car.getPassengers().get(0);
-    assertEquals(TestModel.Gender.female, mum.getGender());
+    Model.Passenger mum = car.getPassengers().get(0);
+    assertEquals(Model.Gender.female, mum.getGender());
     assertEquals("Mum", mum.getName());
-    TestModel.Passenger dad = car.getPassengers().get(1);
-    assertEquals(TestModel.Gender.male, dad.getGender());
+    Model.Passenger dad = car.getPassengers().get(1);
+    assertEquals(Model.Gender.male, dad.getGender());
     assertEquals("Dad", dad.getName());
   }
 

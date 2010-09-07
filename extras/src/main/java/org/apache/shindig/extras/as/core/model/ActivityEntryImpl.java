@@ -23,119 +23,148 @@ import java.util.List;
 import org.apache.shindig.extras.as.opensocial.model.ActivityEntry;
 import org.apache.shindig.extras.as.opensocial.model.ActivityObject;
 
+/**
+ * A simple bean implementation of an ActivityStream Entry.
+ *
+ */
 public class ActivityEntryImpl implements ActivityEntry {
 
-	private String icon;
-	private String time;
-	private ActivityObject actor;
-	private List<String> verb;
-	private ActivityObject object;
-	private ActivityObject target;
-	private ActivityObject generator;
-	private ActivityObject serviceProvider;
-	private String title;
-	private String body;
-	private List<String> standardLink;
-	
-	public ActivityEntryImpl() {
-		this.icon = null;
-		this.time = null;
-		this.actor = null;
-		this.verb = null;
-		this.object = null;
-		this.target = null;
-		this.generator = null;
-		this.serviceProvider = null;
-		this.title = null;
-		this.body = null;
-		this.standardLink = null;
-	}
+  private String icon;
+  private String time;
+  private ActivityObject actor;
+  private List<String> verb;
+  private ActivityObject object;
+  private ActivityObject target;
+  private ActivityObject generator;
+  private ActivityObject serviceProvider;
+  private String title;
+  private String body;
+  private List<String> standardLink;
+  
+  /**
+   * Create a new empty ActivityEntry
+   */
+  public ActivityEntryImpl() {
+    this.icon = null;
+    this.time = null;
+    this.actor = null;
+    this.verb = null;
+    this.object = null;
+    this.target = null;
+    this.generator = null;
+    this.serviceProvider = null;
+    this.title = null;
+    this.body = null;
+    this.standardLink = null;
+  }
 
-	public String getIcon() {
-		return icon;
-	}
+  /** {@inheritDoc} */
+  public String getIcon() {
+    return icon;
+  }
 
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
+  /** {@inheritDoc} */
+  public void setIcon(String icon) {
+    this.icon = icon;
+  }
 
-	public String getTime() {
-		return time;
-	}
+  /** {@inheritDoc} */
+  public String getTime() {
+    return time;
+  }
 
-	public void setTime(String time) {
-		this.time = time;
-	}
+  /** {@inheritDoc} */
+  public void setTime(String time) {
+    this.time = time;
+  }
 
-	public ActivityObject getActor() {
-		return actor;
-	}
+  /** {@inheritDoc} */
+  public ActivityObject getActor() {
+    return actor;
+  }
 
-	public void setActor(ActivityObject actor) {
-		this.actor = actor;
-	}
+  /** {@inheritDoc} */
+  public void setActor(ActivityObject actor) {
+    this.actor = actor;
+  }
 
-	public List<String> getVerb() {
-		return verb;
-	}
+  /** {@inheritDoc} */
+  public List<String> getVerb() {
+    return verb;
+  }
 
-	public void setVerb(List<String> verb) {
-		this.verb = verb;
-	}
+  /** {@inheritDoc} */
+  public void setVerb(List<String> verb) {
+    this.verb = verb;
+  }
 
-	public ActivityObject getObject() {
-		return object;
-	}
+  /** {@inheritDoc} */
+  public ActivityObject getObject() {
+    return object;
+  }
 
-	public void setObject(ActivityObject object) {
-		this.object = object;
-	}
+  /** {@inheritDoc} */
+  public void setObject(ActivityObject object) {
+    this.object = object;
+  }
 
-	public ActivityObject getTarget() {
-		return target;
-	}
+  /** {@inheritDoc} */
+  public ActivityObject getTarget() {
+    return target;
+  }
 
-	public void setTarget(ActivityObject target) {
-		this.target = target;
-	}
+  /** {@inheritDoc} */
+  public void setTarget(ActivityObject target) {
+    this.target = target;
+  }
 
-	public ActivityObject getGenerator() {
-		return generator;
-	}
+  /** {@inheritDoc} */
+  public ActivityObject getGenerator() {
+    return generator;
+  }
 
-	public void setGenerator(ActivityObject generator) {
-		this.generator = generator;
-	}
+  /** {@inheritDoc} */
+  public void setGenerator(ActivityObject generator) {
+    this.generator = generator;
+  }
 
-	public ActivityObject getServiceProvider() {
-		return serviceProvider;
-	}
+  /** {@inheritDoc} */
+  public ActivityObject getServiceProvider() {
+    return serviceProvider;
+  }
 
-	public void setServiceProvider(ActivityObject serviceProvider) {
-		this.serviceProvider = serviceProvider;
-	}
+  /** {@inheritDoc} */
+  public void setServiceProvider(ActivityObject serviceProvider) {
+    this.serviceProvider = serviceProvider;
+  }
 
-	public String getTitle() {
-		return title;
-	}
+  /** {@inheritDoc} */
+  public String getTitle() {
+    return title;
+  }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+  /** {@inheritDoc} */
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-	public String getBody() {
-		return body;
-	}
+  /** {@inheritDoc} */
+  public String getBody() {
+    return body;
+  }
 
-	public void setBody(String body) {
-		this.body = body;
-	}
+  /** {@inheritDoc} */
+  public void setBody(String body) {
+    this.body = body;
+  }
 
-	public List<String> getStandardLink() {
-		return standardLink;
-	}
+  /** {@inheritDoc} */
+  public List<String> getStandardLink() {
+    return standardLink;
+  }
 
-	public void setStandardLink(List<String> standardLink) {
-		this.standardLink = standardLink;
-	}
+  /** {@inheritDoc} */
+  public void setStandardLink(List<String> standardLink) {
+    this.standardLink = standardLink;
+  }
 }

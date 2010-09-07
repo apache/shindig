@@ -17,15 +17,18 @@
  */
 package org.apache.shindig.gadgets.rewrite;
 
-import static org.junit.Assert.assertEquals;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.config.AbstractContainerConfig;
+import org.apache.shindig.config.ContainerConfig;
+import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
 import org.apache.shindig.gadgets.parse.caja.CajaCssParser;
-import org.apache.shindig.gadgets.uri.PassthruManager;
+import org.apache.shindig.gadgets.uri.DefaultProxyUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -33,17 +36,47 @@ import org.junit.Test;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
 
 /**
- *
+ * Tests for CssResponseRewriter.
  */
 public class CssResponseRewriterTest extends RewriterTestBase {
+  private static class FakeContainerConfig extends AbstractContainerConfig {
+    private Map<String, Map<String, Object>> containers = new HashMap<String, Map<String, Object>>();
+
+    private FakeContainerConfig() {
+      containers.put(ContainerConfig.DEFAULT_CONTAINER, ImmutableMap.<String, Object>builder()
+        .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.test.com")
+        .put(DefaultProxyUriManager.PROXY_PATH_PARAM, "/dir/proxy")
+        .build());
+
+      containers.put(MOCK_CONTAINER, ImmutableMap.<String, Object>builder()
+        .put(DefaultProxyUriManager.PROXY_HOST_PARAM, "www.mock.com")
+        .build());
+    }
+
+    @Override
+    public Object getProperty(String container, String name) {
+      Map<String, Object> data = containers.get(container);
+
+      //if there is no value by this key inherit from default
+      if (!data.containsKey(name)) {
+        data = containers.get(ContainerConfig.DEFAULT_CONTAINER);
+      }
+
+      return data.get(name);
+    }
+  }
+
   private CssResponseRewriter rewriter;
   private CssResponseRewriter rewriterNoOverrideExpires;
   private Uri dummyUri;
+  private GadgetContext gadgetContext;
   private ProxyUriManager proxyUriManager;
   private ContentRewriterFeature.Factory factory;
 
@@ -60,7 +93,8 @@ public class CssResponseRewriterTest extends RewriterTestBase {
             return overrideFeatureNoOverrideExpires;
           }
         };
-    proxyUriManager = new PassthruManager("www.test.com", "/dir/proxy");
+    ContainerConfig config = new FakeContainerConfig();
+    proxyUriManager = new DefaultProxyUriManager(config, null);
     rewriterNoOverrideExpires = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factoryNoOverrideExpires);
     final ContentRewriterFeature.Config overrideFeature =
@@ -75,6 +109,12 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     dummyUri = Uri.parse("http://www.w3c.org");
+    gadgetContext = new GadgetContext() {
+      @Override
+      public Uri getUrl() {
+        return dummyUri;
+      }
+    };
   }
 
   @Test
@@ -120,7 +160,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic.css"));
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
-    expected = expected.replace("fp=1150739864", "fp=1150739864&nocache=1");
+    expected = expected.replace("nocache=0", "nocache=1");
     HttpRequest request = new HttpRequest(Uri.parse("http://www.example.org/path/rewritebasic.css"));
     request.setMethod("GET");
     request.setGadget(SPEC_URL);
@@ -141,7 +181,7 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     String expected = IOUtils.toString(this.getClass().getClassLoader().
         getResourceAsStream("org/apache/shindig/gadgets/rewrite/rewritebasic-expected.css"));
     expected = replaceDefaultWithMockServer(expected);
-    proxyUriManager = new PassthruManager("www.mock.com", "/dir/proxy");
+    expected = expected.replace("container=default", "container=" + MOCK_CONTAINER);
     rewriter = new CssResponseRewriter(new CajaCssParser(),
         proxyUriManager, factory);
     
@@ -189,9 +229,13 @@ public class CssResponseRewriterTest extends RewriterTestBase {
         "div {list-style-image:url('http://a.b.com/bullet.gif');list-style-position:outside;margin:5px;padding:0}\n" +
          ".someid {background-image:url(http://a.b.com/bigimg.png);float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     String rewritten =
-        "div {list-style-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbullet.gif');\n"
+        "div {list-style-image:url('//www.test.com/dir/proxy?container=default"
+            + "&gadget=http%3A%2F%2Fwww.w3c.org&debug=0&nocache=0"
+            + "&url=http%3A%2F%2Fa.b.com%2Fbullet.gif');\n"
             + "list-style-position:outside;margin:5px;padding:0}\n"
-            + ".someid {background-image:url('http://www.test.com/dir/proxy?url=http%3A%2F%2Fa.b.com%2Fbigimg.png');\n"
+            + ".someid {background-image:url('//www.test.com/dir/proxy?container=default"
+            + "&gadget=http%3A%2F%2Fwww.w3c.org&debug=0&nocache=0" 
+            + "&url=http%3A%2F%2Fa.b.com%2Fbigimg.png');\n"
             + "float:right;width:165px;height:23px;margin-top:4px;margin-left:5px}";
     validateRewritten(original, rewritten);
   }
@@ -210,7 +254,8 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
-          CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
+            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw,
+            true, gadgetContext);
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(sw.toString()));
     assertEquals(Lists.newArrayList("www.example.org/some.css",
@@ -225,7 +270,8 @@ public class CssResponseRewriterTest extends RewriterTestBase {
     StringWriter sw = new StringWriter();
     List<String> stringList = rewriter
         .rewrite(new StringReader(original), dummyUri,
-          CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw, true);
+            CssResponseRewriter.uriMaker(proxyUriManager, defaultRewriterFeature), sw,
+            true, gadgetContext);
     assertEquals(StringUtils.deleteWhitespace(expected),
         StringUtils.deleteWhitespace(sw.toString()));
     assertEquals(Lists.newArrayList("www.example.org/some.css"), stringList);

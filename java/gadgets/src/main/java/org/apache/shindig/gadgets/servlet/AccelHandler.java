@@ -20,6 +20,7 @@ package org.apache.shindig.gadgets.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
@@ -43,15 +44,12 @@ import java.io.IOException;
 /**
  * Handles requests for accel servlet.
  * The objective is to accelerate web pages.
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class AccelHandler {
   static final String ERROR_FETCHING_DATA = "Error fetching data";
-
-  // TODO: parameterize these.
-  static final Integer LONG_LIVED_REFRESH = (365 * 24 * 60 * 60);  // 1 year
-  static final Integer DEFAULT_REFRESH = (60 * 60);                // 1 hour
-
   protected final RequestPipeline requestPipeline;
   protected final ResponseRewriterRegistry contentRewriterRegistry;
   protected final AccelUriManager uriManager;
@@ -74,7 +72,7 @@ public class AccelHandler {
     // TODO: Handle if modified since headers.
 
     // Parse and normalize to get a proxied request uri.
-    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request.getUri());
+    ProxyUriManager.ProxyUri proxyUri = getProxyUri(request);
 
     // Fetch the content of the requested uri.
     HttpRequest req = buildHttpRequest(request, proxyUri);
@@ -117,26 +115,29 @@ public class AccelHandler {
 
   /**
    * Returns the proxy uri encapsulating the request uri.
-   * @param requestUri The request uri.
+   * @param httpRequest The http request.
    * @return The proxy uri encapsulating the request uri.
    * @throws GadgetException In case of errors.
    */
-  public ProxyUriManager.ProxyUri getProxyUri(Uri requestUri) throws GadgetException {
-    Uri proxiedUri = uriManager.parseAndNormalize(requestUri);
+  public ProxyUriManager.ProxyUri getProxyUri(HttpRequest httpRequest) throws GadgetException {
+    Uri proxiedUri = uriManager.parseAndNormalize(httpRequest);
     String uriString = proxiedUri.getQueryParameter(UriCommon.Param.URL.getKey());
 
     // Throw BAD_GATEWAY in case parsing of url fails.
-    Uri normalizedUri;
+    Uri requestedResource;
     try {
-      normalizedUri = Uri.parse(uriString);
+      requestedResource = Uri.parse(uriString);
     } catch (Uri.UriException e) {
       throw new GadgetException(GadgetException.Code.INTERNAL_SERVER_ERROR,
                                 "Failed to parse uri: " + uriString,
                                 HttpResponse.SC_BAD_GATEWAY);
     }
 
-    Gadget gadget = DomWalker.makeGadget(requestUri);
-    return new ProxyUriManager.ProxyUri(gadget, normalizedUri);
+    Gadget gadget = DomWalker.makeGadget(httpRequest);
+    ProxyUriManager.ProxyUri proxyUri = new ProxyUriManager.ProxyUri(gadget, requestedResource);
+    proxyUri.setHtmlTagContext(proxiedUri.getQueryParameter(
+        UriCommon.Param.HTML_TAG_CONTEXT.getKey()));
+    return proxyUri;
   }
 
   /**

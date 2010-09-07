@@ -44,6 +44,8 @@ import java.util.Map;
  *     dd if=/dev/random bs=32 count=1  | openssl base64 > /tmp/key.txt
  * </pre>
  * Wire format is "&lt;container&gt;:&lt;encrypted-and-signed-token&gt;"
+ *
+ * @since 2.0.0
  */
 @Singleton
 public class BlobCrypterSecurityTokenCodec implements SecurityTokenCodec {

@@ -35,6 +35,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.inject.Inject;
 
+/**
+ * RPC/REST handler for all Messages requests
+ */
 @Service(name = "messages", path="/{userId}+/{msgCollId}/{messageIds}+")
 public class MessageHandler {
 

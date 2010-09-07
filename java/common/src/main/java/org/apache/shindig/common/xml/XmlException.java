@@ -17,6 +17,9 @@
  */
 package org.apache.shindig.common.xml;
 
+/**
+ * Exception throw by shindig XML parsing utility routines
+ */
 public class XmlException extends Exception {
   public XmlException(String message, Exception cause) {
     super(message, cause);

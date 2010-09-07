@@ -30,6 +30,8 @@ import java.util.List;
 /**
  * Response rewriter registry for accel servlet. Encapsulates response rewriters
  * that should be applied for Accel servlet.
+ *
+ * @since 2.0.0
  */
 public class AccelResponseRewriterRegistry extends DefaultResponseRewriterRegistry {
   @Inject

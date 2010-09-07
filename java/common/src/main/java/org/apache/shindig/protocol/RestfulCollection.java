@@ -19,6 +19,9 @@ package org.apache.shindig.protocol;
 
 import java.util.List;
 
+/**
+ * Data structure representing a Rest response.
+ */
 public class RestfulCollection<T> {
   private List<T> entry;
   private int startIndex;

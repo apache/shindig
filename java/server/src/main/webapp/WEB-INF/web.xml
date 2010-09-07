@@ -43,6 +43,30 @@
     </param-value>
   </context-param>
 
+  <!-- 
+  Syntax: <key>=<value> separated by a newline
+  
+  system.properties specifies the environmental variables that will be set to the JVM System Properties at server startup time.
+  Alternatively, you may add these values in your app server (ex: Tomcat) as
+  VM arguments like this: -Dshindig.host="my.production.shindig.server.com".
+  
+  Here are a few properties that can be set for Shindig:
+  shindig.host: the server name that Shindig is deployed and running on
+  shindig.port: the port number of shindig.host server
+  
+  Make sure you escape all HTML values for the web.xml to be parsed correctly.
+  -->
+   <context-param>
+  	<param-name>system.properties</param-name>
+     <param-value>
+    	shindig.host=localhost
+    	
+    	aKey=/shindig/gadgets/proxy?container=default&amp;url=
+    	shindig.port=
+    	
+     </param-value>
+  </context-param>  
+
     <filter>
         <filter-name>ShiroFilter</filter-name>
         <filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class>
@@ -56,9 +80,7 @@
                 [main]
                 shindigSampleRealm = org.apache.shindig.sample.shiro.SampleShiroRealm
                 securityManager.realm = $shindigSampleRealm
-
-                [filters]
-                shiro.loginUrl = /login.jsp
+                authc.loginUrl = /login.jsp
 
                 [urls]
                 # The /login.jsp is not restricted to authenticated users (otherwise no one could log in!), but

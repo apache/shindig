@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+/**
+ * Converts to/from XML format using XStream
+ */
 public class BeanXStreamConverter implements BeanConverter {
   public static final String XML_DECL = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
   private static final XStreamConfiguration.ConverterSet[] MAPPER_SCOPES = {

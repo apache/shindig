@@ -23,6 +23,8 @@ import com.google.inject.util.Providers;
 
 /**
  * Provides default configuration and bindings for Uri classes.
+ *
+ * @since 2.0.0
  */
 public class UriModule extends AbstractModule {
 

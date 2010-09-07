@@ -34,6 +34,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Default implementation of a ConcatUriManager
+ * 
+ * @since 2.0.0
+ */
 public class DefaultConcatUriManager implements ConcatUriManager {
   public static final String CONCAT_HOST_PARAM = "gadgets.uri.concat.host";
   public static final String CONCAT_PATH_PARAM = "gadgets.uri.concat.path";

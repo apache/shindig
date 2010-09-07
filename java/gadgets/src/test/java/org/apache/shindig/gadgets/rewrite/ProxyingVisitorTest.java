@@ -191,5 +191,10 @@ public class ProxyingVisitorTest extends DomWalkerTestBase {
     assertEquals("^!,,|BLARGH", e2.getAttribute("src"));
     assertEquals(rewrittenUri.toString(), e3.getAttribute("src"));
     assertEquals(rewrittenUri.toString(), e4.getAttribute("src"));
+
+    // Test that the html tag context has been correctly filled.
+    assertEquals("script", cap.getValue().get(0).getHtmlTagContext());
+    assertEquals("img", cap.getValue().get(1).getHtmlTagContext());
+    assertEquals("script", cap.getValue().get(2).getHtmlTagContext());
   }
 }

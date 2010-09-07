@@ -30,6 +30,8 @@ import java.util.logging.Logger;
 
 /**
  * Simple rewriter that deletes the base tag from the html document.
+ *
+ * @since 2.0.0
  */
 public class BaseTagRemoverRewriter implements GadgetRewriter, ResponseRewriter {
   private static final Logger logger = Logger.getLogger(BaseTagRemoverRewriter.class.getName());

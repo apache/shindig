@@ -19,11 +19,15 @@ package org.apache.shindig.protocol.conversion;
 
 import java.io.IOException;
 
+/**
+ * Interface for bean conversion classes
+ */
 public interface BeanConverter {
   <T> T convertToObject(String string, Class<T> className);
 
   String convertToString(Object pojo);
 
+  /** @return the content type of the converted data */
   String getContentType();
 
   /**

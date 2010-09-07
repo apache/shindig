@@ -24,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Default implementation of an {@link org.apache.shindig.social.opensocial.model.Activity}
+ */
 public class ActivityImpl implements Activity {
 
   private String appId;
@@ -100,6 +103,7 @@ public class ActivityImpl implements Activity {
     return new Date(updated.getTime());
   }
 
+  /** {@inheritDoc} */
   public void setUpdated(Date updated) {
     if (updated == null) {
       this.updated = null;
@@ -112,6 +116,7 @@ public class ActivityImpl implements Activity {
     return mediaItems;
   }
 
+  /** {@inheritDoc} */
   public void setMediaItems(List<MediaItem> mediaItems) {
     this.mediaItems = mediaItems;
   }
@@ -120,6 +125,7 @@ public class ActivityImpl implements Activity {
     return postedTime;
   }
 
+  /** {@inheritDoc} */
   public void setPostedTime(Long postedTime) {
     this.postedTime = postedTime;
   }
@@ -128,6 +134,7 @@ public class ActivityImpl implements Activity {
     return priority;
   }
 
+  /** {@inheritDoc} */
   public void setPriority(Float priority) {
     this.priority = priority;
   }
@@ -136,6 +143,7 @@ public class ActivityImpl implements Activity {
     return streamFaviconUrl;
   }
 
+  /** {@inheritDoc} */
   public void setStreamFaviconUrl(String streamFaviconUrl) {
     this.streamFaviconUrl = streamFaviconUrl;
   }
@@ -144,6 +152,7 @@ public class ActivityImpl implements Activity {
     return streamSourceUrl;
   }
 
+  /** {@inheritDoc} */
   public void setStreamSourceUrl(String streamSourceUrl) {
     this.streamSourceUrl = streamSourceUrl;
   }
@@ -152,6 +161,7 @@ public class ActivityImpl implements Activity {
     return streamTitle;
   }
 
+  /** {@inheritDoc} */
   public void setStreamTitle(String streamTitle) {
     this.streamTitle = streamTitle;
   }
@@ -160,6 +170,7 @@ public class ActivityImpl implements Activity {
     return streamUrl;
   }
 
+  /** {@inheritDoc} */
   public void setStreamUrl(String streamUrl) {
     this.streamUrl = streamUrl;
   }
@@ -168,6 +179,7 @@ public class ActivityImpl implements Activity {
     return templateParams;
   }
 
+  /** {@inheritDoc} */
   public void setTemplateParams(Map<String, String> templateParams) {
     this.templateParams = templateParams;
   }
@@ -176,6 +188,7 @@ public class ActivityImpl implements Activity {
     return title;
   }
 
+  /** {@inheritDoc} */
   public void setTitle(String title) {
     this.title = title;
   }
@@ -184,6 +197,7 @@ public class ActivityImpl implements Activity {
     return titleId;
   }
 
+  /** {@inheritDoc} */
   public void setTitleId(String titleId) {
     this.titleId = titleId;
   }
@@ -192,6 +206,7 @@ public class ActivityImpl implements Activity {
     return url;
   }
 
+  /** {@inheritDoc} */
   public void setUrl(String url) {
     this.url = url;
   }
@@ -200,6 +215,7 @@ public class ActivityImpl implements Activity {
     return userId;
   }
 
+  /** {@inheritDoc} */
   public void setUserId(String userId) {
     this.userId = userId;
   }

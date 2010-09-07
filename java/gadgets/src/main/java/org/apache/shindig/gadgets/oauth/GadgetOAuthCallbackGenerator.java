@@ -38,43 +38,43 @@ import org.apache.shindig.gadgets.uri.OAuthUriManager;
 
 /**
  * Generates callback URLs for gadgets using OAuth 1.0a.  There are three relevant callback URLs:
- * 
+ *
  * 1) The consumer key callback URL: registered with service providers when they issue OAuth
  *    consumer keys.  Application authors will tell us the callback URL to send to the SP when they
- *    provide us with their consumer key. 
- *    
+ *    provide us with their consumer key.
+ *
  *    The SP will check that the callback URL we send them matches whatever was
  *    preregistered.  It would be nice if they didn't do this, but enough do that we support it.
- *    
+ *
  *    We don't control the consumer key callback URL.  Gadget authors need to make sure that it
  *    always redirect to the shindig-deployment global callback URL.
- *    
+ *
  * 2) Global callback URL: a single callback URL that can be whitelisted by service providers
  *    and shared by all gadgets.  This keeps service providers (and gadget authors) from needing
  *    to be aware of the complexities of which domain a particular gadget actually runs on.
- *    
+ *
  *    The global callback URL always redirects to the gadget-domain callback URL.
- *    
+ *
  * 3) Gadget domain callback URL: URL on the same hostname as the gadget.  This URL will pass
  *    the oauth_verifier token into the gadget for reuse.  (It has to be on the same hostname
  *    so that the same-origin policy allows communication.  We could use gadgets.rpc, except that
  *    because the authorization happens in a popup we've got no good way to do all the gadgets.rpc
  *    bootstrapping.)
- *    
+ *
  * Here's an example of what you might see happen with these URLs:
- * 
+ *
  * Shindig sends request token request to OAuth SP with callback URL of
  *     http://gadgetauthor.com/oauthcallback?cs=<blob>
- *     
+ *
  * User approves access.  OAuth SP redirects to
  *     http://gadgetauthor.com/oauthcallback?cs=<blob>&oauth_verifier=<verifier>
- *     
+ *
  * gadgauthor.com redirects to deployment global callback URL:
  *     http://oauth.shindigexample.com/oauthcallback?cs=<blob>&oauth_verifier=<verifier>
- *     
+ *
  * The global callback URL redirects to a gadget-specific callback URL:
  *     http://12345.smodules.com/oauthcallback?oauth_verifier=<verifier>
- *     
+ *
  * The gadget-specific callback will use window.opener to find the opening gadget and hand it
  * the verified callback URL.
  */

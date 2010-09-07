@@ -35,11 +35,14 @@ import javax.management.MBeanServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Cache interface based on ehcache
+ * @see http://www.ehcache.org
+ */
 public class EhCacheCacheProvider implements CacheProvider {
   private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
   private final CacheManager cacheManager;

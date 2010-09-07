@@ -59,6 +59,8 @@ import java.util.Map;
  * This implementation supports batched versioning as well. The old-style "fp"
  * (fingerprint) parameter is not supported any longer; its functionality is assumed
  * to be subsumed into the version param.
+ *
+ * @since 2.0.0
  */
 public class DefaultProxyUriManager implements ProxyUriManager {
   public static final String PROXY_HOST_PARAM = "gadgets.uri.proxy.host";
@@ -257,7 +259,9 @@ public class DefaultProxyUriManager implements ProxyUriManager {
       status = versioner.validate(uri, container, version);
     }
 
-    return new ProxyUri(status, uri, queryUri);
+    ProxyUri proxied = new ProxyUri(status, uri, queryUri);
+    proxied.setHtmlTagContext(uriIn.getQueryParameter(Param.HTML_TAG_CONTEXT.getKey()));
+    return proxied;
   }
 
   private String getReqConfig(String container, String key) {

@@ -21,6 +21,10 @@ package org.apache.shindig.expressions.jasper;
 import org.apache.shindig.expressions.ShindigTypeConverter;
 import org.json.JSONArray;
 
+/**
+ * Jasper Implementation of a ShindigTypeConverter
+ * @since 2.0.0
+ */
 public class JasperTypeConverter extends ShindigTypeConverter {
 
   @Override

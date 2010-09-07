@@ -23,6 +23,8 @@
  */
 class JsonRpcServlet extends ApiServlet {
 
+  protected $resultKey = 'result';
+
   /**
    * Single request through GET
    * http://api.example.org/rpc?method=people.get&id=myself&userid=@me&groupid=@self
@@ -114,11 +116,11 @@ class JsonRpcServlet extends ApiServlet {
         // FIXME this is a little hacky because of the field names in the RestfulCollection
         $converted->list = $converted->entry;
         unset($converted->entry);
-        $result['result'] = $converted;
+        $result[$this->resultKey] = $converted;
       } elseif ($response instanceof DataCollection) {
-        $result["result"] = $converted->getEntry();
+        $result[$this->resultKey] = $converted->getEntry();
       } else {
-        $result["result"] = $converted;
+        $result[$this->resultKey] = $converted;
       }
     }
     return $result;

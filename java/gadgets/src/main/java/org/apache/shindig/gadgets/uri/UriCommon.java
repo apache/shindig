@@ -18,6 +18,10 @@
  */
 package org.apache.shindig.gadgets.uri;
 
+/**
+ * Common class used for all Uri params.  Makes it very easy to find classes that
+ * use an affected parameter and to insure against duplicates.
+ */
 public interface UriCommon {
   public static final String USER_PREF_PREFIX = "up_";
   public enum Param {
@@ -48,8 +52,12 @@ public interface UriCommon {
     RESIZE_QUALITY("resize_q"),
     NO_EXPAND("no_expand"),
     FALLBACK_URL_PARAM("fallback_url"),
+
     RETURN_ORIGINAL_CONTENT_ON_ERROR("rooe"),
-    
+    // The html tag which requested this proxy uri. For example, "script" when
+    // "<script src='blah.js'></script>" is being proxied.
+    HTML_TAG_CONTEXT("html_tag_context"),
+
     // This is a legacy param, superseded by container.
     @Deprecated
     SYND("synd");

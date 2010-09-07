@@ -19,7 +19,7 @@ package org.apache.shindig.protocol.conversion;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.xml.XmlUtil;
-import org.apache.shindig.protocol.model.TestModel;
+import org.apache.shindig.protocol.model.Model;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -38,12 +37,12 @@ import java.util.Map;
  * Basic test for betwixt based XML conversion
  */
 public class BeanXmlConverterTest extends Assert {
-  private TestModel.Car car;
+  private Model.Car car;
   private BeanXmlConverter beanXmlConverter;
 
   @Before
   public void setUp() throws Exception {
-    car = new TestModel.Car();
+    car = new Model.Car();
     beanXmlConverter = new BeanXmlConverter();
   }
 
@@ -52,7 +51,7 @@ public class BeanXmlConverterTest extends Assert {
     String xml = beanXmlConverter.convertToXml(car);
     XMLUnit.setIgnoreWhitespace(true);
     Diff diff;
-    diff = new Diff(TestModel.Car.DEFAULT_XML, xml);
+    diff = new Diff(Model.Car.DEFAULT_XML, xml);
     diff.overrideElementQualifier(new RecursiveElementNameAndTextQualifier());
     XMLAssert.assertXMLEqual(diff, true);
   }

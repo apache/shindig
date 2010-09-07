@@ -30,6 +30,8 @@ import java.util.logging.Logger;
 
 /**
  * Helper class to update HttpResponse metadata value.
+ *
+ * @since 2.0.0
  */
 public class HttpResponseMetadataHelper {
   public static final String DATA_HASH = "DataHash";

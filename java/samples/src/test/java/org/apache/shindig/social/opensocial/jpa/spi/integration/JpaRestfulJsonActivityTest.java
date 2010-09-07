@@ -41,19 +41,19 @@ public class JpaRestfulJsonActivityTest extends RestfulJsonActivityTest {
    * 
    * @throws Exception the exception
    */
-	@Before
-	public void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
 
-		// Init config
-		Injector injector = JpaRestfulTestConfigHelper.init();
-		this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
-		
-		// Bootstrap hibernate and associated test db, and setup db with test data
-		this.bootstrap = injector.getInstance(SpiDatabaseBootstrap.class);
+    // Init config
+    Injector injector = JpaRestfulTestConfigHelper.init();
+    this.setServlet(JpaRestfulTestConfigHelper.getDataServiceServlet(injector));
+    
+    // Bootstrap hibernate and associated test db, and setup db with test data
+    this.bootstrap = injector.getInstance(SpiDatabaseBootstrap.class);
     this.bootstrap.init();
-	}
-	
-	@After
+  }
+  
+  @After
   public void tearDown() throws Exception {
     this.bootstrap.tearDown();
   }

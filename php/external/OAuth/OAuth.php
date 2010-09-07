@@ -820,6 +820,13 @@ class OAuthUtil {
       $parameter = OAuthUtil::urldecode_rfc3986($split[0]);
       $value = isset($split[1]) ? OAuthUtil::urldecode_rfc3986($split[1]) : '';
 
+      // if we received an empty parameter (can happen with sth like "...php?&key=v..."
+      // which we do not send with our signedrequests, we omit it from the signature
+      // as well
+      if (! $parameter) {
+          continue;
+      }
+
       if (isset($parsed_parameters[$parameter])) {
         // We have already recieved parameter(s) with this name, so add to the list
         // of parameters with this name

@@ -21,6 +21,9 @@ package org.apache.shindig.gadgets.rewrite;
 import org.apache.shindig.gadgets.http.HttpRequest;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.http.HttpResponseBuilder;
+import org.apache.shindig.gadgets.uri.UriCommon;
+
+import javax.annotation.Nullable;
 
 /**
  * Various utility functions used by rewriters
@@ -32,10 +35,23 @@ public final class RewriterUtils {
     String mimeType = getMimeType(request, original);
     return mimeType != null && (mimeType.contains("html"));
   }
-  
+
   public static boolean isHtml(HttpRequest request, HttpResponseBuilder original) {
     String mimeType = getMimeType(request, original);
-    return mimeType != null && (mimeType.contains("html"));
+    return mimeType != null && (mimeType.contains("html")) &&
+           maybeAcceptHtml(request.getParam(UriCommon.Param.HTML_TAG_CONTEXT.getKey()));
+  }
+
+  /**
+   * Returns true if the given html tag can accept text/html data. For now,
+   * all html tags other than "script" are treated as html accepting tags.
+   *
+   * @param htmlTagName The html tag in question.
+   * @return True if {@code htmlTagName} accepts text/html data, false
+   *   otherwise.
+   */
+  public static boolean maybeAcceptHtml(@Nullable String htmlTagName) {
+    return !"script".equalsIgnoreCase(htmlTagName);
   }
 
   public static boolean isCss(HttpRequest request, HttpResponse original) {
@@ -48,6 +64,7 @@ public final class RewriterUtils {
     return mimeType != null && mimeType.contains("css");
   }
 
+  // TODO: Also check if the HTML_TAG_CONTEXT is script.
   public static boolean isJavascript(HttpRequest request, HttpResponse original) {
     String mimeType = getMimeType(request, original);
     return mimeType != null && mimeType.contains("javascript");

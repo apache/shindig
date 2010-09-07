@@ -30,6 +30,11 @@ import org.apache.shindig.gadgets.uri.ProxyUriManager;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Extracts style tags
+ *
+ * @since 2.0.0
+ */
 public class StyleTagExtractorContentRewriter extends DomWalker.Rewriter {
   private final ContentRewriterFeature.Factory featureConfigFactory;
   private final ProxyUriManager proxyUriManager;

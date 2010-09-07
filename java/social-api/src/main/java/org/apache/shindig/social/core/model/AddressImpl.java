@@ -19,6 +19,9 @@ package org.apache.shindig.social.core.model;
 
 import org.apache.shindig.social.opensocial.model.Address;
 
+/**
+ * Default representation of an {@link org.apache.shindig.social.opensocial.model.Address}
+ */
 public class AddressImpl implements Address {
   private String country;
   private Float latitude;
@@ -41,6 +44,7 @@ public class AddressImpl implements Address {
     return country;
   }
 
+  /** {@inheritDoc} */
   public void setCountry(String country) {
     this.country = country;
   }
@@ -49,6 +53,7 @@ public class AddressImpl implements Address {
     return latitude;
   }
 
+  /** {@inheritDoc} */
   public void setLatitude(Float latitude) {
     this.latitude = latitude;
   }
@@ -57,6 +62,7 @@ public class AddressImpl implements Address {
     return locality;
   }
 
+  /** {@inheritDoc} */
   public void setLocality(String locality) {
     this.locality = locality;
   }
@@ -65,6 +71,7 @@ public class AddressImpl implements Address {
     return longitude;
   }
 
+  /** {@inheritDoc} */
   public void setLongitude(Float longitude) {
     this.longitude = longitude;
   }
@@ -73,6 +80,7 @@ public class AddressImpl implements Address {
     return postalCode;
   }
 
+  /** {@inheritDoc} */
   public void setPostalCode(String postalCode) {
     this.postalCode = postalCode;
   }
@@ -81,6 +89,7 @@ public class AddressImpl implements Address {
     return region;
   }
 
+  /** {@inheritDoc} */
   public void setRegion(String region) {
     this.region = region;
   }
@@ -89,6 +98,7 @@ public class AddressImpl implements Address {
     return streetAddress;
   }
 
+  /** {@inheritDoc} */
   public void setStreetAddress(String streetAddress) {
     this.streetAddress = streetAddress;
   }
@@ -97,6 +107,7 @@ public class AddressImpl implements Address {
     return type;
   }
 
+  /** {@inheritDoc} */
   public void setType(String type) {
     this.type = type;
   }
@@ -105,6 +116,7 @@ public class AddressImpl implements Address {
     return formatted;
   }
 
+  /** {@inheritDoc} */
   public void setFormatted(String formatted) {
     this.formatted = formatted;
   }
@@ -113,6 +125,7 @@ public class AddressImpl implements Address {
     return primary;
   }
 
+  /** {@inheritDoc} */
   public void setPrimary(Boolean primary) {
     this.primary = primary;
   }

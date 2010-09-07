@@ -19,11 +19,6 @@
 
 package org.apache.shindig.config;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.shindig.common.JsonSerializer;
-import org.apache.shindig.common.util.ResourceLoader;
-import org.apache.shindig.expressions.Expressions;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -31,6 +26,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.shindig.common.JsonSerializer;
+import org.apache.shindig.common.util.ResourceLoader;
+import org.apache.shindig.expressions.Expressions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,12 +43,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
-
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ValueExpression;
@@ -72,11 +70,16 @@ public class JsonContainerConfig extends AbstractContainerConfig {
   public static final String PARENT_KEY = "parent";
   // TODO: Rename this to simply "container", gadgets.container is unnecessary.
   public static final String CONTAINER_KEY = "gadgets.container";
+  public static final String SERVER_PORT = "SERVER_PORT";
+  public static final String SERVER_HOST = "SERVER_HOST";
 
   private final Map<String, Map<String, Object>> config;
   private final Expressions expressions;
 
   private static final Pattern CRLF_PATTERN = Pattern.compile("[\r\n]+");
+
+  private final String host;
+  private final String port;
 
   // Used by tests
   public JsonContainerConfig(String containers, Expressions expressions) throws ContainerConfigException {
@@ -93,13 +96,10 @@ public class JsonContainerConfig extends AbstractContainerConfig {
                              Expressions expressions)
       throws ContainerConfigException {
     this.expressions = expressions;
+    this.host = host;
+    this.port = port;
+
     JSONObject configJson = loadContainers(containers);
-    try {
-      configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_PORT", port);
-      configJson.getJSONObject(ContainerConfig.DEFAULT_CONTAINER).put("SERVER_HOST", host);
-    } catch (JSONException e) {
-      // ignore
-    }
     config = createContainers(configJson);
     init();
   }
@@ -109,6 +109,8 @@ public class JsonContainerConfig extends AbstractContainerConfig {
    */
   public JsonContainerConfig(JSONObject json, Expressions expressions) {
     this.expressions = expressions;
+    host = null;
+    port = null;
     config = createContainers(json);
     init();
   }
@@ -373,6 +375,15 @@ public class JsonContainerConfig extends AbstractContainerConfig {
           File file = new File(location);
           loadFiles(new File[]{file}, all);
         }
+      }
+
+      // Add {@code SERVER_HOST} and {@code SERVER_PORT} environment to default
+      // container.
+      try {
+        all.getJSONObject(DEFAULT_CONTAINER).put(SERVER_PORT, port);
+        all.getJSONObject(DEFAULT_CONTAINER).put(SERVER_HOST, host);
+      } catch (JSONException e) {
+        // ignore
       }
 
       // Now that all containers are loaded, we go back through them and merge

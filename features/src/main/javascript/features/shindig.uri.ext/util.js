@@ -53,7 +53,7 @@ shindig.uri = (function() {
     }
     var selfPath = self.getPath();
     if (selfPath == '' || selfPath[0] != '/') {
-      var basePath = base.getPath();
+      var basePath = base.getPath(); 
       var lastSlash = basePath.lastIndexOf('/');
       if (lastSlash != -1) {
         basePath = basePath(0, lastSlash + 1);
@@ -72,4 +72,4 @@ shindig.uri = (function() {
     };
     return self;
   };
-});
+})();

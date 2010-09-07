@@ -19,7 +19,9 @@ package org.apache.shindig.social.sample;
 
 import org.apache.shindig.social.opensocial.oauth.OAuthDataStore;
 import org.apache.shindig.social.opensocial.spi.ActivityService;
+import org.apache.shindig.social.opensocial.spi.AlbumService;
 import org.apache.shindig.social.opensocial.spi.AppDataService;
+import org.apache.shindig.social.opensocial.spi.MediaItemService;
 import org.apache.shindig.social.opensocial.spi.MessageService;
 import org.apache.shindig.social.opensocial.spi.PersonService;
 import org.apache.shindig.social.sample.oauth.SampleOAuthDataStore;
@@ -41,10 +43,11 @@ public class SampleModule extends AbstractModule {
     bind(String.class).annotatedWith(Names.named("shindig.canonical.json.db"))
         .toInstance("sampledata/canonicaldb.json");
     bind(ActivityService.class).to(JsonDbOpensocialService.class);
+    bind(AlbumService.class).to(JsonDbOpensocialService.class);
+    bind(MediaItemService.class).to(JsonDbOpensocialService.class);
     bind(AppDataService.class).to(JsonDbOpensocialService.class);
     bind(PersonService.class).to(JsonDbOpensocialService.class);
     bind(MessageService.class).to(JsonDbOpensocialService.class);
-    
     bind(OAuthDataStore.class).to(SampleOAuthDataStore.class);
   }
 }
