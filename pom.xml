@@ -712,6 +712,7 @@
                 <exclude>php/test/misc/rewriter*.js</exclude>
                 <exclude>php/test/misc/*.html</exclude>
                 <exclude>php/test/misc/*.xml</exclude>
+                <exclude>php/test/certs/*</exclude>
                 <exclude>BUILD-JAVA</exclude>
                 <exclude>COMMITTERS</exclude>
                 <exclude>UPGRADING</exclude>
