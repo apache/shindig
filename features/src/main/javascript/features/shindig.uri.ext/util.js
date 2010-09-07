@@ -52,11 +52,11 @@ shindig.uri = (function() {
       self.setAuthority(base.getAuthority());
     }
     var selfPath = self.getPath();
-    if (selfPath == '' || selfPath[0] != '/') {
+    if (selfPath == '' || selfPath.charAt(0) != '/') {
       var basePath = base.getPath(); 
       var lastSlash = basePath.lastIndexOf('/');
       if (lastSlash != -1) {
-        basePath = basePath(0, lastSlash + 1);
+        basePath = basePath.substring(0, lastSlash + 1);
       }
       self.setPath(base.getPath() + selfPath);
     }
