@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 
 /**
  * Cache interface based on ehcache
- * @see http://www.ehcache.org
+ * @see <a href="http://www.ehcache.org">http://www.ehcache.org</a>
  */
 public class EhCacheCacheProvider implements CacheProvider {
   private static final Logger LOG = Logger.getLogger(EhCacheCacheProvider.class.getName());
