@@ -184,6 +184,7 @@ gadgets.config = function() {
             return true;
           }
         }
+        return false;
       };
     },
 

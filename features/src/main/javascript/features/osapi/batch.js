@@ -52,8 +52,8 @@
     var add = function(key, request) {
       if (request && key) {
         keyedRequests.push({"key" : key, "request" : request});
-        return that;
       }
+      return that;
     };
 
     /**

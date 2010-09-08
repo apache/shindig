@@ -33,9 +33,9 @@
   <description>Provides extra, deprecated or extended functionality. The items here have unstable APIs and could change at any time.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/java/extras</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/java/extras</developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0/java/extras</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/extras</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/extras</developerConnection>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0/extras</url>
   </scm>
 
   <build>

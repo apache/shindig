@@ -33,11 +33,11 @@
   <description>Assembles the Java/PHP code base into a deployment package.</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0
+    <connection>scm:svn:http://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/assembly
     </connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/shindig/tags/shindig-project-2.0.0/assembly
     </developerConnection>
-    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0</url>
+    <url>http://svn.apache.org/viewvc/shindig/tags/shindig-project-2.0.0/assembly</url>
   </scm>
 
   <build>

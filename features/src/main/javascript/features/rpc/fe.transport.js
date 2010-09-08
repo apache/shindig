@@ -65,7 +65,7 @@ gadgets.rpctx.frameElement = function() {
 
           // Conduct the RPC call.
           fe[FE_G2C_CHANNEL](gadgets.json.stringify(rpc));
-          return;
+          return true;
         }
       } else {
         // Call from container to gadget[targetId].
@@ -76,12 +76,12 @@ gadgets.rpctx.frameElement = function() {
 
           // Conduct the RPC call.
           frame[FE_G2C_CHANNEL][FE_C2G_CHANNEL](gadgets.json.stringify(rpc));
-          return;
+          return true;
         }
       }
     } catch (e) {
     }
-    return true;
+    return false;
   }
 
   return {
@@ -128,7 +128,7 @@ gadgets.rpctx.frameElement = function() {
     },
 
     call: function(targetId, from, rpc) {
-      callFrameElement(targetId, from, rpc);
+      return callFrameElement(targetId, from, rpc);
     } 
 
   };
