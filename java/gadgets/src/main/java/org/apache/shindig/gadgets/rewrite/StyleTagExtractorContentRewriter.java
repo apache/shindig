@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 
 import org.apache.shindig.common.uri.Uri;
 import org.apache.shindig.gadgets.Gadget;
-import org.apache.shindig.gadgets.rewrite.DomWalker;
 import org.apache.shindig.gadgets.rewrite.DomWalker.Visitor;
 import org.apache.shindig.gadgets.uri.ConcatUriManager;
 import org.apache.shindig.gadgets.uri.ProxyUriManager;
@@ -42,8 +41,7 @@ public class StyleTagExtractorContentRewriter extends DomWalker.Rewriter {
   
   @Inject
   public StyleTagExtractorContentRewriter(ContentRewriterFeature.Factory featureConfigFactory,
-      ConcatUriManager concatUriManager, ProxyUriManager proxyUriManager,
-      CssResponseRewriter cssRewriter) {
+      ProxyUriManager proxyUriManager, CssResponseRewriter cssRewriter) {
     this.featureConfigFactory = featureConfigFactory;
     this.proxyUriManager = proxyUriManager;
     this.cssRewriter = cssRewriter;

@@ -89,11 +89,6 @@ public class OAuthCallbackServlet extends InjectedServlet {
   }
 
   @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-  }
-
-  @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     OAuthCallbackState callbackState = new OAuthCallbackState(stateCrypter,
         req.getParameter(CALLBACK_STATE_PARAM));

@@ -105,11 +105,6 @@ public class ConcatProxyServlet extends InjectedServlet {
     this.executor = executor;
   }
 
-  @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-  }
-
   @SuppressWarnings("boxing")
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)

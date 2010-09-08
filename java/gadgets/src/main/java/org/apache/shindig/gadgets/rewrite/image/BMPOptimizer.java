@@ -44,11 +44,6 @@ public class BMPOptimizer extends PNGOptimizer {
   }
 
   @Override
-  protected void rewriteImpl(BufferedImage image) throws IOException  {
-    super.rewriteImpl(image);
-  }
-
-  @Override
   protected String getOriginalContentType() {
     return "image/bmp";
   }

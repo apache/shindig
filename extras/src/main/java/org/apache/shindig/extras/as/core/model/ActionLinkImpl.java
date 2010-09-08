@@ -26,9 +26,9 @@ public class ActionLinkImpl implements ActionLink {
 
   private String target;
   private String caption;
-  
+
   /**
-   * Construct an empty ActionLinkImpl
+   * Construct an empty ActionLinkImpl.
    */
   public ActionLinkImpl() {
     this.target = null;
