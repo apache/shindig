@@ -951,7 +951,7 @@ gadgets.rpc = function() {
     _createRelayIframe: function(token, data) {
       var relay = gadgets.rpc.getRelayUrl('..');
       if (!relay) {
-        return;
+        return null;
       }
       
       // Format: #targetId & sourceId & authToken & data

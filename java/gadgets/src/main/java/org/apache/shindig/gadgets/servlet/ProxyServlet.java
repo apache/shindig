@@ -68,11 +68,6 @@ public class ProxyServlet extends InjectedServlet {
   }
 
   @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-  }
-  
-  @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse servletResponse)
       throws IOException {
     if (request.getHeader("If-Modified-Since") != null) {

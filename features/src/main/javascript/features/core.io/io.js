@@ -51,16 +51,18 @@ gadgets.io = function() {
         shindig.xhrwrapper &&
         shindig.xhrwrapper.createXHR) {
       return shindig.xhrwrapper.createXHR();
-    } else if (window.ActiveXObject) {
+    } else if (typeof ActiveXObject != 'undefined') {
       x = new ActiveXObject("Msxml2.XMLHTTP");
       if (!x) {
         x = new ActiveXObject("Microsoft.XMLHTTP");
       }
       return x;
     }
-    else if (window.XMLHttpRequest) {
+    // The second construct is for the benefit of jsunit...
+    else if (typeof XMLHttpRequest != 'undefined' || window.XMLHttpRequest) {
       return new window.XMLHttpRequest();
     }
+    else throw("no xhr available");
   }
 
   /**
@@ -196,7 +198,7 @@ gadgets.io = function() {
           break;
         case "DOM":
           var dom;
-          if (window.ActiveXObject) {
+          if (typeof ActiveXObject != 'undefined') {
             dom = new ActiveXObject("Microsoft.XMLDOM");
             dom.async = false;
             dom.validateOnParse = false;

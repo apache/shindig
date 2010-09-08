@@ -175,6 +175,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
         // Join all of the member texts together and wrap them in braces.
         return '{' + a.join(',') + '}';
       }
+      return "undefined";
     }
   
     return {

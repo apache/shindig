@@ -68,11 +68,6 @@ public class JsServlet extends InjectedServlet {
   }
   
   @Override
-  public void init(ServletConfig config) throws ServletException {
-    super.init(config);
-  }
-
-  @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // If an If-Modified-Since header is ever provided, we always say
