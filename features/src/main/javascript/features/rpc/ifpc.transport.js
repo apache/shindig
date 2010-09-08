@@ -130,7 +130,7 @@ gadgets.rpctx.ifpc = function() {
 
       if (!relay) {
         gadgets.warn('No relay file assigned for IFPC');
-        return;
+        return false;
       }
 
       // The RPC mechanism supports two formats for IFPC (legacy and current).

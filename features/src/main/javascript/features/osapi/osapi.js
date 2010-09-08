@@ -23,6 +23,7 @@
    * @param {Object.<string,Object>} transport The transport used to execute a call for the method
    */
   osapi._registerMethod = function (method, transport) {
+    var has___ = typeof ___ !== 'undefined';
 
     // Skip registration of local newBatch implementation.
     if (method == "newBatch") {
@@ -42,8 +43,8 @@
       var batch = osapi.newBatch();
       var boundCall = {};
       boundCall.execute = function(callback) {
-        var feralCallback = window.___ ? ___.untame(callback) : callback;
-        var that = window.___ ? ___.USELESS : this;
+        var feralCallback = has___ ? ___.untame(callback) : callback;
+        var that = has___ ? ___.USELESS : this;
         batch.add(method, this);
         batch.execute(function(batchResult) {
           if (batchResult.error) {
@@ -53,7 +54,7 @@
           }
         });
       }
-      if (window.___) {
+      if (has___) {
           ___.markInnocent(boundCall.execute, 'execute');
       }
       // TODO: This shouldnt really be necessary. The spec should be clear enough about
@@ -69,7 +70,7 @@
 
       return boundCall;
     };
-    if (window.___ && window.___.markInnocent) {
+    if (has___ && typeof ___.markInnocent !== 'undefined') {
       ___.markInnocent(apiMethod, method);
     }
 
