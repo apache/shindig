@@ -356,6 +356,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>hnguy</id>
+      <name>Han Nguyen</name>
+      <email>hnguy@apache.org</email>
+      <organization>ASF</organization>
+      <roles>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
 
     <!-- Mentors -->
     <developer>
