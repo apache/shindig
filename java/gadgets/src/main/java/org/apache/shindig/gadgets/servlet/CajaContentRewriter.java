@@ -27,6 +27,7 @@ import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.parser.html.Dom;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
+import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
 import com.google.caja.plugin.UriFetcher;
@@ -124,17 +125,13 @@ public class CajaContentRewriter implements GadgetRewriter {
 
       compiler.setMessageContext(context);
 
-      /**
-       * TODO(jasvir): This can provide support for debugging with 
-       * cajita-debugmode.js but cajita-debugmode.js should be loaded
-       * iff url param debug=1
-       * 
-       *      if (debug) {
-       *        compiler.setGoals(compiler.getGoals()
-       *            .without(PipelineMaker.ONE_CAJOLED_MODULE)
-       *            .with(PipelineMaker.ONE_CAJOLED_MODULE_DEBUG));
-       *      }
-       */
+      if (debug) {
+        // This will load cajita-debugmode.js
+        gadget.addFeature("caja-debug");
+        compiler.setGoals(compiler.getGoals()
+                .without(PipelineMaker.ONE_CAJOLED_MODULE)
+                .with(PipelineMaker.ONE_CAJOLED_MODULE_DEBUG));
+      }
       
       InputSource is = new InputSource(javaGadgetUri);
       boolean safe = false;
@@ -155,7 +152,7 @@ public class CajaContentRewriter implements GadgetRewriter {
           .withEmbeddable(true));
 
         tc.noMoreTokens();
-        
+
         Node html = compiler.getStaticHtml();
 
         Element script = doc.createElementNS(
@@ -180,7 +177,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         if (cajoledCache != null && !debug) {
           cajoledCache.addElement(cacheKey, cajoledOutput);
         }
-        safe = true;
+
         cajoledData = cajoledOutput;
         createContainerFor(doc, cajoledData);
         mc.documentChanged();
@@ -203,7 +200,7 @@ public class CajaContentRewriter implements GadgetRewriter {
     }
   }
 
-  private boolean cajaEnabled(Gadget gadget) {
+  protected boolean cajaEnabled(Gadget gadget) {
     return (gadget.getAllFeatures().contains("caja") ||
         "1".equals(gadget.getContext().getParameter("caja")));
   }
