@@ -43,7 +43,7 @@ shindig.container.GadgetSite = function(service, gadgetEl, opt_bufferEl) {
    * @type {Element}
    * @private
    */
-  this.curGadgetEl_ = gadgetEl;
+  this.currentGadgetEl_ = gadgetEl;
 
   /**
    * Element holding the loading gadget for 2x buffering.
@@ -71,14 +71,14 @@ shindig.container.GadgetSite = function(service, gadgetEl, opt_bufferEl) {
    * @type {shindig.container.GadgetHolder?}
    * @private
    */
-  this.curGadget_ = null;
+  this.currentGadgetHolder_ = null;
 
   /**
    * Information about the currently loading gadget.
    * @type {shindig.container.GadgetHolder?}
    * @private
    */
-  this.loadingGadget_ = null;
+  this.loadingGadgetHolder_ = null;
 
   this.onConstructed();
 };
@@ -97,9 +97,9 @@ shindig.container.GadgetSite.prototype.onConstructed = function() {};
  * @return {shindig.container.GadgetSite} This instance.
  */
 shindig.container.GadgetSite.prototype.setHeight = function(value) {
-  var activeGadget = this.getActiveGadget();
-  if (activeGadget) {
-    var iframeEl = activeGadget.getIframeElement();
+  var holder = this.getActiveGadgetHolder();
+  if (holder) {
+    var iframeEl = holder.getIframeElement();
     if (iframeEl) {
       iframeEl.style.height = value + 'px';
     }
@@ -114,9 +114,9 @@ shindig.container.GadgetSite.prototype.setHeight = function(value) {
  * @return {shindig.container.GadgetSite} This instance.
  */
 shindig.container.GadgetSite.prototype.setWidth = function(value) {
-  var activeGadget = this.getActiveGadget();
-  if (activeGadget) {
-    var iframeEl = activeGadget.getIframeElement();
+  var holder = this.getActiveGadgetHolder();
+  if (holder) {
+    var iframeEl = holder.getIframeElement();
     if (iframeEl) {
       iframeEl.style.width = value + 'px';
     }
@@ -148,8 +148,8 @@ shindig.container.GadgetSite.prototype.getId = function() {
  * loading, or the currently visible gadget.
  * @return {shindig.container.GadgetHolder} The gadget holder.
  */
-shindig.container.GadgetSite.prototype.getActiveGadget = function() {
-  return this.loadingGadget_ || this.curGadget_;
+shindig.container.GadgetSite.prototype.getActiveGadgetHolder = function() {
+  return this.loadingGadgetHolder_ || this.currentGadgetHolder_;
 };
 
 
@@ -161,8 +161,9 @@ shindig.container.GadgetSite.prototype.getActiveGadget = function() {
  * @return {Object} JSON representing the feature.
  */
 shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInfo) {
-  var gadgetInfo = opt_gadgetInfo || this.getActiveGadget().getGadgetInfo();
-  return gadgetInfo['features'] && gadgetInfo['features'][name];
+  var gadgetInfo = opt_gadgetInfo || this.getActiveGadgetHolder().getGadgetInfo();
+  return gadgetInfo[shindig.container.MetadataResponse.FEATURES] &&
+      gadgetInfo[shindig.container.MetadataResponse.FEATURES][name];
 };
 
 
@@ -172,11 +173,11 @@ shindig.container.GadgetSite.prototype.getFeature = function(name, opt_gadgetInf
  * @return {shindig.container.GadgetHolder?} The gadget. Null, if not exist.
  */
 shindig.container.GadgetSite.prototype.getGadgetHolder = function(id) {
-  if (this.curGadget_ && this.curGadget_.getIframeId() == id) {
-    return this.curGadget_;
+  if (this.currentGadgetHolder_ && this.currentGadgetHolder_.getIframeId() == id) {
+    return this.currentGadgetHolder_;
   }
-  if (this.loadingGadget_ && this.loadingGadget_.getIframeId() == id) {
-    return this.loadingGadget_;
+  if (this.loadingGadgetHolder_ && this.loadingGadgetHolder_.getIframeId() == id) {
+    return this.loadingGadgetHolder_;
   }
   return null;
 };
@@ -193,33 +194,30 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
 /**
  * Render a gadget in the site, by URI of the gadget XML.
  * @param {string} gadgetUrl The absolute URL to gadget.
- * @param {Object} gadgetParams View parameters for the gadget.
+ * @param {Object} viewParams View parameters for the gadget.
  * @param {Object} renderParams. Render parameters for the gadget, including:
  *     view, width, height.
  * @param {function(Object)=} opt_callback Function called with gadget info after
  *     navigation has occurred.
  */
 shindig.container.GadgetSite.prototype.navigateTo = function(
-    gadgetUrl, gadgetParams, renderParams, opt_callback) {
+    gadgetUrl, viewParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
   
   // If metadata has been loaded/cached.
   var gadgetInfo = this.service_.getCachedGadgetMetadata(gadgetUrl);
   if (gadgetInfo) {
-    this.render(gadgetInfo, gadgetParams, renderParams);
+    this.render(gadgetInfo, viewParams, renderParams);
     callback(gadgetInfo);
 
   // Otherwise, fetch gadget metadata.
   } else {
-    var request = {
-      'container': window.__CONTAINER,
-      'ids': [ gadgetUrl ]
-    };
+    var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
     var self = this;
     this.service_.getGadgetMetadata(request, function(response) {
       if (!response.error) {
         var gadgetInfo = response[gadgetUrl];
-        self.render(gadgetInfo, gadgetParams, renderParams);
+        self.render(gadgetInfo, viewParams, renderParams);
         callback(gadgetInfo);
       } else {
         callback(response);
@@ -232,26 +230,28 @@ shindig.container.GadgetSite.prototype.navigateTo = function(
 /**
  * Render a gadget in this site, using a JSON gadget description.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} gadgetParams View parameters for the gadget.
+ * @param {Object} viewParams View parameters for the gadget.
  * @param {Object} renderParams. Render parameters for the gadget, including:
  *     view, width, height.
  */
 shindig.container.GadgetSite.prototype.render = function(
-    gadgetInfo, gadgetParams, renderParams) {
-  var curUrl = this.curGadget_ ? this.curGadget_.getUrl() : null;
+    gadgetInfo, viewParams, renderParams) {
+  var curUrl = this.currentGadgetHolder_ ? this.currentGadgetHolder_.getUrl() : null;
 
   var previousView = null;
   if (curUrl == gadgetInfo['url']) {
-    previousView = this.curGadget_.getView();
+    previousView = this.currentGadgetHolder_.getView();
   }
 
   // Load into the double-buffer if there is one
-  var el = this.loadingGadgetEl_ || this.curGadgetEl_;
-  this.loadingGadget_ = new shindig.container.GadgetHolder(this.id_, el);
+  var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
+  this.loadingGadgetHolder_ = new shindig.container.GadgetHolder(this.id_, el);
 
-  var view = renderParams['view'] || gadgetParams['view'] || previousView
+  var view = renderParams[shindig.container.RenderParam.VIEW]
+      || viewParams[shindig.container.ViewParam.VIEW]
+      || previousView
       || 'default';
-  var viewInfo = gadgetInfo['views'][view];
+  var viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
 
   var delayLoad = this.getFeature('loadstate', gadgetInfo) ||
       this.getFeature('shell', gadgetInfo);
@@ -263,17 +263,23 @@ shindig.container.GadgetSite.prototype.render = function(
 
   // Delay load for now means we autosize.
   if (delayLoad) {
-    localRenderParams['height'] = '0';
+    localRenderParams[shindig.container.RenderParam.HEIGHT] = '0';
   }
-  localRenderParams['view'] = view;
-  localRenderParams['width'] = localRenderParams['width'] ||
-      viewInfo['preferredWidth'] || null;
-  localRenderParams['height'] = localRenderParams['height'] ||
-      viewInfo['preferredHeight'] || '150';
+  localRenderParams[shindig.container.RenderParam.VIEW] = view;
+  localRenderParams[shindig.container.RenderParam.HEIGHT]
+      = renderParams[shindig.container.RenderParam.HEIGHT]
+      || viewInfo[shindig.container.MetadataResponse.PREFERRED_HEIGHT]
+      || gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS][shindig.container.MetadataResponse.HEIGHT]
+      || String(shindig.container.GadgetSite.DEFAULT_HEIGHT_);
+  localRenderParams[shindig.container.RenderParam.WIDTH]
+      = renderParams[shindig.container.RenderParam.WIDTH]
+      || viewInfo[shindig.container.MetadataResponse.PREFERRED_WIDTH]
+      || gadgetInfo[shindig.container.MetadataResponse.MODULE_PREFS][shindig.container.MetadataResponse.WIDTH]
+      || String(shindig.container.GadgetSite.DEFAULT_WIDTH_);
 
   this.updateSecurityToken_(gadgetInfo, localRenderParams);
 
-  this.loadingGadget_.render(gadgetInfo, gadgetParams, localRenderParams);
+  this.loadingGadgetHolder_.render(gadgetInfo, viewParams, localRenderParams);
 
   this.loaded_ = false;
 
@@ -294,8 +300,9 @@ shindig.container.GadgetSite.prototype.render = function(
  */
 shindig.container.GadgetSite.prototype.rpcCall = function(
     serviceName, callback, var_args) {
-  if (this.curGadget_) {
-    gadgets.rpc.call(this.curGadget_.getIframeId(), serviceName, callback, var_args);
+  if (this.currentGadgetHolder_) {
+    gadgets.rpc.call(this.currentGadgetHolder_.getIframeId(),
+        serviceName, callback, var_args);
   }
 };
 
@@ -311,8 +318,8 @@ shindig.container.GadgetSite.prototype.updateSecurityToken_
     = function(gadgetInfo, renderParams) {
   var tokenInfo = this.service_.getCachedGadgetToken(gadgetInfo['url']);
   if (tokenInfo) {
-    var token = tokenInfo['token'];
-    this.loadingGadget_.setSecurityToken(token);
+    var token = tokenInfo[shindig.container.TokenResponse.TOKEN];
+    this.loadingGadgetHolder_.setSecurityToken(token);
   }
 };
 
@@ -323,18 +330,17 @@ shindig.container.GadgetSite.prototype.updateSecurityToken_
  * for removal.
  */
 shindig.container.GadgetSite.prototype.close = function() {
-  // Only remove the element (iframe) created by this, not by the container.
-  if (this.loadingGadgetEl_) {
+  if (this.loadingGadgetEl_ && this.loadingGadgetEl_.firstChild) {
     this.loadingGadgetEl_.removeChild(this.loadingGadgetEl_.firstChild);
   }
-  if (this.curGadgetEl_) {
-    this.curGadgetEl_.removeChild(this.curGadgetEl_.firstChild);
+  if (this.currentGadgetEl_ && this.currentGadgetEl_.firstChild) {
+    this.currentGadgetEl_.removeChild(this.currentGadgetEl_.firstChild);
   }
-  if (this.loadingGadget_) {
-    this.loadingGadget_.dispose();
+  if (this.loadingGadgetHolder_) {
+    this.loadingGadgetHolder_.dispose();
   }
-  if (this.curGadget_) {
-    this.curGadget_.dispose();
+  if (this.currentGadgetHolder_) {
+    this.currentGadgetHolder_.dispose();
   }
 };
 
@@ -366,7 +372,7 @@ shindig.container.GadgetSite.prototype.setLoadState_ = function(state) {
 shindig.container.GadgetSite.prototype.onload_ = function() {
   this.loaded_ = true;
   try {
-    gadgets.rpc.call(this.loadingGadget_.getIframeId(), 'onLoad', null);
+    gadgets.rpc.call(this.loadingGadgetHolder_.getIframeId(), 'onLoad', null);
     if (this.resizeOnLoad_) {
       // TODO need a value for setHeight
       this.setHeight();
@@ -378,12 +384,12 @@ shindig.container.GadgetSite.prototype.onload_ = function() {
 
   this.swapBuffers_();
 
-  if (this.curGadget_) {
-    this.curGadget_.dispose();
+  if (this.currentGadgetHolder_) {
+    this.currentGadgetHolder_.dispose();
   }
 
-  this.curGadget_ = this.loadingGadget_;
-  this.loadingGadget_ = null;
+  this.currentGadgetHolder_ = this.loadingGadgetHolder_;
+  this.loadingGadgetHolder_ = null;
 };
 
 
@@ -395,12 +401,30 @@ shindig.container.GadgetSite.prototype.swapBuffers_ = function() {
   if (this.loadingGadgetEl_) {
     this.loadingGadgetEl_.style.left = '';
     this.loadingGadgetEl_.style.position = '';
-    this.curGadgetEl_.style.position = 'absolute';
-    this.curGadgetEl_.style.left = '-2000px';
+    this.currentGadgetEl_.style.position = 'absolute';
+    this.currentGadgetEl_.style.left = '-2000px';
 
     // Swap references;  cur_ will now again be what's visible
-    var oldCur = this.curGadgetEl_;
-    this.curGadgetEl_ = this.loadingGadgetEl_;
+    var oldCur = this.currentGadgetEl_;
+    this.currentGadgetEl_ = this.loadingGadgetEl_;
     this.loadingGadgetEl_ = oldCur;
   }
 };
+
+
+/**
+ * Default height of gadget. Refer to --
+ * http://code.google.com/apis/gadgets/docs/legacy/reference.html.
+ * @type {number}
+ * @private
+ */
+shindig.container.GadgetSite.DEFAULT_HEIGHT_ = 200;
+
+
+/**
+ * Default width of gadget. Refer to --
+ * http://code.google.com/apis/gadgets/docs/legacy/reference.html.
+ * @type {number}
+ * @private
+ */
+shindig.container.GadgetSite.DEFAULT_WIDTH_ = 320;
