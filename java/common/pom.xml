@@ -70,6 +70,14 @@
           </excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <executions>
+          <execution> <goals><goal>check</goal></goals> </execution>
+        </executions>
+        <configuration> <logResults>true</logResults> </configuration>
+      </plugin>
     </plugins>
   </build>
 
