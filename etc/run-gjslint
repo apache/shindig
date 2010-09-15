@@ -1,0 +1,2 @@
+#!/bin/sh
+gjslint --strict --unix_mode --exclude_directories features/src/main/javascript/features/swfobject,features/src/main/javascript/features/i18n --recurse features/src/main/javascript/features 
