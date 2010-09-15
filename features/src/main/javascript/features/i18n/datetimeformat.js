@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Functions for dealing with Date formatting
+ * @fileoverview Functions for dealing with Date formatting.
  */
 
 gadgets.i18n = gadgets.i18n || {};
@@ -88,7 +88,7 @@ gadgets.i18n = gadgets.i18n || {};
  * @constructor
  */
 gadgets.i18n.DateTimeFormat = function(symbol) {
-    this.symbols_ = symbol;
+  this.symbols_ = symbol;
 };
 
 /**
@@ -96,12 +96,12 @@ gadgets.i18n.DateTimeFormat = function(symbol) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.TOKENS_ = [
-    //quote string
-    /^\'(?:[^\']|\'\')*\'/,
-    // pattern chars
-    /^(?:G+|y+|M+|k+|S+|E+|a+|h+|K+|H+|c+|L+|Q+|d+|m+|s+|v+|z+|Z+)/,
-    // and all the other chars
-    /^[^\'GyMkSEahKHcLQdmsvzZ]+/  // and all the other chars
+  //quote string
+  /^\'(?:[^\']|\'\')*\'/,
+  // pattern chars
+  /^(?:G+|y+|M+|k+|S+|E+|a+|h+|K+|H+|c+|L+|Q+|d+|m+|s+|v+|z+|Z+)/,
+  // and all the other chars
+  /^[^\'GyMkSEahKHcLQdmsvzZ]+/  // and all the other chars
 ];
 
 /**
@@ -109,9 +109,9 @@ gadgets.i18n.DateTimeFormat.TOKENS_ = [
  * @enum {number}
  */
 gadgets.i18n.DateTimeFormat.PartTypes = {
-    QUOTED_STRING : 0,
-    FIELD : 1,
-    LITERAL : 2
+  QUOTED_STRING: 0,
+  FIELD: 1,
+  LITERAL: 2
 };
 
 /**
@@ -128,13 +128,13 @@ gadgets.i18n.DateTimeFormat.PartTypes = {
  * @private
  */
 gadgets.i18n.DateTimeFormat.padNumber_ = function(num, length) {
-    var s = String(num);
-    var index = s.indexOf('.');
-    if (index == -1) {
-        index = s.length;
-    }
-    var tempArray = new Array(Math.max(0, length - index) + 1);
-    return tempArray.join('0') + s;
+  var s = String(num);
+  var index = s.indexOf('.');
+  if (index == -1) {
+    index = s.length;
+  }
+  var tempArray = new Array(Math.max(0, length - index) + 1);
+  return tempArray.join('0') + s;
 };
 
 /**
@@ -142,29 +142,29 @@ gadgets.i18n.DateTimeFormat.padNumber_ = function(num, length) {
  * @param {string} pattern String specifying how the date should be formatted.
  */
 gadgets.i18n.DateTimeFormat.prototype.applyPattern = function(pattern) {
-    this.patternParts_ = [];
+  this.patternParts_ = [];
 
   // lex the pattern, once for all uses
-    while (pattern) {
-        for (var i = 0; i < gadgets.i18n.DateTimeFormat.TOKENS_.length; ++i) {
-            var m = pattern.match(gadgets.i18n.DateTimeFormat.TOKENS_[i]);
-            if (m) {
-                var part = m[0];
-                pattern = pattern.substring(part.length);
-                if (i == gadgets.i18n.DateTimeFormat.PartTypes.QUOTED_STRING) {
-                    if (part == "''") {
-                        part = "'";  // '' -> '
-                    } else {
-                        // strip quotes
-                        part = part.substring(1, part.length - 1);
-                        part = part.replace(/\'\'/, "'");
-                    }
-                }
-                this.patternParts_.push({ text: part, type: i });
-                break;
-            }
+  while (pattern) {
+    for (var i = 0; i < gadgets.i18n.DateTimeFormat.TOKENS_.length; ++i) {
+      var m = pattern.match(gadgets.i18n.DateTimeFormat.TOKENS_[i]);
+      if (m) {
+        var part = m[0];
+        pattern = pattern.substring(part.length);
+        if (i == gadgets.i18n.DateTimeFormat.PartTypes.QUOTED_STRING) {
+          if (part == "''") {
+            part = "'";  // '' -> '
+          } else {
+            // strip quotes
+            part = part.substring(1, part.length - 1);
+            part = part.replace(/\'\'/, "'");
+          }
         }
+        this.patternParts_.push({ text: part, type: i });
+        break;
+      }
     }
+  }
 };
 
 /**
@@ -173,7 +173,7 @@ gadgets.i18n.DateTimeFormat.prototype.applyPattern = function(pattern) {
  * @return {string} Formatted string for the given date.
  */
 gadgets.i18n.DateTimeFormat.prototype.format = function(date) {
-    /*  if (!opt_timeZone) {
+  /*  if (!opt_timeZone) {
         opt_timeZone =
           gadgets.i18n.TimeZone.createTimeZone(date.getTimezoneOffset());
       }
@@ -203,17 +203,17 @@ gadgets.i18n.DateTimeFormat.prototype.format = function(date) {
         dateForTime = new Date(date.getTime() + diff);
       }
     */
-    var out = [];
-    for (var i = 0; i < this.patternParts_.length; ++i) {
-        var text = this.patternParts_[i].text;
-        if (gadgets.i18n.DateTimeFormat.PartTypes.FIELD ==
+  var out = [];
+  for (var i = 0; i < this.patternParts_.length; ++i) {
+    var text = this.patternParts_[i].text;
+    if (gadgets.i18n.DateTimeFormat.PartTypes.FIELD ==
             this.patternParts_[i].type) {
-            out.push(this.formatField_(text, date));
-        } else {
-            out.push(text);
-        }
+      out.push(this.formatField_(text, date));
+    } else {
+      out.push(text);
     }
-    return out.join('');
+  }
+  return out.join('');
 };
 
 /**
@@ -222,19 +222,19 @@ gadgets.i18n.DateTimeFormat.prototype.format = function(date) {
  * @param {number} formatType A number that identified the predefined pattern.
  */
 gadgets.i18n.DateTimeFormat.prototype.applyStandardPattern =
-function(formatType) {
-    var pattern;
-    if (formatType < 4) {
-        pattern = this.symbols_.DATEFORMATS[formatType];
-    } else if (formatType < 8) {
-        pattern = this.symbols_.TIMEFORMATS[formatType - 4];
-    } else if (formatType < 12) {
-        pattern = this.symbols_.DATEFORMATS[formatType - 8] +
+    function(formatType) {
+  var pattern;
+  if (formatType < 4) {
+    pattern = this.symbols_.DATEFORMATS[formatType];
+  } else if (formatType < 8) {
+    pattern = this.symbols_.TIMEFORMATS[formatType - 4];
+  } else if (formatType < 12) {
+    pattern = this.symbols_.DATEFORMATS[formatType - 8] +
                   ' ' + this.symbols_.TIMEFORMATS[formatType - 8];
-    } else {
-        this.applyStandardPattern(gadgets.i18n.MEDIUM_DATETIME_FORMAT);
-    }
-    return this.applyPattern(pattern);
+  } else {
+    this.applyStandardPattern(gadgets.i18n.MEDIUM_DATETIME_FORMAT);
+  }
+  return this.applyPattern(pattern);
 };
 
 /**
@@ -247,8 +247,8 @@ function(formatType) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatEra_ = function(count, date) {
-    var value = date.getFullYear() > 0 ? 1 : 0;
-    return count >= 4 ? this.symbols_.ERANAMES[value] : this.symbols_.ERAS[value];
+  var value = date.getFullYear() > 0 ? 1 : 0;
+  return count >= 4 ? this.symbols_.ERANAMES[value] : this.symbols_.ERAS[value];
 };
 
 /**
@@ -265,13 +265,13 @@ gadgets.i18n.DateTimeFormat.prototype.formatEra_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatYear_ = function(count, date) {
-    var value = date.getFullYear();
-    if (value < 0) {
-        value = -value;
-    }
-    return count == 2 ?
-           gadgets.i18n.DateTimeFormat.padNumber_(value % 100, 2) :
-           String(value);
+  var value = date.getFullYear();
+  if (value < 0) {
+    value = -value;
+  }
+  return count == 2 ?
+      gadgets.i18n.DateTimeFormat.padNumber_(value % 100, 2) :
+      String(value);
 };
 
 /**
@@ -284,14 +284,14 @@ gadgets.i18n.DateTimeFormat.prototype.formatYear_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatMonth_ = function(count, date) {
-    var value = date.getMonth();
-    switch (count) {
-        case 5: return this.symbols_.NARROWMONTHS[value];
-        case 4: return this.symbols_.MONTHS[value];
-        case 3: return this.symbols_.SHORTMONTHS[value];
-        default:
-            return gadgets.i18n.DateTimeFormat.padNumber_(value + 1, count);
-    }
+  var value = date.getMonth();
+  switch (count) {
+    case 5: return this.symbols_.NARROWMONTHS[value];
+    case 4: return this.symbols_.MONTHS[value];
+    case 3: return this.symbols_.SHORTMONTHS[value];
+    default:
+      return gadgets.i18n.DateTimeFormat.padNumber_(value + 1, count);
+  }
 };
 
 /**
@@ -304,7 +304,7 @@ gadgets.i18n.DateTimeFormat.prototype.formatMonth_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.format24Hours_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() || 24, count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() || 24, count);
 };
 
 /**
@@ -318,11 +318,11 @@ gadgets.i18n.DateTimeFormat.prototype.format24Hours_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatFractionalSeconds_ =
-function(count, date) {
-    // Fractional seconds left-justify, append 0 for precision beyond 3
-    var value = date.getTime() % 1000 / 1000;
-    return value.toFixed(Math.min(3, count)).substr(2) +
-           (count > 3 ? gadgets.i18n.DateTimeFormat.padNumber_(0, count - 3) : '');
+    function(count, date) {
+  // Fractional seconds left-justify, append 0 for precision beyond 3
+  var value = date.getTime() % 1000 / 1000;
+  return value.toFixed(Math.min(3, count)).substr(2) +
+      (count > 3 ? gadgets.i18n.DateTimeFormat.padNumber_(0, count - 3) : '');
 };
 
 /**
@@ -335,9 +335,9 @@ function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatDayOfWeek_ = function(count, date) {
-    var value = date.getDay();
-    return count >= 4 ? this.symbols_.WEEKDAYS[value] :
-           this.symbols_.SHORTWEEKDAYS[value];
+  var value = date.getDay();
+  return count >= 4 ? this.symbols_.WEEKDAYS[value] :
+      this.symbols_.SHORTWEEKDAYS[value];
 };
 
 /**
@@ -350,8 +350,8 @@ gadgets.i18n.DateTimeFormat.prototype.formatDayOfWeek_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatAmPm_ = function(count, date) {
-    var hours = date.getHours();
-    return this.symbols_.AMPMS[hours >= 12 && hours < 24 ? 1 : 0];
+  var hours = date.getHours();
+  return this.symbols_.AMPMS[hours >= 12 && hours < 24 ? 1 : 0];
 };
 
 /**
@@ -364,7 +364,7 @@ gadgets.i18n.DateTimeFormat.prototype.formatAmPm_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.format1To12Hours_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() % 12 || 12, count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() % 12 || 12, count);
 };
 
 /**
@@ -377,7 +377,7 @@ gadgets.i18n.DateTimeFormat.prototype.format1To12Hours_ = function(count, date) 
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.format0To11Hours_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() % 12, count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours() % 12, count);
 };
 
 /**
@@ -390,7 +390,7 @@ gadgets.i18n.DateTimeFormat.prototype.format0To11Hours_ = function(count, date) 
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.format0To23Hours_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours(), count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getHours(), count);
 };
 
 /**
@@ -403,18 +403,18 @@ gadgets.i18n.DateTimeFormat.prototype.format0To23Hours_ = function(count, date) 
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatStandaloneDay_ =
-function(count, date) {
-    var value = date.getDay();
-    switch (count) {
-        case 5:
-            return this.symbols_.STANDALONENARROWWEEKDAYS[value];
-        case 4:
-            return this.symbols_.STANDALONEWEEKDAYS[value];
-        case 3:
-            return this.symbols_.STANDALONESHORTWEEKDAYS[value];
-        default:
-            return gadgets.i18n.DateTimeFormat.padNumber_(value, 1);
-    }
+    function(count, date) {
+  var value = date.getDay();
+  switch (count) {
+    case 5:
+      return this.symbols_.STANDALONENARROWWEEKDAYS[value];
+    case 4:
+      return this.symbols_.STANDALONEWEEKDAYS[value];
+    case 3:
+      return this.symbols_.STANDALONESHORTWEEKDAYS[value];
+    default:
+      return gadgets.i18n.DateTimeFormat.padNumber_(value, 1);
+  }
 };
 
 /**
@@ -427,18 +427,18 @@ function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatStandaloneMonth_ =
-function(count, date) {
-    var value = date.getMonth();
-    switch (count) {
-        case 5:
-            return this.symbols_.STANDALONENARROWMONTHS[value];
-        case 4:
-            return this.symbols_.STANDALONEMONTHS[value];
-        case 3:
-            return this.symbols_.STANDALONESHORTMONTHS[value];
-        default:
-            return gadgets.i18n.DateTimeFormat.padNumber_(value + 1, count);
-    }
+    function(count, date) {
+  var value = date.getMonth();
+  switch (count) {
+    case 5:
+      return this.symbols_.STANDALONENARROWMONTHS[value];
+    case 4:
+      return this.symbols_.STANDALONEMONTHS[value];
+    case 3:
+      return this.symbols_.STANDALONESHORTMONTHS[value];
+    default:
+      return gadgets.i18n.DateTimeFormat.padNumber_(value + 1, count);
+  }
 };
 
 /**
@@ -451,9 +451,9 @@ function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatQuarter_ = function(count, date) {
-    var value = Math.floor(date.getMonth() / 3);
-    return count < 4 ? this.symbols_.SHORTQUARTERS[value] :
-           this.symbols_.QUARTERS[value];
+  var value = Math.floor(date.getMonth() / 3);
+  return count < 4 ? this.symbols_.SHORTQUARTERS[value] :
+      this.symbols_.QUARTERS[value];
 };
 
 /**
@@ -466,7 +466,7 @@ gadgets.i18n.DateTimeFormat.prototype.formatQuarter_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatDate_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getDate(), count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getDate(), count);
 };
 
 /**
@@ -479,7 +479,7 @@ gadgets.i18n.DateTimeFormat.prototype.formatDate_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatMinutes_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getMinutes(), count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getMinutes(), count);
 };
 
 /**
@@ -492,7 +492,7 @@ gadgets.i18n.DateTimeFormat.prototype.formatMinutes_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatSeconds_ = function(count, date) {
-    return gadgets.i18n.DateTimeFormat.padNumber_(date.getSeconds(), count);
+  return gadgets.i18n.DateTimeFormat.padNumber_(date.getSeconds(), count);
 };
 
 /**
@@ -506,20 +506,20 @@ gadgets.i18n.DateTimeFormat.prototype.formatSeconds_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatTimeZoneRFC_ =
-function(count, date) {
-    if (count < 4) {
-        // 'short' (standard Java) form, must use ASCII digits
-        var val = date.getTimezoneOffset();
-        var sign = '-';
-        if (val < 0) {
-            val = -val;
-            sign = '+';
-        }
-        val = val / 3 * 5 + val % 60;
-    // minutes => KKmm
-        return sign + gadgets.i18n.DateTimeFormat.padNumber_(val, 4);
+    function(count, date) {
+  if (count < 4) {
+    // 'short' (standard Java) form, must use ASCII digits
+    var val = date.getTimezoneOffset();
+    var sign = '-';
+    if (val < 0) {
+      val = -val;
+      sign = '+';
     }
-    return this.formatGMT_(count, date);
+    val = val / 3 * 5 + val % 60;
+    // minutes => KKmm
+    return sign + gadgets.i18n.DateTimeFormat.padNumber_(val, 4);
+  }
+  return this.formatGMT_(count, date);
 };
 
 /**
@@ -531,19 +531,19 @@ function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatGMT_ = function(count, date) {
-    var value = date.getTimezoneOffset();
-    var out = [];
-    if (value > 0) {
-        out.push('GMT-');
-    } else {
-        value = -value;
-        out.push('GMT+');
-    }
+  var value = date.getTimezoneOffset();
+  var out = [];
+  if (value > 0) {
+    out.push('GMT-');
+  } else {
+    value = -value;
+    out.push('GMT+');
+  }
 
-    out.push(gadgets.i18n.DateTimeFormat.padNumber_(value / 60, 2));
-    out.push(':');
-    out.push(gadgets.i18n.DateTimeFormat.padNumber_(value % 60, 2));
-    return out.join('');
+  out.push(gadgets.i18n.DateTimeFormat.padNumber_(value / 60, 2));
+  out.push(':');
+  out.push(gadgets.i18n.DateTimeFormat.padNumber_(value % 60, 2));
+  return out.join('');
 };
 
 /**
@@ -553,27 +553,27 @@ gadgets.i18n.DateTimeFormat.prototype.formatGMT_ = function(count, date) {
  * @private
  */
 gadgets.i18n.DateTimeFormat.prototype.formatField_ = function(patternStr, date) {
-    var count = patternStr.length;
-    switch (patternStr.charAt(0)) {
-        case 'G': return this.formatEra_(count, date);
-        case 'y': return this.formatYear_(count, date);
-        case 'M': return this.formatMonth_(count, date);
-        case 'k': return this.format24Hours_(count, date);
-        case 'S': return this.formatFractionalSeconds_(count, date);
-        case 'E': return this.formatDayOfWeek_(count, date);
-        case 'a': return this.formatAmPm_(count, date);
-        case 'h': return this.format1To12Hours_(count, date);
-        case 'K': return this.format0To11Hours_(count, date);
-        case 'H': return this.format0To23Hours_(count, date);
-        case 'c': return this.formatStandaloneDay_(count, date);
-        case 'L': return this.formatStandaloneMonth_(count, date);
-        case 'Q': return this.formatQuarter_(count, date);
-        case 'd': return this.formatDate_(count, date);
-        case 'm': return this.formatMinutes_(count, date);
-        case 's': return this.formatSeconds_(count, date);
-        case 'v': return this.formatGMT_(count, date);
-        case 'z': return this.formatGMT_(count, date);
-        case 'Z': return this.formatTimeZoneRFC_(count, date);
-        default: return '';
-    }
+  var count = patternStr.length;
+  switch (patternStr.charAt(0)) {
+    case 'G': return this.formatEra_(count, date);
+    case 'y': return this.formatYear_(count, date);
+    case 'M': return this.formatMonth_(count, date);
+    case 'k': return this.format24Hours_(count, date);
+    case 'S': return this.formatFractionalSeconds_(count, date);
+    case 'E': return this.formatDayOfWeek_(count, date);
+    case 'a': return this.formatAmPm_(count, date);
+    case 'h': return this.format1To12Hours_(count, date);
+    case 'K': return this.format0To11Hours_(count, date);
+    case 'H': return this.format0To23Hours_(count, date);
+    case 'c': return this.formatStandaloneDay_(count, date);
+    case 'L': return this.formatStandaloneMonth_(count, date);
+    case 'Q': return this.formatQuarter_(count, date);
+    case 'd': return this.formatDate_(count, date);
+    case 'm': return this.formatMinutes_(count, date);
+    case 's': return this.formatSeconds_(count, date);
+    case 'v': return this.formatGMT_(count, date);
+    case 'z': return this.formatGMT_(count, date);
+    case 'Z': return this.formatTimeZoneRFC_(count, date);
+    default: return '';
+  }
 };

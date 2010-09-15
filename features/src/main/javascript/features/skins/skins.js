@@ -30,21 +30,21 @@ gadgets.skins = function() {
   var skinProperties = {};
 
   var requiredConfig = {
-    "properties": gadgets.config.ExistsValidator
+    'properties': gadgets.config.ExistsValidator
   };
 
-  gadgets.config.register("skins", requiredConfig, function(config) {
-        skinProperties = config["skins"].properties;
-      });
+  gadgets.config.register('skins', requiredConfig, function(config) {
+    skinProperties = config['skins'].properties;
+  });
 
 
   return {
     /**
      * Override the default properties with a new set of properties.
      *
-     * @param {Object} properties The mapping of property names to values
+     * @param {Object} properties The mapping of property names to values.
      */
-    init : function(properties) {
+    init: function(properties) {
       skinProperties = properties;
     },
 
@@ -53,13 +53,13 @@ gadgets.skins = function() {
      *
      * @param {string} propertyKey The key to get data for;
      *    keys are defined in <a href="gadgets.skins.Property.html"><code>
-     *    gadgets.skins.Property</code></a>
-     * @return {string} The data
+     *    gadgets.skins.Property.</code></a>
+     * @return {string} The data.
      *
      * @member gadgets.skins
      */
-    getProperty : function(propertyKey) {
-      return skinProperties[propertyKey] || "";
+    getProperty: function(propertyKey) {
+      return skinProperties[propertyKey] || '';
     }
   };
 }();
@@ -72,7 +72,7 @@ gadgets.skins = function() {
  * method.
  * @name gadgets.skins.Property
  */
-gadgets.skins.Property =  gadgets.util.makeEnum([
+gadgets.skins.Property = gadgets.util.makeEnum([
   /**
    * An image to use in the background of the gadget.
    * @member gadgets.skins.Property

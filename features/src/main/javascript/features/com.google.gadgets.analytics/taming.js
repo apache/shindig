@@ -24,7 +24,7 @@
 var tamings___ = tamings___ || [];
 tamings___.push(function(imports) {
   caja___.whitelistCtors([
-      [gadgets, 'analytics', Object]
+    [gadgets, 'analytics', Object]
   ]);
   caja___.whitelistMeths([
     [gadgets.analytics, 'reportPageview'],

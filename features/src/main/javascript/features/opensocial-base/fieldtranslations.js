@@ -18,7 +18,7 @@
 
 /**
  * @fileoverview Helper class used to translate from the 0.8 server apis to the 0.8 js apis
- * (which are unfortunately not the same)
+ * (which are unfortunately not the same).
  */
 
 window['FieldTranslations'] = (function() {
@@ -37,100 +37,100 @@ window['FieldTranslations'] = (function() {
 
   return {
     'translateEnumJson' : translateEnumJson,
-    'translateUrlJson' :  translateUrlJson,
-    'translateServerPersonToJsPerson' : 
-    function(serverJson, opt_params) {
-      if (serverJson.emails) {
-        for (var i = 0; i < serverJson.emails.length; i++) {
-          serverJson.emails[i].address = serverJson.emails[i].value;
-        }
-      }
-
-      if (serverJson.phoneNumbers) {
-        for (var p = 0; p < serverJson.phoneNumbers.length; p++) {
-          serverJson.phoneNumbers[p].number = serverJson.phoneNumbers[p].value;
-        }
-      }
-
-      if (serverJson.birthday) {
-        serverJson.dateOfBirth = serverJson.birthday;
-      }
-
-      if (serverJson.utcOffset) {
-        serverJson.timeZone = serverJson.utcOffset;
-      }
-
-      if (serverJson.addresses) {
-        for (var j = 0; j < serverJson.addresses.length; j++) {
-          serverJson.addresses[j].unstructuredAddress = serverJson.addresses[j].formatted;
-        }
-      }
-
-      if (serverJson.gender) {
-        var key = serverJson.gender == 'male' ? 'MALE' :
-                  (serverJson.gender == 'female') ? 'FEMALE' :
-                  null;
-        serverJson.gender = {key : key, displayValue : serverJson.gender};
-      }
-
-      translateUrlJson(serverJson.profileSong);
-      translateUrlJson(serverJson.profileVideo);
-
-      if (serverJson.urls) {
-        for (var u = 0; u < serverJson.urls.length; u++) {
-          translateUrlJson(serverJson.urls[u]);
-        }
-      }
-
-      translateEnumJson(serverJson.drinker);
-      translateEnumJson(serverJson.lookingFor);
-      translateEnumJson(serverJson.networkPresence);
-      translateEnumJson(serverJson.smoker);
-
-      if (serverJson.organizations) {
-        serverJson.jobs = [];
-        serverJson.schools = [];
-
-        for (var o = 0; o < serverJson.organizations.length; o++) {
-          var org = serverJson.organizations[o];
-          if (org.type == 'job') {
-            serverJson.jobs.push(org);
-          } else if (org.type == 'school') {
-            serverJson.schools.push(org);
+    'translateUrlJson' : translateUrlJson,
+    'translateServerPersonToJsPerson' :
+        function(serverJson, opt_params) {
+          if (serverJson.emails) {
+            for (var i = 0; i < serverJson.emails.length; i++) {
+              serverJson.emails[i].address = serverJson.emails[i].value;
+            }
           }
-        }
-      }
 
-      if (serverJson.name) {
-        serverJson.name.unstructured = serverJson.name.formatted;
-      }
+          if (serverJson.phoneNumbers) {
+            for (var p = 0; p < serverJson.phoneNumbers.length; p++) {
+              serverJson.phoneNumbers[p].number = serverJson.phoneNumbers[p].value;
+            }
+          }
 
-      if (serverJson.appData) {
-        serverJson.appData = opensocial.Container.escape(
-            serverJson.appData, opt_params, true);
-      }
+          if (serverJson.birthday) {
+            serverJson.dateOfBirth = serverJson.birthday;
+          }
 
-    },
+          if (serverJson.utcOffset) {
+            serverJson.timeZone = serverJson.utcOffset;
+          }
+
+          if (serverJson.addresses) {
+            for (var j = 0; j < serverJson.addresses.length; j++) {
+              serverJson.addresses[j].unstructuredAddress = serverJson.addresses[j].formatted;
+            }
+          }
+
+          if (serverJson.gender) {
+            var key = serverJson.gender == 'male' ? 'MALE' :
+                (serverJson.gender == 'female') ? 'FEMALE' :
+                null;
+            serverJson.gender = {key: key, displayValue: serverJson.gender};
+          }
+
+          translateUrlJson(serverJson.profileSong);
+          translateUrlJson(serverJson.profileVideo);
+
+          if (serverJson.urls) {
+            for (var u = 0; u < serverJson.urls.length; u++) {
+              translateUrlJson(serverJson.urls[u]);
+            }
+          }
+
+          translateEnumJson(serverJson.drinker);
+          translateEnumJson(serverJson.lookingFor);
+          translateEnumJson(serverJson.networkPresence);
+          translateEnumJson(serverJson.smoker);
+
+          if (serverJson.organizations) {
+            serverJson.jobs = [];
+            serverJson.schools = [];
+
+            for (var o = 0; o < serverJson.organizations.length; o++) {
+              var org = serverJson.organizations[o];
+              if (org.type == 'job') {
+                serverJson.jobs.push(org);
+              } else if (org.type == 'school') {
+                serverJson.schools.push(org);
+              }
+            }
+          }
+
+          if (serverJson.name) {
+            serverJson.name.unstructured = serverJson.name.formatted;
+          }
+
+          if (serverJson.appData) {
+            serverJson.appData = opensocial.Container.escape(
+                serverJson.appData, opt_params, true);
+          }
+
+        },
 
 
     'translateJsPersonFieldsToServerFields' :
-    function(fields) {
-      for (var i = 0; i < fields.length; i++) {
-        if (fields[i] == 'dateOfBirth') {
-          fields[i] = 'birthday';
-        } else if (fields[i] == 'timeZone') {
-          fields[i] = 'utcOffset';
-        } else if (fields[i] == 'jobs') {
-          fields[i] = 'organizations';
-        } else if (fields[i] == 'schools') {
-          fields[i] = 'organizations';
-        }
-      }
+        function(fields) {
+          for (var i = 0; i < fields.length; i++) {
+            if (fields[i] == 'dateOfBirth') {
+              fields[i] = 'birthday';
+            } else if (fields[i] == 'timeZone') {
+              fields[i] = 'utcOffset';
+            } else if (fields[i] == 'jobs') {
+              fields[i] = 'organizations';
+            } else if (fields[i] == 'schools') {
+              fields[i] = 'organizations';
+            }
+          }
 
-      // displayName and id always need to be requested
-      fields.push('id');
-      fields.push('displayName');
-    },
+          // displayName and id always need to be requested
+          fields.push('id');
+          fields.push('displayName');
+        },
 
     'translateIsoStringToDate' : function(isoString) {
       // Date parsing code from http://delete.me.uk/2005/03/iso8601.html
@@ -147,7 +147,7 @@ window['FieldTranslations'] = (function() {
       if (d[7]) { date.setHours(d[7]); }
       if (d[8]) { date.setMinutes(d[8]); }
       if (d[10]) { date.setSeconds(d[10]); }
-      if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+      if (d[12]) { date.setMilliseconds(Number('0.' + d[12]) * 1000); }
       if (d[14]) {
         offset = (Number(d[16]) * 60) + Number(d[17]);
         offset *= ((d[15] == '-') ? 1 : -1);
@@ -165,7 +165,7 @@ window['FieldTranslations'] = (function() {
      * the JS fetchPerson() API in terms of an appData param.  Translate
      * between the two.
      */
-     'addAppDataAsProfileFields' : function(opt_params) {
+    'addAppDataAsProfileFields' : function(opt_params) {
       if (opt_params) {
         // Push the appData keys in as profileDetails
         if (opt_params['appData']) {
@@ -191,40 +191,40 @@ window['FieldTranslations'] = (function() {
     /**
      * Translate standard Javascript arguments to JSON-RPC protocol format.
      */
-    'translateStandardArguments' : 
-    function(opt_params, rpc_params) {
-      if (opt_params['first']) {
-        rpc_params.startIndex = opt_params['first'];
-      }
-      if (opt_params['max']) {
-        rpc_params.count = opt_params['max'];
-      }
-      if (opt_params['sortOrder']) {
-        rpc_params.sortBy = opt_params['sortOrder'];
-      }
-      if (opt_params['filter']) {
-        rpc_params.filterBy = opt_params['filter'];
-      }
-      if (opt_params['filterOp']) {
-        rpc_params.filterOp = opt_params['filterOp'];
-      }
-      if (opt_params['filterValue']) {
-        rpc_params.filterValue = opt_params['filterValue'];
-      }
-      if (opt_params['fields']) {
-        rpc_params.fields = opt_params['fields'];
-      }
-    },
+    'translateStandardArguments' :
+        function(opt_params, rpc_params) {
+          if (opt_params['first']) {
+            rpc_params.startIndex = opt_params['first'];
+          }
+          if (opt_params['max']) {
+            rpc_params.count = opt_params['max'];
+          }
+          if (opt_params['sortOrder']) {
+            rpc_params.sortBy = opt_params['sortOrder'];
+          }
+          if (opt_params['filter']) {
+            rpc_params.filterBy = opt_params['filter'];
+          }
+          if (opt_params['filterOp']) {
+            rpc_params.filterOp = opt_params['filterOp'];
+          }
+          if (opt_params['filterValue']) {
+            rpc_params.filterValue = opt_params['filterValue'];
+          }
+          if (opt_params['fields']) {
+            rpc_params.fields = opt_params['fields'];
+          }
+        },
 
     /**
      * Translate network distance from id spec to JSON-RPC parameters.
      */
-    'translateNetworkDistance' : 
-    function(idSpec, rpc_params) {
-      if (idSpec.getField('networkDistance')) {
-        rpc_params.networkDistance = idSpec.getField('networkDistance');
-      }
-    }
-    // end of returned Object, please no commas
+    'translateNetworkDistance' :
+        function(idSpec, rpc_params) {
+          if (idSpec.getField('networkDistance')) {
+            rpc_params.networkDistance = idSpec.getField('networkDistance');
+          }
+        }
+        // end of returned Object, please no commas
   };
 })();

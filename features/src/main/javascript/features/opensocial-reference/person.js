@@ -58,26 +58,26 @@ opensocial.Person.Field = {
    * A string ID that can be permanently associated with this person.
    * @member opensocial.Person.Field
    */
-  ID : 'id',
+  ID: 'id',
 
   /**
    * A opensocial.Name object containing the person's name.
    * @member opensocial.Person.Field
    */
-  NAME : 'name',
+  NAME: 'name',
 
   /**
    * A String representing the person's nickname.
    * @member opensocial.Person.Field
    */
-  NICKNAME : 'nickname',
+  NICKNAME: 'nickname',
 
   /**
    * Person's photo thumbnail URL, specified as a string.
    * This URL must be fully qualified. Relative URLs will not work in gadgets.
    * @member opensocial.Person.Field
    */
-  THUMBNAIL_URL : 'thumbnailUrl',
+  THUMBNAIL_URL: 'thumbnailUrl',
 
   /**
    * Person's profile URL, specified as a string.
@@ -85,7 +85,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  PROFILE_URL : 'profileUrl',
+  PROFILE_URL: 'profileUrl',
 
   /**
    * Person's current location, specified as an
@@ -93,7 +93,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  CURRENT_LOCATION : 'currentLocation',
+  CURRENT_LOCATION: 'currentLocation',
 
   /**
    * Addresses associated with the person, specified as an Array of
@@ -101,7 +101,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  ADDRESSES : 'addresses',
+  ADDRESSES: 'addresses',
 
   /**
    * Emails associated with the person, specified as an Array of
@@ -109,7 +109,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  EMAILS : 'emails',
+  EMAILS: 'emails',
 
   /**
    * Phone numbers associated with the person, specified as an Array of
@@ -117,7 +117,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  PHONE_NUMBERS : 'phoneNumbers',
+  PHONE_NUMBERS: 'phoneNumbers',
 
   /**
    * A general statement about the person, specified as a string.
@@ -125,7 +125,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  ABOUT_ME : 'aboutMe',
+  ABOUT_ME: 'aboutMe',
 
   /**
    * Person's status, headline or shoutout, specified as a string.
@@ -133,7 +133,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  STATUS : 'status',
+  STATUS: 'status',
 
   /**
    * Person's profile song, specified as an opensocial.Url.
@@ -141,7 +141,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  PROFILE_SONG : 'profileSong',
+  PROFILE_SONG: 'profileSong',
 
   /**
    * Person's profile video, specified as an opensocial.Url.
@@ -149,7 +149,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  PROFILE_VIDEO : 'profileVideo',
+  PROFILE_VIDEO: 'profileVideo',
 
   /**
    * Person's gender, specified as an opensocial.Enum with the enum's
@@ -158,49 +158,49 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  GENDER : 'gender',
+  GENDER: 'gender',
 
   /**
    * Person's sexual orientation, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  SEXUAL_ORIENTATION : 'sexualOrientation',
+  SEXUAL_ORIENTATION: 'sexualOrientation',
 
   /**
    * Person's relationship status, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  RELATIONSHIP_STATUS : 'relationshipStatus',
+  RELATIONSHIP_STATUS: 'relationshipStatus',
 
   /**
    * Person's age, specified as a number.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  AGE : 'age',
+  AGE: 'age',
 
   /**
    * Person's date of birth, specified as a Date object.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  DATE_OF_BIRTH : 'dateOfBirth',
+  DATE_OF_BIRTH: 'dateOfBirth',
 
   /**
    * Person's body characteristics, specified as an opensocial.BodyType.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  BODY_TYPE : 'bodyType',
+  BODY_TYPE: 'bodyType',
 
   /**
    * Person's ethnicity, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  ETHNICITY : 'ethnicity',
+  ETHNICITY: 'ethnicity',
 
   /**
    * Person's smoking status, specified as an opensocial.Enum with the enum's
@@ -209,7 +209,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  SMOKER : 'smoker',
+  SMOKER: 'smoker',
 
   /**
    * Person's drinking status, specified as an opensocial.Enum with the enum's
@@ -218,28 +218,28 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  DRINKER : 'drinker',
+  DRINKER: 'drinker',
 
   /**
    * Description of the person's children, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  CHILDREN : 'children',
+  CHILDREN: 'children',
 
   /**
    * Description of the person's pets, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  PETS : 'pets',
+  PETS: 'pets',
 
   /**
    * Description of the person's living arrangement, specified as a string.
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  LIVING_ARRANGEMENT : 'livingArrangement',
+  LIVING_ARRANGEMENT: 'livingArrangement',
 
   /**
    * Person's time zone, specified as the difference in minutes between
@@ -248,7 +248,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  TIME_ZONE : 'timeZone',
+  TIME_ZONE: 'timeZone',
 
   /**
    * List of the languages that the person speaks as ISO 639-1 codes,
@@ -256,7 +256,7 @@ opensocial.Person.Field = {
    * Container support for this field is OPTIONAL.
    * @member opensocial.Person.Field
    */
-  LANGUAGES_SPOKEN : 'languagesSpoken',
+  LANGUAGES_SPOKEN: 'languagesSpoken',
 
   /**
    * Jobs the person has held, specified as an Array of
@@ -265,7 +265,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  JOBS : 'jobs',
+  JOBS: 'jobs',
 
   /**
    * Person's favorite jobs, or job interests and skills, specified as a string.
@@ -273,7 +273,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  JOB_INTERESTS : 'jobInterests',
+  JOB_INTERESTS: 'jobInterests',
 
   /**
    * Schools the person has attended, specified as an Array of
@@ -282,7 +282,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  SCHOOLS : 'schools',
+  SCHOOLS: 'schools',
 
   /**
    * Person's interests, hobbies or passions, specified as an Array of strings.
@@ -290,7 +290,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  INTERESTS : 'interests',
+  INTERESTS: 'interests',
 
   /**
    * URLs related to the person, their webpages, or feeds. Specified as an
@@ -299,7 +299,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  URLS : 'urls',
+  URLS: 'urls',
 
   /**
    * Person's favorite music, specified as an Array of strings.
@@ -307,7 +307,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  MUSIC : 'music',
+  MUSIC: 'music',
 
   /**
    * Person's favorite movies, specified as an Array of strings.
@@ -315,7 +315,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  MOVIES : 'movies',
+  MOVIES: 'movies',
 
   /**
    * Person's favorite TV shows, specified as an Array of strings.
@@ -323,7 +323,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  TV_SHOWS : 'tvShows',
+  TV_SHOWS: 'tvShows',
 
   /**
    * Person's favorite books, specified as an Array of strings.
@@ -331,7 +331,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  BOOKS : 'books',
+  BOOKS: 'books',
 
   /**
    * Person's favorite activities, specified as an Array of strings.
@@ -339,7 +339,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  ACTIVITIES : 'activities',
+  ACTIVITIES: 'activities',
 
   /**
    * Person's favorite sports, specified as an Array of strings.
@@ -347,7 +347,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  SPORTS : 'sports',
+  SPORTS: 'sports',
 
   /**
    * Person's favorite heroes, specified as an Array of strings.
@@ -355,7 +355,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  HEROES : 'heroes',
+  HEROES: 'heroes',
 
   /**
    * Person's favorite quotes, specified as an Array of strings.
@@ -363,7 +363,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  QUOTES : 'quotes',
+  QUOTES: 'quotes',
 
   /**
    * Person's favorite cars, specified as an Array of strings.
@@ -371,7 +371,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  CARS : 'cars',
+  CARS: 'cars',
 
   /**
    * Person's favorite food, specified as an Array of strings.
@@ -379,7 +379,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  FOOD : 'food',
+  FOOD: 'food',
 
   /**
    * Person's turn ons, specified as an Array of strings.
@@ -387,7 +387,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  TURN_ONS : 'turnOns',
+  TURN_ONS: 'turnOns',
 
   /**
    * Person's turn offs, specified as an Array of strings.
@@ -395,7 +395,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  TURN_OFFS : 'turnOffs',
+  TURN_OFFS: 'turnOffs',
 
   /**
    * Arbitrary tags about the person, specified as an Array of strings.
@@ -403,7 +403,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  TAGS : 'tags',
+  TAGS: 'tags',
 
   /**
    * Person's comments about romance, specified as a string.
@@ -411,7 +411,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  ROMANCE : 'romance',
+  ROMANCE: 'romance',
 
   /**
    * What the person is scared of, specified as a string.
@@ -419,7 +419,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  SCARED_OF : 'scaredOf',
+  SCARED_OF: 'scaredOf',
 
   /**
    * Describes when the person is happiest, specified as a string.
@@ -427,7 +427,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  HAPPIEST_WHEN : 'happiestWhen',
+  HAPPIEST_WHEN: 'happiestWhen',
 
   /**
    * Person's thoughts on fashion, specified as a string.
@@ -435,7 +435,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  FASHION : 'fashion',
+  FASHION: 'fashion',
 
   /**
    * Person's thoughts on humor, specified as a string.
@@ -443,7 +443,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  HUMOR : 'humor',
+  HUMOR: 'humor',
 
   /**
    * Person's statement about who or what they are looking for, or what they are
@@ -453,7 +453,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  LOOKING_FOR : 'lookingFor',
+  LOOKING_FOR: 'lookingFor',
 
   /**
    * Person's relgion or religious views, specified as a string.
@@ -461,7 +461,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  RELIGION : 'religion',
+  RELIGION: 'religion',
 
   /**
    * Person's political views, specified as a string.
@@ -469,7 +469,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  POLITICAL_VIEWS : 'politicalViews',
+  POLITICAL_VIEWS: 'politicalViews',
 
   /**
    * A boolean indicating whether the person has used the current app.
@@ -477,7 +477,7 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  HAS_APP : 'hasApp',
+  HAS_APP: 'hasApp',
 
   /**
    * Person's current network status. Specified as an Enum with the enum's
@@ -486,14 +486,14 @@ opensocial.Person.Field = {
    *
    * @member opensocial.Person.Field
    */
-  NETWORK_PRESENCE : 'networkPresence'
+  NETWORK_PRESENCE: 'networkPresence'
 };
 
 
 /**
  * Gets an ID that can be permanently associated with this person.
  *
- * @return {string} The ID
+ * @return {string} The ID.
  */
 opensocial.Person.prototype.getId = function() {
   return this.getField(opensocial.Person.Field.ID);
@@ -501,17 +501,17 @@ opensocial.Person.prototype.getId = function() {
 
 
 var ORDERED_NAME_FIELDS_ = [
-    opensocial.Name.Field.HONORIFIC_PREFIX,
-    opensocial.Name.Field.GIVEN_NAME,
-    opensocial.Name.Field.FAMILY_NAME,
-    opensocial.Name.Field.HONORIFIC_SUFFIX,
-    opensocial.Name.Field.ADDITIONAL_NAME];
+  opensocial.Name.Field.HONORIFIC_PREFIX,
+  opensocial.Name.Field.GIVEN_NAME,
+  opensocial.Name.Field.FAMILY_NAME,
+  opensocial.Name.Field.HONORIFIC_SUFFIX,
+  opensocial.Name.Field.ADDITIONAL_NAME];
 
 /**
  * Gets a text display name for this person; guaranteed to return
  * a useful string.
  *
- * @return {string} The display name
+ * @return {string} The display name.
  */
 opensocial.Person.prototype.getDisplayName = function() {
   var name = this.getField(opensocial.Person.Field.NAME);
@@ -530,7 +530,7 @@ opensocial.Person.prototype.getDisplayName = function() {
         fullName += nameValue + ' ';
       }
     }
-    return fullName.replace(/^\s+|\s+$/g, '') ;
+    return fullName.replace(/^\s+|\s+$/g, '');
   }
 
   // Finally, try the nickname field
@@ -548,7 +548,7 @@ opensocial.Person.prototype.getDisplayName = function() {
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.Person.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -570,7 +570,7 @@ opensocial.Person.prototype.getAppData = function(key) {
  * Returns true if this person object represents the currently logged in user.
  *
  * @return {boolean} True if this is the currently logged in user;
- *   otherwise, false
+ *   otherwise, false.
  */
 opensocial.Person.prototype.isViewer = function() {
   return !!this.isViewer_;
@@ -581,7 +581,7 @@ opensocial.Person.prototype.isViewer = function() {
  * Returns true if this person object represents the owner of the current page.
  *
  * @return {boolean} True if this is the owner of the page;
- *   otherwise, false
+ *   otherwise, false.
  */
 opensocial.Person.prototype.isOwner = function() {
   return !!this.isOwner_;

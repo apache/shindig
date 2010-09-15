@@ -34,14 +34,14 @@ shindig.container.Service = function(opt_config) {
    * @type {string}
    */
   this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
-     shindig.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
-  
+      shindig.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
+
   /**
    * @type {string}
    */
   this.apiPath_ = String(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
-  
+
   /**
    * Map of gadget URLs to cached gadgetInfo response.
    * @type {Object}
@@ -54,7 +54,7 @@ shindig.container.Service = function(opt_config) {
    */
   this.cachedTokens_ = {};
 
-  this.initializeOsapi_(); 
+  this.initializeOsapi_();
 
   this.onConstructed(config);
 };
@@ -83,8 +83,8 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
     if (response.error) {
       // Hides internal server error.
       callback({
-          error : 'Failed to retrieve gadget metadata.',
-          errorCode : 'NOLOAD'
+        error: 'Failed to retrieve gadget metadata.',
+        errorCode: 'NOLOAD'
       });
     } else {
       for (var id in response) {
@@ -109,8 +109,8 @@ shindig.container.Service.prototype.getGadgetToken = function(
     if (response.error) {
       // Hides internal server error.
       callback({
-          error : 'Failed to retrieve gadget token.',
-          errorCode : 'NOLOAD'
+        error: 'Failed to retrieve gadget token.',
+        errorCode: 'NOLOAD'
       });
     } else {
       for (var id in response) {
@@ -146,17 +146,17 @@ shindig.container.Service.prototype.getCachedGadgetToken = function(url) {
  */
 shindig.container.Service.prototype.initializeOsapi_ = function() {
   var endPoint = this.apiHost_ + this.apiPath_;
-  
+
   var osapiServicesConfig = {};
-  osapiServicesConfig['gadgets.rpc'] = [ 'container.listMethods' ];
+  osapiServicesConfig['gadgets.rpc'] = ['container.listMethods'];
   osapiServicesConfig[endPoint] = [
     'gadgets.metadata.get',
     'gadgets.token.get'
   ];
 
   gadgets.config.init({
-    'osapi': { 'endPoints': [ endPoint ] },
-    'osapi.services': osapiServicesConfig 
+    'osapi': { 'endPoints': [endPoint] },
+    'osapi.services': osapiServicesConfig
   });
 };
 
@@ -172,7 +172,7 @@ shindig.container.Service.prototype.initializeOsapi_ = function() {
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
-// Host to fetch gadget information, via XHR. 
+// Host to fetch gadget information, via XHR.
 shindig.container.ServiceConfig.API_HOST = 'apiHost';
-// Path to fetch gadget information, via XHR. 
+// Path to fetch gadget information, via XHR.
 shindig.container.ServiceConfig.API_PATH = 'apiPath';

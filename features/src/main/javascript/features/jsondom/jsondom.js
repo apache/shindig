@@ -35,9 +35,9 @@ gadgets.jsondom = (function() {
   var domCache = {};
 
   function Node(data, opt_nextSibling) {
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       return Text(data, opt_nextSibling);
-    } else if (typeof data === "object") {
+    } else if (typeof data === 'object') {
       if (data.e) {
         throw new Error(data.e);
       }
@@ -63,7 +63,7 @@ gadgets.jsondom = (function() {
     // Set up children. Do so from the back of the list to
     // properly set up nextSibling references.
     var reverseChildren = [];
-    var backChild = (json.c.length > 0 ? Node(json.c[json.c.length-1]) : null);
+    var backChild = (json.c.length > 0 ? Node(json.c[json.c.length - 1]) : null);
     for (var i = json.c.length - 2; i >= 0; --i) {
       var next = Node(json.c[i], backChild);
       reverseChildren.push(next);
@@ -90,15 +90,15 @@ gadgets.jsondom = (function() {
         }
         return null;
       }
-    }
+    };
   }
 
   function Text(value, opt_nextSibling, opt_name, opt_type) {
     var nodeType = opt_type || DOM_TEXT_NODE;
-    var nodeName = opt_name || "#text";
+    var nodeName = opt_name || '#text';
     var nodeValue = value;
     var nextSibling = opt_nextSibling;
-    
+
     return {
       nodeType: nodeType,
       nodeName: nodeName,
@@ -108,7 +108,7 @@ gadgets.jsondom = (function() {
       cloneNode: function() {
         return Text(nodeValue, nodeName);
       }
-    }
+    };
   }
 
   function Attr(name, value) {

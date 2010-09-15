@@ -119,18 +119,18 @@ gadgets.TabSet = function(opt_moduleId, opt_defaultTab, opt_container) {
   this.tabsContainer_ = null;
   this.rtl_ = document.body.dir === 'rtl';
   this.prefs_ = new gadgets.Prefs();
-  this.selectedTabIndex_ = this.prefs_.getString("selectedTab");
+  this.selectedTabIndex_ = this.prefs_.getString('selectedTab');
   this.mainContainer_ = this.createMainContainer_(opt_container);
   this.tabTable_ = this.createTabTable_();
   this.displayTabs(false);
   //  gadgets.TabSet.addCSS_([  ].join(''));
 };
 
-gadgets.config.register("tabset", {}, function (configuration) { 
-  // Injects the default stylesheet for tabs 
-  gadgets.TabSet.addCSS_( configuration.tabs.css.join('')); 
-}); 
- 
+gadgets.config.register('tabset', {}, function(configuration) {
+  // Injects the default stylesheet for tabs
+  gadgets.TabSet.addCSS_(configuration.tabs.css.join(''));
+});
+
 
 /**
  * Adds a new tab based on the name-value pairs specified in opt_params.
@@ -151,7 +151,7 @@ gadgets.config.register("tabset", {}, function (configuration) {
 gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
   if (typeof opt_params === 'string') {
     opt_params = {contentContainer: document.getElementById(arguments[1]),
-                  callback: arguments[2]};
+      callback: arguments[2]};
   }
 
   var params = opt_params || {};
@@ -161,9 +161,9 @@ gadgets.TabSet.prototype.addTab = function(tabName, opt_params) {
     tabIndex = params.index;
   }
   var tab = this.createTab_(tabName, {
-      contentContainer: params.contentContainer,
-      callback: params.callback,
-      tooltip: params.tooltip
+    contentContainer: params.contentContainer,
+    callback: params.callback,
+    tooltip: params.tooltip
   });
 
   var tr = this.tabTable_.rows[0];
@@ -216,8 +216,8 @@ gadgets.TabSet.prototype.removeTab = function(tabIndex) {
       var maxIndex = this.tabs_.length - 1;
       if (maxIndex > 0) {
         this.selectTab_(tabIndex < maxIndex ?
-          this.tabs_[tabIndex + 1] :
-          this.tabs_[tabIndex - 1]);
+            this.tabs_[tabIndex + 1] :
+            this.tabs_[tabIndex - 1]);
       }
     }
     var tr = this.tabTable_.rows[0];
@@ -338,15 +338,15 @@ gadgets.TabSet.prototype.createMainContainer_ = function(opt_element) {
     document.body.insertBefore(container, document.body.firstChild);
   }
 
-  container.className = this.cascade_("tablib_main_container") + ' ' +
-    container.className;
+  container.className = this.cascade_('tablib_main_container') + ' ' +
+      container.className;
 
   return container;
 };
 
 /**
  * Helper method that expands a class name into two class names.
- * @param {string} label CSS class
+ * @param {string} label CSS class.
  * @return {string} Expanded class names.
  * @private
  */
@@ -448,7 +448,7 @@ gadgets.TabSet.prototype.createTabTable_ = function() {
     var adjustNavigationFn = function() {
       me.adjustNavigation_();
     };
-    gadgets.util.attachBrowserEvent(window, "resize", adjustNavigationFn, false);
+    gadgets.util.attachBrowserEvent(window, 'resize', adjustNavigationFn, false);
   }
 
   this.navTable_ = navTable;
@@ -467,7 +467,7 @@ gadgets.TabSet.prototype.adjustNavigation_ = function() {
   this.leftNavContainer_.style.display = 'none';
   this.rightNavContainer_.style.display = 'none';
   if (this.tabsContainer_.scrollWidth <= this.tabsContainer_.offsetWidth) {
-    if(this.tabsContainer_.scrollLeft) {
+    if (this.tabsContainer_.scrollLeft) {
       // to avoid JS error in IE
       this.tabsContainer_.scrollLeft = 0;
     }
@@ -510,7 +510,7 @@ gadgets.TabSet.prototype.smoothScroll_ = function(container, distance) {
 
 /**
  * Helper function that dynamically inserts CSS rules to the page.
- * @param {string} cssText CSS rules to inject
+ * @param {string} cssText CSS rules to inject.
  * @private
  */
 gadgets.TabSet.addCSS_ = function(cssText) {
@@ -614,7 +614,7 @@ gadgets.TabSet.prototype.saveSelectedTabIndex_ = function() {
     var currentTabIndex = this.selectedTab_.getIndex();
     if (currentTabIndex >= 0) {
       this.selectedTabIndex_ = currentTabIndex;
-      this.prefs_.set("selectedTab", currentTabIndex);
+      this.prefs_.set('selectedTab', currentTabIndex);
     }
   } catch (e) {
     // ignore.  setprefs is optional for tablib.

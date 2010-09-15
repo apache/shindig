@@ -53,7 +53,7 @@ opensocial.ResponseItem = function(originalDataRequest, data,
 /**
  * Returns true if there was an error in fetching this data from the server.
  *
- * @return {boolean} True if there was an error; otherwise, false
+ * @return {boolean} True if there was an error; otherwise, false.
  */
 opensocial.ResponseItem.prototype.hadError = function() {
   return !!this.errorCode_;
@@ -74,7 +74,7 @@ opensocial.ResponseItem.Error = {
    *
    * @member opensocial.ResponseItem.Error
    */
-  NOT_IMPLEMENTED : 'notImplemented',
+  NOT_IMPLEMENTED: 'notImplemented',
 
   /**
    * The gadget does not have access to the requested data.
@@ -84,21 +84,21 @@ opensocial.ResponseItem.Error = {
    *
    * @member opensocial.ResponseItem.Error
    */
-  UNAUTHORIZED : 'unauthorized',
+  UNAUTHORIZED: 'unauthorized',
 
   /**
    * The gadget can never have access to the requested data.
    *
    * @member opensocial.ResponseItem.Error
    */
-  FORBIDDEN : 'forbidden',
+  FORBIDDEN: 'forbidden',
 
-   /**
+  /**
    * The request was invalid. Example: 'max' was -1.
    *
    * @member opensocial.ResponseItem.Error
    */
-  BAD_REQUEST : 'badRequest',
+  BAD_REQUEST: 'badRequest',
 
   /**
    * The request encountered an unexpected condition that
@@ -106,7 +106,7 @@ opensocial.ResponseItem.Error = {
    *
    * @member opensocial.ResponseItem.Error
    */
-  INTERNAL_ERROR : 'internalError',
+  INTERNAL_ERROR: 'internalError',
 
   /**
    * The gadget exceeded a quota on the request. Example quotas include a
@@ -115,7 +115,7 @@ opensocial.ResponseItem.Error = {
    *
    * @member opensocial.ResponseItem.Error
    */
-  LIMIT_EXCEEDED : 'limitExceeded'
+  LIMIT_EXCEEDED: 'limitExceeded'
 };
 
 
@@ -125,7 +125,7 @@ opensocial.ResponseItem.Error = {
  * or one of the values defined by
  * <a href="opensocial.ResponseItem.Error.html"><code>Error</code></a>.
  *
- * @return {string} The error code, or null if no error occurred
+ * @return {string} The error code, or null if no error occurred.
  */
 opensocial.ResponseItem.prototype.getErrorCode = function() {
   return this.errorCode_;
@@ -136,7 +136,7 @@ opensocial.ResponseItem.prototype.getErrorCode = function() {
  * If the request had an error, returns the error message.
  *
  * @return {string} A human-readable description of the error that occurred;
- *    can be null, even if an error occurred
+ *    can be null, even if an error occurred.
  */
 opensocial.ResponseItem.prototype.getErrorMessage = function() {
   return this.errorMessage_;
@@ -147,7 +147,7 @@ opensocial.ResponseItem.prototype.getErrorMessage = function() {
  * Returns the original data request.
  *
  * @return {opensocial.DataRequest} The data request used to fetch this data
- *    response
+ *    response.
  */
 opensocial.ResponseItem.prototype.getOriginalDataRequest = function() {
   return this.originalDataRequest_;
@@ -158,7 +158,7 @@ opensocial.ResponseItem.prototype.getOriginalDataRequest = function() {
  * Gets the response data.
  *
  * @return {Object} The requested value calculated by the server; the type of
- *    this value is defined by the type of request that was made
+ *    this value is defined by the type of request that was made.
  */
 opensocial.ResponseItem.prototype.getData = function() {
   return this.data_;

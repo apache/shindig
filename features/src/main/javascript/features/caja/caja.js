@@ -23,7 +23,7 @@
 
 var valijaMaker = undefined;
 
-(function(){
+(function() {
   var imports = ___.copy(___.sharedImports);
   imports.loader = {
     provide: ___.func(function(v) { valijaMaker = v; })
@@ -33,4 +33,4 @@ var valijaMaker = undefined;
   ___.getNewModuleHandler().handleUncaughtException = function(e) {
     throw e;
   };
- })();
+})();

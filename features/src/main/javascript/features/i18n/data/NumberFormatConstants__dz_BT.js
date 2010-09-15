@@ -20,21 +20,21 @@
 gadgets.i18n = gadgets.i18n || {};
 
 gadgets.i18n.NumberFormatConstants = {
-  DECIMAL_SEP:".",
-  GROUP_SEP:",",
-  PERCENT:"%",
-  ZERO_DIGIT:"0",
-  PLUS_SIGN:"+",
-  MINUS_SIGN:"-",
-  EXP_SYMBOL:"E",
-  PERMILL:"\u2030",
-  INFINITY:"\u221E",
-  NAN:"NaN",
-  DECIMAL_PATTERN:"#,##,##0.###",
-  SCIENTIFIC_PATTERN:"#E+00",
-  PERCENT_PATTERN:"#,##,##0\u00A0%",
-  CURRENCY_PATTERN:"\u00A4#,##,##0.00",
-  DEF_CURRENCY_CODE:"BTN"
+  DECIMAL_SEP: '.',
+  GROUP_SEP: ',',
+  PERCENT: '%',
+  ZERO_DIGIT: '0',
+  PLUS_SIGN: '+',
+  MINUS_SIGN: '-',
+  EXP_SYMBOL: 'E',
+  PERMILL: '\u2030',
+  INFINITY: '\u221E',
+  NAN: 'NaN',
+  DECIMAL_PATTERN: '#,##,##0.###',
+  SCIENTIFIC_PATTERN: '#E+00',
+  PERCENT_PATTERN: '#,##,##0\u00A0%',
+  CURRENCY_PATTERN: '\u00A4#,##,##0.00',
+  DEF_CURRENCY_CODE: 'BTN'
 };
 
 gadgets.i18n.NumberFormatConstants.MONETARY_SEP = gadgets.i18n.NumberFormatConstants.DECIMAL_SEP;

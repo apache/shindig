@@ -99,7 +99,7 @@ shindig.container.GadgetHolder.prototype.getElement = function() {
 
 
 /**
- * @return {string|null} The unique string ID for gadget iframe.
+ * @return {?string} The unique string ID for gadget iframe.
  */
 shindig.container.GadgetHolder.prototype.getIframeId = function() {
   return this.iframeId_;
@@ -107,7 +107,7 @@ shindig.container.GadgetHolder.prototype.getIframeId = function() {
 
 
 /**
- * @return {Object|null} The metadata of gadget.
+ * @return {?Object} The metadata of gadget.
  */
 shindig.container.GadgetHolder.prototype.getGadgetInfo = function() {
   return this.gadgetInfo_;
@@ -123,7 +123,7 @@ shindig.container.GadgetHolder.prototype.dispose = function() {
 
 
 /**
- * @return {string|null} The URL of current gadget.
+ * @return {?string} The URL of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getUrl = function() {
   return (this.gadgetInfo_) ? this.gadgetInfo_['url'] : null;
@@ -131,7 +131,7 @@ shindig.container.GadgetHolder.prototype.getUrl = function() {
 
 
 /**
- * @return {string|null} The view of current gadget.
+ * @return {?string} The view of current gadget.
  */
 shindig.container.GadgetHolder.prototype.getView = function() {
   return this.renderParams_[shindig.container.RenderParam.VIEW];
@@ -209,18 +209,18 @@ shindig.container.GadgetHolder.IFRAME_ID_PREFIX_ = '__gadget_';
  */
 shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
   var iframeParams = {
-      'id': this.iframeId_,
-      'name': this.iframeId_,
-      'src': this.getIframeUrl_(),
-      'scrolling': 'no',
-      'marginwidth': '0',
-      'marginheight': '0',
-      'frameborder': '0',
-      'vspace': '0',
-      'hspace': '0',
-      'class': this.renderParams_[shindig.container.RenderParam.CLASS],
-      'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
-      'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
+    'id': this.iframeId_,
+    'name': this.iframeId_,
+    'src': this.getIframeUrl_(),
+    'scrolling': 'no',
+    'marginwidth': '0',
+    'marginheight': '0',
+    'frameborder': '0',
+    'vspace': '0',
+    'hspace': '0',
+    'class': this.renderParams_[shindig.container.RenderParam.CLASS],
+    'height': this.renderParams_[shindig.container.RenderParam.HEIGHT],
+    'width': this.renderParams_[shindig.container.RenderParam.WIDTH]
   };
 
   // Do not use DOM API (createElement(), setAttribute()), since it is slower,
@@ -262,7 +262,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   if (this.securityToken_) {
     uri.setExistingP('st', this.securityToken_);
   }
-  
+
   uri.setFP('mid', String(this.siteId_));
 
   if (this.hasViewParams_()) {

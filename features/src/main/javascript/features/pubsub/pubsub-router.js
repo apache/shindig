@@ -38,38 +38,38 @@ gadgets.pubsubrouter = function() {
     var sender = gadgetId === '..' ? 'container' : gadgetIdToSpecUrl(gadgetId);
     if (sender) {
       switch (command) {
-      case 'subscribe':
-        if (onSubscribe && onSubscribe(gadgetId, channel)) {
+        case 'subscribe':
+          if (onSubscribe && onSubscribe(gadgetId, channel)) {
+            break;
+          }
+          if (!subscribers[channel]) {
+            subscribers[channel] = {};
+          }
+          subscribers[channel][gadgetId] = true;
           break;
-        }
-        if (!subscribers[channel]) {
-          subscribers[channel] = {};
-        }
-        subscribers[channel][gadgetId] = true;
-        break;
-      case 'unsubscribe':
-        if (onUnsubscribe && onUnsubscribe(gadgetId, channel)) {
+        case 'unsubscribe':
+          if (onUnsubscribe && onUnsubscribe(gadgetId, channel)) {
+            break;
+          }
+          if (subscribers[channel]) {
+            delete subscribers[channel][gadgetId];
+          }
           break;
-        }
-        if (subscribers[channel]) {
-          delete subscribers[channel][gadgetId];
-        }
-        break;
-      case 'publish':
-        if (onPublish && onPublish(gadgetId, channel, message)) {
-          break;
-        }
-        var channelSubscribers = subscribers[channel];
-        if (channelSubscribers) {
-          for (var subscriber in channelSubscribers) {
-            if (channelSubscribers.hasOwnProperty(subscriber)) {
-              gadgets.rpc.call(subscriber, 'pubsub', null, channel, sender, message);
+        case 'publish':
+          if (onPublish && onPublish(gadgetId, channel, message)) {
+            break;
+          }
+          var channelSubscribers = subscribers[channel];
+          if (channelSubscribers) {
+            for (var subscriber in channelSubscribers) {
+              if (channelSubscribers.hasOwnProperty(subscriber)) {
+                gadgets.rpc.call(subscriber, 'pubsub', null, channel, sender, message);
+              }
             }
           }
-        }
-        break;
-      default:
-        throw new Error('Unknown pubsub command');
+          break;
+        default:
+          throw new Error('Unknown pubsub command');
       }
     }
   }
@@ -79,7 +79,7 @@ gadgets.pubsubrouter = function() {
      * Initializes the PubSub message router.
      * @param {function(number)} gadgetIdToSpecUrlHandler Function that returns the full
      *                   gadget spec URL of a given gadget id. For example:
-     *                   function(id) { return idToUrlMap[id]; }
+     *                   function(id) { return idToUrlMap[id]; }.
      * @param {Object=} opt_callbacks Optional event handlers. Supported handlers:
      *                 opt_callbacks.onSubscribe: function(gadgetId, channel)
      *                   Called when a gadget tries to subscribe to a channel.

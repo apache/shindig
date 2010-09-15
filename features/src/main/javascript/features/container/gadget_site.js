@@ -26,7 +26,7 @@
 
 /**
  * @param {shindig.container.Service} service To fetch gadgets metadata, token.
- * @param {Element} gadgetEl Element into which to render the gadget
+ * @param {Element} gadgetEl Element into which to render the gadget.
  * @param {Element=} opt_bufferEl Optional element for double buffering.
  * @constructor
  */
@@ -203,7 +203,7 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
 shindig.container.GadgetSite.prototype.navigateTo = function(
     gadgetUrl, viewParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
-  
+
   // If metadata has been loaded/cached.
   var gadgetInfo = this.service_.getCachedGadgetMetadata(gadgetUrl);
   if (gadgetInfo) {

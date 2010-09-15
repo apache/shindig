@@ -54,7 +54,7 @@ gadgets.pubsub = function() {
      *                     if (isTrustedGadgetSpecUrl(sender)) {
      *                       processMessage(message);
      *                     }
-     *                   }
+     *                   }.
      */
     subscribe: function(channel, callback) {
       listeners[channel] = callback;

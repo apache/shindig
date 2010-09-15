@@ -18,11 +18,11 @@
 
 /**
  * @fileoverview Caja is a whitelisting javascript sanitizing rewriter.
- * This file tames the APIs that are exposed to a gadget
+ * This file tames the APIs that are exposed to a gadget.
  */
 
 var caja___ = (function() {
-    // URI policy: Rewrites all uris in a cajoled gadget
+  // URI policy: Rewrites all uris in a cajoled gadget
   var uriCallback = {
     rewrite: function rewrite(uri, mimeTypes) {
       uri = String(uri);
@@ -48,34 +48,34 @@ var caja___ = (function() {
   }
   function whitelistCtors(schemas) {
     var length = schemas.length;
-    for (var i=0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
         ___.markCtor(schema[0][schema[1]] /* func */, schema[2] /* parent */, schema[1] /* name */);
       } else {
-        gadgets.warn("Error taming constructor: " + schema[0] + "." + schema[1]);
+        gadgets.warn('Error taming constructor: ' + schema[0] + '.' + schema[1]);
       }
     }
   }
   function whitelistFuncs(schemas) {
     var length = schemas.length;
-    for (var i=0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0][schema[1]] === 'function') {
         ___.markInnocent(schema[0][schema[1]], schema[1]);
       } else {
-        gadgets.warn("Error taming function: " + schema[0] + "." + schema[1]);
+        gadgets.warn('Error taming function: ' + schema[0] + '.' + schema[1]);
       }
     }
   }
   function whitelistMeths(schemas) {
     var length = schemas.length;
-    for (var i=0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       var schema = schemas[i];
       if (typeof schema[0].prototype[schema[1]] == 'function') {
         ___.grantInnocentMethod(schema[0].prototype, schema[1]);
       } else {
-        gadgets.warn("Error taming method: " + schema[0] + "." + schema[1]);
+        gadgets.warn('Error taming method: ' + schema[0] + '.' + schema[1]);
       }
     }
   }
@@ -83,20 +83,20 @@ var caja___ = (function() {
   function enable() {
     var imports = ___.copy(___.sharedImports);
     imports.outers = imports;
-    
+
     var gadgetRoot = document.getElementById('cajoled-output');
     gadgetRoot.className = 'g___';
     document.body.appendChild(gadgetRoot);
-    
+
     imports.htmlEmitter___ = new HtmlEmitter(gadgetRoot);
     attachDocumentStub('-g___', uriCallback, imports, gadgetRoot);
-    
+
     imports.$v = valijaMaker.CALL___(imports.outers);
-    
+
     ___.getNewModuleHandler().setImports(imports);
-    
+
     fire(imports);
-    
+
     imports.outers.gadgets = ___.tame(window.gadgets);
     imports.outers.opensocial = ___.tame(window.opensocial);
     ___.grantRead(imports.outers, 'gadgets');

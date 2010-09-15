@@ -58,14 +58,14 @@ opensocial.Email.Field = {
    *
    * @member opensocial.Email.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * The email address, specified as a String.
    *
    * @member opensocial.Email.Field
    */
-  ADDRESS : 'address'
+  ADDRESS: 'address'
 };
 
 
@@ -79,7 +79,7 @@ opensocial.Email.Field = {
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.Email.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

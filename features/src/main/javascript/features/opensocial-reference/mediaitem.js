@@ -32,8 +32,8 @@
 /**
  * Represents images, movies, and audio.
  *
- * @param {string} mimeType The media's type
- * @param {string} url The media's location
+ * @param {string} mimeType The media's type.
+ * @param {string} url The media's location.
  * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params
  *    Any other fields that should be set on the media item object.
  *    All of the defined Fields are supported.
@@ -71,11 +71,11 @@ opensocial.MediaItem = function(mimeType, url, opt_params) {
  */
 opensocial.MediaItem.Type = {
   /** @member opensocial.MediaItem.Type */
-  IMAGE : 'image',
+  IMAGE: 'image',
   /** @member opensocial.MediaItem.Type */
-  VIDEO : 'video',
+  VIDEO: 'video',
   /** @member opensocial.MediaItem.Type */
-  AUDIO : 'audio'
+  AUDIO: 'audio'
 };
 
 
@@ -99,19 +99,19 @@ opensocial.MediaItem.Field = {
    * <code>MediaItem.Type</code></a> object.
    * @member opensocial.MediaItem.Field
    */
-  TYPE : 'type',
+  TYPE: 'type',
 
   /**
    * The MIME type of media, specified as a String.
    * @member opensocial.MediaItem.Field
    */
-  MIME_TYPE : 'mimeType',
+  MIME_TYPE: 'mimeType',
 
   /**
    * A string specifying the URL where the media can be found.
    * @member opensocial.MediaItem.Field
    */
-  URL : 'url'
+  URL: 'url'
 };
 
 
@@ -120,8 +120,8 @@ opensocial.MediaItem.Field = {
  *
  * @param {string} key The key to get data for; see the
  *   <a href="opensocial.MediaItem.Field.html">Field</a> class
- *   for possible values
- * @return {string} The data
+ *   for possible values.
+ * @return {string} The data.
  */
 opensocial.MediaItem.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);
@@ -131,8 +131,8 @@ opensocial.MediaItem.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this media item associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {string} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {string} data The data to set.
  */
 opensocial.MediaItem.prototype.setField = function(key, data) {
   return (this.fields_[key] = data);

@@ -21,11 +21,11 @@
 	gadgets.analytics = function(trackingCode) {
 		this.tracker = _gat._getTracker(trackingCode);
 	};
-	
+
 	gadgets.analytics.prototype.reportPageview = function(path) {
 		this.tracker._trackPageview(path);
 	};
-	
+
 	/**
 	 * label and value are optional
 	 */

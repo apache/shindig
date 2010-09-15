@@ -25,8 +25,8 @@
  * Define 'os:Render' and 'os:Html' tags and the @onAttach attribute
  */
 os.defineBuiltinTags = function() {
-  var osn = os.getNamespace("os") ||
-      os.createNamespace("os", "http://ns.opensocial.org/2008/markup");
+  var osn = os.getNamespace('os') ||
+      os.createNamespace('os', 'http://ns.opensocial.org/2008/markup');
 
   /**
    * <os:Render> custom tag renders the specified child nodes of the current
@@ -34,11 +34,11 @@ os.defineBuiltinTags = function() {
    */
   osn.Render = function(node, data, context) {
     var parent = context.getVariable(os.VAR_parentnode);
-    var exp = node.getAttribute("content") || "*";
+    var exp = node.getAttribute('content') || '*';
     var result = os.getValueFromNode_(parent, exp);
     if (!result) {
-       return "";
-    } else if (typeof(result) == "string") {
+      return '';
+    } else if (typeof(result) == 'string') {
       var textNode = document.createTextNode(result);
       result = [];
       result.push(textNode);
@@ -48,7 +48,7 @@ os.defineBuiltinTags = function() {
         resultArray.push(result.childNodes[i]);
       }
       result = resultArray;
-    } else if (exp != "*" && result.length == 1 &&
+    } else if (exp != '*' && result.length == 1 &&
         result[0].nodeType == DOM_ELEMENT_NODE) {
       // When we call <os:renderAll content="tag"/>, render the inner content
       // of the tag returned, not the tag itself.
@@ -85,7 +85,7 @@ os.defineBuiltinTags = function() {
    * rather than the text of the markup.
    */
   osn.Html = function(node) {
-    var html = node.code ? "" + node.code : node.getAttribute("code") || "";
+    var html = node.code ? '' + node.code : node.getAttribute('code') || '';
     // TODO(levik): Sanitize the HTML here to avoid script injection issues.
     // Perhaps use the gadgets sanitizer if available.
     return html;
@@ -110,11 +110,11 @@ os.defineBuiltinTags = function() {
     var func = new Function(code);
     callbacks.push(createClosure(node, func));
   }
-  os.registerAttribute_("onAttach", processOnAttach);
-  os.registerAttribute_("onCreate", processOnAttach);
-  os.registerAttribute_("oncreate", processOnAttach);
-  os.registerAttribute_("x-oncreate", processOnAttach);
-  os.registerAttribute_("x-onCreate", processOnAttach);
+  os.registerAttribute_('onAttach', processOnAttach);
+  os.registerAttribute_('onCreate', processOnAttach);
+  os.registerAttribute_('oncreate', processOnAttach);
+  os.registerAttribute_('x-oncreate', processOnAttach);
+  os.registerAttribute_('x-onCreate', processOnAttach);
 };
 
 os.defineBuiltinTags();
@@ -135,7 +135,7 @@ os.defineBuiltinTags();
  */
 os.resolveOpenSocialIdentifier = function(object, name) {
   // Simple property from object.
-  if (typeof(object[name]) != "undefined") {
+  if (typeof(object[name]) != 'undefined') {
     return object[name];
   }
 

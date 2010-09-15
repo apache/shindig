@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 /**
  * @fileoverview Implements the global implicit data context for containers.
  */
@@ -47,13 +47,13 @@ opensocial.data.DataContext = function() {
     if (typeof obj === 'undefined' || obj === null) {
       return;
     }
-  
+
     dataSets[key] = obj;
     if (!(opt_fireListeners === false)) {
       fireCallbacks(key);
     }
   };
-  
+
   /**
    * Registers a callback listener for a given set of keys.
    * @param {string|Array.<string>} keys Key or set of keys to listen on.
@@ -64,21 +64,21 @@ opensocial.data.DataContext = function() {
    */
   var registerListener = function(keys, callback, oneTimeListener, fireIfReady) {
     var oneTime = !!oneTimeListener;
-    var listener = {keys : {}, callback : callback, oneTime: oneTime};
+    var listener = {keys: {}, callback: callback, oneTime: oneTime};
 
     if (typeof keys === 'string') {
       listener.keys[keys] = true;
       if (keys != '*') {
-        keys = [ keys ];
+        keys = [keys];
       }
     } else {
       for (var i = 0; i < keys.length; i++) {
         listener.keys[keys[i]] = true;
       }
     }
-    
+
     listeners.push(listener);
-  
+
     // Check to see if this one should fire immediately.
     if (fireIfReady && keys !== '*' && isDataReady(listener.keys)) {
       window.setTimeout(function() {
@@ -86,7 +86,7 @@ opensocial.data.DataContext = function() {
       }, 1);
     }
   };
-  
+
   /**
    * Checks if the data for a map of keys is available.
    * @param {Object.<string, *>} keys An map of keys to check.
@@ -96,7 +96,7 @@ opensocial.data.DataContext = function() {
     if (keys['*']) {
       return true;
     }
-    
+
     for (var key in keys) {
       if (typeof dataSets[key] === 'undefined') {
         return false;
@@ -104,7 +104,7 @@ opensocial.data.DataContext = function() {
     }
     return true;
   };
-    
+
   /**
    * Fires a listener for a key, but only if the data is ready for other
    * keys this listener is bound to.
@@ -118,8 +118,8 @@ opensocial.data.DataContext = function() {
         removeListener(listener);
       }
     }
-  };    
-  
+  };
+
   /**
    * Removes a listener from the list.
    * @param {Object} listener The listener to remove.
@@ -132,7 +132,7 @@ opensocial.data.DataContext = function() {
       }
     }
   };
-    
+
   /**
    * Scans all active listeners and fires off any callbacks that inserting this
    * key or list of keys satisfies.
@@ -140,8 +140,8 @@ opensocial.data.DataContext = function() {
    * @private
    */
   var fireCallbacks = function(keys) {
-    if (typeof(keys) == "string") {
-      keys = [ keys ];
+    if (typeof(keys) == 'string') {
+      keys = [keys];
     }
     for (var i = 0; i < listeners.length; ++i) {
       var listener = listeners[i];
@@ -157,13 +157,13 @@ opensocial.data.DataContext = function() {
 
 
   return {
-    
+
     /**
      * Returns a map of existing data.
      * @return {Object} A map of current data sets.
      * TODO: Add to the spec API?
      */
-    getData : function() {
+    getData: function() {
       var data = {};
       for (var key in dataSets) {
         if (dataSets.hasOwnProperty(key)) {
@@ -172,48 +172,48 @@ opensocial.data.DataContext = function() {
       }
       return data;
     },
-    
+
     /**
      * Registers a callback listener for a given set of keys.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {function(Array.<string>)} callback Function to call when a 
+     * @param {function(Array.<string>)} callback Function to call when a
      * listener is fired.
      */
-    registerListener : function(keys, callback) {
+    registerListener: function(keys, callback) {
       registerListener(keys, callback, false, true);
     },
-        
+
     /**
      * Private version of registerListener which allows one-time listeners to
-     * be registered. Not part of the spec. Exposed because needed by 
+     * be registered. Not part of the spec. Exposed because needed by
      * opensocial-templates.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {function(Array.<string>)} callback Function to call when a 
+     * @param {function(Array.<string>)} callback Function to call when a.
      */
-    registerOneTimeListener_ : function(keys, callback) {
+    registerOneTimeListener_: function(keys, callback) {
       registerListener(keys, callback, true, true);
     },
-    
+
     /**
      * Private version of registerListener which allows listeners to be
      * registered that do not fire initially, but only after a data change.
      * Exposed because needed by opensocial-templates.
      * @param {string|Array.<string>} keys Key or set of keys to listen on.
-     * @param {function(Array.<string>)} callback Function to call when a
+     * @param {function(Array.<string>)} callback Function to call when a.
      */
-    registerDeferredListener_ : function(keys, callback) {
+    registerDeferredListener_: function(keys, callback) {
       registerListener(keys, callback, false, false);
     },
-    
+
     /**
      * Retrieve a data set for a given key.
      * @param {string} key Key for the requested data set.
      * @return {Object} The data set object.
      */
-    getDataSet : function(key) {
+    getDataSet: function(key) {
       return dataSets[key];
     },
-        
+
     /**
      * Puts a data set into the global DataContext object. Fires listeners
      * if they are satisfied by the associated key being inserted.
@@ -221,17 +221,17 @@ opensocial.data.DataContext = function() {
      * @param {string} key The key to associate with this object.
      * @param {ResponseItem|Object} obj The data object.
      */
-    putDataSet : function(key, obj) {
+    putDataSet: function(key, obj) {
       putDataSet(key, obj, true);
-    }, 
-    
+    },
+
     /**
      * Inserts multiple data sets from a JSON object.
      * @param {Object.<string, Object>} dataSets a JSON object containing Data
      * sets keyed by Data Set Key. All the DataSets are added, before firing
      * listeners.
      */
-    putDataSets : function(dataSets) {
+    putDataSets: function(dataSets) {
       var keys = [];
       for (var key in dataSets) {
         keys.push(key);

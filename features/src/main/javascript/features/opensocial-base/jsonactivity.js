@@ -28,7 +28,7 @@
 var JsonActivity = function(opt_params, opt_skipConversions) {
   opt_params = opt_params || {};
   if (!opt_skipConversions) {
-    JsonActivity.constructArrayObject(opt_params, "mediaItems", JsonMediaItem);
+    JsonActivity.constructArrayObject(opt_params, 'mediaItems', JsonMediaItem);
   }
   opensocial.Activity.call(this, opt_params);
 };

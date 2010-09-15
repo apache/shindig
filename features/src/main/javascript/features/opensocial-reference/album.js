@@ -32,7 +32,7 @@
  * @name opensocial.Album
  */
 
- /**
+/**
  * Base interface for collection of media items.
  *
  * @param {Object.<opensocial.Album.Field, Object>=} opt_params
@@ -58,63 +58,63 @@ opensocial.Album.Field = {
    *
    * @member opensocial.Album.Field
    */
-  DESCRIPTION : 'description',
-    
+  DESCRIPTION: 'description',
+
   /**
    * A unique identifier for the album.
    *
    * @member opensocial.Album.Field
    */
-  ID : 'id',
+  ID: 'id',
 
   /**
    * A location corresponding to the album as opensocial.Address.
    *
    * @member opensocial.Album.Field
    */
-  LOCATION : 'location',
+  LOCATION: 'location',
 
   /*
    * The number of items in the album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_ITEM_COUNT : 'mediaITemCount',
+  MEDIA_ITEM_COUNT: 'mediaITemCount',
 
   /*
    * The types of MediaItems in the Album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_MIME_TYPE : 'MEDIA_MIME_TYPE',
+  MEDIA_MIME_TYPE: 'MEDIA_MIME_TYPE',
 
   /*
    * The types of MediaItems in the album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_TYPE : 'MEDIA_TYPE',
+  MEDIA_TYPE: 'MEDIA_TYPE',
 
   /*
    * The string ID of the owner of the album.
    *
    * @member opensocial.Album.Field
    */
-  OWNER_ID : 'ownerId',
+  OWNER_ID: 'ownerId',
 
   /**
    * URL to a thumbnail cover of the album as string.
    *
    * @member opensocial.Album.Field
    */
-  THUMBNAIL_URL : 'thumbnailUrl',
+  THUMBNAIL_URL: 'thumbnailUrl',
 
   /**
    * The title of the album.
    *
    * @member opensocial.Album.Field
    */
-  TITLE : 'title'
+  TITLE: 'title'
 };
 
 /**
@@ -122,12 +122,12 @@ opensocial.Album.Field = {
  *
  * @param {string} key The key to get data for;
  *   see the <a href="opensocial.Album.Field.html">Field</a> class
- * for possible values
+ * for possible values.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @member opensocial.Album
  */
 opensocial.Album.prototype.getField = function(key, opt_params) {
@@ -138,8 +138,8 @@ opensocial.Album.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this album associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {string} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {string} data The data to set.
  */
 opensocial.Album.prototype.setField = function(key, data) {
   return this.fields_[key] = data;

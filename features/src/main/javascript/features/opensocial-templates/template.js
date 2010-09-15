@@ -54,10 +54,10 @@ os.getContextDefaults_ = function() {
     os.contextDefaults_ = {};
     os.contextDefaults_[os.VAR_emptyArray] = os.EMPTY_ARRAY;
     os.contextDefaults_[os.VAR_identifierresolver] = os.getFromContext;
-    if (window["JSON"] && JSON.parse) {
-      os.contextDefaults_["osx:parseJson"] = JSON.parse;
-    } else if (window["gadgets"] && gadgets.json && gadgets.json.parse) {
-      os.contextDefaults_["osx:parseJson"] = gadgets.json.parse;
+    if (window['JSON'] && JSON.parse) {
+      os.contextDefaults_['osx:parseJson'] = JSON.parse;
+    } else if (window['gadgets'] && gadgets.json && gadgets.json.parse) {
+      os.contextDefaults_['osx:parseJson'] = gadgets.json.parse;
     }
   }
   return os.contextDefaults_;
@@ -65,11 +65,11 @@ os.getContextDefaults_ = function() {
 
 /**
  * A renderable compiled Template. A template can contain one or more
- * compiled nodes pre-processed for JST operation. 
+ * compiled nodes pre-processed for JST operation.
  * @constructor
  */
 os.Template = function(opt_id) {
-  this.templateRoot_ = document.createElement("span");
+  this.templateRoot_ = document.createElement('span');
   this.id = opt_id || ('template_' + os.Template.idCounter_++);
 };
 
@@ -83,7 +83,7 @@ os.Template.idCounter_ = 0;
 /**
  * A Map of registered templates by keyed ID.
  * @type {Object.<string, os.Template>}
- * @private 
+ * @private
  */
 os.registeredTemplates_ = {};
 
@@ -135,13 +135,13 @@ os.Template.prototype.setCompiledNodes_ = function(nodes) {
 /**
  * Renders the template and returns the result.
  * Does not fire callbacks.
- * @return {Element} a DOM element containing the result of template processing
+ * @return {Element} a DOM element containing the result of template processing.
  */
 os.Template.prototype.render = function(opt_data, opt_context) {
   if (!opt_context) {
     opt_context = os.createContext(opt_data);
   }
-  return os.renderTemplateNode_(this.templateRoot_, opt_context);            
+  return os.renderTemplateNode_(this.templateRoot_, opt_context);
 };
 
 /**

@@ -50,10 +50,10 @@ gadgets.Prefs.prototype.set = function(key, value) {
 
   var args = [
     null, // go to parent
-    "set_pref", // service name
+    'set_pref', // service name
     null, // no callback
     gadgets.util.getUrlParameters().ifpctok ||
-      gadgets.util.getUrlParameters().rpctoken || 0 // Legacy IFPC "security".
+        gadgets.util.getUrlParameters().rpctoken || 0 // Legacy IFPC "security".
   ].concat(Array.prototype.slice.call(arguments));
 
   gadgets.rpc.call.apply(gadgets.rpc, args);
@@ -69,8 +69,8 @@ gadgets.Prefs.prototype.setArray = function(key, val) {
   // We must escape pipe (|) characters to ensure that decoding in
   // getArray actually works properly.
   for (var i = 0, j = val.length; i < j; ++i) {
-    if (typeof val[i] !== "number") {
-      val[i] = val[i].replace(/\|/g, "%7C");
+    if (typeof val[i] !== 'number') {
+      val[i] = val[i].replace(/\|/g, '%7C');
     }
   }
   this.set(key, val.join('|'));

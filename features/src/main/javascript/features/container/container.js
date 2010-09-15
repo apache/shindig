@@ -56,7 +56,7 @@ shindig.container.Container = function(opt_config) {
       ? Boolean(shindig.container.util.getSafeJsonValue(config,
           shindig.container.ContainerConfig.RENDER_DEBUG, false))
       : (param === '1');
-    
+
   /**
    * @type {boolean}
    */
@@ -78,10 +78,10 @@ shindig.container.Container = function(opt_config) {
 
   /**
    * result from calling window.setInterval()
-   * @type {number|null}
+   * @type {?number}
    */
   this.tokenRefreshTimer_ = null;
-  
+
   this.registerRpcServices_();
 
   this.onConstructed(config);
@@ -90,7 +90,7 @@ shindig.container.Container = function(opt_config) {
 
 /**
  * Create a new gadget site.
- * @param {Element} gadgetEl HTML element into which to render
+ * @param {Element} gadgetEl HTML element into which to render.
  * @param {Element=} opt_bufferEl Optional HTML element for double buffering.
  * @return {shindig.container.GadgetSite} site created for client to hold to.
  */
@@ -267,7 +267,7 @@ shindig.container.ContainerRender.CLASS = 'class';
 // Whether to turn off debugging.
 shindig.container.ContainerRender.DEBUG = 'debug';
 // The starting/default gadget iframe height (in pixels).
-shindig.container.ContainerRender.HEIGHT ='height';
+shindig.container.ContainerRender.HEIGHT = 'height';
 // Whether to turn off debugging.
 shindig.container.ContainerRender.TEST = 'test';
 // The gadget view name.
@@ -293,7 +293,7 @@ shindig.container.Container.prototype.scheduleRefreshTokens_ = function() {
   if (this.isRefreshTokensEnabled_() && !this.tokenRefreshTimer_) {
     var self = this;
     this.tokenRefreshTimer_ = window.setInterval(function() {
-        self.refreshTokens_();
+      self.refreshTokens_();
     }, this.tokenRefreshInterval_);
   }
 };

@@ -41,13 +41,13 @@ var _IG_Prefs = (function() {
     return instance;
   };
 
- _IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
+  _IG_Prefs._parseURL = gadgets.Prefs.parseUrl;
 
   return _IG_Prefs;
 })();
 
 function _IG_Fetch_wrapper(callback, obj) {
-  callback(obj.data ? obj.data : "");
+  callback(obj.data ? obj.data : '');
 }
 
 /**
@@ -84,7 +84,7 @@ function _IG_FetchXmlContent(url, callback, opt_params) {
   } else {
     params['REFRESH_INTERVAL'] = 3600;
   }
-  params.CONTENT_TYPE = "DOM";
+  params.CONTENT_TYPE = 'DOM';
   var cb = gadgets.util.makeClosure(null, _IG_Fetch_wrapper, callback);
   gadgets.io.makeRequest(url, cb, params);
 }
@@ -96,7 +96,7 @@ function _IG_FetchXmlContent(url, callback, opt_params) {
 function _IG_FetchFeedAsJSON(url, callback, numItems, getDescriptions,
                              opt_params) {
   var params = opt_params || {};
-  params.CONTENT_TYPE = "FEED";
+  params.CONTENT_TYPE = 'FEED';
   params.NUM_ENTRIES = numItems;
   params.GET_SUMMARIES = getDescriptions;
   gadgets.io.makeRequest(url,
@@ -179,7 +179,7 @@ function _IG_RegisterOnloadHandler(callback) {
   gadgets.util.registerOnLoadHandler(callback);
 }
 
-/** 
+/**
  * _IG_Callback takes the arguments in the scope the callback is executed and
  * places them first in the argument array. MakeClosure takes the arguments
  * from the scope at callback construction and pushes them first in the array
@@ -192,7 +192,7 @@ function _IG_Callback(handler_func, var_args) {
     var combined_args = Array.prototype.slice.call(arguments);
     // call the handler with all args combined
     handler_func.apply(null,
-      combined_args.concat(Array.prototype.slice.call(orig_args, 1)));
+        combined_args.concat(Array.prototype.slice.call(orig_args, 1)));
   };
 }
 
@@ -220,7 +220,7 @@ function _gel(el) {
  * @deprecated
  */
 function _gelstn(tag) {
-  if (tag === "*" && document.all) {
+  if (tag === '*' && document.all) {
     return document.all;
   }
   return document.getElementsByTagName ?
@@ -286,7 +286,7 @@ function _hesc(str) {
  * @deprecated
  */
 function _striptags(str) {
-  return str.replace(/<\/?[^>]+>/g, "");
+  return str.replace(/<\/?[^>]+>/g, '');
 }
 
 /**
@@ -297,7 +297,7 @@ function _striptags(str) {
  * @deprecated
  */
 function _trim(str) {
-  return str.replace(/^\s+|\s+$/g, "");
+  return str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
@@ -307,12 +307,12 @@ function _trim(str) {
  * @deprecated
  */
 function _toggle(el) {
-  el = (typeof el === "string") ? _gel(el) : el;
+  el = (typeof el === 'string') ? _gel(el) : el;
   if (el !== null) {
-    if (el.style.display.length === 0 || el.style.display === "block") {
-      el.style.display = "none";
-    } else if (el.style.display === "none") {
-      el.style.display = "block";
+    if (el.style.display.length === 0 || el.style.display === 'block') {
+      el.style.display = 'none';
+    } else if (el.style.display === 'none') {
+      el.style.display = 'block';
     }
   }
 }
@@ -328,7 +328,7 @@ var _uid = (function() {
    * @return {number} a unique number.
    * @deprecated
    */
-  return function () {
+  return function() {
     return _legacy_uidCounter++;
   };
 })();
@@ -360,7 +360,7 @@ function _max(a, b) {
  */
 function _exportSymbols(name, sym) {
   var attach = window;
-  var parts = name.split(".");
+  var parts = name.split('.');
   for (var i = 0, j = parts.length; i < j; i++) {
     var part = parts[i];
     attach[part] = attach[part] || {};
@@ -376,9 +376,9 @@ function _exportSymbols(name, sym) {
  * @param {Object} src
  * @param {string} etype
  * @param {function} func
- * TODO - implement
+ * TODO - implement.
  */
 function _IG_AddDOMEventHandler(src, etype, func) {
-  gadgets.warn("_IG_AddDOMEventHandler not implemented - see SHINDIG-198");
+  gadgets.warn('_IG_AddDOMEventHandler not implemented - see SHINDIG-198');
 }
 

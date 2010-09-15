@@ -33,9 +33,9 @@
       // Convert an XHR failure to a JSON-RPC error
       if (response.errors[0]) {
         callback({
-          error : {
-            code : response.rc,
-            message : response.text
+          error: {
+            code: response.rc,
+            message: response.text
           }
         });
       } else {
@@ -53,34 +53,34 @@
     }
 
     var request = {
-      "POST_DATA" : gadgets.json.stringify(requests),
-      "CONTENT_TYPE" : "JSON",
-      "METHOD" : "POST",
-      "AUTHORIZATION" : "SIGNED"
+      'POST_DATA' : gadgets.json.stringify(requests),
+      'CONTENT_TYPE' : 'JSON',
+      'METHOD' : 'POST',
+      'AUTHORIZATION' : 'SIGNED'
     };
 
     var url = this.name;
     var token = shindig.auth.getSecurityToken();
     if (token) {
-      url += "?st=";
+      url += '?st=';
       url += encodeURIComponent(token);
     }
-    gadgets.io.makeNonProxiedRequest(url, processResponse, request, "application/json");
+    gadgets.io.makeNonProxiedRequest(url, processResponse, request, 'application/json');
   }
 
   function init(config) {
-    var services = config["osapi.services"];
+    var services = config['osapi.services'];
     if (services) {
       // Iterate over the defined services, extract the http endpoints and
       // create a transport per-endpoint
       for (var endpointName in services) if (services.hasOwnProperty(endpointName)) {
-        if (endpointName.indexOf("http") == 0 ||
-            endpointName.indexOf("//") == 0) {
+        if (endpointName.indexOf('http') == 0 ||
+            endpointName.indexOf('//') == 0) {
           // Expand the host & append the security token
-          var endpointUrl = endpointName.replace("%host%", document.location.host);
-          var transport = { name : endpointUrl, "execute" : execute };
+          var endpointUrl = endpointName.replace('%host%', document.location.host);
+          var transport = { name: endpointUrl, 'execute' : execute };
           var methods = services[endpointName];
-          for (var i=0; i < methods.length; i++) {
+          for (var i = 0; i < methods.length; i++) {
             osapi._registerMethod(methods[i], transport);
           }
         }
@@ -90,7 +90,7 @@
 
   // We do run this in the container mode in the new common container
   if (gadgets.config) {
-    gadgets.config.register("osapi.services", null, init);
+    gadgets.config.register('osapi.services', null, init);
   }
 
 })();

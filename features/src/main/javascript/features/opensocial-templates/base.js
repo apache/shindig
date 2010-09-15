@@ -62,37 +62,37 @@ window['log'] = os.log;
  * Logs a warning to the console.
  */
 os.warn = function(msg) {
-  os.log("WARNING: " + msg);
+  os.log('WARNING: ' + msg);
 };
 
 /**
- * Is the object an array? 
+ * Is the object an array?
  */
 os.isArray = function(obj) {
-  return typeof(obj) == "object" && 
-      typeof(obj.length) == "number" && 
-      typeof(obj.push) == "function";
+  return typeof(obj) == 'object' &&
+      typeof(obj.length) == 'number' &&
+      typeof(obj.push) == 'function';
 };
 
 /**
  * Constants
  * TODO(davidbyttow): Pull these out of os and make them global (optimization)
  */
-os.ATT_customtag = "customtag";
+os.ATT_customtag = 'customtag';
 
-os.VAR_my = "$my";
-os.VAR_cur = "$cur";
-os.VAR_node = "$node";
-os.VAR_msg = "Msg";
-os.VAR_parentnode = "$parentnode";
-os.VAR_uniqueId = "$uniqueId";
-os.VAR_identifierresolver = "$_ir";
-os.VAR_emptyArray = "$_ea";
-os.VAR_callbacks = "$callbacks_";
+os.VAR_my = '$my';
+os.VAR_cur = '$cur';
+os.VAR_node = '$node';
+os.VAR_msg = 'Msg';
+os.VAR_parentnode = '$parentnode';
+os.VAR_uniqueId = '$uniqueId';
+os.VAR_identifierresolver = '$_ir';
+os.VAR_emptyArray = '$_ea';
+os.VAR_callbacks = '$callbacks_';
 
 /**
  * Reusable empty array instance
- * IE6 PERF: To avoid creating empty arrays when they are needed. 
+ * IE6 PERF: To avoid creating empty arrays when they are needed.
  */
 os.EMPTY_ARRAY = [];
 
@@ -110,11 +110,11 @@ os.regExps_ = {
  * @param {Element|TextNode|string} node DOM node containing the template data, or the
  * string source.
  * @param {string=} opt_id An optional ID for the new template.
- * @return {os.Template} A compiled Template object
+ * @return {os.Template} A compiled Template object.
  */
 os.compileTemplate = function(node, opt_id) {
   // Allow polymorphic behavior.
-  if (typeof(node) == "string") {
+  if (typeof(node) == 'string') {
     return os.compileTemplateString(node, opt_id);
   }
 
@@ -134,8 +134,8 @@ os.compileTemplate = function(node, opt_id) {
  * Compile a template without requiring a DOM node.
  * @param {string} src XML data to be compiled.
  * @param {string=} opt_id An optional ID for the new template.
- * @param {Element=} opt_container An optional container DOM Element 
- * to look for namespaces
+ * @param {Element=} opt_container An optional container DOM Element
+ * to look for namespaces.
  * @return {opensocial.template.Template} A compiled Template object.
  */
 os.compileTemplateString = function(src, opt_id, opt_container) {
@@ -146,7 +146,7 @@ os.compileTemplateString = function(src, opt_id, opt_container) {
 
 /**
  * Render one compiled node with a context.
- * @return {Element} a DOM element containing the result of template processing
+ * @return {Element} a DOM element containing the result of template processing.
  */
 os.renderTemplateNode_ = function(compiledNode, context) {
   var template = domCloneElement(compiledNode);
@@ -181,10 +181,10 @@ os.createTemplateCustomTag = function(template) {
 };
 
 /**
- * Creates a map of the named children of a node. Lower-cased element names 
- * (including transformed custom tags) are used as keys. 
+ * Creates a map of the named children of a node. Lower-cased element names
+ * (including transformed custom tags) are used as keys.
  * Where multiple elements share a name, the map value will be an array.
- * @param {Element} node The node whose children are to be mapped
+ * @param {Element} node The node whose children are to be mapped.
  * @return {Object} A Map of Element names to Elements.
  */
 os.computeChildMap_ = function(node) {
@@ -194,9 +194,9 @@ os.computeChildMap_ = function(node) {
     if (!child.tagName) {
       continue;
     }
-    var name = child.getAttribute(os.ATT_customtag);    
+    var name = child.getAttribute(os.ATT_customtag);
     if (name) {
-      var parts = name.split(":");
+      var parts = name.split(':');
       parts.length == 2 ? name = parts[1] : name = parts[0];
     } else {
       name = child.tagName;
@@ -232,18 +232,18 @@ os.createNodeAccessor_ = function(node) {
 /**
  * A singleton instance of the current gadget Prefs - only instantiated if
  * we are in a gadget container.
- * @type gadgets.Prefs
+ * @type {gadgets.Prefs}
  */
 os.gadgetPrefs_ = null;
 if (window['gadgets'] && window['gadgets']['Prefs']) {
   os.gadgetPrefs_ = new window['gadgets']['Prefs']();
-};
+}
 
 /**
  * A convenience function to get a localized message by key from the shared
  * gadgets.Prefs object.
- * @param {string} key The message key to get
- * @return {string|null} The localized message for a given key, or null if not
+ * @param {string} key The message key to get.
+ * @return {?string} The localized message for a given key, or null if not
  * found, or not in the gadgets environment.
  */
 os.getPrefMessage = function(key) {
@@ -266,7 +266,7 @@ os.customAttributes_ = {};
  * a DOM node, the specified functor will be called.
  * @param {string} attrName The name of the custom attribute.
  * @param {function(string)} functor A function with signature
- *     function({Element}, {string}, {Object}, {JSEvalContext})
+ *     function({Element}, {string}, {Object}, {JSEvalContext}).
  */
 os.registerAttribute_ = function(attrName, functor) {
   os.customAttributes_[attrName] = functor;
@@ -294,37 +294,37 @@ os.doAttribute = function(node, attrName, data, context) {
 os.doTag = function(node, ns, tag, data, context) {
   var tagFunction = os.getCustomTag(ns, tag);
   if (!tagFunction) {
-    os.warn("Custom tag <" + ns + ":" + tag + "> not defined.");
+    os.warn('Custom tag <' + ns + ':' + tag + '> not defined.');
     return;
   }
 
   var ctx = null;
   // Process tag's inner content before processing the tag.
-  for (var child = node.firstChild; child; child = child.nextSibling) {    
+  for (var child = node.firstChild; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
-      if (ctx == null) {        
+      if (ctx == null) {
         var selectInner = node[PROP_jstcache] ? node[PROP_jstcache][ATT_innerselect] : null;
         if (selectInner) {
           var data = context.jsexec(selectInner, node);
           ctx = context.clone(data, 0, 0);
         } else {
-          ctx = context;          
+          ctx = context;
         }
       }
       jstProcess(ctx, child);
       os.markNodeToSkip(child);
     }
-  }  
-  
+  }
+
   ctx = context.clone({}, 0, 0);
   var result = tagFunction.call(null, node, data, ctx);
 
-  if (!result && typeof(result) != "string") {
-    throw Error("Custom tag <" + ns + ":" + tag + "> failed to return anything.");
+  if (!result && typeof(result) != 'string') {
+    throw Error('Custom tag <' + ns + ':' + tag + '> failed to return anything.');
   }
 
-  if (typeof(result) == "string") {
-    node.innerHTML = result ? result : "";
+  if (typeof(result) == 'string') {
+    node.innerHTML = result ? result : '';
   } else if (os.isArray(result)) {
     os.removeChildren(node);
     for (var i = 0; i < result.length; i++) {
@@ -378,7 +378,7 @@ os.setContextNode_ = function(data, context) {
  * different context.
  */
 os.markNodeToSkip = function(node) {
-  node.setAttribute(ATT_skip, "true");
+  node.setAttribute(ATT_skip, 'true');
 
   // Remove the attributes processed when jsskip is true
   node.removeAttribute(ATT_select);

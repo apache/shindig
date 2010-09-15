@@ -67,34 +67,34 @@ opensocial.MessageCollection.Field = {
   ID: 'id',
 
   /**
-   * The title of the message collection. 
+   * The title of the message collection.
    * @member opensocial.MessageCollection.Field
    */
-  TITLE : 'title',
+  TITLE: 'title',
 
   /**
    * The total number of messages in this collection.
    * @member opensocial.MessageCollection.Field
    */
-  TOTAL : 'total',
+  TOTAL: 'total',
 
   /**
    * The total number of unread messages in this collection
    * @member opensocial.MessageCollection.Field
    */
-  UNREAD : 'unread',
+  UNREAD: 'unread',
 
   /**
    * The updated timestamp for this collection
    * @member opensocial.MessageCollection.Field
    */
-  UPDATED : 'updated',
+  UPDATED: 'updated',
 
   /**
    * Urls associated with this collection
    * @member opensocial.MessageCollection.Field
    */
-   URLS : 'urls'
+  URLS: 'urls'
 };
 
 
@@ -103,12 +103,12 @@ opensocial.MessageCollection.Field = {
  *
  * @param {string} key The key to get data for;
  *   see the <a href="opensocial.MessageCollection.Field.html">Field</a> class
- * for possible values
+ * for possible values.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  * @member opensocial.MessageCollection
  */
 opensocial.MessageCollection.prototype.getField = function(key, opt_params) {
@@ -119,8 +119,8 @@ opensocial.MessageCollection.prototype.getField = function(key, opt_params) {
 /**
  * Sets data for this message associated with the given key.
  *
- * @param {string} key The key to set data for
- * @param {string} data The data to set
+ * @param {string} key The key to set data for.
+ * @param {string} data The data to set.
  */
 opensocial.MessageCollection.prototype.setField = function(key, data) {
   return this.fields_[key] = data;

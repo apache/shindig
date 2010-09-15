@@ -66,12 +66,12 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     };
   })();
 } else {
-/**
+  /**
  * Port of the public domain JSON library by Douglas Crockford.
  * See: http://www.json.org/json2.js
  */
-  gadgets['json'] = function () {
-  
+  gadgets['json'] = function() {
+
     /**
      * Formats integers to 2 digits.
      * @param {number} n
@@ -80,16 +80,16 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
     function f(n) {
       return n < 10 ? '0' + n : n;
     }
-  
-    Date.prototype.toJSON = function () {
+
+    Date.prototype.toJSON = function() {
       return [this.getUTCFullYear(), '-',
-             f(this.getUTCMonth() + 1), '-',
-             f(this.getUTCDate()), 'T',
-             f(this.getUTCHours()), ':',
-             f(this.getUTCMinutes()), ':',
-             f(this.getUTCSeconds()), 'Z'].join("");
+        f(this.getUTCMonth() + 1), '-',
+        f(this.getUTCDate()), 'T',
+        f(this.getUTCHours()), ':',
+        f(this.getUTCMinutes()), ':',
+        f(this.getUTCSeconds()), 'Z'].join('');
     };
-  
+
     // table of character substitutions
     /**
      * @const
@@ -104,7 +104,7 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
       '"' : '\\"',
       '\\': '\\\\'
     };
-  
+
     /**
      * Converts a json object into a string.
      * @param {*} value
@@ -118,90 +118,90 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
           l,          // Length.
           r = /["\\\x00-\x1f\x7f-\x9f]/g,
           v;          // The member value.
-  
+
       switch (typeof value) {
-      case 'string':
-      // If the string contains no control characters, no quote characters, and no
-      // backslash characters, then we can safely slap some quotes around it.
-      // Otherwise we must also replace the offending characters with safe ones.
-        return r.test(value) ?
-            '"' + value.replace(r, function (a) {
-              var c = m[a];
-              if (c) {
-                return c;
-              }
-              c = a.charCodeAt();
-              return '\\u00' + Math.floor(c / 16).toString(16) +
-                  (c % 16).toString(16);
+        case 'string':
+          // If the string contains no control characters, no quote characters, and no
+          // backslash characters, then we can safely slap some quotes around it.
+          // Otherwise we must also replace the offending characters with safe ones.
+          return r.test(value) ?
+              '"' + value.replace(r, function(a) {
+                var c = m[a];
+                if (c) {
+                  return c;
+                }
+                c = a.charCodeAt();
+                return '\\u00' + Math.floor(c / 16).toString(16) +
+                   (c % 16).toString(16);
               }) + '"' : '"' + value + '"';
-      case 'number':
-      // JSON numbers must be finite. Encode non-finite numbers as null.
-        return isFinite(value) ? String(value) : 'null';
-      case 'boolean':
-      case 'null':
-        return String(value);
-      case 'object':
-      // Due to a specification blunder in ECMAScript,
-      // typeof null is 'object', so watch out for that case.
-        if (!value) {
-          return 'null';
-        }
-        // toJSON check removed; re-implement when it doesn't break other libs.
-        a = [];
-        if (typeof value.length === 'number' &&
-            !value.propertyIsEnumerable('length')) {
-          // The object is an array. Stringify every element. Use null as a
-          // placeholder for non-JSON values.
-          l = value.length;
-          for (i = 0; i < l; i += 1) {
-            a.push(stringify(value[i]) || 'null');
+        case 'number':
+          // JSON numbers must be finite. Encode non-finite numbers as null.
+          return isFinite(value) ? String(value) : 'null';
+        case 'boolean':
+        case 'null':
+          return String(value);
+        case 'object':
+          // Due to a specification blunder in ECMAScript,
+          // typeof null is 'object', so watch out for that case.
+          if (!value) {
+            return 'null';
           }
-          // Join all of the elements together and wrap them in brackets.
-          return '[' + a.join(',') + ']';
-        }
-        // Otherwise, iterate through all of the keys in the object.
-        for (k in value) {
-          if (k.match('___$'))
-            continue;
-          if (value.hasOwnProperty(k)) {
-            if (typeof k === 'string') {
-              v = stringify(value[k]);
-              if (v) {
-                a.push(stringify(k) + ':' + v);
+          // toJSON check removed; re-implement when it doesn't break other libs.
+          a = [];
+          if (typeof value.length === 'number' &&
+              !value.propertyIsEnumerable('length')) {
+            // The object is an array. Stringify every element. Use null as a
+            // placeholder for non-JSON values.
+            l = value.length;
+            for (i = 0; i < l; i += 1) {
+              a.push(stringify(value[i]) || 'null');
+            }
+            // Join all of the elements together and wrap them in brackets.
+            return '[' + a.join(',') + ']';
+          }
+          // Otherwise, iterate through all of the keys in the object.
+          for (k in value) {
+            if (k.match('___$'))
+              continue;
+            if (value.hasOwnProperty(k)) {
+              if (typeof k === 'string') {
+                v = stringify(value[k]);
+                if (v) {
+                  a.push(stringify(k) + ':' + v);
+                }
               }
             }
           }
-        }
-        // Join all of the member texts together and wrap them in braces.
-        return '{' + a.join(',') + '}';
+          // Join all of the member texts together and wrap them in braces.
+          return '{' + a.join(',') + '}';
       }
-      return "undefined";
+      return 'undefined';
     }
-  
+
     return {
       'stringify': stringify,
-      'parse': function (text) {
-      // Parsing happens in three stages. In the first stage, we run the text against
-      // regular expressions that look for non-JSON patterns. We are especially
-      // concerned with '()' and 'new' because they can cause invocation, and '='
-      // because it can cause mutation. But just to be safe, we want to reject all
-      // unexpected forms.
-      
-      // We split the first stage into 4 regexp operations in order to work around
-      // crippling inefficiencies in IE's and Safari's regexp engines. First we
-      // replace all backslash pairs with '@' (a non-JSON character). Second, we
-      // replace all simple value tokens with ']' characters. Third, we delete all
-      // open brackets that follow a colon or comma or that begin the text. Finally,
-      // we look to see that the remaining characters are only whitespace or ']' or
-      // ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
-  
+      'parse': function(text) {
+        // Parsing happens in three stages. In the first stage, we run the text against
+        // regular expressions that look for non-JSON patterns. We are especially
+        // concerned with '()' and 'new' because they can cause invocation, and '='
+        // because it can cause mutation. But just to be safe, we want to reject all
+        // unexpected forms.
+
+        // We split the first stage into 4 regexp operations in order to work around
+        // crippling inefficiencies in IE's and Safari's regexp engines. First we
+        // replace all backslash pairs with '@' (a non-JSON character). Second, we
+        // replace all simple value tokens with ']' characters. Third, we delete all
+        // open brackets that follow a colon or comma or that begin the text. Finally,
+        // we look to see that the remaining characters are only whitespace or ']' or
+        // ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
+
         if (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/b-u]/g, '@').
             replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
             replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
           return eval('(' + text + ')');
         }
         // If the text is not JSON parseable, then return false.
-  
+
         return false;
       }
     };
@@ -209,10 +209,10 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
 }
 /**
  * Flatten an object to a stringified values. Useful for dealing with
- * json->querystring transformations. 
- * 
+ * json->querystring transformations.
+ *
  * @param obj {Object}
- * @return {Object} object with only string values
+ * @return {Object} object with only string values.
  * @private not in official specification yet
  */
 
@@ -231,4 +231,4 @@ gadgets['json'].flatten = function(obj) {
     }
   }
   return flat;
-}
+};

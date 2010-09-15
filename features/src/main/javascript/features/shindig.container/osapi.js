@@ -17,7 +17,7 @@
  */
 
 /**
- * @fileoverview Base OSAPI binding
+ * @fileoverview Base OSAPI binding.
  */
 
 /**
@@ -43,8 +43,8 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
       // Don't allow underscores in any part of the method name as a convention
       // for restricted methods
       var current = osapi;
-      if (requests[i].method.indexOf("_") == -1) {
-        var path = requests[i].method.split(".");
+      if (requests[i].method.indexOf('_') == -1) {
+        var path = requests[i].method.split('.');
         for (var j = 0; j < path.length; j++) {
           if (current.hasOwnProperty(path[j])) {
             current = current[path[j]];
@@ -63,7 +63,7 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
       current(requests[i].params, function(i) {
         return function(response) {
           // Put back in json-rpc format
-          responses[i] = { id : requests[i].id, data : response};
+          responses[i] = { id: requests[i].id, data: response};
           callCount++;
           if (callCount == requests.length) {
             callback(responses);
@@ -80,9 +80,9 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
    * @param callback
    */
   osapi.container = {};
-  osapi.container["listMethods"] = function(request, callback) {
+  osapi.container['listMethods'] = function(request, callback) {
     var names = [];
-    recurseNames(osapi, "", 5, names)
+    recurseNames(osapi, '', 5, names);
     callback(names);
   };
 
@@ -92,17 +92,17 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
   function recurseNames(base, path, depth, accumulated) {
     if (depth == 0) return;
     for (var prop in base) if (base.hasOwnProperty(prop)) {
-      if (prop.indexOf("_") == -1) {
+      if (prop.indexOf('_') == -1) {
         var type = typeof(base[prop]);
-        if (type == "function") {
+        if (type == 'function') {
           accumulated.push(path + prop);
-        } else if (type == "object") {
-          recurseNames(base[prop], path + prop + ".", depth - 1, accumulated);
+        } else if (type == 'object') {
+          recurseNames(base[prop], path + prop + '.', depth - 1, accumulated);
         }
       }
     }
   }
 
   // Register the osapi RPC dispatcher.
-  gadgets.rpc.register("osapi._handleGadgetRpcMethod", osapi._handleGadgetRpcMethod);
+  gadgets.rpc.register('osapi._handleGadgetRpcMethod', osapi._handleGadgetRpcMethod);
 }

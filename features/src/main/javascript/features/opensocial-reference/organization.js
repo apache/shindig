@@ -59,7 +59,7 @@ opensocial.Organization.Field = {
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  NAME : 'name',
+  NAME: 'name',
 
   /**
    * The title or role the person has in the organization, specified as a
@@ -67,7 +67,7 @@ opensocial.Organization.Field = {
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  TITLE : 'title',
+  TITLE: 'title',
 
   /**
    * A description or notes about the person's work in the organization,
@@ -76,7 +76,7 @@ opensocial.Organization.Field = {
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  DESCRIPTION : 'description',
+  DESCRIPTION: 'description',
 
   /**
    * The field the organization is in, specified as a string. This could be the
@@ -84,21 +84,21 @@ opensocial.Organization.Field = {
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  FIELD : 'field',
+  FIELD: 'field',
 
   /**
    * The subfield the Organization is in, specified as a string.
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  SUB_FIELD : 'subField',
+  SUB_FIELD: 'subField',
 
   /**
    * The date the person started at the organization, specified as a Date.
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  START_DATE : 'startDate',
+  START_DATE: 'startDate',
 
   /**
    * The date the person stopped at the organization, specified as a Date.
@@ -107,29 +107,29 @@ opensocial.Organization.Field = {
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  END_DATE : 'endDate',
+  END_DATE: 'endDate',
 
- /**
+  /**
    * The salary the person receieves from the organization, specified as a
    * string.
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  SALARY : 'salary',
+  SALARY: 'salary',
 
- /**
+  /**
    * The address of the organization, specified as an opensocial.Address.
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  ADDRESS : 'address',
+  ADDRESS: 'address',
 
- /**
+  /**
    * A webpage related to the organization, specified as a string.
    * Not supported by all containers.
    * @member opensocial.Organization.Field
    */
-  WEBPAGE : 'webpage'
+  WEBPAGE: 'webpage'
 };
 
 
@@ -142,8 +142,8 @@ opensocial.Organization.Field = {
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
- *    to pass to the request
- * @return {string} The data
+ *    to pass to the request.
+ * @return {string} The data.
  */
 opensocial.Organization.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

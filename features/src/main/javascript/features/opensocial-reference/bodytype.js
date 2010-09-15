@@ -58,35 +58,35 @@ opensocial.BodyType.Field = {
    * Not supported by all containers.
    * @member opensocial.BodyType.Field
    */
-  BUILD : 'build',
+  BUILD: 'build',
 
   /**
    * The height of the person in meters, specified as a number.
    * Not supported by all containers.
    * @member opensocial.BodyType.Field
    */
-  HEIGHT : 'height',
+  HEIGHT: 'height',
 
   /**
    * The weight of the person in kilograms, specified as a number.
    * Not supported by all containers.
    * @member opensocial.BodyType.Field
    */
-  WEIGHT : 'weight',
+  WEIGHT: 'weight',
 
   /**
    * The eye color of the person, specified as a string.
    * Not supported by all containers.
    * @member opensocial.BodyType.Field
    */
-  EYE_COLOR : 'eyeColor',
+  EYE_COLOR: 'eyeColor',
 
   /**
    * The hair color of the person, specified as a string.
    * Not supported by all containers.
    * @member opensocial.BodyType.Field
    */
-  HAIR_COLOR : 'hairColor'
+  HAIR_COLOR: 'hairColor'
 };
 
 
@@ -100,7 +100,7 @@ opensocial.BodyType.Field = {
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.BodyType.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

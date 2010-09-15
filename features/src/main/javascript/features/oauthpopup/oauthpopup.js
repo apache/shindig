@@ -55,7 +55,7 @@ gadgets.oauth = gadgets.oauth || {};
  * </ul>
  * <p>
  * The "personalization done" button may be unnecessary.  The popup window
- * manager will attempt to detect when the window closes.  However, the 
+ * manager will attempt to detect when the window closes.  However, the
  * "personalization done" button should still be displayed to handle cases
  * where the popup manager is unable to detect that a window has closed.  This
  * allows the user to signal approval manually.
@@ -124,7 +124,7 @@ gadgets.oauth.Popup = function(destination, windowOptions, openCallback,
 };
 
 /**
- * @return {function()} an onclick handler for the "open the approval window" link
+ * @return {function()} an onclick handler for the "open the approval window" link.
  */
 gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
   var self = this;
@@ -135,8 +135,8 @@ gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
 
 /**
  * Called when the user clicks to open the popup window.
- * 
- * @returns false to prevent the default action for the click.
+ *
+ * @return false to prevent the default action for the click.
  * @private
  */
 gadgets.oauth.Popup.prototype.onClick_ = function() {
@@ -144,12 +144,12 @@ gadgets.oauth.Popup.prototype.onClick_ = function() {
   // need to approve the popup, then click again to open the window.
   // Note that because we don't call window.open until the user has clicked
   // something the popup blockers *should* let us through.
-  this.win_ = window.open(this.destination_, "_blank", this.windowOptions_);
+  this.win_ = window.open(this.destination_, '_blank', this.windowOptions_);
   if (this.win_) {
     // Poll every 100ms to check if the window has been closed
     var self = this;
     var closure = function() {
-      self.checkClosed_(); 
+      self.checkClosed_();
     };
     this.timer_ = window.setInterval(closure, 100);
     this.openCallback_();

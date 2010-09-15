@@ -57,42 +57,42 @@ opensocial.Name.Field = {
    *
    * @member opensocial.Name.Field
    */
-  FAMILY_NAME : 'familyName',
+  FAMILY_NAME: 'familyName',
 
   /**
    * The given name. Specified as a String.
    *
    * @member opensocial.Name.Field
    */
-  GIVEN_NAME : 'givenName',
+  GIVEN_NAME: 'givenName',
 
   /**
    * The additional name. Specified as a String.
    *
    * @member opensocial.Name.Field
    */
-  ADDITIONAL_NAME : 'additionalName',
+  ADDITIONAL_NAME: 'additionalName',
 
   /**
    * The honorific prefix. Specified as a String.
    *
    * @member opensocial.Name.Field
    */
-  HONORIFIC_PREFIX : 'honorificPrefix',
+  HONORIFIC_PREFIX: 'honorificPrefix',
 
   /**
    * The honorific suffix. Specified as a String.
    *
    * @member opensocial.Name.Field
    */
-  HONORIFIC_SUFFIX : 'honorificSuffix',
+  HONORIFIC_SUFFIX: 'honorificSuffix',
 
   /**
    * The unstructured name. Specified as a String.
    *
    * @member opensocial.Name.Field
    */
-  UNSTRUCTURED : 'unstructured'
+  UNSTRUCTURED: 'unstructured'
 };
 
 
@@ -106,7 +106,7 @@ opensocial.Name.Field = {
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>
  *    to pass to the request.
- * @return {string} The data
+ * @return {string} The data.
  */
 opensocial.Name.prototype.getField = function(key, opt_params) {
   return opensocial.Container.getField(this.fields_, key, opt_params);

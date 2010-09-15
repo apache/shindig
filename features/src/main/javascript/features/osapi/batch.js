@@ -42,16 +42,16 @@
 
     /**
      * Create a new request in the batch
-     * @param {string} key id for the request
+     * @param {string} key id for the request.
      * @param {Object} request the opensocial request object which is of the form
      * { method : <service-method>
      *   rpc  : <request>
      *   transport : <rpc dispatcher>
-     * }
+     * }.
      */
     var add = function(key, request) {
       if (request && key) {
-        keyedRequests.push({"key" : key, "request" : request});
+        keyedRequests.push({'key' : key, 'request' : request});
       }
       return that;
     };
@@ -61,7 +61,7 @@
      * @param {Object} request
      */
     var toJsonRpc = function(request) {
-      var jsonRpc = {method : request.request.method, id : request.key};
+      var jsonRpc = {method: request.request.method, id: request.key};
       if (request.request.rpc) {
         jsonRpc.params = request.request.rpc;
       }
@@ -75,7 +75,7 @@
      *
      * @param {function(Object)} userCallback the callback to the gadget where results are passed.
      */
-    var execute =  function(userCallback) {
+    var execute = function(userCallback) {
       var batchResult = {};
 
       var perTransportBatch = {};
@@ -133,7 +133,7 @@
 
       // Force the callback to occur asynchronously even if there were no actual calls
       if (latchCount == 0) {
-        window.setTimeout(function(){userCallback(batchResult)}, 0);
+        window.setTimeout(function() {userCallback(batchResult)}, 0);
       }
     };
 

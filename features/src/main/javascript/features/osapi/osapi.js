@@ -19,19 +19,19 @@
 (function() {
   /**
    * Called by the transports for each service method that they expose
-   * @param {string} method  The method to expose e.g. "people.get"
-   * @param {Object.<string,Object>} transport The transport used to execute a call for the method
+   * @param {string} method  The method to expose e.g. "people.get".
+   * @param {Object.<string,Object>} transport The transport used to execute a call for the method.
    */
-  osapi._registerMethod = function (method, transport) {
+  osapi._registerMethod = function(method, transport) {
     var has___ = typeof ___ !== 'undefined';
 
     // Skip registration of local newBatch implementation.
-    if (method == "newBatch") {
-        return;
+    if (method == 'newBatch') {
+      return;
     }
 
     // Lookup last method value.
-    var parts = method.split(".");
+    var parts = method.split('.');
     var last = osapi;
     for (var i = 0; i < parts.length - 1; i++) {
       last[parts[i]] = last[parts[i]] || {};
@@ -55,13 +55,13 @@
         });
       }
       if (has___) {
-          ___.markInnocent(boundCall.execute, 'execute');
+        ___.markInnocent(boundCall.execute, 'execute');
       }
       // TODO: This shouldnt really be necessary. The spec should be clear enough about
       // defaults that we dont have to populate this.
       rpc = rpc || {};
-      rpc.userId = rpc.userId || "@viewer";
-      rpc.groupId = rpc.groupId || "@self";
+      rpc.userId = rpc.userId || '@viewer';
+      rpc.groupId = rpc.groupId || '@self';
 
       // Decorate the execute method with the information necessary for batching
       boundCall.method = method;
@@ -75,7 +75,7 @@
     }
 
     if (last[parts[parts.length - 1]]) {
-      gadgets.warn("Skipping duplicate osapi method definition " + method + " on transport " + transport.name);
+      gadgets.warn('Skipping duplicate osapi method definition ' + method + ' on transport ' + transport.name);
     } else {
       last[parts[parts.length - 1]] = apiMethod;
     }

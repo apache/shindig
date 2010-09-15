@@ -25,8 +25,8 @@ opensocial.newActivityMediaItem = opensocial.newMediaItem;
 opensocial.DataRequest.PersonId = opensocial.IdSpec.PersonId;
 
 opensocial.DataRequest.Group = {
-  OWNER_FRIENDS : 'OWNER_FRIENDS',
-  VIEWER_FRIENDS : 'VIEWER_FRIENDS'
+  OWNER_FRIENDS: 'OWNER_FRIENDS',
+  VIEWER_FRIENDS: 'VIEWER_FRIENDS'
 };
 
 opensocial.DataRequest.prototype.newFetchPeopleRequest_v08
@@ -77,7 +77,7 @@ opensocial.Environment.ObjectType.ACTIVITY_MEDIA_ITEM
 
 opensocial.Person.prototype.getField_v08 = opensocial.Person.prototype.getField;
 opensocial.Person.prototype.getField = function(key, opt_params) {
-  var value =  this.getField_v08(key, opt_params);
+  var value = this.getField_v08(key, opt_params);
   if (key === 'lookingFor' && value) {
     // The lookingFor field used to return a string instead of an enum
     var returnValue = new Array(value.length);
@@ -93,10 +93,10 @@ opensocial.Person.prototype.getField = function(key, opt_params) {
 
 function translateIdSpec(oldIdSpec) {
   if (oldIdSpec == 'OWNER_FRIENDS') {
-    return opensocial.newIdSpec({userId : 'OWNER', groupId : 'FRIENDS'});
+    return opensocial.newIdSpec({userId: 'OWNER', groupId: 'FRIENDS'});
   } else if (oldIdSpec == 'VIEWER_FRIENDS') {
-    return opensocial.newIdSpec({userId : 'VIEWER', groupId : 'FRIENDS'});
+    return opensocial.newIdSpec({userId: 'VIEWER', groupId: 'FRIENDS'});
   } else {
-    return opensocial.newIdSpec({userId : oldIdSpec});
+    return opensocial.newIdSpec({userId: oldIdSpec});
   }
-};
+}
