@@ -543,7 +543,7 @@ opensocial.Person.prototype.getDisplayName = function() {
  *
  * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Person.Field.html"><code>
- *    Person.Field</code></a>
+ *    Person.Field</code></a>.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>=}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>

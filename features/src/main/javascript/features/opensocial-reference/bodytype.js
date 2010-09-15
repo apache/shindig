@@ -95,7 +95,7 @@ opensocial.BodyType.Field = {
  *
  * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.BodyType.Field.html"><code>
- *    BodyType.Field</code></a>
+ *    BodyType.Field</code></a>.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>

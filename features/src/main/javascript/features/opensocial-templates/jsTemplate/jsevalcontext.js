@@ -75,6 +75,7 @@ function JsEvalContext(opt_data, opt_parent) {
  * variables are inherited. Normally the context object of the parent
  * context is the object whose property the parent object is. Null for the
  * context of the root object.
+ * @private
  */
 JsEvalContext.prototype.constructor_ = function(opt_data, opt_parent) {
   var me = this;
@@ -146,6 +147,7 @@ JsEvalContext.prototype.constructor_ = function(opt_data, opt_parent) {
  * A map of globally defined symbols. Every instance of JsExprContext
  * inherits them in its vars_.
  * @type {Object}
+ * @private
  */
 JsEvalContext.globals_ = {};
 
@@ -176,6 +178,7 @@ JsEvalContext.setGlobal(GLOB_default, null);
  * A cache to reuse JsEvalContext instances. (IE6 perf)
  *
  * @type {Array.<JsEvalContext>}
+ * @private
  */
 JsEvalContext.recycledInstances_ = [];
 
@@ -323,6 +326,7 @@ var STRING_with = 'with (a_) with (b_) return ';
 /**
  * Cache for jsEvalToFunction results.
  * @type {Object}
+ * @private
  */
 JsEvalContext.evalToFunctionCache_ = {};
 

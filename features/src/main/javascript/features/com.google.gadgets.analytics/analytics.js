@@ -18,20 +18,20 @@
  */
 
 (function() {
-	gadgets.analytics = function(trackingCode) {
-		this.tracker = _gat._getTracker(trackingCode);
-	};
+  gadgets.analytics = function(trackingCode) {
+    this.tracker = _gat._getTracker(trackingCode);
+  };
 
-	gadgets.analytics.prototype.reportPageview = function(path) {
-		this.tracker._trackPageview(path);
-	};
+  gadgets.analytics.prototype.reportPageview = function(path) {
+    this.tracker._trackPageview(path);
+  };
 
-	/**
-	 * label and value are optional
-	 */
-	gadgets.analytics.prototype.reportEvent = function(name, action, label, value) {
-		this.tracker._trackEvent(name, action, label, value);
-	};
+  /**
+   * label and value are optional
+   */
+  gadgets.analytics.prototype.reportEvent = function(name, action, label, value) {
+    this.tracker._trackEvent(name, action, label, value);
+  };
 }());
 
 var _IG_GA = gadgets.analytics;

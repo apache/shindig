@@ -244,6 +244,7 @@ shindig.container.GadgetHolder.prototype.getIframeHtml_ = function() {
 /**
  * Get the rendering iframe URL.
  * @private
+ * @return {string} the rendering iframe URL.
  */
 shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
   var uri = shindig.uri(this.gadgetInfo_[shindig.container.MetadataResponse.IFRAME_URL]);

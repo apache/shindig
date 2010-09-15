@@ -33,16 +33,19 @@ shindig.container.Container = function(opt_config) {
   /**
    * A JSON list of preloaded gadget URLs.
    * @type {Object}
+   * @private
    */
   this.preloadedGadgetUrls_ = {};
 
   /**
    * @type {Object}
+   * @private
    */
   this.sites_ = {};
 
   /**
    * @type {string}
+   * @private
    */
   this.renderDebugParam_ = String(shindig.container.util.getSafeJsonValue(
       config, shindig.container.ContainerConfig.RENDER_DEBUG_PARAM,
@@ -59,6 +62,7 @@ shindig.container.Container = function(opt_config) {
 
   /**
    * @type {boolean}
+   * @private
    */
   this.renderTest_ = Boolean(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ContainerConfig.RENDER_TEST, false));
@@ -66,6 +70,7 @@ shindig.container.Container = function(opt_config) {
   /**
    * Security token refresh interval (in ms) for debugging.
    * @type {number}
+   * @private
    */
   this.tokenRefreshInterval_ = Number(shindig.container.util.getSafeJsonValue(
       config, shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL,
@@ -73,12 +78,14 @@ shindig.container.Container = function(opt_config) {
 
   /**
    * @type {shindig.container.Service}
+   * @private
    */
   this.service_ = new shindig.container.Service(config);
 
   /**
    * result from calling window.setInterval()
    * @type {?number}
+   * @private
    */
   this.tokenRefreshTimer_ = null;
 
@@ -243,15 +250,30 @@ shindig.container.Container.prototype.onConstructed = function(opt_config) {};
  * @enum {string}
  */
 shindig.container.ContainerConfig = {};
-// Whether debug mode is turned on.
+/**
+ * Whether debug mode is turned on.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerConfig.RENDER_DEBUG = 'renderDebug';
-// The debug param name to look for in container URL for per-request debugging.
+/**
+ * The debug param name to look for in container URL for per-request debugging.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerConfig.RENDER_DEBUG_PARAM = 'renderDebugParam';
-// Whether test mode is turned on.
+/**
+ * Whether test mode is turned on.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerConfig.RENDER_TEST = 'renderTest';
-// Security token refresh interval (in ms) for debugging.
-shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL =
-    'tokenRefreshInterval';
+/**
+ * Security token refresh interval (in ms) for debugging.
+ * @type {string}
+ * @const
+ */
+shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval';
 
 
 /**
@@ -262,17 +284,41 @@ shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL =
  * @enum {string}
  */
 shindig.container.ContainerRender = {};
-// Style class to associate to iframe.
+/**
+ * Style class to associate to iframe.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.CLASS = 'class';
-// Whether to turn off debugging.
+/**
+ * Whether to turn off debugging.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.DEBUG = 'debug';
-// The starting/default gadget iframe height (in pixels).
+/**
+ * The starting/default gadget iframe height (in pixels).
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.HEIGHT = 'height';
-// Whether to turn off debugging.
+/**
+ * Whether to turn off debugging.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.TEST = 'test';
-// The gadget view name.
+/**
+ * The gadget view name.
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.VIEW = 'view';
-// The starting/default gadget iframe width (in pixels).
+/**
+ * The starting/default gadget iframe width (in pixels).
+ * @type {string}
+ * @const
+ */
 shindig.container.ContainerRender.WIDTH = 'width';
 
 

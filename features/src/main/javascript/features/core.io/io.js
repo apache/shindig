@@ -79,10 +79,10 @@ gadgets.io = function() {
     }
     try {
       if (xobj.status !== 200) {
-      	var error = ('' + xobj.status);
-      	if (xobj.responseText) {
-      	  error = error + ' ' + xobj.responseText;
-      	}
+        var error = ('' + xobj.status);
+        if (xobj.responseText) {
+          error = error + ' ' + xobj.responseText;
+        }
         callback({
           errors: [error],
           rc: xobj.status,
@@ -178,7 +178,7 @@ gadgets.io = function() {
     };
 
     if (resp.rc < 200 || resp.rc >= 400) {
-    	resp.errors = [resp.rc + ' Error'];
+      resp.errors = [resp.rc + ' Error'];
     } else if (resp.text) {
       if (resp.rc >= 300 && resp.rc < 400) {
         // Redirect pages will usually contain arbitrary
@@ -235,6 +235,7 @@ gadgets.io = function() {
    * @param {string} proxyUrl The url to proxy through.
    * @param {function()} callback The function to call once the data is fetched.
    * @param {Object} paramData The params to use when processing the response.
+   * @param {string} method
    * @param {function(string,function(Object),Object,Object)}
    *     processResponseFunction The function that should process the
    *     response from the sever before calling the callback.

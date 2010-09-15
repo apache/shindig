@@ -209,11 +209,10 @@ if (window.JSON && window.JSON.parse && window.JSON.stringify) {
 }
 /**
  * Flatten an object to a stringified values. Useful for dealing with
- * json->querystring transformations.
+ * json->querystring transformations. Note: not in official specification yet
  *
- * @param obj {Object}
+ * @param {Object} obj
  * @return {Object} object with only string values.
- * @private not in official specification yet
  */
 
 gadgets['json'].flatten = function(obj) {

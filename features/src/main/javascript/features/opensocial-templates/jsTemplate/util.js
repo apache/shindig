@@ -233,6 +233,7 @@ DomTraverser.prototype.run = function(root) {
 /**
  * Processes a single node.
  * @param {Element} node  The current node of the traversal.
+ * @private
  */
 DomTraverser.prototype.process_ = function(node) {
   var me = this;

@@ -32,25 +32,39 @@ shindig.container.Service = function(opt_config) {
 
   /**
    * @type {string}
+   * @private
    */
   this.apiHost_ = String(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ServiceConfig.API_HOST, window.__API_URI.getOrigin()));
 
   /**
    * @type {string}
+   * @private
    */
   this.apiPath_ = String(shindig.container.util.getSafeJsonValue(config,
       shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
 
   /**
+<<<<<<< HEAD
+=======
+   * @type {boolean}
+   * @private
+   */
+  this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ServiceConfig.SAME_DOMAIN, false));
+
+  /**
+>>>>>>> more gjslint cleanups
    * Map of gadget URLs to cached gadgetInfo response.
    * @type {Object}
+   * @private
    */
   this.cachedMetadatas_ = {};
 
   /**
    * Map of gadget URLs to cached tokenInfo response.
    * @type {Object}
+   * @private
    */
   this.cachedTokens_ = {};
 
@@ -63,7 +77,7 @@ shindig.container.Service = function(opt_config) {
 /**
  * Callback that occurs after instantiation/construction of this. Override to
  * provide your specific functionalities.
- * @param {Object=} opt_config. Configuration JSON.
+ * @param {Object=} opt_config Configuration JSON.
  */
 shindig.container.Service.prototype.onConstructed = function(opt_config) {};
 
@@ -172,7 +186,16 @@ shindig.container.Service.prototype.initializeOsapi_ = function() {
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
-// Host to fetch gadget information, via XHR.
+/**
+ * Host to fetch gadget information, via XHR.
+ * @type {string}
+ * @const
+ */
 shindig.container.ServiceConfig.API_HOST = 'apiHost';
-// Path to fetch gadget information, via XHR.
+
+/**
+ * Path to fetch gadget information, via XHR.
+ * @type {string}
+ * @const
+ */
 shindig.container.ServiceConfig.API_PATH = 'apiPath';

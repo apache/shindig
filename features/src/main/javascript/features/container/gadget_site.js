@@ -311,7 +311,7 @@ shindig.container.GadgetSite.prototype.rpcCall = function(
  * If token has been fetched at least once, set the token to the most recent
  * one. Otherwise, leave it.
  * @param {Object} gadgetInfo The gadgetInfo used to update security token.
- * @param {Object} renderParams. Render parameters for the gadget, including:
+ * @param {Object} renderParams Render parameters for the gadget, including:
  *     view, width, and height.
  */
 shindig.container.GadgetSite.prototype.updateSecurityToken_
@@ -395,6 +395,7 @@ shindig.container.GadgetSite.prototype.onload_ = function() {
 
 /**
  * Swap the double buffer elements, if there is a double buffer.
+ * @private
  */
 shindig.container.GadgetSite.prototype.swapBuffers_ = function() {
   // Only process double buffering if loading gadget exists

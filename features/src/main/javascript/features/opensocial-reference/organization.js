@@ -138,7 +138,7 @@ opensocial.Organization.Field = {
  *
  * @param {string} key The key to get data for;
  *    keys are defined in <a href="opensocial.Organization.Field.html"><code>
- *    Organization.Field</code></a>
+ *    Organization.Field</code></a>.
  * @param {Object.<opensocial.DataRequest.DataRequestFields, Object>}
  *  opt_params Additional
  *    <a href="opensocial.DataRequest.DataRequestFields.html">params</a>

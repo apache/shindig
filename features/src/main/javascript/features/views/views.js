@@ -184,15 +184,15 @@ gadgets.views = function() {
       }
 
       function objectIsEmpty(v) {
-    	if ((typeof v === 'object') || (typeof v === 'function')) {
-    	  for (var i in v) {
-    	    if (v.hasOwnProperty(i)) {
-    	      return false;
-    	    }
-    	  }
-	  return true;
-	}
-	return false;
+        if ((typeof v === 'object') || (typeof v === 'function')) {
+          for (var i in v) {
+            if (v.hasOwnProperty(i)) {
+              return false;
+            }
+          }
+          return true;
+        }
+        return false;
       }
 
       while ((group = expansionRE.exec(urlTemplate))) {
@@ -230,8 +230,8 @@ gadgets.views = function() {
                     for (var i in v) {
                       if (v.hasOwnProperty(i)) {
                         j.push(i + '=' + v[i]);
-		    }
-		  }
+                      }
+                    }
                   }
                 }).join(arg));
                 break;

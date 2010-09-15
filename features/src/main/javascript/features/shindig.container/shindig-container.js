@@ -263,10 +263,9 @@ shindig.IfrGadgetService.prototype.requestNavigateTo = function(view,
  * real containers.
  * TODO: Find a better default for this function
  *
- * @param view The view name to get the url for.
+ * @param {string} view The view name to get the url for.
  */
-shindig.IfrGadgetService.prototype.getUrlForView = function(
-    view) {
+shindig.IfrGadgetService.prototype.getUrlForView = function(view) {
   if (view === 'canvas') {
     return '/canvas';
   } else if (view === 'profile') {

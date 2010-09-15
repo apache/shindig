@@ -99,6 +99,7 @@ os.EMPTY_ARRAY = [];
 /**
  * Regular expressions
  * TODO(levik): Move all regular expressions here.
+ * @private
  */
 os.regExps_ = {
   ONLY_WHITESPACE: /^[ \t\n]*$/,
@@ -147,6 +148,7 @@ os.compileTemplateString = function(src, opt_id, opt_container) {
 /**
  * Render one compiled node with a context.
  * @return {Element} a DOM element containing the result of template processing.
+ * @private
  */
 os.renderTemplateNode_ = function(compiledNode, context) {
   var template = domCloneElement(compiledNode);
@@ -186,6 +188,7 @@ os.createTemplateCustomTag = function(template) {
  * Where multiple elements share a name, the map value will be an array.
  * @param {Element} node The node whose children are to be mapped.
  * @return {Object} A Map of Element names to Elements.
+ * @private
  */
 os.computeChildMap_ = function(node) {
   var map = {};
@@ -233,6 +236,7 @@ os.createNodeAccessor_ = function(node) {
  * A singleton instance of the current gadget Prefs - only instantiated if
  * we are in a gadget container.
  * @type {gadgets.Prefs}
+ * @private
  */
 os.gadgetPrefs_ = null;
 if (window['gadgets'] && window['gadgets']['Prefs']) {
@@ -267,6 +271,7 @@ os.customAttributes_ = {};
  * @param {string} attrName The name of the custom attribute.
  * @param {function(string)} functor A function with signature
  *     function({Element}, {string}, {Object}, {JSEvalContext}).
+ * @private
  */
 os.registerAttribute_ = function(attrName, functor) {
   os.customAttributes_[attrName] = functor;
@@ -365,6 +370,7 @@ os.doTag = function(node, ns, tag, data, context) {
 /**
  * Checks the current context, and if it's an element node, sets it to be used
  * for future <os:renderAll/> operations.
+ * @private
  */
 os.setContextNode_ = function(data, context) {
   if (data.nodeType == DOM_ELEMENT_NODE) {

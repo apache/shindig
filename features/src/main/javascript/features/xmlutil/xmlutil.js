@@ -23,6 +23,7 @@ opensocial.xmlutil = opensocial.xmlutil || {};
 
 /**
  * Cached DOMParser objects on browsers that support it.
+ * @private
  */
 opensocial.xmlutil.parser_ = null;
 
@@ -87,7 +88,9 @@ opensocial.xmlutil.getRequiredNamespaces = function(xml, opt_container) {
   return opensocial.xmlutil.serializeNamespaces_(namespaces);
 };
 
-
+/**
+ * @private
+ */
 opensocial.xmlutil.serializeNamespaces_ = function(namespaces) {
   var buffer = [];
   for (var prefix in namespaces) {
@@ -103,7 +106,8 @@ opensocial.xmlutil.serializeNamespaces_ = function(namespaces) {
  * Returns a map of XML namespaces declared on an DOM Element.
  * @param {Element} el The Element to inspect.
  * @return {Object.<string, string>} A Map of keyed by prefix of declared
- * namespaces.
+ *     namespaces.
+ * @private
  */
 opensocial.xmlutil.getNamespaceDeclarations_ = function(el) {
   var namespaces = {};

@@ -22,12 +22,6 @@
  */
 
 /**
- * @private
- * @constructor
- */
-
-/**
- * @private
  * @constructor
  */
 gadgets.oauth = gadgets.oauth || {};
@@ -136,7 +130,7 @@ gadgets.oauth.Popup.prototype.createOpenerOnClick = function() {
 /**
  * Called when the user clicks to open the popup window.
  *
- * @return false to prevent the default action for the click.
+ * @return {boolean} false to prevent the default action for the click.
  * @private
  */
 gadgets.oauth.Popup.prototype.onClick_ = function() {

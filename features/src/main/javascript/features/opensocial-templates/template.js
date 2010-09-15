@@ -115,6 +115,7 @@ os.getTemplate = function(templateId) {
 /**
  * Sets a single compiled node into this template.
  * @param {Element} node - A compiled node.
+ * @private
  */
 os.Template.prototype.setCompiledNode_ = function(node) {
   os.removeChildren(this.templateRoot_);
@@ -124,6 +125,7 @@ os.Template.prototype.setCompiledNode_ = function(node) {
 /**
  * Sets a list of compiled nodes into this template.
  * @param {Array.<Element>} nodes An array of compiled nodes.
+ * @private
  */
 os.Template.prototype.setCompiledNodes_ = function(nodes) {
   os.removeChildren(this.templateRoot_);

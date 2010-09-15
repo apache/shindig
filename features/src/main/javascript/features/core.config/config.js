@@ -55,7 +55,6 @@
  * configuration.
  */
 
-/** @namespace */
 gadgets.config = function() {
   var components = {};
   var configuration;

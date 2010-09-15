@@ -112,6 +112,7 @@ os.regExps_.SPLIT_INTO_TOKENS =
  * use "<" or ">".
  *
  * @param {string} src The string snippet to parse.
+ * @private
  */
 os.remapOperators_ = function(src) {
   return src.replace(os.regExps_.SPLIT_INTO_TOKENS,
@@ -125,6 +126,7 @@ os.remapOperators_ = function(src) {
  * Remap variable references in the expression.
  * @param {string} expr The expression to transform.
  * @return {string} Transformed exression.
+ * @private
  */
 os.transformVariables_ = function(expr) {
   expr = os.replaceTopLevelVars_(expr);
@@ -134,6 +136,7 @@ os.transformVariables_ = function(expr) {
 
 /**
  * Map of variables to transform
+ * @private
  */
 os.variableMap_ = {
   'my': os.VAR_my,
@@ -149,6 +152,7 @@ os.variableMap_ = {
  * Replace the top level variables
  * @param {string} text The expression.
  * @return {string} Expression with replacements.
+ * @private
  */
 os.replaceTopLevelVars_ = function(text) {
 
@@ -177,6 +181,7 @@ os.replaceTopLevelVars_ = function(text) {
  * for example one that looks up foo -> getFoo() -> get("foo").
  *
  * TODO: This should not be in compiler.
+ * @private
  */
 os.identifierResolver_ = function(data, name) {
   return data.hasOwnProperty(name) ? data[name] : ('get' in data ? data.get(name) : null);
@@ -255,6 +260,7 @@ os.getFromContext = function(context, name, opt_default) {
  * @param {string} expr The expression snippet to parse.
  * @param {string=} opt_default An optional default value reference (such as the
  * literal string 'null').
+ * @private
  */
 os.transformExpression_ = function(expr, opt_default) {
   expr = os.remapOperators_(expr);
@@ -269,6 +275,7 @@ os.transformExpression_ = function(expr, opt_default) {
  * A Map of special attribute names to change while copying attributes during
  * compilation. The key is OST-spec attribute, while the value is JST attribute
  * used to implement that feature.
+ * @private
  */
 os.attributeMap_ = {
   'if': ATT_display,
@@ -278,6 +285,7 @@ os.attributeMap_ = {
 
 /**
  * Appends a JSTemplate attribute value while maintaining previous values.
+ * @private
  */
 os.appendJSTAttribute_ = function(node, attrName, value) {
   var previousValue = node.getAttribute(attrName);
@@ -299,6 +307,7 @@ os.appendJSTAttribute_ = function(node, attrName, value) {
  * TODO(levik): On IE, some properties/attributes might be case sensitive when
  * set through script (such as "colSpan") - since they're not case sensitive
  * when defined in HTML, we need to support this type of use.
+ * @private
  */
 os.copyAttributes_ = function(from, to, opt_customTag) {
 
@@ -405,6 +414,7 @@ os.copyAttributes_ = function(from, to, opt_customTag) {
  * are converted into markup recognizable by JSTemplate.
  *
  * TODO: process text nodes and attributes  with ${} notation here
+ * @private
  */
 os.compileNode_ = function(node) {
   if (node.nodeType == DOM_TEXT_NODE) {
@@ -493,6 +503,7 @@ os.compileNode_ = function(node) {
  * "span" otherwise
  * @param {Element} element The repeater/conditional element.
  * @return {stirng} Name of the node ot represent this repeater.
+ * @private
  */
 os.computeContainerTag_ = function(element) {
   var child = element.firstChild;
@@ -523,6 +534,7 @@ os.ENTITIES = '<!ENTITY nbsp \"&#160;\">';
 /**
  * Creates an HTML node that's a shallow copy of an XML node
  * (includes attributes).
+ * @private
  */
 os.xmlToHtml_ = function(xmlNode) {
   var htmlNode = document.createElement(xmlNode.tagName);
@@ -561,6 +573,7 @@ os.fireCallbacks = function(context) {
  *
  * @return {boolean} true if node only had text data and needs no further
  * processing, false otherwise.
+ * @private
  */
 os.processTextContent_ = function(fromNode, toNode) {
   if (fromNode.childNodes.length == 1 &&
@@ -596,6 +609,7 @@ os.pushTextNode = function(array, text) {
  * @param {boolean=} opt_trimEnd Trim the end of the string.
  * @return {string} The string with extra spaces removed on IE, original
  * string on other browsers.
+ * @private
  */
 os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
   if (os.isIe) {
@@ -619,6 +633,7 @@ os.trimWhitespaceForIE_ = function(string, opt_trimStart, opt_trimEnd) {
  *
  * @return {Array.<Node>} An array of textNodes and Span Elements if variable
  * substitutions were found, or an empty array if none were.
+ * @private
  */
 os.breakTextNode_ = function(textNode) {
   var substRex = os.regExps_.VARIABLE_SUBSTITUTION;
@@ -653,6 +668,7 @@ os.breakTextNode_ = function(textNode) {
  *   - Replaces newlines with spaces.
  *   - Substitutes variable references for literal semicolons.
  *   - Addes single quotes around the string.
+ * @private
  */
 os.transformLiteral_ = function(string) {
   return "'" + string.replace(/'/g, "\\'").
@@ -665,6 +681,7 @@ os.transformLiteral_ = function(string) {
  *
  * @param {string} value Attribute value to parse
  * TODO: Rename to parseExpression().
+ * @private
  */
 os.parseAttribute_ = function(value) {
   if (!value.length) {
@@ -708,6 +725,7 @@ os.parseAttribute_ = function(value) {
  * The special value "*" means return all child Nodes.
  * @return {string|Element|Object|Array.<Element>} The value as a String,
  * Object, Element or array of Elements.
+ * @private
  */
 os.getValueFromNode_ = function(node, name) {
 
@@ -756,6 +774,7 @@ os.getValueFromNode_ = function(node, name) {
 /**
  * A map of identifiers that should not be wrapped
  * (such as JS built-ins and special method names).
+ * @private
  */
 os.identifiersNotToWrap_ = {};
 os.identifiersNotToWrap_['true'] = true;
@@ -811,6 +830,7 @@ os.canBeInToken = function(ch) {
  * @param {string=} opt_context A string expression to use for context.
  * @param {string=} opt_default An optional default value reference (such as the
  * literal string 'null').
+ * @private
  */
 os.wrapSingleIdentifier = function(iden, opt_context, opt_default) {
   if (os.identifiersNotToWrap_.hasOwnProperty(iden) &&

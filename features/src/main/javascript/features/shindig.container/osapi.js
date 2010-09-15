@@ -29,8 +29,7 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
 
   /**
    * Dispatch a JSON-RPC batch request to services defined in the osapi namespace
-   * @param callbackId
-   * @param requests
+   * @param {Array} requests
    */
   osapi._handleGadgetRpcMethod = function(requests) {
     var responses = new Array(requests.length);
@@ -73,13 +72,14 @@ if (gadgets && gadgets.rpc) { //Only define if gadgets rpc exists
     }
   };
 
+  osapi.container = {};
+
   /**
    * Basic implementation of system.listMethods which can be used to introspect
    * available services
    * @param request
    * @param callback
    */
-  osapi.container = {};
   osapi.container['listMethods'] = function(request, callback) {
     var names = [];
     recurseNames(osapi, '', 5, names);

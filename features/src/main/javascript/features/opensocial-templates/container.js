@@ -60,16 +60,19 @@ os.Container.domLoaded_ = false;
 
 /**
  * @type {number} The number of libraries needed to load.
+ * @private
  */
 os.Container.requiredLibraries_ = 0;
 
 /**
  * @type {boolean} Determines whether all templates are automatically processed.
+ * @private
  */
 os.Container.autoProcess_ = true;
 
 /**
  * @type {boolean} Has the document been processed already?
+ * @private
  */
 os.Container.processed_ = false;
 
@@ -391,6 +394,7 @@ os.Container.executeOnDomLoad(os.Container.processGadget);
 /**
  * A flag to determine if auto processing is waiting for libraries to load.
  * @type {boolean}
+ * @private
  */
 os.Container.processWaitingForLibraries_ = false;
 
@@ -423,6 +427,7 @@ os.Container.executeOnDomLoad(function() {
 
 /**
  * A handler called when one of the required libraries loads.
+ * @private
  */
 os.Container.onLibraryLoad_ = function() {
   if (os.Container.requiredLibraries_ > 0) {

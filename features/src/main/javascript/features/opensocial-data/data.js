@@ -140,6 +140,7 @@ opensocial.data.parseExpression_ = function(value) {
  *   - Escapes single quotes.
  *   - Replaces newlines with spaces.
  *   - Addes single quotes around the string.
+ * @private
  */
 opensocial.data.transformLiteral_ = function(string) {
   return "'" + string.replace(/'/g, "\\'").
@@ -214,7 +215,7 @@ opensocial.data.RequestDescriptor.prototype.register_ = function() {
  * @return {Object} The result of evaluation.
  */
 opensocial.data.DataContext.evalExpression = function(expr) {
-  return (new Function("context", 
+  return (new Function("context",
       "with (context) return " + expr))(opensocial.data.DataContext.getData());
 };
 
@@ -363,6 +364,7 @@ opensocial.data.onAPIResponse = function(responseItem, keys, callbacks) {
  * Extract the JSON payload from the ResponseItem. This includes
  * iterating over an array of API objects and extracting their JSON into a
  * simple array structure.
+ * @private
  */
 opensocial.data.extractJson_ = function(responseItem, key) {
   var data = responseItem.getData();
@@ -461,6 +463,7 @@ opensocial.data.loadRequests = function(xml) {
 /**
  * Parses XML data and constructs the pending request list.
  * @param {string} xml A string containing XML markup.
+ * @private
  */
 opensocial.data.loadRequestsFromMarkup_ = function(xml) {
   xml = opensocial.xmlutil.prepareXML(xml);
@@ -540,6 +543,7 @@ opensocial.data.transformSpecialValue = function(value) {
  * @param {Object} params The params object used to construct an Opensocial
  * DataRequest.
  * @param {string} fieldsStr A string containing comma-separated field names.
+ * @private
  */
 opensocial.data.addFieldsToParams_ = function(params, fieldsStr) {
   if (!fieldsStr) {

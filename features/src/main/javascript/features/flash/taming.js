@@ -93,11 +93,8 @@ tamings___.push(function(imports) {
       }
     };
 
-    return ___.frozenFunc(function tamedEmbedFlash(
-swfUrl,         
-swfContainer,        
-swfVersion,         
-opt_params        ) {
+    return ___.frozenFunc(function tamedEmbedFlash(swfUrl, swfContainer, swfVersion,
+                                                   opt_params) {
           // Check that swfContainer is a wrapped node
           if (typeof swfContainer === 'string') {
             // This assumes that there's only one gadget in the frame.

@@ -53,6 +53,7 @@ os.Loader = {};
 
 /**
  * A map of URLs which were already loaded.
+ * @private
  */
 os.Loader.loadedUrls_ = {};
 
@@ -76,6 +77,7 @@ os.Loader.loadUrl = function(url, callback) {
  * the same URL twice.
  * @param {string} url The URL of the Template Library.
  * @param {Function} callback Function to call once loaded.
+ * @private
  */
 os.Loader.requestUrlXHR_ = function(url, callback) {
   if (os.Loader.loadedUrls_[url]) {
@@ -107,6 +109,7 @@ os.Loader.requestUrlXHR_ = function(url, callback) {
  * @param {string} url The URL where the content is located.
  * @param {Function} callback Function to call with the data from the URL
  *     once it is fetched.
+ * @private
  */
 os.Loader.requestUrlGadgets_ = function(url, callback) {
   var params = {};
@@ -155,6 +158,7 @@ os.Loader.loadContent = function(xmlString, url) {
  * Gets the function that should be used for processing a tag.
  * @param {string} tagName Name of the tag.
  * @return {?Function} The function for processing such tags.
+ * @private
  */
 os.Loader.getProcessorFunction_ = function(tagName) {
   // TODO(levik): This won't work once compiler does name mangling.
