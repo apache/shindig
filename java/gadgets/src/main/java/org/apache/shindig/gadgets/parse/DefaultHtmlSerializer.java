@@ -79,7 +79,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
 
         HTMLElements.Element htmlElement =
             HTMLElements.getElement(elem.getNodeName());
-        
+
         printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
 
         // Special HTML elements - <script> in particular - will typically
@@ -114,7 +114,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
     if (scriptType != null) {
       Element replacement = elem.getOwnerDocument().createElement("script");
       replacement.setAttribute("type", scriptType);
-      
+
       // Retain the remaining attributes of the node.
       NamedNodeMap attribs = elem.getAttributes();
       for (int i = 0; i < attribs.getLength(); ++i) {
@@ -168,10 +168,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
       if (attr.getNodeValue() != null) {
         output.append("=\"");
         if (attr.getNodeValue().length() != 0) {
-          boolean isUrlAttribute =
-            elem.getNamespaceURI() == null &&
-            HtmlSerialization.URL_ATTRIBUTES.contains(attrName);
-          printAttributeValue(attr.getNodeValue(), output, isUrlAttribute);
+          printAttributeValue(attr.getNodeValue(), output);
         }
         output.append('"');
       }
@@ -179,13 +176,14 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
     output.append(withXmlClose ? "/>" : ">");
   }
 
-  private static void printAttributeValue(String text, Appendable output, boolean isUrl) throws IOException {
+  private static void printAttributeValue(String text, Appendable output) throws IOException {
     int length = text.length();
     for (int j = 0; j < length; j++) {
       char c = text.charAt(j);
+      // TODO: Complete all special chars (http://www.w3.org/TR/REC-xml/#charsets)
       if (c == '"') {
         output.append("&quot;");
-      } else if (c == '&' && !isUrl) {
+      } else if (c == '&') {
         output.append("&amp;");
       } else {
         output.append(c);
