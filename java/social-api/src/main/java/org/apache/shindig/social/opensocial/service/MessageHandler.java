@@ -99,7 +99,7 @@ public class MessageHandler {
    * Creates a new message collection or message
    */
   @Operation(httpMethods = "POST", bodyParam = "entity")
-  public Future<?> modify(SocialRequestItem request) throws ProtocolException {
+  public Future<?> create(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
@@ -133,7 +133,7 @@ public class MessageHandler {
    * Handles modifying a message or a message collection.
    */
   @Operation(httpMethods = "PUT", bodyParam = "entity")
-  public Future<?> create(SocialRequestItem request) throws ProtocolException {
+  public Future<?> modify(SocialRequestItem request) throws ProtocolException {
 
     Set<UserId> userIds = request.getUsers();
     String msgCollId = request.getParameter("msgCollId");
