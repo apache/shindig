@@ -138,7 +138,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
     output.append("<!--").append(n.getNodeValue()).append("-->");
   }
 
-  private void outputDocType(DocumentType docType, Appendable output) throws IOException {
+  public static void outputDocType(DocumentType docType, Appendable output) throws IOException {
     output.append("<!DOCTYPE ");
     // Use this so name matches case for XHTML
     output.append(docType.getOwnerDocument().getDocumentElement().getNodeName());
