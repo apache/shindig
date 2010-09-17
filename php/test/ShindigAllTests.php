@@ -53,7 +53,7 @@ require_once 'test/TestContext.php';
 if (defined('PHPUnit_MAIN_METHOD') === false) {
   define('PHPUnit_MAIN_METHOD', 'ShindigAllTests::main');
 }
-
+$_SERVER["HTTP_HOST"] = 'localhost';
 class ShindigAllTests {
 
   public static function main() {
