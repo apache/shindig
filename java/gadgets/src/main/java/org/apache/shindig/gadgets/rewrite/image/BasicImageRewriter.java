@@ -67,7 +67,7 @@ public class BasicImageRewriter implements ResponseRewriter {
   static final String
       CONTENT_TYPE_AND_MIME_MISMATCH =
           "Content is not an image but mime type asserts it is";
-    
+
   private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
   /** Returned as the output message if a huge image is submitted to be scaled */
   private static final String RESIZE_IMAGE_TOO_LARGE = "The image is too large to resize";
@@ -99,32 +99,190 @@ public class BasicImageRewriter implements ResponseRewriter {
 
   private final OptimizerConfig config;
 
+  private class ImageResizeData {
+    private Integer requestedWidth;
+    private Integer requestedHeight;
+    private Integer widthDelta;
+    private Integer heightDelta;
+
+    protected ImageResizeData(Integer requestedWidth, Integer requestedHeight, Integer widthDelta,
+        Integer heightDelta) {
+      this.requestedWidth = requestedWidth;
+      this.requestedHeight = requestedHeight;
+      this.widthDelta = widthDelta;
+      this.heightDelta = heightDelta;
+    }
+
+    public Integer getWidth() {
+      return requestedWidth;
+    }
+
+    public Integer getHeight() {
+      return requestedHeight;
+    }
+
+    public Integer getWidthDelta() {
+      return widthDelta;
+    }
+
+    public Integer getHeightDelta() {
+      return heightDelta;
+    }
+  }
+
   @Inject
   public BasicImageRewriter(OptimizerConfig config) {
     this.config = config;
   }
 
+  /**
+   * Predicate check for validating the Image Rewrite step. Images that are either too huge or
+   * invalid resize URL parameters are specified are not fit for rewrite.
+   *
+   * @param request the HTTP request.
+   * @param response the HTTP response for the original image fetched.
+   * @param imageInfo the image information extracted via Apache's Sanselan APIs.
+   * @param isResizeRequested boolean flag to indicate whether Image resize is requested or not.
+   * Huge images for which resize is requested are not fit for rewrite.
+   * @return true if the specified image can be rewriten; else it's set to false.
+   */
+  private Boolean canRewrite(HttpRequest request, HttpResponseBuilder response,
+      ImageInfo imageInfo, Boolean isResizeRequested) {
+    Uri uri = request.getUri();
+    if (null == uri) return false;
+
+    // Don't handle very small images, but check after parsing format to
+    // detect attacks.
+    if (response.getContentLength() < config.getMinThresholdBytes()) {
+      return false;
+    }
+
+    // TODO(anyone): The following check has been retained to maintain the functional equivalency
+    // with the old code (and testcases). In case resize parameters are not specified, still one
+    // can apply optimization to the response (call to 'applyOptimizer').
+    Integer resizeQuality = request.getParamAsInteger(PARAM_RESIZE_QUALITY);
+    Integer requestedWidth = request.getParamAsInteger(PARAM_RESIZE_WIDTH);
+    Integer requestedHeight = request.getParamAsInteger(PARAM_RESIZE_HEIGHT);
+    if (!isUsableParameter(requestedWidth) || !isUsableParameter(requestedHeight) ||
+        !isUsableParameter(resizeQuality)) {
+      return false;
+    }
+
+    if (isResizeRequested && isImageTooLarge(imageInfo)) {
+      errorResponse(response, HttpResponse.SC_FORBIDDEN, RESIZE_IMAGE_TOO_LARGE);
+      return false;
+    }
+
+    // Don't handle animations.
+    // TODO: This doesn't work as current Sanselan doesn't return accurate image counts.
+    // See animated GIF detection below.
+    if (imageInfo.getNumberOfImages() > 1 || isImageTooLarge(imageInfo)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Predicate check for validating the Image Resizing step. Images with improper resize parameters
+   * specified are not fit for resize.
+   *
+   * @param request the HTTP request.
+   * @param response the HTTP response for the original image fetched.
+   * @param imageInfo the image information extracted via Apache's Sanselan APIs.
+   * @return true if the specified image can be rewriten; else it's set to false.
+   */
+  private Boolean isResizeRequested(HttpRequest request, HttpResponseBuilder response,
+      ImageInfo imageInfo) {
+    Integer requestedWidth = request.getParamAsInteger(PARAM_RESIZE_WIDTH);
+    Integer requestedHeight = request.getParamAsInteger(PARAM_RESIZE_HEIGHT);
+
+    boolean resizeRequested = ((requestedWidth != null) && isUsableParameter(requestedWidth) ||
+                               (requestedHeight != null) && isUsableParameter(requestedHeight));
+    boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
+    if (noExpand &&
+        (requestedHeight == null || imageInfo.getHeight() <= requestedHeight) &&
+        (requestedWidth == null || imageInfo.getWidth() <= requestedWidth)) {
+      // Don't do anything, since the current image fits within the bounding area.
+      resizeRequested = false;
+    }
+
+    return resizeRequested;
+  }
+
+  /**
+   * Get Image Resize data by honoring resizing parameters specified in the request.
+   *
+   * @param request the HTTP request.
+   * @param response the HTTP response for the original image fetched.
+   * @param image the image to resize and format conversion.
+   * @param imageInfo the image information extracted via Apache's Sanselan APIs.
+   * @return image resize data corresponding to the transformed width and height. The return value
+   * is null for cases where image can't be resized.
+   */
+   private ImageResizeData getResizeData(HttpRequest request, HttpResponseBuilder response,
+       BufferedImage image, ImageInfo imageInfo) throws IOException {
+    int origWidth = imageInfo.getWidth();
+    int origHeight = imageInfo.getHeight();
+    int widthDelta = 0;
+    int heightDelta = 0;
+    Integer requestedWidth = request.getParamAsInteger(PARAM_RESIZE_WIDTH);
+    Integer requestedHeight = request.getParamAsInteger(PARAM_RESIZE_HEIGHT);
+
+    if (requestedWidth == null || requestedHeight == null) {
+      // It is enough to cast only one int to double, Java will coerce all others to double
+      // (JAVA spec, section 5.1.2).  In addition, interleave divisions and multiplications
+      // to keep the end result at bay, and clip the requested dimensions from below to
+      // compensate for small image dimensions.
+      if (requestedWidth == null) {
+        requestedWidth = max(1, (int) (origWidth / (double) origHeight * requestedHeight));
+      }
+      if (requestedHeight == null) {
+        requestedHeight = max(1, (int) (origHeight / (double) origWidth * requestedWidth));
+      }
+    } else {
+      // If both image dimensions are fixed, the two-step resizing process will need to know
+      // how much it has to fix up the image.
+      double ratio = getResizeRatio(requestedWidth, requestedHeight, origWidth, origHeight);
+      int widthAfterStep1 = max(1, (int) Math.round(ratio * origWidth));
+      widthDelta = requestedWidth - widthAfterStep1;
+
+      int heightAfterStep1 = max(1, (int) Math.round(ratio * origHeight));
+      heightDelta = requestedHeight - heightAfterStep1;
+
+      boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
+      if (noExpand) {
+        // No expansion requested: make sure not to expand the resulting image on either axis,
+        // even if both resize_[w,h] params are specified.
+        if (widthDelta == 0) {
+          requestedHeight = heightAfterStep1;
+          heightDelta = 0;
+        } else if (heightDelta == 0) {
+          requestedWidth = widthAfterStep1;
+          widthDelta = 0;
+        }
+      }
+    }
+
+    if (isResizeRequired(requestedWidth, requestedHeight, imageInfo)
+        && !isTargetImageTooLarge(requestedWidth, requestedHeight, imageInfo)) {
+      return new ImageResizeData(requestedWidth, requestedHeight, widthDelta, heightDelta);
+    } else {
+      return null;
+    }
+  }
+
   public void rewrite(HttpRequest request, HttpResponseBuilder response) {
     if (request == null || response == null) return;
-    
+
     Uri uri = request.getUri();
     if (null == uri) return;
-    
-    try {
-      // Check resizing
-      Integer resizeQuality = request.getParamAsInteger(PARAM_RESIZE_QUALITY);
-      Integer requestedWidth = request.getParamAsInteger(PARAM_RESIZE_WIDTH);
-      Integer requestedHeight = request.getParamAsInteger(PARAM_RESIZE_HEIGHT);
-      boolean isResizeRequested = (requestedWidth != null || requestedHeight != null);
 
-      // If the path or MIME type don't match, continue
-      if (!isSupportedContent(response) && !isImage(uri)) {
-        return;
-      }
-      if (!isUsableParameter(requestedWidth) || !isUsableParameter(requestedHeight) ||
-          !isUsableParameter(resizeQuality)) {
-        return;
-      }
+    try {
+       // If the path or MIME type don't match, continue
+       if (!isSupportedContent(response) && !isImage(uri)) {
+         return;
+       }
 
       // Content header checking is fast so this is fine to do for every response.
       ImageFormat imageFormat = Sanselan
@@ -135,87 +293,35 @@ public class BasicImageRewriter implements ResponseRewriter {
         return;
       }
 
-      // Don't handle very small images, but check after parsing format to
-      // detect attacks.
-      if (response.getContentLength() < config.getMinThresholdBytes()) {
-        return;
-      }
-
       ImageInfo imageInfo = Sanselan.getImageInfo(response.getContentBytes(), uri.getPath());
-      
-      boolean noExpand = "1".equals(request.getParam(PARAM_NO_EXPAND));
-      if (noExpand &&
-          (requestedHeight == null || imageInfo.getHeight() <= requestedHeight) &&
-          (requestedWidth == null || imageInfo.getWidth() <= requestedWidth)) {
-        // Don't do anything, since the current image fits within the bounding area.
-        isResizeRequested = false;
-      }
 
-      boolean isOversizedImage = isImageTooLarge(imageInfo);
-      if (isResizeRequested && isOversizedImage) {
-        errorResponse(response, HttpResponse.SC_FORBIDDEN, RESIZE_IMAGE_TOO_LARGE);
+      Boolean resizeRequested = isResizeRequested(request, response, imageInfo);
+
+      // Return in case image can't be rewriten.
+      if (!canRewrite(request, response, imageInfo, resizeRequested)) {
         return;
       }
 
-      // Don't handle animations.
-      // TODO: This doesn't work as current Sanselan doesn't return accurate image counts.
-      // See animated GIF detection below.
-      if (imageInfo.getNumberOfImages() > 1 || isOversizedImage) {
-        return;
-      }
-      
+      // Step#1: Read the image using appropriate readers for the corresponding image format.
       BufferedImage image = readImage(imageFormat, response);
 
-      if (isResizeRequested) {
-        int origWidth = imageInfo.getWidth();
-        int origHeight = imageInfo.getHeight();
-        int widthDelta = 0;
-        int heightDelta = 0;
+      // Proceed to Resize in case image can be resized.
+      if (resizeRequested) {
+        // Step#2: Get the Resize Data
+        ImageResizeData resizeData = getResizeData(request, response, image, imageInfo);
 
-        if (requestedWidth == null || requestedHeight == null) {
-          // It is enough to cast only one int to double, Java will coerce all others to double
-          // (JAVA spec, section 5.1.2).  In addition, interleave divisions and multiplications
-          // to keep the end result at bay, and clip the requested dimensions from below to
-          // compensate for small image dimensions.
-          if (requestedWidth == null) {
-            requestedWidth = max(1, (int) (origWidth / (double) origHeight * requestedHeight));
-          }
-          if (requestedHeight == null) {
-            requestedHeight = max(1, (int) (origHeight / (double) origWidth * requestedWidth));
-          }
-        } else {
-          // If both image dimensions are fixed, the two-step resizing process will need to know
-          // how much it has to fix up the image.
-          double ratio = getResizeRatio(requestedWidth, requestedHeight, origWidth, origHeight);
-          int widthAfterStep1 = max(1, (int) Math.round(ratio * origWidth));
-          widthDelta = requestedWidth - widthAfterStep1;
+        if (resizeData != null) {
+          // Step#3: Resize (Scale+Stretch) Image using Java AWT Graphics2D package.
+          image = resizeImage(image, resizeData.getWidth(), resizeData.getHeight(),
+              resizeData.getWidthDelta(), resizeData.getHeightDelta());
 
-          int heightAfterStep1 = max(1, (int) Math.round(ratio * origHeight));
-          heightDelta = requestedHeight - heightAfterStep1;
-          
-          if (noExpand) {
-            // No expansion requested: make sure not to expand the resulting image on either axis,
-            // even if both resize_[w,h] params are specified.
-            if (widthDelta == 0) {
-              requestedHeight = heightAfterStep1;
-              heightDelta = 0;
-            } else if (heightDelta == 0) {
-              requestedWidth = widthAfterStep1;
-              widthDelta = 0;
-            }
-          }
-        }
-
-        if (resizeQuality == null) {
-          resizeQuality = DEFAULT_QUALITY;
-        }
-
-        if (isResizeRequired(requestedWidth, requestedHeight, imageInfo)
-            && !isTargetImageTooLarge(requestedWidth, requestedHeight, imageInfo)) {
-          image = resizeImage(image, requestedWidth, requestedHeight, widthDelta, heightDelta);
+          // Step#4: Convert the image format (MIME_TYPE) using javax.imageio package.
           updateResponse(response, image);
         }
       }
+
+      // Step#5: Optimize the supported image formats viz PNG, GIF, JPG & BMP using 'BaseOptimizer'
+      // and it's subclass implementations for the above four formats.
       applyOptimizer(response, imageFormat, image);
     } catch (IOException ioe) {
       LOG.log(Level.WARNING, "IO Error rewriting image " + request.toString() + " - " + ioe.getMessage());
@@ -229,7 +335,7 @@ public class BasicImageRewriter implements ResponseRewriter {
   }
 
   /**
-   * As the image is resized, the request needs to change so that the optimizer can
+   * If the image is resized, the request needs to change so that the optimizer can
    * make sensible image size-related decisions down the pipeline.  GIF images are rewritten
    * as PNGs though, so as not to include the dependency on the GIF decoder.
    *
@@ -237,8 +343,7 @@ public class BasicImageRewriter implements ResponseRewriter {
    * @param image the resized image that needs to be substituted for the original image from
    *        the response
    */
-  private void updateResponse(HttpResponseBuilder response, BufferedImage image)
-      throws IOException {
+  public void updateResponse(HttpResponseBuilder response, BufferedImage image) throws IOException {
     ImageWriter imageWriter = ImageIO.getImageWritersByFormatName(RESIZE_OUTPUT_FORMAT).next();
     ImageOutputter outputter = new ImageIOOutputter(imageWriter, null);
     byte[] imageBytes = outputter.toBytes(image);
@@ -281,7 +386,7 @@ public class BasicImageRewriter implements ResponseRewriter {
    * @return the image obtained by stretching the original image so that its new dimensions
    *        are {@code requestedWidth} and {@code requestedHeight}
    */
-  private BufferedImage resizeImage(BufferedImage image, Integer requestedWidth,
+  public BufferedImage resizeImage(BufferedImage image, Integer requestedWidth,
       Integer requestedHeight, int extraWidth, int extraHeight) {
     int widthStretch = requestedWidth - extraWidth;
     int heightStretch = requestedHeight - extraHeight;
@@ -409,7 +514,7 @@ public class BasicImageRewriter implements ResponseRewriter {
       }
     }
   }
-  
+
   private void errorResponse(HttpResponseBuilder response, int status, String msg) {
     response.clearAllHeaders().setHttpStatusCode(status).setResponseString(msg);
   }

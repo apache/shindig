@@ -120,10 +120,10 @@ public class ImageRewriterTest extends Assert {
 
   private HttpRequest getMockRequest(Integer width, Integer height, Integer quality, boolean noExpand) {
     HttpRequest request = mockControl.createMock(HttpRequest.class);
-    expect(request.getUri()).andReturn(IMAGE_URL);
-    expect(request.getParamAsInteger(Param.RESIZE_QUALITY.getKey())).andReturn(quality);
-    expect(request.getParamAsInteger(Param.RESIZE_WIDTH.getKey())).andReturn(width);
-    expect(request.getParamAsInteger(Param.RESIZE_HEIGHT.getKey())).andReturn(height);
+    expect(request.getUri()).andReturn(IMAGE_URL).anyTimes();
+    expect(request.getParamAsInteger(Param.RESIZE_QUALITY.getKey())).andReturn(quality).anyTimes();
+    expect(request.getParamAsInteger(Param.RESIZE_WIDTH.getKey())).andReturn(width).anyTimes();
+    expect(request.getParamAsInteger(Param.RESIZE_HEIGHT.getKey())).andReturn(height).anyTimes();
     expect(request.getParam(Param.NO_EXPAND.getKey())).andReturn(noExpand ? "1" : null).anyTimes();
     return request;
   }
