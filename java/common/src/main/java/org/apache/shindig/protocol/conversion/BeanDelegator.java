@@ -87,44 +87,7 @@ public class BeanDelegator {
    */
   public Object createDelegator(Object source) {
     if (source == null || delegatedClasses == null) {
-      return null;
-    }
-
-    // For enum, return the converted enum
-    if (source instanceof Enum<?> && delegatedClasses.containsKey(source.getClass())) {
-      return convertEnum((Enum<?>) source);
-    }
-
-    // Proxy each item in a map (map key is not proxied)
-    if (source instanceof Map<?, ?>) {
-      Map<?, ?> mapSource = (Map<?, ?>) source;
-      if (!mapSource.isEmpty() && delegatedClasses.containsKey(
-          mapSource.values().iterator().next().getClass())) {
-        // Convert Map:
-        ImmutableMap.Builder<Object, Object> mapBuilder = ImmutableMap.builder();
-        for (Map.Entry<?, ?> entry : mapSource.entrySet()) {
-          mapBuilder.put(entry.getKey(), createDelegator(entry.getValue()));
-        }
-        return mapBuilder.build();
-      } else {
-        return source;
-      }
-    }
-
-    // Proxy each item in a list
-    if (source instanceof List<?>) {
-      List<?> listSource = (List<?>) source;
-      if (!listSource.isEmpty() && delegatedClasses.containsKey(
-        listSource.get(0).getClass())) {
-        // Convert Map:
-        ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
-        for (Object entry : listSource) {
-          listBuilder.add(createDelegator(entry));
-        }
-        return listBuilder.build();
-      } else {
-        return source;
-      }
+      return source;
     }
 
     if (delegatedClasses.containsKey(source.getClass())) {
@@ -143,6 +106,51 @@ public class BeanDelegator {
   @SuppressWarnings("unchecked")
   public <T> T createDelegator(Object source, Class<T> apiInterface,
                                Map<String, Object> extraFields) {
+
+    if (source == null) {
+      return null;
+    }
+
+    if (apiInterface.isPrimitive() || apiInterface.isAssignableFrom(source.getClass())) {
+      return (T) source;
+    }
+
+    // For enum, return the converted enum
+    if (source instanceof Enum<?> && delegatedClasses.containsKey(source.getClass())) {
+      return (T) convertEnum((Enum<?>) source);
+    }
+
+    // Proxy each item in a map (map key is not proxied)
+    if (source instanceof Map<?, ?>) {
+      Map<?, ?> mapSource = (Map<?, ?>) source;
+      if (!mapSource.isEmpty() && delegatedClasses.containsKey(
+          mapSource.values().iterator().next().getClass())) {
+        // Convert Map:
+        ImmutableMap.Builder<Object, Object> mapBuilder = ImmutableMap.builder();
+        for (Map.Entry<?, ?> entry : mapSource.entrySet()) {
+          mapBuilder.put(entry.getKey(), createDelegator(entry.getValue(), apiInterface));
+        }
+        return (T) mapBuilder.build();
+      } else {
+        return (T) source;
+      }
+    }
+
+    // Proxy each item in a list
+    if (source instanceof List<?>) {
+      List<?> listSource = (List<?>) source;
+      if (!listSource.isEmpty() && delegatedClasses.containsKey(
+        listSource.get(0).getClass())) {
+        // Convert Map:
+        ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
+        for (Object entry : listSource) {
+          listBuilder.add(createDelegator(entry, apiInterface));
+        }
+        return (T) listBuilder.build();
+      } else {
+        return (T) source;
+      }
+    }
     return (T) Proxy.newProxyInstance( apiInterface.getClassLoader(),
       new Class[] { apiInterface }, new DelegateInvocationHandler(source, extraFields));
   }
@@ -189,7 +197,7 @@ public class BeanDelegator {
         Method sourceMethod = sourceClass.getMethod(
             method.getName(), method.getParameterTypes());
         Object result = sourceMethod.invoke(source, args);
-        return createDelegator(result);
+        return createDelegator(result, getParameterizedReturnType(method));
       } catch (NoSuchMethodException e) {
         // Will throw unsupported method below
       } catch (IllegalArgumentException e) {
@@ -202,6 +210,21 @@ public class BeanDelegator {
       throw new UnsupportedOperationException("Unsupported function: " + method.getName());
     }
   }
+
+  private Class<?> getParameterizedReturnType(Method method) {
+    Type type = method.getGenericReturnType();
+    if (type instanceof ParameterizedType) {
+      ParameterizedType paramType = (ParameterizedType) type;
+
+      if (List.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
+        type = paramType.getActualTypeArguments()[0];
+      } else if (Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
+        type = paramType.getActualTypeArguments()[1];
+      }
+    }
+    return (Class<?>) type;
+  }
+
 
   /**
    * Validate all proxied classes to see that all required functions are implemented.
