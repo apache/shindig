@@ -100,7 +100,7 @@ public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
                   + "</head><body><a href=\"hello\">Hello</a>"
                   + "</body></html>";
     String expected = "<html><head>"
-                      + "<meta content=\"text/html ; pharset=\'hello\'; hello=world\" "
+                      + "<meta content=\"text/html ; pharset=&#39;hello&#39;; hello=world\" "
                       + "http-equiv=\"Content-TYPE\">"
                       + "</head><body><a href=\"hello\">Hello</a>\n"
                       + "</body></html>";
@@ -120,7 +120,7 @@ public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
            + "</head><body><a href=\"hello\">Hello</a>"
            + "</body></html>";
     expected = "<html><head>"
-               + "<meta content=\"text/html ; charsett='hello'; hello=world\" "
+               + "<meta content=\"text/html ; charsett=&#39;hello&#39;; hello=world\" "
                + "http-equiv=\"Content-TYPE\">"
                + "</head><body><a href=\"hello\">Hello</a>\n"
                + "</body></html>";

@@ -18,6 +18,7 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.caja.lexer.escaping.Escaping;
 import org.cyberneko.html.HTMLElements;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -168,26 +169,11 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
       if (attr.getNodeValue() != null) {
         output.append("=\"");
         if (attr.getNodeValue().length() != 0) {
-          printAttributeValue(attr.getNodeValue(), output);
+          Escaping.escapeXml(attr.getNodeValue(), /* asciiOnly */ true, output);
         }
         output.append('"');
       }
     }
     output.append(withXmlClose ? "/>" : ">");
-  }
-
-  private static void printAttributeValue(String text, Appendable output) throws IOException {
-    int length = text.length();
-    for (int j = 0; j < length; j++) {
-      char c = text.charAt(j);
-      // TODO: Complete all special chars (http://www.w3.org/TR/REC-xml/#charsets)
-      if (c == '"') {
-        output.append("&quot;");
-      } else if (c == '&') {
-        output.append("&amp;");
-      } else {
-        output.append(c);
-      }
-    }
   }
 }
