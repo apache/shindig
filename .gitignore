@@ -35,6 +35,30 @@
 /assembly/shindig.iws
 /assembly/target
 
+# /extras/
+/extras/target
+/extras/work
+/extras/dojo
+/extras/*.iws
+/extras/*.ipr
+/extras/*.iml
+/extras/derby.log
+/extras/maven.log
+/extras/build.xml
+/extras/build-dependency.xml
+/extras/velocity.log*
+/extras/junit*.properties
+/extras/surefire*.properties
+/extras/.project
+/extras/.classpath
+/extras/.settings
+/extras/.deployables
+/extras/.wtpmodules
+/extras/.externalToolBuilders
+/extras/create.sql
+/extras/drop.sql
+/extras/derby.log
+
 # /features/
 /features/*.iml
 /features/*.ipr
@@ -207,23 +231,26 @@
 /java/social-api/derby.log
 /java/social-api/maven-eclipse.xml
 
-# extras/
-/extras/target
-/extras/work
-/extras/dojo
-/extras/*.iws
-/extras/*.ipr
-/extras/*.iml
-/extras/derby.log
-/extras/maven.log
-/extras/build.xml
-/extras/build-dependency.xml
-/extras/velocity.log*
-/extras/junit*.properties
-/extras/surefire*.properties
-/extras/.project
-/extras/.classpath
-/extras/.settings
-/extras/.deployables
-/extras/.wtpmodules
-/extras/.externalToolBuilders
+# /php/
+/php/target
+/php/work
+/php/dojo
+/php/*.iws
+/php/*.ipr
+/php/*.iml
+/php/derby.log
+/php/maven.log
+/php/build.xml
+/php/build-dependency.xml
+/php/velocity.log*
+/php/junit*.properties
+/php/surefire*.properties
+/php/.project
+/php/.classpath
+/php/.settings
+/php/.deployables
+/php/.wtpmodules
+/php/.externalToolBuilders
+/php/create.sql
+/php/drop.sql
+/php/derby.log
