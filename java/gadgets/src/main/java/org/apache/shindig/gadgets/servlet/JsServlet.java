@@ -31,8 +31,6 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
