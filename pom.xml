@@ -40,6 +40,13 @@
   <url>http://shindig.apache.org</url>
   <inceptionYear>2007</inceptionYear>
 
+  <properties>
+    <!-- What version of the API are we targeting for compatible -->
+    <shindig.api.compatible>2.0.0</shindig.api.compatible>
+    <!-- What version of the API did we ship last -->
+    <shindig.api.previous>1.0.1</shindig.api.previous>
+  </properties>
+
   <prerequisites>
     <maven>2.0.8</maven>
   </prerequisites>
