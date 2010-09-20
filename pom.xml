@@ -843,6 +843,7 @@
         <module>java/server</module>
         <module>java/samples</module>
         <module>extras</module>
+        <module>php</module>
         <module>assembly</module>
       </modules>
       <build>
@@ -888,7 +889,13 @@
         </plugins>
       </build>
     </profile>
-
+    <profile>
+      <id>php</id>
+      <modules>
+        <module>features</module>
+        <module>php</module>
+      </modules>
+    </profile>
     <profile>
       <id>assemble</id>
       <build>
