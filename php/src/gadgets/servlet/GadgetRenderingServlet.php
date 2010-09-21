@@ -19,7 +19,6 @@
  */
 
 require_once 'src/common/HttpServlet.php';
-require_once 'src/common/JsMin.php';
 require_once 'src/common/SecurityTokenDecoder.php';
 require_once 'src/common/SecurityToken.php';
 require_once 'src/common/BlobCrypter.php';

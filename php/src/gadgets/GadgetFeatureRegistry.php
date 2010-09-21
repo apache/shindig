@@ -18,6 +18,8 @@
  * under the License.
  */
 
+require_once 'external/jsmin-php/jsmin.php';
+
 /**
  * Class that deals with the processing, loading and dep resolving of the gadget features
  * Features are javascript libraries that provide an API, like 'opensocial' or 'settitle'
