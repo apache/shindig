@@ -58,6 +58,7 @@ shindig.container.TokenResponse.TOKEN = 'token';
  * @enum {string}
  */
 shindig.container.RenderParam = {};
+shindig.container.RenderParam.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
 shindig.container.RenderParam.CLASS = 'class';
 shindig.container.RenderParam.DEBUG = 'debug';
 shindig.container.RenderParam.HEIGHT = 'height';
@@ -66,6 +67,7 @@ shindig.container.RenderParam.TEST_MODE = 'testmode';
 shindig.container.RenderParam.USER_PREFS = 'userPrefs';
 shindig.container.RenderParam.VIEW = 'view';
 shindig.container.RenderParam.WIDTH = 'width';
+
 
 /**
  * Constants to key into request viewParam JSON.

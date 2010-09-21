@@ -44,6 +44,13 @@ shindig.container.Container = function(opt_config) {
   this.sites_ = {};
 
   /**
+   * @type {boolean}
+   */
+  this.allowDefaultView_ = Boolean(
+      shindig.container.util.getSafeJsonValue(config,
+      shindig.container.ContainerConfig.ALLOW_DEFAULT_VIEW, true));
+
+  /**
    * @type {string}
    * @private
    */
@@ -152,12 +159,15 @@ shindig.container.Container.prototype.getGadgetHolder = function(id) {
 shindig.container.Container.prototype.navigateGadget = function(
     site, gadgetUrl, viewParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
+  if (this.allowDefaultView_) {
+    renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW] = true;
+  }
   if (this.renderDebug_) {
-    renderParams['nocache'] = true;
-    renderParams['debug'] = true;
+    renderParams[shindig.container.RenderParam.NO_CACHE] = true;
+    renderParams[shindig.container.RenderParam.DEBUG] = true;
   }
   if (this.renderTest_) {
-    renderParams['testmode'] = true;
+    renderParams[shindig.container.RenderParam.TEST_MODE] = true;
   }
 
   var self = this;
@@ -166,6 +176,10 @@ shindig.container.Container.prototype.navigateGadget = function(
     // TODO: Navigate to error screen on primary gadget load failure
     // TODO: Should display error without doing a standard navigate.
     // TODO: Bad if the error gadget fails to load.
+    if (gadgetInfo.error) {
+      throw [ 'Failed to possibly schedule token refresh for gadget ',
+          holder.getUrl(), '.' ].join('');
+    }
     if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
       self.scheduleRefreshTokens_();
     }
@@ -205,13 +219,14 @@ shindig.container.Container.prototype.preloadGadgets = function(gadgetUrls) {
   var request = shindig.container.util.newMetadataRequest(gadgetUrls);
   var self = this;
   this.service_.getGadgetMetadata(request, function(response) {
-    if (!response.error) {
-      for (var id in response) {
-        self.addPreloadedGadgetUrl_(id);
-        if (response[id][shindig.container.MetadatResponse.NEEDS_TOKEN_REFRESH]) {
-          // Safe to re-schedule many times.
-          self.scheduleRefreshTokens_();
-        }
+    for (var id in response) {
+      if (response[id].error) {
+        throw [ 'Failed to preload gadget ', id, '.' ].join('');
+      }
+      self.addPreloadedGadgetUrl_(id);
+      if (response[id][shindig.container.MetadatResponse.NEEDS_TOKEN_REFRESH]) {
+        // Safe to re-schedule many times.
+        self.scheduleRefreshTokens_();
       }
     }
   });
@@ -284,6 +299,12 @@ shindig.container.ContainerConfig.TOKEN_REFRESH_INTERVAL = 'tokenRefreshInterval
  * @enum {string}
  */
 shindig.container.ContainerRender = {};
+/**
+ * Allow gadgets to render in unspecified view.
+ * @type {string}
+ * @const
+ */
+shindig.container.ContainerRender.ALLOW_DEFAULT_VIEW = 'allowDefaultView';
 /**
  * Style class to associate to iframe.
  * @type {string}
@@ -443,17 +464,19 @@ shindig.container.Container.prototype.refreshTokens_ = function() {
 
   var self = this;
   this.service_.getGadgetToken(request, function(response) {
-    if (!response.error) {
-      // Update active token-requiring gadgets with new tokens. Do not need to
-      // update pre-loaded gadgets, since new tokens will take effect when they
-      // are navigated to, from cache.
-      for (var key in self.sites_) {
-        var holder = self.sites_[key].getActiveGadgetHolder();
-        var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
-        if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
-          gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
-              response[holder.getUrl()][shindig.container.TokenResponse.TOKEN]);
+    // Update active token-requiring gadgets with new tokens. Do not need to
+    // update pre-loaded gadgets, since new tokens will take effect when they
+    // are navigated to, from cache.
+    for (var key in self.sites_) {
+      var holder = self.sites_[key].getActiveGadgetHolder();
+      var gadgetInfo = self.service_.getCachedGadgetMetadata(holder.getUrl());
+      if (gadgetInfo[shindig.container.MetadataResponse.NEEDS_TOKEN_REFRESH]) {
+        var tokenInfo = response[holder.getUrl()];
+        if (tokenInfo.error) {
+          throw [ 'Failed to get token for gadget ', holder.getUrl(), '.' ].join('');
         }
+        gadgets.rpc.call(holder.getIframeId(), 'update_security_token', null,
+            tokenInfo[shindig.container.TokenResponse.TOKEN]);
       }
     }
     // TODO: Tokens will be stale, but error should not be ignored.

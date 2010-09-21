@@ -194,45 +194,35 @@ shindig.container.GadgetSite.prototype.getParentId = function() {
 /**
  * Render a gadget in the site, by URI of the gadget XML.
  * @param {string} gadgetUrl The absolute URL to gadget.
- * @param {Object} viewParams View parameters for the gadget.
- * @param {Object} renderParams. Render parameters for the gadget, including:
- *     view, width, height.
- * @param {function(Object)=} opt_callback Function called with gadget info after
- *     navigation has occurred.
+ * @param {Object} viewParams Look at shindig.container.ViewParam.
+ * @param {Object} renderParams. Look at shindig.container.RenderParam.
+ * @param {function(Object)=} opt_callback Function called with gadget info
+ *     after navigation has occurred.
  */
 shindig.container.GadgetSite.prototype.navigateTo = function(
     gadgetUrl, viewParams, renderParams, opt_callback) {
   var callback = opt_callback || function() {};
-
-  // If metadata has been loaded/cached.
-  var gadgetInfo = this.service_.getCachedGadgetMetadata(gadgetUrl);
-  if (gadgetInfo) {
-    this.render(gadgetInfo, viewParams, renderParams);
+  var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
+  var self = this;
+  this.service_.getGadgetMetadata(request, function(response) {
+    var gadgetInfo = response[gadgetUrl];
+    if (gadgetInfo.error) {
+      var message = [ 'Failed to navigate for gadget ', gadgetUrl, '.' ].join(''); 
+      shindig.container.util.warn(message);
+    } else {
+      self.render(gadgetInfo, viewParams, renderParams);
+    }
+    // Possibly with an error. Leave to user to deal with raw response.
     callback(gadgetInfo);
-
-  // Otherwise, fetch gadget metadata.
-  } else {
-    var request = shindig.container.util.newMetadataRequest([gadgetUrl]);
-    var self = this;
-    this.service_.getGadgetMetadata(request, function(response) {
-      if (!response.error) {
-        var gadgetInfo = response[gadgetUrl];
-        self.render(gadgetInfo, viewParams, renderParams);
-        callback(gadgetInfo);
-      } else {
-        callback(response);
-      }
-    });
-  }
+  });
 };
 
 
 /**
  * Render a gadget in this site, using a JSON gadget description.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams View parameters for the gadget.
- * @param {Object} renderParams. Render parameters for the gadget, including:
- *     view, width, height.
+ * @param {Object} viewParams Look at shindig.container.ViewParam.
+ * @param {Object} renderParams. Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetSite.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
@@ -243,15 +233,23 @@ shindig.container.GadgetSite.prototype.render = function(
     previousView = this.currentGadgetHolder_.getView();
   }
 
-  // Load into the double-buffer if there is one
+  // Load into the double-buffer if there is one.
   var el = this.loadingGadgetEl_ || this.currentGadgetEl_;
   this.loadingGadgetHolder_ = new shindig.container.GadgetHolder(this.id_, el);
 
+  // Find requested view.
   var view = renderParams[shindig.container.RenderParam.VIEW]
       || viewParams[shindig.container.ViewParam.VIEW]
-      || previousView
-      || 'default';
+      || previousView;
   var viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
+
+  if (!viewInfo && renderParams[shindig.container.RenderParam.ALLOW_DEFAULT_VIEW]) {
+    view = shindig.container.GadgetSite.DEFAULT_VIEW_;
+    viewInfo = gadgetInfo[shindig.container.MetadataResponse.VIEWS][view];
+  }
+  if (!viewInfo) {
+    throw [ 'Unsupported view ', view, ' for gadget ', gadgetInfo_['url'], '.' ].join('');
+  }
 
   var delayLoad = this.getFeature('loadstate', gadgetInfo) ||
       this.getFeature('shell', gadgetInfo);
@@ -311,8 +309,7 @@ shindig.container.GadgetSite.prototype.rpcCall = function(
  * If token has been fetched at least once, set the token to the most recent
  * one. Otherwise, leave it.
  * @param {Object} gadgetInfo The gadgetInfo used to update security token.
- * @param {Object} renderParams Render parameters for the gadget, including:
- *     view, width, and height.
+ * @param {Object} renderParams. Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetSite.prototype.updateSecurityToken_
     = function(gadgetInfo, renderParams) {
@@ -429,3 +426,11 @@ shindig.container.GadgetSite.DEFAULT_HEIGHT_ = 200;
  * @private
  */
 shindig.container.GadgetSite.DEFAULT_WIDTH_ = 320;
+
+
+/**
+ * Default view of gadget.
+ * @type {string}
+ * @private
+ */
+shindig.container.GadgetSite.DEFAULT_VIEW_ = 'default';

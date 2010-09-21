@@ -59,10 +59,6 @@ shindig.container.util.mergeJsons = function(json1, json2) {
 };
 
 
-shindig.container.util.cloneJson = function(json) {
-	
-};
-
 /**
  * Construct a JSON request to get gadget metadata. For now, this will request
  * a super-set of data needed for all CC APIs requiring gadget metadata, since
@@ -112,3 +108,27 @@ shindig.container.util.toArrayOfJsonKeys = function(json) {
   }
   return result;
 };
+
+
+/**
+ * Return true if json is empty.
+ * @param {Object} json to check.
+ * @return {Boolean}
+ */
+shindig.container.util.isEmptyJson = function(json) {
+  for (var key in json) {
+    return false;
+  }
+  return true;
+};
+
+
+/**
+ * Put up a warning message to console.
+ * @param {String} message to warn with.
+ */
+shindig.container.util.warn = function(message) {
+  if (console && console.warn) {
+    console.warn(message);
+  }
+}

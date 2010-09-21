@@ -159,9 +159,8 @@ shindig.container.GadgetHolder.prototype.setSecurityToken = function(value) {
 /**
  * Render a gadget into the element.
  * @param {Object} gadgetInfo the JSON gadget description.
- * @param {Object} viewParams View parameters for the gadget.
- * @param {Object} renderParams Render parameters for the gadget, including:
- *     view, width, height.
+ * @param {Object} viewParams Look at shindig.container.ViewParam.
+ * @param {Object} renderParams. Look at shindig.container.RenderParam.
  */
 shindig.container.GadgetHolder.prototype.render = function(
     gadgetInfo, viewParams, renderParams) {
@@ -170,10 +169,6 @@ shindig.container.GadgetHolder.prototype.render = function(
   this.gadgetInfo_ = gadgetInfo;
   this.viewParams_ = viewParams;
   this.renderParams_ = renderParams;
-  if (!this.gadgetInfo_[shindig.container.MetadataResponse.VIEWS][this.getView()]) {
-    throw 'View ' + this.view_ + ' unsupported in ' + this.gadgetInfo_['url'];
-  }
-
   this.el_.innerHTML = this.getIframeHtml_();
 
   // Set up RPC channel. RPC relay url is on gmodules, relative to base of the
@@ -266,7 +261,7 @@ shindig.container.GadgetHolder.prototype.getIframeUrl_ = function() {
 
   uri.setFP('mid', String(this.siteId_));
 
-  if (this.hasViewParams_()) {
+  if (!shindig.container.util.isEmptyJson(this.viewParams_)) {
     var gadgetParamText = gadgets.json.stringify(this.viewParams_);
     uri.setFP('view-params', gadgetParamText);
   }
@@ -296,17 +291,4 @@ shindig.container.GadgetHolder.prototype.updateUserPrefParams_ = function(uri) {
       uri.setExistingP(upKey, upValue);
     }
   }
-};
-
-
-/**
- * Return true if this has view parameters.
- * @private
- * @return {Boolean}
- */
-shindig.container.GadgetHolder.prototype.hasViewParams_ = function() {
-  for (var key in this.viewParams_) {
-    return true;
-  }
-  return false;
 };

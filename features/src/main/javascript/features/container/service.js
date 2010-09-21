@@ -45,16 +45,6 @@ shindig.container.Service = function(opt_config) {
       shindig.container.ServiceConfig.API_PATH, '/api/rpc/cs'));
 
   /**
-<<<<<<< HEAD
-=======
-   * @type {boolean}
-   * @private
-   */
-  this.sameDomain_ = Boolean(shindig.container.util.getSafeJsonValue(config,
-      shindig.container.ServiceConfig.SAME_DOMAIN, false));
-
-  /**
->>>>>>> more gjslint cleanups
    * Map of gadget URLs to cached gadgetInfo response.
    * @type {Object}
    * @private
@@ -83,31 +73,52 @@ shindig.container.Service.prototype.onConstructed = function(opt_config) {};
 
 
 /**
- * Do an immediate fetch of gadgets metadata for gadgets in request.ids, for
- * container request.container. The optional callback opt_callback will be
+ * Return a possibly-cached gadgets metadata for gadgets in request.ids, for
+ * container request.container. If metadata is not cache, fetch from server
+ * only for the uncached gadget URLs. The optional callback opt_callback will be
  * called, after a response is received.
  * @param {Object} request JSON object representing the request.
  * @param {function(Object)=} opt_callback function to call upon data receive.
  */
 shindig.container.Service.prototype.getGadgetMetadata = function(
     request, opt_callback) {
+  // TODO: come up with an expiration mechanism to evict cached gadgets.
+  // Can be based on renderParam['nocache']. Be careful with preloaded and
+  // arbitrarily-navigated gadgets. The former should be indefinite, unless
+  // unloaded. The later can done without user knowing.
   var callback = opt_callback || function() {};
-  var self = this;
-  osapi.gadgets.metadata.get(request).execute(function(response) {
-    if (response.error) {
-      // Hides internal server error.
-      callback({
-        error: 'Failed to retrieve gadget metadata.',
-        errorCode: 'NOLOAD'
-      });
-    } else {
-      for (var id in response) {
-        var gadgetInfo = response[id];
-        self.cachedMetadatas_[id] = gadgetInfo;
+  var uncachedUrls = this.getUncachedUrls_(request, this.cachedMetadatas_);
+  var finalResponse = this.getCachedData_(request, this.cachedMetadatas_);
+
+  // If fully cached, return from cache.
+  if (uncachedUrls.length == 0) {
+    callback(finalResponse);
+
+  // Otherwise, request for uncached metadatas.
+  } else {
+    var self = this;
+    request = shindig.container.util.newMetadataRequest(uncachedUrls);
+    osapi.gadgets.metadata.get(request).execute(function(response) {
+
+      // If response entirely fails, augment individual errors.
+      if (response.error) {
+        for (var i = 0; i < request.ids.length; i++) {
+          var id = request.ids[i];
+          var message = [ 'Server failure to fetch metadata for gadget ', id, '.' ].join('');
+          finalResponse[id] = { error : message };
+        }
+
+      // Otherwise, cache response. Augment final response with server response.
+      } else {
+        for (var id in response) {
+          self.cachedMetadatas_[id] = response[id];
+          finalResponse[id] = response[id];
+        }
       }
-      callback(response);
-    }
-  });
+
+      callback(finalResponse);
+    });
+  }
 };
 
 
@@ -118,20 +129,29 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
 shindig.container.Service.prototype.getGadgetToken = function(
     request, opt_callback) {
   var callback = opt_callback || function() {};
+
+  // Do not check against cache. Always do a server fetch.
   var self = this;
   osapi.gadgets.token.get(request).execute(function(response) {
+    var finalResponse = {};
+
+    // If response entirely fails, augment individual errors.
     if (response.error) {
-      // Hides internal server error.
-      callback({
-        error: 'Failed to retrieve gadget token.',
-        errorCode: 'NOLOAD'
-      });
+      for (var i = 0; i < request.ids.length; i++) {
+        var id = request.ids[i];
+        var message = [ 'Server failure to fetch token for gadget ' + id + '.' ].join('');
+        finalResponse[id] = { error : message };
+      }
+
+    // Otherwise, cache response. Augment final response with server response.
     } else {
       for (var id in response) {
         self.cachedTokens_[id] = response[id];
+        finalResponse[id] = response[id];
       }
-      callback(response);
     }
+
+    callback(finalResponse);
   });
 };
 
@@ -175,6 +195,44 @@ shindig.container.Service.prototype.initializeOsapi_ = function() {
 };
 
 
+/**
+ * Filter cache with requested ids.
+ * @param {Object} request containing ids.
+ * @param {Object} cache JSON containing cached data.
+ * @return {Object} JSON containing requested and cached entries.
+ * @private
+ */
+shindig.container.Service.prototype.getCachedData_ = function(request, cache) {
+  var result = {};
+  for (var i = 0; i < request.ids.length; i++) {
+    var id = request.ids[i];
+    if (cache[id]) {
+      result[id] = cache[id];
+    }
+  }
+  return result;
+};
+
+
+/**
+ * Extract ids in request not in cache.
+ * @param {Object} request containing ids.
+ * @param {Object} cache JSON containing cached data.
+ * @return {Array.<string>} keys in the json.
+ * @private
+ */
+shindig.container.Service.prototype.getUncachedUrls_ = function(request, cache) {
+  var result = [];
+  for (var i = 0; i < request.ids.length; i++) {
+    var id = request.ids[i];
+    if (!cache[id]) {
+      result.push(id);
+    }
+  }
+  return result;
+};
+
+
 // -----------------------------------------------------------------------------
 // Configuration
 // -----------------------------------------------------------------------------
@@ -186,6 +244,7 @@ shindig.container.Service.prototype.initializeOsapi_ = function() {
  * @enum {string}
  */
 shindig.container.ServiceConfig = {};
+
 /**
  * Host to fetch gadget information, via XHR.
  * @type {string}
