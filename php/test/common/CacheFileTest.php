@@ -76,7 +76,7 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
    * Tests cache->delete()
    */
   public function testDelete() {
-    @rmdir("/tmp/shindig/TestCache/te");
+    @rmdir(sys_get_temp_dir() . "/shindig/TestCache/te");
     $this->cache->set("test", "testing");
     $this->assertTrue(false != $this->cache->get("test"));
     $this->cache->delete("test");
@@ -134,24 +134,24 @@ class CacheFileTest extends PHPUnit_Framework_TestCase {
    * Tests cache->set()
    */
   public function testSetException() {
-    @rmdir("/tmp/shindig/TestCache/te");
-    $this->assertTrue(touch("/tmp/shindig/TestCache/te"));
+    @rmdir(sys_get_temp_dir() . "/shindig/TestCache/te");
+    $this->assertTrue(touch(sys_get_temp_dir() . "/shindig/TestCache/te"));
     $this->setExpectedException("CacheException");
     try {
       $this->cache->set("test", "testing");
     } catch (Exception $e) {
-      $this->assertTrue(unlink("/tmp/shindig/TestCache/te"));
+      $this->assertTrue(unlink(sys_get_temp_dir() . "/shindig/TestCache/te"));
       throw $e;
     }
-    unlink("/tmp/shindig/TestCache/te");
+    unlink(sys_get_temp_dir() . "/shindig/TestCache/te");
   }
 
   /**
    * Tests cache->invalidate()
    */
   public function testInvalidation() {
-    @unlink("/tmp/shindig/TestCache/te/test");
-    @rmdir("/tmp/shindig/TestCache/te");
+    @unlink(sys_get_temp_dir() . "/shindig/TestCache/te/test");
+    @rmdir(sys_get_temp_dir() . "/shindig/TestCache/te");
     $this->cache->set("test", "testing");
     $this->cache->invalidate("test");
     $this->assertEquals(false, $this->cache->get("test"));

@@ -56,9 +56,10 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <dependencies>
           <dependency>
+            <!-- note that 1.8.0 has problems generating xslt output... -->
             <groupId>org.apache.ant</groupId>
             <artifactId>ant-trax</artifactId>
-            <version>1.8.0</version>
+            <version>1.7.0</version>
           </dependency>
           <dependency>
             <groupId>net.sf.saxon</groupId>
@@ -73,12 +74,13 @@
             <phase>process-sources</phase>
             <goals><goal>run</goal></goals>
             <configuration>
-              <tasks>
+              <target>
                 <apply executable="php">
                   <arg value="-l" />
+                  <arg value="-n" />
                   <fileset dir="." includes="src/**/*.php" />
                 </apply>
-              </tasks>
+              </target>
             </configuration>
           </execution>
           <!-- phpdocs -->
@@ -87,7 +89,7 @@
 	    <phase>pre-site</phase>
 	    <goals><goal>run</goal></goals>
 	    <configuration>
-	      <tasks>
+	      <target>
 		<mkdir dir="target/site/phpdoc" />
 		<exec executable="phpdoc" failonerror="true">
 		  <arg value="-d" />
@@ -99,7 +101,7 @@
 		  <arg value="--title" />
 		  <arg value="Apache Shindig ${version}" />
 		</exec>
-	      </tasks>
+	      </target>
 	    </configuration>
 	  </execution>
 	  
@@ -111,19 +113,22 @@
               <goal>run</goal>
             </goals>
             <configuration>
-              <tasks>
+              <target>
                 <mkdir dir="${surefire.reports}" />
                 <mkdir dir="${coverage.report}" />
+		<mkdir dir="target/tmp" />
                 <exec executable="phpunit" dir=".">
+                  <arg line=" --verbose" />
                   <arg line=" --log-junit ${surefire.reports}/phpunit-testresults.xml" />
                   <arg line=" --coverage-html ${coverage.report}" />
                   <arg line=" test/ShindigAllTests.php" />
+		  <env key="TMPDIR" value="${basedir}/target/tmp"/>
                 </exec>
                 <xslt in="${surefire.reports}/phpunit-testresults.xml" out="${surefire.reports}/xslt.info"
-                    style="test/config/phpunit_to_surefire.xslt" processor="trax"> 
-                  <param name="outputDir" expression="${surefire.reports}" />
+                    style="test/config/phpunit_to_surefire.xslt">
+                  <param name="outputDir" expression="." />
                 </xslt>
-              </tasks>
+              </target>
             </configuration>
           </execution>
         </executions>

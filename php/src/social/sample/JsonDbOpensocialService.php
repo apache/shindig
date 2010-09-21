@@ -84,11 +84,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
 
   private $allMessageCollections = null;
 
-  private $jsonDbFileName = 'ShindigDb.json';
+  protected function getDbFilename() {
+    return sys_get_temp_dir() . '/' . 'ShindigDb' + getenv("BUILD_TAG") . '.json';
+  }
 
   public function getDb() {
     try {
-      $fileName = sys_get_temp_dir() . '/' . $this->jsonDbFileName;
+      $fileName = $this->getDbFilename();
       if (file_exists($fileName)) {
         if (! is_readable($fileName)) {
           throw new SocialSpiException("Could not read temp json db file: $fileName, check permissions", ResponseError::$INTERNAL_ERROR);
@@ -119,13 +121,13 @@ class JsonDbOpensocialService implements ActivityService, PersonService, AppData
   }
 
   private function saveDb($db) {
-    if (! @file_put_contents(sys_get_temp_dir() . '/' . $this->jsonDbFileName, json_encode($db))) {
-      throw new Exception("Could not save json db: " . sys_get_temp_dir() . '/' . $this->jsonDbFileName);
+    if (! @file_put_contents($this->getDbFilename(), json_encode($db))) {
+      throw new Exception("Could not save json db: " . $this->getDbFileName());
     }
   }
 
   public function resetDb() {
-    @unlink(sys_get_temp_dir() . '/' . $this->jsonDbFileName);
+    @unlink($this->getDbFilename());
   }
 
   private function getAllPeople() {
