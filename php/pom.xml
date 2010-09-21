@@ -118,10 +118,7 @@
                 <mkdir dir="${coverage.report}" />
 		<mkdir dir="target/tmp" />
                 <exec executable="phpunit" dir=".">
-                  <arg line=" --verbose" />
-                  <arg line=" --log-junit ${surefire.reports}/phpunit-testresults.xml" />
-                  <arg line=" --coverage-html ${coverage.report}" />
-                  <arg line=" test/ShindigAllTests.php" />
+                  <arg value="--verbose"/>
 		  <env key="TMPDIR" value="${basedir}/target/tmp"/>
                 </exec>
                 <xslt in="${surefire.reports}/phpunit-testresults.xml" out="${surefire.reports}/xslt.info"
