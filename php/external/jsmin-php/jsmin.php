@@ -49,13 +49,13 @@ class JSMin {
   const ORD_LF    = 10;
   const ORD_SPACE = 32;
 
-  protected $a           = '';
-  protected $b           = '';
-  protected $input       = '';
-  protected $inputIndex  = 0;
-  protected $inputLength = 0;
-  protected $lookAhead   = null;
-  protected $output      = '';
+  private $a           = '';
+  private $b           = '';
+  private $input       = '';
+  private $inputIndex  = 0;
+  private $inputLength = 0;
+  private $lookAhead   = null;
+  private $output      = '';
 
   // -- Public Static Methods --------------------------------------------------
 
@@ -68,12 +68,15 @@ class JSMin {
 
   public function __construct($input) {
     $this->input       = str_replace("\r\n", "\n", $input);
+    if (strpos($this->input, "\r")) {
+      $this->input = str_replace("\r", "\n", $this->input);
+    }
     $this->inputLength = strlen($this->input);
   }
 
   // -- Protected Instance Methods ---------------------------------------------
 
-  protected function action($d) {
+  private function action($d) {
     switch($d) {
       case 1:
         $this->output .= $this->a;
@@ -103,13 +106,14 @@ class JSMin {
 
       case 3:
         $this->b = $this->next();
+        $a = $this->a;
 
         if ($this->b === '/' && (
-            $this->a === '(' || $this->a === ',' || $this->a === '=' ||
-            $this->a === ':' || $this->a === '[' || $this->a === '!' ||
-            $this->a === '&' || $this->a === '|' || $this->a === '?')) {
+            $a === '(' || $a === ',' || $a === '=' ||
+            $a === ':' || $a === '[' || $a === '!' ||
+            $a === '&' || $a === '|' || $a === '?')) {
 
-          $this->output .= $this->a . $this->b;
+          $this->output .= $a . $this->b;
 
           for (;;) {
             $this->a = $this->get();
@@ -132,42 +136,73 @@ class JSMin {
     }
   }
 
-  protected function get() {
-    $c = $this->lookAhead;
-    $this->lookAhead = null;
+  private function getLF() {
+    for (;;) {
+      $c = $this->lookAhead;
+      $this->lookAhead = null;
 
-    if ($c === null) {
-      if ($this->inputIndex < $this->inputLength) {
-        $c = substr($this->input, $this->inputIndex, 1);
-        $this->inputIndex += 1;
-      } else {
-        $c = null;
+      if ($c === null) {
+        $c = ($this->inputIndex < $this->inputLength) ?
+          $this->input{$this->inputIndex++} : null;
+      }
+
+      $newval = ($c === null || $c === "\n" || ord($c) >= self::ORD_SPACE) ? $c : ' ';
+
+      if (ord($newval) <= self::ORD_LF) {
+        return $newval;
       }
     }
-
-    if ($c === "\r") {
-      return "\n";
-    }
-
-    if ($c === null || $c === "\n" || ord($c) >= self::ORD_SPACE) {
-      return $c;
-    }
-
-    return ' ';
   }
 
-  protected function isAlphaNum($c) {
-    return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
+  private function getCommentEnd() {
+    for (;;) {
+      $c = $this->lookAhead;
+      $this->lookAhead = null;
+
+      if ($c === null) {
+        $c = ($this->inputIndex < $this->inputLength) ?
+          $this->input{$this->inputIndex++} : null;
+      }
+
+      $newval = ($c === null || $c === "\n" || ord($c) >= self::ORD_SPACE) ? $c : ' ';
+
+      switch ($newval) {
+      case '*':
+        if ($this->peek() === '/') {
+          $this->get();
+          return ' ';
+        }
+        break;
+      case null:
+        throw new JSMinException('Unterminated comment.');
+      }
+    }
   }
 
-  protected function min() {
+  private function get() {
+    if ($this->lookAhead === null) {
+      $c = ($this->inputIndex < $this->inputLength) ?
+        $this->input{$this->inputIndex++} : null;
+    } else {
+      $c = $this->lookAhead;
+      $this->lookAhead = null;
+    }
+
+    return ($c === null || $c === "\n" || ord($c) >= self::ORD_SPACE) ? $c : ' ';
+  }
+
+  private function isAlphaNum($c) {
+    return  $c === '\\' || ctype_alnum($c) || ord($c) > 126;
+  }
+
+  private function min() {
     $this->a = "\n";
     $this->action(3);
 
     while ($this->a !== null) {
       switch ($this->a) {
         case ' ':
-          if ($this->isAlphaNum($this->b)) {
+          if (self::isAlphaNum($this->b)) {
             $this->action(1);
           } else {
             $this->action(2);
@@ -176,6 +211,10 @@ class JSMin {
 
         case "\n":
           switch ($this->b) {
+            case ' ':
+              $this->action(3);
+              break;
+
             case '{':
             case '[':
             case '(':
@@ -184,12 +223,9 @@ class JSMin {
               $this->action(1);
               break;
 
-            case ' ':
-              $this->action(3);
-              break;
 
             default:
-              if ($this->isAlphaNum($this->b)) {
+              if (self::isAlphaNum($this->b)) {
                 $this->action(1);
               }
               else {
@@ -201,7 +237,7 @@ class JSMin {
         default:
           switch ($this->b) {
             case ' ':
-              if ($this->isAlphaNum($this->a)) {
+              if (self::isAlphaNum($this->a)) {
                 $this->action(1);
                 break;
               }
@@ -222,7 +258,7 @@ class JSMin {
                   break;
 
                 default:
-                  if ($this->isAlphaNum($this->a)) {
+                  if (self::isAlphaNum($this->a)) {
                     $this->action(1);
                   }
                   else {
@@ -241,36 +277,17 @@ class JSMin {
     return $this->output;
   }
 
-  protected function next() {
+  private function next() {
     $c = $this->get();
 
     if ($c === '/') {
       switch($this->peek()) {
         case '/':
-          for (;;) {
-            $c = $this->get();
-
-            if (ord($c) <= self::ORD_LF) {
-              return $c;
-            }
-          }
+          return $this->getLF();
 
         case '*':
           $this->get();
-
-          for (;;) {
-            switch($this->get()) {
-              case '*':
-                if ($this->peek() === '/') {
-                  $this->get();
-                  return ' ';
-                }
-                break;
-
-              case null:
-                throw new JSMinException('Unterminated comment.');
-            }
-          }
+          return $this->getCommentEnd();
 
         default:
           return $c;
@@ -280,9 +297,8 @@ class JSMin {
     return $c;
   }
 
-  protected function peek() {
-    $this->lookAhead = $this->get();
-    return $this->lookAhead;
+  private function peek() {
+    return $this->lookAhead = $this->get();
   }
 }
 
