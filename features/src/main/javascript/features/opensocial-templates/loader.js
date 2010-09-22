@@ -169,7 +169,12 @@ os.Loader.getProcessorFunction_ = function(tagName) {
  * Processes the <Templates> node.
  */
 os.Loader.processTemplatesNode = function(node) {
-  for (var child = node.firstChild; child; child = child.nextSibling) {
+  // since the ie domparse does not return a general parent element
+  // we check here if firstChild is really present
+  if (node.firstChild) {
+    node = node.firstChild;
+  }
+  for (var child = node; child; child = child.nextSibling) {
     if (child.nodeType == DOM_ELEMENT_NODE) {
       var handler = os.Loader.getProcessorFunction_(child.tagName);
       if (handler) {
@@ -295,7 +300,7 @@ os.Loader.injectStyle = function(cssCode) {
         }
       }
     } catch (err) {
-      gadgets.error('Error in stylesheet: ' + rule + ' - ' + e.name + ' - ' + e.message);
+      gadgets.error('Error in stylesheet: ' + rule + ' - ' + err.name + ' - ' + err.message);
     }
   }
 };

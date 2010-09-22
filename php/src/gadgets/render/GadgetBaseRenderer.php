@@ -346,6 +346,11 @@ abstract class GadgetBaseRenderer extends GadgetRenderer {
         $script .= "opensocial.data.DataContext.putDataSet(\"$key\", $data);\n";
       }
     }
+    if ($this->gadget->gadgetSpec->templatesRequireLibraries) {
+      foreach ($this->gadget->gadgetSpec->templatesRequireLibraries as $url => $library) {
+        $script .= "os.Loader.loadContent(" . json_encode($library) . ", '" . $url . "');\n";
+      }
+    }
     if ($this->gadget->gadgetSpec->templatesDisableAutoProcessing) {
       $script .= "opensocial.template.Container.disableAutoProcessing();\n";
     }
