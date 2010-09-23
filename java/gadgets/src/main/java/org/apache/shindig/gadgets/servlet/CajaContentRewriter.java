@@ -23,13 +23,14 @@ import com.google.caja.lexer.FetchedData;
 import com.google.caja.lexer.InputSource;
 import com.google.caja.lexer.TokenConsumer;
 import com.google.caja.lexer.escaping.Escaping;
-import com.google.caja.opensocial.GadgetRewriteException;
 import com.google.caja.parser.html.Dom;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.parser.js.CajoledModule;
 import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
+import com.google.caja.plugin.LoaderType;
+import com.google.caja.plugin.UriEffect;
 import com.google.caja.plugin.UriFetcher;
 import com.google.caja.plugin.UriPolicy;
 import com.google.caja.render.Concatenator;
@@ -140,7 +141,9 @@ public class CajaContentRewriter implements GadgetRewriter {
 
       try {
         if (!compiler.run()) {
-          throw new GadgetRewriteException("Gadget has compile errors");
+          throw new GadgetException(
+              GadgetException.Code.MALFORMED_FOR_SAFE_INLINING,
+              "Gadget has compile errors");
         }
         StringBuilder scriptBody = new StringBuilder();
         CajoledModule cajoled = compiler.getJavascript();
@@ -183,7 +186,7 @@ public class CajaContentRewriter implements GadgetRewriter {
         mc.documentChanged();
         safe = true;
         HtmlSerialization.attach(doc, htmlSerializer, null);
-      } catch (GadgetRewriteException e) {
+      } catch (GadgetException e) {
         // There were cajoling errors
         // Content is only used to produce useful snippets with error messages
         createContainerFor(doc,

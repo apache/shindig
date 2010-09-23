@@ -35,6 +35,8 @@ import com.google.caja.plugin.PipelineMaker;
 import com.google.caja.plugin.PluginCompiler;
 import com.google.caja.plugin.PluginMeta;
 import com.google.caja.plugin.UriFetcher;
+import com.google.caja.plugin.LoaderType;
+import com.google.caja.plugin.UriEffect;
 import com.google.caja.plugin.UriPolicy;
 import com.google.caja.render.Concatenator;
 import com.google.caja.render.JsMinimalPrinter;
