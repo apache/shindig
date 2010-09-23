@@ -371,21 +371,68 @@
 },
 "albums" : {
 	"john.doe": [{
-		"id" : "album123",
+		"id" : "germany123",
 		"ownerId" : "john.doe",
-  		"thumbnailUrl" : "http://pages.example.org/albums/4433221-tn.png",
-  		"title" : "Example Album",
-  		"description" : "This is an example album, and this text is an example description",
+  		"thumbnailUrl" : "http://hphotos-snc3.fbcdn.net/hs050.snc3/13734_810445703213_6222631_45135775_1728872_n.jpg",
+  		"title" : "Germany 2009",
+  		"description" : "Garmisch-Partenkirchen for research!",
   		"location" : { "latitude": 0, "longitude": 0 }
+	}, {
+		"id" : "cruise123",
+		"ownerId" : "john.doe",
+		"thumbnailUrl" : "http://hphotos-snc3.fbcdn.net/hs143.snc3/17062_828584892133_6222631_45795844_8024804_n.jpg",
+		"title" : "Graduation Cruise",
+		"description" : "Graduation cruise!"
+	}, {
+		"id" : "temp123",
+		"ownerId" : "john.doe",
+		"title" : "Album with no Thumbnail",
+		"description" : "I don't have a thumbnail.  I'm a perfect album to delete..."
 	}]
 },
 "mediaItems" : {
 	"john.doe": [{
-		"id" : "mediaItem123",
-		"albumId" : "album123",
+		"title" : "Ski Jump",
+		"description" : "We're going to the top!",
+		"id" : "mediaItem2",
+		"albumId" : "germany123",
 		"mimeType" : "image/jpeg",
 		"type" : "image",
-		"url" : "http://animals.nationalgeographic.com/staticfiles/NGS/Shared/StaticFiles/animals/images/primary/black-spider-monkey.jpg"
+		"thumbnailUrl" : "http://hphotos-snc3.fbcdn.net/hs070.snc3/13734_810445668283_6222631_45135772_741359_n.jpg",
+		"url" : "http://hphotos-snc3.fbcdn.net/hs070.snc3/13734_810445668283_6222631_45135772_741359_n.jpg"
+	}, {
+		"title" : "Frozen",
+		"description" : "Cool effects...",
+		"id" : "mediaItem3",
+		"albumId" : "germany123",
+		"mimeType" : "image/jpeg",
+		"type" : "image",
+		"thumbnailUrl" : "http://sphotos.ak.fbcdn.net/hphotos-ak-snc4/hs369.snc4/45245_928217193203_6222631_49412689_3724203_n.jpg",
+		"url" : "http://sphotos.ak.fbcdn.net/hphotos-ak-snc4/hs369.snc4/45245_928217193203_6222631_49412689_3724203_n.jpg"
+	}, {
+		"title" : "Hotel resort",
+		"id" : "mediaItem4",
+		"albumId" : "germany123",
+		"mimeType" : "image/jpeg",
+		"type" : "image",
+		"thumbnailUrl" : "http://sphotos.ak.fbcdn.net/hphotos-ak-snc3/hs050.snc3/13734_810445788043_6222631_45135783_1591091_n.jpg",
+		"url" : "http://sphotos.ak.fbcdn.net/hphotos-ak-snc3/hs050.snc3/13734_810445788043_6222631_45135783_1591091_n.jpg"
+	}, {
+		"title" : "Authentic? Yes!",
+		"id" : "mediaItem5",
+		"albumId" : "germany123",
+		"mimeType" : "image/jpeg",
+		"type" : "image",
+		"thumbnailUrl" : "http://hphotos-snc3.fbcdn.net/hs050.snc3/13734_810445758103_6222631_45135780_284612_n.jpg",
+		"url" : "http://hphotos-snc3.fbcdn.net/hs050.snc3/13734_810445758103_6222631_45135780_284612_n.jpg"
+	}, {
+		"title" : "Garmisch-Partenkirchen",
+		"id" : "mediaItem6",
+		"albumId" : "germany123",
+		"mimeType" : "image/jpeg",
+		"type" : "image",
+		"thumbnailUrl" : "http://hphotos-snc3.fbcdn.net/hs050.snc3/13734_810445703213_6222631_45135775_1728872_n.jpg",
+		"url" : "http://hphotos-snc3.fbcdn.net/hs050.snc3/13734_810445703213_6222631_45135775_1728872_n.jpg"
 	}]
 },
 //
