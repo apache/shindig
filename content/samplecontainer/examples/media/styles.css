@@ -1,0 +1,92 @@
+/* ============ ROUND 2 ============== */
+
+td.albumsTitle {
+    font-family:'comic sans ms';
+    width: 100%;
+    font-size:24px;
+}
+
+td.albumListThumbnail {
+    width: 10%;
+    height: 75px;
+}
+
+td.albumListRight {
+    width: 90%;
+}
+
+td.actionLinks {
+    width:100%;
+    font-size:12px;
+}
+
+td.albumListTitle {
+    font-size:24px;
+    white-space:nowrap;
+    font-family:'comic sans ms';
+}
+
+td.albumListDescription {
+    font-family:'comic sans ms';
+}
+
+.albumsTable {
+    width:100%;
+    border-style:solid;
+    background-color:#b0c4de;
+}
+
+td.mediaItemThumbnail {
+    height:100%;
+}
+
+td.mediaItemBox {
+    width: 150px;
+    height: 100px;
+}
+
+.mediaItemControls {
+
+}
+
+
+/* ============ ROUND 1 ============== */
+.temp1 {background-color:#6495ed;}
+.temp2 {background-color:#e0ffff;}
+.temp3 {
+    background-color:#b0c4de;
+    background-image:url('img_flwr.png');
+    background-repeat:no-repeat;
+    background-position:top right;
+}
+
+td2 {
+    border-style:solid;
+}
+
+td.albumLeft {
+    width:10%;
+}
+
+td.albumRight {
+    width: 90%;
+}
+
+
+
+td.albumEdit {
+    width:100%;
+    text-align:right;
+    vertical-align:middle;
+    font-size:12px;
+}
+
+
+
+.albumTitleStyle {
+    color: blue;
+    
+}
+.albumElement {
+    background-color:#b0c4de;
+}

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Albums and MediaItems">
+        <Require feature="osapi"/>
+        <Require feature="dynamic-height"/>
+    </ModulePrefs>
+    
+    <Content type="html"><![CDATA[
+    <html>
+        <head>	
+            <!-- Source imports -->
+            <script src='http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js' type='text/javascript' djConfig='parseOnLoad:true, isDebug:true'></script>
+            <script src='Social.js' type='text/javascript'></script>
+            <script src='MediaUI.js' type='text/javascript'></script>
+            
+            
+            <!-- Styling -->
+            <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/tundra/tundra.css"></link>
+            <link rel="stylesheet" type="text/css" href="styles.css">
+            <style type="text/css">
+            </style>
+            
+            <!-- DOJO requires -->
+            <script type='text/javascript'>
+                dojo.require('dijit.form.Button');
+                dojo.require('dijit.form.Form');
+                dojo.require('dijit.form.TextBox');
+                dojo.require('dijit.form.ValidationTextBox');
+                dojo.require('dijit.Dialog');
+                dojo.require('dijit.form.Textarea');
+                dojo.require('dijit.layout.ContentPane');
+                dojo.require('dijit.layout.TabContainer');
+            </script>
+            
+            <!-- JavaScript -->
+            <script type="text/javascript"> 
+                <!-- Entry point to the gadget -->
+                function init() {
+                    console.log("dojo initialized");
+                    new MediaUI(new SocialWrapper()).init();
+                }
+            
+                <!-- Register entry point -->
+                dojo.addOnLoad(init);   // TODO: work-around to tundra.css issue
+                //gadgets.util.registerOnLoadHandler(function() {
+                    //dojo.addOnLoad(init);
+                //});     
+            </script>   
+        </head>
+        <body class="tundra">
+        </body>
+    </html>
+    ]]></Content>
+</Module>
