@@ -441,6 +441,30 @@ opensocial.DataRequest.AlbumRequestFields = {
 /**
  * @static
  * @class
+ * @name opensocial.DataRequest.MediaItemRequestFields
+ * @enum {string}
+ */
+opensocial.DataRequest.MediaItemRequestFields = {
+  /**
+   * When paginating, the index of the first item to fetch.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.MediaItemRequestFields
+   */
+  FIRST : 'first',
+
+  /**
+   * The maximum number of items to fetch; defaults to 20.
+   * Specified as a <code>Number</code>.
+   *
+   * @member opensocial.DataRequest.MediaItemRequestFields
+   */
+  MAX : 'max'
+};
+
+/**
+ * @static
+ * @class
  * @name opensocial.DataRequest.DataRequestFields
  * @enum {string}
  */
@@ -618,13 +642,41 @@ opensocial.DataRequest.prototype.newFetchActivitiesRequest = function(idSpec,
 /**
  * Creates an item to request albums from the container.
  *
- * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which albms to fetch.
+ * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which albums to fetch.
  * @param {Object.<Object, Object>=} opt_params Additional parameters to pass to the request.
  * @return {Object} A request object.
  */
 opensocial.DataRequest.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {
   opt_params = opt_params || {};
+  
+  var fields = opensocial.DataRequest.AlbumRequestFields;
+
+  this.addDefaultParam(opt_params, fields.FIRST, 0);
+  this.addDefaultParam(opt_params, fields.MAX, 20);
+  
   return opensocial.Container.get().newFetchAlbumsRequest(idSpec, opt_params);
+};
+
+/**
+ * Creates an item to request media items from the container.
+ * 
+ * @param {opensocial.IdSpec}
+ *          idSpec An IdSpec used to specify which media items to fetch.
+ * @param {string}
+ *          albumId The id of the album to fetch media items from.
+ * @param {Object.
+ *          <Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @return {Object} A request object
+ */
+opensocial.DataRequest.prototype.newFetchMediaItemsRequest = function(idSpec, albumId, opt_params) {
+  opt_params = opt_params || {};
+  
+  var fields = opensocial.DataRequest.MediaItemRequestFields;
+
+  this.addDefaultParam(opt_params, fields.FIRST, 0);
+  this.addDefaultParam(opt_params, fields.MAX, 20);
+  
+  return opensocial.Container.get().newFetchMediaItemsRequest(idSpec, albumId, opt_params);
 };
 
 /**

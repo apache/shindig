@@ -339,10 +339,10 @@ opensocial.Container.prototype.newRemovePersonAppDataRequest = function(
  * @param {opensocial.IdSpec} idSpec An IdSpec used to specify which people/groups
  *    to own the album.
  * @param {string} albumId The ID of album to update.
- * @param {Object.<opensocial.Album.Field, Object>=} opt_params The album fields to update.
+ * @param {Object.<opensocial.Album.Field, Object>=} fields The album fields to update.
  * @return {Object} A request object.
  */
-opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId, opt_params) {};
+opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId, fields) {};
 
 /**
  * Updates the fields for a media item specified in the params.
@@ -352,11 +352,11 @@ opensocial.Container.prototype.newUpdateAlbumRequest = function(idSpec, albumId,
  *    own the album/media item.
  * @param {string} albumId The ID of the album containing the media item to update.
  * @param {string} mediaItemId ID of media item to update.
- * @param {Object.<opensocial.MediaItem.Field, Object>=} opt_params The media item fields to update.
+ * @param {Object.<opensocial.MediaItem.Field, Object>=} fields The media item fields to update.
  * @return {Object} A request object.
  */
 opensocial.Container.prototype.newUpdateMediaItemRequest = function(idSpec, albumId,
-    mediaItemId, opt_params) {};
+    mediaItemId, fields) {};
 
 /**
  * Used to request an activity stream from the server.
@@ -374,6 +374,19 @@ opensocial.Container.prototype.newFetchActivitiesRequest = function(idSpec,
     opt_params) {};
 
 opensocial.Container.prototype.newFetchAlbumsRequest = function(idSpec, opt_params) {};
+
+/**
+ * Creates an item to request media items from the container.
+ * 
+ * @param {opensocial.IdSpec}
+ *          idSpec An IdSpec used to specify which media items to fetch.
+ * @param {string}
+ *          albumId The id of the album to fetch MediaItems from.
+ * @param {Object.
+ *          <Object, Object>=} opt_params Additional parameters to pass to the request.
+ * @return {Object} A request object
+ */
+opensocial.Container.prototype.newFetchMediaItemsRequest = function(idSpec, opt_params) {};
 
 opensocial.Container.prototype.newFetchMessageCollectionsRequest = function(idSpec, opt_params) {};
 opensocial.Container.prototype.newFetchMessagesRequest = function(idSpec, msgCollId, opt_params) {};

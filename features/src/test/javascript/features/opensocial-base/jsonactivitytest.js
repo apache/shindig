@@ -69,13 +69,3 @@ JsonActivityTest.prototype.testJsonActivityConstructor = function() {
   this.assertEquals('white', mediaItems[0].getField(mediaItemFields.URL));
   this.assertEquals('orange', mediaItems[0].getField(mediaItemFields.TYPE));
 };
-
-JsonActivityTest.prototype.testJsonMediaItemConstructor = function() {
-  var mediaItem = new JsonMediaItem({'mimeType' : 'black', 'url' : 'white',
-      'type' : 'orange'});
-
-  var fields = opensocial.MediaItem.Field;
-  this.assertEquals('black', mediaItem.getField(fields.MIME_TYPE));
-  this.assertEquals('white', mediaItem.getField(fields.URL));
-  this.assertEquals('orange', mediaItem.getField(fields.TYPE));
-};

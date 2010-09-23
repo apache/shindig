@@ -74,28 +74,31 @@ opensocial.Album.Field = {
    */
   LOCATION: 'location',
 
-  /*
+  /**
    * The number of items in the album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_ITEM_COUNT: 'mediaITemCount',
+  MEDIA_ITEM_COUNT : 'mediaItemCount',
 
-  /*
+
+  /**
    * The types of MediaItems in the Album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_MIME_TYPE: 'MEDIA_MIME_TYPE',
+  MEDIA_MIME_TYPE : 'mediaMimeType',
 
-  /*
+
+  /**
    * The types of MediaItems in the album.
    *
    * @member opensocial.Album.Field
    */
-  MEDIA_TYPE: 'MEDIA_TYPE',
+  MEDIA_TYPE : 'mediaType',
 
-  /*
+
+  /**
    * The string ID of the owner of the album.
    *
    * @member opensocial.Album.Field

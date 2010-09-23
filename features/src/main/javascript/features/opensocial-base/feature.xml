@@ -22,6 +22,8 @@
   <dependency>opensocial-reference</dependency> 
   <gadget>
     <script src="fieldtranslations.js"></script>
+    <script src="jsonmediaitem.js"></script>
+    <script src="jsonalbum.js"></script>
     <script src="jsonactivity.js"></script>
     <script src="jsonperson.js"></script>    
     <script src="jsonmessagecollection.js"></script>
