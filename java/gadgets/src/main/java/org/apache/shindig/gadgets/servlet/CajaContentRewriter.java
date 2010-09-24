@@ -197,7 +197,6 @@ public class CajaContentRewriter implements GadgetRewriter {
         if (!safe) {
           // Fail safe
           mc.setContent("");
-          return;
         }
       }
     }
