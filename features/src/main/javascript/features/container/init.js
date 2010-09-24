@@ -40,22 +40,19 @@
   }
 
   function initializeGlobalVars() {
-    window.__API_URI = getLastScriptUri();
+    window.__CONTAINER_URI = shindig.uri(window.location.href);
+
+    window.__API_URI = null;
+    var scriptEls = document.getElementsByTagName('script');
+    if (scriptEls.length > 0) {
+      window.__API_URI = shindig.uri(scriptEls[scriptEls.length - 1].src);
+      // In case script URI is relative, resolve (make absolute) with container.
+      window.__API_URI.resolve(window.__CONTAINER_URI);
+    }
+    
     window.__CONTAINER = window.__API_URI
         ? window.__API_URI.getQP('container')
         : 'default';
-    window.__CONTAINER_URI = shindig.uri(document.location.href);
-  }
-
-  function getLastScriptUri() {
-    var scriptEls = document.getElementsByTagName('script');
-    var uri = null;
-    if (scriptEls.length > 0) {
-      uri = shindig.uri(scriptEls[scriptEls.length - 1].src);
-      // In case script URI is relative, resolve it against window.location
-      uri.resolve(shindig.uri(window.location));
-    }
-    return uri;
   }
 
   initializeConfig();
