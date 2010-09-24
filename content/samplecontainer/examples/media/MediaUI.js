@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 /*
  * The User Interface for the Albums & MediaItems gadget.
  *
@@ -15,7 +33,10 @@
 function MediaUI(social) {
     var viewer = null;
     var divManager = null;
-
+    
+    var folderUrl = "http://www.clker.com/cliparts/2/b/b/3/1194983972976950993blue_folder_seth_yastrov_01.svg.med.png";
+    var docUrl = "http://www.plastyc.com/images/document-icon.png";
+    
     /*
      * Initializes the gadget.
      */
@@ -118,7 +139,7 @@ function MediaUI(social) {
                 var albumRow = dojo.create('tr', null, tbody);
                 var albumLeft = dojo.create('td', {className: 'albumListThumbnail'}, albumRow);
                 var imgLink = dojo.create('a', {href: "javascript:;", onclick: dojo.hitch(this, onClickAlbum, viewer.id, albums[i])}, albumLeft);
-                dojo.create('img', {src: albums[i].thumbnailUrl, onerror: "this.src='/samplecontainer/examples/media/folder.png';", width: '100%'}, imgLink);
+                dojo.create('img', {src: albums[i].thumbnailUrl, onerror: "this.src='" + folderUrl + "';", width: '100%'}, imgLink);
                 var albumRight = dojo.create('td', {className: 'albumListRight'}, albumRow);
                 var albumTitleRow = dojo.create('tr', null, albumRight);
                 var titleTd = dojo.create('td', {className: 'albumListTitle'}, albumTitleRow); 
@@ -197,9 +218,9 @@ function MediaUI(social) {
                 var imageTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {className: 'mediaItemThumbnail'}));
                 if (mediaItems[i].url) {
                     var imageLink = dojo.create('a', {href: "javascript:;", onclick: dojo.hitch(this, renderMediaItem, album, mediaItems[i])}, imageTd);
-                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='/samplecontainer/examples/media/document.png';", style:'height:100px;'}));
+                    imageLink.appendChild(dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style:'height:100px;'}));
                 } else {
-                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='/samplecontainer/examples/media/document.png';", style:'height:100px;'}, imageTd);
+                    dojo.create('img', {src: mediaItems[i].thumbnailUrl, onerror: "this.src='" + docUrl + "';", style:'height:100px;'}, imageTd);
                 }
                 var titleTd = dojo.create('tr', null, td).appendChild(dojo.create('td', {style: "text-align:center; font-family:'comic sans ms';white-space:nowrap;"}));
                 titleTd.appendChild(dojo.doc.createTextNode(mediaItems[i].title));
