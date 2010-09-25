@@ -19,14 +19,15 @@
 package org.apache.shindig.gadgets.servlet;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shindig.common.uri.Uri;
-import org.apache.shindig.gadgets.GadgetContext;
+import org.apache.shindig.common.uri.Uri.UriException;
+import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
@@ -61,7 +62,7 @@ public class GadgetsHandler {
   static final String FAILURE_TOKEN = "Failed to get gadget token.";
 
   private static final List<String> DEFAULT_METADATA_FIELDS =
-      ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*", "token");
+      ImmutableList.of("iframeUrl", "userPrefs.*", "modulePrefs.*", "views.*");
 
   private static final List<String> DEFAULT_TOKEN_FIELDS = ImmutableList.of("token");
 
@@ -84,10 +85,10 @@ public class GadgetsHandler {
   @Operation(httpMethods = {"POST", "GET"}, path = "metadata.get")
   public Map<String, GadgetsHandlerApi.BaseResponse> metadata(BaseRequestItem request)
       throws ProtocolException {
-    return new AbstractExecutor<GadgetsHandlerApi.MetadataResponse>() {
+    return new AbstractExecutor() {
       @Override
-      protected Callable<GadgetsHandlerApi.MetadataResponse> createJob(String url,
-          BaseRequestItem request) {
+      protected Callable<CallableData> createJob(String url, BaseRequestItem request)
+          throws ProcessingException {
         return createMetadataJob(url, request);
       }
     }.execute(request);
@@ -96,10 +97,10 @@ public class GadgetsHandler {
   @Operation(httpMethods = {"POST", "GET"}, path = "token.get")
   public Map<String, GadgetsHandlerApi.BaseResponse> token(BaseRequestItem request)
       throws ProtocolException {
-    return new AbstractExecutor<GadgetsHandlerApi.TokenResponse>() {
+    return new AbstractExecutor() {
       @Override
-      protected Callable<GadgetsHandlerApi.TokenResponse> createJob(String url,
-          BaseRequestItem request) {
+      protected Callable<CallableData> createJob(String url, BaseRequestItem request)
+          throws ProcessingException {
         return createTokenJob(url, request);
       }
     }.execute(request);
@@ -117,7 +118,22 @@ public class GadgetsHandler {
         beanFilter.getBeanFields(GadgetsHandlerApi.TokenResponse.class, 5));
   }
 
-  private abstract class AbstractExecutor<R extends GadgetsHandlerApi.BaseResponse> {
+  /**
+   * Class to handle threaded reply.
+   * Mainly it made to support filtering the id (url)
+   */
+  class CallableData {
+    private final String id;
+    private final GadgetsHandlerApi.BaseResponse data;
+    public CallableData(String id, GadgetsHandlerApi.BaseResponse data) {
+      this.id = id;
+      this.data = data;
+    }
+    public String getId() { return id; }
+    public GadgetsHandlerApi.BaseResponse getData() { return data; }
+  }
+
+  private abstract class AbstractExecutor {
     @SuppressWarnings("unchecked")
     public Map<String, GadgetsHandlerApi.BaseResponse> execute(BaseRequestItem request) {
       Set<String> gadgetUrls = ImmutableSet.copyOf(request.getListParameter("ids"));
@@ -125,82 +141,78 @@ public class GadgetsHandler {
         return ImmutableMap.of();
       }
 
-      CompletionService<R> completionService = new ExecutorCompletionService<R>(executor);
-      for (String gadgetUrl : gadgetUrls) {
-        Callable<R> job = createJob(gadgetUrl, request);
-        completionService.submit(job);
+      if (StringUtils.isEmpty(request.getParameter("container"))) {
+        throw new ProtocolException(HttpServletResponse.SC_BAD_REQUEST,
+            "Missing container for request.");
       }
 
       ImmutableMap.Builder<String, GadgetsHandlerApi.BaseResponse> builder = ImmutableMap.builder();
-      for (int numJobs = gadgetUrls.size(); numJobs > 0; numJobs--) {
-        R response;
+      int badReq = 0;
+      CompletionService<CallableData> completionService =
+          new ExecutorCompletionService<CallableData>(executor);
+      for (String gadgetUrl : gadgetUrls) {
+        try {
+          Callable<CallableData> job = createJob(gadgetUrl, request);
+          completionService.submit(job);
+        } catch (ProcessingException e) {
+          // Fail to create and submit job
+          builder.put(gadgetUrl, handlerService.createErrorResponse(null,
+              e.getHttpStatusCode(), e.getMessage()));
+          badReq++;
+        }
+      }
+
+      for (int numJobs = gadgetUrls.size() - badReq; numJobs > 0; numJobs--) {
+        CallableData response;
         try {
           response = completionService.take().get();
-          builder.put(response.getUrl().toString(), response);
+          builder.put(response.getId(), response.getData());
         } catch (InterruptedException e) {
           throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
               "Processing interrupted.", e);
         } catch (ExecutionException e) {
-          if (!(e.getCause() instanceof RpcException)) {
-            throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Processing error.", e);
-          }
-          RpcException cause = (RpcException) e.getCause();
-          GadgetContext context = cause.getContext();
-          if (context != null) {
-            Uri url = context.getUrl();
-            GadgetsHandlerApi.BaseResponse errorResponse =
-                handlerService.createBaseResponse(url, cause.getMessage());
-            builder.put(url.toString(), errorResponse);
-          }
+          throw new ProtocolException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+              "Processing error.", e);
         }
       }
       return builder.build();
     }
 
-    protected abstract Callable<R> createJob(String url, BaseRequestItem request);
+    protected abstract Callable<CallableData> createJob(String url, BaseRequestItem request)
+        throws ProcessingException;
   }
 
   // Hook to override in sub-class.
-  protected Callable<GadgetsHandlerApi.MetadataResponse> createMetadataJob(String url,
-      BaseRequestItem request) {
+  protected Callable<CallableData> createMetadataJob(final String url,
+      BaseRequestItem request) throws ProcessingException {
     final MetadataRequestData metadataRequest = new MetadataRequestData(url, request);
-    return new Callable<GadgetsHandlerApi.MetadataResponse>() {
-      public GadgetsHandlerApi.MetadataResponse call() throws Exception {
+    return new Callable<CallableData>() {
+      public CallableData call() throws Exception {
         try {
-          return handlerService.getMetadata(metadataRequest);
+          return new CallableData(url, handlerService.getMetadata(metadataRequest));
         } catch (Exception e) {
-          sendError(metadataRequest.getUrl(), e, FAILURE_METADATA);
-          return null;
+          return new CallableData(url,
+              handlerService.createErrorResponse(null, e, FAILURE_METADATA));
         }
       }
     };
   }
 
   // Hook to override in sub-class.
-  protected Callable<GadgetsHandlerApi.TokenResponse> createTokenJob(String url,
-      BaseRequestItem request) {
-    final TokenRequestData tokenRequest = new TokenRequestData(url, request);
-    return new Callable<GadgetsHandlerApi.TokenResponse>() {
-      public GadgetsHandlerApi.TokenResponse call() throws Exception {
+  protected Callable<CallableData> createTokenJob(final String url,
+      BaseRequestItem request) throws ProcessingException {
+    // TODO: Get token duration from requests
+    final TokenRequestData tokenRequest = new TokenRequestData(url, request, null);
+    return new Callable<CallableData>() {
+      public CallableData call() throws Exception {
         try {
-          return handlerService.getToken(tokenRequest);
+          return new CallableData(url, handlerService.getToken(tokenRequest));
         } catch (Exception e) {
-          sendError(tokenRequest.getUrl(), e, FAILURE_TOKEN);
-          return null;
+          return new CallableData(url,
+            handlerService.createErrorResponse(null, e, FAILURE_TOKEN));
         }
       }
     };
-  }
-
-  private void sendError(final Uri url, Exception e, String msg)
-      throws RpcException {
-    GadgetContext context = new GadgetContext() {
-      @Override
-      public Uri getUrl() { return url; }
-    };
-    // Note: this error message is publicly visible in JSON-RPC response.
-    throw new RpcException(context, msg, e);
   }
 
   /**
@@ -213,10 +225,15 @@ public class GadgetsHandler {
     protected final List<String> fields;
     protected final BaseRequestItem request;
 
-    public AbstractRequest(String url, BaseRequestItem request, List<String> defaultFields) {
-      this.uri = Uri.parse(Preconditions.checkNotNull(url));
-      this.request = Preconditions.checkNotNull(request);
-      this.container = Preconditions.checkNotNull(request.getParameter("container"));
+    public AbstractRequest(String url, BaseRequestItem request, List<String> defaultFields)
+        throws ProcessingException {
+      try {
+        this.uri = Uri.parse(url);
+      } catch (UriException e) {
+        throw new ProcessingException("Bad url - " + url, HttpServletResponse.SC_BAD_REQUEST);
+      }
+      this.request = request;
+      this.container = request.getParameter("container");
       this.fields = processFields(request, defaultFields);
     }
 
@@ -242,7 +259,8 @@ public class GadgetsHandler {
   protected class TokenRequestData extends AbstractRequest
       implements GadgetsHandlerApi.TokenRequest {
 
-    public TokenRequestData(String url, BaseRequestItem request) {
+    public TokenRequestData(String url, BaseRequestItem request, Long durationSeconds)
+        throws ProcessingException {
       super(url, request, DEFAULT_TOKEN_FIELDS);
     }
 
@@ -259,7 +277,8 @@ public class GadgetsHandler {
     protected final boolean ignoreCache;
     protected final boolean debug;
 
-    public MetadataRequestData(String url, BaseRequestItem request) {
+    public MetadataRequestData(String url, BaseRequestItem request)
+        throws ProcessingException {
       super(url, request, DEFAULT_METADATA_FIELDS);
       String lang = request.getParameter("language");
       String country = request.getParameter("country");

@@ -37,9 +37,26 @@ import java.util.Map;
 public class GadgetsHandlerApi {
 
   public interface BaseRequest {
-    public Uri getUrl();
     public String getContainer();
     public List<String> getFields();
+    public Uri getUrl();
+  }
+
+  public interface Error {
+    public int getCode();
+    public String getMessage();
+  }
+
+  public interface BaseResponse {
+    /** Url of the request, optional (for example for bad url error) */
+    public Uri getUrl();
+    /** Error response (optional) */
+    @Unfiltered
+    public Error getError();
+    /** The response expiration time (miliseconds since epoch), -1 for no caching */
+    public Long getExpireTimeMs();
+    /** The response time (miliseconds since epoch) - usefull for misconfigured client time */
+    public Long getResponseTimeMs();
   }
 
   public interface MetadataRequest extends BaseRequest {
@@ -53,17 +70,6 @@ public class GadgetsHandlerApi {
   public interface TokenData {
     public String getOwnerId();
     public String getViewerId();
-  }
-
-  public interface TokenRequest extends BaseRequest {
-    public TokenData getToken();
-  }
-
-  public interface BaseResponse {
-    @Unfiltered
-    public Uri getUrl();
-    @Unfiltered
-    public String getError();
   }
 
   public interface MetadataResponse extends BaseResponse {
@@ -155,6 +161,12 @@ public class GadgetsHandlerApi {
   public interface LinkSpec {
     public String getRel();
     public Uri getHref();
+  }
+
+  public interface TokenRequest extends BaseRequest {
+    public TokenData getToken();
+    // TODO: Consider support container controlled token duration
+    // public Long getDurationSeconds();
   }
 
   public interface TokenResponse extends BaseResponse {

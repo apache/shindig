@@ -107,6 +107,11 @@ public class BeanDelegator {
   public <T> T createDelegator(Object source, Class<T> apiInterface,
                                Map<String, Object> extraFields) {
 
+    if (source == null && extraFields != null && extraFields.size() > 0) {
+      // Create delegator that is based only on fields, so use dummy object
+      source = new NullClass();
+    }
+
     if (source == null) {
       return null;
     }
@@ -193,6 +198,7 @@ public class BeanDelegator {
           return (data == NULL ? null : data);
         }
       }
+      Exception exc = null;
       try {
         Method sourceMethod = sourceClass.getMethod(
             method.getName(), method.getParameterTypes());
@@ -200,14 +206,18 @@ public class BeanDelegator {
         return createDelegator(result, getParameterizedReturnType(method));
       } catch (NoSuchMethodException e) {
         // Will throw unsupported method below
+        exc = e;
       } catch (IllegalArgumentException e) {
         // Will throw unsupported method below
+        exc = e;
       } catch (IllegalAccessException e) {
         // Will throw unsupported method below
+        exc = e;
       } catch (InvocationTargetException e) {
         // Will throw unsupported method below
+        exc = e;
       }
-      throw new UnsupportedOperationException("Unsupported function: " + method.getName());
+      throw new UnsupportedOperationException("Unsupported function: " + method.getName(), exc);
     }
   }
 
@@ -333,4 +343,7 @@ public class BeanDelegator {
    }
    return mapBuilder.build();
   }
+
+  /** Fake class that does not have fields or method for field base delegator */
+  static class NullClass {}
 }

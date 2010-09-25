@@ -26,6 +26,7 @@ import org.apache.shindig.auth.SecurityToken;
 import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.TimeSource;
 import org.apache.shindig.gadgets.Gadget;
 import org.apache.shindig.gadgets.GadgetContext;
 import org.apache.shindig.gadgets.RenderingContext;
@@ -46,6 +47,8 @@ import org.apache.shindig.protocol.conversion.BeanFilter;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Service that interfaces with the system to provide information about gadgets.
@@ -81,6 +84,7 @@ public class GadgetsHandlerService {
               GadgetsHandlerApi.UserPrefDataType.class))
           .build();
 
+  protected final TimeSource timeSource;
   protected final Processor processor;
   protected final IframeUriManager iframeUriManager;
   protected final SecurityTokenCodec securityTokenCodec;
@@ -88,12 +92,11 @@ public class GadgetsHandlerService {
   protected final BeanDelegator beanDelegator;
   protected final BeanFilter beanFilter;
 
-
-
   @Inject
-  public GadgetsHandlerService(Processor processor,
+  public GadgetsHandlerService(TimeSource timeSource, Processor processor,
       IframeUriManager iframeUriManager, SecurityTokenCodec securityTokenCodec,
       BeanFilter beanFilter) {
+    this.timeSource = timeSource;
     this.processor = processor;
     this.iframeUriManager = iframeUriManager;
     this.securityTokenCodec = securityTokenCodec;
@@ -124,15 +127,19 @@ public class GadgetsHandlerService {
     GadgetContext context = new MetadataGadgetContext(request);
     Gadget gadget = processor.process(context);
     String iframeUrl =
-        (fields.contains("iframeurl") || fields.contains(BeanFilter.ALL_FIELDS)) ?
+        isFieldIncluded(fields, "iframeurl")  ?
             iframeUriManager.makeRenderingUri(gadget).toString() : null;
+    // TODO: Figure out url expiration time
     Boolean needsTokenRefresh =
-        (fields.contains("needstokenrefresh") || fields.contains(BeanFilter.ALL_FIELDS)) ?
+        isFieldIncluded(fields, "needstokenrefresh") ?
             gadget.getAllFeatures().contains("auth-refresh") : null;
     return createMetadataResponse(context.getUrl(), gadget.getSpec(), iframeUrl,
-        needsTokenRefresh, fields);
+        needsTokenRefresh, fields, null);
   }
 
+  private boolean isFieldIncluded(Set<String> fields, String name) {
+    return fields.contains(BeanFilter.ALL_FIELDS) || fields.contains(name.toLowerCase());
+  }
   /**
    * Create security token
    * @param request token paramaters (gadget, owner and viewer)
@@ -155,7 +162,8 @@ public class GadgetsHandlerService {
     SecurityToken tokenData = convertToken(request.getToken(), request.getContainer(),
         request.getUrl().toString());
     String token = securityTokenCodec.encodeToken(tokenData);
-    return createTokenResponse(request.getUrl(), token, fields);
+    // TODO: Calculate token expiration in response
+    return createTokenResponse(request.getUrl(), token, fields, null);
   }
 
   /**
@@ -228,30 +236,49 @@ public class GadgetsHandlerService {
             "appid", url, "appurl", url));
   }
 
-  public GadgetsHandlerApi.BaseResponse createBaseResponse(Uri url, String error) {
+  public GadgetsHandlerApi.BaseResponse createErrorResponse(
+    Uri uri, Exception e, String defaultMsg) {
+    if (e instanceof ProcessingException) {
+      ProcessingException processingExc = (ProcessingException) e;
+      return createErrorResponse(uri, processingExc.getHttpStatusCode(),
+          processingExc.getMessage());
+    }
+    return createErrorResponse(uri, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, defaultMsg);
+  }
+
+  public GadgetsHandlerApi.BaseResponse createErrorResponse(Uri url, int code, String error) {
+    GadgetsHandlerApi.Error errorBean = beanDelegator.createDelegator(
+        null, GadgetsHandlerApi.Error.class, ImmutableMap.<String, Object>of(
+          "message", error, "code", code));
+
     return beanDelegator.createDelegator(error, GadgetsHandlerApi.BaseResponse.class,
-        ImmutableMap.<String, Object>of("url", url, "error", error));
+        ImmutableMap.<String, Object>of("url", BeanDelegator.nullable(url), "error", errorBean,
+            "responsetimems", BeanDelegator.NULL, "expiretimems", BeanDelegator.NULL));
   }
 
   private GadgetsHandlerApi.MetadataResponse createMetadataResponse(
       Uri url, GadgetSpec spec, String iframeUrl, Boolean needsTokenRefresh,
-      Set<String> fields) {
+      Set<String> fields, Long expireTime) {
     return (GadgetsHandlerApi.MetadataResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator(spec, GadgetsHandlerApi.MetadataResponse.class,
-            ImmutableMap.<String, Object>of(
-                "url", url,
-                "error", BeanDelegator.NULL,
-                "iframeurl", BeanDelegator.nullable(iframeUrl),
-                "needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))),
+            ImmutableMap.<String, Object>builder()
+                .put("url", url)
+                .put("error", BeanDelegator.NULL)
+                .put("iframeurl", BeanDelegator.nullable(iframeUrl))
+                .put("needstokenrefresh", BeanDelegator.nullable(needsTokenRefresh))
+                .put("responsetimems", timeSource.currentTimeMillis())
+                .put("expiretimems", BeanDelegator.nullable(expireTime)).build()),
         fields);
   }
 
   private GadgetsHandlerApi.TokenResponse createTokenResponse(
-      Uri url, String token, Set<String> fields) {
+      Uri url, String token, Set<String> fields, Long tokenExpire) {
     return (GadgetsHandlerApi.TokenResponse) beanFilter.createFilteredBean(
         beanDelegator.createDelegator("empty", GadgetsHandlerApi.TokenResponse.class,
             ImmutableMap.<String, Object>of("url", url, "error", BeanDelegator.NULL,
-                "token", BeanDelegator.nullable(token))),
+                "token", BeanDelegator.nullable(token),
+                "responsetimems", timeSource.currentTimeMillis(),
+                "expiretimems", BeanDelegator.nullable(tokenExpire))),
         fields);
   }
 }

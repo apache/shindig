@@ -26,6 +26,7 @@ import org.apache.shindig.auth.SecurityTokenCodec;
 import org.apache.shindig.auth.SecurityTokenException;
 import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.uri.Uri;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.features.FeatureRegistry;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.protocol.conversion.BeanDelegator;
@@ -47,6 +48,7 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
   private final BeanDelegator delegator = new BeanDelegator(
     GadgetsHandlerService.apiClasses, GadgetsHandlerService.enumConversionMap);
 
+  private final FakeTimeSource timeSource = new FakeTimeSource();
   private final FeatureRegistry mockRegistry = mock(FeatureRegistry.class);
   private final FakeProcessor processor = new FakeProcessor(mockRegistry);
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
@@ -57,7 +59,7 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
   @Before
   public void setUp() {
     tokenCodec = new FakeSecurityTokenCodec();
-    gadgetHandler = new GadgetsHandlerService(processor, urlGenerator,
+    gadgetHandler = new GadgetsHandlerService(timeSource, processor, urlGenerator,
         tokenCodec, new BeanFilter());
   }
 
@@ -70,7 +72,7 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     delegator.validate();
   }
 
-
+  @SuppressWarnings("unchecked")
   @Test
   public void testGetMetadata() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(
@@ -79,7 +81,8 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     EasyMock.expect(mockRegistry.getFeatures(EasyMock.isA(List.class)))
         .andReturn(Lists.newArrayList("auth-refresh"));
     replay();
-    GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
+    GadgetsHandlerApi.MetadataResponse response =
+        gadgetHandler.getMetadata(request);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), response.getIframeUrl());
     assertTrue(response.getNeedsTokenRefresh());
     assertEquals(1, response.getViews().size());
@@ -101,11 +104,12 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
         FakeProcessor.SPEC_URL, CONTAINER, null,
         createTokenData(null, null), ImmutableList.of("views.*"));
     replay();
-    GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
+    GadgetsHandlerApi.MetadataResponse response =
+        gadgetHandler.getMetadata(request);
     assertNull(response.getIframeUrl());
     assertNull(response.getUserPrefs());
     assertNull(response.getModulePrefs());
-    assertEquals(FakeProcessor.SPEC_URL, response.getUrl());
+    assertNull(response.getUrl());
     assertEquals(1, response.getViews().size());
     assertTrue(response.getViews().get("default").getContent().contains("Hello, world" ));
     verify();
@@ -117,7 +121,7 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
         FakeProcessor.SPEC_URL, null, null,
         createTokenData(null, null), ImmutableList.of("*"));
     replay();
-    GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
+    GadgetsHandlerApi.BaseResponse response = gadgetHandler.getMetadata(request);
   }
 
   @Test(expected = ProcessingException.class)
@@ -126,7 +130,8 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
         null, CONTAINER, null,
         createTokenData(null, null), ImmutableList.of("*"));
     replay();
-    GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
+    GadgetsHandlerApi.MetadataResponse response =
+        gadgetHandler.getMetadata(request);
   }
 
   @Test(expected = ProcessingException.class)
@@ -147,6 +152,7 @@ public class GadgetHandlerServiceTest extends EasyMockTestCase {
     GadgetsHandlerApi.MetadataResponse response = gadgetHandler.getMetadata(request);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testGetMetadataNoToken() throws Exception {
     GadgetsHandlerApi.MetadataRequest request = createMetadataRequest(

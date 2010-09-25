@@ -103,14 +103,13 @@ shindig.container.Service.prototype.getGadgetMetadata = function(
       // If response entirely fails, augment individual errors.
       if (response.error) {
         for (var i = 0; i < request.ids.length; i++) {
-          var id = request.ids[i];
-          var message = [ 'Server failure to fetch metadata for gadget ', id, '.' ].join('');
-          finalResponse[id] = { error : message };
+          finalResponse[id] = { 'error' : response.error };
         }
 
       // Otherwise, cache response. Augment final response with server response.
       } else {
         for (var id in response) {
+          response[id]['url'] = id; // make sure url is set
           self.cachedMetadatas_[id] = response[id];
           finalResponse[id] = response[id];
         }
@@ -138,14 +137,13 @@ shindig.container.Service.prototype.getGadgetToken = function(
     // If response entirely fails, augment individual errors.
     if (response.error) {
       for (var i = 0; i < request.ids.length; i++) {
-        var id = request.ids[i];
-        var message = [ 'Server failure to fetch token for gadget ' + id + '.' ].join('');
-        finalResponse[id] = { error : message };
+        finalResponse[id] = { 'error' : response.error };
       }
 
     // Otherwise, cache response. Augment final response with server response.
     } else {
       for (var id in response) {
+        response[id]['url'] = id; // make sure url is set
         self.cachedTokens_[id] = response[id];
         finalResponse[id] = response[id];
       }

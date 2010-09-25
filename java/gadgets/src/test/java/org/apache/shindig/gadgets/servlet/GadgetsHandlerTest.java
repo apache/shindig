@@ -29,6 +29,7 @@ import org.apache.shindig.common.EasyMockTestCase;
 import org.apache.shindig.common.JsonAssert;
 import org.apache.shindig.common.testing.FakeGadgetToken;
 import org.apache.shindig.common.testing.TestExecutorService;
+import org.apache.shindig.common.util.FakeTimeSource;
 import org.apache.shindig.gadgets.process.ProcessingException;
 import org.apache.shindig.gadgets.spec.GadgetSpec;
 import org.apache.shindig.protocol.DefaultHandlerRegistry;
@@ -48,7 +49,6 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -58,6 +58,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private static final String CONTAINER = "container";
   private static final String TOKEN = "_nekot_";
 
+  private final FakeTimeSource timeSource = new FakeTimeSource();
   private final FakeProcessor processor = new FakeProcessor();
   private final FakeIframeUriManager urlGenerator = new FakeIframeUriManager();
   private final Map<String, FormDataItem> emptyFormItems = Collections.emptyMap();
@@ -78,7 +79,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   private void registerGadgetsHandler(SecurityTokenCodec codec) {
     BeanFilter beanFilter = new BeanFilter();
     GadgetsHandlerService service =
-        new GadgetsHandlerService(processor, urlGenerator, codec, beanFilter);
+        new GadgetsHandlerService(timeSource, processor, urlGenerator, codec, beanFilter);
     GadgetsHandler handler =
         new GadgetsHandler(new TestExecutorService(), service, beanFilter);
     registry = new DefaultHandlerRegistry(
@@ -93,6 +94,14 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
             new JSONObject().put("ids", ImmutableList.copyOf(uris)).put("container", CONTAINER));
     if (lang != null) req.put("language", lang);
     if (country != null) req.put("country", country);
+    return req;
+  }
+
+  private JSONObject makeMetadataNoContainerRequest(String... uris)
+      throws JSONException {
+    JSONObject req =
+      new JSONObject().put("method", "gadgets.metadata").put("id", "req1").put("params",
+          new JSONObject().put("ids", ImmutableList.copyOf(uris)));
     return req;
   }
 
@@ -113,6 +122,19 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   }
 
   @Test
+  public void testMetadataNoContainerRequest() throws Exception {
+    registerGadgetsHandler(null);
+    JSONObject request = makeMetadataNoContainerRequest(GADGET1_URL);
+    RpcHandler operation = registry.getRpcHandler(request);
+    try {
+      Object empty = operation.execute(emptyFormItems, token, converter).get();
+      fail("Missing container");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().contains("Missing container"));
+    }
+  }
+
+  @Test
   public void testTokenEmptyRequest() throws Exception {
     registerGadgetsHandler(null);
     JSONObject request = makeTokenRequest();
@@ -121,20 +143,30 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JsonAssert.assertJsonEquals("{}", converter.convertToString(empty));
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testMetadataInvalidUrl() throws Exception {
     registerGadgetsHandler(null);
-    JSONObject request = makeMetadataRequest(null, null, "[moo]");
+    String badUrl = "[moo]";
+    JSONObject request = makeMetadataRequest(null, null, badUrl);
     RpcHandler operation = registry.getRpcHandler(request);
-    operation.execute(emptyFormItems, token, converter).get();
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+    JSONObject gadget = response.getJSONObject(badUrl);
+    assertEquals("Bad url - " + badUrl, gadget.getJSONObject("error").getString("message"));
+    assertEquals(400, gadget.getJSONObject("error").getInt("code"));
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testTokenInvalidUrl() throws Exception {
     registerGadgetsHandler(null);
-    JSONObject request = makeTokenRequest("[moo]");
+    String badUrl = "[moo]";
+    JSONObject request = makeTokenRequest(badUrl);
     RpcHandler operation = registry.getRpcHandler(request);
-    operation.execute(emptyFormItems, token, converter).get();
+    Object responseObj = operation.execute(emptyFormItems, token, converter).get();
+    JSONObject response = new JSONObject(converter.convertToString(responseObj));
+    JSONObject gadget = response.getJSONObject(badUrl);
+    assertEquals("Bad url - " + badUrl, gadget.getJSONObject("error").getString("message"));
+    assertEquals(400, gadget.getJSONObject("error").getInt("code"));
   }
 
   @Test
@@ -148,7 +180,8 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
     assertEquals(FakeIframeUriManager.DEFAULT_IFRAME_URI.toString(), gadget.getString("iframeUrl"));
     assertEquals(FakeProcessor.SPEC_TITLE, gadget.getJSONObject("modulePrefs").getString("title"));
-
+    assertFalse(gadget.has("error"));
+    assertFalse(gadget.has("url")); // filtered out
     JSONObject view = gadget.getJSONObject("views").getJSONObject(GadgetSpec.DEFAULT_VIEW);
     assertEquals(FakeProcessor.PREFERRED_HEIGHT, view.getInt("preferredHeight"));
     assertEquals(FakeProcessor.PREFERRED_WIDTH, view.getInt("preferredWidth"));
@@ -181,7 +214,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
   public void testTokenOneGadget() throws Exception {
     SecurityTokenCodec codec = EasyMock.createMock(SecurityTokenCodec.class);
     Capture<SecurityToken> tokenCapture = new Capture<SecurityToken>();
-    EasyMock.expect(codec.encodeToken(EasyMock.capture(tokenCapture))).andReturn(TOKEN);
+    EasyMock.expect(codec.encodeToken(EasyMock.capture(tokenCapture))).andReturn(TOKEN).anyTimes();
     replay(codec);
 
     registerGadgetsHandler(codec);
@@ -193,6 +226,7 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
     assertEquals(TOKEN, gadget.getString("token"));
     assertFalse(gadget.has("error"));
+    assertFalse(gadget.has("url")); // filtered out
     // next checks verify all fiels that canbe used for token generation are passed in
     assertEquals("container", tokenCapture.getValue().getContainer());
     assertEquals(GADGET1_URL, tokenCapture.getValue().getAppId());
@@ -211,7 +245,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
     JSONObject response = new JSONObject(converter.convertToString(responseObj));
 
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
-    assertEquals(GadgetsHandler.FAILURE_METADATA, gadget.getString("error"));
+    assertEquals(GadgetsHandler.FAILURE_METADATA,
+        gadget.getJSONObject("error").getString("message"));
+    assertEquals(500, gadget.getJSONObject("error").getInt("code"));
   }
 
   @Test
@@ -229,7 +265,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
     JSONObject gadget = response.getJSONObject(GADGET1_URL);
     assertFalse(gadget.has("token"));
-    assertEquals(GadgetsHandler.FAILURE_TOKEN, gadget.getString("error"));
+    assertEquals(GadgetsHandler.FAILURE_TOKEN,
+        gadget.getJSONObject("error").getString("message"));
+    assertEquals(500, gadget.getJSONObject("error").getInt("code"));
   }
 
   @Test
@@ -269,7 +307,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
     JSONObject gadget2 = response.getJSONObject(GADGET2_URL);
     assertFalse(gadget2.has("token"));
-    assertEquals(GadgetsHandler.FAILURE_TOKEN, gadget2.getString("error"));
+    assertEquals(GadgetsHandler.FAILURE_TOKEN,
+        gadget2.getJSONObject("error").getString("message"));
+    assertEquals(500, gadget2.getJSONObject("error").getInt("code"));
   }
 
   @Test
@@ -287,6 +327,9 @@ public class GadgetsHandlerTest extends EasyMockTestCase {
 
     JSONObject gadget2 = response.getJSONObject(GADGET2_URL);
     assertNotNull("got gadget2", gadget2);
-    assertEquals(GadgetsHandler.FAILURE_METADATA, gadget2.getString("error"));
+    assertEquals("broken", // Processing exception message is used
+        gadget2.getJSONObject("error").getString("message"));
+    assertEquals(HttpServletResponse.SC_BAD_REQUEST,
+        gadget2.getJSONObject("error").getInt("code"));
   }
 }
