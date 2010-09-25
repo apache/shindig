@@ -42,7 +42,7 @@ import com.google.inject.Inject;
  * <p>ActivityStreamsHandler class.</p>
  *
  */
-@Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activitystream}/{activityEntryId}+")
+@Service(name = "activitystreams", path="/{userId}+/{groupId}/{appId}/{activityEntryId}+")
 public class ActivityStreamsHandler {
 
   private final ActivityStreamService service;
