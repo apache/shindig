@@ -223,6 +223,7 @@ public class ServletUtilTest {
     assertEquals("response string", recorder.getResponseAsString());
     assertEquals("v1", recorder.getHeader("h1"));
     assertEquals("v2", recorder.getHeader("h2"));
+    assertEquals("public,max-age=1000", recorder.getHeader("Cache-Control"));
   }
   
   @Test
