@@ -46,7 +46,7 @@ shindig.random = (function() {
     return hash;
   }
 
-  var orig_onmousemove = window.onmousemove || function() { return false };
+  var orig_onmousemove = window.onmousemove || function() { return false; };
 
   window.onmousemove = function(e) {
     if (window.event) {
