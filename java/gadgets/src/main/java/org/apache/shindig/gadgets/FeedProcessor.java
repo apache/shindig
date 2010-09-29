@@ -30,6 +30,7 @@ import com.sun.syndication.feed.module.mediarss.types.Thumbnail;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndImage;
 import com.sun.syndication.feed.synd.SyndPerson;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
@@ -67,6 +68,27 @@ public class FeedProcessor {
       json.put("Description", feed.getDescription());
       json.put("Link", feed.getLink());
 
+    //Retrieve the feed image if it is available as well as an image url if the image is available.
+    if(feed.getImage() != null && !feed.getImage().getUrl().isEmpty()){
+        SyndImage feedImage = (SyndImage)feed.getImage();
+        JSONObject jsonImage = new JSONObject();
+        jsonImage.put("Url", feedImage.getUrl());
+        if(feedImage.getTitle() != null 
+                && !feedImage.getTitle().isEmpty()){
+            jsonImage.put("Title", feedImage.getTitle());
+        }
+        if(feedImage.getDescription() != null &&
+                !feedImage.getDescription().isEmpty()){
+            jsonImage.put("Description", feedImage.getDescription());
+        }
+        if(feedImage.getLink() != null && 
+        		  !feedImage.getLink().isEmpty()){
+        jsonImage.put("Link", feedImage.getLink());
+        }
+        json.put("Image", jsonImage);
+    }
+
+      
       List<SyndPerson> authors = feed.getAuthors();
       String jsonAuthor = null;
       if (authors != null && !authors.isEmpty()) {

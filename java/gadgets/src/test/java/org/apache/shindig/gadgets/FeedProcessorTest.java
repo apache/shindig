@@ -33,6 +33,10 @@ public class FeedProcessorTest {
   private final static String FEED_TITLE = "Example Feed";
   private final static String FEED_AUTHOR = "John Doe";
   private final static String FEED_AUTHOR_EMAIL = "john.doe@example.com";
+  private final static String FEED_IMAGE_URL = "http://example.org/example.gif";
+  private final static String FEED_IMAGE_TITLE = "Example Feed Image";
+  private final static String FEED_IMAGE_DESCRIPTION = "Example Feed Image Description";
+  private final static String FEED_IMAGE_LINK = "http://example.org/";
   private final static String FEED_ENTRY_TITLE = "Atom-Powered Robots Run Amok";
   private final static String FEED_ENTRY_LINK = "http://example.org/2003/12/13/entry03";
   private final static String FEED_ENTRY_SUMMARY = "Some text.";
@@ -46,6 +50,12 @@ public class FeedProcessorTest {
       "<link>http://example.org/</link>" +
       "<description>Example RSS Feed</description>" +
       "<pubDate>Sun, 19 May 2002 15:21:36 GMT</pubDate>" +
+      "<image>" +
+      "<url>" + FEED_IMAGE_URL + "</url>" +
+      "<title>" + FEED_IMAGE_TITLE + "</title>" + 
+      "<description>" + FEED_IMAGE_DESCRIPTION + "</description>" +
+      "<link>" + FEED_IMAGE_LINK + "</link>" +
+      "</image>" +       
       "<item>" +
       "<title>" + FEED_ENTRY_TITLE + "</title>" +
       "<link>" + FEED_ENTRY_LINK + "</link>" +
