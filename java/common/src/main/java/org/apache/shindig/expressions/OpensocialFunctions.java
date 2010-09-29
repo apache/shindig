@@ -19,6 +19,7 @@
 package org.apache.shindig.expressions;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shindig.common.util.Utf8UrlCoder;
 
 import org.json.JSONArray;
@@ -30,7 +31,8 @@ import java.io.UnsupportedEncodingException;
 import javax.el.ELException;
 
 /**
- * Default functions in the "os:" namespace prefix.
+ * Default functions in the OpenSocial-Templating spec are prefixed with "os:"
+ * All other functions are prefixed with "osx:"
  */
 public final class OpensocialFunctions {
   private OpensocialFunctions() {
@@ -78,7 +80,7 @@ public final class OpensocialFunctions {
   /**
    * Form encode a string
    */
-  @Functions.Expose(prefix = "osx", names = {"urlEncode"})
+  @Functions.Expose(prefix = "os", names = {"urlEncode"})
   public static String formEncode(String text) {
     if (text == null) {
       return null;
@@ -92,12 +94,38 @@ public final class OpensocialFunctions {
    * @param text
    * @return
    */
-  @Functions.Expose(prefix = "osx", names = {"urlDecode"})
+  @Functions.Expose(prefix = "os", names = {"urlDecode"})
   public static String formDecode(String text) {
     if (text == null) {
       return null;
     }
     
     return Utf8UrlCoder.decode(text);
+  }
+
+  /**
+   * Escape HTML entities in a string
+   */
+  @Functions.Expose(prefix = "os", names = {"htmlEncode"})
+  public static String htmlEncode(String text) {
+    if (text == null) {
+      return null;
+    }
+
+    return StringEscapeUtils.escapeHtml(text);
+  }
+
+  /**
+   * Unescape HTML entities in a string
+   * @param text
+   * @return
+   */
+  @Functions.Expose(prefix = "os", names = {"htmlDecode"})
+  public static String htmlDecode(String text) {
+    if (text == null) {
+      return null;
+    }
+
+    return StringEscapeUtils.unescapeHtml(text);
   }
 }

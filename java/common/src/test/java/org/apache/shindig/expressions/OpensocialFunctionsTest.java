@@ -74,7 +74,7 @@ public class OpensocialFunctionsTest extends Assert {
     vars.put("test", test);
 
     ValueExpression testUrlEncode =
-      expressions.parse("${osx:urlEncode(test)}", String.class);
+      expressions.parse("${os:urlEncode(test)}", String.class);
     assertEquals("He+He", testUrlEncode.getValue(context));
   }
 
@@ -84,8 +84,28 @@ public class OpensocialFunctionsTest extends Assert {
     vars.put("encoded", test);
 
     ValueExpression testUrlDecode =
-      expressions.parse("${osx:urlDecode(encoded)}", String.class);
+      expressions.parse("${os:urlDecode(encoded)}", String.class);
     assertEquals("He He", testUrlDecode.getValue(context));
+  }
+
+  @Test
+  public void testHtmlEncode() throws Exception {
+    String test = "<test>";
+    vars.put("test", test);
+
+    ValueExpression testHtmlEncode =
+      expressions.parse("${os:htmlEncode(test)}", String.class);
+    assertEquals("&lt;test&gt;", testHtmlEncode.getValue(context));
+  }
+
+  @Test
+  public void testHtmlDecode() throws Exception {
+    String test = "&lt;1+1>3&gt;";
+    vars.put("encoded", test);
+
+    ValueExpression testHtmlDecode =
+      expressions.parse("${os:htmlDecode(encoded)}", String.class);
+    assertEquals("<1+1>3>", testHtmlDecode.getValue(context));
   }
 
   @Test
@@ -105,14 +125,14 @@ public class OpensocialFunctionsTest extends Assert {
   @Test
   public void testUrlEncodeNull() throws Exception {
     ValueExpression testUrlEncode =
-      expressions.parse("${osx:urlEncode(null)}", String.class);
+      expressions.parse("${os:urlEncode(null)}", String.class);
     assertEquals("", testUrlEncode.getValue(context));
   }
 
   @Test
   public void testUrlDecodeNull() throws Exception {
     ValueExpression testUrlDecode =
-      expressions.parse("${osx:urlDecode(null)}", String.class);
+      expressions.parse("${os:urlDecode(null)}", String.class);
     assertEquals("", testUrlDecode.getValue(context));
   }
 }
