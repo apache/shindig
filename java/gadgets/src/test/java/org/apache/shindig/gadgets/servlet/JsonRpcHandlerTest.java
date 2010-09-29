@@ -71,6 +71,7 @@ public class JsonRpcHandlerTest {
     JSONObject gadget = outGadgets.getJSONObject(0);
     assertEquals(FakeProcessor.SPEC_URL.toString(), gadget.getString("iframeUrl"));
     assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
+    assertEquals(FakeProcessor.SPEC_DESCRIPTION, gadget.getString("description"));
     assertEquals(0, gadget.getInt("moduleId"));
 
     JSONObject view = gadget.getJSONObject("views").getJSONObject(GadgetSpec.DEFAULT_VIEW);
@@ -135,10 +136,12 @@ public class JsonRpcHandlerTest {
       JSONObject gadget = outGadgets.getJSONObject(i);
       if (gadget.getString("url").equals(FakeProcessor.SPEC_URL.toString())) {
         assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
+        assertEquals(FakeProcessor.SPEC_DESCRIPTION, gadget.getString("description"));
         assertEquals(0, gadget.getInt("moduleId"));
         first = true;
       } else {
         assertEquals(FakeProcessor.SPEC_TITLE2, gadget.getString("title"));
+        assertEquals(false, gadget.has("description"));
         assertEquals(1, gadget.getInt("moduleId"));
         second = true;
       }
@@ -170,6 +173,7 @@ public class JsonRpcHandlerTest {
       JSONObject gadget = outGadgets.getJSONObject(i);
       if (gadget.getString("url").equals(FakeProcessor.SPEC_URL.toString())) {
         assertEquals(FakeProcessor.SPEC_TITLE, gadget.getString("title"));
+        assertEquals(FakeProcessor.SPEC_DESCRIPTION, gadget.getString("description"));
         assertEquals(0, gadget.getInt("moduleId"));
         first = true;
       } else {

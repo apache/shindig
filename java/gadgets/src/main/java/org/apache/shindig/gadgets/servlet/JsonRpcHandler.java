@@ -218,6 +218,7 @@ public class JsonRpcHandler {
                   .put("moduleId", context.getModuleId())
                   .put("title", prefs.getTitle())
                   .put("titleUrl", prefs.getTitleUrl().toString())
+                  .put("description", prefs.getDescription())
                   .put("views", views)
                   .put("features", features)
                   .put("featureDetails", featureDetailList)

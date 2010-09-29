@@ -37,13 +37,14 @@ public class FakeProcessor extends Processor {
   public static final Uri SPEC_URL2 = Uri.parse("http://example.org/g2.xml");
   public static final String SPEC_TITLE = "JSON-TEST";
   public static final String SPEC_TITLE2 = "JSON-TEST2";
+  public static final String SPEC_DESCRIPTION = "JSON-DESCRIPTION";
   public static final int PREFERRED_HEIGHT = 100;
   public static final int PREFERRED_WIDTH = 242;
   public static final String LINK_REL = "rel";
   public static final String LINK_HREF = "http://example.org/foo";
   public static final String SPEC_XML =
       "<Module>" +
-      "<ModulePrefs title=\"" + SPEC_TITLE + "\">" +
+      "<ModulePrefs title=\"" + SPEC_TITLE + "\" description=\"" + SPEC_DESCRIPTION + "\">" +
       "  <Link rel='" + LINK_REL + "' href='" + LINK_HREF + "'/>" +
       "</ModulePrefs>" +
       "<UserPref name=\"up_one\">" +
