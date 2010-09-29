@@ -216,7 +216,7 @@ public class ProxyUriBase {
     queryBuilder.addQueryParameter(Param.DEBUG.getKey(), isDebug() ? "1" : "0");
     queryBuilder.addQueryParameter(Param.NO_CACHE.getKey(), isNoCache() ? "1" : "0");
     if (!isNoCache()) {
-      if (forcedRefresh != null && forcedRefresh > 0) {
+      if (forcedRefresh != null && forcedRefresh >= 0) {
         queryBuilder.addQueryParameter(Param.REFRESH.getKey(), forcedRefresh.toString());
       } else if (getRefresh() != null) {
         queryBuilder.addQueryParameter(Param.REFRESH.getKey(), getRefresh().toString());      
