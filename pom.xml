@@ -740,6 +740,8 @@
                 <exclude>**/create.sql</exclude>
                 <exclude>**/drop.sql</exclude>
                 <exclude>**/derby.log</exclude>
+                <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
+                <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -1216,6 +1218,8 @@
               <exclude>**/create.sql</exclude>
               <exclude>**/drop.sql</exclude>
               <exclude>**/derby.log</exclude>
+              <exclude>content/editor/CodeMirror-0.8/js/*</exclude>
+              <exclude>content/editor/CodeMirror-0.8/css/*</exclude>
             </excludes>
           </configuration>
         </plugin>
