@@ -35,6 +35,8 @@ import org.apache.shindig.protocol.BaseRequestItem;
 import org.apache.shindig.protocol.Operation;
 import org.apache.shindig.protocol.ProtocolException;
 import org.apache.shindig.protocol.Service;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -285,7 +287,12 @@ public class HttpRequestHandler {
       return processFeed(request, body);
     } else if ("json".equalsIgnoreCase(request.format)) {
       try {
-        return new JSONObject(body);
+        body = body.trim();
+        if(body.charAt(0) == '[') {
+          return new JSONArray(body);
+        } else {
+          return new JSONObject(body);
+        }
       } catch (JSONException e) {
         // TODO: include data block with invalid JSON
         throw new ProtocolException(HttpServletResponse.SC_NOT_ACCEPTABLE, "Response not valid JSON", e);
