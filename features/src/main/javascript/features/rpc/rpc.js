@@ -407,12 +407,9 @@ gadgets.rpc = function() {
    * RPC mechanism. Gadgets, in turn, will complete the setup
    * of the channel once they send their first messages.
    */
-  function setupFrame(frameId, token, forcesecure, forceFrameSetup) {
-    if (setup[frameId] === true && !(forceFrameSetup === true)) {
-      return;
-    }
+  function setupFrame(frameId, token, forcesecure) {
 
-    if (typeof setup[frameId] === 'undefined') {
+	  if (typeof setup[frameId] === 'undefined') {
       setup[frameId] = 0;
     }
 
@@ -521,7 +518,7 @@ gadgets.rpc = function() {
    * @member gadgets.rpc
    * @deprecated
    */
-  function setAuthToken(targetId, token, forcesecure, forceFrameSetup) {
+  function setAuthToken(targetId, token, forcesecure) {
     token = token || "";
 
     // Coerce token to a String, ensuring that all authToken values
@@ -529,7 +526,7 @@ gadgets.rpc = function() {
     // in the process(rpc) method.
     authToken[targetId] = String(token);
 
-    setupFrame(targetId, token, forcesecure, forceFrameSetup);
+    setupFrame(targetId, token, forcesecure);
   }
 
   function setupContainerGadgetContext(rpctoken, opt_forcesecure) {
