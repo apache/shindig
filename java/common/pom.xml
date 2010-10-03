@@ -166,12 +166,6 @@
       <artifactId>xml-apis</artifactId>
     </dependency>
 
-    <!-- test -->
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xmlParserAPIs</artifactId>
-      <scope>test</scope>
-    </dependency>
     <!-- needed for ehcache's use of slf4j -->
     <dependency>
       <groupId>org.slf4j</groupId>
