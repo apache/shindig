@@ -376,11 +376,20 @@ OpenAjax.hub.IframeContainer = function( hub, clientID, params )
         
         span.innerHTML = iframeText;
         
-        var tunnel = params.IframeContainer.tunnelURI;
+        var tunnelText;
+        if ( params.IframeContainer.tunnelURI ) {
+            tunnelText = "&parent=" + encodeURIComponent( params.IframeContainer.tunnelURI ) +
+                         "&forcesecure=true";
+        } else {
+            tunnelText = "&oahParent=" +
+                         encodeURIComponent( OpenAjax.gadgets.rpc.getOrigin( window.location.href ));
+        }
+        var idText = "";
+        if ( internalID !== clientID ) {
+            idText = "&oahId=" + internalID.substring( internalID.lastIndexOf('_') + 1 );
+        }
         document.getElementById( internalID ).src = params.IframeContainer.uri +
-                "#rpctoken=" + securityToken +
-                (tunnel ? "&parent=" + encodeURIComponent( tunnel ) + "&forcesecure=true" :
-                          "&oaaParent=" + encodeURIComponent( OpenAjax.gadgets.rpc.getOrigin( window.location.href )));
+                "#rpctoken=" + securityToken + tunnelText + idText;
     }
     
     // If the relay iframe used by RPC has not been loaded yet, then we won't have unload protection
@@ -516,7 +525,7 @@ OpenAjax.hub.IframeHubClient = function( params )
             // The RMR transport does not require a valid relay file, but does need a URL
             // in the parent's domain. The URL does not need to point to valid file, so just
             // point to 'robots.txt' file. See RMR transport code for more info.
-            var parent = urlParams.oaaParent + "/robots.txt";
+            var parent = urlParams.oahParent + "/robots.txt";
             OpenAjax.gadgets.rpc.setupReceiver( "..", parent );
         }
         
@@ -534,11 +543,10 @@ OpenAjax.hub.IframeHubClient = function( params )
 //    transport requires a child token (IFPC [aka FIM] is not supported).
 //        securityToken = generateSecurityToken( params, scope, log );
 
-        var internalID = OpenAjax.gadgets.rpc.RPC_ID;
-        if ( ! internalID ) {
-            throw new Error( OpenAjax.hub.Error.WrongProtocol );
+        clientID = OpenAjax.gadgets.rpc.RPC_ID;
+        if ( urlParams.oahId ) {
+            clientID = clientID.substring( 0, clientID.lastIndexOf('_') );
         }
-        clientID = internalID.substr( internalID.indexOf("_") + 1 );
     };
     
   /*** HubClient interface ***/
@@ -805,13 +813,14 @@ OpenAjax.hub.IframeContainer._rpcRouter = function() {
                     return;
                 }
                 
-                do {
+                var newId = id;
+                while ( document.getElementById(newId) ) {
                     // a client with the specified ID already exists on this page;
                     // create a unique ID
-                    newID = ((0x7fff * Math.random()) | 0).toString(16) + "_" + id;
-                } while ( receivers[ newID ] );
-                receivers[ newID ] = receiver;
-                return newID;
+                    newId = id + '_' + ((0x7fff * Math.random()) | 0).toString(16);
+                };
+                receivers[ newId ] = receiver;
+                return newId;
             }
             
             // when this function is first called, register the RPC service
