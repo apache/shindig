@@ -191,12 +191,14 @@ public class CajaContentRewriter implements GadgetRewriter {
         // Content is only used to produce useful snippets with error messages
         createContainerFor(doc,
             formatErrors(doc, is, docContent, mq, true /* visible */));
+        mc.documentChanged();
         logException(e, mq);
         safe = true;
       } finally {
         if (!safe) {
           // Fail safe
           mc.setContent("");
+          mc.documentChanged();
         }
       }
     }
