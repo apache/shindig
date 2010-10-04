@@ -187,10 +187,26 @@ public class ConcatVisitorTest extends DomWalkerTestBase {
   }
 
   @Test
-  public void dontVisitCssSeperatedByNonEmptyTextNode() throws Exception {
+  public void visitCssSeperatedByTextNode() throws Exception {
     Node textNode = doc.createTextNode("Data\n");
     Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
     seqNodes(node, textNode, css1);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void visitCssSeperatedByNormalComment() throws Exception {
+    Node commentNode = doc.createComment("This is a comment");
+    Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
+    seqNodes(node, commentNode, css1);
+    assertEquals(VisitStatus.RESERVE_NODE, getVisitStatusCss(node, null));
+  }
+
+  @Test
+  public void dontVisitCssSeperatedByConditionalComment() throws Exception {
+    Node commentNode = doc.createComment("[if IE]");
+    Node node = elem("link", "type", "text/css", "rel", "stylesheet", "href", CSS1_URL_STR);
+    seqNodes(node, commentNode, css1);
     assertEquals(VisitStatus.BYPASS, getVisitStatusCss(node, null));
   }
 
