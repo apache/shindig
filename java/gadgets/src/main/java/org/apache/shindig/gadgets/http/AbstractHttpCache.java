@@ -42,7 +42,7 @@ public abstract class AbstractHttpCache implements HttpCache {
   protected abstract void addResponseImpl(String key, HttpResponse response);
   protected abstract HttpResponse removeResponseImpl(String key);
 
-  public final HttpResponse getResponse(HttpRequest request) {
+  public HttpResponse getResponse(HttpRequest request) {
     if (isCacheable(request)) {
       String keyString = createKey(request);
       HttpResponse cached = getResponseImpl(keyString);
@@ -98,7 +98,7 @@ public abstract class AbstractHttpCache implements HttpCache {
       // Caching was forced. Ignore what the response wants.
       return true;
     }
-    
+
     if (response.getHttpStatusCode() == HttpResponse.SC_NOT_MODIFIED) {
       // Shindig server will serve 304s. Do not cache 304s from the origin server.
       return false;
