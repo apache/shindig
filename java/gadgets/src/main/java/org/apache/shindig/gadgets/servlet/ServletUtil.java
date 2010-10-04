@@ -87,13 +87,13 @@ public final class ServletUtil {
     req.setParam(REMOTE_ADDR_KEY, servletReq.getRemoteAddr());
     return req;
   }
-  
+
   public static void setCachingHeaders(HttpResponseBuilder response, int ttl, boolean noProxy) {
     for (Pair<String, String> header : HttpUtil.getCachingHeadersToSet(ttl, noProxy)) {
       response.setHeader(header.one, header.two);
     }
   }
-  
+
   public static void copyResponseToServlet(HttpResponse response, HttpServletResponse servletResponse)
       throws IOException {
     servletResponse.setStatus(response.getHttpStatusCode());
@@ -104,7 +104,7 @@ public final class ServletUtil {
     HttpUtil.setCachingHeaders(servletResponse, (int)(response.getCacheTtl() / 1000L));
     IOUtils.copy(response.getResponse(), servletResponse.getOutputStream());
   }
-  
+
   /**
    * Validates and normalizes the given url, ensuring that it is non-null, has
    * scheme http or https, and has a path value of some kind.
@@ -128,7 +128,7 @@ public final class ServletUtil {
     }
     return url.toUri();
   }
-  
+
   /**
    * Sets standard forwarding headers on the proxied request.
    * @param inboundRequest
@@ -144,15 +144,14 @@ public final class ServletUtil {
     }
   }
 
-  public static void setXForwardedForHeader(HttpServletRequest inboundRequest, HttpRequest req)
-      throws GadgetException {
+  public static void setXForwardedForHeader(HttpServletRequest inboundRequest, HttpRequest req) {
     String forwardedFor = getXForwardedForHeader(inboundRequest.getHeader("X-Forwarded-For"),
         inboundRequest.getRemoteAddr());
     if (forwardedFor != null) {
       req.setHeader("X-Forwarded-For", forwardedFor);
     }
   }
-  
+
   private static String getXForwardedForHeader(String origValue, String remoteAddr) {
     if (!StringUtils.isEmpty(remoteAddr)) {
       if (StringUtils.isEmpty(origValue)) {
@@ -163,20 +162,21 @@ public final class ServletUtil {
     }
     return origValue;
   }
-  
+
   /**
    * @return An HttpResponse object wrapping the given GadgetException.
    */
   public static HttpResponse errorResponse(GadgetException e) {
     return new HttpResponseBuilder().setHttpStatusCode(e.getHttpStatusCode())
+        .setHeader("Content-Type", "text/plain")
         .setResponseString(e.getMessage() != null ? e.getMessage() : "").create();
   }
-  
+
   /**
    * Converts the given {@code HttpResponse} into JSON form, with at least
    * one field, dataUri, containing a Data URI that can be inlined into an HTML page.
    * Any metadata on the given {@code HttpResponse} is also added as fields.
-   * 
+   *
    * @param response Input HttpResponse to convert to JSON.
    * @return JSON-containing HttpResponse.
    * @throws IOException If there are problems reading from {@code response}.
@@ -214,7 +214,7 @@ public final class ServletUtil {
     } finally {
       IOUtils.closeQuietly(b64input);
     }
-    
+
     // Complete the JSON object.
     pw.write("',\n  ");
     boolean first = true;
@@ -232,7 +232,7 @@ public final class ServletUtil {
     }
     pw.write("\n}");
     pw.flush();
-    
+
     return new HttpResponseBuilder()
         .setHeader("Content-Type", "application/json")
         .setResponseNoCopy(os.toByteArray())
