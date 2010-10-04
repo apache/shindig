@@ -116,6 +116,7 @@ public class TemplateBasedTagHandlerTest {
   }
 
   @Test
+  @Ignore("The CajaHtmlParser doesn't allow unclosed xml tags.")
   public void missingElementPropertyIsNull() throws Exception {
     // Verify the descendant element isn't visible unless directly referenced
     runTest("Bar",

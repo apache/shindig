@@ -36,13 +36,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 /**
  * Parser for arbitrary HTML content
  */
 @ImplementedBy(NekoSimplifiedHtmlParser.class)
 public abstract class GadgetHtmlParser {
+  
+  private static final Logger LOG = Logger.getLogger(GadgetHtmlParser.class.getName());
 
   public static final String PARSED_DOCUMENTS = "parsedDocuments";
   public static final String PARSED_FRAGMENTS = "parsedFragments";
@@ -300,10 +304,28 @@ public abstract class GadgetHtmlParser {
         Attr typeAttr = (Attr)next.getAttributes().getNamedItem("type");
         if (typeAttr != null &&
             SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.get(typeAttr.getValue()) != null) {
+          String osType = SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.get(typeAttr.getValue());
+
           // The underlying parser impl may have already parsed these.
-          // Only re-parse with the coalesced text children if that's all there are.
+          // Only re-parse with the coalesced text children wrapped within
+          // the corresponding OSData/OSTemplate tag.
           boolean parseOs = true;
           StringBuilder sb = new StringBuilder();
+
+          try {
+            // Convert the <script type="os/*" xmlns=""> node into an equivilant OSML tag
+            // while preserving all attributes (excluding 'type') in the original script node,
+            // including any xmlns attribute. This allows children to be reparsed within the
+            // correct xml namespace.
+            next.getAttributes().removeNamedItem("type");
+            
+            HtmlSerialization.printStartElement(osType,
+                next.getAttributes(), sb, /*withXmlClose*/ false);
+
+          } catch (IOException e) {
+            LOG.info("Unable to convert script node to an osml tag");
+          }
+
           NodeList scriptKids = next.getChildNodes();
           for (int i = 0; parseOs && i < scriptKids.getLength(); ++i) {
             Node scriptKid = scriptKids.item(i);
@@ -312,19 +334,24 @@ public abstract class GadgetHtmlParser {
             }
             sb.append(scriptKid.getTextContent());
           }
+          
           if (parseOs) {
             // Clean out the script node.
             while (next.hasChildNodes()) {
               next.removeChild(next.getFirstChild());
             }
+
+            sb.append("</").append(osType).append(">");
             DocumentFragment osFragment = parseFragmentImpl(sb.toString());
             while (osFragment.hasChildNodes()) {
               Node osKid = osFragment.removeChild(osFragment.getFirstChild());
               osKid = next.getOwnerDocument().adoptNode(osKid);
               if (osKid.getNodeType() == Node.ELEMENT_NODE) {
-                next.appendChild(osKid);
+                next.getParentNode().appendChild(osKid);
               }
             }
+
+            next.getParentNode().removeChild(next);            
           }
         }
       }

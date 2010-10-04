@@ -18,11 +18,9 @@
  */
 package org.apache.shindig.gadgets.parse;
 
-import com.google.caja.lexer.escaping.Escaping;
 import org.cyberneko.html.HTMLElements;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -42,7 +40,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
     try {
       StringWriter sw = HtmlSerialization.createWriter(doc);
       if (doc.getDoctype() != null) {
-        outputDocType(doc.getDoctype(), sw);
+        HtmlSerialization.outputDocType(doc.getDoctype(), sw);
       }
       this.serialize(doc, sw);
       return sw.toString();
@@ -81,7 +79,7 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
         HTMLElements.Element htmlElement =
             HTMLElements.getElement(elem.getNodeName());
 
-        printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
+        HtmlSerialization.printStartElement(elem, output, xmlMode && htmlElement.isEmpty());
 
         // Special HTML elements - <script> in particular - will typically
         // only have CDATA.  If they do have elements, that'd be data pipelining
@@ -137,43 +135,5 @@ public class DefaultHtmlSerializer implements HtmlSerializer {
 
   protected void writeComment(Node n, Appendable output) throws IOException {
     output.append("<!--").append(n.getNodeValue()).append("-->");
-  }
-
-  public static void outputDocType(DocumentType docType, Appendable output) throws IOException {
-    output.append("<!DOCTYPE ");
-    // Use this so name matches case for XHTML
-    output.append(docType.getOwnerDocument().getDocumentElement().getNodeName());
-    if (docType.getPublicId() != null && docType.getPublicId().length() > 0) {
-      output.append(" ");
-      output.append("PUBLIC ").append('"').append(docType.getPublicId()).append('"');
-    }
-    if (docType.getSystemId() != null && docType.getSystemId().length() > 0) {
-      output.append(" ");
-      output.append('"').append(docType.getSystemId()).append('"');
-    }
-    output.append(">\n");
-  }
-
-  /**
-   * Print the start of an HTML element.  If withXmlClose==true, this is an
-   * empty element that should have its content
-   */
-  private static void printStartElement(Element elem, Appendable output, boolean withXmlClose)
-      throws IOException {
-    output.append("<").append(elem.getTagName());
-    NamedNodeMap attributes = elem.getAttributes();
-    for (int i = 0; i < attributes.getLength(); i++) {
-      Attr attr = (Attr)attributes.item(i);
-      String attrName = attr.getNodeName();
-      output.append(' ').append(attrName);
-      if (attr.getNodeValue() != null) {
-        output.append("=\"");
-        if (attr.getNodeValue().length() != 0) {
-          Escaping.escapeXml(attr.getNodeValue(), /* asciiOnly */ true, output);
-        }
-        output.append('"');
-      }
-    }
-    output.append(withXmlClose ? "/>" : ">");
   }
 }

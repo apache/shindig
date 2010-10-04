@@ -36,7 +36,7 @@ public class VanillaCajaHtmlSerializer implements HtmlSerializer {
     try {
       StringWriter sw = HtmlSerialization.createWriter(doc);
       if (doc.getDoctype() != null) {
-        DefaultHtmlSerializer.outputDocType(doc.getDoctype(), sw);
+        HtmlSerialization.outputDocType(doc.getDoctype(), sw);
       }
       sw.append(Nodes.render(doc, new RenderContext(new Concatenator(sw, null)).asXml()));
       return sw.toString();

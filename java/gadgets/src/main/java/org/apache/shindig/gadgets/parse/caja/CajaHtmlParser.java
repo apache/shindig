@@ -22,8 +22,10 @@ import java.util.LinkedList;
 
 import com.google.caja.lexer.CharProducer;
 import com.google.caja.lexer.HtmlLexer;
+import com.google.caja.lexer.HtmlTokenType;
 import com.google.caja.lexer.InputSource;
 import com.google.caja.lexer.ParseException;
+import com.google.caja.lexer.TokenQueue;
 import com.google.caja.parser.html.DomParser;
 import com.google.caja.parser.html.Namespaces;
 import com.google.caja.reporting.Message;
@@ -36,12 +38,16 @@ import com.google.inject.Inject;
 import org.apache.shindig.gadgets.GadgetException;
 import org.apache.shindig.gadgets.http.HttpResponse;
 import org.apache.shindig.gadgets.parse.GadgetHtmlParser;
+import org.apache.shindig.gadgets.parse.SocialDataTags;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 
 public class CajaHtmlParser extends GadgetHtmlParser {
+  private static final String OSML_DATA_START = '<' + SocialDataTags.OSML_DATA_TAG;
+  private static final String OSML_TEMPLATE_START = '<' + SocialDataTags.OSML_TEMPLATE_TAG;
+
   @Inject
   public CajaHtmlParser(DOMImplementation documentFactory) {
     super(documentFactory);
@@ -90,21 +96,10 @@ public class CajaHtmlParser extends GadgetHtmlParser {
       throws GadgetException {
     try {
       MessageQueue mq = makeMessageQueue();
-      // Newline works around Caja parser issue with certain short-form
-      // HTML - the internal Lexer gets confused. A bug has been filed w/ Caja.
-      // Even so, adding the newline is innocuous for any HTML.
-      DomParser parser = getDomParser(source + '\n', mq);
+
+      DomParser parser = getDomParser(source, mq);
       DocumentFragment fragment = parser.parseFragment();
-      // Get rid of the newline, if maintained.
-      Node lastChild = fragment != null ? fragment.getLastChild() : null;
-      if (lastChild != null && lastChild.getNodeType() == Node.TEXT_NODE) {
-        String lastText = lastChild.getTextContent();
-        if ("\n".equals(lastText)) {
-          fragment.removeChild(lastChild);
-        } else if (lastText.endsWith("\n")) {
-          lastChild.setTextContent(lastText.substring(0, lastText.length() - 1));
-        }
-      }
+
       if (mq.hasMessageAtLevel(MessageLevel.ERROR)) {
         StringBuilder err = new StringBuilder();
         for (Message m : mq.getMessages()) {
@@ -140,9 +135,14 @@ public class CajaHtmlParser extends GadgetHtmlParser {
   private DomParser getDomParser(String source, final MessageQueue mq) throws ParseException {
     InputSource is = getInputSource();
     HtmlLexer lexer = new HtmlLexer(CharProducer.Factory.fromString(source, is));
+    TokenQueue<HtmlTokenType> tokenQueue = new TokenQueue<HtmlTokenType>(lexer, is);
     final Namespaces ns = Namespaces.HTML_DEFAULT;  // Includes OpenSocial
     final boolean needsDebugData = needsDebugData();
-    DomParser parser = new DomParser(lexer, /* wantsComments */ true, is, ns, mq);
+
+    // OpenSocial Tempates need to be parsed as XML since tags can be self-closing.
+    final boolean asXml =
+        (source.startsWith(OSML_DATA_START) || source.startsWith(OSML_TEMPLATE_START)); 
+    DomParser parser = new DomParser(tokenQueue, asXml, mq);
     parser.setDomImpl(documentFactory);
     parser.setNeedsDebugData(needsDebugData);
     return parser;

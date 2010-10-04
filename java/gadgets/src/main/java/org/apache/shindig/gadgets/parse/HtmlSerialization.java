@@ -17,11 +17,15 @@
  */
 package org.apache.shindig.gadgets.parse;
 
+import com.google.caja.lexer.escaping.Escaping;
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.xerces.xni.QName;
-import org.cyberneko.html.HTMLEntities;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -107,15 +111,51 @@ public class HtmlSerialization {
   }
 
   public static void printEscapedText(CharSequence text, Appendable output) throws IOException {
-    for (int i = 0; i < text.length(); i++) {
-      char c = text.charAt(i);
-      String entity = HTMLEntities.get(c);
-      if (entity != null) {
-        output.append('&').append(entity).append(";");
-      } else {
-        output.append(c);
+    Escaping.escapeXml(text, true, output);
+  }
+
+  /**
+   * Print the start of an HTML element.  If withXmlClose==true, this is an
+   * empty element that should have its content
+   */
+  public static void printStartElement(Element elem, Appendable output, boolean withXmlClose)
+      throws IOException {
+    printStartElement(elem.getTagName(), elem.getAttributes(), output, withXmlClose);
+  }
+
+  public static void printStartElement(String tagName, NamedNodeMap attributes, Appendable output,
+       boolean withXmlClose) throws IOException {
+    output.append("<").append(tagName);
+    for (int i = 0; i < attributes.getLength(); i++) {
+      Attr attr = (Attr)attributes.item(i);
+      String attrName = attr.getNodeName();
+      output.append(' ').append(attrName);
+      if (attr.getNodeValue() != null) {
+        output.append("=\"");
+        if (attr.getNodeValue().length() != 0) {
+          printEscapedText(attr.getNodeValue(), output);
+        }
+        output.append('"');
       }
     }
+    
+    output.append(withXmlClose ? "/>" : ">");
+  }
+
+
+  public static void outputDocType(DocumentType docType, Appendable output) throws IOException {
+    output.append("<!DOCTYPE ");
+    // Use this so name matches case for XHTML
+    output.append(docType.getOwnerDocument().getDocumentElement().getNodeName());
+    if (docType.getPublicId() != null && docType.getPublicId().length() > 0) {
+      output.append(" ");
+      output.append("PUBLIC ").append('"').append(docType.getPublicId()).append('"');
+    }
+    if (docType.getSystemId() != null && docType.getSystemId().length() > 0) {
+      output.append(" ");
+      output.append('"').append(docType.getSystemId()).append('"');
+    }
+    output.append(">\n");
   }
 
   /**
@@ -124,5 +164,4 @@ public class HtmlSerialization {
   public static boolean isUrlAttribute(QName name, String attributeName) {
     return name.uri == null && URL_ATTRIBUTES.contains(attributeName);
   }
-
 }

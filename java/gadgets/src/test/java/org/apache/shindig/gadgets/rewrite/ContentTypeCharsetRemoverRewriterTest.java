@@ -60,7 +60,7 @@ public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
                       + "http-equiv=\"Content-TYPE\">"
                       + "<meta content=\"gzip\" "
                       + "http-equiv=\"Content-Encoding\">"
-                      + "</head><body><a href=\"hello\">Hello</a>\n"
+                      + "</head><body><a href=\"hello\">Hello</a>"
                       + "</body></html>";
 
     ContentTypeCharsetRemoverRewriter rewriter =
@@ -102,7 +102,7 @@ public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
     String expected = "<html><head>"
                       + "<meta content=\"text/html ; pharset=&#39;hello&#39;; hello=world\" "
                       + "http-equiv=\"Content-TYPE\">"
-                      + "</head><body><a href=\"hello\">Hello</a>\n"
+                      + "</head><body><a href=\"hello\">Hello</a>"
                       + "</body></html>";
 
     ContentTypeCharsetRemoverRewriter rewriter =
@@ -122,7 +122,7 @@ public class ContentTypeCharsetRemoverRewriterTest extends DomWalkerTestBase {
     expected = "<html><head>"
                + "<meta content=\"text/html ; charsett=&#39;hello&#39;; hello=world\" "
                + "http-equiv=\"Content-TYPE\">"
-               + "</head><body><a href=\"hello\">Hello</a>\n"
+               + "</head><body><a href=\"hello\">Hello</a>"
                + "</body></html>";
 
     mc = new MutableContent(htmlParser, html);

@@ -488,8 +488,6 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
    * Subclass of Neko's tag balancer that
    * - Normalizes the case of forced html, head and body tags when they don't exist in the original
    * content.
-   * - Convert script tags with type=os/* to OSData and OSTemplate. Record their text content and
-   * force it to be reparsed.
    * -
    */
   private static class NormalizingTagBalancer extends HTMLTagBalancer {
@@ -498,22 +496,11 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
 
     private HTMLScanner scanner;
 
-    private QName currentOsmlTag;
-
     public NormalizingTagBalancer() {
     }
 
     public void setScanner(HTMLScanner scanner) {
       this.scanner = scanner;
-    }
-
-    @Override
-    public void characters(XMLString text, Augmentations augs) throws XNIException {
-      if (currentOsmlTag != null) {
-        scriptContent.append(text.ch, text.offset, text.length);
-      } else {
-        super.characters(text, augs);
-      }
     }
 
     @Override
@@ -531,54 +518,9 @@ public class NekoSimplifiedHtmlParser extends GadgetHtmlParser {
         elem.rawname = "body";
       }
 
-      // Convert script tags of an OSML type to OSTemplate/OSData tags
-      if ("script".equalsIgnoreCase(elem.rawname)) {
-        String value = attrs.getValue("type");
-        String osmlTagName = SocialDataTags.SCRIPT_TYPE_TO_OSML_TAG.get(value);
-        if (osmlTagName != null) {
-          if (currentOsmlTag != null) {
-            throw new XNIException("Nested OpenSocial script elements");
-          }
-          currentOsmlTag = new QName(null, osmlTagName, osmlTagName, null);
-          if (scriptContent == null) {
-            scriptContent = new StringBuilder();
-          }
-          // Remove the type attribute
-          attrs.removeAttributeAt(attrs.getIndex("type"));
-          super.startElement(currentOsmlTag, attrs, augs);
-          return;
-        }
-      }
-
       super.startElement(elem, attrs, augs);
     }
 
-    @Override
-    public void endElement(QName element, Augmentations augs) throws XNIException {
-      if (currentOsmlTag != null && "script".equalsIgnoreCase(element.rawname)) {
-        QName endingTag = currentOsmlTag;
-        currentOsmlTag = null;
 
-        XMLInputSource scriptSource = new XMLInputSource(null, null, null);
-        scriptSource.setCharacterStream(new StringReader(scriptContent.toString()));
-        scriptContent.setLength(0);
-
-        // Evaluate the content of the script block immediately
-        scanner.evaluateInputSource(scriptSource);
-
-        super.endElement(endingTag, augs);
-      } else {
-        super.endElement(element, augs);
-      }
-    }
-
-    @Override
-    protected HTMLElements.Element getElement(QName elementName) {
-      HTMLElements.Element osmlElement = OSML_ELEMENTS.get(elementName.localpart);
-      if (osmlElement != null) {
-        return osmlElement;
-      }
-      return super.getElement(elementName);
-    }
   }
 }

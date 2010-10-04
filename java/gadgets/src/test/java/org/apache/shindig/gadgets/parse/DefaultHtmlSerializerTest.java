@@ -21,7 +21,6 @@ package org.apache.shindig.gadgets.parse;
 
 import org.apache.shindig.gadgets.parse.nekohtml.NekoSimplifiedHtmlParser;
 import org.junit.Test;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -87,6 +86,20 @@ public class DefaultHtmlSerializerTest {
     DefaultHtmlSerializer serializer = new DefaultHtmlSerializer();
     assertEquals("href entities escaped",
         "<a href=\"http://apache.org/?a=0&amp;query=2+3\"></a>",
+        serializer.serialize(doc));
+  }
+
+  @Test
+  public void testDataTemplateTags() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+
+    Element element = doc.createElement("osdata");
+    element.setAttribute("xmlns:foo", "#foo");
+    doc.appendChild(element);
+
+    DefaultHtmlSerializer serializer = new DefaultHtmlSerializer();
+    assertEquals("OSData normalized",
+        "<script type=\"text/os-data\" xmlns:foo=\"#foo\"></script>",
         serializer.serialize(doc));
   }
 }

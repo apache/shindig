@@ -47,9 +47,12 @@ public final class SocialDataTags {
   
   /**
    * Allowed tag names for OpenSocial Data and template blocks.
+   * Make the tag names lower case since they're normalized by
+   * the caja http://code.google.com/p/google-caja/issues/detail?id=1272
+   * Another approach is to namespace them but that causes other issues.
    */
-  public static final String OSML_DATA_TAG = "OSData";
-  public static final String OSML_TEMPLATE_TAG = "OSTemplate";
+  public static final String OSML_DATA_TAG = "osdata";
+  public static final String OSML_TEMPLATE_TAG = "ostemplate";
 
   /**
    * Bi-map of OpenSocial tags to their script type attribute values.
@@ -63,7 +66,7 @@ public final class SocialDataTags {
     for (int i = 0; i < list.getLength(); i++) {
       elements.add((Element) list.item(i));
     }
-    
+
     // Add equivalent <script> elements
     String scriptType = SCRIPT_TYPE_TO_OSML_TAG.inverse().get(tagName);
     if (scriptType != null) {
