@@ -68,6 +68,12 @@
           <excludes>
             <exclude>org/apache/shindig/common/testing/*.java</exclude>
           </excludes>
+          <systemProperties>
+            <property>
+              <name>java.awt.headless</name>
+              <value>true</value>
+            </property>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>
